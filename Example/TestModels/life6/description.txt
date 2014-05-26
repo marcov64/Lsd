@@ -1,0 +1,25 @@
+Artificial Life
+by Marco Valente
+
+(Intermediate complexity)
+
+This model represents a set of agents in a lattice that can choose one over a set of available options. Each agent is initially assingned a random option, and then it can switch it at each time step.
+The procedure to decide which option to choose is based on the previous step states of the same agent and of its four neighbours (up, down, left and right). The agent assigns a minimum probability to be chosen to each of the available options. Moreover, each option increases its probability depending on how many neighbours had that state in the previous time step. 
+The random choice is biased by a coefficient that concentrates, or flatten, the probability curve.
+
+The model is highly automaticised. It creates automatically the lattice structure in Lsd and assigns the initial random states to the agents. Moreover, a graphical representation of the lattice is created and animated at run time.
+
+The parameters to set are:
+NCol, NLine: number of columns and lines in the lattice
+NState: number of available choices, to be less or equal the number of Objects "Option".
+minprob: minimum "raw" probability assigned to each option
+UniProb: unit of "raw" probability assigned for each neighbour having that option
+Elas: exponent used to transform the raw probalities such that true_prob=power(raw_prob, Elas)
+
+The results to observe are:
+glob: number of agents that currently assume an option
+State: Current state of the agent
+
+
+
+

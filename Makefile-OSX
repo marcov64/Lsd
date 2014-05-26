@@ -1,0 +1,16 @@
+# Makefile for lmm
+#
+
+
+LIBS     = -framework Tk -framework Tcl -lstdc++
+
+LIBPATHS = 
+
+INCLUDES = -I /System/Library/Frameworks/Tk.framework/Headers -I /System/Library/Frameworks/Tcl.framework/Headers
+SOURCE   = src/modman.cpp
+
+lmm: lmm.o
+	gcc -o lmm lmm.o $(LIBPATHS) $(LIBS)
+
+lmm.o: $(SOURCE)
+	g++ -g -c $< $(INCLUDES) -o lmm.o 

@@ -1,0 +1,5 @@
+Social Diffusion Model 0.3
+(by Smallwood and Conlisk, 1979, "Product Quality in Markets where Consumers are Imperfectly Informed", Quarterly Journal of Economics, 93-1.)
+implemented by Marco Valente
+
+Same model as version 0.2 plus the dynamics of firms. Firms with 0 market share exits and new firms enter in the market. Quality of products, "BD", changes according to a bounded random walk, so that different firms alternate as market leaders.

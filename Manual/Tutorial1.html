@@ -1,0 +1,145 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Marco Valente">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Tutorial 1 - LMM primer</title>
+</head>
+<body>
+
+<center><b><font size=+2>Tutorial 1 - First use of LMM and test runs of
+available models</font></b></center>
+
+<p>This tutorial guides the first-time users to open LMM, explore its components
+and test the models available in the installation. The only way to learn
+using a software is to try it. Therefore, users are invited to test and
+explore any aspect of the windows appearing while following the tutorial.
+This software comes with an extensive manual (see here for a <a href="TOC.html">list
+of the main pages</a>), covering every window of the programs in the package,
+and discussing many issues concerning Lsd simulation modelling.
+<br>The following text explains the steps required for an early exploration
+of the system. There are many links to other manual pages. Use the icon
+bar in your screen to use the links, observe the Lsd/LMM windows, and return
+to this page.
+<br>To install and run the system read the&nbsp; <a href="LMM_help.html#install" TARGET="newindow">installation
+instructions in the LMM manual</a>. At start time choose the "Create a
+new Text File" option.
+<br>&nbsp;
+<table BORDER >
+<tr>
+<td><b><u><font size=+1>Operations</font></u></b></td>
+
+<td><b><u><font size=+1>Instructions</font></u></b></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Observe LMM
+<br>Interface</td>
+
+<td>LMM is made of a text editor with several menus containing mostly standard
+editing commands. However, the menu <b>Model</b> is special. It allows
+to select a Lsd model and, when this is done, its commands refer to that
+model. For example, the command <b>Model/Show Equations</b> automatically
+inspect which is the source file containing the equations of the model
+selected and loads it into the LMM editor.
+<br>The menu <b>Edit</b> includes many commands useful for writing C++
+code, particularly on international keyboards (e.g. insert the ever present
+'{' and '}', missing in French keyboards, by menu entry or by keyboard
+shortcut).
+<br>Note that most of the items in the <b>Model</b> menu are not active,
+since no model is selected yet. See <a href="LMM_help.html" TARGET="newindow">the
+manual for information</a> on the LMM interfaces.
+<br>The menu <b>Help</b> offers the manual pages most likely to be useful
+to Lsd programmers.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Select a model</td>
+
+<td>Open menu <b>Model/Select Model</b>. LMM will list all models available.
+Scrolling the list a brief description of the model highlighted is shown.
+When a model is selected, LMM loads a brief description of the model content.
+<p>A <a href="FAQs.html#model">Lsd model</a> is a combination of C++ compiled
+code (implementing the equations) and a Lsd specific data structure to
+implement the model elements. Using LMM a modeller can access the C++ file
+containing the code for the equations (i.e. how Variable X must compute
+its values), and modify it. LMM permits also to modify the compilation
+options, and generally performing every operation necessary to compile
+a Lsd model program.&nbsp;
+<p>When a model is loaded in LMM the editor shows initially the same description
+seen in the list of models. Moreover, the commands in menu <b>Model</b>
+become active, and will refer to the specific model selected (the header
+line of LMM reports the model information). Users can use this menu to
+access the most relevant model files.
+<br>See the <a href="LMM_help.html#model" TARGET="newindow">LMM help page</a>
+for more information on menu <b>Model</b>.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Run the Lsd model
+<br>model program</td>
+
+<td>Create a Lsd model program using the command <b>Model/Run</b>. The
+system automatically compiles all the Lsd source files and the model specific
+equation files. If no errors are found, LMM links and run the Lsd model
+program for the model selected. Failures to compile may be due either to
+Lsd system configuration (e.g. wrong libraries) or to errors in the model's
+code. See the <a href="LMM_help.html#run">manual page on this command</a>.&nbsp;
+<p>The very first time this command is issued may take few minutes, since
+it compiles all the Lsd source files. Future requests to compile any Lsd
+model program will use the same pre-compiled Lsd source files, having only
+to re-fresh the model specific code (the model' equations).
+<br>A Lsd model program is an independent program (you may run it even
+outside LMM) containing the equations code that tell the simulation how
+to compute each Variable at each time step. Any Lsd model program has the
+same appearance, which are the interfaces used to load model configurations,
+to change the initialization, to run and control a simulation, and to manage
+the results. However, each model differ in the equations it contains.
+<br>The main interface is the window <b>Browser</b> which issue commands
+before and after a simulation (during a simulation it is not active). The
+menus in this window contains all the commands to control every aspect
+of a simulation simulation (see the <a href="Browser.html" TARGET="newindow">help
+page </a>on this).
+<br>The window <b>Log </b>contains messages and is used to control a simulation
+run (e.g. interrupt or abort a simulation). Several other windows are created
+depending on the actions requested to the Lsd model program (see the <a href="windows.html" TARGET="newindow">help
+page</a> listing the Lsd windows)</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Run a test simulation</td>
+
+<td>Using the newly appeared interface for the Lsd model program choose
+the command <b>File/Load</b>, choose one of the configuration file(s).
+After that, choose menu <b>Run/Run</b> to run a simulation. The simulation
+will either show a graphical representation of the series produced, or
+will print messages in the <b>Log </b>window. The data produced during
+a simulation are stored in memory so that to analyse them after a simulation
+(or during the interruption of a simulation run). These operations will
+be seen in the second tutorial.
+<p>After the simulation close the Lsd model program (menu <b>File/Quit</b>).
+See help on the <a href="Browser.html">Lsd main Browser</a>, or the <a href="TOC.html">general
+help page on Lsd</a> for further details.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Select and test&nbsp;
+<br>other models</td>
+
+<td>Back in LMM select and run other simulation models. Remember to close
+a Lsd model program before running another one. They can actually run in
+parallel, but this would overcrow your screen.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>End of the tutorial</td>
+
+<td>You are now ready to pass to the <a href="ModelUsing.html">tutorial
+2</a> learning to use in detail a Lsd model program features to control
+model configurations and analyse the results of existing models.</td>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+Logist chaotic function
+
+Very symple model, representing only one equation:
+
+X(t)=m*X(t-1)*(1-X(t-1))
+
+This model produces values of X in the range [0,1] when "m" is included in between [0,4]. For "m" below 3 the sequence always converge. Above 3 the sequence cycles or goes chaotic.
+
+Try to run 1000 sequences with increasing values of m, from 2.5 to 3.999. Plot the values of X at several times, say from 950 to 1000, using points. The resulting graph will show the typical chaotic graph.

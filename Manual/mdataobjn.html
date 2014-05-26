@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <title>Menu Data-All Object Number</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="menudata.html">Menu Data</a></font> <font
+ size="-1"><a href="TOC.html">HyperManual</a><a href="windows.html">Lsd
+Windows</a> <a href="Browser.html">Main Browser</a><a href="FAQs.html">Lsd
+FAQ's</a></font></center>
+<p><b><u><font size="+1">Menu "Data"</font></u></b> <b>All Object Num.</b>
+</p>
+<p>Lsd represents a model as a hierarchical structure of Objects. With
+this routine users can set the number of Objects in each position of
+the
+model.
+<br>
+The window shows the number of instances for all Object types in the
+model, and allow to change their number.
+<br>
+The window is organized in lines, where each line corresponds to a
+group of Objects of the same type descending from the same instance.
+The
+lowest part of the window contains, besides the button to return to the
+main Browser (activated also by the key <b><font
+ face="Courier New,Courier">Escape</font></b>),
+an entry to set the maximum hierarchical level of the model shown.
+</p>
+<center>
+<p><img src="numobj.jpg" align="right" height="434" width="508"></p>
+</center>
+Each line contains:
+<ul>
+  <li>
+the label of the group of Objects. The sign(s) + before the label
+indicate
+the number of higher levels in the hierarchy than the group of Objects.
+For example, the third and fourth line shows that the Objects of type <font
+ face="Courier New,Courier">Agent</font>
+are placed in the third level (in their branch of the hierarchy the
+first
+level is <font face="Courier New,Courier">Demand</font> andsecond is <font
+ face="Courier New,Courier">Group</font>).
+The label is typed in red, and can be clicked as a shortcut for the
+initialization
+of values of all the Objects of that type.</li>
+  <li>
+the indication of the exact instance the group is descending from. Each
+instance in a group of Object of the same type is indexed. In the
+example
+above the fourth line is referred to the Objects of type <font
+ face="Courier New,Courier">Agent</font>
+contained in the second <font face="Courier New,Courier">Group</font>
+of
+the first <font face="Courier New,Courier">Demand</font>.</li>
+  <li>
+the number of instances for that group. For example, the fourth line
+says
+that there are 5 Agent in the second Group of the first Demand.
+Clicking
+on this number it is possible either to change the number of instances
+of this group only, or of all the groups of the same type.</li>
+  <li>
+possibly, a warning message indicate that the group of Objects reported
+in the line contains more descendants, currently not shown. Clicking on
+one of these messages increases the hierarchical level shown in the
+window.</li>
+</ul>
+<p><br>
+<a name="modifyNumberObj"></a><b><font size="+1">Modifying the Number
+of Objetcs</font></b>
+<br>
+The user can click on any of the numbers indicating a group of Objects
+to modify it. Depending on the position in the hierarchy of the group
+of
+Objects it is possible to choose to modify the sets of groups of the
+objects
+within one "branch" of the hierarchy. For example clicking on the
+number
+90 indicating the number of Objects "Agent" contained in the second
+Object
+Group, in turn contained in the first Object Demand, one obtains the
+following
+window:
+<br>
+&nbsp;
+</p>
+<ul>
+  <li>
+    <img src="numobjInput.jpg" align="left" height="281" hspace="30"
+ width="265">The
+top of the window indicates the label of the Objects that we are going
+to modify (<b>Agent</b>, in the example), and the container Object (<b>Group</b>),
+along the code identifying the exact copy of the Object. In the example
+it is the first Object <b>Group</b> in the second <b>Demand</b>
+Object
+(hence the <b>2-1</b>).</li>
+  <li>
+The first entry of this window asks for the desired number of Objects
+for
+the group concerned, by default the existing number (75 in the example).</li>
+  <li>
+The third position contains an entry (along the text "<b>Copy from
+instance:</b>")
+indicating the copy to use as blueprint when new Objects are created.
+By
+default this entry contains 1, indicating that the first copy of Object
+Agent found in the model must be used to add new Objects. That is, the
+initial values for Parameters and lagged Variables, and the number of
+descending
+Objects, if present, will be copied identical to the initialization of
+the 1 copy of Agent in the model. Users can insert any ordinal number
+referring
+to an instance to use as example.</li>
+  <li>
+The button <b>Compute</b> allows to determine the ordinal number of a
+specific
+instance of the Object to use as example by determining the ordinal
+number
+of the ancestors.</li>
+  <li>
+The list of options <b>Groups to be modified</b> allows the user to
+determine
+which groups must be modified. By default, only the group of Objects on
+which the user clicked is selected to be modified. The user can select
+any combination of the available possibilities. For example, selecting
+only <b>All groups of 'Agent' in the model</b> will change all the
+three
+goups of Agent. Selecting the first and the last option, the model will
+change all groups in the model contained in the first Object Group.
+That
+is, both Objects Demand will contain the first Group with the new
+number
+of Agent's. In general, the topmost selection determines the branch of
+the model to be affected by the change. The other options, if selected,
+determine the conditions for a sub-branch of the model to be affected.</li>
+</ul>
+<p><br>
+If the new number of Objects is lower than before the system has
+to remove some copies of the Objects. If the user chose one option that
+affected a whole branch of the model than the system automatically
+remove
+the last copies in each affected group. Instead, if the user chose the
+first option, to affect only one group, then the system allow the user
+to either remove the last instances or to pick individually each copy
+to
+remove.
+</p>
+<p><a name="pick_remove"></a><b>Choose Individual Copies to Remove</b>
+<br>
+If the user reduces the number of Objects in only one group (that is,
+does not affect a whole branch of the model), then the user has the
+option
+to remove all excess Objects, or choose the ones to remove
+individually.
+<br>
+<img src="pick_remove.jpg" align="absbottom" height="135" width="172"><br>
+This window indicates the number of instances to remove. In the
+example,
+the user indicated 73 Agent, and, since there were 75, it is necessary
+to remove 2 copies. Choosing <b>Last</b> the system will automatically
+remove all the necessary copies from the last part of the affected
+group.
+Instead, choosing <b>Choose</b>, the system allows the individual
+selection
+of the copies to remove. In this latter case, a selection window allows
+to insert the series of the Objects to remove.
+<br>
+<img src="choose_remove.jpg" height="160" width="172"><br>
+In this window the user needs to type in and press Return (or click
+on Ok), for each element to remove. In the example, the first element
+to
+remove is the third. Pressing Return the same window will request the
+next
+and last element to remove. Notice that it is possible to indicate only
+increasing elements to remove. In the example, after having indicated 3
+for the first remove, the user can indicate only a number from 4 to 75.
+<br>
+&nbsp;
+</p>
+<p><b><i><font face="Arial, helvetica">Important</font></i></b>
+<br>
+When new Objects are inserted in a model they may include initial
+values
+relevant to start the simulation (lagged Variables or Parameters). For
+newly inserted Objects these values are copied by default as defined in
+the very initial instance of the Object. But Lsd does not allow a
+simulation
+to be started unless these values are explicitly set by the user.
+Therefore,
+after a session where new Object instances are added to the model it is
+necessary to edit the Object to set their initial values (see <a
+ href="mdatainit.html">Initial
+Values</a> in <a href="menudata.html">menu Data</a>). Users can access
+to the window for initializing values by just clicking on their label.
+</p>
+<p><a name="this"></a><b>Menu Data - Set current type of Object</b>
+<br>
+This option allows to set the number of instances for an Object type
+without being forced to represent the whole tree of the model. Here you
+set quickly the number of instances of the Object currently pointed by
+the Browser to a chosen value. If there are more than one groups of
+this
+Object type (that is, there are many instances of its ancestor), all
+the
+groups will be changed so that they will have all the same number of
+instances
+as specified. If the new value is larger than the existing number of
+instances,
+the new instances will be appended in the end of the previous set of
+instances.
+If the new value is lower than the previous number of instances, the
+last
+ones will be eliminated. To edit the number of instances
+differentiating
+for each groups of descendants, or to choose the particular instances
+to
+delete, it is necessary to use the entry "<a href="#top">All Object Num.</a>"
+in <a href="menudata.html">menu Data</a>.
+<br>
+&nbsp;
+<br>
+&nbsp; <br>
+</p>
+<hr style="width: 100%; height: 2px;">
+<p>&nbsp;<a name="SelectionInstance"></a><b>Select the instance number<br>
+</b></p>
+<p><b><img alt="" src="InstanceNum.jpg"
+ style="width: 364px; height: 318px;"><br>
+</b></p>
+<p>In some cases it is necessary to specify an exact instance, or copy,
+of an object. Lsd requires the sequential number of the instance among
+all the ones present in the model, but in general users find easier to
+indicate them in respect of the position in the hierarchy of Objects.
+For example, the window above indicates that the 7th object "Worker"
+contained in the 2nd object "Department" contained in the 3rd "Firm" in
+the second "Market" is the 167th.<br>
+Users can set the values in all the cells referring to the objects.
+Pressing <span style="font-weight: bold;">Compute</span> will compute
+the number of instance requested. Pressing <span
+ style="font-weight: bold;">Exit</span> will close this window
+returning to the calling interface. The computed number will be pasted
+in the cell where the instance number is requested.<br>
+</p>
+</body>
+</html>

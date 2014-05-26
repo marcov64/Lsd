@@ -1,0 +1,40 @@
+Fitting Function ver. 0.1
+by Marco Valente
+
+This model is an example of how Lsd can be used to numerically estimate complex functions from a sample of data.
+
+The basic idea is quite trivial: given a number of unknown parameters, try all their values (and their possible combinations) to find the best ones. Stupid, but computers are fast and don't get bored.
+
+The model is meant to provide a framework where everybody can insert its desired fitting function and sample data in order to estimate numerically the parameters. 
+
+The model routine is the following:
+1) initialize the model. Compute the step to vary parameters. 
+2) Variable "set_param" to compute the settings for the parameters
+3) Variable "cum_error". Compute the error between the function and the sample
+4) Variable "store". If the cum_error is less then min_error record the current parameters.
+
+The model is implemented in a quite sophisticated way, inducing automatically a lot of obvious information.
+- read the number of sample data;
+- compute automatically the extend of the variation for each parameter. Each parameter is assigned an equal number of trials, unless its range has width zero (initial value = final value), in which case the model assigns no trial at all. The number of trials depends on the number of time steps for the simulation. So, for example, assigning 10,000 steps make the parameters' variation larger than assigning 1,000,000 steps
+
+This model contains a fitting function, with three unknown parameters, and a sample of data. It varies the parameter within a range defined by users and tests all their possible combinations, recording the values providing the minimum error between the function and the sample of data.
+
+The fitting function is:
+
+           at
+          e
+X(t)= k ------
+             at
+        b + e
+
+The samples of data are drawn from the above function with the parameters:
+a = 0.6
+b = 200
+k = 1000
+Using times from 1 to 24 and from 1 to 9 for the complete and truncated  configurations, which are also differentiated by the number of time steps. Many time steps provide a fine scanning of the parameters' space, while few time steps force to a gross analysis.
+
+WARNING
+The model is thought to span for a large number of steps. 
+- click on button "Fast" in Log window, to speed up the simulation (writing the step number risk to be the most time expensive task...). Click again on "Observe" to see which time step has been reach.
+- Saving data during a simulation may be impossible, given that Lsd should allocate memory for each and every time step. Usually an average computer can store data when the steps are around 10,000 steps, and fails to save data for 1,000,000 steps. If not enough memory is available Lsd will continue simply not saving the data.
+

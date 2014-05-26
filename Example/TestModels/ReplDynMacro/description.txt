@@ -1,0 +1,10 @@
+Replicator Dynamics Model
+
+(Simple model)
+This model represents a population of organisms for different species. Each species is supposed to have a specific "fitness", so that the number of individuals for each species increases if the fitness is higher than the average fitness over all the species. On the opposite, if the fitness of a species is below the average, the number of the individual decreases.
+
+The model implementation allows to set a constant fitness for each species, or a changing one, according to several (random) dynamics.
+
+
+
+

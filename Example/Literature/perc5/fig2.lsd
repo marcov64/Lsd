@@ -1,0 +1,862 @@
+	
+Label Root
+{
+	Son: World
+	Label World
+	{
+		Son: Firm
+		Label Firm
+		{
+			Param: IdFirm
+			Param: Sales
+			Var: q
+			Param: q0
+			Param: app
+			Param: NewSales
+			Param: Lost
+			Param: Users
+			Param: ms
+
+		}
+
+		Var: Init
+		Param: NCol
+		Param: NRow
+		Var: Action
+		Param: PlotLattice
+		Param: PixHeight
+		Param: PixWidth
+		Param: InitPoint
+		Func: Spread
+		Param: a
+		Param: k
+		Param: ProbExogenousAdoption
+		Func: Choose
+		Param: AvProbLeft
+		Param: NumLeft
+		Param: MinRP
+		Param: MaxRP
+		Param: NumFirm
+		Param: weight
+		Param: tail
+		Param: TotUser
+		Param: i
+		Param: j
+		Var: SaveData
+		Param: DoSave
+		Param: RePurchase
+		Param: ChoicesMade
+		Param: ChoicesFailed
+		Param: Replace
+		Param: NewEntry
+		Func: SaveLattice
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: World C	1
+Var: Init 0 n + d n
+Param: NCol 0 n + n n	400
+Param: NRow 0 n + n n	400
+Var: Action 0 s + d n
+Param: PlotLattice 0 n + n n	1
+Param: PixHeight 0 n + n n	400
+Param: PixWidth 0 n + n n	400
+Param: InitPoint 0 n + n n	10
+Func: Spread 0 n + n n
+Param: a 0 n + n n	0.7
+Param: k 0 n + n n	0
+Param: ProbExogenousAdoption 0 n + n n	0
+Func: Choose 0 n + n n
+Param: AvProbLeft 0 s + n n	0
+Param: NumLeft 0 s + n n	0
+Param: MinRP 0 n + n n	10
+Param: MaxRP 0 n + n n	10
+Param: NumFirm 0 n + n n	1
+Param: weight 0 n + n n	0.2
+Param: tail 0 n + n n	0
+Param: TotUser 0 s + n p	0
+Param: i 0 n + n n	0
+Param: j 0 n + n n	0
+Var: SaveData 0 n + n n
+Param: DoSave 0 n + n n	0
+Param: RePurchase 0 s + n n	0
+Param: ChoicesMade 0 s + n n	0
+Param: ChoicesFailed 0 s + n n	0
+Param: Replace 0 s + n n	0
+Param: NewEntry 0 s + n n	0
+Func: SaveLattice 0 n + n n
+
+Object: Firm C	1
+Param: IdFirm 0 n + n n	1000
+Param: Sales 0 s + n n	0
+Var: q 1 s + n n	0.6
+Param: q0 0 n + n n	0.6
+Param: app 0 n + n n	0
+Param: NewSales 0 s + n n	0
+Param: Lost 0 s + n n	0
+Param: Users 0 s + n n	0
+Param: ms 0 s + n n	0
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 5000
+EQUATION fun_per.cpp
+ MODELREPORT report_NewSim100_08.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_World
+'World' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Init
+Initialize the lattice:
+
+- If PlotLattice !=0 then generate the lattice window
+
+- Set the pointers to the neighbours of each cell
+
+- If the cells have been assigned some product (generally this is not the case), store the sum for each product in "tempSales".
+
+'Init' appears in the equation for: ActionDemand.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NCol
+Number of Columns:
+
+'NCol' appears in the equation for: Action, Spread, Init.
+_INIT_
+Integer positive value. The higher the finer the lattice, and the slower the simulation.
+END_DESCRIPTION
+
+Parameter_NRow
+Number of rows
+
+'NRow' appears in the equation for: Action, Spread, Init.
+_INIT_
+Integer positive value. The higher the finer the lattice, and the slower the simulation.
+END_DESCRIPTION
+
+Variable_Action
+Ensure that all cells computed their own "State" variable
+
+'ActionDemand' appears in the equation for: Users.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PlotLattice
+Flag used to show a lattice plotting the value of State for consumers.
+
+'PlotLattice' appears in the equation for: Choose, Init.
+_INIT_
+Value 1: Plot only consumers who adopted or not adoped a product
+Value 2: Plot in different colors products' adopted, depending on their Id.
+Any other vaule: Do no generate the lattice graph.
+END_DESCRIPTION
+
+Parameter_PixHeight
+Number of pixels for the height of the lattice window
+'PixHeight' appears in the equation for: Init.
+_INIT_
+It should be better to be a multiple of NRow, though the system tries to compensate fractional ratios.
+END_DESCRIPTION
+
+Parameter_PixWidth
+Width of the lattice graph, in pixels
+'PixWidth' appears in the equation for: Init.
+_INIT_
+Better have a multiple of NCol
+END_DESCRIPTION
+
+Parameter_InitPoint
+Number of consumers initialized to consider a purchase at time 1.
+
+'InitPoint' appears in the equation for: Init.
+_INIT_
+Positive integer.
+END_DESCRIPTION
+
+Function_Spread
+"Contaminate" consumers neighbouring a consumer who made a purchase.
+Neighbours who did not make any purchase as yet are added to the Job for the next period.
+
+'Spread' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_a
+Parameter influencing the quality of products as a function of the number of its adopters
+'a' appears in the equation for: q.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_k
+Parameter influencing the firms' quality depending on the number of its adopters.
+'k' appears in the equation for: q.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ProbExogenousAdoption
+Probability that a consumer will make a spontaneous purchase, without being triggered by another consumer's adoption.
+
+'ProbExogenousAdoption' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Function_Choose
+Function assigning to a consumer a product, with prob. proportional to their qualities.
+If no product has quality larger than the consumer's threshold, return -1
+
+'Choose' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_AvProbLeft
+Av. threshold of consumers who did not make any purchase.
+
+'AvProbLeft' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NumLeft
+Number of consumers who did not make any purchase.
+
+'NumLeft' appears in the equation for: Action.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_MinRP
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_MaxRP
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NumFirm
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_weight
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tail
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TotUser
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_i
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_j
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SaveData
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DoSave
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RePurchase
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ChoicesMade
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ChoicesFailed
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Replace
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NewEntry
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_SaveLattice
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdFirm
+Unique value of a firm/product. 
+'IdFirm' appears in the equation for: Choose.
+_INIT_
+ All 100 instances increasing from 1000 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_Sales
+Number of adopters for the firm
+
+'Sales' appears in the equation for: q, Choose.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_q
+Quality of the product, increasing with the number of consumers.
+
+The function is:
+              [1-PP(0)]
+PP(t)= 1 - ----------------
+            [1+k*N(t-1)]^a
+            
+The function increases (with decreasing steps) from PP(0) (initial PP at time 0) up to 1 for N going to infinite. K and a influence the speed.
+
+'q' appears in the equation for: Choose.
+_INIT_
+ All 100 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_q0
+Initial leve of product's quality, corresponding to the quality with 0 sales.
+
+'q0' appears in the equation for: q.
+_INIT_
+ All 100 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_app
+Technical parameters, used to make the purchasing decision.
+'app' appears in the equation for: Choose.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NewSales
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Lost
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Users
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ms
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+Root
+InitPoint
+Choose
+AvProbLeft
+NumLeft
+Firm
+Sales
+q
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+NCol
+PixHeight
+PixWidth
+InitPoint
+a
+k
+ProbExogenousAdoption
+NumFirm
+i
+DoSave
+Replace
+NewEntry
+Firm
+IdFirm
+q0
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+
+object *supply;
+MODELBEGIN
+
+
+
+
+
+
+
+EQUATION("Init")
+/*
+Initialize the lattice:
+
+- If PlotLattice !=0 then generate the lattice window
+
+- Set the pointers to the neighbours of each cell
+
+- If the cells have been assigned some product (generally this is not the case), store the sum for each product in "tempSales".
+*/
+
+v[10]=V("PlotLattice");
+
+v[2]=V("NCol");
+v[3]=V("NRow");
+supply=SEARCHS(p->up,"Supply");
+
+if(v[10]==1)
+ init_lattice(600, v[3], v[2], "IdRow", "IdCol", "State", NULL, 0);
+if(v[10]==2)
+ init_lattice(300, v[3], v[2], "IdRow", "IdCol", "IdUsed", NULL, 0);
+
+CYCLE(cur, "Row")
+ {
+  v[0]=VS(cur,"IdRow");
+
+  CYCLES(cur, cur1, "Col")
+  { 
+   v[11]=VS(cur1,"IdUsed");
+   if(v[11]>0)
+    {
+    cur2=SEARCH_CNDS(supply,"IdProd",v[11]);
+    INCRS(cur2,"tempSales",1);
+    }
+   v[1]=VS(cur1,"IdCol");
+   cur1->hook=supply;
+   cur2=SEARCHS(cur1,"Nei"); //first neigh, E
+
+   if(v[1]==v[2])
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",1); 
+     }
+   else
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[1]+1); 
+     }
+    cur2->hook=cur3;
+    
+   cur2=cur2->next; //second neigh, S
+
+   if(v[0]==v[3])
+     {
+     cur3=SEARCH_CND("IdRow",1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+     }
+   else
+     {
+     cur3=SEARCH_CND("IdRow",v[0]+1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+
+     }
+    cur2->hook=cur4;
+    
+   cur2=cur2->next; //third neigh, W
+
+   if(v[1]==1)
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[2]); 
+     }
+   else
+     {
+     cur3=SEARCH_CNDS(cur,"IdCol",v[1]-1); 
+     }
+    cur2->hook=cur3;
+
+
+   cur2=cur2->next; //fourth neigh, N
+
+   if(v[0]==1)
+     {
+     cur3=SEARCH_CND("IdRow",v[3]); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+     }
+   else
+     {
+     cur3=SEARCH_CND("IdRow",v[0]-1); 
+     cur4=SEARCH_CNDS(cur3,"IdCol",v[1]);
+
+     }
+    cur2->hook=cur4;
+
+   }
+
+      
+  }
+
+ 
+PARAMETER
+RESULT( 1)
+
+EQUATION("ActionDemand")
+/*
+Ensure that all cells computed their own "State" variable
+*/
+V("Init");
+CYCLE(cur, "Row")
+ {
+  CYCLES(cur, cur1, "Col")
+   {
+    VS(cur1,"State");
+   }
+
+ }
+
+RESULT(1 )
+
+
+EQUATION("State")
+/*
+State can assume three different values: 0, 1 and 2.
+
+If it is 0 it does nothing. State=0 means that the cell never used a product, nor it has been triggered to act (i.e. no neighbour uses a product.
+
+State=1 means that the agent did not have a product, but the previous period a neighbour bought a product. Therefore, chooses a product (which one is decided by "Choose") and triggers the state of neighbours to be 1, subject to the neighbour has the "Flag" value of 0. Flag is 0 if you did never bought a product, or more than TimeReActivate steps have passed since last purchase.
+
+State=2 means that the agent is currently using a product, and no neighbours had triggered it to make a new purchase.
+*/
+v[1]=0;
+v[0]=VL("State",1);
+
+if(v[0]==1)
+ {
+  //Triggered to act
+  v[1]=VS(p->hook,"Choose");
+  if(v[1]>0)
+   {
+   CYCLE(cur, "Nei")
+    {
+     v[5]=VS(cur->hook,"Flag");
+     if(v[5]==0)
+      {WRITES(cur->hook,"Flag",1); 
+       WRITELS(cur->hook,"State",1, t);
+      } 
+    }
+    WRITEL("IdUsed",v[1], 1);
+    v[6]=V("IdRow");
+    v[7]=V("IdCol");
+   if(V("PlotLattice")==2)
+    update_lattice(v[6], v[7], v[1]);
+   if(V("PlotLattice")==1)
+    update_lattice(v[6], v[7], 2);
+    
+   v[12]=V("TimeReActivate");
+   WRITE("Flag",v[12]);
+   v[1]=2;
+   }
+  else
+   {WRITE("Flag",0);
+    if(V("IdUsed")>0)
+     v[1]=2;
+    else 
+     v[1]=0;
+   } 
+
+ 
+ }
+else
+ {
+  if(v[0]==2 )
+   {
+    v[10]=V("Flag");
+    if(v[10]<0)
+     v[10]=INCR("Flag",1);
+    v[13]=V("ProbReActivate");
+ 
+    if(v[10]==0 && RND<v[13])
+     v[1]=1;
+    else
+     v[1]=2; 
+    
+   }
+  else
+   v[1]=v[0];  
+  } 
+ if(v[1]==0 && V("IdUsed")>0)
+  v[1]=INTERACT("BAH", v[1]); 
+RESULT( v[1])
+
+
+FUNCTION("Choose")
+/*
+Choose the product to buy for the calling cell.
+
+The function scans all neighbours of the calling cell. When it finds the nei. that has chosen its product the previous period, then stores within the "Prod" objects (parameter "app") some probabilities.
+
+The objects assigned positive probabilities are: the one chosen by the triggering nei.; and those around it for a lenght of "NumTail" (the total is always an odd number). Boundaries conditions are accounted for, so to keep the number of total objects with positive probabilities positive.
+
+The concerned "Prod" are discarded if their PP is lesser than the q of the choosing agent. That is, a product to be considered needs to have a quality above the consumer's threshold.
+
+Notice that if the consumer has two triggering neighbours, then it can choose among a double-size option set.
+
+The probabioities assigned to each producer to be chosen are proportional to the PP of the producer raised to the power of alpha. Setting alpha to 0 assigns identical probabilities.
+
+For statistical purposes the parameter "tempSales" of the newly chosen firm is increased, and that of the discarded product, if exist, is decreased.
+
+*/
+
+v[0]=VS(c,"q");
+
+
+CYCLE(cur, "Prod")
+ {
+  WRITES(cur,"app",0);
+  v[1]++;
+ }
+
+
+v[13]=V("alpha");
+v[7]=0;
+v[1]=V("NumProducers");
+v[8]=V("NumTail");
+i=(int)v[8]*2+1;
+CYCLES(c,cur, "Nei")
+ {
+  v[2]=VLS(cur->hook,"State",2);
+  v[3]=VLS(cur->hook,"State",1);
+  if( v[2]==1 && v[3]==2)
+   {
+    v[4]=VS(cur->hook,"IdUsed");
+    v[10]=v[4]-v[8];
+    v[11]=v[4]+v[8];
+    if(v[10]<1)
+     {
+      v[11]-=v[10]+1;
+      v[10]=1;
+     }    
+    if(v[11]>v[1])
+     {
+      v[10]-=(v[11]-v[1]);
+      v[11]-=(v[11]-v[1]);
+     }
+    cur1=SEARCH_CND("IdProd",v[10]);
+    
+    for( j=0; j<i; j++)
+     {
+      v[5]=VS(cur1,"PP");
+      if(v[5]>v[0])
+      {
+       v[6]=pow(v[5],v[13]);
+       INCRS(cur1,"app",v[6]);
+       v[7]++;
+      }
+      cur1=go_brother(cur1);
+     } 
+
+   }//end of triggering neighours
+  }//end of the scanning of neighborus
+
+if(v[7]>0)
+ {
+
+ cur=RNDDRAW("Prod","app");
+ v[4]=VS(cur,"IdProd");
+ INCRS(cur,"tempSales",1);
+ v[8]=VS(c,"IdUsed");
+ if(v[8]>0)
+  {
+  cur1=SEARCH_CND("IdProd",v[8]);
+  INCRS(cur1,"tempSales",-1);
+  
+  }
+
+ }
+else
+ v[4]=0; 
+RESULT(v[4] )
+
+//5809250 I-A
+
+EQUATION("NumProducers")
+/*
+Compute the number of producers currently in the model.
+*/
+v[0]=0;
+CYCLE(cur, "Prod")
+ v[0]++;
+RESULT(v[0] )
+
+
+
+EQUATION("PP")
+/*
+Quality of the product, increasing with the number of consumers.
+
+The function is:
+              [1-PP(0)]
+PP(t)= 1 - ----------------
+            [1+k*N(t-1)]^a
+            
+The function increases (with decreasing steps) from PP(0) (initial PP at time 0) up to 1 for N going to infinite. K and a influence the speed.
+*/
+
+v[0]=VL("Users",1);
+v[1]=V("pp0");
+v[2]=V("a");
+v[3]=V("k");
+
+v[4]=1+v[3]*v[0];
+
+v[5]=1-(1-v[1])*1/pow(v[4],v[2]);
+
+RESULT(v[5])
+
+EQUATION("Users")
+/*
+UPdate the statistics of the number of users.
+
+To speed things up, the computation is indirect. Previous period users are increased of the parameter "tempSales", which is the reset for the next period computation. Current net sales (new consumers minus abandoning ones) are stored in Sales.
+*/
+VS(p->up->next,"ActionDemand");
+v[0]=VL("Users",1);
+v[1]=V("tempSales");
+
+WRITE("Sales",v[1]);
+WRITE("tempSales",0);
+RESULT(v[0]+v[1] )
+
+
+EQUATION("CopyRow")
+/*
+Copy of the IdRow placed in Cell, to improve speed.
+*/
+v[0]=V("IdRow");
+PARAMETER
+RESULT(v[0] )
+
+
+EQUATION("Entry")
+/*
+Entry of new producers, allowed in every PeriodEntry time steps
+*/
+
+v[0]=VL("Entry",1);
+
+if(v[0]<0)
+ END_EQUATION(v[0]+1)
+/*
+CYCLE_SAFE(cur, "Prod")
+ {
+ v[5]=VS(cur,"Users");
+ if(v[5]==0)
+  DELETE(cur);
+ }
+*/  
+ 
+cur=SEARCH("Prod");
+v[3]=VS(cur,"pp0");//pp0 of the very first product
+cur=ADDOBJ_EX("Prod",cur);
+v[2]=V("IssueIdProd");
+WRITES(cur,"IdProd",v[2]);  
+
+
+WRITELS(cur,"PP",v[3],t);
+WRITES(cur,"pp0",v[3]);
+WRITELS(cur,"Users",0,t);
+WRITES(cur,"Sales",0);
+
+v[4]=V("PeriodEntry");
+
+RESULT(v[4] )
+
+FUNCTION("IssueIdProd")
+/*
+Deliver the IdProd for entrants
+*/
+
+RESULT(val[0]+1 )
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

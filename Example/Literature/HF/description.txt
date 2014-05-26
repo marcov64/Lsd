@@ -1,0 +1,30 @@
+History friendly model for the computer industry
+used in Malerba, F. , Nelson, R. , Orsenigo, L. and Winter, S. , 1999, "'History Friendly' Models of Industry Evolution: The Computer Industry", Industrial and Corporate Change, 8-1.
+
+Lsd implementation by Marco Valente after the original version in Java, kindly provided by the authors.
+
+The model represents the computer industry facing two types of demand (mainframes and personal computers) and developing two technologies, transistors and micro-processors. See the original article for more details.
+
+The implementation follows strictly the original Java version of the model, both in terms of initialization values and computational structure. Being a translation from another language, this is not an implemention following usual Lsd modelling style.
+
+The model represents an industry made of supply and demand. Demand is composed by two "user classes" for two types of computers (mainframes and PC's). The supply side is composed by a set of selling and innovating firms, two available technologies, and a definition of a standard. Each firm is made of a research department, a firm's idiosincratic "mix" of the two product characteristics (cheapness and performance), and a product, defined by two values for the two characteristics.
+The very first time step the model initializes the existing firms (Variable "init"), then, for each time step, is made of the following sequence:
+
+secondGenerationCreation
+diversification
+RDInvest
+ebwInvest
+adoption
+innovation
+checkEntry
+marketBfirm
+marketIndiv
+bookKeeping
+
+Each of the above Variable operates on the set of existing firms, setting their values and collecting some statistics. Supply-wide data are stored in Supply, while other information are stored invidually in each userclass. See the Lsd documentation for further information.
+
+
+
+
+
+

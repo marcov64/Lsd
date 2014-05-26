@@ -1,0 +1,323 @@
+	
+Label Root
+{
+	Son: Lattice
+	Label Lattice
+	{
+		Son: Worm
+		Label Worm
+		{
+			Son: Segment
+			Label Segment
+			{
+				Param: IdSegment
+				Var: Direction
+				Var: row
+				Var: col
+				Var: Move
+
+			}
+
+			Param: NSegment
+
+		}
+
+		Param: Nrow
+		Param: Ncol
+		Var: init
+		Var: Wait
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Lattice C	1
+Param: Nrow 0 n + n n	200
+Param: Ncol 0 n + n n	200
+Var: init 0 n + n n
+Var: Wait 1 n + n n	0
+
+Object: Worm C	1
+Param: NSegment 0 n + n n	15
+
+Object: Segment C	15
+Param: IdSegment 0 n + n n	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
+Var: Direction 1 n + d n	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6
+Var: row 1 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Var: col 1 n + n n	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34
+Var: Move 0 n + d n
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION fun_Worm.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Lattice
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Nrow
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Ncol
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_init
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Wait
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Worm
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NSegment
+(no description available)
+_INIT_
+ All 10 instances equal to 15.
+END_DESCRIPTION
+
+Object_Segment
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdSegment
+(no description available)
+_INIT_
+ All 150 instances increasing from 1 with steps 1 re-starting for each group of Objects.
+END_DESCRIPTION
+
+Variable_Direction
+(no description available)
+_INIT_
+ All 150 instances equal to 6.
+END_DESCRIPTION
+
+Variable_row
+(no description available)
+_INIT_
+ All 15 instances equal to 1.
+END_DESCRIPTION
+
+Variable_col
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Move
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+EQUATION("init")
+/*
+Initialize the lattice
+*/
+v[0]=V("Nrow");
+v[1]=V("Ncol");
+
+init_lattice(600, v[0],v[1],"","", "",p, 1);
+CYCLE(cur, "Segment")
+ {
+  v[2]=VLS(cur,"row",1);
+  v[3]=VLS(cur,"col",1);
+  update_lattice(v[2],v[3],2);
+ }
+
+PARAMETER;
+RESULT( 1)
+
+EQUATION("Wait")
+/*
+Just slow down the simulation
+doing nothing for LimitWait
+*/
+
+v[0]=VL("Wait",1);
+for(i=0; i<(int)v[0]; i++)
+ for(j=0; j<10000; j++);
+
+RESULT(v[0])
+
+
+
+EQUATION("Move")
+/*
+Comment
+*/
+
+v[4]=V("IdSegment");
+if(v[4]==1)
+ {
+  v[0]=V("row");
+  v[1]=V("col");
+  update_lattice(v[0],v[1],2);
+ } 
+else
+ {
+  v[5]=V("NSegment");
+ if(v[5]==v[4])
+  {
+  v[2]=VL("row",1);
+  v[3]=VL("col",1);
+  update_lattice(v[2],v[3],1);
+  } 
+ } 
+RESULT(1 )
+
+EQUATION("Direction")
+/*
+
+         0
+        
+    7          1
+             
+6                  2
+              
+    5          3
+              
+         4
+             
+
+*/
+
+v[0]=V("IdSegment");
+if(v[0]==1)
+ {
+  v[1]=rnd_integer(-1, 1);  
+  v[1]=0;
+  v[2]=VL("Direction",1);
+  v[3]=v[2]+v[1];
+  if(v[3]<0)
+   v[3]+=7;
+  else
+   if(v[3]>7)
+    v[3]-=7;
+    
+ }
+else
+ {
+ cur=SEARCH_CNDS(p->up,"IdSegment",v[0]-1);
+
+ v[3]=VLS(cur,"Direction",1);
+
+ 
+ } 
+
+RESULT(v[3] )
+
+EQUATION("row")
+/*
+Column position
+*/
+
+v[0]=V("Direction");
+v[1]=VL("row",1);
+
+if(v[0]==0 || v[0]==1 || v[0]==7 )
+ v[2]=v[1]+1;
+else
+ if(v[0]==3 || v[0]==4 || v[0]==5)
+  v[2]=v[1]-1;
+ else
+  v[2]=v[1]; 
+
+v[3]=V("Nrow");
+if(v[2]>v[3])
+ v[2]=1;
+else
+ if(v[2]<1)
+  v[2]=v[3];  
+ 
+RESULT(v[2] )
+
+
+EQUATION("col")
+/*
+Column position
+*/
+
+v[0]=V("Direction");
+v[1]=VL("col",1);
+
+if(v[0]==1 || v[0]==2 || v[0]==3 )
+ v[2]=v[1]+1;
+else
+ if(v[0]==5 || v[0]==6 || v[0]==7)
+  v[2]=v[1]-1;
+ else
+  v[2]=v[1]; 
+
+v[3]=V("Ncol");
+if(v[2]>v[3])
+ v[2]=1;
+else
+ if(v[2]<1)
+  v[2]=v[3];  
+ 
+RESULT(v[2] )
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

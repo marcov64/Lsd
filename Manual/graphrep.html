@@ -1,0 +1,54 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Generator" content="Microsoft Word 97">
+   <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Graphical Representation</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center><font size=-1><a href="TOC.html">HyperManual</a> <a href="windows.html">Lsd
+Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font></center>
+
+<p><map NAME="browser"><area SHAPE=RECT COORDS="6,25,35,49" HREF="menufile.html" ALT="Menu File"><area SHAPE=RECT COORDS="38,25,83,49" HREF="menumodel.html" ALT="Menu Model"><area SHAPE=RECT COORDS="87,25,105,41" HREF="menudata.html" ALT="Menu Data"><area SHAPE=RECT COORDS="107,25,143,41" HREF="menurun.html" ALT="Menu Run"><area SHAPE=RECT COORDS="164,49,206,65" HREF="#chobjname" ALT="Change Object Name"><area SHAPE=RECT COORDS="179,76,210,94" HREF="#goup" ALT="Move Browser to the Parent Object"><area SHAPE=RECT COORDS="8,134,156,332" HREF="#variables" ALT="Edit Variables"><area SHAPE=RECT COORDS="189,131,335,332" HREF="#descendants" ALT="Move Browser to Descending Objects"></map>
+<center>
+<p><a NAME="graphrep"></a><b><font size=+1>Graphical Model Representation</font></b></center>
+
+<p>Once a model is loaded, its structure is shown with a graphical representation,
+as in the figure below:
+<br>&nbsp;
+<p><br>
+<center>
+<p><img SRC="Image51.gif" height=408 width=578></center>
+
+<p><br>
+<br>
+<p>The graphical representation (which can be incomplete for very large
+models) provides a sketch of the basic structure of the model and can be
+used to quickly browse through the model, since the symbols can be clicked.
+The up-most Object Root is not shown in the window (because normally it
+shouldn't contain any element), which begins showing the Objects of the
+model from the descendants of Root. Each Object is represented by its label
+and by a circle connected with a line to its parent Object. Below each
+Object symbol are reported the number of instances currently contained
+in the model for that Object. In case there are multiple instances of its
+parent Object, there is one number for each group of descendants from each
+instance of the parent Object (if there are very many groups, the system
+shows only the initial ones).
+<p>Moving the mouse pointer over an Object symbol a window will show the
+content of the Object, in terms of Parameters (labels followed by <b><font face="Arial, helvetica">(P)</font></b>)
+and Variables (labels followed by <b><font face="Arial, helvetica">(n)</font></b>,
+where <b><font face="Arial, helvetica">n</font></b> is the maximum number
+of lags, see <b><font face="Arial, helvetica"><a href="Browser.html#variables">Variables</a></font></b>).
+<p>The window can also be used move quickly the browser to show the content
+of one Object type, by double-clicking on its symbol.
+<br>The window offers also another shortcut: clicking on one Object symbol
+with the right button of the mouse the system will show the initial values
+for that Objects (equivalent to the entry <a href="mdatainit.html">Initial
+Values</a> in Menu Data when the main Browser is showing that Object type).
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>

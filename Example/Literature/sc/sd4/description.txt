@@ -1,0 +1,5 @@
+Social Diffusion Model 0.3
+(by Smallwood and Conlisk, 1979, "Product Quality in Markets where Consumers are Imperfectly Informed", Quarterly Journal of Economics, 93-1.)
+implemented by Marco Valente
+
+Same model as version 0.3 plus marketing. A marketing index tracks slowly firms' sales, influencing the probability of a firm to be selected.

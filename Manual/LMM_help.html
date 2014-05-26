@@ -1,0 +1,1587 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR" content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <title>LMM Manual</title></head>
+<body link="#0000ff" vlink="#800080">
+<center><b><font size="+2">Lsd Model Manager - LMM</font></b>&nbsp;<br>
+<b><br><br></b><table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="0"><tbody><tr><td style="width: 650px;"><img style="width: 631px; height: 581px;" alt="" src="lmm_mainM.jpg"></td><td style="vertical-align: top;"><b><font size="+1">&nbsp;Topics</font></b>
+
+<ul><li> <a href="LMM_help.html#introduction">Introduction</a></li><li><a href="LMM_help.html#Lsd_LMM">Lsd and LMM</a></li><li> <a href="LMM_help.html#install">LMM Installation</a></li><li><a href="LMM_help.html#editor">LMM Editor window</a></li><li> <b>LMM Menus</b>:</li><ul><li> <a href="LMM_help.html#file">File</a></li><li> <a href="LMM_help.html#edit">Edit</a></li><li> <a href="LMM_help.html#model">Model</a></li><li> <a href="LMM_help.html#help">Help</a></li></ul><li> <b>Help on Lsd model writing</b></li><ul><li> <a href="LMM_help.html#modelcreation">Lsd model creation</a></li><li> <a href="lsdfunc.html">Lsd functions</a></li><li> <a href="debug.html">Lsd debugging</a></li></ul></ul></td></tr></tbody></table><b><br></b></center>&nbsp;
+<hr width="100%"><br>
+<a name="introduction"></a><b><i><font face="Arial">Introduction</font></i></b>
+<br>
+Lsd Models Manager (LMM) is an integrated environment used to generate,
+modify and access one or more Lsd models. It consists of a normal text
+editor (particularly suited for dealing with C++ source code), plus a
+series
+of commands to manage Lsd model programs. If LMM is loaded with a
+model,
+then its Lsd-related functionalities apply to that model. Otherwise,
+with
+no model loaded, LMM is just a simple editor.
+<br>
+Starting LMM you are shown a window with three options:
+<br><br><br><table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2"><tbody><tr><td style="width: 160px;"><img style="width: 151px; height: 160px;" alt="" src="image385.JPG"></td><td><ul><li> <b>Browse existing Lsd modelsl</b>. Browse all the models
+installed to select one to work on. This option allows also to create, move or delete models.</li><li> <b>Open a text file</b>. The system does not load any model,
+but
+offers
+the possibility to use the LMM editor on an existing file.</li><li> <b>Create a new text file</b>. The system does not load any
+model,
+and
+the editor contains an empty text file. It is possible to name the file
+when saving.</li></ul></td></tr></tbody></table><br>
+<br>
+&nbsp;Both LMM and Lsd are extensively documented by help pages in HTML
+format.
+<a href="#top">This
+document</a> covers the use of LMM; it is roughly organized for menu
+entries,
+and each section is referred to in the buttons <b>Help</b> in any
+interfaces.
+For help on the use of a Lsd model refer to the <a href="TOC.html">Lsd
+manual</a>, or look at the <a href="#hintro">Help on Help </a>section.
+<br>
+<hr width="100%">
+<br>
+<a name="install"></a><b><i><font face="Arial">LMM Installation</font></i></b>
+<p>The code for the Lsd system is identical under any platform, since
+it uses the same C++ compiler and libraries. Consequently, all the
+distributions of Lsd can be used on any system.&nbsp;</p><p>The
+installation consists unpacking the files and run LMM. Once this is
+successfully done, LMM is used to generate run and generate Lsd models.</p><p>There
+are three different packaging facilitating the installation procedures
+on MS Windows, Linux and Mac systems. Details on the installation are
+available in the README.txt file</p><p>&nbsp;
+</p>
+<ul>
+  <li> <b>MS Windows Systems (from Win95 to Vista)</b>: Unpack the
+zipped
+file.
+This will create a directory structure formed by one root directory,
+called
+LsdX.Y for Lsd version X.Y, and several subdirectories. Then run the
+batch
+program <big><tt>run.bat</tt> </big>in the Lsd root directory.&nbsp;</li></ul><ul>
+  <li> <b>Unix Systems</b>: LMM and the Lsd programs require a GNU C++
+compiler
+(any version) and the Tcl/Tk libraries, the most recent version (8.5 at the last updating of this file). LMM is distributed
+as
+a standard tar-zipped file. To unpack the file move in the directory
+were
+the file is located and type:</li>
+  <br>
+  <font face="Courier New,Courier">&gt; tar xsf lsdXYunix.tgz</font> <br>
+This creates a directory called Lsd and several subdirectories
+descending
+from the one in which you have copied your distribution file. Move in
+the
+newly created directory and compile LMM. <br>
+  <font face="Courier New,Courier">&gt; cd LsdX.Y</font> <br>
+  <font face="Courier New,Courier">&gt; make -f makefile.ln</font> <br>
+On success run LMM with the command <br>
+  <font face="Courier New,Courier">&gt; ./lmm</font>
+</ul>
+<ul><li><span style="font-weight: bold;">Mac OS X 10.5</span>: There
+are two options, using the X11 environment or generate a Mac native
+code. In the former case, install the X11 system from the Mac
+installation disks and follow the Unix instructions. Otherwise (and
+recommended) you need to install the Developer Toolkit, from the
+installation disks and the Tcl/Tk distribution from ActiveState site.
+&nbsp;For older versions of Mac OS's see the instructions <a href="#mac">here</a>.&nbsp; </li></ul><p>
+A distribution includes:
+<br>
+&nbsp;
+<table border="1" width="100%">
+  <tbody>
+    <tr>
+      <td><b><u><font size="+2">Directory</font></u></b></td>
+      <td><b><u><font size="+2">Content</font></u></b></td>
+    </tr>
+    <tr>
+      <td valign="top"><b>LsdX.Y</b></td>
+      <td>LMM program and other distribution files (e.g. Readme.txt,
+GPL.txt,
+compilation batch files).</td>
+    </tr>
+    <tr>
+      <td><b>LsdX.Y\src</b></td>
+      <td>System source code. This directory and its content should
+never be
+removed. Updates of Lsd will need to be placed here</td>
+    </tr>
+    <tr>
+      <td><b>LsdX.Y\Manual</b></td>
+      <td>Manual pages for using Lsd and LMM</td>
+    </tr>
+    <tr>
+      <td valign="top"><b>LsdX.Y\gnu </b>(Windows distribution only)</td>
+      <td>The compiler, linker, libraries, headers, and any other file
+required
+to compile C++ programs and run them under Windows. This part is taken
+from the MinGW port of the GNU project under Windows environment
+(ditributed
+under the GNU General Public License). See www.mingw.org. <br>
+Under Unix environment LMM compiles the Lsd model programs exploiting
+the GNU gcc compiler and the Tcl/Tk libraries, normally installed
+on
+every Unix systems.</td>
+    </tr>
+    <tr>
+      <td valign="top"><b>LsdX.Y\ExampleModels</b> <br>
+      <b>(and any other directory)</b></td>
+      <td>The distribution includes a set of example models that can be
+loaded
+and run using LMM. Each model is contained in a directory, possibly
+located
+in a directory tree organized according to groups of related models.
+Users
+can generate new groups of models according to their requirements using
+the Model Browser in LMM.</td>
+    </tr><tr><td><span style="font-weight: bold;">LsdX.Y\Work</span></td><td>Working directory, where the user will place the newly generated models. </td></tr>
+  </tbody>
+</table>
+<br>
+&nbsp;
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="editor"></a><b><i><font face="Arial">The LMM editor</font></i></b>
+<br>
+The LMM window is formed by a header bar and by a text editor. The
+header bar contains the four menus (<a href="#file">File</a>, <a href="#edit">Edit</a>,
+<a href="#model">Model</a>,
+<a href="#help">Help</a>)
+and indicates: the model selected, if any; the model's version number;
+the file currently loaded in the editor, and the columns and line
+position
+of the cursor.
+</p>
+<p><img src="image1MQ.JPG" height="22" width="662"></p>
+<p>The editor applies the usual rules for browsing text, selecting,
+deleting
+etc. Note that the most frequently used editing functions have also
+key-based
+shortcuts for faster access while typing, indicated along the items in
+the menus. Moreover, a short popup menu is activated with the right
+button
+of the mouse.
+</p>
+<p>Although the editor deals with any kind of text file, when it loads
+a file with extension cpp (or any extension related with C language)
+are
+applied different colors to facilitate the code reading. The C++
+comments
+(all the text included in between a /* and */ couple of characters, or
+the line beginning with //) are highlighted in green. Moreover, strings
+(all text included in between double quotes, excluding the \" cases)
+are
+written&nbsp; in blue.
+<br>
+Another binding useful for editing programming code is the automatic
+tabbing. When a new line is inserted (pressing the key Return), the
+editor
+fills the beginning of the new line with as many spaces as in the
+previous
+line, facilitating the standard programming tab styles. See in <a href="#edit">Menu
+Edit</a> a set of entries also useful for C++ coding.
+</p>
+<p><a name="file"></a><b><i><u><font face="Arial,Helvetica">Menu File</font></u></i></b>
+<br>
+This menu is pretty self-explanatory.
+</p>
+<p><a name="newfile"></a><b>New Text File </b>: create a new text
+document,
+initially labelled 'noname.txt'. When saving the document it is
+possible
+to change its name.
+</p>
+<p><a name="open"></a><b>Open </b>(shortcut Ctrl+o): open a new file
+closing
+the previous one (asking whether to save it, in case it is changed).
+Note
+that it is not necessary to open the files required by Lsd models since
+these can be accessed directly using the menu items in <a href="#model">menu
+Model</a>.
+</p>
+<p><a name="save"></a><b>Save </b>(shortcut Ctrl+s): save the current
+file
+with the same name used to open it. Check carefully whether you want to
+overwrite existing files.
+</p>
+<p><a name="saveas"></a><b>Save as </b>(shortcut Ctrl+a): save the
+current
+file asking for a new name.
+</p>
+<p><a name="quit"></a><b>Quit </b>(shortcut Ctrl+q): Quit LMM.
+</p>
+<p><a name="SystemOpt"></a><b>System Options</b>
+<br>The user can specify the following options: consolle terminal; HTML
+browser; font and exact name of the wish,. The terminal is the command
+to be used when launching the GDB debugger. The browser is used to show
+the helpl pages. The font is the name of the fonts to be used in LMM as
+text. Wish is used to run interpreted scripts in Tcl/Tk languages,
+mainly used by TkDiff (see <a href="#tkdiff">TkDiff</a> and <a href="#compmod">Compare Models</a>
+in menu Edit). If these functionalities do not work then open a
+terminal in your system and find out how wish is called (e.g. wish8.4).
+Clicking on the default button provides the most common options for the
+operative system used.
+</p>
+
+<hr width="100%">
+<p><a name="edit"></a><b><i><u><font face="Arial,Helvetica">Menu Edit</font></u></i></b>
+<br>
+This menu deals with the editing of the file shown in the LMM editor.
+Besides the usual copy/paste operation, it offers several facilities
+targeted
+to operate on C++ source code, and Lsd equations in particular:
+</p>
+<ul>
+  <li> <a href="#goto">Goto line</a>; <a href="#search">Find</a>; <a href="#again">Find
+again</a>; <a href="#repl">Replace</a></li>
+  <li> <a href="#match">Match { }</a>; <a href="#matchp">Match ( )</a>;</li>
+  <li> <a href="#insertopengr">Insert {</a>; <a href="#insertclosegr">Insert
+}</a>; <a href="#LsdScript">Insert
+Lsd Scripts</a>;</li>
+  <li> <a href="#wrap">Wrap/Unwrap</a>; <a href="#lfont">Larger Font</a>;
+    <a href="#sfont">Smaller
+Font</a>; <a href="#changefont">Change Fonts</a>; <a href="#indent">Indent-Deindent</a>;</li>
+  <li> <a href="#tkdiff">TkDiff</a></li>
+</ul>
+<p><br>
+Note that most of the commands can be activated using intuitive
+shortcuts of the type Control+X to speed up their use.
+</p>
+<p><a name="goto"></a><a href="#edit">(menu Edit)</a><b> Goto Line </b>(shortcut:
+Ctrl+l):
+<br>
+Go to the chosen line number in the shown text. The corresponding line
+is moved at the center of the window and highlighted. This function is
+very useful to find error messages in compilation, since they are
+referred
+to by the line number.
+</p>
+<p><a name="search"></a><a href="#edit">(menu Edit)</a> <b>Find Text </b>(shortcut:
+Ctrl+f):
+<br>
+Find a text in the document shown. The search start from the current
+position of the cursor downwards or upwards, depending as specified,
+and
+is interrupted at the first instance found. It is possible to make
+either
+a case sensitive or insensitive search. If the searched characters are
+found, they are brought in the center of the text window and
+highlighted.
+Otherwise, the small entry window to insert the text remains visible
+and
+its content is selected for an easy replacement. The small entry window
+accepts, besides the buttons Ok and Esc commands, also the equivalent
+keys
+Return and Escape.
+</p>
+<p><a name="again"></a><a href="#edit">(menu Edit)</a> <b>Find Again</b>
+(shortcut: F3):
+<br>
+Find again the same text as specified in the previous Find Text (and
+applies the same settings). Provide a quick way to find one specific
+instance
+of a frequently repeated pattern.
+</p>
+<p><a name="repl"></a><a href="#edit">(menu Edit)</a> <b>Replace (</b>shortcut:
+Ctrl+r<b>):</b>
+<br>
+Search for a text pattern and replace the text, if found. Three buttons
+are available in the Replace window:
+</p>
+<ul>
+  <li>Search: searches for the text;</li>
+  <li>Replace: replace the selected text after a search and immediately
+repeat
+the searche for a new occurrence;</li>
+  <li>Replace all: replace the currently selected text and continue
+searching
+and replacing until the end of the text.</li>
+</ul>
+The Replace window accepts as keys the button Return for Search and Esc
+as Close.
+<p><a name="match"></a><a href="#edit">(menu Edit)</a> <b>Match { } </b>(shortcut:
+Ctrl+m):
+<br>
+Find the graph bracket matching the one close to the current insertion
+cursor. It is very useful when working with C++. In fact, in complex
+C++
+programs the blocks of lines (for example, in the <font face="Courier New,Courier">if-then-else</font>
+statements, the <font face="Courier New,Courier">for</font> and while
+cycles,
+etc.) are defined by { and } graph brackets. It is very easy to get
+lost
+in the sequences of open and close brackets, and errors due to the
+absence
+or redundancy of a bracket are very difficult to identify.
+</p>
+<p>The function is very simple to use. If the character on the right of
+the insertion cursor is a {, then the function scans downward the text
+stopping at the } character matching the initial {, that is, skipping
+the
+couples {} found during the research. In case the character on the
+right
+of the insertion point is a }, then the scan is made backwards.
+</p>
+<p>When the matching bracket is found, both the initial and the found
+one
+are highlighted, while the text shows the part of the code containing
+the
+found one. If the two brackets are pretty far apart in the text, the
+user
+may want either to focus on the initial bracket or on the just found
+one.
+Users have are alternatives after a successful search: using the arrow
+keys, the window immediately return showing the initial bracket.
+Otherwise,
+clicking with the mouse over the shown area, that becomes the active
+one
+and can be treated normally.
+</p>
+<p>In case the search fails, meaning that the end of the text were
+reached
+before finding the matching bracket, an error sound is emitted. In case
+the character on the right of the insertion point is neither a } or a
+{,
+then the function does nothing.
+</p>
+<p><a name="matchp"></a><a href="#edit">(menu Edit)</a> <b>Match ( ) </b>(shortcut:
+Ctrl+p):
+<br>
+Same as for <a href="#match">Match { }</a> but applies to the
+parenthesis.
+</p>
+<p><a name="insertopengr"></a><a href="#edit">(menu Edit)</a> <b>Insert
+{ </b>(shortcut: Ctrl+'(' ):
+<br>
+In some systems endowed with international settings (non USA keyboards)
+it is difficult to insert the badly needed graph brackets. This items,
+and specially its shortcuts, saves a lot of laborious work.
+</p>
+<p><a name="insertclosegr"></a><a href="#edit">(menu Edit)</a> <b>Insert
+} </b>(shortcut: Ctrl+')' ):
+<br>
+In some systems endowed with international settings (non USA keyboards)
+it is difficult to insert the badly needed graph brackets. This items,
+and specially its shortcuts, saves from a lot of laborious work.
+</p>
+<p><a name="LsdScript"></a><a href="#edit">(menu Edit)</a> <b>Insert
+Lsd
+Script (Shortcur: Ctrl+i)</b>:
+<br>
+Insert in the insertion cursor point a frequently used Lsd script (the
+equation style between C++ or Lsd macros depends on the <a href="#select_macro">option</a>
+chosen). This function is merely implemented to allow modellers to
+quickly
+include frequently used code, minimizing the number of typing mistakes.
+It is possible, of course, to edit the text inserted with this
+function,
+as any text typed manually.
+<br>
+The item activates a window listing the scripts currently available
+for automatic insertion (see the help page on <a href="lsdfuncMacro.html">Lsd
+functions</a> for the complete set of Lsd functions available). When a
+choice is made, an interface requesting the values necessary for the
+script
+appears. The interfaces contain already a default value for each item
+to
+insert, and modellers can move from one item to the next just pressing
+<b>Return</b>
+(the usual key <b>Escape</b> aborts the process at any moment).
+</p>
+<p>Pay attention to the highlighted letters in the list of available
+functions.
+They are also used as short-cuts pressing Control and one of the upper
+case letters. For example, pressing Control and 'V' the interface to
+insert
+a V(...) function is activated.
+</p>
+
+<hr width="100%"><br>
+<a name="wrap"></a><a href="#edit">(menu Edit)</a> <b>Wrap Text/No
+Wrap </b>(shortcut Ctrl+'w'):
+<br>
+The text window can be set either to wrap the text so to not spill
+over the right side. At the start, the default is no wrapping, so that
+the end part of long lines can be read only scrolling the text on the
+right.
+Choosing this item the setting alternate between wrapping and not
+wrapping
+the text. The wrapping does not affect the saved file, but only the
+appearence.
+
+<hr width="100%">
+<p><a name="lfont"></a><a href="#edit">(menu Edit)</a> <b>Larger Font</b>
+(shortcut Ctrl+'+'): Increase the fonts used in the editor.
+<br>
+</p>
+<hr width="100%">
+<p><a name="sfont"></a><a href="#edit">(menu Edit)</a> <b>Smaller Font</b>
+(shortcut Ctrl+'-'): Decrease the fonts used in the editor.
+</p>
+
+<hr width="100%">
+<p><a name="changefont"></a><a href="#edit">(menu Edit)</a> <b>Change
+Font</b>:
+Set the fonts to use in the editor.
+&nbsp;
+</p><hr width="100%"><br>
+<a name="indent"></a><a href="#edit">(menu Edit)</a> <b>Indent and
+Deindent Selection</b> (shortcut Ctrl+'&gt;' and Ctrl+'&lt;'): Add or
+remove
+spaces in the beginning of the selected line(s)
+<br>
+<hr width="100%">
+<br>
+<a name="tkdiff"></a><a href="#edit">(menu Edit)</a> <b>TkDiff</b>
+a WYSWYG interface for "diff" based on Tk, written by John M. Klassa
+(see
+its About ...). It shows differences between two files, useful to
+compare
+equations' code differences in two versions of the same model.
+<br><br>
+<hr width="100%"><a name="compmod"></a> <a href="LMM_help.html#edit">(menu Edit)</a> <span style="font-weight: bold;">Compare models</span>.
+This interface allows to run TkDiff using selecting automatically the
+equation files of two model. The interface shows the complete list of
+the models present in the Lsd distribution. Users need to select one
+model and then click on the "Insertt" button on the right hand of the
+windows. TkDiff will show the differences between the equation files of
+the two models.
+<hr width="100%">
+<br>
+&nbsp;
+<p><a name="model"></a><b><i><font face="Arial">Menu Model</font></i></b>
+</p>
+<p>The items in menu Model activates all the necessary functions to
+create,
+revise or run an existing model. Only two items are available when a
+model
+is not selected: Select Model or New Model. When a model is selected
+then
+also the other items are available, and their function (e.g. compile,
+run
+etc.) refer to the active model only.
+<br>
+Items available in menu Model:
+</p>
+<ul>
+  <li> <a href="#select">Equation Coding Style</a></li>
+  <li> <a href="#select">Browse Models</a></li>
+  <li> <a href="#run">Run</a>; <a href="#debug">Debug</a></li>
+  <li> <a href="#eqution">Show Equation</a>; <a href="#makef">Show
+Makefile</a>; <a href="#compilresult">Show
+Compilation Result</a>, <a href="#description">Show Description</a>, <a href="#modelinfo">Model
+Info</a></li>
+  <li> <a href="#compilation_options">System and Model Compilation
+Options</a></li>
+  <li><a href="#nowindow">Generate NO WINDOW makefile</a><br>
+  </li>
+</ul>
+<hr style="width: 100%; height: 2px;">
+<p><br>
+<a name="switch_macro"></a><a href="#model">(menu Model)</a> <b>Equation
+Coding Style</b>
+<br>
+Allows to choose between the traditional C++ form for expressing the
+code in the Lsd equations, or to use the simpler <a href="#lsd_macro">macro
+language</a>. Depending on which coding style is used, LMM will provide
+the corresponding <a href="#LsdScript">Lsd script</a> to be inserted
+in
+the equations, and will mutate the <a href="#helpeq">Help page on the
+equation</a>
+coding.
+<br>
+Note that users can blend the two languages in the same models,
+expressing
+some part of the code in C++ and others in the Lsd macro.
+<br>
+</p>
+<hr width="100%">
+<p><a name="select_macro"></a><a href="#model">(menu Model)</a> <b>Equation
+Codying Style</b>
+<br>
+Tell LMM to use pure C++ codying style or the simpler Lsd macro codying
+style.
+<br>
+Lsd models implement the Variables' equations in C++, which are stored
+as blocks of code in the model equations file. Besides writing the
+equations
+in C++, users can also use a macro language, which uses shorter
+keywords
+for the most common operations. It is also possible to mix in the same
+model standard C++ and the macro language, although generally this may
+be confusing.
+<br>
+Depending on this option, LMM will insert the <a href="#LsdScript">Lsd
+scripts</a> in the chosen style. Also the <a href="#helpeq">Lsd
+equation
+help</a> menu item will be selected according to this option.
+<br>
+</p>
+<hr width="100%">
+<p><a name="select"></a><a href="#model">(menu Model)</a> <b>Browse
+Models</b>
+<br>
+This functionality allows to manage the models available on your Lsd
+installation. The models are organized each in one directory, and these
+directories are organized in "groups" containing related models.
+<br>
+Users willing to experiment with one of the existing model need only
+to browse the models available and choose one to work with. The system
+will automatically refer to the files concerning the chosen model.
+<br>
+Modellers developing new model programs can use the other
+functionalities
+to organize properly the set of models in suitable groups (e.g. move a
+finished model from the "Work" group to the "PaperXXX" group).
+</p>
+<p>Using the "Lsd Models" browser windows it is possible to:
+</p>
+<ul>
+  <li>select one of the existing models;</li>
+  <li>create new groups, meant to store sets of related models;</li>
+  <li>create new empty models, to be used as basic structure to fill
+out a
+new
+model;</li>
+  <li>"copy" a model from one group and "paste" it in another group;</li>
+  <li>delete existing models. Note that the directories containing the
+models
+are not actually deleted, but are moved under the directory "Trashbin",
+for possible re-use. To re-install the "deleted" models it is necessary
+to find the directory of interest in the trashbin and move it manually
+in one of the groups.</li>
+  <li>edit labels and descriptions of models and groups.</li>
+</ul>
+When necessary, the above functions will request the relevant
+information
+in self-explaining forms. In all cases pressing Escape will abort the
+current
+operation.
+<br>
+<hr width="100%">
+<p><a name="run"></a><a href="#model">(menu Model)</a> <b>Run Lsd Model</b>
+<br>
+Compile, if necessary, and run the Lsd model program.
+<br>
+The system checks that all the files necessary for the Lsd model
+program
+have been compiled, and then run the resulting Lsd model program (see <a href="TOC.html">here
+the manual </a>for the Lsd model program interfaces).
+<br>
+Three possible outputs are possible from this command:
+</p>
+<ul>
+  <li>the Lsd model program (successful compilation);</li>
+  <li>an error message appears (failed compilation);</li>
+  <li>a warning message (possibly failed compilation)</li>
+</ul>
+Both in case of error or warning a new window gives the details of the
+messages from the compilation process. The warning message is issued
+when
+the compilation did issue messages, but a copy of the Lsd model program
+exists. This may happen in radically different cases:
+<br>
+1) the compilation problems did not prevent a successful creation of
+the Lsd model program, which is therefore updated with the latest
+equations'
+code;
+<br>
+2) the compilation failed, but an old copy of the Lsd model program
+(with old equations) exists. In this case, the copy does not contain
+the
+latest (faulty) equations' code. This happens when a previous version
+of
+the Lsd model program had been successfully compiled (and is still
+present
+on the disk).
+<p>The compilation messages indicate which of the two cases you are in.
+Compilation messages indicating only warnings are innocuous. Instead,
+terms
+like errors, failure, stop etc. indicate that the compilation failed.
+See
+in the following for information on the most frequent errors.
+</p>
+<p><b>Frequent Compilation Errors</b>
+<br>
+In case of compilation errors, the system issues a warning and presents
+the compiler's error messages (the window containing the errors can be
+close and re-opened with the command <b>Show Compilation Results</b>
+in
+menu <b>Run</b>). There are two possible sources of errors:
+programming
+bugs and LMM configuration errors.
+</p>
+<p>Programming errors are caused by violations of the C++ grammar in
+the
+equation files (of course, a C++ legal equation code is not necessarily
+doing what it is expected to do, but this can be seen only at run
+time).
+Programming errors are signalled with lines like:
+</p>
+<p><b><font face="Courier New,Courier">XXX.cpp:301 ...</font></b>
+</p>
+<p>meaning that in the file XXX.cpp (typically the equation file of the
+model) at line 301 an error has been found (note the command <b>Goto
+Line</b>
+in menu <b>Edit</b>).
+<br>
+The possibilities of the compiler to indicate exactly where the error
+is located are limited. For example, a missing semi-colon (possibly the
+most frequent error) is indicated in the message as an error in the
+following
+line.
+<br>
+The compilation of the source files is sequential, so that frequently
+one error on one line causes a number of (apparent) other errors in the
+following lines. Fix the errors indicated in the earliest positions
+(top
+messages) and try to recompile without searching for the mass of
+following
+errors.
+<br>
+The nastiest errors are caused by the wrong number of open- and
+close-brackets:
+{ and }. The compiler fails to individuate the location of the missing
+(or redundant) bracket, although it totally misread all the code,
+therefore
+issuing a lot of fake messages. If everything seems correct at the
+lines
+indicated in the error messages, test the brackets of the equation file
+(starting with the very first one) using the command <b>Match </b>{}
+in
+menu <b>Edit </b>(see <a href="#match">here</a> for help on this):
+each
+open bracket must match with a closing one. If no matching bracket is
+found,
+then there is the problem.
+</p>
+<p>It is impossible to write code without writing bugs, so that it is
+important
+to learn to discover them quickly. However, this is possible only if
+one
+has a reasonable idea where to start the research, and therefore it is
+highly recommended to write few lines and then compile. Even if the
+written
+code does not mean anything yet, at least one can clean-up the typing
+mistakes.
+</p>
+<p>Configuration errors occur when the system does not find required
+libraries
+where expected, or they are mispelled. These errors cause messages
+like:
+</p>
+<p><b><font face="Courier New,Courier">No rule to make target `XXX.cpp'</font></b>
+</p>
+<p>or
+</p>
+<p><b><tt><font size="+1">cannot open -ltcl8.0: No such file or
+directory</font></tt></b>
+</p>
+<p>and, in general, messages not related to the content of the equation
+file. In this case the error signals that either the whole package is
+not
+configured properly, or that the model does not contain some crucial
+information.
+These errors generally occur once during the very first time the system
+is used, and then they never appear again. Use the commands for the <b>System
+Compilation Options </b>and <b>Model Compilation Options</b> in menu <b>Model</b>
+to fix the errors (see <a href="#compilation_options">here</a> for
+help
+on this topic).
+</p>
+<p>The system allows to run many copies of the same Lsd model program.
+However they must all share the same equation file. This is because it
+is not possible to replace the files of programs currently running.
+Therefore,
+if you are using a Lsd model program for a simulation run, and then try
+to recompile it with a modified equation file, the system may give a
+message
+like this:
+</p>
+<p><b><font face="Courier New,Courier">ld: cannot open output file
+lsd_gnu.exe:
+Permission denied</font></b>
+</p>
+<p>In this case, either close the running Lsd model program, or re-compile.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="debug"></a><a href="#model">(menu Model)</a> <b>Debug</b>
+<br>
+Use the <i>gdb</i> debugger to follow the simulation
+instruction-by-instruction.
+A debugger is a program that allows other programs to run in a
+controlled
+environment. When a program is run in a debugger, it is possible to
+observe
+in detail what it does, for example interrupting its calculations and
+checking
+the values of its internal variables. The debugger works as if the
+single
+lines of code fire their commands only when explicitly directed.
+</p>
+<p>Note that the <i>gdb</i> is a C++ debugger, which, therefore, knows
+nothing of Lsd equations, Objects etc., but their technical
+representation.
+<i>gdb</i>
+permits, for example, to investigate line by line the execution of an
+equation.
+However, this means that one has also to follow line-by-line a lot of
+non-interesting
+technical code. Lsd programmers may find much more useful the Lsd
+Debugger:
+it permits to follow a simulation by individual equations. When one
+Variable,
+marked to be debugged, is computed, the Lsd debugger interrupts the
+simulation,
+shows the value produced in the equation, the values of v[n] temporary
+values, the whole models' values, etc., permitting to understand, most
+of times, the cause of an error. See the <a href="debug.html">Lsd
+Debugger
+help page</a>. However, the <i>gdb</i> debugger is still useful in
+case
+of very hard problems.
+</p>
+<p>The Lsd model program in the debugger runs as usual (slightly
+slower,
+if anything) but the user can interrupt the program at any point, check
+the value of any variable, make the program proceed by single steps,
+and
+a whole series of other functionality meant to help finding out
+misbehaviours
+or errors in the program.
+</p>
+<p>In case of a Lsd model program, it is usually useful to focus on one
+equation and see the behaviour of the program while executing that
+code.
+In the following, few gdb commands are reported. They all take the form
+of commands to be typed at the line prompt of the gdb shell. More
+information
+can be found in the gdb manual, available on the net, or simply typing
+help in the gdb shell, possibly followed by a precise command.
+</p>
+<ul>
+  <li> <b>break fun_XXX.cpp:132</b>: places a breakpoint at line 132
+of
+the file
+fun_XXX.cpp. When the execution of the program reaches that line, gdb
+interrupts
+the program and offers the users with the gdb prompt.</li>
+  <li> <b>break 232</b>: places a break in the currently considered
+source
+file
+at line 232;</li>
+  <li> <b>break myfu</b>n: places a breakpoint at the first line of
+the
+function
+myfun;</li>
+  <li> <b>break variable::fun</b> places a breakpoint at the first
+line of
+the
+method fun of the object variable.</li>
+  <li> <b>run</b>: causes the program to run. The execution will be
+interrupted
+at one of the following events: the normal end of the program is
+reached;
+the flow of the program finds a breakpoint; the program crashes.</li>
+  <li> <b>print X</b>: shows the content of the variable X</li>
+  <li> <b>display X</b>: shows the content of the variable X, which
+remains visible
+through other commands (e.g. next, step etc.) until undisplay is called.</li>
+  <li> <b>step</b>: makes just one step in the execution of the program</li>
+  <li> <b>next</b>: like step, but, if a subfunction is found, next
+"step
+over"
+it without entering within the code of the function</li>
+  <li> <b>continue</b>: resort the program continuing after an
+interruption;</li>
+  <li> <b>delete [n]</b>: remove the breakpoints. If no number is
+specified all
+the breakpoints are removed. Otherwise, only the one marked with the
+specified
+number is eliminated.</li>
+  <li> <b>list</b>: shows the source code lines above and after the
+one
+that is
+going to be executed.</li>
+  <li> <b>list -10 [10]</b>: shows 10 previous [subsequent] lines in
+respect of
+the one shown before.</li>
+  <li> <b>cond 2 v[0] == 3</b>: assigns a condition to a breakpoint,
+so
+that the
+execution is interrupted only if the condition is true. In the example,
+the second breakpoint specified is active only if the value of v[0] is
+identical to 3, otherwise the execution will not be interrupted.</li>
+  <li> <b>bt (backtrace)</b>: shows the stack of the program. It is
+the
+list of
+functions that are called at the moment in the execution of the program.</li>
+</ul>
+<p><br>
+For more information on this and other commands, use the help in
+gdb (just type help and the name of the command). Moreover, in gdb
+works
+the command completion, so that typing, for example, "disp" and then
+pressing
+the tab key, the command display is automatically completed. In case of
+possible ambiguity (e.g. typing only "dis" and tab) the prompt shows
+the
+list of alternative among which to choose (this is also a weird, but
+rather
+useful, way to discover new functionalities).
+<br>
+</p>
+<hr width="100%">
+<p><a name="eqution"></a><a href="#model">(menu Model)</a> <b>Show
+Equation</b>
+</p>
+<p>The entry <b>Show Equation</b> opens in the LMM editor the file
+containing
+the equations for the selected model. The equation file is a normal C++
+source file, that LMM uses to create a Lsd model program. The modeller
+writes in this file the code for the equations in separated blocks,
+whose
+order is of no importance for the actual order the Variables are
+updated.
+<br>
+There are two possibilities to express the code for an equation: the
+standard C++ expressions (see <a href="lsdfunc.html">here</a> the
+manual)
+or a <a href="#lsd_macro">macro language</a>, much simpler especially
+for
+novel modellers.
+<br>
+The equation file shown in LMM should be used only for editing a model
+and should not be used just for studying a model, since it is not easy
+to reconstruct the functioning of a model looking at the code of the
+equations
+only. In fact, there is no relation between the order of the variables
+blocks and their actual order of execution during a simulation run. To
+browse a model's code Lsd model programs offers to far better
+alternatives.
+Lsd model programs contains several facilities to browse the model
+structure
+(i.e. Object, Variables and Parameters) and equations (see, for
+example,
+the
+<a href="Browser.html#variables">equations windows</a>). Moreover,
+the Lsd models produce HTML documents ( <a href="menufile.html#report">Model
+Report</a>), accessible directly from the Help menu of the Lsd model
+programs,
+that list all the elements of the model including the equations' code.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="makef"></a><a href="#model">(menu Model)</a> <b>Show Makefile</b>
+<br>
+This item shows the content of the "makefile". This is a simple text
+file that contains the commands necessary to build a model program
+using
+the Lsd source code (both the general system code and the model
+specific
+equation' code) with the compiler.
+<br>
+The makefile's for the models are always created merging three files:
+<tt><font size="+1">model_options.txt,
+system_options.txt </font></tt>and<tt><font size="+1">
+makefile_base.txt</font></tt>.
+The first is peculiar to one model, while the others are common to all
+models (located in the Lsd root).
+<br>
+Any time the makefile is required (e.g. to compile a model before
+running
+it) this is created again. Therefore, a direct change to the makefile
+does
+not have any effect. To modify compilation options see <a href="#compilation_options">System
+and Model Compilation Options</a>.
+<br>
+<hr width="100%">
+<p><a name="compilresult"></a><a href="#model">(menu Model)</a> <b>Show
+Compilation Results</b>
+<br>
+This items causes LMM to show the results from the latest compilation
+in a new window. If the compilation did not issue any error the window
+is empty. This option is useful whenever there are many errors in the
+equation
+file (see <a href="#run">run</a> for a discussion on the most frequent
+compilation errors).
+<br>
+</p>
+<hr width="100%">
+<p><a name="description"></a><a href="#model">(menu Model)</a> <b>Show
+Description</b>
+<br>
+Shows the description of the model, a verbal summary of the model
+content
+and aims prepared as presentation of the modeller.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="modelinfo"></a><a href="#model">(menu Model)</a> <b>Model
+Info</b>
+<br>
+Shows summary information on the model:
+<br>
+- the model name (editable);
+<br>
+- the version number (editable);
+<br>
+- the date of creation;
+<br>
+- the date of the latest modification of the equations;
+<br>
+- the directory containig the model files.
+
+<hr width="100%">
+<p><a name="compilation_options"></a><a href="#model">(menu Model)</a><b>System
+</b>and<b>
+Model Compilation Options</b>
+<br>
+Set the compilation options for the whole system and for the model
+respectively. That is, these options are used to create the makefiles
+used
+to compile and link the models according to the local settings and
+user's
+preferences.
+<br>
+Creating a Lsd model program requires, besides the code, the exact
+name and location of several system files. This information is not
+perfectly
+standard, particularly comparing Windows and Unix environment. These
+two
+commands permit to fix problems due to non-standars systems, or to
+easily
+compile a model developed under a different operative system.
+Generally,
+the default values proposed should suit most cases, and are applied by
+the buttons for the Windows and Linux OS's . However, in the following
+I list the details of how Lsd model programs are created (non-expert
+users
+can ignore this).
+</p>
+<p>Lsd is compiled with a standard C++ GNU compiler. It is assumed that
+most Unix system have already installed this. The Windows version comes
+with an extract of the CYGWIN package, a port of the GNU project under
+Win32 by Cygnus (released under the GNU GPL). The Windows installation
+stores in the directory LsdXXX/src all the necessary stuff. In this
+way,
+identical code is compiled seamlessly under different OS's, e.g., both
+under Linux and Windows 2000.
+</p>
+<p>The makefile's for the models are created by three different parts:
+<br>
+- Model specific settings, valid for a single model (stored in the
+model_options.txt in each model directory)
+<br>
+- System-wide settings, valid for all the models (stored in the file
+system_options.txt in the Lsd root directory)
+<br>
+- The body of a makefile used by all models (stored in the file
+makefile_base.txt
+in the Lsd root directory)
+</p>
+<p>When a makefile must be created (e.g creating a new model or
+changing
+the compilation options), the system merge the three parts above. Using
+the system and model compilation option commands users can modify the
+first
+and second part indicated above, since the body of the makefile does
+not
+neet any customization. The required settings are indicated in the
+following
+tables, along with the default values.
+</p>
+<p><b>Model Options</b>
+<table border="1" width="100%">
+  <tbody>
+    <tr>
+      <td><b>Variables</b></td>
+      <td><b>Default</b></td>
+      <td><b>Comments</b></td>
+    </tr>
+    <tr>
+      <td>TARGET=</td>
+      <td>lsd_gnu</td>
+      <td>The name of the Lsd model program (Windows version attach the
+.exe
+extension automatically).</td>
+    </tr>
+    <tr valign="top">
+      <td>FUN=</td>
+      <td>fun_XXX</td>
+      <td>Name of the equation file for model XXX, that is the C++
+source file
+containing the code for the model's equations. The extension .cpp must <i>not</i>
+be included. When creating a model the system by default assigns the
+name
+fun_XXX.cpp to this file, where XXX is the name of the directory where
+to store the model files.</td>
+    </tr>
+    <tr>
+      <td>SWITCH_CC=</td>
+      <td>-g</td>
+      <td>Any optional switch to the compiler can be assigned to this
+variable.
+The -g option includes in the code the debugging information, used by
+the
+gdb debugger. Options like -O, -O1, -O2, -O3 etc generate faster code.
+See the manual for your gcc compiler for further, system-specific
+optimization options</td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p><b></b></p><p><b>System Options</b></p><p>(the version of Tcl/Tk library needs to be &nbsp;changed according to the installed one)<b></b>
+<table border="1" width="100%">
+  <tbody>
+    <tr valign="top">
+      <td><b>Variables</b></td>
+      <td><b>Windows&nbsp;</b></td>
+      <td><b>Linux&nbsp;</b></td>
+      <td><b>Comments</b></td>
+    </tr>
+    <tr valign="top">
+      <td>TCL_VERSION=</td>
+      <td>83</td>
+      <td>8.3</td>
+      <td>Version numbering attached to the Tcl library. On some
+systems there
+is no need for any number, or it may be 82, or 8.2. In case of linker
+errors
+like:
+      <p><b><tt><font size="+1">cannot open -ltcl8.3: No such file or
+directory</font></tt></b> </p>
+      <p>try a different version number, and with or without separating
+dot.<br>
+      </p>
+      </td>
+    </tr>
+    <tr valign="top">
+      <td>TK_VERSION=</td>
+      <td>83</td>
+      <td>8.3</td>
+      <td>Version numbering attached to the Tk library. On some systems
+there
+is no need for any number, or it may be 82, or 8.2. In case of linker
+errors
+like:
+      <p><b><tt><font size="+1">cannot open -ltk8.3: No such file or
+directory</font></tt></b> </p>
+      <p>try a different version number, and with or without separating
+dot.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>LSDROOT</td>
+      <td>C:/Lsd5.1</td>
+      <td>/home/myusername/Lsd51</td>
+      <td>This is the root of the Lsd system directory</td>
+    </tr>
+    <tr valign="top">
+      <td>DUMMY=</td>
+      <td>-Wl,--subsystem,windows</td>
+      <td>(empty)</td>
+      <td>The CYGWIN compiler under Windows accepts this options in
+order to
+compile graphical programs without the console window.</td>
+    </tr>
+    <tr valign="top">
+      <td>PATH_TCL_LIB=</td>
+      <td>../gnu/lib</td>
+      <td>.</td>
+      <td>Path (relative to a model directory) of the Tcl library.</td>
+    </tr>
+    <tr valign="top">
+      <td>PATH_TK_LIB=</td>
+      <td>../gnu/lib</td>
+      <td>.</td>
+      <td>Path (relative to a model directory) of the Tk library.</td>
+    </tr>
+    <tr valign="top">
+      <td>PATH_TK_HEADER=</td>
+      <td>../gnu/include</td>
+      <td>(empty)</td>
+      <td>Path (relative to a model directory) of the Tk header file.</td>
+    </tr>
+    <tr valign="top">
+      <td>PATH_TCL_HEADER=</td>
+      <td>../gnu/include</td>
+      <td>(empty)</td>
+      <td>Path (relative to a model directory) of the Tcl header file.</td>
+    </tr>
+    <tr valign="top">
+      <td>PATH_LIB=</td>
+      <td>../gnu/lib</td>
+      <td>.</td>
+      <td>Path (relative to a model directory) of the standard C++
+libraries.</td>
+    </tr>
+    <tr valign="top">
+      <td>INCLUDE_LIB=</td>
+      <td>-I../gnu/include</td>
+      <td>(empty)</td>
+      <td>Path (relative to a model directory) of the standard header
+directory.</td>
+    </tr>
+    <tr>
+      <td>SRC=</td>
+      <td>src</td>
+      <td>src</td>
+      <td>Directory containing the Lsd source code. You will
+probably&nbsp; never
+need to use this option. It serves in order to test different versions
+of Lsd. In this latter case, insert here the directory you want to use
+to compile a new model</td>
+    </tr>
+    <tr>
+      <td>EXTRA_PAR=</td>
+      <td>-lz<br>
+      </td>
+      <td>-lz</td>
+      <td>Insert here any extra parameter to be used in the
+compilation, for
+example some specific libraries needed on your system. By default it is
+used the zlib library to generate zipped result files. If your system
+does not include this library, leaves empty this variable (e.g.
+EXTRA_PAR= ) and remove the LIBZ macro in the beginning of the code in
+the file src\analysis.cpp.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">SSWITCH_CC=</td>
+      <td style="vertical-align: top;">-O2<br>
+      </td>
+      <td style="vertical-align: top;">-O2<br>
+      </td>
+      <td style="vertical-align: top;">Any optional switch to the
+compiler can be assigned to this variable.
+The -g option includes in the code the debugging information, used by
+the
+gdb debugger. Options like -O, -O1, -O2, -O3 etc generate faster code.
+See the manual for your gcc compiler for further, system-specific
+optimization options.<br>
+      </td>
+    </tr><tr><td>EXT=</td><td>.exe</td><td>(empty)</td><td></td></tr>
+  </tbody>
+</table>
+</p>
+<p></p>
+<hr width="100%"><a name="nowindow"></a><span style="font-weight: bold;">Generate
+NO WINDOW makefile</span><br>
+This option generates a packaged version of the LSD model, including
+the LSD source code and the model, to be compiled without using the
+graphical interfaces. This version of LSD requires only a GCC compiler
+to run a simulation, so that it can be run on systems not endowed with
+TCL/TK.<br>
+Since there are no interfaces, the NO WINDOW version needs a
+configuration file (.lsd) already prepared. The simulation results will
+be automatically stored in files, to be loaded in a normal version of
+LSD for analysis and/or conversion in different formats.<br>
+<br>
+To use the non graphical version of the system you need the following
+files, taken from the model directory:<br>
+<ol>
+  <li>Equation file, normally called <big style="font-family: monospace;">fun_mymodel.cpp</big></li>
+  <li>One or more configuration files, extension <big style="font-family: monospace;">.lsd</big></li>
+  <li>the makefile called "<big><span style="font-family: monospace;">makefileNW</span></big>"</li>
+  <li>the whole directory "<big><span style="font-family: monospace;">src</span></big>"
+contained within the model directory.</li>
+</ol>
+To compile and use the non graphical version of LSD, follow these steps:<br>
+<ol>
+  <li>Move the model directory on the system you want to use. You
+actually need only the files indicated above. The "<big style="font-family: monospace;">src</big>" directory must be contained
+within the model directory.</li>
+  <li>compile the lsd model program with the command: <big style="font-family: monospace;">make -f makefileNW</big>. You may need
+to adjust the variables in the <big><span style="font-family: monospace;">makefileNW </span></big>depending on
+your system. The <big><span style="font-family: monospace;">makefileNW
+    </span></big>includes the options used on the original system, but
+they are mostly not used, since, for example, the non-graphical version
+does not link to the TclTk libraries. <br>
+  </li>
+  <li>the resulting exectuable file requires a Lsd configuration file
+describing the model and its initializations and options. Run a
+simulation with the command: <big style="font-family: monospace;">lsd_gnu
+-f sim1.lsd</big>, where the name of the executable can change
+depending on your <big><span style="font-family: monospace;">makefileNW
+    </span></big>( variable TARGET) and <big><span style="font-family: monospace;">sim1.lsd </span></big>must be
+replaced with your configuration file.</li>
+  <li>After each simulation run the system automatically generates a
+LSD result file (extension <big style="font-family: monospace;">.res</big>)
+containing the data for the variables indicated with the option Saved.</li>
+  <li>Open the result files with any graphical version of LSD to
+analyse the results and/or export the data in other formats.<br>
+  </li>
+</ol>
+<br>
+<hr style="width: 100%; height: 2px;">&nbsp;
+<p><a name="help"></a><b><i><font face="Arial">Menu Help</font></i></b>
+</p>
+<p>The Help menu contains five entry points to the Lsd manual pages
+(see
+the <a href="#hintro">Introduction to Lsd help manual</a> on using Lsd
+manual):
+</p>
+<ul>
+  <li> <a href="#hlmm">Help on LMM</a></li>
+  <li> <a href="#helpeq">Help on Macros for Lsd equations</a></li><li><a href="Lsd_Documentation.html">Lsd Documentation</a></li></ul><br>
+<a name="hintro"></a><b>Help on Help</b>
+<br>
+The <a href="#help">menu Help</a> in LMM, as well as the <a href="menuhelp.html">menu
+Help
+</a>in the Lsd model programs, provides access to an extensive set
+of help pages, covering every aspect of model writing and using. The
+help
+pages are necessary to fully exploit this language, and therefore users
+are strongly invited to make use of the manual pages. Generally
+speaking,
+help pages are structured as a hypertextual document where each window
+or function related to Lsd is devoted a section, so to answer the
+questions
+"What does this mean?" or "How do I use this?". Of course, each section
+is filled with links to sections for related issues.
+<br>
+There are three levels of documentation:
+<ul>
+  <li> <a href="LMM_help.html#top">Help on LMM</a>. How to start the
+system, run
+an existing model program, or create a new one.</li>
+  <li> <a href="TOC.html">Help on Lsd interfaces</a>. How to exploit
+an
+existing
+model: running a simulation, changing initial values, analysing the
+results
+etc.</li>
+  <li>Model specific documentation (model report). This document is
+accessible
+from the menu Help of each Lsd model program and indicates what a given
+Object, Variable or Parameter represents, in which part of the model is
+used, what are the initial values, the equations' code. This document
+is
+partially created automatically fetching the necessary information from
+the structure of the model, and then allowing modellers to add free
+comments
+for any element of the model.</li>
+</ul>
+users are expected to test every aspect of the software, and to see in
+the manual the related page for instruction on its use (or explanation
+on "what does this mean?").
+<p>The manual is written as HTML pages (like web documents) that users
+are supposed to keep open in a Netscape (or any web browser like
+Internet
+Explorer) while working with Lsd. The manual pages are endowed with
+links
+that permit to "jump" to related topics. Usually, using the "back"
+command
+of Netscape permits to find any help required. If users get lost in a
+pattern
+of subsequent "jumps", the best way is to re-start from the first
+manual
+page used.
+</p>
+<p>The manual contains at least one page for each operation. For LMM
+and
+Lsd the help pages are organized according to the menus where the
+commands
+are placed. Each help page begins with the picture of the interface,
+and
+the list of the commands available (see, for example, the <a href="menudata.html">help
+on menu Data</a>, and then use the button "back" to return here). Any
+Lsd
+help page has a link to the <a href="TOC.html">Table of Contents</a>
+listing
+the whole content of the manual, and also links to other potentially
+relevant
+topics, in the very first line on the top of the page.
+</p>
+<p>For the very early users the best way is to follow the three
+tutorials
+listed in the LMM help menu. For a manual page on a Lsd interface, the
+usual starting page for using Lsd is the <a href="TOC.html">Table of
+Contents</a>,
+offering links to the main Lsd windows and other useful topics. A short
+list of help on frequently used operations is contained in the <a href="QuickHelp.html">Quick
+Help </a>page.
+</p>
+<p></p>
+<hr width="100%"><br>
+&nbsp;
+<h3><a name="mac"></a>Using Lsd on Mac OS X &lt; 10.4</h3>
+Matthieu Farcot managed to install Lsd on a Mac OS X and kindly offers
+these guidelines.
+<p>As LSD was designed to work on UNIX, why couldn&#8217;t we use it under
+MAC
+OSX? This little help file is here to do just what it should: show you
+how to install LSD on OSX. Now one would ask: if this application is
+written
+to run on a UNIX system, why can&#8217;t I run it on MAC OSX? Well&#352; Part of
+an
+answer lies here:
+<br>
+<a href="http://developer.apple.com/macosx/architecture">http://developer.apple.com/macosx/architecture</a>
+<br>
+As you see or might know, the roots of Mac OS X lie on Darwin. And
+on the other end, we have that nice Aqua interface. The problem is that
+LSD can run on Darwin, but not using Aqua. So what we need to do is
+install
+first another window management "system", one that would be compatible
+with both Aqua and LSD. And of course, we need to implement a few
+libraries
+that are not installed as standard on Mac OSX. And of course, all
+software
+that we will use will be open-source.
+</p>
+<p>1 ­ Let&#8217;s begin
+<br>
+Make sure that you have admin and/or root access on the Macintosh you
+want to work on:
+<br>
+To enable the root user, open netInfo Manager, and select menu
+domain/security/autentification.
+You will be prompted for an admin right login window.
+<br>
+Once that is filled, if you go again in the domain/security menu,
+you&#8217;ll
+see a new option: "enable root user".&nbsp; Select it. You then will be
+prompted for a root
+<br>
+password.
+<br>
+One word about that password: never, EVER forget it. Trust me. And
+don&#8217;t use the root account for everyday&#8217;s use.
+</p>
+<p>1.1 ­ System requirements:
+<br>
+- A computer (Macintosh, preferably) - MAC OS X (min 10.1.x) with an
+administrative privileged account - The latest MAC OS X Developer Tools
+(free
+<br>
+download at http://connect.apple.com ) - Some basic knowledge of the
+terminal - A good Internet connection - A good amount of free disk
+space
+</p>
+<p>1.2 - LSD 5 download
+<br>
+Start by downloading the LSD 5.0 Unix Zip archive (3.2 MB) from
+http://www.business.auc.dk/lsd
+Stuffit Expander should UnZip automatically a LSD
+<br>
+folder on your Desktop. Check the ReadMe.txt in the folder for any
+new updates.
+<br>
+If you like working in the OSX&#8217;s GUI, first be sure to install
+TinkerTool,
+from http://www.bresink.de/osx/TinkerTool2.html and to check in this
+System
+<br>
+Preference module the "show hidden files and system files" box under
+the Finder tab. Very useful to see the hidden directories we will work
+with.
+</p>
+<p>1.3 ­ GCC download
+<br>
+We will need the GNU Compiler Collection to use LSD. Some part of what
+is need has been installed by the developer tools installation, but we
+need a bit
+<br>
+more.
+<br>
+So connect to: http://gcc.gnu.org/gcc-3.0 And download the binaries
+from the mirror server the closer to your place.
+<br>
+UPDATE: GCC 3 is now part of the latest deveoper tools. How-to is to
+be modified.
+</p>
+<p>1.4 ­ GDB download
+<br>
+To get the GNU Project Debugger, connect to this site:
+http://sources.redhat.com/gdb
+And again, select the archive the closer to you.
+</p>
+<p>The choice is now yours. In part 2, we suppose you have a fast
+Internet
+access on your computer. We will use Fink, an excellent package
+management
+tool
+<br>
+greatly inspired by DEBIAN to easily install Xfree86 (an X Window
+server)
+and the TCL/TK libs.
+<br>
+*-*-*-*-*-*-*-*
+<br>
+&nbsp;
+</p>
+<p>2.1 ­ Fink install
+<br>
+What is Fink? As stated on their website (<a href="http://fink.sourceforge.net">http://fink.sourceforge.net</a>),
+the Fink project is a modification of UNIX software so that they can
+compile
+and run
+<br>
+on Darwin. This is the tool we&#8217;ll use to install the different
+libraries
+needed to run LSD.
+<br>
+So. Start by downloading the fink install image here: <a href="http://prdownloads.sourceforge.net/fink/fink-0.4.0-installer.dmg">http://prdownloads.sourceforge.net/fink/fink-0.4.0-installer.dmg</a>
+<br>
+Run the installation package that is on the newly mounted image.
+<br>
+Open a new Terminal window, and type:
+<br>
+pico .cshrc
+<br>
+source /sw/bin.csh (press enter here)
+<br>
+Press control-o, enter and control-x.
+<br>
+Close the terminal window. Re-launch one. Fink should be set up and
+working. To test it, type sudo apt-get update in your terminal. Then,
+type
+sudo fink
+<br>
+list and after a while, fink should show you a list of packages to
+install.
+</p>
+<p>2.2 - Xfree86 installation
+<br>
+To install Xfree, a X Window integration in Mac OSX, we will use the
+newly installed app. In your terminal type :
+<br>
+sudo apt-get install xfree86-base
+<br>
+The downloaded file will automatically compile and install itslef.
+Once that process is over, type in your terminal window:
+<br>
+sudo apt-get install xfree86-rootless
+<br>
+Done now for X Windows! Check in your application folder: there should
+be a new app, Xdarwin. Open it, select the rootless mode, and after a
+few
+<br>
+minutes, a few apps should load in the new X Window System we installed
+­ Note: it can take some time to load at first ­ Beware, as the
+keyboard layout
+<br>
+is in the QWERTY format on the X Terminal. To change that format, in
+Xdarwin, go to the preferences pane, in start up, select another
+keyboard
+file in the
+<br>
+list.
+</p>
+<p>2.3 ­ Tcl/TK installation
+<br>
+Again in your terminal, type :
+<br>
+sudo fink install tcltk
+<br>
+That&#8217;s it !
+<br>
+&nbsp;
+</p>
+<p>*-*-*-*-*-*-*-*
+</p>
+<p>3.1 - Xfree Installation
+<br>
+The version of the X Windows system will be Xfree86 4.1 You can grab
+the binaries here:
+<br>
+ftp://ftp.xfree86.org/pub/Xfree86/4.2.0/binaries/Darwin-ppc-5.x/ (be
+sure to check their README file). Download all the files in here, and
+simply
+put them
+<br>
+all in a folder on your desktop (here called xfree for the example).
+<br>
+After, use the terminal application to install it by typing:
+<br>
+cd ~/Desktop/xfree sudo sh Xinstall.sh
+</p>
+<p>The first command indicates that you want to go to the xfree folder
+on your desktop, whereas the second one will prompt you for your root
+password
+<br>
+(check the first part for help about that) and start the installation.
+</p>
+<p>Install all of the modules by answering "yes" to the different
+questions
+that you will be asked, apart from the last one, about creating a link
+to the restart
+<br>
+utility, that should be answered "no".
+<br>
+Xfree86 is now installed. But one more thing remains to be settled
+about it: make the X Window run "rootless", or otherwise, it would run
+full screen.
+<br>
+To make it run rootless, download this patch:
+<br>
+http://prdownloads.sourceforge.net/xonx/Xdarwin1.0.6.1.tgz
+</p>
+<p>and then use your terminal to type:
+<br>
+cd / sudo tar zxvf ~/Desktop/Xdarwin1.0.0.6.1.tgz cd ~/Library mkdir
+init cd init mkdir tcsh cd tcsh pico path
+<br>
+(in pico, then type:)
+<br>
+set path =($path /usr/X11R6/bin)
+<br>
+(save by typing control-o then enter, and quit using the control-x
+and enter commands, then type:)
+<br>
+cp /usr/X11R6/lib/X11/xinit/xinitrc ~/.xinitrc
+<br>
+Done now for X Windows! Check in your application folder: there should
+be a new app, Xdarwin. Open it, select the rootless mode, and after a
+few
+<br>
+minutes, a few apps should load in the new X Window System we installed
+­ Note: it can take some time to load at first ­ Beware, as the
+keyboard layout
+<br>
+is in the QWERTY format on the X Terminal. To change that format, in
+Xdarwin, go to the preferences pane, in start up, select another
+keyboard
+file in the
+<br>
+list.
+</p>
+<p>3.2: TCL/TK installation
+<br>
+Start by grabbing those two tar.gz files:
+<br>
+http://dev.scriptics.com/download/tcl/tcl8_3/tk8.3.3.tar.gz
+<br>
+and
+<br>
+http://dev.scriptics.com/download/tcl/tcl8_3/tcl8.3.3.tar.gz
+</p>
+<p>unpack the Tcl files with the command:
+</p>
+<p># tar xzf tcl8.3.3.tar.gz
+</p>
+<p>cd to the directory tcl8.3.3/unix and type the three commands:
+</p>
+<p># ./configure
+<br>
+# ./make
+<br>
+# ./make install
+</p>
+<p>repeat the same for the Tk files
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+</body></html>

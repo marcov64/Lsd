@@ -1,0 +1,4 @@
+fun_extra.cpp: In member function `double variable::fun(object*)':
+fun_extra.cpp:135: error: 'class object' has no member named 'son'
+fun_extra.cpp:174: error: 'class object' has no member named 'son'
+make: *** [fun_extra.o] Error 1

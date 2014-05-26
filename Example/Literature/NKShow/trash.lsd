@@ -1,0 +1,658 @@
+	
+Label Root
+{
+	Son: Population
+	Label Population
+	{
+		Son: Class
+		Label Class
+		{
+			Param: IdClass
+			Param: NumClass
+			Param: TypeNumBits
+			Param: TypeRewardClass
+			Param: AvClFitness
+			Param: AvAgeDeath
+			Param: NClCopies
+			Param: NumDeath
+			Param: SucMut
+			Param: VarClFitness
+			Param: AvGain
+			Param: AvRank
+			Param: AvAge
+			Param: BestCFit
+			Param: AvTestDinner
+			Param: NumFormsClass
+			Param: AvOldFitness
+
+		}
+
+		Son: Agent
+		Label Agent
+		{
+			Son: Block
+			Label Block
+			{
+				Son: BitBlock
+				Label BitBlock
+				{
+					Param: IdBitBlock
+					Param: IdALocus
+					Param: Value
+					Param: FitnessContribution
+
+				}
+
+				Param: IdBlock
+				Param: NumBits
+				Param: NumMut
+
+			}
+
+			Var: Mutation
+			Param: Fitness
+			Param: NumBlocks
+			Param: IdAgent
+			Param: MaxBitLength
+			Param: DateBirth
+			Param: IdOrigin
+			Param: Rank
+			Param: NumCopies
+			Param: BlckChs
+			Param: Age
+			Param: RewardType
+			Var: MutationIndividual
+			Var: MutationTeam
+			Param: AgentType
+			Var: MutationGlobal
+			Var: TestDinner
+			Param: BitChs
+			Var: TestDinnerTeam
+			Var: TestDinnerGlobal
+			Var: TestDinnerIndividual
+			Var: BackDoor
+			Param: CounterMutation
+			Var: MutationTeamParallel
+			Param: ProbDie
+			Param: ProbReplicate
+
+		}
+
+		Param: ProbMut
+		Var: MaxFitness
+		Param: AllEqual
+		Param: NumReplace
+		Param: AvFitness
+		Var: Genetic
+		Param: PeriodGen
+		Param: CounterGen
+		Param: IdWinner
+		Param: NumParent
+		Param: PeriodShk
+		Var: Shake
+		Param: CounterShk
+		Var: InitAgent
+		Var: NumAgent
+		Param: NoTest
+		Param: MutateAlways
+		Var: NumForms
+		Param: ProbRandRelocationGenetic
+		Var: Shift
+		Param: PeriodShift
+		Param: CounterShift
+		Param: AcceptAlways
+		Param: ElasRemove
+		Param: ElasReplicate
+		Param: SingleReplication
+
+	}
+
+	Son: Landscape
+	Label Landscape
+	{
+		Son: LLocus
+		Label LLocus
+		{
+			Son: Link
+			Label Link
+			{
+				Param: IdLink
+
+			}
+
+			Param: IdLocus
+			Param: NLink
+
+		}
+
+		Var: InitEvenK
+		Param: EvenK
+		Var: CreateFitContrib
+		Var: FitFun
+		Param: N
+		Param: ForeOverlap
+		Param: AftOverlap
+		Var: SaveLandscape
+		Param: FlagSaveLandscape
+
+	}
+
+	Var: Init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Init 0 n + n n
+
+Object: Population C	1
+Param: ProbMut 0 n + n n	0.5
+Var: MaxFitness 0 s + n n
+Param: AllEqual 0 n + n n	1
+Param: NumReplace 0 n + n n	20
+Param: AvFitness 0 s + n n	0
+Var: Genetic 0 n + d n
+Param: PeriodGen 0 n + n n	500000
+Param: CounterGen 0 n + n n	1
+Param: IdWinner 0 n + n n	0
+Param: NumParent 0 n + n n	10
+Param: PeriodShk 0 n + n n	5
+Var: Shake 0 n + d n
+Param: CounterShk 0 n + n n	1
+Var: InitAgent 0 n + d n
+Var: NumAgent 0 n + n n
+Param: NoTest 0 n + n n	1
+Param: MutateAlways 0 n + n n	1
+Var: NumForms 0 s + n n
+Param: ProbRandRelocationGenetic 0 n + n n	1
+Var: Shift 0 n + n n
+Param: PeriodShift 0 n + n n	100000
+Param: CounterShift 0 n + n n	1
+Param: AcceptAlways 0 n + n n	0
+Param: ElasRemove 0 n + n n	50
+Param: ElasReplicate 0 n + n n	50
+Param: SingleReplication 0 n + n n	1
+
+Object: Class C	3
+Param: IdClass 0 n + n n	1	2	3
+Param: NumClass 0 s + n n	50	50	50
+Param: TypeNumBits 0 n + n n	1	5	20
+Param: TypeRewardClass 0 n + n n	1	1	1
+Param: AvClFitness 0 s + n n	0	0	0
+Param: AvAgeDeath 0 s + n n	0	0	0
+Param: NClCopies 0 s + n n	0	0	0
+Param: NumDeath 0 s + n n	0	0	0
+Param: SucMut 0 s + n n	0	0	0
+Param: VarClFitness 0 s + n n	0	0	0
+Param: AvGain 0 s + n n	0	0	0
+Param: AvRank 0 n + n n	0	0	0
+Param: AvAge 0 s + n n	0	0	0
+Param: BestCFit 0 s + n n	0	0	0
+Param: AvTestDinner 0 s + n n	0	0	0
+Param: NumFormsClass 0 s + n n	0	0	0
+Param: AvOldFitness 0 s + n n	0	0	0
+
+Object: Agent C	1
+Var: Mutation 0 n + n n
+Param: Fitness 0 s + n n	0
+Param: NumBlocks 0 n + n n	0
+Param: IdAgent 0 n + n n	1
+Param: MaxBitLength 0 n + n n	-1
+Param: DateBirth 0 n + n n	0
+Param: IdOrigin 0 n + n n	1
+Param: Rank 0 n + n n	0
+Param: NumCopies 0 n + n n	0
+Param: BlckChs 0 n + n n	0
+Param: Age 0 n + n n	0
+Param: RewardType 0 n + n n	2
+Var: MutationIndividual 0 n + n n
+Var: MutationTeam 0 n + n n
+Param: AgentType 0 n + n n	0
+Var: MutationGlobal 0 n + n n
+Var: TestDinner 0 n + n n
+Param: BitChs 0 n + n n	0
+Var: TestDinnerTeam 0 n + n n
+Var: TestDinnerGlobal 0 n + n n
+Var: TestDinnerIndividual 0 n + n n
+Var: BackDoor 1 n + n n	0
+Param: CounterMutation 0 n + n n	0
+Var: MutationTeamParallel 0 n + n n
+Param: ProbDie 0 n + n n	0
+Param: ProbReplicate 0 n + n n	0
+
+Object: Block C	1
+Param: IdBlock 0 n + n n	0
+Param: NumBits 0 n + n n	0
+Param: NumMut 0 n + n n	1
+
+Object: BitBlock C	1
+Param: IdBitBlock 0 n + n n	-1
+Param: IdALocus 0 n + n n	-1
+Param: Value 0 n + n n	0
+Param: FitnessContribution 0 n + n n	0
+
+Object: Landscape C	1
+Var: InitEvenK 0 n + d n
+Param: EvenK 0 n + n n	0
+Var: CreateFitContrib 0 n + n n
+Var: FitFun 0 n + n n
+Param: N 0 n + n n	20
+Param: ForeOverlap 0 n + n n	0
+Param: AftOverlap 0 n + n n	0
+Var: SaveLandscape 0 n + n n
+Param: FlagSaveLandscape 0 n + n n	0
+
+Object: LLocus C	1
+Param: IdLocus 0 n + n n	1
+Param: NLink 0 n + n n	0
+
+Object: Link C	1
+Param: IdLink 0 n + n n	0
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 10000
+EQUATION fun_nkun.cpp
+ MODELREPORT    modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Population
+(no description available)
+END_DESCRIPTION
+
+Object_Class
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdClass
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumClass
+(no description available)
+END_DESCRIPTION
+
+Parameter_TypeNumBits
+(no description available)
+END_DESCRIPTION
+
+Parameter_TypeRewardClass
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvClFitness
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvAgeDeath
+(no description available)
+END_DESCRIPTION
+
+Parameter_NClCopies
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumDeath
+(no description available)
+END_DESCRIPTION
+
+Parameter_SucMut
+(no description available)
+END_DESCRIPTION
+
+Parameter_VarClFitness
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvGain
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_AvRank
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvAge
+(no description available)
+END_DESCRIPTION
+
+Parameter_BestCFit
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvTestDinner
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumFormsClass
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvOldFitness
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+(no description available)
+END_DESCRIPTION
+
+Object_Block
+(no description available)
+END_DESCRIPTION
+
+Object_BitBlock
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdBitBlock
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdALocus
+(no description available)
+END_DESCRIPTION
+
+Parameter_Value
+(no description available)
+END_DESCRIPTION
+
+Parameter_FitnessContribution
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdBlock
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumBits
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumMut
+(no description available)
+END_DESCRIPTION
+
+Variable_Mutation
+(no description available)
+END_DESCRIPTION
+
+Parameter_Fitness
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumBlocks
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdAgent
+(no description available)
+END_DESCRIPTION
+
+Parameter_MaxBitLength
+(no description available)
+END_DESCRIPTION
+
+Parameter_DateBirth
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdOrigin
+(no description available)
+END_DESCRIPTION
+
+Parameter_Rank
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumCopies
+(no description available)
+END_DESCRIPTION
+
+Parameter_BlckChs
+(no description available)
+END_DESCRIPTION
+
+Parameter_Age
+(no description available)
+END_DESCRIPTION
+
+Parameter_RewardType
+(no description available)
+END_DESCRIPTION
+
+Variable_MutationIndividual
+(no description available)
+END_DESCRIPTION
+
+Variable_MutationTeam
+(no description available)
+END_DESCRIPTION
+
+Parameter_AgentType
+(no description available)
+END_DESCRIPTION
+
+Variable_MutationGlobal
+(no description available)
+END_DESCRIPTION
+
+Variable_TestDinner
+(no description available)
+END_DESCRIPTION
+
+Parameter_BitChs
+(no description available)
+END_DESCRIPTION
+
+Variable_TestDinnerTeam
+(no description available)
+END_DESCRIPTION
+
+Variable_TestDinnerGlobal
+(no description available)
+END_DESCRIPTION
+
+Variable_TestDinnerIndividual
+(no description available)
+END_DESCRIPTION
+
+Variable_BackDoor
+(no description available)
+END_DESCRIPTION
+
+Parameter_CounterMutation
+(no description available)
+END_DESCRIPTION
+
+Variable_MutationTeamParallel
+(no description available)
+END_DESCRIPTION
+
+Parameter_ProbDie
+(no description available)
+END_DESCRIPTION
+
+Parameter_ProbReplicate
+(no description available)
+END_DESCRIPTION
+
+Parameter_ProbMut
+(no description available)
+END_DESCRIPTION
+
+Variable_MaxFitness
+(no description available)
+END_DESCRIPTION
+
+Parameter_AllEqual
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumReplace
+(no description available)
+END_DESCRIPTION
+
+Parameter_AvFitness
+(no description available)
+END_DESCRIPTION
+
+Variable_Genetic
+(no description available)
+END_DESCRIPTION
+
+Parameter_PeriodGen
+(no description available)
+END_DESCRIPTION
+
+Parameter_CounterGen
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdWinner
+(no description available)
+END_DESCRIPTION
+
+Parameter_NumParent
+(no description available)
+END_DESCRIPTION
+
+Parameter_PeriodShk
+(no description available)
+END_DESCRIPTION
+
+Variable_Shake
+(no description available)
+END_DESCRIPTION
+
+Parameter_CounterShk
+(no description available)
+END_DESCRIPTION
+
+Variable_InitAgent
+(no description available)
+END_DESCRIPTION
+
+Variable_NumAgent
+(no description available)
+END_DESCRIPTION
+
+Parameter_NoTest
+(no description available)
+END_DESCRIPTION
+
+Parameter_MutateAlways
+(no description available)
+END_DESCRIPTION
+
+Variable_NumForms
+(no description available)
+END_DESCRIPTION
+
+Parameter_ProbRandRelocationGenetic
+(no description available)
+END_DESCRIPTION
+
+Variable_Shift
+(no description available)
+END_DESCRIPTION
+
+Parameter_PeriodShift
+(no description available)
+END_DESCRIPTION
+
+Parameter_CounterShift
+(no description available)
+END_DESCRIPTION
+
+Parameter_AcceptAlways
+(no description available)
+END_DESCRIPTION
+
+Parameter_ElasRemove
+(no description available)
+END_DESCRIPTION
+
+Parameter_ElasReplicate
+(no description available)
+END_DESCRIPTION
+
+Parameter_SingleReplication
+(no description available)
+END_DESCRIPTION
+
+Object_Landscape
+(no description available)
+END_DESCRIPTION
+
+Object_LLocus
+(no description available)
+END_DESCRIPTION
+
+Object_Link
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdLink
+(no description available)
+END_DESCRIPTION
+
+Parameter_IdLocus
+(no description available)
+END_DESCRIPTION
+
+Parameter_NLink
+(no description available)
+END_DESCRIPTION
+
+Variable_InitEvenK
+(no description available)
+END_DESCRIPTION
+
+Parameter_EvenK
+(no description available)
+END_DESCRIPTION
+
+Variable_CreateFitContrib
+(no description available)
+END_DESCRIPTION
+
+Variable_FitFun
+(no description available)
+END_DESCRIPTION
+
+Parameter_N
+(no description available)
+END_DESCRIPTION
+
+Parameter_ForeOverlap
+(no description available)
+END_DESCRIPTION
+
+Parameter_AftOverlap
+(no description available)
+END_DESCRIPTION
+
+Variable_SaveLandscape
+(no description available)
+END_DESCRIPTION
+
+Parameter_FlagSaveLandscape
+(no description available)
+END_DESCRIPTION
+
+Variable_Init
+(no description available)
+END_DESCRIPTION
+

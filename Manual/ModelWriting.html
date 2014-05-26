@@ -1,0 +1,1056 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Marco Valente">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Lsd Modelling - Overview</title>
+</head>
+<body>
+
+<center>
+<h1>
+Writing a Lsd Model</h1></center>
+This help page offers a step-by -step tutorial to create a simple model.
+If not already done, users are invited to read the <a href="Tutorial1.html">tutorial
+1</a> for an introduction to Lsd and <a href="ModelUsing.html">tutorial
+2</a> on using Lsd models before reading this tutorial.
+<h2>
+Introduction</h2>
+A Lsd model is composed by:
+<ul>
+<li>
+<b>Model equations</b>: chunks of very simple programming language code
+for each Variable, much like the definition of a mathematical expression
+in a difference equation model;</li>
+
+<li>
+<b>Model structure</b>: a hierarchical collection of entities, called Objects.
+Each Object contains Variables, Parameters or other Objects; the Variables
+are associated to an equation, that can use the values of other Variables
+or Parameters of the model.</li>
+
+<li>
+<b>Model configuration</b>: the initial values used in a simulation run
+at the very first time step to kick off the simulation (e.g. the values
+of Parameters, the number of Objects, the number of time steps etc.). Configurations
+contain also information on the number of time steps, which data must be
+saved etc.</li>
+</ul>
+Practically, this means to create a computer program that includes a lot
+of technical code (the Lsd system code) and the code specific for the model,
+the equations. This program is then used for creating the model structure
+and determining the initial values, which are stored in text files called
+model configurations. At this point, the model users (as opposed to model
+writer) can run the model program, load a configuration, run simulations,
+look at the results, change configurations etc.
+<br>The create a model means therefore to write the code for the equations
+and create the model structure; every other operation required to generate
+a simulation model is performed automatically by either the Lsd model manager
+(LMM) or by the Lsd interfaces, automatically generated with each model
+program.
+<p>This tutorial lists the steps to be followed to create a Lsd model in
+general. Click on the step number for detailed instructions to create an
+example model.
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr>
+<td><b>Step&nbsp;</b></td>
+
+<td><b>Operation</b></td>
+
+<td><b>Instrument&nbsp;</b></td>
+
+<td><b>Result</b></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t1">1</a></td>
+
+<td><a NAME="l1"></a>Design a model</td>
+
+<td>Paper and&nbsp;
+<br>pencil</td>
+
+<td>Decide one or few equations for a prototype of the model, and the entities
+to be represented. Sketch out the kind of results to investigate.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t2">2</a></td>
+
+<td><a NAME="l2"></a>Create a new model</td>
+
+<td>LMM</td>
+
+<td>Generate an "empty" model, that is, all the technical requirement to
+build a model but with no equations' code contained in the equation file
+(<a href="LMM_help.html#new" TARGET="newwindow">see LMM help</a>).</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t3">3</a></td>
+
+<td><a NAME="l3"></a>Insert equations</td>
+
+<td>LMM&nbsp;</td>
+
+<td>Fill the equation file with equations associated with Variables' labels.&nbsp;
+<br>Each equation is inserted independently, much like systems of difference
+equations. The programming knowledge required is limited to the logical/mathematical
+operations represented in the equation. See the help on <a href="lsdfuncMacro.html">Lsd
+equation coding</a>.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t4">4</a></td>
+
+<td><a NAME="l4"></a>Try to run the Lsd model program</td>
+
+<td>LMM</td>
+
+<td>Generate the Lsd model program, or, if errors occur, list the coding
+errors&nbsp; (<a href="LMM_help.html#make" TARGET="newwindow">see LMM help</a>).
+<br>LMM attempts to create a model program by compiling the equation file.
+In case of syntactical errors in the equations' code LMM provides their
+list and location in the equation file.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t5">5</a></td>
+
+<td><a NAME="l5"></a>Fix coding errors</td>
+
+<td>LMM</td>
+
+<td>Generate the Lsd model program (<a href="LMM_help.html#make" TARGET="newwindow">see
+LMM help</a>).
+<br>Using the list of errors provided after a failed compilation it is
+possible to quickly fix the errors in the equations code. Note that errors
+are listed along line numbers referring to the file where they occured.
+LMM shows you the line numbers in the editor, so it is easy to spot the
+location of the error.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t6">6</a></td>
+
+<td><a NAME="l6"></a>Run the Lsd model</td>
+
+<td>LMM</td>
+
+<td>Access Lsd interfaces (<a href="LMM_help.html#make" TARGET="newwindow">see
+LMM help</a>)
+<br>LMM launches the Lsd model program. This contains, besides the equations'
+code used during a simulation run, all the interfaces to deal with a model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t7">7</a></td>
+
+<td><a NAME="l7"></a>Define model structure (Objects, Variables, Parameters)</td>
+
+<td>Lsd</td>
+
+<td>Generate a configuration (<a href="menumodel.html" TARGET="newwindow">see
+Lsd help</a>).
+<br>To define a model structure the modeller needs only to type in the
+labels of the model elements. For a discussion on how to <a href="menumodel.html#hint">design
+a model structure see here</a>.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t8">8</a></td>
+
+<td><a NAME="l8"></a>Insert number of Objects and initial values</td>
+
+<td>Lsd</td>
+
+<td>Generate a configuration (<a href="menudata.html" TARGET="newwindow">see
+Lsd help</a>).
+<br>Given the definition of the model structure the Lsd interfaces generate
+suited windows to insert the numerical values required to start a simulation.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t9">9</a></td>
+
+<td><a NAME="l9"></a>Define general simulation settings</td>
+
+<td>Lsd</td>
+
+<td>Generate a configuration (<a href="menurun.html#simsetting">see Lsd
+help</a>).
+<br>Although provided by default, the modeller may want to determine the
+number of time steps per simulation run, the values to be saved, the series
+to be shown during the run, and other technical settings.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t10">10</a></td>
+
+<td><a NAME="l10"></a>Run simulation</td>
+
+<td>Lsd</td>
+
+<td>Produce results, or logical errors.
+<br>A simulation run produces the series for the data saved, but there
+may be "logical" errors, that is, legal C++ and Lsd code that cannot be
+executed given the state of the model in that moment. Examples of these
+errors are dead-locks (two equations requesting reciprocally to be computed
+before the other), or missing elements of the model (usually due to differences
+in spelling between the equation code and structure labels). Lsd captures
+these errors issuing suited messages (<a href="QuickHelp.html#problem">see
+Lsd help</a>).</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t11">11</a></td>
+
+<td><a NAME="l11"></a>Fix logical errors</td>
+
+<td>Lsd&nbsp;</td>
+
+<td>Find offending code in the equations.
+<br>In most cases the error messages issued by Lsd allow to quickly find
+the line in the equation's code that caused them, since the fatal errors
+issue messages in which the offending equation is reported <a href="QuickHelp.html#problem">(see
+Lsd help</a>).</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t12">12</a></td>
+
+<td><a NAME="l12"></a>Analyse the Simulation Results</td>
+
+<td>Lsd</td>
+
+<td>Observe the data produced by a simulation (see <a href="mdatares.html">Lsd
+help</a>).
+<br>The data saved during a simulation are loaded in the Analysis of Result
+module to produce plots, statistics, export data etc.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t13">13</a></td>
+
+<td><a NAME="l13"></a>Test different configurations</td>
+
+<td>Lsd</td>
+
+<td>Produce different configurations.
+<br>Generally starting from a fresh configuration (not one obtained after
+a simulation run), change the initial values of the simulation, saving
+the configuration with different values to test the behaviour of the model
+in different conditions (see <a href="menudata.html">here for changing
+model's values</a>, or <a href="menurun.html#simsetting">here for simulation
+settings</a>).</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t14">14</a></td>
+
+<td><a NAME="l14"></a>Create the model report</td>
+
+<td>Lsd</td>
+
+<td>Create a HTML file reporting the model structure and the interdependencies
+between model elements.
+<br>The report shows which item is used in each equation's code. The very
+equations' code is also included in the report. The report is extremely
+useful to understand the actual computations of a model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#l15">15</a></td>
+
+<td><a NAME="l15"></a>Extend the model</td>
+
+<td>LMM and
+<br>Lsd</td>
+
+<td>Add new elements to the model, adding also the equations for the new
+Variables. Each time a new equation is involved the model need to be re-compiled.
+<br>See the <a href="lsdfuncMacro.html">Lsd equation manual </a>for more
+detailed on the Lsd coding language.</td>
+</tr>
+</table>
+
+<p>The model you have created can be distributed to any Lsd user by just
+sending the directory where the model is contained. The user will have
+all the code and the documentation to repeat your simulation, understand
+them and possibly extending the model.
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t1"></a>1 - Design a model</h3>
+The design of a model must start with the most simple strucure, to be gradually
+complicated exploiting the possibility to use indifferently Parameters
+or Variables in equations code, to transform a Parameter in a Variable
+by simply adding the equation (and to control for any error), and in general
+to extend gradually a model without affecting previous parts, even when
+these are connected to the new code.
+<p>Let's consider a model where a group of firms compete on a market on
+the basis of the quality of their product. The driving equation is, for
+each firm:
+<ul>
+<li>
+Sales<sub>t</sub> = Sales<sub>t-1</sub>*{1 + a*(Quality/AverageQuality<sub>t-1</sub>
+-1)}</li>
+</ul>
+That is, the sales of each firm remain identical if the quality of its
+product is identical to the average, or changes of "a" percentage points
+in respect of the ratio quality over average quality.
+<br>The equation for the average quality must obviously be:
+<ul>
+<li>
+AverageQuality<sub>t</sub> = sum<sub>i</sub>{Quality<sub>i</sub> * Sales<sub>i</sub>/TotalSales}</li>
+</ul>
+with
+<ul>
+<li>
+TotalSales<sub>t</sub>&nbsp; = sum<sub>i</sub>{ Sales<sub>i</sub>}</li>
+</ul>
+Note that in the first equation for <b>Sales</b> we use <b>AverageQuality</b>
+at time t-1. This is to avoid a dead-lock. This would happen if the equation
+for <b>Sales</b> required the most recent value of <b>AverageQuality</b>,
+which in turn requires <b>Sales</b> which cannot be computed.
+<br>Concerning the structure of the model, we decide to use several Objects,
+called them <b>Firm</b>, containing the values for <b>Sales</b> and <b>Quality</b>.
+The data common to every firm (<b>a</b>, <b>TotalSales</b> and <b>AverageQuality</b>)
+will instead be placed in a single Object (say <b>Market</b>) containing
+the <b>Firm</b> Objects.
+<br><a href="#l1">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t2"></a>2 - Create a new model</h3>
+Start LMM (in Window from menu Start/Programs/Lsd/LMM). In&nbsp; LMM choose
+menu <b>Model/New Model</b>. Type a name (e.g. "mymodel"), a version number
+and a directory where to locate the model. The obvious requirement is that
+there is no another model with the same name and version number, or the
+directory is already used.
+<br>You are now shown the equation file for a new model called "mymodel".
+The equation file is endowed with all the technical requirements for the
+equation file to be included in Lsd model program. You need to fill in
+the equations for your model (in between the two lines MODELBEGIN and MODELEND.
+<br>From now on, all the operations in LMM contained in menu <b>Model</b>
+(e.g. run, debug, show the equation file etc.) will be referred to this
+model.
+<br><a href="#l2">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t3"></a>3 - Insert equations</h3>
+This operation is the core of writing the model, since it tells the simulation
+program how each Variable should produce a new value at each time step.
+You can copy the code for the equations presented here (<tt>the lineS with
+these fonts)</tt> or type it manually. Don't bother for the colors, which
+do not have any influence on the actual working of the code. Consider that
+LMM offers guided shortcuts to insert the most frequently used Lsd functions.
+The list of Lsd functions that you can insert in your equation file is
+activated from menu <b>Model/Insert Lsd Script</b> (Control+i). See the
+<a href="LMM_help.html#LsdScript">LMM manual on this</a>.
+<p>Let's use this structure to write the type in the equation the code
+for the Variable Sales (you can select the following text for the equations,
+up to the last "}" aftet the <b>goto end;&nbsp;</b> statement, copying
+with the menu <b>Edit/Copy</b> in Netscape and then pasting in LMM). The
+equation code for Sales is:
+<p><tt>EQUATION("Sales")</tt>
+<br><tt><font color="#009900">/*</font></tt>
+<br><tt><font color="#009900">Level of sales:</font></tt>
+<br><tt><font color="#009900">Sales[t]=Sales[t-1]*{1+a*(Quality/AverageQuality-1)}</font></tt>
+<p><tt><font color="#009900">The sales of a firm are adjusted in respect
+of the ratio between firm's own Quality and the</font></tt>
+<br><tt><font color="#009900">average quality.</font></tt>
+<p><tt><font color="#009900">*/</font></tt><tt></tt>
+<p><tt>v[0]=V("a");</tt>
+<br><tt>v[1]=VL("Sales",1);</tt>
+<br><tt>v[2]=V("Quality");</tt>
+<br><tt>v[3]=VL("AverageQuality",1);</tt><tt></tt>
+<p><tt>RESULT( v[1]*(1+v[0]*(v[2]/v[3]-1)) )</tt>
+<p>Let's see what the equation does. The first line indicates that this
+code is the equation for the Variable Sales. Then we have placed a comment,
+without any use for the working of the equation, but helpful for documentation
+(this comment is automatically searched by the system and used in the model
+report).
+<br>The next 4 lines in the equation collect the data necessary to compute
+the value of Sales. The v[0], v[1], etc. are temporary C++ variables used
+to store intermediate results during computation. The Lsd function V("label")
+simply returns the value of the item "label") in the model. The VL("label",
+lag) function is the same as V("label"), but request the past value of
+"label", with 'lag' lags.
+<br>For example, in v[1] it is stored the value of the previous time step
+value of Sales.
+<br>The last line contains the result, that is, the numerical value that
+Sales will take after its equation has been computed.
+<p>Note that <tt>V("label")</tt> works identically whether the value searched
+is a Parameter (like <b>a</b>) or a Variable. Moreover, the function is
+identical for data that will be stored in different Objects. In fact, Sales
+is a Variable that we will place in an Object referring to firms, while
+AverageQuality will be located in another Object, Market.
+<p>Now we turn to write another equation. Place the cursor after the last
+line or before the first line of Sales (the order in which the equations'
+code is placed in the equation file does not matter).
+<p>The equation for TotalSales is:
+<p><tt>EQUATION("TotalSales")</tt>
+<br><tt><font color="#009900">/*</font></tt>
+<br><tt><font color="#009900">Sum of the Sales from each Firm</font></tt>
+<br><tt><font color="#009900">*/</font></tt><tt></tt>
+<p><tt>RESULT( SUM("Sales") )</tt>
+<p>The equation for AverageQuality is:
+<br>&nbsp;
+<p>The equation initialise to 0 the value of v[0]. The equation is made
+of a cycle <b>for</b>, that is, a block of code (in between brakets) is
+repeated until a given logical condition is true (see <a href="LMM_help.html#for">LMM
+help on this topic</a>). The header of the cycle (the line with <tt>for(...)</tt>)&nbsp;
+is made of three fields:
+<ul>
+<li>
+a command to be executed before of the first run of the cycle, and never
+again;</li>
+
+<li>
+the condition for repeating the cycle;</li>
+
+<li>
+a command to be executed after each cycle and before the control of the
+condition.</li>
+</ul>
+
+<p><br>The cycle for is composed by three fields, separated by a semi-colon:
+<ul>
+<li>
+<tt>cur=p->search("Firm");</tt></li>
+
+<br>This means that the system must search for the first occurrence of
+the Object <b>Firm</b>, and store it in the temporary Object pointer <tt>cur</tt>;
+<li>
+<tt>cur!=NULL;</tt></li>
+
+<br>This means that the cycle must be repeated as long as <tt>cur</tt>
+contains an Object, and be interrupted when <tt>cur</tt> is empty;
+<li>
+<tt>cur=go_brother(cur)</tt></li>
+
+<br>This means that after a cycle, and before controlling for the condition
+in the second field, the pointer <tt>cur</tt> must be assigned the Object
+next to the Object it currently contains. The function <tt>go_brother(cur)</tt>
+returns an empty value (NULL) if there are no more Objects after <tt>cur</tt>.</ul>
+The last equation, for <b>AverageQuality</b>, is similar to the previous
+one:
+<p><tt>EQUATION("AverageQuality")</tt>
+<br><tt><font color="#009900">/*</font></tt>
+<br><tt><font color="#009900">Average quality of products, weighted with
+the sales.</font></tt>
+<p><tt><font color="#009900">The equation scans all the Object Firm summing
+up the product Sales x Quality and dividing for</font></tt>
+<br><tt><font color="#009900">the total sales.</font></tt>
+<br><tt><font color="#009900">*/</font></tt>
+<br><tt>v[0]=V("TotalSales");</tt>
+<br><tt>v[1]=0;</tt>
+<br><tt>CYCLE(cur, "Firm")</tt>
+<br><tt>&nbsp;{//assign to pointer 'cur' all the Firm</tt><tt></tt>
+<p><tt>&nbsp; v[2]=VS(cur,"Sales"); <font color="#009900">//compute Sales
+for the current Firm</font></tt>
+<br><tt>&nbsp; v[3]=VS(cur,"Quality"); <font color="#009900">//compute
+Quality for the current Firm</font></tt>
+<br><tt>&nbsp; v[1]=v[1]+v[2]*v[3]; <font color="#009900">//cumulate the
+product Sales times Quality</font></tt>
+<br><tt>&nbsp;}</tt><tt></tt>
+<p><tt>RESULT(v[1]/v[0] )</tt><tt></tt>
+<p>This equation deserves some attention. Firstly, we store in v[0] the
+value of total sales. Then, we initialize v[1] to 0. The next lines contain
+a cycle so that make a temporary "pointer" (that is, a temporary variable
+containing Objects instead of numerical values) to contain cyclically all
+the Objects named Firm. The cycle repeat the commands between the '{' and
+'}' for all the Object Firm in the mdoel. In each cycle we make three operations:
+collect the value of Sales and Quality for the firm contained in the pointer,&nbsp;
+add their product to v[1].
+<br>Note that we use the Lsd function VS(pointer, "label"). This function
+asks specifically the value of "label" to the Object 'pointer', instead
+of generally search one copy of "label" in the model.
+<p>Now you have inserted the equations for your model. For more information
+on the Lsd equations' language see the <a href="lsdfunc.html" TARGET="newwindow">Lsd
+help on this</a>).
+<p><a href="#l3">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t4"></a>4 - Create the Model program</h3>
+Save the equation file (menu <b>File/Save</b>). Now you need to create
+a model program including the general Lsd system code and the model specific
+equation file. LMM will do all of this automatically: select the item <b>Run
+</b>in
+menu <b>Model</b>. Now the system compiles the new model program, with
+two possible output: either the Lsd model program starts (showing the Lsd
+Browser), or the compilation fails. In this second case you are shown the
+error messages issued by the compiler (see next paragraph).
+<br><a href="#l4">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t5"></a>5 - Fix the compilation errors</h3>
+When compiling the system controls that the commands written in the equation
+files are legal C++ code. If the compilation fails LMM shows a window containing
+the output of the compiler, that is the list of errors. Note that you can
+always see the error messages choosing the item <b>Show Compilation Results
+</b>in
+menu <b>Model</b>. The errors typically reports a line number where the
+error was found (<a href="LMM_help.html#run">help on compilation errors</a>).
+The LMM editor permits to reach a specific line of the equation file using
+the item <b>Goto Line </b>in menu <b>Edit</b>.
+<br><a href="#l5">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t6"></a>6 - Access the Lsd interfaces</h3>
+If the compilation succeeds the Lsd program shows its interface:
+<center>
+<p><img SRC="emptybrowser.jpg" height=333 width=335></center>
+
+<p>When the Lsd model starts it is empty. That is, there is no configuration
+loaded in the model program, although the program contains the equations'
+code embedded in its C++ core. The interface is composed by the <b>Browser</b>,
+which shows one Object (the Object shown is indicated in red along "<b>Object's
+label</b>"). The Lsd Browser shows two list boxes, for the set of Variables,
+on the left, and for the Objects descending from the currently shown one,
+on the left. Currently, the Browser shows the Object <b>Root</b>, included
+by default in any Lsd model, which contains no Variables and no descending
+Objects.
+<br>The Lsd model program starts also a new window, called <b>Log</b>.
+This will contain messages from the system, when necessary. For the moment
+you can ignore it.
+<br>The Browser contains several menus. Modellers are interested only in
+the menu <b>Model </b>to determine the model structure, while the other
+menus are used to manage different aspects of the simulation that also
+users may be interested in changing (like initial values, number of time
+steps, etc.). The structure of the model and the initializations are saved
+in configurations files (extension .lsd) that can be loaded to run directly
+a simulation run.
+<p><a href="#l6">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t7"></a>7 - Define the model structure</h3>
+The model structure is always defined in respect of the Object currently
+shown in the Browser. The structure we want to produce is a <b>Market </b>containing
+several <b>Firm</b>. In particular, we want the Object <b>Root </b>to contain
+an Object <b>Market</b>, which in turns contain anObject <b>Firm </b>(for
+the moment we ignore the numerical aspects of the model, like how many
+<b>Firm</b>s).
+In <b>Market </b>and <b>Firm </b>we need to define several Variables and
+Parameters. Follow the instructions below:
+<ul>
+<li>
+Choose the item <b>Add Descending Obj.</b> in menu <b>Model </b>to add
+an Object to <b>Root</b>. Type the label <b>Market </b>and press <b>Ok</b>
+(you may add a description, but for the moment leaves the box empty). Now
+the Browser shows <b>Market </b>in the list of descendants. Notice that
+a new window has appeared, titled Lsd Model Structure. This is a graphical
+representation of the model (ignoring <b>Root</b>).</li>
+
+<li>
+Double-click on <b>Market </b>to move the Browser to show Object <b>Market</b>.
+If
+you typed the wrong label instead of <b>Market </b>you can click on its
+name in the header of the Browser window. If you remove completely the
+label, leaving an empty string, the Object is removed altogether.</li>
+
+<li>
+<b>Market
+</b>is created with no Variable or Parameters. We need <b>Market
+</b>to contain one Parameter, <b>a</b>, and two Variables, <b>TotalSales
+</b>and
+<b>AverageQuality</b>.
+Choose the item <b>Add a Parameter
+</b>in menu <b>Model </b>and type <b>a</b>.
+Insert the Variable <b>TotalSales</b> choose menu item <b>Model/Add a Variable</b>.
+When adding the Variable <b>AverageQuality</b> set to 1 the lag desired.
+This is because we need to use <b>AverageQuality
+</b>with lag 1 (in the
+equation for <b>Sales</b>), and this must be signalled when the Variable
+is created. Notice that the Browser window will list in the Variables list
+box the elements added.</li>
+
+<li>
+Control that the Browser appears as below (the order of Variables and Parameters
+does not matter):</li>
+</ul>
+
+<center><img SRC="market_defined.jpg" height=342 width=335></center>
+
+<ul>
+<li>
+The list of Variables shows the label of the items followed by (P), if
+it is a Parameter, and by an integer if it is a Variable. The integer indicate
+the number of lag values that the Variable must kept during a simulation
+step.</li>
+
+<li>
+If you made a mistake inserting an element, double-click on the wrong item.
+You are shown the list of options for the item. Double-click on the label
+of the item to edit it to fix the error. Inserting an empty label will
+remove the item altogether.</li>
+
+<li>
+The order in which the items appear in the Variables' list of an Object
+is not relevant (it follows the order of insertion).</li>
+
+<li>
+Create now the Object <b>Firm</b>, as descending from <b>Market </b>(choose
+item <b>Add Descending Obj.</b> in menu <b>Model </b>and type <b>Firm</b>).
+The Browser will list <b>Firm </b>as descending from <b>Market</b>. Double-click
+on <b>Firm </b>moving the Browser to show this Object. Notice that the
+Lsd Model Structure window has been updated showing <b>Market </b>as containing
+<b>Firm</b>.</li>
+
+<li>
+In <b>Firm </b>(when the Browser shows it), use the same process (menu
+<b>Model
+</b>and
+<b>Add
+a Variable</b> or <b>Add a Parameter</b>) to create the Variable
+<b>Sales
+</b>(it
+needs one lag) and the Parameter <b>Quality</b>.</li>
+</ul>
+Now the model structure is complete. It may still contain few mistakes:
+these will be corrected later, when the simulation manager will issue errors.
+Save the configuration from menu <b>File/Save</b>.
+<br><a href="#l7">return to the tutorial list</a>
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="t8"></a>8 - Insert initial values and the number of Objects</h3>
+The model structure is still not sufficient to run a simulation: we inserted
+only the general structure, but the model need to specify also the values
+to be used for the Parameters and for the lagged Variables during the very
+first time steps of the simulation. And this depends also on the number
+of Objects placed in the model, which are, by default, only one Object.
+<br>Let's begin to see how we can specify number of Objects for each type.
+<br>Choose item <b>Set Number of Objects </b>in menu <b>Data </b>(option
+<b>All
+Object Number</b>). This window shows the whole hierarchy of Objects, up
+to the hierarchical level indicated (see the <a href="mdataobjn.html">Lsd
+help on this </a>for details on this window). Click on the text <tt>(click
+here to see descendants)</tt> to increase the hierarchichal level shown,
+so to see also the Object <b>Firm</b>. Click on the number shown on the
+side of <b>Firm </b>and type 10. For your interest, try also to increase
+the number of Objects Market to 3: you will see three groups of <b>Firm</b>,
+one for each <b>Market</b>. Before exiting return to only 1 <b>Market</b>.&nbsp;
+Notice that removing the Objects the system offers you the possibility
+to remove some specific instance, or the ones at end of the series. Click
+on <b>Exit</b> to return to the Browser.
+<p>Now we have the model configured with 1 instance of Object <b>Market
+</b>and
+10 Object <b>Firm</b>. To run a simulaiton we need to determine the values
+of the Paremeters and of the lagged Variables to be used at the first time
+step of a simulation run, that is the initial values. Setting the number
+of Objects can be done for the whole model at once. Instead, setting the
+initial values must be done for one Object type per time. Move the Browser
+to show the Object <b>Firm
+</b>(you can double-click on the symbol representing
+Firm in the graphical representation of the model). Choose the item <b>Initial
+Values </b>in menu <b>Data</b>. The window is like a spreadsheet, listing
+the different instances of Objects on the columns and the Parameters or
+lagged Variables on the lines. You can manually type in each cell a number
+(pressing Return on your keyboard to move to the next cell), or use the
+<b>Set
+All </b>button to set the whole values for a line (see the <a href="mdatainit.html">Lsd
+manual on this</a>). For the Objects <b>Firm </b>we need to set the lagged
+values of <b>Sales </b>and the level of <b>Quality</b>. Set the same value
+for
+<b>Sales
+</b>for all firms (say 100). To do this using the <b>Set All
+</b>button,
+type 100 and select the option <b>Equal To</b>. For <b>Quality </b>set
+increasing values from 1, 1.1, 1.2 etc. To do this, select the option <b>Increasing</b>,
+and type 1 as starting value and 0.1 as step.
+<p>Click on Ok when you have finished to set the initial values for Objects
+<b>Firm</b>,
+move the Browser to show the Object Market (click on the label
+<b>Market
+</b>in
+the Browser on the left of the text "<b>Descending from:
+</b>..."), and
+choose <b>Initial Values </b>in menu <b>Data</b>. You can obtain the same
+result by clicking with the right button of the mouse on the symbol for
+Market in the graphical representation. Notice that the Variable <b>TotalSales</b>
+does not appear in the window. In fact, this Variable does not need to
+be initialized, since it is never used as lagged value. Type 0.05 for the
+Parameter <b>a </b>and 1.5 for <b>AverageQuality
+</b>with lag 1.
+<br><a href="#l8">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t9"></a>9 - General Simulation Settings</h3>
+The model is now potentially ready to run a simulation, since it contains
+the equations, the model structure and the initial values. However, by
+default Lsd models do not save the data produced during a simulation, so
+you need to specify the data series you want to observe (this information
+is stored in the configuration file, so you do not need to specify the
+series to be saved any time). Let's save the series for <b>AverageQuality
+</b>and
+<b>TotalSales
+</b>in
+<b>Market</b>,
+and <b>Sales </b>in <b>Firm</b>. To select a Variable to be saved double-click
+on its label contained in the list of Variables in the Browser (when this
+shows the Object containing the Variable of interest, of course). This
+shows a window with the label of the Variable and several items (see the
+<a href="Browser.html#variables">Lsd
+manual on this topic</a>). Check on the option "<b>To Save</b>". Concerning
+the Variable <b>Sales
+</b>in Firm, check on also the option "<b>Run Time
+Plot</b>". Now the model will save during every run all the data produced
+by the Variables marked. These data can be accessed after the simulation.
+Moreover, the data for
+<b>Sales
+</b>will produce during the simulation,
+at run time, a plot showing their values.
+<br>Concerning Variable <b>AverageQuality</b>, check on also the option
+<b>Debug</b>.
+This will interrupt the simulation at this equation when the Debug Mode
+is set on (users can activate the Debug Mode any time during a simulation,
+or it can be set on from the very beginning of the simulation run).
+<br>When starting with no model loaded, the time steps for a simulation
+run are set to 100. To change this choose item <b>Sim.Setting </b>in menu
+<b>Run</b>.
+This will show a window with several options (see the <a href="menurun.html#simsetting">Lsd
+manual on this topic</a>). In the cell labelled <b>Simulation Steps</b>
+type 2000.
+<br>Now the configuration to run a simulation is complete. Save the configuration
+choosing item <b>Save</b> in menu <b>File</b>, and typing a name for the
+configuration, for example <b>trial1</b>.
+<br><a href="#l9">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t10"></a>10 - Run the simulation</h3>
+To run a simulation you just need to choose the item <b>Run</b> in menu
+<b>Run</b>.
+This will show a summary message; choosing <b>Ok</b> confirms to run the
+simulation.
+<p>If there are errors the simulation is interrupted immediately, or the
+Lsd error manager issue few messages offering the modeller with several
+possibilities to investigate the error (see <a href="#t11">Fix logical
+errors </a>below). If the simulation runs smoothly, you will see a new
+window, the <b>Run Time Plot</b>, showing the series of the data set with
+this option (<b>Sales</b> in the example). If you did not set any Variable
+to appear in the <b>Run Time Plot</b>, then the <b>Log </b>window will
+signal all steps that have been successfully completed.
+<br>During a simulation run the Log window can be used to control the simulation,
+using the four buttons in the lower part of the window:
+<ul>
+<li>
+<b>Stop</b>: end the simulation when the current time step is finished;</li>
+
+<li>
+<b>Fast</b>: continue the simulation without issuing the time step lines
+in the Log window (only if there is no Run Time Plot windows);</li>
+
+<li>
+<b>Observe</b>: return to show the time step completed (only if there is
+no Run Time Plot windows);</li>
+
+<li>
+<b>Debug</b>: set on the Debug Mode, temporarily interrupting the simulation
+and allowing to explore the status of the model.</li>
+</ul>
+After a simulation run the model remains with the status of the last time
+step of the simulation. That is, every Variable has the values resulting
+from the last time its equation have been computed. Lsd prevents to run
+immediately new simulation exercise with such values as initial values.
+This, in fact, would overwrite the configuration file used to run the original
+simulation. However, the after-simulation configuration can be saved (possibly
+with a different name). And therefore this new configuration can be loaded
+and run, like any configuration.
+<p>Although it is not strictly necessary for writing Lsd models, it may
+be interesting to know what happens when a simulation is run. The operations
+of a simulation run are:
+<ol>
+<li>
+Save the configuration file (beware that every change to the model overwrites
+the pre-existing configuration)</li>
+
+<li>
+Set the simulation time counter to 1</li>
+
+<li>
+Select the Root Object as current Object</li>
+
+<li>
+Compute the equation for all the Variables in the current Object</li>
+
+<li>
+Set the descendants of the current Object as new current Object and return
+to 4.</li>
+
+<li>
+(when all Objects of the model have been explored) increase the time counter
+and return to 3.</li>
+</ol>
+Note that the cycle decribed above does not correspond necessarily to the
+actual order of execution of the equations. In fact, it is possible that
+the computation for an equation in an upper position of the model (say
+<b>AverageQuality
+</b>in
+<b>Market)</b>
+requires other Variables to be computed first (<b>Sales</b> in <b>Firm
+</b>in the example). But the flow of updating described above is such that
+the equation for <b>AverageQuality</b> begins to be computed <i>before
+</i><b>Sales</b> are updated. Lsd records every value for a Variable along
+with the time step in which it was computed. Therefore it knows that <b>Sales</b>
+need to be updated before completing the equation for <b>AverageQuality</b>,
+and automatically computes the equation for each Variable <b>Sales</b>
+before completing <b>AverageQuality</b>.
+<p>When a lower Variable already computed is reached by the standard simulation
+cycle, or it is requested again by another Variable, Lsd does not re-compute
+it, but uses the value already computed the first time in that time step.
+<br>Modellers can also decide to use Variables that, instead having an
+equation assigned, has a function. This is identical to an equation, but
+includes also few lines such that the value of the Variable is recomputed
+as many times as it is requested, even many times during a time step.
+<p><a href="#l10">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t11"></a>11 - Fix logical errors</h3>
+During the compilation it is possible to discover errors in the model code
+(i.e. the equations) due to illegal C++. But only during a simulation it
+is possible identify errors due to the design of the model. If there is
+an error Lsd writes a message in the Log windows. Typical errors are:
+<h4>
+Data not loaded</h4>
+Lsd found that some initial values (for Parameters or lagged Variables)
+have not been defined by the user. The error message is:
+<p><tt><font size=+1>Data for XXX in Object YYY not loaded</font></tt>
+<p>This happen either when a Parameter or lagged Variable is inserted,
+or when the number of Objects is increased, but the user did not set any
+initial value for it. In both cases Lsd assign a default value that must
+be, at least, confirmed before being able to run a simulation.
+<br>To fix the error re-load the configuration (menu <b>File/Re-Load</b>).
+Move the Browser to show the Object YYY containing the un-initialized elements.
+Choose item <b>Initial Values </b>in menu <b>Data</b>. Even if the data
+are not changed, only opening this window is considered as a confirmation
+of the values presented.
+<h4>
+<b>Variable not found</b></h4>
+This problem arises when a Variable is missing or, more frequently, when
+it is spelled differently in the equations' code and in the model configuration.
+The error message in the Log windows gives indications on where the error
+occurred. There are two possible types of errors. If the error is:
+<p><tt><font size=+1>Equation for XXX not found</font></tt>
+<p>it means that the Variable defined in the model configuration does not
+correspond to any equation block in the equation file. This error is also
+caused if you defined a Variable instead of a Parameter (to Lsd, it is
+a Variable without equation). For example, if you defined <b>a</b> as a
+Variable it appears as
+<br>a (0)
+<br>in the left list box in Market, instead of
+<br>a (P)
+<br>as it should be for Parameters. See <a href="#correct_label">below</a>
+how to correct this error.
+<p>If the error is:
+<p><tt><font size=+1>Search for XXX failed in YYY</font></tt>
+<br><tt><font size=+1>Fatal error detected at time 1.</font></tt>
+<br><tt><font size=+1>Offending code contained in the equation for Variable:
+ZZZ</font></tt>
+<p>it means that the Variable (or Parameter) XXX requested in the equation
+for ZZZ was not found. You likely mispelled XXX in the equation's code.
+<p><a NAME="correct_label"></a>To correct the error you need either to
+change the equations code, or to change the label of the element in the
+model structure. In any case, close the Lsd model program (choosing <b>Abort</b>
+if the error message is of the second type). You can change the equations'
+code, if necessary, using LMM. Save the equations' file (menu <b>File/Save</b>)
+and run the Lsd model program (menu <b>Model/Run</b>). When the Lsd model
+program starts, load the configuration (menu <b>File/Load</b>) and choose
+the configuration file that caused the error. Now the model is defined
+exactly as when you started the simulation, but with the fixed equation
+code. If you want to edit the model structure definition (e.g. change the
+label) move the Browser to show the Object containing the Variable to be
+changed. Double-click on it, and, in the option window, double-click on
+its label to change as necessary. After the changes try to run the simulation
+again (menu <b>Run/Run</b>).
+<br>&nbsp;
+<h4>
+Lag error</h4>
+This error causes a message like:
+<p><tt><font size=+1>Lag error: Variable XXX requested lag K but available
+only H</font></tt>
+<p>This means that the Variable XXX in the equation was requested with
+a lag superior than that available (typically, it is requested with 1 lag,
+but it was defined without any lag, or lag 0). Again, it may be an error
+in the equations' code, or in the model structure definition. Follow <a href="#correct_label">the
+instructions </a>on how to correct this error.
+<br>&nbsp;
+<h4>
+Dead lock error</h4>
+This error occurs if an equation (say for X) requires the value of another
+Variable (Y) whose equation, in turn, requires the computation of X. Clearly,
+one of the two Variables need to use a call to the other equation with
+a lagged value.
+<br>For example, if the equation for <b>Sales</b> contained the request
+for <b>AverageQuality</b> with no lag<b>, </b>the message issued would
+be:
+<br><tt>Dead lock! Variable:</tt>
+<br><b><tt>AverageQuality</tt></b>
+<br><tt>requested by Object:</tt>
+<br><tt>Firm</tt>
+<br>&nbsp;
+<p><tt>Fatal error detected at time 1.</tt>
+<br><b><tt>Offending code contained in the equation for Variable: Sales</tt></b>
+<p><tt>List of Variables currently under computation.</tt>
+<br><tt>(the first-level Variable is computed by the simulation manager,</tt>
+<br><tt>while possible other Variables are triggered by the lower level
+ones</tt>
+<br><tt>because necessary for completing their computation)</tt>
+<p><tt>Level Variable Label</tt>
+<br><tt>3 Sales</tt>
+<br><tt>2 TotalSales</tt>
+<br><tt>1 AverageQuality</tt>
+<br><tt>0 Lsd Simulation Manager</tt>
+<p>The lines highlighted show the two Variables involved in the dead-lock.
+<br>To fix the error set one call with a lag, according to the logic you
+want to use in the model.
+<p><a href="#l11">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t12"></a>12 - Analyse the Simulation Results</h3>
+After a simulation users can use the module for analyse the simulation
+results. Choose item <b>Analysis Result</b> in menu <b>Data</b>. This will
+prompt a window asking if you want to use the data from the latest simulation
+run or from a file containing data saved from another simulation (if there
+was no such a window, it means that there are no data from simulation stored
+in memory, and the system automatically search for a file with simulation
+data). Choose <b>Simulation</b> to use the data from the simulation.
+<br>The window for the analysis of results contains three main boxes, and
+few other items. The box on the left, labelled <b>Series Available</b>
+lists the data saved. For each series is reported the name of the Variable,
+a code, and the initial and final time step in which the Variable existed.
+The code contains as many digits as the hierarchical level of the Object
+containing the Variable, so that, for example, the Varibales for the third
+Firm has the code 1_3, meaning first Market and third Firm.
+<br>The window is operated by moving one or more elements from the left
+box to the one in the middle (<b>Series Selected</b>). The different commands
+concern only the series contained in this box.
+<br>Users can plot the series or ask for the descriptive statistics, both
+as time series or as cross-section analysis (in this latter case a series
+is made by the values of all the Variables listed in the middle box at
+a given time). The plots generated are listed in the right box (<b>Graphs</b>),
+and can be brought in the foreground by clicking on them. To raise the
+main window, frequently hidden behind a stack of plot windows, double click
+on any of such windows. See the <a href="mdatares.html">Lsd manual </a>on
+the detail use of this module.
+<br><a href="#l12">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t13"></a>13 - Test different configurations</h3>
+Exit from the Analysis of Result module (menu <b>Exit</b>). Re-load the
+configuration used for the simulation run (menu <b>File/Re-Load</b>, or
+use the shortcut Ctrl+w). Save the configuration with a different name
+(e.g. trial2). Now you can test different configurations, setting the number
+of entities to different values, changing the initial values, changing
+the simulation settings etc. For a detailed account on these aspects see
+the <a href="ModelUsing.html" TARGET="newwindow">tutorial 2</a>.
+<br><a href="#l13">return to the tutorial list</a>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t14"></a>14 - Create Model Report</h3>
+Understanding the functioning of a model means to know the elements of
+the model (Objects, Variables and Parameters) and how they relate to each
+other. This means to know the structure of the model and all the connections
+between them like, for example, in which equation(s) a Parameter is used.
+This is of importance both to the modeller and to the user. For the modeller
+it is the crucial information for modifying a model; for model users it
+is the best way to understand how a model is implemented. If a model report
+exists, it will always be available to the model users for documentation
+(from the menu <b>Help/Model Report)</b>. The model report is a HTML file
+(readable with any web browser) created automatically by the system at
+request of the modeller.
+<p>To create the report it is necessary to tell the system the equation
+file name, menu <b>Model</b> item <b>Equation File</b>, and indicating
+the filename suggested in the resulting window. Lsd model programs permit
+to add to each item a textual description, that appear in their option
+window and are used in the model report. However, it is also possible to
+request the system to automatically induce some of the relevant information.
+To do this, use the command in menu <b>Model / Generate Automatic Documentation</b>.
+After this, click on a Parameter or a Variable to see the results.
+<p>Then choose the item
+<b>Create Model Report</b> in menu <b>Model</b>
+and the system pops up a window where the modeller can choose the options
+concerning the report. Confirming the creation of the report makes the
+system create the report's file (or overwrite the existing file). After
+the creation the report is shown. It is always possible to access the report
+from its indication in the menu <b>Help </b>(obviously, only if available).
+<br><a href="#l14">return to the tutorial list</a>
+<p>
+<hr WIDTH="100%">
+<h3>
+<a NAME="t15"></a>15 - Extend the model</h3>
+A crucial rule in developing simulation models is to proceed gradually
+incrementing the elements of a model. Lsd allows a very easy extension
+of an existing model. As exercise, let's add a Variable to compute the
+market shares of firms.
+<br>For this we need to add an equation to the equation file, and to add
+the relative Variable in the model.
+<p>Close the Lsd model program and return to LMM, open the equation file
+for the model (menu <b>Model/Show Equation</b>), and place the cursor in
+a legal position for a Lsd equation (within the lines MODELBEGIN and MODELEND
+and outside the block for an existing equation).
+<p>Press the keys Ctrl+Shift+e to insert an equation (or use the normal
+way through the menu <b>Model/Insert Lsd Scripts</b>), for the Variable
+"ms".
+<p>The block for the equation is:
+<p><tt>EQUATION("ms")</tt>
+<br><tt><font color="#00CC00">/*</font></tt>
+<br><tt><font color="#00CC00">Market shares</font></tt>
+<br><tt><font color="#00CC00">*/</font></tt>
+<br><tt>v[0]=V("Sales");</tt>
+<br><tt>v[1]=V("TotalSales");</tt><tt></tt>
+<p><tt>RESULT( v[0]/v[1])</tt>
+<br>&nbsp;
+<p>Now you have inserted the new equation saying that the market shares
+(Variable "ms") must be computed as the ratio between Sales and TotalSales.
+The whole equation should be like:
+<p>Save the equation file (menu <b>File/Save</b>, or press Ctrl+s), and
+run the model, menu <b>Run/Run</b>. The system automatically acknowledges
+that the file is changed, and therefore recompiles the whole Lsd model
+program.
+<p>When the Lsd Browser window appears, open one of the configuration files
+(<b>menu File/Load</b>). Note that you may run the model as before since
+the new code does not interfere with the previous equations.
+<p>Move the Browser to point to the Object <b>Firm </b>(double-click on
+the symbol for <b>Firm </b>in the graphical representation). There insert
+the new Variable "ms": choose menu <b>Model/Add a Variable</b> (or press
+Ctrl+v), and type "ms", with 0 lags.
+<p>As last operation, double-click on the newly insereted "ms" Variable
+in the list of Variables for <b>Firm</b> and check on the <b>To Save</b>
+option, so to include the values of the market shares Variables in the
+data saved during the simulation runs.
+<p>Now you can run a simulation and observe the results
+<br><a href="#l16">return to the tutorial list</a>
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>

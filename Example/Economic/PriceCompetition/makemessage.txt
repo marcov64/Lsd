@@ -1,0 +1,5 @@
+fun_Aix.cpp: In member function `double variable::fun(object*)':
+fun_Aix.cpp:57: error: `sds' undeclared (first use this function)
+fun_Aix.cpp:57: error: (Each undeclared identifier is reported only once for each function it appears in.)
+fun_Aix.cpp:57: error: expected `;' before "if"
+make: *** [fun_Aix.o] Error 1

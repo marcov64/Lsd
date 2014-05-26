@@ -1,0 +1,355 @@
+	
+Label Root
+{
+	Son: Swarm
+	Label Swarm
+	{
+		Son: Bug
+		Label Bug
+		{
+			Var: Age
+			Var: Life
+			Param: ReadyMate
+
+		}
+
+		Var: Action
+		Var: Mate
+		Param: MaxAge
+		Param: DeadAge
+		Param: DeadStarved
+		Param: Fed
+		Var: Stock
+		Var: Eat
+		Var: NumBugs
+		Param: IncrStock
+		Param: NewStock
+		Var: ProbMate
+		Param: StepAge
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Swarm C	1
+Var: Action 0 s + d p
+Var: Mate 0 s + d n
+Param: MaxAge 0 n + n n	15
+Param: DeadAge 0 s + n n	0
+Param: DeadStarved 0 s + n n	0
+Param: Fed 0 s + n n	0
+Var: Stock 1 s + n n	100
+Var: Eat 0 n + n n
+Var: NumBugs 0 s + d n
+Param: IncrStock 0 n + n n	0.95
+Param: NewStock 0 n + n n	5000
+Var: ProbMate 0 n + n n
+Param: StepAge 0 n + n n	0.8
+
+Object: Bug C	100
+Var: Age 1 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Var: Life 0 n + n n
+Param: ReadyMate 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION fun_anitbiotics.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Swarm
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Action
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Mate
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_MaxAge
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DeadAge
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DeadStarved
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Fed
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Stock
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Eat
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NumBugs
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IncrStock
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NewStock
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ProbMate
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_StepAge
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Bug
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Age
+(no description available)
+_INIT_
+ All 100 instances equal to 1.
+END_DESCRIPTION
+
+Variable_Life
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ReadyMate
+(no description available)
+_INIT_
+ All 100 instances equal to 1.
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+Action
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+EQUATION("Age")
+/*
+time passing by
+*/
+
+RESULT(CURRENT+1 )
+
+EQUATION("Life")
+/*
+Check if the bug is too old, starved, or it can mate
+*/
+
+v[0]=V("Age");
+v[1]=V("MaxAge");
+if(v[1]<=v[0])
+ v[2]=1;
+else
+ {
+ 
+ v[3]=V("Eat");
+ if(v[3]==0)
+  v[2]=2;
+ else
+  {
+   v[2]=3;
+   v[3]=V("ProbMate");
+   if(RND<v[3])
+    WRITE("ReadyMate",1);
+   else
+    WRITE("ReadyMate",0); 
+  } 
+ } 
+RESULT( v[2])
+
+FUNCTION("Eat")
+/*
+Test if there is food
+*/
+v[0]=V("Fed");
+v[1]=VL("Stock",1);
+v[2]=(v[1]-v[0])/v[1];
+if(RND<v[2])
+ {
+ INCR("Fed",1);
+ v[2]=1;
+ }
+else
+ v[2]=0; 
+
+RESULT(v[2] )
+
+
+EQUATION("Mate")
+/*
+Scan all bugs and reproduce the ones ready to mate
+*/
+v[10]=V("Action");
+v[11]=0;
+CYCLE(cur, "Bug")
+ {
+  v[0]=VS(cur,"ReadyMate");
+  if(v[0]>0)
+   {
+    cur2=ADDOBJ_EX("Bug",cur);
+    WRITES(cur2,"ReadyMate",0);
+    WRITELS(cur2,"Age",0, t);
+    v[11]++;
+   }
+ }
+
+RESULT(v[11] )
+
+EQUATION("Action")
+/*
+Main cycle on existing bugs: remove dead ones
+and keep statistics
+*/
+WRITE("DeadAge",0);
+WRITE("DeadStarved",0);
+WRITE("Fed",0);
+
+v[4]=0;
+CYCLE_SAFE(cur, "Bug")
+ {
+  v[2]=VS(cur,"Life");
+  if(v[2]==2 || v[2]==1)
+   {
+   DELETE(cur);
+   if(v[2]==1)
+    INCR("DeadAge",1);
+   if(v[2]==2)
+    INCR("DeadStarved",1);
+   }
+   else
+    v[4]++;
+ }
+
+RESULT(v[4] )
+
+EQUATION("Stock")
+/*
+compute the amount of food
+*/
+V("Action");
+v[0]=V("Fed");
+v[1]=V("IncrStock");
+v[2]=V("NewStock");
+
+v[3]=CURRENT-v[0];
+v[4]=v[3]*v[1]+(1-v[1])*v[2];
+
+RESULT(v[4] )
+
+EQUATION("NumBugs")
+/*
+Number of bugs as the survivors from previous generation plus
+new offspinrgs
+*/
+v[0]=V("Action");
+v[1]=V("Mate");
+
+RESULT(v[0]+v[1] )
+
+
+FUNCTION("ProbMate")
+/*
+Comment
+*/
+v[0]=VS(c,"Age");
+v[2]=V("StepAge");
+
+if(v[0]>0)
+ {
+  v[1]=1-v[2]*(v[0]-1);
+ }
+else
+ v[1]=0; 
+RESULT(v[1] )
+
+
+
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

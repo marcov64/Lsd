@@ -1,0 +1,19 @@
+Network Eternalities Model
+Presented in Arthur, B.W., 1989, "Competing Technologies, Increasing Returns, and Lock-in by Historical Events", Economic Journal, 99, p.116-131.
+Implemented by Marco Valente
+
+(Very Simple)
+
+The model consider two types of agents , say 0 or 1, and two types of a product, say A or B. At any period a new agent, of randomly determined type, enter in the market and chooses one of the two products. The model studies the market shares among the two products.
+
+Agents choose the product that provides the highest utility. For example, the utility of product A for agents 0 is computed as:
+
+U(A,0)=T(A,0) + X(0) x N(A)
+
+where T(A,0) is the utility provided from product 0 to agent A for using the product individually, X(0) is the coefficient of network externalitie, indicating how important is the external factor for agents 0 and N(A) is the current number of consumer using product A. In a similar way it is possible to compute the remainig three utilities so to have all the combinations of products and consumers.
+
+The model can be configured to have positive, null or negative externalities by choosing appropriate values for X(0) and X(1).
+
+
+
+

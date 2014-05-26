@@ -1,0 +1,50 @@
+# Makefile to compile LMM adapt as required. Under MS Windows system with installed Lsd follow these steps:
+# 1. Open a dos shell and move in the root of Lsd system, where this makefile is located.
+# 2. Run the batch file "run.bat". This will start LMM. Type Esc and quit the program. This will add to the shell
+#    the required path
+# 3. type make -f makefile.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
+
+TARGET=lmm
+SWITCH_CC=-g
+
+
+TCL_VERSION=8.5
+TK_VERSION=8.5
+
+# For Unix 
+LSDROOT=.
+DUMMY=
+PATH_TCL_LIB=/usr/lib #path to the file libtclXXX.a
+PATH_TK_LIB=/usr/lib #path to the file libtkXXX.a
+PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
+PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
+PATH_LIB=/usr/X11/lib #path to general libraries
+INCLUDE_LIB= -lX11 #additional libraries
+
+# from here you should not need to modify anything
+CC=g++	
+SRC=src
+
+SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# Variable used to prepare the options to search for the tcl and tk headers
+# Do not modify
+INCLD_TCL_TK=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) 
+
+
+# Set the complete option for the libraries to link to the models.
+TCL_LIB=-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION)
+TK_LIB=-L$(PATH_TK_LIB) -ltk$(TK_VERSION)
+
+$(TARGET): $(SRC_DIR)modman.o
+	$(CC) $(SWITCH_CC) -L$(PATH_LIB) -lc $(SRC_DIR)modman.o \
+	$(TCL_LIB) $(TK_LIB) $(EXTRA_PAR) -L$(PATH_LIB) $(INCLUDE_LIB) -o $(TARGET) $(DUMMY)
+
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+
+
+
+
+
+

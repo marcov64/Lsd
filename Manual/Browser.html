@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <title>Browser</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a name="top"></a><a href="TOC.html">HyperManual</a>
+<a href="windows.html">Lsd
+Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
+<p><b><font size="+2">Lsd Main Browser</font></b></p>
+</center>
+<p>The main browser is used at the same time for two purposes: showing
+the content of one Object type (referred to "the Object pointed by the
+Browser") and serving as control center for all activities of Lsd
+before
+and after a simulation run. The Object shown can be edited (e.g. add
+new
+Variable, change its number if instances, set its initial data). The
+uppermost
+part of the main Browser is made of a menu bar that allow to make the
+actions,
+on either the whole model (e.g. run the simulation) or change the
+Object
+pointed by the browser.<br>
+<br>
+</p>
+<center>
+<p><img src="browser.jpg" style="height: 512px; width: 408px;"
+ align="left" title="" alt="" hspace="30"></p>
+</center>
+<b><i><font face="Arial, helvetica">
+<br>
+Menus of the Browser:</font></i></b>
+<br>
+<a href="menufile.html">Menu File</a>
+<br>
+<a href="menumodel.html">Menu Model</a>
+<br>
+<a href="menudata.html">Menu Data</a>
+<br>
+<a href="menurun.html">Menu Run</a>
+<br>
+<a href="menuhelp.html">Menu Help</a>
+<p><b><i><font face="Arial, helvetica">Browser commands:</font></i></b>
+</p>
+<ul>
+  <li> <a href="#chobjname">Object Label</a></li>
+  <li> <a href="#goup">Parent Object</a></li>
+  <li> <a href="#variables">Variables list</a></li>
+  <li> <a href="#descendants">Descendants list</a></li>
+</ul>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<p></p>
+<br>
+<br>
+<hr width="100%">
+<p><a name="chobjname"></a><font size="-1"><a href="#top">(Main Browser)</a></font>
+"<b><font face="Arial, helvetica">Object:</font></b>"
+<br>
+The red label indicates the name of the Object pointed to by the
+Browser.
+Any operation specific to an Object will concern all the instances in
+the
+model of this type of Object.
+<br>
+Clicking on the red label is a shortcut to entry "<a
+ href="menumodel.html#ChangeObjName">Change
+Object Name</a>" in menu <a href="menumodel.html">Model</a>.
+<br>
+</p>
+<hr width="100%"><br>
+&nbsp;
+<p><a name="goup"></a><font size="-1"><a href="#top">(Main Browser)</a>
+</font>"<b><font face="Arial, helvetica">Parent Object:</font></b>"
+<br>
+The red label reports the name of the Object from which the currently
+shown Object descends. The label can be clicked to move the Browser to
+point to that Object, that is "up" in the hierarchy.
+<br>
+</p>
+<hr width="100%">
+<p><a name="variables"></a><font size="-1"><a href="#top">(Main Browser)</a></font><b><font
+ face="Arial,Helvetica">Listbox
+"Variables"</font></b>
+<br>
+The listbox <b>Variable</b> contains all the Variables and the
+Parameters
+in the Object pointed by the <a href="Browser.html">Browser</a>. The
+order
+in which the Variables and Parameters are listed depends on the order
+in
+which they have been inserted in the model, and it has no relevance for
+the simulation actual order of computation during a time step (for this
+see the <a href="debug.html#simman">Lsd Simulation Manager</a> help
+page).
+<br>
+After the label of the Variables and Parameters there is a code between
+parenthesis:
+</p>
+<ul>
+  <li>(P) means that the label corresponds to a Parameter;</li>
+  <li>(n), where n is a non-negative integer, means that the label
+corresponds
+to a Variable. If n equals zero, it means that the Variable is never
+used
+in the model with lagged values. Positive <b>n</b>'s mean that the
+corresponding
+Variable is used with a maximum lag equal to n.</li>
+</ul>
+Double-clicking on one element in the list causes a window like the
+following
+to appear:
+<center>
+<p><img src="variable_options.JPG" style="height: 588px; width: 502px;"
+ title="" alt="" align="left" hspace="40"></p>
+</center>
+<p>The top part of the window indicates the label of the Variable or
+Parameter
+and the Object where it is contained. <a href="#change_nature">Double-click
+on the name</a> of the Variable
+or Parameter to change it in another type of element (e.g. change the
+label, or turn a variable in a parameter).<br>
+Below the title there are three options (two for Parameters):
+</p>
+<ul>
+  <li>The field <b><font face="Arial, helvetica">Debug</font></b>
+(only for
+Variables)
+checked on means that the computation of any instance of the Variable
+causes
+the debugger to stop the simulation and show the state of the model
+(see <a href="debug.html">Lsd
+Debugger</a>). The simulation will be interrupted immediately after the
+computation of the Variable.</li>
+  <li>The field <b><font face="Arial, helvetica">Save</font></b>
+checked on
+means
+that the value of the Variable or Parameter must be saved in the result
+file for <a href="mdatares.html">post-simulation analysis</a>.</li>
+  <li>The field <b><font face="Arial, helvetica">Run Time Plot</font></b>
+means
+that the value of the Variable or Parameter must be plotted during the
+simulation run on the <a href="Runtime.html">Run Time Plot</a>. Note
+that
+this does not cause the automatic saving of the values in the result
+file
+for post-simulation analysis.</li>
+</ul>
+The following buttons indicates to continue saving the options (<b>Continue</b>),
+to continue without saving the modified options (<b>Cancel</b>) and the
+help button for this page.
+<br>
+The parts below refer to the documentation of the Variable or
+Parameter.
+The "Description" is a text that the modeller can edit to indicate the
+meaning of the item. <br>
+<br>
+The following two options, <span style="font-weight: bold;">Observe</span>
+and <span style="font-weight: bold;">Initialize</span> are used in the
+documentation of the model. I checked, the model will include this item
+in the list of elements containing relevant results and in the list of
+initializations. These lists are issued from the <a href="menurun.html">menu
+Run</a> and placed in the header of the model report.<br>
+<br>
+The four buttons below the Description (three for
+Parameters) have the following effects:
+<ul>
+  <li> <b>See code</b>: show in a new window the actual code used to
+compute the
+Variable (not present for Parameters). See the manual page on the Lsd
+equations
+(<a href="lsdfunc.html">C++ codying style</a> or the new <a
+ href="lsdfuncMacro.html">Lsd
+Macro codying style</a>)</li>
+  <li> <b>Auto Docum.</b>: ask the system to provide automatic
+documentation for
+the Variable, which will replace any text possibly present. If the item
+is a Variable the system scans the equation's code looking for a
+commented
+part in the beginning of the equation. If found, this comment is copied
+in the Description. Moreover, both for Variables and for Parameters,
+the
+system also reports in which other equations the item is used.</li>
+  <li> <b>Vars using 'XXX'</b>: clicking this button creates a list of
+Variables
+whose equation makes use the item XXX</li>
+  <li> <b>Vars./Pars. used in 'XXX'</b>: clicking on this item creates
+a
+new window
+with the list of items used in the equation for XXX.</li>
+</ul>
+The last part of the window contains place to store comments on the
+initialization
+of the item (of course, it is present only for items with initial
+values:
+Parameters and lagged Variables). This comment is automatically filled
+when the user makes use of the <a href="mdatainit.html#setall">Set All</a>
+function in the <a href="mdatainit.html">Initial Values</a> window.
+<p>The description part and the comments on the initial values are used
+in the model report in the cell concerning the item.
+<br>
+</p>
+<hr width="100%">
+<p><a name="change_nature"></a><a href="#variables">(Element Options)</a><b><font
+ face="Arial,Helvetica">Change
+Labels, lags and nature of an element</font></b>
+<br>
+</p>
+<p><span style="font-style: italic;"><span style="font-weight: bold;">WARNING:
+Changing the nature of an element or its location in the objects'
+structure can severely compromise the model. Use this option only to
+fix errors.<br>
+<br>
+</span></span>After having inserted a Variable or a Parameter it is
+possible to
+change
+the nature of the element by changing its label, transforming a
+Parameter
+in a Variable, a Variable in a Parameter, moving it to another Object
+or changing the number of lags
+for a variable. Generally, these operations are required only in order
+to fix spelling errors. If the model runs, the only reason for such a
+change
+is when the equations are changed, for example when you want to
+transform
+a Parameter in a Variable.
+</p>
+<p>To change the nature of an element you need to:&nbsp;&nbsp;
+<br>
+</p>
+<ol>
+  <li>use the <a href="Browser.html">Browser</a> to show the object
+containing
+the element you want to change;</li>
+  <li>Double-click on the element entry in the list of Variables to <a
+ href="#variables">show
+the options </a>for the element;</li>
+  <li>Use the following window to edit the element as required.</li>
+</ol>
+<img src="change_nature.jpg" style="height: 193px; width: 333px;"
+ title="" alt="">
+<br>
+<br>
+The available operations are the follwing:<br>
+<ul>
+  <li><span style="font-weight: bold;">Change label</span>: edit the
+label of the element. To delete the element altogether assign an empty
+label, that is, delete all character in this box</li>
+  <li><span style="font-weight: bold;">Move to another object</span>:
+remove the element from the current object to be placed in another one.
+Click on the button showing the original Object containing the element,
+and a list of objects in the model will appear.&nbsp;</li>
+  <li><span style="font-weight: bold;">Variable</span>: turns the
+element in a variable. Use this option to modify the number of lags
+defined for the variable, too.</li>
+  <li><span style="font-weight: bold;">Parameter</span>: turn the
+element in a parameter.</li>
+  <li><span style="font-weight: bold;">Funtion</span>: turn the element
+in a function.<br>
+  </li>
+</ul>
+<br>
+<hr width="100%">
+<p><a name="descendants"></a><font size="-1"><a href="#top">(Main
+Browser)</a></font><b><font face="Arial,Helvetica">Listbox
+"Descendants"</font></b>
+<br>
+Listbox containing the list of descendants from the Object shown in
+the Browser. The names of the descendants can be double-clicked and the
+Browser will move to show that descendant. A model in Lsd is composed
+by
+a hierarchical structure of Objects: the whole model has a unique root,
+whose label is Root. Any Object can have any number of descendants,
+both
+intended in terms of different types of descendants and different
+numbers
+of instances for each Object type. The main Browser considers only
+Object
+types, without specifying the actual number of instances of each type.
+Therefore, browsing the model using the main Browser can be done by
+clicking
+on the descendants' names to go down the hierarchy and clicking on the
+label of the parent Object to go up the hierarchy.
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+</body>
+</html>

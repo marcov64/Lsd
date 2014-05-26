@@ -1,0 +1,255 @@
+	
+Label Root
+{
+	Son: Population
+	Label Population
+	{
+		Son: Class
+		Label Class
+		{
+			Param: IdClass
+			Param: NumClass
+			Param: TypeNumBits
+			Param: TypeRewardClass
+			Param: AvClFitness
+			Param: AvAgeDeath
+			Param: NClCopies
+			Param: NumDeath
+			Param: SucMut
+			Param: VarClFitness
+			Param: AvGain
+			Param: AvRank
+			Param: AvAge
+			Param: BestCFit
+			Param: AvTestDinner
+			Param: NumFormsClass
+
+		}
+
+		Son: Agent
+		Label Agent
+		{
+			Son: Block
+			Label Block
+			{
+				Son: BitBlock
+				Label BitBlock
+				{
+					Param: IdBitBlock
+					Param: IdALocus
+					Param: Value
+					Param: FitnessContribution
+
+				}
+
+				Param: IdBlock
+				Param: NumBits
+				Param: NumMut
+
+			}
+
+			Var: Mutation
+			Param: Fitness
+			Param: NumBlocks
+			Param: IdAgent
+			Param: MaxBitLength
+			Param: DateBirth
+			Param: IdOrigin
+			Param: Rank
+			Param: NumCopies
+			Param: BlckChs
+			Param: Age
+			Param: RewardType
+			Var: MutationIndividual
+			Var: MutationTeam
+			Param: AgentType
+			Var: MutationGlobal
+			Var: TestDinner
+			Param: BitChs
+			Var: TestDinnerTeam
+			Var: TestDinnerGlobal
+			Var: TestDinnerIndividual
+			Var: BackDoor
+			Param: CounterMutation
+			Var: MutationTeamParallel
+			Param: ProbDie
+			Param: ProbReplicate
+
+		}
+
+		Param: ProbMut
+		Var: MaxFitness
+		Param: AllEqual
+		Param: NumReplace
+		Param: AvFitness
+		Var: Genetic
+		Param: PeriodGen
+		Param: CounterGen
+		Param: IdWinner
+		Param: NumParent
+		Param: PeriodShk
+		Var: Shake
+		Param: CounterShk
+		Var: InitAgent
+		Var: NumAgent
+		Param: NoTest
+		Param: MutateAlways
+		Var: NumForms
+		Param: ProbRandRelocationGenetic
+		Var: Shift
+		Param: PeriodShift
+		Param: CounterShift
+		Param: AcceptAlways
+		Param: ElasRemove
+		Param: ElasReplicate
+		Param: SingleReplication
+
+	}
+
+	Son: Landscape
+	Label Landscape
+	{
+		Son: LLocus
+		Label LLocus
+		{
+			Son: Link
+			Label Link
+			{
+				Param: IdLink
+
+			}
+
+			Param: IdLocus
+			Param: NLink
+
+		}
+
+		Var: InitEvenK
+		Param: EvenK
+		Var: CreateFitContrib
+		Var: FitFun
+		Param: N
+		Param: ForeOverlap
+		Param: AftOverlap
+		Var: SaveLandscape
+		Param: FlagSaveLandscape
+
+	}
+
+	Var: Init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Init 0 n + n n
+
+Object: Population C	1
+Param: ProbMut 0 n + n n	0.500000
+Var: MaxFitness 0 s + n n
+Param: AllEqual 0 n + n n	0.000000
+Param: NumReplace 0 n + n n	20.000000
+Param: AvFitness 0 s + n n	0.000000
+Var: Genetic 0 n + d n
+Param: PeriodGen 0 n + n n	50.000000
+Param: CounterGen 0 n + n n	1.000000
+Param: IdWinner 0 n + n n	0.000000
+Param: NumParent 0 n + n n	20.000000
+Param: PeriodShk 0 n + n n	50.000000
+Var: Shake 0 n + n n
+Param: CounterShk 0 n + n n	1.000000
+Var: InitAgent 0 n + d n
+Var: NumAgent 0 n + n n
+Param: NoTest 0 n + n n	1.000000
+Param: MutateAlways 0 n + n n	0.000000
+Var: NumForms 0 s + n n
+Param: ProbRandRelocationGenetic 0 n + n n	1.000000
+Var: Shift 0 n + n n
+Param: PeriodShift 0 n + n n	100000.000000
+Param: CounterShift 0 n + n n	0.000000
+Param: AcceptAlways 0 n + n n	0.000000
+Param: ElasRemove 0 n + n n	5.000000
+Param: ElasReplicate 0 n + n n	5.000000
+Param: SingleReplication 0 n + n n	1.000000
+
+Object: Class C	3
+Param: IdClass 0 n + n n	1.000000	2.000000	3.000000
+Param: NumClass 0 s + n p	50.000000	50.000000	50.000000
+Param: TypeNumBits 0 n + n n	1.000000	5.000000	10.000000
+Param: TypeRewardClass 0 n + n n	1.000000	1.000000	1.000000
+Param: AvClFitness 0 s + n n	0.000000	0.000000	0.000000
+Param: AvAgeDeath 0 s + n n	0.000000	0.000000	0.000000
+Param: NClCopies 0 s + n n	0.000000	0.000000	0.000000
+Param: NumDeath 0 s + n n	0.000000	0.000000	0.000000
+Param: SucMut 0 s + n n	0.000000	0.000000	0.000000
+Param: VarClFitness 0 s + n n	0.000000	0.000000	0.000000
+Param: AvGain 0 n + n n	0.000000	0.000000	0.000000
+Param: AvRank 0 n + n n	0.000000	0.000000	0.000000
+Param: AvAge 0 s + n n	0.000000	0.000000	0.000000
+Param: BestCFit 0 s + n n	0.000000	0.000000	0.000000
+Param: AvTestDinner 0 s + n n	0.000000	0.000000	0.000000
+Param: NumFormsClass 0 s + n n	0.000000	0.000000	0.000000
+
+Object: Agent C	1
+Var: Mutation 0 n + n n
+Param: Fitness 0 s + n n	0.000000
+Param: NumBlocks 0 n + n n	0.000000
+Param: IdAgent 0 n + n n	1.000000
+Param: MaxBitLength 0 n + n n	-1.000000
+Param: DateBirth 0 n + n n	0.000000
+Param: IdOrigin 0 n + n n	1.000000
+Param: Rank 0 n + n n	0.000000
+Param: NumCopies 0 n + n n	0.000000
+Param: BlckChs 0 n + n n	0.000000
+Param: Age 0 n + n n	0.000000
+Param: RewardType 0 n + n n	2.000000
+Var: MutationIndividual 0 n + n n
+Var: MutationTeam 0 n + n n
+Param: AgentType 0 n + n n	0.000000
+Var: MutationGlobal 0 n + n n
+Var: TestDinner 0 n + n n
+Param: BitChs 0 n + n n	0.000000
+Var: TestDinnerTeam 0 n + n n
+Var: TestDinnerGlobal 0 n + n n
+Var: TestDinnerIndividual 0 n + n n
+Var: BackDoor 1 n + n n	0.000000
+Param: CounterMutation 0 n + n n	0.000000
+Var: MutationTeamParallel 0 n + n n
+Param: ProbDie 0 n + n n	0.000000
+Param: ProbReplicate 0 n + n n	0.000000
+
+Object: Block C	1
+Param: IdBlock 0 n + n n	0.000000
+Param: NumBits 0 n + n n	0.000000
+Param: NumMut 0 n + n n	1.000000
+
+Object: BitBlock C	1
+Param: IdBitBlock 0 n + n n	-1.000000
+Param: IdALocus 0 n + n n	-1.000000
+Param: Value 0 n + n n	0.000000
+Param: FitnessContribution 0 n + n n	0.000000
+
+Object: Landscape C	1
+Var: InitEvenK 0 n + d n
+Param: EvenK 0 n + n n	4.000000
+Var: CreateFitContrib 0 n + n n
+Var: FitFun 0 n + n n
+Param: N 0 n + n n	50.000000
+Param: ForeOverlap 0 n + n n	0.000000
+Param: AftOverlap 0 n + n n	0.000000
+Var: SaveLandscape 0 n + n n
+Param: FlagSaveLandscape 0 n + n n	0.000000
+
+Object: LLocus C	1
+Param: IdLocus 0 n + n n	1.000000
+Param: NLink 0 n + n n	0.000000
+
+Object: Link C	1
+Param: IdLink 0 n + n n	0.000000
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 2000
+EQUATION fun_nkun.cpp

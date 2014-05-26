@@ -1,0 +1,269 @@
+	
+Label Root
+{
+	Son: Population
+	Label Population
+	{
+		Son: Species
+		Label Species
+		{
+			Var: Num
+			Var: Fitness
+			Var: ms
+
+		}
+
+		Param: Alpha
+		Var: TotNum
+		Var: AvFit
+		Param: DeltaFit
+		Param: CumulativeModel
+		Param: Drift
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Population C	1
+Param: Alpha 0 n + n n	0.4
+Var: TotNum 0 s + d n
+Var: AvFit 0 s + d n
+Param: DeltaFit 0 n + n n	0
+Param: CumulativeModel 0 n + n n	0
+Param: Drift 0 n + n n	0
+
+Object: Species C	10
+Var: Num 1 s + n n	1e+006	1e+006	1e+006	1e+006	1e+006	1e+006	1e+006	1e+006	1e+006	1e+006
+Var: Fitness 1 s + n n	10	9.5	9	8.5	8	7.5	7	6.5	6	5.5
+Var: ms 1 s + n p	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 2000
+EQUATION fun_ReplDynMacro.cpp
+ MODELREPORT report_RDSimple.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Population
+'Population' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Alpha
+Determine the rate of change for Num.
+
+'Alpha' appears in the equation for: Num.
+_INIT_
+The higher the value the faster Num is updated.
+END_DESCRIPTION
+
+Variable_TotNum
+Sum of Num for each Species (the rounding causes the total to change)
+
+'TotNum' appears in the equation for: ms.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_AvFit
+Average fitness. Note that the average uses the Num[t-1] as weights, since this Variable is part of the computation of Num[t].
+
+'AvFit' appears in the equation for: Num.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DeltaFit
+This parameter is used to have Fitness changing. It is the maximum jump that Fitness can make.
+
+'DeltaFit' appears in the equation for: Fitness.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_CumulativeModel
+If this parameter is set to 0, then the Fitness changes according to random walk. If set to any other value, Fitness is modified according to a cumulative model. That is, the value of market shares is multiplied to the drift, so that the higher market shares the higher is the drift.
+
+'CumulativeModel' appears in the equation for: Fitness.
+_INIT_
+Set to 0 for non cumulative model, or to another value for a cumulative one.
+END_DESCRIPTION
+
+Parameter_Drift
+The drift is a constant modification of the Fitness. In case of cumulative model only a portion (equal to the market shares) is actually used for each species.
+
+'Drift' appears in the equation for: Fitness.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Species
+'Species' appears in the equation for: AvFit, TotNum.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Num
+Number of individual present for each species. It is computed as:
+Num[t]=Num[t-1](1+Alpha(Fitness[t]-AvFitness[t])/AvFitness[t])
+
+That is, the number of individuals increases if the species has an above average fitness and decreases otherwise.
+
+The speed of change is set by Alpha.
+
+'Num' appears in the equation for: AvFit, ms, Num, TotNum.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Fitness
+Fitness, computed as a random walk of DeltaFit. Two alternative models
+are considered. In the non-cumulative model (Parameter CumulativeModel=0)
+the fitness is computed as:
+Fitness[t]=Fitness[t-1]+RndUniform(Fitness[t-1]-DeltaFit, Fitness[t-1]+DeltaFit)
+
+In the alternative model (Parameter CumulativeModel=1) the maximum range is
+proportional to the shares:
+Fitness[t]=
+=Fitness[t-1]+RndUniform(Fitness[t-1]-ms[t-1]*DeltaFit, Fitness[t-1]+ms[t-1]*DeltaFit)
+
+'Fitness' appears in the equation for: Fitness, AvFit, Num.
+_INIT_
+If DeltaFit and Drift are set to 0, Fitness does never changes, so that it always remain to its initial values. 
+END_DESCRIPTION
+
+Variable_ms
+Shares of population for the Species
+
+'ms' appears in the equation for: Fitness.
+_INIT_
+It should be set to the value of the shares of Num/TotNum. However, even the first time step "ms" is computed. The only place where ms is actually used is 
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+
+
+MODELBEGIN
+
+
+EQUATION("Fitness")
+/*
+Fitness, computed as a random walk of DeltaFit. Two alternative models
+are considered. In the non-cumulative model (Parameter CumulativeModel=0)
+the fitness is computed as:
+Fitness[t]=Fitness[t-1]+RndUniform(Fitness[t-1]-DeltaFit, Fitness[t-1]+DeltaFit)
+
+In the alternative model (Parameter CumulativeModel=1) the maximum range is
+proportional to the shares:
+Fitness[t]=
+=Fitness[t-1]+RndUniform(Fitness[t-1]-ms[t-1]*DeltaFit, Fitness[t-1]+ms[t-1]*DeltaFit)
+*/
+
+
+v[0]=V("DeltaFit");
+v[1]=VL("Fitness",1);
+v[2]=RND;
+v[5]=V("Drift");
+v[3]=V("CumulativeModel");
+if(v[3]==0)
+  v[6]=v[1]+v[5]+(v[2]-0.5)*2*v[0]; //Non-cumulative model
+else
+ {v[4]=VL("ms",1);
+  v[6]=v[1]+v[5]*v[4]+(v[2]-0.5)*2*v[0]; //Cumulative model
+ }
+RESULT(v[6])
+
+
+
+
+EQUATION("AvFit")
+/*
+Average fitness. Note that the average uses the
+Num[t-1] as weights, since this Variable is part of the
+computation of Num[t].
+*/
+v[3]=0,v[2]=0;
+CYCLE(cur,"Species")
+ {
+  v[0]=VLS(cur,"Num",1);
+  v[1]=VS(cur,"Fitness");
+  v[2]+=v[0]*v[1];
+  v[3]+=v[0];
+ }
+
+RESULT(v[2]/v[3]);
+
+EQUATION( "ms")
+
+/*
+Shares of population for the Species
+*/
+v[0]=V("Num");
+v[1]=V("TotNum");
+RESULT(v[0]/v[1]);
+
+EQUATION( "Num")
+/*
+Number of individual present for each species. It is computed as:
+Num[t]=Num[t-1](1+Alpha(Fitness[t]-AvFitness[t])/AvFitness[t])
+
+That is, the number of individuals increases if the species has an above average fitness and decreases otherwise.
+
+The speed of change is set by Alpha.
+*/
+v[0]=V("Fitness"); //Fitness
+v[1]=VL("Num",1);
+v[2]=V("Alpha");
+v[3]=V("AvFit");
+
+RESULT(round(v[1]+v[1]*v[2]*(v[0]-v[3])/v[3]))
+
+EQUATION( "TotNum")
+/*
+Sum of Num for each Species (the rounding causes the total to change)
+*/
+v[0]=0;
+
+CYCLE(cur,"Species")
+  v[0]+=VS(cur,"Num");
+RESULT(v[0])
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

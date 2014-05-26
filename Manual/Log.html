@@ -1,0 +1,75 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Generator" content="Microsoft Word 97">
+   <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Log Window</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center><font size=-1><a href="TOC.html">HyperManual</a> <a href="windows.html">Lsd
+Windows</a> <a href="Browser.html">Main Browser</a> <a href="FAQs.html">Lsd
+FAQ's</a></font>
+<br><b><font size=+2>Log Window</font></b></center>
+
+<p>This window is a note pad where the system writes down <a href="#Messages">messages</a>
+(that users can edit, copy and paste somewhere else). Moreover, during
+a simulation run the Log window is active, allowing users <a href="#buttons">to
+control</a> the simulation flow.
+<center>
+<p><img SRC="log.jpg" height=471 width=593></center>
+
+<p><br>
+<br>
+<p>
+<hr WIDTH="100%">
+<br><a NAME="Messages"></a><b><font face="Arial, helvetica"><font size=+1>Messages</font></font></b>
+<br>If the model configuration does not specify a Variable to be plotted
+in a <a href="Runtime.html">Run Time Plot</a>, then the Log window will
+write down a single line for each time step terminated (see the example
+above for the top half window). The lines specify also the number of the
+simulation exercises to execute, starting from 0, in case multiple simulation
+asks have been requested (see <a href="menurun.html#simsetting">Simulation
+Settings</a>). These messages can be suppressed and reinstated with the
+buttons <b>Fast</b> and <b>Observe</b> respectively.
+<br>Users can ask further information reported in the Log window, concerning
+the state of the <a href="debug.html#stackinfo">stack</a>, that is the
+single Variable's computations (see the middle of the example window above).
+This gives information on each single equation computed, the time, and
+whether is was a normal updating or the computation requested by another
+equation.
+<br>Other messages concern the descriptive statistics produced during a
+<a href="mdatares.html">Analysis of Result</a> session (see the last line
+in the example above).
+<br>In general, any error issues a message with details in the Log window.
+<br>
+<hr WIDTH="100%">
+<p><a NAME="buttons"></a><b><font face="Arial, helvetica"><font size=+1>Simulation
+Control Buttons</font></font></b>
+<br>While a simulation is running, users can press one of the buttons in
+the lowest bar of the window to modify the simulation flow.
+<p><b><font face="Arial, helvetica">Stop</font></b>
+<br>Quit the simulation. Simulation data for the&nbsp; result analysis
+are saved up to the last step fully computed. In case users decided to
+run multiple simulation exercises the remaining simulation runs are not
+executed.
+<p><b><font face="Arial, helvetica">Fast</font></b>
+<br>Increase the speed of simulation preventing the system from writing
+messages. In fact, for simple models (with few Variables) spend most of
+simulation time just writing down the step number computed.
+<br>To further increase the simulation speed, minimize (but not destroy!)
+the <a href="Runtime.html">Run Time Plot</a> window, if exists.
+<p><b><font face="Arial, helvetica">Observe</font></b>
+<br>Return the system to print the messages on the status of the simulation
+in case <b>Fast</b> has been previously used.
+<p><b><font face="Arial, helvetica">Debug</font></b>
+<br>Change the simulation in Debug Mode. This means that when a <a href="Browser.html#variables">Variable
+set to be debugged</a> finishes its equation the system interrupts the
+simulation and start the <a href="debug.html">Debugger</a>, allowing a
+through check of the status of the model. The button has no effect if no
+Variable is checked to be debugged.
+<br>&nbsp;
+</body>
+</html>

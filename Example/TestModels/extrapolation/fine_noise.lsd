@@ -1,0 +1,89 @@
+	
+Label Root
+{
+	Son: Obj
+	Label Obj
+	{
+		Param: a
+		Param: k
+		Param: b
+		Param: init_a
+		Param: limit_a
+		Param: init_b
+		Param: limit_b
+		Param: init_k
+		Param: limit_k
+		Param: step_a
+		Param: step_b
+		Param: step_k
+		Param: best_a
+		Param: best_b
+		Param: best_k
+		Var: cum_error
+		Param: min_error
+		Var: set_param
+		Var: store
+
+	}
+
+	Son: Database
+	Label Database
+	{
+		Son: Years
+		Label Years
+		{
+			Param: time
+			Param: true_value
+			Param: best_value
+			Param: err_best-true
+
+		}
+
+		Param: num_years
+
+	}
+
+	Var: init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: init 0 n + d n
+
+Object: Obj C	1
+Param: a 0 n + n n	0.000000
+Param: k 0 n + n n	0.000000
+Param: b 0 n + n n	0.000000
+Param: init_a 0 n + n n	0.400000
+Param: limit_a 0 n + n n	0.800000
+Param: init_b 0 n + n n	100.000000
+Param: limit_b 0 n + n n	500.000000
+Param: init_k 0 n + n n	500.000000
+Param: limit_k 0 n + n n	1500.000000
+Param: step_a 0 n + n n	-0.010000
+Param: step_b 0 n + n n	-1.000000
+Param: step_k 0 n + n n	10.000000
+Param: best_a 0 n + n n	0.000000
+Param: best_b 0 n + n n	0.000000
+Param: best_k 0 n + n n	0.000000
+Var: cum_error 0 n + d n
+Param: min_error 0 n + n n	10000000000000000000000.000000
+Var: set_param 0 n + n n
+Var: store 0 n + n n
+
+Object: Database C	1
+Param: num_years 0 n + n n	0.000000
+
+Object: Years C	24
+Param: time 0 n + n n	1.000000	2.000000	3.000000	4.000000	5.000000	6.000000	7.000000	8.000000	9.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000
+Param: true_value 0 n + n n	9.380678	16.236786	28.111472	54.267272	88.324177	159.255656	250.913637	390.220450	545.722171	678.930978	752.836756	902.275238	926.304967	912.743307	993.114377	1016.120016	1005.613712	969.236415	1025.711195	985.132823	998.955861	982.677165	965.360435	951.662355
+Param: best_value 0 n + n n	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000
+Param: err_best-true 0 n + n n	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 1000000
+EQUATION C:/Lsd/extrapolation/fun_extra.cpp

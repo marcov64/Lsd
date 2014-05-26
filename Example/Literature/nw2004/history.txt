@@ -1,0 +1,35 @@
+﻿HISTORY OF THE NW2004 PROGRAM
+
+23 March 2004: nw2004 version 0.6. Changes to adapt to Andersen's
+course on Schumpeterian economics at Kyoto University
+
+22 January 2004: The NW2004 model (version 0.5)
+- After many Lsd model variants, Esben Sloth Andersen made a major
+change in the older Lsd versions of NW. The changes have two major
+purposes: (1) to allow moving from simpler to more complex versions
+of NW-like models, (2) to allow the use of new features like new
+firms that spinn-off from old ones, and (3) to include a powerful
+analytical tool for analysing the simulation results
+
+28 January 2003: A modification of the NW standard
+- A revised version by Toke Reichstein. Is not distributed with Lsd5.1 
+but available from the Lsd Model Download Site
+http://www.business.auc.dk/evolution/lsd/download/
+
+21 Oct 2001: A revised NW standard
+A revised standard NW version by Yildizoglu, distributed with Lsd4.1
+and Lsd5.1
+
+5 May 1999: The first NW model for Lsd
+- Lsd version of NelWin 82 by Yildizoglu, derived from the first
+Lsd version by Valente 
+
+1995-1999: Prehistory as NelWin models in Maple
+- At Aalborg University both Andersen and several economics students
+reconstructed and developed Maple implementations of many, partly
+rather complex, versions of different Nelson-Winter
+models. Documentation of one type of work is found in Andersen, E. S.,
+Jensen, A. K., Madsen, L., and Jørgensen, M. (1996), "The Nelson and
+Winter Models Revisited: Prototypes for Computer-Based Reconstruction
+of Schumpeterian Competition", DRUID Working Papers:
+http://www.business.auc.dk/druid/wp/pdf_files/96-5.pdf

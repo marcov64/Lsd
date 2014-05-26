@@ -1,0 +1,10 @@
+Models in M.Valente's PhD thesis
+
+These models have been produced for the PhD project: 
+"Evolutionary Economics and Computer Simulations - A Model for the Evolution of Markets", 2000, Aalborg University, Denmark
+
+The group M.Valente Thesis include:
+- Social Diffusion model
+- Demand Model
+- Market evolution model
+

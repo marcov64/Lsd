@@ -1,0 +1,210 @@
+	
+Label Root
+{
+	Son: Obj
+	Label Obj
+	{
+		Param: a
+		Param: k
+		Param: b
+		Param: init_a
+		Param: limit_a
+		Param: init_b
+		Param: limit_b
+		Param: init_k
+		Param: limit_k
+		Param: step_a
+		Param: step_b
+		Param: step_k
+		Param: best_a
+		Param: best_b
+		Param: best_k
+		Var: cum_error
+		Param: min_error
+		Var: set_param
+		Var: store
+
+	}
+
+	Son: Database
+	Label Database
+	{
+		Son: Years
+		Label Years
+		{
+			Param: time
+			Param: true_value
+			Param: best_value
+			Param: err_best-true
+
+		}
+
+		Param: num_years
+
+	}
+
+	Var: init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: init 0 n + d n
+
+Object: Obj C	1
+Param: a 0 s + n n	0
+Param: k 0 s + n n	0
+Param: b 0 s + n n	0
+Param: init_a 0 n + n n	0.4
+Param: limit_a 0 n + n n	0.8
+Param: init_b 0 n + n n	100
+Param: limit_b 0 n + n n	500
+Param: init_k 0 n + n n	500
+Param: limit_k 0 n + n n	1500
+Param: step_a 0 n + n n	-0.01
+Param: step_b 0 n + n n	-1
+Param: step_k 0 n + n n	10
+Param: best_a 0 n + n n	0
+Param: best_b 0 n + n n	0
+Param: best_k 0 n + n n	0
+Var: cum_error 0 s + d n
+Param: min_error 0 n + n n	1e+22
+Var: set_param 0 n + n n
+Var: store 0 n + n n
+
+Object: Database C	1
+Param: num_years 0 n + n n	0
+
+Object: Years C	24
+Param: time 0 n + n n	1	2	3	4	5	6	7	8	9	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: true_value 0 n + n n	9.02834	16.3295	29.3601	52.2368	91.2624	154.685	250.055	377.936	525.399	668.561	786.118	870.082	924.26	956.962	975.913	986.635	992.621	995.937	997.766	998.773	999.326	999.63	999.797	999.889
+Param: best_value 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: err_best-true 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION C:/Lsd/extrapolation/fun_extra.cpp
+ MODELREPORT  modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Obj
+(no description available)
+END_DESCRIPTION
+
+Parameter_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_init_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_limit_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_step_k
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_a
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_b
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_k
+(no description available)
+END_DESCRIPTION
+
+Variable_cum_error
+(no description available)
+END_DESCRIPTION
+
+Parameter_min_error
+(no description available)
+END_DESCRIPTION
+
+Variable_set_param
+(no description available)
+END_DESCRIPTION
+
+Variable_store
+(no description available)
+END_DESCRIPTION
+
+Object_Database
+(no description available)
+END_DESCRIPTION
+
+Object_Years
+(no description available)
+END_DESCRIPTION
+
+Parameter_time
+(no description available)
+END_DESCRIPTION
+
+Parameter_true_value
+(no description available)
+END_DESCRIPTION
+
+Parameter_best_value
+(no description available)
+END_DESCRIPTION
+
+Parameter_err_best-true
+(no description available)
+END_DESCRIPTION
+
+Parameter_num_years
+(no description available)
+END_DESCRIPTION
+
+Variable_init
+(no description available)
+END_DESCRIPTION
+

@@ -1,0 +1,627 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Marco Valente">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Lsd Use Tutorial</title>
+</head>
+<body>
+
+<center>
+<h1>
+<font size=-1><a href="TOC.html">Lsd main Manual</a></font></h1></center>
+
+<center>
+<h1>
+Using a Lsd Model</h1></center>
+
+<h2>
+Introduction</h2>
+The best way to learn to use a Lsd model is, like any software, to try
+and err. In the following is presented a tutorial listing the main steps
+in using a Lsd model, as guideline to start using Lsd models. The goal
+of a simulation exercise is to obtain interesting results <i>and</i> understand
+why they have been produced. Therefore it is not sufficient to obtain fancy
+graphs, but it is also necessary to get into the code of the model, and
+understand its functioning. After this tutorial you should be able to fully
+exploit an existing model, and to explore the Lsd interfaces even in the
+parts not explicitly covered here. Refer to the <a href="TOC.html">main
+Lsd manual</a> for a complete description of the Lsd interfaces.
+<p>To run a simulation exercise with Lsd it is used:
+<ul>
+<li>
+a <b>Lsd model program</b>. This is a program mixing the C++ code implementing
+equations for a model and the general Lsd code. The modeller has created
+the code for the equations, and users cannot modify it by running the model
+program.</li>
+
+<li>
+a <b>model configuration</b>. This is the definition of the model prepared
+by the modeller. It contains the description in terms of entities (Objects),
+Variables and Parameters. The configuration contains also all the necessary
+information used to run a simulation: the number of Objects, the initial
+values for Parameters, the number of time steps, etc. Users can easily
+modify each of these values to test different configurations.</li>
+</ul>
+Using Lsd entails the access to several windows, and sometime the one to
+use is hidden behind other ones. It is strongly advised to make use of
+the icon bar to access the window needed.
+<p>The table below consists of three columns:
+<ul>
+<li>
+<b>Operation</b>, summary of the operation to perform;</li>
+
+<li>
+<b>Progr. </b>indicates the software to use: <a href="LMM_help.html" TARGET="newwindow">LMM</a>
+(Lsd Model Manager, which is supposed to be running before starting this
+tutorial); <a href="Browser.html" TARGET="newwindow">Lsd</a>; Netsc. (Netscape,
+or any web browser);</li>
+
+<li>
+<b>Menu choices and Comments</b> The beginning of this cell contains always
+the operation to perform (the menu choices are written in bold), and then
+follow comments and explanations.</li>
+</ul>
+To use the tutorial you should run LMM, from the main manu Start of windows,
+or from clicking on its icon. Unix users need to locate the directory where
+it is installed and run <tt><font size=+1>./lmm</font></tt>.
+<p>Now you can follow the steps indicated below. Using the program indicated
+in the <b>Instr.</b> column follow the instruction at the top of any cell
+in the right column. The text in bold indicates either a relevant window
+or a menu and the menu entry to choose: <b>menu/menu_entry</b>. Many windows
+will pop up during this exercise, partly from the program used, part from
+new Netscape windows if you click on a link. Use the icon bar of your screen
+to retrive the program you want to access.
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr VALIGN=TOP>
+<td><b>Operation</b></td>
+
+<td><b>Progr.&nbsp;</b></td>
+
+<td><b>Menu choices and Comments</b></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l1"></a>Run the Lsd model program</td>
+
+<td>LMM</td>
+
+<td>
+<ol>
+<li>
+<b>Model/Select</b></li>
+
+<li>
+<b>Model/Run</b></li>
+</ol>
+Choose the model you want to explore using menu <b>Model/Select Model</b>,
+and then run the corresponding Lsd model program. LMM automatically starts
+the Lsd model program for you (ensuring that it has been properly compiled).
+If LMM cannot run the model, for example because the compilation fails,
+a log window informs you with the reasons of the failures. See the <a href="LMM_help.html#run">help
+page</a> on possible problems.
+<br>When Lsd starts, it shows two windows, <b>Browser</b> and <b>Log</b>.
+The model interfaces are initially empty, since no configuration is loaded.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l2"></a>Load a configuration file</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Load</b></li>
+</ul>
+Choose one of the proposed files with extension ".lsd". A model configuration
+contains the model description, the initial data, and everything it is
+required to run a simulation. The modeller has prepared at least one configuration,
+and more can be created with the Lsd interfaces.
+<br>The <b>Lsd Browser </b>now shows the Object Root as containing some
+elements. A graphical representation of the model is shown in a new window.
+The Browser is thought as a control center to issue commands to the Lsd
+model program, and as the inspector for one Object type. The Browser is
+always pointed on an Object, and lists its Variables and the contained
+Objects.
+<p>IMPORTANT: Close the windows using their buttons or keyboards shortcuts.
+Killing a window closes the whole Lsd model program.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l3"></a>Give a first look to the model</td>
+
+<td>Lsd&nbsp;</td>
+
+<td>
+<ul>
+<li>
+See the structure of the model</li>
+
+<li>
+<b>Help/Model Help</b></li>
+
+<li>
+<b>Help/Model Report</b></li>
+</ul>
+Although you may already run a simulation, spend some time to look at how
+Lsd represents a model.&nbsp;
+<br>The "scheleton" of the model are Objects, elements containing Parameters,
+Variables, or other Objects. Therefore, a model is represented by a hierarchy
+of Objects, whose "top" element is conventionally called Root. Root is
+the only Object that is always present in a model with a single instance,
+while the other Objects can be multiplied in as many instances as desired.
+Actually, the number of instances for each Object type is a parameter stored
+in the configuration file. Users can change these values, as we will see
+later.
+<p>Variables and Parameters are labels attached with numbers. The obvious
+difference is that Variables can change values at each time step using
+a specific equation, while Parameters don't have an equation (although
+an equation for a Variable can overwrite the value of a Parameter). The
+goal of Objects in Lsd models is to contain Variables: multiplying the
+number of Objects, also all the Variables and the Parameters contained
+in that Object type are multiplied. This is similar to using vectors, but
+it is more efficient, and permits to easily create hierarchies. See the
+<a href="FAQs.html" TARGET="newwindows">Lsd
+FAQ's</a> for more details.
+<p>It is possible to explore the model with the <b>Browser </b>(square
+window on the top left part of the screen), which shows one single Object's
+content. This is shown with some headers and two list boxes: <b>Variables</b>
+(and Parameters) and the <b>Descendants</b>, Objects contained in that
+type of Object. Variables are indicated with a integer number (the lagged
+values used in the model for that Variable), and Parameters are indicated
+with the letter "P". Variables labels can also be double-clicked to set
+their options and see their documentation (see below).
+<br>The Browser can be moved from one Object to another double-clicking
+on the descendants of an Object (to go "down") or on the name of the Object's
+"parent" (to go "up"). You can also use the arrows to move along Objects
+and Variables.&nbsp;
+<p>Another representation of the model is shown (on the right of the Browser)
+in a symbolic format. It shows the hierarchy of the Objects and indicates
+also the number of copies, or instances, for each Object type. Moving the
+mouse pointer over the symbol for one Objects makes appear a small window
+listing the Variables and Parameters contained in the Object. It is possible
+to click on the symbol of an Object in the graphical representation of
+the model to move there with the Browser.
+<p>Besides showing the content of an Object, the main Browser is the interface
+of the Lsd model program. From its manus it is possible to change the configuration,
+run a simulation launch the analysis of results, etc.&nbsp;
+<br>&nbsp;
+<p>The structure of a model and the exact role of each item (Object, Variable
+or Parameter) depends not only from its own content, but also from its
+relation with the rest of the model. To better grasp this aspect Lsd models
+offer the Model Reports. These may&nbsp;
+<br>The most detailed information on the model is contained in two documents
+prepared by the modellers: the <b>model help</b> and the <b>model report</b>.
+These are two HTML documents that appear in your system web browser (e.g.
+Netscape), when selecting their command in the menu <b>Help</b> of the
+<b>Browser</b>.&nbsp;
+<p>The <b>model report </b>is the most useful documentation of the model.
+It contains all the information presented in such a way to provide very
+quickly any information requested. Its links permit to see:
+<ul>
+<li>
+each Object with its content;</li>
+
+<li>
+where each element is used (e.g the Variables using a Parameter)</li>
+
+<li>
+which elements are used (e.g. which Parameters are used in a Variable's
+equation</li>
+</ul>
+For each Variable is also reported the actual C++ code used for the Variable,
+where the model elements in the code are links to their own section in
+the model report. For non expert programmers the code is provided with
+a brief description (represented as comment).
+<p>Spend some time to "play" with the links of the model report, to see
+how they show the model content. Do not try, at least for complex models,
+to read systematically the document and to understand the whole model structure.
+Just start from one component, look at its equations, or the equations
+that use it, and continue along creating your own path through the model
+structure.&nbsp;
+<br>The <b>model help</b> contains the list of the model element, possibly
+with a verbal descriptions prepared by the modeller. The <b>model report</b>
+contains the actual code used for the equations and other relevant information
+on the model structure. The two documents contain links to each other bringing
+at your attention all the relevant information for each element of the
+model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Model Report</td>
+
+<td>Lsd</td>
+
+<td>The structure of a model and the exact role of each item (Object, Variable
+or Parameter) depends not only from its own content, but also from its
+relation with the rest of the model. To better grasp this aspect Lsd models
+offer the Model Reports. These standard HTML documents that can be opened
+using the menu <b>Help/Model Report</b>.&nbsp;
+<p>(It is possible that for some model configuration the Model Report is
+not available, which is indicated by an error message appearing when trying
+to open it. In this case you can create the report with two commands. Choose
+the command in menu <b>Mode/Generate Automatic Description</b> and after
+that the command in menu <b>Model/Create Report</b>, accepting the default
+options.)
+<p>The reports are extremely useful to understand how the model works.
+They contain an introductory section with a verbal description of the model
+and three sections reporting:
+<ul>
+<li>
+<b>Summary</b>: list of all Objects, Variables and Parameters indicating
+where they are used (that is, in which equation their label appear), and
+possibly a verbal description of their functioning.</li>
+
+<li>
+<b>Initial Values</b>: list of all Objects, Variables and Parameters reporting
+the initial values used at the start of the simulation (Variables never
+used with a lag do not appear here since they don't have initial values).</li>
+
+<li>
+<b>Details</b>: list of all Objects, Variables and Parameters reporting
+the actual code for Variables' equations, items used, and other information.</li>
+</ul>
+Each item in each section contains links to their location in the other
+sections, so that the report can be easily browsed to understand the working
+of a model even without a full understanding of the actual code used in
+the equations. Test the report trying to understand some part of the model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l4"></a>Run a simulation</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Run</b></li>
+
+<li>
+Observe the Run Time Plot</li>
+</ul>
+Run a simulation exercise accepting all the default initialization defined
+by the modeller. Before running the symulation, the system issues a confirmation
+message listing the options used for the simulation.
+<br>A simulation run consist in several time steps, during each of which
+all the Variables of the models are updated, using their equations to compute
+the new values.&nbsp;
+<br>During the simulation run some Variables may be plotted in a self-scaling
+window called <b>Run Time Plot</b>, if the configuration is set for this.
+If no Variable is set to be plotted during the simulation (the so-called
+Run Time Plot), the <b>Log </b>window prints a line for each time step
+completed. More series are saved in the memory for later analysis (but
+not all data produced by the model at every time step are saved by default).&nbsp;
+<br>During a simulation it is possible to use the buttons in the Log window:
+<ul>
+<li>
+<b>Stop</b>: abort the simulation</li>
+
+<li>
+<b>Fast</b>: make run the simulation faster not issuing any message, if
+possible (to accellerate the simulation minimize the Run Time Plot window,
+if exists)</li>
+
+<li>
+<b>Observe</b>: run the simulation in normal (message issuing) mode, if
+requested by the configuration.</li>
+
+<li>
+<b>Debug</b>: interrupt the simulation when an equation marked to be debugged
+is computed. The simulation run may be resumed after that.</li>
+
+<li>
+<b>Help</b>: help on the Log window</li>
+</ul>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l5"></a>Analyse the results</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Data/Analysis of Results</b></li>
+</ul>
+The <b>Run Time Plot</b> may have given you some intuition of the simulation
+results. However, the modeller is likely to have set more data to be saved,
+besides the ones shown at run time. In fact, Lsd models allow to choose
+the Variables and Parameters values to be saved for later analysis.
+<p>This command makes available the data stored in memory after a simulation
+run, or previously saved on a file (when requested choose <b>Simulation</b>
+for using the data from the latest exercise, or <b>File</b> to get data
+from a file). It permits to observe in detail the series of the simulation.
+<p>The overall structure of this module is to list the elements available
+for analysis on the left box. Some of these must be selected and moved
+to the central box for elaboration, activated with the buttons in the lower
+part of the window. The right box contains the list of the graphs produced.
+Try to explore the data available (see <a href="mdatares.html" TARGET="newwindow">here
+for the manual</a> on this topic).
+<p>There is a large number of possible options to produce time series,
+cross-section or XY scatter plot graphs. Moreover, users can produce statistics
+on the data available and save data files in a variety of formats. It is
+also possible to launch gnuplot, a package for function and data-plotting
+(Lsd distribution for Windows contains also Gnuplot for Windows, while
+Unix users are expected to already have it).
+<p>See carefully the <a href="mdatares.html" TARGET="newwindow">manual</a>
+for this module to fully exploit its functionalities.
+<br>&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l6"></a>Interpret the results</td>
+
+<td>Lsd
+<br>and
+<br>Netsc.</td>
+
+<td>
+<ul>
+<li>
+plot graphs and statistics of the simulation data (See <a href="mdatares.html" TARGET="newwindow">here
+for the manual</a>)</li>
+
+<li>
+use <b>Model Report</b> to make sense of the series' meaning</li>
+</ul>
+Search in the documentation the elements of interest and look at their
+functioning in the model to understand the reasons for ther results obtained.
+In fact, in the section Summary of the report it is either contained the
+verbal description of the Variable computation or, in case of a Parameter,
+it is at least indicated the Variable(s) that may have changed its values.
+<br>When finished, exit the Analysis of Result module with the menu <b>Exit</b>.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l7"></a>Reload the configuration</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Reload</b></li>
+</ul>
+Reset the model to contain again the values for beginning a simulation.
+<br>After a simulation exercise Lsd contains in memory the values computed
+at the last time step. The system prevents the use of these values as the
+starting values of a new simulation run, and therefore a new configuration
+must be loaded.
+<br>Note that it is possible to save the model status as new configuration,
+which can be loaded to continue a simulation exercise.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l8"></a>Edit the number of instances&nbsp;
+<br>for the Objects</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Data/Set Number of Objects/All types of Objects</b></li>
+</ul>
+Modify the number of Objects.&nbsp;
+<br>One obvious request to test a simulation model is to modify the number
+of Objects (and therefore the number of Variables, Parameters and other
+Objects they contain).
+<br>With this interface it is possible to modify any group of Objects,
+always maintaining the same model structure (i.e. the new Objects at higher
+level in the hierarchy will contain the same type of descending Objects
+at lower levels. But there will be, by default, only one instance of such
+descending Objects). See the <a href="mdataobjn.html" TARGET="newwindow">Lsd
+help on this</a>.&nbsp;
+<p>When finished, click on Exit to the return to the Browser.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l9"></a>Edit the initial values</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+Browse the model</li>
+
+<li>
+<b>Data/Init. Values</b></li>
+</ul>
+Change the initial values used to start a simulation.&nbsp;
+<br>When starting a simulation Lsd needs to know the values to assign to
+the Parameters. Moreover, the models usually contain Variables used with
+past values, that must be inserted for use in the very first steps of the
+simulation. This command allows users to modify such values, for one Object
+type. Note that the hierarchical structure of the Lsd models forces to
+use multi-digit indexing to identify the Object instance containing a given
+Parameter or lagged Variable value.
+<br>The initialization of values is requested also for the Objects created
+when modifying the number of Objects. They are assigned a default value
+(copied from the very first instance of that type of Object in the model),
+but usually the user may want to modify this.
+<br>Although the data may be inserted manually, when there are very many
+values it is convenient to use the <b>Set All</b> button to set all the
+initial values for a single line.
+<br>See the <a href="mdatainit.html" TARGET="newwindow">Lsd manual on this</a>.&nbsp;
+<p>When finished, click on Ok to return to the Browser.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l10"></a>Edit the simulation settings</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Sim. Settings</b></li>
+</ul>
+Choose the number of time step per simulation, the seed for the random
+generator, and number of simulation exercises to be run in a sequence (each
+with the same initialization values and different random generator seed).
+See the <a href="menurun.html#simsetting" TARGET="newwindow">Lsd manual
+on this</a>.
+<br>Note that running more than a simulation exercise cause the system
+to save the data in files.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l11"></a>Edit the choices on which
+<br>series to save, to plot
+<br>at run time, or to debug</td>
+
+<td>Lsd&nbsp;</td>
+
+<td>
+<ul>
+<li>
+Browse the model</li>
+
+<li>
+double-click on the Variable of interest</li>
+</ul>
+For each Variables and Parameters it is possible to decide whether:
+<ul>
+<li>
+it must be included in the data saved for analysis after a simulation (<b>To
+Save</b>)</li>
+
+<li>
+it must appear in the Run Time Plot, to observe its values during the simulation
+run (<b>Run Time Plot</b>)</li>
+
+<li>
+it should cause the simulation to be interrupted immediately after its
+equation has been computed (<b>Debug)</b>. Only for Variables</li>
+</ul>
+This options are passed in the configuration file, but it is possible to
+change them (saving too many data makes the simulation slower).
+<br>See the <a href="Browser.html#variables" TARGET="newwindow">Lsd manual
+on this</a>.
+<br>These choices can also be changed individually for each element, or
+can be set&nbsp; off for the whole model using <b>Remove ...</b> in menu
+<b>Run</b>.
+<br>&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l12"></a>Save the configuration</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Save</b></li>
+</ul>
+A modified configuration should be saved with a different name from the
+configuration loaded before the changes since, when running a simulation,
+the system overwrites the original configuration loaded with the new options.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a NAME="l13"></a>Run the newly configured model</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Run</b></li>
+</ul>
+It is possible that an attempt to run a modified model does not succeed.
+The system prevents running model configurations not adapt, issuing messages
+to fix the errors (some message can be printed in the Log window, that
+may be hiddeen behind the graphical representation). Typical errors are:
+<ul>
+<li>
+model already run. The configuration is derived from the last step of a
+simulation exercise, and not from a "fresh" configuration file. Load a
+new configuration, makes the changes as indicated above, save the configuration
+with a new name, and finally run the newly configured model.</li>
+
+<li>
+data non initialized. If the number of Objects is increased, then the newly
+created instances contain Parameters and lagged Variables that must be
+initialized before they can be used for a simulation run. Move the Browser
+to point to the Object indicated in the error message (in the Log window)
+and choose <b>Data/Init. Values</b>.</li>
+</ul>
+It is also possible some configurations are initialized with non-consistent
+values, causing, for example, divisions by zero during the computation
+of some equation. The simulation results are, in these cases, erratic,
+and may even cause sudden crashes of Lsd. To avoid this keep always a copy
+of a working configuration, and try few changes per time.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Test other aspects of Lsd</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+Any menu, any entry</li>
+</ul>
+Explore any menu entry of the Browser (see the <a href="Browser.html" TARGET="newwindow">help
+on the Browser</a>). As general advice:
+<ul>
+<li>
+the menu <b>Model</b> modifies the structure of the model, and should be
+used only by modellers since it likely entails modifications of the equations'
+code;</li>
+
+<li>
+remember that when running a simulation the configuration is written on
+file, overwriting the last configuration loaded with the same name;</li>
+
+<li>
+keep open the Lsd help pages, explaining in detail the effects of any operation</li>
+</ul>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Open another model</td>
+
+<td>LMM</td>
+
+<td>
+<ol>
+<li>
+<b>Model/Select</b></li>
+
+<li>
+<b>Model/Run</b></li>
+</ol>
+After closing the current model, try another model and follow the same
+instructions to appreciate the differences (and the common interfaces)
+between two Lsd models.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td>Create your own model</td>
+
+<td>LMM</td>
+
+<td>As you have seen, using an existing model permit to modify every <i>numerical</i>
+aspect of the simulation, but you are constrained to keep the model structure
+(Objects, Variables and Parameters) and the equations unchanged. This is
+because the structure influences the way the equations compute their values
+for the Variables. And the equations are implemented as compiled code within
+the Lsd model program. Follow the <a href="ModelWriting.html">tutorial
+3 </a>to learn to create a new Lsd model.</td>
+</tr>
+</table>
+
+<br>&nbsp;
+</body>
+</html>

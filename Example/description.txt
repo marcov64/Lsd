@@ -1,0 +1,9 @@
+Example Models
+
+This is the example models for the Lsd system. They are hierarchically organised. If you double-click on GROUP:Example Files, you are brought to a lower level in the hierarchy. Double-click on one of the groups to move down in the hierarchy. When you have found the model you want, double-click it to open it in LMM. Double-click on the <UP> indicator at the bottom of the list to move up in the hierarchy.
+
+You will find a list of the different types of models that are available as example.
+
+Note that some of the models are written in pure C++ code (older models) while others adopt the new Lsd macro language.
+
+See the Lsd Documention in the LMM help menu.

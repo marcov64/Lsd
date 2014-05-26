@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+  <meta name="Author" content="Marco Valente">
+  <title>Lsd HyperManual</title>
+</head>
+<body text="#000000" bgcolor="#ffffff" link="#0000ff" vlink="#800080"
+ alink="#ff0000">
+<center><b><font size="+2">Lsd HyperManual</font></b></center>
+<p>The manual is made of a collection of web pages connected with
+hyperlinks
+explaining the functions of all aspects of any Lsd model program (see <a
+ href="LMM_help.html">help
+pages on LMM</a> for the documentation on the creation of Lsd model
+programs).
+This manual includes a section for each Lsd windows, and can be used
+during
+an actual session with a Lsd model so to have a direct explanation for
+all aspects of Lsd.
+</p>
+<p><b><font face="Arial, helvetica"><font size="+1">Table of Contents</font></font></b>
+</p>
+<ul>
+  <li>
+    <a href="#introduction">Introduction</a> what is Lsd and <a
+ href="#why">why
+should I use it</a></li>
+  <li>
+    <b>Tutorials</b>. The manual includes three tutorials on the use of
+Lsd:
+    <a href="Tutorial1.html">first
+time users</a>, <a href="ModelUsing.html">using an existing model</a>,
+    <a href="ModelWriting.html">writing
+a new model</a>.</li>
+  <li>
+    <a href="LMM_help.html">Lsd Model Manager (LMM)</a> the program
+used to
+manage Lsd models</li>
+  <li>
+    <a href="windows.html">Lsd Windows</a>&nbsp; list of the main
+windows used
+by Lsd</li>
+  <li>
+    <a href="Browser.html">Lsd Main Browser</a> the control center of
+Lsd to
+run, edit or create a model configuration. The commands (most of them
+are
+accessible also via shortcuts) are defined in the following menus:</li>
+  <ul>
+    <li>
+      <a href="menufile.html">Menu File</a></li>
+    <li>
+      <a href="menumodel.html">Menu Model</a></li>
+    <li>
+      <a href="menudata.html">Menu Data</a></li>
+    <li>
+      <a href="menurun.html">Menu Run</a></li>
+    <li>
+      <a href="menuhelp.html">Menu Help</a></li>
+  </ul>
+  <li>
+    <a href="FAQs.html">FAQs</a> frequently Asked Questions, with
+definitions
+of the most recurrent terms.</li>
+  <li>
+    <a href="debug.html">Lsd Debugger</a> The debugger allows to
+observe the
+values of the model during the simulation runs, and possibly to change
+some of the numerical values.</li>
+  <li>
+    <a href="lsdfuncMacro.html">Lsd Equation Functions</a> the
+equations in Lsd
+are written in C++ plus some special Lsd functions to deal with Lsd
+models
+specific commands.</li>
+</ul>
+<p><br>
+<a name="introduction"></a><b>Introduction</b>
+<br>
+Lsd (Laboratory for Simulation Development) is a simple and powerful
+language for simulation models. Lsd has been conceived and developed in
+order to provide automatically all the technical elements required to
+run
+a simulation program, although enjoying the maximum freedom to
+implement
+whatever computational model, since at its core is just pure C++
+(meaning
+speed, reliability, portability etc.).
+</p>
+<p>A Lsd model is composed by its computational content, the equations,
+and by the model structure. A developing environment (Lsd Model
+Manager,
+LMM) permits to write with extreme simplicity the equations of the
+model,
+expressed like difference equations and implemented either in C++ or in
+an equivalent simplified macro-language. Using LMM the equations are
+compiled
+and embedded in a stand-alone program, together with the rest of the
+code
+for Lsd.. The resulting Lsd model program allows to define the model
+and
+run the simulations, complete with graphical interfaces for any
+possible
+operation on the model, from defining the initial values to plot the
+final
+results.
+</p>
+<p>Modellers and users of Lsd models need to concentrate exclusively on
+the model neglecting every technical aspect of programming (not related
+to the actual model). For example, a simple entry in LMM creates a new
+model, and another compiles the equations, checks for errors and runs
+the
+Lsd program. Lsd models are endowed with controls catching errors
+whenever
+they occur, providing information on how to fix them before they crash
+the program.
+</p>
+<p>Users of an existing Lsd model can load a pre-packaged configuration
+of the model (e.g. initial values, number of steps) and repeat the
+simulation
+as suggested by the model author. New configurations are created with
+extremely
+simple and intuitive interfaces, so that even users ignoring totally
+any
+programming language can make use of simulation models.
+</p>
+<p>Lsd is particularly suited to implement agent-based models, given
+its
+embedded multi-layered system. However, at the very core Lsd is nothing
+else that pure C++ (inheriting its speed, reliability and portability),
+with an added a layer of graphical interfaces, so that any
+computational
+structure can be implemented in Lsd. A model is composed by chunks of
+C++
+representing the equations of the model (normally very simple).
+Modellers
+define the entities of the model and the initial data using simple and
+intuitive graphical interfaces. At run time the system automatically
+arranges
+the pieces of code in the correct sequence and collects the results.
+</p>
+<p>A crucial characteristic of a Lsd model is that it is inherently
+modular.
+You can (an should) implement one piece per time, test it, and then
+extend
+the model with a new part. Since the equation are represented like
+difference
+equations, the system automatically sorts out the correct sequence of
+computations
+during a simulation time step, signalling possible inconsistencies. The
+system provides automatically all the documentation concerning the
+model
+(e.g. which equation uses which parameter), so that even very complex
+models
+can easily be reviewed without getting lost in a lot of messy code.
+</p>
+<p>Lsd appeals to novel programmers because facilitates a gradual,
+trial
+and error process to modelling, signalling errors and suggesting
+solutions.
+However, Lsd is also useful for expert programmers because the language
+does not pose any limitation to the models it can implement and
+facilitates
+the management of very complex models.
+</p>
+<p>An exenstive documentation covers every aspect of Lsd, with
+tutorials,
+explanations of the interfaces, hints on programming.
+<br>
+<a href="#top">return to the top</a>
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="why"></a><b>Why Lsd?</b>
+<br>
+A Lsd model is simple to write, to use and it is as powerful as any
+pure C++ program. Lsd differentiates between the model computational
+content
+and its numerical values. The former is a subject for modellers, which
+are requested a minimum of computer programming. The latter can be
+accessed
+and modified by any users, given the interfaces and the documentation
+functions
+provided automatically with a Lsd model.
+<p>The main advantage of Lsd is that it minimises the code modellers
+are
+requested to write for a model. When the model is ready, users of the
+model
+have available a huge set of interfaces for dealing with the model
+(e.g.
+running simulations, changing initial data, observing the results,
+etc.).
+These interfaces are added without any intervention from the modeller,
+and permit the thorough exploitation of a model even to users with
+scarce
+computer experience.
+</p>
+<p>A very important aspect of Lsd is that it provides a complete
+documentation
+of a model. This is important for the modeller, since he can easily
+control
+the effect of a modification even in large and complex models. But this
+is even more important for users of a model, since the documentation
+provides
+a complete and informative way to understand the very functioning of a
+model.
+</p>
+<p>Although Lsd offers several tools to facilitate the writing of
+simulation
+models, it does not limit at all the scope of models that it can
+implement.
+In fact, all Lsd does is to wrap C++ code with "smart" interfaces, and
+therefore expert users can include in a Lsd model whatever C++ code
+they
+like. This implies that a Lsd model is extremely fast to run, and it is
+virtually unlimited in the dimensions of the model.
+</p>
+<p>The cost of using C++ is that it generally requires quite advanced
+tools
+and programming experience. Using Lsd and the programming environment
+LMM
+modellers create models writing only the code for the equations of the
+model, while the technical operations for actually producing the
+program
+are hidden behind &#8220;smart&#8221; graphical interfaces.
+<br>
+A non secondary feature of Lsd is that it favours gradual programming,
+limiting the scope for errors. The typical cycle to build a Lsd model
+is
+the following:
+</p>
+<ul>
+  <li>
+create a model with one single Variable and all parameters</li>
+  <li>
+write one equation for the Variable</li>
+  <li>
+test the model result (and fix the errors)</li>
+  <li>
+transform one Parameter in a Variable (or add a new Variable)</li>
+  <li>
+write the equation code for the new Variable</li>
+  <li>
+go to 3.</li>
+</ul>
+<p><br>
+In Lsd this is possible because it is extremely easy to modify a
+model adding extra elements (or removing existing ones), and editing
+its
+code. Moreover, the interfaces provide many powerful ways to explore
+the
+functioning of the model (e.g. step by step running, conditional
+breaks,
+modification of values during the simulation etc.).
+</p>
+<p><a href="#top">return to the top</a>
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="install"></a><b>Installation and Content</b>
+<br>
+The installation includes:
+</p>
+<ul>
+  <li>
+the Lsd source code</li>
+  <li>
+several Lsd example models</li>
+  <li>
+LMM</li>
+  <li>
+the manuals for Lsd and LMM</li>
+  <li>
+other required software (Windows installation only)</li>
+</ul>
+<p><br>
+<i><u>Windows installation (95/98/NT/2000)</u></i>
+<br>
+Run the self-installing file and follow the instructions. A new item
+will appear in your main menu Start to launch LMM or a manual page. Lsd
+does not require any additional package to be used under Windows.
+</p>
+<p><i><u>Unix installation</u></i>
+<br>
+Lsd requires a GNU C++ compiler and the Tcl/Tk package ver.8.2, all
+of which is available for any system under the GNU General Public
+License.
+These packages are usually available in the standard installation of
+almost
+every Unix system.
+<br>
+To install the Lsd system copy the tar-zipped file in a directory and
+run the two following commands:
+</p>
+<p><tt>&gt; gzip -d lsdsc31.tgz</tt>
+<br>
+<tt>&gt; tar xf lsdsc31.tar</tt>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; This creates a directory called LsdSc and
+several
+subdirectories descending from the one in which you have copied your
+distribution
+file. Move in the newly created directory and compile LMM with the
+commands:
+</p>
+<p><tt>&gt; cd LsdSc</tt>
+<br>
+<tt>&gt; ./comp.bat</tt>
+</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; This will create the lmm executable for
+LMM,
+to be launched with the command:
+</p>
+<p><tt>&gt; ./lmm</tt>
+</p>
+<p>In case of errors due to misplaced or mispelling of the Tcl/Tk
+libraries
+edit the comp.bat file.
+<br>
+<a href="#top">return to the top</a>
+</p>
+<p></p>
+<hr width="100%"><br>
+&nbsp;
+</body>
+</html>

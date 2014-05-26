@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+  <title>Menu File</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
+ href="windows.html">Lsd
+Windows</a> <a href="Browser.html">Main Browser</a> <a
+ href="FAQs.html">Lsd
+FAQ's</a></font></center>
+<p><b><u><font size="+1">Menu File</font></u></b>
+</p>
+<p>This menu deals with the configuration files to load, save or
+discard.
+</p>
+<center>
+<p><img src="menufile.jpg" style="height: 512px; width: 408px;"
+ align="left" title="" alt="" hspace="50"></p>
+</center>
+<b><i><font face="Arial, helvetica">Other Menus of the Browser:</font></i></b>
+<br>
+<a href="menumodel.html">Menu Model</a>
+<br>
+<a href="menudata.html">Menu Data</a>
+<br>
+<a href="menurun.html">Menu Run</a>
+<br>
+<a href="menuhelp.html">Menu Help</a>
+<p><b><i><font face="Arial, helvetica">Menu "File" Entries:</font></i></b>
+</p>
+<ul>
+  <li><a href="#load">Load</a></li>
+  <li><a href="#reload">Re-load</a></li>
+  <li><a href="#save">Save</a></li>
+  <li><a href="#empty">Empty</a></li>
+  <li><a href="#quit">Quit</a></li>
+</ul>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<hr width="100%"><br>
+&nbsp;
+<p><a name="load"></a><font size="-1"><a href="#top">(Menu File)</a></font><b>
+Load</b>
+<br>
+Shortcut: <b><font face="Arial, helvetica">control+l</font></b>
+<br>
+Cause the system to load a previously saved configuration ( by default,
+files with extensions "lsd").
+<br>
+A configuration contains all the information necessary to run a
+simulation,
+but the equations whose computational content is embedded in the Lsd
+model
+program (see the <a href="FAQs.html#modelsetting">FAQ on configuration</a>).
+<br>
+The configuration file name, after the loading, appears in the header
+of the Browser window.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="reload"></a><font size="-1"><a href="#top">(Menu File)</a></font><b>Re-Load</b>
+<br>
+Shortcut: <b><font face="Arial, helvetica">control+w</font></b>
+<p>This command cause the system to re-load the current configuration.
+It is normally used after a simulation run before running another
+simulation
+exercise, possibly changing some parameterization.
+<br>
+This command is frequently used because Lsd does not allow to run a
+simulation immediatly after another. This is because the Lsd model
+program
+stores in memory the model configuration resulting at the end of the
+simulation,
+which normally is not suited to start a new simulation.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="save"></a><br>
+<font size="-1"><a href="#top">(Menu File)</a><b> </b></font><b>Save</b>
+<br>
+<b>Shortcut: <font face="Arial, helvetica">control+s</font></b>
+<p>Save the current configuration in a Lsd model file. In general,
+users
+do not need to save a configuration since it is automatically saved
+just
+before running a simulation, using the same file name of the
+configuration
+file previously loaded. Therefore, after a simulation run the
+configuration
+file is updated with the changes possibly made before running the
+simulation.
+<br>
+Therefore, this command is used in case one wants to run a simulation
+with different initializations from the lastly loaded configuration.
+<br>
+There is also another case in which this command is used. After a
+simulation
+run a Lsd model program contains, as configuration, the values obtained
+during the very last time step of the simulation. Lsd does not allow to
+launch a simulation with such configuration (it would overwrite the
+configuration
+file from which the original simulation was obtained). However, users
+can
+sabe the last step configuration with a different name, and then load
+it
+as a new configuration, being therefore able to virtually "extend" a
+simulation
+beyond the time steps originally planned.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="empty"></a><font size="-1"><a href="#top">(Menu File)</a></font><b>Empty</b>
+<br>
+<b>Shortcut <font face="Arial, helvetica">control+e</font></b>
+<br>
+Empty the system from the configuration currently loaded.
+<br>
+</p>
+<hr width="100%">
+<p><a name="quit"></a><font size="-1"><a href="#top">(Menu File)</a><b>
+</b></font><b>Quit</b>
+</p>
+<p><b>Shortcuts: control+Q</b>
+<br>
+Exit Lsd.
+<br>
+&nbsp;
+<br>
+&nbsp;
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+</body>
+</html>

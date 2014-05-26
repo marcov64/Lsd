@@ -1,0 +1,145 @@
+	
+Label Root
+{
+	Son: Obj1
+	Label Obj1
+	{
+		Son: Obj2
+		Label Obj2
+		{
+			Var: X
+
+		}
+
+		Param: minX
+		Param: maxX
+		Func: RandomEvent
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Obj1 C	2
+Param: minX 0 n + n n	-10	-1
+Param: maxX 0 n + n n	10	1
+Func: RandomEvent 0 n + n n
+
+Object: Obj2 C	10	10
+Var: X 1 s + d p	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 1000
+EQUATION fun_adaptive.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Obj1
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_minX
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxX
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_RandomEvent
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Obj2
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_X
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+
+
+
+EQUATION("X")
+/*
+A variable moving as a random walk
+*/
+
+v[0]=V("minX");
+v[1]=V("maxX");
+v[2]=VL("X",1);
+
+v[3]=UNIFORM(v[0],v[1])+v[2];
+RESULT(v[3] )
+
+
+EQUATION("smoothX")
+/*
+Tracking variable for X
+*/
+
+v[0]=VL("smoothX",1);
+v[1]=V("X");
+v[2]=V("a");
+
+v[3]=v[0]*v[2]+v[1]*(1-v[2]);
+RESULT(v[0] )
+
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

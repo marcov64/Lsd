@@ -1,0 +1,2899 @@
+	
+Label Root
+{
+	Son: Industry
+	Label Industry
+	{
+		Son: Supply
+		Label Supply
+		{
+			Son: Firm
+			Label Firm
+			{
+				Son: ResTeam
+				Label ResTeam
+				{
+					Param: cheapEng
+					Param: perfEng
+					Param: RTAverageExperience
+
+				}
+
+				Son: Mix
+				Label Mix
+				{
+					Param: cheapMix
+					Param: perfMix
+					Var: randomMix
+
+				}
+
+				Son: Product
+				Label Product
+				{
+					Param: cheap
+					Param: perf
+
+				}
+
+				Param: id
+				Param: birth
+				Param: generation
+				Param: whenEntered
+				Param: alive
+				Param: entered
+				Param: diversified
+				Param: adopted
+				Param: daughter
+				Param: mother
+				Param: initBud
+				Param: debt
+				Param: bud
+				Param: mup
+				Param: u
+				Param: profit
+				Param: profitRate
+				Param: oldProfitRate
+				Param: slopeOfProfitRate
+				Param: numberOfNewSubMarkets
+				Param: share
+				Param: experience
+				Param: averageExperience
+				Param: ebw
+				Param: RDExpenditures
+				Param: servedMkt
+				Param: servedUserClass
+				Param: numberOfServedSubMarkets
+				Param: averageAgeOfSubMarkets
+				Param: numberOfBreakdowns
+				Param: numberOfBLReturns
+				Var: distanceCovered
+				Param: IdTecUsed
+				Var: distanceFromCorner
+
+			}
+
+			Son: Technology
+			Label Technology
+			{
+				Param: tecLabel
+				Param: cheapLim
+				Param: perfLim
+				Var: diagonal
+
+			}
+
+			Son: StandardSet
+			Label StandardSet
+			{
+				Param: gammaDxCheapSt
+				Param: gammaDxPerfSt
+				Param: alfa1DxSt
+				Param: alfa2DxSt
+				Param: alfa3DxSt
+				Param: alfa4DxSt
+				Param: engineerCostSt
+				Param: projectDurationSt
+				Param: maxInitBudSt
+				Param: minInitBudSt
+				Param: TRPerfLimSt
+				Param: TRCheapLimSt
+
+			}
+
+			Param: minInitBud
+			Param: maxInitBud
+			Param: initMarkUp
+			Var: secondGenerationCreation
+			Param: projectDuration
+			Param: fractionOfProfitForDebtPayBack
+			Param: r
+			Param: wheightOfPast
+			Param: slopeOfFailure
+			Param: maxEbwEffect
+			Param: bw
+			Param: errorDemand
+			Param: breakdown
+			Param: fullVisible
+			Var: diversification
+			Var: RDInvest
+			Var: ebwInvest
+			Var: adoption
+			Var: innovation
+			Var: checkEntry
+			Var: marketBfirm
+			Var: marketIndiv
+			Var: bookKeeping
+			Param: firstGeneration
+			Param: secondGeneration
+			Param: secondGenerationTime
+			Param: initBudReductionFactor
+			Param: gammaUt
+			Param: engineerCost
+			Param: alfa1Dx
+			Param: alfa2Dx
+			Param: alfa3Dx
+			Param: alfa4Dx
+			Param: startAlfaDesign
+			Param: maxAlfaDesign
+			Param: ebwErosion
+			Param: ebwExpenditure
+			Var: maxEbwExpenditure
+			Param: errorDx
+			Param: adoption1
+			Param: adoption2
+			Param: difficultyOfAdoption
+			Param: Efactor
+			Param: percCostOfAdoption
+			Param: fixedCostOfAdoption
+			Param: goDiversification
+			Param: RDexpendituresOnProfits
+			Var: MedCheapPCFirm
+			Var: MedPerfPCFirm
+			Var: gammaDxCheap
+			Var: gammaDxPerf
+			Var: findBestMPDistance
+			Var: failFirm
+			Param: percCostOfDiversification
+			Param: fixedCostOfDiversification
+			Param: percEbwDiversification
+			Var: NumFirm
+
+		}
+
+		Son: Demand
+		Label Demand
+		{
+			Son: UserClass
+			Label UserClass
+			{
+				Param: IdUserClass
+				Param: cheapThreshold
+				Param: cheapExp
+				Param: perfThreshold
+				Param: perfExp
+				Param: brandLoyalty
+				Param: lambda
+				Param: alfaDesign
+				Param: whenMktOpen
+				Param: numOfFirstGenerationSellingFirms
+				Param: numOfFirstGenerationDiversifiedSellingFirms
+				Param: numOfSecondGenerationSellingFirms
+				Param: numOfDaughterSellingFirms
+				Param: generationOfLeader
+				Param: quantityPurchased
+				Param: herfindal
+				Param: UCProfitRate
+				Param: maxProfitRate
+				Param: profitRateOfFirstGenerationLeader
+				Param: profitRateOfSecondGenerationLeader
+				Param: profitRateOfDaughterLeader
+				Param: shareOfFirstGenerationLeader
+				Param: shareOfSecondGenerationLeader
+				Param: shareOfDaughterLeader
+				Param: distanceOfFirstGenerationLeader
+				Param: distanceOfSecondGenerationLeader
+				Param: distanceOfDaughterLeader
+				Param: numOfSubMarkets
+				Param: techlevelCheap
+				Param: techlevelPerf
+				Param: MPshare
+				Param: TRshare
+				Param: DIVshare
+				Var: utility
+
+			}
+
+
+		}
+
+		Var: main
+
+	}
+
+	Var: init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: init 0 n + d n
+
+Object: Industry C	1
+Var: main 0 n + n n
+
+Object: Supply C	1
+Param: minInitBud 0 n + n n	9
+Param: maxInitBud 0 n + n n	9
+Param: initMarkUp 0 n + n n	0.1
+Var: secondGenerationCreation 0 n + d n
+Param: projectDuration 0 n + n n	35
+Param: fractionOfProfitForDebtPayBack 0 n + n n	0.15
+Param: r 0 n + n n	0.025
+Param: wheightOfPast 0 n + n n	4
+Param: slopeOfFailure 0 n + n n	-0.03
+Param: maxEbwEffect 0 n + n n	1.5
+Param: bw 0 n + n n	1
+Param: errorDemand 0 n + n n	0.1
+Param: breakdown 0 n + n n	12
+Param: fullVisible 0 s + n n	5
+Var: diversification 0 s + n n
+Var: RDInvest 0 n + d n
+Var: ebwInvest 0 n + n n
+Var: adoption 0 n + n n
+Var: innovation 0 n + n n
+Var: checkEntry 0 n + n n
+Var: marketBfirm 0 n + n n
+Var: marketIndiv 0 n + n n
+Var: bookKeeping 0 n + d n
+Param: firstGeneration 0 n + n n	6
+Param: secondGeneration 0 n + n n	20
+Param: secondGenerationTime 0 n + n n	30
+Param: initBudReductionFactor 0 n + n n	0.45
+Param: gammaUt 0 n + n n	0.08
+Param: engineerCost 0 n + n n	0.001
+Param: alfa1Dx 0 n + n n	1
+Param: alfa2Dx 0 n + n n	0.95
+Param: alfa3Dx 0 n + n n	0.25
+Param: alfa4Dx 0 n + n n	0
+Param: startAlfaDesign 0 n + n n	2
+Param: maxAlfaDesign 0 n + n n	2
+Param: ebwErosion 0 n + n n	0.1
+Param: ebwExpenditure 0 n + n n	0.1
+Var: maxEbwExpenditure 0 n + n n
+Param: errorDx 0 n + n n	0
+Param: adoption1 0 n + n n	1
+Param: adoption2 0 n + n n	1
+Param: difficultyOfAdoption 0 n + n n	1
+Param: Efactor 0 n + n n	1
+Param: percCostOfAdoption 0 n + n n	0.5
+Param: fixedCostOfAdoption 0 n + n n	1
+Param: goDiversification 0 n + n n	0.4
+Param: RDexpendituresOnProfits 0 n + n n	0.1
+Var: MedCheapPCFirm 0 n + n n
+Var: MedPerfPCFirm 0 n + n n
+Var: gammaDxCheap 0 n + n n
+Var: gammaDxPerf 0 n + n n
+Var: findBestMPDistance 0 n + n n
+Var: failFirm 0 n + n n
+Param: percCostOfDiversification 0 n + n n	0.5
+Param: fixedCostOfDiversification 0 n + n n	0
+Param: percEbwDiversification 0 n + n n	0.8
+Var: NumFirm 0 s + n n
+
+Object: Firm C	6
+Param: id 0 n + n n	1	2	3	4	5	6
+Param: birth 0 n + n n	0	0	0	0	0	0
+Param: generation 0 n + n n	0	0	0	0	0	0
+Param: whenEntered 0 n + n n	0	0	0	0	0	0
+Param: alive 0 n + n n	0	0	0	0	0	0
+Param: entered 0 n + n n	0	0	0	0	0	0
+Param: diversified 0 n + n n	0	0	0	0	0	0
+Param: adopted 0 n + n n	0	0	0	0	0	0
+Param: daughter 0 n + n n	0	0	0	0	0	0
+Param: mother 0 n + n n	0	0	0	0	0	0
+Param: initBud 0 n + n n	0	0	0	0	0	0
+Param: debt 0 n + n n	0	0	0	0	0	0
+Param: bud 0 n + n n	0	0	0	0	0	0
+Param: mup 0 n + n n	0	0	0	0	0	0
+Param: u 0 s + n n	0	0	0	0	0	0
+Param: profit 0 s + n n	0	0	0	0	0	0
+Param: profitRate 0 n + n n	0	0	0	0	0	0
+Param: oldProfitRate 0 n + n n	0	0	0	0	0	0
+Param: slopeOfProfitRate 0 n + n n	0	0	0	0	0	0
+Param: numberOfNewSubMarkets 0 s + n n	0	0	0	0	0	0
+Param: share 0 s + n n	0	0	0	0	0	0
+Param: experience 0 n + n n	0	0	0	0	0	0
+Param: averageExperience 0 n + n n	0	0	0	0	0	0
+Param: ebw 0 n + n n	0	0	0	0	0	0
+Param: RDExpenditures 0 n + n n	0	0	0	0	0	0
+Param: servedMkt 0 n + n n	0	0	0	0	0	0
+Param: servedUserClass 0 n + n n	0	0	0	0	0	0
+Param: numberOfServedSubMarkets 0 n + n n	0	0	0	0	0	0
+Param: averageAgeOfSubMarkets 0 n + n n	0	0	0	0	0	0
+Param: numberOfBreakdowns 0 n + n n	0	0	0	0	0	0
+Param: numberOfBLReturns 0 n + n n	0	0	0	0	0	0
+Var: distanceCovered 0 n + d n
+Param: IdTecUsed 0 n + n n	1	1	1	1	1	1
+Var: distanceFromCorner 0 s + n n
+
+Object: ResTeam C	1	1	1	1	1	1
+Param: cheapEng 0 s + n n	0	0	0	0	0	0
+Param: perfEng 0 s + n n	0	0	0	0	0	0
+Param: RTAverageExperience 0 n + n n	0	0	0	0	0	0
+
+Object: Mix C	1	1	1	1	1	1
+Param: cheapMix 0 n + n n	0	0	0	0	0	0
+Param: perfMix 0 n + n n	0	0	0	0	0	0
+Var: randomMix 0 n + n n
+
+Object: Product C	1	1	1	1	1	1
+Param: cheap 0 s + n n	0	0	0	0	0	0
+Param: perf 0 s + n n	0	0	0	0	0	0
+
+Object: Technology C	2
+Param: tecLabel 0 n + n n	1	2
+Param: cheapLim 0 n + n n	2000	9000
+Param: perfLim 0 n + n n	8000	9000
+Var: diagonal 0 n + n n
+
+Object: StandardSet C	1
+Param: gammaDxCheapSt 0 n + n n	0.0002
+Param: gammaDxPerfSt 0 n + n n	0.0002
+Param: alfa1DxSt 0 n + n n	1
+Param: alfa2DxSt 0 n + n n	0.65
+Param: alfa3DxSt 0 n + n n	0.5
+Param: alfa4DxSt 0 n + n n	0
+Param: engineerCostSt 0 n + n n	0.001
+Param: projectDurationSt 0 n + n n	35
+Param: maxInitBudSt 0 n + n n	9
+Param: minInitBudSt 0 n + n n	9
+Param: TRPerfLimSt 0 n + n n	8000
+Param: TRCheapLimSt 0 n + n n	2000
+
+Object: Demand C	1
+
+Object: UserClass C	2
+Param: IdUserClass 0 n + n n	1	2
+Param: cheapThreshold 0 n + n n	400	2000
+Param: cheapExp 0 n + n n	0.2	0.8
+Param: perfThreshold 0 n + n n	4000	500
+Param: perfExp 0 n + n n	0.8	0.2
+Param: brandLoyalty 0 n + n n	0	0
+Param: lambda 0 n + n n	0	0.05
+Param: alfaDesign 0 n + n n	2	2
+Param: whenMktOpen 0 n + n n	0	0
+Param: numOfFirstGenerationSellingFirms 0 n + n n	0	0
+Param: numOfFirstGenerationDiversifiedSellingFirms 0 n + n n	0	0
+Param: numOfSecondGenerationSellingFirms 0 n + n n	0	0
+Param: numOfDaughterSellingFirms 0 n + n n	0	0
+Param: generationOfLeader 0 n + n n	0	0
+Param: quantityPurchased 0 s + n n	0	0
+Param: herfindal 0 s + n p	0	0
+Param: UCProfitRate 0 n + n n	0	0
+Param: maxProfitRate 0 n + n n	0	0
+Param: profitRateOfFirstGenerationLeader 0 n + n n	0	0
+Param: profitRateOfSecondGenerationLeader 0 n + n n	0	0
+Param: profitRateOfDaughterLeader 0 n + n n	0	0
+Param: shareOfFirstGenerationLeader 0 n + n n	0	0
+Param: shareOfSecondGenerationLeader 0 n + n n	0	0
+Param: shareOfDaughterLeader 0 n + n n	0	0
+Param: distanceOfFirstGenerationLeader 0 n + n n	0	0
+Param: distanceOfSecondGenerationLeader 0 n + n n	0	0
+Param: distanceOfDaughterLeader 0 n + n n	0	0
+Param: numOfSubMarkets 0 n + n n	3000	3000
+Param: techlevelCheap 0 n + n n	0	0
+Param: techlevelPerf 0 n + n n	0	0
+Param: MPshare 0 n + n n	0	0
+Param: TRshare 0 n + n n	0	0
+Param: DIVshare 0 n + n n	0	0
+Var: utility 0 n + n n
+
+SIM_NUM 1
+SEED 3
+MAX_STEP 150
+EQUATION fun_HF.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_init
+Initialisation function of firms. It is computed just the first time step and never again
+
+'init' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Industry
+'Industry' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_main
+Main cycle calling the different function in the desired order. Since this equation is placed in an Object on the top of the hierarchy it is computed before everything else at each time step.
+
+'main' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Supply
+'Supply' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_minInitBud
+'minInitBud' appears in the equation for: secondGenerationCreation, init, gammaDxCheap, gammaDxPerf.
+
+Minimum of range for random initial budget
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxInitBud
+'maxInitBud' appears in the equation for: maxEbwExpenditure, secondGenerationCreation, init, gammaDxCheap, gammaDxPerf.
+
+Maximum of range for random initial budget
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_initMarkUp
+'initMarkUp' appears in the equation for: diversification, secondGenerationCreation, init.
+
+Markup value, assigned to every firm
+_INIT_
+
+END_DESCRIPTION
+
+Variable_secondGenerationCreation
+Introduce the second generation
+
+'secondGenerationCreation' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_projectDuration
+'projectDuration' appears in the equation for: bookKeeping, RDInvest, gammaDxCheap, gammaDxPerf.
+
+duration of project time 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fractionOfProfitForDebtPayBack
+'fractionOfProfitForDebtPayBack' appears in the equation for: bookKeeping.
+
+Fraction of profits for debt payback 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_r
+'r' appears in the equation for: bookKeeping.
+
+Interest rate 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_wheightOfPast
+'wheightOfPast' appears in the equation for: bookKeeping.
+
+(see slopeOfFailure) 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_slopeOfFailure
+'slopeOfFailure' appears in the equation for: bookKeeping.
+
+if profitRate decerases more than slopeOfFailure firm fails (if wheightOfPast = 1) 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxEbwEffect
+'maxEbwEffect' appears in the equation for: marketIndiv, marketBfirm.
+
+max ebw possible effect 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_bw
+'bw' appears in the equation for: marketIndiv, marketBfirm.
+
+band wagon effect 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_errorDemand
+'errorDemand' appears in the equation for: marketIndiv, marketBfirm.
+
+noise in sub markets sharing with respect to utility 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_breakdown
+'breakdown' appears in the equation for: marketIndiv, marketBfirm.
+
+max computer life 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fullVisible
+'fullVisible' appears in the equation for: marketIndiv, marketBfirm.
+
+number of firms that makes all sbmkts present 
+_INIT_
+
+END_DESCRIPTION
+
+Variable_diversification
+equation setting allowing for firms to diversify in the new market for PC 
+
+'diversification' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_RDInvest
+Manages research team of engineers (setting values in Obejct ResTeam). Calculates avg experience of team if the team grows. Generally innovation expenditures are on profits but if project time has not finished thenexpenditures are on a constant fraction of initial budget (+ profits'contribution if there are).
+
+'RDInvest' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ebwInvest
+Equation managing the endogenous band wagon effect (marketing)
+
+'ebwInvest' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_adoption
+Manages the switch of technology from transistors to micro-processors
+
+'adoption' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_innovation
+Implement the innovation, modifying the characteristics of product (cheap and performance) 
+
+'innovation' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_checkEntry
+Uhu? Strangely enough, a firm entering BFIRM does not have any chance to enter subsequently
+in INDIV, at least using this function. In fact, when "entered" is set to TRUE the firm skips this
+code.
+Probably there is another function (diversification?) allowing for firms to operate in two markets.
+
+
+'checkEntry' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_marketBfirm
+Manages the market functioning for big firms (mainframes)
+
+'marketBfirm' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_marketIndiv
+manages the market functioning for indivual users (PC)
+
+'marketIndiv' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_bookKeeping
+Update the financial values and other statistics
+
+'bookKeeping' appears in the equation for: main.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_firstGeneration
+'firstGeneration' appears in the equation for: secondGenerationCreation.
+
+number of firms of the first generation at t=0 (NOTE: in Lsd this value must be identical to the initial number of Objects "Firm" in the model).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_secondGeneration
+'secondGeneration' appears in the equation for: secondGenerationCreation.
+
+number of firms of second generation 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_secondGenerationTime
+'secondGenerationTime' appears in the equation for: adoption, secondGenerationCreation.
+
+time of entry of second generation firms 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_initBudReductionFactor
+'initBudReductionFactor' appears in the equation for: secondGenerationCreation.
+
+reduction factor for second generation firms 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_gammaUt
+'gammaUt' appears in the equation for: utility.
+
+scale factor of utility 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_engineerCost
+'engineerCost' appears in the equation for: RDInvest, gammaDxCheap, gammaDxPerf.
+
+cost of a single engineer 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa1Dx
+'alfa1Dx' appears in the equation for: innovation, gammaDxCheap, gammaDxPerf.
+
+exponent of design change
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa2Dx
+'alfa2Dx' appears in the equation for: innovation, gammaDxCheap, gammaDxPerf.
+
+exponent of design change
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa3Dx
+'alfa3Dx' appears in the equation for: innovation, gammaDxCheap, gammaDxPerf.
+
+exponent of design change
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa4Dx
+'alfa4Dx' appears in the equation for: innovation.
+
+exponent of design change
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_startAlfaDesign
+'startAlfaDesign' appears in the equation for: marketIndiv, marketBfirm.
+
+initial value for alfaDesign (in UserClass)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxAlfaDesign
+'maxAlfaDesign' appears in the equation for: marketIndiv, marketBfirm.
+
+max value for alfaDesign (in UserClass) 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ebwErosion
+'ebwErosion' appears in the equation for: ebwInvest.
+
+erosion of endogenous bw effect 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ebwExpenditure
+'ebwExpenditure' appears in the equation for: ebwInvest.
+
+fraction of profits spent in ebw 
+_INIT_
+
+END_DESCRIPTION
+
+Variable_maxEbwExpenditure
+max useful level of ebw stock expenditure. Auto value is maxInitBud/10
+
+'maxEbwExpenditure' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_errorDx
+'errorDx' appears in the equation for: (Never Used).
+
+noise factor in design change (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_adoption1
+'adoption1' appears in the equation for: adoption.
+
+exponent on tec distance of the firm in adoption probability 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_adoption2
+'adoption2' appears in the equation for: adoption.
+
+exponent on tec distance of  best the MP firm 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_difficultyOfAdoption
+'difficultyOfAdoption' appears in the equation for: adoption.
+
+general exponent that decreases probability of adoption 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Efactor
+'Efactor' appears in the equation for: adoption, diversification.
+
+effectiveness of the average experience bonus 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_percCostOfAdoption
+'percCostOfAdoption' appears in the equation for: adoption.
+
+cost of adoption in terms of budget fraction 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fixedCostOfAdoption
+'fixedCostOfAdoption' appears in the equation for: adoption.
+
+fixed cost of adoption 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_goDiversification
+'goDiversification' appears in the equation for: diversification.
+
+when PC market becomes visible in terms of relative dimension with respect to mainframe mkt (number of computers sold)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RDexpendituresOnProfits
+'RDexpendituresOnProfits' appears in the equation for: diversification, secondGenerationCreation, init.
+
+R&D expenditures on profits 
+_INIT_
+
+END_DESCRIPTION
+
+Variable_MedCheapPCFirm
+Average cheap value of firms in PC user class 
+
+'MedCheapPCFirm' appears in the equation for: diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_MedPerfPCFirm
+Average performance value of firms in PC user class 
+
+'MedPerfPCFirm' appears in the equation for: diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_gammaDxCheap
+scale of design change 
+
+'gammaDxCheap' appears in the equation for: innovation.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_gammaDxPerf
+scale of design change
+
+'gammaDxPerf' appears in the equation for: innovation.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_findBestMPDistance
+Best distance in micro-processor technology
+
+'findBestMPDistance' appears in the equation for: adoption.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_failFirm
+function killing firms 
+
+'failFirm' appears in the equation for: bookKeeping, RDInvest.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_percCostOfDiversification
+'percCostOfDiversification' appears in the equation for: diversification.
+
+cost of diversification in terms of budget fraction 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fixedCostOfDiversification
+'fixedCostOfDiversification' appears in the equation for: diversification.
+
+fixed cost of diversification 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_percEbwDiversification
+'percEbwDiversification' appears in the equation for: diversification.
+
+percentual of ebw inherited by daughter 
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NumFirm
+number of existing Object firm 
+
+'NumFirm' appears in the equation for: diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm
+'Firm' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, checkEntry, innovation, findBestMPDistance, adoption, ebwInvest, RDInvest, diversification, secondGenerationCreation, init, MedCheapPCFirm, MedPerfPCFirm, NumFirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_id
+'id' appears in the equation for: diversification, secondGenerationCreation, init.
+
+Identification code
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_birth
+'birth' appears in the equation for: bookKeeping, RDInvest, diversification, secondGenerationCreation, init.
+
+Time of birth 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_generation
+'generation' appears in the equation for: marketIndiv, marketBfirm, diversification, secondGenerationCreation, init.
+
+Generation (first or second)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_whenEntered
+'whenEntered' appears in the equation for: checkEntry, diversification.
+
+Time of first selling 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alive
+'alive' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, checkEntry, innovation, findBestMPDistance, adoption, ebwInvest, failFirm, RDInvest, diversification, secondGenerationCreation, init, MedCheapPCFirm, MedPerfPCFirm.
+
+Flag telling whether the firm is failed or not 
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_entered
+'entered' appears in the equation for: bookKeeping, checkEntry, adoption, diversification, secondGenerationCreation, init.
+
+Flag telling whether the firm is selling
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_diversified
+'diversified' appears in the equation for: marketIndiv, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_adopted
+'adopted' appears in the equation for: marketBfirm, adoption, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_daughter
+'daughter' appears in the equation for: diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_mother
+'mother' appears in the equation for: diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_initBud
+'initBud' appears in the equation for: bookKeeping, RDInvest, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_debt
+'debt' appears in the equation for: bookKeeping, failFirm, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_bud
+'bud' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, adoption, ebwInvest, failFirm, RDInvest, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_mup
+'mup' appears in the equation for: marketIndiv, marketBfirm, utility, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_u
+'u' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_profit
+'profit' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, ebwInvest, RDInvest.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_profitRate
+'profitRate' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_oldProfitRate
+'oldProfitRate' appears in the equation for: bookKeeping.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_slopeOfProfitRate
+'slopeOfProfitRate' appears in the equation for: bookKeeping.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numberOfNewSubMarkets
+'numberOfNewSubMarkets' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_share
+'share' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_experience
+'experience' appears in the equation for: innovation, adoption, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_averageExperience
+'averageExperience' appears in the equation for: innovation, adoption, RDInvest, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ebw
+'ebw' appears in the equation for: marketIndiv, marketBfirm, ebwInvest, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RDExpenditures
+'RDExpenditures' appears in the equation for: RDInvest, diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_servedMkt
+'servedMkt' appears in the equation for: marketIndiv, marketBfirm, checkEntry, diversification, MedCheapPCFirm, MedPerfPCFirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_servedUserClass
+'servedUserClass' appears in the equation for: bookKeeping, checkEntry, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numberOfServedSubMarkets
+'numberOfServedSubMarkets' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_averageAgeOfSubMarkets
+'averageAgeOfSubMarkets' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numberOfBreakdowns
+'numberOfBreakdowns' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numberOfBLReturns
+'numberOfBLReturns' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_distanceCovered
+returns the fraction of the diagonal (from the origin to the tech corner) covered by the firm
+
+'distanceCovered' appears in the equation for: findBestMPDistance, adoption.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdTecUsed
+'IdTecUsed' appears in the equation for: distanceFromCorner, innovation, findBestMPDistance, adoption, diversification, secondGenerationCreation, init, distanceCovered.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_distanceFromCorner
+returns (1 - the relative distance from the corner) with respect to the diagonal
+
+'distanceFromCorner' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Object_ResTeam
+'ResTeam' appears in the equation for: RDInvest, secondGenerationCreation.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheapEng
+'cheapEng' appears in the equation for: innovation, RDInvest, secondGenerationCreation.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perfEng
+'perfEng' appears in the equation for: innovation, RDInvest, secondGenerationCreation.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RTAverageExperience
+'RTAverageExperience' appears in the equation for: secondGenerationCreation.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Mix
+'Mix' appears in the equation for: diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheapMix
+'cheapMix' appears in the equation for: RDInvest, randomMix.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perfMix
+'perfMix' appears in the equation for: RDInvest, randomMix.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_randomMix
+Set cheapMix and perfMix to new random values in between 0 and 1 such that their sum is 1.
+
+It is computed only when requested
+
+'randomMix' appears in the equation for: diversification, secondGenerationCreation, init.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Product
+'Product' appears in the equation for: innovation, diversification, secondGenerationCreation.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheap
+'cheap' appears in the equation for: marketIndiv, distanceFromCorner, marketBfirm, utility, innovation, diversification, secondGenerationCreation, MedCheapPCFirm, distanceCovered.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perf
+'perf' appears in the equation for: marketIndiv, distanceFromCorner, marketBfirm, utility, innovation, diversification, secondGenerationCreation, MedPerfPCFirm, distanceCovered.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Technology
+'Technology' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tecLabel
+'tecLabel' appears in the equation for: distanceFromCorner, innovation, diversification, gammaDxCheap, gammaDxPerf, distanceCovered.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheapLim
+'cheapLim' appears in the equation for: distanceFromCorner, innovation, diversification, diagonal, gammaDxCheap.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perfLim
+'perfLim' appears in the equation for: distanceFromCorner, innovation, diversification, diagonal, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_diagonal
+value of the diagonal in technologies
+
+'diagonal' appears in the equation for: distanceFromCorner, distanceCovered.
+_INIT_
+
+END_DESCRIPTION
+
+Object_StandardSet
+'StandardSet' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_gammaDxCheapSt
+'gammaDxCheapSt' appears in the equation for: gammaDxCheap.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_gammaDxPerfSt
+'gammaDxPerfSt' appears in the equation for: gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa1DxSt
+'alfa1DxSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa2DxSt
+'alfa2DxSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa3DxSt
+'alfa3DxSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfa4DxSt
+'alfa4DxSt' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_engineerCostSt
+'engineerCostSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_projectDurationSt
+'projectDurationSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxInitBudSt
+'maxInitBudSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_minInitBudSt
+'minInitBudSt' appears in the equation for: gammaDxCheap, gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TRPerfLimSt
+'TRPerfLimSt' appears in the equation for: gammaDxPerf.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TRCheapLimSt
+'TRCheapLimSt' appears in the equation for: gammaDxCheap.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Demand
+'Demand' appears in the equation for: init.
+_INIT_
+
+END_DESCRIPTION
+
+Object_UserClass
+'UserClass' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdUserClass
+'IdUserClass' appears in the equation for: bookKeeping, marketIndiv, marketBfirm, checkEntry, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheapThreshold
+'cheapThreshold' appears in the equation for: utility.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_cheapExp
+'cheapExp' appears in the equation for: utility.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perfThreshold
+'perfThreshold' appears in the equation for: utility.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_perfExp
+'perfExp' appears in the equation for: utility.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_brandLoyalty
+'brandLoyalty' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_lambda
+'lambda' appears in the equation for: utility.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alfaDesign
+'alfaDesign' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_whenMktOpen
+'whenMktOpen' appears in the equation for: marketIndiv, marketBfirm, checkEntry.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numOfFirstGenerationSellingFirms
+'numOfFirstGenerationSellingFirms' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numOfFirstGenerationDiversifiedSellingFirms
+'numOfFirstGenerationDiversifiedSellingFirms' appears in the equation for: marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numOfSecondGenerationSellingFirms
+'numOfSecondGenerationSellingFirms' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numOfDaughterSellingFirms
+'numOfDaughterSellingFirms' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_generationOfLeader
+'generationOfLeader' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_quantityPurchased
+'quantityPurchased' appears in the equation for: marketIndiv, marketBfirm, diversification.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_herfindal
+'herfindal' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_UCProfitRate
+'UCProfitRate' appears in the equation for: bookKeeping.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_maxProfitRate
+'maxProfitRate' appears in the equation for: bookKeeping.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_profitRateOfFirstGenerationLeader
+'profitRateOfFirstGenerationLeader' appears in the equation for: marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_profitRateOfSecondGenerationLeader
+'profitRateOfSecondGenerationLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_profitRateOfDaughterLeader
+'profitRateOfDaughterLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_shareOfFirstGenerationLeader
+'shareOfFirstGenerationLeader' appears in the equation for: marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_shareOfSecondGenerationLeader
+'shareOfSecondGenerationLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_shareOfDaughterLeader
+'shareOfDaughterLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_distanceOfFirstGenerationLeader
+'distanceOfFirstGenerationLeader' appears in the equation for: marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_distanceOfSecondGenerationLeader
+'distanceOfSecondGenerationLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_distanceOfDaughterLeader
+'distanceOfDaughterLeader' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numOfSubMarkets
+'numOfSubMarkets' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_techlevelCheap
+'techlevelCheap' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_techlevelPerf
+'techlevelPerf' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_MPshare
+'MPshare' appears in the equation for: marketIndiv, marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TRshare
+'TRshare' appears in the equation for: marketBfirm.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_DIVshare
+'DIVshare' appears in the equation for: marketIndiv.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_utility
+Function contained in UserClass called by Firm. Therefore:
+p-> refers to the userclass 
+c-> refers to the firm
+
+'utility' appears in the equation for: marketIndiv, marketBfirm, checkEntry.
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+
+/***************************************************
+****************************************************
+LSD 2.0 - April 2000
+written by Marco Valente
+Aalborg University
+
+Example for an equation file. Users should include in this header a
+brief description of the model.
+
+Include the equations in the space indicated below, after the line:
+
+Place here your equations
+
+
+****************************************************
+****************************************************/
+
+#include "../src/fun_head.h"
+int deb(object *r, object *c, char *lab, double *res);
+double  S(double x, double maxX, double maxY);
+int roundInt(double a);
+extern int max_step;
+object *demand;
+#define BFIRM 1
+#define INDIV 2
+
+#define TR 1
+#define MP 2
+
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
+
+
+
+double variable::fun(object *caller)
+{
+//These are the local variables used by default
+
+double v[100];
+double res;
+object *p, *c, *cur1, *cur2, *cur3, *cur4, *cur5;
+variable *cur_v;
+
+
+
+//Declare here any other local variable to be used in your equations
+//You may need an integer to be used as a counter
+int i, j;
+//and an object (a pointer to)
+register object *cur;
+
+
+if(quit==2)
+ return -1;
+
+p=up;
+c=caller;
+FILE *f;
+
+
+//Uncommenting the following lines the file "log.log" will
+//contain the name of the variable just computed.
+//To be used in case of unexpected crashes. It slows down sensibly the simulation
+/**
+f=fopen("log.log","a");
+ fprintf(f,"t=%d %s\n",t,label);
+ fclose(f);
+**/
+
+//Place here your equations. They must be blocks of the following type
+
+
+
+if(!strcmp(label,"maxEbwExpenditure"))
+{
+/*
+max useful level of ebw stock expenditure. Auto value is maxInitBud/10
+*/
+v[0]=p->cal("maxInitBud",0);
+res=v[0]/10;
+goto end;
+}
+
+
+if(!strcmp(label,"main"))
+{
+/*
+Main cycle calling the different function in the desired order. Since this equation is placed in an Object on the top of the hierarchy it is computed before everything else at each time step.
+*/
+
+p->cal("secondGenerationCreation",0);
+p->cal("diversification",0);
+p->cal("RDInvest",0);
+p->cal("ebwInvest",0);
+p->cal("adoption",0);
+p->cal("innovation",0);
+p->cal("checkEntry",0);
+p->cal("marketBfirm",0);
+p->cal("marketIndiv",0);
+p->cal("bookKeeping",0);
+
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"bookKeeping"))
+{
+/*
+Update the financial values and other statistics
+*/
+cur1=demand->search_var_cond("IdUserClass",BFIRM, 0);
+cur2=demand->search_var_cond("IdUserClass",INDIV, 0);
+cur1->write("UCProfitRate",0, 0);
+cur2->write("UCProfitRate",0, 0);
+
+
+v[1]=p->cal("projectDuration",0);
+v[4]=p->cal("fractionOfProfitForDebtPayBack",0);
+v[7]=p->cal("r",0);
+v[13]=p->cal("wheightOfPast",0);
+v[21]=p->cal("slopeOfFailure",0);
+
+for(v[17]=v[18]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[0]=cur->cal("debt",0);
+  v[3]=cur->cal("birth",0);
+  if(v[0]>0)
+   {
+    v[2]=cur->cal("profit",0);
+    if(v[2]>0 && ((double)t-v[3])>v[1])
+     {
+      v[6]=cur->increment("debt",-1*v[2]*v[4]);
+      v[5]=cur->increment("bud",-1*v[2]*v[4]);
+      if(v[6]<0)
+        {
+         cur->increment("bud",-1*v[6]);
+         cur->write("debt",0, 0);
+         
+        }
+     }
+    v[0]=cur->multiply("debt",(1+v[7])); 
+   }
+  v[9]=cur->multiply("bud",(1+v[7]));   
+  v[10]=cur->cal("profitRate",0);
+  cur->write("oldProfitRate",v[10], 0);
+  v[11]=cur->cal("initBud",0);
+  v[12]=(v[9]-v[0])/(v[11]*pow(1+v[7],(double)t-v[3]));
+  cur->write("profitRate",v[12], 0);
+  v[14]=cur->cal("slopeOfProfitRate",0);
+  v[15]=v[14]*((v[13]-v[1])/v[1])+(v[12]-v[14])/v[13];
+  cur->write("slopeOfProfitRate",v[14], 0);
+  v[16]=cur->cal("servedUserClass",0);
+  if(v[16]==BFIRM)
+   {
+    v[17]++; //NumA
+    cur1->increment("UCProfitRate",v[12]);
+    if(v[17]==1)
+      v[19]=v[12];
+    else
+      if(v[19]<v[12])
+        v[19]=v[12]; //maxProfitRate  
+    
+   }
+  if(v[16]==INDIV)
+   {
+    v[18]++; //NumB
+    cur2->increment("UCProfitRate",v[12]);
+    if(v[18]==1)
+      v[20]=v[12];
+    else
+      if(v[20]<v[12])
+        v[20]=v[12]; //maxProfitRate  
+    
+   }
+   
+   v[22]=cur->cal("alive",0);
+   v[23]=cur->cal("entered",0);
+   if(v[22]==1 && v[23]==1 && v[12]<0 && v[14]<v[21])
+    cur->cal("failFirm",0);
+ }
+
+cur1->write("maxProfitRate",v[19], 0);
+cur2->write("maxProfitRate",v[20], 0);
+
+if(v[17]>0)
+ cur1->multiply("UCProfitRate",1/v[17]);
+if(v[18]>0)
+ cur1->multiply("UCProfitRate",1/v[18]);
+ 
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"marketIndiv"))
+{
+/*
+manages the market functioning for indivual users (PC)
+*/
+
+cur1=demand->search_var_cond("IdUserClass",INDIV, 0);
+
+cur1->write("techlevelCheap",0, 0);
+cur1->write("techlevelPerf",0, 0);
+cur1->write("DIVshare",0, 0);
+cur1->write("MPshare",0, 0);
+cur1->write("quantityPurchased",0, 0);
+cur1->write("herfindal",0, 0);
+cur1->write("numOfFirstGenerationSellingFirms",0, 0);
+cur1->write("numOfSecondGenerationSellingFirms",0, 0);
+cur1->write("numOfDaughterSellingFirms",0, 0); 
+cur1->write("generationOfLeader",0, 0);
+cur1->write("shareOfSecondGenerationLeader",0, 0);
+cur1->write("shareOfDaughterLeader",0, 0);
+cur1->write("profitRateOfSecondGenerationLeader",0, 0);
+cur1->write("profitRateOfDaughterLeader",0, 0);
+cur1->write("distanceOfSecondGenerationLeader",0, 0);
+cur1->write("distanceOfDaughterLeader",0, 0);
+
+
+v[45]=cur1->cal("whenMktOpen",0);
+if(v[45]>0)
+ {
+  v[46]=cur1->cal("maxAlfaDesign",0);
+  v[47]=cur1->cal("startAlfaDesign",0);
+  v[48]=cur1->cal("startAlfaDesign",0);
+  v[49]=(v[46]- v[48])/((double)max_step-v[45]); 
+  v[5]=cur1->increment("alfaDesign",v[49]);
+ }
+else
+ v[5]=cur1->cal("alfaDesign",0); 
+v[19]=cur1->cal("brandLoyalty",0);
+v[24]=cur1->cal("numOfSubMarkets",0);
+
+v[56]=p->cal("maxEbwExpenditure",0);
+v[7]=p->cal("maxEbwEffect",0);
+v[10]=p->cal("bw",0);
+v[11]=p->cal("errorDemand",0);
+v[17]=p->cal("breakdown",0);
+v[41]=p->cal("fullVisible",0);
+
+for(v[21]=0,v[14]=0,v[2]=0, cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[0]=cur->cal("alive",0);
+  v[1]=cur->cal("servedMkt",0);
+  if(v[0]==1 && v[1]==2)
+   {
+   v[2]++; //numOfSellingFirms
+   v[3]=cur->cal("generation",0);
+   if(v[3]==1)
+     cur1->increment("numOfFirstGenerationSellingFirms",1);
+    if(v[3]==2)
+      cur1->increment("numOfSecondGenerationSellingFirms",1);
+    if(v[3]==3)
+      cur1->increment("numOfDaughterSellingFirms",1);  
+      
+    cur->write("numberOfNewSubMarkets",0, 0);  
+    v[4]=cur1->cal(cur,"utility",0);
+    cur->write("u",v[4], 0);
+    v[8]=cur->cal("share",0);
+    v[9]=cur->cal("ebw",0);
+    v[12]= pow(v[4],v[5]+1)*pow(1+v[8],v[10]-0.9)*pow(1+S(v[9],v[56],v[7]),v[7]+1); //!?! different from BFIRM case
+    v[13]=v[12]*(1-v[11]+2*RND*v[11]);
+    cur->write("share",v[13], 0);
+    v[14]+=v[13]; //cumulatedProb
+    v[15]=cur->cal("numberOfServedSubMarkets",0);
+    v[20]=cur->cal("numberOfBLReturns",0);
+    if(v[15]>0)
+      {
+       v[16]=cur->cal("averageAgeOfSubMarkets",0);
+       v[18]=round(v[15]*v[16]/v[17]);
+       cur->write("numberOfBreakdowns",v[18], 0);
+       v[20]=round(v[18]*v[19]);
+       cur->write("numberOfBLReturns",v[20], 0);
+       v[15]=cur->increment("numberOfServedSubMarkets",-1*v[18]);
+       cur->write("numberOfNewSubMarkets",v[20], 0); //!?! see below
+      }
+    v[21]+=v[15]+v[20]; //busySubMarkets)
+    } //if firm is alive and serves the market
+   } //end of cycle for through Firm's
+
+   if(v[2]<=v[41]) 
+     v[23]= round( (v[24]-v[21])*v[2]/v[41]); //numberOfPurchasingSubMarkets
+   else
+     v[23]= round( v[24]-v[21]);
+     
+   //second cycle  
+   for(v[40]=0,v[30]=v[29]=v[27]=v[25]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+    {
+     v[0]=cur->cal("alive",0);
+     v[1]=cur->cal("servedMkt",0);
+     if(v[0]==1 && v[1]==2)
+      {
+       v[26]=cur->cal("generation",0);
+       v[24]=cur->multiply("share",1/v[14]);  
+       if(v[25]<v[24])
+        {//share of leader
+         v[25]=v[24];
+         cur1->write("generationOfLeader",v[26], 0);
+        } 
+       if(v[26]==2 && v[27]<v[24]) //leader share of second generation firms
+        {
+         v[27]=v[24];
+         v[28]=cur->cal("profitRate",0);
+         cur1->write("shareOfSecondGenerationLeader",v[24], 0);
+         cur1->write("profitRateOfSecondGenerationLeader",v[28], 0);
+         cur1->write("distanceOfSecondGenerationLeader",cur->cal("distanceFromCorner",0), 0);
+         } 
+       if(v[26]==3 && v[40]<v[24])
+        {
+         v[40]=v[24];
+         v[28]=cur->cal("profitRate",0);         
+         cur1->write("shareOfDaughterLeader",v[40], 0);
+         cur1->write("profitRateOfDaughterLeader",v[28], 0);
+         cur1->write("distanceOfDaughterLeader",cur->cal("distanceFromCorner",0), 0);
+        }  
+       
+       v[29]+=v[24]*v[24];  //herfindal
+       v[42]=cur->increment("numberOfNewSubMarkets",roundInt(v[24]*v[23]));
+       cur1->increment("quantityPurchased",v[42]*cur->cal("u",0));
+       v[31]=cur->cal("averageAgeOfSubMarkets",0);
+       v[22]=cur->cal("numberOfServedSubMarkets",0);
+       if(v[22]+v[42]>0)
+         v[32]=1+v[31]*v[22]/(v[22]+v[42]);
+       else
+         v[32]=1;  
+       cur->write("averageAgeOfSubMarkets",v[32], 0);
+       v[33]=cur->increment("numberOfServedSubMarkets",v[42]);
+       v[34]=cur->cal("cheap",0);
+       v[35]=cur->cal("mup",0);
+       v[36]=cur->cal("u",0);
+       v[37]=(1/v[34])*v[35]*v[36]*v[42];
+       cur->write("profit",v[37], 0);
+       cur->increment("bud",v[37]);
+       v[38]=cur->cal("perf",0);
+       cur1->increment("techlevelCheap",v[34]*v[24]);
+       cur1->increment("techlevelPerf",v[38]*v[24]);
+       
+       v[39]=cur->cal("generation",0);
+       if(v[39]==2)
+         cur1->increment("MPshare",v[24]);  
+       v[43]=cur->cal("diversified",0);
+       if(v[43]==1)
+         cur1->increment("DIVshare",v[24]);  
+
+        
+      }
+      
+    }    
+cur1->write("herfindal",v[29], 0);
+
+res=1;
+goto end;
+
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"distanceFromCorner"))
+{
+/*
+returns (1 - the relative distance from the corner) with respect to the diagonal
+*/
+
+v[6]=p->cal("IdTecUsed",0);
+cur=p->search_var_cond("tecLabel",v[6], 0);
+v[0]=cur->cal("cheapLim",0);
+v[1]=p->cal("cheap",0);
+v[2]=cur->cal("perfLim",0);
+v[3]=p->cal("perf",0);
+v[4]=cur->cal("diagonal",0);
+
+res=sqrt((v[0]-v[1])*(v[0]-v[1])+(v[2]-v[3])*(v[2]-v[3]))/v[4];
+goto end;
+}
+
+
+
+
+if(!strcmp(label,"marketBfirm"))
+{
+/*
+Manages the market functioning for big firms (mainframes)
+*/
+cur1=demand->search_var_cond("IdUserClass",BFIRM, 0);
+
+cur1->write("techlevelCheap",0, 0);
+cur1->write("techlevelPerf",0, 0);
+cur1->write("TRshare",0, 0);
+cur1->write("MPshare",0, 0);
+cur1->write("quantityPurchased",0, 0);
+cur1->write("herfindal",0, 0);
+cur1->write("numOfFirstGenerationSellingFirms",0, 0);
+cur1->write("numOfFirstGenerationDiversifiedSellingFirms",0, 0);
+cur1->write("numOfSecondGenerationSellingFirms",0, 0);
+cur1->write("numOfDaughterSellingFirms",0, 0); 
+cur1->write("generationOfLeader",0, 0);
+cur1->write("shareOfFirstGenerationLeader",0, 0);
+cur1->write("profitRateOfFirstGenerationLeader",0, 0);
+cur1->write("distanceOfFirstGenerationLeader",0, 0);
+
+
+v[45]=cur1->cal("whenMktOpen",0);
+if(v[45]>0)
+ {
+  v[46]=cur1->cal("maxAlfaDesign",0);
+  v[47]=cur1->cal("startAlfaDesign",0);
+  v[48]=cur1->cal("startAlfaDesign",0);
+  v[49]=(v[46]-v[48])/((double)max_step-v[45]); 
+  v[5]=cur1->increment("alfaDesign",v[49]);
+ }
+else
+ v[5]=cur1->cal("alfaDesign",0); 
+
+v[19]=cur1->cal("brandLoyalty",0);
+v[44]=cur1->cal("numOfSubMarkets",0);
+
+v[56]=p->cal("maxEbwExpenditure",0);
+v[7]=p->cal("maxEbwEffect",0);
+v[10]=p->cal("bw",0);
+v[11]=p->cal("errorDemand",0);
+v[17]=p->cal("breakdown",0);
+v[41]=p->cal("fullVisible",0);
+
+v[21]=0;
+for(v[14]=0,v[2]=0, cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[0]=cur->cal("alive",0);
+  v[1]=cur->cal("servedMkt",0);
+  if(v[0]==1 && v[1]==1)
+   {
+   v[2]++; //numOfSellingFirms
+   v[3]=cur->cal("generation",0);
+   if(v[3]==1)
+    {
+     cur1->increment("numOfFirstGenerationSellingFirms",1);
+     v[6]=cur->cal("adopted",0);
+     if(v[6]==1)
+      cur1->increment("numOfFirstGenerationDiversifiedSellingFirms",1);
+    }
+    if(v[3]==2)
+      cur1->increment("numOfSecondGenerationSellingFirms",1);
+    if(v[3]==3)
+      cur1->increment("numOfDaughterSellingFirms",1);  
+      
+    cur->write("numberOfNewSubMarkets",0, 0);  
+    v[4]=cur1->cal(cur,"utility",0);
+    cur->write("u",v[4], 0);
+    v[8]=cur->cal("share",0);
+    v[9]=cur->cal("ebw",0);
+    v[12]= pow(v[4],v[5]);
+    v[12]*=pow(1+v[8],v[10]);
+    v[12]*=pow(1+S(v[9],v[56],v[7]),v[7]);
+    v[13]=v[12]*(1-v[11]+2*RND*v[11]);
+    cur->write("share",v[13], 0);
+    v[14]+=v[13]; //cumulatedProb
+    v[15]=cur->cal("numberOfServedSubMarkets",0);
+    v[20]=cur->cal("numberOfBLReturns",0);
+    if(v[15]>0)
+      {
+       v[16]=cur->cal("averageAgeOfSubMarkets",0);
+       v[18]=round(v[15]*v[16]/v[17]);
+       cur->write("numberOfBreakdowns",v[18], 0);
+       v[20]=round(v[18]*v[19]);
+       cur->write("numberOfBLReturns",v[20], 0);
+       v[15]=cur->increment("numberOfServedSubMarkets",-1*v[18]);
+       cur->write("numberOfNewSubMarkets",v[20], 0); //!?! see below
+      }
+    v[21]+=v[20]+v[15]; //busySubMarkets)
+    } //if firm is alive and serves the market
+   } //end of cycle for through Firm's
+
+   if(v[2]>v[41]) 
+     v[23]= round( (v[44]-v[21])*v[2]/v[41]); //numberOfPurchasingSubMarkets
+   else
+     v[23]= round( v[44]-v[21]);
+     
+   //second cycle  
+   for(v[30]=v[29]=v[27]=v[25]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+    {
+     v[0]=cur->cal("alive",0);
+     v[1]=cur->cal("servedMkt",0);
+     if(v[0]==1 && v[1]==1)
+      {
+       v[26]=cur->cal("generation",0);
+       v[24]=cur->multiply("share",1/v[14]);  
+       if(v[25]<v[24])
+        {//share of leader
+         v[25]=v[24];
+         cur1->write("generationOfLeader",v[26], 0);
+        } 
+       if(v[26]==1 && v[27]<v[24]) //leader share of first generation firms
+        {
+         v[27]=v[24];
+         v[28]=cur->cal("profitRate",0);
+         cur1->write("shareOfFirstGenerationLeader",v[24], 0);
+         cur1->write("profitRateOfFirstGenerationLeader",v[28], 0);
+         cur1->write("distanceOfFirstGenerationLeader",cur->cal("distanceFromCorner",0), 0);
+         } 
+       v[29]+=v[24]*v[24];  //herfindal
+
+       v[42]=cur->increment("numberOfNewSubMarkets",roundInt(v[24]*v[23]));
+       cur1->increment("quantityPurchased",v[42]*cur->cal("u",0));
+
+       v[31]=cur->cal("averageAgeOfSubMarkets",0);
+       v[22]=cur->cal("numberOfServedSubMarkets",0);
+       if(v[22]+v[42]>0)
+         v[32]=1+v[31]*v[22]/(v[22]+v[42]);
+       else
+         v[32]=1;  
+       cur->write("averageAgeOfSubMarkets",v[32], 0);
+       v[33]=cur->increment("numberOfServedSubMarkets",v[42]);
+       v[34]=cur->cal("cheap",0);
+       v[35]=cur->cal("mup",0);
+       v[36]=cur->cal("u",0);
+       v[37]=(1/v[34])*v[35]*v[36]*v[42];
+       cur->write("profit",v[37], 0);
+       cur->increment("bud",v[37]);
+       v[38]=cur->cal("perf",0);
+       cur1->increment("techlevelCheap",v[34]*v[24]);
+       cur1->increment("techlevelPerf",v[38]*v[24]);
+       v[39]=cur->cal("generation",0);
+       if(v[39]==1)
+         cur1->increment("TRshare",v[24]);  
+       if(v[39]==2)
+         cur1->increment("MPshare",v[24]);  
+      }
+      
+    }    
+
+cur1->write("herfindal",v[29], 0);
+
+res=1;
+goto end;
+}
+
+
+
+
+
+if(!strcmp(label,"utility"))
+{
+/*
+Function contained in UserClass called by Firm. Therefore:
+p-> refers to the userclass 
+c-> refers to the firm
+*/
+last_update--;//repeat the computation any time is requested
+if(c==NULL)//Avoids to be computed when the system activates the equation
+{
+res=-1;
+goto end;
+}
+
+v[0]=p->cal("gammaUt",0); //0.08
+v[1]=c->cal("cheap",0);
+v[2]=c->cal("mup",0);
+v[3]=p->cal("cheapThreshold",0);
+v[4]=c->cal("perf",0);
+v[5]=p->cal("perfThreshold",0);
+v[6]=p->cal("lambda",0);
+v[7]=p->cal("cheapExp",0);
+v[8]=p->cal("perfExp",0);
+v[9]=v[1]/(1+v[2]);
+if(v[9]<=v[3] || v[4]<= v[5]) 
+ res=0;
+else
+ {
+  v[10]=v[0]*pow(v[9]-v[3],v[6]+v[7])*pow(v[4]-v[5],v[6]+v[8]);
+  res=v[10];
+ } 
+
+
+//v[9]=501/(1.01)=455.45*pow(239,0.85)*(1)=3825.9527254107266758641098038425
+
+
+
+goto end;
+}
+
+
+if(!strcmp(label,"checkEntry"))
+{
+/*
+Uhu? Strangely enough, a firm entering BFIRM does not have any chance to enter subsequently
+in INDIV, at least using this function. In fact, when "entered" is set to TRUE the firm skips this
+code.
+Probably there is another function (diversification?) allowing for firms to operate in two markets.
+
+*/
+cur1=demand->search_var_cond("IdUserClass",BFIRM, 0);
+v[0]=cur1->cal("whenMktOpen",0);
+
+cur2=demand->search_var_cond("IdUserClass",INDIV, 0);
+v[1]=cur2->cal("whenMktOpen",0);
+
+for(v[10]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[2]=cur->cal("alive",0);
+  v[3]=cur->cal("entered",0);
+  if(v[2]==1 && v[3]==0)
+   {
+    v[4]=cur1->cal(cur,"utility",0);
+    if(v[4]>0)
+    {v[10]++;
+     cur->write("entered",1, 0);
+     v[5]=cur1->cal("whenMktOpen",0);
+     if(v[5]==0)
+      cur1->write("whenMktOpen",(double)t, 0);
+     cur->write("whenEntered",(double)t, 0); 
+     cur->write("servedUserClass",BFIRM, 0);
+     cur->write("servedMkt",1, 0);
+    }
+    v[6]=cur2->cal(cur,"utility",0);
+    if(v[6]>0)
+    {v[10]++;
+     cur->write("entered",1, 0);
+     v[7]=cur2->cal("whenMktOpen",0);
+     if(v[7]==0)
+      cur2->write("whenMktOpen",(double)t, 0);
+     cur->write("whenEntered",(double)t, 0); 
+     cur->write("servedUserClass",INDIV, 0);
+     cur->write("servedMkt",2, 0);
+    }
+   //here should go the standard settings  
+    
+   }
+ }
+
+
+
+res=v[10];
+goto end;
+}
+
+
+
+if(!strcmp(label,"innovation"))
+{
+/*
+Implement the innovation, modifying the characteristics of product (cheap and performance) 
+*/
+
+res=1;
+
+v[0]=p->cal("gammaDxCheap",0);
+v[17]=p->cal("gammaDxPerf",0);
+v[1]=p->cal("alfa1Dx",0);
+v[2]=p->cal("alfa2Dx",0);
+v[3]=p->cal("alfa3Dx",0);
+v[4]=p->cal("alfa4Dx",0);
+
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  if(cur->cal("alive",0)==1)
+  {
+    cur2=cur->search("Product");
+    v[5]=cur->cal("IdTecUsed",0);
+    cur1=p->search_var_cond("tecLabel",v[5], 0);
+    v[5]=cur1->cal("cheapLim",0);
+    v[14]=cur2->cal("cheap",0);
+    v[6]=cur->cal("cheapEng",0);
+    v[7]=cur->cal("experience",0);
+    v[8]=cur->cal("averageExperience",0);
+    v[9]=v[0]*pow(v[5]-v[14],v[1])*pow(v[6],v[2])*pow(v[7],v[3])*pow(v[8],v[4]);
+    v[10]=cur2->increment("cheap",v[9]);
+    if(v[10]>v[5])
+     cur2->write("cheap",v[5], 0);
+  
+    v[11]=cur1->cal("perfLim",0);
+    v[15]=cur2->cal("perf",0);
+    v[12]=cur->cal("perfEng",0);
+    v[13]=v[17]*pow(v[11]-v[15],v[1])*pow(v[12],v[2])*pow(v[7],v[3])*pow(v[8],v[4]);
+    v[16]=cur2->increment("perf",v[13]);
+    if(v[16]>v[11])
+     cur2->write("perf",v[11], 0);
+    
+    cur->increment("experience",1);
+    }  
+    
+ }
+
+goto end;
+}
+
+
+
+if(!strcmp(label,"findBestMPDistance"))
+{
+/*
+
+Best distance in micro-processor technology
+*/
+v[0]=v[3]=0;
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[1]=cur->cal("alive",0);
+  v[2]=cur->cal("IdTecUsed",0);
+  if(v[1]==1 && v[2]==MP)
+   {
+    v[3]=cur->cal("distanceCovered",0);
+    if(v[3]>v[0])
+      v[0]=v[3];
+   
+   }
+ }
+
+res=v[3];
+goto end;
+}
+
+
+if(!strcmp(label,"adoption"))
+{
+/*
+Manages the switch of technology from transistors to micro-processors
+*/
+v[0]=p->cal("secondGenerationTime",0);
+if(v[0]>(double)t)
+ {res=-1;
+  goto end;
+ }
+v[1]=p->cal("findBestMPDistance",0);
+v[5]=p->cal("adoption1",0);
+v[6]=p->cal("adoption2",0);
+v[7]=p->cal("difficultyOfAdoption",0);
+v[10]=p->cal("percCostOfAdoption",0);
+v[11]=p->cal("fixedCostOfAdoption",0);
+v[15]=p->cal("Efactor",0);
+for(v[18]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[2]=cur->cal("alive",0);
+  v[3]=cur->cal("entered",0);
+  v[4]=cur->cal("IdTecUsed",0);
+  if(v[2]==1 && v[3]==1 && v[4]==TR)
+   {v[9]=cur->cal("distanceCovered",0);
+    v[8]=pow(0.5*pow(v[9],v[5]) + 0.5*pow(v[1],v[6]),v[7]);
+    v[12]=cur->cal("bud",0);
+    v[13]=(v[12]*(1-v[10])-v[11]);
+    if(RND<v[8] && v[13]>0)
+      {v[18]++;
+       cur->write("bud",v[13],0);
+
+       cur->write("IdTecUsed",MP, 0);
+       cur->write("adopted",1, 0);
+       v[14]=cur->cal("experience",0);
+       v[16]=cur->cal("averageExperience",0);
+       v[17]=1+roundInt(v[15]*(v[14]-v[16]));
+       cur->write("experience",v[17], 0);
+       // bonus if average experience is low !!!!
+       if(v[17] > v[14])
+         cur->write("experience",v[14], 0); //the lower the better ?!?
+       cur->write("averageExperience",1, 0);
+      }
+   }
+ }
+res=v[18];
+goto end;
+}
+
+
+if(!strcmp(label,"ebwInvest"))
+{
+/*
+Equation managing the endogenous band wagon effect (marketing)
+*/
+v[0]=p->cal("ebwErosion",0);
+v[1]=p->cal("ebwExpenditure",0);
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+ v[5]=cur->cal("alive",0);
+ if(v[5]==1)
+  {
+  cur->multiply("ebw",1-v[0]);
+  v[2]=cur->cal("profit",0);
+  cur->increment("ebw",v[1]*v[2]);
+  v[3]=cur->cal("bud",0);
+  v[4]=cur->increment("bud",-v[2]*v[1]);
+  if(v[4]<=0)
+    cur->write("alive",0, 0);
+  }  
+ }
+
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"failFirm"))
+{
+/*
+function killing firms 
+*/
+last_update--;//repeat the computation any time is requested
+if(c==NULL)//Avoids to be computed when the system activates the equation
+{
+res=-1;
+goto end;
+}
+
+v[0]=c->cal("bud",0);
+c->increment("debt",-v[0]);
+c->write("alive",0, 0);
+
+
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"RDInvest"))
+{
+/*
+Manages research team of engineers (setting values in Obejct ResTeam). Calculates avg experience of team if the team grows. Generally innovation expenditures are on profits but if project time has not finished thenexpenditures are on a constant fraction of initial budget (+ profits'contribution if there are).
+*/
+res=1;
+v[0]=p->cal("projectDuration",0);
+v[8]=p->cal("engineerCost",0);
+
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[1]=cur->cal("alive",0);
+  if(v[1]==1)
+   {
+    cur2=cur->search("ResTeam");
+    v[19]=cur2->cal("cheapEng",0)+cur2->cal("perfEng",0);
+    v[2]=cur->cal("birth",0);
+    if((double)t-v[2]<v[0])
+     {//  firm hasn't finished its project yet
+      v[3]=cur->cal("initBud",0);
+      v[4]=cur->cal("profit",0);
+      v[5]=cur->cal("RDExpenditures",0);
+      v[6]=cur->cal("cheapMix",0);
+      v[7]=cur->cal("perfMix",0);
+      
+      v[9]=round(((v[3]/v[0]+v[4]*v[5])*v[6])/v[8]);
+
+      cur2->write("cheapEng",v[9], 0);
+      v[10]=round(((v[3]/v[0]+v[4]*v[5])*v[7])/v[8]);
+      cur2->write("perfEng",v[10], 0);
+      v[17]=v[3]/v[0]+v[4]*v[5];
+      cur->increment("bud",-1*v[17]);
+
+     }
+    else
+     {// initial project has finished and debt payback is on
+      v[3]=cur->cal("cheapMix",0);
+      v[12]=cur->cal("perfMix",0);
+      v[4]=cur->cal("profit",0);
+      v[5]=cur->cal("RDExpenditures",0);
+      v[6]=cur2->cal("cheapEng",0);
+      v[7]=cur2->cal("perfEng",0);
+      
+      if(v[4]*v[5]<v[8]*v[19])
+       {// profits are too low to mantain current team
+        v[10]=round(v[6]*0.9);
+        v[11]=round(v[7]*0.9);
+        cur2->write("cheapEng",v[10], 0);
+        cur2->write("perfEng",v[11], 0);
+        cur->increment("bud",round(-0.9*v[19])*v[8]);
+       }
+      else
+       {// profits are enough to mantain current	team at least
+        v[10]=round(((v[4]*v[5])*v[3])/v[8]);
+        cur2->write("cheapEng",v[10], 0);
+        v[11]=round(((v[4]*v[5])*v[12])/v[8]);
+        cur2->write("perfEng",v[11], 0);
+        
+        v[18]=v[4]*v[5];
+        cur->increment("bud",-1*v[18]);
+       } 
+     } 
+    v[15]=cur2->cal("cheapEng",0);
+    v[16]=cur2->cal("perfEng",0);
+
+    v[17]=cur->cal("bud",0);
+    if(v[15]+v[16]<1 || v[17]<=0)
+      cur->cal("failFirm",0); 
+    cur->increment("averageExperience",1);  
+    if(v[15]+v[16]>v[19])
+      {
+       cur->multiply("averageExperience",v[19]/(v[15]+v[16]));
+       cur->increment("averageExperience",(v[15]+v[16]-v[19])/(v[15]+v[16]));
+      }  
+   }  
+ }
+
+
+goto end;
+}
+
+
+
+if(!strcmp(label,"diversification"))
+{
+/*
+equation setting allowing for firms to diversify in the new market for PC 
+*/
+cur=demand->search_var_cond("IdUserClass",INDIV,0);
+v[0]=cur->cal("quantityPurchased",0);
+if(v[0]<=0)
+ {res=-2;
+  goto end;
+ }
+cur=demand->search_var_cond("IdUserClass",BFIRM,0);
+v[1]=cur->cal("quantityPurchased",0);
+v[2]=p->cal("goDiversification",0);
+if(v[1]/v[0]<v[2])
+ {res=-1;
+  goto end;
+ } 
+
+v[10]=p->cal("percCostOfDiversification",0);
+v[11]=p->cal("fixedCostOfDiversification",0);
+
+
+cur3=p->search_var_cond("tecLabel",MP, 0);
+
+v[14]=cur3->cal("cheapLim",0);
+v[15]=cur3->cal("perfLim",0);
+v[16]=p->cal("initMarkUp",0);
+v[18]=p->cal("RDexpendituresOnProfits",0);  
+v[19]=p->cal("percEbwDiversification",0);
+v[20]=p->cal("Efactor",0);
+v[23]=p->cal("MedCheapPCFirm",0);
+v[24]=p->cal("MedPerfPCFirm",0);
+v[26]=p->cal("NumFirm",0)+1;
+v[27]=0;
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[3]=cur->cal("alive",0);
+  v[4]=cur->cal("mother",0);  
+  v[5]=cur->cal("daughter",0);
+  v[6]=cur->cal("servedMkt",0);
+  v[7]=cur->cal("IdTecUsed",0);
+  v[8]=cur->cal("profitRate",0);
+  v[9]=cur->cal("bud",0);
+  if(v[3]==1 && v[4]==0 && v[5]==0 && v[6]==1 && v[7]==MP && v[8]>0 && v[9]*(1-v[10])> v[11])
+   {v[27]++;
+    //cur1=p->add_an_object("Firm",cur);
+    cur1=ADDOBJ_EX("Firm",cur);
+    cur1->write("id",v[26]+v[27], 0);
+    cur1->write("birth",(double)t, 0);
+    cur1->write("generation",3, 0);
+ 
+    cur1->write("IdTecUsed",MP, 0);
+    
+    cur2=cur1->search("Mix");
+    cur2->write("randomMix",-1, t-1);
+    cur2->cal("randomMix",0);
+    
+    cur1->write("alive",1, 0);
+    cur1->write("entered",0, 0);
+    cur1->write("diversified",0, 0);
+    cur1->write("adopted",0, 0);
+    
+    cur1->write("daughter",1, 0);
+    cur1->write("mother",0, 0);
+    v[17]=cur->cal("bud",0);
+    cur1->write("initBud",v[17]*v[10], 0);
+    cur1->write("bud",v[17]*v[10], 0);
+    cur1->write("debt",v[17]*v[10], 0);
+    cur1->write("mup",v[16], 0);
+    cur1->write("RDExpenditures",v[18], 0);
+    cur1->write("ebw",cur->cal("ebw",0)*v[19], 0);
+    
+    v[22]=cur->cal("averageExperience",0);
+    
+    v[21]=cur->cal("experience",0);
+    cur1->write("experience",(v[21]-v[22])*v[20], 0);
+    
+    cur2=cur1->search("Product");
+    cur2->write("cheap",v[23], 0);
+    cur2->write("perf",v[24], 0);
+    cur->multiply("bud",(1-v[10]));
+    cur->increment("bud",-1*v[11]);
+    
+    cur1->write("entered",1, 0);
+    cur1->write("diversified",1, 0);
+    cur1->write("whenEntered",(double)t, 0);
+    cur1->write("servedUserClass",INDIV, 0);
+    cur1->write("servedMkt",2, 0);
+
+    cur->write("mother",1, 0);
+    
+    
+   }
+ 
+ }
+ 
+res=v[27];
+goto end;
+}
+
+
+if(!strcmp(label,"secondGenerationCreation"))
+{
+/*
+Introduce the second generation
+*/
+v[0]=p->cal("secondGenerationTime",0);
+if((double)t!=v[0])
+ {res=0;
+  goto end;
+ }
+v[0]=p->cal("firstGeneration",0); 
+v[1]=p->cal("secondGeneration",0);
+
+v[6]=p->cal("initBudReductionFactor",0);
+v[7]=p->cal("initMarkUp",0);
+v[8]=p->cal("RDexpendituresOnProfits",0);  
+v[20]=p->cal("minInitBud",0);
+v[21]=p->cal("maxInitBud",0);
+
+cur1=p->search("Firm");
+for(v[13]=1; v[13]<=v[1]; v[13]++ )
+ {
+  //cur=p->add_an_object("Firm",cur1);
+  cur=ADDOBJ_EX("Firm",cur1);
+  for(cur_v=cur->v; cur_v!=NULL; cur_v=cur_v->next)
+    cur_v->val[0]=0; //I suspect that newly created Objects are set to 0 in Java
+  cur->write("id",v[0]+v[13], 0);
+  cur->write("birth",(double)t, 0);
+  cur->write("generation",2, 0);
+  cur->write("IdTecUsed",MP, 0);
+  cur2=cur->search("Mix");
+  cur2->write("randomMix",-1, t-1);  
+  cur2->cal("randomMix",0);
+  cur->write("alive",1, 0); 
+  cur->write("entered",0, 0);
+  cur->write("diversified",0, 0);
+  cur->write("adopted",0, 0);
+  cur->write("daughter",0, 0);
+  cur->write("mother",0, 0);
+  v[3]=v[20]+RND*(v[21]-v[20]);
+  cur->write("initBud",v[3]*v[6], 0);
+  cur->write("debt",v[3]*v[6], 0);  
+  cur->write("bud",v[3]*v[6], 0);  
+  cur->write("mup",v[7], 0);
+  cur->write("RDExpenditures",v[8], 0);
+  cur2=cur->search("ResTeam");
+  cur2->write("cheapEng",0, 0);
+  cur2->write("perfEng",0, 0);
+  cur2->write("RTAverageExperience",0, 0);
+  cur2=cur->search("Product");
+  cur2->write("cheap",0, 0);
+  cur2->write("perf",0, 0);
+ }
+ 
+res=1;
+goto end;
+}
+
+if(!strcmp(label,"init"))
+{
+/*
+Initialisation function of firms. It is computed just the first time step and never again
+*/
+demand=p->search("Demand");
+v[0]=p->cal("minInitBud",0);
+v[1]=p->cal("maxInitBud",0);
+v[4]=p->cal("initMarkUp",0);
+v[5]=p->cal("RDexpendituresOnProfits",0);  
+
+
+for(v[2]=1,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur),v[2]++ )
+ {
+  cur->write("id",v[2], 0);
+  cur->write("birth",1, 0);
+  cur->write("generation",1, 0);
+  cur->write("IdTecUsed",TR, 0);
+
+  cur1=cur->search("Mix");
+  cur1->cal("randomMix",0);
+
+  cur->write("alive",1, 0);
+  cur->write("entered",0, 0);
+  cur->write("diversified",0, 0);
+  cur->write("adopted",0, 0);
+  cur->write("daughter",0, 0);
+  cur->write("mother",0, 0);
+  v[3]=v[0]+RND*(v[1]-v[0]);
+  cur->write("initBud",v[3], 0);
+  cur->write("debt",v[3], 0);  
+  cur->write("bud",v[3], 0);  
+  cur->write("mup",v[4], 0);
+  cur->write("RDExpenditures",v[5], 0);
+
+ }
+
+res=v[2];
+param=1;
+goto end;
+}
+
+
+if(!strcmp(label,"diagonal"))
+{
+/*
+value of the diagonal in technologies
+*/
+v[0]=p->cal("cheapLim",0);
+v[1]=p->cal("perfLim",0);
+
+res=sqrt(v[0]*v[0]+v[1]*v[1]);
+goto end;
+}
+
+
+if(!strcmp(label,"randomMix"))
+{
+/*
+Set cheapMix and perfMix to new random values in between 0 and 1 such that their sum is 1.
+
+It is computed only when requested
+*/
+last_update--;//repeat the computation any time is requested
+if(c==NULL)//Avoids to be computed when the system activates the equation
+{
+res=-1;
+goto end;
+}
+v[0]=101*RND;
+if(v[0]>100)
+ v[0]=100;
+p->write("cheapMix",v[0]/100, 0);
+p->write("perfMix",(100-v[0])/100, 0);
+
+ 
+res=1;
+goto end;
+}
+
+
+if(!strcmp(label,"MedCheapPCFirm"))
+{
+/*
+Average cheap value of firms in PC user class 
+*/
+
+for(v[0]=v[1]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[2]=cur->cal("alive",0);
+  v[3]=cur->cal("servedMkt",0);
+  if(v[2]==1 && v[3]==2)
+    {v[1]+=cur->cal("cheap",0);
+     v[0]++;
+    } 
+  
+ }
+if(v[0]>0)
+  res=v[1]/v[0];
+else
+  res=0;  
+goto end;
+}
+
+if(!strcmp(label,"MedPerfPCFirm"))
+{
+/*
+Average performance value of firms in PC user class 
+*/
+
+for(v[0]=v[1]=0,cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+ {
+  v[2]=cur->cal("alive",0);
+  v[3]=cur->cal("servedMkt",0);
+  if(v[2]==1 && v[3]==2)
+    {v[1]+=cur->cal("perf",0);
+     v[0]++;
+    } 
+  
+ }
+if(v[0]>0)
+  res=v[1]/v[0];
+else
+  res=0;  
+goto end;
+}
+
+
+if(!strcmp(label,"gammaDxCheap"))
+{
+/*
+scale of design change 
+*/
+
+v[0]=p->cal("gammaDxCheapSt",0);
+v[1]=p->cal("TRCheapLimSt",0);
+v[2]=p->cal("alfa1DxSt",0);
+cur=p->search_var_cond("tecLabel",TR, 0);
+v[3]=cur->cal("cheapLim",0);
+v[4]=p->cal("alfa1Dx",0);
+v[19]=p->cal("alfa2Dx",0);
+v[20]=p->cal("alfa3Dx",0);
+v[21]=p->cal("alfa1DxSt",0);
+v[22]=p->cal("alfa2DxSt",0);
+v[23]=p->cal("alfa3DxSt",0);
+
+v[5]=p->cal("minInitBudSt",0);
+v[6]=p->cal("maxInitBudSt",0);
+v[7]=p->cal("engineerCostSt",0);
+v[8]=p->cal("projectDurationSt",0);
+v[9]=p->cal("minInitBud",0);
+v[10]=p->cal("maxInitBud",0);
+v[11]=p->cal("engineerCost",0);
+v[12]=p->cal("projectDuration",0);
+
+v[16]=(0.5*(v[5]+v[6]))/(2*v[7]*v[8]); //RR0
+v[17]=(0.5*(v[9]+v[10]))/(2*v[11]*v[12]);//RR1
+
+
+
+
+v[18]=v[0]*pow(0.5*v[1],v[21])/pow(0.5*v[3],v[4]) *
+							pow(v[16],v[22])/pow(v[17],v[19]) *
+							pow(v[8],v[23])/pow(v[12],v[20]) *
+							v[3]/v[1];
+
+res=v[18];
+goto end;
+}
+
+if(!strcmp(label,"gammaDxPerf"))
+{
+/*
+
+scale of design change
+*/
+
+v[0]=p->cal("gammaDxPerfSt",0);
+v[1]=p->cal("TRPerfLimSt",0);
+v[2]=p->cal("alfa1DxSt",0);
+cur=p->search_var_cond("tecLabel",TR, 0);
+v[3]=cur->cal("perfLim",0);
+v[4]=p->cal("alfa1Dx",0);
+v[19]=p->cal("alfa2Dx",0);
+v[20]=p->cal("alfa3Dx",0);
+v[21]=p->cal("alfa1DxSt",0);
+v[22]=p->cal("alfa2DxSt",0);
+v[23]=p->cal("alfa3DxSt",0);
+
+v[5]=p->cal("minInitBudSt",0);
+v[6]=p->cal("maxInitBudSt",0);
+v[7]=p->cal("engineerCostSt",0);
+v[8]=p->cal("projectDurationSt",0);
+v[9]=p->cal("minInitBud",0);
+v[10]=p->cal("maxInitBud",0);
+v[11]=p->cal("engineerCost",0);
+v[12]=p->cal("projectDuration",0);
+
+v[16]=(0.5*(v[5]+v[6]))/(2*v[7]*v[8]); //RR0
+v[17]=(0.5*(v[9]+v[10]))/(2*v[11]*v[12]);//RR1
+
+
+
+
+v[18]=v[0]*pow(0.5*v[1],v[21])/pow(0.5*v[3],v[4]) *
+							pow(v[16],v[22])/pow(v[17],v[19]) *
+							pow(v[8],v[23])/pow(v[12],v[20]) *
+							v[3]/v[1];
+
+res=v[18];
+goto end;
+}
+
+
+if(!strcmp(label,"distanceCovered"))
+{
+/*
+returns the fraction of the diagonal (from the origin to the tech corner) covered by the firm
+*/
+v[0]=p->cal("cheap",0);
+v[1]=p->cal("perf",0);
+
+v[6]=p->cal("IdTecUsed",0);
+cur=p->search_var_cond("tecLabel",v[6], 0);
+
+v[2]=cur->cal("diagonal",0);
+
+
+res=sqrt(v[0]*v[0]+v[1]*v[1])/v[2];
+goto end;
+}
+
+if(!strcmp(label,"NumFirm"))
+{
+/*
+number of existing Object firm 
+*/
+v[0]=0;
+for(cur=p->search("Firm"); cur!=NULL; cur=go_brother(cur) )
+    v[0]++;
+res=v[0];
+goto end;
+}
+
+
+/*********************
+
+Do not place equations beyond this point.
+
+*********************/
+
+sprintf(msg, "\nEquation for %s not found", label);
+plog(msg);
+quit=2;
+return -1;
+
+
+end :
+
+if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
+ { plog("\\nMath error. Simulation switch to debug mode.\\nThe code for the current equation (see Debugger) produces illegal data. Check the equation code and the temporary values v[...] to find the faulty line(s).\\n\\n");
+  debug_flag=1;
+  debug='d';
+ } 
+ 
+
+if(debug_flag==1)
+ {
+ for(i=0; i<40; i++)
+  i_values[i]=v[i];
+ }
+
+
+return(res);
+}
+
+/*
+This function is executed once at the end of a simulation run. It may be used
+to perform some cleanup, in case the model allocated memory during the simulation.
+*/
+void close_sim(void)
+{
+
+}
+
+
+
+double  S(double x, double maxX, double maxY) 
+{
+
+   /* logistic function: this function is defined in the box [0,0][1,1]
+      on x values 0, 0.25, 0.5, 0.75, 1. The input value is parametrized
+      on maxX and the output value on maxY: if X>maxX then y=maxY whilest
+      we have a 's' shaped relationship for other values of x.            */
+
+		x=x/maxX;
+			if (x<=0) return 0;
+				else if (x<=0.25) return (x*0.5)*maxY;
+					else if ((x>0.25)&&(x<=0.75)) return ((x-0.25)*1.5+0.125)*maxY;
+						else if ((x>0.75)&&(x<=1)) return ((x-0.75)*0.5+0.875)*maxY;
+							else if (x>1) return maxY;
+		return 1;
+}
+
+int roundInt(double a) {
+		if (a-(int)a>=0.5) return (int)(a+1);
+		else return (int)a;
+	}
+
+
+END_EQ_FILE

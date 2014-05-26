@@ -1,0 +1,94 @@
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:pack mm.lab
+Produced message:
+wrong # args: should be "pack option arg ?arg ...?"
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:label .mm.lab1 -text "Suggestions" - fg red
+Produced message:
+unknown option "-"
+-----
+
+Command:pack .mm.lab1 .mm.lab
+Produced message:
+bad window path name ".mm.lab1"
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\Lsd61\Example\Economic\BusinessPlanning>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_BusinessPlanning.cpp -IC:/Lsd61/gnu/include -IC:/Lsd61/gnu/include  -IC:/Lsd61/gnu/include -IC:/Lsd61/src
+child process exited abnormally
+-----

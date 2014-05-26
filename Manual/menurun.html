@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+  <title>Menu Run</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
+ href="windows.html">Lsd
+Windows</a> <a href="Browser.html">Main Browser</a> <a
+ href="FAQs.html">Lsd
+FAQ's</a></font></center>
+<p><b><u><font size="+1">Menu "Run"</font></u></b>
+</p>
+<p>From this menu it is possible to start the simulation run of the
+currently
+loaded model and change the simulations settings not related with the
+model
+content. It also provides shortcuts to re-set the debug, runtime plot
+and
+saving options to all the elements of the model.
+<br>
+&nbsp;
+<br>
+&nbsp;
+<br>
+</p>
+<center>
+<p><img src="menurun.jpg" alt="" style="height: 512px; width: 408px;"
+ align="left" hspace="50"></p>
+<table style="text-align: left; width: 50%;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><b><i><font
+ face="Arial, helvetica">Menu "Run" Entries:</font></i></b></td>
+      <td style="vertical-align: top; width: 30%;"><b><i><font
+ face="Arial, helvetica">Other Menus of the Browser:</font></i></b></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#run">Run</a></td>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menufile.html">Menu File</a></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#simsetting">Simulation
+Settings</a></td>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menumodel.html">Menu Model</a></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#remdebug">Remove Debug
+Flags</a></td>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menudata.html">Menu Data</a></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#remsave">Remove Save Flags</a></td>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menuhelp.html">Menu Help</a></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#remplot">Remove Plot Flags</a></td>
+      <td style="vertical-align: top; width: 30%;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#showsave">Show elements
+saved</a></td>
+      <td style="vertical-align: top; width: 30%;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#sobs">Show elements to
+observe</a></td>
+      <td style="vertical-align: top; width: 30%;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#sobs">Show elements to
+initialize</a></td>
+      <td style="vertical-align: top; width: 30%;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 30%;"><a
+ href="menurun.html#remrtplot">Remove Runtime
+Plots</a></td>
+      <td style="vertical-align: top; width: 30%;"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><br>
+</p>
+<p><br>
+</p>
+</center>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<hr width="100%">
+<p><a name="run"></a><font size="-1"><a href="#top">(Menu Run)</a><b> </b></font><b>"Run"</b>
+<br>
+Shortcur:<b><font face="Arial, helvetica"> control+r</font></b>.
+</p>
+<p>Start the simulation run. Lsd will write (and in case, overwrite)
+the
+configuration file with the data currently loaded.
+</p>
+<p>Before starting, the system provides a summary of the options chosen
+for the simulation settings. The summary differs depending on the
+running
+options chosen, defined in the <a href="#simsetting">Simulation
+Settings</a>
+menu entry. Two main running options are available: single run and
+multiple
+runs.
+<br>
+In the first case the simulation runs in memory only. After the
+exercise
+the data are stored in memory so that users can access them by means of
+the <a href="mdatares.html">Analysis of Result</a> module (menu <b>Data</b>).
+If a new simulation is run, the results from the previous simulation
+are
+cancelled and replaced with the new values. Remember that after a
+simulation
+only the time series of Variables marked to be saved can be observed in
+the results (see the <a href="Browser.html#variables">Variable list</a>
+in the main Browser for info on how to mark a Variable to be saved).
+Result
+data stored in memory can be written on file for later use using the
+command
+<a href="menudata.html#saveres">Save Results</a> in Menu <b>Data</b>.
+</p>
+<p>In case of multiple runs, instead, at the end of each simulation
+exercise
+the results are saved in a Lsd result file. The name of the file is the
+same name of the model name plus a integer number referring to the
+"seed"
+used for the pseudo-random number generator. During a multiple-run
+exercise
+Lsd creates also a summary result file, having as many "cases" as many
+simulations runs. Each record of this summary file (having the
+extension
+.tot) contains the values of the saved elements of the model at the
+very
+last time step of each simulation.
+</p>
+<center>
+<p><img src="summary_run.jpg" height="354" width="337"></p>
+</center>
+<p>On the summary window, clicking on <b><font face="Arial, helvetica">Ok</font></b>
+the simulation will start, while clicking on <b><font
+ face="Arial, helvetica">Cancel</font></b>
+the system will abort the simulation and return to the main Browser.
+<br>
+</p>
+<hr width="100%"><br>
+<a name="simsetting"></a>
+<p><font size="-1"><a href="#top">(Menu Run)</a><b> </b></font><b>"Sim.
+Settings"</b>
+<br>
+Shortcut:<b><font face="Arial, helvetica"> control+m.</font></b>
+</p>
+<p>Set the main simulation options using the following interface
+</p>
+<center>
+<p><img src="simsetting.jpg" title="" alt=""
+ style="width: 257px; height: 252px;"></p>
+</center>
+<p>It is possible to determine:
+</p>
+<p>- <b><font face="Arial, helvetica">Number of Simulations</font></b>.
+It sets the number of simulations runs to make. Each simulation run
+uses
+the same initial data of the present model with different seeds for the
+pseudo-random number generator. If only one simulation is run is
+requested
+Lsd will not save the results (which can be done manually after the
+simulation
+using entry <b>Save Result</b> in <a href="menudata.html">menu Data</a>).
+<br>
+If more than one simulation run is chosen, then the results for each
+run are saved automatically in a file (to be used with the Lsd <a
+ href="mdatares.html">Analysis
+of Results</a> module, from <a href="menudata.html">menu Data</a>)
+whose
+name is composed by the configuration name and by the number of the
+seed
+generator (with the extension .res). In this way the user can know the
+seed used to produce each simulation run. After each simulation run,
+the
+system reloads automatically the configuration, setting increasing
+seeds
+for generating random numbers. Besides the results for each simulation,
+in case of multiple runs Lsd generates also a summary result file with
+the name of the configuration and the extension .tot. This result file
+can be open with the <a href="mdatares.html">Analysis of Result</a>
+module
+(from <a href="menudata.html">menu Data</a>), and contains the values
+saved
+for each simulation at the very time step of their runs. This file can
+therefore be used to perform robustness tests over the whole set of
+simulation
+runs.
+</p>
+<p>Note that if the the user requests multiple simulation runs, and
+there
+are series set to be shown in <a href="Runtime.html">Run Time Plots</a>,
+then there will be as many plots as simulation runs, possibly crowding
+the screen with hundreds of windows. In this case, either <a
+ href="#remplot">remove
+the option to plot the Run Time Plots</a> from every Variable in the
+model
+before running the set of simulations, or <a href="#remrtplot">remove
+the
+whole set of Run Time Plot windows</a> after the simulation runs (both
+commands are contained in menu Run).
+</p>
+<p>- <b><font face="Arial, helvetica">Initial seed</font></b>. Users
+can
+decide which seed to use, so that they can replicate exactly also the
+pseudo-random
+events. If more than one simulation runs have been requested, each of
+them
+will use a different seed value, starting from the one indicated here,
+and increasing of one unit.
+<br>
+The seed number is used to generate pseudo-random numbers. That is,
+a simulation run using random values will generate exactly the same
+(pseudo-)random
+values if the same seed is used.
+</p>
+<p>- <b><font face="Arial, helvetica">Simulation steps</font></b>. How
+many time steps a simulation run has to perform. After the value here
+indicated
+the simulation will stop. Note that modellers can write model's
+equations
+such that the simulation can stop even before (for example, if certain
+conditions are satisfied). Moreover, model users can stop the
+simulation
+runs using the button <b>Stop </b>in the <a href="Log.html">Log
+window
+</a>during
+a simulation.
+</p>
+<p>- <b><font face="Arial, helvetica">Insert Debugger at:</font></b>
+Make
+activate the Debugger Mode at the specified time step. When the
+simulation
+run reaches this time step, it is interrupted at the end of the
+computation
+of a Variable marked to be debugged. See <a
+ href="Browser.html#variables">here</a>
+on how to mark Variables to be debugged, and <a href="debug.html">here</a>
+for help on the Lsd debugger.
+<br>
+</p>
+<p>- <span style="font-family: arial,helvetica;"><span
+ style="font-weight: bold;">Print until Stack</span></span><b><font
+ face="Arial, helvetica">:</font></b> During a simulation the system
+determines automatically the order in which variables must be computed.
+If you want to control the exact order, you can request the system to
+print in the <a href="Log.html">Log window </a>one line for each
+variable computed. In general, a variable requested by the system to be
+computed cannot complete its equation because requires the value of
+another variable that still needs to be updated. In this case, the
+system interrupt the first variable, computes the second one, and then
+continue with the first variable. The computation of a variable
+interrupted for this reason is said to be placed <span
+ style="font-style: italic;">on the stack</span>, saving all the
+current values, to be later used when the computation continue. If you
+insert in this entry the value 1, the system will print one line for
+each variable updated because the system requested to, and not because
+another variable requested its value. That is, all the variables
+computed at <span style="font-style: italic;">stack </span>1. Setting
+a very high level, with almost certainty the system will issue a line
+for every variable computed. For more information on this see the
+documentation of the <a href="debug.html#simman">Lsd simulation manager</a>.
+</p>
+<br>
+<hr width="100%">
+<p><a name="remdebug"></a><font size="-1"><a href="#top">(Menu Run)</a></font><b>"Remove
+Debug Flags"</b>
+<br>
+<b>Shortcut: <font face="Arial, helvetica">control+f</font>.</b>
+<br>
+Remove from any Variable in the model every debug option possibly
+existing.
+See <a href="debug.html">Lsd Debugger</a> for the debugging of Lsd
+Variables.
+<br>
+</p>
+<hr width="100%"><br>
+<a name="remsave"></a><br>
+<font size="-1"><a href="#top">(Menu Run)</a><b> </b></font><b>"Remove
+Save Flags"</b>
+<br>
+<b>Shortcut: <font face="Arial, helvetica">control+g</font>.</b>
+<p>Remove from any variable in the model every save option possibly
+existing.
+If the simulation is run after having used this option, no data will be
+saved during the simulation run for <a href="mdatares.html">Analysis
+of
+Result</a> module.
+<br>
+</p>
+<hr width="100%">
+<p><a name="remplot"></a><br>
+<font size="-1"><a href="#top">(Menu Run)</a><b> </b></font><b>"Remove
+Plot Flags"</b>
+</p>
+<p>Remove from any Variable in the model every run time plot option
+possibly
+existing. If the simulation is run after having used this option the
+system
+will not create the <a href="Runtime.html">run time plot</a>.
+<br>
+</p>
+<hr width="100%">
+<p><a name="showsave"></a><font size="-1"><a href="#top">(Menu Run)</a></font><b>"Show
+elements saved"</b>
+</p>
+<p>Prints in the <a href="Log.html">Log window</a> the list of the
+Variables and Parameters whose
+values will be saved during a simulation for the <a
+ href="mdatares.html">Analysis of Results</a> after a simulation run.
+These are the elements with the <a href="Browser.html#variables">option</a>
+<span style="font-weight: bold;">Save</span> set on.<br>
+</p>
+<hr width="100%">
+<p><a name="sobs"></a><font size="-1"><a href="menurun.html#top">(Menu
+Run)</a></font><b>"Show
+elements to observe"</b>
+</p>
+<p>Prints in the <a href="Log.html">Log window</a>
+the list of the Variables and Parameters whose
+values can be worth to observe. These are the elements with the <a
+ href="Browser.html#variables">option</a> <span
+ style="font-weight: bold;">Observe</span> set on. The modeller
+indicates with this option that this element contains relevant results,
+although not all of them may be possible to actually save.<br>
+</p>
+<hr width="100%">
+<p><a name="sinit"></a><font size="-1"><a href="menurun.html#top">(Menu
+Run)</a></font><b>"Show
+elements to initialize"</b>
+</p>
+Prints in the <a href="Log.html">Log window</a>
+the list of the Variables and Parameters whose
+values need to be initialized. These are the elements with the <a
+ href="Browser.html#variables">option</a> <span
+ style="font-weight: bold;">Initialize</span>
+set on. The modeller indicates with this option that these elements
+affect the results. In many models, in fact, there are parameters or
+lagged variables that are not necessary to initialize.<br>
+<hr width="100%">
+<p><a name="remrtplot"></a><font size="-1"><a href="#top">(Menu Run)</a></font><b>"Remove
+Runtime Plots"</b>
+<br>
+Removes all the <a href="Runtime.html">run time plot</a>'s possibly
+created during previous simulation runs.
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+</body>
+</html>

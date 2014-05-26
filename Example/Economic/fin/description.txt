@@ -1,0 +1,10 @@
+Financial Market Model
+The model represents a very simple financial market, where agents submit "proposals" committing them to sell (or buy) at a given minimum (maximum) price. A market clearing system, following the Italian stock exchange mechanism (and possibly also other ones) ranks all the standing proposals and matches the best ones, disregarding the time of submission. If an agent’s proposal did not find a matching one for a transaction after a given length of time, the proposal is dropped, and the agent is free to submit a new proposal at a different price.
+
+The goal of the model is twofold: firstly, it wants to propose a skeleton for a more realistic financial market model (where, for example, agents did not choose randomly whether to sell or buy...). Secondly, the model shows several implementation techniques available in Lsd models. Basically, the model should be used as initial prototype to test and possibly gradually add new features for a full-fledged model of financial markets.
+
+See the file description.html for more details on model's content.
+
+
+
+

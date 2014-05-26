@@ -1,0 +1,403 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Marco Valente">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Lsd Use Tutorial</title>
+</head>
+<body>
+
+<center>
+<h1>
+<font size=-1><a href="TOC.html">Lsd main Manual</a></font></h1></center>
+
+<center>
+<h1>
+Using a Lsd Model</h1></center>
+
+<h2>
+Introduction</h2>
+The best way to learn to use a Lsd model is, like any software, to try
+and err. In the following is presented a brief tutorial listing the main
+steps in using a Lsd model, as guidelines to start using Lsd models.After
+this tutorial you should be able to fully exploit an existing model, and
+to explore the Lsd interfaces even in the parts not covered here. Refer
+to the <a href="TOC.html">main Lsd manual </a>for a complete description
+of the Lsd interfaces.
+<p>To run a simulation exercise with Lsd it is used:
+<ul>
+<li>
+a <b>Lsd model program</b>. This is a program mixing the C++ code implementing
+equations for the model and the general Lsd code to deal with the model.
+The modeller has created the code for the equations, and users cannot modify
+it by running the model program.</li>
+
+<li>
+a <b>model configuration</b>. This is the definition of the model prepared
+by the modeller. It contains the description in terms of entities (Objects),
+Variables and Parameters. The configuration contains also all the necessary
+information used to run a simulation: the number of Objects, the initial
+values for Parameters, the number of time steps, etc. Users can easily
+modify each of these values to test different configurations.</li>
+</ul>
+Using Lsd entails the access to several windows, and sometime the one to
+use is hidden behind other ones.
+<br>&nbsp;
+<table BORDER WIDTH="100%" >
+<tr VALIGN=TOP>
+<td><b>Step&nbsp;</b></td>
+
+<td><b>Operation</b></td>
+
+<td><b>Instr.&nbsp;</b></td>
+
+<td><b>Menu choices and Comments</b></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t1">1</a></td>
+
+<td><a NAME="l1"></a>Run the Lsd model program</td>
+
+<td>LMM</td>
+
+<td>
+<ol>
+<li>
+<b>Model/Select</b></li>
+
+<li>
+<b>Model/Run</b></li>
+</ol>
+Choose the model you want to explore, and then run the corresponding Lsd
+model program. LMM automatically starts the Lsd model program for you (ensuring
+that it has been properly compiled). The model interfaces are initially
+empty, since no configuration is loaded.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t2">2</a></td>
+
+<td><a NAME="l2"></a>Load a configuration file</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Load</b></li>
+</ul>
+A model configuration contains the model description, the initial data,
+and everything it is required to run a simulation. The modeller has prepared
+at least one configuration, while more will be created when using the model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t3">3</a></td>
+
+<td><a NAME="l3"></a>Give a first look to the model</td>
+
+<td>Lsd&nbsp;</td>
+
+<td>
+<ul>
+<li>
+See the structure of the model</li>
+
+<li>
+<b>Help/Model Help</b></li>
+
+<li>
+<b>Help/Model Report</b></li>
+</ul>
+Although you may already run a simulation, spend some time to look at how
+Lsd represents a model.
+<br>The "scheleton" of the model are Objects, elements containing Parameters,
+Variables, or other Objects. Therefore, a model is represented by a hierarchy
+of Objects, whose "top" element is conventionally called Root. Root is
+the only Object that is always present in a model with a single instance,
+while the other Objects can be multiplied in as many instances as desired.&nbsp;
+<p>It is possible to explore the model with the Browser (square window
+on the top left part of the screen), which shows one Object's content.
+This is shown with some headers and two list boxes: Variables (and Parameters)
+and the Objects contained, if any. Variables are indicated with a integer
+number (the lagged values used in the model for that Variable), and Parameters
+are indicated with the letter "P". Variables labels can also be double-clicked
+to set their options (see below).
+<br>The Browser can be moved from one Object to another double-clicking
+on the descendants of an Object (to go "down") or on the name of the Object's
+"parent" (to go "up").
+<br>When a model is loaded a graphical representation of the model is shown
+(on the right of the Browser). It is also possible to click on the symbol
+of an Object in the graphical representation of the model to move there
+with the Browser.
+<br>The <b>model help</b> contains the verbal descriptions of the elements,
+and the <b>model report</b> the actual code used for the equations and
+other relevant information on the model structure. The two documents contain
+links to each other bringing at your attention all the relevant information
+for each element of the model.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t4">4</a></td>
+
+<td><a NAME="l4"></a>Run a simulation</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Run</b></li>
+
+<li>
+Observe the Run Time Plot</li>
+</ul>
+Run a simulation exercise accepting all the default initialization defined
+by the modeller. Before running the symulation, the system issues a confirmation
+message listing the options used for the simulation.
+<br>A simulation run consist in the Lsd model manager that explores every
+Object in the model computing the equation for their Variables. The Lsd
+model manager ensures that the values Variables used in the equation of
+other Variables are updated as required, independently from the actual
+exploration of the model.
+<br>During the simulation run some Variables are plotted in a self-scaling
+window. More series are saved in the memory for later analysis. During
+a simulation it is possible to use the buttons in the Log window:
+<ul>
+<li>
+<b>Stop</b>: abort the simulation</li>
+
+<li>
+<b>Fast</b>: make run the simulation faster not issuing any message, if
+possible (minimize the Run Time Plot window for accellerating sensibly
+the simulation)</li>
+
+<li>
+<b>Observe</b>: run the simulation in normal (message issuing) mode, if
+requested by the configuration.</li>
+
+<li>
+<b>Debug</b>: interrupt the simulation when an equation marked to be debugged
+is computed. The simulation run may be resumed after that.</li>
+</ul>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t5">5</a></td>
+
+<td><a NAME="l5"></a>Analyse the results</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Data/Analysis of Results</b></li>
+</ul>
+Create graphical representations of the data produced in the simulation.
+This module can be used with the data stored in memory after a simulation
+run, or using the data previously saved on a file (choose <b>Simulation</b>
+for using the data from the latest exercise).
+<br>The overall philosophy of this module is to list the elements available
+for analysis on the left box. Some of these should be selected and moved
+to the central box for elaboration, activated with the button in the lower
+part of the window. The right box contains the list of the graphs produced.
+<br>Frequently the large number of graphs produced auses a mess to find
+one specific graph, or even the main control window. To avoid this, click
+on one of the items in the right box to pop the corresponding graph up
+in the foreground. Double-clicking any graph brings the main control window
+in the foreground.
+<br>See <a href="mdatares.html">here for the manual</a> on this topic.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t6">6</a></td>
+
+<td><a NAME="l6"></a>Interpret the results</td>
+
+<td>Netsc.</td>
+
+<td>
+<ul>
+<li>
+use Model Help and Model Report</li>
+</ul>
+Search in the documentation the elements of interest and look at their
+functioning in the model to understand the motivation for ther results
+obtained.
+<br>Notice that the equations' code in the Model Report, although obscure
+to non-Lsd programmers, contains extensive comments (in green text), translating
+the overall meaning of the code.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t7">7</a></td>
+
+<td><a NAME="l7"></a>Reload the configuration</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Reload</b></li>
+</ul>
+Reset the model to contain again the values for the beginning of the simulation.
+<br>After a simulation exercise Lsd contains in memory the values computed
+at the last time step. The system prevents the use of these values as the
+beginning of a new simulation run, and therefore a new configuration must
+be loaded.
+<br>Note that it is possible to save the model status as new configuration,
+which can be loaded to continue a simulation exercise.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t8">8</a></td>
+
+<td><a NAME="l8"></a>Edit the number of instances for the Objects</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Data/Set Number of Objects/All types of Objects</b></li>
+</ul>
+Accept or modify the number of Objects. See the <a href="mdataobjn.html">Lsd
+help on this</a></td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t9">9</a></td>
+
+<td><a NAME="l9"></a>Edit the initial values</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+Browse the model</li>
+
+<li>
+<b>Data/Init. Values</b></li>
+</ul>
+Change the initial values used to start a simulation. They concern the
+Parameters and the Variables used with lagged values. These changes are
+made on one single Object type per time, and it is necessary to insert
+one value for each Object instance. See the <a href="mdatainit.html">Lsd
+manual on this</a>.&nbsp;</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t10">10</a></td>
+
+<td><a NAME="l10"></a>Edit the simulation settings</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Sim. Settings</b></li>
+</ul>
+Choose the number of time step per simulation, the seed for the random
+generator, and number of simulation exercises to be run in a sequence (each
+with the same initialization values and different random generator seed).
+See the <a href="menurun.html#simsetting">Lsd manual on this</a>.
+<br>Note that running more than a simulation exercise cause the system
+to save the data in files.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t11">11</a></td>
+
+<td><a NAME="l11"></a>Edit the choices on which
+<br>series to save, to plot
+<br>at run time, or to debug</td>
+
+<td>Lsd&nbsp;</td>
+
+<td>
+<ul>
+<li>
+Browse the model</li>
+
+<li>
+double-click on the Variable of interest</li>
+</ul>
+For each Variables and Parameters it is possible to decide whether:
+<ul>
+<li>
+it must be included in the data saved for analysis after a simulation (<b>To
+Save</b>)</li>
+
+<li>
+it must appear in the Run Time Plot, to observe its values during the simulation
+run (<b>Run Time Plot</b>)</li>
+
+<li>
+it should cause the simulation to be interrupted immediately after its
+equation has been computed (<b>Debug)</b>. Only for Variables</li>
+</ul>
+See the <a href="Browser.html#variables">Lsd manual on this</a>.
+<br>These choices can be changed individually for each element, or can
+be set&nbsp; off for the whole model using <b>Remove ...</b> in menu <b>Run</b>.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t12">12</a></td>
+
+<td><a NAME="l12"></a>Save the configuration</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>File/Save</b></li>
+</ul>
+A modified configuration should be saved with a different name from the
+configuration loaded before the changes since, when running a simulation,
+the system overwrites the configuration file with the new initial values.</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><a href="#t13">13</a></td>
+
+<td><a NAME="l13"></a>Run the newly configured model</td>
+
+<td>Lsd</td>
+
+<td>
+<ul>
+<li>
+<b>Run/Run</b></li>
+</ul>
+It is possible that an attempt to run a modified model does not succeed.
+The system prevents running model configurations not adapt, issuing messages
+to fix the errors. For example:
+<ul>
+<li>
+model already run. The configuration is derived from the last step of a
+simulation exercise, and not from a "fresh" configuration file;</li>
+
+<li>
+data non initialized. If the number of Objects is increased, then the newly
+created instances contain Parameters and lagged Variables that must be
+initialized before they can be used for a simulation run.</li>
+</ul>
+It is also possible some configurations are initialized with non-consistent
+values, causing, for example, divisions by zero errors. The simulation
+results are, in these cases, erratic, and may even cause sudden crashes
+of Lsd. To avoid this keep always a copy of a working configuration, and
+try few changes per time.</td>
+</tr>
+</table>
+
+<br>&nbsp;
+</body>
+</html>

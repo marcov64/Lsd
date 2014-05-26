@@ -1,0 +1,21 @@
+Social Diffusion Model 
+(by Smallwood and Conlisk, 1979, "Product Quality in Markets where Consumers are Imperfectly Informed", Quarterly Journal of Economics, 93-1.)
+implemented by Marco Valente
+
+The model represents a group of consumers which are offered a group of differentiated products. A product is assigned a quality level in the form of the probability that, at any moment, a user is not satisfied with the product and wants to buy a replacement.
+
+Consumers at each time step buy one unit of product with the following criterion:
+Probability BD : choose a new product randomly, with probabilities drawn from market shares.
+Probability (1-BD): keep the current product.
+
+Besides the parameters BD, the crucial setting is a parameter, alpha, used to bias the probabilities for choosing products. Such probabilities, called Visibility, are computed as follow:
+
+Visibility_i=pow(ms_i, Delta) / sum_j(pow(ms_j, Delta))
+
+Therefore, the higher is 'alpha' the more concentrated are probabilities.
+
+The model represent a set of un-informed consumer who choose their product depending on the market shares of products fellow consumers. The original paper shows that when 'alpha' is set to 1, then the consumer concentrate always in selecting the best product (lowest BD). 
+For lower values, the products gain a market share proportional to their qualities. 
+For higher values any product may become the market monopolist, exploiting initial random fluctuations to gain ever increasing market shares.
+
+This version of the model implement the "weakly dissatisfied" version in the paper only.

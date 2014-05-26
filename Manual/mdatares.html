@@ -1,0 +1,1487 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR" content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <title>Menu Data-Analysis of Results</title></head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="TOC.html">HyperManual</a>&nbsp;&nbsp;
+<a href="windows.html">Lsd
+Windows</a>&nbsp;&nbsp; <a href="Browser.html">Main
+Browser</a>&nbsp;&nbsp; <a href="FAQs.html">Lsd FAQ's</a></font></center>
+<p><b><u><font size="+1">Menu "Data"</font></u></b> <b><i>Analysis of
+Results</i></b>
+</p>
+<p>This module permits users to analyse the data produced during a
+simulation.
+See the <a href="#introduction">Introduction</a>, or the <a href="#elements">window
+elements</a>.
+<br>
+</p>
+<p><img style="width: 795px; height: 424px;" alt="" src="anal_res.jpg"></p>
+<h2><a name="elements"></a><b>Elements of the Analysis of Results window</b></h2>
+&nbsp;
+<table border="1" cols="2" width="100%">
+  <tbody>
+    <tr valign="top">
+      <td><b>List Boxes:</b>
+      <ul>
+        <li> <a href="#Vars__Available">Series. Available</a> (and <a href="#batch_sel">filtered
+selection</a>)</li>
+        <li> <a href="#vtoplot">Series Selected</a></li>
+        <li> <a href="#graphs">Graphs</a></li>
+      </ul>
+      </td>
+      <td><b>Buttons moving list elements</b>
+      <ul>
+        <li> <a href="#in">Button '&gt;'</a></li>
+        <li> <a href="#out">Button '&lt;'</a></li>
+        <li> <a href="#sort">Buttons concerning Sorting</a></li>
+        <li> <a href="#empty">Button "Clear"</a></li>
+        <li> <a href="#add_series">Button "Add series"</a></li>
+        <li> <a href="#batch_sel">Mouse Right button</a>, add a batch
+of
+items</li>
+      </ul>
+      </td>
+    </tr>
+    <tr valign="top">
+      <td><b>Options</b>
+      <ul>
+        <li> <a href="#xscaling">Use All Cases (from case - to case -)</a></li>
+        <li> <a href="#yscaling">Y Scaling (Min Y: Max Y)</a></li>
+        <li> <a href="#y2axis">Y2 Axis</a></li>
+        <li> <a href="#title">Title</a></li>
+        <li> <a href="#yscaling">No colors</a></li>
+        <li> <a href="#grids">Grid</a></li>
+        <li> <a href="#watch">Watch</a></li>
+        <li> <a href="#ts_cs">Option "Time Series" or "Cross Selection</a>"</li>
+        <li> <a href="#seq_xy">Option "Sequence" or "XY Plot</a>"</li>
+      </ul>
+      </td>
+      <td><b>Commands</b>
+      <ul>
+        <li> <a href="#plot">Plot</a></li>
+        <li> <a href="#save">Save Data</a></li><li><a href="#printdata">Print Data</a></li>
+        <li> <a href="#statistics">Statistics</a></li>
+        <li> <a href="#postscript">Postscript</a></li>
+        <li> <a href="#lattice">Lattice</a></li>
+        <li>menu <b><a href="#exit">Exit</a></b></li>
+        <li>menu <b><a href="#help">Help</a></b></li>
+        <li>menu<b> <a href="#color">Color</a></b></li>
+        <li>menu<b> <a href="#Gnuplot">Gnuplot</a></b></li>
+      </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+&nbsp;
+<h3><a name="introduction"></a>Introduction</h3>
+During a simulation run some of the data produced are stored in memory
+(the model configuration indicates which series, Variables or
+Parameters,
+have to be saved. See the section for <a href="Browser.html#variables">Variables
+in the main Browser</a>). This data can be accessed by by means of the
+<b>Analysis
+of Result</b> module, which offers the possibility to observe the data
+in a variety of formats. The <b>Analysis of Result</b> module is
+activated
+in four different cases:
+<ol>
+  <li>From the <b><a href="menudata.html#analres">Browser</a></b>
+using
+the data produced by the latest simulation, which are stored in memory
+until a new simulation run is launched;</li>
+  <li>during a <a href="debug.html">debugging
+session</a> (button <b>Analysis</b>), when a simulation is
+interrupted;
+in this case the data are available up to the next to last simulation
+step,
+and after the analysis of (partial) result the simulation can continue;</li>
+  <li>loading the data from a file containing simulation data
+previously
+saved.
+This option is alwasy offered even when a data set is available in
+memory
+as in the previous two cases.</li>
+  <li>Loading data currently stored in the model. These series can be
+analysed only at the current time step, that is they are available with
+one value.<br>
+  </li>
+</ol>
+<p><br>
+The window for the <b>Analysis of Result </b>shows the data available
+listed in the <a href="#Vars__Available"><b>Series Available</b></a>
+list box. The series to be
+elaborated
+must be selected and moved in the central list <b>Series Selected</b>:
+all the commands concerning plotting, producing statistics or save data
+concern only the series in this box. Users can select the options
+available
+and then issue one of the following commands:
+</p>
+<ul>
+  <li> <b>graphical representations of the series.</b> The series are
+plotted
+in graphs in different arrangements according to the options chosen
+(e.g.
+time series or cross section). The graphs are shown in individual
+windows
+which are listed in the rightmost list box <b>Graphs</b>, and can be
+brought
+up in the foreground by double-clicking on their title in the list;</li>
+  <li> <b>descriptive statistics</b>, either taken over time or
+cross-section.
+They are printed in the Log window;</li>
+  <li> <b>text files</b>, containing in the columns the series
+produced. A
+variety
+of formats are available for export from Lsd, to be subsequently
+imported
+in an external package for further elaboration;</li>
+  <li> <b>postscript files</b> containing the graphical representation
+produced
+on the windows in a format suitable for inclusion in a word processor.</li>
+</ul>
+The user can set a number of options for each of the above operations.
+Therefore, each operation is made by the following actions:
+<ol>
+  <li>Empty the central list box, if necessary.</li>
+  <li>Select the series of interest in the <b>Series Available </b>list
+box,
+possibly after sorting the available series in a suitable order or
+filtering them in a particular way, and
+move
+them in the central list box <b>Series Selected</b> (button "<b>&gt;").</b></li>
+  <li>Set the options of interest (e.g. automatic scaling, color or no
+color
+graphs, type of plotting, etc.)</li>
+  <li>Issue the command (e.g. plot, statistics etc.)</li>
+  <li>If necessary, compare with the model description (e.g. the
+equation for
+the Variable plotted) available from the menu <b>Help</b></li>
+</ol>
+The module <b>Analysis of Result<i> </i></b>does not interfere with
+the
+other activities of a Lsd model program, so that it is possible, for
+example,
+to analyse the partial results during a simulation and then continue
+it.
+See <a href="#elements">the complete description </a>of the elements
+available
+in the <b>Analysis of Result </b>window.
+<br>
+<hr width="100%">
+<p><a name="Vars__Available"></a><b>Series Available</b>
+<br>
+List of the series available. The series are presented in the following
+format:
+<br>
+<b><tt><font size="+1">InstallBase 1_11 (30 - 200)</font></tt></b>
+<br>
+which contains the following information:
+</p>
+<ul>
+  <li>the name of the Variable or Parameter (<b><tt><font size="+1">InstallBase</font></tt></b>);</li>
+  <li>a code to distinguish between the same Variables or Parameters in
+different
+Objects of the model (<b><tt><font size="+1">1_11</font></tt></b>).
+This
+code contains as many digits as the hierarchical level of the Object
+containing
+the Variable, in the example the first highest level Object and the
+eleventh
+of the second level. The user can check in the model report, observable
+from the menu <b>Help</b>, where the Variable is placed.</li>
+  <li>the first and last simulation time step for which the data are
+available
+(<b><tt><font size="+1">30 - 200</font></tt></b>). In the example the
+Object
+containing this Variable has been created in the 30th time step, and
+lasted
+up to 200th time step.</li>
+</ul>
+<b><i>Sorting series</i></b>
+<br>
+The order of the series reflects the structure of the model, and
+therefore
+variables saved from the same Object are listed sequentially. For large
+models it may be useful to <a href="#sort">sort the series </a>available
+in one of the available formats.
+<p><b><i>Selection Methods</i></b>
+<br>
+From this list variables must be selected to be moved in the list of
+the <b>Series Selected</b>. using the&nbsp; <a href="#in">Button
+'&gt;'</a>.
+The labels can be selected using the mouse with the usual bindings:
+</p>
+<ul>
+  <li>&nbsp;click on one label to select it and de-select any other;</li>
+  <li>&nbsp;keep the control key pressed and click on a label to add it
+to
+the
+selection without de-selecting other ones.</li>
+  <li>&nbsp;click on a selected label to de-select it;</li>
+  <li>&nbsp;click and scroll the mouse pointer oevr the listbox to
+select all
+the labels encountered;</li>
+  <li>&nbsp;click on one label, keep the shift key pressed and click on
+another
+label to select all the labels between the two;</li>
+</ul>
+It is possible to select a group of items with the same label, and also
+filtering these according to their instance code, using the right
+button
+of the mouse on one of the labels to select. See help on the <a href="#batch_sel">batch
+selection</a> on this.
+<p><b><i>Variables' equations</i></b>
+<br>
+Clicking with the right button of the mouse while keeping the shift
+key pressed the system pops up a window showing the code for the
+variable.
+Note that if the series concern a parameter's value, this operation has
+no effect.
+</p>
+<hr width="100%"><br>
+<a name="vtoplot"></a><b>Series Selected</b>
+<br>
+This list contains the active series, to be plotted, saved, made
+statistics
+about. These series have been moved in from the <b>Series Available </b>list
+box and pressing the <b>button "&gt;"</b>.
+<br>
+The same selection rules as in listbox <b><a href="#Vars__Available">Series
+Available</a></b> apply. Pressing the <b>button "&lt;"</b> removes
+from
+this list all the selected labels.<b> </b>Pressing the button <b>Empty</b>
+removes all the series in this box, selected or not selected,
+equivalent
+to select all the labels in this box.
+<br>
+<hr width="100%">
+<p><a name="in"></a><b>Button "&gt;"</b>
+<br>
+Insert in the listbox <b>Series Selected</b> the variables selected
+in the <b>Series Available</b>.
+</p>
+<hr width="100%"><br>
+<a name="out"></a><b>Button "&lt;"</b>
+<br>
+Remove the selected labels from listbox <b>Series Selected</b>.
+<hr width="100%"><br>
+<a name="sort"></a><b>Buttons concerning Sorting</b>
+<br>
+The labels shown in the <b>Series Available</b> list box are sorted
+according to the Object that contain them, starting from the highest
+level
+Objects to the lowest ones. When there are many series it may is useful
+to list all series of the same type together, so to make easier their
+selection.
+The avaiable sorting criteria are:
+<ul>
+  <li> <b>Sort</b>: list the series according to their increasing
+label
+alphabetical
+order and to their code.</li>
+  <li> <b>Sort (end)</b>: sort the labels according to, firstly, their
+increasing
+alphabetical label order, and, secondly, then to their "end" date, the
+time step when the Object containing the Variable has been removed by
+the
+model. If no Object has been removed during the simulation, this option
+sorts the labels identically to the previous one, <b>Sort</b>. But if
+some
+Object have been removed, this sorting method shows sequentially the
+series
+with the same labels placing first the series in Objects still existing.</li>
+  <li> <b>Un-sort</b>: reproduce the original order of the series,
+with
+the ones
+contained in the highest Objects first, and then grouped according the
+Object containing them.</li>
+</ul>
+<hr width="100%">
+<br>
+<a name="empty"></a><b>Button "Clear"</b>
+<br>
+Removes all the labels from the listbox <b>Series Selected</b>.
+Equivalent
+to select all labels in the listbox and pressing button "&lt;".
+<hr width="100%"><br>
+<a name="add_series"></a><b>Button "Add series"</b>
+<br>
+Add more data series for analysis to the ones currently available,
+taken from the current model, from previously saved result files, or
+from elaborations of the
+selected series.<br>
+<br>
+<img src="choosedata.jpg" title="" alt="" style="width: 247px; height: 221px;"><br>
+By default the <span style="font-weight: bold;">Analysis of Result</span>
+module loads in the <span style="font-weight: bold;">Series Available </span>listbox
+all the series saved during the latest simulation run (that is the data
+contained in variables or parameters <a href="Browser.html#variables">marked
+to be saved</a>). Besides these data, the user can load three other
+types of data to the<span style="font-weight: bold;"> Analysis of Result</span>
+module:<br>
+<ul>
+  <li>Data from the <span style="font-weight: bold;">current
+configuration</span> of the model. These data will conventionally be
+marked as data at time step 0, and can be used to make cross-section
+graphs or statistics only, since the system can retrieve only the
+values of the elements at the current time step. Note that the system
+offers a auto-completion facility, so that the window to inser the
+label of the desired element is automatically filled in. <br>
+  </li>
+  <li>Data loaded from&nbsp; <span style="font-weight: bold;">file(s)
+of Lsd
+results</span> saved from a previous simulation run(s). This option
+loads
+the data from a files selected with the usual file selection
+method. When a file is loaded, its series will be marked by adding a
+"F" letter in the end of the label, and the file is assigned an
+increasing number, indicated in the <span style="font-weight: bold;">Log</span>
+window. This file number is also indicated in the first location of the
+tag of the series. This convention permits to differentiate from series
+produced during the last simulation run, from those data loaded from
+the file and, in case, of the different data files loaded.&nbsp; It is
+possible to also load several files, usually produced by&nbsp; <a href="file:///C:/Lsd5.5/Manual/menurun.html#simsetting">multiple runs</a>.
+  </li>
+  <li>(<span style="font-style: italic;">available only if some series
+is present in the </span><span style="font-weight: bold; font-style: italic;">Series Selected</span><span style="font-style: italic;"> listbox</span>) Data from <span style="font-weight: bold;">creation of new series</span> obtained as
+elaboration of the selected series. The system can generate a new
+series using the average, minimum, maximum or variance of the selected
+series. The user is asked to specify the label of the new variable and
+the tag. See <a href="#create_series">here for further details</a>.<br>
+  </li>
+</ul>
+<br>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"><a name="create_series"></a>Create Series</span><br>
+<img style="width: 254px; height: 531px;" alt="" src="CreateSeries.jpg"><br>
+<br>
+This option elaborates selected series creating a single new series. The existing
+series can be scanned along two dimensions:<br>
+<ul>
+  <li><span style="font-weight: bold;">Compute over series</span>: the
+new variable will be composed by as many time steps as the selected
+ones. Each time step value is computed elaborating the same time step
+values of the selected series. For example, (choosing Average) being <span style="font-style: italic;">v<sub>t</sub><sup>j</sup></span> the value
+of series <span style="font-style: italic;">j</span> (with <span style="font-style: italic;">j</span>={1, 2, ...n}) at time <span style="font-style: italic;">t</span> the new series will be computed
+as: <span style="font-style: italic;">NewSeries<sub>t</sub></span>=SUM<span style="font-style: italic;"><sub>j</sub></span><span style="font-family: symbol;">[<span style="font-style: italic;">
+    </span></span><span style="font-style: italic;">v<sub>t</sub><sup>j</sup>
+</span>]<span style="font-style: italic;"> / n</span></li>
+  <li><span style="font-weight: bold;">Compute over cases</span>: The
+new series will be composed by as many time steps as the number of
+series selected. Each value is computed elaborating all the values for
+one of the series selected across all the time steps of the series. For example, (choosing Average) being <span style="font-style: italic;">v<sub>t</sub><sup>j</sup></span> the value
+of series <span style="font-style: italic;">j</span> at time <span style="font-style: italic;">t</span> the new series will be computed,
+for the conventional time step <span style="font-style: italic;">j</span>,
+as: <span style="font-style: italic;">NewSeries<sub>j</sub></span>=SUM<span style="font-style: italic;"><sub>t</sub></span><span style="font-family: symbol;">[<span style="font-style: italic;"></span></span><span style="font-family: symbol;"><span style="font-style: italic;"></span></span><span style="font-style: italic;">v<sub>t</sub><sup>j</sup></span> ]<span style="font-style: italic;"> / m, </span>where&nbsp;<span style="font-style: italic;">m</span> is the total number of time steps of the series</li>
+</ul>
+The new series can be computed as the average, maximum, minimum,
+variance, standard deviation (multiplied by a factor) and simple count
+of the values in the series. The user must specify a label and a <span style="font-style: italic;">tag</span>, the set of digits used for Lsd
+model series used to differentiate&nbsp;for series in different
+objects.<br><br>It
+is possible to filter away data during the elaboration. For example, it
+is possible to let the calculation ignore all values below or above a
+specified value.<br>
+<br>
+<hr width="100%">
+<p><a name="graphs"></a><b>Listbox "Graphs"</b>
+<br>
+List of <a href="#graph">graphs</a> already created by means of a <a href="#plot">plot</a>
+command. Each graph is linked to one item in this listbox, where they
+appear
+with the title assigned when created, an increasing counter. Double
+clicking
+on one of the lines in the list brings the selected graph in the
+foreground.
+Graphs created directly by <a href="#Gnuplot">gnuplot</a> are reported
+in the listbox but are re-created any time their title is
+double-clicked.
+<br>
+Graphs may be destroyed (and removed from the list) either clicking
+on the item to remove with the right button of the mouse, or selecting
+it and pressing the Delete key.
+<br>
+&nbsp;
+</p>
+<hr width="100%"><br>
+<a name="summary"></a><b>"Series = n Cases = c"</b>
+<br>
+Summary information of the result file, where <b><font face="Arial, helvetica">n</font></b>
+is the number of series contained in the data available from the
+simulation
+and <b><font face="Arial, helvetica">c</font></b> is the number of
+cases
+(i.e. time steps).
+<hr width="100%"><br>
+<a name="xscaling"></a><b>"Use All Cases"</b>
+<br>
+<img src="xall.jpg" height="31" width="362"><br>
+This option tells the system to apply the commands (e.g. plotting,
+statistics, export data) to all the cases available. Set off this
+option
+in order to apply the commands to only a portion of the cases
+available.
+<br>
+<hr width="100%">
+<br>
+<a name="initendcase"></a><a name="xmanual"></a><b>"From case INIT
+to case END"</b>
+<br>
+These cells can be accessed only if the <b>Use All Cases</b> option
+is off. They indicate the first and last time step to be used for the
+different
+commands.
+<br>
+<hr width="100%">
+<br>
+<a name="scaling"></a><a name="yscaling"></a><b>"Y Self-scaling"</b>
+<br>
+<img src="yselfscaling.jpg" height="31" width="325"><br>
+If this option is checked on, the graph will automatically set the
+minimum and maximum Y according to the data observed. Set off this
+option
+to set manually the max and min Y values.
+<hr width="100%"><br>
+<a name="minmaxy"></a><b>"Min. Y - Max. Y "</b>
+<br>
+These cells can be accessed on if <b>Y Self-scaling </b>is set off.
+It sets the graph's minimum and maximum Y to the values indicated.
+<hr width="100%"><br>
+<a name="y2axis"></a><b>Y2 Axis</b>
+<br>
+<img src="y2_axis.jpg" height="23" width="265"><br>
+Only for time series graphs, it is possible to use a double Y axis.
+That is, some of the series selected will be plotted along one scale,
+and
+other series will be used on another one. These graphs are constrained
+to use the automatically determined scaling. When this option is on,
+the
+user must select a number indicating the first series to be plotted
+according
+to the second scale. All the series after the indicated series will use
+the secondary scale. Therefore, this number must be included between 2
+and the number of series in the listbox <b>Series Selected</b>.
+<p>Notice that the secondary scale is indicated among parenthesis in
+the
+Y axis (see the <a href="#y2example">example graph</a>). Pressing the
+Shift
+key, the mouse cursor over the graph indicate the position in respect
+of
+the secondary scale.
+</p>
+<hr width="100%"><br>
+<a name="title"></a><b>"Title"</b>
+<br>
+Allows users to assign a title to the graph. The title will be used
+in the list of graph and as header to the window showing it. By
+default,
+the system assigns as title name the very first variable in the list of
+the ones to be plotted.
+<hr width="100%">
+<p><a name="watch"></a><b>"Watch"</b>
+<br>
+Checkbox that, if on, refreshes all the Lsd windows during the creation
+of the graph, showing the process of graph creation. If checked off,
+the
+plot is made in background, increasing slightly the speed of producing
+the graph.
+<br>
+If checked off, users cannot access the Lsd windows during the plot
+of graphs. This is relevant because during the creation of a graph the
+user can abort the plotting (the button for <b>Plot</b> is changed in <b>Stop</b>),
+if the graph is too complex and taking too much time to be plotted.
+<br>
+</p>
+<hr width="100%">
+<p><a name="timeseries"></a><a name="plot"></a><b>Button "Plot"</b>
+<br>
+This button creates a <a href="#graphs">graph window</a> plotting the
+data from series listed in
+<b>Series Selected</b> and using the options
+for: <a href="#xscaling">Cases to Plot</a>; <a href="#yscaling">Y
+scale</a>;
+<a href="#color">Color</a>;
+<a href="#lines_points">Lines
+/ Point</a>;
+<a href="#point_size">Point size</a>; <a href="#grids">Grids</a>,
+<a href="#ts_cs">Time
+Series / Cross Section</a> option, <a href="#seq_xy">Sequence / XY
+Plotting</a>
+option.
+<br>
+The graphs produced depend on the options <b>Time Series / Cross
+Section
+</b>and
+<b>Sequence
+/ XY Plotting</b> chosen, and the number of series selected, for a
+total
+of five different types of graphs:
+</p>
+<p><i><u>Time Series &amp; Sequence&nbsp;</u></i><img src="ts_seq.jpg" height="52" width="212">
+<br>
+The standard time series plotting, where X contains the time step of
+the simulation and the series are plotted. The system automatically
+removes
+series non existing during the cases considered, or truncates as
+necessary.
+Lines connects points from the same series in different times. Note
+that
+if the number of time steps is larger than the available definition
+(640
+points) the system computes one single point (the average) for each
+datum
+falling in the same X value.
+</p>
+<p><i><u>Cross Section &amp; Sequence&nbsp;</u></i><img src="cr_seq.jpg" height="57" width="213">
+<br>
+The X axis corresponds to the series, the Y axis to their value and
+the lines with different colors correspond to a particular time step of
+the simulation. The cases to plot, and the order in which the Variables
+has to appear in the X axis, are set with a specific <a href="#crosssection">window</a>.
+It is possible to rank the series listed in the X axis according to
+increasing
+or decreasing values (at a certain time step), or to use the same rank
+as appear in the Series Selected listbox. A label below the X axis
+reports
+the number of series used. The lines connect points from the different
+series at the same time step.
+</p>
+<p><i><u>Time Series &amp; XY Plotting and <b>more than one </b>series
+selected&nbsp;</u></i><img src="ts_xy.jpg" height="54" width="219">
+<br>
+The X axis reports the values from the very first series in the window
+<b>Series
+Selected</b>. The graph will contain a line for each subsequent series,
+placing a point for each value from the first series. For example,
+suppose
+there are three series in the <b>Series Selected</b> list (X<sup>1</sup>,
+X<sup>2</sup>, and X<sup>3</sup>). The graph will contain two lines (or
+groups of points) at the coordinates (X<sup>1</sup><sub>t</sub>,X<sup>2</sup><sub>t</sub>)
+and (X<sup>1</sup><sub>t</sub>,X<sup>3</sup><sub>t</sub>), for each
+time
+step t included in the user's <a href="#xscaling">selection of cases</a>.
+The graph is produced by gnuplot (see here for details on how to manage
+the windows produced by gnuplot).
+</p>
+<p><i><u>Time Series &amp; XY Plotting and <b>one single series </b>selected&nbsp;</u></i><img src="ts_xy.jpg" height="54" width="219">
+<br>
+This graph reports the phase diagram of a series. The X axes contain
+values of the series selected, and on the Y axes are reported the
+values
+of future time. It is possible to insert a 45° line in the graph so
+to indicate the stable points (where X<sub>t</sub>=X<sub>t+1</sub>).
+The
+user is requested to insert a lag value, and a single series will be
+produced
+for each lag. For example, consider the user requesting three lags. The
+graph will contains two series at the coordinates (X<sub>t</sub>,X<sub>t+1</sub>)
+and (X<sub>t</sub>,X<sub>t+2</sub>) respectively.
+</p>
+<p><i><u>Cross Section &amp; XY Plotting</u></i><img src="cr_xy.jpg" height="52" width="218">
+<br>
+This graph considers data from a single time step. It uses the values
+from a group of series for the X values and produces lines from
+group(s)
+of other series.
+<br>
+The user is asked to specify one single time step and how many series
+will give the values for the X axis. It is necessary that the number of
+series chosen for the X axis is an exact divisor of the rest of the
+series.
+For example, if the <b>Series Selected</b> list contains 6000 series,
+the
+user can choose 1000, 2000 or 3000 as "block length". If 2000 is chosen
+(and k is the time step chosen) the system considers the values from
+the
+first 2000 series as values defining the X axis, and two other data
+sets
+(from the 2001 to 4000, and from 4001 to 6000) that will provide the Y
+values to plot. The graph will therefore contain two lines defined by
+the
+2000 points each with coordinates {(X<sup>1</sup><sub>k</sub>,X<sup>2001</sup><sub>k</sub>),
+(X<sup>2</sup><sub>k</sub>,X<sup>2002</sup><sub>k</sub>), ..., (X<sup>2000</sup><sub>k</sub>,X<sup>4000</sup><sub>k</sub>)}
+for the first series and&nbsp; {(X<sup>1</sup><sub>k</sub>,X<sup>4001</sup><sub>k</sub>),
+(X<sup>2</sup><sub>k</sub>,X<sup>4002</sup><sub>k</sub>), ..., (X<sup>2000</sup><sub>k</sub>,X<sup>6000</sup><sub>k</sub>)}
+for the second.
+<br>
+&nbsp;
+
+</p><hr width="100%"><span style="font-weight: bold;"><a name="printdata"></a>Print Data</span><br>This
+button prints in the Log window the data from the series selected. The
+data are organized in columns with&nbsp;headers indicating the names of
+the series. The data comprise the time steps indicated in the <a href="#initendcase">fiedls for initial and ending</a> cases.
+<hr width="100%"><br>
+<a name="lattice"></a><b>Lattice</b>
+<br>
+Lsd permits to plot 2D lattices, where each square is colored according
+to different values of a n x m series of data. The data must be defined
+in positive integer values (including 0) .
+<br>
+The <b>Series Selected</b> listbox must contain all the data for the
+lattice at the same time step, ranked by line. When asking for a
+lattice
+the system opens the following window:
+<center><img src="insert_lat.jpg" height="254" width="165"></center>
+<ul>
+  <li> <b>Insert time step to use</b> : insert the time step when the
+data
+must
+be used. By default the window reports the latest time step available
+for
+the data</li>
+  <li> <b>Insert number of columns</b> : the system requires to know
+the
+length
+of the lines in the lattice. For example, if the number of columns is
+40,
+then the 41st series is considered to be the first value of the second
+line.</li>
+  <li> <b>Lattice width</b> : width of the lattice plot, expressed in
+screen pixels</li>
+  <li> <b>Lattice height</b> : heigth of the lattice plot, expressed
+in
+screen
+pixels</li>
+</ul>
+If the option grid is set on, the plot will draw lines separating the
+elements
+in the lattice.
+<br>
+Note that if the total number of series selected divided by the number
+of columns does not make an integer number, then the lattice plotting
+is
+aborted.
+<hr width="100%"><br>
+<a name="Gnuplot"></a><b>Gnuplot</b>
+<br>
+<tt><font size="+1">Gnuplot</font></tt> is a package, distributed
+freely,
+for creating graphical representations of numerical series. It is a
+very
+powerful and flexible tool, which is frequently installed by default in
+Unix systems. For Windows is available <tt><font size="+1">wgnuplot</font></tt>,
+which is included in the Lsd distribution. <tt><font size="+1">Gnuplot</font></tt>
+can be run from the operative system or launched from its menu entry in
+the main <a href="#top">Analysis of Result </a>window, normally to
+operate
+on a file created with the <a href="#save">Save Data</a> command
+(remember
+to place a # before the labels' line).
+<p>Lsd uses <tt><font size="+1">gnuplot</font></tt> automatically to
+create
+the XY graphs (see <a href="#plot">plot</a> for further details). It
+is
+a three steps procedure:
+</p>
+<ol>
+  <li>create a data file and a command file with the data to use and
+the <tt><font size="+1">gnuplot</font></tt>
+commands for the desired graph; these files are located in a
+subdirectory
+of the model's own directory named plotxy_n, where n is the graph
+number
+reported in the <b>Graph</b> listbox.</li>
+  <li>execute <tt><font size="+1">gnuplot</font></tt>'s commands
+resulting
+in graph
+with a format suitable to be imported in Tcl/Tk, the graphical language
+used by Lsd.</li>
+  <li>create a standard Lsd windows for a graph importing the <tt><font size="+1">gnuplot</font></tt>
+generated graph.</li>
+</ol>
+Step 3 may be dangerous for Windows OS's. In fact, Tcl/Tk is likely to
+crash when a too large graph is created (and all of your simulation
+results
+are lost...). To avoid this a control asks users whether to skip step 3
+in case the graph appears too large (&gt; 0.5 Mb). Instead of creating
+the
+Lsd internal windows, it is possible to generate a <tt><font size="+1">gnuplot</font></tt>
+graph window, which is not related to the Lsd program. Such windows
+need
+to be closed explicitly, which is done by using a small windows created
+together with the main <tt><font size="+1">gnuplot</font></tt> graphs
+window.
+<br>
+<tt><font size="+1">gnuplot</font></tt> offers a wide set of options,
+and Lsd exploits only a small part of these. However, it is possible to
+edit the options used to create XY graphs and make them appear in the
+Lsd
+windows. See <a href="#replot_gnuplot">here</a> how to do this.
+<br>
+Users willing to create sophisticated graphs, beyond the Lsd
+possibilities,
+can save the necessary data using the <a href="#save">Save Data</a>
+command.
+Then, run <tt><font size="+1">gnuplot</font></tt> (<tt><font size="+1">wgnuplot</font></tt>
+for Windows users) from menu Help and exploit all the <tt><font size="+1">gnuplot</font></tt>
+possibilities (see the <tt><font size="+1">gnuplot</font></tt>
+extensive
+help typing "help" in the <tt><font size="+1">gnuplot</font></tt>
+editor).<br><br><br>
+<hr width="100%"><a name="gpoptions"></a><span style="font-weight: bold;">Gnuplot options</span><br>These
+options concern the terminal defined in gnuplot. The system
+automatically recognizes the operative system used, and set the values
+accordingly, although in some cases (e.g. Mac OS) there may be
+different alternatives. Normally, MS Windows users should use the
+"windows" terminal, while Linux and Mac users should use "x11".
+However, Mac users can also use "aqua".<br>The second option concern the level of detail used by gnuplot for the 3D graphs. For details see the gnuplot help for "dgrid3d".<br>
+<hr width="100%"><br><br>
+<a name="replot_gnuplot"></a><b>XY Plotting and Gnuplot (for expert
+users)</b>
+<br>
+The XY plots are generated using the gnuplot package (wgnuplot for
+Windows). Gnuplot is used in batch mode. That is, Lsd prepares the
+files
+with the data ("data.gp") and with the commands for gnuplot
+("gnuplot.lsd").
+The resulting graph ("plot.file") is exported in the terminal&nbsp; <i>tkcanvas</i>
+and
+then sourced in the Lsd own Tcl/Tk interpreter. The files generated for
+this process are kept on the disk <i>up to the closing </i>of the
+Analysis
+of Result module, during which they are removed. Users may exploit
+these
+files to run gnuplot interactively, for example generating XYZ plots,
+errorbars
+etc. For this purpose Lsd generates also a gnuplot command file
+("gnuplot.gp")
+that contains the same commands for the plot without the instructions
+for
+generating a <i>tkcanvas</i>.
+<p>Users may customize the gnuplot graphs by acting directly on the
+commands
+to gnuplot. To do this use the following steps:
+</p>
+<ol>
+  <li>Create a graph using the desired series with the <b>XY Plot </b>option
+on. This will store the data for the graph in the file 'data.gp'
+located
+in a directory called <b>plotxy_N</b>, where N is the plot number,
+descending
+from the model directory. See the <b>Model Info</b> <a href="LMM_help.html#modelinfo">in
+LMM</a> to know the model directory. The file <b>gnuplot.gp</b> will
+contain
+the gnuplot commands.</li>
+  <li>Close the window containing the generated plot.</li>
+  <li>Open with an editor (e.g. LMM itself) the file <b>gnuplot.gp</b>.</li>
+  <li>Edit and save the file <b>gnuplot.gp</b>. For example, add a
+line
+stating <tt>set
+nokey</tt> and save.</li>
+  <li>Double-click on the item in <b>Graphs</b> corresponding on the
+deleted
+graph,</li>
+</ol>
+The system will generate a new gnuplot graph applying the edited
+commands,
+in the example above will use the same options but will not print the
+legend.
+<p>Note that the graphs exported from gnuplot to Tk tend to be pretty
+large.
+Before loading them Lsd scans these files (reaching even tens of Mb's)
+and removes the duplications, leaving manageable files of few tens of
+Kb's.
+</p>
+<hr width="100%"><br>
+<a name="lines_points"></a><b>Lines / Points</b>
+<br>
+This option allows users to create graph with lines or points. Note
+that for graphs using a large number of values the lines can be just an
+approximation of the positions of the actual values.
+<hr width="100%"><br>
+<a name="point_size"></a><b>Point size</b>
+<br>
+For graphs produced by gnuplot determines the size of points. 1 is
+normal size.
+<hr width="100%"><br>
+<a name="color"></a><b>Color</b>
+<br>
+By default the graphs created with <b>Plot</b> assign differen colors
+to each series. Checking this options all series are plotted in black.
+Users can still identify each series when no color is used by using the
+mouse sensitivity features of the <a href="#graph">graph windows</a>.
+<br>
+<hr width="100%">
+<p><a name="grids"></a><b>Grids</b>
+<br>
+This option set on causes the graphs to be plotted with a grid dividing
+the space in sections of 25% each, both on the vertical and horizontal
+dimension.
+<br>
+</p>
+<hr width="100%">
+<p><a name="crosssection"></a><b>Selection of Cases for "Cross Section"
+Analysis</b>
+<br>
+When the option <a href="#ts_cs">"Cross Section"</a> is checked on
+(but in the case of XY plots), this function allows to decide the
+cases,
+i.e. the time steps, to consider as single series. It applies both for
+<a href="#plot">plots</a>
+(where one line indicates a time step over all the Variables selected)
+or for <a href="#statistics">statistics</a>, taken over the Variables
+selected
+at a given time.
+<br>
+The window below asks users the list of cases to be considered, to
+be typed and added to a list, and then the sorting.
+</p>
+<p><img src="insert_cross.jpg" align="absbottom" height="297" width="485"></p>
+<p>The leftmost section of the window contains the entry where to type
+the cases to use. Below the entry there is the list of cases already
+selected.
+</p>
+<p>The central part contains four buttons:
+</p>
+<ul>
+  <li> <b>Add</b>: include the typed case in the list of time steps
+selected.
+It is equivalent to pressing the key Enter.</li>
+  <li> <b>Delete</b>: remove from the list of time steps the elements
+currently
+highlighted</li>
+  <li> <b>Continue</b>: end the insertion of cases and continue the
+operation
+of plotting, or making statistics on, the cases selected (short cut: c).</li>
+  <li> <b>Abort</b>: abort the operation, returning to the main
+Anlysis of
+Result
+window</li>
+</ul>
+The rightmost section concerns the sorting of the Variables, to appear
+as the X axis on the cross section graph (it is ignored for the
+statistics
+command). It contains a label indicating the option currently chosen,
+which
+changes when pressing one of the three buttons:
+<ul>
+  <li> <b>Sorting Ascending</b>: the Variables will appear according
+to
+their
+increasing values at the time highlighted in the list of Time Steps
+selected
+when the button is pressed. That is, the Variable with the lowest value
+at the time indicated will appear on the left of the graph, while the
+Variable
+with the highest value at the same time step will appear on the right
+of
+the graph.</li>
+  <li> <b>Sorting Descending</b>: the Variables will appear according
+to
+their
+decreasing values at the time highlighted in the list of Time Steps
+selected
+when the button is pressed. That is, the Variable with the highest
+value
+at the time indicated will appear on the left of the graph, while the
+Variable
+with the lowest value at the same time step will appear on the right of
+the graph.</li>
+  <li> <b>No sort</b>: the order of the Variables will be the same
+used in
+the
+list of <b>Vars. to Plot</b>.</li>
+</ul>
+<p>In case you want to insert a sequence of times, to generate many
+series, there are several shortcuts:<br>
+</p>
+<ul>
+  <li><span style="font-weight: bold;">Control-f</span> (for <span style="font-style: italic;">from</span>). The value indicated will be
+used as the first time step to insert.</li>
+  <li><span style="font-weight: bold;">Control-t</span> (for <span style="font-style: italic;">to</span>). The value indicated will be
+used as the last time step to insert.</li>
+  <li><span style="font-weight: bold;">Control-x</span> . The value
+indicated will be used as step of the series. For example, starting
+from 2 and setting step 3 you will insert 2-5-8-11-14 etc, until the
+value indicated for final time.</li>
+  <li><span style="font-weight: bold;">Control-z</span> . Insert the
+series as defined. If no step value have been indicated it will use
+step 1.<br>
+  </li>
+</ul>
+<hr width="100%"><br>
+<a name="save"></a><b>Button "Save Data"</b>
+<br>
+This command exports variable values from the <b>Series Selected </b>window
+in a text file made of as many columns as the Variables chosen and as
+many
+lines as the cases indicated with the <a href="#xscaling">Cases to use</a>
+option. Two types of data files are available:
+<ul>
+  <li> <b>Lsd Result Files</b>: file contains data that can be loaded
+in a
+new
+session of Analysis of Result in Lsd</li>
+  <li> <b>Text Files</b>: file contains data in a generalized format</li>
+</ul>
+Many options are available for the the case of text files.
+<p><b><i>Labels to use</i></b><img src="lab_to_use.jpg" align="right" height="132" width="164">
+<br>
+The option "Original" leaves the same series name as in the Lsd model,
+attaching a progressive number to distinguish between different
+instances
+of the same series. This options can cause problems when Variables have
+long names and the packages meant to be used for the data treatment
+accepts
+only few characters (e.g. SPSS and Statistica use only up to 8
+characters
+for variables names). The option <b>New Names </b>allows users to
+assign
+a name that replaces the original name of the variable, and the system
+assigns a progressive number to distinguish between the different
+variables.
+For example, if the new name assigned is "Col", the series will be
+indicated
+by Col1, Col2 etc.
+<br>
+Users can add a '#' symbol before the first line indicating the
+Variable's
+labels. This is the standard for files accepted by <a href="#Gnuplot">gnuplot</a>
+which ignores the columns' headers.
+</p>
+<p><b><i>Columns delimiter&nbsp;</i></b><img src="col_delimiter.jpg" align="right" height="157" width="163">
+<br>
+Three options are available. The default is the standard Tab delimited
+file, where the column are separated by the tab character (accepted by
+most packages). The second option allows users to specify their own
+delimiter
+for columns (e.g. semicolon, spaces etc.). The last option allows users
+to create fixed length columns. This means that each column will
+contain
+exactly the spaces indicated. For variables labels (first line) the
+possible
+extra spaces are filled with spaces, while for the values are filled
+trailing
+decimal zeros.
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+<p><b><i>General Options&nbsp;</i></b><img src="gen_options.jpg" align="right" height="96" width="164">
+<br>
+Lastly, users can decide whether to have variables labels in the first
+row of the file (some packages don't accept data mixed with labels). In
+case there are missing data, users can specify the code for missing
+values.
+<br>
+&nbsp;&nbsp;</p><p></p>
+<hr width="100%"><br>
+<a name="statistics"></a><b>Button "Statistics"</b>
+<br>
+This button causes Lsd to compute few descriptive statistics on the
+variables' values selected in Vars. To Plot listbox. Depending on the
+options
+chosen, the statistics can be computed on all cases for each variable (<b>Time
+Series</b>) or single cases for all variables (<b>Cross Section</b>).
+Moreover,
+in case of time series statistics, the statistics are computed only on
+the cases set with the option for <a href="#xscaling">X self scaling</a>.
+The statistics appear in the <a href="Log.html">log
+window</a> (from which can are copied and pasted elsewhere). The
+indicators
+provided are:
+<ul>
+  <li>average;</li>
+  <li>variance;</li>
+  <li>minimum</li>
+  <li>maximum</li>
+  <li>standard deviation</li>
+</ul>
+The statistics are reported on lines containing, for time series
+statistics,
+a line for each variable and the number of cases considered:
+<br>
+<tt>Time series Descriptive Stats.</tt>
+<br>
+<tt>400
+Cases&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Average&nbsp;&nbsp; Var.&nbsp;&nbsp; Min Max Sigma</tt>
+<br>
+<tt>InstallBase 1_10 (400) 161.855&nbsp; 8811.14&nbsp; 0&nbsp; 251
+93.9852</tt>
+<br>
+<tt>InstallBase 1_18 (349) 107.845&nbsp; 1523.25&nbsp; 0&nbsp; 131
+39.0849</tt>
+<br>
+<tt>InstallBase 1_101 (26) 0.884615 0.102071 0&nbsp;&nbsp;&nbsp;
+1&nbsp;
+0.325813</tt>
+<p>The header indicates the number of cases considered in all. But, if
+the Variable lasted only few time steps, the statistics are computed
+only
+over the actual time steps it lasted. These are indicated in between
+parenthesis
+after the name and code of the Variable. In the example the first line
+concern a Variable lasting for all the 400 cases. Instead, the second
+and
+third Variable have lasted for 349 and 26 cases respectively.
+</p>
+<p>For cross section statistics, each line refers to a time step and
+reports
+the statistics over the Variables considered. Again, the computation
+consider
+only the periods of existence for the Variables:
+</p>
+<p><tt>Cross Section Descriptive Stats.</tt>
+<br>
+<tt>3 Variables&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Average Var. Min&nbsp; Max Sigma</tt>
+<br>
+<tt>Case 50
+(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;
+8&nbsp;&nbsp;&nbsp;&nbsp;
+0</tt>
+<br>
+<tt>Case 100
+(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+60 169&nbsp;&nbsp;&nbsp;&nbsp; 47&nbsp; 73&nbsp;&nbsp;&nbsp; 18.3848</tt>
+<br>
+<tt>Case 370 (3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7.667 10422.2&nbsp; 1 251&nbsp;&nbsp; 125.033</tt>
+</p>
+<p>In the example above the statistics requested concern three
+Variables
+and three time steps, 50, 100 and 370. In between parenthesis is
+reported
+how many Variables existed in each case (1, 2 and 3).
+<br>
+</p>
+<hr width="100%"><br>
+<a name="exit"></a><b>Menu "Exit"</b>
+<br>
+Exits the Analysis of Result and return to the Lsd Browser window or
+to the Debugger window. All graphs are lost when the module Analysis of
+Results is closed.
+<hr width="100%"><br>
+<a name="ts_cs"></a><b>Option "Time Series" or "Cross Section"</b>
+<br>
+This option allows to consider <a href="#plot">plots</a> and <a href="#statistics">statistics</a>
+as time series or cross section analysis. In the <b>Time Series</b>
+case
+the data used are all the values in the <a href="#xscaling">range of
+cases
+</a>specified
+by the user (automatically excluding missing values) and the analysis
+consider
+a data set as the values produced by one Variable across the time
+steps.
+In the <b>Cross Section</b> case the user is requested to specify one
+or
+more time steps (series including missing values at that time step are
+automatically excluded). In this case a data set is given by the values
+of different Variables at the same time step.
+<p>For plotting graphs the results depend also on the option <b>Sequence
+/ XY Plot</b> (see <a href="#seq_xy">here</a>). See help on <a href="#plot">plot</a>
+for further details.
+</p>
+<hr width="100%"><br>
+<a name="seq_xy"></a><b>Option "Sequence / XY Plots"</b>
+<br>
+This option allows to consider alternatively <a href="#plot">plots</a>
+of a sequence of values or as a XY mapping. The case of <b>Sequence</b>
+consider each data set as identical to the others. Instead, the case of
+<b>XY
+Plots</b> consider one data set as to be placed on the X axis of the
+graph
+and the other(s) to be plotted as corresponding Y's.
+<br>
+The actual type of graph depends also on the option <b>Time Series</b>
+/ <b>Cross Section (</b>see <a href="#ts_cs">above</a> or on
+<a href="#plot">help
+on plot</a> for further details).
+<br>
+In the following is discussed the case of <b>XY Plots</b>.
+<ul>
+  <li>In case of <b>Time Series</b> the X axis will be occupied by the
+values
+of the very first entry in the list of the <b>Series Selected</b>. and
+the graph will consider as separate data sets any other series. For
+example,
+suppose there are three series in the <b>Series Selected</b> list, X<sup>1</sup>,
+X<sup>2</sup>, and X<sup>3</sup> The graph will contain two lines (or
+groups
+of points) at the coordinates (X<sup>1</sup><sub>t</sub>,X<sup>2</sup><sub>t</sub>)
+and (X<sup>1</sup><sub>t</sub>,X<sup>3</sup><sub>t</sub>), for each
+time
+step t included in the user's <a href="#xscaling">selection of cases</a>.</li>
+</ul>
+<ul>
+  <li>In case of <b>Cross Section</b>, the user will be asked to
+specify one
+single time step and how many series will give the values for the X
+axis.
+It is necessary that the number of series chosen for the X axis is an
+exact
+divisor of the rest of the series. For example, if the <b>Series
+Selected</b>
+list contains 6000 series, the user can choose 1000, 2000 or 3000 as
+"block
+length". If 2000 is chosen (and k is the time step chosen) the system
+considers
+the values from the first 2000 series as values defining the X axis,
+and
+two other data sets (from the 2001 to 4000, and from 4001 to 6000) that
+will provide the Y values to plot. The graph will therefore contain two
+lines defined by the 2000 points with coordinates {(X<sup>1</sup><sub>k</sub>,X<sup>2001</sup><sub>k</sub>),
+(X<sup>2</sup><sub>k</sub>,X<sup>2002</sup><sub>k</sub>), ..., (X<sup>2000</sup><sub>k</sub>,X<sup>4000</sup><sub>k</sub>)}
+for the first series and&nbsp; {(X<sup>1</sup><sub>k</sub>,X<sup>4001</sup><sub>k</sub>),
+(X<sup>2</sup><sub>k</sub>,X<sup>4002</sup><sub>k</sub>), ..., (X<sup>2000</sup><sub>k</sub>,X<sup>6000</sup><sub>k</sub>)}
+for the second.</li>
+</ul>
+Note that the XY graphs are not generated by Lsd directly but are
+imported
+from <tt>gnuplot</tt>, a graphical package. Only few of the options
+offered
+by <tt>gnuplot</tt> are exploited in the Lsd <b>Analysis of Result </b>options.
+See the <a href="#replot_gnuplot">instructions
+</a>to apply different <tt>gnuplot</tt>
+commands to your Lsd graphs.
+<hr width="100%"><br>
+<a name="postscript"></a><b>Button "Postscript"</b>
+<br>
+This function allows to save a graph as postcript file, which is a
+standard format for graphical pictures. These files can be printed (to
+postcript printers) or included in documents.
+<br>
+Users are requested to specify which graph they want to save, by
+selecting
+one in the Graphs list. The following options are available:
+<ul>
+  <li> <b>Include graph labels:</b> include in the file the labels for
+the
+series.</li>
+  <li> <b>Color or Gray</b>: produces a color or gray shades postcript
+file</li>
+  <li> <b>Landscape or Portrai</b>: produces a horizontal- or
+vertical-riented
+postscript file</li>
+  <li> <b>Dimension</b>: allows users to define the width (in
+millimeters)
+of
+the picture in the postcript file</li>
+  <li> <b>filename</b>: choose the file name for the picture</li>
+  <li> <b>Choose file</b>: allows users to modify the name of the file
+and
+its
+directory</li>
+</ul>
+<hr width="100%">
+<br>
+<a name="graph"></a><b>Graph Windows</b>
+<br>
+The graphs produced during a <b>Analysis of Result</b> session are
+listed in the <a href="#graphs">right-most list</a> in the main <a href="#top">Analysis
+of Results</a> window. They are independent windows that are destroyed
+once the <b>Analysis of Result</b> session is closed. Graph windows
+can
+be removed by clicking with the right button of the mouse in the <b>Graphs</b>
+listbox in the main window, or selecting it and pressing the Delete
+key.
+<br>
+The plots produced with the commands <a href="#plot">Plot </a>are
+endowed
+with a series of features that semplify their use and reading (some of
+these features are not available for graphs produced using the<b> <a href="#seq_xy">XY
+Plot</a> </b>option on). Of course, windows produced by <a href="#Gnuplot">gnuplot</a>
+do not share such features.
+<br>
+<img src="example_graph.jpg" height="465" width="652">
+<p>The example above is a (time series) plot where the series have been
+selected as the only Objects surviving at a given time (using the
+option
+<a href="#sort">Sort
+(end)</a> ), with colors and no grids.
+<br>
+These windows are sensitive to the mouse passing over them: the bottom
+part of the window prints the series over which the mouse is positioned
+(<tt><font size="+1">InstallBase 1_5 </font></tt>in the example), the
+X value
+(<tt><font size="+1">Case num: 208</font></tt>) and the Y value (<tt><font size="+1">Y
+value: 310.3831</font></tt>). This sensitivity permits to read a graph
+containing very many series, even when using the
+<a href="#color">no color
+option</a>.
+</p>
+<p>Graphs can be improved adding new labels and modifying existing
+ones:
+</p>
+<ul>
+  <li> <b>Click and drag </b>one of the existing label moves them
+around
+the graphs;</li>
+  <li> <b>Click the right button </b>of the mouse over one label to
+edit
+its text,
+dimension,&nbsp; font and color.</li>
+  <li>Press the <b>Shift key and Click</b> to create a new label;</li>
+</ul>
+<a name="y2example"></a>With this option it is possible to create fancy
+graphs. In the following example a two-scales graphs enjoys edited
+labels,
+repositioned and recolored.
+<p><img src="ex_piccolo.JPG" height="276" width="567"></p>
+<p>Frequently a user produces quite many graphs, and the screen becomes
+easily crowded of graphs. To move easibly among the graph windows the
+user
+can exploit two features:
+</p>
+<ul>
+  <li>double-clicking on the label of one graph the listbox <b>Graphs</b>
+in
+main <b>Analysis of Result</b> control window brings that graph in the
+foreground.</li>
+  <li>double-clicking on a graphs window brings the main <b>Analysis
+of
+Result</b>
+control windows in the foreground.</li>
+</ul>
+<hr width="100%">
+<br>
+<a name="help"></a><b>Menu Help</b>
+<br>
+This menu offers three elements
+<ul>
+  <li>A<b>nalysis of Results - Help</b>. Show this help page</li>
+  <li> <b>Model Report</b> show the model report, containing model
+structure.
+See the <a href="menuhelp.html#modelreport">help
+on the model report</a>.</li>
+  <li> <b>Model Help</b> show the model help, containing the
+modeller's
+comment
+on the model. See the <a href="menuhelp.html#modelreport">help
+on the </a><a href="menuhelp.html#modelhelp">model
+help</a>.</li>
+</ul>
+<hr width="100%">
+<br>
+<a name="color"></a><b>Menu Color</b>
+<br>
+Users can set personal colors to use for the first 20 series
+(subsequent
+series are plotted in black). Choosing the menu entry "Set colors" a
+new
+window shows the colors currently used. Click on one of the colors to
+modify
+it. Only the graphs produced after the color change are affected.
+<br>
+Choose "Default colors" to reset the initial colors.
+<br>
+&nbsp;
+<hr width="100%"><br>
+<a name="batch_sel"></a><b>Batch Selection</b>
+<br>
+When users need to select many series in the listboxes <span style="font-weight: bold;">Series Available</span> and <span style="font-weight: bold;">Series Selected</span> it is possible to
+click on one label with the right button of the mouse in order to use a
+general criterion to operate with a whole set of series with that
+label. In the example below the mouse was clicked with the right button
+of the mouse on the label <span style="font-weight: bold;">HerfEval</span>.<br>
+<br>
+<img alt="" src="add_batch.jpg" style="width: 331px; height: 433px;" align="middle"><br>
+<br>
+There are three possible criteria:<br>
+<ul>
+  <li><span style="font-weight: bold;">Select all the series</span>:
+select all the series with the chosen label.</li>
+  <li><span style="font-weight: bold;">Select for series' tags:</span>
+series are associated with tags containing as many numbers as the
+hierachy of objects containing them. In the example, the variable <span style="font-weight: bold;">HerfEval</span> is located in an object in
+the third hierarchical level, and therefore you need two digits to
+indicate the exact copy of the object containing it: one for the second
+layer and one for the third layer (the first layer is <span style="font-weight: bold;">Root</span> which is present with only one
+copy). Choosing this criterion, the user can place one value in one of
+the cells (only one) and the system will select all the series
+respecting the condition in respect of the indicated number in the
+tag's position indicated by the cell.</li>
+  <li><span style="font-weight: bold;">Select for values of another
+series</span>: it is possible to select the series in respect of the
+values that another series in the same object takes at a given time
+step. The user needs to indicate the label of the other series, the
+time step to be used, and the value to be used for comparison. The
+condition indicates the criterion by which to compare the value of the
+selecting series.<br>
+  </li>
+</ul>
+Inserting no values in the cells the system will add all the copies
+of the label ("numLinkA" in the example) in the <a href="#vtoplot">Series
+Selected</a> listbox. Inserting one value, the system will insert only
+the copies having the inserted value in the position of the cell used. <br>
+<br>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"><a name="3dCrossSection"></a>
+Cross-section Scatter plots</span><br>
+This option is activated when the user selects <span style="font-weight: bold;">Cross-Section</span> in the <a href="#ts_cs">Time Series/Cross-section</a> option and <span style="font-weight: bold;">XY-graphs</span> in the <a href="#seq_xy">Sequence/XY-graph</a>
+option and press the button <a href="#plot">Plot</a>.
+The graph generated will be a scatter plot built with points composed
+from data in the series selected at a specific time. That is, from each
+series selected the system extracts one value at the specified time.
+The graph can be composed by points or line as indicated by the option
+on the main Analysis of Results window. These values are re-arreanged
+to generated 2 or more variables: one or two independent ones (for 2D
+or 3D graphs respectively), and one or more dependent ones.<br><br>Users
+need to provide the number of series that must be plotted, which depend
+on the number of series selected (call it M), the number of indepedent
+series (say N) and whether the graph will be 2D or 3D.<br><br>The
+series selected are considered sequentially, according to the order
+used in the Series Selected listbox. The M series used will be divided
+in N+1, for 2D graphs or N+2 blocks containing an identical number of
+series. The first block (for 2D) or the first two (for 3D) will be
+considered the values for the independent variable(s), used for the
+horizontal axis or plane. The remaing series will be the dependent
+ones, appearing on the vertical axis.<br><br>For example, suppose you
+selected 120 series. If N=2, that is, there are two dependent series to
+plot, if you choose a 2D each variable in the graph will contain 40
+points. If you select a 3D graph each variable in the graph will
+contain 30 points.<br><br>
+<img alt="" src="cd3Dcs.jpg" style="width: 179px; height: 361px;" align="middle"><br>
+<br>The user must provide the following information:<br><span style="font-weight: bold;">Time step</span>:
+Time step of the values to extract from the series selected. Series
+whose initial and final time of existence is 0 (conventional values
+indicatating that the series is actually composed by a single value)
+will always used that value, irrrespective of the time step indicated.<br><br><span style="font-weight: bold;">2D or 3D</span>: generate a plot in 2 or 3 dimensions.<br><br><span style="font-weight: bold;">3D options</span>:
+For 3D graphs only gnuplot offers the possibility to use "gridded"
+data. Instead of considering the actual values, gnuplot will divide the
+plane of the independent variables in equally spaced squares,
+interpolating the values in those squares. In case of gridded data it
+is possible to replace the lines or points with a colored surface.<br><br><span style="font-weight: bold;">Number of independent variables</span>:
+the user must indicate how many&nbsp;dependent variables must appear in
+the graph, generating as many lines (or surfaces) as a function of the
+independent ones.<br><br style="font-weight: bold;"><span style="font-weight: bold;">Num. of points</span>:
+for control only, the system indicates the number of points on the
+independent variable (or plane) can be constructed with the options
+indicated.<br><br><span style="font-weight: bold;">Window type</span>:
+the graph generated can be placed either into a normal Lsd graph
+window, or as an external window managed by gnuplot. The latter has
+normally better quality and many features (e.g. it is possible to
+rotate 3D graphs), but cannot be exported as with the Lsd windows. <br><br><br>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"><a name="3dTime"></a>3D Time Series Graphs</span><br>
+This option is activated when the user selects <span style="font-weight: bold;">Time Series</span> in the <a href="mdatares.html#ts_cs">Time Series/Cross-section</a> option, <span style="font-weight: bold;">XY-graphs</span> in the <a href="mdatares.html#seq_xy">Sequence/XY-graph</a>
+option, and 3 or more series appear in the <span style="font-weight: bold;">Series
+Selected</span> listbox. and press the button <a href="mdatares.html#plot">Plot</a>.
+The graph will consider the first two series as independent variables
+plotted on a horizontal plane and the subsequent series as
+dependent variables plotted on the vertical axis. The user is requested
+to choose between a 2D graph with multiple dependent variables or a 3D
+graph with one or more independent variables. The same options as for
+the <a href="#3dCrossSection">Cross-Section 3D graphs </a>apply.<br><br><br><img style="width: 179px; height: 280px;" alt="" src="cd3Dts.jpg"><br><br>The same options as for
+the <a href="mdatares.html#3dCrossSection">Cross-Section 3D graphs </a>apply.
+The additional option concern the possibility to generate 3D graphs
+using the time as one of the independent variables, while the first
+series selected will be the other variable on the plane of the graph.<br><br>
+<br>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;"><a name="3DOptions"></a>3D Graphs options</span><br>
+There a many ways to customize a 3D graph, giving the flexibility
+offered by gnuplot. Unfortunately, they are less than obvious, and so
+in this section we present how&nbsp; Lsd user can easily modify the
+most relevant aspects of a 3D graph. The graphs appear in a window that
+can be closed clicking on the button <span style="font-weight: bold;">Ok</span>
+in a small window telling <span style="font-weight: bold;">Click to
+close</span>.<br>
+<br>
+Lsd generates surface graphs, either with a color or a gray scale, like
+the one depicted below.<br>
+<br>
+<img alt="" src="ex3dsurface.jpg" style="width: 952px; height: 690px;"><br>
+<br>
+<br>
+<br>
+Such image can be rotated by clicking with the main button of the mouse
+and moving it across the image. For example, you can immediately
+observe the next image.<br>
+<br>
+<img alt="" src="ex3dsurface1.jpg" style="width: 952px; height: 690px;"><br>
+<br>
+In order to export such graphs there is not, unfortunately, a direct
+way. You need to click with the mouse over the bar topping the window
+containing the graph. From there choose the option to <span style="font-weight: bold;">Copy to clipboard</span> the image. Then
+you can past the image in a graphical package, for exampe <span style="font-weight: bold;">Paint</span> in Windows (menu Accessories),
+and save the image with your preferred format.<br>
+<br>
+In order to access more sophisticated options you need to know how Lsd
+uses gnuplot. When a gnuplot graph needs to be produced, Lsd generates
+a new directory and places there several files. One file is called <span style="font-family: monospace;">data.gp</span>, containing the values
+used for the graph. The other two files <span style="font-family: monospace;">gnuplot.gp</span>and <span style="font-family: monospace;">gnuplot.lsd</span>, contain the
+commands to gnuplot in order to elaborate the data. Lsd generates a new
+graph anytime you double click on the name of the graph using the
+commands contained in <span style="font-family: monospace;">gnuplot.gp</span>.
+Therefore, in order to generate a modified 3D graph you need to:<br>
+<ol>
+  <li>Generate the graph with the default options.</li>
+  <li>Close the newly generated window with the graph.</li>
+  <li>Opening the file <span style="font-family: monospace;">gnuplot.gp</span>
+with any text editor (for example, with LMM), considering that the
+directory containing it is called <span style="font-family: monospace;">plotxy_N</span>
+where <span style="font-family: monospace;">N</span> is the number of
+graph.</li>
+  <li>Edit the <span style="font-family: monospace;">gnuplot.gp</span>
+file</li>
+  <li>Double-click on the name of the graph in the <span style="font-weight: bold;">Graph</span> listbox in the main <span style="font-weight: bold;">Analysis of Result</span> window of Lsd.</li>
+</ol>
+<br>
+Here are the options available:<br>
+<ul>
+  <li><span style="font-family: monospace;">set xlabel</span> :
+determines the label for the X axis. The same command works for the <span style="font-family: monospace;">ylabel</span> and <span style="font-family: monospace;">zlabel</span>.</li>
+  <li><span style="font-family: monospace;">set dgrid3d 30,30,4</span>
+: this command determines the definition of the graph. The first two
+values (30,30 by default) indicate the number of segments used on the X
+and Y axis. The higher this number the more precise is the graph (and
+the heavier is the memory requirements). The third value (4 by default)
+indicates the approximation for the Z values. The higher the closer.</li>
+  <li><span style="font-family: monospace;">set pm3d</span> : draws a
+surface connecting the points of the series. This is set by default.
+Removing this line you generate a graph made only of lines or dots (as
+indicated in the option <a href="#lines_points">Lines/Points</a> in
+the main <span style="font-weight: bold;">Analysis of Results</span>
+window. For example, using the <span style="font-weight: bold;">Lines</span>
+option you would obtain:</li>
+</ul>
+<img alt="" src="ex3dsurface3.jpg" style="width: 606px; height: 432px;"><br>
+<br>
+<ul>
+  <li><span style="font-family: monospace;">set palette gray</span>
+or&nbsp; <span style="font-family: monospace;">set palette color</span>
+: generate the surface in gray shades or colors (only if the option <span style="font-family: monospace;">set pm3d </span>is present). <br>
+    <span style="font-family: monospace;"></span></li>
+  <li><span style="font-family: monospace;">set grid </span>:&nbsp;
+uses a grid for the plane X-Y</li>
+</ul>
+After all the options have been given, there is the main command to
+plot the series. The command indicates the file name from which to take
+the data, the columns to use, and other options. For example, in order
+to plot the two series in the example graphs the command is:<br>
+<span style="font-family: monospace;">splot 'data.gp' using 1:2:3 with
+lines t "z1(1)", 'data.gp' using 1:2:4 with lines t "z2(1)"</span><br>
+<br>
+where: <br>
+<ul>
+  <li><span style="font-family: monospace;">splot</span>: is the
+command for a 3D graph</li>
+  <li><span style="font-family: monospace;">'data.gp'</span>: is the
+data file</li>
+  <li><span style="font-family: monospace;">using 1:2:3</span> : is the
+command sayng that the surface must use the data in columns 1 and 2 for
+the independent variables, and 3 for the dependent variable.</li>
+  <li><span style="font-family: monospace;">with lines</span> :
+indicates to use lines to connect the points. Alternatievely, one can
+be <span style="font-family: monospace;">points</span>, or <span style="font-family: monospace;">pm3d</span> for the surface only (but,
+in the case, you need the option <span style="font-family: monospace;">set
+pm3d</span>). <br>
+  </li>
+  <li><span style="font-family: monospace;">t "my tytle" </span>:
+indicates the title for the series. To omit the title set <span style="font-family: monospace;"><span style="font-family: monospace;">t
+""</span></span><br>
+  </li>
+</ul>
+<br>
+For further information on gnuplot, open an interactive console of
+gnuplot by choosing it in the main <span style="font-weight: bold;">Analysis
+of Result</span> window.<br>
+<br>
+</body></html>

@@ -1,0 +1,14 @@
+Literature Models
+
+Lsd implementations of few models widely known in the literature.
+
+The group of Literature models include:
+- Nelson and Winter, 1982
+- NK Fitness Landscape, Kauffman
+- B.Arthur network externality model
+- Artificial Life; CA imitating their neighbours
+- Coordination game
+- Lotka-Volterra (discrete prey-predator model)
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

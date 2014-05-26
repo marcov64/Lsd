@@ -1,0 +1,6 @@
+Prey and Predator Model
+(Intermdiate complexity. Old equation grammar)
+
+The model represents two populations of a prey and a predator, Sheep and Wolfs.
+Sheep enjoy higher reproduction rates, but suffer both from hunting and from limited food. Wolfs depend for the food on the availability of sheep, otherwise they die just by age.
+

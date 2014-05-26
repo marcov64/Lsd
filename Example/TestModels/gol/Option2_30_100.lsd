@@ -1,0 +1,192 @@
+	
+Label Root
+{
+	Son: Lattice
+	Label Lattice
+	{
+		Son: Option
+		Label Option
+		{
+			Param: Id
+			Param: num
+			Param: prob
+			Param: glob
+
+		}
+
+		Son: Row
+		Label Row
+		{
+			Son: Cell
+			Label Cell
+			{
+				Var: State
+				Param: Col
+
+			}
+
+			Param: Line
+
+		}
+
+		Var: up
+		Var: down
+		Var: left
+		Var: right
+		Var: Init
+		Param: NCol
+		Param: NLine
+		Param: NState
+		Param: Elas
+		Var: Choose
+		Param: minprob
+		Param: UnitProb
+		Param: width
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Lattice C	1
+Var: up 0 n + n n
+Var: down 0 n + n n
+Var: left 0 n + n n
+Var: right 0 n + n n
+Var: Init 0 n + d n
+Param: NCol 0 n + n n	100
+Param: NLine 0 n + n n	30
+Param: NState 0 n + n n	2
+Param: Elas 0 n + n n	2
+Var: Choose 0 n + d n
+Param: minprob 0 n + n n	0
+Param: UnitProb 0 n + n n	10
+Param: width 0 n + n n	0
+
+Object: Option C	2
+Param: Id 0 n + n n	0	1
+Param: num 0 n + n n	0	0
+Param: prob 0 n + n n	0	0
+Param: glob 0 s + n p	0	0
+
+Object: Row C	1
+Param: Line 0 n + n n	1
+
+Object: Cell C	1
+Var: State 1 n + n n	1
+Param: Col 0 n + n n	1
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 2000
+EQUATION fun_life.cpp
+ MODELREPORT     modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Lattice
+(no description available)
+END_DESCRIPTION
+
+Object_Option
+(no description available)
+END_DESCRIPTION
+
+Parameter_Id
+(no description available)
+END_DESCRIPTION
+
+Parameter_num
+(no description available)
+END_DESCRIPTION
+
+Parameter_prob
+(no description available)
+END_DESCRIPTION
+
+Parameter_glob
+(no description available)
+END_DESCRIPTION
+
+Object_Row
+(no description available)
+END_DESCRIPTION
+
+Object_Cell
+(no description available)
+END_DESCRIPTION
+
+Variable_State
+(no description available)
+END_DESCRIPTION
+
+Parameter_Col
+(no description available)
+END_DESCRIPTION
+
+Parameter_Line
+(no description available)
+END_DESCRIPTION
+
+Variable_up
+(no description available)
+END_DESCRIPTION
+
+Variable_down
+(no description available)
+END_DESCRIPTION
+
+Variable_left
+(no description available)
+END_DESCRIPTION
+
+Variable_right
+(no description available)
+END_DESCRIPTION
+
+Variable_Init
+(no description available)
+END_DESCRIPTION
+
+Parameter_NCol
+(no description available)
+END_DESCRIPTION
+
+Parameter_NLine
+(no description available)
+END_DESCRIPTION
+
+Parameter_NState
+(no description available)
+END_DESCRIPTION
+
+Parameter_Elas
+(no description available)
+END_DESCRIPTION
+
+Variable_Choose
+(no description available)
+END_DESCRIPTION
+
+Parameter_minprob
+(no description available)
+END_DESCRIPTION
+
+Parameter_UnitProb
+(no description available)
+END_DESCRIPTION
+
+Parameter_width
+(no description available)
+END_DESCRIPTION
+

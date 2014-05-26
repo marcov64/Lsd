@@ -1,0 +1,128 @@
+	
+Label Root
+{
+	Son: Lattice
+	Label Lattice
+	{
+		Son: Worm
+		Label Worm
+		{
+			Son: Segment
+			Label Segment
+			{
+				Param: IdSegment
+				Var: Direction
+				Var: row
+				Var: col
+				Var: Move
+
+			}
+
+			Param: NSegment
+
+		}
+
+		Param: Nrow
+		Param: Ncol
+		Var: init
+		Var: Wait
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Lattice C	1
+Param: Nrow 0 n + n n	100
+Param: Ncol 0 n + n n	100
+Var: init 0 n + n n
+Var: Wait 1 n + n n	0
+
+Object: Worm C	10
+Param: NSegment 0 n + n n	15	15	15	15	15	15	15	15	15	15
+
+Object: Segment C	15	15	15	15	15	15	15	15	15	15
+Param: IdSegment 0 n + n n	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
+Var: Direction 1 n + d n	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6	6
+Var: row 1 n + n n	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20	20
+Var: col 1 n + n n	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34
+Var: Move 0 n + d n
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION fun_Worm.cpp
+ MODELREPORT                                       modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Lattice
+(no description available )
+END_DESCRIPTION
+
+Object_Worm
+(no description available )
+END_DESCRIPTION
+
+Object_Segment
+(no description available )
+END_DESCRIPTION
+
+Parameter_IdSegment
+(no description available)
+_INIT_
+ All 150 instances increasing from 1 with steps 1 re-starting for each group of Objects.
+END_DESCRIPTION
+
+Variable_Direction
+(no description available)
+_INIT_
+ All 150 instances equal to 6.
+END_DESCRIPTION
+
+Variable_row
+(no description available)
+END_DESCRIPTION
+
+Variable_col
+(no description available)
+END_DESCRIPTION
+
+Variable_Move
+(no description available)
+END_DESCRIPTION
+
+Parameter_NSegment
+(no description available)
+_INIT_
+ All 10 instances equal to 15.
+END_DESCRIPTION
+
+Parameter_Nrow
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Ncol
+(no description available)
+END_DESCRIPTION
+
+Variable_init
+(no description available)
+END_DESCRIPTION
+
+Variable_Wait
+(no description available)
+END_DESCRIPTION
+

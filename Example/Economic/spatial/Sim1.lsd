@@ -1,0 +1,302 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Son: Demand
+		Label Demand
+		{
+			Son: Consumer
+			Label Consumer
+			{
+				Var: Purchase
+				Param: LocationC
+
+			}
+
+
+		}
+
+		Son: Supply
+		Label Supply
+		{
+			Son: Firm
+			Label Firm
+			{
+				Param: IdFirm
+				Param: LocationF
+				Param: Sales
+				Param: Prob
+				Param: Quality
+				Var: SmoothSales
+
+			}
+
+			Var: Shopping
+			Param: alpha
+			Param: parSmooth
+
+		}
+
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	1
+
+Object: Demand C	1
+
+Object: Consumer C	300
+Var: Purchase 1 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: LocationC 0 n + n n	0.415999	0.0919649	0.75641	0.5297	0.930436	0.383502	0.653919	0.0668422	0.72266	0.671149	0.383416	0.631635	0.884707	0.519416	0.651519	0.237774	0.262453	0.762198	0.753356	0.909208	0.0726859	0.27271	0.897656	0.274907	0.516292	0.359265	0.247039	0.486517	0.846167	0.830965	0.0345721	0.991037	0.679296	0.766495	0.0605643	0.384142	0.477732	0.947764	0.934693	0.904653	0.319033	0.701191	0.00769819	0.365339	0.266145	0.986642	0.277082	0.629543	0.166507	0.736082	0.436411	0.98255	0.736225	0.233195	0.0907329	0.504523	0.493977	0.050084	0.464446	0.526929	0.412081	0.306322	0.910321	0.770205	0.529747	0.537304	0.588977	0.686773	0.913817	0.178328	0.888572	0.827817	0.500707	0.571655	0.0330538	0.269317	0.725412	0.513274	0.890737	0.748293	0.212752	0.0474645	0.84204	0.554584	0.802406	0.0534616	0.0029996	0.688455	0.0158677	0.239911	0.591114	0.624849	0.417486	0.467917	0.415395	0.681346	0.53445	0.0268763	0.31754	0.125365	0.328234	0.845576	0.0737491	0.845982	0.556146	0.147533	0.590109	0.652059	0.999458	0.351015	0.868247	0.983305	0.488515	0.841511	0.414293	0.387725	0.94098	0.761514	0.15372	0.14182	0.803073	0.70982	0.180896	0.955361	0.651254	0.252126	0.159768	0.20325	0.274588	0.426497	0.629269	0.901673	0.130427	0.247842	0.886991	0.0921736	0.148152	0.162199	0.142021	0.135109	0.455307	0.385815	0.126712	0.349524	0.464031	0.4523	0.215248	0.947487	0.0283752	0.587187	0.564899	0.471262	0.199757	0.908922	0.49848	0.600394	0.150335	0.931674	0.755844	0.621634	0.951367	0.250126	0.410313	0.131189	0.632739	0.885648	0.365339	0.651646	0.289316	0.287212	0.414028	0.954415	0.702207	0.389314	0.808945	0.476432	0.462245	0.679592	0.499741	0.80072	0.715642	0.729748	0.0909903	0.253057	0.987145	0.126031	0.85127	0.961095	0.440039	0.706535	0.524987	0.71471	0.865883	0.682049	0.741716	0.463323	0.916634	0.43933	0.215532	0.817561	0.31925	0.955409	0.199555	0.514659	0.890019	0.537426	0.408767	0.876566	0.211519	0.80665	0.886031	0.630488	0.103434	0.632639	0.773352	0.824697	0.881504	0.000879	0.86086	0.139195	0.667679	0.450347	0.315732	0.439726	0.0945488	0.727335	0.989362	0.488943	0.0190924	0.205262	0.61635	0.688981	0.543948	0.999117	0.213547	0.95216	0.467532	0.764005	0.417724	0.153604	0.708921	0.389854	0.869264	0.83642	0.682494	0.828708	0.244054	0.0710636	0.0651939	0.60101	0.947545	0.776866	0.42246	0.282156	0.576717	0.505956	0.365158	0.514435	0.219411	0.398144	0.191824	0.284035	0.233599	0.79477	0.000595042	0.388823	0.696243	0.0113162	0.598217	0.828355	0.136455	0.193967	0.75294	0.987937	0.692169	0.318778	0.0817376	0.17688	0.783153	0.0564407	0.937897	0.157731	0.485325	0.0810608	0.161688	0.738997	0.213852	0.553911	0.269215	0.713422	0.702989	0.258843	0.430848	0.257169	0.393018	0.227008	0.63343	0.319178	0.143045	0.526123
+
+Object: Supply C	1
+Var: Shopping 0 n + d n
+Param: alpha 0 n + n n	0.5
+Param: parSmooth 0 n + n n	0.99
+
+Object: Firm C	10
+Param: IdFirm 0 n + n n	1	2	3	4	5	6	7	8	9	10
+Param: LocationF 0 n + n n	0	0.1	0.2	0.3	0.4	0.5	0.6	0.7	0.8	0.9
+Param: Sales 0 s + n n	0	0	0	0	0	0	0	0	0	0
+Param: Prob 0 n + n n	0	0	0	0	0	0	0	0	0	0
+Param: Quality 0 n + n n	1	1	1	1	1	1	1	1	1	1
+Var: SmoothSales 1 s + n p	0	0	0	0	0	0	0	0	0	0
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 1000
+EQUATION fun_spatial.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Object_Demand
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Object_Consumer
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Purchase
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_LocationC
+(no description available)
+_INIT_
+ All 300 instances set to random values drawn from a uniform in the range [0,1].
+END_DESCRIPTION
+
+Object_Supply
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Shopping
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_alpha
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_parSmooth
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_IdFirm
+(no description available)
+_INIT_
+ All 10 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_LocationF
+(no description available)
+_INIT_
+ All 10 instances increasing from 0 with steps 0.1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_Sales
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Prob
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Quality
+(no description available)
+_INIT_
+ All 10 instances equal to 1.
+END_DESCRIPTION
+
+Variable_SmoothSales
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+FUNCTION("Shopping")
+/*
+Function: Shopping
+
+This function is executed again and again every time it is requested (note that, on the contrary, normal variables are executed only once at every time step). It is assuming that it is a Consumer
+who asked for this value.
+
+The code of this equation reads the spatial location of the consumer (location is one dimension between 0 and 1). Then scans all the firms and, to each of them, computes the distance between the firm and the consumer. This distance value is raised to the power of "alpha" to allow for higher or lower sensitivity to distance. This 'distorted' distance is used as probability (remember that locations must be defined between 0 and 1), so that with prob 1-(D^a) the firm is selected, otherwise it is discarded.
+
+Among all the selected firms the function chooses randomly one firm with probability equal to the value of parameter Quality. The function return the IdFirm of the chosen firm. If no firm is selected (may happen), then it returns the IdFirm of the previously chosen product, indicated in the lagged consumer's variable Purchase.
+*/
+v[0]=VS(c,"LocationC"); //spatial location of the consumer
+v[3]=V("alpha"); //exponent used to bias probabilities
+
+v[8]=0; //flag to control whether at least one firm is selected
+CYCLE(cur, "Firm")
+ {//cycle scanning all the firms
+  v[1]=VS(cur,"LocationF");
+  v[2]=1-pow(abs(v[0]-v[1]),v[3]); //probability indicator
+  if(RND<v[2])
+   { // happen with v[2] prob
+    v[4]=VS(cur,"Quality");
+    WRITES(cur,"Prob",v[4]); //assign to the parameter Prob of the current firm the value of its Quality
+    v[8]++;
+   }
+  else
+    WRITES(cur,"Prob",0); //assign to the parameter Prob of the current firm the value 0 (not selected
+  
+ }
+
+
+v[6]=VLS(c,"Purchase",1); //read the IdFirm of the previously purchased product by the consumer
+if(v[8]>0)
+{ //at least one firm have been selected
+  if(v[6]>0)
+   { //The consumer did have a previous product (at time 0 no consumer is using any product)
+   cur=SEARCH_CND("IdFirm",v[6]); //search the Firm
+   v[7]=INCRS(cur,"Sales",-1); //decrease its sales
+   }
+  cur=RNDDRAW("Firm","Prob"); //choose randomly one firm according to their probabilities Prob
+  v[5]=VS(cur,"IdFirm"); //read the IdFirm of the chosen firm
+  INCRS(cur,"Sales",1); //increase the Sales of the chosen firm
+ }
+else
+ v[5]=v[6];  //no firm have been selected, return the consumer's previous purchase
+RESULT(v[5] )
+
+EQUATION("Purchase")
+/*
+Variable Purchase.
+
+Choose one product. All the job is done by function Shopping.
+
+For optimization purposes, the Lsd function used is not V("Shopping"). In fact, this would require Lsd to 
+retrive the object containing Shopping automatically. Since variable Purchase is stored in object Consumer, 
+the automatic Lsd retrival system would need to scan : 
+- all Consumer;
+- the Demand object;
+- the Root object
+- the Supply object, and here it is found
+
+Instead, it uses the V_CHEAT Lsd function. This function permits to specify the exact object where the required variable is stored (Supply) relative to the calling object. In our case, the calling object is a Consumer, therefore the path from Consumer to Supply is: Consumer->Demand->Supply, therefore p->up->next. 
+The last field of VS_CHEAT is the object that will appear to the called variable as the calling object, therefore this Consumer, p.
+*/
+
+RESULT(V("Shopping") )
+
+
+
+
+EQUATION("SmoothSales")
+/*
+
+SmoothSales[t]=SmoothSales[t-1]*parSmooth + Sales*(1-parSmooth)
+
+Descriptive statistics used to smooth away short period volatility of Sales.
+
+SmoothSales can be considered a sort of moving average over Sales with weights that decrease exponentially for older values of Sales.
+*/
+v[0]=VL("SmoothSales",1);
+v[3]=V("parSmooth");
+v[2]=V("Sales");
+if(v[0]==0)
+ v[1]=v[2];
+else
+ v[1]=v[0]*v[3]+(1-v[3])*v[2];
+
+ 
+RESULT(v[1] )
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

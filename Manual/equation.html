@@ -1,0 +1,182 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Generator" content="Microsoft Word 97">
+   <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Equation Code</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center><font size=-1><a href="TOC.html">HyperManual</a> <a href="windows.html">Lsd
+Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
+<p><b><font size=+2>Equation Code</font></b></center>
+
+<p>These windows are created during a Lsd simulation session to show the
+C++ code used to compute the Variables of the model. This code is copied
+from the equation file for presentation purposes but does not affect the
+actual simulation behaviour. To change the model's equation it is necessary
+to recompile the model (see the <a href="LMM_help.html">LMM Manual</a>).
+For help on the Lsd equation language see the <a href="lsdfunc.html">Lsd
+function</a> manual.
+<br>A window reporting the equation for a Variable is can be created double-clicking
+on the Variable's label (in the <a href="Browser.html">main Browser</a>
+when the simulation is not running, from the <a href="debug.html">Debugger</a>
+window during a simulation run, or from the Analysis of Result window clicking
+with the right button of the mouse) and using the button <b>Equation</b>.
+In case the equation file is mis-specified, users must choose the <a href="menumodel.html#setequation">equation
+file name</a> (normally named <font face="Courier New">fun_XYZ.cpp</font>
+for the XYZ model).
+<br>&nbsp;
+<br>&nbsp;
+<br>
+<center>
+<p><img SRC="Image49.gif" height=489 width=670></center>
+
+<p>The window reports the C++ code using different colors:
+<ul>
+<li>
+<font color="#00FF00">green for comments</font>, that is, pieces of text
+that are not considered code to be executed;</li>
+
+<li>
+<font color="#0000FF">blue</font> for the local variables <font color="#0000FF">v[0],
+v[1]</font> etc., used in the equations to store temporary values;</li>
+
+<li>
+<font color="#FF0000">red</font> for models' labels. In case the label
+is a variable it can be double-clicked to show their equations;</li>
+</ul>
+A button <b>Search</b> permit to search strings in the window.
+<p>In order to have the equation code showed, the <a href="menumodel.html#setequation">equation
+file name</a> must be properly set.
+<p>To close the window, click on the button <b><font face="Arial">Close</font></b>.
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<h3>
+Lsd Equations' Language Hints</h3>
+The code for the equations in Lsd is written in C++, though, in most cases,
+the actual code is very simple to write, implying few elementary operations.
+Moreover, Lsd offers model writers a set of functions that facilitate the
+task of writing equations (see the <a href="lsdfunc.html">Lsd function</a>
+section). Yet, model writers can include in the equation code any legal
+C++ statement.
+<br>&nbsp;
+<h4>
+Usual Simulation Equations' Problems</h4>
+Writing programs for simulation models, there are two types of problems
+arising when writing the equations:
+<br>1) Multiple instances of elements with the same name;
+<br>2) Execution precedence.
+<br>The first problem arises because we want to use the same functional
+structure for different instances of the same type of Variable, but different
+numerical values (depending on the exact instance).
+<br>The second problem stems from the fact that computers are inherently
+sequential machines, while we usually think a model in separate chunks.
+If a Variable Y uses another Variable X in its equation, it is pretty different
+if X has already been updated when used by Y or has still the previous
+period's value.
+<br>Normal programming languages offers a variety of solutions to these
+problems, but the results are often error prone and very rigid. That is,
+the whole program cannot be even slightly changed without affecting the
+overall consistency of the computational flow.
+<br>Lsd requests model writers to make only minimal efforts in order to
+solve the above problems, offering a very simple and straightforward system
+to express equations. In fact, in Lsd an equation is represented as an
+abstract algorithm, and only at the very time of updating of a Variable
+its numerical content is filled with the current values stored in the model.
+<br>&nbsp;
+<h3>
+Lsd Equations</h3>
+Each equation is a piece of code attached to every Variable with a given
+Label that is computed during a generic time t of a simulation run, providing
+the value of time t for its corresponding Variable. Though the algorithm
+is the same, in general the numerical values to be used in the equations
+for the different instances must be different. For example, the productivity
+if each firm in a model will be computed in the same way for all firms,
+but has to use the differentiated cost values of each firm. Technically,
+it means that any numerical value of the model used in the code of one
+equation must be requested to one Object of the model. Any equation has
+available two Objects by default, and others can be obtained using special
+Lsd functions.
+<br>The two Object always available are the following:
+<h4>
+Variable's Object: <u><font face="Arial">p-></font></u></h4>
+The Object most used to fetch values in an equation is the Object containing
+the Variable to which the equation refers to. Using this Object, if there
+are many instances of its type, each equation for its Variables will use
+the values contained in the same Object.
+<br>In the code the Object is referred to using "<font face="Arial">p-></font>"
+(for "parent of the Variable")&nbsp; followed by the type of function that
+is necessary to use. Typically, model writers will use the function <font face="Arial">cal("Label",
+lag)</font> providing the value of Variable (or Parameter) with name <font face="Arial">Label</font>
+and with lag <font face="Arial">lag</font> (where the lag is always 0 for
+Parameters). See more on available <a href="lsdfunc.html">Lsd functions</a>.
+<br>&nbsp;
+<h4>
+Caller's Object: <u><font face="Arial">c-></font></u></h4>
+Another frequently used Object is called <b><font face="Arial">c-></font></b>,
+for caller. If a Variable requests the value of another Variable, the latter's
+equation can necessitate to use the Object containing the "caller" Variable,
+and for this its equation can use <b><font face="Arial">c-></font></b>.
+Note that if a Variable is not requested by another Variable (but it is
+simply computed because of its normal updating), the value of c-> is NULL.
+<br>&nbsp;
+<h4>
+Other Objects: <u><font face="Arial">cur-></font>, cur1-> etc.</u></h4>
+Sometime it is necessary to use other Objects, for example for implementing
+a cycle through a series of different Objects. Modellers can assign C++
+pointers to Objects to different Objects of the model and using them to
+activate the Lsd functions.
+<p>During the computation of an equation are usually used temporary C++
+variables to store partial computations. These variables are called <b><font face="Arial">v[0],
+v[1] </font></b>etc. and have a meaning only within one single equation.
+The final part of any equation there is always a line like <b><font face="Arial">res=...;</font></b>
+that is, the assignation of a value to the C++ variable <b><font face="Arial">res</font></b>,
+that will be used as the value of the Variable for that time step.
+<p>The most frequently used Lsd equations are:
+<p><b><font face="Courier New">object->cal("Lab", n);</font></b>
+<p>Means that the equation asks to the Object <font face="Courier New">object</font>
+to provide the value of <font face="Courier New">Lab</font> with the <font face="Courier New">n</font>
+time lags. <font face="Courier New">Lab</font> must a Variable or a Parameter.
+The Object <font face="Courier New">object</font> can contain or not the
+requested <font face="Courier New">Lab</font>. A automatic search procedure
+will explore the whole model, if necessary, searching for a Variable or
+Parameter with the label <font face="Courier New">Lab</font>. If more there
+exists more than one instance of <font face="Courier New">Lab</font>, the
+search procedure will return the value of the "closest" to the Object <font face="Courier New">object</font>.
+The value of <font face="Courier New">n</font> is the number of lags. That
+is, if <font face="Courier New">n</font> equals 1 means that the value
+requested must be the one of the previous time step of the simulation.
+If <font face="Courier New">n</font> equals 0, it means that value requested
+must be the one of the same time step for which the equation is computing
+the value of its Variable. For Parameters, the value of <font face="Courier New">n</font>
+is always 0.
+<p>An example of the use of this Lsd function is:
+<p><font face="Courier New">v[0]=p->cal("Profit",1);</font>
+<p>that means that the equation assigns to the temporary variable v[0]
+a value of the model. The value is requested to the Object containing the
+Variable under computation. It has to provide the value of Variable Profit
+at the previous time step.
+<p>Another example is:
+<p><font face="Courier New">v[1]=c->cal("K",0);</font>
+<p>That is, the line assigns to v[1] the value of Variable or Parameter
+<font face="Courier New">K</font>.
+But the instance of K must be searched starting from the Object that originated
+the computation of the equation itself and not from the Object containing
+the Variable of the equation.
+<p>Normally, the use of <font face="Courier New">c-</font> in an equation
+indicates that Variable to which the equation refers is a sort of "service"
+Variable. That is, its value is not useful in itself but it is used by
+other Variables in the model that request it to make some computations.
+Therefore the Variable must not be computed, as the default system in Lsd,
+only once at each time step, but as many times as it is requested. This
+is obtained by adding in the equations the line
+<p><font face="Courier New">last_update--;</font>
+<p>that forces the Variable to be computed any time it is requested.
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>

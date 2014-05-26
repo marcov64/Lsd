@@ -1,0 +1,188 @@
+	
+Label Root
+{
+	Son: Market
+	Label Market
+	{
+		Son: Firm
+		Label Firm
+		{
+			Param: IdFirm
+			Param: ProbBreak
+			Var: ProbShopping
+			Param: InUse
+			Var: ms
+			Var: RD
+			Var: Quality
+			Param: Sales
+
+		}
+
+		Son: Consumer
+		Label Consumer
+		{
+			Var: ProductUsed
+
+		}
+
+		Var: Shopping
+		Var: DayAction
+		Var: N
+		Param: alpha
+		Param: TimeRD
+		Param: IncrQuality
+		Var: MaxQuality
+		Var: TotalSales
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Market C	1
+Var: Shopping 0 n + n n
+Var: DayAction 0 n + n n
+Var: N 0 n + n n
+Param: alpha 0 n + n n	1
+Param: TimeRD 0 n + n n	100
+Param: IncrQuality 0 n + n n	0.1
+Var: MaxQuality 0 n + d n
+Var: TotalSales 0 s + n n
+
+Object: Firm C	3
+Param: IdFirm 0 n + n n	1	2	3
+Param: ProbBreak 0 n + n n	1	1	1
+Var: ProbShopping 0 n + n n
+Param: InUse 0 s + n p	300	300	300
+Var: ms 1 s + n n	0.333	0.333	0.333
+Var: RD 1 n + n n	1	33	66
+Var: Quality 1 s + n n	12	11	10
+Param: Sales 0 s + n n	0	0	0
+
+Object: Consumer C	1000
+Var: ProductUsed 1 n + n n	2	1	3	3	2	1	1	1	2	2	3	1	3	2	3	1	3	2	3	2	1	2	2	1	1	1	1	1	2	2	1	2	3	3	3	1	2	1	3	2	2	1	3	2	1	2	1	3	1	3	2	2	1	1	1	1	2	1	3	3	3	2	2	1	2	2	3	3	2	3	3	3	1	2	2	2	3	1	3	1	3	1	1	1	2	2	1	1	1	3	3	3	3	3	3	1	2	1	3	2	1	1	2	1	2	3	1	3	3	2	1	2	1	1	1	1	2	2	3	1	3	2	2	2	2	3	3	2	3	3	2	3	3	3	2	2	3	1	3	3	2	3	1	2	1	2	1	1	2	1	3	1	3	2	1	1	1	3	1	3	2	1	1	3	1	2	1	3	3	1	3	3	3	3	1	1	3	1	3	1	1	1	3	3	1	1	3	3	1	3	1	1	1	2	1	1	2	1	3	3	1	3	2	2	2	2	1	2	2	3	3	1	2	1	2	1	3	3	2	1	1	2	1	2	1	1	3	2	1	3	3	3	2	3	2	2	3	1	1	2	3	2	1	2	2	2	3	1	3	3	2	2	2	3	2	3	2	3	2	1	1	1	3	3	2	1	2	3	3	2	1	3	2	1	2	3	2	2	3	1	2	1	1	2	2	3	3	3	1	3	2	2	2	1	3	2	2	2	1	2	2	2	2	2	2	1	1	3	1	3	3	3	2	2	3	2	2	2	2	2	3	2	2	2	2	1	2	2	1	2	2	2	2	1	1	1	1	3	2	3	1	1	1	3	1	3	1	3	1	3	3	2	3	3	1	2	2	1	2	3	1	2	1	3	1	3	3	2	3	1	2	3	2	2	3	1	3	3	3	2	1	1	3	1	1	3	2	3	1	1	2	3	2	1	3	3	1	2	1	3	3	2	3	2	2	1	1	1	3	3	2	1	3	3	3	2	2	1	3	3	3	1	2	2	2	2	1	1	2	3	1	1	3	3	1	1	2	2	3	1	3	2	2	2	1	1	2	3	3	1	1	2	1	3	1	1	3	1	2	2	2	2	2	1	1	2	3	3	1	3	2	2	2	2	2	1	1	1	1	1	2	2	1	1	3	2	1	1	2	1	1	1	3	3	1	2	2	1	1	1	1	3	3	2	1	1	1	2	1	3	1	2	2	3	1	1	3	1	2	1	2	3	2	3	3	2	3	1	1	1	1	3	2	3	2	1	3	3	3	3	1	3	3	2	2	1	2	3	3	1	2	3	2	2	3	3	1	3	3	3	1	2	2	3	2	3	3	3	3	1	3	1	1	1	1	3	1	2	3	2	2	2	3	3	1	3	2	3	1	3	1	3	1	3	3	2	2	3	3	3	2	2	3	2	3	3	3	1	2	3	2	1	1	3	1	2	3	1	2	1	3	3	2	2	3	2	3	1	2	2	1	2	1	2	2	3	1	2	1	2	2	2	1	2	1	1	1	3	2	1	3	2	2	2	2	2	1	3	1	3	1	3	2	1	1	2	1	1	1	3	3	1	2	2	3	3	1	1	1	1	1	1	3	3	2	2	1	2	2	2	2	2	2	2	3	2	2	3	2	2	3	3	3	2	3	2	2	1	3	2	2	2	3	1	2	3	2	2	1	3	1	1	2	1	2	1	3	3	1	3	1	1	1	3	1	3	2	1	2	2	1	2	2	3	1	2	1	3	1	3	1	2	2	1	3	3	1	3	3	1	2	1	3	3	1	3	3	3	3	1	2	1	2	2	3	2	3	3	1	3	3	1	1	2	2	3	3	3	3	1	3	2	2	3	1	3	2	1	3	2	3	1	2	3	3	2	3	1	1	1	3	3	2	1	3	3	1	1	3	2	3	1	1	3	1	2	2	3	1	1	3	3	2	2	3	2	3	1	3	3	3	3	3	3	2	3	3	3	2	3	2	3	2	3	3	1	1	2	1	2	2	2	2	3	3	3	2	1	2	3	3	3	3	2	2	3	1	3	3	3	1	2	1	1	1	2	3	1	2	1	2	1	3	2	3	2	1	2	2	2	1	3	1	1	1	2	1	1	3	3	3	3	3	1	2	2	2	1	3	1	1	2	3	2	3	3	3	3	3	1	1	3	3	1	2	1	2	2	3	3	1	1	3	3	2	3	3	3	3	1	3	1	3	1	2	3	3	3	2	1	2	1	1	3	3	2	1	2	2	2	3	3	1	1	1	3	1	3	2	2	1	1	3	2	1	2	2	1	1	3	1	2	2	3	2	1	2	3	2	2
+
+SIM_NUM 1
+SEED 0
+MAX_STEP 10000
+EQUATION fun_Consumption.cpp
+ MODELREPORT                                         modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Market
+(no description available )
+END_DESCRIPTION
+
+Object_Firm
+(no description available )
+END_DESCRIPTION
+
+Parameter_IdFirm
+(no description available)
+END_DESCRIPTION
+
+Parameter_ProbBreak
+(no description available)
+_INIT_
+ All 3 instances equal to 0.01.
+END_DESCRIPTION
+
+Variable_ProbShopping
+(no description available)
+_INIT_
+ All 10 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_InUse
+(no description available)
+_INIT_
+ All 3 instances equal to 300.
+END_DESCRIPTION
+
+Variable_ms
+(no description available)
+_INIT_
+ All 3 instances equal to 0.333.
+END_DESCRIPTION
+
+Variable_RD
+(no description available)
+_INIT_
+ All 10 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Variable_Quality
+(no description available)
+_INIT_
+ All 10 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_Sales
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Consumer
+(no description available )
+END_DESCRIPTION
+
+Variable_ProductUsed
+(no description available)
+_INIT_
+ All 1000 instances set to integer random values drawn from a uniform in the range [1,3].
+END_DESCRIPTION
+
+Variable_Shopping
+(no description available)
+END_DESCRIPTION
+
+Variable_DayAction
+(no description available)
+END_DESCRIPTION
+
+Variable_N
+(no description available)
+END_DESCRIPTION
+
+Parameter_alpha
+(no description available)
+END_DESCRIPTION
+
+Parameter_TimeRD
+(no description available)
+END_DESCRIPTION
+
+Parameter_IncrQuality
+(no description available)
+END_DESCRIPTION
+
+Variable_MaxQuality
+(no description available)
+END_DESCRIPTION
+
+Variable_TotalSales
+(no description available)
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+

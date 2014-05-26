@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+  <title>Runtime Plot</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
+ href="windows.html">Lsd
+Windows</a> <a href="Browser.html">Main Browser</a> <a
+ href="FAQs.html">Lsd
+FAQ's</a></font>
+<p><b><font size="+2">Runtime Plot</font></b></p>
+</center>
+<p>The Runtime Plot is a window created automatically during the
+simulation
+run to show the dynamic graph of a selected group of Variables or
+Parameters.
+Users need to specify which ones they want to appear on the Runtime
+Plot
+by <a href="Browser.html#variables">selecting the Run Time option flag</a>
+from the <a href="Browser.html">main Browser</a>.
+<br>
+&nbsp;
+</p>
+<p><br>
+<img src="Runtime.jpg" style="height: 461px; width: 590px;" title=""
+ alt=""></p>
+<center></center>
+<p>The window for the Runtime Plot is automatically defined with the X
+dimensions containing the <a href="menurun.html#simsetting">number of
+steps</a>
+of the simulation, while the Y dimension depends on the maximum and the
+minimum values plotted. Note that the Y re-scaling "overshoots"
+slightly
+the max and min values to anticipate future values, so to reduce the
+number
+of re-scaling operations that slow down the simulation.
+</p>
+<p>Users should select carefully which series are shown in the Run Time
+Plot. The rules are:
+</p>
+<ol>
+  <li>
+do never use series contained in Objects that can be created or
+destroyed
+during a simulation;</li>
+  <li>
+use only one, or few, series assuming values in the same range, to
+avoid
+the automatic scaling "flattening" the variability of the seris.</li>
+</ol>
+<p><br>
+If the <span style="font-weight: bold;">scroll</span> option is
+checked on the window automatically scrolls at each time step. Clicking
+on the button <b>Center</b> the window scrolls
+to show the current time step at about the beginning of the visible
+portion.
+</p>
+<p>The plot of the Runtime series can slow down the simulation.
+Minimizing
+this window increases sensibly the speed of the simulation program.
+</p>
+<p>To avoid the Runtime Plot to appear, chose the entry <a
+ href="menurun.html#remplot">Remove
+Plot Flags</a> in Menu <b>Run</b>. In particular, this is a good
+option
+in case of multiple simulation runs (see in <a
+ href="menurun.html#simsetting">Simulation
+Settings</a> in Menu <b>Run</b>), since this will create tens, or
+hundreds
+of windows. If the users has been already flooded with Runtime Plots,
+then
+the option <a href="menurun.html#remrtplot">Remove Runtime Plots</a>
+in
+Menu <b>Run</b> will automatically destroy all these windows.
+<br>
+&nbsp;
+</p>
+</body>
+</html>

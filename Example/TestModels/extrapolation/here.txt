@@ -1,0 +1,1 @@
+dati.txt datinoise.txt description.txt fine.lsd fine_noise.lsd fine_truncated.lsd fun_extra.cpp gross.lsd gross_noise.lsd gross_truncated.lsd makefile makemessage.txt modelinfo.txt model_options.txt fun_extra.bak here.txt crt0.o

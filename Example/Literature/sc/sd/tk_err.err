@@ -1,0 +1,24 @@
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\LsdLatest\Example\Literature\sc\sd>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_sd.cpp -IC:/LsdLatest/gnu/include -IC:/LsdLatest/gnu/include  -IC:/LsdLatest/gnu/include -IC:/LsdLatest/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\LsdLatest\Example\Literature\sc\sd>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_sd.cpp -IC:/LsdLatest/gnu/include -IC:/LsdLatest/gnu/include  -IC:/LsdLatest/gnu/include -IC:/LsdLatest/src
+child process exited abnormally
+-----
+
+Command:catch [set result [catch [exec a.bat]] ]
+Produced message:
+
+C:\LsdLatest\Example\Literature\sc\sd>make -fmakefile  2>makemessage.txt 
+g++ -g -c fun_sd.cpp -IC:/LsdLatest/gnu/include -IC:/LsdLatest/gnu/include  -IC:/LsdLatest/gnu/include -IC:/LsdLatest/src
+child process exited abnormally
+-----

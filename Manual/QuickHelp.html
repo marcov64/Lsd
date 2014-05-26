@@ -1,0 +1,838 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Marco Valente">
+  <meta name="GENERATOR"
+ content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <title>Lsd Quick Help</title>
+</head>
+<body>
+<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
+ href="windows.html">Lsd
+Windows</a></font>
+<p><b><font size="+2">Lsd Quick Help</font></b></p>
+</center>
+<p><span style="font-weight: bold;">ERRORS</span>? click <a
+ href="#errors">here</a>.
+<br>
+&nbsp;
+<table border="1" cols="2" width="100%">
+  <tbody>
+    <tr>
+      <td><b>How To</b></td>
+      <td><b>Info</b></td>
+    </tr>
+    <tr>
+      <td><a href="#run">Run</a> a simulation</td>
+      <td>What is a <a href="#info_run">Lsd simulation run</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="#browse">Browse</a> the model</td>
+      <td>What is a <a href="#info_lsd">Lsd model program</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="#load">Load</a> a configuration</td>
+      <td>What is a <a href="#info_config">model configuration</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="#init">Set initial</a> values</td>
+      <td>What is a <a href="#info_vpo">Variable/Parameter/Object</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="#numobj">Set the number</a> of objects</td>
+      <td>What are i<a href="#info_init">nitial values/num. of
+objects/Sim.settings</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="menurun.html#simsetting">Set number of steps</a> and
+other
+options.</td>
+      <td>What is an <a href="#info_equation">equation</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="#analyse">Analyse</a> the results</td>
+      <td>What is the <a href="#info_browsers">Lsd Browser/Data
+Browser/Debugger</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="Runtime.html">Plot/Don't plot</a> variables at run
+time</td>
+      <td>What is the <a href="#info_analysis">analysis of results</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="debug.html">Debug</a> a variable</td>
+      <td>What is <a href="#info_lmm">LMM</a>?</td>
+    </tr>
+    <tr>
+      <td><a href="Browser.html#change_nature">Change</a> an element in
+the model
+configuration.</td>
+      <td>What is a <a href="#report">model report</a>?<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<p><b><font size="+2">General Info</font></b>
+</p>
+<p><a name="info_run"></a><b>What is a simulation run?</b>
+<br>
+A simulation run requires a Lsd model program and a model
+configuration.
+For any time step, all the variables of the model are updated once, and
+only once, using their equation. At the end of each period all elements
+of the model marked to be saved have their values registered for
+post-simulation
+analysis.
+</p>
+<p><a name="info_lsd"></a><b>What is a Lsd model program?</b>
+<br>
+A Lsd model program is an executable compiled with all the equations
+defined in the model equation file (usually written using LMM) and with
+all the technical Lsd code. Any Lsd model program has the same
+interfaces,
+but the equations are different. Any Lsd model program can create
+configurations
+and analyse result files, but can execute simulation only with a
+configuration
+containing the variables matching the equations in the equation file.
+</p>
+<p><a name="info_config"></a><b>What is a model configuration?</b>
+<br>
+A model configuration is a collection of objects, variables, parameters
+and their initial values. A model configuration is stored in files
+(with
+extension <tt>.lsd</tt>) that are created, saved and loaded by Lsd
+model
+programs. Model configurations define the state of the model at time 0,
+just before starting the simulation. They are created using menu <a
+ href="menumodel.html">Model</a>
+in the Lsd model programs, and saved or loaded&nbsp; with the menu <a
+ href="menufile.html">File</a>.
+</p>
+<p><a name="info_vpo"></a><b>What is a Variable, Parameter, Object?</b>
+<br>
+A Lsd variable is an element to which a simulation run associates a
+real valued number for each time step. Modellers control the model
+dynamics
+only by means of computations executed in the variables' equations.. A
+parameter is an element that does not change value, unless some
+variable's
+equations overwrite their values. Objects are containers of variables,
+parameter or other objects, so that a model is structured as a
+hierarchical
+tree of objects.
+</p>
+<p><a name="info_init"></a><b>What are initial values/num. of
+objects/Sim.settings?</b>
+<br>
+The numerical values used to start a simulation require:
+</p>
+<ul>
+  <li>Initial values for parameters and lagged values for variables, to
+be
+used
+in the first step(s) of the simulation. They are set with menu <a
+ href="mdatainit.html">Data/Init.value</a>
+for each object type.</li>
+  <li>Number of objects, determining how many objects are present in
+the
+model
+(and therefore how may parameters, lagged variable's values and groups
+of descending objects). These values are set with menu <a
+ href="mdataobjn.html">Data/Num.Object</a>.</li>
+  <li>Other simulation settings, like the number of steps, series to
+save,
+series
+to show at run time. Options for variables or parameters are set from
+the
+main <a href="Browser.html">Browser</a> double-clicking on the <a
+ href="Browser.html#variables">element
+concerned</a>.</li>
+</ul>
+<a name="info_equation"></a><b>What is an equation?</b>
+<br>
+An equation is a chunk of code to be executed at any time step to
+compute
+the value for a type of variable. Equations are stored in a text file,
+generally written using <a href="info_lmm">LMM</a>, the developing
+environment
+for Lsd models. The same code for a variable type is executed in a time
+step as many times as many copies of that variable exist in the model.
+Equations can be written with any legal C++ statement. However, in most
+of cases modellers use the <a href="lsdfuncMacro.html">Lsd functions</a>
+that allow to inspect and/or modify the model.
+<p><a name="info_browsers"></a><b>What is the Lsd Browser/Data
+Browser/Debugger?</b>
+<br>
+There are many ways to inspect a model, before, during and after a
+simulation run. The main ones are:
+</p>
+<ul>
+  <li> <a href="Browser.html">Lsd Browser</a>. Shows the structure of
+the
+model
+showing one type of object: variables and parameters contained;
+descending
+objects; parent object. Any action performed with the Lsd browser, e.g.
+initializing its values, concern all objects of the type currently
+shown.</li>
+  <li> <a href="menudatabrow.html">Data Browser</a>. Shows the
+structure
+of the
+model showing one copy of each object. For the copy of the object shown
+it is possible to observe the values stored in its variables and
+parameters.
+From Lsd ver. 5.2 it is also possible to access the settings of the
+model
+(i.e. initial values and number of objects) from this interface.</li>
+  <li> <a href="debug.html">Debugger</a>. During a simulation run it
+is
+possible
+to interrupt the simulation, inspect the model as with the Data
+Browser,
+analyse the results generated so far, and other operations. The
+debugger
+can show the simulation dynamics equation-by-equation, and allows to
+modify
+manually any aspect of the model.</li>
+</ul>
+<a name="info_analysis"></a><b>What is the Analysis of Results?</b>
+<br>
+After a simulation run the series of the variables and parameters <a
+ href="Browser.html#variables">set
+to be saved</a> are available for post-simulation analysis, to be
+activated
+from the <a href="Browser.html">Lsd Browser</a> after a run using with
+menu Data/Analysis of Results. <a href="mdata_analres.html">This module</a>
+provides the most used tools to inspect series: time series and
+cross-section
+plots; sequential or scatter plots, including phase diagrams;
+descriptive
+statistics. Plots can be exported as post-script files, while all the
+data
+can be exported in a wide variety of text formats, for more
+sophisticated
+statistical elaborations.
+<p><a name="info_lmm"></a><b>What is the LMM?</b>
+<br>
+<a href="LMM_help.html">LMM</a> (Lsd Model Manager) is an integrated
+environment to develop Lsd models. It contains:
+</p>
+<ul>
+  <li>Lsd Model Browser. Modellers typically work on dozens of models
+at
+different
+stages of development. LMM allows to manage the models in orderly
+directory
+structures. The Lsd Model Browser allows also to create new model
+projects
+providing all the necessary files: an empty equation file and the
+compilation
+commands (i.e. the makefile).</li>
+  <li>A text editor suited for developing C++ code in general (e.g.
+colored
+text)
+and Lsd code in particular, with a set of script to insert common Lsd
+commands
+without typing mistakes.</li>
+  <li>Compile and fix Lsd model programs. When an equation file has
+been
+edited
+LMM runs the compilation commands launching the program in case of
+success
+of showing the compilation errors in case of failure.</li>
+</ul>
+<p><br>
+</p>
+<hr width="100%"><br>
+<a name="run"></a><b>Run a simulation</b>
+<br>
+To run a simulation choose <a href="menurun.html">menu Run/Run</a>.
+Note that a configuration file must be loaded in order to run a
+simulation.
+Moreover, after a simulation exercise it is necessary to re-load a
+configuration
+file before being able to run a new simulation.
+<p></p>
+<hr width="100%"><br>
+<a name="load"></a><b>Load a configuation file</b>
+<br>
+<a href="menufile.html">Menu File/Load</a> allows to choose one of
+the available configuration files. These contain all the necessary
+information
+for running a simulation, and its name is printed in the header of the
+Browser window.
+<br>
+Configuration files contain information about:
+<ul>
+  <li>structure of the model (Variables, Parameters and Entities)</li>
+  <li>initial values (lagged Variables and Parameters values)</li>
+  <li>number of instances for each Object</li>
+  <li>information on which data must be saved</li>
+  <li>information on which data must be shown in the run-time plot</li>
+  <li>simulation settings (number of time steps per simulation, number
+of
+simulation
+runs, pseudo-random number generetor seed)</li>
+</ul>
+If a configuration is modified (e.g. changing parameters' values), the
+changes are automatically saved in the present configuration
+overwriting
+the previous file. To avoid this it is necessary to save the modified
+configuration
+with a different name before running the simulation (meu <b><a
+ href="menufile.html#save">File/Save</a></b>).
+<p></p>
+<hr width="100%"><br>
+<a name="analyse"></a><b>Analyse the result</b>
+<br>
+It is possible to analyse the results only for the series explicitly
+saved during a simulation run. To set on the option to save data for a
+variable (or a parameter) use the <a href="Browser.html#variables">elements'
+options</a> window before running the simulation.
+<br>
+<a href="mdatares.html">Menu Data/Analysis Result</a> starts the
+analysis
+of result module. Users have available two options: analyse the result
+of the latest simulation run (stored in the memory after a simulation),
+or analyse the results previously saved in a file. If a simulation has
+not been run, only the file option is available. The <a
+ href="mdatares.html">module
+for Analysis of Results</a> allow the creation of graphical
+representation
+of time series, the computation of some statistics, to export the data
+in several formtas, the creation of EPS graphical files of the produced
+graphs.
+<p></p>
+<hr width="100%"><a name="browse"></a><b>Browsing a model</b>
+<br>
+The main browser window allow modellers to observe the model structure.
+When a model is just loaded the browser shows the highest Object in the
+model hierarchy, called Root. To move "down" the model structure click
+on the name of the object descending from the currrently shown one
+(right
+hand list). To move "up" in the model structure click on the label of
+the
+parent object of the currently shown one (just above the two lists). It
+is also possible to double-click on the name of the objects shown on
+the
+graphical representation of the model.
+<p></p>
+<hr width="100%"><a name="init"></a><b>Change initial values</b>
+<br>
+To change the parameters and lagged values of one type of Objects
+position
+the browser to show that type of Object (see <a href="#browse">Browsing
+a model</a>). Then choose <a href="mdatainit.html">menu Data/Init.
+Values</a>.
+This will show a spread-sheet like window containing one row for each
+Parameter
+or lagged Variable and one column for each Object instance. See the <a
+ href="mdatainit.html">initial
+values page</a> on the main manual for further details.
+<p></p>
+<hr width="100%"><a name="numobj"></a><b>Change the number of entities</b>
+<br>
+Choose <a href="mdataobjn.html">menu Data/All Obj. Num.</a> to modify
+the number of instances for each Object type. The entry in menu
+Data/This
+Obj. Num changes only the number of instances of the Object type shown
+in the browser. See the <a href="mdataobjn.html">page on object number</a>
+in the main manual for details.
+<p></p>
+<hr width="100%"><a name="simset"></a><b>Change simulation settings</b>
+<br>
+In <a href="menurun.html">menu Run/Sim. Settings</a> it is possible
+to set:
+<ul>
+  <li>the number of simulation runs</li>
+  <li>the seed used to produce pseudo-random numbers</li>
+  <li>the number of steps per simulation</li>
+</ul>
+The user can also choose to run in debug mode (interrupting the
+simulation
+when the Variables tagged to be debugged are computed), and to plot the
+stack information (Lsd will produce a line of text in the Log window
+for
+each equation computed).
+<p></p>
+<hr width="100%"><a name="report"></a><b>Model report</b>
+<br>
+The model report provides a complete and easy to use description of
+the model content. A model report contains four sections, all of them,
+but the first, begin with the whole list of links to model items
+(Objects,
+Variables and Paramters) contained in the section. The sections are:
+<ul>
+  <li> <b>Description</b> section written by the model writer, usually
+summarizing
+the goal of the model. This section contains also a list of the
+elements that the modeller suggests as relevant to initialize and to
+observe (these options are set in the elements' <a
+ href="Browser.html#variables">options window</a>).<br>
+  </li>
+  <li> <b>Summary section</b>, listing all model elements along a
+textual
+description
+of their role in the model.</li>
+  <li> <b>Initial Values section</b>, listing the numerical values
+used to
+initialize
+number of instances of Objects, Parameters and lagged Variable;</li>
+  <li> <b>Details section</b>, listing all the model elements showing
+the
+equations
+code for the Variables and other relevant information to understand the
+connection between the model items.</li>
+</ul>
+The descriptions for each item in the different sections are linked
+with
+hyperlinks, so that users can, for example, pass from the verbal
+description
+of a Variable, read its code, see the initial value of a Parameter used
+in the equation, read the description of the Parameter, see the list of
+other equations where the Parameter is used, see all the Variables and
+Parameters contained in the same Object, etc. All these operations are
+executed clicking on one link in the report file.
+<p>Report files are standard HTML files, and therefore can be used as
+model
+documentation for users using whatever operative system. The report
+files
+are generated automatically by the system merging the information of
+the
+model with optional text from the model writer. In particular, normally
+it is used the command for <a href="menumodel.html#auto_docu">generating
+automatically</a> the model documentation before <a
+ href="menumodel.html#createreport">creating
+the report</a>. In these cases, the sections include automatically the
+following information:
+</p>
+<ul>
+  <li> <b>Description</b> section filled with the file
+"description.txt"
+in the
+model directory.</li>
+  <li> <b>Summary section</b> is formed by one table for each Object
+formed by
+a line</li>
+  <ul>
+    <li> <b>Objects</b>: list of the Variables whose equations contain
+reference
+to the Object</li>
+    <li> <b>Variables</b>: comments contained in the first line of the
+equations
+code, plus the list of Variables that use the Variable label in their
+equation.
+For Variables used with lags, it may contain the text describing the
+initialization
+of the lagged values</li>
+    <li> <b>Parameter</b>: list of the Variables that use the
+Parameter
+label. It
+may contain the text describing the initialization values</li>
+  </ul>
+  <li> <b>Initial Values section</b>, listing the numerical values
+used to
+initialize
+number of instances of Objects, Parameters and lagged Variable;</li>
+  <li> <b>Details section</b>, listing all the model elements showing
+the
+equations
+code for the Variables and other relevant information concerning the
+connection
+between the model items.</li>
+</ul>
+<hr width="100%"><a name="problem"></a><b>Common problems</b>
+<p><b><u>The simulation run does not start</u>:</b>
+</p>
+<ul>
+  <li>A configuration is not loaded. <a href="#load">Load a
+configuration</a>.</li>
+  <li>A configuration is loaded and I just ran a simulation. Re-load a
+fresh
+configuration to start a new simulation (menu <b>File/Reload</b>) with
+the same initial data. If you want to use the data in the model (i.e.
+the
+values at the last time step of the latest simulation) as the start for
+a new simulation, then save the model as a new configuration file (menu
+File/Save)</li>
+  <li>A configuration is loaded and I changed the number of Objects. If
+new
+Objects
+has been created Lsd assigns "intuitively" their initial values, but
+does
+not allow to run a simulation with these. Move the Browser on the type
+of objects whose number you modified, and set their initial values
+(menu <b>Data/Init.
+Values</b>). Even if you don't change them, it is sufficient to open
+the
+initial data window to confirm the data for a simulation run.</li>
+</ul>
+<b><u>Cannot change the initial data/ the number of Objects</u></b>
+<ul>
+  <li>A configuration is not loaded. <a href="#load">Load a
+configuration</a>.</li>
+  <li>I have just finished a simulation run. Lsd does not allow to
+modify the
+data after a simulation, because the data resulting from a simulation
+run
+may not be suited to start a new simulation. If you want to use the
+data
+remained in the model after a simulation run save them (menu <b>File/Save</b>)
+as a new configuration file and load this configuration.</li>
+</ul>
+<b><u>I ran a simulation, but cannot find the Variable XXX in the
+results</u></b>
+<ul>
+  <li>Series not saved. By default Lsd does not keep the data of
+Variables
+for
+post-simulation analysis. The user specifies which series must be saved
+for post-simulation observation. To include a Variable in the result
+use
+a fresh configuration (not one after a simulation run). Move the
+Browser
+to show the content of the Object containing the Variable of interest.
+Double-click on the Variable and check on the option "To Save". The
+simulation
+runs that will use this configuration will save one series for the
+Variable
+for every instance of the Object that contains it.</li>
+  <li>Series saved, but still not visible in the Analysis of Results.
+It is
+possible
+to tell Lsd to ignore the variables in some objects of the model, and
+in
+all their descendants. This option allows to speed up a simulation, and
+relies on the modeller to ensure that the variables in the skipped
+objects
+are updated. When this option is on all the items contained in the
+object
+set to be not computed and in the descending object will not be saved.</li>
+</ul>
+<p><br>
+<b><u>The Variable appears in the series saved, but the values are
+non-existent/I see the value NaN</u></b>
+<br>
+An error is returned by a&nbsp; mathematical function (e.g. the use
+of negative exponents in the power function). There is not much you can
+do, since tracing the error is quite complicated. If the model works
+with
+another configuration, you probably used initialization values not
+permitted.
+Send a message to the model author.
+</p>
+<p><b><u>Cannot find the model report/model help</u></b>
+<br>
+The author did not include the documentation of the model. You can
+create a report, or the help, file choosing the appropriate item in
+menu
+Model. Note that the automatic routine to generate the model help will
+create an empty structure, where the comments must be included manually
+by editing the HTML file.
+<br>
+&nbsp;
+</p>
+<p><b><u>Simulation Aborted</u></b>
+<br>
+The simulation was running and a <a href="debug.html#crash">small
+window
+appeared</a>. When a bug is encountered during a simulation run, most
+of
+the times Lsd is able to "capture" it. At his point Lsd interrupts the
+simulation and the type of error is signalled in the <a href="Log.html">Log
+window</a>. You have three options:
+</p>
+<ul>
+  <li> <b>Data Browse</b>: <a href="menudatabrow.html">explore the
+model </a>status
+(the value of every item in the model at the present time step);</li>
+  <li> <b>Analysis of Result</b>: <a href="mdatares.html">analyse the
+available
+results</a> (up to the time step before the crash);</li>
+  <li> <b>Abort the simulation</b>. Quit the Lsd model program.
+Re-running
+the
+program using the same configuration will cause the same error to
+occur,
+so you can <a href="debug.html#cond">set conditional breaks</a> to
+control
+for error-causing values.</li>
+</ul>
+<b><u>Everything disappeared</u></b>
+<ul>
+  <li>I simply closed one window. In Lsd every window must remain
+active.
+Whenever
+you kill a window the whole system is shut down.</li>
+  <li>The simulation was running and crashed suddenly without any
+message. A
+bug in the simulation code caused the program to crash, sneaking
+through
+the Lsd controls. This is a quite rare case, but it is still possible.
+This are the cases of mathematical errors (typically a division by 0)
+occurring
+with the C++ libraries. The only way to solve the error is to fiddle
+with
+the model code. It is a good practice to send the configuration causing
+this hard error to the model author.</li>
+</ul>
+<p><br>
+</p>
+<hr width="100%"><br>
+<a name="err_search"></a><b><font face="Arial,Helvetica">Error in
+equation
+for 'X' searching for 'Y'.</font></b>
+<br>
+The equation for <b>X</b> contains a reference to the an element <b>Y</b>
+that could not be found in the model. Likely, it is a mispelling
+between
+the equation's code and the name of the element in the model
+configuration.
+Possibly you forgot to include the element in the model.
+<p>To fix this error be edit the equations or the change the element or
+add the element in the model. See the <a href="#top">how to</a>
+section.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="err_trying"></a><b><font face="Arial,Helvetica">Error trying
+to compute variable 'X'.</font></b>
+<br>
+The variable 'X' does not have an equation to be computed. Either you
+forgot to inser the equation, or the name of the variable is different
+in the equation header and in the model configuration. Either change
+the
+equation's code, or change the label of the variable.&nbsp; See the <a
+ href="#top">how
+to</a> section.
+<p></p>
+<hr width="100%"><br>
+<a name="errors"></a><b><font size="+2">Errors and fixes</font></b>
+<p>In the following are listed the possible errors occurring when
+launching
+a simulation run.
+</p>
+<ol>
+  <li>The simulation does not&nbsp; start because a <a
+ href="#err_justrun">previous
+simulation has just been run</a>.</li>
+  <li>The simulation does not&nbsp; start because <a
+ href="#err_notinit">some
+elements have not beein initialized</a>.</li>
+  <li>The simulation have been interrupted: <a href="#err_eqnotfound">equation
+not found</a>.</li>
+  <li>The simulation have been interrupted: <a
+ href="#err_elementnotfound">element
+not found</a>.</li>
+  <li>The simulation have been interrupted: <a href="#err_invalid">Invalid
+values</a>
+produced.</li>
+  <li>The simulation have been interrupted: operation requested to a <a
+ href="#err_NULL">NULL
+pointer</a></li>
+  <li>The simulation have been interrupted: <a href="#err_crash">sudden
+crash</a>,
+Lsd model program disappears</li>
+</ol>
+<hr width="100%">
+<br>
+<a name="err_justrun"></a><b>The simulation does not&nbsp; start
+because
+a previous simulation has just been run</b>
+<br>
+A simulation cannot start if a previous simulation has just finished
+to be run. This is because the configuration of the model after a
+simulation
+run does not reflect the values chosen by the modeller, but it is made
+of the values at the last time step of the simulation run.
+<br>
+If a modeller wants to continue a simulation run after its end, it
+is necessary to save the configuration of the model at the end of the
+run
+as a new configuration file (menu <b>File/Save</b>), load it as a new
+configuration
+(<b>File/Load</b>) and start the new simulation. Generally, it is
+better
+to re-start completely a new simulation setting a larger number of time
+steps.
+<br>
+<hr width="100%">
+<br>
+<a name="err_notinit"></a><b>The simulation does not&nbsp; start
+because
+some elements have not beein initialized</b>
+<br>
+When a model is created or new objects are inserted in a model, the
+parameters and lagged variables' values are automatically set by the
+system.
+Before running a simulation the system requires at least a confirmation
+that those values are ok, or, more likely, to set the initial values to
+appropriate values. To run a simulation after this message, select with
+the <a href="Browser.html">Lsd Browser</a> the object containing the
+elements
+not initialized and <a href="mdatainit.html">set their initial values</a>.
+<br>
+<hr width="100%">
+<br>
+<a name="err_eqnotfound"></a><b>The simulation have been interrupted:
+equation not found</b>
+<br>
+The Lsd model program tried to compute a variable but could not find
+a corresponding equation. There may be several reasons for this:
+<ul>
+  <li>The equation does not exist in the equation file. Add an equation
+for
+the
+variable using LMM in the model equation file. See <a
+ href="LMM_help.html#Lsd_LMM">here</a>
+an introduction to Lsd model writing.</li>
+  <li>The equation does exists, but it is mis-spelled. That is, the
+label for
+the variable in the equation header is different from the label in the
+model configuration. You can either change the the label in the
+equation
+file or <a href="Browser.html#change_nature">edit the label</a> in the
+configuration. In the first case, you need to close the current Lsd
+model
+program and re-compile a new Lsd model program with the new equations'
+code.</li>
+  <li>The equation exists in the equation file with the same spelling,
+but
+the
+model was compiled with a different equation file. When <a
+ href="Lmm_help.html">LMM</a>
+tries to run a Lsd model program, it reads the name of the equation
+file
+from the <a href="LMM_help.html#compilation_options">Model Compilation
+Options</a>. If you placed the equations in a different file the Lsd
+model
+program does not contain the equations. To check which file LMM is
+using
+use the menu in LMM <b>Model/Show Equation File</b>. If you discovered
+that the equations are placed in a different file you can either insert
+the code in the file used by LMM (copy and paste) or use the&nbsp; <a
+ href="LMM_help.html#compilation_options">Model
+Compilation Options</a>&nbsp; menu&nbsp; to specify a different file.</li>
+</ul>
+<hr width="100%">
+<br>
+<a name="err_elementnotfound"></a><b>The simulation have been
+interrupted:
+element not found</b>
+<br>
+During the execution of one equation the code used an element that
+cannot be found in the model. That is, one parameter, variable or
+object
+label used in the code does not have a corresponding element in the
+model
+condifuguration. If the configuration does not contain the element add
+it with the options in menu <a href="menumodel.html">Model</a>.
+However,
+the most likely reason for such a problem is that there is a different
+spelling in the equation's code and in the intended element in the
+model
+condifuration. In this case you can either modify the equation's code
+or
+<a href="Browser.html#change_nature">edit the element label</a>.
+<p></p>
+<hr width="100%"><br>
+<a name="err_invalid"></a><b>Invalid values produced</b>
+<br>
+The result of a computation produced an invalid value. Typically, this
+happens when a division have a divisor equal to 0. The error signals
+the
+equation providing the invalid value. In the <a href="debug.html">debugger
+window</a> it is possible to request the values for the intermediate
+values
+v[0], v[1], etc. to identify the error. When the problem has been
+found,
+close the Lsd model program, fix the code and re-compile the Lsd model
+program.
+<p></p>
+<hr width="100%"><br>
+<a name="err_NULL"></a><b>Operation requested to a NULL pointer</b>
+<br>
+Most of the Lsd functions used in the equations are applied to an
+object.
+During the execution of an equation the system knows the object
+containing
+the equation under computation, the calling object, and all other
+objects
+returned by Lsd functions for this purpose. If an operation has been
+requested
+to a non-existing object the operation cannot be concluded. The error
+message
+signals the variable with the faulty equation and, in the <a
+ href="Log.html">log
+window</a>, other information to understand the reason for the failure.
+Fix the error in the equation file using <a href="LMM_help.html">LMM</a>,
+close the current Lsd model program and re-compile a new one with the
+correct
+equation file.
+<p></p>
+<hr width="100%"><br>
+<a name="err_crash"></a><b>Sudden crash: Lsd model program disappeared</b>
+<br>
+These errors are rare since Lsd is able to capture a potentially
+disruptive
+error before crashing the program, but, when they occur,&nbsp; they are
+the most difficult to fix since there is no indication on where they
+occurred.
+Firstly, therefore, it is necessary to identify the equation during
+which
+the problem occurred. To do this insert in the equation file the
+command
+DEBUG_AT(1) immediately after the MODELBEGIN command. Re-compile and
+run
+the simulation. After the crash, open the new file log.log that contain
+the list of variables that have successfully started to be computed.
+The
+last one will be the variable that caused the system to crash.
+<br>
+Once you know which variable caused the crash inspect the code for
+the variable. You can insert the command <a
+ href="lsdfuncMacro.html#interact">INTERACT(...)</a>
+to interrupt the simulation within the execution of the equation.
+<p>For example, let's assume that you have a model that crashes at time
+32. You can then insert in the beginning of the equation file the
+following
+line:<tt></tt>
+</p>
+<p><tt>#include <font color="#3333ff">"fun_head.h"</font></tt><tt></tt>
+</p>
+<p><tt>MODELBEGIN</tt>
+<br>
+<tt>DEBUG_AT(32)</tt><tt></tt>
+</p>
+<p>This line will cause the system to write all the variables executed
+after time step 32. Once you discover that the variable causing the
+crash
+is Price you may insert use INTERACT(...) to inspect the model. For
+example:
+</p>
+<p><tt>EQUATION(<font color="#3333ff">"Price"</font>)</tt>
+<br>
+<tt><font color="#00cc00">/*</font></tt>
+<br>
+<tt><font color="#00cc00">Compute the price as the inverse of Q</font></tt>
+<br>
+<tt><font color="#00cc00">*/</font></tt>
+<br>
+<tt>v[0]=V(<font color="#3333ff">"Q"</font>);</tt>
+<br>
+<tt>if(t==32)</tt>
+<br>
+<tt>&nbsp;INTERACT(<font color="#3333ff">"Value of Q"</font>, v[0]);</tt>
+<br>
+<tt>v[1]=1/v[0];</tt>
+<br>
+<tt>RESULT(v[1] )</tt>
+<br>
+&nbsp;
+</p>
+</body>
+</html>

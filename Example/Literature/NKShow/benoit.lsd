@@ -1,0 +1,867 @@
+	
+Label Root
+{
+	Son: Population
+	Label Population
+	{
+		Son: Class
+		Label Class
+		{
+			Param: IdClass
+			Param: NumClass
+			Param: TypeNumBits
+			Param: TypeRewardClass
+			Param: AvClFitness
+			Param: AvAgeDeath
+			Param: NClCopies
+			Param: NumDeath
+			Param: SucMut
+			Param: VarClFitness
+			Param: AvGain
+			Param: AvRank
+			Param: AvAge
+			Param: BestCFit
+			Param: AvTestDinner
+			Param: NumFormsClass
+			Param: AvOldFitness
+
+		}
+
+		Son: Agent
+		Label Agent
+		{
+			Son: Block
+			Label Block
+			{
+				Son: BitBlock
+				Label BitBlock
+				{
+					Param: IdBitBlock
+					Param: IdALocus
+					Param: Value
+					Param: FitnessContribution
+
+				}
+
+				Param: IdBlock
+				Param: NumBits
+				Param: NumMut
+
+			}
+
+			Var: Mutation
+			Param: Fitness
+			Param: NumBlocks
+			Param: IdAgent
+			Param: MaxBitLength
+			Param: DateBirth
+			Param: IdOrigin
+			Param: Rank
+			Param: NumCopies
+			Param: BlckChs
+			Param: Age
+			Param: RewardType
+			Var: MutationIndividual
+			Var: MutationTeam
+			Param: AgentType
+			Var: MutationGlobal
+			Var: TestDinner
+			Param: BitChs
+			Var: TestDinnerTeam
+			Var: TestDinnerGlobal
+			Var: TestDinnerIndividual
+			Var: BackDoor
+			Param: CounterMutation
+			Var: MutationTeamParallel
+			Param: ProbDie
+			Param: ProbReplicate
+
+		}
+
+		Param: ProbMut
+		Var: MaxFitness
+		Param: AllEqual
+		Param: NumReplace
+		Param: AvFitness
+		Var: Genetic
+		Param: PeriodGen
+		Param: CounterGen
+		Param: IdWinner
+		Param: NumParent
+		Param: PeriodShk
+		Var: Shake
+		Param: CounterShk
+		Param: InitAgent
+		Var: NumAgent
+		Param: NoTest
+		Param: MutateAlways
+		Var: NumForms
+		Param: ProbRandRelocationGenetic
+		Var: Shift
+		Param: PeriodShift
+		Param: CounterShift
+		Param: AcceptAlways
+		Param: ElasRemove
+		Param: ElasReplicate
+		Param: SingleReplication
+
+	}
+
+	Son: Landscape
+	Label Landscape
+	{
+		Son: LLocus
+		Label LLocus
+		{
+			Son: Link
+			Label Link
+			{
+				Param: IdLink
+
+			}
+
+			Param: IdLocus
+			Param: NLink
+
+		}
+
+		Var: InitEvenK
+		Param: EvenK
+		Var: CreateFitContrib
+		Var: FitFun
+		Param: N
+		Param: ForeOverlap
+		Param: AftOverlap
+		Var: SaveLandscape
+		Param: FlagSaveLandscape
+
+	}
+
+	Var: Init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Init 0 n + n n
+
+Object: Population C	1
+Param: ProbMut 0 n + n n	0.5
+Var: MaxFitness 0 s + n n
+Param: AllEqual 0 n + n n	0
+Param: NumReplace 0 n + n n	20
+Param: AvFitness 0 s + n n	0
+Var: Genetic 0 n + d n
+Param: PeriodGen 0 n + n n	500000
+Param: CounterGen 0 n + n n	1
+Param: IdWinner 0 n + n n	0
+Param: NumParent 0 n + n n	10
+Param: PeriodShk 0 n + n n	500000
+Var: Shake 0 n + n n
+Param: CounterShk 0 n + n n	1
+Param: InitAgent 0 n + d n	0
+Var: NumAgent 0 n + n n
+Param: NoTest 0 n + n n	1
+Param: MutateAlways 0 n + n n	0
+Var: NumForms 0 s + n n
+Param: ProbRandRelocationGenetic 0 n + n n	1
+Var: Shift 0 n + n n
+Param: PeriodShift 0 n + n n	100000
+Param: CounterShift 0 n + n n	1
+Param: AcceptAlways 0 n + n n	0
+Param: ElasRemove 0 n + n n	50
+Param: ElasReplicate 0 n + n n	50
+Param: SingleReplication 0 n + n n	1
+
+Object: Class C	1
+Param: IdClass 0 n + n n	1
+Param: NumClass 0 s + n n	35
+Param: TypeNumBits 0 n + n n	1
+Param: TypeRewardClass 0 n + n n	1
+Param: AvClFitness 0 s + n p	0
+Param: AvAgeDeath 0 s + n n	0
+Param: NClCopies 0 s + n n	0
+Param: NumDeath 0 s + n n	0
+Param: SucMut 0 s + n n	0
+Param: VarClFitness 0 s + n n	0
+Param: AvGain 0 n + n n	0
+Param: AvRank 0 n + n n	0
+Param: AvAge 0 s + n n	0
+Param: BestCFit 0 s + n n	0
+Param: AvTestDinner 0 s + n n	0
+Param: NumFormsClass 0 s + n n	0
+Param: AvOldFitness 0 n + n n	0
+
+Object: Agent C	35
+Var: Mutation 0 n + n n
+Param: Fitness 0 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: NumBlocks 0 n + n n	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10
+Param: IdAgent 0 n + n n	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	31	32	33	34	35
+Param: MaxBitLength 0 n + n n	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3
+Param: DateBirth 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: IdOrigin 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: Rank 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: NumCopies 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: BlckChs 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: Age 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: RewardType 0 n + n n	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2	2
+Var: MutationIndividual 0 n + n n
+Var: MutationTeam 0 n + n n
+Param: AgentType 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Var: MutationGlobal 0 n + n n
+Var: TestDinner 0 n + n n
+Param: BitChs 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: TestDinnerTeam 0 n + n n
+Var: TestDinnerGlobal 0 n + n n
+Var: TestDinnerIndividual 0 n + n n
+Var: BackDoor 1 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: CounterMutation 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: MutationTeamParallel 0 n + n n
+Param: ProbDie 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: ProbReplicate 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+Object: Block C	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10
+Param: IdBlock 0 n + n n	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10	1	2	3	4	5	6	7	8	9	10
+Param: NumBits 0 n + n n	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3
+Param: NumMut 0 n + n n	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+
+Object: BitBlock C	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3	3
+Param: IdBitBlock 0 n + n n	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3	1	2	3
+Param: IdALocus 0 n + n n	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30	1	2	3	4	5	6	7	8	9	10	11	12	13	14	15	16	17	18	19	20	21	22	23	24	25	26	27	28	29	30
+Param: Value 0 n + n n	0	1	0	0	1	0	1	1	1	1	1	0	1	0	1	1	0	1	0	1	1	0	1	1	0	1	0	0	1	0	0	1	1	0	1	0	1	1	1	0	0	0	1	0	0	1	0	1	0	1	1	1	1	1	0	1	0	1	1	0	1	1	0	1	0	0	1	0	0	0	0	1	0	1	0	0	0	1	1	1	1	0	0	1	0	0	0	1	0	0	1	1	1	1	0	1	1	0	0	0	1	0	0	0	1	1	0	0	0	0	0	1	1	0	0	0	1	0	0	0	0	0	0	0	1	1	0	0	0	0	0	1	1	0	0	1	1	1	1	1	1	0	0	0	1	1	1	1	0	1	1	1	0	0	0	1	0	0	1	0	0	0	0	0	0	0	0	1	1	0	0	0	1	0	1	0	0	1	1	0	0	0	1	1	1	0	1	1	1	1	1	0	0	0	0	0	0	0	0	1	0	0	0	0	1	0	1	1	0	0	1	1	1	0	1	0	0	0	0	1	0	0	1	1	1	1	1	0	1	0	1	0	1	0	0	0	0	0	0	1	0	1	0	0	1	0	0	0	1	0	0	0	1	0	0	1	1	1	0	0	1	0	1	1	1	1	0	0	1	1	0	0	0	1	1	1	1	0	0	0	1	1	1	0	0	1	0	1	0	0	1	1	0	0	1	0	1	0	1	1	0	0	1	1	0	1	1	1	1	0	1	1	1	0	0	1	1	0	1	0	0	1	1	1	0	0	0	0	0	1	1	1	1	0	1	0	0	0	0	1	0	0	0	0	1	1	0	1	1	1	0	0	0	1	0	0	1	0	1	1	1	0	1	0	0	0	1	1	1	0	1	0	1	0	1	0	0	1	0	1	0	1	1	1	0	1	0	0	0	1	0	0	1	1	1	1	0	0	1	0	1	0	0	0	0	0	0	0	0	0	1	0	1	0	1	0	1	0	1	1	1	0	1	0	1	1	1	1	1	1	1	1	1	0	0	0	1	1	1	1	1	0	1	1	1	0	0	0	0	1	0	0	0	0	0	1	1	0	1	1	1	1	0	0	1	1	1	1	1	0	1	1	1	1	0	1	1	0	1	1	0	0	1	0	0	0	0	1	1	1	0	0	1	1	1	1	1	1	0	1	1	0	1	0	0	1	1	0	0	1	1	0	0	1	0	0	1	0	0	1	0	0	1	1	1	0	0	0	0	1	1	0	1	1	1	0	1	0	1	0	0	1	1	1	1	1	1	1	1	0	1	0	0	0	1	1	1	0	1	0	0	1	0	0	0	0	0	1	0	0	1	1	0	1	0	1	1	1	0	1	1	0	0	1	0	1	1	0	1	0	0	1	0	0	0	1	1	0	1	1	1	1	0	1	1	0	0	1	1	0	0	0	1	1	1	1	0	0	0	0	0	1	1	1	1	0	0	1	0	0	1	1	1	0	1	1	0	1	1	1	0	0	0	0	0	0	0	1	1	0	1	1	1	1	0	0	1	1	0	1	0	1	1	1	1	0	1	0	1	1	1	0	1	1	0	0	0	1	1	1	1	0	0	0	0	0	0	0	1	0	0	0	1	0	0	0	1	1	1	0	0	0	1	1	0	1	0	0	0	1	0	0	0	1	1	1	1	1	1	1	1	1	1	0	1	0	0	0	1	1	0	1	0	0	1	0	0	1	1	0	0	0	1	1	0	1	0	0	0	0	0	1	1	1	1	1	0	1	0	0	1	1	1	0	0	0	0	0	0	1	1	0	0	0	0	1	0	1	0	1	1	0	1	1	1	1	1	1	0	0	0	1	0	1	0	0	1	0	1	0	0	1	1	1	0	1	0	1	0	0	0	0	0	1	1	1	1	1	1	1	1	1	1	0	0	0	1	0	1	0	0	1	1	1	0	1	0	1	0	1	0	0	0	0	1	1	1	1	1	0	0	0	0	0	0	1	1	0	0	0	1	1	1	0	1	1	0	1	0	1	0	0	1	0	1	1	1	1	0	1	1	1	0	0	0	0	0	0	0	1	1	0	1	1	1	1	0	0	0	1	0	0	0	0	0	1	1	0	0	0	0	0	1	0	0	1	1	0	1	1	1	0	1	1	1	1	0	1	0	1	1	1	1	0	0	0	1	0	1	1	0	0	1	0	1	0	0	0	0	1	0	0	1	0	1	0	1	1	0	1	0	0	1	0	0	0	0	1	0	1	1	0	0	1	0	1	1	0	1	1	1	1	1	1	1	0	1	0	0	1	1	1	0	1	1	1	0	1	0	0	1	0	0	1	0	0	1	0	1	0	0	0	1	0	1	1	1	1	0	0	1	1	0	1	0	0	1	0	0	0	1	1	1	1	1	0	0	0	1	0	0	1	0	1	0	1	1	0	1	1
+Param: FitnessContribution 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+Object: Landscape C	1
+Var: InitEvenK 0 n + d n
+Param: EvenK 0 n + n n	2
+Var: CreateFitContrib 0 n + n n
+Var: FitFun 0 n + n n
+Param: N 0 n + n n	30
+Param: ForeOverlap 0 n + n n	0
+Param: AftOverlap 0 n + n n	0
+Var: SaveLandscape 0 n + n n
+Param: FlagSaveLandscape 0 n + n n	0
+
+Object: LLocus C	1
+Param: IdLocus 0 n + n n	1
+Param: NLink 0 n + n n	0
+
+Object: Link C	1
+Param: IdLink 0 n + n n	0
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 10000
+EQUATION fun_nkun.cpp
+ MODELREPORT        modelreport.html
+
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Population
+'Population' appears in the equation for: Init.
+END_DESCRIPTION
+
+Object_Class
+'Class' appears in the equation for: MaxFitness, Genetic, InitAgent.
+END_DESCRIPTION
+
+Parameter_IdClass
+'IdClass' appears in the equation for: MaxFitness, Genetic, InitAgent, NumForms.
+END_DESCRIPTION
+
+Parameter_NumClass
+'NumClass' appears in the equation for: MaxFitness, Genetic, InitAgent.
+END_DESCRIPTION
+
+Parameter_TypeNumBits
+'TypeNumBits' appears in the equation for: InitAgent.
+END_DESCRIPTION
+
+Parameter_TypeRewardClass
+'TypeRewardClass' appears in the equation for: InitAgent.
+END_DESCRIPTION
+
+Parameter_AvClFitness
+'AvClFitness' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_AvAgeDeath
+'AvAgeDeath' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_NClCopies
+'NClCopies' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_NumDeath
+'NumDeath' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_SucMut
+'SucMut' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_VarClFitness
+'VarClFitness' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_AvGain
+'AvGain' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_AvRank
+'AvRank' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_AvAge
+'AvAge' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_BestCFit
+'BestCFit' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_AvTestDinner
+'AvTestDinner' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_NumFormsClass
+'NumFormsClass' appears in the equation for: NumForms.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_AvOldFitness
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+'Agent' appears in the equation for: MaxFitness, NumAgent, Shake, Genetic, InitAgent, NumForms, Shift.
+END_DESCRIPTION
+
+Object_Block
+'Block' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, Shake, Genetic, InitAgent, BackDoor, Shift.
+END_DESCRIPTION
+
+Object_BitBlock
+'BitBlock' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, Shake, Genetic, InitAgent, BackDoor, Shift.
+END_DESCRIPTION
+
+Parameter_IdBitBlock
+'IdBitBlock' appears in the equation for: MutationTeamParallel, MutationIndividual, MutationTeam, MutationGlobal, InitAgent.
+_INIT_
+ All 30 instances increasing from 1 with steps 1 re-starting for each group of Objects.
+END_DESCRIPTION
+
+Parameter_IdALocus
+'IdALocus' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, InitAgent.
+_INIT_
+ All 30 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_Value
+'Value' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, Shake, Genetic, InitAgent, BackDoor, Shift.
+_INIT_
+ All 1050 instances set to integer random values drawn from a uniform in the range [0,1].
+END_DESCRIPTION
+
+Parameter_FitnessContribution
+'FitnessContribution' appears in the equation for: MutationTeamParallel, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, Shake, Genetic, InitAgent, BackDoor, Shift.
+END_DESCRIPTION
+
+Parameter_IdBlock
+'IdBlock' appears in the equation for: MutationIndividual, MutationTeam, MutationGlobal, InitAgent.
+_INIT_
+ All 10 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_NumBits
+'NumBits' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, InitAgent.
+_INIT_
+ All 10 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_NumMut
+'NumMut' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Variable_Mutation
+Mutation modifies the point of the agent. It returns 0 is not mutation took place, and the number of mutate bits otherwise.
+
+There are several options concerning the timing and the type of mutation:
+- MutationGlobal
+- MutationTeam
+- MutationIndividual
+- MutationTeamParallel
+
+All the above mutation style are based on the agent's strategy, that is, the grouping of the loci in blocks that are assumed to be reciprocally linked. They differ because of the fitness measures use to accept or reject the new mutated point.
+
+I MutateAlways is set to 0, the mutation attempts take place only every few time steps, with a number of idle time steps equal to the dimensions of the loci groups in the agent strategy. This ensure that the expected number of mutated bits is identical for agents with different research strategies.
+
+
+'Mutation' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_Fitness
+'Fitness' appears in the equation for: Mutation, MutationTeamParallel, MutationIndividual, MutationTeam, MutationGlobal, MaxFitness, Shake, Genetic, InitAgent, BackDoor, NumForms, Shift.
+END_DESCRIPTION
+
+Parameter_NumBlocks
+'NumBlocks' appears in the equation for: MutationIndividual, MutationTeam, MutationGlobal, InitAgent.
+_INIT_
+ All 35 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_IdAgent
+'IdAgent' appears in the equation for: MaxFitness, Genetic, InitAgent, NumForms.
+_INIT_
+ All 35 instances increasing from 1 with steps 1. The value is increased every 1 instances.
+END_DESCRIPTION
+
+Parameter_MaxBitLength
+'MaxBitLength' appears in the equation for: Mutation, Genetic, InitAgent.
+_INIT_
+ All 35 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_DateBirth
+'DateBirth' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_IdOrigin
+'IdOrigin' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_Rank
+'Rank' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_NumCopies
+'NumCopies' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_BlckChs
+'BlckChs' appears in the equation for: MutationIndividual, MutationTeam, MutationGlobal.
+END_DESCRIPTION
+
+Parameter_Age
+'Age' appears in the equation for: MaxFitness, Genetic.
+END_DESCRIPTION
+
+Parameter_RewardType
+'RewardType' appears in the equation for: Mutation, TestDinner, InitAgent.
+END_DESCRIPTION
+
+Variable_MutationIndividual
+This mutation method chooses one block and flip at least one (and at most all) bits of the original string. Each individual bit decides whether to accept or reject the mutation on whether the fitness contribution of the newly mutated string is higher than the previous fitness contribution.
+
+Note that the actual fitness contributions of each bit after the whole process may well be below the previous time. In fact, if the bits are linked, then the decision of accepting a mutation may depend on a bit that, in the event, rejected the mutation. As a consequence, agents using this method may (and usually do) see their overall fitness moving up and down.
+
+
+If successful set:
+- new fitness in Fitness
+- new Values for each Bit
+- new fitness contributions for each bit
+
+
+'MutationIndividual' appears in the equation for: Mutation.
+END_DESCRIPTION
+
+Variable_MutationTeam
+This mutation method selects one block and mutate at least one, and at most all, the bits in it. After the mutation the sum of the fitness contributions of the block's bit is compared with the sum before the mutation. If the new sum is higher the mutation is accepted.
+
+Note that if the agents' block do not match the true decomposition of the landscape, then it is possible that the overall fitness falls. This is because after a succesful mutation the fitness contribution of bits outside the block (but actually linked) change unpredictably their contribution.
+
+If successful set:
+- new fitness in Fitness
+- new Values for each Bit
+- new fitness contributions for each bit
+
+'MutationTeam' appears in the equation for: Mutation.
+END_DESCRIPTION
+
+Parameter_AgentType
+'AgentType' appears in the equation for: MaxFitness, Genetic, InitAgent, NumForms.
+_INIT_
+ All 35 instances equal to 1.
+END_DESCRIPTION
+
+Variable_MutationGlobal
+This mutation method selects one block and mutate at least one, and at most all, the bits in it. After the mutation the overall fitness of the mutated string is compared with the fitness before the mutation. If the new value is higher the mutation is accepted.
+
+Unless parameter "AcceptAlways" is set on, the mutation method ensures that the values of fitness can only go upwards.
+
+
+If successful set:
+- new fitness in Fitness
+- new Values for each Bit
+- new fitness contributions for each bit
+
+
+'MutationGlobal' appears in the equation for: Mutation.
+END_DESCRIPTION
+
+Variable_TestDinner
+The test explore all the points that may be reached with the mutation from the current point
+Of course, it executes the correct test for each type of reward.
+The function returns the percentage of points with higher fitness, practically the probability of a successful mutation. 
+The test does nothing to the functioning of the agent and takes a hell of a lot of time, so there is the possibility to switch it off setting NoTest=1.
+
+Just for fun, it may compute also the test values assuming the other two types of reward. To avoid such useless and expensive extra-tests comment the cals to the tests (not assigned to v[1]) AND de-comment the subsequent p->write (to avoid the tests be computed automatically).
+
+'TestDinner' appears in the equation for: Mutation, MaxFitness.
+END_DESCRIPTION
+
+Parameter_BitChs
+'BitChs' appears in the equation for: MutationIndividual, MutationTeam, MutationGlobal.
+END_DESCRIPTION
+
+Variable_TestDinnerTeam
+Test if there is still a potential improvement. Test all the possible mutations and 
+return the percentage of success using the team reward
+
+Return -1 if skipped.
+
+'TestDinnerTeam' appears in the equation for: TestDinner.
+END_DESCRIPTION
+
+Variable_TestDinnerGlobal
+Test if there is still a potential improvement. Test all the possible mutations and 
+return the percentage of success using the global reward
+
+Return -1 if skipped.
+
+'TestDinnerGlobal' appears in the equation for: TestDinner.
+END_DESCRIPTION
+
+Variable_TestDinnerIndividual
+Test if there is still a potential improvement. Test all the possible mutations and 
+return the percentage of success using the individual reward.
+
+Return -1 if skipped.
+
+'TestDinnerIndividual' appears in the equation for: TestDinner.
+END_DESCRIPTION
+
+Variable_BackDoor
+This equation permit to force an agent to occupy a given point. It is used only for control, or for forcing agents to move to a different place.
+
+To operate BackDoor it is necessary to set BackDoor to a value different from 0. At the next time step the equation open the file "string.txt" that must contain the binary version of the point and nothing else. The equation replace the current point with the one in the file and computes its fitness.
+
+'BackDoor' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Parameter_CounterMutation
+'CounterMutation' appears in the equation for: Mutation, Genetic, InitAgent.
+END_DESCRIPTION
+
+Variable_MutationTeamParallel
+This mutation method tries to change all blocks, accepting the mutation if the block fitness is higher than before.
+If successful set:
+- new fitness in Fitness
+- new Values for each Bit
+- new fitness contributions for each bit
+
+The implementation is tricky because each block must be mutated as compared to the original ones, even while blocks may have been mutated. Therefore, there are several strings storing points.
+
+- str is always the string to test (used in FitFun)
+- str3 stores always the original point, even when some blocks may be mutated
+- str4 stores bits from the (possibly mutated) blocks
+
+'MutationTeamParallel' appears in the equation for: Mutation.
+END_DESCRIPTION
+
+Parameter_ProbDie
+'ProbDie' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_ProbReplicate
+'ProbReplicate' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_ProbMut
+'ProbMut' appears in the equation for: MutationTeamParallel, MutationIndividual, MutationTeam, MutationGlobal.
+END_DESCRIPTION
+
+Variable_MaxFitness
+This equation computes the maximum fitness of the population. It also performs
+a number of other computations. Namely, it resets to zero the values of a set 
+of statistics in each object Class. The function continues triggering the computation of
+Mutation for each agent. Then it reads the value of Fitness of the just mutated
+agent and adds this value to its class (determined by value of MaxBitLength).
+After having finished the mutations for each agents, it computes the average fitness of
+of each class by dividing the total fitness by the number of Agents in the each class.
+The funtion writes also the id number of the highest fitness agent in the parameter
+IdWinner.
+****
+'MaxFitness' appears in the equation for: Genetic, NumForms.
+END_DESCRIPTION
+
+Parameter_AllEqual
+'AllEqual' appears in the equation for: Shake, InitAgent.
+END_DESCRIPTION
+
+Parameter_NumReplace
+'NumReplace' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_AvFitness
+'AvFitness' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Variable_Genetic
+This equation modifies the composition of the population of the Agents removing the worst performing with "copies" of the best ones.
+The probability for an agent to be removed equals (1-Fitness)^ElasRemove, while the probability to replicate (i.e. produce a copy) is Fitness^ElasReplicate. 
+Only the worst NumReplace Agents may be removed (the others are assigned null probabilities). Similarly, only NumParent Agent can replicate, being assigned positive probabilities. Therefore, the middle NumAgent-NumParent-NumReplicate cannot replicate nor die.
+
+The equation is executed only once every PeriodGen time steps, and in these cases after the updating of the Fitness of each Agent. It is composed by the following steps:
+1) Reset some Class statistics on replication
+2) Sort agents by Fitness and assign the probs to die or replicate
+3) For NumReplicate steps:
+	a) draw one agent to kill and one to replicate
+	b) destroy the agent to kill and create a new agent identical to the one to replicate
+	c) reset the data of the new agent as necessary (e.g. Age, IdAgent, NumCopies, etc.)
+	d) for the newly created agent set to 0 the probability to replicate or die
+	e) with prob=ProbRandRelocationGenetic draw randomly a new point for the new agent, otherwise leave it in the same point as the replicated agent
+	f) if SingleReplication==1 set to 0 the prob of the copied agent to replicate again
+
+
+'Genetic' appears in the equation for: Shake.
+END_DESCRIPTION
+
+Parameter_PeriodGen
+'PeriodGen' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_CounterGen
+'CounterGen' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_IdWinner
+'IdWinner' appears in the equation for: MaxFitness.
+END_DESCRIPTION
+
+Parameter_NumParent
+'NumParent' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_PeriodShk
+'PeriodShk' appears in the equation for: Shake.
+END_DESCRIPTION
+
+Variable_Shake
+Every PeriodShk moves each agent in a new randomly chosen point.
+If parameter AllEqual is 1, then all agents move to the same point. Otherwise, each agent moves to a different point.
+
+'Shake' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Parameter_CounterShk
+'CounterShk' appears in the equation for: Shake.
+END_DESCRIPTION
+
+Parameter_InitAgent
+(no description available)
+END_DESCRIPTION
+
+Variable_NumAgent
+Compute how many agents are present.
+BEWARE. It is tranformed in a parameter because, at this time, the total number of agents never changes. Removes the line if used in a model where the number of agents do change.
+
+
+'NumAgent' appears in the equation for: MaxFitness, Genetic.
+END_DESCRIPTION
+
+Parameter_NoTest
+'NoTest' appears in the equation for: TestDinner, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual.
+END_DESCRIPTION
+
+Parameter_MutateAlways
+'MutateAlways' appears in the equation for: Mutation.
+END_DESCRIPTION
+
+Variable_NumForms
+Compute how many different points are occupied by the agents. If NumForms equal 1, it means that all agents in the population stay in the same point.
+
+It computes first the number of different points for agents in the classes separatedly and then the number of forms in the whole population.
+
+'NumForms' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Parameter_ProbRandRelocationGenetic
+'ProbRandRelocationGenetic' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Variable_Shift
+Every PeriodShift steps the fitness contributions are shifted. That is, one of the fitness contributions is changed
+
+'Shift' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+Parameter_PeriodShift
+'PeriodShift' appears in the equation for: Shift.
+END_DESCRIPTION
+
+Parameter_CounterShift
+'CounterShift' appears in the equation for: Shift.
+END_DESCRIPTION
+
+Parameter_AcceptAlways
+'AcceptAlways' appears in the equation for: MutationGlobal.
+END_DESCRIPTION
+
+Parameter_ElasRemove
+'ElasRemove' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_ElasReplicate
+'ElasReplicate' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Parameter_SingleReplication
+'SingleReplication' appears in the equation for: Genetic.
+END_DESCRIPTION
+
+Object_Landscape
+'Landscape' appears in the equation for: Init.
+END_DESCRIPTION
+
+Object_LLocus
+'LLocus' appears in the equation for: CreateFitContrib, InitEvenK.
+END_DESCRIPTION
+
+Object_Link
+'Link' appears in the equation for: CreateFitContrib, InitEvenK.
+END_DESCRIPTION
+
+Parameter_IdLink
+'IdLink' appears in the equation for: CreateFitContrib, InitEvenK.
+END_DESCRIPTION
+
+Parameter_IdLocus
+'IdLocus' appears in the equation for: InitEvenK.
+END_DESCRIPTION
+
+Parameter_NLink
+'NLink' appears in the equation for: CreateFitContrib, InitEvenK.
+END_DESCRIPTION
+
+Variable_InitEvenK
+Creation of the landscape structure, created once and never again. It is used to form the memory structure meant to keep the landscape data (see eq. for FitFun)
+The  equation reads the desired N, EvenK, AftOverlap and ForeOverlap then creates a set of 
+LLocus (N-1 because one exists from the beginning). 
+For each of the LLocus, the equation creates groups of EvenK + AftOverlap + ForeOverlap links, initialized so that each group refers to the same set loci.
+
+EvenK is the number of loci that each bit is reciprocally connected to. For example, if EvenK is 2, then the loci will be grouped as:
+{1,2,3}; {4,5,6}; {7,8,9}; ...
+That is, e.g., the 4th, 5th and 6th elements are reciprocally connected. The dimension of the blocks is therefore EvenK+1 (the last block may be smaller if N/(EvenK+1) is not an integer).
+
+AftOverlap indicates how many loci contiguous and consecutive are to be added unilaterally to the blocks of EvenK+1 elements. If AftOverlap is 1, then all the loci in the block {1,2,3} from the previous example are also connected to 4 (but 4th locus is not connected to 1st, 2nd or 3rd). Elements in the last block set links with the very first bits.
+
+ForeOverlap is like AftOverlap but links unilaterally the blocks with the loci before the blocks.
+
+Probably the best way to understand how the equation works is to observe the model structure after InitEvenK has created it. To do this simply make the debugger start at the very first time step and move down. LLocus's are the Objects representing loci and link's are the Object containing the id of the loci connected to it.
+
+
+'InitEvenK' appears in the equation for: Init.
+END_DESCRIPTION
+
+Parameter_EvenK
+'EvenK' appears in the equation for: InitEvenK, SaveLandscape.
+END_DESCRIPTION
+
+Variable_CreateFitContrib
+Variable in Landscape that creates the landscape values.
+Initialize the vectors used for computating and storing the landscape values.
+
+'CreateFitContrib' appears in the equation for: Init.
+END_DESCRIPTION
+
+Variable_FitFun
+Compute the fitness of the binary point stored in "str".
+
+This implementation makes use of dynamically allocated memory. It means that FitFun stores in memory the fitness of points already computed, including the fitness contribution of each bit of the string. If the point has nevery been computed before, then a new fitness value is randomly generated respecting the constraints defined in the landscape (the epistatic relations), and stored in memory for future uses.
+
+The core idea of NK systems is that the fitness of a binary point is computed as average of the fitness contributions (fc) of each element. The epistatic relations of a NK system define which bit influences other bit. Therefore, the system must store in memory 2^(K+1) fc's for each bit linked to other K bits. The current implementation, summarised below, allows to create as complex landscapes as desired, even if the whole NK system would require and impossibly huge amount of memory. The system continues to allocate memory for new points until the OS memory limitations are reached. At that point the Lsd program crashes. Note that under Windows the system crashes more easily if more than one simulation is run in succession (WIN seems to not make available immediately the memory released). 
+
+Technically, the data on fitness values are stored in a memory structure defined as:
+
+struct bit
+{
+int id; //id of the bit (from 1 to N)
+struct dynlink l; //see below
+int *link; //vector of integers reporting the bit's linked to the bit
+int nlink; //number of bit's linked to the bit (i.e. length of *link)
+double fitcontr; //fitness contribution of the bit, computed by FitFun whenever requested
+};
+
+struct dynlink
+{
+dynlink *l0;
+dynlink *l1;
+double *f;
+};
+
+The dynlink is an element of the binary linked chain generated whenever the fitness of a point is computed. Starting from bit.l a unary linked chain is generated passing for l0 or l1 depending on the states of the related bits. Only the last dynlink contains an existing f field, for the fitness contributions.
+
+When FitFun is requested then for each bit stores the states of related bits in *link. Then, in l checks whether l0 exists or is NULL (if the related bit is 0) or check l1, if the related bit is 1. Continue until either:
+- a NULL l0 or l1 is encountered. Continue to generate a new linked chain until the end of related bits and generate a new fitness contribution stored in f.
+- the related bits are finished. Return the f value as fitness contribution.
+
+At the end of each simulation run the "close_sim()" function cleans up all the memory
+
+
+
+'FitFun' appears in the equation for: MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, MutationIndividual, MutationTeam, MutationGlobal, Shake, Genetic, InitAgent, SaveLandscape, BackDoor, Shift.
+END_DESCRIPTION
+
+Parameter_N
+'N' appears in the equation for: FitFun, MutationTeamParallel, TestDinnerGlobal, TestDinnerTeam, TestDinnerIndividual, Shake, Genetic, InitAgent, CreateFitContrib, InitEvenK, SaveLandscape, Shift.
+END_DESCRIPTION
+
+Parameter_ForeOverlap
+'ForeOverlap' appears in the equation for: InitEvenK.
+END_DESCRIPTION
+
+Parameter_AftOverlap
+'AftOverlap' appears in the equation for: InitEvenK.
+END_DESCRIPTION
+
+Variable_SaveLandscape
+Save in a file the landscape's fitness values. 
+Beware that the lines are equal to 2^N. Better use for small N only.
+
+
+'SaveLandscape' appears in the equation for: Init.
+END_DESCRIPTION
+
+Parameter_FlagSaveLandscape
+'FlagSaveLandscape' appears in the equation for: SaveLandscape.
+END_DESCRIPTION
+
+Variable_Init
+Equation setting the basic initializations. Computed only once, it transformed
+itself in parameter and is not computed again.
+
+'Init' appears in the equation for: (Never Used).
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+

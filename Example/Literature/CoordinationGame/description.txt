@@ -1,0 +1,37 @@
+Coordination Game
+(Simple model)
+
+The model represents a selection process on a population of agents playing a coordination game. Agents set their strategy as real values in the [0,1] interval. They receive as payoff the following "fitness": 
+
+Fitness = c1 - c2*|Strategy - Omega * Mean * (1-Mean)| 
+
+where c1, c2 and Omega are parameters, Mean is the average strategy of the population and Strategy is the strategy of the player.
+
+On the game 
+The fitness is maximum when the absolute part of the fitness is zero. This implies that, in general, the maximizing strategy is not "feasible", in the sense that it differs from the mean strategy. There are only two values such that the same strategy played by every agent provide them with the maximum fitness: 
+1) Strategy=0 
+2) Strategy= -(1-Omega)/Omega 
+
+On the model 
+The model represents a number of agents setting randomly a value in the interval [0,1]. At each time step a number of the worse fitness agents are removed and replaced with new agents, i.e. agents with a newly generated random number. The remaining agents maintain the same random value as before. 
+
+Simulation Settings 
+The distribution contains two pre-set configurations, Single and Multiple. The single one contains one population only, while the multiple contains 10 (independent) populations. The multiple population settings include two groups of 5 population each with the
+parameter Omega set at 2.47222 and 3.86957. Moreover the five populations in each group have different values for parameter Replace. 
+The relevant parameters to set are: 
+
+- c1, c2, Omega: parameters of the game 
+- Replace: the number of agents to be replaced at each time step 
+- number of objects Agent 
+
+Simulation results 
+The simulation represents a number of agents who play a random value and are rewarded by a fitness computed over a function of the difference between their own individual strategy and the mean strategy of the whole population. 
+At each time step the agents with the worst fitness (i.e. further from the mean) are removed and replaced by new agents, again playing a random strategy. The remaining agents continue to play the same strategy determined in their initial period. 
+
+The simulation is meant to show that agents acting randomly reach the equilibrium point by means of selection only, and that the algorithm used to determine the strategy is uninfluential. 
+The crucial parameter is "Replace" which determines the speed at which the equilibrium point is reached and the "noise" around the equilibrium. 
+The results are stored in the following variables: 
+Mean: average strategy played by the agents 
+Variance: variance of strategy, indicating the dispersion around the mean strategy 
+AvFitness: average fitness obtained by the agents 
+

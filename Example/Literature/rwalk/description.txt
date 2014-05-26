@@ -1,0 +1,16 @@
+Random Walk model
+
+This model is composed by two simple equations:
+
+X=X[-1] + RandomEvent
+
+and
+
+RandomEvent=U(min, max)
+
+where X[-1] indicates the past value of variable X and U(min, max) is a Lsd routine generating a random value in the specified range with a uniform distribution.
+
+The model's main purpose is to show the characteristic of Lsd models to keep separate the computational part of a model (the equations) from the model structure. The variables and parameters of the model can be located in different entities generating different models, as shown in the different configuration files, though always using the same identical computational structure.
+
+The model also shows the different between Lsd variables (elements computed always and only once at each time step) and Lsd functions (computed every time and only when needed by other equations).
+

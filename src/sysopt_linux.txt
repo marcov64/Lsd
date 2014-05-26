@@ -1,0 +1,18 @@
+TCL_VERSION=8.5
+TK_VERSION=8.5
+DUMMY=
+PATH_TCL_LIB=.
+PATH_TK_LIB=.
+PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h/usr/include/tcl$(TCL_VERSION) #path to the tk.h
+PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
+PATH_LIB=.
+INCLUDE_LIB=
+CC=g++
+SRC=src
+EXTRA_PAR=
+SSWITCH_CC=-O2
+EXT=
+
+# Set the complete option for the libraries to link to the models.
+TCL_LIB=-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION)
+TK_LIB=-L$(PATH_TK_LIB) -ltk$(TK_VERSION)

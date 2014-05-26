@@ -1,0 +1,1053 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+  <title>FAQs</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><a name="top"></a><font size="-1"><a href="TOC.html">HyperManual</a>&nbsp;
+<a href="windows.html">Lsd Windows</a> <a href="Browser.html">Main
+Browser</a></font>
+<p><b><font size="+1">Frequently Asked Questions on Lsd</font></b></p>
+</center>
+<ul>
+  <li> <a href="#lsd">What is Lsd?</a></li>
+  <li> <a href="#lmm">What is LMM?</a></li>
+  <li> <a href="#using">Where do I start using a Lsd model?</a></li>
+  <li> <a href="#writing">Where do I start writing a Lsd model?</a></li>
+  <li> <a href="#model">What is a model in Lsd?</a></li>
+  <li> <a href="#simulation">What is a simulation run?</a></li>
+  <li>How does Lsd run a simulation? (who decide the priorities of
+computations?<br>
+  </li>
+  <li> <a href="#equation">What is an equation?</a></li>
+  <li> <a href="#eqfile">What is a Lsd equation file?</a></li>
+  <li> <a href="#compile">By the way, what does it mean "compiler", or
+"re-compile"?</a></li>
+  <li> <a href="#object">What is an Object</a></li>
+  <li> <a href="#variable">What is a Variable?</a></li>
+  <li> <a href="#parameter">What is a Parameter?</a></li>
+  <li><a href="#function">What is a Function?</a><br>
+  </li>
+  <li> <a href="#modelsetting">What is a model configuration?</a></li>
+  <li> <a href="#modelstructure">What is the Lsd model structure?</a></li>
+  <li> <a href="#writelsd">Why should a model writer use Lsd?</a></li>
+  <li> <a href="#torunlsd">What do I need to run a Lsd model?</a></li>
+  <li> <a href="#dowithlsd">What can I do with a Lsd model?</a></li>
+  <li> <a href="#result">What are the results of a Lsd Simulation Run,
+and
+what
+can I do with that?</a></li>
+  <li> <a href="#documentation">What documentation does exist on Lsd?</a></li>
+  <li> <a href="#windows">What is the XXX Lsd window?</a></li>
+  <li> <a href="#who">Who did write Lsd, and why?</a></li>
+</ul>
+<hr>
+<br>
+&nbsp;
+<p><a name="lsd"></a><b>What is Lsd?</b>
+<br>
+Lsd (Laboratory for Simulation Development) is a language to write
+simulation models, which appear as stand-alone programs complete of
+graphical
+based interfaces for any possible use of the model (from running the
+simulation
+to prepare scientific publications). Two characteristics make Lsd
+particularly
+useful in order to use simulation models in social sciences:
+</p>
+<p>1) a Lsd model is an extremely simple to use, stand-alone program
+that
+even non-expert computer users can use to run and test the results from
+simulation models.
+</p>
+<p>2) Model writers need to write all and only the code directly linked
+to the content of the model, having automatically available all
+interfaces
+that allow to access any aspect of the model, simplifying the process
+of
+building the model and allowing an easy distribution of the model.
+</p>
+<p>Lsd tries to break the trade-off between simplicity of use of a
+simulation
+model and complexity to build it. This is obtain by allowing
+programmers
+to write pieces of code independently for each equation (i.e. Variable)
+of the model. In this way the process of code writing is greatly
+simplified
+because a complex model is decomposed in its individual equations. When
+the equations are (supposed to be) ready, the system automatically
+generates
+an executable complete with interfaces. The system automatically
+exploits
+the Variables' code as required during a simulation run, storing the
+results,
+signalling errors, and allowing the model inspections, without any need
+for the modeller to write specific code for these operations.
+</p>
+<p>Although very simple to use, Lsd is also extremely powerful, since
+it
+is based on C++, and therefore the resulting simulations are fast and
+virtually
+unlimited in their dimensions.
+</p>
+<p>The general philosophy of Lsd models is based on the difference
+equations
+model: modellers write each Variables' equation in order to compute its
+generic value at time t using Parameters and other models Variables at
+time t, t-1, t-2 etc. Any legal C++ statement can be included in a
+Variable's
+equation, allowing the use of a large set of libraries available for
+this
+language.
+</p>
+<p>Lsd is particularly useful for agent based models, since it entails
+models based on a hierarchy of entities, with fast and automatic search
+through the "tree" of entities for the correct elements.
+</p>
+<p>Lsd is distributed as source code (completely free to use, under the
+GNU general public license) that must be integrated with the code of
+the
+model to compile a stand-alone Lsd instance, a model. Lsd makes use of
+Tcl/Tk libraries and of the GNU C++ compiler, all of which is freely
+available under the same GNU
+general public licence).
+</p>
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr>
+<p><a name="lmm"></a><b>What is LMM?</b>
+<br>
+LMM (Lsd Model Manager) is an integrated environment created to to
+develop and manage a set of Lsd models. LMM is composed by a text
+editor,
+specially suited for C++ coding in general and Lsd coding in
+particular,
+and by a set of commands. The editor is automatically used to write the
+Lsd equations. The commands available make automatic the procedures of
+compiling, debugging and running Lsd programs in a transparent way, so
+that even non-expert programmers can use C++ compiled code for their
+simulation
+models. See the <a href="LMM_help.html">LMM Manual </a>for further
+information.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr>
+<p><a name="using"></a><b>Where do I start using a Lsd model?</b>
+<br>
+The distribution of Lsd includes several example models, some of which
+are for purely teaching purposes, while others are complex models with
+scientific purposes.
+<br>
+Although Lsd model programs are stand-alone programs, the best and
+simplest way is to use <a href="#lmm">LMM</a> to compile and run them.
+<br>
+To run a Lsd model program follow these steps:
+</p>
+<ul>
+  <li>run LMM.&nbsp; In Windows, search for the installation directory
+where
+Lsd is located. (e.g. C:\Lsd ) and run the file
+"run.bat". In Unix run the command "./lmm" in the Lsd installation
+directory.
+The LMM will start asking which operations you want to perform. Choose
+to open an existing model.</li>
+  <li>LMM will show the list of available models; choose a model among
+the
+ones
+available. This sets LMM to deal with that model.</li>
+  <li>in LMM choose menu Model/Run; the Lsd model program is compiled,
+if
+necessary,
+and run. The Lsd interfaces will appear covering the LMM windows,
+although
+LMM is still active. LMM and any Lsd model program are completely
+independent
+programs, so you may, e.g. shut down LMM without affecting the Lsd
+model
+program.</li>
+  <li>in Lsd, choose menu File, Load, to load a <a href="#modelsetting">configuration</a>;</li>
+  <li>explore the menus of the Lsd interfaces (e.g. menu Run, Run
+starts the
+simulation); keep the <a href="Browser.html">Lsd Browser help </a>pages
+open for help.</li>
+</ul>
+The manual includes a <a href="ModelUsing.html">tutorial for the basic
+operations </a>of running a Lsd model.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+<hr>
+<br>
+<a name="writing"></a><b>Where do I start writing a Lsd model?</b>
+<br>
+To create a Lsd model you need to write few equations, to be compiled
+in order to create a Lsd model program, and then to create the model
+structure
+with the resulting Lsd model program. It is usually better to run some
+example models before creating your own model.
+<br>
+It is strongly adviced to create models in a very gradual way:
+<ul>
+  <li>write one, or very few, equation(s);</li>
+  <li>create a model structure with the only Variable(s) corresponding
+to the
+equation(s), and the rest of elements defined as Parameters;</li>
+  <li>test the working of the code, and fix the likely errors;</li>
+  <li>add one or few equations, either transforming some Parameters in
+Variables,
+or adding new Variables;</li>
+  <li>re-test the model;</li>
+  <li>etc.</li>
+</ul>
+The manual includes a <a href="ModelWriting.html">tutorial for the
+basic
+operations </a>of creating a simple Lsd model.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+<hr>
+<br>
+<a name="model"></a><b>What is a model in Lsd?</b>
+<br>
+An abstract definition of a simulation model is: a collection of
+variables
+that change values through the simulation time according to specified
+rules.
+However, this definition leaves a lot at implicit level. A more
+pedantic
+list is better to understand how Lsd functions. Usually a model
+includes
+several <a href="#variable">Variables</a> (and <a href="#equation">equations</a>)
+and <a href="#parameter">Parameters</a> and they are located into <a
+ href="#object">Objects</a>,
+to be thought of as containers for Variables and Parameters. Providing
+the above items with initial data (values for Parameter, the number of
+Objects, etc.), a simulation run can be executed.
+<p>The equations are implemented as pieces of code, defined
+independently
+for each equation, which are implemented in a Lsd model program. This
+program
+can either create, load or modify a <a href="#modelstructure">model
+structure</a>,
+which contains the definitions for all the items in the model,
+initializations
+etc.
+</p>
+<p>Lsd is founded on the opinion that generating values is still not
+sufficient
+to exploit simulation models. It is necessary to fully understand the
+results.
+For this, Lsd model programs produce automatically a complete
+documentation
+of the model, called model report, which provide a complete description
+of the model in a very clear and intuitive way.
+</p>
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="simulation"></a><b>What is a simulation run?</b>
+<br>
+A simulation run is a virtual history of a simulated reality, whose
+study can provide insights on the real counterpart of the model. In Lsd
+a simulation run is the sequence of time steps during which each
+Variable
+in the model uses its equation to compute an updated value.
+<br>
+Lsd is founded on the opinion it is not sufficient for a simulation
+to produce results, but these must be fully understood, that is linked
+to the functional content of the model and its initial numerical
+values.
+For this reason during a simulation run users can interrupt the
+simulation,
+investigate the model, observe the data generated up to that time,
+modify
+values. Moreover, Lsd model come with a full documentation
+(automatically
+generated) to grasp the connections between elements even in very
+complex
+models.
+<p>Technically, when a user asks to run a Lsd simulation exercise with
+the following steps:
+</p>
+<ol>
+  <li>save the current model configuration. This may be redundant if
+users
+did
+not modify the configuration loaded, but avoid that interesting results
+are produced by a forgotten parameter setting</li>
+  <li>initialize the counter of the simulations and the seed for random
+number
+generation. Most frequently a model is run only once, but Lsd allows to
+run also batteries of simulations with the same configuration and
+different
+seeds to test the robustness of result. Therefore, each simulation run
+is assigned a number starting from 0.</li>
+  <li>initialize the counter of the simulation time steps. That is, t=1.</li>
+  <li>for every Variable in every Object in the model compute the
+corresponding
+equation, determining automatically the scheduling of computations as
+implicitly
+determined by the lag notation in the equations.</li>
+  <li>update the simulation time steps: t=t+1</li>
+  <li>repeat from 4. until the reaching the time steps set in the
+configuration</li>
+  <li>save the results produced, if more than one simulation runs is
+requested</li>
+  <li>reload the configuration, update the counter of simulations, and
+use a
+new seed</li>
+  <li>repeat from 3. until the reaching the number of simulation runs
+indicated
+in the configuration</li>
+</ol>
+At the end, users can analyse the results of the last simulation run,
+still
+stored in memory, or load one of the result files.
+<br>
+During the simulation runs the Lsd simulation manager controls for
+possible errors, in case issuing messages indicating which type of
+error
+occurred
+and in which equation. Lsd is endowed with its own debugger (for
+equation-by-equation
+running) and can use a C++ debugger (gdb) for line-by-line running.
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<br>
+<hr><br>
+<a name="simulation"></a><span style="font-weight: bold;">How does Lsd
+run a simulation? </span>(who decide the priorities of computations?)
+<br>
+Lsd does not force modellers to make explicit the full sequence of
+executions of the model variables. Such requirement is both annoying,
+complicated and redundant. In fact, for large models you may have
+hundreds of different types of equations, with tens of thousands of
+instances. It is also difficult to have the complete map of interaction
+among variables, so that it is easy to make mistakes in determining the
+order of execution. And it is also redundant, since in many cases
+several computations may virtually run in parallel, without the
+necessity to set a specific order.<br>
+<br>
+Lsd relies on a rule allowing modellers to decide "locally" the order
+of computation. Only if there is a specific need to keep a certain
+sequence, then the model will follow it. Otherwise, the system will
+automatically determine one order. The model controls the orders of
+execution very simply by using an equivalent of the lag notation.<br>
+<br>
+For example, writing the equation X=F(Y) forces the system to compute Y
+before X. Otherwise, the code for X=F(Y[1]) tells the system to use a
+lagged value of Y in the equation for X, thus the equation for Y may be
+computed before or after that of X.<br>
+<hr><br>
+<a name="equation"></a><b>What is an equation?</b>
+<br>
+An equation in a Lsd model can be understood as a difference equation
+that computes a numerical value for a Variable as a function of present
+and past values of the model. Technically, it is a piece of code (C++
+code,
+extended with a <a href="lsdfunc.html">library of Lsd specific
+functions</a>)
+that is executed once for each instance of the Variable it refers to at
+each time step of the simulation. Users of a model do not need to deal
+with the equations, though they have access to the code implementing
+the
+equations, including all the explanations and comments provided by the
+author of the model.
+<p>The necessity to write C++ code for the equations is the major
+difficulty
+for writing Lsd models. This is necessary because, after all, a
+simulation
+is a program and model writers must be aware of the content of their
+model,
+and Lsd does not pose any limitation on the family of models that can
+be
+implemented with it. On the other hand, Lsd facilitates enormously the
+code writing in respect of writing a pure C++ program. In fact, it
+takes
+the burden of two major difficulties in writing simulation programs.
+The
+first, it is to ensure that Variables' values updating is consistent,
+that
+is, that the equations be computed at the right time so that lagged and
+updated values are used appropriately. The second difficulty is to be
+sure
+that Variables contained in different instances of the same Objects use
+the correct values (a big source of troubles for agent-based,
+micro-founded
+models where the same entity is replicated many times in the models).
+</p>
+<p>The problem of the scheduling of the operations during a simulation
+time step is solved in Lsd by writing equations as difference
+equations.
+That is, model writers use a lag notation that implicitly provides the
+correct scheduling. A powerful debugger helps to solve the problem of
+scheduling
+errors even under the most extreme conditions.
+</p>
+<p>The problem of multiple Variables with the same name is solved by
+using
+a hierarchical structure. That is, if model writers do not specify
+which
+instance they need to use in their equations, the system automatically
+provides the value of the "closest" instance of the requested element.
+Overruling systems allow anyway modellers to access any value of the
+model
+they may necessitate.
+</p>
+<p>All in all, writing the equations' code for a Lsd model has the same
+difficulty of writing the C++ equivalent of the set of difference
+equations
+expressing the model, and therefore the complexity depends on the model
+only. Moreover, an equation can contain any legal C++ code besides
+computing
+numerical values. For example, an equation can overwrite other
+Variables'
+or Parameters' values of the model, create or remove Objects, quit the
+simulation, trigger messages under particular circumstances, etc.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="eqfile"></a><br>
+<b>What is a Lsd equation file?</b>
+<br>
+The equation file is a standard C++ source code file containing all
+the equations of the model. The equations are implemented as sections
+of
+this file independently from each other. Model writers fill this file
+with
+the equation code for all the Variables in the model and compile the
+file
+together with the rest of the code of Lsd. The order in which the
+sections
+for the equations are included in the equation file is irrelevant.
+<br>
+Being a standard C++ source code linked with the Lsd model program,
+the equation file may contain any legal C++ statement, for example to
+add
+C++ functions of any sort.
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="compile"></a><b>By the way, what does it mean "compiler",
+or "re-compile"?</b>
+<br>
+The compilation of Lsd model programs, and the possible dealing with
+the error messages produced, is automatically dealt by LMM whenever a
+modeller
+tries to run a model. However, here is some basic information.
+<br>
+The so-called "compiled" languages are based on a compiler. That is,
+programmers write normal text files (called "source") containing
+commands
+that must comply to a given grammar (FORTRAN, PASCAL, C, etc.). When
+programmers
+(believe to) have finished the program, he/she "compiles" it by using
+the
+compiler on the file containing the program. The compiler reads the
+commands
+in the sequence written in the source file and, if there are no errors,
+produces as output the actual executable program that anyone can run on
+their computers (provided they share the same operative system). The
+executable
+translates the commands written in the program in the actual operations
+made in the same sequence reported in the "source" file. If the text
+file
+containing the program (the source) is modified, the changes do not
+affect
+the actual executable program, unless the programmer re-compiles the
+edited
+file producing a new executable file. In Lsd, all the changes
+concerning
+the structure of the model or the settings of the model can be done
+"run
+time", that is, they have immediate effects on the simulation program.
+Instead, the equations' code is a "compiled" part of the simulation
+model,
+and changes to the equations do not affect the model unless the
+equations'
+file is recompiled.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+<hr>
+<br>
+<a name="object"></a><b>What is an Object?</b>
+<br>
+An Object is a representation of a piece of reality defined by <a
+ href="#variable">Variables</a>,
+<a href="#parameter">Parameters</a>
+and other Objects:
+<p>Object Obj
+<br>
+&nbsp;{ Variables: X, Y, Z, ...;
+<br>
+&nbsp;&nbsp;&nbsp; Parameters: H, K, ...;
+<br>
+&nbsp;&nbsp;&nbsp; Objects: Obj1, Obj2, Obj3, ...;
+<br>
+&nbsp;&nbsp;&nbsp; Function: F1, F2, ...;<br>
+&nbsp;}<br>
+</p>
+<p>Labels for Objects, Parameters and Variables must be unique strings
+of standard characters (e.g. no spaces).
+<br>
+Since an Object can be composed by other Objects, a model is made of
+a collection of Objects in the form of a hierarchical structure. Any
+model
+"begins" with the uppermost Object called Root that, in general,
+shouldn't
+contain other elements as Variables and Parameters. Objects in Lsd are
+defined by model writers and (apart the Root) can be replicated by
+users
+in many instances in a model setting.
+</p>
+<p>The hierarchical structure is used during a simulation to "induce"
+where
+the data required in an equation must be retrieved. In fact, in general
+there are many instances of each Object type, and therefore there many
+instances of Variables and Parameters with the same label. In general,
+consider the case of the equation for Variable A using the values of
+Parameter
+B. If B is defined as a member of the same Object as A, then the
+equation
+for A will use the instance of B in the same Object. If B is not
+contained
+in the same Object type (and there are many instances of the Object
+containing
+B) the structure of the model is crucial. Lsd has a default system that
+provides always the required values searching through the whole model.
+The model writer, when designing the model, must ensure that the
+correct
+instance is used. Most of the times, the default systems provides the
+correct
+solution. But modellers can always overrule the default system and
+implement
+model specific data retrieving systems.
+</p>
+<p>Generally speaking, an Object must be represented as a descendant
+from
+a parent Object in case during all its existence in the model (Object
+can
+be created or removed during simulation runs) it uses the values of the
+same identical instance of the parent Object. If instead, the
+(purported)
+descendant Object can refer to different instances of the parent
+Object,
+then it should be placed in a parallel "branch" of the other Object.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+</p>
+<p></p>
+<hr><br>
+<a name="variable"></a><b>What is a Variable?</b>
+<br>
+A Variable is an element of a Lsd model that changes its value at any
+time step during a simulation run, and may be used by other Variables
+in
+other equations of the model. Variables are defined as elements of
+Objects,
+so that, if a model contains many instances of the same type of
+Objects,
+it has also many instances of the same Variable, all of which use the
+same
+equation for their updating.
+<p>Technically, a Variable is made of an equation, attached to a list
+of
+numerical values (Lsd implements only real valued Variables) each
+tagged
+with a time index. Different instances of the same Variable have the
+same
+equation to compute their value, although these value in general may
+differ
+because they use the values from different instances of the same type
+of
+Object.
+</p>
+<p>The numerical values are computed using the equation and the past
+values
+are shifted so that at each generic time step during a simulation the
+system
+(or the user of the model) can access the desired Variable's value
+knowing
+which value was computed at each time step. Variables that are never
+used
+with lagged (past) values in the model (i.e. in the equations) do not
+require
+to be initialized before the simulation run, since their value is
+computed
+at the very first time step using their equation. Instead, Variables
+with
+lags requires initial values to be used at the very beginning of the
+simulation
+runs.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="parameter"></a><b>What is a Parameter?</b>
+<br>
+A Parameter is a numerical (real-valued) element of a Lsd model that
+is not changed by its own equation during a simulation. Technically, it
+is a Variable without equation and with no lagged values. Therefore the
+value of a Parameter is required to be inserted by users before staring
+a simulation run. Parameters do never change value during a simulation
+run, unless an equation overwrites their values with new values.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+<hr><br>
+<a name="function"></a><b>What is a Function?<br>
+</b>A function is like a Variable: a label connected to a piece of code
+written in the equation file. However, the equation computing a
+Function is not, like those for Variables, automatically executed once,
+and only once, at every time step. Rather, the code of a Function is
+executed only, and every time, the code of some Variables request them.<br>
+<br>
+<b></b>
+<hr><br>
+<a name="modelsetting"></a><b>What is a model configuration?</b>
+<br>
+The configuration of a model consists of all the definition of the
+model, but the equations' code (embedded in the Lsd model program).
+Generally
+speaking, it contains:
+<ul>
+  <li>the model structure (Objects, Variables and Parameter definitions)</li>
+  <li>the numerical initialization (how many Objects of each type, the
+Parameters'
+values, the lagged Variables' values)</li>
+  <li>other simulation settings (e.g. number of time steps per
+simulation,
+number
+of simulation runs, which series must be saved, etc.)</li>
+</ul>
+The model structure contained in a configuration is defined by the
+modeller
+(see <a href="menumodel.html">menu Model</a>), and should never be
+changed
+by users, since this affect the working of the equations' code. The
+same
+model structure is replicated in all the configurations, that normally
+contain different numerical initializations and/or simulation settings.
+<p>In detail, a Lsd configuration is a standard text file, but should
+never
+be edited manually. For interested users, Lsd Model files have the
+following
+structure:
+</p>
+<ul>
+  <li>The structure of the model (Object hierarchy, labels and
+positions of
+Variables
+and Parameters);</li>
+  <li>Initial Values, that is, information used to run an actual
+simulation</li>
+  <ul>
+    <li>Number of instances for each Object type</li>
+    <li>One value for each Parameter (that is, for each instance of the
+Object
+type containing the Parameter)</li>
+    <li>One value for each lag for each Variable</li>
+    <li>Flags for saving, plotting and debugging Variables and
+Parameters.</li>
+  </ul>
+  <li>Number of simulations to make</li>
+  <li>Value for the pseudo-random numbers seed generator</li>
+  <li>Number of steps for each simulation run</li>
+  <li>Name of the C++ file containing the equations of the model</li>
+  <li>Documentation for the model items</li>
+</ul>
+<p><br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="modelstructure"></a><b>What is the Lsd model structure?</b>
+<br>
+The Lsd model structure is the composition of Objects forming a model.
+Each Object represents an entity of the reality implemented in the
+model.
+It can contain hierarchically other Objects forming a hierarchical
+structure.
+Besides other Objects, each Object is made of Variables and Parameters.
+The structure of a model is built in parallel during the implementation
+of the equations of the model and should not be changed without
+considering
+its effects on the execution of the equations' code.
+<p>The structure of a model is a hierarchy in that represents "what
+contains
+what" in the reality represented by the simulation model. The entities,
+or Objects, in the model can be hierarchically linked or "parallel". In
+the first case, the parent Objects (higher in the hierarchy) can access
+many instances of the same Objects descending from them, so that they
+can
+compute aggregate values produced by the whole set of descendants.
+Descending
+Objects, instead, have access to only one instance of the parent
+Object,
+and it is the same instance for all the same descendants, so that they
+can access the same values contained in the parent. This system allows
+model writers to easily write equations code relying on the
+hierarchical
+links to individuate the correct instance to use in the equations.
+Independent,
+or parallel, can access each others' values as long as they are unique
+instances.
+</p>
+<p>The general rule is that Variables in descending Objects must make
+use
+in their equation of elements in parent Objects when they must refer to
+the same instance for all their existence in the simulation. If,
+instead,
+a descending Object needs to access different instances then the
+Objects
+must not be hierarchically linked (and the modeller must explicitly
+provide
+the code for which instance to access).
+</p>
+<p>For example, consider a model where many instance of Object Firm
+have
+the Variable Quantity. The equation for Quantity makes use of the
+lagged
+value of Variable Price. Suppose Objects Firm are defined as
+descendants
+from Object Supply, that is, many Firm are part of a Supply side,
+which,
+in turn, is defined as having a parallel Object Demand. We can imagine
+three situations: Variable Price is placed in the same Object Firm, or
+in the Object Supply, or in Object Demand. Wherever it is placed, in
+the
+equation for Quantity is always possible to refer to values for Price
+without
+specifying where this Variable is contained. The difference is about
+how
+the model considers the Price to be formed.
+</p>
+<p>In case Price is contained in each Firm, there will be as many
+Prices
+as many Firms, with Demand represented as Price-taker.
+</p>
+<p>For a Lsd model does not make any difference whether the Variable
+Price
+is placed as part of Object Firm or as part of Object Market containing
+Object Firms. The only difference is that, in the first case, each Firm
+will use the value of a different instance of Variable Price (one in
+each
+Firm), while, in the second case, all Firms will use the same instance,
+since they will find the same Variable Price contained in the Object
+Market
+containing them. The same applies also if there are many Objects
+Markets,
+each with its group of Firms. In this case (and with a centralized
+Price)
+each Firm will use the instance of Price in "its own" market, with no
+danger
+that a different instance of Price can be used.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="writelsd"></a><b>Why should a model writer use Lsd?</b>
+<br>
+Lsd offers two main advantages: easy of use of the model and easy of
+writing the model. Lsd has been built on the belief that the main
+reasons
+that hindered the use of the simulation methodology in social sciences
+are due to the difficulty to build models and the difficulty to share
+the
+results in academic environments traditionally not trained in the use
+of
+computational techniques.
+<p>The simplicity of use Lsd permits to distribute models to non-expert
+users that can easily understand and replicate the results. Lsd can run
+under any Windows and Unix system (and it is possible to run a model
+created
+in one environment&nbsp; in another). The complete Lsd installation is
+very small (~5-15 Mb, depending the OS used). It does not require any
+additional
+software for Windows users, while under Unix is required a GNU C++
+compiler,
+and the Tcl/Tk libraries, already installed in practically any Unix
+system.
+</p>
+<p>Lsd models are, by all means, pure C++ compiled code using
+dynamically
+allocated memory, therefore exploiting at the best the power of your
+system.
+</p>
+<p>Last, but not least, Lsd stresses specificully the problem of
+documentation,
+which causes the large majority of potential users to abandon
+simulations
+since it is not clear what a model does. Any Lsd model is accompanied
+by
+an automatically created HTML document, the Model Report, showing the
+code
+used for the equations and their connections with other elements of the
+model. Moreover, Lsd creates automatically another document, the Model
+Help, listing all elements of the model, so that the modeller can
+easily
+include comments and indications on the element's meaning. Both the
+Model
+Help and the Model Repor contain cross-references linking each other at
+the correct sections for each element of the model, and can be accessed
+by users under the menu item "Help".
+</p>
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="torunlsd"></a><b>What do I need to run a Lsd model?</b>
+<br>
+Just your computer and either a Windows operative system
+(95/98/NT/2000),
+or a Unix system. Only for Unix users it is required to have a GNU C++
+compiler and the Tcl/Tk 8.2 libraries.
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="dowithlsd"></a><b>What can I do with a Lsd model?</b>
+<br>
+The basic use of a Lsd model is to run the model replicating the
+simulations
+with the specifications provided by the model writer. This can be done
+"on the spot" by downloading the model and pressing one button. Besides
+that, users can change any aspect of the model (but the equations'
+code,
+for which it is necessary to re-compile the equations). In particular
+users
+can use simple, intuitive and efficient graphical interfaces (provided
+automatically by Lsd with no intervention of the model writer) to:
+<ul>
+  <li>observe the model content at different levels of detail (overall
+structure,
+individual elements, numerical values, equations code);</li>
+  <li>run the simulations for any length and how many time steps as
+desired
+(multiple
+simulations allowed, with single simulation results and all-simulations
+results summary available on files)</li>
+  <li>change any value of the model, including the number of Objects in
+the
+model
+and the Parameters and lagged values to simulate different settings;</li>
+  <li>see the plot of the values selected for this purpose during the
+simulation
+run;</li>
+  <li>analyse the results after the simulation plotting graphs of the
+series,
+making cross section graphs and obtaining statistics (to be used as
+figures
+in documents);</li>
+  <li>export simulation results in other packages for further
+statistical
+analysis
+(e.g. SPSS, SAS, Excel etc.);</li>
+  <li>determine the values to be saved during the simulation run (the
+more
+series
+are saved, the slower the simulation);</li>
+  <li>save configuration and results for distribution to other users;</li>
+  <li>interrupt a simulation run exploring the state of the model,
+analyzing
+the data produced data produced up to that time step, proceed
+step-by-step
+the simulation, abort the simulation or resume the full-speed
+simulation
+run;</li>
+  <li>continue the simulation after the end of a previous simulation
+run (the
+status of the model after a simulation must be saved as a
+configuration,
+and re-loaded).</li>
+  <li>access the automatically created report on the model in HTML
+file, to
+be
+used for explanation purposes or as appendix to scientific publications;</li>
+  <li>access the automatically create model help, hopefully added with
+the
+modeller's
+comments, to understand the model purposes and functioning.</li>
+</ul>
+<p><br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="result"></a><b>What are the results of a Lsd Simulation Run,
+and what can I do with that?</b>
+<br>
+As a matter of principle, Lsd is based on the assumptions that
+simulation
+models do not serve (only) to produce data series, but to understand a
+complex system evolving through time according to pre-defined
+computational
+functions. Therefore, a simulation result is supposed to be analysed
+together
+with the model documentation so to be able to trace back the
+motivations
+of the patterns obtained with the simulation.
+<br>
+Given the hierarchical structure of Lsd models, it is very easy to
+build micro-founded models where many small entities behave (almost)
+wildly
+and higher-up entities aggregate their information in a simple
+statistics.
+This is the core instruments to study the Saint Graal of agent-based
+models,
+the emergent properties, even though, in the end of the day, all
+simulation
+models do is to produce streams of data.
+<p>During a simulation run only the data specifically indicated to be
+saved
+are kept in memory. Lsd is endowed with an <a href="mdatares.html">Analysis
+of Result module </a>that permits to print graphs and produce some
+statistics
+from these series. The same module allows to export data in a variety
+of
+text formats for more sophisticated statistical or graphical
+elaborations.
+<br>
+In case the configuration asks for many simulation runs to be done
+in a sequence (typically, for robustness analysis), the system saves on
+files the data at the end of each simulation. Each of these files
+(extension
+.res) can be used in the Analysis of Result module in Lsd. Moreover,
+only
+in case of multiple simulation runs, the system saves also the values
+of
+each series at the very last time step for each simulation run in a
+single
+file (called .tot file). This file (to be used with the Analysis of
+Result
+module) can be used to compare the final statuses of the model in each
+simulaiton.
+</p>
+<p><font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="documentation"></a><b>What documentation does exist on Lsd?</b>
+<br>
+Lsd models have all the same interfaces, and therefore exists a general
+documentation on Lsd system and a specific documentation for each Lsd
+model.
+<p>Concerning the documentation for Lsd in general, being a matter of
+software,
+the best way to learn Lsd is to use it. A hyper-manual is available,
+with
+all the aspects of Lsd reproduced as html files that can be browsed as
+hypertext with a normal Internet browser (e.g. Netscape Navigator,
+recommended,
+or Microsoft Explorer). This documentation is particularly useful
+because
+shows users the same interfaces of the Lsd models providing explanation
+on the functioning of the system.
+</p>
+<p>Concerning the specific documentation of each Lsd model it depends
+on
+the model writer. Lsd offers the possibility to create automatically a
+html file (Model Report) describing the content of the model as a
+hypertext
+that can be read at different levels of detail (overall model
+structure,
+individual elements, the whole code of the model's equations, each
+numerical
+value used). Modellers have also available the possibility to fill in
+the
+automatically created Model Help file, commenting any element of the
+model.
+Both the Model Report and the Model Help are shown automatically when
+requested
+from the menu Help of the Lsd model program.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+</p>
+<hr><br>
+<a name="windows"></a><b>What is the XXX Lsd window?</b>
+<br>
+See the <a href="windows.html">Lsd windows</a> page.
+<br>
+<font size="-1"><a href="#top">Return to the top</a></font>
+<br>
+<hr>
+<br>
+<a name="who"></a><b>Who did write Lsd, and why?</b>
+<br>
+Marco Valente (mv@business.auc.dk, <a
+ href="http://www.business.auc.dk/%7Emv">http://www.business.auc.dk/~mv</a>)
+is the writer of Lsd, initially as part of the TED project in IIASA,
+Austria
+(led by Prof. G.Dosi) and later as an activity related to my studies
+for
+a PhD in Economics in the University of Aalborg, Denmark, under the
+supervision
+of Esben S. Andersen.
+<p>Since my graduate dissertation (" tesi di Laurea", supervised by
+Prof.
+G.Dosi) I used simulation models, both for my own studies or under
+contract
+for other researchers. The basic motivation of Lsd (I mean, my own
+motivations)
+is laziness. I simply did not want to write twice the same code for
+different
+models. Since it is pretty common that a computer program uses 90% of
+the
+code for non-core operations, I found myself writing programs 90% of
+which
+were similar to previously written code every time I started a model.
+The
+basic idea of Lsd is to separate the model content from the "service"
+simulation
+code. In this way, writing the few lines of code corresponding to the
+equations
+of a model you obtain a fully serviced program, with interfaces, file
+management,
+debug control etc.
+</p>
+<p>The history of evolution of Lsd is made of too many small steps to
+be
+reported in detail. However, it is made of two different, although
+related,
+purposes. I want Lsd to:
+</p>
+<ul>
+  <li>be a powerful and simple to use language for simulation modelling;</li>
+  <li>bring economists, and social scientist in general, to use
+simulations;</li>
+</ul>
+Because of the first goal I cumulated more and more functions that,
+used
+in the model equations, facilitate the writing of models. Because of
+the
+second goal (to understand whose importance I am grateul especially to
+E.S.Andersen), I worked to refine interfaces, to produce the manual,
+and
+to push modellers (myself included) to fully document every model and
+every
+single part of a model.
+<br>
+<hr>
+<br>
+&nbsp;
+</body>
+</html>

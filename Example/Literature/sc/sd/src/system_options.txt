@@ -1,0 +1,18 @@
+TCL_VERSION=85
+TK_VERSION=85
+DUMMY=-mwindows
+PATH_TCL_LIB=$(LSDROOT)/gnu/lib
+PATH_TK_LIB=$(LSDROOT)/gnu/lib
+PATH_TK_HEADER=$(LSDROOT)/gnu/include
+PATH_TCL_HEADER=$(LSDROOT)/gnu/include
+PATH_LIB=$(LSDROOT)/gnu/lib
+INCLUDE_LIB=-I$(LSDROOT)/gnu/include
+CC=g++
+SRC=src
+EXTRA_PAR=-lz
+SSWITCH_CC=-O2
+EXT=.exe
+
+# Set the complete option for the libraries to link to the models.
+TCL_LIB=-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION)
+TK_LIB=-L$(PATH_TK_LIB) -ltk$(TK_VERSION)

@@ -1,0 +1,4 @@
+TARGET=lsd_gnu
+FUN=fun_life
+SWITCH_CC=-g
+

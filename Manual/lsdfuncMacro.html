@@ -1,0 +1,2229 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Generator" content="Microsoft Word 97">
+  <meta name="Template"
+ content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+  <meta name="GENERATOR"
+ content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
+  <meta name="Author" content="Marco Valente">
+  <title>Lsd Equations Functions</title>
+</head>
+<body link="#0000ff" vlink="#800080">
+<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
+ href="windows.html">Lsd
+Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
+<p><b><font size="+2">Lsd Equations Macro Language</font></b></p>
+</center>
+<p>See the <a href="#equation">Introduction</a> to Lsd macro language
+for
+equations. Lsd accepts also pure C++ with the actual Lsd functions
+expressed
+in pure C++ (most models are expressed in this language. Refer to the <a
+ href="lsdfunc.html">manual
+for the original Lsd language</a>.).
+<br>
+Search the function of interest below, considering that most of them
+are part of a family with post-fix -L, -S, -LS. For example, the
+function
+V(...) is part of a family of function together with VL(...), VS(...)
+and
+VLS(...).
+<br>
+&nbsp;
+<table border="1" width="100%">
+  <tbody>
+    <tr>
+      <td><b>Return values</b></td>
+      <td><b>Return Objects</b></td>
+      <td><b>Modify Values</b></td>
+      <td><b>Edit Model Structure</b></td>
+      <td><b>Other elements</b></td>
+    </tr>
+    <tr>
+      <td><a href="#V">V</a></td>
+      <td><a href="#ADDOBJ">ADDOBJ</a></td>
+      <td><a href="#WRITE">WRITE</a></td>
+      <td><a href="#ADDOBJ">ADDOBJ</a></td>
+      <td><a href="#v">v[n]</a></td>
+    </tr>
+    <tr>
+      <td><a href="#STAT">STAT</a></td>
+      <td><a href="#RNDDRAW">RNDDRAW</a></td>
+      <td><a href="#INCR">INCR</a></td>
+      <td><a href="#DELETE">DELETE</a></td>
+      <td><a href="#CURRENT">CURRENT</a></td>
+    </tr>
+    <tr>
+      <td><a href="#SUM">SUM</a></td>
+      <td><a href="#RNDDRAWFAIR">RNDDRAWFAIR</a></td>
+      <td><a href="#MULT">MULT</a></td>
+      <td><a href="#SORT">SORT</a></td>
+      <td><a href="#p">p-&gt;</a></td>
+    </tr>
+    <tr>
+      <td><a href="#WHTAVE">WHTAVE</a></td>
+      <td><a href="#SEARCH_CND">SEARCH_CND</a></td>
+      <td><br>
+      </td>
+      <td><a href="#CYCLE">CYCLE</a></td>
+      <td><a href="#c">c-&gt;</a></td>
+    </tr>
+    <tr>
+      <td><a href="#MAX">MAX</a></td>
+      <td><a href="#SEARCH">SEARCH</a></td>
+      <td><br>
+      </td>
+      <td><a href="#init_lattice">init_lattice(...)</a></td>
+      <td><a href="#cur1">cur, cur1, cur2...</a></td>
+    </tr>
+    <tr>
+      <td><a href="#INCR">INCR</a></td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><a href="#update_lattice">update_lattice(...)</a></td>
+      <td><a href="#up">up-&gt;, next-&gt;, etc.</a></td>
+    </tr>
+    <tr>
+      <td><a href="#MULT">MULT</a></td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><a href="#objmodelspecific">model specific objects</a></td>
+    </tr>
+    <tr>
+      <td><a href="#rnd">Random and math functions</a></td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><a href="#advanced">Advanced coding </a>(debug, memory
+management, <br>
+"object-&gt;hook", )<a href="#advanced"><br>
+      </a></td>
+    </tr>
+    <tr>
+      <td><a href="#V_CHEAT">V_CHEAT</a></td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><a href="#basicc">Basic C++</a></td>
+    </tr>
+    <tr>
+      <td><a href="#interact">INTERACT</a></td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</p>
+<hr style="width: 100%; height: 2px;">
+<p><br>
+<a name="equation"></a><b>Lsd Equations</b>
+<br>
+A simulation run consists in a sequence of time steps, during each
+of which every Variable of the model is "updated". That is, a piece of
+code is executed, normally returning a numerical value that is
+associated
+to the Variable for that time step. The Lsd equations are these pieces
+of codes.
+</p>
+<p>The code for the equations are separated in blocks (see below). They
+are located all in a file, called the equations' file, which is then
+compiled
+together with the rest of the Lsd source code. Normally, this is doen
+using
+LMM, and therefore the user should find the equation file automatically
+prepared.
+<br>
+The only required lines in the equation file are the following:
+<br>
+<tt><font size="+1">#include "../src/fun_head.h"</font></tt>
+</p>
+<p><tt><font size="+1">MODELBEGIN</font></tt>
+</p>
+<p><tt><font size="+1">MODELEND</font></tt>
+</p>
+<p><tt><font size="+1">void close_sim(void)</font></tt>
+<br>
+<tt><font size="+1">{</font></tt>
+<br>
+<tt><font size="+1">}</font></tt>
+</p>
+<p>The user should place the equations only after the keyword <tt><font
+ size="+1">MODELBEGIN</font></tt>
+and before <tt><font size="+1">MODELEND</font></tt> . Placing the
+keyword
+<tt><font size="+1">DEBUG</font></tt>
+before the first equation's code (but after <tt><font size="+1">MODELBEGIN
+</font></tt>begin)
+the simulation run will write a file called "log.log" where all the
+Variables'
+equations computed are listed with some relevant information. Of
+course,
+this slows down sensibly the simulation, but it may be useful to find
+errors,
+since the last Variable computed before a crash will be the likely
+faulty
+one.
+</p>
+<p>Every type of Variable has its own equation, although a model
+normally
+contains many copies of a Variable. In this cases the same piece of
+code
+is executed, as many times as many copies of the Variables, but, of
+course,
+the values used in each execution may change. In fact, Variables are
+located
+in Objects, so many copies of the Objects contains the copies of the
+Variables.
+The equations' code always refer to an Object. For example, suppose an
+Object Firm contains Variable Q and Variable K. If there are many
+copies
+of Objects Firm's, each equation of Q, that uses K for its computation,
+will refer to its own copy of K, that is, the copy of K in the same
+Object
+containing the copy of Q currently under computation.
+</p>
+<p>The equations' code for all the Variables are located in the same
+file.
+The order in which the equations appear in the file is irrelevant,
+since
+the system automatically decides which Variable needs to be executed.
+Therefore,
+each equation must be thought of as a difference equation, written
+independenlty
+from one another, and computed at the generic time t:
+</p>
+<ul>
+  <li>X<sub>t</sub> =<font size="+1"> <i>f</i></font>(Y<sub>t-lag</sub>,
+Z<sub>t-lag</sub>,
+...)</li>
+</ul>
+The system analyses the lag structure and decides which computation
+needs
+to be computed first.
+<p>The code for a (type of) Variable can be expressed in two forms:
+</p>
+<p><tt>EQUATION("VarLabel")</tt>
+<br>
+<tt><font color="#00cc00">/*</font></tt>
+<br>
+<tt><font color="#00cc00">Normally here should be place a comment,
+specifying what the equation does</font></tt>
+<br>
+<tt><font color="#00cc00">*/</font></tt>
+</p>
+<p><tt>RESULT(3) <font color="#00cc00">//This equation assigns always
+the
+value 3 to any copy of Variable VarLabel</font></tt>
+</p>
+<p>The first line indicates that the code refer to the Variable
+labelled
+VarLabel. After the initial line normally it is placed a comment
+(highlighted
+in green). The following lines can contain any Lsd (or C++) code. The
+last
+line must be indicated with the keyword "RESULT(...)" where, in between
+the parenthesis, is contained the value that the Variable is assigned.
+<br>
+The <tt>EQUATION("VarLabel")</tt> line indicates that the Variable
+must be computed once and only once at every time step. Therefore, for
+example, if a Variable uses its values in many other equations, than it
+returns always the same value. That is, the number VarLabel at time t
+is
+always identical. <br>
+</p>
+<p>Lsd offers numerous functions to express the equations. The most
+frequently
+used is <a href="#V">V("Var_or_ParLabel")</a> that simply compute the
+value
+of another Variable or Parameter in the model. When the computations
+required
+for an equation (or a function) are slightly less than trivial, it is
+common
+to use local variables where to store intermediate results. For
+example,
+consider the following equation:
+</p>
+<p><tt>EQUATION("PROF")</tt>
+<br>
+<tt><font color="#009900">/***************************</font></tt>
+</p>
+<p><tt><font color="#009900">The equation computes the profit rate:</font></tt>
+<br>
+<tt><font color="#009900">PROF(t) = P(t) * A(t-1) -C -RIM - RIN*Inn</font></tt>
+</p>
+<p><tt><font color="#009900">profits per unit of capital are equal
+current
+price times lagged productivity</font></tt>
+<br>
+<tt><font color="#009900">minus the cost for research (innovative firms
+spend for both type</font></tt>
+<br>
+<tt><font color="#009900">of research) and fixed costs.</font></tt>
+</p>
+<p><tt><font color="#009900">***************************/</font></tt>
+<br>
+<tt>RESULT(V("Price")*VL("A",1) - V("C") - V("RIM") - V("RIN")*V("Inn"))</tt>
+</p>
+<p>It may be preferred to store the intermediate values used in the
+final
+computation in local variables, called v[0], v[1], v[2], etc.:
+</p>
+<p><tt>EQUATION("PROF")</tt>
+<br>
+<tt><font color="#009900">/***************************</font></tt>
+</p>
+<p><tt><font color="#009900">The equation computes the profit rate:</font></tt>
+<br>
+<tt><font color="#009900">PROF(t) = P(t) * A(t-1) -C -RIM - RIN*Inn</font></tt>
+</p>
+<p><tt><font color="#009900">profits per unit of capital are equal
+current
+price times lagged productivity</font></tt>
+<br>
+<tt><font color="#009900">minus the cost for research (innovative firms
+spend for both type</font></tt>
+<br>
+<tt><font color="#009900">of research) and fixed costs.</font></tt>
+</p>
+<p><tt><font color="#009900">***************************/</font></tt>
+<br>
+<tt>v[0]=V("Price");</tt>
+<br>
+<tt>v[1]=VL("A",1);</tt>
+<br>
+<tt>v[2]=V("C");</tt>
+<br>
+<tt>v[3]=V("RIM");</tt>
+<br>
+<tt>v[4]=V("RIN");</tt>
+<br>
+<tt>v[5]=V("Inn");</tt>
+</p>
+<p><tt>RESULT(v[0]*v[1]-v[2]-v[3]-v[4]*v[5])</tt>
+</p>
+<p>This system has several advantages. Firstly, the code generally is
+more
+readable using shorter symbols for values. Secondly, the intermediate
+values
+can be observed using the <a href="debug.html">Lsd debugger</a>, so to
+trace errors. Thirdly, if a value is used many times in the same
+equation,
+instead of re-calling the function providing it it is faster to store
+the
+value in a v[...] local variable and just re-use it.
+</p>
+<p>Besides local variables for intermediate numerical values, it is
+also
+available a group of local "pointers": cur, cur1, cur2, etc. These are
+used to store objects managed in the equation. Typically, when creating
+new Objects one may want to initialize the Parameters of the newly
+created
+Object. This is made storing the new Object in a temporary pointer, and
+applying to it the Lsd functions required. For example, the following
+lines
+in an equation create a new Object of type Firm and set to 0 its K
+Variable
+(see details in the description of the Lsd functions listed <a
+ href="#top">above</a>).
+</p>
+<p><tt>...</tt>
+<br>
+<tt>cur=ADDOBJ("Firm");</tt>
+<br>
+<tt>WRITELS(cur, "K",0,t);</tt>
+<br>
+<tt>...</tt>
+</p>
+<p>Most of the Lsd functions, like WRITE or V used above, come as a
+family
+where the name of the function can be expressed with no post-fix, "L",
+"S", and "LS" as post-fix. The post-fix "L" stands for Lag, indicating
+that the operation must refer to past values. The post-fix "S"
+indicates
+a Specific object. Consider that any Lsd operation is performed at a
+given
+time step in a given equation. Therefore, the time "now" and the Object
+containing the Variable whose equation is executed are used as default,
+and no post-fix needs to be used. Otherwise, for operations that must
+refer
+to past time steps, or to Objects different from the one containing the
+Variable whose equation is executed, the modeller must use the post-fix
+version of the Lsd functions and provide the necessary details:
+</p>
+<ul>
+  <li>If no post-fix is specified the function is supposed to refer to
+the
+Object
+containing the Variable under computation and to the current time step.</li>
+  <li>The post-fix "L" means that the function apply to the same Object
+containing
+the Variable under computation, but must be specified the lag to which
+the operation refers to.</li>
+  <li>The post-fix "S" means that the function contains the
+specification to
+the Object to which it must be applied, and it refers to the current
+time
+step.</li>
+  <li>The post-fix "LS" means that the function is applied to the lag
+specified
+and to the Object specified.</li>
+</ul>
+The equation's code can use two Objects that are available to the
+modeller.
+One is "p", which indicates the Object containing the Variable under
+computation.
+The other is "c" which refers to the Object containing the Variable
+that
+triggered the computation of the Variable under computation.<br>
+<hr style="width: 100%; height: 2px;"><br>
+<span style="font-weight: bold;"><a name="Functions"></a>Functions</span><br
+ style="font-weight: bold;">
+<p>Variables associated to an EQUATION are computed once and only once
+at each time step. That is, the value of a variable can be used by
+another variable in the model, by many other variables, or by no
+variable at all. In any case, the system ensures that the code of the
+equation is computed at each time step. If, in the same time step, the
+value is requested more than once, then the system does not recompute
+the equation but returns directly the same value computed before during
+the same time step.<br>
+</p>
+<p>In some, rare, cases, a Variable should be recomputed
+every time it is requested, even in the same time step, but should not
+be computed if no variable request it. <br>
+</p>
+<p>This is, for example, the case of a Variable
+computing an identification value that must differ for any object. For
+example, suppose that in the model a firm can generate, with some
+probability, a spin-off, that is, a new firm. Moreover, each firm must
+have a unique IdFirm value. It is possible that during the same time
+step many new firms are created, or none. To generate an identification
+number unique for each firm it is possible to use the following code<br>
+<br>
+</p>
+<p><tt>FUNCTION("IdGenerator")</tt>
+<br>
+<tt><font color="#00cc00">/*</font></tt>
+<br>
+<tt><font color="#00cc00">Generate new values any time this variable is
+requested<br>
+</font></tt></p>
+<p><tt><font color="#00cc00">*/<br>
+</font></tt><br>
+<tt>RESULT(CURRENT + 1)</tt>
+</p>
+<br>
+<hr style="width: 100%; height: 2px;">
+<p><b>Objects in the equations' code</b>
+<br>
+Most Lsd functions are operated by an Object, in the case above (and
+almost always) by <font face="Courier New,Courier">p-&gt;</font>. The
+reason
+why (most of ) Lsd functions are operated by Objects is that the same
+equation
+code is, in general, used by many copies of the Variable it refers to.
+For example, consider a model with an Object Firm containing Variables
+Profit, Price and Quantity, and the equation for Profit is (neglecting
+the temporal index):
+</p>
+<ul>
+  <li>Profit = Price x Quantity</li>
+</ul>
+In general the model may have many copies of Object Firm, and each
+Variable
+Profit will need to use the values of Quantity and Price referring to
+the
+same instance of Object Firm. Lsd takes care automatically of
+identifying
+the correct values in the code of the equation, using the Object the
+Lsd
+function is attached to. In particular,
+<ul>
+  <li>p is the same Object containing the Variable whose equation is
+computed</li>
+  <li>c is the Object that requested the computation of the equation</li>
+  <li>cur, cur1, cur2, etc. are C++ temporary "pointers", which can
+store
+addresses
+of Objects obtained by other Lsd functions.</li>
+</ul>
+<a name="p"></a><b>Parent Object: <font face="Courier New">p</font></b>
+<br>
+This symbol refers to the Object containing the Variable whose equation
+is being executed ("p" for "parent of the Variable"). Since most of the
+operations in an equation concerns the values in the same Object, this
+Object is the most frequently used in the equations, and in most of
+cases
+the Lsd functions allow to use it by default without specifying it.
+<p><a name="c"></a><b>Caller Object: <font face="Courier New">c</font></b>
+<br>
+In most of cases equations computing some Variable's values are
+executed
+because other equations needed those values. This object in an equation
+contains the pointer to the Object that caused that equation to be
+computed,
+if any ("c" reads for "caller"). If an equation is computed only
+because
+the system requested so, and no other equation triggered the
+computation,
+then c is NULL, a conventional value.<br>
+</p>
+<p>Typically the object "c" is used in <a href="#Functions">FUNCTION</a>'s,
+since these are not computed unless another equation requested their
+computation. As an example example, the following function generates a
+random value from a poisson random function, with the mean value taken
+from the parameter "mean" stored in the <br>
+<br>
+</p>
+<p><a name="cur1"></a><b>Temporary Object's pointers:<font
+ face="Courier New,Courier">
+cur, cur1, cur2, ...</font></b>
+<br>
+These elements are pointers to Objects, used to store temporary
+required
+Object (like&nbsp; <a href="#v">v[n]</a> is used to stored temporay
+numerical
+values). Typically, the user applies to p-&gt;, or c-&gt; a Lsd
+function returning
+Objects, assigning the result to <span style="font-family: monospace;">cur</span>.
+Then uses cur to apply a function
+returning values, or modifying values. See any example of the <a
+ href="#top">Lsd
+function </a>returning Objects.
+</p>
+<p><a name="up"></a><b>object elements: <tt><font size="+1">up-&gt;,
+next-&gt;,
+son-&gt;</font></tt></b>
+<br>
+The information in this paragraph is not necessarily relevant for
+writing
+Lsd models. But it explains the technical implementation of a Lsd model
+that can be used to optimize a model's code.
+<br>
+Every Object (for example, p, c etc.) is related to its neighbours
+in the model hierarchy. Every Object can therefore bring to its
+neighbours
+using the links to them. The links are determined with the following
+components
+of each Object:
+</p>
+<ul>
+  <li> <tt><font size="+1">object-&gt;up-&gt;</font></tt> is the
+Object
+containing the
+Object <tt><font size="+1">object</font></tt>. The top&nbsp; Object in
+the
+model hierarchy, <b>Root</b>, has the field <tt><font size="+1">up </font></tt>set
+to NULL.</li>
+  <li> <tt><font size="+1">object-&gt;next-&gt;</font></tt> is the
+Object
+copy following
+the Object <tt><font size="+1">object</font></tt> in the list of
+descendants
+from the parent of <tt><font size="+1">object</font></tt>. Note that <tt><font
+ size="+1">object-&gt;next-&gt;</font></tt>
+can be of different type from <font size="+1"><tt>object</tt>. </font>All
+the Object in the chain next will have the same Object up, since all of
+them descend from the same parent Object. The last Object in the chain
+has teh field next equal to NULL.</li>
+  <li> <tt><font size="+1">object-&gt;son-&gt;</font></tt> is the
+first
+copy of the set
+of Objects descending fom the Object <tt><font size="+1">object</font></tt>.
+The lowest Object in the hierarchy have the field son set to NULL.</li>
+</ul>
+In other terms, every Object can bring to another Object using the
+appropriate
+pattern along the <tt><font size="+1">up-&gt;</font></tt>, <tt><font
+ size="+1">next-&gt;</font></tt>
+and <tt><font size="+1">son-&gt;</font></tt> fields. For example, the
+Object:
+<br>
+<tt><font size="+1">object-&gt;son-&gt;next-&gt;up</font></tt>
+<br>
+is nothing else that the very same initial <tt><font size="+1">object</font></tt>
+(assuming it has at least two descending Objects).
+<br>
+The best way to remember the object's components is to keep in mind
+a geometrical representation of Objects:
+<p><tt>&nbsp;up</tt>
+<br>
+<tt>&nbsp;/\</tt>
+<br>
+<tt>&nbsp;||</tt>
+<br>
+<tt>&nbsp;--------</tt>
+<br>
+<tt>|object | =&gt; next</tt>
+<br>
+<tt>&nbsp;--------</tt>
+<br>
+<tt>&nbsp;||</tt>
+<br>
+<tt>&nbsp;\/</tt>
+<br>
+<tt>&nbsp;son</tt>
+</p>
+<p>The fields above are proper Objects, and therefore can be used to
+run
+Lsd functions. For example, consider a model where you have 100,000
+Objects
+Firm descending from a single Object Market. If a Variable in Firm uses
+a Parameter in Market, say Price, you can write the line
+<br>
+<font face="Courier New,Courier"><font size="-1">v[0]=V("Price");</font></font>
+<br>
+but it will take a lot of time to work out, because the system will
+have to visit and discard all the Objects Firm before moving "up" to
+check
+in market. In fact, the function V<b>(...)
+</b>will search in Firm for
+a Variable or Parameter Price. If it does not find it, it will look if
+it can be found after the set of Firm, descending from the same Object.
+Which means to skip through 100,000 objects, for the first firm, 99,000
+for the second and so on. Instead, using the line:
+</p>
+<p><font face="Courier New,Courier"><font size="-1">v[0]=VS(p-&gt;up,"Price");</font></font>
+</p>
+<p>returns directly the desired value, since the first Object searched
+is <tt><font size="+1">p-&gt;up</font></tt>, which is Market. Note
+that the
+modeller must be sure that objects fields use exists. If, in the
+example
+above, the equation is placed in Root, no <tt><font size="+1">up-&gt;</font></tt>
+Object exists, and the simulation will issue an error.
+</p>
+<p><a name="objmodelspecific"></a><b>Model specific objects</b>
+<br>
+The Object pointers saw above (p-&gt;, c-&gt;, cur-&gt; etc.) are all
+"local"
+Objects, in the sense that they represent a different content depending
+on the Variable in whose equation they are used. That is, they refer to
+Objects that, depending on the Variable whose equation is computed,
+change
+their content when the Variable computed changes: p-&gt; refers to the
+Object
+copy whose Variable is computed; c-&gt; to the Object that caused the
+Variable
+to be computed; cur-&gt; and the others are assigned within the
+equations
+code.
+<br>
+However, the modeller can create and use "global" Object pointers,
+that is Object that never change the content throughout a simulation
+run.
+This is mainly done for optimization purposes, when a very large model
+(many Objects) contain Variables that refer frequently to one specific
+Object copy. The use of global Object should be avoided by
+unexperienced
+modellers, because it risks to create error difficult to be captured.
+<br>
+To use a global Object, declare the Object outside the scope of the
+equation function, on the top of the equation file before the line:
+</p>
+<p><tt>MODELBEGIN</tt>
+<br>
+the declaration line must be something like:
+</p>
+<p><tt>object *market;</tt>
+</p>
+<p>where the name of the Object ("market" in the example) must not be
+one
+of the existing Objects (p, c, cur etc). The Object must be assigned
+with
+one of the Lsd equation functions returning Objects within an equations
+code. For example, there may be a Variable called <b>init</b> making
+such
+assignements. For example, it may be:
+</p>
+<p><tt>EQUATION("Init")</tt>
+<br>
+<tt><font color="#009900">/*</font></tt>
+<br>
+<tt><font color="#009900">Technical initialization function. It is
+computed only once and then it is</font></tt>
+<br>
+<tt><font color="#009900">transformed in a parameter and never computed
+again.</font></tt>
+</p>
+<p><tt><font color="#009900">Sets the global pointer 'market' pointing
+to the Object Market, so</font></tt>
+<br>
+<tt><font color="#009900">to speed up the access to this object</font></tt>
+</p>
+<p><tt><font color="#009900">*/</font></tt>
+</p>
+<p><tt>market=SEARCH("Market"); <font color="#009900">//assign the C++
+object pointer "market" to point to the Lsd Object Market</font></tt>
+<br>
+<tt>param=1; <font color="#009900">//optional; transform "Init" in
+a parameter so to not compute again this equation.</font></tt>
+<br>
+<tt><font color="#000000">RESULT(1)</font></tt>
+</p>
+<p>The Variable <b>Init</b> must be computed for sure before <b>market</b>
+is used in any other equation. This can be ensured placing <b>Init </b>in
+the Object <b>Root</b>, since the simulation step starts always the
+computation
+from the Variables contained in the top of the model structure.
+<br>
+With the setting described above, the modeller can use "market" as
+any other Object, knowing that it refers always to the Lsd Object
+Market.
+For example, the equation for a Variable placed anywhere in the model
+may
+use the line:
+</p>
+<p><tt>v[0] = VS(market,"Price");</tt>
+</p>
+<p>and be sure that the value of Variable Price is returned quickly.
+Note
+that also the conventional line
+</p>
+<p><tt>v[0] = V("Price");</tt>
+</p>
+<p>would work. But it would cost a lot of time in case the Variable
+whose
+equation containing the line for Price is placed very "far" from
+Market.
+<br>
+Modellers using global Objects should be careful when assigning
+configurations
+with many copies. If, for example, the model configuration uses many
+copies
+of Objects Market, any use of the global object <tt><font size="+1">market
+</font></tt>would
+refer only to the very first copy.
+<br>
+</p>
+<hr width="100%">
+<p><a name="V"></a><b><font face="Courier New">V("Lab"), VL("Lab",
+lag),
+VS(obj,"Lab"), VLS(obj,"Lab",lag)</font></b>
+<br>
+This is the most used Lsd function. It returns the value of the
+Variable
+or Parameter with label <tt><font size="+1">Lab</font></tt>. The forms
+VL(...)
+and VLS(...) permit to specify a lag, so that the values returned
+concern
+the value of <tt><font size="+1">Lab</font></tt> with <tt><font
+ size="+1">lag</font></tt>
+lags. The forms VS(...) and VLS(...) specify in which Object the
+Parameter
+or Variable must be searched for. In V(...) and VL(...), where no
+Object
+is specified, the search starts from <tt><font size="+1">p </font></tt>(see
+available Objects).
+</p>
+<p>In case the model contains many instances of Variables with the same
+label <font face="Courier New">Var</font> (that is, many instances of
+Object
+containing this Variable), the function returns the value of the
+instance
+"closer" to the Object where the search start from. By closer, it is
+meant
+the first instance found by searching the model using the following
+strategy:
+</p>
+<p>1) Search in the Object <font face="Courier New">object </font>(the
+one specified in the function call);
+<br>
+2) Search in the Object(s) descending from <font face="Courier New">object</font>;
+<br>
+3) Search in the parent Object of <font face="Courier New">object</font>;
+</p>
+<p>In each Object explored, the same strategy is applied recursively,
+so
+that every Object in the model is visited, if necessary. So, for
+example,
+if there is only one instance of Variable <font face="Courier New">Var</font>in
+the model, this can be found whatever Object is used to start the
+search.
+</p>
+<p><b>Example</b>
+<br>
+Consider the equation Q<sub>t</sub> = K<sub>t-1</sub> * A<sub>t</sub>
+<br>
+The code will be as follows:
+</p>
+<p><font face="Courier New"><font size="-1">EQUATION("Q")</font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">/*</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">Compute
+the quantity Q as the product of lagged capital K and current
+productivity
+A</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">*/</font></font></font>
+<br>
+<font face="Courier New"><font size="-1">RESULT( VL("K",1) * V(A) )</font></font>
+</p>
+<p>or, equivalently:
+</p>
+<p><font face="Courier New"><font size="-1">EQUATION("Q")</font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">/*</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">Compute
+the quantity Q as the product of lagged capital K and current
+productivity
+A</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">*/</font></font></font>
+<br>
+<font face="Courier New"><font size="-1">v[0]=VL("K",1);</font></font>
+<br>
+<font face="Courier New"><font size="-1">v[1]=V(A);</font></font>
+<br>
+<font face="Courier New"><font size="-1">RESULT( v[0]* V(A) )</font></font>
+</p>
+<p>In the second case the two temporary variables <font
+ face="Courier New">v[0]</font>
+and <font face="Courier New">v[1] </font>are used to store the
+intermediate
+results, which can be observed during a debugging session, so that
+modeller
+can trace possible unexpected results.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="V_CHEAT"></a><b><font face="Courier New">V_CHEAT("Lab",
+fake_caller),
+VL_CHEAT("Lab", lag, fake_caller), VS_CHEAT(obj,"Lab", fake_caller),
+VLS_CHEAT(obj,"Lab",lag,
+fake_caller)</font></b>
+<p>This function is used for sophisticated coding. When the standard <a
+ href="#V">V(...)</a>
+requests the value of a Variable, when this Variable equation is
+executed
+it can access the Object containing the caller Variable (Object <a
+ href="#c">c</a>).
+However, in some cases, mostly for reasons of efficiency, it may be
+useful
+to "cheat" the requested Variable in believing that the Object is
+something
+else. With <tt>V_CHEAT</tt> the modeller must specify another Object (<tt>fake_caller</tt>)
+that will appear in the called Variable as if it were the "caller".
+<br>
+</p>
+<hr width="100%"><br>
+<a name="SUM"></a><b><font face="Courier New">SUM("Lab"), SUML("Lab",
+lag), SUMS(obj, "Lab"), SUMLS(obj, "Lab", lag")</font></b>
+<p>This function searches, with the same strategy described in <a
+ href="#V">V(...)</a>
+(see also the different forms), an instance of the Variable <font
+ face="Courier New">Var</font>.
+Then, it keeps on summing up all the values of Variables <font
+ face="Courier New">Var</font>
+(with the lag <font face="Courier New">lag</font> if specified),&nbsp;
+found in the set of Objects contiguous to the one found. Normally, it
+should
+be used to sum up the values of descending Objects. For example, if
+Q_TOT
+is contained in an Object Market, from which descend a set of Objects
+Firm
+containing Variables Q, its equation can be:
+</p>
+<p><font face="Courier New"><font size="-1">EQUATION("Q_TOT")</font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">/*</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">Compute
+the sum of all Q's in the market*/</font></font></font>
+<br>
+<font face="Courier New"><font size="-1">RESULT( SUM("Q") )</font></font>
+<br>
+&nbsp;
+</p>
+<p>Note that, if your model contains many Objects Market, this equation
+will sum up only the Q's contained in the set of descendants of Market,
+and not all the Q's existing in the model.
+<br>
+</p>
+<hr width="100%">
+<p><a name="MAX"></a><b><font face="Courier New">MAX("Lab"),
+MAXL("Lab",
+lag), MAXS(obj,"Lab"), MAXLS(obj,"Lab",lag)</font></b>
+<br>
+Same as <font face="Courier New"><a href="#sum">object-&gt;sum()</a></font>,
+but returns the maximum value instead of the sum.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="WHTAVE"></a><b><font face="Courier New">WHTAVE("Lab1","Lab2"),
+WHTAVEL("Lab1", "Lab2", lag),
+WHTAVES(obj,"Lab1","Lab2"),WHTAVELS(obj,"Lab1","Lab2",lag)</font></b>
+</p>
+<p>Same as <font face="Courier New"><a href="#sum">object-&gt;sum()</a></font>,
+but returns the weighted average of a Variable or Parameter, that is
+the
+sum of the products between the values of Lab1 times Lab2. Of course,
+both
+Variables need to be contained in the same type of Objects.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="STAT"></a><b><font face="Courier New">STAT("Var"),
+STATS(obj,"VAR)</font></b>
+<br>
+This function does not return a value as the ones above, but stores
+a set of values in the vector <font face="Courier New">v</font>. It
+works
+as the function <a href="#SUM">SUM</a>, and the like, but computes a
+set
+of descriptive statistics. Namely, it places in <font
+ face="Courier New">v</font>
+the following values:
+</p>
+<p>v[0]=number of elements;
+<br>
+v[1]=average of Var
+<br>
+v[2]=variance of Var
+<br>
+v[3]=maximum values
+<br>
+v[4]=mininimu values
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="SEARCH_CND"></a><b><font face="Courier New">SEARCH_CND("Lab",
+val), SEARCH_CNDL("Lab", val, lag), SEARCH_CNDS(obj, "Lab", val),
+SEARCH_CNDLS(obj,
+"Lab", val, lag")</font></b>
+</p>
+<p>This method is used to find an Object in the model that contains the
+Variable <font face="Courier New">Lab</font> with value <font
+ face="Courier New">val</font>
+(considered the lag <font face="Courier New">lag</font>). Basically,
+it
+uses the same strategy to explore the model as described in function <font
+ face="Courier New"><a href="#V">V(...)</a></font>
+above. Only, it does not stop to the first instance encountered, but
+continues
+until the searched Variable is not found with the desired value. When
+an
+Object that satisfies the condition is found, it is returned to the
+calling
+equation, and can be used to activate other Lsd functions, like <font
+ face="Courier New"><a href="#V">V(...)</a></font>
+.
+</p>
+<p>The function is used to identify a particular Object, which is
+neither
+<font face="Courier New"><a href="#p">p</a></font>
+nor <font face="Courier New"><a href="#c">c</a></font>. For example,
+suppose
+you want to extract randomly a Firm from a group of 100 instances, and
+that these contain a Parameter IdFirm set from 1 to 100, you can use
+the
+following code:
+</p>
+<p><font face="Courier New"><font size="-1">v[0]=rnd_integer(1,100)</font></font>
+<br>
+<font face="Courier New"><font size="-1">cur=SEARCH_CND("IdFirm", v[0]);</font></font>
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="SORT"></a><b><font face="Courier New">SORT("LabObj", "Lab",
+"Direction"), SORTS(obj, "LabObj", "Lab", "Direction"), SORT2("LabObj",
+"Lab1", "Lab2", "Direction"), SORTS2(obj, "LabObj", "Lab1", "Lab2",
+"Direction"),</font></b>
+<br>
+This function sorts (with the quick sort method) a set of Objects
+labeled
+<font face="Courier New">LabObj</font>
+according to the values of Variable
+<font face="Courier New">Lab</font>.
+The field <font face="Courier New">Direction</font> must be either
+"UP"
+or "DOWN". It returns an error in case the Variable
+<font face="Courier New">Var</font>,
+though defined in the model, is not contained in the Object <font
+ face="Courier New">Obj_Label</font>.
+In case there are many sets of Objects with label <font
+ face="Courier New">Obj_Label</font>,
+the function sorts only the first set encountered by exploring the
+model
+with the usual strategy (see <a href="#V">V(...)</a> ). If specified,
+the
+search for the group of Objects to sort start from
+<font face="Courier New">obj</font>.
+</p>
+<p><b>Example:</b>
+<br>
+<font face="Courier New">SORT("Firm","Q", "DOWN");</font>
+<br>
+this line, used in an equation contained in an Object from which
+descend
+many Object labelled Firm, sorts these descendants according to
+decreasing
+values of their Variable Q.
+<br>
+The <font face="Courier New">SORT2</font> function is also available
+for ranking on two dimensions:
+<br>
+<font face="Courier New">SORT2("AnObject","X", "Y", "UP");</font>
+<br>
+In this second case the Objects are sorted according to their
+increasing
+values of X. If two or more Objects have identical values on X, then
+the
+Variable or Parameter Y is used to sort them.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="ADDOBJ"></a><b><font face="Courier New">ADDOBJ("Obj_Label"),
+ADDOBJS(obj,"Obj_Label"), ADDOBJ_EX("Obj_Label", obj_ex),
+ADDOBJS_EX(obj,"Obj_Label",
+obj_ex), ADDNOBJ(</font></b><b><font face="Courier New">"Obj_Label",
+num, obj_ex), </font></b><b><font face="Courier New">ADDNOBJS(obj,</font></b><b><font
+ face="Courier New">"Obj_Label", num, obj_ex)</font></b><br>
+These functions adds a descendent to the Object of type <font
+ face="Courier New">Obj_Label</font>
+to&nbsp; <font face="Courier New">obj</font>, or in <a href="#p">p</a>
+if <font face="Courier New,Courier">obj </font>not specified, and
+return
+the newly created Object. The <font face="Courier New">ADDOBJ</font>
+version
+initializes the new Object (that is, sets the values for its Parameters
+and Variables, including the lagged values) according to the values
+defined
+in the initialization file for the model. In case there are many
+Objects
+of type <font face="Courier New">Obj_Label</font>, the function
+considers
+the data for the very first Object in the data file for the model. The
+Variables are defined as if they were already updated in the current
+time
+step. In the <font face="Courier New">ADDOBJ_EX</font> version, the
+function
+uses the <font face="Courier New,Courier">example</font> Object to
+initialize
+the newly created Object.
+<br>
+In case the new Object is defined as having descendants, the function
+builds the whole structure of its descendants. The function returns the
+address of the newly created Object, so that the modeller can add in
+the
+equation a customized initialization. See the function <a href="#WRITE">WRITE</a>
+for changing the values of Variables (without using the equation) and
+of
+Parameters.
+<p>For example, you can have an equation for a Variable in the Object
+Market
+that contains the following lines:
+</p>
+<p><font face="Courier New"><font size="-1">cur=ADDOBJ("Firm");</font></font>
+<br>
+<font face="Courier New"><font size="-1">WRITE("DateBirth",(double)t);</font></font>
+</p>
+<p>The lines above create a new Object Firm, which has the same initial
+data as the first Object in the model file. Then it modifies the
+Parameter
+DateBirth, storing there the current time step. Note that the C++
+variable
+t, expressing the time step of the simulation, is an integer Variable,
+and therefore needs to be explicitly declared as double (that is,
+double
+precision floating point variable in C++), because all the numerical
+values
+in Lsd are real numbers.
+</p>
+<p>As a second example, suppose that in the Market Object is contained
+a Variable A_MAX containing the maximum productivity. The following
+lines
+identify the Object Firm with the maximum productivity and produce a
+new
+Firm with the same initialization of this Obejcts:
+</p>
+<p><font face="Courier New"><font size="-1">v[0]=V("A_MAX");</font></font>
+<br>
+<font face="Courier New"><font size="-1">cur=SEARCH_CND("A", v[0]);</font></font>
+<br>
+<font face="Courier New"><font size="-1">cur=ADDOBJ_EX("Firm", cur);</font></font>
+</p>
+<p>The first line obtains the value of the highest productivity among
+the
+existing Firms. Then, the function <font face="Courier New"><a
+ href="#SEARCH_CND">SEARCH_CND(...)</a></font>
+returns the Object that has the same productivity as the maximum one.
+This
+Object is used as example for the creation of the new Firm. Note that
+the
+same temporary variable <font face="Courier New">cur</font> is used,
+firstly,
+to store the most productive Firm and then, both as example Object and
+as the new Object. This may seem strange to whom is not accustomed to
+C++,
+but it is perfectly safe. In fact, the content of the temporary
+variable
+cur has already been used when the function returns the newly created
+Object.
+</p>
+<p>If the added Object is set to save its values, these are available
+for
+post-simulation Analysis of Result. The data concerning the periods
+before
+its introduction are filled with missing values.<br>
+</p>
+<b><font face="Courier New">ADDNOBJ(</font></b><b><font
+ face="Courier New">"Obj_Label", num, obj_ex) </font></b>generates a
+number <b><font face="Courier New">num</font></b> of new objects, each
+copied from <b><font face="Courier New">obj_ex</font></b>.<font
+ face="Courier New"></font>
+<p></p>
+<p><i>Warning:</i>
+<br>
+The newly created Object must be added to a parent Object (that is,
+<font face="Courier New,Courier">object-&gt;</font>)
+which is already defined as having <font face="Courier New">Obj_Label</font>
+type of descendants.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="DELETE"></a><b><font face="Courier New">DELETE(obj)</font></b>
+<br>
+This function deletes the Object <font face="Courier New">obj</font>
+from the model, removing it from the model and freeing the memory it
+was
+allocated for it. While its use is very simple, it should be used with
+care to avoid the elimination of data structure used in other parts of
+the model. The data produced by the Objects and saved are available for
+the Analysis of Result
+<br>
+The data stored in the deleted Objects are always available for
+analysis
+at the end of the simulation, filling with missing values the periods
+after
+the deletion.
+<br>
+</p>
+<hr width="100%">
+<p><a name="WRITE"></a><b><font face="Courier New">WRITE("Lab",
+new_value),
+WRITEL("Lab", new_value, time), WRITES(obj, "Lab", new_value),
+WRITELS(obj,
+"Lab", new_value, time)</font></b>
+<br>
+This function writes the value <font face="Courier New">new_value</font>
+in the Variable or Parameter <font face="Courier New">Lab</font>.&nbsp;
+In case of Variable, it possible to make appear as if the
+time
+of latest computation for the overwriten Variable is <font
+ face="Courier New">time</font>.
+That is, after to function is executed, the Variable <font
+ face="Courier New">Var</font>
+will result as if its last computation had been executed at time <font
+ face="Courier New">time</font>,
+and the result of the equation were <font face="Courier New">new_value</font>.
+If the label <font face="Courier New">Var</font> corresponds to a
+Parameter,
+the field time is ignored. The Variable must be contained in the Object
+<font face="Courier New">obj</font>,
+(or in <a href="#p">p</a> if <font face="Courier New,Courier">obj </font>not
+specified),&nbsp; otherwise the functions returns an error and stops
+the
+simulation.
+<br>
+This function can be very useful to implement complex situations, but
+it should be used with extreme care because it disrupts the automatic
+system
+of controls for the execution of the equations. If the function
+concerns
+a Parameter, the field <font face="Courier New,Courier">time </font>is
+ignored. The most frequent use of <font face="Courier New,Courier">write</font>
+concerns the initialization of newly added Objects.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="SEARCH"></a><b><font face="Courier New">SEARCH("Obj_Label"),
+SEARCHS(obj, "Obj_Label")</font></b>
+<br>
+This function explores one single branch of the model searching for
+the first instance of the Object <font face="Courier New">Obj_Label.</font>
+That is, it searches only within the descendants of <font
+ face="Courier New">obj</font>,
+if specified, or in <a href="#p">p</a> if <font
+ face="Courier New,Courier">obj
+</font>not
+specified, and their descendants. Therefore, the search is not
+exhaustive
+over all the model, unless it is started from the <font
+ face="Courier New">Root</font>
+of the model. It returns the address of the found Object or NULL if no
+Object is found.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="v"></a><b><font face="Courier New,Courier">v[n]</font></b>
+<br>
+The standard way to express an equation is to collect a set of data
+from the model and then to elaborate them to provide the desired value.
+Since the Lsd function to collect data may be quite long, it is good
+practice
+to store values to be used in a numerical vector. See the <a
+ href="#equation">Introduction</a>.
+<br>
+The values of <font face="Courier New,Courier">v[n]</font> are reset
+for each equation, and therefore cannot be used to transfer information
+from one equation to another.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="CURRENT"></a><b><font face="Courier New,Courier">CURRENT</font></b>
+<br>
+This keyword contains the current value of the Variable under
+computation, irrespective of the time of last computation of the
+variable.It is the same value that can be obtained with the function <a
+ href="#V">VL("VarLabel",1)</a>,
+used in the equation for VarLabel. The result of the equation will be
+reported
+in CURRENT at the subsequent time step.
+</p>
+<p><b>Example:</b>
+<br>
+<font face="Courier New"><font size="-1">EQUATION("VarX")</font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">/*</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">This
+function
+returns a progressive value each time it is requested</font></font></font>
+<br>
+<font face="Courier New"><font color="#00cc00"><font size="-1">*/</font></font></font>
+<br>
+</p>
+<p><font face="Courier New"><font size="-1">v[0]=CURRENT;<br>
+v[1]=VL("VarX",1);<br>
+</font></font></p>
+<p><font face="Courier New"><font size="-1"><span
+ style="color: rgb(51, 204, 0);">/* v[0] and v[1] are identical */</span><br>
+RESULT(v[0])</font></font>
+<br>
+</p>
+<p>This can be used even when a variable is not defined to store past
+values, since it accesses directly the C++ memory location storing the
+variables' values.<br>
+</p>
+<hr width="100%">
+<p><a name="INCR"></a><b><font face="Courier New,Courier">INCR("Lab",
+value),
+INCRS(obj, "Lab", value)</font></b>
+<br>
+This function works only if <font face="Courier New,Courier">VarLabel</font>
+is contained in <font face="Courier New,Courier">obj</font>, or in <a
+ href="#p">p</a>
+if <font face="Courier New,Courier">obj </font>not specified,
+otherwise
+produces an error. It adds to the current value of <font
+ face="Courier New,Courier">Lab</font>
+the value of <font face="Courier New,Courier">value</font>. The
+function
+returns the new value after the increment. This function should be used
+only with Parameters, for the same reasons explained in the functions <a
+ href="#WRITE">WRITE.</a>
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="MULT"></a><b><font face="Courier New,Courier">MULT("Lab",
+value),
+MULTS(obj, "Lab", value)</font></b>
+<br>
+This function works only if <font face="Courier New,Courier">VarLabel</font>
+is contained in <font face="Courier New,Courier">obj</font>, , or in <a
+ href="#p">p</a>
+if <font face="Courier New,Courier">obj </font>not specified,
+otherwise
+produces an error. It multiplies the current value of <font
+ face="Courier New,Courier">VarLabel</font>
+times the value of <font face="Courier New,Courier">value</font>. The
+function
+returns the new value after the product.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="rnd"></a><b><font face="Courier New,Courier">Math and other
+functions</font></b>
+<br>
+Besides the Lsd specific function modellers can use one of the
+following
+random and mathematical functions. Of course, it is always possible to
+declare new functions or link to the Lsd model any C++ library.
+</p>
+<ul>
+  <li> <b><font face="Courier New,Courier">abs(a)</font></b>: return
+the
+absolute
+value of a;</li>
+  <li> <b><font face="Courier New,Courier">min(a,b)</font></b>: return
+the
+minimum
+between a and b;</li>
+  <li> <b><font face="Courier New,Courier">max(a,b)</font></b>: return
+the
+maximum
+between a and b;</li>
+  <li> <b><font face="Courier New,Courier">round(a)</font></b>: return
+the
+integer
+closest to the real value <font face="Courier New,Courier">a</font>;</li>
+  <li> <b><font face="Courier New,Courier">exp(a)</font></b>: return
+the
+exponential
+of a;</li>
+  <li> <b><font face="Courier New,Courier">log(a)</font></b>: return
+the
+natural
+log of a;</li>
+  <li> <b><font face="Courier New,Courier">sqrt(a)</font></b>: return
+the
+square
+root of a;</li>
+  <li> <b><font face="Courier New,Courier">pow(a,b)</font></b>: return
+the
+power
+b of a;</li>
+  <li> <b><font face="Courier New,Courier">UNIFORM(min, max): </font></b>This
+function (is actualy a macro) produces a random uniform value in the
+interval
+[min,max].</li>
+  <li> <b><font face="Courier New,Courier">rnd_integer(min, max)</font></b>:
+return
+a random integer value in the interval [min, max] with uniform
+probability</li>
+  <li> <b><font face="Courier New,Courier">norm(mean,dev)</font></b>:
+return a
+random value drawn from a normal random function with mean <font
+ face="Courier New,Courier">mean</font>
+and deviation <font face="Courier New,Courier">dev</font>;</li>
+  <li> <b><font face="Courier New,Courier">poisson(mean)</font></b>:
+return a
+draw from a poisson random function with mean <font
+ face="Courier New,Courier">mean</font>;</li>
+  <li> <b><font face="Courier New,Courier">gamma(mean)</font></b>:
+return
+a draw
+from a gamma random function with mean <font face="Courier New,Courier">mean</font>;</li>
+</ul>
+<hr width="100%">
+<p><a name="RNDDRAW"></a><b><font face="Courier New,Courier">RNDDRAW("ObjLabel",
+"VarLabel"), RNDDRAWL("ObjLabel", "VarLabel", lag), RNDDRAWS(obj,
+"ObjLabel",
+"VarLabel"), RNDDRAWLS(obj, "ObjLabel", "VarLabel", lag)</font></b>
+<br>
+This function searches for a group of Objects <font
+ face="Courier New,Courier">ObjLabel</font>,
+and returns the pointer to one of them chosen randomly with probability
+proportional to the values of <font face="Courier New,Courier">VarLabel</font>.
+<font face="Courier New,Courier">obj
+</font>can
+specify where the search must start from. <font
+ face="Courier New,Courier">lag
+</font>can
+specify the lag to use for the values of <font
+ face="Courier New,Courier">VarLabel</font>.
+</p>
+<p>EXAMPLE
+<br>
+Consider the equation for DrawAFirm which has to return the value of
+Parameter IdFirm in one of the Objects Firm descending from the Object
+where DrawAFirm is contained in. The equation will be:
+<br>
+is specified the starting&nbsp; then computes the values of <font
+ face="Courier New,Courier">VarLabel</font>
+for each of them. It returns the address of one of the Objects of the
+group
+chosen randomly with probability linearly dependent on the value of <font
+ face="Courier New,Courier">VarLabel</font>.
+The version of the function with total assumes that the latter value is
+equal to the sum of all VarLabel in the group, and is faster.
+<br>
+The following example c an equation for a Variable stored in an Object
+that contains a group of descending Objects Firm. The code assigns to
+the
+Parameter Prob in each Firm the square of their market shares and then
+draws randomly one of them, returning its identification number.
+<br>
+&nbsp;
+</p>
+<p><tt>EQUATION("DrawAFirm"))</tt>
+<br>
+<tt><font color="#00cc00">/***************************</font></tt>
+<br>
+<tt><font color="#00cc00">Return the Id of a Firm chosen randomly with
+probability</font></tt>
+<br>
+<tt><font color="#00cc00">equal to the square of the market shares.</font></tt>
+</p>
+<p><tt><font color="#00cc00">***************************/</font></tt>
+</p>
+<p><font face="Courier New"><font size="-1">CYCLE(cur, "Firm")</font></font>
+<br>
+<font face="Courier New"><font size="-1">{</font></font>
+<br>
+<font face="Courier New"><font size="-1">&nbsp;v[0]=V("ms");</font></font>
+<br>
+<font face="Courier New"><font size="-1">&nbsp;WRITES(cur,"Prob",v[0]*v[0]);</font></font>
+<br>
+<font face="Courier New"><font size="-1">}</font></font>
+</p>
+<p><font face="Courier New"><font size="-1">cur=RNDDRAW("Firm","Prob");</font></font>
+<br>
+<font face="Courier New"><font size="-1">RESULT(VS(cur, "IdFirm")</font></font>
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="RNDDRAWFAIR"></a><b><font face="Courier New,Courier">RNDDRAWFAIR("ObjLabel"),
+RNDDRAWFAIRS(obj, "ObjLabel")</font></b>
+<br>
+This function is identical to <a href="#RNDDRAW">RNDDRAW</a> but uses
+the same probability for any object. For example, the
+following equation returns a the parameter IdFirm from a randomly
+chosen
+object Firm.
+</p>
+<p><tt>EQUATION("DrawAFirm"))</tt>
+<br>
+<tt><font color="#00cc00">/***************************</font></tt>
+<br>
+<tt><font color="#00cc00">Return the Id of a Firm chosen randomly with
+identical</font></tt>
+<br>
+<tt><font color="#00cc00">probabilities for each object</font></tt>
+<br>
+<tt><font color="#00cc00">***************************/</font></tt><tt><font
+ color="#00cc00"></font></tt>
+</p>
+<p><font face="Courier New"><font size="-1">cur=RNDDRAWFAIR("Firm");</font></font>
+<br>
+<font face="Courier New"><font size="-1">RESULT(VS(cur, "IdFirm")</font></font>
+<br>
+&nbsp;
+<br>
+&nbsp;
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="RNDDRAWTOT"></a><b><font face="Courier New,Courier">RNDDRAWTOT("ObjLabel",
+"VarLabel", total), RNDDRAWL("ObjLabel", "VarLabel", lag, , total),
+RNDDRAWS(obj,
+"ObjLabel", "VarLabel", total), RNDDRAWLS(obj, "ObjLabel", "VarLabel",
+lag, total)</font></b>
+<br>
+This function is identical, but faster, to <a href="#RNDDRAW">RNDDRAW</a>
+but it includes also the total of the sum over all the VarLabel values.
+<br>
+<hr width="100%">
+<br>
+<a name="CYCLE"></a><b><font face="Courier New,Courier">CYCLE(cur,
+"ObjLabel"){&nbsp; }, CYCLES(obj_from, cur, "ObjLabel"){&nbsp; }</font></b>
+<br>
+This macro scans all the Objects labelled ObjLabel descending from
+<a href="#p">p</a>
+or from the specified <tt><font size="+1">obj_from</font></tt>
+assigning
+cyclically the pointer <tt><font size="+1">cur</font></tt> specified.
+See
+the example for <a href="#RNDDRAW">RNDDRAW</a>.
+<p>Can be used embedded CYCLE's , provided that the pointers differ for
+the different cycles. For example, consider a model including Objects
+Market
+containing Objects Firm. An equation in an object containing a set of
+Market,
+for example representing a country, can use the following code:
+</p>
+<p><tt>v[0]=0; <font color="#00cc00">//set to v[0] to be initially 0</font></tt>
+<br>
+<tt>CYCLE(cur, "Market")</tt>
+<br>
+<tt>&nbsp;{<font color="#00cc00">//for each market</font></tt>
+<br>
+<tt>&nbsp; CYCLES(cur,cur1, "Firm")</tt>
+<br>
+<tt>&nbsp;&nbsp; {<font color="#00cc00">//for each firm, contained
+in cur</font></tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; v[1]=VS(cur1,"Profit");</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; v[0]=v[0]+v[1];</tt>
+<br>
+<tt>&nbsp;&nbsp; }</tt>
+<br>
+<tt>&nbsp;}</tt>
+<br>
+<tt><font color="#00cc00">//from here v[0]contains the cumulated profits</font></tt>
+<br>
+The <tt>cur</tt> pointer cycles through all Market's. For each Market
+the pointer <tt>cur1</tt> cycles through each Firm. For each Firm,
+v[1]
+contains the value of Profit which is cumulated in v[0].
+</p>
+<p><b>WARNING</b>: Never use <a href="#DELETE">DELETE(cur)</a> in a <tt>CYCLE</tt>.
+In fact, deleting the objects pointed to by <tt>cur</tt> prevents the <tt>CYCLE</tt>
+from identifying the next one. Instead, use the command <tt>CYCLE_SAFE(cur,
+"ObjLabel")</tt>. In this case, it is possible to delete the cycling
+pointer
+<tt>cur</tt>.
+but it is not possible to nest different cycles.
+<br>
+The example below is a mistake because cur1 is deleted within a CYCLE
+command
+<br>
+<b>ERROR - ERROR -ERROR</b>
+<br>
+<tt>CYCLE(cur, "Market")</tt>
+<br>
+<tt>&nbsp;{<font color="#00cc00">//for each market</font></tt>
+<br>
+<tt>&nbsp; CYCLES(cur,cur1, "Firm")</tt>
+<br>
+<tt>&nbsp;&nbsp; {<font color="#00cc00">//for each firm, contained
+in cur</font></tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; v[1]=VS(cur1,"Profit");</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; if(v[1]&lt;0)</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE(cur1);</tt>
+<br>
+<tt>&nbsp; }</tt>
+<br>
+<tt>&nbsp;}</tt>
+<br>
+<tt><font color="#00cc00">//from here there are no Firm with negative
+profits</font></tt>
+<br>
+<b>ERROR - ERROR -ERROR</b>
+</p>
+<p>Instead, it should be:
+<br>
+<tt>CYCLE(cur, "Market")</tt>
+<br>
+<tt>&nbsp;{<font color="#00cc00">//for each market</font></tt>
+<br>
+<tt>&nbsp; CYCLE_SAFES(cur,cur1, "Firm")</tt>
+<br>
+<tt>&nbsp;&nbsp; {<font color="#00cc00">//for each firm, contained
+in cur</font></tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; v[1]=VS(cur1,"Profit");</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; if(v[1]&lt;0)</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE(cur1);</tt>
+<br>
+<tt>&nbsp; }</tt>
+<br>
+<tt>&nbsp;}</tt>
+<br>
+<tt><font color="#00cc00">//from here there are no Firm with negative
+profits</font></tt>
+<br>
+&nbsp;
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="init_lattice"></a><b><font face="Courier New,Courier">init_lattice(double
+pix, double nrow, double ncol, char lrow[], char lcol[], char lvar[],
+object
+*p, int init_color)</font></b>
+<br>
+This function creates a lattice graphical windows available for run
+time updating during a simulation run. The parameters to be passed to
+the
+function have the following meaning:
+<br>
+- pix=pixels used for the width of the lattice (600 should fit in
+typical
+screens)
+<br>
+- nrow= number of rows in the lattice
+<br>
+- ncol= number of columns in the lattice
+<br>
+- lrow= label of variable or parameter indicating the row value
+<br>
+- lcol= label of variable or parameter indicating the column value
+<br>
+- lvar= label of variable or parameter from which to read the initial
+color of the cell (if init_color is different from -1)
+<br>
+- p= pointer of the object containing the initial color of the cell
+(if init_color equals -1)
+<br>
+- init_color= indicate the type of initialization. If init_color equals
+-1, the function uses the lvar values reading the coordinates in each
+lrow
+and lcol to initialize the lattice. Otherwise, the lattice is
+homogeneously
+initialized to the color specified by init_color.
+<p>This function must be used only once in each simulation run and
+never
+again. Updates to the lattice colors can be applied using the
+update_lattice(...)
+function.
+</p>
+<p></p>
+<hr width="100%"><br>
+<a name="update_lattice"></a><b><font face="Courier New,Courier">update_lattice(double
+line, double col, double val)</font></b>
+<br>
+Modifies the color of the lattice cell in line <tt>line</tt> and
+column
+<tt>col</tt>
+to the value of <tt>val</tt>.
+<p></p>
+<hr width="100%"><br>
+<a name="interact"></a><b><font face="Courier New,Courier">INTERACT("A
+commenting text", val), INTERACTS(obj,"A commenting text", val)</font></b>
+<br>
+This function interrupts the simulation run showing a window like that
+of the <a href="debug.html">debugger</a>. The object shown in the
+debugger
+is the same object containing the variable under computation, or the
+specified
+object <tt>obj</tt>. Contrary to the debugger, the name of the
+Variable
+just computed and&nbsp; its value, the user is shown a free text, and
+the
+value is any C++ variable, typically one of the v[i] temporary
+elements.
+The value typed in by the user will be returned by the function.
+<p>This function inserted in an equation allows the run to be modified
+according to the choice of an interacting user. For example, an
+equation
+may contain the following code:
+</p>
+<p><tt><font size="-1">&nbsp;</font>v[1]=V("<font color="#000099">MinMarketShare</font>");
+<font color="#009900">//minimum
+m.s. below which a firm should be removed</font></tt>
+<br>
+<tt>&nbsp;CYCLE_SAFE(cur, "<font color="#000099">Firm</font>")</tt>
+<br>
+<tt>&nbsp; {<font color="#009900">//Cycle through each firm, allowing
+for the removal of the pointer.</font></tt>
+<br>
+<tt>&nbsp;&nbsp; v[0]=VS(cur,"<font color="#000099">MarketShare</font>");
+<font color="#009900">//read
+the market share</font></tt>
+<br>
+<tt>&nbsp;&nbsp; if(v[0]&lt;v[1] )</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; v[5]=INTERACTS(cur, "<font
+ color="#000099">Remove
+this firm? (1=yes; 2=no)</font>", v[4]);</tt>
+</p>
+<p><tt>&nbsp;&nbsp; if(v[5]==1)</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; {<font color="#00cc00">//remove if the answer
+was 1</font></tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp; DELETE(cur);</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp; v[3]++;</tt>
+<br>
+<tt>&nbsp;&nbsp;&nbsp; }</tt>
+<br>
+<tt>&nbsp; }</tt>
+</p>
+<p>This cycle removed all firms having market shares smaller than a
+given
+value and that the user permitted to kill.
+</p>
+<p>Beware that such a function used in a model requires the user to
+interact
+with it.
+</p>
+<p></p>
+<hr width="100%">
+<p><a name="advanced"></a><b><font size="+1">Advanced Lsd coding</font></b>
+</p>
+<p>The commands listed here provide special operation rarely used. They
+should concern only advanced programmers.<br>
+<br>
+<b>close_sim()</b>
+<br>
+At the end of each simulation run modellers can execute some specific
+code. Typically, this is used to free some memory allocated during the
+simualation run. At the end of the file for the equation is located the
+function close_sim() where such code can be placed. By default this
+function
+does nothing.
+</p>
+<p><b>PARAMETER</b>
+<br>
+This command within an equation transform the Variable in a Parameter,
+so that the equation is never computed again during the simulation run.
+Normally, this is used in equations meant to initialize a model at the
+very first time step, and does not need to be computed during a
+simulation
+run.
+</p>
+<p><b>global variable 't'</b>
+<br>
+This variable indicates the current time step of the simulation. Note
+that this is an integer variable, so that to assign its value to one of
+the Lsd function, requiring real numbers, it is necessary to use a
+cast.
+For example:
+<br>
+<tt>v[9]=(double)t;</tt>
+</p>
+<p><b><tt>DEBUG_AT(XXX)</tt></b>
+<br>
+This function placed in the equation files is used to spot the
+equations
+that causes a crash of the program. It serves to tell the modeller
+which
+equation caused the crash.
+<br>
+This function must placed just aftet the command line MODELBEGIN and
+causes the system to enter in a special running mode at time <tt>XXX</tt>
+(and to remain so onward). Any time a variable needs to be computed
+after
+the specified time step the system opens a file called <tt>log.log </tt>and
+writes the name of the variable and the time step. So, for example, if
+an equation file begins with the code:
+</p>
+<p><tt>#include "fun_head.h"</tt>
+</p>
+<p><tt>MODELBEGIN</tt>
+</p>
+<p><tt>DEBUG_AT(2)</tt>
+<br>
+<tt>...</tt>
+</p>
+<p>then we will find in the <tt>log.log</tt> file all the variables
+computed.<br>
+</p>
+<p><b>obejct-&gt;hook<tt><br>
+</tt></b></p>
+Any object in a Lsd model contains a special field called <span
+ style="font-family: monospace;">hook</span>. This field is a pointer
+to another object, like the other pointers <span
+ style="font-family: monospace;">-&gt;up, -&gt;son, -&gt;next</span>
+that allow to move from one object&nbsp; to other objects in the model:
+the containing, of "father", object, the first contained object, then
+next object contained in the same "father". The difference is that <span
+ style="font-family: monospace;">-&gt;hook</span> is never used by the
+system, and is left to the modellers for special purposes. Typically,
+it serves to speed up the access of a frequently requested object.<br>
+<br>
+For example, suppose you have a model where the object consumer stores
+in the parameter <span style="font-family: monospace;">IdUsed</span>
+the id of the product currently used. Moreover, suppose that the
+products can break at each time step with a probability contained in
+the object <span style="font-family: monospace;">Firm</span>. The
+equation of the consumer to check if the product breaks should be the
+following:<br>
+<br>
+<span style="font-family: monospace;">EQUATION("IdUsed")</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">/*<br>
+Id of the product used by the consumer.<br>
+<br style="font-family: monospace;">
+</span><span style="font-family: monospace;">Look whether the product
+breaks down or not. In teh first case choose a new product.</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">*/</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">v[0]=VL("IdUsed",1); //product
+used by the consumer</span><br style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">cur=SEARCH_CND("IdFirm",v[0]);
+//find the object with IdFirm equal to my IdUsed</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">v[2]=VS(cur,"BD"); //read the
+probability of breaking the product</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">if(RND&lt;v[2])</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{ </span><span
+ style="font-family: monospace;">//product broken</span><span
+ style="font-family: monospace;"> </span><br>
+<span style="font-family: monospace;">&nbsp;
+cur1=RNDDRAWFAIRS(cur-&gt;up,"Firm"); //choose a new firm from the
+father of the former firm<br>
+&nbsp; v[1]=VS(cur1, "IdFirm"); <br>
+&nbsp;}<br>
+</span><span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;v[1]=v[0]; //product not
+broken, used the same product as before</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">RESULT(v[1] )</span><br
+ style="font-family: monospace;">
+<br>
+This equation can slow down the simulation in case it contains
+thousands of producers and of consumers, since the system has to scan
+many <span style="font-family: monospace;">Firm</span>'s to find the
+one required by the consumer. The same code can be written as follows:<br>
+<br>
+<span style="font-family: monospace;">EQUATION("IdUsed")</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">/*<br>
+Id of the product used by the consumer.<br>
+<br style="font-family: monospace;">
+</span><span style="font-family: monospace;">Look whether the product
+breaks down or not. In teh first case choose a new product.</span><br
+ style="font-family: monospace;">
+<br>
+p-&gt;hook is teh consumers' free pointer containing the firm used by
+the consumer.<br style="font-family: monospace;">
+<span style="font-family: monospace;">*/</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">v[2]=VS(p-&gt;hook,"BD"); //read the
+probability of breaking the product</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">if(RND&lt;v[2])</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{ </span><span
+ style="font-family: monospace;">//product broken</span><span
+ style="font-family: monospace;"> </span><br>
+<span style="font-family: monospace;">&nbsp;
+cur1=RNDDRAWFAIRS(cur-&gt;up,"Firm"); //choose a new firm from the
+father of the former firm<br>
+&nbsp; p-&gt;hook=cur1;<br>
+&nbsp; v[1]=VS(cur1, "IdFirm"); <br>
+&nbsp;}<br>
+</span><span style="font-family: monospace;">else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;v[1]=v[0]; //product not
+broken, used the same product as before</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">RESULT(v[1] )</span><br
+ style="font-family: monospace;">
+<br>
+The code is faster because the equation do not need to scan all firms
+to find the desired one.<br>
+<br>
+Beware that the modeller must ensure that the <span
+ style="font-family: monospace;">hook</span> is always correctly
+assigned. In the example, you need to consider that at the very first
+time step teh <span style="font-family: monospace;">hook</span> is not
+assigned. At the start of a simulation run all the <span
+ style="font-family: monospace;">hook's </span>are set to <span
+ style="font-family: monospace;">NULL. </span>Therefore, you may
+change the code as follows.<br>
+<br>
+<br>
+<br>
+<span style="font-family: monospace;">EQUATION("IdUsed")</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">/*<br>
+Id of the product used by the consumer.<br>
+<br style="font-family: monospace;">
+</span><span style="font-family: monospace;">Look whether the product
+breaks down or not. In teh first case choose a new product.</span><br
+ style="font-family: monospace;">
+<br>
+p-&gt;hook is teh consumers' free pointer containing the firm used by
+the consumer.<br style="font-family: monospace;">
+<span style="font-family: monospace;">*/<br>
+if(p-&gt;hook==NULL)<br>
+&nbsp; {//executed the very first time step, when hook is not assigned<br>
+</span><span style="font-family: monospace;">&nbsp;&nbsp;
+v[0]=VL("IdUsed",1); //product used by the consumer</span><br
+ style="font-family: monospace;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-family: monospace;">cur=SEARCH_CND("IdFirm",v[0]);
+//find the object with IdFirm equal to my IdUsed<br>
+</span><span style="font-family: monospace;">&nbsp;&nbsp;
+v[2]=VS(cur,"BD"); //read the probability of breaking the product<br>
+&nbsp;&nbsp; p-&gt;hook=cur;<br style="font-family: monospace;">
+</span>&nbsp;&nbsp;
+}<br>
+else<br>
+&nbsp; <span style="font-family: monospace;">v[2]=VS(p-&gt;hook,"BD");
+//read the probability of breaking the product<br>
+<br style="font-family: monospace;">
+</span><span style="font-family: monospace;">if(RND&lt;v[2])</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{ </span><span
+ style="font-family: monospace;">//product broken</span><span
+ style="font-family: monospace;"> </span><br>
+<span style="font-family: monospace;">&nbsp;
+cur1=RNDDRAWFAIRS(cur-&gt;up,"Firm"); //choose a new firm from the
+father of the former firm<br>
+&nbsp; p-&gt;hook=cur1;<br>
+&nbsp; v[1]=VS(cur1, "IdFirm"); <br>
+&nbsp;}<br>
+</span><span style="font-family: monospace;">else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;v[1]=v[0]; //product not
+broken, used the same product as before</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">RESULT(v[1] )</span><br
+ style="font-family: monospace;">
+<br>
+<p></p>
+<p></p>
+<hr width="100%">
+<p><a name="basicc"></a><b><font size="+1">Basic C++ structures</font></b>
+<br>
+</p>
+<p>Lsd modellers need not to write programs, but just the code to
+compute the values of variables. The Lsd functions available allow to
+read the values of the model and/or to modify it. The elaboration of
+the variables' equation can use any C++ legal command. Here we present
+the most basic (and frequently used) commands. Remember that the code
+to compute a variable's value is executed sequentially when the system
+requires that variable to be updated. At the end of the equation's
+computation the system assign the value to the variable and then moves
+to compute another variable.<br>
+</p>
+<p>The code is composed by lines of
+commands that the computer generally executes sequentially, moving to
+the next line when the previous one has been completed. <br>
+Any line of code must respect the C++ rule of terminating with a
+semi-colon ``;'', unless the line is a multi-column Lsd command like <span
+ style="font-family: monospace;">EQUATION</span>, or C++ command, like <span
+ style="font-family: monospace;">if(condition)</span>.<br>
+<br>
+</p>
+<h3>Comments</h3>
+The code can include comments, that is text that is ignored by the
+compiler and serves to describe the code to readers. Comments in C++
+comes in two forms:<br>
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">/*</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">This is a multi line comment,
+continuing until</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">a sequence "star slash" is
+encountered</span><br style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">*/</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">//this is a single line comment,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">//terminating at the end of the
+line</span><br style="font-family: monospace;">
+<br>
+<h3>Assignments, arithmetic operations and increments</h3>
+If <span style="font-family: monospace;">a</span> is a variable, then
+the programmer can assign a value to it with the command ``='':<br>
+<br>
+<span style="font-family: monospace;">a=4.3;</span><br>
+<br>
+Any assignment must be terminated with a semi-colon ``;''.<br>
+<br>
+It is also possible to assign values from other variables, and use the
+standard mathematical operations, using the parentheses to group
+relevant priorities:<br>
+<span style="font-family: monospace;">a=b+3-d/(e+g)*(h+i);</span><br>
+<br>
+Less obviously, it is also possible to use the same variable on both
+sides of the assignment:<br>
+<br>
+<span style="font-family: monospace;">a=a+32; <br>
+<br>
+</span>The above line assigns <span style="font-family: monospace;">a</span>
+with its previous value increased of 32. Therefore, if&nbsp; <span
+ style="font-family: monospace;">a</span> had the value of, say, 5,
+after the above line it is assigned the value of 37.<br>
+<br>
+These commands incrementing the value of a variable are so common that
+they have also a short way to express them. For example, the command <span
+ style="font-family: monospace;">a=a+32;</span> can be expressed also<br>
+with the command <br>
+<br>
+<span style="font-family: monospace;">a+=32</span>;<br>
+<br>
+saving the expression of <span style="font-family: monospace;">a</span>
+in the left part of the assignment. This short expression can even be
+used for the other arithmetical operations:<br>
+<br>
+<span style="font-family: monospace;">a=a+32;</span> is equivalent
+to&nbsp; <span style="font-family: monospace;">a+=32;</span> <br>
+<span style="font-family: monospace;">a=a/32;</span> is equivalent
+to&nbsp; <span style="font-family: monospace;">a/=32; </span><br>
+<span style="font-family: monospace;">a=a*32;</span> is equivalent
+to&nbsp; <span style="font-family: monospace;">a*=32;</span><br>
+<span style="font-family: monospace;">a=a-32;</span> is equivalent to<span
+ style="font-family: monospace;"> </span> <span
+ style="font-family: monospace;">a-=32;</span> <br>
+<br>
+A C peculiar command (++}) allows both to increase of 1 a variable and
+to use it as assignment. that is:<br>
+<br>
+<span style="font-family: monospace;">a++ </span>is equivalent to <span
+ style="font-family: monospace;">a+=1</span> is equivalent to <span
+ style="font-family: monospace;">a=a+1</span><br>
+<br>
+The command ++ (and its sister command --) works differently depending
+on whether it is used after or before a variable symbol. If it is used
+after (<span style="font-family: monospace;">a++</span>) the command
+firstly assign the current value, and then increases it of 1. Instead,
+if ++ is used before a variable (<span style="font-family: monospace;">++a</span>),
+it firstly increases its value, and then assigns the ersult. For
+example:<br>
+<br>
+<span style="font-family: monospace;">a=3;</span><br>
+<span style="font-family: monospace;">b=a++;</span><br>
+<span style="font-family: monospace;">c=++a;</span><br>
+<br>
+At the end of the above list of commands, we will see that <span
+ style="font-family: monospace;">a</span> equals 5 (3 and two
+increments in the second and third line), <span
+ style="font-family: monospace;">b</span> equals 3 (because <span
+ style="font-family: monospace;">b=a++</span> firstly assigns the value
+of <span style="font-family: monospace;">a</span> to <span
+ style="font-family: monospace;">b</span>, and then increments <span
+ style="font-family: monospace;">a</span>), and <span
+ style="font-family: monospace;">c</span> equals 5, because <span
+ style="font-family: monospace;">a </span>increased from 4 to 5 before
+being assigned to <span style="font-family: monospace;">c</span>.<br>
+<br>
+Note the difference that exists between the equal sign ``='' used as
+assignment (i.e. load the value on the left to the symbol on the
+right), from the logical condition of identity (are the right and left
+sides identical?). Computer languages must use two different symbols
+for the two operations. In the following paragraph on the <span
+ style="font-family: monospace;">if() </span>conditional statement we
+will see the symbol used for the logical identity.<br>
+<br>
+<h3>Condition <span style="font-family: monospace;">if ... then ...
+else ...</span><br>
+</h3>
+As said before, lines of code are executed sequentially, but the
+programmer can jump conditionally some blocks of code. A frequently
+used statement is the conditional execution of different blocks of line
+depending on whether a condition is verified as true or not. The
+grammar of the conditional command is the following:<br>
+<br>
+<br>
+<span style="font-family: monospace;">if(condition)</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; insert here any line you
+want to be executed</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; if "condition" is true</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;}</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; insert here any line you
+want to be executed</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; if "condition" is false</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;}</span><br
+ style="font-family: monospace;">
+<br>
+The curly brackets "{" and "}" can be skipped if there is only one line
+to be executed conditionally.<br>
+<br>
+The <span style="font-family: monospace;">condition</span> is normally
+based on one of the following binary relations, assuming <span
+ style="font-family: monospace;">a</span> and <span
+ style="font-family: monospace;">b</span> to be two numerical values or
+variables containing numerical values:<br>
+<br>
+<ul>
+  <li>Equal <span style="font-family: monospace;">a==b</span>: the
+condition is true of <span style="font-family: monospace;">a</span>
+equals <span style="font-family: monospace;">b</span>.</li>
+  <li>Not equal <span style="font-family: monospace;">a!=b</span> the
+condition is true if <span style="font-family: monospace;">a</span> is
+not equal to <span style="font-family: monospace;">b</span>.<br>
+  </li>
+  <li>Larger <span style="font-family: monospace;">a&gt;b</span>: the
+condition is true of <span style="font-family: monospace;">a</span> is
+larger than <span style="font-family: monospace;">b</span>.</li>
+  <li>Larger or equal <span style="font-family: monospace;">a&gt;=b</span>:
+the condition is true of <span style="font-family: monospace;">a</span>
+is larger than or equal to <span style="font-family: monospace;">b</span>.</li>
+  <li>Smaller <span style="font-family: monospace;">a&lt;b</span>: the
+condition is true of <span style="font-family: monospace;">a</span> is
+smaller than <span style="font-family: monospace;">b</span>.</li>
+  <li>Smaller or equal <span style="font-family: monospace;">a&lt;=b</span>:
+the condition is true of <span style="font-family: monospace;">a</span>
+is smaller than or equal to <span style="font-family: monospace;">b</span>.</li>
+</ul>
+<br>
+<br>
+The condition can be composed with the logical operators of negation,
+logical "and", logical "or":<br>
+<br>
+<ul>
+  <li><span style="font-weight: bold;">Negation</span> <span
+ style="font-family: monospace;">!(condition)</span> is true if <span
+ style="font-family: monospace;">condition</span> is false, and
+viceversa.</li>
+  <li><span style="font-weight: bold;">Logical "and"</span> <span
+ style="font-family: monospace;">&amp;&amp;</span> given two conditions
+    <span style="font-family: monospace;">cond1</span> and <span
+ style="font-family: monospace;">cond2</span> the composed condition <span
+ style="font-family: monospace;">(cond1 &amp;&amp; cond2)</span>is true
+only if both conditions are true.</li>
+  <li><span style="font-weight: bold;">Logical "or"</span> <span
+ style="font-family: monospace;">||</span> given two conditions <span
+ style="font-family: monospace;">cond1</span> and <span
+ style="font-family: monospace;">cond2</span> the composed condition <span
+ style="font-family: monospace;">(cond1 || cond2)</span>is true if one
+or both conditions are true.</li>
+</ul>
+<br>
+For example, the following code distinguish three possible situations:<br>
+<br>
+<ol>
+  <li><span style="font-family: monospace;">a</span> equals <span
+ style="font-family: monospace;">b</span> and <span
+ style="font-family: monospace;">c</span> does not equal <span
+ style="font-family: monospace;">d</span></li>
+  <li><span style="font-family: monospace;">a</span> equals <span
+ style="font-family: monospace;">b</span> and <span
+ style="font-family: monospace;">c</span> equals <span
+ style="font-family: monospace;">d</span></li>
+  <li><span style="font-family: monospace;">a</span> does not equal <span
+ style="font-family: monospace;">b</span> (irrespective of <span
+ style="font-family: monospace;">c</span> and <span
+ style="font-family: monospace;">d</span>)</li>
+</ol>
+<br>
+<br>
+<br>
+<span style="font-family: monospace;">if(a==b &amp;&amp; !(c==d))</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{/*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; "a" equals "b" and
+"c" is different from "d"</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;}</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{// if the process is here,
+than one of the two conditions above is not true</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; if(a==b)</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; { /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"c" equals "d"</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; }</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; else</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; { /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"a" is not equal to "b", but "c" may or may not equal "d"</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; }</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;}</span><br
+ style="font-family: monospace;">
+<br>
+Conditions in C++ are just integer numbers, where ``0'' (zero) means
+false, and any non-zero integer means true.<br>
+<br>
+<h3>Cycles <span style="font-family: monospace;">for(...)</span></h3>
+A very frequent command allows to repeat a block of lines again and
+again until a specific condition is satisfied. The grammar for the
+cycle <span style="font-family: monospace;">for(...)</span> is:<br>
+<br>
+<span style="font-family: monospace;">for(INIT ; CONDITION ; ENDCYCLE)<br>
+&nbsp;{<br>
+&nbsp; //Block of code of the cycle<br>
+&nbsp; //here there can be any command<br>
+&nbsp;}<br>
+</span><br>
+&nbsp;followed by the block of code to be repeated contained between
+curly brackets "<span style="font-family: monospace;">{</span>" and "<span
+ style="font-family: monospace;">}</span>".<br>
+<br>
+The the execution of the program reaches a line with the <span
+ style="font-family: monospace;">for(...)</span> command, then the
+following operations are executed:<br>
+<br>
+<ol>
+  <li>Execute any command contained in <span
+ style="font-family: monospace;">INIT</span>; more than one command can
+be placed here separated by a comma ","</li>
+  <li>Control that <span style="font-family: monospace;">CONDITION</span>
+is true. <br>
+  </li>
+  <li>If the <span style="font-family: monospace;">CONDITION</span> is
+not true exit the cycle and continue with the first line after the
+block of the <span style="font-family: monospace;">for(...)</span>
+cycle</li>
+  <li>If the <span style="font-family: monospace;">CONDITION</span> is
+true, execute once the block of code </li>
+  <li>Execute any command contained in <span
+ style="font-family: monospace;">ENDCYCLE</span>; more than one command
+can be placed here separated by a comma ","</li>
+  <li>Return to point 2.</li>
+</ol>
+<br>
+<br>
+Example: cycle <span style="font-family: monospace;">for(...) </span>to
+pepeat a block of code 5 times setting a variable from -2 to 2:<br>
+<br>
+<span style="font-family: monospace;">for(i=-2; i&lt;3 ; i++)</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;{</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; in the execution of
+these lines i</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; assumes values -2,
+-1, 0, 1 and 2</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;}</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">//here i equals 3, because it was
+the condition to exit the cycle</span><br
+ style="font-family: monospace;">
+<br>
+</body>
+</html>

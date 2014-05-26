@@ -1,0 +1,261 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Generator" content="Microsoft Word 97">
+   <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
+   <title>Lsd Model Definition</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center><font size=-1><a href="TOC.html">HyperManual</a> <a href="windows.html">Lsd
+Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
+<p><map NAME="browser"><area SHAPE=RECT COORDS="6,25,35,49" HREF="menufile.html" ALT="Menu File"><area SHAPE=RECT COORDS="38,25,83,49" HREF="menumodel.html" ALT="Menu Model"><area SHAPE=RECT COORDS="87,25,105,41" HREF="menudata.html" ALT="Menu Data"><area SHAPE=RECT COORDS="107,25,143,41" HREF="menurun.html" ALT="Menu Run"><area SHAPE=RECT COORDS="164,49,206,65" HREF="#chobjname" ALT="Change Object Name"><area SHAPE=RECT COORDS="179,76,210,94" HREF="#goup" ALT="Move Browser to the Parent Object"><area SHAPE=RECT COORDS="8,134,156,332" HREF="#variables" ALT="Edit Variables"><area SHAPE=RECT COORDS="189,131,335,332" HREF="#descendants" ALT="Move Browser to Descending Objects"></map>
+<br><b><font size=+2>Components of a Lsd Model</font></b></center>
+
+<p>A model in Lsd is composed by a hierarchical collection of <a href="#obj">Objects</a>,
+each defined as containing <a href="#variables">Variable(s)</a> and/or
+<a href="#parameters">Parameter(s)</a>
+and/or <a href="#objstr">other Object(s)</a>. This information about a
+model is spread in several components of a model.
+<p>Though a Lsd model is rather intuitive, it is crucial to understand
+the difference between the content of the model in terms of structure (i.e.
+definitions of the entities) and of data (number of elements and their
+initial values). The structure of the model is defined by the modeller
+(see <a href="menumodel.html">Menu Model</a>) and cannot be changed (in
+general) without changing also the equations of the model, which requires
+the technical tools and a (minimal) expertise as programmers. Instead,
+once a model is built, the data of a model can be modified by any user,
+being guided by user-friendly interfaces (see <a href="menudata.html">Menu
+Data</a>) and the model can be simulated (see <a href="menurun.html">Menu
+Run</a>).
+<br>&nbsp;
+<p><a NAME="obj"></a><b><font face="Arial, helvetica"><font size=+1>Object</font></font></b>
+<p>It is the basic entity of a Lsd model. It represents an entity of the
+reality simulated in the model. It is composed by: <a href="#objlab">Label</a>;
+<a href="#flagcomp">Flag
+for Computation</a>; <a href="#variables">Variables</a>;
+<a href="#parameters">Parameters</a>;
+<a href="#objstr">Ancestor
+and Descendants</a>.
+<p>An Object is defined when the model is built and its definition cannot
+change during a simulation run. A specific configuration of a model can
+implement as many copies, or instances, of a specific Object type, and
+this number can also vary during a simulation run. Each instance of an
+Object replicates exactly the same structure of any other instance of the
+same Object type, but, of course, assigns a specific area of memory for
+the numerical values it contains (i.e. Variables, Parameters). The descendants,
+as well, must be the same for each instance of an Object, though their
+number (i.e. the number of instances of descendants) can vary.
+<p><a NAME="objlab"></a><b><i><font face="Arial, helvetica">Label</font></i></b>
+<p>Name used to identify an Object type. The label must be unique for each
+Object type. The label is a string of any length, but cannot contain end-of-string
+characters, like spaces (" "), slashes ("/" and "\") and the like. In Lsd,
+labels are case sensitive.
+<p><a NAME="flagcomp"></a><b><i><font face="Arial, helvetica">Flag for
+Computations</font></i></b>
+<p>Normally, this option can be ignored, since it is useful only to increase
+the speed of the simulation under certain circumstances. For huge models,
+it can be the case that some Objects are used only for storing data. If
+there are very many instances of these Objects it is possible to force
+the simulation to ignore them during the simulation time step, so that
+they are not (uselessly) explored for updating Variables. It is safe to
+leave the default option.
+<br>&nbsp;
+<br>&nbsp;
+<p><a NAME="variables"></a><b><font face="Arial, helvetica"><font size=+1>Variables</font></font></b>
+<p>It is one type of Lsd element used to store numerical values obtained
+as result of an equation. An equation normally uses values of Parameters
+and Variables contained in the model, the latter also as lagged values.
+<p>Since Lsd is based on the Object Oriented paradigm, it is not possible
+to use vectors of Variables. In order to use many instances of Variables
+(or Parameters) it is necessary to define many instances of the Objects
+containing the Variable or Parameter of interest. Note that this means
+that the whole content of the Object will be replicated in many instances.
+If a modeller finds out that replicating part of the Object is useless
+for the meaning the model, this may indicate that the model structure is
+inadequate, and the model needs to be revised, for example creating two
+Object in place of the previous one.
+<p>A Variable is defined by: label; lags; equation
+<p><a NAME="varlab"></a><b><i><font face="Arial, helvetica">Label</font></i></b>
+<p>The label must be unique (i.e. no other Variables or Parameters in the
+model must share the same label) and can be any length, without using string-terminating
+characters. In Lsd, labels are case sensitive.
+<p><a NAME="lags"></a><b><i><font face="Arial, helvetica">Lags</font></i></b>
+<p>Each Variable is assigned a numerical value at each time step. In most
+cases, some Variables need to use the past value(s) of other Variables.
+Therefore, the Variables that are used with past values must store these
+values computed in previous time steps. These values are referred to as
+lagged values, and, when creating a Variable, modellers have to declare
+how many lags the Variable will have to store. In case of erroneous declarations
+it is not possible to add new lags to an existent Variable, but is necessary
+to <a href="menumodel.html">delete the Variable and create a new one</a>
+with the correct number of lags (and the same Label).
+<p>If a Variable is defined as having no lagged values, it does not need
+to have any value at the beginning of the simulation, since its values
+are always computed at each time step. But, in case it has lagged values,
+users need to assign numerical values that will be used during the earliest
+time step of the simulation as lagged values. See how to <a href="mdatainit.html">set
+initial values</a>.
+<p><a NAME="equations"></a><b><i><font face="Arial, helvetica">Equations</font></i></b>
+<p>The values for Variables are computed at each time step using a piece
+of C++ code. The code of all the equations for the Variables in a model
+is contained in a C++ source file, which must be compiled and linked to
+the rest of Lsd source code in order to obtain a Lsd simulation model.
+<p>The code for a Lsd equation can be any legal C++ piece of code. The
+value of the Variable for the generic time step is the one assigned to
+the C++ variable "res". Note that the equations can also perform other
+functions, besides providing numerical values. For example, they can create
+or destroy Objects, sort sets of Objects, overwrite previously computed
+values of Variables or modify values of Parameters. Since it is pure C++
+code, an equation can also be used to activate external packages.
+<p>The code for an equation must be interpreted as the computations to
+be executed during a generic time step. During the simulation runs, the
+Lsd system takes care of updating the different Variables so that to respect
+precedence order implied by the lag notation used in the equations' code.
+That is, if an equation is like X<sub>t</sub>=f(Y<sub>t</sub>), the system
+will automatically compute the equation for Y before the equation for X,
+because the Y's updated value is necessary for X. If, instead, the equation
+is like X<sub>t</sub>=f(Y<sub>t-1</sub>), then the system may compute X
+before Y, because the Variable Y had store its value of the previous time
+step. Using the Lsd functions to overwrite existing value must be used
+with extreme care because it destroys this automatic updating order control.
+See the <a href="lsdfunc.html">Lsd functions</a> for further details.
+<p><a NAME="parameters"></a><b><font face="Arial, helvetica"><font size=+1>Parameters</font></font></b>
+<p>A Parameter is an element of Objects that is assigned a numerical value
+and is not changed by the system during the simulation time step. Therefore,
+it is basically a Variable without equation (and no lags, of course) with
+attached a numerical value.
+<p>In order to run a simulation, it is necessary that each Parameter (i.e.
+each Parameter contained in each instance of Objects) is assigned a numerical
+value before a simulation is run. See how to <a href="mdatainit.html">set
+initial values</a>.
+<p>Though the system does not computes explicitly new values for Parameters
+during a simulation run, the equations for Variables can overwrite the
+value of a Parameter during the execution of their code.
+<br>&nbsp;
+<br>&nbsp;
+<p><a NAME="objstr"></a><b><font face="Arial, helvetica"><font size=+1>Ancestor
+and Descendants</font></font></b>
+<p>A model in Lsd can be considered as a collection of Objects organized
+in a <a href="graphrep.html">hierarchical structure</a>. That is, each
+Object has one and only one ancestor (from which it descends) and, possibly,
+a set of descendant Objects. The structure of the model must be determined
+on the basis of the meaning of the Objects. In general, an Object is defined
+as a descendant of another Object if it can interpreted as a component
+of its parent Object. Technically, a the hierarchy is used by Lsd at run
+time to allow the equations for Variable in an Object to easily find values
+contained in Objects replicated in many instances. For example, consider
+a model that contains many instances of Object Market, from each of which
+descend many Objct Firm. If equations for variables in Firm needs to retrive
+values contained in Market, each Firm
+<br>One two Object are defined as one descending from the other, any instance
+of the parent Object is will contain at least one instance for each of
+the Object types descending from it.
+<p>In Lsd, the structure of the model is used in order to retrieve Variables
+and Parameters during the simulation runs. In the equation code, modellers
+refer to other Variables or Parameters of the model by simply using their
+labels. But, of course, in general there can be many instances of the Variables
+or Parameters, one for each instance of the Object defined as containing
+that element. In order to choose which instance to use, Lsd exploits the
+hierarchical structure:
+<ul>
+<li>
+a value in the model must be requested to one specific Object.</li>
+
+<li>
+If this Object contains the requested element, this one is returned.</li>
+
+<li>
+If it does not contain the requested element, the Object sends the request
+to its descending Object, if there are any.</li>
+
+<li>
+In case also this search fails, the request is sent to its parent Object,
+which will use the same strategy (of course, the search strategy is implemented
+in such a way to not pass twice through the same Object).</li>
+</ul>
+This search strategy has the property that, if the model is well defined,
+modellers can write the equations' code by simply using the label of the
+Parameter or Variable necessary, despite the number of instances they can
+replicated in the model. For example, consider a model where an Object
+Market is defined as having one Parameter Price and several instances of
+descendant Object type Firm. If the model data define Market as being replicated
+in several instances, each of them will be defined as having a group of
+descending Object Firm. If the equations in Firm request the value of Price,
+each of them will refer to the instance of Price contained in their own
+instance of parent Object Market, so that the modeller does not have to
+worry for specifying which Price to use among the many present in the model.
+<p>Lsd provides also ways to overrule the default mode. Suppose that, for
+an extension of the above cited model, the modeller wants Firm's to choose
+the Market on which they operate. Therefore, Firm will not be any longer
+a "component" of Market, but each time Price is used in the equations an
+algorithm to decide which Market to refer to will be used. In this case,
+the model structure can be changed to have groups of Firm defined as "parallel"
+to groups of Markets.
+<br>&nbsp;
+<br>&nbsp;
+<p><a NAME="Models' Technical Representation"></a><b><font face="Arial, helvetica"><font size=+1>Models'
+Technical Representation</font></font></b>
+<p>The information about a Lsd is spread in two distinct parts: the equations'
+code and the model structure and data. The equations are expressed as C++
+code that the model writer has compiled and linked to the rest of the system.
+The model structure and its data are instead loaded dynamically.&nbsp;
+In this way, the simulation program resulting is as fast as a pure C++
+program, though it is extremely flexible because every value of the model
+can be easily changed. On the other hand, in order to change even slightly
+the equations of a model, it is necessary to recompile the whole system
+( see the <a href="LMM_help.html">LMM manual </a>on how to accomplish this).
+<p>The information on the structure of the model and on the initial values
+used for the simulations is contained in text based files (by default with
+the extension "lsd"). <a href="nw82_lsd.html">See one of these files</a>.
+They contain:
+<ul>
+<li>
+the structure of the model (name of the Objects and their content);</li>
+
+<li>
+the initial values (number of instances of Objects, values for Parameters,
+values for lagged Variables);</li>
+
+<li>
+some technical information (e.g. variables to be saved or debugged);</li>
+
+<li>
+simulation settings (number of time steps and the like);</li>
+
+<li>
+the name of the equation file (for presentation purposes only)</li>
+</ul>
+These files should never be edited manually, since they are created and
+used automatically by the system, and if the file has some unexpected content
+the results are impredictable. In case, it is possible to change the order
+of the content of the elements in the first part of the file, since this
+affect the order of presentation of the elements in the Browser. The order
+in which elements appear does not have any relevance for the simulation,
+but may improve the readibility of a model.
+<p>When Lsd loads one of these files, it creates in the memory the structure
+of the model corresponding to the configuration contained in the Lsd model
+file currently loaded. The memory structure of the model triggers the creation
+of all the graphical interfaces, so that they result as if were built specifically
+for that model. When running the simulation of the model each variable
+of the model is connected to the piece of code corresponding to its equation
+stored in the executable. In other words, each Lsd model is a program that
+contains the code of the equations for a given set of Variables. It can
+load any model respecting the Lsd standards, but can run only a model that
+contains only the Variables for which the program has the equations' code.
+Note that the equations' code embedded in a Lsd simulation model can also
+concern Variables not contained in a model, because this code will simply
+be never used. But it is not possible to run a simulation model with a
+Variable whose code was not considered when the Lsd simulation model was
+compiled.
+<p>This system allows, for any Lsd simulation program containing any set
+of equations (even no equations at all) to load and edit the structure
+of a model. Only when the simulation is actually launched, the possible
+inconsistency among labels of the variables in the model and labels of
+the equations in the program can cause the system to issue an error.
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>
