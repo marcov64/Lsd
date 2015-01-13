@@ -1255,7 +1255,7 @@ for(i=0; i<=t-1; i++)
   if(i>=vcv->start && i <=vcv->end)
     fprintf(f,"%lf\t\n",vcv->data[i]);
   else
-    fprintf(f,"0\t\n");
+    fprintf(f,"n/a\t\n");
   }
   
  

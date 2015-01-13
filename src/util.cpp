@@ -609,7 +609,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    if(cv->start <= i && cv->end >= i)
      fprintf(f, "%g\t", cv->data[i]);
    else
-     fprintf(f, "0\t");
+     fprintf(f, "n/a\t");
   }
  
  }
@@ -628,7 +628,7 @@ if(r->up==NULL)
     if(cv->start<=i && cv->end>=i)
        fprintf(f, "%g\t", cv->data[i]);
      else
-       fprintf(f, "0\t");
+       fprintf(f, "n/a\t");
  }
 }
 
