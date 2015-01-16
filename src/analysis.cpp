@@ -3748,7 +3748,7 @@ for(i=0; i<nv; i++)
 
 //Variables' Name in first column
 fr=1;
-strcpy(misval,"0");
+strcpy(misval,"n/a");
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
 cmd(inter, "toplevel .lab");
@@ -7347,7 +7347,7 @@ for(i=0; i<nv; i++)
 
 //Variables' Name in first column
 fr=1;
-strcpy(misval,"0");
+strcpy(misval,"n/a");
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
 cmd(inter, "toplevel .lab");
