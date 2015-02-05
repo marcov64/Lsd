@@ -947,6 +947,7 @@ return cur;
 
 
 extern char *simul_name;
+extern char *path;
 extern int seed;
 extern int sim_num;
 extern int max_step;
@@ -1006,6 +1007,9 @@ for(i=0; i<s->nvalues; i++)
     }
 
    }
+	if(strlen(path)>0)
+		sprintf(fname,"%s/%s_%d.lsd",path,simul_name,*findex);
+	else
   	sprintf(fname,"%s_%d.lsd",simul_name,*findex);
     f=fopen(fname,"w");
     strcpy(lab, "");
@@ -1041,14 +1045,15 @@ void dataentry_sensitivity(int *choice, sense *s)
 {
 
 int i;
-char *lab;
+char *lab,*sss,*tok;
 FILE *f;
 
 *choice=0;
 cmd(inter, "toplevel .des");
 cmd(inter, "set a .des");
-
-cmd(inter, "label $a.lab -text \"Data for Sensitivity Analysis \" -foreground red");
+cmd(inter, "wm title .des \"Sensitivity Analysis\"");
+sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);
+cmd(inter, msg);
 cmd(inter, "pack $a.lab");
 cmd(inter, "text $a.t; pack $a.t");
 cmd(inter, "frame $a.fb -relief groove -bd 2");
@@ -1057,6 +1062,7 @@ cmd(inter, "button $a.fb.esc -text \" Cancel \" -command {set choice 2}");
 cmd(inter, "button $a.fb.paste -text \" Paste \" -command {tk_textPaste}");
 cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.paste -side left");
 cmd(inter, "pack $a.fb");
+cmd(inter, "focus -force .des.t");
 
 while(*choice==0)
   Tcl_DoOneEvent(0);
@@ -1067,15 +1073,20 @@ if(*choice==2)
   return; 
  }
 
-cmd(inter, "set f [open sss.txt w]");
-cmd(inter, "puts $f [$a.t get 0.0 end]");
-cmd(inter, "close $f");
-f=fopen("sss.txt", "r");
+//cmd(inter, "set f [open sss.txt w]");
+//cmd(inter, "puts $f [$a.t get 0.0 end]");
+//cmd(inter, "close $f");
+//f=fopen("sss.txt", "r");
+cmd(inter, "set sss [$a.t get 0.0 end]"); // uses memory to
+sss=(char*)Tcl_GetVar(inter,"sss",0); // prevent ocasional crashes
 for(i=0; i<s->nvalues; i++)
  {
-  fscanf(f, "%lf",&(s->v[i]));
+//  fscanf(f, "%lf",&(s->v[i]));
+  tok=strtok(sss," ,;|/#\t\n");		// accepts several separators
+  sss=NULL;
+  sscanf(tok, "%lf",&(s->v[i]));
  }
-fclose(f);
+//fclose(f);
 cmd(inter, "destroy $a");
 
 }

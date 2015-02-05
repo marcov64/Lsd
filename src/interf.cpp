@@ -3576,7 +3576,11 @@ if (rsense!=NULL)
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
     rsense=NULL; //ok, ok, I will collect my garbage later on...
+ 	cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
+else
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+	
 *choice=0;
 return r;
 
@@ -3585,9 +3589,13 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
-    
+    char* sens_name=new char[strlen(simul_name)+10];
+	if(strlen(path)>0)
+		sprintf(sens_name,"%s/%s_sens.txt",path,simul_name);
+	else
+		sprintf(sens_name,"%s_sens.txt",simul_name); // personalize name to prevent overwrite
     findex=1;
-      f=fopen("sensitivity_sq.txt", "w");
+      f=fopen(sens_name, "wt");  // use text mode for Windows better compatibility
       for(cs=rsense; cs!=NULL; cs=cs->next)
       {
           fprintf(f, "%s %d:", cs->label, cs->nvalues);
@@ -3597,8 +3605,13 @@ if (rsense!=NULL)
       }
       fclose(f);
     sensitivity_sequential(&findex,rsense);
+	delete sens_name;
     rsense=NULL; //ok, ok, I will collect my garbage later on...
+ 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
   }
+else
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+
 *choice=0;
 return r;
 default:
