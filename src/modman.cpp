@@ -521,7 +521,7 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"System Compilation Options\" -command {set choice 47}");
 cmd(inter, "$w add command -label \"Model Compilation Options\" -state disabled -command {set choice 48}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Generate 'NO WINDOW' makefile\" -command {set choice 62}");
+cmd(inter, "$w add command -label \"Generate 'NO WINDOW' version\" -command {set choice 62}");
 
 cmd(inter, "menu $w.macro -tearoff 0");
 cmd(inter, "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}}");
@@ -5500,7 +5500,83 @@ cmd(inter, "puts -nonewline $f \"#define NO_WINDOW\\n\"");
 cmd(inter, "close $f");
 
 cmd(inter, "cd $RootLsd"); 
-cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'no window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnu -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"");
+
+// Compile a local machine version of lsd_gnuNW
+cmd(inter, "set fapp [file nativename $modeldir/makefileNW]");
+s=(char *)Tcl_GetVar(inter, "fapp",0);
+f=fopen(s, "r");
+if(f==NULL)
+  goto loop;
+fscanf(f, "%s", str);
+while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
+fclose(f);
+if(strncmp(str, "FUN=", 4)!=0)
+{
+  choice=0;
+  goto loop;
+}
+sprintf(msg, "set fname %s.cpp", str+4);
+
+f=fopen(s, "r");
+fscanf(f, "%s", str);
+while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
+fclose(f);
+if(strncmp(str, "TARGET=", 7)!=0)
+{
+  choice=0;
+  goto loop;
+}
+strcat(str,"NW");
+cmd(inter, msg);
+cmd(inter, "set init_time [clock seconds]"); 
+cmd(inter, "toplevel .t");
+cmd(inter, "wm title .t \"Wait\"");
+cmd(inter, "label .t.l -text \"Making non-graphical version of the model.\nThe system is generating the executable 'lsd_gnuNW' for this system.\"");
+cmd(inter, "pack .t.l");
+cmd(inter, "focus -force .t.l");
+cmd(inter, "grab set .t.l");
+#ifndef DUAL_MONITOR
+cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
+cmd(inter, "update");  
+
+cmd(inter, "cd $modeldir");
+cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1;set add_exe \".exe\"} {set choice 0;set add_exe \"\"}");
+if(choice==0)
+  cmd(inter, "set result \"[catch [exec make -fmakefileNW 2> makemessage.txt]]\""); 
+else
+{  
+  cmd(inter, "set result -2.2");
+  cmd(inter, "set file [open a.bat w]");
+  cmd(inter, "puts -nonewline $file \"make -fmakefileNW 2> makemessage.txt\\n\"");
+  cmd(inter, "close  $file");
+  cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
+  sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
+  cmd(inter, msg);
+  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy $RootLsd/$LsdGnu/bin/crtend.o .;file copy $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy $RootLsd/$LsdGnu/bin/crt2.o .} {}");
+  cmd(inter, "catch [set result [catch [exec a.bat]] ]");
+  cmd(inter, "file delete a.bat");
+  cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
+}
+cmd(inter, "destroy .t");
+cmd(inter, "update");
+
+cmd(inter, "if { [file size makemessage.txt]==0 } {set choice 0} {set choice 1}");
+if(choice==1)
+{
+  cmd(inter, "set funtime [file mtime $fname]");
+  sprintf(msg, "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}",str+7,str+7);
+  cmd(inter, msg);
+  cmd(inter, "if {$init_time < $exectime } {set choice 0} { }");
+  //turn into 0 if the executable is newer than the compilation command, implying just warnings
+}
+cmd(inter, "cd $RootLsd");
+if(choice==1)
+  cmd(inter, "tk_messageBox -type ok -icon error -title \"Generate NO WINDOW executable\" -message \"There is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' without errors. The error list is in the file 'makemessage.txt'.\"");
+else
+  cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'no window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"");
 choice=0;
 goto loop;
 
