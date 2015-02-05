@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.3 - May 2014
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -1202,11 +1202,11 @@ cmd(inter, "frame $r.r.pos -bd 2");
 cmd(inter, "set res 1");
 cmd(inter, "radiobutton $r.r.pos.p1 -text \"Landscape\" -variable res -value 1");
 cmd(inter, "radiobutton $r.r.pos.p2 -text \"Portrait\" -variable res -value 2");
-cmd(inter, "bind $r.r.pos.p1 <Button-1> {set dim 240}");
-cmd(inter, "bind $r.r.pos.p2 <Button-1> {set dim 170}");
+cmd(inter, "bind $r.r.pos.p1 <Button-1> {set dim 270}");
+cmd(inter, "bind $r.r.pos.p2 <Button-1> {set dim 200}");
 
-cmd(inter, "label $r.ldim -text \"Dimension (width in mm)\"");
-cmd(inter, "set dim 240");
+cmd(inter, "label $r.ldim -text \"Dimension (width in mm @96DPI)\"");
+cmd(inter, "set dim 270");
 cmd(inter, "entry $r.dim -width 4 -relief sunken -bd 2 -textvariable dim");
 cmd(inter, "pack $r.r.pos.p1 $r.r.pos.p2");
 cmd(inter, "pack $r.r.col $r.r.pos -side left");
@@ -2252,7 +2252,7 @@ for(i=0; i<nv; i++)
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
-   }
+  }
 
  }
 
@@ -2728,7 +2728,7 @@ cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Case num:\" -
 if(logs)
  cmd(inter, "$p create text 360 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w ");
 else
-cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
+ cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
 
 sprintf(msg, "set p .f.new%d$tit", cur_plot);
 
@@ -3158,11 +3158,11 @@ cmd(inter, msg);
 
 cmd(inter, "set lab \"\"");
 
-cmd(inter, "$p create text 5 400 -font {Times 10 normal} -text \"X value: \" -anchor w ");
+  cmd(inter, "$p create text 5 400 -font {Times 10 normal} -text \"X value: \" -anchor w ");
 if(logs)
   cmd(inter, "$p create text 5 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w ");
 else
-cmd(inter, "$p create text 5 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
+  cmd(inter, "$p create text 5 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
 
 sprintf(msg, "set p .f.new%d$tit", cur_plot);
 
@@ -3780,7 +3780,7 @@ for(j=0; j<=new_c; j++)
 	  sscanf(tok,"%lf",&(vs[i].data[j]));
  	tok=strtok(NULL,sep);		// get next token, if any
  }
- }
+}
 fclose(f);
 *num_v+=new_v;
 new_c--;
@@ -4149,7 +4149,7 @@ for(i=0; i<nv; i++)
 if(logs)
  sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats (in log).\n\" tabel");
 else
-sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats.\n\" tabel");
+ sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
 sprintf(str1, "%d Cases", max_c-min_c+1);
@@ -4431,7 +4431,7 @@ for(i=0; i<nv; i++)
    data[i]=find_data(idseries); 
    }
  */  
-
+   
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
@@ -4451,7 +4451,7 @@ for(i=0; i<nv; i++)
 if(logs)
  sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats (in log).\n\" tabel");
 else
-sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats.\n\" tabel");
+ sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
 sprintf(str1, "%d Variables",nv);
@@ -4611,11 +4611,11 @@ cmd(inter, "radiobutton .s.o.b -text \"Use time and rank as plane\" -variable bo
 cmd(inter, "checkbutton .s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
 cmd(inter, "checkbutton .s.o.p -text \"Draw palette-mapped surface\" -variable pm3d -anchor w");
 
-cmd(inter, "pack .s.o.l .s.o.a rrr.s.o.c .s.o.b .s.o.g .s.o.p -expand yes -fill x -anchor w");
+cmd(inter, "pack .s.o.l .s.o.a .s.o.c .s.o.b .s.o.g .s.o.p -expand yes -fill x -anchor w");
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 2");
+cmd(inter, "set wind 1");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
@@ -4740,10 +4740,15 @@ sprintf(msg, "plotxy_%d", cur_plot);
 chdir(msg);
 f=fopen("data.gp","w");
 fprintf(f,"#");
-cmd(inter, "set choice $box");
-box=*choice;
-cmd(inter, "set choice $gridd");
-gridd=*choice;
+if(nv>2)
+{
+  cmd(inter, "set choice $box");
+  box=*choice;
+  cmd(inter, "set choice $gridd");
+  gridd=*choice;
+}
+else
+  box=gridd=0;
 
 if(box==0)
  {
@@ -5008,7 +5013,11 @@ fprintf(f2, "pause -1 \"Close graph %d)\"\n", cur_plot);
 
 fclose(f);
 fclose(f2);
-cmd(inter, "set choice $wind");
+
+if(nv>2)
+ cmd(inter, "set choice $wind");
+else
+ *choice=0;
 
 show_plot_gnu(cur_plot, choice, *choice);
 
@@ -5200,7 +5209,7 @@ cmd(inter, "pack .s.l.l ");
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 2");
+cmd(inter, "set wind 1");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
@@ -5557,7 +5566,7 @@ cmd(inter, "pack .s.i.l .s.i.e .s.i.arrow");
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 2");
+cmd(inter, "set wind 1");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x");
@@ -6557,7 +6566,7 @@ for(i=0; i<nv; i++)
    data[i]=find_data(idseries);
    }
   *********************/
-
+   
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
@@ -7612,7 +7621,7 @@ for(i=0; i<nv; i++)
 
 //Variables' Name in first column
 fr=1;
-strcpy(misval,"n/a");
+strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
 cmd(inter, "toplevel .lab");
@@ -8073,7 +8082,7 @@ for(i=0; i<nv; i++)
  }
 }
 
-sprintf(msg, "%s_%s", str[0], tag[0]);
+sprintf(msg, "\n\n%s_%s", str[0], tag[0]);
 plog(msg); 
 
 for(i=1; i<nv; i++)

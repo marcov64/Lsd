@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.3 - May 2014
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -219,7 +219,7 @@ if(*choice==4)
 
 }
 Tcl_UnlinkVar(inter, "lag");
-cmd(inter, "unset lag");
+//cmd(inter, "unset lag");
 
 }
 

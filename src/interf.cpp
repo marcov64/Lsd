@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.1 - June 2011
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -3608,7 +3608,7 @@ if (rsense!=NULL)
 	delete sens_name;
     rsense=NULL; //ok, ok, I will collect my garbage later on...
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
-  }
+ }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
@@ -3722,8 +3722,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
    plog(msg);
 
    cmd(inter, "");
-   if(cv->param==1 )
-     sprintf(msg, ".log.text.text insert end \"%s %lf\"", cv->label, cv->val[0]);
+   sprintf(msg, ".log.text.text insert end \"%s (%lf)\" highlight", cv->label, cv->val[0]);
    cmd(inter, msg);
    plog("\n");
 

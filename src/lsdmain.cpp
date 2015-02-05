@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.3 - May 2014
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -244,7 +244,7 @@ if(batch_sequential==0)
  {
  struct_file=new char[strlen(simul_name)+1];
  sprintf(struct_file, "%s", simul_name);
- simul_name[strlen(simul_name)-4]=NULL;
+ simul_name[strlen(simul_name)-4]='\0';
   } 
 #else 
 for(i=1; argv[i]!=NULL; i++)
@@ -296,6 +296,7 @@ if(f==NULL)
   printf("\nFile %s not found. This is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
   exit(0);
  }
+fclose(f);
 #else 
 Tcl_FindExecutable(argv[0]); 
 inter=InterpInitWin(tcl_dir);
@@ -365,7 +366,7 @@ if(done==1)
  }
 else
  { 
-  cmd(inter, "tk_messageBox -title Warning -type Ok -message \"The system could not locate the LMM system options.\\nIt may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
+  cmd(inter, "tk_messageBox -title Warning -type ok -message \"The system could not locate the LMM system options.\\nIt may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
  }
 
 Tcl_UnlinkVar(inter, "done");
@@ -379,7 +380,7 @@ cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global Root
 cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {exec cmd.exe /c start $b &}}");
 
 
-cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; if {$tcl_platform(platform) == \"unix\"} {exec wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start wish84 $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec wish84 $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start wish84 $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
+cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
@@ -1035,7 +1036,7 @@ if(Tcl_Init(app)!=TCL_OK)
  {
   lsdroot=getenv("LSDROOT");
   if(lsdroot==NULL)
-   {f=fopen("tk_err.err","w");
+   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Environmental variable 'LSDROOT' is not set, probably because you are using Win95/98/ME and no environmental space is available.\nTo fix the problem see in the LMM manual in the section concerning the compilation errors.");
     fclose(f);
     cmd(app, "set a [pwd]");
@@ -1193,7 +1194,8 @@ cmd(inter, "wm title .log \"Log\"");
 cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
 cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
 cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");
-cmd(inter, "$w.text configure -tabs {3.5c 5.5c 7.5c 9.5c 11.5c}");
+//cmd(inter, "$w.text configure -tabs {3.5c 5.5c 7.5c 9.5c 11.5c}");
+cmd(inter, "$w.text configure -tabs {5c 7.5c 10c 12.5c 15c 17.5c 20c}"); // fix misalignment
 cmd(inter, "$w.text tag configure highlight -foreground red");
 cmd(inter, "$w.text tag configure tabel");
 

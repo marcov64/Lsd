@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.3 - May 2014
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -359,7 +359,7 @@ case 10:
     cs->label=new char[strlen(lab+1)];
     strcpy(cs->label,lab);
     cs->next=NULL;
-    cs->nvalues=value1;
+    cs->nvalues=(int)value1;
     cs->v=new double[(int)value1];
     for (i=1; i<=value1; i++) {
         cs->v[i-1]=0;
@@ -1010,7 +1010,7 @@ for(i=0; i<s->nvalues; i++)
 	if(strlen(path)>0)
 		sprintf(fname,"%s/%s_%d.lsd",path,simul_name,*findex);
 	else
-  	sprintf(fname,"%s_%d.lsd",simul_name,*findex);
+		sprintf(fname,"%s_%d.lsd",simul_name,*findex);
     f=fopen(fname,"w");
     strcpy(lab, "");
 	root->save_struct(f,lab);
