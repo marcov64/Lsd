@@ -180,6 +180,7 @@ int autom;
 int autom_x;
 extern int watch;
 int res, dir;
+int pdigits;   // precision parameter for labels in y scale
 int data_infile=0;
 int cur_plot=0;
 int file_counter=0;
@@ -461,11 +462,13 @@ Tcl_LinkVar(inter, "point_size", (char *) &point_size, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "tc", (char *) &time_cross, TCL_LINK_INT);
 Tcl_LinkVar(inter, "line_point", (char *) &line_point, TCL_LINK_INT);
 Tcl_LinkVar(inter, "xy", (char *) &xy, TCL_LINK_INT);
+Tcl_LinkVar(inter, "pdigits", (char *) &pdigits, TCL_LINK_INT);
 
 point_size=1.0;
 xy=0;
 line_point=1;
 time_cross=1;
+pdigits=4;
 
 cmd(inter, "frame .f.tit -relief groove -bd 2");
 cmd(inter, "label .f.tit.l -text Title");
@@ -482,7 +485,12 @@ cmd(inter, "label .f.tit.ps.l -text \"Point size\"");
 cmd(inter, "entry .f.tit.ps.e -width 4 -textvariable point_size");
 cmd(inter, "pack .f.tit.ps.l .f.tit.ps.e -anchor w");
 
-cmd(inter, "pack .f.tit.l .f.tit.e .f.tit.allblack .f.tit.grid .f.tit.lp .f.tit.ps -side left");
+cmd(inter, "frame .f.tit.pr");			// field for adjusting y-axis precision
+cmd(inter, "label .f.tit.pr.l -text \"Precision\"");
+cmd(inter, "entry .f.tit.pr.e -textvariable pdigits -width 2");
+cmd(inter, "pack .f.tit.pr.l .f.tit.pr.e -anchor w");
+
+cmd(inter, "pack .f.tit.l .f.tit.e .f.tit.allblack .f.tit.grid .f.tit.lp .f.tit.ps .f.tit.pr -side left");
 cmd(inter, "pack .f.tit");
 
 
@@ -574,6 +582,9 @@ if(*choice==1 && time_cross==2 && xy==1) //Plot XY Cross section
 
 if(*choice==12 && time_cross==2) //Statistics cross section
  *choice=13;
+
+if(pdigits<1 || pdigits>8)
+	pdigits=4;
 
 switch(*choice)
 {
@@ -2434,28 +2445,28 @@ cmd(inter, "$p create line 35 75 45 75  -tag p");
 cmd(inter, "$p create line 35 2 45 2 -tag p");
 }
 
-sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",miny);
+sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,miny);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %g -tag {p  text}]",(miny+(truemaxy-miny)/4));
+sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p  text}]",pdigits,(miny+(truemaxy-miny)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(miny+(truemaxy-miny)/2));
+sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(miny+(truemaxy-miny)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(miny+(truemaxy-miny)*3/4));
+sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(miny+(truemaxy-miny)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -2463,7 +2474,7 @@ cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",(truemaxy));
+sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]",pdigits,(truemaxy));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -2472,35 +2483,35 @@ cmd(inter, msg);
 
 if(numy2!=nv+2)
  {
-sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",miny2);
+sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,miny2);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/4));
+sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/2));
+sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)*3/4));
+sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%g) -tag {p text}]",(truemaxy2));
+sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%.*g) -tag {p text}]",pdigits,(truemaxy2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -2686,12 +2697,12 @@ cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Y value: \" -
 
 sprintf(msg, "set p .f.new%d$tit", cur_plot);
 
-sprintf(msg, "bind $p <Motion> {.f.new%d.f.plots delete xpos%d; .f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr (300.0-%%y)*(%lf-%lf)/300+%lf] -tag ypos%d}}",cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy, miny, miny, cur_plot);
+sprintf(msg, "bind $p <Motion> {.f.new%d.f.plots delete xpos%d; .f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}",cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy, miny, miny, cur_plot);
 cmd(inter, msg);
 
 if(numy2!=nv+2)
 {
-sprintf(msg, "bind $p <Shift-Motion> {.f.new%d.f.plots delete xpos%d; .f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr (300.0-%%y)*(%lf-%lf)/300+%lf] -tag ypos%d}}",cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy2, miny2, miny2, cur_plot);
+sprintf(msg, "bind $p <Shift-Motion> {.f.new%d.f.plots delete xpos%d; .f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}",cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy2, miny2, miny2, cur_plot);
 cmd(inter, msg);
 }
 for(i=0; i<nv; i++)
@@ -2957,35 +2968,35 @@ cmd(inter, "$p create line 35 75 45 75  -tag p");
 cmd(inter, "$p create line 35 2 45 2 -tag p");
 }
 
-sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",miny);
+sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,miny);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(miny+(truemaxy-miny)/4));
+sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(miny+(truemaxy-miny)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(miny+(truemaxy-miny)/2));
+sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(miny+(truemaxy-miny)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(miny+(truemaxy-miny)*3/4));
+sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(miny+(truemaxy-miny)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",(truemaxy));
+sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]",pdigits,(truemaxy));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -3102,7 +3113,7 @@ sprintf(msg, "set p .f.new%d$tit", cur_plot);
 //app=(char *)Tcl_GetVar(inter, "tit",0);
 //strcpy(str1, app);
 
-sprintf(msg, "bind $p <Motion> {.f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} { .f.new%d.f.plots create text 110 420 -font {Times 10 normal} -text [expr (300.0-%%y)*(%lf-%lf)/300+%lf] -tag ypos%d}}", cur_plot, cur_plot,cur_plot, maxy, miny, miny, cur_plot);
+sprintf(msg, "bind $p <Motion> {.f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} { .f.new%d.f.plots create text 130 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}", cur_plot, cur_plot,cur_plot, maxy, miny, miny, cur_plot);
 cmd(inter, msg);
 
 
@@ -4085,13 +4096,13 @@ for(i=0; i<nv; i++)
   var=sig=0;
  if(num>0)
  {
- sprintf(msg, "%s %s (%g)", str[i], tag[i], num);
+ sprintf(msg, "%s %s (%.*g)", str[i], tag[i], pdigits, num);
  sprintf(str1, "%-20s\t", msg);
  sprintf(msg, ".log.text.text insert end \"%s\" tabel", str1);
  cmd(inter, msg);
 
 
- sprintf(longmsg, "%g\t%g\t%g\t%g\t%g\n", av, var, ymin, ymax, sig);
+ sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
 sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
@@ -4232,7 +4243,7 @@ sprintf(msg, ".log.text.text insert end \"\nFreq. for %s_%s\nVal.\tNum.\n\" ", s
 cmd(inter, msg);
 for(h=0; h<num_freq[i]; h++)
  {
- sprintf(msg, ".log.text.text insert end \"%g\t%d\n\"",freq[i].v[h], freq[i].freq[h]);
+ sprintf(msg, ".log.text.text insert end \"%.*g\t%d\n\"", pdigits, freq[i].v[h], freq[i].freq[h]);
  cmd(inter, msg);
  
  }
@@ -4363,11 +4374,11 @@ for(j=0; j<nt; j++)
   var=sig=0;
  if(num>0)
  {
- sprintf(str1, "Case %d (%g)\t",h, num);
+ sprintf(str1, "Case %d (%.*g)\t",h, pdigits, num);
  sprintf(msg, ".log.text.text insert end \"%s\" tabel", str1 );
  cmd(inter, msg);
 
- sprintf(longmsg, "%g\t%g\t%g\t%g\t%g\n",av, var, ymin, ymax, sig);
+ sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
  sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg );
  cmd(inter, msg);
  }
@@ -5989,7 +6000,7 @@ cmd(inter, "set choice $stat");
 stat = *choice;
 
 if(stat==1)
- plog("\n\n#   Boundaries(center)\t\tMin Ave Max\tNum.\tFreq.");
+ plog("\n\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq.");
 step=(mx+a/2-(mn-a/2))/(ap);
 
 lminy=last-first;
@@ -6002,7 +6013,7 @@ for(i=0; i<num_bin; i++)
   cl[i].center=  cl[i].highb/2+  cl[i].lowb/2;
  if(stat==1)
  {
- sprintf(msg, "\n%3d: %g<=X<%g (%g)\t\t%g %g %g\t%g\t%g", i+1, mn-a/2+(double)(i)*step, mn -a/2 + (double)(i+1)*step , mn -a/2 +(double)(i)*step +step/2, cl[i].min, cl[i].av, cl[i].max, cl[i].num, cl[i].num/(tot));
+ sprintf(msg, "\n%3d: %.*g<=X<%.*g (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i+1, pdigits, mn-a/2+(double)(i)*step, pdigits, mn -a/2 + (double)(i+1)*step, pdigits, mn -a/2 +(double)(i)*step +step/2, pdigits, cl[i].min, pdigits, cl[i].av, pdigits, cl[i].max, pdigits, cl[i].num, pdigits, cl[i].num/(tot));
  plog(msg);
  }
  if(cl[i].num<lminy)
@@ -6072,7 +6083,7 @@ cmd(inter, "$p create line 490 295 490 305 -width 1 -tag p");
 }
 
 
-sprintf(msg, "set choice [$p create text 40 312 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",cl[0].lowb);
+sprintf(msg, "set choice [$p create text 40 312 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]", pdigits,cl[0].lowb);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6080,7 +6091,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 i=num_bin/4;
-sprintf(msg, "set choice [$p create text 190 312 -font {Times 10 normal} -anchor n -text %g -tag {p text}]",cl[i].center);
+sprintf(msg, "set choice [$p create text 190 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p text}]", pdigits,cl[i].center);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6093,7 +6104,7 @@ if(num_bin%2==0)
 else
  a=cl[(num_bin-1)/2].center; 
 i=num_bin/2;
-sprintf(msg, "set choice [$p create text 340 312 -font {Times 10 normal} -anchor n -text %g -tag {p  text}]",a);
+sprintf(msg, "set choice [$p create text 340 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p  text}]", pdigits,a);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6102,7 +6113,7 @@ cmd(inter, msg);
 
 
 i=(int)((double)(num_bin)*.75);
-sprintf(msg, "set choice [$p create text 490 312 -font {Times 10 normal} -anchor n -text %g -tag {p text}]",cl[i].center);
+sprintf(msg, "set choice [$p create text 490 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p text}]", pdigits,cl[i].center);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6110,7 +6121,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 635 312 -font {Times 10 normal} -anchor ne -text %g -tag {p  text}]",cl[num_bin-1].highb);
+sprintf(msg, "set choice [$p create text 635 312 -font {Times 10 normal} -anchor ne -text %.*g -tag {p  text}]", pdigits,cl[num_bin-1].highb);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6138,22 +6149,14 @@ cmd(inter, "$p create line 35 75 45 75  -tag p");
 cmd(inter, "$p create line 35 2 45 2 -tag p");
 }
 
-sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",lminy);
+sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,lminy);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %g -tag {p  text}]",(lminy+(truemaxy-lminy)/4));
-cmd(inter, msg);
-sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
-cmd(inter, msg);
-sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
-cmd(inter, msg);
-
-
-sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(lminy+(truemaxy-lminy)/2));
+sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p  text}]", pdigits,(lminy+(truemaxy-lminy)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6161,7 +6164,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(lminy+(truemaxy-lminy)*3/4));
+sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(lminy+(truemaxy-lminy)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6169,7 +6172,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",(truemaxy));
+sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(lminy+(truemaxy-lminy)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6177,7 +6180,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",miny2);
+sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]", pdigits,(truemaxy));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6185,7 +6188,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/4));
+sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,miny2);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6193,7 +6196,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/2));
+sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6201,14 +6204,22 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 
-sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)*3/4));
+sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%g) -tag {p text}]",(truemaxy2));
+
+sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)*3/4));
+cmd(inter, msg);
+sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
+cmd(inter, msg);
+sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
+cmd(inter, msg);
+
+sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%.*g) -tag {p text}]", pdigits,(truemaxy2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6229,7 +6240,7 @@ for(i=0; i<num_bin; i++)
   {//in case of user-definde miny
   sprintf(msg,"$p create rect %d %d %d %d -tag p%d -width 1 -fill $c%d",x1,y1,x2,y2, i, 1);
   cmd(inter, msg);
-sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %g <= X < %g, (center=%g)\\nContains %g units (%g perc.). Actual values: min=%g, av.=%g, max=%g  \" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, cl[i].lowb, cl[i].highb, cl[i].center, cl[i].num, 100*cl[i].num/tot, cl[i].min, cl[i].av, cl[i].max );
+sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %.*g <= X < %.*g, (center=%.*g)\\nContains %.*g units (%.*g perc.). Actual values: min=%.*g, av.=%.*g, max=%.*g  \" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, pdigits, cl[i].lowb, pdigits, cl[i].highb, pdigits, cl[i].center, pdigits, cl[i].num, pdigits, 100*cl[i].num/tot, pdigits, cl[i].min, pdigits, cl[i].av, pdigits, cl[i].max );
 
 //sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %g <= X < %g, min=%g center=%g max=%g.\\nContains %g units (%g perc.)\" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, cl[i].lowb, cl[i].highb, cl[i].min, cl[i].center, cl[i].max, cl[i].num, 100*cl[i].num/tot);
 
@@ -6533,7 +6544,7 @@ cmd(inter, "set choice $stat");
 stat = *choice;
 
 if(stat==1)
- plog("\n\n#:   Boundaries(center)\t\tMin Ave Max\tNum.\tFreq.");
+ plog("\n\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq.");
 step=(mx+a/2-(mn-a/2))/(ap);
 
 lminy=active_v;
@@ -6547,7 +6558,7 @@ for(i=0; i<num_bin; i++)
   cl[i].center=  cl[i].highb/2+  cl[i].lowb/2;
  if(stat==1)
  {
- sprintf(msg, "\n%3d %g<=X<%g (%g)\t\t%g %g %g\t%g\t%g", i+1, mn-a/2+(double)(i)*step, mn -a/2 + (double)(i+1)*step , mn -a/2 +(double)(i)*step +step/2, cl[i].min, cl[i].av, cl[i].max, cl[i].num, cl[i].num/(tot));
+ sprintf(msg, "\n%3d %.*g<=X<%.*g (%.*g)\t\t%.*g\t%.*g\t%.*g\t%.*g\t%.*g", i+1, pdigits, mn-a/2+(double)(i)*step, pdigits, mn -a/2 + (double)(i+1)*step, pdigits, mn -a/2 +(double)(i)*step +step/2, pdigits, cl[i].min, pdigits, cl[i].av, pdigits, cl[i].max, pdigits, cl[i].num, pdigits, cl[i].num/(tot));
  plog(msg);
  }
  if(cl[i].num<lminy)
@@ -6617,7 +6628,7 @@ cmd(inter, "$p create line 490 295 490 305 -width 1 -tag p");
 }
 
 
-sprintf(msg, "set choice [$p create text 40 312 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",cl[0].lowb);
+sprintf(msg, "set choice [$p create text 40 312 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]",pdigits,cl[0].lowb);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6625,7 +6636,7 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 i=num_bin/4;
-sprintf(msg, "set choice [$p create text 190 312 -font {Times 10 normal} -anchor n -text %g -tag {p text}]",cl[i].center);
+sprintf(msg, "set choice [$p create text 190 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p text}]",pdigits,cl[i].center);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6638,7 +6649,7 @@ if(num_bin%2==0)
 else
  a=cl[(num_bin-1)/2].center; 
 i=num_bin/2;
-sprintf(msg, "set choice [$p create text 340 312 -font {Times 10 normal} -anchor n -text %g -tag {p  text}]",a);
+sprintf(msg, "set choice [$p create text 340 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p  text}]",pdigits,a);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6646,14 +6657,14 @@ sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag se
 cmd(inter, msg);
 
 i=(int)((double)(num_bin)*.75);
-sprintf(msg, "set choice [$p create text 490 312 -font {Times 10 normal} -anchor n -text %g -tag {p text}]",cl[i].center);
+sprintf(msg, "set choice [$p create text 490 312 -font {Times 10 normal} -anchor n -text %.*g -tag {p text}]",pdigits,cl[i].center);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 635 312 -font {Times 10 normal} -anchor ne -text %g -tag {p  text}]",cl[num_bin-1].highb);
+sprintf(msg, "set choice [$p create text 635 312 -font {Times 10 normal} -anchor ne -text %.*g -tag {p  text}]",pdigits,cl[num_bin-1].highb);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6681,70 +6692,70 @@ cmd(inter, "$p create line 35 75 45 75  -tag p");
 cmd(inter, "$p create line 35 2 45 2 -tag p");
 }
 
-sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",lminy);
+sprintf(msg, "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,lminy);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %g -tag {p  text}]",(lminy+(truemaxy-lminy)/4));
+sprintf(msg, "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p  text}]",pdigits,(lminy+(truemaxy-lminy)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(lminy+(truemaxy-lminy)/2));
+sprintf(msg, "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(lminy+(truemaxy-lminy)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %g -tag {p text}]",(lminy+(truemaxy-lminy)*3/4));
+sprintf(msg, "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]",pdigits,(lminy+(truemaxy-lminy)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %g -tag {p text}]",(truemaxy));
+sprintf(msg, "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]",pdigits,(truemaxy));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",miny2);
+sprintf(msg, "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,miny2);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/4));
+sprintf(msg, "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)/2));
+sprintf(msg, "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)/2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%g) -tag {p text}]",(miny2+(truemaxy2-miny2)*3/4));
+sprintf(msg, "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]",pdigits,(miny2+(truemaxy2-miny2)*3/4));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-2> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
 
-sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%g) -tag {p text}]",(truemaxy2));
+sprintf(msg, "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%.*g) -tag {p text}]",pdigits,(truemaxy2));
 cmd(inter, msg);
 sprintf(msg, ".f.new%d.f.plots bind $choice <Button-3> {.f.new%d.f.plots dtag selected; .f.new%d.f.plots addtag selected withtag %d; set ccanvas .f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot);
 cmd(inter, msg);
@@ -6765,7 +6776,7 @@ for(i=0; i<num_bin; i++)
   sprintf(msg,"$p create rect %d %d %d %d -tag p%d -width 1 -fill $c%d",x1,y1,x2,y2, i, 1);
   cmd(inter, msg);
 //sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %g <= X < %g, min=%g center=%g max=%g.\\nContains %g units (%g perc.)\" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, cl[i].lowb, cl[i].highb, cl[i].min, cl[i].center, cl[i].max, cl[i].num, 100*cl[i].num/tot);
-sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %g <= X < %g, (center=%g)\\nContains %g units (%g perc.). Actual values: min=%g, av.=%g, max=%g  \" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, cl[i].lowb, cl[i].highb, cl[i].center, cl[i].num, 100*cl[i].num/tot, cl[i].min, cl[i].av, cl[i].max);
+sprintf(msg, "$p bind p%d <Enter> {.f.new%d.f.plots delete xpos; .f.new%d.f.plots create text 0 390 -font {Times 10 normal} -text \"Class %d, %.*g <= X < %.*g, (center=%.*g)\\nContains %.*g units (%.*g perc.). Actual values: min=%.*g, av.=%.*g, max=%.*g  \" -anchor w -tag xpos}",i,  cur_plot, cur_plot, i, pdigits, cl[i].lowb, pdigits, cl[i].highb, pdigits, cl[i].center, pdigits, cl[i].num, pdigits, 100*cl[i].num/tot, pdigits, cl[i].min, pdigits, cl[i].av, pdigits, cl[i].max);
 
 
 cmd(inter, msg);
