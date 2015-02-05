@@ -94,7 +94,7 @@ Exit function, which is customized on the operative system.
 
 //remove or comment the next line to compile without libz. It will not be possible to generate zipped result files.
 
-//#define LIBZ 
+#define LIBZ 
 #define PI 3.141592654
 #include <tk.h>
 #include <stdio.h>
@@ -7566,7 +7566,7 @@ int i, nv, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
 double **data, *dd, *ddstart;
 
 #ifdef LIBZ
- gzFile *fsavez;
+ gzFile fsavez;
 #else
  FILE *fsavez; 
 #endif 
@@ -7747,7 +7747,7 @@ if(dozip==1)
  {
  strcat(msg, ".gz");
  #ifdef LIBZ
-  fsavez=(gzFile *)gzopen(msg, "wb");
+  fsavez=gzopen(msg, "wb");
  #endif 
 
    
