@@ -1825,7 +1825,11 @@ if(actual_steps>0)
   cmd(inter, "focus -force .warn");
   cmd(inter, "bind .warn <KeyPress-Return> {.warn.f.ok invoke}");
   cmd(inter, "bind .warn <KeyPress-Escape> {.warn.f.ok invoke}");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -2010,7 +2014,11 @@ case 11:
    *choice=0;
    cmd(inter, "bind .w <Return> {.w.f.ok invoke}");
    cmd(inter, "bind .w <Escape> {.w.f.esc invoke}");
+#ifndef DUAL_MONITOR
    cmd(inter, "set w .w; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+   cmd(inter, "set w .w; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
    while(*choice==0 )
     Tcl_DoOneEvent(0);
    cmd(inter, "destroy .w");
@@ -2510,7 +2518,11 @@ if(actual_steps>0)
   cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
   cmd(inter, "focus -force .warn");
   cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
+#ifndef DUAL_MONITOR
  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+ cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -2545,7 +2557,11 @@ if(actual_steps>0)
   cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
   cmd(inter, "focus -force .warn");
   cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -2682,7 +2698,11 @@ if(actual_steps>0)
   cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
   cmd(inter, "focus -force .warn");
   cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -2904,7 +2924,11 @@ if(actual_steps>0)
   cmd(inter, "pack .warn.l1 .warn.l .warn.b");
   cmd(inter, "focus -force .warn");
   cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -3011,7 +3035,11 @@ if(actual_steps==0)
   cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
   cmd(inter, "pack .warn.l .warn.b");
   cmd(inter, "focus -force .warn.b");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");  
+#else
+  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");  
+#endif
   while(*choice==0)
    Tcl_DoOneEvent(0);
   *choice=0;
@@ -3033,7 +3061,11 @@ if(actual_steps==0)
   cmd(inter, "pack .n.l .n.e .n.b .n.c");
   cmd(inter, "bind .n <KeyPress-Return> {set choice 1}");
   cmd(inter, "bind .n <KeyPress-Escape> {set choice 2}");
+#ifndef DUAL_MONITOR
   cmd(inter, "set w .n; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");  
+#else
+  cmd(inter, "set w .n; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");  
+#endif
   cmd(inter, ".n.e selection range 0 end");  
   while(*choice==0)
    Tcl_DoOneEvent(0);
@@ -3166,7 +3198,11 @@ cmd(inter, "pack .warn.l .warn.o .warn.f");
 cmd(inter, "focus -force .warn.f.ok");
 cmd(inter, "bind .warn <KeyPress-Return> {.warn.f.ok invoke}");
 cmd(inter, "bind .warn <KeyPress-Escape> {.warn.f.esc invoke}");
+#ifndef DUAL_MONITOR
 cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
 cmd(inter, "set x 1");
 while(*choice==0)
  Tcl_DoOneEvent(0);
@@ -3278,7 +3314,11 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.def .a.f.esc -side left");
 cmd(inter, "pack .a.l2 .a.v_num2 .a.f");
 
 //cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
+#ifndef DUAL_MONITOR
 cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
 
 cmd(inter, "focus -force .a.v_num2");
 cmd(inter, ".a.v_num2 selection range 0 end");
@@ -3311,7 +3351,11 @@ cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
 cmd(inter, "pack .s.i .s.ok .s.esc");
 cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
+#ifndef DUAL_MONITOR
 cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
 *choice=0;
 cmd(inter, "focus .s.i.e");
 cmd(inter, "bind .s.i.e <KeyRelease> {if { %N < 256 } { set b [.s.i.e index insert]; set c [.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .s.i.e delete 0 end; .s.i.e insert 0 $d; .s.i.e index $b; .s.i.e selection range $b end } { } } { } }");

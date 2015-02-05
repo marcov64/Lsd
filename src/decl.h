@@ -17,6 +17,8 @@ Comments and bug reports to marco.valente@univaq.it
 #include <string.h>
 #include <stdlib.h>
 
+#define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
+
 //class speedup;
 class object;
 class variable

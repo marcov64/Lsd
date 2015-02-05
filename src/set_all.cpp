@@ -757,7 +757,11 @@ cmd(inter, "button .a.ok -text Ok -command {set choice 1}");
 cmd(inter, "button .a.esc -text Escape -command {set choice 2}");
 cmd(inter, "button .a.se -text Search -command {set filename [tk_getOpenFile -filetypes {{{\"Text Files\"} {.txt}}}]; raise .a; focus -force .a}");
 cmd(inter, "pack .a.l .a.e .a.se .a.ok .a.esc ");
+#ifndef DUAL_MONITOR
 cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
 cmd(inter, "raise .a");
 while(*choice==0)
   Tcl_DoOneEvent(0);
