@@ -1,9 +1,9 @@
 Laboratory for Simulation Development - Lsd
 and
 Lsd Model Manager - LMM
-May 2014)
+January 2015)
 
-Version 6.3
+Version 6.4
 by Marco Valente - marco.valente@univaq.it
 
 This Readme.txt file contains:
@@ -13,27 +13,28 @@ This Readme.txt file contains:
 - Hints on the use of LMM and Lsd.
 
 
-***********************
+************
 What is Lsd?
-***********************
+************
 
-Lsd is based on the assumption that simulation models are distinguihed from simulation programs. Using Lsd a user is concerned exclusively with the description of the theoretical model, while all the technicalities of the program implementing the model are automatically generated in an intuitive and computationally efficient way.
+Lsd is based on the assumption that simulation models are distinguished from simulation programs. Using Lsd a user is concerned exclusively with the description of the theoretical model, while all the technicalities of the program implementing the model are automatically generated in an intuitive and computationally efficient way.
 
 Lsd can be considered as a modelling language. Using Lsd a user is required to describe a model as if it were a system of discrete equations, where each variable is associated to piece of code (usually short and simple), indicating how the generic instance of the variable must compute its value at a generic time step. No other coding is required (e.g. to define the simulation cycle, saving data series, etc.). The required programming skills to use Lsd are therefore solely dependent on the complexity of the equations of the model.
 
 The code for the equations is expressed in a highly symbolic form, using a development environment providing assistance and examples. From this code the system automatically generates a program endowed with a complete set of interfaces to exploit the model. With such interfaces the user can: define the elements of the model, run simulations in various modes, inspect in any details events at run time, being informed on errors, analyse the results, generate automatic documentation.
 
-The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a Lsd model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. Lsd is an opensource project and makes use of other opensource tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. Lsd is available natively for Linux, Windows and Mac OS X systems, with minimal requirements.
+The user interfaces and the skills required to implement simple models can be learned in a few days of training. Being based on C++ a Lsd model can both express any computational content, and make use of existing libraries, generating extremely fast and efficient code. Lsd is an opensource project and makes use of other open source tools, as the GNU C++ compiler, Tcl/Tk windowing toolkit, gnuplot graphical package. Lsd is available natively for Linux, Windows and Mac OS X systems, with minimal requirements.
 
-***********************
+************************
 Lsd installation content
-***********************
+************************
+
 This distribution contains:
 - Lsd source code, for the creation of simulation models
 - Several Lsd example models
 - Lsd Model Manager (LMM), a developing environment for Lsd models
 - Documentation, as context dependent help pages 
-- (Windows version only) GNU C++ compiler and other GNU stuff. 
+- (Windows 32-bit version only) GNU C++ compiler and other GNU stuff. 
 
 Lsd source code
 The Lsd source files are usually managed (e.g. for compilation) automatically, so that users need not to worry for technical issues. Upgrading to new versions of Lsd (which always guarantees backward compatibility) necessitates only to replace the source files.
@@ -52,25 +53,44 @@ All the documentation is accessible through the help menus, presented as HTML pa
 - The distributed Lsd models produce automatically their own documentation.
 
 MS Windows users
-Contrary to Linux and Mac systems, MS Windows systems normally do not contain C++ programming tools (compiler, libraries, debugger, etc.). The Windows distribution of Lsd contains a selection of the MinGW package with all (and only) the packages required to use Lsd, so that no extra software must be installed to use Lsd on such systems.
+Contrary to Linux and Mac systems, MS Windows systems normally do not contain C++ programming tools (compiler, libraries, debugger, etc.). The Windows distribution of Lsd contains a selection of the MinGW 32-bit package with all (and only) the packages required to use Lsd, so that no extra software must be installed to use Lsd on such systems. 
 
-***********************
-MS Windows Installation
-***********************
+Optionally, Windows x64 users may use LMM/Lsd under native 64-bit support. This is not required, as the standard 32-bit version also works in the 64-bit versions of Windows (Vista/7/8/10). However, the 64-bit version of Lsd is reasonably faster and supports models accessing far more memory (in practice, limited only by the amount of available RAM).
+
+
+***********************************
+MS Windows Installation (32/64-bit)
+***********************************
 The installation consists simply in unpacking the Lsd files that are structured in a root directory (e.g. C:\Lsd) and several subdirectories for the models, manuals and source code. 
 
 *** IMPORTANT ***
 Lsd cannot be installed within a directory (or having an ancestor directory) containing a space in its name. For example, the directory:
 C:\Documents and Settings\Lsd
 cannot work. If you installed the system in such a wrong directory, simply move the whole Lsd directory in another location.
-*******************
-When the installation is completed run the file:
+*****************
 
-- run.bat
+When the installation is completed, run this file inside the Lsd directory (double clicking in Windows Explorer is fine):
+
+> run.bat
 
 in the installation directory. This will run LMM (Lsd Model Manager) that allows to create new models, or select existing models.
 
 
+*************************************
+MS Windows Installation (64-bit only)
+*************************************
+
+To use the 64-bit of Lsd, additionally, you need the Cygwin 64-bit version installed (or a compatible GNU GCC compiler). The installer can be downloaded at http://www.cygwin.com/ (make sure you download the "setup-x86_64.exe" file). Install it to any appropriate directory (the same restrictions mentioned above, about folder names with spaces, also apply to Cygwin). Verify in the installer that "gcc-g++" (compiler) and "gdb" (debugger) were selected for installation. Alternatively, MinGW gcc-g++ 64-bit can also be used. You don't have to install Tcl/Tk or gnuplot in Cygwin, the required versions are already included with Lsd.
+
+After installation check that Cygwin was added to the PATH environment variable. To do that, in Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the line to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done.
+
+When the installation is completed, run this file inside the Lsd directory (double clicking in Windows Explorer is fine):
+
+> run64.bat
+
+If you switch between the 32 and 64-bit versions, make sure you adjust the "System Compilation Options" (in the "Model" menu in LMM), at least by clicking on the button "Default Windows[64]".
+
+ 
 *****************
 Unix Installation
 *****************
@@ -108,9 +128,9 @@ For persisting problems email me: valente@ec.univaq.it
 If you modified the makefile to compile LMM, the same changes will need to be made to the makefiles used to generate the Lsd Model Programs. You need to make these changes only once using a command in LMM. Use the menu item System Compilation Options in menu Model. You will have the same variables as in the makefile used to compile LMM that must be set to the same values.
 
 
-*****************
+*******************************
 Mac OS X (Leopard) Installation
-*****************
+*******************************
 Mac users have two options. Either compile Lsd as a Unix system, or use the package native for Mac OS X. In both cases you need to install the developer toolkit. In the first case you also need to install the X11 package (see the help on your Mac documentation). Then, open a terminal and follow the instructions for installing Lsd on Linux systems.
 
 For a native Mac look&feel you need to install the ActiveState distribution of Tcl/Tk. Unpack the Lsd distribution on your preferred location. Open a terminal and enter the directory of Lsd installation. Give then the command:
@@ -126,10 +146,11 @@ or simply click on its icon from the Finder.
 For updates and tips see: http://andre.lorentz.pagesperso-orange.fr/Site/%5BLSD_on_a_Mac%5D.html
 
 
-*******************
+******************
 Use of LMM and Lsd
 ******************
-LMM (Lsd Model Manager) is a program used to manage Lsd model programs. Lsd (Laboratory for Simulation Development) model programs are stand-alone programs that execute fastly and efficiently difference-equation simulation models. For a user to develop a new simulation model it is only requested to specify the equations of the model in a simplified C++ language, with the assistence of automatic help. Lsd model programs generate automatically the code necessary to link the equations in a coherent sequence within a simulated time steps, saving and elaborating the result, allowing easy access to initialization values, and many other operations required for fully exploiting the simulation model. Both LMM and Lsd offer extensive manual pages for each operation available.
+
+LMM (Lsd Model Manager) is a program used to manage Lsd model programs. Lsd (Laboratory for Simulation Development) model programs are stand-alone programs that execute fast and efficiently difference-equation simulation models. For a user to develop a new simulation model it is only requested to specify the equations of the model in a simplified C++ language, with the assistance of automatic help. Lsd model programs generate automatically the code necessary to link the equations in a coherent sequence within a simulated time steps, saving and elaborating the result, allowing easy access to initialization values, and many other operations required for fully exploiting the simulation model. Both LMM and Lsd offer extensive manual pages for each operation available.
 
 When LMM starts the first operation is to choose a model to work with. Using the LMM's Models' Browser you can either select one of the existing models, or create a new empty one  (that is, no equations, variables etc.). When a model is selected you can ask LMM to:
 - compile the model and run it;
@@ -139,7 +160,7 @@ When LMM starts the first operation is to choose a model to work with. Using the
 
 Besides this model-specific operations, LMM is also a standard editor for creating and editing text files.
 
-ATTENTION: the very first time a model is compiled an error can be caused by the mispecification of the system directories. In this case, use menu Model/System Compilation Option and use the default values for your operative system to let LMM adjust automatically the error.
+ATTENTION: the very first time a model is compiled an error can be caused by the misspecification of the system directories. In this case, use menu Model/System Compilation Option and use the default values for your operative system to let LMM adjust automatically the error.
 
 When a model program is successfully compiled and run by LMM it can interact with the user with the Lsd interfaces. These permit to control every aspect of the simulation runs (e.g. setting initial values, observing and saving results, reading the model documentation etc.) but for the modification of the code for the equations. For this latter operation you need to close the Lsd model program, tell LMM to show the equation file, edit it and re-compile a new Lsd model program.
 
