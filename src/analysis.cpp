@@ -101,6 +101,8 @@ Exit function, which is customized on the operative system.
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+#include <limits.h>
+#include <float.h>
 
 
 #include "decl.h"
@@ -183,6 +185,7 @@ int cur_plot=0;
 int file_counter=0;
 char filename[1000];
 char **name_var;
+const char *nonavail="n/a";	// string for unavailable values
 extern char msg[];
 
 extern variable *cemetery;
@@ -3683,10 +3686,27 @@ for(i=*num_v; i<*num_v+new_v; i++)
  vs[i].data=new double[new_c+2];
  }
 
-for(j=0; j<=new_c; j++)
- { for(i=*num_v; i<new_v+*num_v; i++)
-    fscanf(f,"%lf",&(vs[i].data[j]));
+long linsiz=new_v*(DBL_DIG+4)+1;
+if(linsiz>INT_MAX)
+ linsiz=INT_MAX;	// prevents too big buffers for 32-bit arch
+char *tok,*linbuf=new char[linsiz];
+const char *sep=" \t,;|";	// token separators are spaces, tabs, commas etc.
 
+for(j=0; j<=new_c; j++)
+{
+ fgets(linbuf,linsiz,f);	// buffers one entire line
+ tok=strtok(linbuf,sep); // prepares for parsing and get first one
+ for(i=*num_v; i<new_v+*num_v; i++)
+ {
+    //fscanf(f,"%lf",&(vs[i].data[j]));      // can't handle n/a's
+	if(tok==NULL)				// get to end of line too early
+	  break;
+	if(!strcmp(tok,nonavail))	// it's a non-available observation
+	  vs[i].data[j]=0.0;
+	else
+	  sscanf(tok,"%lf",&(vs[i].data[j]));
+ 	tok=strtok(NULL,sep);		// get next token, if any
+ }
  }
 fclose(f);
 *num_v+=new_v;
@@ -3748,7 +3768,7 @@ for(i=0; i<nv; i++)
 
 //Variables' Name in first column
 fr=1;
-strcpy(misval,"n/a");
+strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
 cmd(inter, "toplevel .lab");
