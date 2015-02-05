@@ -225,6 +225,13 @@ for(;O!=NULL;O=go_brother(O))
 #define SEARCH(X) p->search((char*)X)
 #define SEARCHS(Y,X) Y->search((char*)X)
 
+// Seeds turbo search: O=pointer to container object where searched objects are
+//                     X=name of variable contained inside the searched objects
+#define INI_TSEARCHS(O,X) O->initturbo((char*)X,0)
+// Performs turbo search: O, X as in INI_TSEARCHS
+//                        Y=value of the variable X to be searched for
+#define TSEARCH_CNDS(O,X,Y) O->turbosearch((char*)X,0,Y)
+
 #define SORT(X,Y,Z) p->lsdqsort((char*)X,(char*)Y,(char*)Z)
 #define SORTS(O,X,Y,Z) O->lsdqsort((char*)X,(char*)Y,(char*)Z)
 #define SORT2(X,Y,L,Z) p->lsdqsort((char*)X,(char*)Y,(char*)L,(char*)Z)

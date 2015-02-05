@@ -58,6 +58,7 @@ public:
 
 mnode *son;
 object *pntr;
+long deflev;		// saves the log of number of objects to allow defaulting
 
 void create(double level);
 object *fetch(double *n, double level);

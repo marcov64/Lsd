@@ -2597,14 +2597,14 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with turbo-search.\"",stacklog->label, label); 
+   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
    #ifndef NO_WINDOW
      cmd(inter, msg); 
    #else
      plog(msg);
    #endif    
    
-    sprintf(msg, "Error in equation for '%s' when searching '%s' for turbosearch",stacklog->label, label); 
+    sprintf(msg, "Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'",stacklog->label, label); 
 	 plog(msg);
     error_hard();
 	 quit=2;
@@ -2613,14 +2613,14 @@ if(cb==NULL)
 
 if(cb->mn==NULL)
  {
-    sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with turbo-search. Turbosearch can be used only after initializing the object with 'initturbo'.\"",stacklog->label, label); 
+    sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
    #ifndef NO_WINDOW
      cmd(inter, msg); 
    #else
      plog(msg);
    #endif    
    
-    sprintf(msg, "Error in equation for '%s' when searching '%s' for turbosearch. Turbosearch can be used only after initializing the object with 'initturbo'.",stacklog->label, label); 
+    sprintf(msg, "Error in equation for '%s' when searching for '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.",stacklog->label, label); 
 	 plog(msg);
     error_hard();
 	 quit=2;
@@ -2628,11 +2628,14 @@ if(cb->mn==NULL)
   } 
  
 val=num-1;
+if(tot>0)					// if size is informed
 	lev=floor(log10(tot-1))+1;
+else
+	lev=cb->mn->deflev;		// if not, use default
 return(cb->mn->fetch(&val, lev));
 
 }
-void object::initturbo(char *label, double tot)
+void object::initturbo(char const *label, double tot=0)
 {
 /*
 Generate the data structure required to use the turbo-search.
@@ -2640,30 +2643,36 @@ Generate the data structure required to use the turbo-search.
 - num is the total number of objects.
 */
 bridge *cb;
-double lev;
+double lev,stats[10];
 
 for(cb=b; cb!=NULL; cb=cb->next)
  if(!strcmp(cb->blabel, label))
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s' to initialize turbo-search.\"",stacklog->label, label, label); 
+   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
    #ifndef NO_WINDOW
      cmd(inter, msg); 
    #else
      plog(msg);
    #endif    
    
-    sprintf(msg, "Error in equation for '%s' when searching '%s' to initialize turbo-search: the model does not contain any element '%s' in the expected position.",stacklog->label, label, label); 
+    sprintf(msg, "Error in equation for '%s' when searching '%s' to initialize Turbosearch: the model does not contain any element '%s' in the expected position.",stacklog->label, label, label); 
 	 plog(msg);
     error_hard();
 	 quit=2;
     return;
   } 
 
+if(tot<=0)					// if size not informed
+{
+	this->stat(label,stats);	// compute it
+	tot=stats[0];
+}
 globalcur=cb->head;
 cb->mn= new mnode;
 lev=floor(log10(tot-1))+1;
+cb->mn->deflev=lev;			// save as default lev
 cb->mn->create(lev);
 
 }
