@@ -491,6 +491,7 @@ RUN
 void run(object *root)
 {
 int i, j, done=0, fast=0;
+bool batch_sequential_loop=false; // indicates second or higher iteration of a batch
 char ch[120], nf[300];
 FILE *f;
 double app=0;
@@ -509,6 +510,8 @@ quit=0;
 Tcl_UnlinkVar(inter, "done");
 Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
 #else
+    sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
+    plog(msg);
    	f=fopen(struct_file, "r");
     root->load_struct(f);
 	  struct_loaded=1;
@@ -523,7 +526,7 @@ Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
     fclose(f);
 #endif
 
-for(i=0; i<sim_num && quit!=2; i++)
+for(i=1; i<=sim_num && quit!=2; i++)
 {
 
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
@@ -532,21 +535,24 @@ prepare_plot(root, i);
 
 if(done_in==2 && cur_plt>0)
  cmd(inter, "if {[winfo exists $activeplot]==1} {wm iconify $activeplot} {}");
+#else
+sprintf(msg, "\nSimulation %d running ...\n", i);
+plog(msg);
 #endif
 
 // deb(root->son, NULL, "stop 1", &app);
-if(i>0)
+if(i>1 || batch_sequential_loop)
 {
  root->empty();
  root->init(NULL, "Root");
  blueprint->empty();
- if(batch_sequential==1)
-  {
-   sprintf(msg, "%s_%d.lsd",simul_name,findex);
-   delete[] struct_file;
-   struct_file=new char[strlen(msg)+1];
-   strcpy(struct_file,msg);
-  } 
+// if(batch_sequential==1)
+//  {
+//   sprintf(msg, "%s_%d.lsd",simul_name,findex);
+//   delete[] struct_file;
+//   struct_file=new char[strlen(msg)+1];
+//   strcpy(struct_file,msg);
+//  } 
  f=fopen(struct_file, "r");
  if(f==NULL)
   {
@@ -742,21 +748,17 @@ if(no_res==0)
 if(batch_sequential==0)
  sprintf(msg, "\nSaving results in file %s_%d.res",simul_name, seed-1);
 else
- sprintf(msg, "\nSaving results in file %s_%d.res",simul_name, findex);
+ sprintf(msg, "\nSaving results in file %s_%d_%d.res",simul_name, findex, seed-1);
 
-
-#ifndef NO_WINDOW 
 plog(msg);
+#ifndef NO_WINDOW 
 cmd(inter, "update");
-#else
- printf("\n%s",msg);
- printf("\n");
 #endif
 
 if(batch_sequential==0)
  sprintf(msg, "%s_%d.res", simul_name, seed-1);
 else
- sprintf(msg, "%s_%d.res", simul_name, findex);
+ sprintf(msg, "%s_%d_%d.res", simul_name, findex, seed-1);
 
 f=fopen(msg,"wt");  // use text mode for Windows better compatibility
 save_title_result(f, root, 1);
@@ -770,20 +772,22 @@ fclose(f);
 if(batch_sequential==0)
  sprintf(msg, "\nResults saved in file %s_%d.res",simul_name, seed-1);
 else
- sprintf(msg, "\nResults saved in file %s_%d.res",simul_name, findex);
+ sprintf(msg, "\nResults saved in file %s_%d_%d.res",simul_name, findex, seed-1);
 
 plog(msg);
 }
 #ifndef NO_WINDOW 
 cmd(inter, "update");
+#else
+printf("\n");
 #endif
 
 if(batch_sequential==0)
- sprintf(msg, "%s_%d_%d.tot", simul_name, seed-1-i, seed-2+sim_num-i);
+ sprintf(msg, "%s_%d_%d.tot", simul_name, seed-i, seed-1+sim_num-i);
 else
- sprintf(msg, "%s.tot", simul_name);
+ sprintf(msg, "%s_%d_%d_%d.tot", simul_name, findex, seed-i, seed-1+sim_num-i);
 
-if(i==0 && add_to_tot==0)
+if(i==1 && add_to_tot==0)
  {
  f=fopen(msg,"wt");  // use text mode for Windows better compatibility
  save_title_result(f, root, 0);
@@ -794,8 +798,28 @@ else
 save_result(f,root, actual_steps);
 fprintf(f, "\n");
 fclose(f);
-if(batch_sequential==1)
- findex+=1;
+//if(batch_sequential==1)
+// findex+=1;
+ if(batch_sequential==1 && i==sim_num)  // last run of current batch file?
+ {
+   findex++;							// try next file
+   sprintf(msg, "%s_%d.lsd",simul_name,findex);
+   delete[] struct_file;
+   struct_file=new char[strlen(msg)+1];
+   strcpy(struct_file,msg);
+   f=fopen(struct_file, "r");			
+   if(f==NULL)  // no more file to process
+   {
+     sprintf(msg, "\nFinished processing %s.\n",simul_name);
+     plog(msg);
+     break;
+   }
+   sprintf(msg, "\n\nProcessing configuration file %s ...\n",struct_file);
+   plog(msg);
+   fclose(f);  // process next file
+   i=0;   // force restarting run count
+   batch_sequential_loop=true;
+  } 
 }
 }
 /*

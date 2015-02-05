@@ -1016,7 +1016,8 @@ for(i=0; i<s->nvalues; i++)
 	root->save_struct(f,lab);
    fprintf(f, "\n\nDATA");
 	root->save_param(f);
-	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", nv, seed+*findex-1, max_step, equation_name, name_rep);
+//	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", nv, seed+*findex-1, max_step, equation_name, name_rep);
+	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed+sim_num*(*findex-1), max_step, equation_name, name_rep);
   fprintf(f, "\nDESCRIPTION\n\n");
   save_description(root, f);  
   fprintf(f, "\nDOCUOBSERVE\n");
