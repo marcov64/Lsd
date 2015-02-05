@@ -3094,7 +3094,7 @@ cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
 cmd(inter, "update");
 
 sprintf(msg, "%s.res", lab);
-f=fopen(msg,"w");
+f=fopen(msg,"wt");  // use text mode for Windows better compatibility
 for(n=r; n->up!=NULL; n=n->up);
 save_title_result(f, n, 1);
 fprintf(f, "\n");
@@ -3460,7 +3460,7 @@ strcpy(lab, lab1);
 
 if(strlen(lab)==0)
  break;
-f=fopen(lab, "w");
+f=fopen(lab, "wt");  // use text mode for Windows better compatibility
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
 cmd(inter, "tk_messageBox -title Warning -icon warning -message \"The new equation file\\n$res1\\nhas been created.\\nYou need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
@@ -3477,7 +3477,7 @@ if(strlen(lsd_eq_file)==0)
  {*choice=0;
   break;
  } 
-f=fopen("temp.tmp", "w");
+f=fopen("temp.tmp", "wt");  // use text mode for Windows better compatibility
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
 
@@ -3507,7 +3507,7 @@ break;
 case 57:
 cmd(inter, "destroy .l .m");
 
-f=fopen("tex_report.tex", "w");
+f=fopen("tex_report.tex", "wt");
 fprintf(f,"\\newcommand{\\lsd}[1] {\\textit{#1}}\n");
 tex_report_init(root,f);
 tex_report_observe(root, f);

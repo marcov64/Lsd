@@ -3964,7 +3964,7 @@ strcpy(msg, app);
 
 if(strlen(msg)==0)
  goto end;
-fsave=fopen(msg, "w");
+fsave=fopen(msg, "wt");  // use text mode for Windows better compatibility
 
 
 if(del!=3) //Delimited files
@@ -7753,7 +7753,7 @@ if(dozip==1)
    
  } 
 else
- fsave=fopen(msg, "w"); 
+ fsave=fopen(msg, "wt");  // use text mode for Windows better compatibility
 
 
 if(del!=3) //Delimited files

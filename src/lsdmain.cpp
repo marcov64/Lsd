@@ -758,7 +758,7 @@ if(batch_sequential==0)
 else
  sprintf(msg, "%s_%d.res", simul_name, findex);
 
-f=fopen(msg,"w");
+f=fopen(msg,"wt");  // use text mode for Windows better compatibility
 save_title_result(f, root, 1);
 fprintf(f, "\n");
 for(j=0; j<=actual_steps; j++)
@@ -785,7 +785,7 @@ else
 
 if(i==0 && add_to_tot==0)
  {
- f=fopen(msg,"w");
+ f=fopen(msg,"wt");  // use text mode for Windows better compatibility
  save_title_result(f, root, 0);
  fprintf(f, "\n");
  }
@@ -940,7 +940,7 @@ for(cb=root->b; cb!=NULL; cb=cb->next)
  {
 
  sprintf(ch, "%s_1.res",root->label);
- f=fopen(ch, "w");
+ f=fopen(ch, "wt");  // use text mode for Windows better compatibility
 
  for(cv=cur->v; cv!=NULL; cv=cv->next)
   {if(cv->save==1)
@@ -1023,7 +1023,7 @@ if(Tcl_Init(app)!=TCL_OK)
   sprintf(msg, "set tk_library {%s/gnu/lib/tk8.3}", lsdroot);
   cmd(app, msg);
   if(Tcl_Init(app)!=TCL_OK)
-   {f=fopen("tk_err.err","w");
+   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
     exit(1);
@@ -1035,7 +1035,7 @@ if(Tcl_Init(app)!=TCL_OK)
 
 
 if(Tk_Init(app)!=TCL_OK)
-   {f=fopen("tk_err.err","w");
+   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
     exit(1);
@@ -1144,7 +1144,7 @@ analysis(choice);
 */
 printf("\nFinished simulation. Saving results...\n");
 sprintf(msg, "%s_%d.res", simul_name, seed-1);
-f=fopen(msg,"w");
+f=fopen(msg,"wt");  // use text mode for Windows better compatibility
 save_title_result(f, root, 1);
 fprintf(f, "\n");
 for(j=1; j<=actual_steps; j++)
@@ -1246,7 +1246,7 @@ int i;
 
 set_lab_tit(vcv);
 sprintf(msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
-f=fopen(msg, "w");
+f=fopen(msg, "wt");  // use text mode for Windows better compatibility
 
 fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
 
