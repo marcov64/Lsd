@@ -184,7 +184,7 @@ clock_t start_profile[100], end_profile[100];
 INIT
 ****************************************************/
 
-int variable::init(object *_up, char *_label, int _num_lag, double *v, int _save)
+int variable::init(object *_up, char const *_label, int _num_lag, double *v, int _save)
 {
 int i;
 

@@ -639,7 +639,7 @@ ADD_VAR
 Add a Variable to all the Objects of this type in the model
 ****************************************************/
 
-void object::add_var(char *lab, int lag, double *val, int save)
+void object::add_var(char const *lab, int lag, double *val, int save)
 {
 variable *a;
 object *cur;
@@ -709,7 +709,7 @@ return(cur);
 Add num sons with label lab to ANY object like this one, wherever is on the
 tree 
 ****************************************************/
-void object::add_obj(char *lab, int num, int propagate)
+void object::add_obj(char const *lab, int num, int propagate)
 {
 bridge *cb;
 object *a, *cur, *first;
@@ -750,7 +750,7 @@ INSERT_PARENT_OBJ_ONE
 Insert a new parent in the model structure. The this object is placed below
 the new (otherwise empty) Object
 ****************************************************/
-void object::insert_parent_obj_one(char *lab)
+void object::insert_parent_obj_one(char const *lab)
 {
 object *cur,*c2, *newo;
 bridge *cb, *cb1, *newb;
@@ -896,7 +896,7 @@ CHG_LAB
 Change the label of the Object, for all the instances
 ****************************************************/
 
-void object::chg_lab(char *lab)
+void object::chg_lab(char const *lab)
 {
 
 object *cur;
@@ -933,7 +933,7 @@ else
 CHG_VAR_LAB
 Change the label of the Variable from old to n
 ****************************************************/
-void object::chg_var_lab(char *old, char *n)
+void object::chg_var_lab(char const *old, char const *n)
 {
 variable *cur;
 
@@ -1003,7 +1003,7 @@ Compute the sum of Variables or Parameters lab with lag lag.
 The sum is computed over the elements in a single branch of the model
 ****************************************************/
 
-double object::sum(char *lab, int lag)
+double object::sum(char const *lab, int lag)
 {
 double tot;
 object *cur;
@@ -1044,7 +1044,7 @@ OVERALL_MAX
 Compute the maximum of lab, considering only the Objects in a single branch of the model.
 ****************************************************/
 
-double object::overall_max(char *lab, int lag)
+double object::overall_max(char const *lab, int lag)
 {
 double tot, temp;
 object *cur;
@@ -1083,7 +1083,7 @@ WHG_AV
 Compute the weighted average of lab (lab2 are the weights)
 ****************************************************/
 
-double object::whg_av(char *lab, char *lab2, int lag)
+double object::whg_av(char const *lab, char const *lab2, int lag)
 {
 double tot, c1, c2;
 object *cur;
@@ -1195,7 +1195,7 @@ ADD_EMPTY_VAR
 Add a new (empty) Variable, used in the creation of the model structure
 ****************************************************/
 
-variable *object::add_empty_var(char *str)
+variable *object::add_empty_var(char const *str)
 {
 variable *cv;
 variable *app;
@@ -1647,7 +1647,7 @@ r[4]=min
 
 ****************************************************/
 
-void object::stat(char *lab, double *r)
+void object::stat(char const *lab, double *r)
 {
 object *cur;
 variable *cur_v;
@@ -2143,7 +2143,7 @@ Multiply the value of the variable lv with value.
 last_update untouched.
 return the new value.
 */
-double object::multiply(char *lv, double value)
+double object::multiply(char const *lv, double value)
 {
 variable *cv;
 
@@ -2582,7 +2582,7 @@ else
 return cur; 
 }
 
-object *object::turbosearch(char *label, double tot, double num)
+object *object::turbosearch(char const *label, double tot, double num)
 {
 /*
 Search the object label placed in num position.
@@ -2628,7 +2628,7 @@ if(cb->mn==NULL)
   } 
  
 val=num-1;
-lev=floor(log10(tot-1))+1;
+	lev=floor(log10(tot-1))+1;
 return(cb->mn->fetch(&val, lev));
 
 }
