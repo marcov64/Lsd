@@ -131,7 +131,7 @@ if(e!=(char *)NULL)
     loc=strstr(here, "lmm");
     for(i=0; strcmp(here+i,loc); i++);
     here[i-1]='\0';
-    strcat(here, "/gnu/bin");
+    strcat(here, "/gnu/bin");  // remember to check for _WIN64
     sprintf(newpath, "PATH=%s;%s",e,here);
     getenv(newpath);
 
@@ -166,10 +166,10 @@ return 0;
 INTERPINITWIN
 Calls tclinit and tkinit, managing he errors
 WARNING !!!
-This function presumes the installation of a /gnu directory along
-the model's one. Tcl and Tk initialization files MUST be in
-/gnu/share/tcl8.0
-/gnu/share/tk8.0
+This function presumes the installation of a /gnu (or gnu64 for Win64) 
+directory along the model's one. Tcl and Tk initialization files MUST be in
+/gnu[64]/share/tcl8.X
+/gnu[64]/share/tk8.X
 *********************************/
 Tcl_Interp *InterpInitWin(void)
 {
@@ -180,7 +180,7 @@ app=Tcl_CreateInterp();
 
 //cmd(app, "puts $tcl_library");
 //cmd(app, "source init.tcl");
-//cmd(app, "source C:/Lsd5.5/gnu/lib/tk8.4/tk.tcl");
+//cmd(app, "source C:/Lsd5.5/gnu/lib/tk8.4/tk.tcl");  // remember to check for _WIN64
 
 //Tcl_SetVar(app, "tcl_library", "C:/Lsd5.5/gnu/lib/tcl8.4", TCL_APPEND_VALUE);
 /*
@@ -192,16 +192,22 @@ return app;
 */    
 //cmd(app, "lappend tcl_libPath {gnu/lib/tcl8.4}");
 
-if(Tcl_Init(app)!=TCL_OK)
+if((res=Tcl_Init(app))!=TCL_OK)
  {
+  char estring[255];
+  sprintf(estring,"Tcl Error = %d : %s\n",res,app->result);
+  errormsg(estring,NULL);
   exit(1);
  
  }
 
 //cmd(app, "set env(DISPLAY) :0.0");
-if(Tk_Init(app)!=TCL_OK)
+if((res=Tk_Init(app))!=TCL_OK)
  {
-  errormsg( (char *)"Tk Initialization failed. Check directory structure:\nLSDHOME\\lib\\share\\tk8.0\n", NULL);
+  errormsg( (char *)"Tk Initialization failed. Check directory structure:\nLSDHOME\\gnu[64]\\lib\\tk8.5\n", NULL);
+  char estring[255];
+  sprintf(estring,"Tk Error = %d : %s\n",res,app->result);
+  errormsg(estring,NULL);
   exit(1);
  }
 
@@ -324,6 +330,12 @@ cmd(inter, "set fonttype $DefaultFont");
 cmd(inter, "set wish $DefaultWish");
 cmd(inter, "set LsdSrc src");
 
+// Handles Windows 32 and 64-bit versions (at run time)
+if((size_t)-1 > 0xffffffffUL)  // test for 64-bit address space
+ cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set LsdGnu gnu64} {set LsdGnu gnu}");
+else
+ cmd(inter, "set LsdGnu gnu");
+	
 cmd(inter, "set choice [file exist $RootLsd/lmm_options.txt]");
 if(choice==1)
  {
@@ -1041,7 +1053,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
   sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
   cmd(inter, msg);
-  cmd(inter, "if { [file exists $RootLsd/gnu/bin/crtend.o] == 1} { file copy $RootLsd/gnu/bin/crtend.o .;file copy $RootLsd/gnu/bin/crtbegin.o .;file copy $RootLsd/gnu/bin/crt2.o .} {}");
+  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy $RootLsd/$LsdGnu/bin/crtend.o .;file copy $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy $RootLsd/$LsdGnu/bin/crt2.o .} {}");
 
   cmd(inter, "catch [set result [catch [exec a.bat]] ]");
   //cmd(inter, "tkwait variable result");
@@ -1310,7 +1322,7 @@ if(choice==0)
 #endif
   //cmd(inter, "set w .t; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
   
-  cmd(inter, "if {[file isdirectory ../gnu/bin ] == 1} {set a [../gnu/bin/make]} {set a \"make\"}");
+  cmd(inter, "if {[file isdirectory ../$LsdGnu/bin ] == 1} {set a [../$LsdGnu/bin/make]} {set a \"make\"}");
 
   cmd(inter, "catch [exec $a 2> makemessage.txt]"); 
   cmd(inter, "destroy .t");
@@ -1614,14 +1626,14 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
    if(choice==3)
     {
      
-    cmd(inter, "set SETDIR \"../gnu/share/gdbtcl\"");
+    cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
 //    sprintf(msg, "exec start /min gdb_bat %s $SETDIR &", str1); //Win 9x
     sprintf(msg, "exec start gdb_batw9x %s &", str1); //Win 9x    
     }
 
    if(choice==4)
     {//WIndows NT case
-    cmd(inter, "set SETDIR \"../gnu/share/gdbtcl\"");
+    cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
     sprintf(msg, "exec cmd.exe /c start /min gdb_bat %s $SETDIR &", str1); //Win NT case
     }
    if(choice==5)
@@ -1630,7 +1642,7 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
 //     cmd(inter, "set answer [tk_messageBox -type yesno -title \"Text-based GDB\" -icon question -message \"Use text-based GDB?\"]");
 //     cmd(inter, "if {$answer == \"yes\"} {set nowin \"-nw\"} {set nowin \"\"}");
     cmd(inter, "set nowin \"\"");
-    sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/gnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
+    sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/$LsdGnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
     cmd(inter, msg);
     sprintf(msg, "exec run_gdb &");
      
@@ -1969,7 +1981,7 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-//cmd(inter, "if { $tcl_platform(platform) == \"windows\" } {file copy $RootLsd/gnu/bin/crt0.o $modeldir} {}");
+//cmd(inter, "if { $tcl_platform(platform) == \"windows\" } {file copy $RootLsd/$LsdGnu/bin/crt0.o $modeldir} {}");
 
 cmd(inter, "cd $RootLsd");
 cmd(inter, ".m.model entryconf 4 -state normal");
@@ -5116,12 +5128,19 @@ cmd(inter, "frame .l.t");
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
 cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 16 -relief sunken -yscrollcommand \".l.t.yscroll set\"");
 
+if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
+  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-llibz\\nSSWITCH_CC=-march=native -mtune= native -O3\\n\"");
+else
+  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
 
-cmd(inter, "set win_default \"TCL_VERSION=8\\nTK_VERSION=84\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/gnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/gnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/gnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/gnu/include\\nPATH_LIB=\\$(LSDROOT)/gnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/gnu/include\\nCC=gcc\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
-cmd(inter, "set lin_default \"TCL_VERSION=8.4\\nTK_VERSION=8.4\\nLSDROOT=[pwd]\\nDUMMY=\\nPATH_TCL_LIB=.\\nPATH_TK_LIB=.\\nPATH_TK_HEADER=\\nPATH_TCL_HEADER=\\nPATH_LIB=.\\nINCLUDE_LIB=\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
+cmd(inter, "set lin_default \"TCL_VERSION=8.5\\nTK_VERSION=8.5\\nLSDROOT=[pwd]\\nDUMMY=\\nPATH_TCL_LIB=.\\nPATH_TK_LIB=.\\nPATH_TK_HEADER=\\nPATH_TCL_HEADER=\\nPATH_LIB=.\\nINCLUDE_LIB=\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
 
 cmd(inter, "frame .l.t.d -relief groove -bd 2");
-cmd(inter, "button .l.t.d.win -text \" Default Windows \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+
+if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
+  cmd(inter, "button .l.t.d.win -text \" Default Windows x64 \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+else
+  cmd(inter, "button .l.t.d.win -text \" Default Windows \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 
 
 cmd(inter, "button .l.t.d.lin -text \" Default Linux \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
@@ -5695,7 +5714,7 @@ cmd(inter, "set f [open makefile w]");
 cmd(inter, "puts -nonewline $f $c");
 cmd(inter, "close $f");
 cmd(inter, "update");
-//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/gnu/bin/crt0.o .} {}");
+//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/$LsdGnu/bin/crt0.o .} {}");
 }
 
 
@@ -5744,7 +5763,7 @@ cmd(inter, "set f [open makefileNW w]");
 cmd(inter, "puts -nonewline $f $c");
 cmd(inter, "close $f");
 cmd(inter, "update");
-//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/gnu/bin/crt0.o .} {}");
+//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/$LsdGnu/bin/crt0.o .} {}");
 }
 
 
