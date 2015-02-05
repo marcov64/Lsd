@@ -181,6 +181,7 @@ int autom_x;
 extern int watch;
 int res, dir;
 int pdigits;   // precision parameter for labels in y scale
+int logs;		// log scale flag for the y-axis
 int data_infile=0;
 int cur_plot=0;
 int file_counter=0;
@@ -438,8 +439,11 @@ Tcl_LinkVar(inter, "auto", (char *) &autom, TCL_LINK_INT);
 cmd(inter, "checkbutton .f.sc.auto -text \"Y Self-scaling\" -variable auto -command {if {$auto==1} {.f.sc.max conf -state disabled; .f.sc.min conf -state disabled} {.f.sc.max conf -state normal; .f.sc.min conf -state normal}}");
 Tcl_LinkVar(inter, "maxy", (char *) &maxy, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "miny", (char *) &miny, TCL_LINK_DOUBLE);
+Tcl_LinkVar(inter, "logs", (char *) &logs, TCL_LINK_INT);
 
+logs=0;
 cmd(inter, "frame .f.y2");
+cmd(inter, "checkbutton .f.y2.logs -text \"Series in logs\" -variable logs");
 cmd(inter, "set y2 0");
 cmd(inter, "checkbutton .f.y2.y2 -text \"Y2 axis\" -variable y2");
 cmd(inter, "label .f.y2.l -text \"Num. of first series in Y2 axis\"");
@@ -451,7 +455,7 @@ cmd(inter, "entry .f.sc.max -width 10 -relief sunken -textvariable maxy -state d
 cmd(inter, "label .f.sc.lmin -text \"Min. Y\"");
 cmd(inter, "entry .f.sc.min -width 10 -relief sunken -textvariable miny -state disabled");
 cmd(inter, "pack .f.sc.auto .f.sc.lmin .f.sc.min .f.sc.lmax .f.sc.max -side left");
-cmd(inter, "pack .f.y2.y2 .f.y2.l .f.y2.e -side left");
+cmd(inter, "pack .f.y2.logs .f.y2.y2 .f.y2.l .f.y2.e -side left");
 cmd(inter, "pack .f.com .f.vars .f.ft .f.sc .f.y2");
 
 allblack=0;
@@ -2181,7 +2185,7 @@ double step;
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.f.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
-double **data;
+double **data,**logdata;
 
 if(nv>1000)
  {
@@ -2196,6 +2200,7 @@ if(nv==0)
  return;
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 
@@ -2220,6 +2225,21 @@ for(i=0; i<nv; i++)
    {
 
    data[i]=find_data(idseries);
+   
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
    }
 
  }
@@ -2693,6 +2713,9 @@ for(x02=0; i<=max_c; i++)
 
  sprintf(msg, "%d", i);
 cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Case num:\" -anchor w ");
+if(logs)
+ cmd(inter, "$p create text 360 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w ");
+else
 cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
 
 sprintf(msg, "set p .f.new%d$tit", cur_plot);
@@ -2737,12 +2760,15 @@ cmd(inter, msg);
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 delete[] str;
 delete[] tag;
 delete[] y1;
 delete[] y2;
 
+delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
@@ -2767,7 +2793,7 @@ int *erase;
 FILE *f;
 int i, nv, j, *pos, k, nt, *list_times, h,  first;
 double x1, y01, x2,  y02;
-double val1,  step, **val, **data, truemaxy;
+double val1,  step, **val, **data, **logdata, truemaxy;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.f.vars.ch.v size]");
@@ -2812,6 +2838,7 @@ for(i=0; i<nv;i++)
  }
 */
 data=new double *[nv];
+logdata=new double *[nv];
 for(i=0, new_nv=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
@@ -2832,6 +2859,21 @@ for(i=0, new_nv=0; i<nv; i++)
     data[i]=find_data(idseries);
     if(data[i]==NULL)
       plog("Shit\n");
+   
+    if(logs)			// apply log to the values to show "log scale"
+    {
+	  logdata[new_nv]=new double[end[i]+1];	// create space for the logged values
+      for(j=start[i];j<=end[i];j++)		// log everything possible
+	    if(data[i][j]>0.0)
+		  logdata[new_nv][j]=log(data[i][j]);
+	    else
+	    {
+		  logdata[new_nv][j]=0.0;
+		  sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		  plog(msg);
+	    }
+	  data[i]=logdata[new_nv];				// replace the data series
+    }
     val[new_nv]=new double[nt];
     new_nv++;
    }
@@ -3105,6 +3147,9 @@ cmd(inter, msg);
 cmd(inter, "set lab \"\"");
 
 cmd(inter, "$p create text 5 400 -font {Times 10 normal} -text \"X value: \" -anchor w ");
+if(logs)
+  cmd(inter, "$p create text 5 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w ");
+else
 cmd(inter, "$p create text 5 420 -font {Times 10 normal} -text \"Y value: \" -anchor w ");
 
 sprintf(msg, "set p .f.new%d$tit", cur_plot);
@@ -3125,7 +3170,11 @@ for(i=0; i<nv; i++)
   delete[] tag[i];
  }
 for(i=0; i<new_nv; i++)
+{
   delete[] val[i];
+  if(logs)
+    delete[] logdata[i];
+}
 delete[] str;
 delete[] tag;
 delete[] pos;
@@ -3133,6 +3182,7 @@ delete[] val;
 delete[] start;
 delete[] end;
 delete[] erase;
+delete[] logdata;
 }
 
 
@@ -3751,6 +3801,9 @@ Tcl_UnlinkVar(inter, "nv");
 if(nv==0)
  return;
 
+if(logs)
+  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+
 data=new double *[nv];
 start=new int[nv];
 end=new int[nv];
@@ -4024,10 +4077,11 @@ int i, nv, j, *start, *end;
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.f.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
-double **data, av, var, num, ymin, ymax, sig;
+double **data,**logdata, av, var, num, ymin, ymax, sig;
 
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 
@@ -4053,10 +4107,28 @@ for(i=0; i<nv; i++)
   if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries); 
+   
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
    }
 
  }
 
+if(logs)
+ sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats (in log).\n\" tabel");
+else
 sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
@@ -4113,10 +4185,13 @@ plog("\n");
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 delete[] str;
 delete[] tag;
 
+delete[] logdata;
 delete[] data;
 /*
 else
@@ -4280,7 +4355,7 @@ char *app;
 char **str, **tag;
 char str1[50], longmsg[180];
 int i, nv, j, *start, *end, nt, *list_times, h, k;
-double **data, av, var, num, ymin, ymax, sig;
+double **data,**logdata, av, var, num, ymin, ymax, sig;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.f.vars.ch.v size]");
@@ -4306,6 +4381,7 @@ for(i=0; i<nt; i++)    //Sets the list of cases to plot
 Tcl_UnlinkVar(inter, "k");
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 
@@ -4336,8 +4412,25 @@ for(i=0; i<nv; i++)
    }
  */  
 
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
  }
 
+if(logs)
+ sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats (in log).\n\" tabel");
+else
 sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
@@ -4388,9 +4481,12 @@ delete[] list_times;
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 delete[] str;
 delete[] tag;
+delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
@@ -4456,7 +4552,7 @@ char *app;
 char **str, **tag;
 char str1[50], str2[100], str3[10], dirname[300];
 FILE *f, *f2;
-double **data;
+double **data,**logdata;
 
 int i, nv,nanv=0, j, k, *start, *end, done, box;
 int idseries, ndim, gridd;
@@ -4530,6 +4626,7 @@ else
  ndim=2; 
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
@@ -4552,6 +4649,21 @@ for(i=0; i<nv; i++)
    {
 
   data[i]=find_data(idseries); 
+
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
    }
   else
    nanv++; 
@@ -4882,11 +4994,14 @@ end:
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 
 delete[] str;
 delete[] tag;
 
+delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
@@ -4904,7 +5019,7 @@ char *app;
 char **str, **tag;
 char str1[500], str2[500], str3[10], dirname[300];
 FILE *f, *f2;
-double **data;
+double **data,**logdata;
 int i, nv, j, k, *start, *end, done, color;
 int time_sel, block_length, ndim;
 
@@ -4919,6 +5034,7 @@ if(nv==0)
  }
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 
@@ -4942,6 +5058,21 @@ for(i=0; i<nv; i++)
   if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
    {
   data[i]=find_data(idseries); 
+   
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
    }
 
  }
@@ -5266,11 +5397,14 @@ end:
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 
 delete[] str;
 delete[] tag;
 
+delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
@@ -5289,7 +5423,7 @@ char *app;
 char **str, **tag;
 char str1[50], str2[100], str3[100], dirname[300];
 FILE *f, *f2;
-double **data;
+double **data,**logdata;
 
 int i, nv, j, k, *start, *end, done, nlags;
 
@@ -5304,6 +5438,7 @@ if(*choice!=1)
 nv=1; //ridiculous, but I am recycling the code
 
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
@@ -5325,6 +5460,21 @@ for(i=0; i<nv; i++)
   if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries);
+   
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
    }
 
  }
@@ -5500,11 +5650,14 @@ end:
 for(i=0; i<nv; i++)
  {delete[] str[i];
   delete[] tag[i];
+  if(logs)
+    delete[] logdata[i];
  }
 
 delete[] str;
 delete[] tag;
 
+delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
@@ -6319,7 +6472,7 @@ int idseries;
 char *app;
 char **str;
 char **tag;
-double **data;
+double **data,**logdata;
 int *start, *end;
 int i, num_bin, j, first, last, stat, nv, time, active_v;
 int x1, x2, y1,y2;
@@ -6336,6 +6489,7 @@ if(nv<2)
   cmd(inter, msg);
 }
 data=new double *[nv];
+logdata=new double *[nv];
 start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
@@ -6364,6 +6518,20 @@ for(i=0; i<nv; i++)
    }
   *********************/
 
+   if(logs)			// apply log to the values to show "log scale" in the y-axis
+   {
+	 logdata[i]=new double[end[i]+1];	// create space for the logged values
+     for(j=start[i];j<=end[i];j++)		// log everything possible
+	   if(data[i][j]>0.0)
+		 logdata[i][j]=log(data[i][j]);
+	   else
+	   {
+		 logdata[i][j]=0.0;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	   }
+	 data[i]=logdata[i];				// replace the data series
+   }
  }
 
 
@@ -6430,7 +6598,10 @@ if(*choice==2)
   delete[] str[i];
   delete[] tag[i];
   
+  if(logs)
+    delete[] logdata[i]; 
   }
+ delete[] logdata;
  delete[] str;
  delete[] tag; 
  cur_plot--;
@@ -6849,7 +7020,10 @@ for(i=0; i<nv; i++)
  {
  delete[] str[i];
  delete[] tag[i];
+ if(logs)
+   delete[] logdata[i];
  }
+delete[] logdata;
 delete[] str;
 delete[] tag; 
 
@@ -6874,6 +7048,9 @@ double **data;
 
 if(nv==0)
  return;
+
+if(logs)
+  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
@@ -7197,6 +7374,8 @@ double **data;
 if(nv==0)
  return;
 
+if(logs)
+  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Mov.Av. Range\"");
@@ -7349,6 +7528,9 @@ Tcl_UnlinkVar(inter, "nv");
 
 if(nv==0)
  return;
+
+if(logs)
+  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
@@ -7776,7 +7958,8 @@ double **data;
 if(nv==0)
  return;
 
-
+if(logs)
+  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
