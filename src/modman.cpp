@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.3 - May 2014
+LSD 6.4 - January 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -241,7 +241,7 @@ return;
 
 code=Tcl_Eval(inter, cm);
 
-if(code!=TCL_OK)
+if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilation errors
  {
   ferr=fopen("tk_err.err","a");
   sprintf(msg, "\nCommand:%s\nProduced message:\n%s\n-----\n",cm, inter->result);
@@ -321,7 +321,7 @@ cmd(inter, "lappend ml $RootLsd");
 cmd(inter, "array set env $ml");
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
-cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set DefaultWish wish; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
+cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
 
 cmd(inter, "set Terminal $DefaultTerminal");
@@ -480,7 +480,7 @@ cmd(inter, "$w add command -label \"Replace\" -command {set choice 21} -underlin
 cmd(inter, "$w add separator");
 
 cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -underline 0 -accelerator Control+m");
-cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -underline 0 -accelerator Control+p");
+cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -underline 0 -accelerator Control+u");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Control+\\\(");
 cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Control+\\)");
@@ -543,7 +543,7 @@ cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Tutorial 3 - Writing Lsd Models\" -underline 6 -command {LsdHelp ModelWriting.html}");
 cmd(inter, "$w add command -label \"Lsd documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
-cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; label .about.l -text \"Version 6.3 \n\nMay 2014\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
+cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; label .about.l -text \"Version 6.4 \n\nJanuary 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
 
 
 cmd(inter, "frame .f");
@@ -641,7 +641,7 @@ cmd(inter, "bind .f.t.t <Control-r> {set choice 2}");
 cmd(inter, "bind .f.t.t <Control-e> {set choice 8}");
 cmd(inter, "bind .f.t.t <Control-KeyRelease-o> {if {$tk_strictMotif == 0} {set a [.f.t.t index insert]; .f.t.t delete \"$a lineend\"} {}; set choice 15; break}");
 cmd(inter, "bind .f.t.t <Control-q> {set choice 1}");
-cmd(inter, "bind .f.t.t <Control-p> {set choice 32}");
+//cmd(inter, "bind .f.t.t <Control-p> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-u> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-m> {set choice 17}");
 
@@ -1062,7 +1062,7 @@ if(s==NULL || !strcmp(s, ""))
 
    }
   cmd(inter, "destroy .t");
-  cmd(inter, "wm deiconify .");
+//  cmd(inter, "wm deiconify .");  // only reopen if error
   cmd(inter, "update");
   
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}");
@@ -1082,6 +1082,7 @@ if(s==NULL || !strcmp(s, ""))
 
   if(choice==1)
    { //problem
+   cmd(inter, "wm deiconify .");  // only reopen if error
    create_compresult_window();
 /* 
 Old message, offering to run an existing executable. Never used in 10 years, better to scrap it
@@ -1683,7 +1684,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"New model or group?\"");
-cmd(inter, "label .a.tit -text \"Currrent group:\\n$modelgroup\"");
+cmd(inter, "label .a.tit -text \"Current group:\\n$modelgroup\"");
 cmd(inter, "frame .a.f -relief groove");
 
 cmd(inter, "set temp 1");
@@ -5877,21 +5878,23 @@ cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill b
 
 cmd(inter, "frame .mm.b -relief groove -bd 2");
 
-cmd(inter, "button .mm.b.ferr -text \" Next error \" -command {set errtemp [.mm.t search -- error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp +1ch\";  .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel $errtemp \"$errtemp + 5ch\";  .mm.t see $cerr} }");
+cmd(inter, "set error \"error\"");				// error string to be searched
+cmd(inter, "button .mm.b.ferr -text \" Next error \" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }");
 
-cmd(inter, "button .mm.b.perr -text \" Previous error \" -command {set errtemp [ .mm.t search -backward -- error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp -1ch\";  .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel $errtemp \"$errtemp + 5ch\"; .mm.t see $cerr} }");
+cmd(inter, "button .mm.b.perr -text \" Previous error \" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }");
 
-cmd(inter, "pack .mm.b.ferr .mm.b.perr -expand yes -fill x -side left");
+cmd(inter, "pack .mm.b.perr .mm.b.ferr -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
 cmd(inter, "button .mm.close -text \" Close \" -command {destroy .mm}");
 cmd(inter, "pack .mm.close -side bottom");
 
 cmd(inter, "bind .mm <Escape> {destroy .mm}");
-cmd(inter, "focus -force .mm");
+cmd(inter, "focus -force .mm.t");
 cmd(inter, "set file [open $modeldir/makemessage.txt]");
 cmd(inter, ".mm.t insert end [read $file]");
 cmd(inter, "close $file");
-cmd(inter, ".mm.t mark set insert 1.0");
+cmd(inter, ".mm.t mark set insert \"1.0\";");
+cmd(inter, "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;}");
 }
 
 
