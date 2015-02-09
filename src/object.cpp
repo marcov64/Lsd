@@ -2643,7 +2643,8 @@ Generate the data structure required to use the turbo-search.
 - num is the total number of objects.
 */
 bridge *cb;
-double lev,stats[10];
+object *cur;
+double lev;
 
 for(cb=b; cb!=NULL; cb=cb->next)
  if(!strcmp(cb->blabel, label))
@@ -2665,10 +2666,8 @@ if(cb==NULL)
   } 
 
 if(tot<=0)					// if size not informed
-{
-	this->stat(label,stats);	// compute it
-	tot=stats[0];
-}
+	for(tot=0,cur=this->search(label); cur!=NULL; tot++,cur=go_brother(cur));
+							// compute it
 globalcur=cb->head;
 cb->mn= new mnode;
 lev=floor(log10(tot-1))+1;
