@@ -2725,6 +2725,8 @@ case 24:
 			cmd(inter, "destroy .l .m");
 		  *choice=0;
 
+		    if(res_g==NULL)
+			  return r;
 			for(n=r; n->up!=NULL; n=n->up);
 			n=n->search(res_g);
 			strcpy(lastObj,res_g);	// save last object for quick reload
