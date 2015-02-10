@@ -213,6 +213,7 @@ extern int lattice_type;
 extern int no_res;
 extern object *blueprint;
 extern sense *rsense;
+char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 
 #ifdef DUAL_MONITOR
 // Main window constraints
@@ -253,6 +254,15 @@ cmd(inter, msg);
 
 sprintf(msg, "set lattype %d", lattice_type);
 cmd(inter, msg);
+
+if(strlen(lastObj)>0)		// restore previous object in browser, if any
+{
+	for(cur=cr; cur->up!=NULL; cur=cur->up);
+	cur=cur->search(lastObj);
+	if(cur!=NULL)
+		cr=cur;
+}
+
 while(choice!=1) //Main Cycle ********************************
 {
 if(choice==-1)
@@ -1142,8 +1152,9 @@ if(n==NULL)
   plog(ch);
   return r;
  }
-else
- return (n);
+//else
+strcpy(lastObj,lab1);		// save last shown object for quick reload (choice=38)
+return (n);
 
 
 
@@ -1154,7 +1165,8 @@ if(r->up==NULL)
  return r;
 for(i=0, cb=r->up->b; cb->head!=r; cb=cb->next, i++);
 sprintf(msg, "set listfocus 2; set itemfocus %d", i);
-cmd(inter, msg);   
+cmd(inter, msg); 
+strcpy(lastObj,r->up->label);		// save last shown object for quick reload (choice=38)
 return r->up;
 
 
@@ -2171,6 +2183,7 @@ case 38: //quick reload
 if(*choice==17)
 {
   *choice=0;
+  strcpy(lastObj,"");	// disable last object for quick reload
   sprintf(lab, "set res %s", simul_name);
   cmd(inter, lab);
   if(strlen(path)>0)
@@ -2290,7 +2303,7 @@ if(*choice==17)
     autofill_descr(r);
     *choice=0;
     t=0;
-    break;
+    goto end1738;
     }  
    fscanf(f, "%s", name_rep);
    if(fscanf(f, "%s", msg)!=1) //should be DESCRIPTION
@@ -2299,7 +2312,7 @@ if(*choice==17)
     autofill_descr(r);
     *choice=0;
     t=0;
-    break;
+    goto end1738;
     }  
    
    fscanf(f, "%s", msg); //should be the first description   
@@ -2315,7 +2328,7 @@ if(*choice==17)
     fclose(f);
     *choice=0;
     t=0;
-    break;
+    goto end1738;
     } 
    fscanf(f, "%s", msg);  
    while(strcmp(msg, "END_DOCUOBSERVE")!=0)
@@ -2369,6 +2382,13 @@ if(*choice==17)
    
    *choice=0;
    t=0;
+end1738:
+	if(strlen(lastObj)>0)
+	{
+		for(n=r; n->up!=NULL; n=n->up);
+		n=n->search(lastObj);
+		return n;
+	}
 	break;
 
 //Save a model
@@ -2625,6 +2645,7 @@ case 20:
 		  r=n;
 		  cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
 		  *choice=0;
+	  strcpy(lastObj,"");	// disable last object for quick reload
       actual_steps=0;
       empty_descr();
       add_description("Root", "Object", "(no description available)");      
@@ -2704,6 +2725,7 @@ case 24:
 
 			for(n=r; n->up!=NULL; n=n->up);
 			n=n->search(res_g);
+			strcpy(lastObj,res_g);	// save last object for quick reload
 			return n;
 
 //Edit initial values of Objects pointed on the graphical map
@@ -3132,7 +3154,7 @@ cmd(inter, "wm deiconify .");
 //cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 return r;
 break;
-
+/*
 //Re-load last model
 case 380:
         *choice=0;
@@ -3172,7 +3194,7 @@ case 380:
 	  fscanf(f, "%d", &max_step);
 	 fclose(f);
 	 break;
-
+*/
 case 41:
 //help on lsd
 cmd(inter, "destroy .l .m");
