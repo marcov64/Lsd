@@ -214,6 +214,14 @@ extern int no_res;
 extern object *blueprint;
 extern sense *rsense;
 
+#ifdef DUAL_MONITOR
+// Main window constraints
+char hsize[]="400";			// horizontal size in pixels
+char vsize[]="500";			// vertical minimum size in pixels
+char hmargin[]="20";		// horizontal right margin from the screen borders
+char vmargin[]="20";		// vertical margins from the screen borders
+#endif
+
 /****************************************************
 CREATE
 ****************************************************/
@@ -595,6 +603,12 @@ cmd(inter, "pack .l -fill both -expand yes");
 
 *choice=0;
 
+#ifdef DUAL_MONITOR
+Tcl_SetVar(inter, "widthB", hsize, 0);		// horizontal size in pixels
+Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
+Tcl_SetVar(inter, "posX", hmargin, 0);	// horizontal right margin from the screen borders
+Tcl_SetVar(inter, "posY", vmargin, 0);	// vertical margins from the screen borders
+#endif
 
 
 cmd(inter, "set choice [info exist widthB]");
@@ -628,8 +642,13 @@ else
 //   plog("\n1b: [wm geometry .]"); 
   } 
 
+#ifdef DUAL_MONITOR
+cmd(inter, "set posXLog [expr $posX + $widthB + $posX]");
+cmd(inter, "wm geometry .log -$posX+$posY");	
+#else
 cmd(inter, "set posXLog [expr $posX + $widthB +40]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");	
+#endif
 
 //cmd(inter, ".l.v.c.var_name selection set $cur");
 //cmd(inter, ".l.v.c.var_name activate $cur");

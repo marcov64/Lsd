@@ -110,9 +110,6 @@ char bordsize[]="4";		// width of windows borders
 char tbarsize[]="80";		// size in pixels of bottom taskbar (exclusion area)
 							// Windows 7+ = 82
 #endif
-#ifndef DUAL_MONITOR
-#else
-#endif
 								
 int main(int argn, char **argv)
 {
