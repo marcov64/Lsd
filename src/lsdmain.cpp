@@ -186,6 +186,7 @@ int no_more_memory=0;
 int series_saved;
 int findex;
 int batch_sequential=0;
+int fast=0;		// make fast persistent across runs
 
 /*********************************
 LSD MAIN
@@ -491,7 +492,7 @@ RUN
 *********************************/
 void run(object *root)
 {
-int i, j, done=0, fast=0;
+int i, j, done=0;
 bool batch_sequential_loop=false; // indicates second or higher iteration of a batch
 char ch[120], nf[300];
 FILE *f;
@@ -656,8 +657,10 @@ break;
 case 2:
  fast=1;
  debug_flag=0;
- sprintf(msg, "if { [winfo exist .plt%d]} {wm iconify .plt%d} {}", i, i);
- cmd(inter, msg);
+ cmd(inter, "set a [split [winfo children .] ]");
+ cmd(inter, " foreach i $a {if [string match .plt* $i] {wm iconify $i}}");
+// sprintf(msg, "if { [winfo exist .plt%d]} {wm iconify .plt%d} {}", i, i);
+// cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}",i, i);
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
@@ -668,8 +671,10 @@ case 2:
 
 case 4:
  fast=0;
-sprintf(msg, "if { [winfo exist .plt%d]} {wm deiconify .plt%d} {}", i, i);
- cmd(inter, msg);
+ cmd(inter, "set a [split [winfo children .] ]");
+ cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i}}");
+// sprintf(msg, "if { [winfo exist .plt%d]} {wm deiconify .plt%d} {}", i, i);
+// cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}",i, i);
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}",i, i);

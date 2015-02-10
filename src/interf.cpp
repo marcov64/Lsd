@@ -218,7 +218,7 @@ char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 #ifdef DUAL_MONITOR
 // Main window constraints
 char hsize[]="400";			// horizontal size in pixels
-char vsize[]="500";			// vertical minimum size in pixels
+char vsize[]="600";			// vertical minimum size in pixels
 char hmargin[]="20";		// horizontal right margin from the screen borders
 char vmargin[]="20";		// vertical margins from the screen borders
 #endif
@@ -2167,6 +2167,8 @@ case 38: //quick reload
        } 
        actual_steps=0; //Flag that no simulation has been run
 
+       cmd(inter, "set a [split [winfo children .] ]");  // remove old runtime plots
+       cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
        for(n=r; n->up!=NULL; n=n->up);
 //		  cmd(inter, "destroy .l .b");
 		  n->empty();

@@ -75,6 +75,13 @@ void init_plot(int i, int id_sim);
 void cmd(Tcl_Interp *inter, char const *cc);
 
 
+#ifdef DUAL_MONITOR
+// Main window constraints
+int sidemarg=440;	// horizontal right margin from the screen borders
+int topmarg=450;	// vertical margins from the screen borders
+int shift=20;		// new window shift
+char intval[16];	// string buffer
+#endif
 
 
 extern char msg[];
@@ -195,7 +202,17 @@ cmd(inter, "if {[winfo exists $activeplot]==1} {destroy $activeplot} {}");
 cmd(inter, "toplevel $activeplot");
 cmd(inter, "wm resizable $activeplot 1 0");
 cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW { }");
+#ifdef DUAL_MONITOR
+i=sidemarg+(id_sim-1)*shift;				// calculate window position
+j=topmarg+(id_sim-1)*shift;
+sprintf(intval,"%i",i);
+Tcl_SetVar(inter, "posXrt", intval, 0);	// horizontal right margin from the screen borders
+sprintf(intval,"%i",j);
+Tcl_SetVar(inter, "posYrt", intval, 0);	// vertical margins from the screen borders
+cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
+#else
 cmd(inter, "wm geometry $activeplot +0+340");
+#endif
 sprintf(msg,"wm title $activeplot \"%d Run Time Plot\"", id_sim);
 cmd(inter,msg);
 cmd(inter, "frame $activeplot.c");
