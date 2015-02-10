@@ -140,6 +140,7 @@ int deb(object *r, object *c, char const *lab, double *res);
 void wipe_out(object *d);
 int check_label(char *l, object *r);
 int cd(char *path);
+void set_blueprint(object *container, object *r);
 
 void myexit(int i);
 void scan_used_lab(char *lab, int *choice);
@@ -1919,10 +1920,13 @@ add_to_tot=*choice;
 *choice=1;
 for(n=r; n->up!=NULL; n=n->up);
 
+blueprint->empty();			    // update blueprint to consider last changes
+set_blueprint(blueprint, n);
+
 if(strlen(path)>0)
-  sprintf(msg, "%s/%s.lsd", path, simul_name);
+  sprintf(struct_file, "%s/%s.lsd", path, simul_name);
 else
-  sprintf(msg, "%s.lsd", simul_name);
+  sprintf(struct_file, "%s.lsd", simul_name);
 f=fopen(struct_file, "w");
 if(f==NULL)
  {*choice=0;
