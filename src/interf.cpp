@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 63
+USED CASE 67
 */
 
 /****************************************************
@@ -177,6 +177,7 @@ void shift_var(int direction, char *vlab, object *r);
 void shift_desc(int direction, char *dlab, object *r);
 object *sensitivity_parallel(object *o, sense *s );
 void sensitivity_sequential(int *findex, sense *s );
+void empty_sensitivity(sense *cs);
 
 extern object *root;
 extern char *simul_name;
@@ -214,6 +215,7 @@ extern int no_res;
 extern object *blueprint;
 extern sense *rsense;
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
+char *sens_file=NULL;		// current sensitivity analysis file
 
 #ifdef DUAL_MONITOR
 // Main window constraints
@@ -446,9 +448,12 @@ cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
 cmd(inter, "$w add command -label Load -command {set choice 17} -underline 0 -accelerator Control+L");
-cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -accelerator Control+W");
+cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -underline 0 -accelerator Control+W");
 cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Control+S");
 cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Control+E");
+cmd(inter, "$w add separator");
+cmd(inter, "$w add command -label \"Load Sensitivity Data\" -command {set choice 64} -underline 17");
+cmd(inter, "$w add command -label \"Save Sensitivity Data\" -command {set choice 65} -underline 1");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Control+Q");
 
@@ -482,13 +487,15 @@ cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
 cmd(inter, "$w add cascade -label \"Set number of Objects\" -underline 0 -menu $w.setobj");
 cmd(inter, "$w add command -label \"Init. Values\" -command {set choice 21} -underline 0 -accelerator Control+I");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Sensitivity (parallel)\" -command {set choice 62}");
-cmd(inter, "$w add command -label \"Sensitivity (sequential)\" -command {set choice 63}");
+cmd(inter, "$w add command -label \"Sensitivity (parallel)\" -command {set choice 62} -underline 13");
+cmd(inter, "$w add command -label \"Sensitivity (sequential)\" -command {set choice 63} -underline 15");
+cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
+cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
 
 cmd(inter, "$w add separator");
 
 cmd(inter, "$w add command -label \"Analysis of Results\" -command {set choice 26} -underline 0 -accelerator Control+A");
-cmd(inter, "$w add command -label \"Save Results\" -command {set choice 37} -accelerator Control+Z");
+cmd(inter, "$w add command -label \"Save Results\" -command {set choice 37}  -underline 5 -accelerator Control+Z");
 cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -underline 5 -accelerator Control+B");
 
 cmd(inter, "set w .m.data.setobj");
@@ -692,7 +699,7 @@ if(choice_g!=0)
 
 if(actual_steps>0)
  {
-  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 )
+  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 )
    {
      cmd(inter, "toplevel .warn");
      cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently loaded is the last step of the previous run.\nThe requested operation makes no sense on the final data of a simulation.\nChoose one of the followig options.\"");
@@ -749,9 +756,9 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r)
 {
-char *lab1,lab[90],lab_old[50], ch[150];
+char *lab1,*lab2,lab[90],lab_old[50], ch[150];
 int sl, done=0, num, i, param, save, plot, nature, numlag, k, findex;
-char observe, initial;
+char observe, initial, cc;
 bridge *cb;
 
 object *n, *cur, *cur1;
@@ -2180,6 +2187,8 @@ case 38: //quick reload
 		  cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
       empty_descr();
       add_description("Root", "Object", "(no description available)");
+	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
+	  rsense=NULL;
      }
 
 if(*choice==17)
@@ -3624,8 +3633,9 @@ if (rsense!=NULL)
     cur=root->b->head;
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
-    rsense=NULL; //ok, ok, I will collect my garbage later on...
- 	cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
+    empty_sensitivity(rsense);
+	rsense=NULL;
+ 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -3638,24 +3648,10 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
-    char* sens_name=new char[strlen(simul_name)+10];
-	if(strlen(path)>0)
-		sprintf(sens_name,"%s/%s_sens.txt",path,simul_name);
-	else
-		sprintf(sens_name,"%s_sens.txt",simul_name); // personalize name to prevent overwrite
     findex=1;
-      f=fopen(sens_name, "wt");  // use text mode for Windows better compatibility
-      for(cs=rsense; cs!=NULL; cs=cs->next)
-      {
-          fprintf(f, "%s %d:", cs->label, cs->nvalues);
-          for(i=0; i<cs->nvalues; i++)
-              fprintf(f,"\t%g", cs->v[i]);
-          fprintf(f,"\n");
-      }
-      fclose(f);
     sensitivity_sequential(&findex,rsense);
-	delete sens_name;
-    rsense=NULL; //ok, ok, I will collect my garbage later on...
+    empty_sensitivity(rsense);
+	rsense=NULL;
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
  }
 else
@@ -3663,6 +3659,230 @@ else
 
 *choice=0;
 return r;
+
+//Load a sensitivity analysis configuration
+case 64:
+	cmd(inter, "destroy .l .m");
+	*choice=0;
+
+	// check for existing sensitivity data loaded
+	if (rsense!=NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is sensitivity data already loaded.\\n\\nPlease perform a sensitivity analysis command before loading new sensitivity data, remove the sensitivity data or reload your model.\"");
+		break;
+	}
+	// check a model is already loaded
+	if(struct_loaded==0)
+	{ 
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease load one before trying to load a sensitivity analysis configuration.\"");
+		break;
+    } 
+	// set default name and path to conf. file folder
+	sprintf(lab, "set res %s_sens", simul_name);
+	cmd(inter, lab);
+	if(strlen(path)>0)
+		sprintf(msg, "set path \"%s\"", path);
+	else
+		sprintf(msg, "set path [pwd]");
+	cmd(inter, msg);
+	cmd(inter, "cd $path");
+	// open dialog box to get file name & folder
+	sprintf(msg, " set bah [tk_getOpenFile -title \"Load Sensitivity Analysis Data\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
+	cmd(inter, msg);
+	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
+	if(*choice==2)
+		break;
+	lab1=(char *)Tcl_GetVar(inter, "res",0);
+	lab2=(char *)Tcl_GetVar(inter, "path",0);
+	// form full name
+	if(sens_file!=NULL)
+		delete sens_file;
+	sens_file=new char[strlen(lab1)+strlen(lab2)+7];
+	if(strlen(lab1)>0)
+	{
+		cmd(inter, "cd $path");
+		sprintf(sens_file,"%s/%s.txt",lab2,lab1);
+	}
+	else
+		sprintf(sens_file,"%s.txt",lab1);
+	// read sensitivity file (text mode)
+	f=fopen(sens_file, "rt");
+	if(f==NULL)
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Sensitivity analysis file not found.\"");
+		break;
+	}
+
+	// read data from file (1 line per element, '#' indicate comment)
+	while(!feof(f))
+	{	// read element by element, skipping comments
+		fscanf(f, "%s", lab);				// read string
+		while(lab[0]=='#')					// start of a comment
+		{
+			do								// jump to next line
+				cc=fgetc(f);
+			while(!feof(f) && cc!='\n');
+			fscanf(f, "%s", lab);			// try again
+		}
+
+		if(feof(f))							// ended too early?
+			break;
+
+		for(n=r; n->up!=NULL; n=n->up);		// check if element exists
+		cv=n->search_var(n,lab);
+		if(cv==NULL || (cv->param!=1 && cv->num_lag==0))
+			goto error64;					// and not parameter or lagged variable
+		// create memory allocation for new variable		
+		if (rsense==NULL)					// allocate first element
+			rsense=cs=new sense;
+		else								// allocate next ones
+		{
+			cs->next=new sense;
+			cs=cs->next;
+		}
+		cs->v=NULL;							// initialize struct pointers
+		cs->next=NULL;
+
+		cs->label=new char[strlen(lab+1)];  // save element name
+		strcpy(cs->label,lab);
+		// get lags and # of values to test
+		if(!fscanf(f, "%d %d:", &cs->lag, &cs->nvalues))
+			goto error64;
+		
+		if(cs->lag==0)						// adjust type and lag #
+			cs->param=1;
+		else
+		{
+			cs->param=0;
+			cs->lag=abs(cs->lag)-1;
+		}
+
+		cs->v=new double[cs->nvalues];		// get values
+		for (i=0; i < cs->nvalues; i++)
+			if(!fscanf(f, "%lf", &cs->v[i]))
+				goto error64;
+	}	
+	fclose(f);
+	break;
+	
+	// error handling
+	error64:
+		empty_sensitivity(rsense); 			// discard read data
+		rsense=NULL;
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid sensitivity analysis file.\"");
+		fclose(f);
+		break;
+
+//Save a sensitivity analysis configuration
+case 65:
+	cmd(inter, "destroy .l .m");
+	*choice=0;
+
+	// check for existing sensitivity data loaded
+	if (rsense==NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to save.\\n\\nBefore using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+		break;
+	}
+	// default file name and path
+	sprintf(lab, "set res %s_sens", simul_name);
+	cmd(inter, lab);
+	if(strlen(path)>0)
+		sprintf(msg, "set path \"%s\"", path);
+	else
+		sprintf(msg, "set path [pwd]");
+	cmd(inter, msg);
+	cmd(inter, "cd $path");
+	// open dialog box to get file name & folder
+	sprintf(msg, " set bah [tk_getSaveFile -title \"Save Sensitivity Analysis Data\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
+	cmd(inter, msg);
+	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
+	if(*choice==2)
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid sensitivity analysis file name or path.\"");
+		break;
+	}
+	lab1=(char *)Tcl_GetVar(inter, "res",0);
+	lab2=(char *)Tcl_GetVar(inter, "path",0);
+	// form full name
+	if(sens_file!=NULL)
+		delete sens_file;
+	sens_file=new char[strlen(lab2)+strlen(lab1)+7];
+	if(strlen(lab2)>0)
+	{
+		cmd(inter, "cd $path");
+		sprintf(sens_file,"%s/%s.txt",lab2,lab1);
+	}
+	else
+		sprintf(sens_file,"%s.txt",lab1);
+	// write sensitivity file (text mode)
+	f=fopen(sens_file, "wt");  // use text mode for Windows better compatibility
+	if(f==NULL)
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Sensitivity analysis file not saved.\\n\\nPlease check the file name and path are valid.\"");
+		break;
+	}
+	for(cs=rsense; cs!=NULL; cs=cs->next)
+	{
+		if(cs->param==1)
+			fprintf(f, "%s 0 %d:", cs->label, cs->nvalues);	
+		else
+			fprintf(f, "%s -%d %d:", cs->label, cs->lag+1, cs->nvalues);
+		for(i=0; i<cs->nvalues; i++)
+			fprintf(f," %g", cs->v[i]);
+		fprintf(f,"\n");
+	}
+	fclose(f);
+	break;
+
+//Show sensitivity analysis configuration
+case 66:
+	cmd(inter, "destroy .l .m");
+	*choice=50;
+
+	// check for existing sensitivity data loaded
+	if (rsense==NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to show.\"");
+		break;
+	}
+	// print data to log window
+	plog("\n\nVariables and parameters set for sensitivity analysis :\n");
+	for(cs=rsense; cs!=NULL; cs=cs->next)
+	{
+		if(cs->param==1)
+			sprintf(msg, "Param: %s\t#%d:\t", cs->label, cs->nvalues);
+		else
+			sprintf(msg, "Var: %s(-%d)\t#%d:\t", cs->label, cs->lag+1, cs->nvalues);
+		plog(msg);
+		cmd(inter, "");
+
+		for(i=0; i<cs->nvalues; i++)
+		{
+			sprintf(msg, ".log.text.text insert end \"%g\\t\" highlight", cs->v[i]);
+			cmd(inter, msg);
+		}
+		plog("\n");
+	}
+    cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
+	break;
+
+//Remove sensitivity analysis configuration
+case 67:
+	cmd(inter, "destroy .l .m");
+	*choice=0;
+
+	// check for existing sensitivity data loaded
+	if (rsense==NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to remove.\"");
+		break;
+	}
+	// empty sensitivity data
+	empty_sensitivity(rsense); 			// discard read data
+	rsense=NULL;
+	break;
+	
 default:
 sprintf(ch,"\nChoice %d not recognized\n",*choice);
 plog(ch);

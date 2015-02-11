@@ -172,6 +172,8 @@ description *next;
 struct sense
 {
  char *label;
+ int param;			// save element type/lag to allow
+ int lag;			// handling lags > 1
  int nvalues;
  int i;
  double *v;

@@ -364,6 +364,10 @@ case 10:
     for (i=1; i<=value1; i++) {
         cs->v[i-1]=0;
     }
+	// save type and lags
+    cv=r->search_var(NULL, lab);
+	cs->param=cv->param;
+	cs->lag=lag;
     dataentry_sensitivity(choice, cs);
     break;
 //Equal 
@@ -936,7 +940,10 @@ for(i=0; i<s->nvalues; i++)
    for (cs=rsense; cs!=NULL; cs=cs->next) 
    {
     cvar=cur->search_var(cur, cs->label);
-    cvar->val[0]=cs->v[cs->i];
+	if(cs->param==1)				// handle lags > 0
+	  cvar->val[0]=cs->v[cs->i];
+	else
+      cvar->val[cs->lag]=cs->v[cs->i];
    }
    cur=cur->hyper_next(cur->label);
   }
@@ -1001,9 +1008,11 @@ for(i=0; i<s->nvalues; i++)
     cvar=root->search_var(root, cs->label);
     for(cur=cvar->up; cur!=NULL; cur=cur->hyper_next(cur->label) )
     {
-      cvar=cur->search_var(cur, cs->label);  
-      cvar->val[0]=cs->v[cs->i];
-      
+      cvar=cur->search_var(cur, cs->label); 
+	  if(cs->param==1)				// handle lags > 0
+		cvar->val[0]=cs->v[cs->i];
+	  else
+        cvar->val[cs->lag]=cs->v[cs->i];
     }
 
    }
@@ -1092,3 +1101,21 @@ cmd(inter, "destroy $a");
 
 }
 
+/*
+Deallocate sensitivity analysis memory
+*/
+void empty_sensitivity(sense *cs)
+{
+	if(cs==NULL)			// prevent invalid calls
+		return;
+	
+	if(cs->next!=NULL)		// recursively start from the end of the list
+		empty_sensitivity(cs->next);
+	
+	if(cs->v!=NULL)			// deallocate requested memory, if applicable
+		delete cs->v;
+	if(cs->label!=NULL)
+		delete cs->label;
+
+	delete cs;				// suicide
+}
