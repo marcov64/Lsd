@@ -760,6 +760,8 @@ cmd(inter, "set before [.f.t.t get 1.0 end]");
 cmd(inter, "set a [wm maxsize .]");
 cmd(inter, "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"");
 cmd(inter, "wm geometry . $c");
+// change window icon
+cmd(inter, "wm iconbitmap . -default $RootLsd/$LsdSrc/lmm.ico");
 
 if(argn>1)
  {sprintf(msg, "if {[file exists \"$filetoload\"] == 1} {set choice 0} {set choice -2}");

@@ -659,6 +659,10 @@ else
 //   plog("\n1b: [wm geometry .]"); 
   } 
 
+// change window icon
+sprintf(msg, "wm iconbitmap . -default $RootLsd/$LsdSrc/lsd.ico; update");
+cmd(inter, msg);
+
 #ifdef DUAL_MONITOR
 cmd(inter, "set posXLog [expr $posX + $widthB + $posX]");
 cmd(inter, "wm geometry .log -$posX+$posY");	
