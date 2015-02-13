@@ -1298,6 +1298,7 @@ if(i==1)
  
  cmd(inter, "set w .desc_$vname");
  cmd(inter, "toplevel $w");
+ cmd(inter, "wm transient $w .");
  cur=search_description(lab);
  if(!strcmp(cur->type,"Parameter") )
    cmd(inter, "wm title $w \"Description: Parameter $vname\"");
@@ -1483,6 +1484,7 @@ dimW=pixW/ncol;
 cmd(inter, "if {[winfo exists .lat]==1} {destroy .lat} {}");
 //create the window with the lattice, roughly 600 pixels as maximum dimension
 cmd(inter, "toplevel .lat");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .lat @$RootLsd/$LsdSrc/lsd.xbm} {}");
 sprintf(msg, "wm title .lat \"Lsd lattice (%.0lf x %.0lf)\"",nrow, ncol);
 cmd(inter, msg);
 

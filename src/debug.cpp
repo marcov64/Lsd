@@ -750,7 +750,7 @@ cmd(inter, "set a [winfo exists .a]");
 cmd(inter, "if { $a==1} {destroy .a} {}");
 //cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm geom .a -0+0; wm title .a \"Equation Intermediate Values\"; raise .a");
 
-cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm title .a \"Equation Intermediate Values\"; raise .a");
+cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm title .a \"Equation Intermediate Values\"; wm transient .a .; raise .a");
 
 cmd(inter, ".a.t tag configure v -foreground red");
 //cmd(inter, "align .a .");

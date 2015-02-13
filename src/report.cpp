@@ -112,6 +112,7 @@ if(*choice == 1)
 
 cmd(inter, "toplevel .w");
 cmd(inter, "wm title .w \"Report Generation\"");
+cmd(inter, "wm transient .w .");
 cmd(inter, "label .w.l1 -text \"Report Generation\" -font {System 14 bold}");
 cmd(inter, "frame .w.f");
 cmd(inter, "label .w.f.l -text \"Model title: \"");
@@ -263,6 +264,7 @@ start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
  {*choice=0;
   cmd(inter, "toplevel .warn_eq");
+  cmd(inter, "wm transient .warn_eq .");
   cmd(inter, "label .warn_eq.lab1 -text \"Equation file\"");
   sprintf(msg, "label .warn_eq.lab2 -text \"%s\" -foreground red", equation_name);
   cmd(inter, msg);

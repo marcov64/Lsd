@@ -754,6 +754,7 @@ case 7:
 
 cmd(inter, "set oldpath [pwd]");
 cmd(inter, "toplevel .a");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l -text \"Insert file name\"");
 cmd(inter, "entry .a.e -width 50 -textvariable filename");
 *choice=0;
@@ -1060,6 +1061,7 @@ FILE *f;
 
 *choice=0;
 cmd(inter, "toplevel .des");
+cmd(inter, "wm transient .des .");
 cmd(inter, "set a .des");
 cmd(inter, "wm title .des \"Sensitivity Analysis\"");
 sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);

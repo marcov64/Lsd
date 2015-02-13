@@ -2206,6 +2206,7 @@ choice=0;
 cmd(inter, "toplevel .cazzo");
 
 
+cmd(inter, "wm transient .cazzo .");
 cmd(inter, "wm title .cazzo Error");
 //cmd(inter, "label .cazzo.err.l -text \"Fatal error: see message in Log\"");
 

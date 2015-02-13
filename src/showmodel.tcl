@@ -46,6 +46,7 @@ set choiceSM 0
 toplevel .l
 wm protocol .l WM_DELETE_WINDOW { }
 wm title .l "Lsd Models"
+wm transient .l .
 
 frame .l.l -relief groove -bd 2
 #if { [string compare "$modelgroup" "."] == 0 } {set modelgroup "(no group)"} {}
@@ -226,6 +227,7 @@ global lrn ldn lmn group lmd result
 destroy .l
 toplevel .l
 
+wm transient .l .
 wm title .l "Edit"
 if { [lindex $group $i] == 1} {set item group} {set item model}
 label .l.ln -text "Insert new label for the $item [lindex $lmn $i]" -anchor w
@@ -280,6 +282,7 @@ set pastedir [lindex $lrn $i]
 
 destroy .l
 toplevel .l
+wm transient .l .
 
 update
 wm title .l "Paste Model"

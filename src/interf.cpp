@@ -659,10 +659,6 @@ else
 //   plog("\n1b: [wm geometry .]"); 
   } 
 
-// change window icon
-sprintf(msg, "wm iconbitmap . -default $RootLsd/$LsdSrc/lsd.ico; update");
-cmd(inter, msg);
-
 #ifdef DUAL_MONITOR
 cmd(inter, "set posXLog [expr $posX + $widthB + $posX]");
 cmd(inter, "wm geometry .log -$posX+$posY");	
@@ -706,6 +702,7 @@ if(actual_steps>0)
   if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 )
    {
      cmd(inter, "toplevel .warn");
+	 cmd(inter, "wm transient .warn .");
      cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently loaded is the last step of the previous run.\nThe requested operation makes no sense on the final data of a simulation.\nChoose one of the followig options.\"");
      cmd(inter, "pack .warn.l");
      cmd(inter, "set temp 38");
@@ -1857,7 +1854,7 @@ cmd(inter, "destroy .m .l");
 if(actual_steps>0)
  {cmd(inter, "toplevel .warn");
   cmd(inter, "wm iconify .");
-//  cmd(inter, "wm transient .warn .");
+  cmd(inter, "wm transient .warn .");
   cmd(inter, "wm title .warn \"Warning\"");
   cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently available is the last step of the previous run.\nLoad a new configuration (or re-load the previous one) to run a simulation\"");
   cmd(inter, "frame .warn.f");
@@ -2049,6 +2046,7 @@ case 11:
 //   cmd(inter, "set answer [tk_messageBox -type yesno -icon question -title \"Quit?\" -message \"Do you really want to exit Lsd?\"]");
   // cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1 } {set choice 0}");
    cmd(inter, "toplevel .w");
+   cmd(inter, "wm transient .warn .");
    cmd(inter, "wm title .w \"Confirm\"");
    cmd(inter, "label .w.l -text \"Quit Lsd?\" -fg red");
    cmd(inter, "label .w.l1 -text \"You closing this Lsd model program.\\nAll data generated and not saved in files will be lost.\" -justify left");
@@ -3242,8 +3240,8 @@ if(*choice==1)
 cmd(inter, "wm iconify .");
 cmd(inter, "toplevel .warn");
 
-//cmd(inter, "wm transient .warn .");
-//cmd(inter, "wm title .warn \"Auto Documentation\"");
+cmd(inter, "wm transient .warn .");
+cmd(inter, "wm title .warn \"Auto Documentation\"");
 cmd(inter, "label .warn.l -text \"Choose which elements of the model must replace their documentation.\"");
 cmd(inter, "frame .warn.o");
 
@@ -3356,6 +3354,7 @@ case 48:
 //set the Html browser for Unix systems
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "set temp_var $HtmlBrowser");
 cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages.\"");
@@ -3401,6 +3400,7 @@ break;
 case 50: //find an element of the model
 cmd(inter, "destroy .l .m");
 cmd(inter, "toplevel .s");
+cmd(inter, "wm transient .s .");
 cmd(inter, "wm title .s \"Find element\"");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Type the initial letters of the variable or parameter. The system will propose a name.\nPress Enter when the desired label appears.\"");
@@ -3456,6 +3456,7 @@ Tcl_LinkVar(inter, "lattype", (char *) &done, TCL_LINK_INT);
 done=lattice_type;
 cmd(inter, "set a $lattype");
 cmd(inter, "toplevel .a");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "label .a.l -text \"Type of lattice updating\" -fg red");
 cmd(inter, "pack .a.l");
@@ -4188,6 +4189,7 @@ char *ol;
 Tcl_LinkVar(inter, "done1", (char *) &done1, TCL_LINK_INT);
 
 cmd(inter, "toplevel .a");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "label .a.l -text \"List of Objects\"");
 cmd(inter, "pack .a.l");

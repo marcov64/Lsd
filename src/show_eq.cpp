@@ -86,6 +86,7 @@ start:
 if( (f=fopen(equation_name,"r"))==NULL)
  {*choice=0;
   cmd(inter, "toplevel .warn_eq");
+  cmd(inter, "wm transient .warn_eq .");
   cmd(inter, "label .warn_eq.lab1 -text \"Equation file\"");
   sprintf(msg, "label .warn_eq.lab2 -text \"%s\" -foreground red", equation_name);
   cmd(inter, msg);
@@ -152,6 +153,8 @@ if(done==0)
 sprintf(msg, "toplevel .eq_%s", lab);
 cmd(inter, msg);
 
+sprintf(msg, "wm transient .eq_%s .", lab);
+cmd(inter, msg);
 sprintf(msg, "wm resizable .eq_%s 1 1", lab);
 cmd(inter, msg);
 
@@ -170,7 +173,7 @@ cmd(inter, "pack $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f -expand yes -fill both");
 sprintf(msg, "button $w.close -text Close -command {destroy .eq_%s}", lab);
 cmd(inter, msg);
-sprintf(msg, "button $w.search -text Search -command {set cur [.eq_%s.f.text index insert]; toplevel $w.s; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -text Search -command {set cur [.eq_%s.f.text search -count length $s $cur end]; if {[string length $cur] > 0} {.eq_%s.f.text tag add sel $cur \"$cur + $length char\"; .eq_%s.f.text mark set insert \"$cur + $length char\" ;update; destroy $w.s; .eq_%s.f.text see $cur} { destroy $w.s}}; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}}",lab, lab, lab, lab, lab);
+sprintf(msg, "button $w.search -text Search -command {set cur [.eq_%s.f.text index insert]; toplevel $w.s; wm transient $w.s .; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -text Search -command {set cur [.eq_%s.f.text search -count length $s $cur end]; if {[string length $cur] > 0} {.eq_%s.f.text tag add sel $cur \"$cur + $length char\"; .eq_%s.f.text mark set insert \"$cur + $length char\" ;update; destroy $w.s; .eq_%s.f.text see $cur} { destroy $w.s}}; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}}",lab, lab, lab, lab, lab);
 cmd(inter, msg);
 
 cmd(inter, "pack $w.search $w.close");
@@ -356,6 +359,7 @@ if(*choice==1)
  return;
 
 cmd(inter, "toplevel $list");
+cmd(inter, "wm transient $list .");
 sprintf(msg, "wm title $list \"%s Users\"", lab);
 cmd(inter, msg);
 cmd(inter, "listbox $list.l ");
@@ -424,6 +428,7 @@ if(*choice==1)
   return;
 
 cmd(inter, "toplevel $list");
+cmd(inter, "wm transient $list .");
 sprintf(msg, "wm title $list \"Used in %s\"", lab);
 cmd(inter, msg);
 cmd(inter, "listbox $list.l");

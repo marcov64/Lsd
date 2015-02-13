@@ -540,8 +540,8 @@ cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Tutorial 3 - Writing Lsd Models\" -underline 6 -command {LsdHelp ModelWriting.html}");
 cmd(inter, "$w add command -label \"Lsd documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
-cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; label .about.l -text \"Version 6.4 \n\nJanuary 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
 
+cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 6.4 \n\nJanuary 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
@@ -761,7 +761,7 @@ cmd(inter, "set a [wm maxsize .]");
 cmd(inter, "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"");
 cmd(inter, "wm geometry . $c");
 // change window icon
-cmd(inter, "wm iconbitmap . -default $RootLsd/$LsdSrc/lmm.ico");
+cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/lmm.xbm}");
 
 if(argn>1)
  {sprintf(msg, "if {[file exists \"$filetoload\"] == 1} {set choice 0} {set choice -2}");
@@ -1309,6 +1309,8 @@ if(choice==0)
  }
 
   cmd(inter, "toplevel .t");
+  // change window icon
+  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
   cmd(inter, "wm title .t \"Wait\"");
   cmd(inter, "label .t.l -text \"Making model.\nThe system is checking the files modified since the last compilation and recompiling as necessary.\nAt the end, the output of the process will appear in the text window and in the file makemessage.txt\"");
   cmd(inter, "pack .t.l");
@@ -1494,6 +1496,7 @@ cmd(inter, "set line \"\"");
 cmd(inter, "toplevel .search_line");
 cmd(inter, "wm protocol .search_line WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .search_line \"Goto Line\"");
+cmd(inter, "wm transient .search_line .");
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
 cmd(inter, "entry .search_line.e -width 30 -textvariable line");
 cmd(inter, "button .search_line.ok -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
@@ -1511,7 +1514,6 @@ cmd(inter, "set w .search_line; wm withdraw $w; update idletasks; set x [expr [w
   
 
 cmd(inter, "focus -force .search_line.e");
-cmd(inter, "wm transient .search_line .");
 choice=0;
 goto loop;
 }
@@ -1525,6 +1527,7 @@ if(choice==0)
 
 cmd(inter, "set curcounter $lfindcounter");
 cmd(inter, "toplevel .find");
+cmd(inter, "wm transient .find .");
 cmd(inter, "wm protocol .find WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .find \"Search Text\"");
 
@@ -1683,6 +1686,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"New model or group?\"");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Current group:\\n$modelgroup\"");
 cmd(inter, "frame .a.f -relief groove");
 
@@ -1724,6 +1728,7 @@ if(choice==2)
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"New group\"");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Create a new group in group:\\n $modelgroup\"");
 
 cmd(inter, "label .a.mname -text \"Insert new group name\"");
@@ -1806,6 +1811,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"New model\"");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Create a new model in group:\\n $modelgroup\"");
 
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
@@ -2181,6 +2187,7 @@ cmd(inter, "set cur \"\"");
 cmd(inter, "if { [winfo exists .l]==1} {.l.m.file invoke 1} { }");
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
+cmd(inter, "wm transient .l .");
 cmd(inter, "grab set .l");
 cmd(inter, "wm title .l \"Replace Text\"");
 //cmd(inter, "set textsearch \"\"");
@@ -2256,6 +2263,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert an equation\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
@@ -2336,6 +2344,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert an equation\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
@@ -2415,6 +2424,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'V(...)' command\"");
 
 
@@ -2499,6 +2509,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'cal'\"");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -2577,6 +2588,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'CYCLE' command\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
@@ -2681,6 +2693,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a cycle for\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
@@ -2753,6 +2766,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a Lsd script\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit1 -text \"Insert Lsd Script\" -foreground #ff0000");
 cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
@@ -2842,6 +2856,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a Lsd script\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit1 -text \"Insert Lsd Script\" -foreground #ff0000");
 cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
@@ -2932,6 +2947,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'INCR' command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
@@ -3011,6 +3027,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'increment'\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -3086,6 +3103,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'MULT' command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
@@ -3168,6 +3186,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'multiply'\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -3245,6 +3264,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'WRITE' command\"");
 
 cmd(inter, ".f.t.t conf -state disabled");
@@ -3325,6 +3345,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'write' command\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
 cmd(inter, "set v_num 0");
@@ -3396,6 +3417,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'search_var_cond' command\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
@@ -3470,6 +3492,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'SEARCH_CND' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
@@ -3551,6 +3574,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'SORT' command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
@@ -3639,6 +3663,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert a 'lsdqsort' command\"");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
@@ -3714,6 +3739,7 @@ Insert a math function
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a math operation\"");
 
 cmd(inter, "set value1 \"0\"; set value2 \"1\"; set res 1; set str \"UNIFORM($value1,$value2)\"");
@@ -3811,6 +3837,7 @@ here_addobj:
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'ADDOBJ' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
@@ -3924,6 +3951,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'add_an_object' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
@@ -3996,6 +4024,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'DELETE' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
@@ -4053,6 +4082,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'delete_obj' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
@@ -4110,6 +4140,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'RNDDRAW' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
@@ -4210,6 +4241,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'draw_rnd' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
@@ -4296,6 +4328,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'SEARCH' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
@@ -4361,6 +4394,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'search' command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
@@ -4427,6 +4461,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'SUM'\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -4508,6 +4543,7 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert a 'sum'\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -4904,6 +4940,7 @@ if(choice==0)
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
+cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Model Info\"");
 cmd(inter, "frame .a.c");
 
@@ -5123,6 +5160,7 @@ cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .l \"System Compilation's Options\"");
 
+cmd(inter, "wm transient .l .");
 cmd(inter, "frame .l.t");
 
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
@@ -5219,6 +5257,7 @@ cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .l \"Model Compilation's Options\"");
 
+cmd(inter, "wm transient .l .");
 
 cmd(inter, "frame .l.t");
 
@@ -5305,6 +5344,7 @@ if(choice==59)
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Enter the font name you wish to use\"");
 
 cmd(inter, "entry .a.v_num -width 30 -textvariable fonttype");
@@ -5362,6 +5402,7 @@ cmd(inter, "set temp_var5 $LsdSrc");
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"LMM Options\"");
+cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Terminal to use for the GDB debugger\"");
 cmd(inter, "entry .a.v_num -width 30 -textvariable temp_var1");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.v_num2; .a.v_num2 selection range 0 end}");
@@ -5530,8 +5571,10 @@ strcat(str,"NW");
 cmd(inter, msg);
 cmd(inter, "set init_time [clock seconds]"); 
 cmd(inter, "toplevel .t");
+// change window icon
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "wm title .t \"Wait\"");
-cmd(inter, "label .t.l -text \"Making non-graphical version of the model.\nThe system is generating the executable 'lsd_gnuNW' for this system.\"");
+cmd(inter, "label .t.l -text \"Making non-graphical version of the model.\nLsd is generating the executable 'lsd_gnuNW' for this system.\"");
 cmd(inter, "pack .t.l");
 cmd(inter, "focus -force .t.l");
 cmd(inter, "grab set .t.l");
@@ -5864,6 +5907,8 @@ cmd(inter, "if {$a==1} {destroy .mm} {}");
 
 cmd(inter, "set cerr 0.0");
 cmd(inter, "toplevel .mm");
+// change window icon
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "label .mm.lab1 -text \"Compilation errors\" -fg red");
 
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\"");

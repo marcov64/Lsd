@@ -238,6 +238,7 @@ FILE *f;
 if(actual_steps>0)
 {
 cmd(inter, "toplevel .ask");
+cmd(inter, "wm transient .ask .");
 sprintf(msg, "wm title .ask \"File or Simulation?\"");
 cmd(inter, msg);
 cmd(inter, "label .ask.l -text \"Use data from a previously saved file or from last simulation?\"");
@@ -720,7 +721,8 @@ case 36: //Print the data series in the log window
    goto there;
 case 37: //set options for gnuplot
 cmd(inter, "toplevel .a");
- cmd(inter, "wm title .a \"Gnuplot options\"");
+cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"Gnuplot options\"");
 cmd(inter, "label .a.l -text \"Set options for gnuplot\" -fg red");
 cmd(inter, "frame .a.t -relief groove -bd 2");
 cmd(inter, "label .a.t.l -text \"Terminal \"");
@@ -1005,6 +1007,7 @@ case 27:
  cmd(inter, "toplevel .a");
  cmd(inter, "wm geometry .a +$hereX+$hereY");
  cmd(inter, "wm title .a \"Insert new labels\"");
+ cmd(inter, "wm transient .a $ncanvas");
  cmd(inter, "label .a.l -text \"New label\"");
  cmd(inter, "set itext \"new text\"");
  cmd(inter, "entry .a.e -textvariable itext -width 30");
@@ -1139,6 +1142,7 @@ exist_selection:
 *choice=0;
   cmd(inter, "toplevel .w");
   cmd(inter, "wm title .w \"Save Lsd Graph\"");
+  cmd(inter, "wm transient .w .");
   cmd(inter, "bind .w <Destroy> {set choice 2}");
   cmd(inter, "label .w.l -text \"Select one graph\"");
   cmd(inter, "button .w.o -text Ok -command {set choice 1}");
@@ -1179,6 +1183,7 @@ cmd(inter, "set cazzo $a");
 cmd(inter, "toplevel .filename");
 cmd(inter, "set r .filename");
 cmd(inter, "wm title .filename \"Save Lsd Graph\"");
+cmd(inter, "wm transient .filename .");
 cmd(inter, "bind .filename <Destroy> {set choice 2}");
 cmd(inter, "label .filename.l -text \"Save the graph\\n$it\"");
 cmd(inter, "frame .filename.b");
@@ -1395,6 +1400,7 @@ case 21:
 *choice=0;
 cmd(inter, "toplevel .a -background white");
 cmd(inter, "wm title .a \"\"");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.l1");
 cmd(inter, "frame .a.l2");
@@ -1495,6 +1501,7 @@ Insert series not saved from the current model.
 cmd(inter, "set choice [.f.vars.ch.v size]");
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Choose data source\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "label .s.l -text \"Select the source of additional series\"");
 cmd(inter, "set bidi 0");
 cmd(inter, "frame .s.i -relief groove -bd 2");
@@ -1594,6 +1601,7 @@ if(*choice==1 || *choice==3)
  }
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Insert series\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Type the label of the series to insert (self-completion)\"");
 cmd(inter, "set bidi \"\"");
@@ -1621,6 +1629,7 @@ if(*choice==2)
   goto there;
  }
 cmd(inter, "toplevel .s");
+cmd(inter, "wm transient .s .");
 cmd(inter, "label .s.l -text \"Inserting new series\"");
 cmd(inter, "pack .s.l");
 app=(char *)Tcl_GetVar(inter, "bidi",0);
@@ -1647,6 +1656,7 @@ cmd(inter, "set ntag $i");
 cmd(inter, "set ssys 2");
 cmd(inter, "toplevel .a");
 cmd(inter, "wm title .a \"Add a batch of items\"");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.tit  -relief groove -bd 2");
 cmd(inter, "label .a.tit.l -text \"Select series with label : \"");
@@ -1914,6 +1924,7 @@ cmd(inter, "set i [llength [split $c {_}]]");
 cmd(inter, "set ssys 2");
 cmd(inter, "toplevel .a");
 cmd(inter, "wm title .a \"Remove a batch of items\"");
+cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.tit  -relief groove -bd 2");
 cmd(inter, "label .a.tit.l -text \"Select series with label : \"");
@@ -2390,6 +2401,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> { raise .; focus -force .b.ts}");
 sprintf(msg, "wm protocol $p WM_DELETE_WINDOW { wm withdraw .f.new%d}", cur_plot);
 cmd(inter, msg);
@@ -2946,6 +2958,7 @@ sprintf(msg, "set p .f.new%d", cur_plot);
 cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 
 cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
@@ -3247,6 +3260,7 @@ void set_cs_data(int *choice)
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm protocol .s WM_DELETE_WINDOW {set choice 2}");
+cmd(inter, "wm transient .s .");
 cmd(inter, "set p .s");
 cmd(inter, "wm title $p \"Select Cases for Cross section analysis\"");
 //cmd(inter, "raise $p");
@@ -4590,6 +4604,7 @@ if(nv>2)
  {
  cmd(inter, "toplevel .s");
  cmd(inter, "wm title .s \"2D or 3D?\"");
+ cmd(inter, "wm transient .s .");
 
  cmd(inter, "label .s.l -text \"Choose the type of graph\"");
 
@@ -5154,6 +5169,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Options\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert time step to use\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
@@ -5556,6 +5572,7 @@ for(done=0, i=0; i<nv; i++)
 
 cmd(inter, "set bidi 1");
 cmd(inter, "toplevel .s");
+cmd(inter, "wm transient .s .");
 cmd(inter, "wm title .s \"Lags to plot\"");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert number of lags\"");
@@ -5745,6 +5762,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .}");
 cmd(inter, "frame $p.f");
 cmd(inter, "canvas $p.f.plots -height 430 -width 640 -bg white");
@@ -5841,6 +5859,7 @@ for(i=0; i<nv; i++)
 cmd(inter, "set bidi 1");
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Insert\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert number of columns\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
@@ -5923,6 +5942,7 @@ sprintf(msg, "set p .f.new%d", cur_plot);
 cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .}");
 sprintf(msg,"frame $p.f -width %d -height %d", ncol*le, nlin*hi);
 cmd(inter, msg);
@@ -6080,6 +6100,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Number of classes\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert the number of classes to use\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
@@ -6257,6 +6278,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
@@ -6597,6 +6619,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Number of classes\"");
+cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.t -relief groove -bd 2");
 cmd(inter, "label .s.t.l -text \"Insert the time step to use\"");
 cmd(inter, "entry .s.t.e -textvariable time");
@@ -6824,6 +6847,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
@@ -7111,6 +7135,7 @@ Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Select elaborations\"");
+cmd(inter, "wm transient .s .");
 
 cmd(inter, "frame .s.o -relief groove -bd 2");
 cmd(inter, "label .s.o.l -text \"Type of scanning\" -fg red");
@@ -7436,6 +7461,7 @@ if(logs)
 
 cmd(inter, "toplevel .s");
 cmd(inter, "wm title .s \"Mov.Av. Range\"");
+cmd(inter, "wm transient .s .");
 
 cmd(inter, "frame .s.o -relief groove -bd 2");
 cmd(inter, "label .s.o.l -text \"Set # of (odd) periods\" -fg red");

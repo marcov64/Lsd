@@ -285,7 +285,7 @@ cmd(inter, ch);
 sprintf(ch, "$c.c bind %s <Leave> {$c.c delete list}", str2);
 cmd(inter, ch);
 */
-sprintf(ch, "$c.c bind %s <Enter> {set res_g %s; if {[winfo exists .list]==1} {destroy .list} {};toplevel .list ;label .list.l -text \"$list_%s\" -justify left; pack .list.l;  align .list . }", str2, str2, str2);
+sprintf(ch, "$c.c bind %s <Enter> {set res_g %s; if {[winfo exists .list]==1} {destroy .list} {};toplevel .list ; wm transient .list .; label .list.l -text \"$list_%s\" -justify left; pack .list.l;  align .list . }", str2, str2, str2);
 cmd(inter, ch);
 sprintf(ch, "$c.c bind %s <Leave> {destroy .list}", str2);
 cmd(inter, ch);
