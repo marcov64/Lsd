@@ -133,9 +133,9 @@ bind .f.t.t <Enter> {focus -force .l};  wm transient .l .; focus -force .l;
 #.f.t.t conf -state disabled
 
 
-menu .l.m -tearoff 0 -relief groove -bd 12
+menu .l.m -tearoff 0 -relief groove -bd 2
 set m .l.m.file 
-menu $m -tearoff 0 -relief raised
+menu $m -tearoff 0
 .l.m add cascade -label File -menu $m -underline 0
 $m add command -label Select -underline 0 -accelerator Enter -command {set result [.l.l.l curselection]; if { [lindex $group $result] == 1 } { if { [lindex $lmn $result] == "<UP>"} {set modelgroup [file dirname $modelgroup]} {set modelgroup [lindex $lmn $result]};bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  showmodel [lindex $ldn $result]} { bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  set choiceSM 1} }
 
@@ -143,7 +143,7 @@ $m add command -label Abort -underline 0 -accelerator Escape -command {set resul
 
 
 set m .l.m.edit 
-menu $m -tearoff 0 -relief raised -bd 2
+menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Edit -menu $m -underline 0
 
 $m add command -label "New Model/Group" -underline 0 -command {bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  set choiceSM 14} 
@@ -154,7 +154,7 @@ $m add command -label "Edit name/description" -underline 0 -command {edit [.l.l.
 
 
 set m .l.m.help 
-menu $m -tearoff 0 -relief raised
+menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Help -menu $m -underline 0
 $m add command -label "Help" -underline 0 -accelerator F1 -command {LsdHelp LMM_help.html#select}
 
