@@ -13,7 +13,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*****
-used up to 62 options included
+used up to 66 options included
 *******/
 
 /* TEST UNDO:
@@ -78,6 +78,8 @@ The widget of importance are:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 #define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
 
@@ -86,6 +88,7 @@ Tcl_Interp *inter;
 char msg[300];
 int choice;
 int v_counter=0; //counter of the v[i] variables inserted in the equations
+int shigh=2;		// syntax highlighting state (0, 1 or 2)
 
 void copy(char *f1, char *f2);
 Tcl_Interp *InterpInitWin(void);
@@ -93,7 +96,7 @@ void cmd(Tcl_Interp *inter, char *cc);
 void cmd(Tcl_Interp *inter, const char cc[]) {cmd(inter, (char *)cc);};
 int errormsg( char *lpszText,  char *lpszTitle);
 int ModManMain(int argn, char **argv);
-void color(int *num);
+void color(int hiLev, long iniLin, long finLin);
 void make_makefile(void);
 void make_makefileNW(void);
 char app_str[2][200];
@@ -442,6 +445,7 @@ Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_INT);
 Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_INT);
 macro=1;    
+Tcl_LinkVar(inter, "shigh", (char *) &shigh, TCL_LINK_INT);
   
 
 cmd(inter, "menu .m -tearoff 0");
@@ -464,10 +468,18 @@ cmd(inter, "set w .m.edit");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Edit -menu $w -underline 0");
 cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Control+c");
-cmd(inter, "$w add command -label \"Cut\" -command {tk_textCut .f.t.t} -underline 1");
-cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Control+v");
-cmd(inter, "$w add command -label \"Undo\" -command {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}} -underline 0 -accelerator Control+z");
-cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Control+y");
+
+// collect information to focus recoloring
+cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Control+x");
+cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Control+v");
+// make menu the same as ctrl-z/y (more color friendly)
+cmd(inter, "$w add command -label \"Undo\" -command {catch {.f.t.t edit undo}} -underline 0 -accelerator Control+z");
+cmd(inter, "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -underline 2 -accelerator Control+y");
+
+//cmd(inter, "$w add command -label \"Cut\" -command {tk_textCut .f.t.t} -underline 1");
+//cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Control+v");
+//cmd(inter, "$w add command -label \"Undo\" -command {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}} -underline 0 -accelerator Control+z");
+//cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Control+y");
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Goto Line\" -command {set choice 10} -underline 5 -accelerator Control+l");
@@ -487,6 +499,15 @@ cmd(inter, "$w add check -label \" Wrap/Unwrap\" -variable wrap -command {if {$w
 cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"} -accelerator Control+'+'");
 cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"} -accelerator Control+'-'");
 cmd(inter, "$w add command -label \"Change fonts\" -command {set choice 59} ");
+
+// add option to ajust syntax highlighting (word coloring)
+cmd(inter, "$w add cascade -label \"Syntax highlighting\" -menu $w.color -underline 0");
+cmd(inter, "menu $w.color -tearoff 0");
+cmd(inter, "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Control+;\"");
+cmd(inter, "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Control+,");
+cmd(inter, "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set choice 66} -underline 1 -accelerator Control+.");
+
+cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Control+>");
 cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Control+<");
 
@@ -558,9 +579,15 @@ cmd(inter, "set a [list $fonttype $dim_character]");
 cmd(inter, ".f.t.t conf -font \"$a\"");
 //cmd(inter, "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"");
 //
-cmd(inter, ".f.t.t tag configure comment1 -foreground #00aa00");
-cmd(inter, ".f.t.t tag configure comment2 -foreground #00aa00");
-cmd(inter, ".f.t.t tag configure str -foreground blue");
+// set syntax colors
+cmd(inter, ".f.t.t tag configure comment1 -foreground green4");
+cmd(inter, ".f.t.t tag configure comment2 -foreground green4");
+cmd(inter, ".f.t.t tag configure str -foreground blue4");
+cmd(inter, ".f.t.t tag configure cprep -foreground SaddleBrown");
+cmd(inter, ".f.t.t tag configure lsdvar -foreground red4");
+cmd(inter, ".f.t.t tag configure lsdmacro -foreground DodgerBlue4");
+cmd(inter, ".f.t.t tag configure ctype -foreground DarkViolet");
+cmd(inter, ".f.t.t tag configure ckword -foreground purple4");
 cmd(inter, ".f.t.t configure -selectbackground gray");
 cmd(inter, ".f.t.t configure -selectforeground black");
 
@@ -611,6 +638,18 @@ cmd(inter, "set wrap 0");
 
 cmd(inter, "bind . <Control-n> {tk_menuSetFocus .m.file}");
 
+// procedures to save cursor environment before and after changes in text window for syntax coloring
+cmd(inter, "proc savCurIni {} {global curSelIni curPosIni; set curSelIni [.f.t.t tag nextrange sel 1.0]; set curPosIni [.f.t.t index insert]; .f.t.t edit modified false}");
+cmd(inter, "proc savCurFin {} {global curSelFin curPosFin; set curSelFin [.f.t.t tag nextrange sel 1.0]; set curPosFin [.f.t.t index insert]; .f.t.t edit modified false}");
+cmd(inter, "proc updCurWnd {} {.f.hea.line.line conf -text [.f.t.t index insert]}");
+
+// redefine bindings to better support new syntax highlight routine
+cmd(inter, "bind .f.t.t <KeyPress> {savCurIni}");
+cmd(inter, "bind .f.t.t <KeyRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}");
+cmd(inter, "bind .f.t.t <ButtonPress> {savCurIni}");
+cmd(inter, "bind .f.t.t <ButtonRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}");
+
+/*
 cmd(inter, "bind .f.t.t <KeyRelease> {.f.hea.line.line conf -text [.f.t.t index insert]}");
 cmd(inter, "bind .f.t.t <ButtonRelease> {.f.hea.line.line conf -text [.f.t.t index insert]}");
 
@@ -624,7 +663,7 @@ cmd(inter, "bind .f.t.t <KeyRelease-BackSpace> {.f.hea.line.line conf -text [.f.
 cmd(inter, "bind .f.t.t <KeyRelease-slash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
 cmd(inter, "bind .f.t.t <KeyRelease-asterisk> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
 cmd(inter, "bind .f.t.t <KeyRelease-quotedbl> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-backslash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
+cmd(inter, "bind .f.t.t <KeyRelease-backslash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");*/
 
 
 cmd(inter, "bind .f.t.t <Control-l> {set choice 10}");
@@ -655,6 +694,9 @@ cmd(inter, "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\\{}");
 cmd(inter, "bind .f.t.t <Control-parenright> {.f.t.t insert insert \\}}");
 cmd(inter, "bind .f.t.t <Control-greater> {set choice 42}");
 cmd(inter, "bind .f.t.t <Control-less> {set choice 43}");
+cmd(inter, "bind .f.t.t <Control-semicolon> {set choice 64}");
+cmd(inter, "bind .f.t.t <Control-comma> {set choice 65}");
+cmd(inter, "bind .f.t.t <Control-period> {set choice 66}");
 cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}} {}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\" && $tcl_platform(platform)!= \"Darwin\"} {bind .f.t.t <Control-c> {tk_textCopy .f.t.t}} {}");
@@ -787,9 +829,10 @@ if(argn>1)
        {strcpy(str, s);
         if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++")|| !strcmp(str, ".h")|| !strcmp(str, ".H"))
           {sourcefile=1;
-           cmd(inter, "set inicolor \"1.0\"");
-           cmd(inter, "set endcolor [.f.t.t index end]");
-           color(&num);
+//           cmd(inter, "set inicolor \"1.0\"");
+//           cmd(inter, "set endcolor [.f.t.t index end]");
+//           color(&num);
+			color(shigh, 0, 0);			// set color types (all text)
           }
         else
           sourcefile=0;
@@ -1467,12 +1510,14 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "update");
   sourcefile=1;
   choice=0;
-  cmd(inter, "set inicolor \"1.0\"");
-  cmd(inter, "set endcolor [.f.t.t index end]");
+//  cmd(inter, "set inicolor \"1.0\"");
+//  cmd(inter, "set endcolor [.f.t.t index end]");
   cmd(inter, ".f.t.t tag add bc \"1.0\"");
   cmd(inter, ".f.t.t tag add fc \"1.0\"");
   cmd(inter, ".f.t.t mark set insert 1.0");
-  color(&num);
+//  color(&num);
+color(shigh, 0, 0);			// set color types (all text)
+  
 cmd(inter, "catch [unset -nocomplain ud]");
 cmd(inter, "catch [unset -nocomplain udi]");
 cmd(inter, "catch [unset -nocomplain rd]");
@@ -2042,11 +2087,12 @@ s=(char *)Tcl_GetVar(inter, "s",0);
 choice=0;
 if(s[0]!='\0')
  {strcpy(str, s);
-  if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++"))
+  if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H"))
    {sourcefile=1;
-    cmd(inter, "set inicolor \"1.0\"");
-    cmd(inter, "set endcolor [.f.t.t index end]");
-    color(&num);
+//    cmd(inter, "set inicolor \"1.0\"");
+//    cmd(inter, "set endcolor [.f.t.t index end]");
+//    color(&num);
+	color(shigh, 0, 0);			// set color types (all text)
    }
   else
    sourcefile=0;
@@ -2115,6 +2161,8 @@ goto loop;
 }
 
 
+/*
+// It seems it's not used anymore
 if(choice==19)
 {
 choice=0;
@@ -2126,6 +2174,7 @@ goto loop;
 
 
 
+// It seems it's not used anymore
 if(choice==22)
 {
 //reset the coloring around the insertion point after a deletion
@@ -2150,6 +2199,7 @@ choice=0;
 goto loop;
 }
 
+*/
 if(choice==23)
 { //reset colors after a sign for coloring
 
@@ -2157,7 +2207,41 @@ if(sourcefile==0)
  {choice=0;
   goto loop;
  }
-  cmd(inter, "set inicolor [.f.t.t search -backwards */ [.f.t.t index insert] 1.0]");
+else
+{	
+  choice=0;
+  // text window not ready?
+  if(Tcl_GetVar(inter,"curPosIni",0) == NULL)			
+	  goto loop;
+  // check if inside or close to multi-line comment and enlarge region appropriately
+  cmd(inter, "if {[lsearch -exact [.f.t.t tag names $curPosIni] comment1] != -1} {set curPosFin [.f.t.t search */ $curPosIni end]; set newPosIni [.f.t.t search -backwards /* $curPosIni 1.0]; set curPosIni $newPosIni} {if {[.f.t.t search -backwards */ $curPosIni \"$curPosIni linestart\"] != \"\"} {set comIni [.f.t.t search -backwards /* $curPosIni]; if {$comIni != \"\"} {set curPosIni $comIni}}; if {[.f.t.t search /* $curPosFin \"$curPosFin lineend\"] != \"\"} {set comFin [.f.t.t search */ $curPosFin]; if {$comFin != \"\"} {set curPosFin $comFin}}}");
+  // find the range of lines to reeval the coloring
+  char *curPosIni=(char*)Tcl_GetVar(inter,"curPosIni",0); // position before insertion
+  char *curPosFin=(char*)Tcl_GetVar(inter,"curPosFin",0); // position after insertion
+  char *curSelIni=(char*)Tcl_GetVar(inter,"curSelIni",0); // selection before insertion
+  char *curSelFin=(char*)Tcl_GetVar(inter,"curSelFin",0); // selection after insertion
+  // collect all selection positions, before and after change
+  float curPos[6];
+  int nVal = 0;
+  i = sscanf(curPosIni, "%f", &curPos[nVal]);
+  nVal += i < 0 ? 0 : i;
+  i = sscanf(curPosFin, "%f", &curPos[nVal]);
+  nVal += i < 0 ? 0 : i;
+  i = sscanf(curSelIni, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
+  nVal += i < 0 ? 0 : i;
+  i = sscanf(curSelFin, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
+  nVal += i < 0 ? 0 : i;
+  // find previous and next lines to select (worst case scenario)
+  long prevLin = (long)floor(curPos[0]);
+  long nextLin = (long)floor(curPos[0]) + 1;
+  for(i = 1; i < nVal; i++)
+  {
+	  if(curPos[i] < prevLin) prevLin = (long)floor(curPos[i]);
+	  if(curPos[i] + 1 > nextLin) nextLin = (long)floor(curPos[i]) + 1;
+  }
+  
+/*  
+  cmd(inter, "set inicolor [.f.t.t search -backwards * / [.f.t.t index insert] 1.0]");
   cmd(inter, "if {$inicolor==\"\"} {set inicolor 1.0} {set inicolor [.f.t.t index \"$inicolor + 2 char\"]}");
   cmd(inter, "set endcolor [.f.t.t search /* [.f.t.t index insert] end]");
   cmd(inter, "if {$endcolor==\"\"} {set endcolor end} {}");
@@ -2168,9 +2252,12 @@ if(sourcefile==0)
 
 //cmd(inter, "set inicolor 1.0");
 //cmd(inter, "set endcolor end");
-choice=0;
-color(&num);
+*/
 
+//choice=0;
+//color(&num);
+color(shigh, prevLin, nextLin);
+}
 goto loop;
 
 }
@@ -2247,6 +2334,7 @@ cmd(inter, "grab release .l");
 cmd(inter, "focus -force .f.t.t");
 cmd(inter, "destroy .l");
 cmd(inter, ".f.t.t tag remove found 1.0 end");
+color(shigh, 0, 0);				// reevaluate colors
 choice=0;
 goto loop;
 }
@@ -2312,6 +2400,7 @@ if(choice==2)
  }
 cmd(inter, "if {$isfun == 1} {set choice 3} {}");
 
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 if(choice!=3)
@@ -2328,7 +2417,8 @@ v_counter=0;
 cmd(inter, "set v_num 0");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -2390,6 +2480,7 @@ if(choice==2)
  }
 cmd(inter, "if {$isfun == 1} {set choice 3} {}");
 
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, ".f.t.t insert insert \"if(!strcmp(label,\\\"$v_label\\\"))\\n\"");
 cmd(inter, ".f.t.t insert insert \"{\\n\"");
@@ -2411,7 +2502,8 @@ cmd(inter, ".f.t.t tag add sel insert \"insert + 7 char\"");
 
 v_counter=0;
 cmd(inter, "set v_num 0");
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -2479,7 +2571,8 @@ if(choice==2)
   choice=0;
   goto loop;
  }
-cmd(inter, "set a [.f.t.t index insert]");
+cmd(inter, "savCurIni");	// save data for recolor
+ cmd(inter, "set a [.f.t.t index insert]");
 
 //cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
 cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
@@ -2496,7 +2589,8 @@ cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
 if(num!=-1)
  v_counter=++num;
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -2561,6 +2655,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
@@ -2572,7 +2667,8 @@ cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
 if(num!=-1)
  v_counter=num;
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -2634,6 +2730,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 //cmd(inter, ".f.t.t insert insert \"for($v_obj=$v_par->search(\\\"$v_label\\\"); $v_obj!=NULL; $v_obj=go_brother($v_obj) )\\n\"");
@@ -2677,7 +2774,8 @@ cmd(inter, ".f.t.t insert insert \"}\\n\"");
 cmd(inter, ".f.t.t mark set insert \"$b\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 
 }
@@ -2739,6 +2837,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, ".f.t.t insert insert \"for($v_obj=$v_par->search(\\\"$v_label\\\"); $v_obj!=NULL; $v_obj=go_brother($v_obj) )\\n\"");
@@ -2746,7 +2845,8 @@ cmd(inter, ".f.t.t insert insert \" {\\n  \\n }\\n\"");
 cmd(inter, ".f.t.t mark set insert \"$a + 2 line + 2 char\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 
 }
@@ -3001,6 +3101,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
 cmd(inter, "if {$v_num!=\"\" } {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
@@ -3012,7 +3113,8 @@ if(num!=-1)
  v_counter=++num;
 
 cmd(inter, "unset -nocomplain v_num");
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3079,6 +3181,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
@@ -3089,7 +3192,7 @@ if(num!=-1)
  v_counter=++num;
 
 cmd(inter, "unset v_num");
-choice=0;
+cmd(inter, "savCurIni");	// save data for recolor
 goto loop;
 }
 
@@ -3159,6 +3262,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
@@ -3172,7 +3276,8 @@ if(num!=-1)
  v_counter=++num;
 
 cmd(inter, "unset v_num");
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3240,6 +3345,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
@@ -3250,7 +3356,8 @@ if(num!=-1)
  v_counter=++num;
 
 cmd(inter, "unset v_num");
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3322,6 +3429,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num, $v_lag);\"");
 //cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
@@ -3331,7 +3439,8 @@ cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 } { .f.t.t insert insert \"WRITES(
 cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"WRITELS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3399,11 +3508,13 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num, $v_lag);\"");
 //cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3475,10 +3586,12 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3551,6 +3664,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 
@@ -3561,7 +3675,8 @@ cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0
 cmd(inter, "destroy .a");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3633,6 +3748,7 @@ if(choice==2)
  }
 
 cmd(inter, "set choice $v_direction");
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 /*
 if(choice==1)
@@ -3649,7 +3765,8 @@ else
 cmd(inter, "if {$v_obj1 ==\"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"$direction\\\");\"} {}");
 cmd(inter, "if {$v_obj1 !=\"p\"} {.f.t.t insert insert \"SORTS($v_obj1,\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"$direction\\\");\"} {}");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3719,6 +3836,7 @@ if(choice==2)
  }
 
 cmd(inter, "set choice $v_direction");
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 if(choice==1)
   cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"UP\\\");\"");
@@ -3726,7 +3844,8 @@ else
   cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"DOWN\\\");\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3821,9 +3940,11 @@ break;
 default: break;
 }
 
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, ".f.t.t insert insert \"$str\"");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3903,6 +4024,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if { $numobj == \"1\"} {set choice 1} {set choice 0}");
 cmd(inter, "if {$v_obj0 != \"\"} {.f.t.t insert insert $v_obj0; .f.t.t insert insert =} {}");
@@ -3938,7 +4060,8 @@ if(choice!=-3)
 
 
 cmd(inter, "sblocklmm .a");
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4006,11 +4129,13 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, "if {$v_num==\"\" } { .f.t.t insert insert \"$v_obj0=$v_obj->add_an_object(\\\"$v_label\\\");\\n\"} {.f.t.t insert insert \"$v_obj0=$v_obj->add_an_object(\\\"$v_label\\\",$v_num);\\n\"}");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4063,13 +4188,15 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 
 cmd(inter, ".f.t.t insert insert \"DELETE($v_obj0);\\n\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4120,13 +4247,15 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 
 cmd(inter, ".f.t.t insert insert \"$v_obj0->delete_obj();\\n\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4203,6 +4332,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
@@ -4228,7 +4358,8 @@ else
  }
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4304,6 +4435,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
@@ -4313,7 +4445,8 @@ if(choice==1)
 else
   cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"");
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4375,12 +4508,14 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, "if { $v_obj1 == \"p\" } {.f.t.t insert insert \"$v_obj0=SEARCH(\\\"$v_lab\\\");\\n\"} {.f.t.t insert insert \"$v_obj0=SEARCHS($v_obj1,\\\"$v_lab\\\");\\n\"}");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4442,12 +4577,14 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj1->search(\\\"$v_lab\\\");\\n\"");
 
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4514,6 +4651,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 //cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
@@ -4530,7 +4668,8 @@ cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
 if(num!=-1)
  v_counter=++num;
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -4595,6 +4734,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
+cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->sum(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\",$v_lag);\\n\"}");
@@ -4605,7 +4745,8 @@ cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
 if(num!=-1)
  v_counter=++num;
 
-choice=0;
+cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -5624,6 +5765,47 @@ choice=0;
 goto loop;
 
 }
+
+if(choice==64)
+{
+/*
+Full syntax highlighting
+*/
+shigh=2;
+Tcl_UpdateLinkedVar(inter, "shigh");
+color(shigh, 0, 0);			// set color types (all text)
+
+choice=0;
+goto loop;
+}
+
+if(choice==65)
+{
+/*
+Partial syntax highlighting
+*/
+shigh=1;
+Tcl_UpdateLinkedVar(inter, "shigh");
+// select entire text to be color adjusted
+color(shigh, 0, 0);			// set color types (all text)
+
+choice=0;
+goto loop;
+}
+
+if(choice==66)
+{
+/*
+No syntax highlighting
+*/
+shigh=0;
+Tcl_UpdateLinkedVar(inter, "shigh");
+color(shigh, 0, 0);			// set color types (all text)
+
+choice=0;
+goto loop;
+}
+
 if(choice!=1)
  {choice=0;
  goto loop;
@@ -5632,6 +5814,7 @@ if(choice!=1)
 Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "tosave");
+Tcl_UnlinkVar(inter, "shigh");
 
 Tcl_Exit(0);
 
@@ -5639,8 +5822,166 @@ exit(0);
 
 }
 
+// data structures for color syntax (used by color/rm_color)
+struct hit
+{
+	int type, count;
+	long iniLin, iniCol;
+	char previous, next;
+};
+// color types (0-n) to Tk tags mapping
+const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword"};
+// regular expressions identifying colored text types
+ const char *cRegex[] = {
+	"/\[*].*\[*]/",		// each item define one different color
+	"//.*",
+	"^(\\s)*#\[^/]*",
+	"\\\"\[^\\\"]*\\\"",
+	"v\\[\[0-9]{1,2}]|cur\[0-9]?",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(?=[ ]*\\()|SUM|SUM[LS]*|STAT(S)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*|SEARCH_CND[LS]*|SEARCH(S)?|INI_TSEARCHS|TSEARCH_CNDS|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice",
+	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
+	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
+};
 
+// count words in a string (used by color)
+int strwrds(char string[])
+{
+	int i = 0, words = 0;
+	char lastC = '\0';
+	if(string == NULL) return 0;
+	while(isspace(string[i])) i++;
+	if(string[i] == '\0') return 0;
+	for( ; string[i] != '\0'; lastC = string[i++])
+		if(isspace(string[i]) && ! isspace(lastC)) words++;
+	if(isspace(lastC)) return words;
+	else return words + 1;
+}
 
+// map syntax highlight level to the number of color types to use
+int map_color(int hiLev)
+{
+	if(hiLev == 0)
+		return 0;
+	if(hiLev == 1)
+		return 4;
+	if(sizeof(*cTypes) > sizeof(*cRegex))
+		return sizeof(*cRegex);
+	return sizeof(*cTypes);
+}
+
+// compare function for qsort to compare different color hits (used by color)
+int comphit(const void *p1, const void *p2)
+{
+	if(((hit*)p1)->iniLin < ((hit*)p2)->iniLin) return -1;
+	if(((hit*)p1)->iniLin > ((hit*)p2)->iniLin) return 1;
+	if(((hit*)p1)->iniCol < ((hit*)p2)->iniCol) return -1;
+	if(((hit*)p1)->iniCol > ((hit*)p2)->iniCol) return 1;
+	if(((hit*)p1)->type < ((hit*)p2)->type) return -1;
+	if(((hit*)p1)->type > ((hit*)p2)->type) return 1;
+	return 0;
+}
+
+/* New color routine, using new tcl/tk 8.5 search for all feature */
+void color(int hiLev, long iniLin, long finLin)
+{
+int i, maxColor, newCnt;
+long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[sizeof(*cTypes)];
+char type, *pcount, *ppos, *count[sizeof(*cTypes)], *pos[sizeof(*cTypes)], finStr[16], *s;
+struct hit *hits;
+
+// prepare parameters
+maxColor = map_color(hiLev);	// convert option to # of color types
+if(finLin == 0)			// convert code 0 for end of text
+	sprintf(finStr, "end");
+else
+	sprintf(finStr, "%ld.end", finLin);
+
+// remove color tags
+for(i = 0; i < sizeof(*cTypes); i++)
+{
+	sprintf(msg, ".f.t.t tag remove %s %ld.0 %s", cTypes[i], iniLin == 0 ? 1 : iniLin, finStr);
+	cmd(inter, msg);
+}
+
+// find & copy all occurrence types to arrays of C strings
+for(i = 0; i < maxColor; i++)
+{
+	// locate all occurrences of each color group
+	Tcl_UnsetVar(inter, "ccount", 0);
+	if(!strcmp(cTypes[i], "comment1"))	// multi line search element?
+		sprintf(msg, "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[i], iniLin == 0 ? 1 : iniLin, finStr);
+	else
+		sprintf(msg, "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[i], iniLin == 0 ? 1 : iniLin, finStr);
+	cmd(inter, msg);
+
+	// check number of ocurrences
+	pcount = (char*)Tcl_GetVar(inter, "ccount", 0);
+	size[i] = strwrds(pcount);
+	if(size[i] == 0)				// nothing to do?
+		continue;
+	tsize += size[i];
+
+	// do intermediate store in C memory
+	count[i] = (char*)calloc(strlen(pcount) + 1, sizeof(char));
+	strcpy(count[i], pcount);
+	ppos = (char*)Tcl_GetVar(inter, "pos", 0);
+	pos[i] = (char*)calloc(strlen(ppos) + 1, sizeof(char));
+	strcpy(pos[i], ppos); 
+}
+if(tsize == 0)
+	return;							// nothing to do
+
+// organize all occurrences in a single array of C numbers (struct hit)
+hits = (hit*)calloc(tsize, sizeof(hit));
+for(i = 0, k = 0; i < maxColor; i++)
+{
+	if(size[i] == 0)				// nothing to do?
+		continue;
+	pcount = (char*)count[i] - 1;
+	ppos = (char*)pos[i] - 1;
+	for(j = 0; j < size[i] && k < tsize; j++, k++)
+	{
+		hits[k].type = i;
+		s = strtok(pcount + 1, " \t");
+		hits[k].count = atoi(s);
+		pcount = s + strlen(s);
+		s = strtok(ppos + 1, " \t");
+		sscanf(strtok(s, " \t"), "%ld.%ld", &hits[k].iniLin, &hits[k].iniCol);
+		ppos = s + strlen(s);
+	}
+	free(count[i]);
+	free(pos[i]);
+}
+
+// Sort the single list for processing
+qsort((void *)hits, tsize, sizeof(hit), comphit);
+
+// process each occurrence, if applicable
+Tcl_LinkVar(inter, "lin", (char*)&newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
+Tcl_LinkVar(inter, "col", (char*)&newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
+Tcl_LinkVar(inter, "cnt", (char*)&newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY);
+for(k = 0; k < tsize; k++)
+	// skip occurrences inside other occurrence
+	if(hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol))
+	{
+		newLin = hits[k].iniLin;
+		newCol = hits[k].iniCol;
+		newCnt = hits[k].count;
+		cmd(inter, "set end [.f.t.t index \"$lin.$col + $cnt char\"]");
+		// treats each type of color case properly
+		sprintf(msg, ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
+		cmd(inter, msg);
+		// next search position
+		ppos = (char*)Tcl_GetVar(inter, "end", 0);
+		sscanf(ppos, "%ld.%ld", &curLin, &curCol);
+	}
+Tcl_UnlinkVar(inter, "lin");
+Tcl_UnlinkVar(inter, "col");
+Tcl_UnlinkVar(inter, "cnt");
+free(hits);
+}
+
+/*	
 void color(int *num)
 {
 int i=0;
@@ -5675,7 +6016,7 @@ printf("%s",s);
 
 s=(char *)Tcl_GetVar(inter, "previ",0);
 printf("%s",s);
-*/
+* /
  if(i==2)
  {
   //comment of type //
@@ -5688,9 +6029,9 @@ printf("%s",s);
  }
 if(i==3)
   {
-  /*comment of the type /*  ********** */
+  /*comment of the type /*  ********** * /
 
-  cmd(inter, "set fin [.f.t.t search \"*/\" $previ end]");
+  cmd(inter, "set fin [.f.t.t search \"* /\" $previ end]");
   cmd(inter, "if {[string compare $fin \"\"]==0} {set fin end; set i 1} {set i 0}");
   //cmd(inter, ".f.t.t tag remove str $previ \"$fin + 2 char\"");
   //cmd(inter, ".f.t.t tag remove comment2 $previ \"$fin + 2 char\"");
@@ -5723,7 +6064,7 @@ cmd(inter, "if {[.f.t.t compare $previ >= $endcolor]==1} {set i 1} {}");
 
 Tcl_UnlinkVar(inter, "i");
 }
-
+*/
 
 /*
 Create the makefile for a model, merging:
