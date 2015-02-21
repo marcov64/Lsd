@@ -85,7 +85,7 @@ The widget of importance are:
 
 
 Tcl_Interp *inter;
-char msg[300];
+char msg[1024];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
 int choice;
 int v_counter=0; //counter of the v[i] variables inserted in the equations
 int shigh=2;		// syntax highlighting state (0, 1 or 2)
@@ -1070,12 +1070,15 @@ if(s==NULL || !strcmp(s, ""))
   
   cmd(inter, "set init_time [clock seconds]"); 
   cmd(inter, "toplevel .t");
+  // change window icon
+  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
   cmd(inter, "wm title .t \"Wait\"");
-  cmd(inter, "label .t.l -text \"Making model.\nThe system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched.\nOn failure a text window will show the compiling error messages.\"");
-  cmd(inter, "pack .t.l");
+  cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
+  cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
+  cmd(inter, "pack .t.l1 .t.l2");
   cmd(inter, "wm iconify .");
-  cmd(inter, "focus -force .t.l");
-  cmd(inter, "grab set .t.l");
+  cmd(inter, "focus -force .t");
+  cmd(inter, "grab set .t");
 #ifndef DUAL_MONITOR
   cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
 #else
@@ -5715,10 +5718,11 @@ cmd(inter, "toplevel .t");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "wm title .t \"Wait\"");
-cmd(inter, "label .t.l -text \"Making non-graphical version of the model.\nLsd is generating the executable 'lsd_gnuNW' for this system.\"");
-cmd(inter, "pack .t.l");
-cmd(inter, "focus -force .t.l");
-cmd(inter, "grab set .t.l");
+cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
+cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\nNO WINDOW version in other systems.\"");
+cmd(inter, "pack .t.l1 .t.l2");
+cmd(inter, "focus -force .t");
+cmd(inter, "grab set .t");
 #ifndef DUAL_MONITOR
 cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
 #else
