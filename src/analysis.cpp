@@ -756,7 +756,7 @@ if(*choice==3)
   cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} { set gpterm \"x11\"}");
   goto gpoptions;
  }
-cmd(inter, "set gpooptions \"\[.a.o.t get 0.0 end\]\""); 
+cmd(inter, "set gpooptions \"\[.a.o.t get 0.0 end]\""); 
 cmd(inter, "destroy .a");
 *choice=0;
 goto there;
