@@ -81,7 +81,8 @@ Tcl_Interp *inter;
 #endif
 
 #include <string.h>
-
+#include <ctype.h>
+#include <unistd.h>
 #include "decl.h"
 #include <time.h>
 int t;
@@ -154,6 +155,8 @@ void control_bridge(object *r);
 void save_single(variable *vcv);
 void delete_mn(mnode *mn);
 void scan_mn(object *c);
+char *clean_file(char *);
+char *clean_path(char *);
 
 char *upload_eqfile(void);
 lsdstack *stacklog;
@@ -166,6 +169,8 @@ description *descr=NULL;
 char *simul_name;
 char *struct_file;
 char *equation_name;
+char *exec_file;		// name of executable file
+char *exec_path;		// path of executable file
 char name_rep[400];
 
 char *path;
@@ -184,7 +189,7 @@ int no_res=0;
 int message_logged=0;
 int no_more_memory=0;
 int series_saved;
-int findex;
+int findex, fend;
 int batch_sequential=0;
 int fast=0;		// make fast persistent across runs
 
@@ -202,6 +207,8 @@ blueprint=NULL;
 simul_name=new char[30];
 path=new char[300];
 equation_name=new char[300];
+exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
+exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
 
 strcpy(path, "");
 strcpy(tcl_dir, "");
@@ -210,6 +217,7 @@ strcpy(equation_name,"fun.cpp");
 #ifdef NO_WINDOW
 
 findex=1;
+fend=0;		// no file number limit
 
 if(argn<3)
  {
@@ -233,7 +241,11 @@ else
  	 findex=atoi(argv[i+1]);
   batch_sequential=1;   
   }
-  
+ if(argv[i][0]=='-' && argv[i][1]=='e' )	// read -e parameter : last sequential file to process
+  {done=1;
+ 	 fend=atoi(argv[i+1]);
+  }
+
   
   if(done==0)
    {  printf("\nOption '%s' not recognized. Lsd NoWindow version. This is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", argv[1]);
@@ -817,8 +829,9 @@ fclose(f);
    struct_file=new char[strlen(msg)+1];
    strcpy(struct_file,msg);
    f=fopen(struct_file, "r");			
-   if(f==NULL)  // no more file to process
+   if(f==NULL || (fend!=0 && findex>fend))  // no more file to process
    {
+	 if(f!=NULL) fclose(f);
      sprintf(msg, "\nFinished processing %s.\n",simul_name);
      plog(msg);
      break;
@@ -1311,4 +1324,30 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   for(cur=cb->head; cur!=NULL; cur=cur->next)
     scan_mn(cur);
  }
+}
+
+// remove any path prefixes to filename, if present
+char *clean_file(char *filename)
+{
+	if(strchr(filename, '/') != NULL)
+		return strrchr(filename, '/') + 1;
+	if(strchr(filename, '\\') != NULL)
+		return strrchr(filename, '\\') + 1;
+	return filename;
+}
+
+// remove cygwin path prefix, if present
+char *clean_path(char *filepath)
+{
+	int len=strlen("/cygdrive/");
+	if(!strncmp(filepath, "/cygdrive/", len))
+	{
+		char *temp=new char[strlen(filepath) + 1];
+		temp[0]=toupper(filepath[len]);				// copy drive letter
+		temp[1]=':';								// insert ':'
+		strcpy(temp + 2, filepath + len + 1);		// copy removing prefix
+		strcpy(filepath, temp);
+		delete[] temp;
+	}
+	return filepath;
 }

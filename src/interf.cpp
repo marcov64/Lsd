@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 67
+USED CASE 69
 */
 
 /****************************************************
@@ -109,6 +109,7 @@ Exit function, which is customized on the operative system.
 
 
 
+#include <sys/stat.h>
 #include <tk.h>
 #include "decl.h"
 
@@ -176,12 +177,14 @@ void tex_report_observe(object *r, FILE *f);
 void shift_var(int direction, char *vlab, object *r);
 void shift_desc(int direction, char *dlab, object *r);
 object *sensitivity_parallel(object *o, sense *s );
-void sensitivity_sequential(int *findex, sense *s );
+void sensitivity_sequential(int *findexSens, sense *s );
 void empty_sensitivity(sense *cs);
 
 extern object *root;
 extern char *simul_name;
 extern char *struct_file;
+extern char *exec_file;		// name of executable file
+extern char *exec_path;		// path of executable file
 extern int add_to_tot;
 extern int struct_loaded;
 extern char *path;
@@ -216,6 +219,7 @@ extern object *blueprint;
 extern sense *rsense;
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
+int findexSens=0;				// index to sequential sensitivity configuration filenames
 
 #ifdef DUAL_MONITOR
 // Main window constraints
@@ -491,6 +495,7 @@ cmd(inter, "$w add command -label \"Sensitivity (parallel)\" -command {set choic
 cmd(inter, "$w add command -label \"Sensitivity (sequential)\" -command {set choice 63} -underline 15");
 cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
 cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
+cmd(inter, "$w add command -label \"Create Sensitivity Batch\" -command {set choice 68} -underline 0");
 
 cmd(inter, "$w add separator");
 
@@ -507,6 +512,7 @@ cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Control+R");
+cmd(inter, "$w add command -label \"Start 'No WINDOW' job'\" -command {set choice 69} -underline 0");
 cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Control+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56}");
 
@@ -699,7 +705,7 @@ if(choice_g!=0)
 
 if(actual_steps>0)
  {
-  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 )
+  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 || *choice==68 || *choice==69 )
    {
      cmd(inter, "toplevel .warn");
 	 cmd(inter, "wm transient .warn .");
@@ -757,8 +763,8 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r)
 {
-char *lab1,*lab2,lab[90],lab_old[50], ch[150];
-int sl, done=0, num, i, param, save, plot, nature, numlag, k, findex;
+char *lab1,*lab2,lab[300],lab_old[300], ch[300];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k;
 char observe, initial, cc;
 bridge *cb;
 
@@ -2191,7 +2197,8 @@ case 38: //quick reload
       add_description("Root", "Object", "(no description available)");
 	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
 	  rsense=NULL;
-     }
+ 	  findexSens=0;
+    }
 
 if(*choice==17)
 {
@@ -2661,6 +2668,9 @@ case 20:
 	  strcpy(lastObj,"");	// disable last object for quick reload
       actual_steps=0;
       empty_descr();
+	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
+	  rsense=NULL;
+ 	  findexSens=0;
       add_description("Root", "Object", "(no description available)");      
       cmd(inter, "catch {unset ModElem}");
       break;
@@ -3628,6 +3638,7 @@ shift_desc(1, lab_old, r);
 *choice=0;
 return r;
 
+//Create parallel sensitivity analysis configuration
 case 62:
 cmd(inter, "destroy .m .l");
 
@@ -3638,8 +3649,6 @@ if (rsense!=NULL)
     cur=root->b->head;
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
-    empty_sensitivity(rsense);
-	rsense=NULL;
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
@@ -3648,15 +3657,14 @@ else
 *choice=0;
 return r;
 
+//Create sequential sensitivity analysis configuration
 case 63:
 cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
-    findex=1;
-    sensitivity_sequential(&findex,rsense);
-    empty_sensitivity(rsense);
-	rsense=NULL;
+    findexSens=1;
+    sensitivity_sequential(&findexSens,rsense);
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
  }
 else
@@ -3668,20 +3676,25 @@ return r;
 //Load a sensitivity analysis configuration
 case 64:
 	cmd(inter, "destroy .l .m");
-	*choice=0;
-
-	// check for existing sensitivity data loaded
-	if (rsense!=NULL) 
-	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is sensitivity data already loaded.\\n\\nPlease perform a sensitivity analysis command before loading new sensitivity data, remove the sensitivity data or reload your model.\"");
-		break;
-	}
+	
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease load one before trying to load a sensitivity analysis configuration.\"");
 		break;
     } 
+	// check for existing sensitivity data loaded
+	if (rsense!=NULL) 
+	{
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"There is sensitivity data already loaded.\\n\\nPress 'Ok' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
+		if(*choice == 2)
+			break;
+		
+		// empty sensitivity data
+		empty_sensitivity(rsense); 			// discard read data
+		rsense=NULL;
+		findexSens=0;
+	}
 	// set default name and path to conf. file folder
 	sprintf(lab, "set res %s_sens", simul_name);
 	cmd(inter, lab);
@@ -3781,7 +3794,6 @@ case 64:
 //Save a sensitivity analysis configuration
 case 65:
 	cmd(inter, "destroy .l .m");
-	*choice=0;
 
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
@@ -3886,8 +3898,335 @@ case 67:
 	// empty sensitivity data
 	empty_sensitivity(rsense); 			// discard read data
 	rsense=NULL;
+	findexSens=0;
 	break;
 	
+//Create batch for serial sensitivity analysis job and optionally run it
+case 68:
+	cmd(inter, "destroy .l .m");
+
+	// check a model is already loaded
+	if(struct_loaded==0)
+	{ 
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease select one before trying to create a script/batch.\"");
+		break;
+	}
+
+	// check for existing NW executable
+	sprintf(ch, "%s/%s", exec_path, exec_file);			// form full executable name
+	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
+	if(*choice == 1)
+	{
+		// remove Windows extension, if present
+		if((lab1 = strstr(ch, ".exe")) != NULL)
+			lab1[0]='\0';
+		else
+			if((lab1 = strstr(ch, ".EXE")) != NULL) 
+				lab1[0]='\0';
+			
+		strcat(ch, "NW.exe");							// add Windows ending
+	}
+	else
+		strcat(ch, "NW");								// add Unix ending
+
+	if ((f=fopen(ch, "rb")) == NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate NO WINDOW version' in LMM first.\"");
+		break;
+	}
+	fclose(f);
+	
+	// check if serial sensitivity configuration was just created
+	*choice=0;
+	if(findexSens > 0)
+		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default yes -title \"Sensitivity Analysis\" -message \"A sequential sensitivity set of configuration files was just created and will be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
+	if(*choice == 2)
+		break;
+	
+	// get configuration files to use
+	int ffirst, fnext;
+	if(*choice == 1)					// use current configuration files
+	{
+		ffirst=1;
+		fnext=findexSens;
+		lab1=simul_name;
+		lab2=path;
+		Tcl_SetVar(inter, "path", path, 0);
+	}
+	else								// ask for first configuration file
+	{
+		sprintf(msg, "set res %s_1.lsd", simul_name);	// default name
+		cmd(inter, msg);
+		if(strlen(path) > 0)							// default path
+			sprintf(msg, "set path \"%s\"", path);
+		else
+			sprintf(msg, "set path [pwd]");
+		cmd(inter, msg);
+		// open dialog box to get file name & folder
+		sprintf(msg, " set bah [tk_getOpenFile -title \"Load first sensitivity analysis configuration file\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
+		cmd(inter, msg);
+		cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; set choice [string range $res $numpos end]; set res [string range $res 0 [expr $numpos - 2]]} {set choice 0}");
+		if(*choice == 0)
+			break;
+		ffirst=*choice;
+		lab1=(char *)Tcl_GetVar(inter, "res",0);
+		lab2=(char *)Tcl_GetVar(inter, "path",0);
+		f=NULL;
+		do									// search for all sequential files
+		{
+			if(strlen(lab2) == 0)			// default path
+				sprintf(lab, "%s_%d.lsd", lab1, (*choice)++);
+			else
+				sprintf(lab, "%s/%s_%d.lsd", lab2, lab1, (*choice)++);
+			if(f != NULL) fclose(f);
+			f=fopen(lab, "r");
+		}
+		while(f != NULL);
+		fnext=*choice - 1;
+	}
+
+	// confirm number of cores to use
+	cmd(inter, "toplevel .s");
+	cmd(inter, "wm transient .s .");
+	cmd(inter, "wm title .s \"Num. of CPU cores\"");
+	cmd(inter, "frame .s.i -relief groove -bd 2");
+	cmd(inter, "label .s.i.l -text \"Type the number of parallel processes to use.\"");
+	cmd(inter, "set cores \"4\"");
+	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable cores");
+	cmd(inter, ".s.i.e selection range 0 end");
+	cmd(inter, "label .s.i.w -text \"Using a number higher than the number\nof processors/cores is not recommended.\"");
+	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
+	cmd(inter, "button .s.ok -text Ok -command {set choice $cores}");
+	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
+	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
+	cmd(inter, "bind .s <KeyPress-Return> {set choice $cores}");
+	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
+	cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+	*choice=-1;
+	cmd(inter, "focus .s.i.e");
+	while(*choice==-1)
+		Tcl_DoOneEvent(0);
+	cmd(inter, "destroy .s");
+	if(*choice==0)
+		break;
+	param=*choice;
+	if(param < 1 || param > 12) param=4;
+	
+	// create batch file
+	char wpath[300];
+	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
+	if(*choice == 1)
+		sprintf(lab, "%s/%s_%d_%d.bat", lab2, lab1, ffirst, fnext - 1);
+	else
+		sprintf(lab, "%s/%s_%d_%d.sh", lab2, lab1, ffirst, fnext - 1);
+	f=fopen(lab, "wt");
+	if(*choice == 1)						// Windows header
+	{
+		fprintf(f, "@echo off\nrem Sequential sensitivity batch generated by Lsd\n");
+		fprintf(f, "echo Processing %d configuration files in up to %d parallel processes...\n", fnext - ffirst, param);
+
+		// convert to Windows folder separators (\)
+		for(i=0; i < strlen(ch); i++) 
+			if(ch[i] == '/') ch[i]='\\';
+		strcpy(wpath, lab2);
+		for(i=0; i < strlen(wpath); i++) 
+			if(wpath[i] == '/') wpath[i]='\\';
+	}
+	else									// Unix header
+	{
+		fprintf(f, "#!/bin/bash\n# Sequential sensitivity script generated by Lsd\n");
+		fprintf(f, "echo \"Processing %d configuration files in up to %d parallel processes...\"\n", fnext - ffirst, param);
+	}
+	
+	if((fnext - ffirst) > param)			// if possible, work in blocks
+	{
+		num=(fnext - ffirst)/param;			// base number of cases per core
+		sl=(fnext - ffirst)%param;			// remaining cases per core
+		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
+		{
+			if(*choice == 1)				// Windows
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, wpath, lab1, j);
+			else							// Unix
+				fprintf(f, "%s -f %s/%s -s %d -e %d >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, lab2, lab1, j);
+			 j <= sl ? i+=num+1 : i+=num;
+		}
+	}
+	else									// if not, do one by one
+		for(i=ffirst, j=1; i < fnext; i++, j++)
+			if(*choice == 1)				// Windows
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, wpath, lab1, i);
+			else							// Unix
+				fprintf(f, "%s -f %s/%s_%d.lsd >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, lab2, lab1, i);
+	
+	if(*choice == 1)						// Windows closing
+	{
+		fprintf(f, "echo %d log files being generated: %s_1.log to %s_%d.log .\n", j - 1, lab1, lab1, j - 1);
+		fclose(f);
+	}
+	else									// Unix closing
+	{
+		fprintf(f, "echo \"%d log files being generated: %s_1.log to %s_%d.log .\"\n", j - 1, lab1, lab1, j - 1);
+		fprintf(f, "echo \"This terminal shell must not be closed during processing.\"\n");
+		fclose(f);
+		chmod(lab, ACCESSPERMS);			// set executable perms
+	}
+
+	// ask if script/batch should be executed right away
+	cmd(inter, "set answer [tk_messageBox -type okcancel -icon question -default cancel -title \"Sensitivity Analysis\" -message \"The script/batch for running the sensitivity configuration files was saved.\n\nPress 'Ok' if you want to start the script/batch as separated processes right now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}"); 
+	if(*choice == 2)
+		break;
+
+	// start the job
+	sprintf(msg, "set path \"%s\"", lab2);
+	cmd(inter, msg);
+	cmd(inter, "cd $path");
+
+	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
+	if(*choice == 1)						// Windows?
+		sprintf(msg, "exec %s &", lab);
+	else									// Unix
+		sprintf(msg, "exec %s &", lab);
+    cmd(inter, msg);
+
+	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"The sensitivity analysis script/batch was started in separated processes.\\n\\nThe results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
+break;
+
+//Start NO WINDOW job as a separate background process
+case 69:
+	cmd(inter, "destroy .l .m");
+
+	// check a model is already loaded
+	if(struct_loaded==0)
+	{ 
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start NO WINDOW job\" -message \"There is no model loaded.\\n\\nPlease select one before trying to start a NO WINDOW job.\"");
+		break;
+	}
+
+	// confirm overwriting current configuration
+	cmd(inter, "button .ok -text Ok -command {set choice 1}");
+	cmd(inter, "button .cancel -text Cancel -command {set choice 2}");
+	cmd(inter, "label .war1 -text \"Starting NO WINDOW job for the model configuration:\"");
+	sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
+	cmd(inter, ch);
+	sprintf(ch, "label .war3 -text \"Number of simulations: %d\"", sim_num);
+	cmd(inter, ch);
+	sprintf(ch, "label .war4 -text \"Time steps (max): %d\"", max_step);
+	cmd(inter, ch);
+	cmd(inter, "label .war5 -text \"Results file(s) (single simulation):\"");
+	cmd(inter, "label .war7 -text \"Total file (last steps):\"");
+	sprintf(ch, "label .war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
+	cmd(inter, ch);
+	cmd(inter, "label .tosave -text \"\\nYou are going to overwrite the existing configuration file\\nand any results files in the destination folder\\n\"");
+	
+	if(sim_num>1)	// multiple runs case
+	{
+		sprintf(ch, "label .war6 -text \"from %s_%d.res to %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
+		cmd(inter, ch);
+		cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .war7 .war8 .tosave\"");
+	}
+	else			// single run case
+	{
+		sprintf(ch, "label .war6 -text \"%s_%d.res\"", simul_name, seed);
+		cmd(inter, ch);
+		cmd(inter, "set wind \".war1 .war2 .war4 .war5 .war6 .war7 .war8 .tosave\"");
+	}
+	
+	cmd(inter, "foreach i $wind {pack $i}; pack .ok .cancel; ");
+	cmd(inter, "bind . <KeyPress-Return> {.ok invoke}; bind . <KeyPress-Escape> {.cancel invoke}");
+	cmd(inter, "focus -force .");
+	set_window_size();
+	
+	*choice=0;
+	while(*choice==0)
+		Tcl_DoOneEvent(0);
+	
+	cmd(inter, "bind . <KeyPress-Return> {}; bind . <KeyPress-Escape> {}");
+	cmd(inter, "foreach i $wind {destroy $i}; destroy .ok .cancel");
+	
+	if(*choice==2)
+		break;
+
+	// save the current configuration
+	for(n=r; n->up!=NULL; n=n->up);
+	blueprint->empty();			    // update blueprint to consider last changes
+	set_blueprint(blueprint, n);
+
+	if(strlen(path)>0)
+		sprintf(struct_file, "%s/%s.lsd", path, simul_name);
+	else
+		sprintf(struct_file, "%s.lsd", simul_name);
+	f=fopen(struct_file, "w");
+	if(f==NULL)
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Configuration file  cannot be opened.\n\nCheck if the file is set READ-ONLY.");
+		break;
+	}
+	else							// run save procedure
+	{
+		strcpy(lab, "");
+		for(cur=r; cur->up!=NULL; cur=cur->up);
+		cur->save_struct(f,lab);
+		fprintf(f, "\nDATA\n");
+		cur->save_param(f);
+		fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed, max_step, equation_name, name_rep);
+		fprintf(f, "\nDESCRIPTION\n\n");
+		save_description(cur, f);
+		fprintf(f, "\nDOCUOBSERVE\n");
+		for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
+			if(cur_descr->observe=='y')     
+				fprintf(f, "%s\n",cur_descr->label);
+		fprintf(f, "\nEND_DOCUOBSERVE\n\n");
+		fprintf(f, "\nDOCUINITIAL\n");
+		for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
+			if(cur_descr->initial=='y')     
+				fprintf(f, "%s\n",cur_descr->label);
+		fprintf(f, "\nEND_DOCUINITIAL\n\n");
+		save_eqfile(f);
+		fclose(f);
+	}
+
+	// check for existing NW executable
+	sprintf(lab, "%s/%s", exec_path, exec_file);		// form full executable name
+	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
+	if(*choice == 1)
+	{
+		// remove Windows extension, if present
+		if((lab1 = strstr(lab, ".exe")) != NULL)
+			lab1[0]='\0';
+		else
+			if((lab1 = strstr(lab, ".EXE")) != NULL) 
+				lab1[0]='\0';
+			
+		strcat(lab, "NW.exe");							// add Windows ending
+	}
+	else
+		strcat(lab, "NW");								// add Unix ending
+
+	if ((f=fopen(lab, "rb")) == NULL) 
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start NO WINDOW job\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate NO WINDOW version' in LMM first.\"");
+		break;
+	}
+	fclose(f);
+	
+	// start the job
+	if(strlen(path)>0)
+		sprintf(msg, "set path \"%s\"", path);
+	else
+		sprintf(msg, "set path [pwd]");
+	cmd(inter, msg);
+	cmd(inter, "cd $path");
+
+	if(*choice == 1)							// Windows?
+		sprintf(msg, "exec %s -f %s >& %s.log  &", lab, struct_file, simul_name);
+	else										// Unix
+		sprintf(msg, "exec %s -f %s >& %s.log  &", lab, struct_file, simul_name);
+    cmd(inter, msg);
+
+	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start NO WINDOW job\" -message \"The current configuration was started as a NO WINDOW background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
+	cmd(inter, msg);
+break;
+
 default:
 sprintf(ch,"\nChoice %d not recognized\n",*choice);
 plog(ch);
