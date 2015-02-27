@@ -5661,7 +5661,7 @@ make_makefileNW();
 cmd(inter, "if { [file exist src] ==1 } {set choice 1} {file mkdir src; set choice 0}");
 
 //cmd(inter, "set lfile [glob $RootLsd/$LsdSrc/*.cpp]");
-cmd(inter, "set lfile {$RootLsd/$LsdSrc/lsdmain.cpp $RootLsd/$LsdSrc/main_gnuwin.cpp $RootLsd/$LsdSrc/file.cpp $RootLsd/$LsdSrc/util.cpp $RootLsd/$LsdSrc/variab.cpp $RootLsd/$LsdSrc/object.cpp $RootLsd/$LsdSrc/lsdmain.cpp $RootLsd/$LsdSrc/report.cpp $RootLsd/$LsdSrc/fun_head.h $RootLsd/$LsdSrc/decl.h } ");
+cmd(inter, "set lfile {$RootLsd/$LsdSrc/lsdmain.cpp $RootLsd/$LsdSrc/main_gnuwin.cpp $RootLsd/$LsdSrc/file.cpp $RootLsd/$LsdSrc/util.cpp $RootLsd/$LsdSrc/variab.cpp $RootLsd/$LsdSrc/object.cpp $RootLsd/$LsdSrc/nets.cpp $RootLsd/$LsdSrc/report.cpp $RootLsd/$LsdSrc/fun_head.h $RootLsd/$LsdSrc/decl.h } ");
 
 //cmd(inter, "foreach i $lfile {file copy -force \"$i\" src}");
 
@@ -5674,6 +5674,7 @@ cmd(inter, "file copy -force $RootLsd/$LsdSrc/variab.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/object.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/report.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/util.cpp src");
+cmd(inter, "file copy -force $RootLsd/$LsdSrc/nets.cpp src");
 
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/fun_head.h src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/decl.h src");
@@ -5841,9 +5842,9 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 	"//.*",
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
-	"v\\[\[0-9]{1,2}]|cur\[0-9]?",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(?=[ ]*\\()|SUM|SUM[LS]*|STAT(S)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*|SEARCH_CND[LS]*|SEARCH(S)?|INI_TSEARCHS|TSEARCH_CNDS|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice",
-	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
+	"v\\[\[0-9]{1,2}]|cur(l)?\[0-9]?",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(?=[ ]*\\()|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
+	"auto|const|double|float|int(?!\[a-zA-Z0-9])|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
 

@@ -217,6 +217,8 @@ extern int lattice_type;
 extern int no_res;
 extern object *blueprint;
 extern sense *rsense;
+extern long nodesSerial;	// network node serial number global counter
+
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
 int findexSens=0;				// index to sequential sensitivity configuration filenames
@@ -2224,6 +2226,7 @@ case 38: //quick reload
 	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
 	  rsense=NULL;
  	  findexSens=0;
+	  nodesSerial=0;				// network node serial number global counter
     }
 
 if(*choice==17)
@@ -2697,6 +2700,7 @@ case 20:
 	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
 	  rsense=NULL;
  	  findexSens=0;
+	  nodesSerial=0;				// network node serial number global counter
       add_description("Root", "Object", "(no description available)");      
       cmd(inter, "catch {unset ModElem}");
       break;

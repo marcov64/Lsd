@@ -76,6 +76,37 @@ bool counter_updated;
 mnode *mn;
 };
 
+// network data structures
+struct netLink		// individual outgoing link
+{
+	long serTo;		// destination node serial number (fixed)
+	object *ptrTo;	// pointer to destination number
+	object *ptrFrom;// network node containing the link
+	netLink *prev;	// pointer to next link (NULL if first)
+	netLink *next;	// pointer to next link (NULL if last)
+	double weight;	// link weight
+	double probTo;	// destination node draw probability
+	
+	netLink( object *origNode, object *destNode, double linkWeight = 0, double destProb = 1 ); 
+					// constructor
+	~netLink( void ); // destructor
+};
+
+struct netNode		// network node data
+{
+	long id;		// node unique ID number (reorderable)
+	char *name;		// node textual name (not required)
+	long serNum;	// node serial number (initial order, fixed)
+	long nLinks;	// number of arcs FROM node
+	netLink *first;	// first link in the linked list of links
+	netLink *last;	// last link in the linked list of links
+	double prob;	// assigned node draw probability
+	
+	netNode( long nodeId = -1, char const nodeName[] = "", double nodeProb = 1 );
+					// constructor
+	~netNode( void );// destructor
+};
+
 class object
 {
 public:
@@ -89,6 +120,8 @@ bridge *b;
 
 int acounter;
 int to_compute;
+
+netNode *node;		// pointer to network node data structure
 
 double cal(object *caller,  char const *l, int lag);
 double cal( char const *l, int lag);
@@ -147,6 +180,28 @@ double interact(char const *text, double v, double *tv);
 void initturbo(char const *label, double num);//set the structure to use the turbosearch
 object *turbosearch(char const *label, double tot, double num);
 
+// set the network handling methods
+netNode *add_node_net( long id, char const *nodeName, double prob );
+void delete_node_net( void );
+void name_node_net( char const *nodeName );
+void stats_net( char const *lab, double *r );
+object *search_node_net( char const *lab, long id ); 
+object *draw_node_net( char const *lab ); 
+object *shuffle_nodes_net( char const *lab );
+netLink *add_link_net( object *destPtr, double weight, double probTo );
+void delete_link_net( netLink *ptr );
+netLink *search_link_net( long id ); 
+long read_file_net( char const *lab, char const *dir, char const *base_name, char const *ext, int serial );
+long write_file_net( char const *lab, char const *dir, char const *base_name, char const *ext, int serial );
+long init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 );
+long init_discon_net( char const *lab, long numNodes );
+long init_random_dir_net( char const *lab, long numNodes, long numLinks );
+long init_random_undir_net( char const *lab, long numNodes, long numLinks );
+long init_uniform_net( char const *lab, long numNodes, long outDeg );
+long init_circle_net( char const *lab, long numNodes, long outDeg );
+long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
+long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
+long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
 };
 
 struct lsdstack

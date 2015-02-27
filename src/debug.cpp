@@ -210,9 +210,10 @@ cmd(inter, "button .b.move.down -text \"Down\" -command {set choice 6} -underlin
 cmd(inter, "button .b.move.prev -text \"Prev.\" -command {set choice 12} -underline 0");
 cmd(inter, "button .b.move.call -text \"Caller\" -command {set choice 9} -underline 0");
 cmd(inter, "button .b.move.hook -text \"Hook\" -command {set choice 21} -underline 0");
+cmd(inter, "button .b.move.net -text \"Network\" -command {set choice 22} -underline 3");
 cmd(inter, "button .b.move.search -text \"Search for\" -command {set choice 10} -underline 7");
 
-cmd(inter, "pack .b.move.up .b.move.broth .b.move.hypern .b.move.last .b.move.down .b.move.prev .b.move.call .b.move.hook .b.move.search -side left");
+cmd(inter, "pack .b.move.up .b.move.broth .b.move.hypern .b.move.last .b.move.down .b.move.prev .b.move.call .b.move.hook .b.move.net .b.move.search -side left");
 cmd(inter, "pack .b.act .b.move -side top");
 
 
@@ -239,6 +240,7 @@ cmd(inter, "bind . <Left> {.b.move.prev invoke}");
 cmd(inter, "bind . <KeyPress-a> {.b.act.an invoke}");
 cmd(inter, "bind . <KeyPress-i> {.b.act.until invoke}");
 cmd(inter, "bind . <KeyPress-h> {set choice 21}");
+cmd(inter, "bind . <KeyPress-w> {set choice 22}");
 
 deb_show(r, inter);
 
@@ -300,6 +302,7 @@ cmd(inter, "bind . <KeyPress-a> {}");
 cmd(inter, "bind . <KeyPress-l> {}");
 cmd(inter, "bind . <KeyPress-i> {}");
 cmd(inter, "bind . <KeyPress-h> {}");
+cmd(inter, "bind . <KeyPress-w> {}");
 cmd(inter, "bind . <Up> {}");
 cmd(inter, "bind . <Down> {}");
 cmd(inter, "bind . <Left> {}");
@@ -382,6 +385,56 @@ case 21: if( r->hook!=NULL)
 			 choice=0;
 
 			break;
+			
+//Show network node attributes
+case 22:
+	choice=0;
+	if(r->node == NULL)
+		break;
+	
+	cmd(inter, "set a [winfo exists .a]");
+	cmd(inter, "if { $a==1} {destroy .a} {}");
+	cmd(inter, "toplevel .a");
+	cmd(inter, "label .a.l1 -text \"Node id:\"");
+	sprintf(msg, "label .a.l2 -foreground red -text \"%d\"", r->node->id);
+	cmd(inter, msg); 
+	cmd(inter, "label .a.l3 -text \"Num. links out:\"");
+	sprintf(msg, "label .a.l4 -foreground red -text \"%d\"", r->node->nLinks);
+	cmd(inter, msg); 
+	cmd(inter, "label .a.l5 -text \"Outgoing links:\"");
+	cmd(inter, "label .a.l6 -text \"dest. id          (weight)\" -foreground red");
+	if(r->node->name != NULL)		// is node named?
+	{
+		cmd(inter, "label .a.l7 -text \"Node name:\"");
+		sprintf(msg, "label .a.l8 -foreground red -text \"%s\"", r->node->name);
+		cmd(inter, msg); 
+		cmd(inter, "pack .a.l7 .a.l8 .a.l1 .a.l2 .a.l3 .a.l4 .a.l5");
+	}
+	else
+		cmd(inter, "pack .a.l1 .a.l2 .a.l3 .a.l4 .a.l5");
+	cmd(inter, "pack .a.l6 -anchor w");
+	cmd(inter, "text .a.t -width 15 -yscrollcommand \".a.yscroll set\" -wrap word");
+	cmd(inter, "scrollbar .a.yscroll -command \".a.t yview\"");
+	cmd(inter, "button .a.c -text Close -command {destroy .a}"); 
+	cmd(inter, "pack .a.yscroll -side right -fill y");
+	cmd(inter, "pack .a.t -expand yes -fill both");
+	cmd(inter, "pack .a.c");
+	cmd(inter, "wm title .a \"Network\""); 
+	cmd(inter, "wm transient .a ."); 
+	cmd(inter, "raise .a");
+	cmd(inter, ".a.t tag configure v -foreground red");
+	
+	for(netLink *curLnk=r->node->first; curLnk != NULL; curLnk=curLnk->next)
+	{
+		sprintf(msg, ".a.t insert end \"%d\"", curLnk->ptrTo->node->id);
+		cmd(inter, msg);
+		if(curLnk->weight != 0)
+			sprintf(msg, ".a.t insert end \"\t(%g)\n\"", curLnk->weight);
+		else
+			sprintf(msg, ".a.t insert end \"\n\"");
+		cmd(inter, msg);
+	}
+break;
 
 case 12:if(r->up==NULL)
           {choice=0;

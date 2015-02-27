@@ -39,6 +39,8 @@ extern object *root;
 extern int seed;
 extern long idum;
 extern int sim_num;
+extern char *simul_name;	// configuration name being run (for saving networks)
+
 
 void error(char *);
 double log(double v);
@@ -102,6 +104,7 @@ int i,j,h,k; \
 double v[1000]; \
 object register *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
 cur=cur1=cur2=cur3=cur4=cur5=cyccur=NULL; \
+netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 if(quit==2) \
  return -1; \
 p=up; \
@@ -226,11 +229,11 @@ for(;O!=NULL;O=go_brother(O))
 #define SEARCHS(Y,X) Y->search((char*)X)
 
 // Seeds turbo search: O=pointer to container object where searched objects are
-//                     X=name of variable contained inside the searched objects
-#define INI_TSEARCHS(O,X) O->initturbo((char*)X,0)
-// Performs turbo search: O, X as in INI_TSEARCHS
-//                        Y=value of the variable X to be searched for
-#define TSEARCH_CNDS(O,X,Y) O->turbosearch((char*)X,0,Y)
+//                     X=name of object contained inside the searched objects
+#define TSEARCHS_INI(O,X) O->initturbo((char*)X,0)
+// Performs turbo search: O, X as in TSEARCHS_INI
+//                        Y=position of object X to be searched for
+#define TSEARCHS(O,X,Y) O->turbosearch((char*)X,0,Y)
 
 #define SORT(X,Y,Z) p->lsdqsort((char*)X,(char*)Y,(char*)Z)
 #define SORTS(O,X,Y,Z) O->lsdqsort((char*)X,(char*)Y,(char*)Z)
@@ -272,6 +275,91 @@ for(;O!=NULL;O=go_brother(O))
 
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
+
+// NETWORK MACROS
+
+// create a network using as nodes object label X, located inside object O,
+// applying generator Y, number of nodes Z, out-degree W and 
+// parameter V
+#define NETWORK_INI(X,Y,Z,W,V) (p->init_stub_net((char*)X,(char*)Y,(long)Z,(long)W,V))
+#define NETWORKS_INI(O,X,Y,Z,W,V) (O==NULL?0.:O->init_stub_net((char*)X,(char*)Y,(long)Z,(long)W,V))
+
+// read a network in Pajek format from file named Y/Z_xx.net (xx is the current seed) 
+// using as nodes object with label X located inside object O
+#define NETWORK_LOAD(X,Y,Z) (p->read_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+#define NETWORKS_LOAD(O,X,Y,Z) (O==NULL?0.:O->read_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+
+// save a network in Pajek format to file from the network formed by nodes
+// with label X located inside object O with filename Y/Z (file name is Y/Z_xx.net)
+#define NETWORK_SAVE(X,Y,Z) (p->write_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+#define NETWORKS_SAVE(O,X,Y,Z) (O==NULL?0.:O->write_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+
+// shuffle the nodes of a network composed by objects with label X, contained in O
+#define SHUFFLE(X) p->shuffle_nodes_net((char*)X);
+#define SHUFFLES(O,X) if(O!=NULL)O->shuffle_nodes_net((char*)X);
+
+// random draw one node from a network composed by objects with label X, contained in O
+#define RNDDRAW_NET(X) (p->draw_node_net((char*)X))
+#define RNDDRAWS_NET(O,X) (O==NULL?NULL:O->draw_node_net((char*)X))
+
+// get the number of nodes of network based on object X, contained in O
+#define STAT_NET(X) p->stats_net((char*)X,v);
+#define STATS_NET(O,X) if(O!=NULL)O->stats_net((char*)X,v);
+
+// search node objects X, contained in O, for first occurrence of id=Y
+#define SEARCH_NET(X,Y) (p->search_node_net((char*)X,(long)Y))
+#define SEARCHS_NET(O,X,Y) (O==NULL?NULL:O->search_node_net((char*)X,(long)Y))
+
+// get the id of the node object O
+#define V_NODEID (p->node==NULL?0.:(double)p->node->id)
+#define VS_NODEID(O) (O==NULL?0.:O->node==NULL?0.:(double)O->node->id)
+
+// get the name of the node object O
+#define V_NODENAME (p->node==NULL?"":p->node->name==NULL?"":p->node->name)
+#define VS_NODENAME(O) (O==NULL?"":O->node==NULL?"":O->node->name==NULL?"":O->node->name)
+
+// set the id of the node object O
+#define WRITE_NODEID(X) if(p->node!=NULL)p->node->id=(double)X;
+#define WRITES_NODEID(O,X) if(O!=NULL)if(O->node!=NULL)O->node->id=(double)X;
+
+// set the name of the node object O to X
+#define WRITE_NODENAME(X) p->name_node_net((char*)X);
+#define WRITES_NODENAME(O,X) if(O!=NULL)O->name_node_net((char*)X);
+
+// get the number of outgoing links from object O
+#define STAT_NODE p->node==NULL?v[0]=0.:v[0]=(double)p->node->nLinks;
+#define STATS_NODE(O) O==NULL?v[0]=0.:O->node==NULL?v[0]=0.:v[0]=(double)O->node->nLinks;
+
+// add a link from object O to object X, both located inside same parent, same label
+// and optional weight Y
+#define ADDLINK(X) (p->add_link_net(X,0,1))
+#define ADDLINKS(O,X) (O==NULL?NULL:O->add_link_net(X,0,1))
+#define ADDLINKW(X,Y) (p->add_link_net(X,Y,1))
+#define ADDLINKWS(O,X,Y) (O==NULL?NULL:O->add_link_net(X,Y,1))
+
+// delete the link pointed by O
+#define DELETELINK(O) if(O!=NULL)O->ptrFrom->delete_link_net(O);
+
+// search outgoing links from object O for first occurrence of id=X
+#define SEARCH_LINK(X) (p->search_link_net((long)X))
+#define SEARCHS_LINK(O,X) (O==NULL?NULL:O->search_link_net((long)X))
+
+// get the destination object of link pointed by O
+#define LINKTO(O) (O==NULL?NULL:O->ptrTo)
+
+// get the destination object of link pointed by O
+#define LINKFROM(O) (O==NULL?NULL:O->ptrFrom)
+
+// get the weight of link pointed by O
+#define VS_WEIGHT(O) (O==NULL?0.:O->weight)
+
+// set the weight of link pointed by O to X
+#define WRITES_WEIGHT(O,X) if(O!=NULL)O->weight=X;
+
+// cycle through set of links of object C, using link pointer O
+#define CYCLE_LINK(O) if(p->node==NULL)error_cycle("invalid node");else O=p->node->first;for(;O!=NULL;O=O->next)
+#define CYCLES_LINK(C,O) if(C==NULL)error_cycle("invalid node");else if(C->node==NULL)error_cycle("invalid node");else O=C->node->first;for(;O!=NULL;O=O->next)
+
 
 
 

@@ -50,6 +50,10 @@ descendant of the same type one after another
 pointer to the next object in the linked chain of the descendant of the parent
 of this object.
 
+- network *node;
+pointer to the data structure containing the network links from the object
+(see nets.cpp for the details)
+
 The drawing below sketches one object. All the object of the same chain
 same parent, that is up. They can only provide a way to continue along the
 linked chain (via next). The only way to "go back" is by starting again: go
@@ -309,6 +313,9 @@ Deletes all the contents of the object, freeing its memory. Used in delete_obj
 just before suicide with
 delete this;
 
+METHODS FOR NETWORK OPERATION
+
+see nets.cpp
 
 ****************************************************/
 
@@ -630,6 +637,7 @@ strcpy(label, _label);
 to_compute=1;
 b=NULL;
 hook=NULL;
+node=NULL;	// not part of a network yet
 return 0;
 }
 
@@ -1410,6 +1418,11 @@ delete[] label;
 label=NULL;
 b=NULL; 
 
+if(node!=NULL)		// network data to delete?
+{
+	delete node;
+	node=NULL;
+}
 }
 
 /****************************************************
@@ -1538,6 +1551,12 @@ sprintf(msg, "\nError adding new object(s): object '%s' does not contain objects
  return NULL;
 }
 
+//check if the objects are nodes in a network (avoid using EX from blueprint)
+bool net=false;
+cur=search(lab);
+if(cur!=NULL && cur->node!=NULL)
+	net=true;
+
 last=NULL;//pointer of the object to link to, signalling also the special first case
 for(i=0; i<n; i++)
 {
@@ -1552,6 +1571,19 @@ if(cur==NULL)
  return NULL;
  }
 cur->init(this, lab);
+
+if(net)							// if objects are nodes in a network
+{
+	cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
+	if(cur->node==NULL)
+	{
+		sprintf(msg, "\nOut of memory");
+		plog(msg);
+		error_hard();
+		quit=2;
+		return NULL;
+	}
+}
 
 //create its variables and initialize them
 for(cv=ex->v; cv!=NULL; cv=cv->next)  
@@ -1733,6 +1765,7 @@ delete this;
 lsdqsort
 Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
+if var is NULL, try sorting using the network node id
 ****************************************************/
 
 void object::lsdqsort(char const *obj, char const *var, char const *direction)
@@ -1742,6 +1775,9 @@ bridge *cb;
 variable *cur_v;
 int num, flag_f, i;
 
+bool useNodeId = var==NULL?true:false;		// sort on node id and not on variable
+if ( ! useNodeId )
+{
 cur_v=search_var(this, var);
 if(cur_v==NULL)
  {sprintf(msg, "Error: variable %s not found in sort", var);
@@ -1768,6 +1804,25 @@ if(cur->up==NULL)
  }
 
 cb=cur_v->up->up->b;
+}
+else									// pick network object to sort
+{
+	cur=search( obj );
+	if ( cur != NULL )
+		if ( cur->node != NULL )		// valid network node?
+			cb=cur->up->b;
+		else
+		{
+			sprintf(msg, "\nError: object %s has no network data structure", obj);
+			plog(msg);
+			error_hard();
+			quit=2;
+			return;
+		}
+	else
+		cb=NULL;
+}
+
 for(; cb!=NULL && strcmp(cb->blabel, obj); cb=cb->next);
 if(cb==NULL)
  {sprintf(msg, "Error in sorting: objext '%s' not contained in object '%s'. ", obj, label);
@@ -1824,11 +1879,17 @@ Comparison function used in lsdqsort
 *************************/
 int sort_function_up(  const void *a, const void *b)
 {
+if(qsort_lab!=NULL)		// variable defined?
 if( (*(object **)a)->cal(qsort_lab, 0)< (*(object **)b)->cal(qsort_lab, 0) )
  return -1;
 else
  return 1;
 
+// handles the case of node id comparison
+if( (*(object **)a)->node->id < (*(object **)b)->node->id )
+ return -1;
+else
+ return 1;
 }
 
 /************************
@@ -1836,11 +1897,17 @@ Comparison function used in lsdqsort
 *************************/
 int sort_function_down( const void *a, const void *b)
 {
+if(qsort_lab!=NULL)		// variable defined?
 if( (*(object **)a)->cal(qsort_lab, 0)> (*(object **)b)->cal(qsort_lab, 0) )
  return -1;
 else
  return 1;
 
+// handles the case of node id comparison
+if( (*(object **)a)->node->id > (*(object **)b)->node->id )
+ return -1;
+else
+ return 1;
 }
 
 /****************************************************
