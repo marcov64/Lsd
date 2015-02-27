@@ -1197,9 +1197,10 @@ sscanf(lab1, "%s", lab_old);
 
 cmd(inter, "frame .b");
 cmd(inter, "button .b.ok -text Continue -command {set choice 1}");
+cmd(inter, "button .b.del -text DELETE -command {set choice 3}");
 cmd(inter, "button .b.cancel -text Cancel -command {set choice 2}");
 cmd(inter, "button .b.help -text Help -command {LsdHelp menumodel.html#ChangeObjName}");
-cmd(inter, "pack .b.ok .b.cancel .b.help -side left -fill x -expand yes");
+cmd(inter, "pack .b.ok .b.del .b.cancel .b.help -side left -fill x -expand yes");
 
 cmd(inter, "frame .b1");
 sprintf(msg, "set to_compute %d",r->to_compute);
@@ -1273,12 +1274,21 @@ cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 
 cmd(inter, "set text_description \"[.desc.f.text get 1.0 end]\"");
 cmd(inter, "destroy .h .b1 .b .desc");
-if(*choice==1|| *choice==5)
+if(*choice==1|| *choice==5 || *choice==3)
 {
 
 change_descr_text(lab_old);
 
-if(*choice==5)
+if(*choice==5 || *choice==3)
+{
+if(*choice==3)
+{
+	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n\n$lab\"]");
+	 cmd(inter, "switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
+	 if(*choice == 1)				// simulate a name change
+		cmd(inter, "set lab \"\"");	// to empty string (delete)
+}
+else
 {
 cmd(inter, "label .l -text \"New label for Object $lab\"");
 cmd(inter, "entry .e -width 30 -textvariable lab");
@@ -1295,6 +1305,7 @@ set_window_size();
 while(*choice==0)
  Tcl_DoOneEvent(0);
 cmd(inter, "destroy .l .e .b");
+}
  if(*choice==2)
   {
    *choice=0;
@@ -1475,11 +1486,12 @@ cmd(inter, ch);
  cmd(inter, "button $w.b.eq -text \"See code\" -command {set done 3}");
  cmd(inter, "button $w.b.auto_doc -text \"Auto Docum.\" -command {set done 9}");
  cmd(inter, "button $w.b.us -text \"Eq. using this element\" -command {set done 4}");
- cmd(inter, "button $w.b.using -text \"Elements used in this equation\" -command {set done 7}");
+ cmd(inter, "button $w.b.using -text \"Elements used\" -command {set done 7}");
+ cmd(inter, "button $w.b.del -text \"DELETE element\" -command {set done 10}");
  if(!strcmp(cur_descr->type, "Parameter"))
-   cmd(inter, "pack $w.b.auto_doc $w.b.us -side left -expand yes");
+   cmd(inter, "pack $w.b.auto_doc $w.b.us $w.b.del -side left -expand yes");
  else
-   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using -side left -expand yes");
+   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using $w.b.del -side left -expand yes");
  cmd(inter, "pack $w.f $w.b -fill x -expand yes");
  if(cv->param==1 || cv->num_lag>0)
   {
@@ -1627,7 +1639,19 @@ if(done==8)
  {
  return r;
  }
-if(done==5)
+if(done==5||done==10)	// treat also express delete button
+ {
+ if(done==10)
+ {
+	 cmd(inter, "set answer [tk_messageBox -title \"Delete Element\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n\n$vname\"]");
+	 cmd(inter, "switch -- $answer {ok {set done 1} cancel {set done 2}}");
+	 if(done == 1)
+	 {
+		nature=3;												// simulate a name change 
+		cmd(inter, "set vname \"\"; set nature 3; set numlag 0");// to empty string (delete)
+	 }
+ }
+ else					// original handling of done=5
  {
  
  cv=r->search_var(NULL, lab_old);
@@ -1674,6 +1698,7 @@ if(done==5)
  cmd(inter, "bind . <KeyPress-Escape> {.b.esc invoke}"); 
  done=0;
  set_window_size();
+ }
  here_changenature:
  while(done==0)
   Tcl_DoOneEvent(0);
