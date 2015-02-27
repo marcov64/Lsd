@@ -2205,8 +2205,8 @@ loop:
 choice=0;
 cmd(inter, "toplevel .cazzo");
 
+cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {wm iconbitmap .cazzo @$RootLsd/$LsdSrc/lsd.xbm}");
 
-cmd(inter, "wm transient .cazzo .");
 cmd(inter, "wm title .cazzo Error");
 //cmd(inter, "label .cazzo.err.l -text \"Fatal error: see message in Log\"");
 
@@ -2588,6 +2588,7 @@ object *object::turbosearch(char const *label, double tot, double num)
 /*
 Search the object label placed in num position.
 This search exploits the structure created with 'initturbo'
+If tot is 0, previous set value is used
 */
 
 bridge *cb;
@@ -2598,15 +2599,15 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
    #ifndef NO_WINDOW
+   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
      cmd(inter, msg); 
-   #else
      plog(msg);
-   #endif    
    
+   #else
     sprintf(msg, "Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'",stacklog->label, label); 
 	 plog(msg);
+   #endif    
     error_hard();
 	 quit=2;
     return NULL;
@@ -2614,15 +2615,15 @@ if(cb==NULL)
 
 if(cb->mn==NULL)
  {
-    sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
    #ifndef NO_WINDOW
+    sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
      cmd(inter, msg); 
-   #else
      plog(msg);
-   #endif    
    
+   #else
     sprintf(msg, "Error in equation for '%s' when searching for '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.",stacklog->label, label); 
 	 plog(msg);
+   #endif    
     error_hard();
 	 quit=2;
     return NULL;
@@ -2641,7 +2642,7 @@ void object::initturbo(char const *label, double tot=0)
 /*
 Generate the data structure required to use the turbo-search.
 - label must be the label of the descending object whose set is to be organized 
-- num is the total number of objects.
+- num is the total number of objects (if not provided or zero, it's calculated).
 */
 bridge *cb;
 object *cur;
@@ -2652,15 +2653,15 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
    #ifndef NO_WINDOW
+   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
      cmd(inter, msg); 
-   #else
      plog(msg);
-   #endif    
    
+   #else
     sprintf(msg, "Error in equation for '%s' when searching '%s' to initialize Turbosearch: the model does not contain any element '%s' in the expected position.",stacklog->label, label, label); 
 	 plog(msg);
+   #endif    
     error_hard();
 	 quit=2;
     return;

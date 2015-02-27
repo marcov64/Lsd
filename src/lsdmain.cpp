@@ -315,6 +315,7 @@ Tcl_FindExecutable(argv[0]);
 inter=InterpInitWin(tcl_dir);
 eq_file=upload_eqfile();
 lsd_eq_file[0]=(char)NULL;
+/* this does not work with cygwin
 cmd(inter, "pwd");
 sprintf(msg, "%s",*argv);
 if(!strncmp(msg, "//", 2))
@@ -328,6 +329,10 @@ sprintf(msg, "if {[file exists [file dirname \"%s\"]]==1} {cd [file dirname \"%s
 cmd(inter, msg);
 
 cmd(inter, "pwd");
+*/
+// use the new exec_path variable to change to the model directory
+sprintf(msg, "cd \"%s\"", exec_path);
+cmd(inter, msg);
 
 if(inter==NULL)
  myexit(1);

@@ -1288,6 +1288,7 @@ cmd(inter, "button .b.ok -text Ok -command {set choice 1}");
 cmd(inter, "button .b.esc -text Cancel -command {set choice 2}");
 cmd(inter, "pack .b.ok .b.esc -side left");
 cmd(inter, "pack .b");
+cmd(inter, "focus -force .e");
 *choice=0;
 
 set_window_size();
@@ -2052,7 +2053,7 @@ case 11:
 //   cmd(inter, "set answer [tk_messageBox -type yesno -icon question -title \"Quit?\" -message \"Do you really want to exit Lsd?\"]");
   // cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1 } {set choice 0}");
    cmd(inter, "toplevel .w");
-   cmd(inter, "wm transient .warn .");
+   cmd(inter, "wm transient .w .");
    cmd(inter, "wm title .w \"Confirm\"");
    cmd(inter, "label .w.l -text \"Quit Lsd?\" -fg red");
    cmd(inter, "label .w.l1 -text \"You closing this Lsd model program.\\nAll data generated and not saved in files will be lost.\" -justify left");
@@ -2780,6 +2781,8 @@ if(actual_steps>0)
   return r;
  }
 
+		    if(res_g==NULL)
+			  return r;
 			for(n=r; n->up!=NULL; n=n->up);
 			r=n->search(res_g);
       cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");

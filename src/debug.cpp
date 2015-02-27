@@ -869,21 +869,25 @@ sprintf(msg, "label .t.instance -text \"%s\" -justify left", ch);
 cmd(inter, msg);
 cmd(inter, "pack .t.obj .t.instance -side left -anchor s");
 
+cmd(inter, "pack .t -side top");	// fix this frame in the center before proceeding
+
+// adjust spacing to align labels with data and increase columns width to better fill window
+cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set w1 26; set w2 10; set w3 20} {set w1 19; set w2 9; set w3 15}");
 cmd(inter, "frame .tit");
 cmd(inter, "frame .tit.h1");
-cmd(inter, "label .tit.h1.name -text \"     Variable\" -width 17 -anchor w");
-cmd(inter, "label .tit.h1.last -text \"   LastUpdate\" -width 15 -anchor w -foreground red");
-cmd(inter, "label .tit.h1.val -text \"        Value\" -width 10");
+cmd(inter, "label .tit.h1.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w");
+cmd(inter, "label .tit.h1.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w -foreground red");
+cmd(inter, "label .tit.h1.val -text Value -width $w3 -pady 0 -bd 0 -anchor w");
 cmd(inter, "pack .tit.h1.name .tit.h1.val .tit.h1.last -side left");
 
 cmd(inter, "frame .tit.h2");
-cmd(inter, "label .tit.h2.name -text Variable -width 17 -anchor w");
-cmd(inter, "label .tit.h2.last -text LastUpdate -width 15 -anchor w -foreground red");
-cmd(inter, "label .tit.h2.val -text Value -width 6 -anchor w");
+cmd(inter, "label .tit.h2.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w");
+cmd(inter, "label .tit.h2.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w -foreground red");
+cmd(inter, "label .tit.h2.val -text Value -width $w3 -pady 0 -bd 0 -anchor w");
 cmd(inter, "pack .tit.h2.name .tit.h2.val .tit.h2.last -side left -anchor w");
 
 cmd(inter, "pack .tit.h1 .tit.h2 -side left");
-cmd(inter, "pack .t .tit -side top");
+cmd(inter, "pack .tit -side top -anchor w");	// align this frame to the left
 
 cmd(inter, "frame .cc -relief groove -bd 2");
 cmd(inter, "scrollbar .cc.scroll -command \".cc.l yview\"");                                    //before 100
@@ -908,16 +912,16 @@ else
      sprintf(msg, "set val %g", ap_v->val[0]);
      cmd(inter, msg);
 	  cmd(inter, "frame .cc.l.e$i");
-	  strcpy(ch, "label .cc.l.e$i.name -width 20 -pady 0 -anchor w -bd 0 -text ");
+	  strcpy(ch, "label .cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text ");
 	  strcat(ch, ap_v->label);
 	  cmd(inter, ch);
 	  if(ap_v->param==0)
-		 cmd(inter, "label .cc.l.e$i.last -width 5 -pady 0 -bd 0 -text $last -foreground red");
+		 cmd(inter, "label .cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text $last -foreground red");
 	  if(ap_v->param==1)
-		 cmd(inter, "label .cc.l.e$i.last -width 5 -pady 0 -bd 0 -text Par -foreground red");
+		 cmd(inter, "label .cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Par -foreground red");
 	  if(ap_v->param==2)
-		 cmd(inter, "label .cc.l.e$i.last -width 5 -pady 0 -bd 0 -text Fun -foreground red");
-	  cmd(inter, "label .cc.l.e$i.val -width 15 -pady 0 -bd 0 -anchor w -text $val");
+		 cmd(inter, "label .cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Fun -foreground red");
+	  cmd(inter, "label .cc.l.e$i.val -width $w3 -pady 0 -bd 0 -anchor w -text $val");
 
 	  cmd(inter, "pack .cc.l.e$i.name .cc.l.e$i.val .cc.l.e$i.last -side left");
 //	  if(ap_v->param==0)
