@@ -1341,10 +1341,10 @@ char *clean_file(char *filename)
 	return filename;
 }
 
-// remove cygwin path prefix, if present
+// remove cygwin path prefix, if present, and replace \ with /
 char *clean_path(char *filepath)
 {
-	int len=strlen("/cygdrive/");
+	int i, len=strlen("/cygdrive/");
 	if(!strncmp(filepath, "/cygdrive/", len))
 	{
 		char *temp=new char[strlen(filepath) + 1];
@@ -1354,5 +1354,11 @@ char *clean_path(char *filepath)
 		strcpy(filepath, temp);
 		delete[] temp;
 	}
+	
+	len=strlen(filepath);
+	for(i=0; i<len; i++)
+		if(filepath[i]=='\\')	// replace \ with /
+			filepath[i]='/';
+			
 	return filepath;
 }

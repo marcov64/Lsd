@@ -113,6 +113,10 @@ Exit function, which is customized on the operative system.
 #include <tk.h>
 #include "decl.h"
 
+#ifndef ACCESSPERMS
+#define ACCESSPERMS 0777 
+#endif
+
 object *operate( int *choice, object *r);
 int browse( object *r, int *choice);
 object *skip_next_obj(object *t, int *i);

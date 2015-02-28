@@ -5,7 +5,7 @@
 # 3. type make -f makefile.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
 
 TARGET=lmm
-SWITCH_CC=-g
+SWITCH_CC=
 
 
 TCL_VERSION=85
@@ -35,7 +35,7 @@ TCL_LIBRARY=$(LSDROOT)/gnu/lib/tcl8.5
 
 # from here you should not need to modify anything
 CC=gcc
-SRC=src_3
+SRC=src
 
 SRC_DIR=$(LSDROOT)/$(SRC)/
 

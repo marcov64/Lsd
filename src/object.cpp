@@ -2740,7 +2740,7 @@ if(tot<=0)					// if size not informed
 globalcur=cb->head;
 cb->mn= new mnode;
 lev=floor(log10(tot-1))+1;
-cb->mn->deflev=lev;			// save as default lev
+cb->mn->deflev=(long)lev;			// save as default lev
 cb->mn->create(lev);
 
 }
