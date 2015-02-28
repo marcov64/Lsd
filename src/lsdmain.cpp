@@ -1289,10 +1289,10 @@ cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -side left");
 cmd(inter, "pack $w");
 #ifdef DUAL_MONITOR
 // better adjusts position for X11
-cmd(inter, "update");
+cmd(inter, "update idletasks");
 cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
 cmd(inter, "set posYLog [expr [winfo screenheight .log] - 4 * $posY - [winfo reqheight .log]]");
-cmd(inter, "wm geometry .log +$posXLog+$posYLog");	
+cmd(inter, "wm geometry .log +$posXLog+$posYLog; update idletasks");	
 #else
 //cmd(inter, "set posX [winfo x .]");
 cmd(inter, "set posXLog [expr $posX + 340]");

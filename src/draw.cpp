@@ -69,6 +69,8 @@ void put_node(Tcl_Interp *interp, int x1, int y1, int x2, int y2, char *str);
 void put_line(Tcl_Interp *interp, int x1, int y1, int x2, int y2);
 void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
 
+extern int strWindowOn;		// control the presentation of the model structure window
+
 int range_type=90;
 int step_level=15;
 int step=10;
@@ -85,6 +87,13 @@ object *top;
 
 //return;
 cmd(inter, "set c .model_str");
+
+if(!strWindowOn)	// model structure window is deactivated?
+{
+	cmd(inter, "if {[winfo exists $c]==1} {wm withdraw $c; wm deiconify $c; destroy $c}");
+	return;
+}
+
 #ifdef DUAL_MONITOR
 // better adjusts position for X11
 cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c}}");
@@ -96,8 +105,10 @@ cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[wi
 #endif
 
 cmd(inter, "wm title $c \"Lsd Model Structure\"");
-cmd(inter, "bind $c <Destroy> {set choice 35}");
 
+//cmd(inter, "bind $c <Destroy> {set choice 35}");
+// if window is closed, do it properly in 'interf.cpp'
+cmd(inter, "wm protocol $c WM_DELETE_WINDOW {set strWindowOn 0; set choice 70}");
 cmd(inter, "canvas $c.c -width 15.c -height 10.c");
 cmd(inter, "pack $c.c");
 cmd(inter, "bind $c.c <1> {.log.text.text insert end 1}");

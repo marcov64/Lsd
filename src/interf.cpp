@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 69
+USED CASE 70
 */
 
 /****************************************************
@@ -226,6 +226,7 @@ extern long nodesSerial;	// network node serial number global counter
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
 int findexSens=0;				// index to sequential sensitivity configuration filenames
+int strWindowOn=1;			// control the presentation of the model structure window
  
 /****************************************************
 CREATE
@@ -243,6 +244,7 @@ cmd(inter, "set itemfocus 0");
 
 cmd(inter, "set choice -1");
 cmd(inter, "set c \"\"");
+Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
 //Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 
 
@@ -482,6 +484,7 @@ cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choic
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Find an element of the model\" -command {set choice 50} -underline 0 -accelerator Control+f");
+cmd(inter, "$w add checkbutton -label \"Enable Model Structure window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Control+Tab");
 
 cmd(inter, "set w .m.data");
 cmd(inter, "menu $w -tearoff 0");
@@ -556,6 +559,7 @@ cmd(inter, "bind . <Control-b> {set choice 34}");
 cmd(inter, "bind . <Control-c> {set choice 36}");
 cmd(inter, "bind . <Control-z> {set choice 37}");
 cmd(inter, "bind . <Control-w> {set choice 38}");
+cmd(inter, "bind . <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
 
 
 cmd(inter, "bind .log <Control-l> {set choice 17}");
@@ -578,7 +582,10 @@ cmd(inter, "bind .log <Control-b> {set choice 34}");
 cmd(inter, "bind .log <Control-c> {set choice 36}");
 cmd(inter, "bind .log <Control-z> {set choice 37}");
 cmd(inter, "bind .log <Control-w> {set choice 38}");
+cmd(inter, "bind .log <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
 
+if(strWindowOn)
+{
 cmd(inter, "bind $c <Control-l> {set choice 17}");
 cmd(inter, "bind $c <Control-s> {set choice 18}");
 cmd(inter, "bind $c <Control-e> {set choice 20}");
@@ -599,7 +606,8 @@ cmd(inter, "bind $c <Control-b> {set choice 34}");
 cmd(inter, "bind $c <Control-c> {set choice 36}");
 cmd(inter, "bind $c <Control-z> {set choice 37}");
 cmd(inter, "bind $c <Control-w> {set choice 38}");
-
+cmd(inter, "bind $c <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
+}
 
 cmd(inter, ". configure -menu .m");
 
@@ -4249,6 +4257,11 @@ case 69:
 
 	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start NO WINDOW job\" -message \"The current configuration was started as a NO WINDOW background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
 	cmd(inter, msg);
+break;
+
+// toggle the state of the model structure windows
+case 70:
+	cmd(inter, "destroy .l .m");
 break;
 
 default:
