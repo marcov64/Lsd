@@ -85,9 +85,15 @@ object *top;
 
 //return;
 cmd(inter, "set c .model_str");
+#ifdef DUAL_MONITOR
+// better adjusts position for X11
+cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c}}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $c @$RootLsd/$LsdSrc/lsd.xbm} {}");
+#else
 //cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .}}");
 //cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .; bind $c <FocusIn> {focus -force .l.v.c.var_name}}}");cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .; bind $c <FocusIn> {focus -force .l.v.c.var_name}}}");
 cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c; wm transient $c .}}");
+#endif
 
 cmd(inter, "wm title $c \"Lsd Model Structure\"");
 cmd(inter, "bind $c <Destroy> {set choice 35}");
@@ -103,8 +109,16 @@ draw_obj(inter, t, top, 10, 70, 0);
 cmd(inter, "bind $c.c <1> {set choice_g 24}");
 cmd(inter, "bind $c.c <2> {set choice_g 25}");
 cmd(inter, "bind $c.c <3> {set choice_g 25}");
+#ifdef DUAL_MONITOR
+// better adjusts position for X11
+cmd(inter, "set posXstr [expr [winfo x .] + $posX + $widthB]");
+cmd(inter, "set posYstr [winfo y .]");
+cmd(inter, "wm geometry $c +$posXstr+$posYstr"); 
+cmd(inter, "lower $c .");
+#else
 cmd(inter, "wm geometry $c +$posXLog+$posY"); 
 //cmd(inter, "lower $c .");
+#endif
 
 }
 

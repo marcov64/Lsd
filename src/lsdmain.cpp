@@ -193,6 +193,13 @@ int series_saved;
 int findex, fend;
 int batch_sequential=0;
 int fast=0;		// make fast persistent across runs
+#ifdef DUAL_MONITOR
+// Main window constraints
+char hsize[]="400";			// horizontal size in pixels
+char vsize[]="620";			// vertical minimum size in pixels
+char hmargin[]="20";		// horizontal right margin from the screen borders
+char vmargin[]="20";		// vertical margins from the screen borders
+#endif
 
 /*********************************
 LSD MAIN
@@ -403,6 +410,14 @@ cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wi
 
 // set window icon
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/lsd.xbm}");
+// set position parameters now
+#ifdef DUAL_MONITOR
+Tcl_SetVar(inter, "widthB", hsize, 0);		// horizontal size in pixels
+Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
+Tcl_SetVar(inter, "posX", hmargin, 0);		// horizontal right margin from the screen borders
+Tcl_SetVar(inter, "posY", vmargin, 0);		// vertical margins from the screen borders
+cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
+#endif
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
@@ -472,10 +487,12 @@ stacklog->vs=NULL;
 strcpy(stacklog->label, "Lsd Simulation Manager");
 
 #ifndef NO_WINDOW
+#ifndef DUAL_MONITOR
 cmd(inter, "set widthB 400");
 cmd(inter, "set heightB 454");
 cmd(inter, "set posX 50");
 cmd(inter, "set posY 46");
+#endif
 cmd(inter, "source $RootLsd/$LsdSrc/align.tcl");
 while(1)
 {
@@ -764,7 +781,7 @@ if(strlen(path)>0 || no_window==1)
   sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC), simul_name, seed-1);
 else
   sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC, simul_name, seed-1);
-  plog(msg);
+ plog(msg);
 /****************************************************/
 //sprintf(msg, "\nSimulation %d finished\n",i);
 //plog(msg);
@@ -1270,10 +1287,18 @@ cmd(inter, "button $w.copy -text Copy -command {tk_textCopy .log.text.text}");
 
 cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -side left");
 cmd(inter, "pack $w");
+#ifdef DUAL_MONITOR
+// better adjusts position for X11
+cmd(inter, "update");
+cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
+cmd(inter, "set posYLog [expr [winfo screenheight .log] - 4 * $posY - [winfo reqheight .log]]");
+cmd(inter, "wm geometry .log +$posXLog+$posYLog");	
+#else
 //cmd(inter, "set posX [winfo x .]");
 cmd(inter, "set posXLog [expr $posX + 340]");
 //cmd(inter, "set posY [winfo y .]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");
+#endif
 
 }
 

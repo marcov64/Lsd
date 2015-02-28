@@ -76,9 +76,7 @@ void cmd(Tcl_Interp *inter, char const *cc);
 
 
 #ifdef DUAL_MONITOR
-// Main window constraints
-int sidemarg=440;	// horizontal right margin from the screen borders
-int topmarg=450;	// vertical margins from the screen borders
+// better adjusts position for X11
 int shift=20;		// new window shift
 char intval[16];	// string buffer
 #endif
@@ -205,12 +203,11 @@ cmd(inter, "wm resizable $activeplot 1 0");
 cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW {set done_in 5}");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $activeplot @$RootLsd/$LsdSrc/lsd.xbm} {}");
 #ifdef DUAL_MONITOR
-i=sidemarg+(id_sim-1)*shift;				// calculate window position
-j=topmarg+(id_sim-1)*shift;
+i=(id_sim)*shift;				// calculate window shift position
 sprintf(intval,"%i",i);
-Tcl_SetVar(inter, "posXrt", intval, 0);	// horizontal right margin from the screen borders
-sprintf(intval,"%i",j);
-Tcl_SetVar(inter, "posYrt", intval, 0);	// vertical margins from the screen borders
+Tcl_SetVar(inter, "shift", intval, 0);
+cmd(inter, "set posXrt [expr $posXstr + $shift]");
+cmd(inter, "set posYrt [expr $posYstr + $shift]");
 cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
 #else
 cmd(inter, "wm geometry $activeplot +0+340");

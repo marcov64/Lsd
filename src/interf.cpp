@@ -226,15 +226,7 @@ extern long nodesSerial;	// network node serial number global counter
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
 int findexSens=0;				// index to sequential sensitivity configuration filenames
-
-#ifdef DUAL_MONITOR
-// Main window constraints
-char hsize[]="400";			// horizontal size in pixels
-char vsize[]="600";			// vertical minimum size in pixels
-char hmargin[]="20";		// horizontal right margin from the screen borders
-char vmargin[]="20";		// vertical margins from the screen borders
-#endif
-
+ 
 /****************************************************
 CREATE
 ****************************************************/
@@ -318,8 +310,8 @@ if(choice!=35)
  cmd(inter, "wm resizable . 0 0");
 */
 //Perform the task selected
-cmd(inter, "set ugo 2");
-cmd(inter, "set ugo [winfo exists .model_str]");
+//cmd(inter, "set ugo 2");
+//cmd(inter, "set ugo [winfo exists .model_str]");
 cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
 cr=operate( &choice, cr);
 
@@ -328,11 +320,11 @@ cr=operate( &choice, cr);
 
 }
 Tcl_UnlinkVar(inter,"save_option");
-cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
+//cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 //Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "choice_g");
 
-cmd(inter, "wm deiconify .log");
+cmd(inter, "wm deiconify .log; wm deiconify .; raise .; focus -force .; update");
 return(cr);
 }
 
@@ -633,13 +625,9 @@ cmd(inter, "pack .l -fill both -expand yes");
 *choice=0;
 
 #ifdef DUAL_MONITOR
-Tcl_SetVar(inter, "widthB", hsize, 0);		// horizontal size in pixels
-Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
-Tcl_SetVar(inter, "posX", hmargin, 0);	// horizontal right margin from the screen borders
-Tcl_SetVar(inter, "posY", vmargin, 0);	// vertical margins from the screen borders
-#endif
-
-
+// just restore size
+cmd(inter, "wm geometry . \"[expr $widthB]x$heightB\"");
+#else
 cmd(inter, "set choice [info exist widthB]");
 if(*choice==1)
   {
@@ -670,11 +658,6 @@ else
    cmd(inter, "wm geometry . +$posX+$posY; update");
 //   plog("\n1b: [wm geometry .]"); 
   } 
-
-#ifdef DUAL_MONITOR
-cmd(inter, "set posXLog [expr $posX + $widthB + $posX]");
-cmd(inter, "wm geometry .log -$posX+$posY");	
-#else
 cmd(inter, "set posXLog [expr $posX + $widthB +40]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");	
 #endif
@@ -699,8 +682,10 @@ if(*choice==50)
 while(*choice==0 && choice_g==0)
  Tcl_DoOneEvent(0);
  
+#ifndef DUAL_MONITOR
 cmd(inter, "scan [wm geom .] %dx%d+%d+%d widthB heightB posX posY");
 //plog("\n2: [wm geometry .]");
+#endif
  
 if(choice_g!=0)
  {*choice=choice_g;
@@ -715,6 +700,9 @@ if(actual_steps>0)
    {
      cmd(inter, "toplevel .warn");
 	 cmd(inter, "wm transient .warn .");
+	 #ifdef DUAL_MONITOR
+	 cmd(inter, "wm geometry .warn +[expr [winfo x .] + 20]+[expr [winfo y .] + 20]");
+	 #endif
      cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently loaded is the last step of the previous run.\nThe requested operation makes no sense on the final data of a simulation.\nChoose one of the followig options.\"");
      cmd(inter, "pack .warn.l");
      cmd(inter, "set temp 38");
