@@ -10,7 +10,7 @@ PATH_LIB=$(LSDROOT)/gnu/lib
 INCLUDE_LIB=-I$(LSDROOT)/gnu/include
 CC=g++
 SRC=src
-EXTRA_PAR=
+EXTRA_PAR=-lz
 SSWITCH_CC=-O2
 EXT=.exe
 
