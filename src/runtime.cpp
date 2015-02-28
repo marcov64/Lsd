@@ -201,7 +201,8 @@ cmd(inter, msg);
 cmd(inter, "if {[winfo exists $activeplot]==1} {destroy $activeplot} {}");
 cmd(inter, "toplevel $activeplot");
 cmd(inter, "wm resizable $activeplot 1 0");
-cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW { }");
+// allow for run time plot window destruction
+cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW {set done_in 5}");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $activeplot @$RootLsd/$LsdSrc/lsd.xbm} {}");
 #ifdef DUAL_MONITOR
 i=sidemarg+(id_sim-1)*shift;				// calculate window position

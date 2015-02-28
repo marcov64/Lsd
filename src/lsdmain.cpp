@@ -706,6 +706,8 @@ case 4:
  break;
  
 case 1:
+  sprintf(msg, "\nSimulation stopped at t = %d", t);
+  plog(msg);
   quit=2;
   done_in=0;
 break;
@@ -729,6 +731,21 @@ if(app<2 && app > 1)
  refresh=app;
 done_in=0;
 break; 
+
+// plot window DELETE_WINDOW button handler
+case 5:
+ cmd(inter, " if { [winfo exists .plt%d] == 1} {wm deiconify .plt%d} {}");
+ sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}",i, i);
+ cmd(inter, msg);
+ sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
+ cmd(inter, msg);
+ sprintf(msg, "if { [winfo exist .plt%d]} {destroy .plt%d} {}", i, i);
+ cmd(inter, msg);
+ sprintf(msg, "\nSimulation stopped at t = %d", t);
+ plog(msg);
+ quit=2;
+ done_in=0;
+break;
 }
 
 cmd(inter, "update");
@@ -744,9 +761,9 @@ if(quit==1) //For multiple simulation runs you need to reset quit
 /**************** WORKS ONLY FOR WINDOWS VERSION */
 end=clock();
 if(strlen(path)>0 || no_window==1)
-  sprintf(msg, "\nSimulation %d finished (%f sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC), simul_name, seed-1);
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC), simul_name, seed-1);
 else
-  sprintf(msg, "\nSimulation %d finished (%f sec.)",i,(float)( end - start) /CLOCKS_PER_SEC, simul_name, seed-1);
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC, simul_name, seed-1);
   plog(msg);
 /****************************************************/
 //sprintf(msg, "\nSimulation %d finished\n",i);
@@ -754,6 +771,8 @@ else
 
 #ifndef NO_WINDOW 
 cmd(inter, "update");
+// allow for run time plot window destruction
+cmd(inter, "if {[info exists activeplot] == 1} {if {[winfo exists $activeplot] == 1} {wm protocol $activeplot WM_DELETE_WINDOW \"\"}}");
 #endif
 
 close_sim();
