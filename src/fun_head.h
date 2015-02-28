@@ -40,6 +40,7 @@ extern int seed;
 extern long idum;
 extern int sim_num;
 extern char *simul_name;	// configuration name being run (for saving networks)
+extern char *path;			// folder where the configuration is
 
 
 void error(char *);

@@ -813,6 +813,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 {
 	long link, idNode, numLinks, numNeigh, tryNode, newNode;
 	object *cur, *cur1;
+	netLink *curl;
 
 	numLinks = init_circle_net( lab, numNodes, outDeg );			// first generate a circle regular network	
 
@@ -829,7 +830,12 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 				if ( tryNode > numNodes )							// if above max node ID
 					tryNode -= numNodes;							// take one round turn
 					
-				cur1 = cur->search_link_net( tryNode )->ptrTo;		// get dest. link object pointer,
+				curl = cur->search_link_net( tryNode );				// get dest. link
+				if ( curl == NULL || curl->ptrTo == NULL )			// invalid pointers?
+					continue;
+				else
+					cur1 = curl->ptrTo;								// get dest. object pointer
+				
 				cur1->delete_link_net( cur1->search_link_net ( idNode ) );
 																	// remove link to this object
 				cur->delete_link_net( cur->search_link_net ( tryNode ) );

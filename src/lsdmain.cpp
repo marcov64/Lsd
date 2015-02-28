@@ -121,6 +121,7 @@ int choice_g;
 
 extern double ymin;
 extern double ymax;
+extern long nodesSerial;
 
 int errormsg(char const *lpszText,  char const *lpszTitle);
 object *create( object *r);
@@ -568,6 +569,7 @@ if(i>1 || batch_sequential_loop)
  root->empty();
  root->init(NULL, "Root");
  blueprint->empty();
+ nodesSerial=0;			// restart network nodes serial counter
 // if(batch_sequential==1)
 //  {
 //   sprintf(msg, "%s_%d.lsd",simul_name,findex);
