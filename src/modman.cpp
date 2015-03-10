@@ -5843,8 +5843,8 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,2}]|cur(l)?\[0-9]?",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(?=[ ]*\\()|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
-	"auto|const|double|float|int(?!\[a-zA-Z0-9])|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
+	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
 
@@ -5863,15 +5863,16 @@ int strwrds(char string[])
 }
 
 // map syntax highlight level to the number of color types to use
+#define ITEM_COUNT( ptrArray )  ( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
 int map_color(int hiLev)
 {
 	if(hiLev == 0)
 		return 0;
 	if(hiLev == 1)
 		return 4;
-	if(sizeof(*cTypes) > sizeof(*cRegex))
-		return sizeof(*cRegex);
-	return sizeof(*cTypes);
+	if(ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex))
+		return ITEM_COUNT(cRegex);
+	return ITEM_COUNT(cTypes);
 }
 
 // compare function for qsort to compare different color hits (used by color)
@@ -5887,11 +5888,12 @@ int comphit(const void *p1, const void *p2)
 }
 
 /* New color routine, using new tcl/tk 8.5 search for all feature */
+#define TOT_COLOR ITEM_COUNT( cTypes )
 void color(int hiLev, long iniLin, long finLin)
 {
 int i, maxColor, newCnt;
-long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[sizeof(*cTypes)];
-char type, *pcount, *ppos, *count[sizeof(*cTypes)], *pos[sizeof(*cTypes)], finStr[16], *s;
+long j, k, tsize = 0, curLin = 0, curCol = 0, newLin, newCol, size[TOT_COLOR];
+char type, *pcount, *ppos, *count[TOT_COLOR], *pos[TOT_COLOR], finStr[16], *s;
 struct hit *hits;
 
 // prepare parameters
@@ -5902,7 +5904,7 @@ else
 	sprintf(finStr, "%ld.end", finLin);
 
 // remove color tags
-for(i = 0; i < sizeof(*cTypes); i++)
+for(i = 0; i < TOT_COLOR; i++)
 {
 	sprintf(msg, ".f.t.t tag remove %s %ld.0 %s", cTypes[i], iniLin == 0 ? 1 : iniLin, finStr);
 	cmd(inter, msg);
@@ -5974,7 +5976,10 @@ for(k = 0; k < tsize; k++)
 		newCnt = hits[k].count;
 		cmd(inter, "set end [.f.t.t index \"$lin.$col + $cnt char\"]");
 		// treats each type of color case properly
+		if(hits[k].type < 4)			// non token?
 		sprintf(msg, ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
+		else							// token - should not be inside another word
+			sprintf(msg, "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[hits[k].type]);
 		cmd(inter, msg);
 		// next search position
 		ppos = (char*)Tcl_GetVar(inter, "end", 0);
