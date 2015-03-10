@@ -104,6 +104,11 @@ void set_obj_number(object *r, int *choice);
 void myexit(int code);
 void set_window_size(void);
 int set_focus;
+#ifdef DUAL_MONITOR
+// Main window constraints
+char widthDE[]="800";			// horizontal size in pixels
+char heightDE[]="700";			// vertical size in pixels
+#endif
 
 /****************************************************
 EDIT_DATA
@@ -127,6 +132,11 @@ cmd(inter, "bind . <KeyPress-Escape> {.boh.ok invoke}");
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
 cmd(inter, "wm title . \"Lsd - Data Editor\"");
 //cmd(inter, "wm resizable . 0 0");
+#ifdef DUAL_MONITOR
+Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
+Tcl_SetVar(inter, "heightDE", heightDE, 0);		// vertical minimum size in pixels
+cmd(inter, "if {[info exists lastSizeDE]==0} {set lastSizeDE \"[expr $widthDE]x$heightDE\"}");
+#endif
 cmd(inter, "set position 1.0");
 while(*choice==0)
 {
@@ -181,12 +191,18 @@ cmd(inter, "bind . <Destroy> {set choice 35}");
 cmd(inter, "bind .log <Destroy> {set choice 35}");
 
 
+#ifdef DUAL_MONITOR
+cmd(inter, "wm geometry . $lastSizeDE; update");
+#else
 set_window_size();
+#endif
 if(set_focus==1)
   cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
 
  while(*choice==0)
 	Tcl_DoOneEvent(0);
+
+cmd(inter, "set lastSizeDE [wm geometry .]"); 	// save window geometry
 
 //clean up
 if(*choice==35)

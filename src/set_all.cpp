@@ -292,10 +292,13 @@ cmd(inter, "button .f2.b.can -text Cancel -command {set choice 2}");
 cmd(inter, "pack .f2.b.ok .f2.b.help .f2.b.can -side left");
 cmd(inter, "pack .f2.b -side bottom");
 cmd(inter, "focus -force .f1.rd.r1; .f1.rd.r1 invoke");
-cmd(inter, "bind .f1.val.e1 <KeyPress-Return> { .f1.val.e2 selection range 0 end; focus .f1.val.e2}");
-cmd(inter, "bind .f1.val.e2 <KeyPress-Return> {focus -force .f2.s.all; .f2.s.all invoke}");
+//cmd(inter, "bind .f1.val.e1 <KeyPress-Return> { .f1.val.e2 selection range 0 end; focus .f1.val.e2}");
+//cmd(inter, "bind .f1.val.e2 <KeyPress-Return> {focus -force .f2.s.all; .f2.s.all invoke}");
 cmd(inter, "bind .f2.b.ok <KeyPress-Return> {.f2.b.ok invoke}");
 cmd(inter, ".f1.rd.r1 invoke");
+cmd(inter, ".f1.val.e1 selection range 0 end; focus .f1.val.e1");	// speed-up data entry focusing first data field
+cmd(inter, "bind .f1.val.e1 <KeyPress-Return> {.f2.b.ok invoke}");
+cmd(inter, "bind .f1.val.e2 <KeyPress-Return> {.f2.b.ok invoke}");
 
 here_setall:
 set_window_size();

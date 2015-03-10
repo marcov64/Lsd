@@ -227,6 +227,7 @@ char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
 int findexSens=0;				// index to sequential sensitivity configuration filenames
 int strWindowOn=1;			// control the presentation of the model structure window
+bool justAddedVar=false;	// control the selection of last added variable
  
 /****************************************************
 CREATE
@@ -383,6 +384,11 @@ else
 	  cmd(inter, ch);
     cmd(inter, "incr app");
 
+	  if(ap_v->next == NULL && justAddedVar)	// last variable & just added a new variable?
+	  {
+		  justAddedVar=false;
+		  cmd(inter, ".l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set end; set res [.l.v.c.var_name curselection]; set cur $res; if {$res !=\"\"} {set res [ .l.v.c.var_name get $res]; set listfocus 1; set itemfocus $cur}");
+	  }
 	 }
   }
 if(r->v!=NULL)
@@ -704,7 +710,7 @@ if(choice_g!=0)
 
 if(actual_steps>0)
  {
-  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 || *choice==68 || *choice==69 )
+  if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==7 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 || *choice==68 || *choice==69 )
    {
      cmd(inter, "toplevel .warn");
 	 cmd(inter, "wm transient .warn .");
@@ -934,6 +940,8 @@ if(sl!=0)
 
 	for(i=0; i<num+1; i++)
 	 cv->val[i]=0;
+ 
+	justAddedVar=true;		// flag variable just added (for acquiring focus)
   }
  }
  }
