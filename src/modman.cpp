@@ -2021,7 +2021,7 @@ cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
 //create the model_options.txt file
 cmd(inter, "set dir [glob *.cpp]");
 cmd(inter, "set b [lindex $dir 0]");
-cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
 cmd(inter, "set f [open model_options.txt w]");
 cmd(inter, "puts $f $a");
 cmd(inter, "close $f");
@@ -5231,7 +5231,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -5390,7 +5390,7 @@ if(choice==1)
 else
   {
    cmd(inter, "tk_messageBox -type ok -icon warning -message \"Model compilation options not found. The system will use default values.\" -title \"Warning\"");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -5408,7 +5408,7 @@ cmd(inter, "frame .l.t");
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
 cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 10 -relief sunken -yscrollcommand \".l.t.yscroll set\"");
 
-cmd(inter, "set default \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+cmd(inter, "set default \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
 
 
 cmd(inter, "frame .l.t.d -relief groove -bd 2");
@@ -5977,7 +5977,7 @@ for(k = 0; k < tsize; k++)
 		cmd(inter, "set end [.f.t.t index \"$lin.$col + $cnt char\"]");
 		// treats each type of color case properly
 		if(hits[k].type < 4)			// non token?
-		sprintf(msg, ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
+			sprintf(msg, ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
 		else							// token - should not be inside another word
 			sprintf(msg, "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[hits[k].type]);
 		cmd(inter, msg);
@@ -6151,7 +6151,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -6200,7 +6200,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");

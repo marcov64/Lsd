@@ -16,7 +16,7 @@ $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o
 	$(SRC_DIR)object.o $(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o \
 	$(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(FUN).o $(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o \
 	$(SRC_DIR)report.o $(SRC_DIR)nets.o \
-	$(TCL_LIB) $(TK_LIB) $(EXTRA_PAR) -L$(PATH_LIB) -lm -o $(TARGET) $(DUMMY)
+	$(TCL_LIB) $(TK_LIB) $(EXTRA_PAR) -L$(PATH_LIB) -lm $(SWITCH_CC_LNK) -o $(TARGET) $(DUMMY)
 
 $(SRC_DIR)file.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
 	$(CC) $(XLIBS) $(SSWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o $(INCLD_TCL_TK) $(INCLUDE_LIB)

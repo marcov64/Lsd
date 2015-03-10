@@ -10,7 +10,7 @@ $(TARGETNW): $(SRC_DIR)choose.h  model_options.txt $(SRC_DIR)system_options.txt 
 $(SRC_DIR)file.obj $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(FUN).obj $(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj
 	$(CC) $(SWITCH_CC)  $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj \
 	$(FUN).obj $(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj \
-	$(EXTRA_PAR) -L$(PATH_LIB) -lm -o $(TARGETNW) $(DUMMY)
+	$(EXTRA_PAR) -L$(PATH_LIB) -lm $(SWITCH_CC_LNK) -o $(TARGETNW) $(DUMMY)
 
 $(SRC_DIR)file.obj: $(SRC_DIR)choose.h  $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
 	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE_LIB)
