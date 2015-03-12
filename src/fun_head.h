@@ -73,6 +73,7 @@ extern int max_step;
 extern int quit;
 extern char msg[];
 extern int debug_flag;
+extern int fast;		// expose the global logging control variable
 
 
 void plog(char const *msg);

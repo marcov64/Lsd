@@ -85,6 +85,8 @@ Tcl_Interp *inter;
 #include <unistd.h>
 #include "decl.h"
 #include <time.h>
+#include <signal.h>
+
 int t;
 int quit=0;
 int done_in;
@@ -294,6 +296,13 @@ for(i=1; argv[i]!=NULL; i++)
 struct_file=new char[strlen(simul_name)+5];
 sprintf(struct_file, "%s.lsd", simul_name);
 #endif
+
+// register critical signal handlers
+void signal_handler(int);
+signal(SIGFPE, signal_handler);  
+signal(SIGILL, signal_handler);  
+signal(SIGSEGV, signal_handler);  
+
 root=new object;
 root->init(NULL, "Root");
 blueprint=new object;
@@ -1407,4 +1416,35 @@ char *clean_path(char *filepath)
 			filepath[i]='/';
 			
 	return filepath;
+}
+
+// handle critical system signals
+void signal_handler(int signum)
+{
+	switch(signum)
+	{
+		case SIGFPE:
+			sprintf(msg, "SIGFPE (Floating-Point Exception):\n  Maybe a division by 0 or similar?");
+		break;
+		
+		case SIGILL:
+			sprintf(msg, "SIGILL (Illegal Instruction):\n  Maybe executing data?");		
+		break;
+		
+		case SIGSEGV:
+			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer?");		
+		break;
+		
+		default:
+			sprintf(msg, "Unknown signal");			
+	}
+#ifdef NO_WINDOW
+	printf("FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
+#else
+	char msg2[1000];
+	sprintf(msg2, "tk_messageBox -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'gdb debug' option.\n\nLsd is aborting...\"", msg);
+	cmd(inter, msg2);
+#endif
+
+	exit(signum);			// abort program
 }

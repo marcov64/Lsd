@@ -154,6 +154,7 @@ activate the debugger.
 
 #include "decl.h"
 #include <time.h>
+#include <exception>
 
 #ifndef NO_WINDOW
  #include <tk.h>
@@ -173,6 +174,7 @@ extern int stack;
 extern char msg[];
 extern lsdstack *stacklog;
 extern int total_var;
+extern int fast;
 
 
 void set_lab_tit(variable *var);
@@ -291,7 +293,31 @@ if(stackinfo_flag>=stack)
 /****************/
 
 //Compute the Variable's equation
-app=fun(caller);
+if(!fast)				// not running in fast mode?
+{
+	try 				// do it while catching exceptions to avoid obscure aborts
+	{
+		app=fun(caller);
+	}
+	catch(std::exception& exc)
+	{
+		sprintf(msg, "\nException! An exception of type:\n '%s'\n was detected while computing the Equation for:\n %s\nrequested by Object:\n %sn\n", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
+		plog(msg);
+		error_hard();
+		quit=2;
+		return -1;
+	}
+	catch(...)
+	{
+		sprintf(msg, "\nException! An unknown problem was detected while computing the Equation for:\n %s\nrequested by Object:\n %sn\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
+		plog(msg);
+		error_hard();
+		quit=2;
+		return -1;
+	}
+}
+else
+	app=fun(caller);	// or simply do it unsupervised
 
 for(i=0; i<num_lag; i++) //scale down the past values
  val[num_lag-i]=val[num_lag-i-1];
