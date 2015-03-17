@@ -73,8 +73,6 @@ given the file name name, the routine searches for the data line for the variabl
 #endif
 
 #include "decl.h"
-#include <math.h>
-#include <stdio.h>
 #include <ctype.h>
 
 extern char *simul_file;
@@ -91,6 +89,7 @@ extern description *descr;
 extern char *eq_file;
 extern char lsd_eq_file[];
 extern int lattice_type;
+extern char nonavail[];	// string for unavailable values
 
 double ran1(long *idum);
 #define RND (double)ran1(&idum)
@@ -606,10 +605,10 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  
  if(cv->save==1)
   {
-   if(cv->start <= i && cv->end >= i)
+   if(cv->start <= i && cv->end >= i && !isnan(cv->data[i]))		// save NaN as n/a
      fprintf(f, "%g\t", cv->data[i]);
    else
-     fprintf(f, "n/a\t");
+     fprintf(f, "%s\t", nonavail);
   }
  
  }
@@ -625,10 +624,10 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 
 if(r->up==NULL)
  {for(cv=cemetery; cv!=NULL; cv=cv->next)
-    if(cv->start<=i && cv->end>=i)
+    if(cv->start<=i && cv->end>=i && !isnan(cv->data[i]))		// save NaN as n/a
        fprintf(f, "%g\t", cv->data[i]);
      else
-       fprintf(f, "n/a\t");
+       fprintf(f, "%s\t", nonavail);
  }
 }
 

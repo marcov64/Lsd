@@ -124,6 +124,7 @@ int choice_g;
 extern double ymin;
 extern double ymax;
 extern long nodesSerial;
+extern char nonavail[]="NA";	// string for unavailable values (use R default)
 
 int errormsg(char const *lpszText,  char const *lpszTitle);
 object *create( object *r);
@@ -1361,10 +1362,10 @@ fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
 
 for(i=0; i<=t-1; i++)
  {
-  if(i>=vcv->start && i <=vcv->end)
+  if(i>=vcv->start && i <=vcv->end && !isnan(vcv->data[i]))		// save NaN as n/a
     fprintf(f,"%lf\t\n",vcv->data[i]);
   else
-    fprintf(f,"n/a\t\n");
+    fprintf(f,"%s\t\n", nonavail);
   }
   
  

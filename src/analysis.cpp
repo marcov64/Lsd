@@ -97,11 +97,7 @@ Exit function, which is customized on the operative system.
 #define LIBZ 
 #define PI 3.141592654
 #include <tk.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
 #include <unistd.h>
-#include <limits.h>
 #include <float.h>
 
 
@@ -187,7 +183,7 @@ int cur_plot=0;
 int file_counter=0;
 char filename[1000];
 char **name_var;
-const char *nonavail="n/a";	// string for unavailable values
+extern char nonavail[];	// string for unavailable values
 extern char msg[];
 
 extern variable *cemetery;
@@ -1851,7 +1847,8 @@ for(i=0; i<j; i++)
    {
    datum=find_data(k);
    r=0;
-   switch(p)
+   if(!isnan(datum[h]))		// ignore NaNs
+    switch(p)
     {
     case 1: if(datum[h]==compvalue) r=1;
     break;
@@ -2112,7 +2109,8 @@ for(i=0; i<j; i++)
    {
    datum=find_data(k);
    r=0;
-   switch(p)
+   if(!isnan(datum[h]))		// ignore NaNs
+    switch(p)
     {
     case 1: if(datum[h]==compvalue) r=1;
     break;
@@ -2253,12 +2251,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -2309,13 +2307,13 @@ for(done=doney2=0, i=0; i<nv; i++)
   {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j)
+    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && data[i][j]<miny )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && data[i][j]>maxy )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -2324,13 +2322,13 @@ for(done=doney2=0, i=0; i<nv; i++)
   {
   for(j=min_c; j<=max_c; j++)
    {
-    if(doney2==0 && start[i]<=j && end[i]>=j)
+    if(doney2==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
      {miny2=maxy2=data[i][j];
       doney2=1;
      }
-    if(start[i]<=j && end[i]>=j && data[i][j]<miny2 )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny2 )		// ignore NaNs
      miny2=data[i][j];
-    if(start[i]<=j && end[i]>=j && data[i][j]>maxy2 )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy2 )		// ignore NaNs
      maxy2=data[i][j];
 
    }
@@ -2622,7 +2620,7 @@ for(k=0; k<nv; k++)
 for(x01=0,x1=40,i=min_c ;x1==40 ;i++ ) //, and record the first to be used
  {
   for(k=0; k<nv; k++)
-   {if(start[k]<=i && end[k]>=i)
+   {if(start[k]<=i && end[k]>=i && !isnan(data[k][i]))		// ignore NaNs
       y1[k]+=data[k][i];
    }
   x1=40+(int)((double)(1+i)*step);
@@ -2670,7 +2668,7 @@ for(x02=0; i<=max_c; i++)
      }
       
     color++;
-    if( (start[k]<i) && (end[k]>=i) )
+    if( (start[k]<i) && (end[k]>=i) && !isnan(data[k][i]))		// ignore NaNs
 	  {y2[k]+=data[k][i];
 		if(x1!=x2 )
 		{y2[k]/=x02;
@@ -2710,7 +2708,7 @@ for(x02=0; i<=max_c; i++)
 		 }
 	  }
      else
-      if(start[k]==i)
+      if(start[k]==i && !isnan(data[k][i]))		// ignore NaNs
        { //series entrying after the min_c
 
         y1[k]=(300-((data[k][i]-cminy)/(cmaxy-cminy))*300);
@@ -2888,14 +2886,15 @@ for(i=0, new_nv=0; i<nv; i++)
     {
 	  logdata[new_nv]=new double[end[i]+1];	// create space for the logged values
       for(j=start[i];j<=end[i];j++)		// log everything possible
-	    if(data[i][j]>0.0)
-		  logdata[new_nv][j]=log(data[i][j]);
-	    else
-	    {
-		  logdata[new_nv][j]=0.0;
-		  sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
-		  plog(msg);
-	    }
+	  if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+		 logdata[i][j]=log(data[i][j]);
+	  else
+	  {
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
+		 plog(msg);
+	  }
+	  
 	  data[i]=logdata[new_nv];				// replace the data series
     }
     val[new_nv]=new double[nt];
@@ -2912,7 +2911,7 @@ REMOVED
   for(j=0, first=1, i=0; j<nv; j++)
   {
 	for(k=0; k<nt; k++)
-	{if(erase[j]==0)
+	{if(erase[j]==0 && !isnan(data[j][list_times[k]]))		// ignore NaNs
 	  {val[i][k]=data[j][list_times[k]];
      if(first==1)  //The first value is assigned to both min and max
       {miny=maxy=val[i][k];
@@ -3789,7 +3788,7 @@ for(j=0; j<=new_c; j++)
 	if(tok==NULL)				// get to end of line too early
 	  break;
 	if(!strcmp(tok,nonavail))	// it's a non-available observation
-	  vs[i].data[j]=0.0;
+	  vs[i].data[j]=NAN;
 	else
 	  sscanf(tok,"%lf",&(vs[i].data[j]));
  	tok=strtok(NULL,sep);		// get next token, if any
@@ -4045,7 +4044,7 @@ if(del!=3) //data delimited writing
 {
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i])
+   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// save NaN as n/a
       fprintf(fsave, "%g%s", data[i][j], delimiter);
     else
       fprintf(fsave, "%s%s", misval, delimiter);
@@ -4059,12 +4058,14 @@ else //column data writing
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
    {
-   if(j>=start[i] && j<=end[i])
+   if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))
+   {
       sprintf(msg, "%.10lf", data[i][j]);
+	  strcat(msg, str1);
+	  msg[numcol]=(char)NULL;
+   }
    else
-      sprintf(msg, "%s.0", misval);
-   strcat(msg, str1);
-   msg[numcol]=(char)NULL;
+      sprintf(msg, "%s", misval);		// save NaN as n/a
    fprintf(fsave, "%s", msg);
    }
   fprintf(fsave,"\n");
@@ -4146,12 +4147,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -4178,7 +4179,7 @@ for(i=0; i<nv; i++)
 
  for(av=var=num=0, j=min_c; j<=max_c; j++)
   {
-  if(j>=start[i] && j<=end[i])
+  if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// ignore NaNs
   {
 //   if(j==start[i])
 //     ymin=ymax=data[i][j]; DOES NOT WORK IN CASE OF LIMITED RANGE
@@ -4259,6 +4260,7 @@ char *app;
 char **str, **tag;
 char str1[50], longmsg[180];
 int i, nv, j, h,k, *start, *end;
+bool first;
 
 fr *freq;
 
@@ -4314,16 +4316,18 @@ for(i=0; i<nv; i++)
 
 for(i=0; i<nv; i++)
 {
+ first=true;
  //for each var
  for(j=min_c; j<=max_c; j++)
   {//for each case
-  if(j>=start[i] && j<=end[i])
+  if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// ignore NaNs
   {
 
-  if(j==start[i])
+  if(first)
    {//very first case
     freq[i].v[0]=data[i][j];
     freq[i].freq[0]=1;
+	first=false;
    }
   else 
    {
@@ -4390,6 +4394,7 @@ char **str, **tag;
 char str1[50], longmsg[180];
 int i, nv, j, *start, *end, nt, *list_times, h, k;
 double **data,**logdata, av, var, num, ymin, ymax, sig;
+bool first;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.f.vars.ch.v size]");
@@ -4450,12 +4455,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -4475,13 +4480,16 @@ cmd(inter, msg);
 
 for(j=0; j<nt; j++)
 {h=list_times[j];
-
+ first=true;
  for(av=var=num=0, i=0; i<nv; i++)
   {
-  if(h>=start[i] && h<=end[i])
+  if(h>=start[i] && h<=end[i] && !isnan(data[i][h]))		// ignore NaNs
   {
-  if(i==0)
+  if(first)
+  {
      ymin=ymax=data[i][h];
+	 first=false;
+  }
    if(data[i][h]<ymin)
     ymin=data[i][h];
    if(data[i][h]>ymax)
@@ -4693,12 +4701,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -4729,13 +4737,13 @@ for(done=0, i=1; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j)
+    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && data[i][j]<miny )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && data[i][j]>maxy )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -4807,7 +4815,7 @@ for(j=min_c; j<=max_c; j++)
     if(j>=start[i] && i<=end[i])
       fprintf(f,"%lf\t", data[i][j]);
     else
-      fprintf(f,"na\t");  
+      fprintf(f,"nan\t");  
     
     }
  fprintf(f,"\n");
@@ -4828,7 +4836,7 @@ if(gridd==0)
       if(j>=start[i] && i<=end[i])
        fprintf(f,"%d\t%lf\t",i+1, data[i][j]);
       else
-        fprintf(f,"%d\tna\t", i+1);        
+        fprintf(f,"%d\tnan\t", i+1);        
       }
    fprintf(f,"\n");
   }
@@ -4843,7 +4851,7 @@ if(gridd==0)
       if(j>=start[i] && i<=end[i]) 
         fprintf(f,"%lf\t",data[i][j]);
       else
-        fprintf(f,"na\t");  
+        fprintf(f,"nan\t");  
       } 
    fprintf(f,"\n");
   }
@@ -4860,7 +4868,7 @@ else
      if(j>=start[i] && i<=end[i])
        fprintf(f,"%d\t%d\t%lf\n",j,i+1,data[i][j]);
      else
-       fprintf(f,"%d\t%d\tna\n",j,i+1);         
+       fprintf(f,"%d\t%d\tnan\n",j,i+1);         
      }
    }  
  } 
@@ -4874,8 +4882,8 @@ fclose(f);
 f=fopen("gnuplot.lsd","w");
 f2=fopen("gnuplot.gp","w");
 
-fprintf(f, "set datafile missing \"na\" \n");
-fprintf(f2, "set datafile missing \"na\" \n");
+fprintf(f, "set datafile missing \"nan\" \n");		//handle NaNs
+fprintf(f2, "set datafile missing \"nan\" \n");
 app=(char *)Tcl_GetVar(inter, "gpterm",0);
 
 fprintf(f,"set term tkcanvas\n");
@@ -5111,12 +5119,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -5148,13 +5156,13 @@ for(done=0, i=1; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j)
+    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && data[i][j]<miny )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && data[i][j]>maxy )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -5337,6 +5345,8 @@ fclose(f);
 f=fopen("gnuplot.lsd","w");
 f2=fopen("gnuplot.gp","w");
 
+fprintf(f, "set datafile missing \"nan\" \n");		//handle NaNs
+fprintf(f2, "set datafile missing \"nan\" \n");
 app=(char *)Tcl_GetVar(inter, "gpterm",0);
 fprintf(f2,"set term %s\n", app);
 fprintf(f,"set term tkcanvas\n");
@@ -5518,12 +5528,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -5555,13 +5565,13 @@ for(done=0, i=0; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j)
+    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && data[i][j]<miny )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && data[i][j]>maxy )
+    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -5645,6 +5655,8 @@ fclose(f);
 *choice=0;
 f=fopen("gnuplot.lsd","w");
 f2=fopen("gnuplot.gp","w");
+fprintf(f, "set datafile missing \"nan\" \n");		//handle NaNs
+fprintf(f2, "set datafile missing \"nan\" \n");
 fprintf(f,"set term tkcanvas\n");
 fprintf(f,"set output 'plot.file'\n");
 
@@ -6093,9 +6105,14 @@ else
   }
  }  
 
+for(tot=0, i=first; i<=last; i++)	// count number of points excluding NaNs
+ if(!isnan(data[i]))				// ignore NaNs
+  tot++;
+
 *choice=0;
 /********/
-sprintf(msg, "set bidi %d", 100<last-first?100:last-first);
+//sprintf(msg, "set bidi %d", 100<last-first?100:last-first);
+sprintf(msg, "set bidi %d", 100<tot?100:(int)tot);
 cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
@@ -6158,6 +6175,8 @@ ap=(double)num_bin;
 tot=average=sigma=0;
 for(i=first; i<=last; i++)
  {
+ if(isnan(data[i]))		// ignore NaNs
+  continue;
  if(i==first)
   mx=mn=data[i];
  else
@@ -6189,6 +6208,8 @@ for(i=0; i<num_bin; i++)
 step=(mx-mn)/(ap); 
 for(i=first; i<=last; i++)
  {
+  if(isnan(data[i]))		// ignore NaNs
+   continue;
   a=floor( ap*(data[i]-mn)/(mx-mn));
   s=ap*(data[i]-mn)/(mx-mn);
     
@@ -6226,7 +6247,8 @@ if(stat==1)
  plog("\n\n#    Boundaries(center)\t\tMin\tAve\tMax\tNum.\tFreq.");
 step=(mx+a/2-(mn-a/2))/(ap);
 
-lminy=last-first;
+//lminy=last-first;
+lminy=tot;		// consider only non-NaNs
 truemaxy=0;
 for(i=0; i<num_bin; i++)
  {if(cl[i].num!=0)
@@ -6593,12 +6615,12 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(data[i][j]>0.0)
+	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
-		 logdata[i][j]=0.0;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (log set to zero)\n         Series: %d, Case: %d\n",i+1,j);
+		 logdata[i][j]=NAN;
+		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
 		 plog(msg);
 	   }
 	 data[i]=logdata[i];				// replace the data series
@@ -6702,7 +6724,7 @@ if(autom==1)
 {//min and max fixed automatically
 for(i=0; i<nv; i++)
  {
- if(start[i]<=time && end[i]>=time)
+ if(start[i]<=time && end[i]>=time && !isnan(data[i][time]))		// ignore NaNs
  {
  if(active_v==0)
   mx=mn=data[i][time];
@@ -6727,7 +6749,7 @@ mx=maxy;
 mn=miny;
 for(i=0; i<nv; i++)
  {
- if(start[i]<=time && end[i]>=time && data[i][time]>=mn && data[i][time]<=mx)
+ if(start[i]<=time && end[i]>=time && !isnan(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
  {
   average+=data[i][time];
   sigma+=data[i][time]*data[i][time];
@@ -6737,6 +6759,8 @@ for(i=0; i<nv; i++)
  }
 
 }
+if(tot==0)
+	tot=1;
 average=average/tot;
 sigma=sigma/tot-average*average;
 
@@ -6753,7 +6777,7 @@ for(i=0; i<num_bin; i++)
 step=(mx-mn)/(ap); 
 for(i=0; i<nv; i++)
  {
-  if(start[i]<=time && end[i]>=time && data[i][time]>=mn && data[i][time]<=mx)
+  if(start[i]<=time && end[i]>=time && !isnan(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
   {
   a=floor( ap*(data[i][time]-mn)/(mx-mn));
   s=ap*(data[i][time]-mn)/(mx-mn);
@@ -7113,6 +7137,7 @@ void create_series(int *choice)
 int i, nv, j, k, *start, *end, idseries, flt;
 double nmax, nmin, nmean, nvar, nn, thflt, confi;
 double step;
+bool first;
 
 thflt=0;
 char *lapp, **str, **tag;
@@ -7309,15 +7334,19 @@ cmd(inter, "set choice $bidi");
 
 for(i=min_c; i<=max_c; i++)
  {nmean=nn=nvar=0;
+  first=true;
   for(j=0; j<nv; j++)
    {
-    if(i>=start[j] && i<=end[j] && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))
+    if(i>=start[j] && i<=end[j] && !isnan(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))		// ignore NaNs
     {
     nmean+=data[j][i];
     nvar+=data[j][i]*data[j][i];
     nn++;
-    if(j==0)
+    if(first)
+	{
      nmin=nmax=data[j][i];
+	 first=false;
+	}
     else
      {
      if(nmin>data[j][i])
@@ -7328,9 +7357,17 @@ for(i=min_c; i<=max_c; i++)
      } 
     }
    }
-   nmean/=nn;
-   nvar/=nn;
-   nvar-=nmean*nmean;
+
+   if(nn==0)	// not a single valid value?
+   {
+		nn=nmean=nvar=nmin=nmax=NAN;
+   }
+   else
+   {
+		nmean/=nn;
+		nvar/=nn;
+		nvar-=nmean*nmean;
+   }
    
 if(*choice==1)
  vs[num_var].data[i]=nmean;
@@ -7372,15 +7409,19 @@ cmd(inter, "set choice $bidi");
 
 for(j=0; j<nv; j++)
  {nmean=nn=nvar=0;
+  first=true;
   for(i=min_c; i<=max_c; i++)
    {
-    if(i>=start[j] && i<=end[j] && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
+    if(i>=start[j] && i<=end[j] && !isnan(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
     {
     nmean+=data[j][i];
     nvar+=data[j][i]*data[j][i];
     nn++;
-    if(j==0)
+    if(first)
+	{
      nmin=nmax=data[j][i];
+	 first=false;
+	}
     else
      {
      if(nmin>data[j][i])
@@ -7391,10 +7432,18 @@ for(j=0; j<nv; j++)
      } 
     }
    }
-   nmean/=nn;
-   nvar/=nn;
-   nvar-=nmean*nmean;
-   
+
+   if(nn==0)	// not a single valid value?
+   {
+		nn=nmean=nvar=nmin=nmax=NAN;
+   }
+   else
+   {
+		nmean/=nn;
+		nvar/=nn;
+		nvar-=nmean*nmean;
+   }
+      
 if(*choice==1)
  vs[num_var].data[j]=nmean;
 if(*choice==5)
@@ -7550,15 +7599,27 @@ for(i=0; i<nv; i++)
    data[i]=find_data(idseries);
    xapp=0;
 
-   for(j=start[i]; j<start[i]+flt;j++)
-     xapp+=data[i][j]/(double)flt;
-
+   for(h=0, j=start[i]; j<start[i]+flt;j++)
+//     xapp+=data[i][j]/(double)flt;
+	   if(!isnan(data[i][j]))		// not a NaN?
+	   {
+		   xapp+=data[i][j];
+		   h++;
+	   }
+	if(h==0)	// no observation?
+		xapp=NAN;
+	else
+		xapp/=(double)h;
+	
    for(j=start[i]; j<start[i]+(flt-1)/2; j++)
      vs[num_var+i].data[j]=xapp;
 
    for(   ; j<end[i]-(flt-1)/2; j++)
     {
-     xapp=xapp-data[i][j-(flt-1)/2]/(double)flt+data[i][j+(flt-1)/2]/(double)flt;
+	 if(!isnan(data[i][j-(flt-1)/2]) && !isnan(data[i][j+(flt-1)/2]))
+		xapp=xapp-data[i][j-(flt-1)/2]/(double)flt+data[i][j+(flt-1)/2]/(double)flt;
+	 else
+		xapp=NAN;
      vs[num_var+i].data[j]=xapp;
     }
    for(   ; j<end[i]; j++)
@@ -7927,7 +7988,7 @@ if(dozip==1)
 for(j=min_c; j<=max_c; j++)
  {
   for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i])
+   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
       gzprintf(fsavez, "%g%s", data[i][j], delimiter);
     else
       gzprintf(fsavez, "%s%s", misval, delimiter);
@@ -7963,7 +8024,7 @@ else
 {
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i])
+   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
       fprintf(fsave, "%g%s", data[i][j], delimiter);  
     else
       fprintf(fsave, "%s%s", misval, delimiter);  
@@ -7977,12 +8038,14 @@ else //column data writing
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
    {
-   if(j>=start[i] && j<=end[i])
+   if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
+   {
       sprintf(msg, "%.10lf", data[i][j]);
+	  strcat(msg, str1);
+	  msg[numcol]=(char)NULL;
+   }
    else
-      sprintf(msg, "%s.0", misval);
-   strcat(msg, str1);
-   msg[numcol]=(char)NULL;
+      sprintf(msg, "%s", misval);
    if(dozip==1) 
      {
      #ifdef LIBZ
@@ -8121,11 +8184,17 @@ plog("\n");
 
 for(i=min_c; i<=max_c; i++)
  {
- sprintf(msg, "%lf", data[0][i]);
+ if(!isnan(data[0][i]))		// write NaN as n/a
+	sprintf(msg, "%lf", data[0][i]);
+ else
+	sprintf(msg, "%s", nonavail);
  plog(msg);
  for(j=1; j<nv; j++)
    {
-   sprintf(msg, "\t%lf", data[j][i]);
+   if(!isnan(data[j][i]))		// write NaN as n/a
+	sprintf(msg, "\t%lf", data[j][i]);
+   else
+	sprintf(msg, "%s", nonavail);
    plog(msg);
    
    }

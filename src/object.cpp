@@ -397,6 +397,7 @@ char *qsort_lab;
 char *qsort_lab_secondary;
 
 int no_error=0;
+bool use_nan=false;		// flag to allow using Not a Number value
 
 int stairs=0;
 int sig_stairs=0;
@@ -1333,7 +1334,7 @@ if(this==NULL)
  quit=2;
  return;
 }
-if(isnan(value)==1 || isinf(value)==1)
+if((!use_nan && isnan(value)) || isinf(value)==1)
 {sprintf(msg, "\nMath error: write of %s requested with a wrong value\n\n", lab);
  plog(msg);
  debug_flag=1;
@@ -2179,7 +2180,7 @@ if(this==NULL)
  return -1;
 }
 
-if(isnan(value)==1 || isinf(value==1))
+if((!use_nan && isnan(value)) || isinf(value==1))
 {sprintf(msg, "\nMath error: increment of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;
@@ -2223,7 +2224,7 @@ if(this==NULL)
  return -1;
 }
 
-if(isnan(value)==1 || isinf(value==1))
+if((!use_nan && isnan(value)) || isinf(value==1))
 {sprintf(msg, "\nMath error: multiply of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;

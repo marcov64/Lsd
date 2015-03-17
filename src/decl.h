@@ -16,6 +16,15 @@ Comments and bug reports to marco.valente@univaq.it
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+#include <limits.h>
+
+// redefine NAN to use faster non-signaling NaNs
+#if has_quiet_NaN 
+#undef NAN
+#define NAN quiet_NaN()
+#endif
+#define NaN NAN
 
 #define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
 
