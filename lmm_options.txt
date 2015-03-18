@@ -1,5 +1,0 @@
-terminal
-open
-Courier
-wish8.5
-src
