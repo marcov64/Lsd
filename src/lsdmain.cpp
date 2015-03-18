@@ -830,9 +830,15 @@ cmd(inter, "update");
 #endif
 
 if(batch_sequential==0)
- sprintf(msg, "%s_%d.res", simul_name, seed-1);
+ if(strlen(path)==0)
+  sprintf(msg, "%s_%d.res", simul_name, seed-1);
+ else
+  sprintf(msg, "%s/%s_%d.res", path, simul_name, seed-1);
 else
- sprintf(msg, "%s_%d_%d.res", simul_name, findex, seed-1);
+ if(strlen(path)==0)
+  sprintf(msg, "%s_%d_%d.res", simul_name, findex, seed-1);
+ else
+  sprintf(msg, "%s/%s_%d_%d.res", path, simul_name, findex, seed-1);
 
 f=fopen(msg,"wt");  // use text mode for Windows better compatibility
 save_title_result(f, root, 1);
@@ -857,9 +863,15 @@ printf("\n");
 #endif
 
 if(batch_sequential==0)
- sprintf(msg, "%s_%d_%d.tot", simul_name, seed-i, seed-1+sim_num-i);
+ if(strlen(path)==0)
+  sprintf(msg, "%s_%d_%d.tot", simul_name, seed-i, seed-1+sim_num-i);
+ else
+  sprintf(msg, "%s/%s_%d_%d.tot", path, simul_name, seed-i, seed-1+sim_num-i);
 else
- sprintf(msg, "%s_%d_%d_%d.tot", simul_name, findex, seed-i, seed-1+sim_num-i);
+ if(strlen(path)==0)
+  sprintf(msg, "%s_%d_%d_%d.tot", simul_name, findex, seed-i, seed-1+sim_num-i);
+ else
+  sprintf(msg, "%s/%s_%d_%d_%d.tot", path, simul_name, findex, seed-i, seed-1+sim_num-i);
 
 if(i==1 && add_to_tot==0)
  {

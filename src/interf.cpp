@@ -3196,7 +3196,7 @@ sprintf(msg, "%s.lsd", simul_name);
 sprintf(ch, "%s.lsd", lab);
 sprintf(msg, "file copy -force %s.lsd %s.lsd", simul_name, lab);
 cmd(inter, msg);
-sprintf(msg, "\nLsd result file: %s.res\nLsd data file %s.lsd\nSaving data ...",lab, lab);
+sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data ...",lab, lab);
 plog(msg);
 cmd(inter, "focus .log");
 //cmd(inter, "raise .log");

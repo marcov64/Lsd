@@ -221,7 +221,7 @@ void analysis(int *choice)
 {
 char *app;
 cmd(inter, "if {[winfo exists $c]==1} {wm withdraw $c} {}");
-cmd(inter, "wm iconify .log");
+//cmd(inter, "wm iconify .log");
 
 cmd(inter, "set a [info vars c0]");
 cmd(inter, "if {$a==\"\" } {set choice 0} {set choice 1}");
