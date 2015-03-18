@@ -1,0 +1,9 @@
+Work/
+trashbin/
+SyncToy*
+*.err
+*.o
+system_options.txt
+lmm_options.txt
+temp.html
+n++.wsp
