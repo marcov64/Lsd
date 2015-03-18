@@ -828,6 +828,279 @@ do {
  return em;
 }
 
+// ################### ADDITIONAL STATISTICAL C FUNCTIONS ################### //
+
+/*
+ * Return a draw from a lognormal distribution
+ */
+
+double lnorm( double mu, double sigma )
+{
+	if ( sigma <= 0.0 )
+	{
+		plog( "\nWarning: bad sigma in function: lnorm" );
+		return 0.0;
+	}
+
+	return exp( norm( mu, sigma ) );
+}
+
+
+/*
+ * Return a draw from an asymmetric laplace distribution
+ */
+
+double alapl( double mu, double alpha1, double alpha2 )
+{
+	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
+	{
+		plog( "\nWarning: bad alpha in function: alapl" );
+		return 0.0;
+	}
+
+	double draw = RND;
+	if( draw < ( alpha1 / ( alpha1 + alpha2 ) ) )
+		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
+	else 
+		return mu - alpha2 * log( ( 1 - draw ) * ( 1 + alpha1 / alpha2 ) );
+}
+
+
+/*
+ * Return a draw from a Beta(alfa,beta) distribution
+ * Dosi et al. (2010) K+S
+ */
+
+double beta( double alpha, double beta )
+
+{
+	if ( alpha <= 0.0 || beta <= 0.0 )
+	{
+		plog( "\nWarning: bad alpha or beta in function: beta" );
+		return 0.0;
+	}
+	
+	double U, V, den;
+	U = RND;
+	V = RND; 
+	den = pow( U, ( 1 / alpha ) ) + pow( V, ( 1 / beta ) );
+	
+	while ( den <= 0 || den > 1)
+	{
+		U = RND;
+		V = RND;
+		den = pow( U,( 1 / alpha ) ) + pow( V, ( 1 / beta ) );
+	}
+
+	return pow( U , ( 1 / alpha ) ) / den;
+}
+
+
+/*
+ * Factorial function
+ */
+
+double fact( double x )
+{
+	x = floor( x );
+	if ( x < 0.0 )
+	{
+		plog( "\nWarning: bad x in function: fact" );
+		return 0.0;
+	}
+
+	double fact = 1.0;
+	long i = 1;
+	while (i <= x)
+		fact *= i++;
+	
+	return fact;
+}
+
+
+/*
+ * Uniform cumulative distribution function
+ */
+
+double unifcdf( double a, double b, double x )
+{
+	if ( a >= b )
+	{
+		plog( "\nWarning: bad a or b in function: uniformcdf" );
+		return 0.0;
+	}
+
+	if ( x <= a )
+		return 0.0;
+	if ( x >= b )
+		return 1.0;
+
+	return ( x - a ) / ( b - a );
+}
+
+
+/*
+ * Poisson cumulative distribution function
+ */
+
+double poissoncdf( double lambda, double k )
+{
+	k = floor( k );
+	if ( lambda <= 0.0 || k < 0.0 )
+	{
+		plog( "\nWarning: bad lambda or k in function: poissoncdf" );
+		return 0.0;
+	}
+	
+	double sum = 0.0;
+	long i;
+	for ( i = 0; i <= k; i++ )
+		sum += pow( lambda, i ) / fact( i );
+	
+	return exp( -lambda ) * sum;
+}
+
+
+/*
+ * Normal cumulative distribution function
+ */
+
+double normcdf( double mu, double sigma, double x )
+{
+	if ( sigma <= 0.0 )
+	{
+		plog( "\nWarning: bad sigma in function: normalcdf" );
+		return 0.0;
+	}
+	
+	return 0.5 * ( 1 + erf( ( x - mu ) / ( sigma * sqrt( 2.0 ) ) ) );
+}
+
+
+/*
+ * Lognormal cumulative distribution function
+ */
+
+double lnormcdf( double mu, double sigma, double x )
+{
+	if ( sigma <= 0.0 || x <= 0.0 )
+	{
+		plog( "\nWarning: bad sigma or x in function: lnormalcdf" );
+		return 0.0;
+	}
+	
+	return 0.5 + 0.5 * erf( ( log( x ) - mu ) / ( sigma * sqrt( 2.0 ) ) );
+}
+
+
+/*
+ * Asymmetric laplace cumulative distribution function
+ */
+
+double alaplcdf( double mu, double alpha1, double alpha2, double x )
+{
+	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
+	{
+		plog( "\nWarning: bad alpha in function: alaplcdf" );
+		return 0.0;
+	}
+	
+	if ( x < mu )									// cdf up to upper bound
+		return 0.5 * exp( ( x - mu ) / alpha1 );
+	else
+		return 1 - 0.5 * exp( -( x - mu ) / alpha2 );
+}
+
+
+/*
+ * Beta distribution: continued fraction evaluation function
+ * Press et al. (1992) Numerical Recipes in C, 2nd Ed.
+ */
+
+#define MAXIT 100
+#define BEPS 3.0e-7
+#define FPMIN 1.0e-30
+
+double betacf( double a, double b, double x )
+{
+	void nrerror(char error_text[]);
+	int m, m2;
+	double aa, c, d, del, h, qab, qam, qap;
+
+	qab = a + b;
+	qap = a + 1.0;
+	qam = a - 1.0;
+	c = 1.0;
+	d = 1.0 - qab * x / qap;
+
+	if ( fabs( d ) < FPMIN ) 
+		d = FPMIN;
+	d = 1.0 / d;
+	h = d;
+
+	for ( m = 1; m <= MAXIT; m++ ) 
+	{
+		m2 = 2 * m;
+		aa = m * ( b - m ) * x / ( ( qam + m2 ) * ( a + m2 ) );
+		d = 1.0 + aa * d;
+		if ( fabs( d ) < FPMIN)
+			d = FPMIN;
+		
+		c = 1.0 + aa / c;
+		if ( fabs( c ) < FPMIN )
+			c=FPMIN;
+
+		d = 1.0 / d;
+		h *= d * c;
+		aa = -( a + m ) * ( qab + m ) * x / ( ( a + m2 ) * ( qap + m2 ) );
+		d = 1.0 + aa * d;
+		if ( fabs( d ) < FPMIN )
+			d = FPMIN;
+
+		c = 1.0 + aa / c;
+		if ( fabs( c ) < FPMIN )
+			c = FPMIN;
+
+		d = 1.0 / d;
+		del = d * c;
+		h *= del;
+		if ( fabs( del - 1.0) < BEPS )
+			break;
+	}
+
+	if ( m > MAXIT ) 
+		plog( "\nWarning: a or b too big (or MAXIT too small) in function: betacf");
+
+	return h;
+}
+
+
+/*
+ * Beta cumulative distribution function: incomplete beta function
+ * Press et al. (1992) Numerical Recipes in C, 2nd Ed.
+ */
+
+double betacdf( double alpha, double beta, double x )
+{
+	double bt;
+
+	if ( alpha <= 0.0 || beta <= 0.0 || x < 0.0 || x > 1.0 )
+	{
+		plog( "\nWarning: bad alpha, beta or x in function: betacdf" );
+		return 0.0;
+	}
+
+	if ( x == 0.0 || x == 1.0 )
+		bt = 0.0;
+	else
+		bt = exp( lgamma( alpha + beta ) - lgamma( alpha ) - lgamma( beta ) 
+				 + alpha * log( x ) + beta * log( 1.0 - x ) );
+
+	if ( x < ( alpha + 1.0 ) / ( alpha + beta + 2.0 ) )
+		return bt * betacf( alpha, beta, x ) / alpha;
+	else
+		return 1.0 - bt * betacf( beta, alpha, 1.0 - x ) / beta;
+}
 
 
 void error(char *m)

@@ -44,17 +44,28 @@ extern char *path;			// folder where the configuration is
 void error(char *);
 double log(double v);
 double exp(double c);
+double fact( double x );								// Factorial function
 double ran1(long *idum);
 #define RND (double)ran1(&idum)
 double poidev(double xm, long *idum);
 double poisson(double m) {return poidev(m, &idum); };
+double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
 double gamdev(int ia, long *idum);
 double gamma(double m) {return gamdev((int)m, &idum);};
+double beta( double alpha, double beta );				// draw from a beta distribution
+double betacf( double a, double b, double x );			// beta distribution function
+double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
+double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
+double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cumulative distribution function
+double lnorm( double mu, double sigma );				// draw from a lognormal distribution
+double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
+double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
 void error_cycle(char const *l);
 
 int deb(object *r, object *c, char const *lab, double *res);
 
 double norm(double mean, double dev);
+double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
 double max(double a, double b);
 double min(double a, double b);
 double round(double r);
