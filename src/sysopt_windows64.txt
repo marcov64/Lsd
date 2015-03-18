@@ -9,7 +9,7 @@ PATH_LIB=$(LSDROOT)/gnu64/lib
 INCLUDE_LIB=-I$(LSDROOT)/gnu64/include
 CC=g++
 SRC=src
-EXTRA_PAR=-llibz
+EXTRA_PAR=-lz
 SSWITCH_CC=-march=native -mtune=native -O3
 EXT=.exe
 

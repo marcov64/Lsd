@@ -5311,7 +5311,7 @@ cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
 cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 16 -relief sunken -yscrollcommand \".l.t.yscroll set\"");
 
 if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
-  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-llibz\\nSSWITCH_CC=-march=native -mtune= native -O3\\n\"");
+  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-march=native -mtune= native -O3\\n\"");
 else
   cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
 
@@ -6268,8 +6268,11 @@ cmd(inter, "pack .mm.lab1 .mm.lab");
 cmd(inter, "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word; scrollbar .mm.yscroll -command \".mm.t yview\"");
 
 
+#ifndef DUAL_MONITOR
 cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm -0+0; wm title .mm \"Compilation Errors List\"");
-
+#else
+cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm +0+0; wm title .mm \"Compilation Errors List\"");
+#endif
 
 cmd(inter, "frame .mm.b -relief groove -bd 2");
 
