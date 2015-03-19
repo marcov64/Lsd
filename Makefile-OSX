@@ -1,16 +1,39 @@
-# Makefile for lmm
-#
+# Makefile for lmm in OSX (tested up to 10.9)
+# Require ActiveTcl 8.5 and X11/XQuartz installed
+
+TARGET=lmm
+SWITCH_CC=-w
+
+LSDROOT=.
+PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers
+PATH_TCL_HEADER=/System/Library/Frameworks/Tcl.framework/Headers
+PATH_LIB=.
+INCLUDE_LIB=-I/opt/X11/include
+
+# from here you should not need to modify anything
+CC=g++
+RM=rm -f
+SRC=src
+
+SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# Variable used to prepare the options to search for the tcl and tk headers
+# Do not modify
+INCLD_TCL_TK=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) 
 
 
-LIBS     = -framework Tk -framework Tcl -lstdc++
+# Set the complete option for the libraries to link to the models.
+TCL_LIB=-framework Tcl
+TK_LIB=-framework Tk
 
-LIBPATHS = 
+$(TARGET): $(SRC_DIR)modman.o
+	$(CC) $(SWITCH_CC)  $(SRC_DIR)modman.o \
+	$(TCL_LIB) $(TK_LIB) -L$(PATH_LIB) -o $(TARGET)
 
-INCLUDES = -I /System/Library/Frameworks/Tk.framework/Headers -I /System/Library/Frameworks/Tcl.framework/Headers
-SOURCE   = src/modman.cpp
+$(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o \
+	$(INCLD_TCL_TK) $(INCLUDE_LIB)
 
-lmm: lmm.o
-	gcc -o lmm lmm.o $(LIBPATHS) $(LIBS)
-
-lmm.o: $(SOURCE)
-	g++ -g -c $< $(INCLUDES) -o lmm.o 
+# Clean object files for building for another distribution
+clean:
+	$(RM) $(SRC_DIR)modman.o

@@ -385,7 +385,7 @@ if(choice==1)
 
 cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
 if(choice==1)
- {cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set sysfile \"sysopt_windows.txt\"} { if { $tcl_platform(os) == \"\"} {set sysfile \"sysopt_mac.txt\"} {set sysfile \"sysopt_linux.txt\"}}");
+ {cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set sysfile \"sysopt_windows.txt\"} { if { $tcl_platform(os) == \"Darwin\"} {set sysfile \"sysopt_mac.txt\"} {set sysfile \"sysopt_linux.txt\"}}");
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     //cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");

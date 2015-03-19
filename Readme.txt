@@ -94,15 +94,12 @@ If you switch between the 32 and 64-bit versions, make sure you adjust the "Syst
 *****************
 Unix Installation
 *****************
-To use the Lsd system it is necessary to have a GNU GCC compiler with the standard libraries and the Tcl/Tk package; you likely have already Tcl/Tk installed on your system, but you also need the "development" package for your Tcl/Tk version. Use your preferred package manager to get the 'dev' package.
+To use the Lsd system it is necessary to have a GNU GCC compiler with the standard libraries and the Tcl/Tk 8.5 package; you likely have already Tcl/Tk installed on your system, but you also need the "development" package for your Tcl/Tk version. Use your preferred package manager to get the 'dev' package.
 
 Though not striclty necessary, it is also suggested to have the GDB debugger (for low-level inspection of a simulation working) and the gnuplot graphical package. 
 
-To unpack the file, e.g. Lsd52unix.tgz,  use the command:
-# tar xzf Lsd52unix.tgz
+To unpack the file, e.g. LsdXX.zip, simple unzip it in the chosen directory.
 This will create the whole directory structure. 
-
-(if the file is in format .zip, then simple unzip it)
 
 To compile LMM move in the new Lsd directory and use the makefile "makefile.ln":
 # make -f makefile.ln
@@ -128,12 +125,14 @@ For persisting problems email me: valente@ec.univaq.it
 If you modified the makefile to compile LMM, the same changes will need to be made to the makefiles used to generate the Lsd Model Programs. You need to make these changes only once using a command in LMM. Use the menu item System Compilation Options in menu Model. You will have the same variables as in the makefile used to compile LMM that must be set to the same values.
 
 
-*******************************
-Mac OS X (Leopard) Installation
-*******************************
-Mac users have two options. Either compile Lsd as a Unix system, or use the package native for Mac OS X. In both cases you need to install the developer toolkit. In the first case you also need to install the X11 package (see the help on your Mac documentation). Then, open a terminal and follow the instructions for installing Lsd on Linux systems.
+*********************************
+Mac OS X (Mavericks) Installation
+*********************************
+Mac users have two options. Either compile Lsd as a Unix system, or use the package native for Mac OS X. In both cases you need to install the X11 package (see the help on your Mac documentation). In the first case you also need to install the Tcl/Tk 8.5 developer toolkit. Then, open a terminal and follow the instructions for installing Lsd on Linux systems.
 
-For a native Mac look&feel you need to install the ActiveState distribution of Tcl/Tk. Unpack the Lsd distribution on your preferred location. Open a terminal and enter the directory of Lsd installation. Give then the command:
+For updates and tips see: http://andre.lorentz.pagesperso-orange.fr/Site/%5BLSD_on_a_Mac%5D.html
+
+For a native Mac look&feel you need to install the ActiveState ActiveTcl distribution of Tcl/Tk 8.5. Unpack the Lsd distribution on your preferred location. Open a terminal and enter the directory of Lsd installation. Give then the command:
 
 > make -f Makefile-OSX
 
@@ -142,8 +141,6 @@ after the compilation launch LMM with the command:
 > ./lmm
 
 or simply click on its icon from the Finder.
-
-For updates and tips see: http://andre.lorentz.pagesperso-orange.fr/Site/%5BLSD_on_a_Mac%5D.html
 
 
 ******************
