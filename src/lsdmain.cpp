@@ -124,7 +124,7 @@ int choice_g;
 extern double ymin;
 extern double ymax;
 extern long nodesSerial;
-extern char nonavail[]="NA";	// string for unavailable values (use R default)
+char nonavail[]="NA";	// string for unavailable values (use R default)
 
 int errormsg(char const *lpszText,  char const *lpszTitle);
 object *create( object *r);
