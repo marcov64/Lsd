@@ -967,7 +967,7 @@ extern char name_rep[400];
 void save_eqfile(FILE *f);
 
 
-void sensitivity_sequential(int *findex, sense *s )
+void sensitivity_sequential(long *findex, sense *s, double probSampl = 1.0)
 {
 /*
 This function fills the initial values according to the sensitivity analysis system performed by sequential simulations: each run executes one configuration labelled with sequential labels.
@@ -975,19 +975,19 @@ This function fills the initial values according to the sensitivity analysis sys
 Contrary to parallel sensitivity settings, this function initialize all elements in the configuration with the specified label.
 
 In set all users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser. This command generates
-as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
+When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser.
 
-The user is supposed then to save the resulting configuration.
-
-Options concerning initialization for sensitivity analysis are not saved into the model configuration files, and are therefore lost when closing the LSD model program. 
+Options concerning initialization for sensitivity analysis are saved into model configuration files, to be executed with a No Window version of the LSD model. 
+One configuration file is created for each possible combination of the sensitivity analysis values (parameters and initial conditions). Optionally, it is possible
+to define the parameter "probSampl" with the (uniform) probability of a given point in the sensitivity analysis space is saved as configuration file. In practice,
+this allows for the Monte Carlo sampling of the parameter space, which is often necessary when the s.a. space is too big to be analyzed in its entirety.
 
 */
 int i,nv;
 sense *cs;
 object *cur;
 variable *cvar;
-char lab[2000],fname[2000];
+char lab[200],fname[300];
 FILE *f;
 
 
@@ -997,7 +997,7 @@ if(s->next!=NULL)
   for(i=0; i<s->nvalues; i++)
    {
     s->i=i;
-    sensitivity_sequential(findex,s->next);
+    sensitivity_sequential(findex,s->next,probSampl);
    }
  return;
  }
@@ -1020,17 +1020,20 @@ for(i=0; i<s->nvalues; i++)
     }
 
    }
-	if(strlen(path)>0)
-		sprintf(fname,"%s/%s_%d.lsd",path,simul_name,*findex);
+
+ if(RND <= probSampl)		// draw if point will be sampled
+ {
+   if(strlen(path)>0)
+		sprintf(fname,"%s/%s_%ld.lsd",path,simul_name,*findex);
 	else
-		sprintf(fname,"%s_%d.lsd",simul_name,*findex);
+		sprintf(fname,"%s_%ld.lsd",simul_name,*findex);
     f=fopen(fname,"w");
     strcpy(lab, "");
 	root->save_struct(f,lab);
    fprintf(f, "\n\nDATA");
 	root->save_param(f);
-//	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", nv, seed+*findex-1, max_step, equation_name, name_rep);
-	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed+sim_num*(*findex-1), max_step, equation_name, name_rep);
+//	fprintf(f, "\nSIM_NUM %d\nSEED %ld\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", nv, seed+*findex-1, max_step, equation_name, name_rep);
+	fprintf(f, "\nSIM_NUM %d\nSEED %ld\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed+sim_num*(*findex-1), max_step, equation_name, name_rep);
   fprintf(f, "\nDESCRIPTION\n\n");
   save_description(root, f);  
   fprintf(f, "\nDOCUOBSERVE\n");
@@ -1051,10 +1054,24 @@ for(i=0; i<s->nvalues; i++)
   
   fclose(f);
   *findex=*findex+1;
-  }
-
+ }
+}
  
 }
+
+
+long num_sensitivity_points(void)	// calculates the sensitivity space size
+{
+	long nv;
+	sense *cs;
+	
+	for (nv = 1, cs = rsense; cs!=NULL; cs=cs->next)	// scan the linked-list
+		nv *= cs->nvalues;	// update the number of variables
+
+	return nv;
+}
+
+
 void dataentry_sensitivity(int *choice, sense *s)
 {
 

@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 70
+USED CASE 71
 */
 
 /****************************************************
@@ -117,6 +117,8 @@ Exit function, which is customized on the operative system.
 #define ACCESSPERMS 0777 
 #endif
 
+#define MAX_SENS_POINTS 999		// default warning threshold for sensitivity analysis
+
 object *operate( int *choice, object *r);
 int browse( object *r, int *choice);
 object *skip_next_obj(object *t, int *i);
@@ -181,7 +183,8 @@ void tex_report_observe(object *r, FILE *f);
 void shift_var(int direction, char *vlab, object *r);
 void shift_desc(int direction, char *dlab, object *r);
 object *sensitivity_parallel(object *o, sense *s );
-void sensitivity_sequential(int *findexSens, sense *s );
+void sensitivity_sequential(long *findexSens, sense *s, double probSampl = 1.0);
+long num_sensitivity_points(void);	// calculates the sensitivity space size
 void empty_sensitivity(sense *cs);
 
 extern object *root;
@@ -225,7 +228,7 @@ extern long nodesSerial;	// network node serial number global counter
 
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 char *sens_file=NULL;		// current sensitivity analysis file
-int findexSens=0;				// index to sequential sensitivity configuration filenames
+long findexSens=0;			// index to sequential sensitivity configuration filenames
 int strWindowOn=1;			// control the presentation of the model structure window
 bool justAddedVar=false;	// control the selection of last added variable
  
@@ -500,6 +503,7 @@ cmd(inter, "$w add command -label \"Init. Values\" -command {set choice 21} -und
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Sensitivity (parallel)\" -command {set choice 62} -underline 13");
 cmd(inter, "$w add command -label \"Sensitivity (sequential)\" -command {set choice 63} -underline 15");
+cmd(inter, "$w add command -label \"Sensitivity (Monte Carlo)\" -command {set choice 71} -underline 13");
 cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
 cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
 cmd(inter, "$w add command -label \"Create Sensitivity Batch\" -command {set choice 68} -underline 0");
@@ -3684,6 +3688,17 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
+	// Prevent running into too big sensitivity spaces (high computation times)
+	long sensPoints = num_sensitivity_points();	// total number of points in sensitivity space
+	if(sensPoints > MAX_SENS_POINTS)
+	{
+		sprintf(msg, "\nWarning: sensitivity analysis space size (%ld) is too big!", sensPoints);
+		plog(msg);
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		if(*choice == 0)
+			break;
+	}
+	
     for (i=1,cs=rsense; cs!=NULL; cs=cs->next)
         i*=cs->nvalues;
     cur=root->b->head;
@@ -3702,11 +3717,90 @@ case 63:
 cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
-  {
+{
+	// Prevent running into too big sensitivity spaces (high computation times)
+	long sensPoints = num_sensitivity_points();	// total number of points in sensitivity space
+	if(sensPoints > MAX_SENS_POINTS)
+	{
+		sprintf(msg, "\nWarning: sensitivity analysis space size (%ld) is too big!", sensPoints);
+		plog(msg);
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		if(*choice == 0)
+			break;
+	}
+	
     findexSens=1;
     sensitivity_sequential(&findexSens,rsense);
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
- }
+}
+else
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+
+*choice=0;
+return r;
+
+//Create Monte Carlo (random) sensitivity analysis configuration
+case 71:
+cmd(inter, "destroy .m .l");
+
+if (rsense!=NULL) 
+{
+	// get the number of Monte Carlo samples to produce
+	double sizMC;
+	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
+	cmd(inter, "toplevel .s");
+	cmd(inter, "wm transient .s .");
+	cmd(inter, "wm title .s \"Num. of MC samples\"");
+	cmd(inter, "frame .s.i -relief groove -bd 2");
+	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas % of sensitivity space size.\n(from 0 to 100)\"");
+	cmd(inter, "set sizMC \"10.0\"");
+	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable sizMC");
+	cmd(inter, ".s.i.e selection range 0 end");
+	cmd(inter, "label .s.i.w -text \"Requesting a too big\nsample is not recommended.\nThe sample size represents the\napproximated target average.\"");
+	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
+	cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
+	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
+	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
+	cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
+	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
+	cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+	*choice = -1;
+	cmd(inter, "focus .s.i.e");
+	while(*choice == -1)
+		Tcl_DoOneEvent(0);
+	cmd(inter, "destroy .s");
+	Tcl_UnlinkVar(inter, "sizMC");
+	if(*choice == 0)
+		break;
+	
+	// Check if number is valid
+	sizMC /= 100.0;
+	long maxMC = num_sensitivity_points();	// total number of points in sensitivity space
+	if( (sizMC * maxMC) < 1 || sizMC > 1.0)
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Monte Carlo sample size to perform the sensitivity analysis.\\n\\nSelect a number between 0% and 100% that produces at least one sample (in average).\"");
+		*choice=0;
+		break;
+	}
+
+	// Prevent running into too big sensitivity spaces (high computation times)
+	if((sizMC * maxMC) > MAX_SENS_POINTS)
+	{
+		sprintf(msg, "\nWarning: sensitivity analysis space size (%ld) is too big!", sizMC * maxMC);
+		plog(msg);
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		if(*choice == 0)
+			break;
+	}
+	
+	sprintf(msg, "\nSensitivity analysis space size: %ld (%.1f%% target sampling)", maxMC, 100 * sizMC);
+	plog(msg);
+    findexSens=1;
+    sensitivity_sequential(&findexSens, rsense, sizMC);
+	sprintf(msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1);
+	plog(msg);
+ 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+}
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
