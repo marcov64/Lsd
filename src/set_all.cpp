@@ -1021,7 +1021,7 @@ for(i=0; i<s->nvalues; i++)
 
    }
 
- if(RND <= probSampl)		// draw if point will be sampled
+ if(probSampl == 1.0 || RND <= probSampl)		// if required draw if point will be sampled
  {
    if(strlen(path)>0)
 		sprintf(fname,"%s/%s_%ld.lsd",path,simul_name,*findex);
@@ -1096,6 +1096,9 @@ cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.paste -side left");
 cmd(inter, "pack $a.fb");
 cmd(inter, "focus -force .des.t");
 
+do			// finish only after reading all values
+{
+
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
@@ -1115,10 +1118,20 @@ for(i=0; i<s->nvalues; i++)
  {
 //  fscanf(f, "%lf",&(s->v[i]));
   tok=strtok(sss," ,;|/#\t\n");		// accepts several separators
+  if(tok==NULL)		// finished too early?
+  {
+	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
+	  *choice=0;
+	  cmd(inter, "focus -force .des.t");
+	  break;
+  }
   sss=NULL;
   sscanf(tok, "%lf",&(s->v[i]));
  }
 //fclose(f);
+}
+while(tok==NULL);	// require enough values (if more, extra ones are discarded)
+
 cmd(inter, "destroy $a");
 
 }

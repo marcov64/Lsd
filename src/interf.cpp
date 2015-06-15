@@ -3745,6 +3745,10 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
+	long maxMC = num_sensitivity_points();	// total number of points in sensitivity space
+	sprintf(msg, "\nSensitivity analysis space size: %ld", maxMC);
+	plog(msg);
+
 	// get the number of Monte Carlo samples to produce
 	double sizMC;
 	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
@@ -3775,7 +3779,6 @@ if (rsense!=NULL)
 	
 	// Check if number is valid
 	sizMC /= 100.0;
-	long maxMC = num_sensitivity_points();	// total number of points in sensitivity space
 	if( (sizMC * maxMC) < 1 || sizMC > 1.0)
 	{
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Monte Carlo sample size to perform the sensitivity analysis.\\n\\nSelect a number between 0% and 100% that produces at least one sample (in average).\"");
@@ -3786,14 +3789,14 @@ if (rsense!=NULL)
 	// Prevent running into too big sensitivity spaces (high computation times)
 	if((sizMC * maxMC) > MAX_SENS_POINTS)
 	{
-		sprintf(msg, "\nWarning: sensitivity analysis space size (%ld) is too big!", sizMC * maxMC);
+		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is still too big!", (long)(sizMC * maxMC));
 		plog(msg);
 		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
 	
-	sprintf(msg, "\nSensitivity analysis space size: %ld (%.1f%% target sampling)", maxMC, 100 * sizMC);
+	sprintf(msg, "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", (long)(sizMC * maxMC), 100 * sizMC);
 	plog(msg);
     findexSens=1;
     sensitivity_sequential(&findexSens, rsense, sizMC);
