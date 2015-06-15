@@ -95,8 +95,10 @@ int when_debug;
 int stackinfo_flag=0;
 int optimized=0;
 int check_optimized=0;
-int add_to_tot;
+int add_to_tot=0;
 int plot_flag=1;
+bool grandTotal = false;	// flag to produce or not grand total in batch processing
+bool firstRes = true;		// flag to mark first results file (init grand total file)
 double refresh=1.01;
 char *eq_file=NULL;
 char lsd_eq_file[200000];
@@ -232,7 +234,7 @@ fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nLsd NoWindow version. This is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n");
+  printf("\nThis is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n");
   exit(0);
  }
 else
@@ -256,10 +258,16 @@ else
   {done=1;
  	 fend=atoi(argv[i+1]);
   }
-
+ if( argv[i][0] == '-' && argv[i][1] == 'g' )	// read -g parameter : create grand total file (batch only)
+ {
+	done = 1;
+	i--; 	// no parameter for this option
+	grandTotal = true;
+	printf( "\nGrand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
+ }
   
   if(done==0)
-   {  printf("\nOption '%s' not recognized. Lsd NoWindow version. This is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", argv[1]);
+   {  printf("\nOption '-%s' not recognized.\nThis is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", argv[i][1]);
     exit(0);
    }
   }
@@ -324,7 +332,7 @@ else
  }
 if(f==NULL)
  {
-  printf("\nFile %s not found. This is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
+  printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
   exit(0);
  }
 fclose(f);
@@ -873,17 +881,42 @@ else
  else
   sprintf(msg, "%s/%s_%d_%d_%d.tot", path, simul_name, findex, seed-i, seed-1+sim_num-i);
 
-if(i==1 && add_to_tot==0)
- {
- f=fopen(msg,"wt");  // use text mode for Windows better compatibility
- save_title_result(f, root, 0);
- fprintf(f, "\n");
- }
-else
- f=fopen(msg,"a");
-save_result(f,root, actual_steps);
-fprintf(f, "\n");
-fclose(f);
+if( batch_sequential == 0 || ! grandTotal )		// generate partial total files?
+{
+	if(i==1 && add_to_tot==0)
+	{
+		f=fopen(msg,"wt");  // use text mode for Windows better compatibility
+		save_title_result(f, root, 0);
+		fprintf(f, "\n");
+	}
+	else
+		f=fopen(msg,"a");
+	save_result(f,root, actual_steps);
+	fprintf(f, "\n");
+	fclose(f);
+}
+else	// generate single grand total file
+{
+	if(strlen(path)==0)
+		sprintf(msg, "%s.tot", simul_name);
+	else
+		sprintf(msg, "%s/%s.tot", path, simul_name);
+
+	if( firstRes )
+	{
+		f=fopen(msg,"wt");  // use text mode for Windows better compatibility
+		save_title_result(f, root, 0);
+		fprintf(f, "\n");
+		firstRes = false;
+	}
+	else
+		f=fopen(msg,"a");
+	
+	save_result(f,root, actual_steps);
+	fprintf(f, "\n");
+	fclose(f);
+}
+
 //if(batch_sequential==1)
 // findex+=1;
  if(batch_sequential==1 && i==sim_num)  // last run of current batch file?
