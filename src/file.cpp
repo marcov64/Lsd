@@ -197,7 +197,7 @@ OBJECT::SAVE_STRUCT
 
 ****************************************************/
 
-void object::save_struct(FILE *f, char *tab)
+void object::save_struct(FILE *f, char const *tab)
 {
 object *o, *o1;
 bridge *cb, *cb1;

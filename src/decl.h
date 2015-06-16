@@ -159,7 +159,7 @@ void replicate(int num, int propagate);
 int load_param(char *file_name, int repl, FILE *f);
 void load_struct(FILE *f);
 void save_param(FILE *f);
-void save_struct(FILE *f, char *tab);
+void save_struct(FILE *f, char const *tab);
 int read_param(char *file_name);
 
 void sort_asc( object *from, char *l_var);
@@ -244,3 +244,13 @@ struct sense
  sense *next;
 };
 
+// design of experiment object
+struct design 
+{ 
+	int typ, tab, n, k, *par, *lag;		// experiment parameters
+	double *hi, *lo, **ptr; 
+	char **lab;
+
+	design( sense *rsens, int typ = 1, char const *fname = "" );// constructor
+	~design( void );					// destructor
+};
