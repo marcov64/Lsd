@@ -242,6 +242,7 @@ struct sense
  int i;
  double *v;
  sense *next;
+ bool entryOk;		// flag valid data entered
 };
 
 // design of experiment object

@@ -118,6 +118,7 @@ void set_all(int *choice, object *original, char *lab, int lag)
 {
 char *l, ch[300];
 int res, i, kappa, cases_from=1, cases_to=0, to_all, update_description, fill=0;
+bool exist;
 object *cur, *r;
 double value, value1, value2, step, counter;
 variable *cv;
@@ -352,28 +353,70 @@ switch(res)
 {
 
 case 10: 
-    if (rsense==NULL) {
+	exist = false;
+	sense *ps;
+    if (rsense==NULL) 
+	{
+		if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
+		{
+			cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
+			break;		// abort command
+		}
         rsense=cs=new sense;
     }
     else
-     {
-     for(cs=rsense; cs->next!=NULL; cs=cs->next);
-     cs->next=new sense;
-     cs=cs->next;
-     }
-    cs->label=new char[strlen(lab+1)];
-    strcpy(cs->label,lab);
-    cs->next=NULL;
-    cs->nvalues=(int)value1;
-    cs->v=new double[(int)value1];
-    for (i=1; i<=value1; i++) {
-        cs->v[i-1]=0;
-    }
+    {
+		// check if sensitivity data for the variable already exists 
+		for ( cs = rsense, ps = NULL; cs != NULL; ps = cs, cs = cs->next )
+			if ( ! strcmp( cs->label, lab ) )
+			{
+				exist = true;
+				break;	// get out of the for loop
+			}
+			
+		if ( ! exist )	// if new variable, append at the end of the list
+		{
+			if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
+			{
+				cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
+				break;		// abort command
+			}
+			for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
+			cs->next = new sense;	// create new variable
+			ps = cs;	// keep previous sensitivity variable
+			cs = cs->next;
+		}
+	}
+
+	if ( ! exist )	// do only for new variables in the list
+	{
+		cs->label=new char[strlen(lab+1)];
+		strcpy(cs->label,lab);
+		cs->next=NULL;
+	}
+	// do if new or changed number of values (0 values mean edit)
+	if ( ! exist || ( exist && cs->nvalues != ( int ) value1 && ( int ) value1 != 0 ) )
+	{
+		cs->nvalues=(int)value1;
+		cs->v=new double[(int)value1];
+		cs->entryOk = false;			// no valid data yet
+	}
 	// save type and lags
     cv=r->search_var(NULL, lab);
 	cs->param=cv->param;
 	cs->lag=lag;
-    dataentry_sensitivity(choice, cs);
+	
+    dataentry_sensitivity(choice, cs);	// ask values to the user
+	
+	if ( ! cs->entryOk )	// data entry failed?
+	{
+		if( rsense == cs )	// is it the first variable?
+			rsense = cs->next;	// update list root
+		else
+			ps->next = cs->next;// remove from sensitivity list
+		delete [] cs->v;	// free space
+		delete cs;
+	}
     break;
 //Equal 
 case 1:
@@ -1090,11 +1133,12 @@ int num_sensitivity_variables( sense *rsens )
 }
 			
 
+// try to get values for sensitivity analysis (true: values are ok)
 void dataentry_sensitivity(int *choice, sense *s)
 {
 
 int i;
-char *lab,*sss,*tok;
+char *lab, *sss = NULL, *tok = NULL;
 FILE *f;
 
 *choice=0;
@@ -1105,20 +1149,42 @@ cmd(inter, "wm title .des \"Sensitivity Analysis\"");
 sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);
 cmd(inter, msg);
 cmd(inter, "pack $a.lab");
-cmd(inter, "text $a.t; pack $a.t");
+cmd(inter, "text $a.t; pack $a.t"); 
 cmd(inter, "frame $a.fb -relief groove -bd 2");
 cmd(inter, "button $a.fb.ok -text \" Ok \" -command {set choice 1}");
 cmd(inter, "button $a.fb.esc -text \" Cancel \" -command {set choice 2}");
 cmd(inter, "button $a.fb.paste -text \" Paste \" -command {tk_textPaste}");
-cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.paste -side left");
+cmd(inter, "button $a.fb.del -text \" Delete \" -command {set choice 3}");
+cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.paste $a.fb.del -side left");
 cmd(inter, "pack $a.fb");
 cmd(inter, "focus -force .des.t");
 
+if ( s->entryOk )	// is there valid data from a previous data entry?
+{
+	sss = new char[ 26 * s->nvalues + 1];	// allocate space for string
+	tok = new char[ 26 + 1 ];				
+	strcpy( sss, "" );
+	for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
+	{
+		sprintf( tok, "%.15g ", s->v[i] );	// add each value
+		strcat( sss, tok );					// to the string
+	}
+	Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
+	cmd(inter, "$a.t insert 0.0 $sss");		// insert string in entry window
+	delete [] tok, sss;
+}
+		
 do			// finish only after reading all values
 {
 
 while(*choice==0)
   Tcl_DoOneEvent(0);
+
+if ( *choice == 3 )	// force error to delete variable from list
+{
+	s->entryOk = false;
+	*choice = 2; 
+}
 
 if(*choice==2)
  {
@@ -1126,15 +1192,10 @@ if(*choice==2)
   return; 
  }
 
-//cmd(inter, "set f [open sss.txt w]");
-//cmd(inter, "puts $f [$a.t get 0.0 end]");
-//cmd(inter, "close $f");
-//f=fopen("sss.txt", "r");
-cmd(inter, "set sss [$a.t get 0.0 end]"); // uses memory to
-sss=(char*)Tcl_GetVar(inter,"sss",0); // prevent ocasional crashes
+ cmd(inter, "set sss [$a.t get 0.0 end]");
+sss=(char*)Tcl_GetVar(inter,"sss",0);
 for(i=0; i<s->nvalues; i++)
  {
-//  fscanf(f, "%lf",&(s->v[i]));
   tok=strtok(sss," ,;|/#\t\n");		// accepts several separators
   if(tok==NULL)		// finished too early?
   {
@@ -1146,12 +1207,12 @@ for(i=0; i<s->nvalues; i++)
   sss=NULL;
   sscanf(tok, "%lf",&(s->v[i]));
  }
-//fclose(f);
 }
 while(tok==NULL);	// require enough values (if more, extra ones are discarded)
+	
+s->entryOk = true;	// flag valid data
 
 cmd(inter, "destroy $a");
-
 }
 
 
