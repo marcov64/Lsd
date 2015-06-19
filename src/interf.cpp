@@ -503,14 +503,14 @@ cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
 cmd(inter, "$w add cascade -label \"Set number of Objects\" -underline 0 -menu $w.setobj");
 cmd(inter, "$w add command -label \"Init. Values\" -command {set choice 21} -underline 0 -accelerator Control+I");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Sensitivity (parallel)\" -command {set choice 62} -underline 13");
-cmd(inter, "$w add command -label \"Sensitivity (sequential)\" -command {set choice 63} -underline 15");
-cmd(inter, "$w add command -label \"Sensitivity (MC sampling)\" -command {set choice 71} -underline 13");
-cmd(inter, "$w add command -label \"Sensitivity (NOLH sampling)\" -command {set choice 72} -underline 13");
+cmd(inter, "$w add command -label \"Full Sensitivity (online)\" -command {set choice 62} -underline 18");
+cmd(inter, "$w add command -label \"Full Sensitivity (batch)\" -command {set choice 63} -underline 0");
+cmd(inter, "$w add command -label \"MC Sampling Sensit. (batch)\" -command {set choice 71} -underline 0");
+cmd(inter, "$w add command -label \"NOLH Sampl. Sensit. (batch)\" -command {set choice 72} -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
 cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
-cmd(inter, "$w add command -label \"Create Sensitivity Batch\" -command {set choice 68} -underline 0");
+cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 0");
 
 cmd(inter, "$w add separator");
 
@@ -527,7 +527,7 @@ cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Control+R");
-cmd(inter, "$w add command -label \"Start 'No WINDOW' job'\" -command {set choice 69} -underline 0");
+cmd(inter, "$w add command -label \"Start 'No Window' batch'\" -command {set choice 69} -underline 0");
 cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Control+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56}");
 
