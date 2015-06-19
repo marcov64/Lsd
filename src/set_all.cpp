@@ -393,14 +393,32 @@ case 10:
 		cs->label=new char[strlen(lab+1)];
 		strcpy(cs->label,lab);
 		cs->next=NULL;
-	}
-	// do if new or changed number of values (0 values mean edit)
-	if ( ! exist || ( exist && cs->nvalues != ( int ) value1 && ( int ) value1 != 0 ) )
-	{
 		cs->nvalues=(int)value1;
 		cs->v=new double[(int)value1];
 		cs->entryOk = false;			// no valid data yet
 	}
+	else
+	{
+		// do if changed number of values (0 values mean edit)
+		if ( cs->nvalues != ( int ) value1 && ( int ) value1 != 0 )
+		{
+			// copy old values as possible
+			double *nv = new double[ ( int ) value1 ];
+			for ( i = 0; i < ( int ) value1; i++ )
+			{
+				if ( i < cs->nvalues )	// copy only the existing ones
+					nv[ i ] = cs->v[ i ];
+				else
+					nv[ i ] = 0.;
+			}
+	
+			delete [ ] cs->v;				// free old storage of values
+			cs->nvalues = ( int ) value1;
+			cs->v = nv;
+		}
+		cs->entryOk = true;					// valid data already there
+	}
+
 	// save type and lags
     cv=r->search_var(NULL, lab);
 	cs->param=cv->param;
@@ -1153,9 +1171,10 @@ cmd(inter, "text $a.t; pack $a.t");
 cmd(inter, "frame $a.fb -relief groove -bd 2");
 cmd(inter, "button $a.fb.ok -text \" Ok \" -command {set choice 1}");
 cmd(inter, "button $a.fb.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "button $a.fb.paste -text \" Paste \" -command {tk_textPaste}");
-cmd(inter, "button $a.fb.del -text \" Delete \" -command {set choice 3}");
-cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.paste $a.fb.del -side left");
+cmd(inter, "button $a.fb.del -text \" Delete Values \" -command {$a.t delete 0.0 end}");
+cmd(inter, "button $a.fb.paste -text \" Paste Clipboard \" -command {tk_textPaste}");
+cmd(inter, "button $a.fb.rem -text \" Remove Var. from Analysis \" -command {set choice 3}");
+cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.del $a.fb.paste $a.fb.rem -side left");
 cmd(inter, "pack $a.fb");
 cmd(inter, "focus -force .des.t");
 
