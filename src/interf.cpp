@@ -188,6 +188,7 @@ void sensitivity_doe( long *findex, design *doe );
 long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
 int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
 void empty_sensitivity(sense *cs);
+void set_all(int *choice, object *original, char *lab, int lag);
 
 extern object *root;
 extern char *simul_name;
@@ -1517,6 +1518,7 @@ cmd(inter, ch);
    cmd(inter, "label $w.i.int -text \"Comments on the initial values of '$vname'\"");
    cmd(inter, "scrollbar $w.i.yscroll -command \"$w.i.text yview\"");
    cmd(inter, "text $w.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.i.yscroll set\"");
+   cmd(inter, "button $w.i.setall -text \"Initialize\" -command {set done 11}" );
    cmd(inter, "pack $w.i.yscroll -side right -fill y");
    if(cur_descr->init!=NULL)
     {
@@ -1536,7 +1538,7 @@ cmd(inter, ch);
       }
      cmd(inter, ".desc.i.text delete \"end - 1 char\"");
     }
-   cmd(inter, "pack $w.i.int $w.i.text -anchor w -expand yes -fill both");
+   cmd(inter, "pack $w.i.int $w.i.text $w.i.setall -anchor w -expand yes -fill both");
    cmd(inter, "pack $w.i -anchor w -expand yes -fill both");
    cmd(inter, "bind .desc.f.text <Control-i> {focus -force .desc.i.text}");
    cmd(inter, "bind .desc.i.text <Control-z> {set done 1}");   
@@ -1885,7 +1887,12 @@ if(done!=8)
   *choice=0;
 else
   *choice=7;  
-
+if(done==11)
+ {//initialize
+ *choice=0;
+ set_all(choice, r, cv->label, 0);
+ *choice=0;
+ }
 
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "save");
