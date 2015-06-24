@@ -870,6 +870,7 @@ plog(msg);
 cmd(inter, "update");
 #else
 printf("\n");
+fflush( stdout );	// force buffer flush to update file in case of redirection
 #endif
 
 if(batch_sequential==0)
