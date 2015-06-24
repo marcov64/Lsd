@@ -154,8 +154,6 @@ void scan_used_lab(char *lab, int *choice);
 void scan_using_lab(char *lab, int *choice);
 void report(int *choice, object *r);
 void empty_cemetery(void);
-void save_result(FILE *f, object *r, int i);
-void save_title_result(FILE *f, object *r, int header);
 void createmodelhelp(int *choice, object *r);
 description *search_description(char *lab);
 void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
@@ -196,6 +194,7 @@ extern char *struct_file;
 extern char *exec_file;		// name of executable file
 extern char *exec_path;		// path of executable file
 extern int add_to_tot;
+extern bool dozip;			// compressed results file flag
 extern int struct_loaded;
 extern char *path;
 extern char *equation_name;
@@ -788,6 +787,7 @@ bridge *cb;
 object *n, *cur, *cur1;
 variable *cur_v, *cv, *app;
 FILE *f;
+result *rf;					// pointer for results files (may be zipped or not)
 double fake=0;
 
 sense *cs;
@@ -1947,6 +1947,7 @@ cmd(inter, ch);
 cmd(inter, "label .tosave -text \"\\n\\nYou are going to overwrite the existing configuration file\\n\"");
 
 cmd(inter, "set overw 0"); //flag for overwriting existing total file
+cmd(inter, "set dozip 0");	// flag for producing compressed files
 
 if(sim_num>1)
 {
@@ -1965,6 +1966,7 @@ Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
 
 
 cmd(inter, "checkbutton .nores -text \"Skip generating result files\" -variable no_res");
+cmd(inter, "checkbutton .dozip -text \"Generate zipped files\" -variable dozip");
 
 cmd(inter, "label .war7 -text \"Total file (last steps):\"");
 sprintf(ch, "label .war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
@@ -1979,10 +1981,10 @@ if(*choice==1)
  cmd(inter, "radiobutton .c.b1 -text \"Overwrite existing Total File\" -variable overw -value 0 -anchor w");
  cmd(inter, "radiobutton .c.b2 -text \"Append to existing Total File\" -variable overw -value 1 -anchor w");
  cmd(inter, "pack .c.l .c.b1 .c.b2 -fill x");
- cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .nores .war7 .war8 .c .tosave\"");
+ cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .nores .dozip .war7 .war8 .c .tosave\"");
  }
 else
- cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .nores .war7 .war8 .tosave\"");
+ cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .nores .dozip .war7 .war8 .tosave\"");
 
 cmd(inter, "foreach i $wind {pack $i}");
 }
@@ -2013,6 +2015,8 @@ if(*choice==2)
 
 cmd(inter, "set choice $overw");
 add_to_tot=*choice;
+cmd(inter, "set choice $dozip");
+dozip=*choice;
 *choice=1;
 for(n=r; n->up!=NULL; n=n->up);
 
@@ -3179,11 +3183,12 @@ if(actual_steps==0)
   cmd(inter, "label .n.l -text \"Choose a name for result files.\\nAll data saved will be stored in the file '.res'\\nand the configuration that produced will be copied in a new file '.lsd'.\"");
   cmd(inter, "set lab \"Res1\"");
   cmd(inter, "entry .n.e -width 20 -relief sunken -textvariable lab");
-
+  cmd(inter, "set dozip 0");
+  cmd(inter, "checkbutton .n.dozip -text \"Generate zipped results file\" -variable dozip");
   cmd(inter, "button .n.b -text Ok -command {set choice 1}");
   cmd(inter, "button .n.c -text Cancel -command {set choice 2}");
   cmd(inter, "focus -force .n.e");
-  cmd(inter, "pack .n.l .n.e .n.b .n.c");
+  cmd(inter, "pack .n.l .n.e .n.dozip .n.b .n.c");
   cmd(inter, "bind .n <KeyPress-Return> {set choice 1}");
   cmd(inter, "bind .n <KeyPress-Escape> {set choice 2}");
 #ifndef DUAL_MONITOR
@@ -3206,28 +3211,29 @@ if(actual_steps==0)
 
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
 strcpy(lab, lab1);
-
+cmd(inter, "set choice $dozip");
+dozip=*choice;
 sprintf(msg, "%s.lsd", simul_name);
 sprintf(ch, "%s.lsd", lab);
 sprintf(msg, "file copy -force %s.lsd %s.lsd", simul_name, lab);
 cmd(inter, msg);
-sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data ...",lab, lab);
+sprintf(msg, "\nLsd result file: %s.res%s\nLsd data file: %s.lsd\nSaving data ...",lab, dozip?".gz":"", lab);
 plog(msg);
 cmd(inter, "focus .log");
 //cmd(inter, "raise .log");
 cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
 cmd(inter, "update");
 
-sprintf(msg, "%s.res", lab);
-f=fopen(msg,"wt");  // use text mode for Windows better compatibility
-for(n=r; n->up!=NULL; n=n->up);
-save_title_result(f, n, 1);
-fprintf(f, "\n");
-for(i=0; i<=actual_steps; i++)
-  {save_result(f,n, i);
-   fprintf(f, "\n");
-  }
-fclose(f);
+if( strlen( path ) == 0 )
+	sprintf( msg, "%s.res", lab );
+else
+	sprintf( msg, "%s/%s.res", path, lab );
+	
+rf = new result( msg, "wt", dozip );	// create results file object
+for( n = r; n->up != NULL; n = n->up );	// get root object
+rf->title( n, 1 );						// write header
+rf->data( n, 0, actual_steps );			// write all data
+delete rf;								// close file and delete object
 plog(" done\n");
 *choice=0;
 cmd(inter, "wm deiconify .");
@@ -4236,7 +4242,9 @@ case 68:
 	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable cores");
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"Using a number higher than the number\nof processors/cores is not recommended.\"");
-	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
+	cmd(inter, "set dozip 0");
+	cmd(inter, "checkbutton .s.i.dozip -text \"Generate zipped files\" -variable dozip");
+	cmd(inter, "pack .s.i.l .s.i.e .s.i.w .s.i.dozip");
 	cmd(inter, "button .s.ok -text Ok -command {set choice $cores}");
 	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
 	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
@@ -4251,6 +4259,10 @@ case 68:
 	if(*choice==0)
 		break;
 	param=*choice;
+	cmd(inter, "set choice $dozip");
+	dozip=*choice;
+	*choice=param;
+	
 	if(param < 1 || param > 12) param=4;
 	
 	// create batch file
@@ -4286,18 +4298,18 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, wpath, lab1, j);
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", wpath, lab1, j);
 			else							// Unix
-				fprintf(f, "%s -f %s/%s -s %d -e %d >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, lab2, lab1, j);
+				fprintf(f, "%s -f %s/%s -s %d -e %d %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", lab2, lab1, j);
 			 j <= sl ? i+=num+1 : i+=num;
 		}
 	}
 	else									// if not, do one by one
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, wpath, lab1, i);
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, dozip ? "-z" : "", wpath, lab1, i);
 			else							// Unix
-				fprintf(f, "%s -f %s/%s_%d.lsd >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, lab2, lab1, i);
+				fprintf(f, "%s -f %s/%s_%d.lsd %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, dozip ? "-z" : "", lab2, lab1, i);
 	
 	if(*choice == 1)						// Windows closing
 	{
@@ -4361,13 +4373,13 @@ case 69:
 	
 	if(sim_num>1)	// multiple runs case
 	{
-		sprintf(ch, "label .war6 -text \"from %s_%d.res to %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
+		sprintf(ch, "label .war6 -text \"from %s_%d.res%s to %s_%d.res%s\"", simul_name, seed, dozip ? ".gz" : "", simul_name, seed+sim_num-1);
 		cmd(inter, ch);
 		cmd(inter, "set wind \".war1 .war2 .war3 .war4 .war5 .war6 .war7 .war8 .tosave\"");
 	}
 	else			// single run case
 	{
-		sprintf(ch, "label .war6 -text \"%s_%d.res\"", simul_name, seed);
+		sprintf(ch, "label .war6 -text \"%s_%d.res%s\"", simul_name, seed, dozip ? ".gz" : "");
 		cmd(inter, ch);
 		cmd(inter, "set wind \".war1 .war2 .war4 .war5 .war6 .war7 .war8 .tosave\"");
 	}

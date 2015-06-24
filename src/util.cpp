@@ -591,8 +591,31 @@ for(cv=cemetery; cv!=NULL; )
 cemetery=NULL;
 }
 
+/*
+	Methods for results file saving (class result)
+*/
 
-void save_result(FILE *f, object *r, int i)
+// saves data to file in the specified period
+void result::data( object *root, int initstep, int endtstep )
+{
+	endtstep = endtstep == 0 ? initstep : endtstep;	// adjust for 1 time step if needed
+	
+	for ( int i = initstep; i <= endtstep; i++ )
+	{
+		data_recursive( root, i );		// output one data line
+		
+		if ( dozip )				// and change line
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "\n" );
+			#endif
+		}
+		else
+			fprintf( f, "\n" );
+	}
+}
+
+void result::data_recursive( object *r, int i )
 {
 object *cur;
 variable *cv;
@@ -606,9 +629,23 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  if(cv->save==1)
   {
    if(cv->start <= i && cv->end >= i && !isnan(cv->data[i]))		// save NaN as n/a
-     fprintf(f, "%g\t", cv->data[i]);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%g\t", cv->data[i] );
+			#endif
+		}
+		else
+			fprintf( f, "%g\t", cv->data[i] );
    else
-     fprintf(f, "%s\t", nonavail);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%s\t", nonavail );
+			#endif
+		}
+		else
+			fprintf( f, "%s\t", nonavail );
   }
  
  }
@@ -618,20 +655,49 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   if(cur->to_compute==1)
   {
   for(; cur!=NULL; cur=cur->next)
-   save_result(f, cur, i);
+	data_recursive( cur, i );
   } 
  }
 
 if(r->up==NULL)
  {for(cv=cemetery; cv!=NULL; cv=cv->next)
     if(cv->start<=i && cv->end>=i && !isnan(cv->data[i]))		// save NaN as n/a
-       fprintf(f, "%g\t", cv->data[i]);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%g\t", cv->data[i] );
+			#endif
+		}
+		else
+			fprintf( f, "%g\t", cv->data[i] );
      else
-       fprintf(f, "%s\t", nonavail);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%s\t", nonavail );
+			#endif
+		}
+		else
+			fprintf(f, "%s\t", nonavail);
  }
 }
 
-void save_title_result(FILE *f, object *r, int header)
+// saves header to file
+void result::title( object *root, int flag )
+{
+	title_recursive( root, flag );		// output header
+		
+	if ( dozip )						// and change line
+	{
+		#ifdef LIBZ
+			gzprintf( fz, "\n" );
+		#endif
+	}
+	else
+		fprintf( f, "\n" );
+}
+
+void result::title_recursive( object *r, int header )
 {
 object *cur;
 variable *cv;
@@ -643,9 +709,23 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
   if(cv->save==1)
    {set_lab_tit(cv);
    if(header==1)
-     fprintf(f, "%s %s (%d %d)\t",cv->label, cv->lab_tit, cv->start, cv->end);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+			#endif
+		}
+		else
+			fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
    else
-     fprintf(f, "%s %s (-1 -1)\t",cv->label, cv->lab_tit);
+		if ( dozip )
+		{
+			#ifdef LIBZ
+				gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
+			#endif
+		}
+		else
+			fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
    }
  }
  
@@ -655,18 +735,56 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   if(cur->to_compute==1)
   {
   for(; cur!=NULL; cur=cur->next)
-    save_title_result(f, cur, header);
+    title_recursive( cur, header );
   } 
  } 
 
 if(r->up==NULL)
  {for(cv=cemetery; cv!=NULL; cv=cv->next)
-   {
-    fprintf(f, "%s %s (%d %d)\t",cv->label, cv->lab_tit, cv->start, cv->end);
-    }
-
+	if ( dozip )
+	{
+		#ifdef LIBZ
+			gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+		#endif
+	}
+	else
+		fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
  }
 
+}
+
+// open the appropriate file for saving the results (constructor)
+result::result( char const *fname, char const *fmode, bool dozip )
+{
+	#ifndef LIBZ
+		dozip = false;			// disable zip if libraries not available
+	#endif
+	this->dozip = dozip;		// save local class flag
+	if ( dozip )
+	{
+		#ifdef LIBZ
+			char *fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name
+			strcpy( fnamez, fname );
+			strcat( fnamez, ".gz");
+			fz = gzopen( fnamez, fmode );
+			delete fnamez;
+		#endif
+	}
+	else
+		f = fopen( fname, fmode );
+}
+
+// close the appropriate results file (destructor)
+result::~result( void )
+{
+	if ( dozip )
+	{
+		#ifdef LIBZ
+			gzclose( fz );
+		#endif
+	}
+	else
+		fclose( f );
 }
 
 

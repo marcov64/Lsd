@@ -92,9 +92,6 @@ Exit function, which is customized on the operative system.
 
 ****************************************************/
 
-//remove or comment the next line to compile without libz. It will not be possible to generate zipped result files.
-
-#define LIBZ 
 #define PI 3.141592654
 #include <tk.h>
 #include <unistd.h>
@@ -102,12 +99,6 @@ Exit function, which is customized on the operative system.
 
 
 #include "decl.h"
-#ifdef LIBZ
-//#include "errno.h"
-#include "zlib.h"
-
-
-#endif
 
 object *go_brother(object *c);
 void cmd(Tcl_Interp *inter, char const *cc);

@@ -19,6 +19,12 @@ Comments and bug reports to marco.valente@univaq.it
 #include <math.h>
 #include <limits.h>
 
+// comment the next line to compile without libz. It will not be possible to generate zipped result files.
+#define LIBZ 
+#ifdef LIBZ
+#include <zlib.h>
+#endif
+
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
 #undef NAN
@@ -254,4 +260,23 @@ struct design
 
 	design( sense *rsens, int typ = 1, char const *fname = "" );// constructor
 	~design( void );					// destructor
+};
+
+// results file object
+class result
+{
+	FILE *f;					// uncompressed file pointer
+	#ifdef LIBZ
+		gzFile fz;				// compressed file pointer
+	#endif
+	bool dozip;					// compressed file flag
+
+	void title_recursive( object *r, int i );	// write file header (recursively)
+	void data_recursive( object *r, int i );	// save a single time step (recursively)
+
+public:
+	result( char const *fname, char const *fmode, bool dozip = false );	// constructor
+	~result( void );							// destructor
+	void title( object *root, int flag );		// write file header
+	void data( object *root, int initstep, int endtstep = 0 );	// write data
 };

@@ -146,8 +146,6 @@ void myexit(int v);
 FILE *search_str(char const *name, char const *str);
 void set_lab_tit(variable *var);
 void reset_end(object *r);
-void save_title_result(FILE *f, object *r, int header );
-void save_result(FILE *f, object *r, int i);
 void close_sim(void);
 double ran1(long *idum);
 int deb(object *r, object *c, char *lab, double *res);
@@ -198,6 +196,7 @@ int series_saved;
 int findex, fend;
 int batch_sequential=0;
 int fast=0;		// make fast persistent across runs
+bool dozip = false;			// compressed results file flag
 #ifdef DUAL_MONITOR
 // Main window constraints
 char hsize[]="400";			// horizontal size in pixels
@@ -234,7 +233,7 @@ fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nThis is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n");
+  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n");
   exit(0);
  }
 else
@@ -265,9 +264,15 @@ else
 	grandTotal = true;
 	printf( "\nGrand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
  }
+ if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : create compressed result files
+ {
+	done = 1;
+	i--; 	// no parameter for this option
+	dozip = true;
+ }
   
   if(done==0)
-   {  printf("\nOption '-%s' not recognized.\nThis is the no window version of Lsd. Specify '-f filename.lsd' to run a single configuration file, or '-f simul_name -s 1' for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", argv[i][1]);
+   {  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n", argv[i][0], argv[i][1]);
     exit(0);
    }
   }
@@ -552,6 +557,7 @@ int i, j, done=0;
 bool batch_sequential_loop=false; // indicates second or higher iteration of a batch
 char ch[120], nf[300];
 FILE *f;
+result *rf;					// pointer for results files (may be zipped or not)
 double app=0;
 clock_t start, end;
 
@@ -828,9 +834,9 @@ if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
 if(no_res==0)
 {
 if(batch_sequential==0)
- sprintf(msg, "\nSaving results in file %s_%d.res",simul_name, seed-1);
+ sprintf(msg, "\nSaving results in file %s_%d.res%s",simul_name, seed-1, dozip?".gz":"");
 else
- sprintf(msg, "\nSaving results in file %s_%d_%d.res",simul_name, findex, seed-1);
+ sprintf(msg, "\nSaving results in file %s_%d_%d.res%s",simul_name, findex, seed-1, dozip?".gz":"");
 
 plog(msg);
 #ifndef NO_WINDOW 
@@ -848,19 +854,15 @@ else
  else
   sprintf(msg, "%s/%s_%d_%d.res", path, simul_name, findex, seed-1);
 
-f=fopen(msg,"wt");  // use text mode for Windows better compatibility
-save_title_result(f, root, 1);
-fprintf(f, "\n");
-for(j=0; j<=actual_steps; j++)
-  {save_result(f,root, j);
-   fprintf(f, "\n");
-  }
-fclose(f);
+rf = new result( msg, "wt", dozip );	// create results file object
+rf->title( root, 1 );					// write header
+rf->data( root, 0, actual_steps );		// write all data
+delete rf;								// close file and delete object
 
 if(batch_sequential==0)
- sprintf(msg, "\nResults saved in file %s_%d.res",simul_name, seed-1);
+ sprintf(msg, "\nResults saved in file %s_%d.res%s",simul_name, seed-1, dozip?".gz":"");
 else
- sprintf(msg, "\nResults saved in file %s_%d_%d.res",simul_name, findex, seed-1);
+ sprintf(msg, "\nResults saved in file %s_%d_%d.res%s",simul_name, findex, seed-1, dozip?".gz":"");
 
 plog(msg);
 }
@@ -882,20 +884,15 @@ else
   sprintf(msg, "%s/%s_%d_%d_%d.tot", path, simul_name, findex, seed-i, seed-1+sim_num-i);
 
 if( batch_sequential == 0 || ! grandTotal )		// generate partial total files?
-{
 	if(i==1 && add_to_tot==0)
 	{
-		f=fopen(msg,"wt");  // use text mode for Windows better compatibility
-		save_title_result(f, root, 0);
-		fprintf(f, "\n");
+		rf = new result( msg, "wt", dozip );	// create results file object
+		rf->title( root, 0 );					// write header
 	}
 	else
-		f=fopen(msg,"a");
-	save_result(f,root, actual_steps);
-	fprintf(f, "\n");
-	fclose(f);
-}
-else	// generate single grand total file
+		rf = new result( msg, "a", dozip );		// add results object to existing file
+	
+else											// generate single grand total file
 {
 	if(strlen(path)==0)
 		sprintf(msg, "%s.tot", simul_name);
@@ -904,21 +901,17 @@ else	// generate single grand total file
 
 	if( firstRes )
 	{
-		f=fopen(msg,"wt");  // use text mode for Windows better compatibility
-		save_title_result(f, root, 0);
-		fprintf(f, "\n");
+		rf = new result( msg, "wt", dozip );	// create results file object
+		rf->title( root, 0 );					// write header
 		firstRes = false;
 	}
 	else
-		f=fopen(msg,"a");
-	
-	save_result(f,root, actual_steps);
-	fprintf(f, "\n");
-	fclose(f);
+		rf = new result( msg, "a", dozip );		// add results object to existing file
 }
 
-//if(batch_sequential==1)
-// findex+=1;
+rf->data( root, actual_steps );					// write current data data
+delete rf;										// close file and delete object
+
  if(batch_sequential==1 && i==sim_num)  // last run of current batch file?
  {
    findex++;							// try next file
@@ -1224,6 +1217,7 @@ void run_no_window(void)
 {
 int j, choice;
 FILE *f;
+result *rf;					// pointer for results files (may be zipped or not)
 char ch[10];
 
 root=new object;
@@ -1287,15 +1281,12 @@ cmd(inter, "set c");
 analysis(choice);
 */
 printf("\nFinished simulation. Saving results...\n");
-sprintf(msg, "%s_%d.res", simul_name, seed-1);
-f=fopen(msg,"wt");  // use text mode for Windows better compatibility
-save_title_result(f, root, 1);
-fprintf(f, "\n");
-for(j=1; j<=actual_steps; j++)
-  {save_result(f,root, j);
-   fprintf(f, "\n");
-  }
-fclose(f);
+sprintf(msg, "%s_%d.res%s", simul_name, seed-1, dozip?".gz":"");
+rf = new result( msg, "wt", dozip );	// create results file object
+rf->title( root, 1 );					// write header
+rf->data( root, 1, actual_steps );		// write all data
+delete rf;								// close file and delete object
+
 exit(0);
 
 }
