@@ -134,6 +134,7 @@ variable *v;
 bridge *b;
 
 int acounter;
+int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 int to_compute;
 
 netNode *node;		// pointer to network node data structure

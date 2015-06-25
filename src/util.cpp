@@ -509,7 +509,13 @@ if(cb->counter_updated==true)
   return;
 
 for(cur=cb->head,i=1; cur!=NULL; cur=cur->next,i++)
- cur->acounter=i;
+	if ( cur->lstCntUpd == ( int ) t )		// don't update more than once per period
+		continue;							// to avoid deletions to change counters
+	else
+	{
+		cur->acounter = i;
+		cur->lstCntUpd = ( int ) t;
+	}
 
 cb->counter_updated=true;
    

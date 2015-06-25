@@ -641,6 +641,7 @@ b=NULL;
 hook=NULL;
 node=NULL;	// not part of a network yet
 acounter=0;	// "fail safe" when creating labels
+lstCntUpd=0; // counter never updated
 return 0;
 }
 
