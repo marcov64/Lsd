@@ -89,6 +89,8 @@ extern description *descr;
 extern char *eq_file;
 extern char lsd_eq_file[];
 extern int lattice_type;
+extern int t;
+extern int running;
 extern char nonavail[];	// string for unavailable values
 
 double ran1(long *idum);
@@ -530,7 +532,7 @@ if(var->up->up==NULL)
    //this is the Root of the model
    if(var->lab_tit!=NULL)
      return; //already done in the past
-   var->lab_tit=new char[strlen("R")];
+   var->lab_tit=new char[strlen("R")+1];
    strcpy(var->lab_tit,"R");
    return;
   }
@@ -565,7 +567,6 @@ Store the variable in a list of variables in objects deleted
 but to be used for analysis.
 */
 variable *cv;
-set_lab_tit(v);
 if(v->savei==true)
   save_single(v);
 if(cemetery==NULL)
@@ -577,6 +578,25 @@ else
   cv->next=v;
   v->next=NULL;
  }
+}
+
+// Processes variables from an object required to go to cemetery 
+void collect_cemetery( object *o )
+{
+	variable *cv, *nv;
+	
+	for ( cv = o->v; cv != NULL; cv = nv )	// scan all variables
+	{
+		nv = cv->next;						// pointer to next variable
+		
+		if ( running==1 && ( cv->save == true || cv->savei == true ) )	// need to save?
+		{
+			cv->end = t;					// define last period,
+			cv->data[ t ] = cv->val[ 0 ];	// last value
+			set_lab_tit( cv );				// and last lab_tit
+			add_cemetery( cv );				// put in cemetery (destroy cv->next)
+		}
+	}
 }
 
 void empty_cemetery(void)

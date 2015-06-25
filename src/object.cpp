@@ -374,6 +374,7 @@ int sort_function_up_two( const void *a, const void *b);
 int deb(object *r, object *c, char const *lab, double *res);
 
 void set_lab_tit(variable *var);
+void collect_cemetery( object *o );		// collect variables from object before deletion
 void add_cemetery(variable *v);
 void myexit(int v);
 void error_hard(void);
@@ -639,6 +640,7 @@ to_compute=1;
 b=NULL;
 hook=NULL;
 node=NULL;	// not part of a network yet
+acounter=0;	// "fail safe" when creating labels
 return 0;
 }
 
@@ -1388,10 +1390,7 @@ if(root==this)
 for(cv=v; cv!=NULL;cv=cv1 )
  {if(running==1 &&(cv->save==true || cv->savei==true))
    {cv1=cv->next;
-    cv->end=t;
-    cv->data[t]=cv->val[0];
-    add_cemetery(cv);
-
+		// variable should have been already saved to cemetery!!!
    }
   else
    {cv1=cv->next;
@@ -1741,6 +1740,7 @@ if(this==NULL)
  return;
 }
 
+collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
 //find the bridge
 for(cb=up->b; cb!=NULL && strcmp(cb->blabel, label); cb=cb->next);

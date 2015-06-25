@@ -4008,7 +4008,7 @@ case 64:
 		cs->v=NULL;							// initialize struct pointers
 		cs->next=NULL;
 
-		cs->label=new char[strlen(lab+1)];  // save element name
+		cs->label=new char[strlen(lab)+1];  // save element name
 		strcpy(cs->label,lab);
 		// get lags and # of values to test
 		if(!fscanf(f, "%d %d:", &cs->lag, &cs->nvalues))
