@@ -279,7 +279,7 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 
 	if ( strcmp( nodeName, "" ) )	// name assigned?
 	{
-		name = new char[ strlen( nodeName + 1 ) ];
+		name = new char[ strlen( nodeName ) + 1 ];
 		if( name == NULL )
 		{
 			plog( "\nError: out of memory." );
@@ -355,7 +355,7 @@ void object::name_node_net( char const *nodeName )
 		
 	if ( strcmp( nodeName, "" ) )	// name assigned?
 	{
-		node->name = new char[ strlen( nodeName + 1 ) ];
+		node->name = new char[ strlen( nodeName ) + 1 ];
 		if( node->name == NULL )
 		{
 			plog( "\nError: out of memory." );

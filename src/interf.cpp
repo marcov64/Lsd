@@ -187,6 +187,7 @@ long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space
 int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
 void empty_sensitivity(sense *cs);
 void set_all(int *choice, object *original, char *lab, int lag);
+void dataentry_sensitivity(int *choice, sense *s, int nval);
 
 extern object *root;
 extern char *simul_name;
@@ -780,7 +781,7 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k;
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag;
 char observe, initial, cc;
 bridge *cb;
 
@@ -1491,7 +1492,7 @@ cmd(inter, ch);
  cmd(inter, msg);
  
  cmd(inter, "label $w.opt.l -text \"In model documentation set the element to be: \"");
- cmd(inter, "pack $w.opt.l");
+ cmd(inter, "pack $w.opt.l -side left");
  cmd(inter, "checkbutton $w.opt.obs -text \"Observe\" -variable observe -anchor w");
  cmd(inter, "checkbutton $w.opt.ini -text \"Initialize\" -variable initial -anchor w"); 
  if(cv->param==1 || cv->num_lag>0)
@@ -1508,9 +1509,9 @@ cmd(inter, ch);
  cmd(inter, "button $w.b.using -text \"Elements used\" -command {set done 7}");
  cmd(inter, "button $w.b.del -text \"DELETE element\" -command {set done 10}");
  if(!strcmp(cur_descr->type, "Parameter"))
-   cmd(inter, "pack $w.b.auto_doc $w.b.us $w.b.del -side left -expand yes");
+   cmd(inter, "pack $w.b.auto_doc $w.b.us $w.b.del -side left -expand yes -fill both");
  else
-   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using $w.b.del -side left -expand yes");
+   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using $w.b.del -side left -expand yes -fill both");
  cmd(inter, "pack $w.f $w.b -fill x -expand yes");
  if(cv->param==1 || cv->num_lag>0)
   {
@@ -1518,7 +1519,6 @@ cmd(inter, ch);
    cmd(inter, "label $w.i.int -text \"Comments on the initial values of '$vname'\"");
    cmd(inter, "scrollbar $w.i.yscroll -command \"$w.i.text yview\"");
    cmd(inter, "text $w.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.i.yscroll set\"");
-   cmd(inter, "button $w.i.setall -text \"Initialize\" -command {set done 11}" );
    cmd(inter, "pack $w.i.yscroll -side right -fill y");
    if(cur_descr->init!=NULL)
     {
@@ -1538,8 +1538,13 @@ cmd(inter, ch);
       }
      cmd(inter, ".desc.i.text delete \"end - 1 char\"");
     }
-   cmd(inter, "pack $w.i.int $w.i.text $w.i.setall -anchor w -expand yes -fill both");
+   cmd(inter, "pack $w.i.int $w.i.text -anchor w -expand yes -fill both");
    cmd(inter, "pack $w.i -anchor w -expand yes -fill both");
+   cmd(inter, "frame $w.b2");
+   cmd(inter, "button $w.b2.setall -text \"Initialize\" -command {set done 11}" );
+   cmd(inter, "button $w.b2.sens -text \"Sensitivity Analysis\" -command {set done 12}" );
+   cmd(inter, "pack $w.b2.setall $w.b2.sens -side left -expand yes -fill both");
+   cmd(inter, "pack $w.b2 -anchor w -expand yes -fill both");
    cmd(inter, "bind .desc.f.text <Control-i> {focus -force .desc.i.text}");
    cmd(inter, "bind .desc.i.text <Control-z> {set done 1}");   
    }
@@ -1575,10 +1580,11 @@ sprintf(msg, "set obj_name %s", cv->up->label);
 cmd(inter, msg);
 cmd(inter, "label .h.obj -text \"in Object $obj_name\"");
 
+cmd(inter, "button .h.prop -text \"Properties\" -command {set done 5}" );
 cmd(inter, "bind .h <Double-1> {set done 5}");
 cmd(inter, "bind .h.lab_ent <Double-1> {set done 5}");
 cmd(inter, "bind .h.ent_var <Double-1> {set done 5}");
-cmd(inter, "pack .h.lab_ent .h.ent_var .h.obj");
+cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop .h.obj");
 cmd(inter, "pack .h .b1 .b .desc -fill x -expand yes");
 cmd(inter, "focus .b1	");
 cmd(inter, "bind .b1 <Control-d> {focus -force .desc.f.text}");
@@ -1887,12 +1893,111 @@ if(done!=8)
   *choice=0;
 else
   *choice=7;  
+
+// do lag selection, if necessary, for initialization/sensitivity data entry
+lag = 0;							// lag option for the next cases (first lag)
+if ( ( done == 11 || done == 12 ) && cv->param == 0 && cv->num_lag > 1 )
+{									// more than one lag to choose?
+	// confirm which lag to use
+	cmd( inter, "toplevel .s" );
+	cmd( inter, "wm transient .s ." );
+	cmd( inter, "wm title .s \"Select lag\"" );
+	cmd( inter, "frame .s.i -relief groove -bd 2" );
+	cmd( inter, "label .s.i.l -text \"Type the number of the lag to edit.\"" );
+	cmd( inter, "set lag \"1\"" );
+	cmd( inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable lag" );
+	cmd( inter, ".s.i.e selection range 0 end" );
+	sprintf( msg, "label .s.i.w -text \"Valid values are: 1 to %d\" -fg red", cv->num_lag );
+	cmd( inter, msg );
+	cmd( inter, "pack .s.i.l .s.i.e .s.i.w" );
+	cmd( inter, "button .s.ok -text Ok -command {set choice $lag}" );
+	cmd( inter, "button .s.esc -text Cancel -command {set choice 0}" );
+	cmd( inter, "pack .s.i .s.ok .s.esc -fill x");
+	cmd( inter, "bind .s <KeyPress-Return> {set choice $lag}" );
+	cmd( inter, "bind .s <KeyPress-Escape> {set choice 0}" );
+	cmd( inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w" );
+	*choice=-1;
+	cmd( inter, "focus .s.i.e" );
+	while ( *choice == -1 )		// wait for user action
+		Tcl_DoOneEvent( 0 );
+	cmd( inter, "destroy .s" );
+	
+	lag = abs( *choice ) - 1;	// try to extract chosed lag
+	*choice = 0;
+	
+	// abort if necessary
+	if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
+	{
+		cmd( inter, "tk_messageBox -title \"Select lag\" -icon error -type ok -default ok -message \"Invalid lag selected.\n\nSelect a valid lag value for the variable or change the number of lagged values for this variable.\"" );
+		done = 1;
+	}
+}
+
 if(done==11)
  {//initialize
  *choice=0;
- set_all(choice, r, cv->label, 0);
+ set_all(choice, r, cv->label, lag);
  *choice=0;
  }
+
+// edit sensitivity analysis data
+if ( done == 12 )
+{
+	*choice = 0;
+	bool exist = false;
+	sense *cs, *ps = NULL;
+	
+    if (rsense==NULL)				// no sensitivity analysis structure yet?
+        rsense=cs=new sense;
+    else
+    {
+		// check if sensitivity data for the variable already exists 
+		for ( cs = rsense, ps = NULL; cs != NULL; ps = cs, cs = cs->next )
+			if ( ! strcmp( cs->label, cv->label ) && 
+				 ( cs->param == 1 || cs->lag == lag ) )
+			{
+				exist = true;
+				break;	// get out of the for loop
+			}
+			
+		if ( ! exist )	// if new variable, append at the end of the list
+		{
+			for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
+			cs->next = new sense;	// create new variable
+			ps = cs;	// keep previous sensitivity variable
+			cs = cs->next;
+		}
+	}
+		
+	if ( ! exist )		// do only for new variables in the list
+	{
+		cs->label = new char[ strlen( cv->label ) + 1 ];
+		strcpy( cs->label, cv->label );
+		cs->next = NULL;
+		cs->nvalues = 0;
+		cs->v = NULL;
+		cs->entryOk = false;	// no valid data yet
+	}
+	else
+		cs->entryOk = true;		// valid data already there
+
+	// save type and specific lag in this case
+	cs->param = cv->param;
+	cs->lag = lag;
+	
+	dataentry_sensitivity( choice, cs, 0 );
+	
+	if ( ! cs->entryOk )		// data entry failed?
+	{
+		if( rsense == cs )		// is it the first variable?
+			rsense = cs->next;	// update list root
+		else
+			ps->next = cs->next;// remove from sensitivity list		
+		delete [ ] cs->label;	// garbage collection
+		delete cs;
+	}
+	*choice = 0;
+}
 
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "save");

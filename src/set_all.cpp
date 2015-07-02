@@ -103,7 +103,7 @@ void change_descr_lab(char const *lab_old, char const *lab, char const *type, ch
 int compute_copyfrom(object *c, int *choice);
 void set_window_size(void);
 void add_description(char const *lab, char const *type, char const *text);
-void dataentry_sensitivity(int *choice, sense *s);
+void dataentry_sensitivity(int *choice, sense *s, int nval);
 void save_description(object *r, FILE *f);
 int init_random(int seed);
 void NOLH_clear( void );	// external DoE	cleanup
@@ -152,7 +152,7 @@ cmd(inter, "label .head.lg -text \"Set initial values for every copy of \"");
 if(cv->param==1)
   sprintf(ch, "label .head.l -text \"Parameter %s\" -fg red", lab);
 else
-  sprintf(ch, "label .head.l -text \"Var: %s (lag %d)\" -fg red", lab, t-cv->last_update+lag);
+  sprintf(ch, "label .head.l -text \"Var: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
 cmd(inter, ch);
 
 sprintf(ch, "label .head.lo -text \"contained in Object %s\"", cv->up->label);
@@ -351,7 +351,7 @@ update_description=*choice;
 
 switch(res)
 {
-
+// Sensitivity Analysis
 case 10: 
 	exist = false;
 	sense *ps;
@@ -368,7 +368,8 @@ case 10:
     {
 		// check if sensitivity data for the variable already exists 
 		for ( cs = rsense, ps = NULL; cs != NULL; ps = cs, cs = cs->next )
-			if ( ! strcmp( cs->label, lab ) )
+			if ( ! strcmp( cs->label, lab ) && 
+				 ( cs->param == 1 || cs->lag == lag ) )
 			{
 				exist = true;
 				break;	// get out of the for loop
@@ -390,7 +391,7 @@ case 10:
 
 	if ( ! exist )	// do only for new variables in the list
 	{
-		cs->label=new char[strlen(lab+1)];
+		cs->label=new char[strlen(lab)+1];
 		strcpy(cs->label,lab);
 		cs->next=NULL;
 		cs->nvalues=(int)value1;
@@ -419,12 +420,12 @@ case 10:
 		cs->entryOk = true;					// valid data already there
 	}
 
-	// save type and lags
+	// save type and specific lag in this case
     cv=r->search_var(NULL, lab);
 	cs->param=cv->param;
-	cs->lag=lag;
+	cs->lag = lag;
 	
-    dataentry_sensitivity(choice, cs);	// ask values to the user
+    dataentry_sensitivity(choice, cs, cs->nvalues);	// ask values to the user
 	
 	if ( ! cs->entryOk )	// data entry failed?
 	{
@@ -432,7 +433,7 @@ case 10:
 			rsense = cs->next;	// update list root
 		else
 			ps->next = cs->next;// remove from sensitivity list
-		delete [] cs->v;	// free space
+		delete [ ] cs->v, cs->label;	// free space
 		delete cs;
 	}
     break;
@@ -1149,10 +1150,13 @@ int num_sensitivity_variables( sense *rsens )
 			nv++;
 	return nv;
 }
-			
 
+			
 // try to get values for sensitivity analysis (true: values are ok)
-void dataentry_sensitivity(int *choice, sense *s)
+
+#define SEP	" ,;|/#\t\n"					// sensitivity data valid separators
+
+void dataentry_sensitivity(int *choice, sense *s, int nval = 0)
 {
 
 int i;
@@ -1164,7 +1168,10 @@ cmd(inter, "toplevel .des");
 cmd(inter, "wm transient .des .");
 cmd(inter, "set a .des");
 cmd(inter, "wm title .des \"Sensitivity Analysis\"");
-sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);
+if ( nval > 0)								// number of values defined (0=no)?
+	sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);
+else
+	sprintf(msg, "label $a.lab -text \"Enter the desired values (at least 2) for \'%s\' (most separators accepted)\" -foreground red",s->label);
 cmd(inter, msg);
 cmd(inter, "pack $a.lab");
 cmd(inter, "text $a.t; pack $a.t"); 
@@ -1213,9 +1220,41 @@ if(*choice==2)
 
  cmd(inter, "set sss [$a.t get 0.0 end]");
 sss=(char*)Tcl_GetVar(inter,"sss",0);
-for(i=0; i<s->nvalues; i++)
+
+if ( nval == 0 )					// undefined number of values?
+{	
+	double temp;
+	char *tss, *ss = new char[ strlen( sss ) + 1 ];
+	tss = ss;						// save original pointer to gc
+	strcpy( ss, sss );				// make a draft copy
+	
+	i = 0;							// count number of values
+	do
+	{
+		tok = strtok( ss, SEP );	// accepts several separators
+		if ( tok == NULL )			// finished?
+			break;
+		ss = NULL;					
+		i += sscanf( tok, "%lf", &temp );	// count valid doubles only
+	 }
+	 while ( tok != NULL );
+	 
+	 if ( i < 2 )					// invalid number of elements?
+		i = 2;						// minimum is 2
+		
+	 if ( s->nvalues < i )			// is there insufficient space already alloc'd?
+	 {
+		 delete [ ] s->v;			// free old and reallocate enough space
+		 s->v = new double[ i ];
+	 }
+	 s->nvalues = i;				// update # of values
+	 
+	 delete [ ] tss;
+}
+
+for(i=0; i<s->nvalues;)
  {
-  tok=strtok(sss," ,;|/#\t\n");		// accepts several separators
+  tok=strtok(sss, SEP);		// accepts several separators
   if(tok==NULL)		// finished too early?
   {
 	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
@@ -1224,10 +1263,10 @@ for(i=0; i<s->nvalues; i++)
 	  break;
   }
   sss=NULL;
-  sscanf(tok, "%lf",&(s->v[i]));
+  i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
  }
 }
-while(tok==NULL);	// require enough values (if more, extra ones are discarded)
+while( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
 	
 s->entryOk = true;	// flag valid data
 
