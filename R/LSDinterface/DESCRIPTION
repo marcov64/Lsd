@@ -1,0 +1,11 @@
+Package: LSDinterface
+Type: Package
+Title: Functions for Reading LSD Results (.res) Files
+Version: 0.1
+Date: 2015-06-29
+Author: Marcelo C. Pereira
+Maintainer: Marcelo <marcelocpereira@uol.com.br>
+Description: A collection of tools for easy interface of R with LSD (Laboratory for Simulation Development) by Marco Valente.
+Depends: abind
+License: GPL-3
+LazyData: TRUE
