@@ -1,9 +1,9 @@
-\name{clean.name.lsd}
-\alias{clean.name.lsd}
+\name{name.clean.lsd}
+\alias{name.clean.lsd}
 \title{Get clean (R) variable name}
 \description{This function produces a more appropriate variable name from R initial column name conversion.}
 \usage{
-clean.name.lsd(r.name)
+name.clean.lsd(r.name)
 }
 \arguments{
   \item{r.name}{
@@ -18,12 +18,14 @@ A character vector of with the same attributes as x (after possible coercion) an
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{var.name.lsd}}, 
-\code{\link{read.names.lsd}}
+\code{\link{name.var.lsd}},
+\code{\link{name.nice.lsd}},
+\code{\link{info.names.lsd}}
 }
 \examples{
-clean.name.lsd("Var1.1_1..1.100.")
-clean.name.lsd(c("Var1.1_1..1.100.", "Var2.1_2_3..50.70."))
+name.clean.lsd("Var1.1_1..1.100.")
+
+name.clean.lsd(c("Var1.1_1..1.100.", "Var2.1_2_3..50.70."))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1,0 +1,1556 @@
+	
+Label Root
+{
+	Son: Country
+	Label Country
+	{
+		Son: Firm1
+		Label Firm1
+		{
+			Param: ID1
+			Var: _A1p
+			Var: _A1scr
+			Var: _size1
+			Var: _growth1
+			Var: _S1
+			Var: _growthS1
+
+		}
+
+		Son: Firm2
+		Label Firm2
+		{
+			Param: ID2
+			Var: _A2
+			Var: _A2scr
+			Var: _size2
+			Var: _growth2
+			Var: _S2
+			Var: _growthS2
+
+		}
+
+		Param: flagFRONT
+		Param: flagFRONTEX
+		Param: flagPAT
+		Param: flagENTRY
+		Param: flagdie
+		Param: flagdieW
+		Param: flagdieP
+		Param: flagTAX
+		Param: flagPC
+		Param: flagC
+		Param: flagCN
+		Param: flagGDP
+		Param: flagRD
+		Param: flagEXP
+		Param: flagEXTRA
+		Param: flagSticky
+		Param: flagTCGEN
+		Param: flagTC
+		Param: N1
+		Param: N2
+		Param: T
+		Param: nu
+		Param: xi
+		Param: o1
+		Param: o2
+		Param: uu3
+		Param: uu4
+		Param: uu5
+		Param: uu6
+		Param: uu7
+		Param: N1f
+		Param: uinf
+		Param: usup
+		Param: b_a1
+		Param: b_b1
+		Param: b_a2
+		Param: b_b2
+		Param: b_a3
+		Param: b_b3
+		Param: patdur
+		Param: patbre
+		Param: w1sup
+		Param: w1inf
+		Param: w2sup
+		Param: w2inf
+		Param: ksup
+		Param: kinf
+		Param: phi1
+		Param: phi2
+		Param: mi2
+		Param: mi1
+		Param: deltami2
+		Param: Gamma
+		Param: f1max
+		Param: chi
+		Param: omega1
+		Param: omega2
+		Param: psi1
+		Param: psi2
+		Param: psi3
+		Param: ustar
+		Param: exit2
+		Param: w_min
+		Param: pmin
+		Param: mdw
+		Param: theta
+		Param: u
+		Param: alfa
+		Param: alfasup
+		Param: b
+		Param: dim_mach
+		Param: eta
+		Param: r
+		Param: agemax
+		Param: wu
+		Param: aliq
+		Param: a
+		Param: A0
+		Param: LS0
+		Param: W10
+		Param: W20
+		Param: w0
+		Param: K0
+		Param: sticky
+		Param: d1
+		Param: d2
+		Param: gdrift
+		Param: gpar
+		Param: uu
+		Param: uu1
+		Param: uu2
+		Param: beta1
+		Param: beta2
+		Param: beta3
+		Param: beta4
+		Param: beta
+		Param: delta1
+		Param: delta5
+		Param: delta6
+		Var: initCountry
+		Var: timeStep
+		Var: GDP
+		Var: GDP1
+		Var: EItot
+		Var: SItot
+		Var: Ntot
+		Var: dNtot
+		Var: Qtot1
+		Var: Qtot2
+		Var: Creal
+		Var: Ir
+		Var: Debtot1
+		Var: Debtot2
+		Var: Pitot1
+		Var: Pitot2
+		Var: Wtot1
+		Var: Wtot2
+		Var: LD
+		Var: U
+		Var: w
+		Var: diff_w
+		Var: ppi
+		Var: cpi
+		Var: diff_cpi
+		Var: Am
+		Var: A_sd
+		Var: Am1
+		Var: Am2
+		Var: next1
+		Var: next2
+		Var: rw
+		Var: Mutot
+		Var: G
+		Var: Tax
+		Var: Def
+		Var: Deb
+		Var: DefonGDP
+		Var: DebonGDP
+		Var: H1
+		Var: H2
+		Var: N2lI
+		Var: N2hI
+		Var: N2lEI
+		Var: N2hEI
+		Var: DF1
+		Var: DF2
+		Var: Stot1
+		Var: Stot2
+
+	}
+
+	Var: init
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: init 0 n + n n
+
+Object: Country C	1
+Param: flagFRONT 0 n + n n	2
+Param: flagFRONTEX 0 n + n n	0
+Param: flagPAT 0 n + n n	0
+Param: flagENTRY 0 n + n n	3
+Param: flagdie 0 n + n n	1
+Param: flagdieW 0 n + n n	1
+Param: flagdieP 0 n + n n	1
+Param: flagTAX 0 n + n n	2
+Param: flagPC 0 n + n n	0
+Param: flagC 0 n + n n	2
+Param: flagCN 0 n + n n	1
+Param: flagGDP 0 n + n n	0
+Param: flagRD 0 n + n n	1
+Param: flagEXP 0 n + n n	0
+Param: flagEXTRA 0 n + n n	0
+Param: flagSticky 0 n + n n	0
+Param: flagTCGEN 0 n + n n	2
+Param: flagTC 0 n + n n	1
+Param: N1 0 n + n n	5
+Param: N2 0 n + n n	200
+Param: T 0 n + n n	600
+Param: nu 0 n + n n	0.04
+Param: xi 0 n + n n	0.5
+Param: o1 0 n + n n	0.3
+Param: o2 0 n + n n	0.3
+Param: uu3 0 n + n n	0.0275
+Param: uu4 0 n + n n	0.0275
+Param: uu5 0 n + n n	-0.15
+Param: uu6 0 n + n n	0.15
+Param: uu7 0 n + n n	0.3
+Param: N1f 0 n + n n	50
+Param: uinf 0 n + n n	-0.15
+Param: usup 0 n + n n	0.15
+Param: b_a1 0 n + n n	3
+Param: b_b1 0 n + n n	3
+Param: b_a2 0 n + n n	2
+Param: b_b2 0 n + n n	4
+Param: b_a3 0 n + n n	3
+Param: b_b3 0 n + n n	3
+Param: patdur 0 n + n n	12
+Param: patbre 0 n + n n	0.01
+Param: w1sup 0 n + n n	0.9
+Param: w1inf 0 n + n n	0.1
+Param: w2sup 0 n + n n	0.9
+Param: w2inf 0 n + n n	0.1
+Param: ksup 0 n + n n	0.9
+Param: kinf 0 n + n n	0.1
+Param: phi1 0 n + n n	2
+Param: phi2 0 n + n n	2
+Param: mi2 0 n + n n	0.3
+Param: mi1 0 n + n n	0.04
+Param: deltami2 0 n + n n	0.04
+Param: Gamma 0 n + n n	0.5
+Param: f1max 0 n + n n	1
+Param: chi 0 n + n n	-1
+Param: omega1 0 n + n n	1
+Param: omega2 0 n + n n	1
+Param: psi1 0 n + n n	0
+Param: psi2 0 n + n n	1
+Param: psi3 0 n + n n	0
+Param: ustar 0 n + n n	0.01
+Param: exit2 0 n + n n	1e-05
+Param: w_min 0 n + n n	1
+Param: pmin 0 n + n n	0.01
+Param: mdw 0 n + n n	1
+Param: theta 0 n + n n	0.1
+Param: u 0 n + n n	0.75
+Param: alfa 0 n + n n	0
+Param: alfasup 0 n + n n	0.5
+Param: b 0 n + n n	120
+Param: dim_mach 0 n + n n	40
+Param: eta 0 n + n n	0
+Param: r 0 n + n n	0.01
+Param: agemax 0 n + n n	19
+Param: wu 0 n + n n	0.4
+Param: aliq 0 n + n n	0.1
+Param: a 0 n + n n	0.1
+Param: A0 0 n + n n	1
+Param: LS0 0 n + n n	250000
+Param: W10 0 n + n n	10000
+Param: W20 0 n + n n	10000
+Param: w0 0 n + n n	1
+Param: K0 0 n + n n	800
+Param: sticky 0 n + n n	0.9
+Param: d1 0 n + n n	0
+Param: d2 0 n + n n	0
+Param: gdrift 0 n + n n	42000
+Param: gpar 0 n + n n	1.01
+Param: uu 0 n + n n	0.005
+Param: uu1 0 n + n n	0.04
+Param: uu2 0 n + n n	0.04
+Param: beta1 0 n + n n	0.4
+Param: beta2 0 n + n n	0.4
+Param: beta3 0 n + n n	0
+Param: beta4 0 n + n n	0
+Param: beta 0 n + n n	0.5
+Param: delta1 0 n + n n	1
+Param: delta5 0 n + n n	0.3
+Param: delta6 0 n + n n	0.3
+Var: initCountry 0 n + n n
+Var: timeStep 0 n + n n
+Var: GDP 0 s + n n
+Var: GDP1 0 n + n n
+Var: EItot 0 n + n n
+Var: SItot 0 n + n n
+Var: Ntot 0 n + n n
+Var: dNtot 0 n + n n
+Var: Qtot1 0 n + n n
+Var: Qtot2 0 n + n n
+Var: Creal 0 s + n n
+Var: Ir 0 s + n n
+Var: Debtot1 0 n + n n
+Var: Debtot2 0 n + n n
+Var: Pitot1 0 n + n n
+Var: Pitot2 0 n + n n
+Var: Wtot1 0 n + n n
+Var: Wtot2 0 n + n n
+Var: LD 0 n + n n
+Var: U 0 n + n n
+Var: w 0 n + n n
+Var: diff_w 0 n + n n
+Var: ppi 0 n + n n
+Var: cpi 0 n + n n
+Var: diff_cpi 0 n + n n
+Var: Am 0 s + n n
+Var: A_sd 0 n + n n
+Var: Am1 0 n + n n
+Var: Am2 0 n + n n
+Var: next1 0 n + n n
+Var: next2 0 n + n n
+Var: rw 0 n + n n
+Var: Mutot 0 n + n n
+Var: G 0 s + n n
+Var: Tax 0 n + n n
+Var: Def 0 s + n n
+Var: Deb 0 s + n n
+Var: DefonGDP 0 n + n n
+Var: DebonGDP 0 n + n n
+Var: H1 0 n + n n
+Var: H2 0 n + n n
+Var: N2lI 0 n + n n
+Var: N2hI 0 n + n n
+Var: N2lEI 0 n + n n
+Var: N2hEI 0 n + n n
+Var: DF1 0 n + n n
+Var: DF2 0 n + n n
+Var: Stot1 0 n + n n
+Var: Stot2 0 n + n n
+
+Object: Firm1 C	5
+Param: ID1 0 n + n n	0	0	0	0	0
+Var: _A1p 0 s + n n
+Var: _A1scr 0 n + n n
+Var: _size1 0 n + n n
+Var: _growth1 0 s + n n
+Var: _S1 0 n + n n
+Var: _growthS1 0 n + n n
+
+Object: Firm2 C	200
+Param: ID2 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: _A2 0 n + n n
+Var: _A2scr 0 n + n n
+Var: _size2 0 n + n n
+Var: _growth2 0 n + n n
+Var: _S2 0 n + n n
+Var: _growthS2 0 n + n n
+
+SIM_NUM 3
+SEED 2
+MAX_STEP 100
+EQUATION fun_LaborMkt.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_init
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Country
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_flagFRONT
+Flag per frontiera progresso tecnico endogeno
+=1 frontiera esogena
+=2 frontiera endogena
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagFRONTEX
+Flag per frontiera esogena
+=0 entry frontiera, innovation local
+=1 entry local, innovation frontiera
+=2 entry frontiera, innovation frontiera
+=3 entry local, innovation imprese-frontiera
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagPAT
+Flag per patent (=0 off; =1 on =2 on + breadth)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagENTRY
+Flag per modalità entry
+=0 random copy in entrambi i settori
+=1 random copy SOLO settore 2
+=2 random copy SOLO settore 1
+=3 mai random copy
+_INIT_
+ All 1 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_flagdie
+flag pagamenti imprese macchinari se cliente muore
+flagdie = 0 imprese macchinari non sono pagate 
+flagdie = 1 imprese macchinari sempre pagate
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagdieW
+flag morte imprese macchinari per motivi finanziari (W1<0)
+flagdieW = 0 imprese macchinari muoiono
+flagdieW = 1 imprese macchinari non muoiono
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagdieP
+flag imprese macchinari variabili finanziarie influenzano produzione
+flagdieP = 0 produzione imprese vincolata risorse finanziarie
+flagdieP = 1 produzione imprese non vincolata risorse finanziarie
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagTAX
+flag per applicazione tasse
+=1 tasse su profitti e salari
+=2 tasse solo su profitti
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagPC
+Flag per scrapping se c2(t)>p2(t-1): =1 scrapping 
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagC
+flag Consumo: 0 work-or-die
+              1 spesa pubblica
+              2 sussidio disoccupazione
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagCN
+flag contabilità nazionale: 1 C =  Q2+N
+			    0 C >= Q2+N
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagGDP
+Flag per calcolo GDP: 1 GDP pesa I e C
+		      0 GDP non pesa I e C
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagRD
+Flag per fondi destinati a R&D
+=0 nominale, frazione del fatturato
+=1 reale frazione di fatturato/salario
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_flagEXP
+Flag x aspettative: 0 miopi memoria 1
+                    1 miopi memoria t
+		    2 accelerative GD
+                    3 1st order adaptive
+                    4 Estrapolative - Accelerative
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagEXTRA
+Flag per marocchini in forza lavoro =1 marocchi
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagSticky
+Flag per sticky wages 
+=0 flexible wages 
+=1 sticky wages
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_flagTCGEN
+Flag progresso tecnico Esogeno/Endogeno
+=1 esogeno
+=2 endogeno
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_flagTC
+Flag per progresso tecnico ESOGENO: 
+=1 progr. tecnico stocastico
+=2 progr. tecnico deterministico
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_N1
+Numero imprese industria machine tools
+_INIT_
+ All 1 instances equal to 5.
+END_DESCRIPTION
+
+Parameter_N2
+Numero imprese industria manufatturiera
+_INIT_
+ All 1 instances equal to 200.
+END_DESCRIPTION
+
+Parameter_T
+Numero cicli temporali
+_INIT_
+ All 1 instances equal to 600.
+END_DESCRIPTION
+
+Parameter_nu
+Parametro spesa R&D
+_INIT_
+ All 1 instances equal to 0.04.
+END_DESCRIPTION
+
+Parameter_xi
+Alloca spesa R&D tra innovazione e imitazione (=1 solo innovazione)
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_o1
+Produttività spesa in R&D innovazione (0.3)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_o2
+Produttività spesa in R&D imitazione (0.3)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_uu3
+Tasso di crescita frontiera esogena produttività macchinari
+_INIT_
+ All 1 instances equal to 0.0275.
+END_DESCRIPTION
+
+Parameter_uu4
+Tasso di crescita frontiera esogena produttività processo
+_INIT_
+ All 1 instances equal to 0.0275.
+END_DESCRIPTION
+
+Parameter_uu5
+Limite negativo variazione produttività macchinari
+_INIT_
+ All 1 instances equal to -0.15.
+END_DESCRIPTION
+
+Parameter_uu6
+Limite positivo variazione produttività macchinari
+_INIT_
+ All 1 instances equal to 0.15.
+END_DESCRIPTION
+
+Parameter_uu7
+Limite max supporto entry frontiera endogena
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_N1f
+Numero imprese straniere
+_INIT_
+ All 1 instances equal to 50.
+END_DESCRIPTION
+
+Parameter_uinf
+Limite inferiore supporto Uniforme innovazione frontiera esogena
+_INIT_
+ All 1 instances equal to -0.15.
+END_DESCRIPTION
+
+Parameter_usup
+Limite superiore supporto Uniforme innovazione frontiera esogena
+_INIT_
+ All 1 instances equal to 0.15.
+END_DESCRIPTION
+
+Parameter_b_a1
+Parametro alfa distribuzione Beta innovazione (3)
+_INIT_
+ All 1 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_b_b1
+Parametro beta distribuzione Beta innovazione (3)
+_INIT_
+ All 1 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_b_a2
+Parametro alfa distribuzione Beta entry (2)
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_b_b2
+Parametro beta distribuzione Beta entry (4)
+_INIT_
+ All 1 instances equal to 4.
+END_DESCRIPTION
+
+Parameter_b_a3
+Parametro alfa distribuzione Beta innovazione frontiera (3)
+_INIT_
+ All 1 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_b_b3
+Parametro beta distribuzione Beta innovazione frontiera (3)
+_INIT_
+ All 1 instances equal to 3.
+END_DESCRIPTION
+
+Parameter_patdur
+Parametro durata patent
+_INIT_
+ All 1 instances equal to 12.
+END_DESCRIPTION
+
+Parameter_patbre
+Parametro breadth patent
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_w1sup
+Perc. max ricchezza netta imprese entranti settore 1
+_INIT_
+ All 1 instances equal to 0.9.
+END_DESCRIPTION
+
+Parameter_w1inf
+Perc. min ricchezza netta imprese entranti settore 1
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_w2sup
+Perc. max ricchezza netta imprese entranti settore 2
+_INIT_
+ All 1 instances equal to 0.9.
+END_DESCRIPTION
+
+Parameter_w2inf
+Perc. min ricchezza netta imprese entranti settore 2
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_ksup
+Capitale max. imprese entranti settore 2
+_INIT_
+ All 1 instances equal to 0.9.
+END_DESCRIPTION
+
+Parameter_kinf
+Capitale max. imprese entranti settore 2
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_phi1
+Regola credito massimo
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_phi2
+Regola credito max per investimenti
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_mi2
+Mark-up industria 2 (0.18 - 0.3)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_mi1
+Mark-up industria 1
+_INIT_
+ All 1 instances equal to 0.04.
+END_DESCRIPTION
+
+Parameter_deltami2
+Parametro variazione mark-up flessibile (0.075)
+_INIT_
+ All 1 instances equal to 0.04.
+END_DESCRIPTION
+
+Parameter_Gamma
+Regola numero nuovi clienti contattati da imprese macchin
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_f1max
+Tetto antitrust settore 1. Se f1max >=1 --> no antitrust
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_chi
+Replicator dynamics industria consumption good
+_INIT_
+ All 1 instances equal to -1.
+END_DESCRIPTION
+
+Parameter_omega1
+Competitività prezzo manufactoring
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_omega2
+Competitività domanda non soddisfatta manufactoring
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_psi1
+Salario inflazione
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_psi2
+Salario produttività
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_psi3
+Salario disoccupazione
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_ustar
+Disoccupazione naturale
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_exit2
+Market share per uscita industria manifatturiera
+_INIT_
+ All 1 instances equal to 1e-05.
+END_DESCRIPTION
+
+Parameter_w_min
+Salario sussistenza
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_pmin
+Limite inferiore prezzi imprese 0.01
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_mdw
+Massima variazione salario
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_theta
+Scorte attese
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_u
+Utilizzo capacità produttiva
+_INIT_
+ All 1 instances equal to 0.75.
+END_DESCRIPTION
+
+Parameter_alfa
+Trigger investimenti
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_alfasup
+(no description available)
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_b
+Pay-back (320)
+_INIT_
+ All 1 instances equal to 120.
+END_DESCRIPTION
+
+Parameter_dim_mach
+Dimensione macchinario
+_INIT_
+ All 1 instances equal to 40.
+END_DESCRIPTION
+
+Parameter_eta
+Crescita offerta lavoro
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_r
+Tasso esogeno
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_agemax
+(no description available)
+_INIT_
+ All 1 instances equal to 19.
+END_DESCRIPTION
+
+Parameter_wu
+Salario disoccupazione
+_INIT_
+ All 1 instances equal to 0.4.
+END_DESCRIPTION
+
+Parameter_aliq
+Aliquota imposta
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_a
+Parametro scala
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_A0
+Inizializzazione produttività
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_LS0
+Inizializzazione offerta lavoro iniziale
+_INIT_
+ All 1 instances equal to 250000.
+END_DESCRIPTION
+
+Parameter_W10
+Inizializzazione ricchezza netta (1)
+_INIT_
+ All 1 instances equal to 10000.
+END_DESCRIPTION
+
+Parameter_W20
+Inizializzazione ricchezza netta (2)
+_INIT_
+ All 1 instances equal to 10000.
+END_DESCRIPTION
+
+Parameter_w0
+Inizializzazione salario
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_K0
+Inizializzazione stock capitale iniziale
+_INIT_
+ All 1 instances equal to 800.
+END_DESCRIPTION
+
+Parameter_sticky
+threshold sticky wages
+_INIT_
+ All 1 instances equal to 0.9.
+END_DESCRIPTION
+
+Parameter_d1
+Aliquota dividendi (1)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_d2
+Aliquota dividendi (2)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_gdrift
+(no description available)
+_INIT_
+ All 1 instances equal to 42000.
+END_DESCRIPTION
+
+Parameter_gpar
+(no description available)
+_INIT_
+ All 1 instances equal to 1.01.
+END_DESCRIPTION
+
+Parameter_uu
+Tasso di crescita progresso tecnico esogeno costante
+_INIT_
+ All 1 instances equal to 0.005.
+END_DESCRIPTION
+
+Parameter_uu1
+Supporto uniforme innovazione processo esogena
+_INIT_
+ All 1 instances equal to 0.04.
+END_DESCRIPTION
+
+Parameter_uu2
+Supporto uniforme innovazione prodotto esogena
+_INIT_
+ All 1 instances equal to 0.04.
+END_DESCRIPTION
+
+Parameter_beta1
+Parametro t-1 aspettative miopi
+_INIT_
+ All 1 instances equal to 0.4.
+END_DESCRIPTION
+
+Parameter_beta2
+Parametro t-2 aspettative miopi
+_INIT_
+ All 1 instances equal to 0.4.
+END_DESCRIPTION
+
+Parameter_beta3
+Parametro t-3 aspettative miopi
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_beta4
+Parametro t-4 aspettative miopi
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_beta
+Parametro aspettative accelerative GD
+_INIT_
+ All 1 instances equal to 0.5.
+END_DESCRIPTION
+
+Parameter_delta1
+Parametro aspettative first order adaptive
+_INIT_
+ All 1 instances equal to 1.
+END_DESCRIPTION
+
+Parameter_delta5
+Parametro aspettative estrapolative (0.0000001 - 0.00000001 - 0.00000005)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Parameter_delta6
+Parametro aspettative estrapolative (0.0000001 - 0.00000001 - 0.00000005)
+_INIT_
+ All 1 instances equal to 0.3.
+END_DESCRIPTION
+
+Variable_initCountry
+Create the K+S country object and attach (hook) it to the LSD
+object containing this variable (that is run only once).
+
+'initCountry' appears in the equation for: init.
+_INIT_
+
+END_DESCRIPTION
+
+Variable_timeStep
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_GDP
+Gross Domestic Product (expenditure approach).
+
+'GDP' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_GDP1
+Gross Domestic Product (production approach).
+
+'GDP1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_EItot
+Real total Expansion Investment.
+
+'EItot' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SItot
+Real total Substitution Investment.
+
+'SItot' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Ntot
+Total Inventories.
+
+'Ntot' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_dNtot
+Changes (delta) in Inventories.
+
+'dNtot' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Qtot1
+Total Production of sector 1 (real).
+
+'Qtot1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Qtot2
+Total Production of sector 2 (real).
+
+'Qtot2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Creal
+Real aggregated Consumption.
+
+'Creal' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Ir
+Real aggregated investment.
+
+'Ir' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Debtot1
+Total Debt of sector 1.
+
+'Debtot1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Debtot2
+Total Debt of sector 2.
+
+'Debtot2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Pitot1
+Total Profits of sector 1.
+
+'Pitot1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Pitot2
+Total Profits of sector 2.
+
+'Pitot2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Wtot1
+Total net Worth of sector 1.
+
+'Wtot1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Wtot2
+Total net Worth of sector 2.
+
+'Wtot2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_LD
+Labor aggregated Demand.
+
+'LD' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_U
+Unemployment rate.
+
+'U' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_w
+Average nominal wage.
+
+'w' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_diff_w
+Average nominal wage first difference (in log).
+
+'diff_w' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ppi
+Production Price Index.
+
+'ppi' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_cpi
+Consumption Price Index.
+
+'cpi' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_diff_cpi
+CPI first difference (in log).
+
+'diff_cpi' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Am
+Average productivity.
+
+'Am' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_A_sd
+Standard deviation of productivity in sector 2.
+
+'A_sd' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Am1
+Average productivity of sector 1.
+
+'Am1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Am2
+Average productivity of sector 2.
+
+'Am2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_next1
+Number of exiting firms in sector 1.
+
+'next1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_next2
+Number of exiting firms in sector 2.
+
+'next2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_rw
+Average real wage.
+
+'rw' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Mutot
+Average Markup of sector 2.
+
+'Mutot' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_G
+Government expenditure (exogenous demand).
+
+'G' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Tax
+Government tax income.
+
+'Tax' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Def
+Government deficit.
+
+'Def' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Deb
+Government accumulated debt.
+
+'Deb' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_DefonGDP
+Government Deficit on GDP ratio.
+
+'DefonGDP' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_DebonGDP
+Government Debt on GDP ratio.
+
+'DebonGDP' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_H1
+Herfindahl-Hirschman Index for sector 1.
+
+'H1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_H2
+Herfindahl-Hirschman Index for sector 2.
+
+'H2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_N2lI
+Number of low investing firms in sector 2 (I/K < 2%).
+
+'N2lI' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_N2hI
+Number of high investing firms in sector 2 (I/K > 35%).
+
+'N2hI' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_N2lEI
+Number of low expansion investing firms in sector 2 (EI/K < 2%).
+
+'N2lEI' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_N2hEI
+Number of high expansion investing firms in sector 2 (EI/K > 35%).
+
+'N2hEI' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_DF1
+Sum of Marke Share changes (delta) in sector 1.
+
+'DF1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_DF2
+Sum of Marke Share changes (delta) in sector 2.
+
+'DF2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Stot1
+'Stot1' appears in the equation for: .
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Stot2
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm1
+Firm in sector 1
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ID1
+Firm sequential ID (from 1)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__A1p
+Productivity of a firm in sector 1.
+
+'A1p' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__A1scr
+Normalized productivity of a firm in sector 1.
+
+'A1scr' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__size1
+Size of a firm in sector 1.
+
+'size1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__growth1
+Size growth of a firm in sector 1.
+
+'growth1' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__S1
+Sales of a firm in sector 1.
+_INIT_
+
+END_DESCRIPTION
+
+Variable__growthS1
+Growth of sales of a firm in sector 1.
+_INIT_
+
+END_DESCRIPTION
+
+Object_Firm2
+Firm in sector 2
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ID2
+Firm sequential ID (from 1)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Variable__A2
+Productivity of a firm in sector 2.
+
+'A2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__A2scr
+Normalized productivity of a firm in sector 2.
+
+'A2scr' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__size2
+Size of a firm in sector 2.
+
+'size2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__growth2
+Size growth of a firm in sector 2.
+
+'growth2' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable__S2
+Sales of a firm in sector 2.
+_INIT_
+
+END_DESCRIPTION
+
+Variable__growthS2
+Growth of sales of a firm in sector 2.
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+#include "investment_include.h"
+#include "Inv_globalvar.cpp"
+
+KScountry country;																			// create the country object
+
+MODELBEGIN
+
+
+EQUATION( "timeStep" )
+/*
+Execute one timestep of K+S code
+*/
+
+country.t_step( t );
+
+RESULT( t )
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

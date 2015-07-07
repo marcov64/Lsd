@@ -1,13 +1,13 @@
 \name{read.multi.lsd}
 \alias{read.multi.lsd}
 \title{
-Read all instances of LSD variables (time series) from a LSD results file 
+Read all instances of LSD variables (time series) from a LSD results file
 }
 \description{
 This function reads the data series associated to all instances of each selected variable from a LSD results file (.res).
 }
 \usage{
-read.multi.lsd(file, col.names = NULL, nrows = -1, skip = 0, check.names = TRUE, stringsAsFactors = default.stringsAsFactors())
+read.multi.lsd(file, col.names = NULL, nrows = -1, skip = 0, check.names = TRUE)
 }
 \arguments{
   \item{file}{
@@ -23,36 +23,44 @@ integer: the maximum number of time steps (rows) to read in. Negative and other 
 integer: the number of time steps (rows) of the results file to skip before beginning to read data. The default is to read from the first time step (t = 1).
 }
   \item{check.names}{
-logical. If TRUE then the names of the variables in the data frame are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
-}
-  \item{stringsAsFactors}{
-logical: should character vectors be converted to factors?
+logical. If TRUE then the names of the variables are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
 }
 }
 \value{
-Returns a single data frame containing the selected variables' time series contained in the results file.
+Returns a list of matrices, each containing one of the selected variables' time series from the results file.
 }
 \author{Marcelo C. Pereira}
 \note{
-The returned data frame may be potentially very wide, in particular if variables are not well selected(see col.names above) or if there is a large number of instances.
 For extracting data from multiple similar files (like sensitivity analysis results), see \code{\link{read.list.lsd}}.
 }
 \seealso{
-\code{\link{read.lsd}}, 
-\code{\link{read.list.lsd}}, 
-\code{\link{read.3d.lsd}}, 
+\code{\link{read.single.lsd}},
+\code{\link{read.list.lsd}},
+\code{\link{read.3d.lsd}},
+\code{\link{read.4d.lsd}},
 \code{\link{read.raw.lsd}}
 }
 \examples{
-## reads all instances of all variables
-#bigTable <- read.multi.lsd("Sim1_1.res")
+# Save current work directory and change to the examples directory
+currWD <- getwd()
+setwd(system.file("extdata", package = "LSDinterface"))
 
-## read all instances of a set of variables named 'a' and 'b'
-#abTable <- read.multi.lsd("~/LSD/Work/Simulation_A/Sim1_2.res.gz", c("a", "b"))
+# Load a sample .res file into a simple matrix (all instances)
+macroList <- read.multi.lsd("Sim1_1.res")
 
-## reads all instances of all variables, skipping the initial 100 time steps
-## and keeping up to 200 time steps (from t = 101 up to t = 300)
-#allDF100_300 <- read.multi.lsd("Sim1_1.res", skip = 100, nrows = 200)
+# See matrix in the data viewer (require package 'utils')
+length(macroList)
+#View(macroList[[1]])
+#View(macroList[[8]])
+
+# reads first instance of 2 variables, skipping the initial 20 time steps
+# and keeping up to 50 time steps (from t = 21 up to t = 70)
+varsList21_70 <- read.multi.lsd("Sim1_1.res", c("_A1p", "_growth1"), skip = 20, nrows = 50)
+#View(varsList21_70[[1]])
+#View(varsList21_70[[2]])
+
+# Restore working directory
+setwd(currWD)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

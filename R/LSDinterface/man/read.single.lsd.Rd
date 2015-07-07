@@ -1,13 +1,14 @@
-\name{read.lsd}
-\alias{read.lsd}
+\name{read.single.lsd}
+\alias{read.single.lsd}
 \title{
-Read LSD variables (time series) from a LSD results file (one instance of each variable only)
+Read LSD variables (time series) from a LSD results file (a single instance of each variable only)
 }
 \description{
-This function reads the data series associated to one instance of each selected variable from a LSD results file (.res). Just one instance (time series of a single LSD object) is read at each call.
+This function reads the data series associated to one instance of each selected variable from a LSD results file (.res). Just a single instance (time series of a single LSD object) is read at each call.
 }
 \usage{
-read.lsd(file, col.names = NULL, nrows = -1, skip = 0, check.names = TRUE, instance = 1, stringsAsFactors = default.stringsAsFactors())
+read.single.lsd(file, col.names = NULL, nrows = -1, skip = 0,
+                check.names = TRUE, instance = 1)
 }
 \arguments{
   \item{file}{
@@ -23,17 +24,14 @@ integer: the maximum number of time steps (rows) to read in. Negative and other 
 integer: the number of time steps (rows) of the results file to skip before beginning to read data. The default is to read from the first time step (t = 1).
 }
   \item{check.names}{
-logical. If TRUE then the names of the variables in the data frame are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
+logical. If TRUE then the names of the variables are checked to ensure that they are syntactically valid variable names. If necessary they are adjusted (by make.names) so that they are, and also to ensure that there are no duplicates.
 }
   \item{instance}{
 integer: the instance of the variable to be read, for variables that exist in more than one object. This number is based on the position (column) of the variable in the results file. The default is to read the first instance.
 }
-  \item{stringsAsFactors}{
-logical: should character vectors be converted to factors?
-}
 }
 \value{
-Returns a data frame containing the selected variables' time series contained in the results file.
+Returns a matrix containing the selected variables' time series contained in the results file.
 }
 \author{Marcelo C. Pereira}
 \note{
@@ -42,20 +40,34 @@ For multi-instanced variables, see \code{\link{read.multi.lsd}}. For extracting 
 }
 
 \seealso{
-\code{\link{read.multi.lsd}}, 
-\code{\link{read.list.lsd}}, 
-\code{\link{read.3d.lsd}}, 
+\code{\link{read.multi.lsd}},
+\code{\link{read.list.lsd}},
+\code{\link{read.3d.lsd}},
+\code{\link{read.4d.lsd}},
 \code{\link{read.raw.lsd}}
 }
 \examples{
-#inst1Table <- read.lsd("Sim1_1.res")	# reads first instance of all variables
+# Save current work directory and change to the examples directory
+currWD <- getwd()
+setwd(system.file("extdata", package = "LSDinterface"))
 
-## read second instance of a set of variables named 'a' and 'b'
-#ab2Table <- read.lsd("~/LSD/Work/Simulation_A/Sim1_2.res.gz", c("a", "b"), instance = 2)
+# Load a sample .res file into a simple matrix (first instances only)
+macroVar <- read.single.lsd("Sim1_1.res")
 
-## reads first instance of all variables, skipping the initial 100 time steps
-## and keeping up to 200 time steps (from t = 101 up to t = 300)
-#inst2DF100_300 <- read.lsd("Sim1_1.res", skip = 100, nrows = 200)
+# See matrix in the data viewer (require package 'utils')
+#View(macroVar)
+
+# read second instance of a set of variables named '_A1p' and '_growth1'
+ag2Table <- read.single.lsd("Sim1_2.res.gz", c("_A1p", "_growth1"), instance = 2)
+#View(ag2Table)
+
+# reads first instance of all variables, skipping the initial 20 time steps
+# and keeping up to 50 time steps (from t = 21 up to t = 70)
+var21_70 <- read.single.lsd("Sim1_1.res", skip = 20, nrows = 50)
+#View(var21_70)
+
+# Restore working directory
+setwd(currWD)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

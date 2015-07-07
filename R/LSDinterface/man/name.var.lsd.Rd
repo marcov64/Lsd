@@ -1,5 +1,5 @@
-\name{var.name.lsd}
-\alias{var.name.lsd}
+\name{name.var.lsd}
+\alias{name.var.lsd}
 \title{
 Get original LSD variable name
 }
@@ -7,7 +7,7 @@ Get original LSD variable name
 This function generates the original LSD variable name, as it was defined in LSD and before R adjusts the name, from a R column name (with or without position or timing information appended).
 }
 \usage{
-var.name.lsd(r.name)
+name.var.lsd(r.name)
 }
 \arguments{
   \item{r.name}{
@@ -22,12 +22,13 @@ A character vector of with the same attributes as x (after possible coercion).
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{clean.name.lsd}},
-\code{\link{read.names.lsd}}
+\code{\link{name.clean.lsd}},
+\code{\link{info.names.lsd}}
 }
 \examples{
-var.name.lsd("label")
-var.name.lsd(c("label", "X_underlinelabel"))
+name.var.lsd("label")
+
+name.var.lsd(c("label", "X_underlinelabel"))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

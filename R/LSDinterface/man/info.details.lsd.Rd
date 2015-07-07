@@ -1,20 +1,17 @@
-\name{read.info.lsd}
-\alias{read.info.lsd}
+\name{info.details.lsd}
+\alias{info.details.lsd}
 \title{
-Read information from a LSD results file
+Get detailed information from a LSD results file
 }
 \description{
 This function reads, analyze and organize the information from a LSD results file (.res).
 }
 \usage{
-read.info.lsd(file, stringsAsFactors = default.stringsAsFactors())
+info.details.lsd(file)
 }
 \arguments{
   \item{file}{
 the name of the LSD results file which the data are to be read from. If it does not contain an absolute path, the file name is relative to the current working directory, getwd(). Tilde-expansion is performed where supported. This can be a compressed file (see file) and must include the appropriated extension (usually .res or .res.gz).
-}
-  \item{stringsAsFactors}{
-logical: should character vectors be converted to factors?
 }
 }
 \value{
@@ -22,12 +19,23 @@ Returns a data frame containing detailed description (columns) of all variables 
 }
 \author{Marcelo C. Pereira}
 \seealso{
-\code{\link{read.init.lsd}}, 
-\code{\link{read.names.lsd}}
+\code{\link{info.init.lsd}},
+\code{\link{info.names.lsd}}
+\code{\link{info.dimensions.lsd}}
 }
 \examples{
-#read.info.lsd("Sim1_1.res")
-#read.info.lsd("~/LSD/Work/Simulation_A/Sim1_2.res.gz", stringsAsFactors = FALSE)
+# Save current work directory and change to the examples directory
+currWD <- getwd()
+setwd(system.file("extdata", package = "LSDinterface"))
+
+info1 <- info.details.lsd("Sim1_1.res")
+#View(info1)
+
+info2 <- info.details.lsd("Sim1_2.res.gz")
+#View(info2)
+
+# Restore working directory
+setwd(currWD)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
