@@ -738,7 +738,7 @@ if(actual_steps>0)
    cmd(inter, "button .warn.b.ok -text \" Ok \" -command {set choice 1}");
    cmd(inter, "button .warn.b.esc -text \" Cancel \" -command {set choice 2}");
    cmd(inter, "button .warn.b.help -text \" Help \" -command {LsdHelp QuickHelp.html#problem}");
-   cmd(inter, "pack .warn.b.ok .warn.b.esc .warn.b.help -side left");
+   cmd(inter, "pack .warn.b.ok .warn.b.help .warn.b.esc -side left");
    cmd(inter, "pack .warn.b");
    
    *choice=0;
@@ -1220,7 +1220,7 @@ cmd(inter, "button .b.ok -text Continue -command {set choice 1}");
 cmd(inter, "button .b.del -text DELETE -command {set choice 3}");
 cmd(inter, "button .b.cancel -text Cancel -command {set choice 2}");
 cmd(inter, "button .b.help -text Help -command {LsdHelp menumodel.html#ChangeObjName}");
-cmd(inter, "pack .b.ok .b.del .b.cancel .b.help -side left -fill x -expand yes");
+cmd(inter, "pack .b.ok .b.del .b.help .b.cancel -side left -fill x -expand yes");
 
 cmd(inter, "frame .b1");
 sprintf(msg, "set to_compute %d",r->to_compute);
@@ -1420,7 +1420,7 @@ cmd(inter, "frame .b");
 cmd(inter, "button .b.ok -text Continue -command {set done 1}");
 cmd(inter, "button .b.cancel -text Cancel -command {set done 2}");
 cmd(inter, "button .b.help -text Help -command {LsdHelp Browser.html#variables}");
-cmd(inter, "pack .b.ok .b.cancel .b.help -side left -fill x -expand yes");
+cmd(inter, "pack .b.ok .b.help .b.cancel -side left -fill x -expand yes");
 
 cmd(inter, "frame .b1");
 cmd(inter, "checkbutton .b1.deb -text \"Debug: allow interruption after this equation\" -variable debug -anchor w");
@@ -3542,7 +3542,7 @@ cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#V}");
 cmd(inter, "button .a.f.def -text Default -command {set temp_var mozilla}");

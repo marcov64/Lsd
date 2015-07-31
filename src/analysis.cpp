@@ -236,7 +236,7 @@ cmd(inter, "pack .ask.b.file .ask.b.sim -side left");
 cmd(inter, "frame .ask.c");
 cmd(inter, "button .ask.c.can -text Cancel -command {set choice 3}");
 cmd(inter, "button .ask.c.help -text Help -command {LsdHelp menudata.html#analres}");
-cmd(inter, "pack .ask.c.can .ask.c.help -side left");
+cmd(inter, "pack .ask.c.help .ask.c.can -side left");
 cmd(inter, "pack .ask.l .ask.b .ask.c");
 cmd(inter, "bind .ask <KeyPress-f> {.ask.b.file invoke}");
 cmd(inter, "bind .ask <KeyPress-s> {.ask.b.sim invoke}");
@@ -1519,7 +1519,7 @@ cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
 cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
 cmd(inter, "button .s.help -text \" Help \" -command {LsdHelp mdatares.html#add_series}");
 
-cmd(inter, "pack .s.i .s.ok .s.esc .s.help");
+cmd(inter, "pack .s.i .s.ok .s.help .s.esc");
 cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
 #ifndef DUAL_MONITOR
@@ -1704,7 +1704,7 @@ cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
 
 cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
 cmd(inter, "button .a.b.help -text \" Help \" -command {LsdHelp mdatares.html#batch_sel}");
-cmd(inter, "pack .a.b.ok .a.b.esc .a.b.help -side left");
+cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
 
 cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
 cmd(inter, "pack .a.b");
@@ -1974,7 +1974,7 @@ cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
 
 cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
 cmd(inter, "button .a.b.help -text \" Help \" -command {LsdHelp mdatares.html#batch_sel}");
-cmd(inter, "pack .a.b.ok .a.b.esc .a.b.help -side left");
+cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
 
 cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
 cmd(inter, "pack .a.b");
@@ -3289,7 +3289,7 @@ cmd(inter, "button $p.del -text Delete -command {.s.i.lb delete [.s.i.lb cursele
 cmd(inter, "button $p.can -text Abort -command {set choice 2}");
 cmd(inter, "button $p.end -text Continue -command {set choice 1}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#crosssection}");
-cmd(inter, "pack $p.add $p.del $p.end $p.can $p.help -expand yes -fill x -anchor n");
+cmd(inter, "pack $p.add $p.del $p.end $p.help $p.can -expand yes -fill x -anchor n");
 
 cmd(inter, "frame .s.s -relief groove -bd 2");
 cmd(inter, "label .s.s.l -text \"Use series in the same order as selected\"");
@@ -3878,7 +3878,7 @@ if(*choice==2)
 type_res=typelab;
 
 *choice=0;
-cmd(inter, "destroy .lab.f .lab.ok .lab.esc .lab.help");
+cmd(inter, "destroy .lab.f .lab.ok .lab.help .lab.esc");
 
  
 
@@ -3932,7 +3932,7 @@ cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
 cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
 
 cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
-cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.esc .lab.help -fill x");
+cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
 *choice=0;
 cmd(inter, "focus .lab");
 cmd(inter, "bind .lab <KeyPress-Return> {.lab.ok invoke}");
@@ -4639,7 +4639,7 @@ cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
  cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
  cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
  cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#3dTime}");
- cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+ cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
  
  cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
 
@@ -5235,7 +5235,7 @@ cmd(inter, "set p .s.b");
 cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
 cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#3dCrossSection}");
-cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
 
@@ -5594,7 +5594,7 @@ cmd(inter, "set p .s.b");
 cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
 cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#plot}");
-cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
@@ -5892,7 +5892,7 @@ cmd(inter, "set p .s.b");
 cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
 cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#lattice}");
-cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
@@ -6127,7 +6127,7 @@ cmd(inter, "set p .s.b");
 cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
 cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#seq_xy}");
-cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
@@ -6656,7 +6656,7 @@ cmd(inter, "set p .s.b");
 cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
 cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
 cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#seq_xy}");
-cmd(inter, "pack $p.ok $p.can $p.help -side left -expand yes -fill x");
+cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
@@ -7740,7 +7740,7 @@ cmd(inter, "set choice $dozip");
 dozip=*choice;
 
 *choice=0;
-cmd(inter, "destroy .lab.f .lab.ok .lab.esc .lab.help");
+cmd(inter, "destroy .lab.f .lab.ok .lab.help .lab.esc");
 
  
 
@@ -7794,7 +7794,7 @@ cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
 cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
 
 cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
-cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.esc .lab.help -fill x");
+cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
 *choice=0;
 cmd(inter, "focus .lab");
 cmd(inter, "bind .lab <KeyPress-Return> {.lab.ok invoke}");
