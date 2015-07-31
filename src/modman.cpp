@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.4 - January 2015
+LSD 6.5 - July 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -13,7 +13,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*****
-used up to 66 options included
+used up to 67 options included
 *******/
 
 /* TEST UNDO:
@@ -88,7 +88,7 @@ Tcl_Interp *inter;
 char msg[1024];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
 int choice;
 int v_counter=0; //counter of the v[i] variables inserted in the equations
-int shigh=2;		// syntax highlighting state (0, 1 or 2)
+int shigh;			// syntax highlighting state (0, 1 or 2)
 
 void copy(char *f1, char *f2);
 Tcl_Interp *InterpInitWin(void);
@@ -321,7 +321,7 @@ cmd(inter, "lappend ml $RootLsd");
 cmd(inter, "array set env $ml");
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
-cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
+cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
 
 cmd(inter, "set Terminal $DefaultTerminal");
@@ -345,19 +345,37 @@ if(choice==1)
   cmd(inter, "gets $f fonttype");
   cmd(inter, "gets $f wish");
   cmd(inter, "gets $f LsdSrc");
-  cmd(inter, "close $f");
+	cmd( inter, "gets $f dim_character" );
+	cmd( inter, "gets $f tabsize" );
+	cmd( inter, "gets $f wrap" );
+	cmd( inter, "gets $f shigh" );
+	cmd( inter, "gets $f autoHide" );
+  cmd(inter, "close $f" );
+	// handle old options file
+	cmd( inter, "if {$dim_character == \"\"} {set choice 0}" );
  }
-else
+// handle non-existent or old options file for new options
+if ( choice != 1 )
  {
+	cmd( inter, "set dim_character 0" );	// default font size (0=force auto-size)
+	cmd( inter, "set tabsize 2" );		// default tab size
+	cmd( inter, "set wrap 1" );			// default text wrapping mode (1=yes)
+	cmd( inter, "set shigh 2" );			// default is full syntax highlighting
+	cmd( inter, "set autoHide 1" );		// default is to auto hide LMM on run
   cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
   cmd(inter, "puts $f $Terminal");
   cmd(inter, "puts $f $HtmlBrowser");
   cmd(inter, "puts $f $fonttype");
   cmd(inter, "puts $f $wish");  
   cmd(inter, "puts $f $LsdSrc");
+	cmd( inter, "puts $f $dim_character" );
+	cmd( inter, "puts $f $tabsize" );
+	cmd( inter, "puts $f $wrap" );
+	cmd( inter, "puts $f $shigh" );
+	cmd( inter, "puts $f $autoHide" );
   cmd(inter, "close $f");
  }
-
+ 
 
 //cmd(inter, "tk_messageBox -type ok -message \"$env(LSDROOT)\\n[pwd]\"");
 strcpy(msg, s);
@@ -427,6 +445,11 @@ cmd(inter, "proc lmmraise {win ent} {wm focusmodel . active; if { $ent!=\"\"} {f
 //tk_messageBox -message \"My focus is\n[focus -lastfor $w]\nLast for focus is\n[focus -displayof $w]\";
 cmd(inter, "proc blocklmm w {  bind .f.t.t <1> { raise $w .; focus -force [focus -lastfor $w]};  wm transient $w .;bind . <Escape> {sblocklmm $w}; bind . <1> {sblocklmm $w}; .f.t.t conf -state disabled}");
 cmd(inter, "proc sblocklmm w {bind .f.t.t <1> {}; .f.t.t conf -state normal; destroy $w; focus -force .f.t.t; bind .f.t.t <Escape> {} }");
+
+// procedures to adjust tab size according to font type and size and text wrapping
+cmd( inter, "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
+cmd( inter, "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
+
 cmd(inter, "wm title . \"LMM - Lsd Model Manager\"");
 cmd(inter, "wm protocol . WM_DELETE_WINDOW {set choice 1}");
 cmd(inter, "bind . <Destroy> {set choice -1}");
@@ -439,6 +462,7 @@ cmd(inter, "set currentpos \"\"");
 cmd(inter, "set currentdoc \"\"");
 cmd(inter, "set v_num 0");
 cmd(inter, "set macro 1");
+cmd(inter, "set shigh_temp $shigh");
 cmd(inter, "source $RootLsd/$LsdSrc/showmodel.tcl");
 cmd(inter, "source $RootLsd/$LsdSrc/lst_mdl.tcl");
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
@@ -446,17 +470,18 @@ Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_INT);
 Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_INT);
 macro=1;    
 Tcl_LinkVar(inter, "shigh", (char *) &shigh, TCL_LINK_INT);
-  
+cmd(inter, "set shigh $shigh_temp");	// restore correct value
+
 
 cmd(inter, "menu .m -tearoff 0");
 
 cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
-cmd(inter, "$w add command -label \"New text file\" -command { set choice 39} -underline 0");
+cmd(inter, "$w add command -label \"New Text File\" -command { set choice 39} -underline 0");
 cmd(inter, "$w add command -label \"Open File\" -command { set choice 15} -underline 0 -accelerator Control+o");
 cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}} -underline 0 -accelerator Control+s");
-cmd(inter, "$w add command -label \"Save as\" -command {set choice 4} -underline 5 -accelerator Control+a");
+cmd(inter, "$w add command -label \"Save As\" -command {set choice 4} -underline 5 -accelerator Control+a");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Control+q");
 
@@ -493,15 +518,16 @@ cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -u
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Control+\\\(");
 cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Control+\\)");
-cmd(inter, "$w add command -label \"Insert Lsd scripts\" -command {set choice 28} -underline 0 -accelerator Control+i");
+cmd(inter, "$w add command -label \"Insert Lsd Scripts\" -command {set choice 28} -underline 0 -accelerator Control+i");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add check -label \" Wrap/Unwrap\" -variable wrap -command {if {$wrap == 1} {.f.t.t conf -wrap word } {.f.t.t conf -wrap none}} -underline 1 -accelerator Control+w ");
-cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"} -accelerator Control+'+'");
-cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"} -accelerator Control+'-'");
-cmd(inter, "$w add command -label \"Change fonts\" -command {set choice 59} ");
+cmd(inter, "$w add check -label \" Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Control+w ");
+cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Control+'+'");
+cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Control+'-'");
+cmd(inter, "$w add command -label \"Change Font\" -command {set choice 59} ");
+cmd(inter, "$w add command -label \"Change Tab Size\" -command {set choice 67} ");
 
 // add option to ajust syntax highlighting (word coloring)
-cmd(inter, "$w add cascade -label \"Syntax highlighting\" -menu $w.color -underline 0");
+cmd(inter, "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0");
 cmd(inter, "menu $w.color -tearoff 0");
 cmd(inter, "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Control+;\"");
 cmd(inter, "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Control+,");
@@ -513,7 +539,7 @@ cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 4
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"TkDiff\" -command {set choice 57}");
-cmd(inter, "$w add command -label \"Compare models\" -command {set choice 61}");
+cmd(inter, "$w add command -label \"Compare Models\" -command {set choice 61}");
 //cmd(inter, "$w add command -label \"LMM Options\" -command {set choice 63}");
 
 
@@ -538,6 +564,7 @@ cmd(inter, "$w add command -label \"Model Info\" -underline 6 -state disabled -c
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"System Compilation Options\" -command {set choice 47}");
 cmd(inter, "$w add command -label \"Model Compilation Options\" -state disabled -command {set choice 48}");
+cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Generate 'NO WINDOW' version\" -command {set choice 62}");
 
@@ -562,21 +589,23 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Lsd documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
 
-cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 6.4 \n\nJanuary 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
+cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 7.0 Beta \n\nJuly 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
 cmd(inter, "scrollbar .f.t.vs -command \".f.t.t yview\"");
 cmd(inter, "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"");
-cmd(inter, "text .f.t.t -height 2 -tabs 20 -undo 1 -wrap none -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"");
+cmd(inter, "text .f.t.t -height 2 -undo 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"");
 cmd(inter, "set a [.f.t.t conf -font]");
 cmd(inter, "set b [lindex $a 3]");
-cmd(inter, "set dim_character [lindex $b 1]");
+cmd(inter, "if {$dim_character == 0} {set dim_character [lindex $b 1]}");
 //cmd(inter, "set fonttype [lindex $b 0]");
 cmd(inter, "if { $dim_character == \"\"} {set dim_character 12} {}");
 
 cmd(inter, "set a [list $fonttype $dim_character]");
-cmd(inter, ".f.t.t conf -font \"$a\"");
+// set preferred tab size and wrap option
+cmd( inter, "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
+cmd( inter, "setwrap .f.t.t $wrap" );		// adjust text wrap
 //cmd(inter, "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"");
 //
 // set syntax colors
@@ -633,9 +662,6 @@ cmd(inter, "set dir [glob *]");
 cmd(inter, "set num [llength $dir]");
 
 
-
-cmd(inter, "set wrap 0");
-
 cmd(inter, "bind . <Control-n> {tk_menuSetFocus .m.file}");
 
 // procedures to save cursor environment before and after changes in text window for syntax coloring
@@ -667,7 +693,7 @@ cmd(inter, "bind .f.t.t <KeyRelease-backslash> {.f.hea.line.line conf -text [.f.
 
 
 cmd(inter, "bind .f.t.t <Control-l> {set choice 10}");
-cmd(inter, "bind .f.t.t <Control-w> {if {$wrap == 0} {.f.t.t conf -wrap word; set wrap 1} {.f.t.t conf -wrap none; set wrap 0 }}");
+cmd(inter, "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwrap .f.t.t $wrap}");
 
 cmd(inter, "bind .f.t.t <Control-f> {set choice 11}");
 cmd(inter, "bind .f.t.t <F3> {set choice 12}");
@@ -902,7 +928,7 @@ if( tosave==1 && (choice==2 || choice==15 || choice==1 ||choice==14 ||choice==6 
   {
 
 //  cmd(inter, "set answer [tk_dialog .dia \"Save?\" \"Save the file $filename?\" \"\" 0 yes no cancel]");
-  cmd(inter, "set answer [tk_messageBox -type yesnocancel -title \"Save file?\" -message \"Recent changes to file '$filename' have not been saved. Do you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
+  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save file?\" -message \"Recent changes to file '$filename' have not been saved. Do you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
   //cmd(inter, " if { $answer == \"yes\"} {set tk_strictMotif 0; set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname]; set tk_strictMotif 1; if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");
   
 //cmd(inter, " if { $answer == \"yes\"} { set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname];  if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");  if(choice==0)
@@ -1067,7 +1093,8 @@ if(s==NULL || !strcmp(s, ""))
     goto loop;
    }
 
-  
+  s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
+
   cmd(inter, "set init_time [clock seconds]"); 
   cmd(inter, "toplevel .t");
   // change window icon
@@ -1076,7 +1103,8 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
   cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2");
-  cmd(inter, "wm iconify .");
+  if( ! strcmp( s, "1" ) )			// auto hide LMM if appropriate
+	cmd(inter, "wm iconify .");
   cmd(inter, "focus -force .t");
   cmd(inter, "grab set .t");
 #ifndef DUAL_MONITOR
@@ -1311,8 +1339,6 @@ if(s==NULL || !strcmp(s, ""))
    sourcefile=0;
    cmd(inter, ".f.t.t mark set insert 1.0");
    cmd(inter, "focus -force .f.t.t");
-   cmd(inter, ".f.t.t conf -wrap word");
-   cmd(inter, "set wrap 1");
   }
   cmd(inter, "set before [.f.t.t get 1.0 end]");
   cmd(inter, "set filename description.txt");
@@ -1592,7 +1618,7 @@ cmd(inter, "button .find.ok -text Ok -command {incr lfindcounter; set curcounter
 cmd(inter, "bind .find.e <Up> {if { $curcounter >= 0} {incr curcounter -1; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 cmd(inter, "bind .find.e <Down> {if { $curcounter <= $lfindcounter} {incr curcounter; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 
-cmd(inter, "button .find.esc -text Esc -command {sblocklmm .find}");
+cmd(inter, "button .find.esc -text Cancel -command {sblocklmm .find}");
 
 
 cmd(inter, "bind .find <KeyPress-Return> {.find.ok invoke}");
@@ -2373,7 +2399,7 @@ cmd(inter, "set isfun 0");
 cmd(inter, "frame .a.b");	
 cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "button .a.b.help -text Help -command {LsdHelp lsdfuncMacro.html#equation}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
@@ -2454,7 +2480,7 @@ cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w -fill x ");
 cmd(inter, "frame .a.b");	
 cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "button .a.b.help -text Help -command {LsdHelp lsdfunc.html#equation}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
@@ -2549,7 +2575,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#V}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -2633,7 +2659,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#cal}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -2708,7 +2734,7 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#CYCLE}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -2815,7 +2841,7 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#basicc}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -2907,7 +2933,7 @@ cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#LsdScript}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -2997,7 +3023,7 @@ cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#LsdScript}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3079,7 +3105,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#INCR}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3159,7 +3185,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#increment}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3239,7 +3265,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#MULT}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3322,7 +3348,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#multiply}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3405,7 +3431,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#WRITE}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3484,7 +3510,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#write}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3561,7 +3587,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#search_var_cond}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3640,7 +3666,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH_CND}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3722,7 +3748,7 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SORT}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3811,7 +3837,7 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#lsdqsort}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -3994,7 +4020,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#ADDOBJ}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4105,7 +4131,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#add_an_object}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4163,7 +4189,7 @@ cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#DELETE}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4223,7 +4249,7 @@ cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#delete_obj}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4309,7 +4335,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#RNDDRAW}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4412,7 +4438,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#draw_rnd}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4485,7 +4511,7 @@ cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4553,7 +4579,7 @@ cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#search}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4629,7 +4655,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SUM}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -4713,7 +4739,7 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#sum}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -5489,6 +5515,7 @@ if(choice==59)
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"Change Font\"");
 cmd(inter, "label .a.l1 -text \"Enter the font name you wish to use\"");
 
 cmd(inter, "entry .a.v_num -width 30 -textvariable fonttype");
@@ -5498,7 +5525,7 @@ cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#changefont}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
@@ -5523,7 +5550,7 @@ if(choice==2)
   choice=0;
   goto loop;
  }
-cmd(inter, "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"");
+cmd(inter, "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"");
 
 
 
@@ -5542,6 +5569,11 @@ cmd(inter, "set temp_var2 $HtmlBrowser");
 cmd(inter, "set temp_var3 $fonttype");
 cmd(inter, "set temp_var4 $wish");
 cmd(inter, "set temp_var5 $LsdSrc");
+cmd(inter, "set temp_var6 $dim_character");
+cmd(inter, "set temp_var7 $tabsize");
+cmd(inter, "set temp_var8 $wrap");
+cmd(inter, "set temp_var9 $shigh");
+cmd(inter, "set temp_var10 $autoHide");
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
@@ -5553,31 +5585,51 @@ cmd(inter, "bind .a.v_num <Return> {focus -force .a.v_num2; .a.v_num2 selection 
 
 cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages.\"");
 cmd(inter, "entry .a.v_num2 -width 30 -textvariable temp_var2");
-cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.v_num3; .a.v_num3 selection range 0 end}");
+cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.v_num4; .a.v_num4 selection range 0 end}");
 
-cmd(inter, "label .a.l3 -text \"Font family\"");
-cmd(inter, "entry .a.v_num3 -width 30 -textvariable temp_var3");
-cmd(inter, "bind .a.v_num3 <Return> {focus -force .a.v_num4; .a.v_num4 selection range 0 end}");
-
-cmd(inter, "label .a.l4 -text \"Wish\"");
+cmd(inter, "label .a.l4 -text \"Wish program\"");
 cmd(inter, "entry .a.v_num4 -width 30 -textvariable temp_var4");
 cmd(inter, "bind .a.v_num4 <Return> {focus -force .a.v_num5; .a.v_num4 selection range 0 end}");
 
-cmd(inter, "label .a.l5 -text \"Wish\"");
+cmd(inter, "label .a.l5 -text \"Source code subdirectory\"");
 cmd(inter, "entry .a.v_num5 -width 30 -textvariable temp_var5");
-cmd(inter, "bind .a.v_num5 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.v_num5 <Return> {focus -force .a.v_num3; .a.v_num3 selection range 0 end}");
+
+cmd(inter, "label .a.l3 -text \"Font family\"");
+cmd(inter, "entry .a.v_num3 -width 30 -textvariable temp_var3");
+cmd(inter, "bind .a.v_num3 <Return> {focus -force .a.v_num6; .a.v_num6 selection range 0 end}");
+
+cmd(inter, "label .a.l6 -text \"Font size (points)\"");
+cmd(inter, "entry .a.v_num6 -width 30 -textvariable temp_var6");
+cmd(inter, "bind .a.v_num6 <Return> {focus -force .a.v_num7; .a.v_num7 selection range 0 end}");
+
+cmd(inter, "label .a.l7 -text \"Tab size (characters))\"");
+cmd(inter, "entry .a.v_num7 -width 30 -textvariable temp_var7");
+cmd(inter, "bind .a.v_num7 <Return> {focus -force .a.v_num8; .a.v_num8 selection range 0 end}");
+
+cmd(inter, "label .a.l8 -text \"Wrap text (0:no/1:yes)\"");
+cmd(inter, "entry .a.v_num8 -width 30 -textvariable temp_var8");
+cmd(inter, "bind .a.v_num8 <Return> {focus -force .a.v_num9; .a.v_num9 selection range 0 end}");
+
+cmd(inter, "label .a.l9 -text \"Syntax highlights (0:no/1:part./2:full)\"");
+cmd(inter, "entry .a.v_num9 -width 30 -textvariable temp_var9");
+cmd(inter, "bind .a.v_num9 <Return> {focus -force .a.v_num10; .a.v_num10 selection range 0 end}");
+
+cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
+cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
+cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Esc -command {set choice 2}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
-cmd(inter, "button .a.f.def -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src}");
+cmd(inter, "button .a.f.def -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.def .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2  .a.l3 .a.v_num3 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.f");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.f");
 
 //cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
 #ifndef DUAL_MONITOR
@@ -5600,15 +5652,28 @@ if(choice==1)
  cmd(inter, "set fonttype $temp_var3");
  cmd(inter, "set wish $temp_var4");
  cmd(inter, "set LsdSrc $temp_var5");
+ cmd(inter, "set dim_character $temp_var6");
+ cmd(inter, "set tabsize $temp_var7");
+ cmd(inter, "set wrap $temp_var8");
+ cmd(inter, "set shigh $temp_var9");
+ cmd(inter, "set autoHide $temp_var10");
  
  cmd(inter, "set a [list $fonttype $dim_character]");
  cmd(inter, ".f.t.t conf -font \"$a\"");
- cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
+ cmd( inter, "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
+ cmd( inter, "setwrap .f.t.t $wrap" );			// adjust text wrap
+ color(shigh, 0, 0);							// set color highlights (all text)
+cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
  cmd(inter, "puts -nonewline $f  \"$Terminal\n\"");
  cmd(inter, "puts $f $HtmlBrowser");
  cmd(inter,  "puts $f $fonttype");
  cmd(inter,  "puts $f $wish");
  cmd(inter, "puts $f $LsdSrc");
+ cmd(inter, "puts $f $dim_character");
+ cmd(inter, "puts $f $tabsize");
+ cmd(inter, "puts $f $wrap");
+ cmd(inter, "puts $f $shigh");
+ cmd(inter, "puts $f $autoHide");
  cmd(inter, "close $f");
  }
 
@@ -5807,6 +5872,49 @@ shigh=0;
 Tcl_UpdateLinkedVar(inter, "shigh");
 color(shigh, 0, 0);			// set color types (all text)
 
+choice=0;
+goto loop;
+}
+
+if(choice==67)
+{
+//Change tab size
+
+cmd(inter, "toplevel .a");
+cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"Change Tab Size\"");
+cmd(inter, "label .a.l1 -text \"Enter the Tab size (in characters)\"");
+cmd(inter, "entry .a.v_num -width 30 -textvariable tabsize");
+cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
+cmd(inter, "frame .a.f");
+cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
+cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
+cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#changetab}");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.f");
+
+#ifndef DUAL_MONITOR
+cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
+#else
+cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+#endif
+
+cmd(inter, "focus -force .a.v_num");
+cmd(inter, ".a.v_num selection range 0 end");
+cmd(inter, "blocklmm .a");
+choice=0;
+while(choice==0)
+	Tcl_DoOneEvent(0);
+cmd(inter, "sblocklmm .a");
+if(choice==2)
+{
+	choice=0;
+	goto loop;
+}
+cmd(inter, "settab .f.t.t $tabsize \"[.f.t.t cget -font]\"");
 choice=0;
 goto loop;
 }
