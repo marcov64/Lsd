@@ -251,9 +251,9 @@ cmd(inter, "menu .m -tearoff 0 -relief groove -bd 2");
 cmd(inter, "set w .m.help");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
 cmd(inter, ".m add cascade -label Help -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Lsd Debugger Help\" -command {LsdHelp debug.html}");
+cmd(inter, "$w add command -label \"Help on Lsd Debugger\" -command {LsdHelp debug.html} -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44}");
+cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 cmd(inter, "focus -force .");
 if(interact_flag==1)
  {

@@ -479,30 +479,30 @@ cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
 cmd(inter, "$w add command -label \"Add a Variable\" -command {set param 0; set choice 2} -underline 6 -accelerator Control+V");
 cmd(inter, "$w add command -label \"Add a Parameter\" -command {set param 1; set choice 2} -underline 6 -accelerator Control+P");
 cmd(inter, "$w add command -label \"Add a Function\" -command {set param 2; set choice 2} -underline 8 -accelerator Control+N");
-cmd(inter, "$w add command -label \"Add a Descending Obj.\" -command {set choice 3} -underline 6 -accelerator Control+D");
+cmd(inter, "$w add command -label \"Add a Descending Object\" -command {set choice 3} -underline 6 -accelerator Control+D");
 cmd(inter, "$w add command -label \"Insert New Parent\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Change Obj. Name\" -command {set choice 6}");
+cmd(inter, "$w add command -label \"Change Object Name\" -command {set choice 6} -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Set Equation File label\" -command {set choice 28} -underline 2 -accelerator Control+U");
-cmd(inter, "$w add checkbutton -label \"Ignore eq. file controls \" -variable ignore_eq_file -command {set choice 54}");
-cmd(inter, "$w add command -label \"Upload equation file \" -command {set choice 51}");
-cmd(inter, "$w add command -label \"Offload equation file \" -command {set choice 52}");
-cmd(inter, "$w add command -label \"Compare eq. files \" -command {set choice 53}");
+cmd(inter, "$w add command -label \"Set Equation File Name\" -command {set choice 28} -underline 2 -accelerator Control+U");
+cmd(inter, "$w add checkbutton -label \"Ignore Equation File Controls \" -variable ignore_eq_file -command {set choice 54} -underline 0");
+cmd(inter, "$w add command -label \"Upload Equation File \" -command {set choice 51} -underline 0");
+cmd(inter, "$w add command -label \"Offload Equation File \" -command {set choice 52} -underline 0");
+cmd(inter, "$w add command -label \"Compare Equation Files \" -command {set choice 53} -underline 2");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Generate Automatic Descriptions \" -command {set choice 43} -underline 7");
+cmd(inter, "$w add command -label \"Generate Auto Descriptions \" -command {set choice 43} -underline 7");
 cmd(inter, "$w add command -label \"Create Report \" -command {set choice 36} -underline 7");
-cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57}");
+cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57} -underline 9");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Find an element of the model\" -command {set choice 50} -underline 0 -accelerator Control+f");
-cmd(inter, "$w add checkbutton -label \"Enable Model Structure window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Control+Tab");
+cmd(inter, "$w add command -label \"Find Element in Model\" -command {set choice 50} -underline 0 -accelerator Control+F");
+cmd(inter, "$w add checkbutton -label \"Enable Structure Window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Control+Tab");
 
 cmd(inter, "set w .m.data");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
-cmd(inter, "$w add cascade -label \"Set number of Objects\" -underline 0 -menu $w.setobj");
-cmd(inter, "$w add command -label \"Init. Values\" -command {set choice 21} -underline 0 -accelerator Control+I");
+cmd(inter, "$w add cascade -label \"Set Number of Objects\" -underline 0 -menu $w.setobj");
+cmd(inter, "$w add command -label \"Initial Values\" -command {set choice 21} -underline 0 -accelerator Control+I");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Full Sensitivity (online)\" -command {set choice 62} -underline 18");
 cmd(inter, "$w add command -label \"Full Sensitivity (batch)\" -command {set choice 63} -underline 0");
@@ -521,8 +521,8 @@ cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -unde
 
 cmd(inter, "set w .m.data.setobj");
 cmd(inter, "menu $w -tearoff 0");
-cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Control+0");
-cmd(inter, "$w add command -label \"Only current type of object\" -command {set choice 33}");
+cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Control+0 -underline 0");
+cmd(inter, "$w add command -label \"Only current type of object\" -command {set choice 33} -underline 0");
 
 cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
@@ -530,27 +530,27 @@ cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Control+R");
 cmd(inter, "$w add command -label \"Start 'No Window' batch'\" -command {set choice 69} -underline 0");
 cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Control+M");
-cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56}");
+cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Control+F");
 cmd(inter, "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Control+G");
 cmd(inter, "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Show elements saved\" -command {set choice 39}");
-cmd(inter, "$w add command -label \"Show elements to observe\" -command {set choice 42}");
-cmd(inter, "$w add command -label \"Show elements to initialize\" -command {set choice 49}");
+cmd(inter, "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1");
+cmd(inter, "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17");
+cmd(inter, "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Remove Runtime Plots\" -command {set choice 40}");
+cmd(inter, "$w add command -label \"Remove Runtime Plots\" -command {set choice 40} -underline 8");
 
 cmd(inter, "set w .m.help");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Help -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Help on Browser\" -command {LsdHelp Browser.html}");
-cmd(inter, "$w add command -label \"Lsd Quick Help\" -command {LsdHelp QuickHelp.html}");
+cmd(inter, "$w add command -label \"Help on Browser\" -command {LsdHelp Browser.html} -underline 0");
+cmd(inter, "$w add command -label \"Lsd Quick Help\" -command {LsdHelp QuickHelp.html} -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} } {}");
-cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44}");
+cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}");
+cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 
 
 cmd(inter, "bind . <Control-l> {set choice 17}");

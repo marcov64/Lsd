@@ -524,26 +524,26 @@ cmd(inter, "menu .m -tearoff 0 -relief groove -bd 2");
 cmd(inter, "set w .m.exit");
 cmd(inter, ".m add cascade -label Exit -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Exit Analysis of Result\" -command {set choice 2}");
+cmd(inter, "$w add command -label \"Exit Analysis of Result\" -command {set choice 2} -underline 0");
 
 cmd(inter, "set w .m.gp");
 cmd(inter, ".m add cascade -label Gnuplot -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Gnuplot\" -command {if {$tcl_platform(platform) == \"unix\"} {exec xterm -e gnuplot &} {if {$tcl_platform(os) == \"Windows NT\"} {exec wgnuplot &} {exec start wgnuplot &}}}");
-cmd(inter, "$w add command -label \"Gnuplot options\" -command {set choice 37}");
+cmd(inter, "$w add command -label \"Gnuplot\" -command {if {$tcl_platform(platform) == \"unix\"} {exec xterm -e gnuplot &} {if {$tcl_platform(os) == \"Windows NT\"} {exec wgnuplot &} {exec start wgnuplot &}}} -underline 0");
+cmd(inter, "$w add command -label \"Gnuplot Options\" -command {set choice 37} -underline 8");
 
 
 cmd(inter, "set w .m.color");
 cmd(inter, ".m add cascade -label Color -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Default colors\" -command {set choice 22}");
-cmd(inter, "$w add command -label \"Set colors\" -command {set choice 21}");
+cmd(inter, "$w add command -label \"Default Colors\" -command {set choice 22} -underline 0");
+cmd(inter, "$w add command -label \"Set Colors\" -command {set choice 21} -underline 0");
 
 cmd(inter, "set w .m.help");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
 cmd(inter, ".m add cascade -label Help -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Analysis of Result - Help\" -command {set choice 41}");
-cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44}");
+cmd(inter, "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0");
+cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 
 cmd(inter, "bind . <Control-x> {set choice 23}");
 cmd(inter, "bind . <Control-z> {set choice 24}");
