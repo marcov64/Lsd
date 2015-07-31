@@ -3531,6 +3531,7 @@ case 48:
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"Set Browser\"");
 
 cmd(inter, "set temp_var $HtmlBrowser");
 cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages.\"");
@@ -3617,7 +3618,7 @@ no_error=0;
 if(cv!=NULL)
  {
  for(i=0, cur_v=cv->up->v; cur_v!=cv; cur_v=cur_v->next, i++);
- sprintf(msg, "set cur %d", i);
+ sprintf(msg, "set cur %d; set listfocus 1; set itemfocus $cur", i);
  cmd(inter, msg);
  return cv->up;
  }
@@ -3633,6 +3634,7 @@ done=lattice_type;
 cmd(inter, "set a $lattype");
 cmd(inter, "toplevel .a");
 cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"Set Lattice Updating\"");
 
 cmd(inter, "label .a.l -text \"Type of lattice updating\" -fg red");
 cmd(inter, "pack .a.l");
@@ -4891,7 +4893,9 @@ char *ol;
 Tcl_LinkVar(inter, "done1", (char *) &done1, TCL_LINK_INT);
 
 cmd(inter, "toplevel .a");
+cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
+cmd(inter, "wm title .a \"\"");
 
 cmd(inter, "label .a.l -text \"List of Objects\"");
 cmd(inter, "pack .a.l");
@@ -4902,6 +4906,7 @@ cmd(inter, "pack .a.v.lb .a.v.v_scroll -side left -fill y");
 
 insert_lb_object(root);
 
+cmd(inter, "raise .a .; focus -force .a.v.lb; grab set .a");
 cmd(inter, ".a.v.lb selection set 0");
 cmd(inter, "set choice 0");
 
@@ -4916,7 +4921,7 @@ while(done1==0)
 cmd(inter, "set movelabel [.a.v.lb get [.a.v.lb curselection]]");
 ol=(char *)Tcl_GetVar(inter, "movelabel",0);
 
-cmd(inter, "destroy .a");
+cmd(inter, "grab release .a; destroy .a");
 Tcl_UnlinkVar(inter,"done1");
 return ol;
 }

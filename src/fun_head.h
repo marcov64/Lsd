@@ -70,12 +70,13 @@ double max(double a, double b);
 double min(double a, double b);
 double round(double r);
 double rnd_integer(double m, double x);
-double abs(double a)
+double _abs(double a)
 {if(a>0)
 	return a;
   else
 	return(-1*a);
 };
+#define abs( a ) _abs( a )	// redefine as macro to avoid conflicts with C++ version in <cmath>
 
 extern int t;
 extern int max_step;
