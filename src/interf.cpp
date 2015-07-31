@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 72
+USED CASE 73
 */
 
 /****************************************************
@@ -188,6 +188,8 @@ int num_sensitivity_variables( sense *rsens );	// calculates the number of varia
 void empty_sensitivity(sense *cs);
 void set_all(int *choice, object *original, char *lab, int lag);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
+bool discard_change( bool checkSense = true );	// ask before discarding unsaved changes
+bool discard_sense( void );						// ask before discarding unsaved sensitivity changes
 
 extern object *root;
 extern char *simul_name;
@@ -205,6 +207,7 @@ extern int stackinfo_flag;
 extern int t;
 extern int optimized;
 extern int check_optimized;
+extern int when_debug;
 
 extern Tcl_Interp *inter;
 extern int seed;
@@ -234,6 +237,8 @@ char *sens_file=NULL;		// current sensitivity analysis file
 long findexSens=0;			// index to sequential sensitivity configuration filenames
 int strWindowOn=1;			// control the presentation of the model structure window
 bool justAddedVar=false;	// control the selection of last added variable
+bool unsavedChange = false;	// control for unsaved changes in configuration
+bool unsavedSense = false;	// control for unsaved changes in sensitivity data
  
 /****************************************************
 CREATE
@@ -466,6 +471,7 @@ cmd(inter, ".m add cascade -label File -menu $w -underline 0");
 cmd(inter, "$w add command -label Load -command {set choice 17} -underline 0 -accelerator Control+L");
 cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -underline 0 -accelerator Control+W");
 cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Control+S");
+cmd(inter, "$w add command -label \"Save As\" -command {set choice 73} -underline 5");
 cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Control+E");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Load Sensitivity Data\" -command {set choice 64} -underline 17");
@@ -482,7 +488,7 @@ cmd(inter, "$w add command -label \"Add a Function\" -command {set param 2; set 
 cmd(inter, "$w add command -label \"Add a Descending Object\" -command {set choice 3} -underline 6 -accelerator Control+D");
 cmd(inter, "$w add command -label \"Insert New Parent\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Change Object Name\" -command {set choice 6} -underline 0");
+cmd(inter, "$w add command -label \"Change Object\" -command {set choice 6} -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Set Equation File Name\" -command {set choice 28} -underline 2 -accelerator Control+U");
 cmd(inter, "$w add checkbutton -label \"Ignore Equation File Controls \" -variable ignore_eq_file -command {set choice 54} -underline 0");
@@ -781,7 +787,8 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag;
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[4];
+bool saveAs;
 char observe, initial, cc;
 bridge *cb;
 
@@ -953,6 +960,7 @@ if(sl!=0)
  
 	justAddedVar=true;		// flag variable just added (for acquiring focus)
   }
+  unsavedChange = true;		// signal unsaved change
  }
  }
 
@@ -1049,7 +1057,8 @@ if(done==1)
    lab1=(char *)Tcl_GetVar(inter, "text_description",0);
    add_description(lab, "Object", lab1);
 
-   }
+   unsavedChange = true;		// signal unsaved change
+  }
  else
   cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
  }
@@ -1157,6 +1166,8 @@ if(done==1)
  cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available )\"} {}");
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
+
+ unsavedChange = true;		// signal unsaved change
 
 cmd(inter, "destroy .d .ok .cancel .help .lab_ent .ent_var");
 Tcl_UnlinkVar(inter, "done");
@@ -1272,11 +1283,12 @@ cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
 
 cmd(inter, "label .h.lab_ent -text \"Object\"");
 
+cmd(inter, "button .h.prop -text \"Change Name\" -command {set choice 5}" );
 cmd(inter, "bind .h <Double-1> {set choice 5}");
 cmd(inter, "bind .h.lab_ent <Double-1> {set choice 5}");
 cmd(inter, "bind .h.ent_var <Double-1> {set choice 5}");
 cmd(inter, "bind .h.ent_var <KeyPress-c> {.b1.com invoke}");
-cmd(inter, "pack .h.lab_ent .h.ent_var");
+cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop");
 cmd(inter, "pack .h .b1 .b .desc -fill x -expand yes");
 cmd(inter, "focus -force .h.ent_var");
 cmd(inter, "bind . <Control-d> {}");
@@ -1299,6 +1311,8 @@ if(*choice==1|| *choice==5 || *choice==3)
 
 change_descr_text(lab_old);
 
+unsavedChange = true;		// signal unsaved change
+  
 if(*choice==5 || *choice==3)
 {
 if(*choice==3)
@@ -1310,7 +1324,7 @@ if(*choice==3)
 }
 else
 {
-cmd(inter, "label .l -text \"New label for Object $lab\"");
+cmd(inter, "label .l -text \"New Label for Object $lab\"");
 cmd(inter, "entry .e -width 30 -textvariable lab");
 cmd(inter, "pack .l .e -anchor w");
 cmd(inter, "frame .b");
@@ -1633,6 +1647,7 @@ if(done == 9)
      }
       
    } 
+  unsavedChange = true;		// signal unsaved change
  }
 if(done == 7 || done == 4 || done == 3 || done == 9)
  {
@@ -1652,7 +1667,8 @@ if(done==1)
     {cmd(inter, "set text_description \"[.desc.i.text get 1.0 end]\"");
      change_init_text(lab_old);
     }
-
+  
+  unsavedChange = true;		// signal unsaved change
   }
 if(done==3 )
  {done=0;
@@ -1675,6 +1691,8 @@ if(done==5||done==10)	// treat also express delete button
 	 {
 		nature=3;												// simulate a name change 
 		cmd(inter, "set vname \"\"; set nature 3; set numlag 0");// to empty string (delete)
+  
+		unsavedChange = true;		// signal unsaved change
 	 }
  }
  else					// original handling of done=5
@@ -1753,6 +1771,9 @@ if(done==2)
   return r;
 
  }
+  
+unsavedChange = true;		// signal unsaved change
+
 cmd(inter, "set choice $nature");
 nature=*choice;
 
@@ -1996,6 +2017,8 @@ if ( done == 12 )
 		delete [ ] cs->label;	// garbage collection
 		delete cs;
 	}
+	else
+		unsavedSense = true;	// signal unsaved change
 	*choice = 0;
 }
 
@@ -2208,32 +2231,10 @@ return(n);
 
 //Exit Lsd
 case 11:
+    cmd( inter, "set exit [ tk_messageBox -title \"Exit?\" -type okcancel -default ok -icon info -message \"You are closing Lsd.\\n\\nAll data generated and not saved will be lost.\" ]; if { $exit == \"ok\" } { set choice 1 } { set choice 2 }" ); 
 
-//   cmd(inter, "set answer [tk_messageBox -type yesno -icon question -title \"Quit?\" -message \"Do you really want to exit Lsd?\"]");
-  // cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1 } {set choice 0}");
-   cmd(inter, "toplevel .w");
-   cmd(inter, "wm transient .w .");
-   cmd(inter, "wm title .w \"Confirm\"");
-   cmd(inter, "label .w.l -text \"Quit Lsd?\" -fg red");
-   cmd(inter, "label .w.l1 -text \"You closing this Lsd model program.\\nAll data generated and not saved in files will be lost.\" -justify left");
-   cmd(inter, "frame .w.f");
-   cmd(inter, "button .w.f.ok -text \" Confirm \" -command {set choice 1}");
-   cmd(inter, "button .w.f.esc -text \" Cancel \" -command {set choice 2}");
-   cmd(inter, "pack .w.f.ok .w.f.esc -side left");
-   cmd(inter, "pack .w.l .w.l1 .w.f");
-   *choice=0;
-   cmd(inter, "bind .w <Return> {.w.f.ok invoke}");
-   cmd(inter, "bind .w <Escape> {.w.f.esc invoke}");
-#ifndef DUAL_MONITOR
-   cmd(inter, "set w .w; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-   cmd(inter, "set w .w; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-   while(*choice==0 )
-    Tcl_DoOneEvent(0);
-   cmd(inter, "destroy .w");
-	if(*choice==1)
-	 myexit(0);
+	if(*choice==1 && discard_change( ) )	// unsaved configuration changes ?
+		myexit(0);
 	cmd(inter, "destroy .m .l");
 	*choice=0;
    break;
@@ -2323,6 +2324,9 @@ case 38: //quick reload
 
    if(struct_loaded==1)
 	  { 
+	 if ( ! discard_change( ) )		// unsaved configuration?
+		 break;
+
      if(*choice==17)
       {  
        cmd(inter, "button .ok -text Empty -command {set choice 1}");
@@ -2357,6 +2361,7 @@ case 38: //quick reload
       add_description("Root", "Object", "(no description available)");
 	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
 	  rsense=NULL;
+	  unsavedSense = false;			// nothing to save
  	  findexSens=0;
 	  nodesSerial=0;				// network node serial number global counter
     }
@@ -2558,6 +2563,7 @@ if(*choice==17)
 
      }  
     }  
+	unsavedChange = false;		// no changes to save
     fclose(f);
 	 }
    
@@ -2573,8 +2579,11 @@ end1738:
 	break;
 
 //Save a model
+case 73:
 case 18:
-   Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
+	saveAs = ( *choice == 73 ) ? true : false;
+
+	Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
    cmd(inter, "destroy .l .m");
 
    if(struct_loaded==0)
@@ -2592,6 +2601,7 @@ case 18:
         {Tcl_UnlinkVar(inter, "done");
          break;
         }
+		saveAs = true;	// require file name to save
      }
    if(actual_steps>0)
 	  { cmd(inter, "button .ok -text Save -command {set done 1}");
@@ -2608,6 +2618,7 @@ case 18:
         {Tcl_UnlinkVar(inter, "done");
          break;
         }
+		saveAs = true;	// require file name to save
      }
 
 done=0;
@@ -2618,6 +2629,9 @@ if(strlen(path)>0)
 else
  sprintf(msg, "set path [pwd]");
 cmd(inter, msg);
+
+if ( saveAs )			// only asks file name if instructed to or necessary
+{
 //sprintf(msg, "set tk_strictMotif 0; set bah [tk_getSaveFile -title \"Save Lsd Model\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]; set tk_strictMotif 1");
 sprintf(msg, "set bah [tk_getSaveFile -title \"Save Lsd Model\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
 cmd(inter, msg);
@@ -2661,11 +2675,7 @@ else
  {struct_file=new char[strlen(simul_name)+6];
   sprintf(struct_file,"%s.lsd",simul_name);
  }
-
-if(strlen(path)>0)
- sprintf(msg, "%s/%s.lsd", path, simul_name);
-else
- sprintf(msg, "%s.lsd", simul_name);
+}	// end if ( saveAs )
 
 f=fopen(struct_file, "w");
 if(f==NULL)
@@ -2723,6 +2733,7 @@ else
   
 	fclose(f);
  }  
+   unsavedChange = false;		// signal no unsaved change
    Tcl_UnlinkVar(inter, "done");
 	break;
 
@@ -2762,6 +2773,7 @@ cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 		  set_obj_number(n, choice);
 cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 		  r=n->search(lab);
+		  unsavedChange = true;		// signal unsaved change
 		  *choice=0;
 		  break;
 
@@ -2803,12 +2815,19 @@ cmd(inter, "destroy .l .m");
 cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 edit_data(n, choice, r->label);
 cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 break;
 
 //Empty the model
 case 20:
       cmd(inter, "destroy .l .m");
+	  if ( ! discard_change( ) )	// check for unsaved configuration changes
+	  {
+		*choice = 0;
+		break;
+	  }
+	  
       cmd(inter, "set answer [tk_messageBox -type yesno -title \"Empty model?\" -message \"Do you want to empty the Lsd model program?\\nPressing Yes you will delete all elements in the model. Press No to abort the operation.\"]");
       cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 0} {set choice 1}");
       if(*choice==1)
@@ -2831,16 +2850,23 @@ case 20:
       empty_descr();
 	  empty_sensitivity(rsense); 	// discard sensitivity analysis data
 	  rsense=NULL;
+	  unsavedSense = false;			// nothing to save
  	  findexSens=0;
 	  nodesSerial=0;				// network node serial number global counter
       add_description("Root", "Object", "(no description available)");      
       cmd(inter, "catch {unset ModElem}");
+	  unsavedChange = false;		// signal no unsaved change
       break;
 
 //Simulation manager: sets seeds, number of steps, number of simulations
 case 22:
 		  cmd(inter, "destroy .l .m");
   		  *choice=0;
+		  // save previous values to allow canceling operation
+		  temp[1] = sim_num; 
+		  temp[2] = seed; 
+		  temp[3] = max_step; 
+		  temp[4] = when_debug;
 		  Tcl_LinkVar(inter, "sim_num", (char *) &sim_num, TCL_LINK_INT);
 		  Tcl_LinkVar(inter, "seed", (char *) &seed, TCL_LINK_INT);
 		  Tcl_LinkVar(inter, "max_step", (char *) &max_step, TCL_LINK_INT);
@@ -2876,30 +2902,45 @@ case 22:
 		  cmd(inter, ".f.e.e2 selection range 0 end");
         cmd(inter, "pack .f.e.l2 .f.e.e2 -side left -anchor w");
 
-
-		  cmd(inter, "button .ok -text \" Ok \" -command {set choice 1}");
-		  cmd(inter, "button .help -text \" Help \" -command {LsdHelp menurun.html#simsetting}");
+		  cmd(inter, "frame .b");
+		  cmd(inter, "button .b.ok -text \" Ok \" -command {set choice 1}");
+		  cmd(inter, "button .b.esc -text \" Cancel \" -command {set choice 2}");
+		  cmd(inter, "button .b.help -text \" Help \" -command {LsdHelp menurun.html#simsetting}");
+		  cmd(inter, "pack .b.ok .b.help .b.esc -side left");
         cmd(inter, "pack .f.a .f.b .f.c .f.d .f.e -anchor w");
-		  cmd(inter, "pack .tit .f .ok .help ");
+		  cmd(inter, "pack .tit .f .b ");
         cmd(inter, "focus .f.a.e");
         cmd(inter, "bind .f.a.e <KeyPress-Return> {focus .f.b.e1; .f.b.e1 selection range 0 end}");
         cmd(inter, "bind .f.b.e1 <KeyPress-Return> {focus .f.c.e2; .f.c.e2 selection range 0 end}");
         cmd(inter, "bind .f.c.e2 <KeyPress-Return> {focus .f.d.e2; .f.d.e2 selection range 0 end}");
         cmd(inter, "bind .f.d.e2 <KeyPress-Return> {focus .f.e.e2; .f.e.e2 selection range 0 end}");
         cmd(inter, "bind .f.e.e2 <KeyPress-Return>  {focus .ok}");
-        cmd(inter, "bind .ok <KeyPress-Return> {set choice 1}");
+        cmd(inter, "bind .b.ok <KeyPress-Return> {set choice 1}");
+        cmd(inter, "bind .b.esc <KeyPress-Escape> {set choice 2}");
 
      set_window_size();
 		  while(*choice==0)
 			 Tcl_DoOneEvent(0);
+		 
+	 cmd(inter, "destroy .tit .f .b");
+	 
+	 if ( *choice == 2 )	// Escape - revert previous values
+	 {
+		sim_num = temp[1];
+		seed = temp[2];
+		max_step = temp[3];
+		when_debug = temp[4];
+		*choice=0;
+		break;
+	 }
 
        cmd(inter, "set choice $stack_info");
        stackinfo_flag=*choice;
 
-		  cmd(inter, "destroy .tit .f .ok .help");
 		  Tcl_UnlinkVar(inter, "seed");
 		  Tcl_UnlinkVar(inter, "sim_num");
 //       plog("$stack_info");
+		  unsavedChange = true;		// signal unsaved change
 		  *choice=0;
 		  break;
 
@@ -2950,6 +2991,7 @@ if(actual_steps>0)
 			edit_data(n, choice, r->label);
 
 cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
+			unsavedChange = true;		// signal unsaved change
 			*choice=choice_g=0;
 			return r;
 
@@ -2981,6 +3023,7 @@ case 27:
 			{
 			for(n=r; n->up!=NULL; n=n->up);
 			clean_debug(n);
+			unsavedChange = true;		// signal unsaved change
 			}
 			*choice=0;
 			return r;
@@ -3018,6 +3061,7 @@ strcpy(lab, lab1);
 delete[] equation_name;
 equation_name=new char[strlen(lab)+1];
 strcpy(equation_name, lab);
+unsavedChange = true;		// signal unsaved change
 }
 cmd(inter, "destroy .ok .cancel .lab_ent .search .help .ent_var");
 Tcl_UnlinkVar(inter, "done");
@@ -3060,6 +3104,7 @@ case 30:
 			{
 			for(n=r; n->up!=NULL; n=n->up);
 			clean_save(n);
+			unsavedChange = true;		// signal unsaved change
 			}
 			*choice=0;
 			return r;
@@ -3132,6 +3177,7 @@ case 31:
 			{
 			for(n=r; n->up!=NULL; n=n->up);
 			clean_plot(n);
+			unsavedChange = true;		// signal unsaved change
 			}
 			*choice=0;
 			return r;
@@ -3226,6 +3272,7 @@ k=*choice;
 for(i=0, cur=r->up;cur!=NULL; i++, cur=cur->up); 
 chg_obj_num(&r, num, i, NULL, choice,k);
 
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 return r;
 break;
@@ -3244,6 +3291,7 @@ break;
 
 //Windows destroyed
 case 35:
+if ( discard_change( ) )	// check for unsaved configuration changes
 myexit(0);
 break;
 
@@ -3504,6 +3552,7 @@ strcpy(lab, lab1);
 
 change_descr_text(lab);
 
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 break;
 
@@ -3673,6 +3722,7 @@ cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1} {set choic
  if(*choice == 0)
   break;
 strcpy(lsd_eq_file, eq_file);
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 break;
 
@@ -3694,8 +3744,9 @@ sprintf(msg, "set tk_strictMotif 0; set bah [tk_getSaveFile -title \"Save Equati
 cmd(inter, msg);
 
 cmd(inter,"if {[string length $bah] > 0} { set choice 1; set res1 [file tail $res]} {set choice 0}");
-if(*choice==0)
+if ( *choice == 0 || ! discard_change( ) )	// esc or unsaved configuration?
   break;
+
 lab1=(char *)Tcl_GetVar(inter, "res",0);
 strcpy(lab, lab1);
 
@@ -3714,7 +3765,7 @@ case 53: //Compare equation files
 
 */
 cmd(inter, "destroy .l .m");
-if(strlen(lsd_eq_file)==0)
+if ( strlen( lsd_eq_file ) == 0 || ! discard_change( ) )	// esc or unsaved configuration?)
  {*choice=0;
   break;
  } 
@@ -3767,6 +3818,7 @@ sprintf(msg, "set vname %s",lab_old);
 cmd(inter, msg);
 //show_description(lab_old);
 shift_var(-1, lab_old, r);
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 return r;
 
@@ -3779,6 +3831,7 @@ sprintf(msg, "set vname %s",lab_old);
 cmd(inter, msg);
 //show_description(lab_old);
 shift_var(1, lab_old, r);
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 return r;
 
@@ -3791,6 +3844,7 @@ sprintf(msg, "set vname %s",lab_old);
 cmd(inter, msg);
 //show_description(lab_old);
 shift_desc(-1, lab_old, r);
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 return r;
 
@@ -3803,6 +3857,7 @@ sprintf(msg, "set vname %s",lab_old);
 cmd(inter, msg);
 //show_description(lab_old);
 shift_desc(1, lab_old, r);
+unsavedChange = true;		// signal unsaved change
 *choice=0;
 return r;
 
@@ -3812,6 +3867,9 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
@@ -3832,6 +3890,7 @@ if (rsense!=NULL)
     cur=root->b->head;
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
+	unsavedChange = true;		// signal unsaved change
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
@@ -3846,6 +3905,9 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
@@ -3879,6 +3941,9 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
@@ -3953,6 +4018,9 @@ cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
@@ -4047,6 +4115,7 @@ case 64:
 		// empty sensitivity data
 		empty_sensitivity(rsense); 			// discard read data
 		rsense=NULL;
+		unsavedSense = false;				// nothing to save
 		findexSens=0;
 	}
 	// set default name and path to conf. file folder
@@ -4204,6 +4273,7 @@ case 65:
 		fprintf(f,"\n");
 	}
 	fclose(f);
+	unsavedSense = false;			// nothing to save
 	break;
 
 //Show sensitivity analysis configuration
@@ -4249,9 +4319,14 @@ case 67:
 		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to remove.\"");
 		break;
 	}
+	
+	if ( ! discard_sense( ) )	// unsaved configuration?
+		break;
+
 	// empty sensitivity data
 	empty_sensitivity(rsense); 			// discard read data
 	rsense=NULL;
+	unsavedSense = false;				// nothing to save
 	findexSens=0;
 	break;
 	
@@ -4265,6 +4340,9 @@ case 68:
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease select one before trying to create a script/batch.\"");
 		break;
 	}
+
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
 
 	// check for existing NW executable
 	sprintf(ch, "%s/%s", exec_path, exec_file);			// form full executable name
@@ -5074,4 +5152,61 @@ if(direction==1)
    
  } 
 plog("\nError in shift_desc: should never reach this line\n"); 
+}
+
+/*
+	Ask user to discard changes in configuration, if applicable
+	Returns: 0: abort, 1: continue without saving
+*/
+
+bool discard_change( bool checkSense )
+{
+	bool discard;
+	
+	// just run or nothing to save?
+	if ( actual_steps > 0 || ! unsavedChange )
+		discard = true;					// simply discard configuration
+	else
+	{
+		Tcl_SetVar( inter, "filename", simul_name , 0 );
+		// ask the user what to do
+		cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' have not been saved!\n\nDo you want to discard them and continue?\"]" );
+		cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
+		const char *ans = Tcl_GetVar( inter, "ans", 0 );
+		discard = atoi( ans );
+	}
+	
+ 	// check also for sensitivity data changed
+	if ( discard && ( ! checkSense || discard_sense( ) ) )
+		return true;
+	else
+		return false;
+}
+
+/*
+	Ask user to discard changes in sensitivity data, if applicable
+	Returns: 0: abort, 1: continue without saving
+*/
+
+bool discard_sense( void )
+{
+	// nothing to save?
+	if ( rsense == NULL || ! unsavedSense )
+		return true;					// simply discard
+
+	// ask the user what to do
+	cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data have not been saved!\n\nDo you want to discard them and continue?]" );
+	cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
+	const char *ans = Tcl_GetVar( inter, "ans", 0 );
+	return atoi( ans );
+}
+
+// Entry point function for access from the Tcl interpreter
+int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+{
+	if ( discard_change( true ) == 1 )
+		inter->result = "ok";
+	else
+		inter->result = "cancel";
+	return TCL_OK;
 }

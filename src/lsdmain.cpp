@@ -161,6 +161,7 @@ void delete_mn(mnode *mn);
 void scan_mn(object *c);
 char *clean_file(char *);
 char *clean_path(char *);
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 
 char *upload_eqfile(void);
 lsdstack *stacklog;
@@ -442,9 +443,12 @@ Tcl_SetVar(inter, "posY", vmargin, 0);		// vertical margins from the screen bord
 cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
 #endif
 
+// create a Tcl command that calls the C discard_change function before killing Lsd
+Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
-cmd(inter, "wm protocol . WM_DELETE_WINDOW {set message [tk_messageBox -title \"Exit?\" -type yesno -message \"Do you really want to kill Lsd?\"]; if {$message==\"yes\"} {exit} {}}"); 
+cmd( inter, "wm protocol . WM_DELETE_WINDOW { set message [ tk_messageBox -title \"Exit?\" -type okcancel -default cancel -icon warning -message \"Do you really want to close Lsd?\\n\\nAll data generated and not saved will be lost.\" ]; if { $message == \"ok\" } { if { [ discard_change ] == \"ok\" } { exit } { } } }" ); 
 cmd(inter, "update");
 
 add_description("Root", "Object", "(no description available)");
@@ -1300,7 +1304,7 @@ void create_logwindow(void)
 cmd(inter, "toplevel .log");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/lsd.xbm} {}");
-cmd(inter, "wm protocol .log WM_DELETE_WINDOW {set message [tk_messageBox -title \"Exit?\" -type yesno -icon warning -message \"Do you really want to kill Lsd?\"]; if {$message==\"yes\"} {exit} {}}"); 
+cmd( inter, "wm protocol .log WM_DELETE_WINDOW { set message [ tk_messageBox -title \"Exit?\" -type okcancel -default cancel -icon warning -message \"Do you really want to close Lsd?\\n\\nAll data generated and not saved will be lost.\" ]; if { $message == \"ok\" } { if { [ discard_change ] == \"ok\" } { exit } { } } }" ); 
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");
 cmd(inter, "wm title .log \"Log\"");
