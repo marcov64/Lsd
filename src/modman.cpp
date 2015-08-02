@@ -13,7 +13,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*****
-used up to 67 options included
+used up to 69 options included
 *******/
 
 /* TEST UNDO:
@@ -102,6 +102,7 @@ void make_makefileNW(void);
 char app_str[2][200];
 void signal(char *s);
 void create_compresult_window(void);
+void delete_compresult_window( void );
 
 #ifdef DUAL_MONITOR
 // Main window constraints
@@ -479,67 +480,67 @@ cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
 cmd(inter, "$w add command -label \"New Text File\" -command { set choice 39} -underline 0");
-cmd(inter, "$w add command -label \"Open File\" -command { set choice 15} -underline 0 -accelerator Control+o");
-cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}} -underline 0 -accelerator Control+s");
-cmd(inter, "$w add command -label \"Save As\" -command {set choice 4} -underline 5 -accelerator Control+a");
+cmd(inter, "$w add command -label \"Open...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o");
+cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}} -underline 0 -accelerator Ctrl+s");
+cmd(inter, "$w add command -label \"Save As...\" -command {set choice 4} -underline 5 -accelerator Ctrl+a");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Control+q");
+cmd(inter, "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Ctrl+q");
 
 //cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"System Options\" -command { set choice 60} } {}");
 
-cmd(inter, "$w add command -label \"System Options\" -command { set choice 60} ");
+cmd(inter, "$w add command -label \"System Options...\" -command { set choice 60} ");
 
 cmd(inter, "set w .m.edit");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Edit -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Control+c");
+cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Ctrl+c");
 
 // collect information to focus recoloring
-cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Control+x");
-cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Control+v");
+cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Ctrl+x");
+cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Ctrl+v");
 // make menu the same as ctrl-z/y (more color friendly)
-cmd(inter, "$w add command -label \"Undo\" -command {catch {.f.t.t edit undo}} -underline 0 -accelerator Control+z");
-cmd(inter, "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -underline 2 -accelerator Control+y");
+cmd(inter, "$w add command -label \"Undo\" -command {catch {.f.t.t edit undo}} -underline 0 -accelerator Ctrl+z");
+cmd(inter, "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -underline 2 -accelerator Ctrl+y");
 
 //cmd(inter, "$w add command -label \"Cut\" -command {tk_textCut .f.t.t} -underline 1");
-//cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Control+v");
-//cmd(inter, "$w add command -label \"Undo\" -command {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}} -underline 0 -accelerator Control+z");
-//cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Control+y");
+//cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Ctrl+v");
+//cmd(inter, "$w add command -label \"Undo\" -command {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}} -underline 0 -accelerator Ctrl+z");
+//cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Ctrl+y");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Goto Line\" -command {set choice 10} -underline 5 -accelerator Control+l");
-cmd(inter, "$w add command -label \"Find\" -command {set choice 11} -underline 0 -accelerator Control+f");
+cmd(inter, "$w add command -label \"Goto Line...\" -command {set choice 10} -underline 5 -accelerator Ctrl+l");
+cmd(inter, "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f");
 cmd(inter, "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3");
-cmd(inter, "$w add command -label \"Replace\" -command {set choice 21} -underline 0");
+cmd(inter, "$w add command -label \"Replace...\" -command {set choice 21} -underline 0");
 cmd(inter, "$w add separator");
 
-cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -underline 0 -accelerator Control+m");
-cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -underline 0 -accelerator Control+u");
+cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -underline 0 -accelerator Ctrl+m");
+cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -underline 0 -accelerator Ctrl+u");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Control+\\\(");
-cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Control+\\)");
-cmd(inter, "$w add command -label \"Insert Lsd Scripts\" -command {set choice 28} -underline 0 -accelerator Control+i");
+cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Ctrl+\\\(");
+cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Ctrl+\\)");
+cmd(inter, "$w add command -label \"Insert Lsd Scripts...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add check -label \" Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Control+w ");
-cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Control+'+'");
-cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Control+'-'");
-cmd(inter, "$w add command -label \"Change Font\" -command {set choice 59} ");
-cmd(inter, "$w add command -label \"Change Tab Size\" -command {set choice 67} ");
+cmd(inter, "$w add check -label \" Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w ");
+cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'");
+cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'");
+cmd(inter, "$w add command -label \"Change Font...\" -command {set choice 59} ");
+cmd(inter, "$w add command -label \"Change Tab Size...\" -command {set choice 67} ");
 
 // add option to ajust syntax highlighting (word coloring)
 cmd(inter, "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0");
 cmd(inter, "menu $w.color -tearoff 0");
-cmd(inter, "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Control+;\"");
-cmd(inter, "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Control+,");
-cmd(inter, "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set choice 66} -underline 1 -accelerator Control+.");
+cmd(inter, "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Ctrl+;\"");
+cmd(inter, "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Ctrl+,");
+cmd(inter, "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set choice 66} -underline 1 -accelerator Ctrl+.");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Control+>");
-cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Control+<");
+cmd(inter, "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Ctrl+>");
+cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Ctrl+<");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"TkDiff\" -command {set choice 57}");
-cmd(inter, "$w add command -label \"Compare Models\" -command {set choice 61}");
+cmd(inter, "$w add command -label \"TkDiff...\" -command {set choice 57}");
+cmd(inter, "$w add command -label \"Compare Models...\" -command {set choice 61}");
 //cmd(inter, "$w add command -label \"LMM Options\" -command {set choice 63}");
 
 
@@ -548,29 +549,29 @@ cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
 cmd(inter, "$w add cascade -label \"Equations' Coding Style\" -menu $w.macro");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Browse Models\" -underline 0 -command {set choice 33}");
+cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33}");
 //cmd(inter, "$w add command -label \"New Model\" -underline 0 -command { set choice 14}");
 //cmd(inter, "$w add command -label \"Copy Model\" -state disabled -underline 0 -command { set choice 41}");
 cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Compile\" -state disabled -underline 2 -command {set choice 6}");
-cmd(inter, "$w add command -label \"Compile and Run Model\" -state disabled -underline 0 -command {set choice 2} -accelerator Control+r");
+cmd(inter, "$w add command -label \"Compile and Run Model...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r");
 cmd(inter, "$w add command -label \"gdb Debug\" -state disabled -underline 0 -command {set choice 13}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Show Equations File\" -state disabled -underline 5 -command {set choice 8} -accelerator Control+e");
+cmd(inter, "$w add command -label \"Show Equations File\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e");
 cmd(inter, "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}");
 cmd(inter, "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}");
 cmd(inter, "$w add command -label \"Show Description\" -underline 1 -state disabled -command {set choice 5}");
-cmd(inter, "$w add command -label \"Model Info\" -underline 6 -state disabled -command {set choice 44}");
+cmd(inter, "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"System Compilation Options\" -command {set choice 47}");
-cmd(inter, "$w add command -label \"Model Compilation Options\" -state disabled -command {set choice 48}");
+cmd(inter, "$w add command -label \"System Compilation Options...\" -command {set choice 47}");
+cmd(inter, "$w add command -label \"Model Compilation Options...\" -state disabled -command {set choice 48}");
 cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Generate 'NO WINDOW' version\" -command {set choice 62}");
 
 cmd(inter, "menu $w.macro -tearoff 0");
-cmd(inter, "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}}");
-cmd(inter, "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}}");
+cmd(inter, "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}");
+cmd(inter, "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}");
 
 
 cmd(inter, "set w .m.help");
@@ -586,10 +587,10 @@ cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Tutorial 1 - LMM First users\" -underline 6 -command {LsdHelp Tutorial1.html}");
 //cmd(inter, "$w add command -label \"Tutorial 2 - Using Lsd Models\" -underline 0 -command {LsdHelp ModelUsing.html}");
 //cmd(inter, "$w add command -label \"Tutorial 3 - Writing Lsd Models\" -underline 6 -command {LsdHelp ModelWriting.html}");
-cmd(inter, "$w add command -label \"Lsd documentation\" -command {LsdHelp Lsd_Documentation.html}");
+cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
 
-cmd(inter, "$w add command -label \"About LMM + Lsd\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 7.0 Beta \n\nJuly 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
+cmd(inter, "$w add command -label \"About LMM + Lsd...\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 7.0 Beta \n\nJuly 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
@@ -745,7 +746,7 @@ cmd(inter, "bind . <KeyPress-Insert> {# nothing}");
 
 
 /*
-POPUP manu, to be completed
+POPUP manu
 */
 cmd(inter, "menu .v -tearoff 0");
 
@@ -756,33 +757,53 @@ cmd(inter, ".v add command -label \"Cut\" -command {tk_textCut .f.t.t}");
 cmd(inter, ".v add command -label \"Paste\" -command {tk_textPaste .f.t.t}");
 
 cmd(inter, ".v add separator");
-cmd(inter, ".v add cascade -label \"Insert Lsd Script \" -command {set choice 28}");
+cmd(inter, ".v add cascade -label \"Lsd Script\" -menu .v.i");
+cmd(inter, ".v add command -label \"Insert Lsd Script...\" -command {set choice 28}");
 cmd(inter, ".v add command -label \"Indent Selection\" -command {set choice 42}");
 cmd(inter, ".v add command -label \"De-indent Selection\" -command {set choice 43}");
-cmd(inter, ".v add command -label \"Place a break and run gdb\" -command {set choice 58}");
+cmd(inter, ".v add command -label \"Place a Break and Run gdb\" -command {set choice 58}");
 
 cmd(inter, ".v add separator");
-cmd(inter, ".v add command -label \"Find\" -command {set choice 11}");
+cmd(inter, ".v add command -label \"Find...\" -command {set choice 11}");
 cmd(inter, ".v add command -label \"Match \\\{ \\}\" -command {set choice 17}");
 cmd(inter, ".v add command -label \"Match \\\( \\)\" -command {set choice 32}");
 
-
-cmd(inter, "menu .v.i -tearoff 0");
-cmd(inter, ".v.i add command -label \"Lsd Equation\" -command {set choice 25}");
-cmd(inter, ".v.i add command -label \"cal(...)\" -command {set choice 26}");
-cmd(inter, ".v.i add command -label \"SUM\" -command {set choice 56}");
-cmd(inter, ".v.i add command -label \"Math Operation\" -command {set choice 51}");
-
-cmd(inter, ".v.i add command -label \"write(...)\" -command {set choice 29}");
-cmd(inter, ".v.i add command -label \"increment(...)\" -command {set choice 40}");
-cmd(inter, ".v.i add command -label \"multiply(...)\" -command {set choice 45}");
-cmd(inter, ".v.i add command -label \"lsdqsort(...)\" -command {set choice 31}");
-cmd(inter, ".v.i add command -label \"Add a new Object\" -command {set choice 52}");
-cmd(inter, ".v.i add command -label \"Delete an Object\" -command {set choice 53}");
-cmd(inter, ".v.i add command -label \"Draw Rnd. an Object\" -command {set choice 54}");
-cmd(inter, ".v.i add command -label \"Search\" -command {set choice 55}");
-cmd(inter, ".v.i add command -label \"search_var_cond(...)\" -command {set choice 30}");
-cmd(inter, ".v.i add command -label \"for( ; ; )\" -command {set choice 27}");
+if ( macro == 0 )
+{
+	cmd( inter, "menu .v.i -tearoff 0");
+	cmd( inter, ".v.i add command -label \"Lsd equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( inter, ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
+	cmd( inter, ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
+	cmd( inter, ".v.i add command -label \"search_var_cond(...)\" -command {set choice 30} -accelerator Ctrl+S" );
+	cmd( inter, ".v.i add command -label \"Search(...)\" -command {set choice 55} -accelerator Ctrl+A" );
+	cmd( inter, ".v.i add command -label \"write(...)\" -command {set choice 29} -accelerator Ctrl+W" );
+	cmd( inter, ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( inter, ".v.i add command -label \"lsdqsort(...)\" -command {set choice 31} -accelerator Ctrl+T" );
+	cmd( inter, ".v.i add command -label \"Add a new object\" -command {set choice 52} -accelerator Ctrl+O" );
+	cmd( inter, ".v.i add command -label \"Delete an object\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( inter, ".v.i add command -label \"Draw random an object\" -command {set choice 54} -accelerator Ctrl+N" );
+	cmd( inter, ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
+	cmd( inter, ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
+	cmd( inter, ".v.i add command -label \"Math operation\" -command {set choice 51} -accelerator Ctrl+H" );
+}
+else
+{
+	cmd( inter, "menu .v.i -tearoff 0");
+	cmd( inter, ".v.i add command -label \"Lsd equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( inter, ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
+	cmd( inter, ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
+	cmd( inter, ".v.i add command -label \"SEARCH_CND(...)\" -command {set choice 30} -accelerator Ctrl+S" );
+	cmd( inter, ".v.i add command -label \"SEARCH(...)\" -command {set choice 55} -accelerator Ctrl+A" );
+	cmd( inter, ".v.i add command -label \"WRITE(...)\" -command {set choice 29} -accelerator Ctrl+W" );
+	cmd( inter, ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( inter, ".v.i add command -label \"SORT(...)\" -command {set choice 31} -accelerator Ctrl+T" );
+	cmd( inter, ".v.i add command -label \"ADDOBJ(...)\" -command {set choice 52} -accelerator Ctrl+O" );
+	cmd( inter, ".v.i add command -label \"DELETE(...))\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( inter, ".v.i add command -label \"RNDDRAW(...)\" -command {set choice 54} -accelerator Ctrl+N" );
+	cmd( inter, ".v.i add command -label \"INCR(...)\" -command {set choice 40} -accelerator Ctrl+I" );
+	cmd( inter, ".v.i add command -label \"MULT(...)\" -command {set choice 45} -accelerator Ctrl+M" );
+	cmd( inter, ".v.i add command -label \"Math operation\" -command {set choice 51} -accelerator Ctrl+H" );
+}
 
 cmd(inter, "bind .f.t.t <Control-E> {set choice 25}");
 cmd(inter, "bind .f.t.t <Control-V> {set choice 26}");
@@ -798,7 +819,7 @@ cmd(inter, "bind .f.t.t <Control-W> {set choice 29}");
 cmd(inter, "bind .f.t.t <Control-O> {set choice 52}");
 cmd(inter, "bind .f.t.t <Control-D> {set choice 53}");
 cmd(inter, "bind .f.t.t <Control-N> {set choice 54}");
-cmd(inter, "bind .f.t.t <Control-P> {set choice 51}");
+cmd(inter, "bind .f.t.t <Control-H> {set choice 51}");
 
 
 cmd(inter, "bind .f.t.t <F1> {set choice 34}");
@@ -1040,6 +1061,7 @@ if(s==NULL || !strcmp(s, ""))
 
   cmd(inter, "cd $modeldir");
   
+  delete_compresult_window( );		// close any open compilation results window
 
   make_makefile();
 
@@ -1379,6 +1401,7 @@ if(choice==0)
   goto loop;
  
  }
+  delete_compresult_window( );		// close any open compilation results window
 
   cmd(inter, "toplevel .t");
   // change window icon
@@ -2897,23 +2920,23 @@ cmd(inter, "wm title .a \"Insert a Lsd script\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
-cmd(inter, "label .a.tit1 -text \"Insert Lsd Script\" -foreground #ff0000");
+cmd(inter, "label .a.tit1 -text \"Insert Lsd Script...\" -foreground #ff0000");
 cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
-cmd(inter, "radiobutton .a.r.cal -text \"V(...)- request the value of a Var\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"SUM - Compute the sum of a Var over a set of Obj.\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.cal -text \"V(...) - request the value of a Variable\" -underline 0 -variable res -value 26");
+cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
 cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.sear -text \"SEARCH - search the first instance an Object type\" -underline 2 -variable res -value 55");
 cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.lqs -text \"SORT - sort a group of Objects\" -underline 3 -variable res -value 31");
-cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - Add a new Object\" -underline 3 -variable res -value 52");
-cmd(inter, "radiobutton .a.r.delo -text \"DELETE - Delete an Object\" -underline 0 -variable res -value 53");
-cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - Draw an Object\" -underline 1 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - add a new Object\" -underline 3 -variable res -value 52");
+cmd(inter, "radiobutton .a.r.delo -text \"DELETE - delete an Object\" -underline 0 -variable res -value 53");
+cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - draw an Object\" -underline 1 -variable res -value 54");
 cmd(inter, "radiobutton .a.r.incr -text \"INCR - increment the value of a Parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"MULT - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
-cmd(inter, "radiobutton .a.r.math -text \"Insert A Math/Prob. function\" -underline 14 -variable res -value 51");
+cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
 cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}");
@@ -2928,7 +2951,7 @@ cmd(inter, "bind .a <KeyPress-o> {.a.r.addo invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-p> {.a.r.math invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
@@ -2987,23 +3010,23 @@ cmd(inter, "wm title .a \"Insert a Lsd script\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
-cmd(inter, "label .a.tit1 -text \"Insert Lsd Script\" -foreground #ff0000");
+cmd(inter, "label .a.tit1 -text \"Insert Lsd Script...\" -foreground #ff0000");
 cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
-cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a Var\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"sum - Compute the sum of a Var over a set of Obj.\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a Variable\" -underline 0 -variable res -value 26");
+cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
 cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.sear -text \"search - search the first instance an Object type\" -underline 3 -variable res -value 55");
 cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of Objects\" -underline 7 -variable res -value 31");
-cmd(inter, "radiobutton .a.r.addo -text \"add_an_object - Add a new Object\" -underline 0 -variable res -value 52");
-cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - Delete an Object\" -underline 0 -variable res -value 53");
-cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - Draw an Object\" -underline 6 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.addo -text \"add_an_object - add a new Object\" -underline 0 -variable res -value 52");
+cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - delete an Object\" -underline 0 -variable res -value 53");
+cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - draw an Object\" -underline 6 -variable res -value 54");
 cmd(inter, "radiobutton .a.r.incr -text \"increment - increment the value of a Parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
-cmd(inter, "radiobutton .a.r.math -text \"Insert A Math/Prob. function\" -underline 14 -variable res -value 51");
+cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
 cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}");
@@ -3018,7 +3041,7 @@ cmd(inter, "bind .a <KeyPress-a> {.a.r.addo invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-p> {.a.r.math invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
@@ -5919,6 +5942,50 @@ choice=0;
 goto loop;
 }
 
+if ( choice == 68 )
+{	// Adjust context menu for LSD macros
+	cmd( inter, "destroy .v.i");
+	cmd( inter, "menu .v.i -tearoff 0");
+	cmd( inter, ".v.i add command -label \"Lsd equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( inter, ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
+	cmd( inter, ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
+	cmd( inter, ".v.i add command -label \"SEARCH_CND(...)\" -command {set choice 30} -accelerator Ctrl+S" );
+	cmd( inter, ".v.i add command -label \"SEARCH(...)\" -command {set choice 55} -accelerator Ctrl+A" );
+	cmd( inter, ".v.i add command -label \"WRITE(...)\" -command {set choice 29} -accelerator Ctrl+W" );
+	cmd( inter, ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( inter, ".v.i add command -label \"SORT(...)\" -command {set choice 31} -accelerator Ctrl+T" );
+	cmd( inter, ".v.i add command -label \"ADDOBJ(...)\" -command {set choice 52} -accelerator Ctrl+O" );
+	cmd( inter, ".v.i add command -label \"DELETE(...))\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( inter, ".v.i add command -label \"RNDDRAW(...)\" -command {set choice 54} -accelerator Ctrl+N" );
+	cmd( inter, ".v.i add command -label \"INCR(...)\" -command {set choice 40} -accelerator Ctrl+I" );
+	cmd( inter, ".v.i add command -label \"MULT(...)\" -command {set choice 45} -accelerator Ctrl+M" );
+	cmd( inter, ".v.i add command -label \"Math operation\" -command {set choice 51} -accelerator Ctrl+H" );
+	choice = 0;
+	goto loop;
+}
+
+if ( choice == 69 )
+{	// Adjust context menu for LSD C++
+	cmd( inter, "destroy .v.i");
+	cmd( inter, "menu .v.i -tearoff 0");
+	cmd( inter, ".v.i add command -label \"Lsd equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( inter, ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
+	cmd( inter, ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
+	cmd( inter, ".v.i add command -label \"search_var_cond(...)\" -command {set choice 30} -accelerator Ctrl+S" );
+	cmd( inter, ".v.i add command -label \"Search(...)\" -command {set choice 55} -accelerator Ctrl+A" );
+	cmd( inter, ".v.i add command -label \"write(...)\" -command {set choice 29} -accelerator Ctrl+W" );
+	cmd( inter, ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( inter, ".v.i add command -label \"lsdqsort(...)\" -command {set choice 31} -accelerator Ctrl+T" );
+	cmd( inter, ".v.i add command -label \"Add a new object\" -command {set choice 52} -accelerator Ctrl+O" );
+	cmd( inter, ".v.i add command -label \"Delete an object\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( inter, ".v.i add command -label \"Draw random an object\" -command {set choice 54} -accelerator Ctrl+N" );
+	cmd( inter, ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
+	cmd( inter, ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
+	cmd( inter, ".v.i add command -label \"Math operation\" -command {set choice 51} -accelerator Ctrl+H" );
+	choice = 0;
+	goto loop;
+}
+
 if(choice!=1)
  {choice=0;
  goto loop;
@@ -6403,20 +6470,9 @@ cmd(inter, ".mm.t mark set insert \"1.0\";");
 cmd(inter, "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;}");
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// delete any previously open compilation results window
+void delete_compresult_window( void )
+{
+	cmd( inter, "set a [winfo exists .mm]" );
+	cmd( inter, "if { $a == 1 } { destroy .mm } { }" );
+}
