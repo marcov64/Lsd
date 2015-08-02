@@ -530,14 +530,14 @@ cmd(inter, "set w .m.gp");
 cmd(inter, ".m add cascade -label Gnuplot -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
 cmd(inter, "$w add command -label \"Gnuplot\" -command {if {$tcl_platform(platform) == \"unix\"} {exec xterm -e gnuplot &} {if {$tcl_platform(os) == \"Windows NT\"} {exec wgnuplot &} {exec start wgnuplot &}}} -underline 0");
-cmd(inter, "$w add command -label \"Gnuplot Options\" -command {set choice 37} -underline 8");
+cmd(inter, "$w add command -label \"Gnuplot Options...\" -command {set choice 37} -underline 8");
 
 
 cmd(inter, "set w .m.color");
 cmd(inter, ".m add cascade -label Color -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
 cmd(inter, "$w add command -label \"Default Colors\" -command {set choice 22} -underline 0");
-cmd(inter, "$w add command -label \"Set Colors\" -command {set choice 21} -underline 0");
+cmd(inter, "$w add command -label \"Set Colors...\" -command {set choice 21} -underline 0");
 
 cmd(inter, "set w .m.help");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
@@ -1371,7 +1371,7 @@ case 19:
 
 case 20:
 //remove a graph
-cmd(inter, "set answer [tk_messageBox -type yesno -title \"Delete Graph?\" -message \"Press Yes to delete graph:\\n$it\"]");
+cmd(inter, "set answer [tk_messageBox -type yesno -title \"Delete Graph?\" -message \"Press Yes to delete graph:\\n$tit\"]");
 cmd(inter, "if {[string compare $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
 if(*choice==0)
  goto there;
