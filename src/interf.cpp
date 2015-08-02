@@ -248,6 +248,15 @@ object *create( object *cr)
 
 object *cur;
 
+#ifdef DUAL_MONITOR
+// procedure to save top window size
+cmd( inter, "proc save_top_size { } { scan [ wm geometry . ] \"%dx%d%*s\" w h; variable wB $w; variable hB $h }" );
+// procedure to restore top window size
+cmd( inter, "proc restore_top_size { } { variable wB; variable hB; scan [ wm geometry . ] \"%dx%d%*s\" w h; if { $wB != $w || $hB != $h } { wm geometry . \"[ expr $wB ]x$hB\" } }" );
+// set and save top window initial configuration
+cmd( inter, "wm geometry . \"[ expr $widthB ]x$heightB\"" );
+cmd( inter, "scan [ wm geometry . ] \"%dx%d%*s\" wB hB" );
+#endif
 
 
 
@@ -468,47 +477,47 @@ cmd(inter, "menu .m -tearoff 0");
 cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
-cmd(inter, "$w add command -label Load -command {set choice 17} -underline 0 -accelerator Control+L");
-cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -underline 0 -accelerator Control+W");
-cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Control+S");
+cmd(inter, "$w add command -label Load -command {set choice 17} -underline 0 -accelerator Ctrl+L");
+cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -underline 0 -accelerator Ctrl+W");
+cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Ctrl+S");
 cmd(inter, "$w add command -label \"Save As\" -command {set choice 73} -underline 5");
-cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Control+E");
+cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Ctrl+E");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Load Sensitivity Data\" -command {set choice 64} -underline 17");
 cmd(inter, "$w add command -label \"Save Sensitivity Data\" -command {set choice 65} -underline 1");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Control+Q");
+cmd(inter, "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Ctrl+Q");
 
 cmd(inter, "set w .m.model");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Add a Variable\" -command {set param 0; set choice 2} -underline 6 -accelerator Control+V");
-cmd(inter, "$w add command -label \"Add a Parameter\" -command {set param 1; set choice 2} -underline 6 -accelerator Control+P");
-cmd(inter, "$w add command -label \"Add a Function\" -command {set param 2; set choice 2} -underline 8 -accelerator Control+N");
-cmd(inter, "$w add command -label \"Add a Descending Object\" -command {set choice 3} -underline 6 -accelerator Control+D");
+cmd(inter, "$w add command -label \"Add a Variable\" -command {set param 0; set choice 2} -underline 6 -accelerator Ctrl+V");
+cmd(inter, "$w add command -label \"Add a Parameter\" -command {set param 1; set choice 2} -underline 6 -accelerator Ctrl+P");
+cmd(inter, "$w add command -label \"Add a Function\" -command {set param 2; set choice 2} -underline 8 -accelerator Ctrl+N");
+cmd(inter, "$w add command -label \"Add a Descending Object\" -command {set choice 3} -underline 6 -accelerator Ctrl+D");
 cmd(inter, "$w add command -label \"Insert New Parent\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Change Object\" -command {set choice 6} -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Set Equation File Name\" -command {set choice 28} -underline 2 -accelerator Control+U");
+cmd(inter, "$w add command -label \"Set Equation File Name\" -command {set choice 28} -underline 2 -accelerator Ctrl+U");
 cmd(inter, "$w add checkbutton -label \"Ignore Equation File Controls \" -variable ignore_eq_file -command {set choice 54} -underline 0");
 cmd(inter, "$w add command -label \"Upload Equation File \" -command {set choice 51} -underline 0");
 cmd(inter, "$w add command -label \"Offload Equation File \" -command {set choice 52} -underline 0");
 cmd(inter, "$w add command -label \"Compare Equation Files \" -command {set choice 53} -underline 2");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Generate Auto Descriptions \" -command {set choice 43} -underline 7");
-cmd(inter, "$w add command -label \"Create Report \" -command {set choice 36} -underline 7");
+cmd(inter, "$w add command -label \"Create Model Report \" -command {set choice 36} -underline 7");
 cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57} -underline 9");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Find Element in Model\" -command {set choice 50} -underline 0 -accelerator Control+F");
-cmd(inter, "$w add checkbutton -label \"Enable Structure Window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Control+Tab");
+cmd(inter, "$w add command -label \"Find Element in Model\" -command {set choice 50} -underline 0 -accelerator Ctrl+F");
+cmd(inter, "$w add checkbutton -label \"Enable Structure Window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Ctrl+Tab");
 
 cmd(inter, "set w .m.data");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
 cmd(inter, "$w add cascade -label \"Set Number of Objects\" -underline 0 -menu $w.setobj");
-cmd(inter, "$w add command -label \"Initial Values\" -command {set choice 21} -underline 0 -accelerator Control+I");
+cmd(inter, "$w add command -label \"Initial Values\" -command {set choice 21} -underline 0 -accelerator Ctrl+I");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Full Sensitivity (online)\" -command {set choice 62} -underline 18");
 cmd(inter, "$w add command -label \"Full Sensitivity (batch)\" -command {set choice 63} -underline 0");
@@ -521,26 +530,26 @@ cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set ch
 
 cmd(inter, "$w add separator");
 
-cmd(inter, "$w add command -label \"Analysis of Results\" -command {set choice 26} -underline 0 -accelerator Control+A");
-cmd(inter, "$w add command -label \"Save Results\" -command {set choice 37}  -underline 5 -accelerator Control+Z");
-cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -underline 5 -accelerator Control+B");
+cmd(inter, "$w add command -label \"Analysis of Results\" -command {set choice 26} -underline 0 -accelerator Ctrl+A");
+cmd(inter, "$w add command -label \"Save Results\" -command {set choice 37}  -underline 5 -accelerator Ctrl+Z");
+cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -underline 5 -accelerator Ctrl+B");
 
 cmd(inter, "set w .m.data.setobj");
 cmd(inter, "menu $w -tearoff 0");
-cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Control+0 -underline 0");
+cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Ctrl+0 -underline 0");
 cmd(inter, "$w add command -label \"Only current type of object\" -command {set choice 33} -underline 0");
 
 cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
-cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Control+R");
+cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R");
 cmd(inter, "$w add command -label \"Start 'No Window' batch'\" -command {set choice 69} -underline 0");
-cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Control+M");
+cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Control+F");
-cmd(inter, "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Control+G");
+cmd(inter, "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F");
+cmd(inter, "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Ctrl+G");
 cmd(inter, "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1");
@@ -653,10 +662,7 @@ cmd(inter, "pack .l -fill both -expand yes");
 
 *choice=0;
 
-#ifdef DUAL_MONITOR
-// just restore size
-cmd(inter, "wm geometry . \"[expr $widthB]x$heightB\"");
-#else
+#ifndef DUAL_MONITOR
 cmd(inter, "set choice [info exist widthB]");
 if(*choice==1)
   {
@@ -707,6 +713,10 @@ if(*choice==50)
   *choice=0;
  } 
 
+#ifdef DUAL_MONITOR
+// just restore size, if needed
+cmd( inter, "restore_top_size" );		// restore top window size, if changed
+#endif
 
 while(*choice==0 && choice_g==0)
  Tcl_DoOneEvent(0);
@@ -714,6 +724,8 @@ while(*choice==0 && choice_g==0)
 #ifndef DUAL_MONITOR
 cmd(inter, "scan [wm geom .] %dx%d+%d+%d widthB heightB posX posY");
 //plog("\n2: [wm geometry .]");
+#else
+cmd( inter, "save_top_size" );			// save top window configuration before processing
 #endif
  
 if(choice_g!=0)
@@ -5205,8 +5217,8 @@ bool discard_sense( void )
 int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
 	if ( discard_change( true ) == 1 )
-		inter->result = "ok";
+		inter->result = ( char * ) "ok";
 	else
-		inter->result = "cancel";
+		inter->result = ( char * ) "cancel";
 	return TCL_OK;
 }
