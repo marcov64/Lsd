@@ -341,7 +341,7 @@ cmd(inter, "bind $f.v <KeyPress-b> {set res [.f.vars.lb.v get active]; set choic
 
 
 cmd(inter, "bind $f.v <Shift-Button-3> {.f.vars.lb.v selection clear 0 end;.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 16}");
-cmd(inter, "pack $f.v $f.v_scroll -side right -fill y");
+cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 
 cmd(inter, "set f .f.vars.ch");
 cmd(inter, "frame $f");
@@ -352,7 +352,7 @@ cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll s
 cmd(inter, "bind $f.v <KeyPress-o> {.f.vars.b.out invoke}");
 cmd(inter, "bind $f.v <Return> {.b.ts invoke}");
 
-cmd(inter, "pack $f.v $f.v_scroll -side right -fill y");
+cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 cmd(inter, "bind $f.v <Double-Button-1> {.f.vars.b.out invoke}");
 cmd(inter, "bind $f.v <Button-3> {.f.vars.ch.v selection clear 0 end;.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
 cmd(inter, "bind $f.v <Button-2> {.f.vars.ch.v selection clear 0 end;.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
@@ -364,8 +364,9 @@ cmd(inter, "pack $f.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
 cmd(inter, "listbox $f.v -width 30 -yscroll \"$f.v_scroll set\" -height 12 -selectmode single");
 
-cmd(inter, "pack $f.v $f.v_scroll -side right -fill y");
+cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 cmd(inter, "bind $f.v <Double-Button-1> {set it [selection get];set choice 3}");
+cmd(inter, "bind $f.v <Return> {set it [selection get];set choice 3}");
 cmd(inter, "bind .f.vars.pl.v <Button-3> {.f.vars.pl.v selection clear 0 end; .f.vars.pl.v selection set @%x,%y; set it [selection get]; set n_it [.f.vars.pl.v curselection]; set choice 20}");
 cmd(inter, "bind .f.vars.pl.v <Button-2> {.f.vars.pl.v selection clear 0 end; .f.vars.pl.v selection set @%x,%y; set it [selection get]; set n_it [.f.vars.pl.v curselection]; set choice 20}");
 cmd(inter, "bind . <KeyPress-Delete> {set n_it [.f.vars.pl.v curselection]; if {$n_it != \"\" } {set it [selection get]; set choice 20} {}}");
@@ -739,11 +740,12 @@ while(*choice==0)
 	Tcl_DoOneEvent(0);
 if(*choice==3)
  {
-  cmd(inter, "set gpdgrid3d \"60,60,3\"");
+  cmd(inter, "set gpdgrid3d \"60,60,3\"; set gpooptions \"set ticslevel 0.0\"");
+  cmd(inter, ".a.o.t delete 1.0 end; .a.o.t insert end \"$gpooptions\"");
   cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} { set gpterm \"x11\"}");
   goto gpoptions;
  }
-cmd(inter, "set gpooptions \"\[.a.o.t get 0.0 end]\""); 
+cmd(inter, "set gpooptions [.a.o.t get 0.0 end]"); 
 cmd(inter, "destroy .a");
 *choice=0;
 goto there;

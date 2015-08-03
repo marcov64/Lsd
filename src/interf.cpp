@@ -253,9 +253,8 @@ object *cur;
 cmd( inter, "proc save_top_size { } { scan [ wm geometry . ] \"%dx%d%*s\" w h; variable wB $w; variable hB $h }" );
 // procedure to restore top window size
 cmd( inter, "proc restore_top_size { } { variable wB; variable hB; scan [ wm geometry . ] \"%dx%d%*s\" w h; if { $wB != $w || $hB != $h } { wm geometry . \"[ expr $wB ]x$hB\" } }" );
-// set and save top window initial configuration
-cmd( inter, "wm geometry . \"[ expr $widthB ]x$heightB\"" );
-cmd( inter, "scan [ wm geometry . ] \"%dx%d%*s\" wB hB" );
+// set and save top window initial configuration (run only once)
+cmd( inter, "if { [ info exists wB ] == 0 || [ info exists wB ] == 0 } { wm geometry . \"[ expr $widthB ]x$heightB\"; scan [ wm geometry . ] \"%dx%d%*s\" wB hB }" );
 #endif
 
 
@@ -335,7 +334,7 @@ if(choice!=35)
 //Perform the task selected
 //cmd(inter, "set ugo 2");
 //cmd(inter, "set ugo [winfo exists .model_str]");
-cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
+//cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
 cr=operate( &choice, cr);
 
 //Delete the graphical representation
@@ -347,6 +346,7 @@ Tcl_UnlinkVar(inter,"save_option");
 //Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "choice_g");
 
+cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
 cmd(inter, "wm deiconify .log; wm deiconify .; raise .; focus -force .; update");
 return(cr);
 }
@@ -725,9 +725,12 @@ while(*choice==0 && choice_g==0)
 cmd(inter, "scan [wm geom .] %dx%d+%d+%d widthB heightB posX posY");
 //plog("\n2: [wm geometry .]");
 #else
-cmd( inter, "save_top_size" );			// save top window configuration before processing
+cmd( inter, "save_top_size" );		// save top window configuration before processing
 #endif
  
+if( *choice == 17 || *choice == 20 || *choice == 38 )	// reset only when really necessary
+ cmd(inter, "set cur 0"); //Set yview for vars listbox
+
 if(choice_g!=0)
  {*choice=choice_g;
   res_g=(char *)Tcl_GetVar(inter, "res_g",0);
@@ -780,9 +783,6 @@ if(actual_steps>0)
 
 //cmd(inter, "set posY [winfo y .]");
  
-if(*choice!=7)
- cmd(inter, "set cur 0"); //Set yview for vars listbox
-
 if(*choice!=35)
 {cmd(inter, "if {[winfo exists .]==1} {bind . <Destroy> {}} {}");
  cmd(inter, "if {[winfo exists $c]==1} {bind $c <Destroy> {}} {}");
@@ -982,7 +982,7 @@ cmd(inter, "unset lab done");
 
 if(done!=2)
  {
-  sprintf(msg, "lappend ModElem %s", lab1);
+  sprintf(msg, "lappend ModElem %s", lab);
   cmd(inter, msg);
  }  
 Tcl_UnlinkVar(inter, "done");
@@ -2840,13 +2840,8 @@ case 20:
 		break;
 	  }
 	  
-      cmd(inter, "set answer [tk_messageBox -type yesno -title \"Empty model?\" -message \"Do you want to empty the Lsd model program?\\nPressing Yes you will delete all elements in the model. Press No to abort the operation.\"]");
-      cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 0} {set choice 1}");
-      if(*choice==1)
-       {*choice=0;
-        break;
-       } 
-      
+	  cmd( inter, "if { [ winfo exists .model_str ] == 1 } { wm withdraw .model_str }");
+	  
       for(n=r; n->up!=NULL; n=n->up);
 		  cmd(inter, "destroy .l .m");
 		  n->empty();

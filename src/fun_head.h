@@ -177,8 +177,8 @@ return(res); \
 
 #define V(X) p->cal(p,(char*)X,0)
 #define VL(X,Y) p->cal(p,(char*)X,Y)
-#define VS(X,Y) X->cal(p,(char*)Y,0)
-#define VLS(X,Y,Z) X->cal(p,(char*)Y,Z)
+#define VS(X,Y) X->cal(X,(char*)Y,0)
+#define VLS(X,Y,Z) X->cal(X,(char*)Y,Z)
 
 #define V_CHEAT(X,C) p->cal(C,(char*)X,0)
 #define VL_CHEAT(X,Y,C) p->cal(C,(char*)X,Y)
