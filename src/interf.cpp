@@ -2331,7 +2331,6 @@ break;
 //Load a model
 case 17:
 case 38: //quick reload
-   actual_steps=0;
    cmd(inter, "destroy .l .m");
 
    if(struct_loaded==1)
@@ -2356,7 +2355,6 @@ case 38: //quick reload
          break;
         }
        } 
-       actual_steps=0; //Flag that no simulation has been run
 
        cmd(inter, "set a [split [winfo children .] ]");  // remove old runtime plots
        cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
@@ -2377,6 +2375,8 @@ case 38: //quick reload
  	  findexSens=0;
 	  nodesSerial=0;				// network node serial number global counter
     }
+
+	actual_steps=0;					//Flag that no simulation has been run
 
 if(*choice==17)
 {
@@ -2921,7 +2921,7 @@ case 22:
         cmd(inter, "bind .f.b.e1 <KeyPress-Return> {focus .f.c.e2; .f.c.e2 selection range 0 end}");
         cmd(inter, "bind .f.c.e2 <KeyPress-Return> {focus .f.d.e2; .f.d.e2 selection range 0 end}");
         cmd(inter, "bind .f.d.e2 <KeyPress-Return> {focus .f.e.e2; .f.e.e2 selection range 0 end}");
-        cmd(inter, "bind .f.e.e2 <KeyPress-Return>  {focus .ok}");
+        cmd(inter, "bind .f.e.e2 <KeyPress-Return>  {focus .b.ok}");
         cmd(inter, "bind .b.ok <KeyPress-Return> {set choice 1}");
         cmd(inter, "bind .b.esc <KeyPress-Escape> {set choice 2}");
 
