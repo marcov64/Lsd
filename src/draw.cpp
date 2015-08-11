@@ -111,12 +111,12 @@ cmd(inter, "wm title $c \"Lsd Model Structure\"");
 cmd(inter, "wm protocol $c WM_DELETE_WINDOW {set strWindowOn 0; set choice 70}");
 cmd(inter, "canvas $c.c -width 15.c -height 10.c");
 cmd(inter, "pack $c.c");
-cmd(inter, "bind $c.c <1> {.log.text.text insert end 1}");
+cmd(inter, "bind $c.c <1> {.log.text.text.internal insert end 1}");
 for(top=t; top->up!=NULL; top=top->up);
 
 cmd(inter, "set color white");
 draw_obj(inter, t, top, 10, 70, 0);
-//cmd(inter, ".log.text.text insert end \"[bind $c.c]\"");
+//cmd(inter, ".log.text.text.internal insert end \"[bind $c.c]\"");
 cmd(inter, "bind $c.c <1> {set choice_g 24}");
 cmd(inter, "bind $c.c <2> {set choice_g 25}");
 cmd(inter, "bind $c.c <3> {set choice_g 25}");
@@ -318,20 +318,20 @@ cmd(inter, ch);
 sprintf(ch, "$c.c bind %s <Double-1> {set res_g %s; set choice_g 24}", str2, str2);
 //cmd(inter, ch);
 bah=Tcl_GetStringResult(inter);
-sprintf(ch, "$c.c bind %s <Button-3> {.log.text.text insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+sprintf(ch, "$c.c bind %s <Button-3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <3> {.log.text.text insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+sprintf(ch, "$c.c bind %s <3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <2> {.log.text.text insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+sprintf(ch, "$c.c bind %s <2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
 
-sprintf(ch, "$c.c bind %s <Button-2> {.log.text.text insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+sprintf(ch, "$c.c bind %s <Button-2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
 
 sprintf(ch, "$c.c bind %s <Shift-Button-1> {set res_g %s; set choice_g 25;}", str2, str2);
 //cmd(inter, ch);
 
-//sprintf(ch, ".log.text.text insert end [$c.c bind %s <2>]; .log.text.text inser end \\n", str2);
+//sprintf(ch, ".log.text.text.internal insert end [$c.c bind %s <2>]; .log.text.text.internal inser end \\n", str2);
 //cmd(inter, ch);
 
 bah=Tcl_GetStringResult(inter);

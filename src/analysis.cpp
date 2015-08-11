@@ -2057,7 +2057,7 @@ for(j=0; j<*choice; j++)
 switch(i) 
 {
 case 1:
-//  cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} {.log.text.text insert end \"$x - [lindex $vcell $x] - [lindex [split [lindex [split $i] 1] {_}] $x]\n \"; if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] != [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .f.vars.ch.v selection set $myc; incr myc  } {}} {}}");
+//  cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} {.log.text.text.internal insert end \"$x - [lindex $vcell $x] - [lindex [split [lindex [split $i] 1] {_}] $x]\n \"; if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] != [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .f.vars.ch.v selection set $myc; incr myc  } {}} {}}");
  cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\" && [lindex [split [lindex [split $i] 1] {_}] $choice] == $xval } {  .f.vars.ch.v selection set $myc  } {}; incr myc}");
  break;
 case 2:
@@ -4167,14 +4167,14 @@ for(i=0; i<nv; i++)
  }
 
 if(logs)
- sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats (in log).\n\" tabel");
+ sprintf(msg, ".log.text.text.internal insert end \"\n\nTime series Descriptive Stats (in log).\n\" tabel");
 else
- sprintf(msg, ".log.text.text insert end \"\n\nTime series Descriptive Stats.\n\" tabel");
+ sprintf(msg, ".log.text.text.internal insert end \"\n\nTime series Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
 sprintf(str1, "%d Cases", max_c-min_c+1);
 sprintf(longmsg, "%-20s\tAverage\tVar.\tMin\tMax\tSigma\n", str1);
-sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg);
+sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
 for(i=0; i<nv; i++)
@@ -4210,12 +4210,12 @@ for(i=0; i<nv; i++)
  {
  sprintf(msg, "%s %s (%.*g)", str[i], tag[i], pdigits, num);
  sprintf(str1, "%-20s\t", msg);
- sprintf(msg, ".log.text.text insert end \"%s\" tabel", str1);
+ sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", str1);
  cmd(inter, msg);
 
 
  sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
-sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg);
+sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
 
@@ -4357,11 +4357,11 @@ for(i=0; i<nv; i++)
   }
   }
 
-sprintf(msg, ".log.text.text insert end \"\nFreq. for %s_%s\nVal.\tNum.\n\" ", str[i], tag[i]);
+sprintf(msg, ".log.text.text.internal insert end \"\nFreq. for %s_%s\nVal.\tNum.\n\" ", str[i], tag[i]);
 cmd(inter, msg);
 for(h=0; h<num_freq[i]; h++)
  {
- sprintf(msg, ".log.text.text insert end \"%.*g\t%d\n\"", pdigits, freq[i].v[h], freq[i].freq[h]);
+ sprintf(msg, ".log.text.text.internal insert end \"%.*g\t%d\n\"", pdigits, freq[i].v[h], freq[i].freq[h]);
  cmd(inter, msg);
  
  }
@@ -4473,14 +4473,14 @@ for(i=0; i<nv; i++)
  }
 
 if(logs)
- sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats (in log).\n\" tabel");
+ sprintf(msg, ".log.text.text.internal insert end \"\n\nCross Section Descriptive Stats (in log).\n\" tabel");
 else
- sprintf(msg, ".log.text.text insert end \"\n\nCross Section Descriptive Stats.\n\" tabel");
+ sprintf(msg, ".log.text.text.internal insert end \"\n\nCross Section Descriptive Stats.\n\" tabel");
 cmd(inter, msg);
 
 sprintf(str1, "%d Variables",nv);
 sprintf(longmsg, "%-20s\tAverage\tVar.\tMin\tMax\tSigma\n", str1);
-sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg);
+sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
 for(j=0; j<nt; j++)
@@ -4515,11 +4515,11 @@ for(j=0; j<nt; j++)
  if(num>0)
  {
  sprintf(str1, "Case %d (%.*g)\t",h, pdigits, num);
- sprintf(msg, ".log.text.text insert end \"%s\" tabel", str1 );
+ sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", str1 );
  cmd(inter, msg);
 
  sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
- sprintf(msg, ".log.text.text insert end \"%s\" tabel", longmsg );
+ sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg );
  cmd(inter, msg);
  }
 }

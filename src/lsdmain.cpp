@@ -1108,10 +1108,10 @@ void plog(char const *cm)
 char app[1000];
 
 #ifndef NO_WINDOW 
-sprintf(app, ".log.text.text insert end \"%s\"", cm);
+sprintf(app, ".log.text.text.internal insert end \"%s\"", cm);
 
 cmd(inter, app);
-cmd(inter, ".log.text.text see end");
+cmd(inter, ".log.text.text.internal see end");
 //cmd(inter, "raise .log");
 //cmd(inter, "update");
 #else
@@ -1325,6 +1325,8 @@ cmd(inter, "bind .log <KeyPress-f> {.log.but.speed invoke}");
 cmd(inter, "bind .log <KeyPress-o> {.log.but.obs invoke}");
 cmd(inter, "bind .log <KeyPress-d> {.log.but.deb invoke}");
 cmd(inter, "bind .log <KeyPress-h> {.log.but.help invoke}");
+cmd(inter, "bind .log <KeyPress-c> {.log.but.copy invoke}");
+cmd(inter, "bind .log <Control-c> {.log.but.copy invoke}");
 cmd(inter, "bind .log <KeyPress-Escape> {focus -force .}");
 
 cmd(inter, "set w .log.but");
@@ -1350,7 +1352,9 @@ cmd(inter, "set posXLog [expr $posX + 340]");
 //cmd(inter, "set posY [winfo y .]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");
 #endif
-
+// replace text widget default insert, delete and replace bindings, preventing the user to change it
+cmd( inter, "rename .log.text.text .log.text.text.internal" );
+cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
 }
 
 #endif

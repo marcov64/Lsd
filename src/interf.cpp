@@ -609,7 +609,6 @@ cmd(inter, "bind .log <Control-f> {set choice 50}");
 cmd(inter, "bind .log <Control-u> {set choice 28}");
 cmd(inter, "bind .log <Control-g> {set choice 30}");
 cmd(inter, "bind .log <Control-b> {set choice 34}");
-cmd(inter, "bind .log <Control-c> {set choice 36}");
 cmd(inter, "bind .log <Control-z> {set choice 37}");
 cmd(inter, "bind .log <Control-w> {set choice 38}");
 cmd(inter, "bind .log <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
@@ -707,7 +706,7 @@ main_cycle:
 
 cmd(inter, "if { $listfocus == 1} {focus -force .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
 cmd(inter, "if { $listfocus == 2} {focus -force .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
-//cmd(inter, ".log.text.text insert end \"\\nListfocus $listfocus; itemfocus $itemfocus\"");
+//cmd(inter, ".log.text.text.internal insert end \"\\nListfocus $listfocus; itemfocus $itemfocus\"");
 if(*choice==50)
  {cmd(inter, "raise .log .");
   *choice=0;
@@ -4307,7 +4306,7 @@ case 66:
 
 		for(i=0; i<cs->nvalues; i++)
 		{
-			sprintf(msg, ".log.text.text insert end \"%g\\t\" highlight", cs->v[i]);
+			sprintf(msg, ".log.text.text.internal insert end \"%g\\t\" highlight", cs->v[i]);
 			cmd(inter, msg);
 		}
 		plog("\n");
@@ -4742,7 +4741,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
    plog(msg);
 
    cmd(inter, "");
-   sprintf(msg, ".log.text.text insert end \"%s\" highlight", cv->label);
+   sprintf(msg, ".log.text.text.internal insert end \"%s\" highlight", cv->label);
    cmd(inter, msg);
    plog("\n");
 
@@ -4785,7 +4784,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
    plog(msg);
 
    cmd(inter, "");
-   sprintf(msg, ".log.text.text insert end \"%s (%lf)\" highlight", cv->label, cv->val[0]);
+   sprintf(msg, ".log.text.text.internal insert end \"%s (%lf)\" highlight", cv->label, cv->val[0]);
    cmd(inter, msg);
    plog("\n");
 
@@ -4828,7 +4827,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
    plog(msg);
 
    cmd(inter, "");
-   sprintf(msg, ".log.text.text insert end \"%s \t\" highlight", cv->label);
+   sprintf(msg, ".log.text.text.internal insert end \"%s \t\" highlight", cv->label);
    cmd(inter, msg);
    if(cd->init==NULL || strlen(cd->init)==0)
     {
