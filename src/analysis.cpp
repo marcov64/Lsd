@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 /* 
 ############################################################
-Reached case 37
+Reached case 38
 ############################################################
 */
 
@@ -330,7 +330,7 @@ cmd(inter, "frame $f");
 cmd(inter, "label .f.vars.lb.l -text \"Series Available\"");
 cmd(inter, "pack .f.vars.lb.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll set\" -height 12");
+cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll set\" -height 14");
 
 cmd(inter, "bind $f.v <Double-Button-1> {.f.vars.b.in invoke}");
 cmd(inter, "bind $f.v <Return> {.f.vars.b.in invoke}");
@@ -348,7 +348,7 @@ cmd(inter, "frame $f");
 cmd(inter, "label .f.vars.ch.l -text \"Series Selected\"");
 cmd(inter, "pack .f.vars.ch.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll set\" -height 12");
+cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll set\" -height 14");
 cmd(inter, "bind $f.v <KeyPress-o> {.f.vars.b.out invoke}");
 cmd(inter, "bind $f.v <Return> {.b.ts invoke}");
 
@@ -362,7 +362,7 @@ cmd(inter, "frame $f");
 cmd(inter, "label $f.l -text \"Graphs\"");
 cmd(inter, "pack $f.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -width 30 -yscroll \"$f.v_scroll set\" -height 12 -selectmode single");
+cmd(inter, "listbox $f.v -width 30 -yscroll \"$f.v_scroll set\" -height 14 -selectmode single");
 
 cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 cmd(inter, "bind $f.v <Double-Button-1> {set it [selection get];set choice 3}");
@@ -375,14 +375,15 @@ cmd(inter, "frame .f.vars.b");
 cmd(inter, "set f .f.vars.b");
 cmd(inter, "button $f.in -text > -command {set choice 6}");
 cmd(inter, "button $f.out -state disabled -text < -command {set choice 7}");
-cmd(inter, "button $f.sort -text Sort -command {set choice 5}");
+cmd(inter, "button $f.sort -text \"Sort \u25b2\" -command {set choice 5}");
 cmd(inter, "button $f.unsort -text \"Un-sort\" -command {set choice 14}");
 cmd(inter, "button $f.sortend -text \"Sort (End)\" -command {set choice 15}");
+cmd(inter, "button $f.sortdesc -text \"Sort \u25bc\" -command {set choice 38}");
 cmd(inter, "button $f.empty -text Clear -command {set choice 8}");
 
 cmd(inter, "button $f.add -text \"Add series\" -command {set choice 24}");
 
-cmd(inter, "pack $f.in $f.out $f.sort $f.sortend $f.unsort $f.add $f.empty -fill x");
+cmd(inter, "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.add $f.empty -fill x");
 
 
 cmd(inter, "pack .f.vars.lb .f.vars.b .f.vars.ch .f.vars.pl -side left");
@@ -682,6 +683,17 @@ case 5:
   cmd(inter, "set a [.f.vars.lb.v get 0 end]");
   cmd(inter, "set b {}");
   cmd(inter, "set b [lsort -dictionary $a]");
+  cmd(inter, ".f.vars.lb.v delete 0 end");
+  cmd(inter, "foreach i $b {.f.vars.lb.v insert end $i}");
+  *choice=0;
+  goto there;
+  
+// Sort (descending order)
+case 38:
+  cmd(inter, "set a {}");
+  cmd(inter, "set a [.f.vars.lb.v get 0 end]");
+  cmd(inter, "set b {}");
+  cmd(inter, "set b [lsort -decreasing -dictionary $a]");
   cmd(inter, ".f.vars.lb.v delete 0 end");
   cmd(inter, "foreach i $b {.f.vars.lb.v insert end $i}");
   *choice=0;
