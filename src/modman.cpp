@@ -80,6 +80,9 @@ The widget of importance are:
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <time.h>
+#include <sys/stat.h>
+
 
 #define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
 
@@ -277,7 +280,7 @@ ModManMain
 int ModManMain(int argn, char **argv)
 {
 int i, num, tosave, sourcefile, macro;
-char str[500], str1[50];
+char str[500], str1[500], str2[500];
 char *s;
 FILE *f;
 
@@ -521,7 +524,7 @@ cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert
 cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Ctrl+\\)");
 cmd(inter, "$w add command -label \"Insert Lsd Scripts...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add check -label \" Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w ");
+cmd(inter, "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w ");
 cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'");
 cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'");
 cmd(inter, "$w add command -label \"Change Font...\" -command {set choice 59} ");
@@ -651,6 +654,9 @@ cmd(inter, "label .f.hea.line.line -relief sunk -width 12 -text \"[.f.t.t index 
 cmd(inter, "pack .f.hea.line.line -anchor e -expand no");
 cmd(inter, "pack .f.hea.grp .f.hea.mod .f.hea.ver .f.hea.file .f.hea.line -side left -expand yes -fill x");
 
+cmd(inter, "bind .f.hea.line.line <Button-1> {set choice 10}");
+cmd(inter, "bind .f.hea.line.line <Button-2> {set choice 10}");
+cmd(inter, "bind .f.hea.line.line <Button-3> {set choice 10}");
 
 cmd(inter, "pack .f.hea -fill x");
 cmd(inter, "pack .f.t -expand yes -fill both");
@@ -945,7 +951,7 @@ if(choice==-1)
 
 cmd(inter, "if { [winfo exists .]==1} {set after [.f.t.t get 1.0 end]} { set after $before}");
 cmd(inter, "if {[string compare $before $after] != 0} {set tosave 1} {set tosave 0}");
-if( tosave==1 && (choice==2 || choice==15 || choice==1 ||choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
+if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {
 
 //  cmd(inter, "set answer [tk_dialog .dia \"Save?\" \"Save the file $filename?\" \"\" 0 yes no cancel]");
@@ -1689,7 +1695,7 @@ if(s==NULL || !strcmp(s, ""))
    {
    //cmd(inter, "scan [.f.t.t index insert] %d.%d line col");
    cmd(inter, "scan $vmenuInsert %d.%d line col");
-   cmd(inter, "set f [open break.txt w]; puts $f \"break $filename:$line\\n\"; close $f");
+   cmd(inter, "set f [open break.txt w]; puts $f \"break $filename:$line\nrun\n\"; close $f");
    cmd(inter, "set cmdbreak \"--command=break.txt\"");
    
    }
@@ -1729,12 +1735,14 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
     cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
 //    sprintf(msg, "exec start /min gdb_bat %s $SETDIR &", str1); //Win 9x
     sprintf(msg, "exec start gdb_batw9x %s &", str1); //Win 9x    
+	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
     }
 
    if(choice==4)
     {//WIndows NT case
     cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
     sprintf(msg, "exec cmd.exe /c start /min gdb_bat %s $SETDIR &", str1); //Win NT case
+	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
     }
    if(choice==5)
     {//Windows 2000
@@ -1745,15 +1753,40 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
     sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/$LsdGnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
     cmd(inter, msg);
     sprintf(msg, "exec run_gdb &");
+	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
      
     }
 
    if(choice==1)
      {
       sprintf(msg, "if {$cmdbreak==\"\"} {exec $Terminal -e gdb %s &} {exec $Terminal -e gdb $cmdbreak %s &}", str1, str1); //Unix case
+	sprintf( str, "%s", str1 );				// full executable file name
      }
      
-    cmd(inter, msg);
+	// check if executable file is older than model file
+	s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+	sprintf( str1, "%s/%s", s, str );
+	strcpy( str, s );
+	s = ( char * ) Tcl_GetVar( inter, "filename", 0 );
+	sprintf( str2, "%s/%s", str, s );
+
+	// get OS info for files
+	struct stat stExe, stMod;
+	if ( stat( str, &stExe ) == 0 && stat( str1, &stMod ) == 0 )
+	{
+		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+		{
+			cmd( inter, "set answer [t k_messageBox -title Warning -icon warning -type okcancel -default cancel -message \"The executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if { $answer == ok } { set choice 1 } { set choice 2 }" );
+			if ( choice == 2 )
+			{
+				choice = 0;
+				goto loop;
+			}
+			choice = 0;
+		}
+	}
+
+	 cmd(inter, msg);
     cmd(inter, "cd $RootLsd"); 
    } 
   else
