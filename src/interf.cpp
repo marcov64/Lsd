@@ -375,7 +375,7 @@ cmd(inter, "label .l.s.lab -text Descendants");
 
 cmd(inter, "frame .l.v.c");
 cmd(inter, "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"");
-cmd(inter, "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\" -height 20");
+cmd(inter, "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"");
 
 cmd(inter, "bind .l.v.c.var_name <Return> {set res [.l.v.c.var_name curselection]; set cur $res; if {$res !=\"\"} {set res [ .l.v.c.var_name get $res]; set listfocus 1; set itemfocus $cur ; set choice 7} {}}");
 cmd(inter, "bind .l.v.c.var_name <Right> {focus -force .l.s.son_name; .l.s.son_name selection set 0}");
@@ -415,14 +415,14 @@ if(r->v!=NULL)
   {cmd(inter, "bind .l.v.c.var_name <Double-Button-1> {set res [selection get]; set choice 7; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; }");
 	cmd(inter, "bind .l.v.c.var_name <Button-3> {.l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; set vname [selection get]; set choice 29; set cur [.l.v.c.var_name cur]}");
 	cmd(inter, "bind .l.v.c.var_name <Button-2> {.l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; set vname [selection get]; set choice 29; set cur [.l.v.c.var_name cur]}");
-    cmd(inter, "bind .l.v.c.var_name <Control-Up> {set vname [selection get]; ; set listfocus 1; set choice 58; set itemfocus [.l.v.c.var_name curselection]; incr itemfocus -1}");
-    cmd(inter, "bind .l.v.c.var_name <Control-Down> {set vname [selection get]; set listfocus 1; set choice 59; set itemfocus [.l.v.c.var_name curselection]; incr itemfocus}");
+	cmd( inter, "bind .l.v.c.var_name <Control-Up> { if { ! [ catch { set vname [ selection get ] } ] } { set listfocus 1; set choice 58; set itemfocus [ .l.v.c.var_name curselection ]; incr itemfocus -1 } }" );
+	cmd( inter, "bind .l.v.c.var_name <Control-Down> { if { ! [ catch { set vname [ selection get ] } ] } { set listfocus 1; set choice 59; set itemfocus [ .l.v.c.var_name curselection ]; incr itemfocus } }" );
   }
 cmd(inter, ".l.v.c.var_name yview $cur");
 
 
 cmd(inter, "pack .l.v.c.v_scroll -side right -fill y");
-cmd(inter, "listbox .l.s.son_name -height 20");
+cmd(inter, "listbox .l.s.son_name");
 if(r->b==NULL)
   cmd(inter, ".l.s.son_name insert end \"(no Objects)\"");
 else
@@ -435,8 +435,8 @@ else
 if(r->b!=NULL)
   cmd(inter, "bind .l.s.son_name <Double-Button-1> {set res [selection get]; set choice 4}");
 cmd(inter, "bind .l.s.son_name <Return> {set res [.l.s.son_name curselection]; if {$res !=\"\"} {set res [ .l.s.son_name get $res]; set choice 4} {}}");
-cmd(inter, "bind .l.s.son_name <Control-Up> {set vname [selection get]; set choice 60; set listfocus 2; set itemfocus [.l.s.son_name curselection];  incr itemfocus -1; .log.text.text insert end \"$cur\"} ");
-cmd(inter, "bind .l.s.son_name <Control-Down> {set vname [selection get]; set choice 61; set listfocus 2; set itemfocus [.l.s.son_name curselection]; incr itemfocus;  .log.text.text insert end \"$cur\" }");
+cmd( inter, "bind .l.s.son_name <Control-Up> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 60; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus -1; .log.text.text.internal insert end \"$cur\"} }" );
+cmd( inter, "bind .l.s.son_name <Control-Down> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 61; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus; .log.text.text.internal insert end \"$cur\"} }" );
 
 cmd(inter, "bind .l.s.son_name <Left> {focus -force .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0}");
 
