@@ -300,11 +300,11 @@ if(ymax==ymin) //Very initial setting
 // they are supposed to grow
     }
 
-	sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %lf", ymax);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.5g", ymax);
 	cmd(inter, msg);
-	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %lf", ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.5g", ymin);
 	cmd(inter, msg);
-	sprintf(msg, "$activeplot.c.yscale itemconf medy -text %lf", (ymax-ymin)/2+ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
 	cmd(inter, msg);
 
  }
@@ -313,12 +313,14 @@ if(v->val[0]>=ymax)
 	step=1.1;
   else
 	step=0.9;
-  sprintf(msg, "$activeplot.c.c.cn scale punto 0 300 1 %lf",(ymax-ymin)/(v->val[0]*step-ymin) );
+  
+  double scale = ( ymax - ymin ) / ( v->val[ 0 ] * step - ymin );
+  sprintf( msg, "$activeplot.c.c.cn scale punto 0 300 1 %lf", scale  < 0.01 ? 0.01 : scale );
   cmd(inter, msg);
   ymax=v->val[0]*step;
-  sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %g", ymax);
+  sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.5g", ymax);
   cmd(inter, msg);
-  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %g", (ymax-ymin)/2+ymin);
+  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
   cmd(inter, msg);
 
  }
@@ -330,12 +332,13 @@ if(v->val[0]<=ymin)
 	step=1.1;
   value=min(v->val[0]*step, ymin-(ymax-ymin)/300);
 
-  sprintf(msg, "$activeplot.c.c.cn scale punto 0 0 1 %lf",(ymax-ymin)/(ymax - value) );
+  double scale = ( ymax - ymin ) / ( ymax - value );
+  sprintf( msg, "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale );
   cmd(inter, msg);
   ymin=value;
-	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %g", ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.5g", ymin);
   cmd(inter, msg);
-  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %g", (ymax-ymin)/2+ymin);
+  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
   cmd(inter, msg);
 
  }
