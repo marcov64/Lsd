@@ -506,7 +506,7 @@ cmd(inter, "$w add command -label \"Offload Equation File \" -command {set choic
 cmd(inter, "$w add command -label \"Compare Equation Files \" -command {set choice 53} -underline 2");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Generate Auto Descriptions \" -command {set choice 43} -underline 7");
-cmd(inter, "$w add command -label \"Create Model Report \" -command {set choice 36} -underline 7");
+cmd(inter, "$w add command -label \"Create Model Report \" -command {set choice 36} -underline 7 -accelerator Ctrl+C");
 cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57} -underline 9");
 
 cmd(inter, "$w add separator");
@@ -536,15 +536,15 @@ cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -unde
 
 cmd(inter, "set w .m.data.setobj");
 cmd(inter, "menu $w -tearoff 0");
-cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Ctrl+0 -underline 0");
+cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Ctrl+O -underline 0");
 cmd(inter, "$w add command -label \"Only current type of object\" -command {set choice 33} -underline 0");
 
 cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R");
-cmd(inter, "$w add command -label \"Start 'No Window' batch'\" -command {set choice 69} -underline 0");
-cmd(inter, "$w add command -label \"Sim. Settings\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
+cmd(inter, "$w add command -label \"Start 'No Window' Batch\" -command {set choice 69} -underline 0");
+cmd(inter, "$w add command -label \"Simulation Settings\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
 
 cmd(inter, "$w add separator");
@@ -3933,7 +3933,7 @@ if (rsense!=NULL)
     sensitivity_sequential(&findexSens,rsense);
 	sprintf( msg, "\nSensitivity analysis configurations produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -4010,7 +4010,7 @@ if (rsense!=NULL)
     sensitivity_sequential(&findexSens, rsense, sizMC);
 	sprintf(msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1);
 	plog(msg);
- 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -4090,7 +4090,7 @@ if (rsense!=NULL)
     sensitivity_doe( &findexSens, NOLHdoe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'no window' version of the model program, using the 'Model'/'Generate NO WINDOW makefile' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+ 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 end72:
 	delete NOLHdoe;
@@ -4369,7 +4369,7 @@ case 68:
 
 	if ((f=fopen(ch, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate NO WINDOW version' in LMM first.\"");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM first.\"");
 		break;
 	}
 	fclose(f);
@@ -4542,14 +4542,14 @@ case 69:
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start NO WINDOW job\" -message \"There is no model loaded.\\n\\nPlease select one before trying to start a NO WINDOW job.\"");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"There is no model loaded.\\n\\nPlease select one before trying to start a 'No Window' batch.\"");
 		break;
 	}
 
 	// confirm overwriting current configuration
 	cmd(inter, "button .ok -text Ok -command {set choice 1}");
 	cmd(inter, "button .cancel -text Cancel -command {set choice 2}");
-	cmd(inter, "label .war1 -text \"Starting NO WINDOW job for the model configuration:\"");
+	cmd(inter, "label .war1 -text \"Starting 'No Window' batch for the model configuration:\"");
 	sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
 	cmd(inter, ch);
 	sprintf(ch, "label .war3 -text \"Number of simulations: %d\"", sim_num);
@@ -4648,7 +4648,7 @@ case 69:
 
 	if ((f=fopen(lab, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start NO WINDOW job\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate NO WINDOW version' in LMM first.\"");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM first.\"");
 		break;
 	}
 	fclose(f);
@@ -4667,7 +4667,7 @@ case 69:
 		sprintf(msg, "exec %s -f %s >& %s.log  &", lab, struct_file, simul_name);
     cmd(inter, msg);
 
-	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start NO WINDOW job\" -message \"The current configuration was started as a NO WINDOW background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
+	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start 'No Window' Batch\" -message \"The current configuration was started as a 'No Window' background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
 	cmd(inter, msg);
 break;
 

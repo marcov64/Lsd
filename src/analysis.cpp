@@ -526,7 +526,7 @@ cmd(inter, "menu .m -tearoff 0 -relief groove -bd 2");
 cmd(inter, "set w .m.exit");
 cmd(inter, ".m add cascade -label Exit -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Exit Analysis of Result\" -command {set choice 2} -underline 0");
+cmd(inter, "$w add command -label \"Exit and return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc");
 
 cmd(inter, "set w .m.gp");
 cmd(inter, ".m add cascade -label Gnuplot -menu $w -underline 0");

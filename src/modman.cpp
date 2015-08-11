@@ -570,7 +570,7 @@ cmd(inter, "$w add command -label \"System Compilation Options...\" -command {se
 cmd(inter, "$w add command -label \"Model Compilation Options...\" -state disabled -command {set choice 48}");
 cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Generate 'NO WINDOW' version\" -command {set choice 62}");
+cmd(inter, "$w add command -label \"Create 'No Window' Version\" -command {set choice 62}");
 
 cmd(inter, "menu $w.macro -tearoff 0");
 cmd(inter, "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}");
@@ -5841,7 +5841,7 @@ cmd(inter, "toplevel .t");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "wm title .t \"Wait\"");
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
-cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\nNO WINDOW version in other systems.\"");
+cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
 cmd(inter, "pack .t.l1 .t.l2");
 cmd(inter, "focus -force .t");
 cmd(inter, "grab set .t");
@@ -5884,9 +5884,9 @@ if(choice==1)
 }
 cmd(inter, "cd $RootLsd");
 if(choice==1)
-  cmd(inter, "tk_messageBox -type ok -icon error -title \"Generate NO WINDOW executable\" -message \"There is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' without errors. The error list is in the file 'makemessage.txt'.\"");
+  cmd(inter, "tk_messageBox -type ok -icon error -title \"Generate 'No Window' Version\" -message \"There is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' without errors. The error list is in the file 'makemessage.txt'.\"");
 else
-  cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'no window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"");
+  cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"");
 choice=0;
 goto loop;
 
