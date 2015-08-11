@@ -228,9 +228,9 @@ for(;O!=NULL;O=go_brother(O))
 #define MAXS(X,Y) X->overall_max((char*)X,0)
 #define MAXLS(O,X,Y) O->overall_max((char*)X,Y)
 
-#define WRITE(X,Y) p->write((char*)X,Y,0)
+#define WRITE(X,Y) p->write((char*)X,Y,t)
 #define WRITEL(X,Y,Z) p->write((char*)X,Y,Z)
-#define WRITES(O,X,Y) O->write((char*)X,Y,0)
+#define WRITES(O,X,Y) O->write((char*)X,Y,t)
 #define WRITELS(O,X,Y,Z) O->write((char*)X,Y,Z)
 
 #define SEARCH_CND(X,Y) p->search_var_cond((char*)X,Y,0)

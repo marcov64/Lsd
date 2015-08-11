@@ -309,7 +309,7 @@ if(!fast)				// not running in fast mode?
 	}
 	catch(...)
 	{
-		sprintf(msg, "\nException! An unknown problem was detected while computing the Equation for:\n %s\nrequested by Object:\n %sn\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
+		sprintf(msg, "\nException! An unknown problem was detected while computing the Equation for:\n %s\nrequested by Object:\n %s\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
 		plog(msg);
 		error_hard();
 		quit=2;
@@ -360,8 +360,11 @@ else
 stack --;
 //Remove the element of the stack
 stacklog=stacklog->prev;
+if ( stacklog != NULL )
+{
 delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
 stacklog->next=NULL; //REIINSERTED
+}
 /****************/
 under_computation=0;
 

@@ -1355,15 +1355,33 @@ for(cv=v; cv!=NULL; cv=cv->next)
       plog(msg);
       quit=2;
      }
-	 cv->val[0]=value;
-   if(cv->param!=1 && time == 0 && t>1)
+   if(cv->param!=1 && time <= 0 && t>1)
    {
-      sprintf(msg, "\nWARNING: while writing variable '%s' in equation for '%s' the time for the last update is zero.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d\n", lab, stacklog->vs->label, lab, t);
+      sprintf(msg, "\nWARNING: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d\n", lab, stacklog->vs->label, lab, t);
       plog(msg);
+	  cv->val[0]=value;
       cv->last_update=t;
     }
    else
+	// allow for change of initial lagged values when starting simulation (t=1)
+	if ( cv->param != 1 && time < 0 && t == 1 )
+	{
+		if ( - time > cv->num_lag )		// check for invalid lag
+		{
+			sprintf( msg, "\nWhile writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored\n", lab, stacklog->vs->label, time );
+			plog( msg );
+		}
+		else
+		{
+			cv->val[ - time - 1 ] = value;
+			cv->last_update = 0;	// force new updating
+		}
+	}
+	else
+	{
+	 cv->val[0]=value;
    	 cv->last_update=time;
+	}
 	 return;
 	 }
  }
