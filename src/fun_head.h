@@ -139,7 +139,7 @@ cmd(inter, msg); \
 quit=2; \
 return -1; \
 end : \
-if( ((!use_nan && isnan(res)) || isinf(res)==1) && quit!=1) \
+if( ((!use_nan && ::isnan(res)) || ::isinf(res)==1) && quit!=1) \
  { \
   sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
   error(msg); \
