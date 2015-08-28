@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.4 - January 2015
+LSD 7.0 - August 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -568,7 +568,8 @@ cmd(inter, "$w add command -label \"Lsd Quick Help\" -command {LsdHelp QuickHelp
 cmd(inter, "$w add separator");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}");
 cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
-
+cmd( inter, "$w add separator" );
+cmd( inter, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version 7.0 \n\nAugust 2015\" } -underline 0" );
 
 cmd(inter, "bind . <Control-l> {set choice 17}");
 cmd(inter, "bind . <Control-s> {set choice 18}");

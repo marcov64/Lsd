@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 5.2 - December 2003
+LSD 7.0 - August 2015
 written by Marco Valente
 Universita' dell'Aquila
 

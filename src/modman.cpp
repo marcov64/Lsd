@@ -1,6 +1,6 @@
 /***************************************************
 ****************************************************
-LSD 6.5 - July 2015
+LSD 7.0 - August 2015
 written by Marco Valente
 Universita' dell'Aquila
 
@@ -593,7 +593,7 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
 
-cmd(inter, "$w add command -label \"About LMM + Lsd...\" -command {if { [winfo exists .about]==1} {destroy .about } {}; toplevel .about; wm transient .about .; label .about.l -text \"Version 7.0 Beta \n\nJuly 2015\n\n\"; button .about.ok -text \"Ok\" -command {destroy .about}; pack .about.l .about.ok; wm title .about \"\"}"); 
+cmd( inter, "$w add command -label \"About LMM...\" -command { tk_messageBox -type ok -icon info -title \"About LMM\" -message \"Version 7.0 \n\nAugust 2015\" } -underline 0" ); 
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
