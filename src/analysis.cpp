@@ -1220,7 +1220,7 @@ cmd(inter, "entry $r.dim -width 4 -relief sunken -bd 2 -textvariable dim");
 cmd(inter, "pack $r.r.pos.p1 $r.r.pos.p2");
 cmd(inter, "pack $r.r.col $r.r.pos -side left");
 
-cmd(inter, "set heightpost 390");
+cmd(inter, "set heightpost 1");
 //cmd(inter, "checkbutton .filename.lab -text \"Include graph labels\" -variable heightpost -onvalue 390 -offvalue 325");
 cmd(inter, "scan $it %d)%s a b");
 
