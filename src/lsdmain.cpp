@@ -1352,6 +1352,8 @@ cmd(inter, "set posXLog [expr $posX + 340]");
 //cmd(inter, "set posY [winfo y .]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");
 #endif
+cmd( inter, "focus -force .log" );
+
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
 cmd( inter, "rename .log.text.text .log.text.text.internal" );
 cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );

@@ -270,7 +270,7 @@ Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
 //cmd(inter, "wm focusmodel . active");
 choice_g=choice=0;
-cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1} {set choice -1}");
+cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1; focus -force .log} {set choice -1}");
 cmd(inter, "wm resizable . 1 1");
 cmd(inter, "set cur 0"); //Set yview for vars listbox
 
@@ -369,7 +369,7 @@ if(*choice!=7 && *choice!=50 && *choice!=55)
 cmd(inter, "frame .l -relief groove -bd 2");
 cmd(inter, "frame .l.v -relief groove -bd 2");
 cmd(inter, "frame .l.s -relief groove -bd 2");
-cmd(inter, "label .l.v.lab -text Variables");
+cmd(inter, "label .l.v.lab -text \"Variables & Parameters\"");
 cmd(inter, "label .l.s.lab -text Descendants");
 
 cmd(inter, "frame .l.v.c");
@@ -380,7 +380,7 @@ cmd(inter, "bind .l.v.c.var_name <Return> {set res [.l.v.c.var_name curselection
 cmd(inter, "bind .l.v.c.var_name <Right> {focus -force .l.s.son_name; .l.s.son_name selection set 0}");
 
 if(r->v==NULL)
-  cmd(inter, ".l.v.c.var_name insert end \"(no Variables)\"");
+  cmd(inter, ".l.v.c.var_name insert end \"(none)\"");
 else
   {
   cmd(inter, "set app 0");
@@ -423,7 +423,7 @@ cmd(inter, ".l.v.c.var_name yview $cur");
 cmd(inter, "pack .l.v.c.v_scroll -side right -fill y");
 cmd(inter, "listbox .l.s.son_name");
 if(r->b==NULL)
-  cmd(inter, ".l.s.son_name insert end \"(no Objects)\"");
+  cmd(inter, ".l.s.son_name insert end \"(none)\"");
 else
  for(cb=r->b; cb!=NULL; cb=cb->next )
   {
@@ -518,14 +518,10 @@ cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
 cmd(inter, "$w add cascade -label \"Set Number of Objects\" -underline 0 -menu $w.setobj");
 cmd(inter, "$w add command -label \"Initial Values\" -command {set choice 21} -underline 0 -accelerator Ctrl+I");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Full Sensitivity (online)\" -command {set choice 62} -underline 18");
-cmd(inter, "$w add command -label \"Full Sensitivity (batch)\" -command {set choice 63} -underline 0");
-cmd(inter, "$w add command -label \"MC Sampling Sensit. (batch)\" -command {set choice 71} -underline 0");
-cmd(inter, "$w add command -label \"NOLH Sampl. Sensit. (batch)\" -command {set choice 72} -underline 0");
-cmd(inter, "$w add separator");
+cmd(inter, "$w add cascade -label \"Configure Sensitivity Analysis\" -underline 0 -menu $w.setsens");
 cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
 cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
-cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 0");
+cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 11");
 
 cmd(inter, "$w add separator");
 
@@ -537,6 +533,13 @@ cmd(inter, "set w .m.data.setobj");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, "$w add command -label \"All types of objects\" -command {set choice 19} -accelerator Ctrl+O -underline 0");
 cmd(inter, "$w add command -label \"Only current type of object\" -command {set choice 33} -underline 0");
+
+cmd(inter, "set w .m.data.setsens");
+cmd(inter, "menu $w -tearoff 0");
+cmd(inter, "$w add command -label \"Full (online)\" -command {set choice 62} -underline 0");
+cmd(inter, "$w add command -label \"Full (batch)\" -command {set choice 63} -underline 6");
+cmd(inter, "$w add command -label \"MC Sampling (batch)\" -command {set choice 71} -underline 0");
+cmd(inter, "$w add command -label \"NOLH Sampling (batch)\" -command {set choice 72} -underline 0");
 
 cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
