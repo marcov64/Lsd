@@ -558,12 +558,12 @@ cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {se
 cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Compile\" -state disabled -underline 2 -command {set choice 6}");
 cmd(inter, "$w add command -label \"Compile and Run Model...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r");
-cmd(inter, "$w add command -label \"gdb Debug\" -state disabled -underline 0 -command {set choice 13}");
+cmd(inter, "$w add command -label \"gdb Debug\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Show Equations File\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e");
 cmd(inter, "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}");
 cmd(inter, "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}");
-cmd(inter, "$w add command -label \"Show Description\" -underline 1 -state disabled -command {set choice 5}");
+cmd(inter, "$w add command -label \"Show Description\" -underline 1 -state disabled -command {set choice 5} -accelerator Ctrl+d");
 cmd(inter, "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"System Compilation Options...\" -command {set choice 47}");
@@ -713,6 +713,8 @@ cmd(inter, "bind .f.t.t <Control-q> {set choice 1}");
 //cmd(inter, "bind .f.t.t <Control-p> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-u> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-m> {set choice 17}");
+cmd(inter, "bind .f.t.t <Control-g> {set choice 13}");
+cmd(inter, "bind .f.t.t <Control-d> {set choice 5; break}");
 
 
 
