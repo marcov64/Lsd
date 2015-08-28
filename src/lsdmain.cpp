@@ -448,7 +448,7 @@ Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
-cmd( inter, "wm protocol . WM_DELETE_WINDOW { set message [ tk_messageBox -title \"Exit?\" -type okcancel -default cancel -icon warning -message \"Do you really want to close Lsd?\\n\\nAll data generated and not saved will be lost.\" ]; if { $message == \"ok\" } { if { [ discard_change ] == \"ok\" } { exit } { } } }" ); 
+cmd( inter, "wm protocol . WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd(inter, "update");
 
 add_description("Root", "Object", "(no description available)");
@@ -1304,7 +1304,7 @@ void create_logwindow(void)
 cmd(inter, "toplevel .log");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/lsd.xbm} {}");
-cmd( inter, "wm protocol .log WM_DELETE_WINDOW { set message [ tk_messageBox -title \"Exit?\" -type okcancel -default cancel -icon warning -message \"Do you really want to close Lsd?\\n\\nAll data generated and not saved will be lost.\" ]; if { $message == \"ok\" } { if { [ discard_change ] == \"ok\" } { exit } { } } }" ); 
+cmd( inter, "wm protocol .log WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");
 cmd(inter, "wm title .log \"Log\"");

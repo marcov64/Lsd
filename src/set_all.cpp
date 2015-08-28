@@ -91,6 +91,8 @@ extern char msg[];
 extern int t;
 extern object *root;
 extern description *descr;
+extern bool unsavedChange;	// control for unsaved changes in configuration
+extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 
 void cmd(Tcl_Interp *inter, char const *cc);
 double ran1(long *idum);
@@ -436,6 +438,8 @@ case 10:
 		delete [ ] cs->v, cs->label;	// free space
 		delete cs;
 	}
+	else
+	  unsavedSense = true;		// signal unsaved sensitivity change
     break;
 //Equal 
 case 1:
@@ -485,6 +489,7 @@ case 1:
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
+  		unsavedChange = true;		// signal unsaved change
 		  break;
 
 //Range
@@ -548,6 +553,7 @@ case 9:
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
+  		unsavedChange = true;		// signal unsaved change
 		  break;
 
 case 2: //increasing
@@ -603,6 +609,7 @@ case 2: //increasing
          change_descr_lab(lab, "", "", "", msg);
         }  
         }
+  		unsavedChange = true;		// signal unsaved change
         break;
 case 4: cv=r->search_var(NULL, lab);
 		  for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
@@ -653,6 +660,7 @@ case 4: cv=r->search_var(NULL, lab);
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
+  		unsavedChange = true;		// signal unsaved change
 
         break;
 
@@ -706,6 +714,7 @@ case 3:
         }  
        }
 
+  		unsavedChange = true;		// signal unsaved change
 
 		  break;
 case 5: 
@@ -759,6 +768,7 @@ case 5:
            change_descr_lab(lab, "", "", "", msg);        
         }  
        }
+  		unsavedChange = true;		// signal unsaved change
 
 		  break;
 
@@ -813,6 +823,7 @@ case 6: cv=r->search_var(NULL, lab);
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
+  		unsavedChange = true;		// signal unsaved change
 
         break;
 
@@ -901,6 +912,7 @@ if(l!=(char *)NULL && strcmp(l, ""))
     
     }
    }
+  unsavedChange = true;		// signal unsaved change
 break;
 
 case 8:
@@ -954,6 +966,7 @@ case 8:
         }  
        }
 
+  		unsavedChange = true;		// signal unsaved change
 
 		  break;
 

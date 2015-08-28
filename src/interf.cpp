@@ -188,8 +188,7 @@ int num_sensitivity_variables( sense *rsens );	// calculates the number of varia
 void empty_sensitivity(sense *cs);
 void set_all(int *choice, object *original, char *lab, int lag);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
-bool discard_change( bool checkSense = true );	// ask before discarding unsaved changes
-bool discard_sense( void );						// ask before discarding unsaved sensitivity changes
+bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
 
 extern object *root;
 extern char *simul_name;
@@ -2242,9 +2241,7 @@ return(n);
 
 //Exit Lsd
 case 11:
-    cmd( inter, "set exit [ tk_messageBox -title \"Exit?\" -type okcancel -default ok -icon info -message \"You are closing Lsd.\\n\\nAll data generated and not saved will be lost.\" ]; if { $exit == \"ok\" } { set choice 1 } { set choice 2 }" ); 
-
-	if(*choice==1 && discard_change( ) )	// unsaved configuration changes ?
+	if ( discard_change( ) )	// unsaved configuration changes ?
 		myexit(0);
 	cmd(inter, "destroy .m .l");
 	*choice=0;
@@ -4326,7 +4323,7 @@ case 67:
 		break;
 	}
 	
-	if ( ! discard_sense( ) )	// unsaved configuration?
+	if ( ! discard_change( true, true ) )	// unsaved configuration?
 		break;
 
 	// empty sensitivity data
@@ -5164,53 +5161,38 @@ plog("\nError in shift_desc: should never reach this line\n");
 	Ask user to discard changes in configuration, if applicable
 	Returns: 0: abort, 1: continue without saving
 */
-
-bool discard_change( bool checkSense )
+bool discard_change( bool checkSense, bool senseOnly )
 {
-	bool discard;
-	
-	// just run or nothing to save?
-	if ( actual_steps > 0 || ! unsavedChange )
-		discard = true;					// simply discard configuration
-	else
-	{
-		Tcl_SetVar( inter, "filename", simul_name , 0 );
-		// ask the user what to do
-		cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' have not been saved!\n\nDo you want to discard them and continue?\"]" );
-		cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
-		const char *ans = Tcl_GetVar( inter, "ans", 0 );
-		discard = atoi( ans );
-	}
-	
- 	// check also for sensitivity data changed
-	if ( discard && ( ! checkSense || discard_sense( ) ) )
+	// nothing to save?
+	if ( actual_steps == 0 && ! unsavedChange && ! unsavedSense )
+		return true;					// yes: simply discard configuration
+	else								// no: ask for confirmation
+		if ( ! senseOnly && actual_steps > 0 )
+			cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard data?\" -message \"All data generated and not saved will be lost!\n\nDo you want to continue?\"]" );
+		else
+			if ( ! senseOnly && unsavedChange )
+			{
+				Tcl_SetVar( inter, "filename", simul_name , 0 );
+				cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' are not saved!\n\nDo you want to discard and continue?\"]" );
+			}
+			else						// there is unsaved sense data
+				if ( checkSense )
+					cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data are not saved!\n\nDo you want to discard and continue?\"]" );
+				else
+					return true;		// checking sensitivity data is disabled
+
+	cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
+	const char *ans = Tcl_GetVar( inter, "ans", 0 );
+	if ( atoi( ans ) == 1 )
 		return true;
 	else
 		return false;
 }
 
-/*
-	Ask user to discard changes in sensitivity data, if applicable
-	Returns: 0: abort, 1: continue without saving
-*/
-
-bool discard_sense( void )
-{
-	// nothing to save?
-	if ( rsense == NULL || ! unsavedSense )
-		return true;					// simply discard
-
-	// ask the user what to do
-	cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data have not been saved!\n\nDo you want to discard them and continue?]" );
-	cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
-	const char *ans = Tcl_GetVar( inter, "ans", 0 );
-	return atoi( ans );
-}
-
 // Entry point function for access from the Tcl interpreter
 int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
-	if ( discard_change( true ) == 1 )
+	if ( discard_change( ) == 1 )
 		inter->result = ( char * ) "ok";
 	else
 		inter->result = ( char * ) "cancel";
