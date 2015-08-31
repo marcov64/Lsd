@@ -16,27 +16,6 @@ Comments and bug reports to marco.valente@univaq.it
 used up to 69 options included
 *******/
 
-/* TEST UNDO:
-
-Set uscounter=-1
-Command to store:
-bind .t <KeyPress-Return> {lappend ud [.t get 0.0 "end - 1 chars"]; lappend udi [.t index insert]; incr udcounter}
-<<repeat for space and any other word terminal of choice>>
-
-Command to retrieve:
-bind .t <Control-z> {if {$udcounter < 0 } {} {.t delete 0.0 end; .t insert 0.0 [lindex $ud $udcounter]; .t delete end; .t see [lindex $udi $udcounter]; .t mark set insert [lindex $udi $udcounter]; incr udcounter -1}}
-
-bind .t <Control-z> {if {[llength $ud] ==0 } {} {lappend rd [.t get 0.0 "end - 1 chars"]; lappend rdi [.t index insert]; .t delete 0.0 end; .t insert 0.0 [lindex $ud end]; .t delete end; .t see [lindex $udi end]; .t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]}}
-
-bind .t <Control-y> {if {[llength $rd] ==0} {} {lappend ud [.t get 0.0 "end -1 chars"]; lappend udi [.t index insert]; .t delete 0.0 end; .t insert 0.0 [lindex $rd end]; .t delete end; .t see [lindex $rdi end]; .t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]} }
-
-- Adjust for controlling of negative udcounter
-- Adjust the "see", probably to replace with yview
-
-
-ERROR! The "lappend" command increases always the list. When an "undo" is done, , the list should be shortened.
-********************/
-
 /*****************************************************
 This program is a front end for dealing with Lsd models code (running, compiling, editing, debugging 
 Lsd model programs). See the manual for help on its use (really needed?)
@@ -47,14 +26,9 @@ a programming environment for Lsd model programs.
 
 This file can be compiled with the command line:
 
-gcc -g src\modman.cpp -Lgnu/lib -ltcl83 -ltk83 -Ignu/include -o lmm -Wl,--subsystem,windows
+make -f <makefile>
 
-or
-
-gcc -g modman.cpp -ltcl8.3 -ltk8.3 -o lmm
-
-for Windows or Unix systems respectively (changes may be required depending on your installation directories.
-
+There are several makefiles in Lsd root directory appropriate to different environments (Windows, Mac & Linux) and configurations (32 or 64-bit)
 
 LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick is required because under Windows there are troubles launchins external package from a "first instance" of a program.
 
@@ -445,17 +419,33 @@ cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global Root
  
 cmd(inter, "proc lmmraise {win ent} {wm focusmodel . active; if { $ent!=\"\"} {focus -force $ent} {focus -force $win}; wm focusmodel . passive}");
 
-//cmd(inter, "proc blocklmm w {set curfoc [focus -displayof .]; tk_messageBox -message \"My focus is\n$curfoc\nLast for focus is\n[focus -displayof $w]\"; bind $w <Leave> {set curfoc [focus -displayof $w]};  bind .f.t.t <1> {focus -force $curfoc};  wm transient $w .;.f.t.t conf -state disabled}");
-//tk_messageBox -message \"My focus is\n[focus -lastfor $w]\nLast for focus is\n[focus -displayof $w]\";
-cmd(inter, "proc blocklmm w {  bind .f.t.t <1> { raise $w .; focus -force [focus -lastfor $w]};  wm transient $w .;bind . <Escape> {sblocklmm $w}; bind . <1> {sblocklmm $w}; .f.t.t conf -state disabled}");
-cmd(inter, "proc sblocklmm w {bind .f.t.t <1> {}; .f.t.t conf -state normal; destroy $w; focus -force .f.t.t; bind .f.t.t <Escape> {} }");
+cmd(inter, "proc blocklmm w { wm transient $w [ winfo parent $w ]; raise $w; focus -force [focus -lastfor $w]; grab set $w }");
+cmd(inter, "proc sblocklmm w { grab release $w; destroy $w; focus -force .f.t.t }");
+
+#ifdef DUAL_MONITOR
+/* procedures to adjust window positioning (settings for dual and single monitor setups). Three types for positioning:
+	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
+	centerW: center over the parent window (in any display)
+	topleft: put over the top left corner of parent window (below menu bar)
+*/
+// check if window center is in primary display
+cmd( inter, "proc primdisp w { if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } { return true } { return false } } " );
+// compute x and y coordinates of new window according to the types
+cmd( inter, "proc getx { w type } { switch $type { centerS { return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ] } centerW { return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ] } topleft { return [ expr [ winfo x [ winfo parent $w ] ] + 5 ] } } }" );
+cmd( inter, "proc gety { w type } { switch $type { centerS { return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ] } centerW { return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ] } topleft { return [ expr [ winfo y [ winfo parent $w ] ] + 50 ] } } }" );
+// configure the window
+cmd( inter, "proc setgeom { w { type centerW } } { wm withdraw $w; update idletasks; if { [ string equal $type centerS ] && ! [ primdisp [ winfo parent $w ] ] } { set type centerW }; set x [ getx $w $type ]; set y [ gety $w $type ]; wm geom $w +$x+$y; update; wm deiconify $w; wm transient $w [ winfo parent $w ] }" );
+#else
+// old centering procedure (doesn't work well for dual monitor), probably obsolete
+cmd( inter, "proc setgeom { w { type window_center } } { wm withdraw $w; update idletasks; set x [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 - [ winfo vrootx [ winfo parent $w ] ] ]; set y [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 - [ winfo vrooty [ winfo parent $w ] ] ]; wm geom $w +$x+$y; update; wm deiconify $w }");
+#endif
 
 // procedures to adjust tab size according to font type and size and text wrapping
 cmd( inter, "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
 cmd( inter, "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
 
 cmd(inter, "wm title . \"LMM - Lsd Model Manager\"");
-cmd(inter, "wm protocol . WM_DELETE_WINDOW {set choice 1}");
+cmd(inter, "wm protocol . WM_DELETE_WINDOW { set choice 1 }");
 cmd(inter, "bind . <Destroy> {set choice -1}");
 cmd(inter, "set choice 0");
 cmd(inter, "set recolor \"\"");
@@ -487,23 +477,24 @@ cmd(inter, "$w add command -label \"Open...\" -command { set choice 15} -underli
 cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}} -underline 0 -accelerator Ctrl+s");
 cmd(inter, "$w add command -label \"Save As...\" -command {set choice 4} -underline 5 -accelerator Ctrl+a");
 cmd(inter, "$w add separator");
+cmd(inter, "$w add command -label \"TkDiff...\" -command {set choice 57} -underline 0");
+
+cmd(inter, "$w add separator");
+cmd(inter, "$w add command -label \"Options...\" -command { set choice 60} -underline 1");
+cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Ctrl+q");
-
-//cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"System Options\" -command { set choice 60} } {}");
-
-cmd(inter, "$w add command -label \"System Options...\" -command { set choice 60} ");
 
 cmd(inter, "set w .m.edit");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Edit -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Ctrl+c");
-
-// collect information to focus recoloring
-cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Ctrl+x");
-cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Ctrl+v");
 // make menu the same as ctrl-z/y (more color friendly)
 cmd(inter, "$w add command -label \"Undo\" -command {catch {.f.t.t edit undo}} -underline 0 -accelerator Ctrl+z");
 cmd(inter, "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -underline 2 -accelerator Ctrl+y");
+cmd(inter, "$w add separator");
+// collect information to focus recoloring
+cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Ctrl+x");
+cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Ctrl+c");
+cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Ctrl+v");
 
 //cmd(inter, "$w add command -label \"Cut\" -command {tk_textCut .f.t.t} -underline 1");
 //cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Ctrl+v");
@@ -511,66 +502,59 @@ cmd(inter, "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -
 //cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Ctrl+y");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Goto Line...\" -command {set choice 10} -underline 5 -accelerator Ctrl+l");
 cmd(inter, "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f");
 cmd(inter, "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3");
 cmd(inter, "$w add command -label \"Replace...\" -command {set choice 21} -underline 0");
+cmd(inter, "$w add command -label \"Goto Line...\" -command {set choice 10} -underline 5 -accelerator Ctrl+l");
 cmd(inter, "$w add separator");
 
-cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -underline 0 -accelerator Ctrl+m");
-cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -underline 0 -accelerator Ctrl+u");
-cmd(inter, "$w add separator");
+cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -accelerator Ctrl+m");
+cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -accelerator Ctrl+u");
 cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Ctrl+\\\(");
 cmd(inter, "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Ctrl+\\)");
-cmd(inter, "$w add command -label \"Insert Lsd Scripts...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w ");
+cmd(inter, "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Ctrl+>");
+cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Ctrl+<");
+cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'");
 cmd(inter, "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'");
-cmd(inter, "$w add command -label \"Change Font...\" -command {set choice 59} ");
-cmd(inter, "$w add command -label \"Change Tab Size...\" -command {set choice 67} ");
-
+cmd(inter, "$w add command -label \"Change Font...\" -command {set choice 59} -underline 8");
+cmd(inter, "$w add separator");
 // add option to ajust syntax highlighting (word coloring)
 cmd(inter, "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0");
+cmd(inter, "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w ");
+cmd(inter, "$w add command -label \"Change Tab Size...\" -command {set choice 67} -underline 7");
+cmd(inter, "$w add command -label \"Insert Lsd Scripts...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i");
+
 cmd(inter, "menu $w.color -tearoff 0");
 cmd(inter, "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Ctrl+;\"");
 cmd(inter, "$w.color add radio -label \" Partial\" -variable shigh -value 1 -command {set choice 65} -underline 1 -accelerator Ctrl+,");
 cmd(inter, "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set choice 66} -underline 1 -accelerator Ctrl+.");
 
-cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Ctrl+>");
-cmd(inter, "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Ctrl+<");
-
-cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"TkDiff...\" -command {set choice 57}");
-cmd(inter, "$w add command -label \"Compare Models...\" -command {set choice 61}");
-//cmd(inter, "$w add command -label \"LMM Options\" -command {set choice 63}");
-
-
 cmd(inter, "set w .m.model");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
-cmd(inter, "$w add cascade -label \"Equations' Coding Style\" -menu $w.macro");
-cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33}");
 //cmd(inter, "$w add command -label \"New Model\" -underline 0 -command { set choice 14}");
 //cmd(inter, "$w add command -label \"Copy Model\" -state disabled -underline 0 -command { set choice 41}");
+cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b");
+cmd(inter, "$w add command -label \"Compare Models...\" -underline 3 -command {set choice 61}");
 cmd(inter, "$w add separator");
-//cmd(inter, "$w add command -label \"Compile\" -state disabled -underline 2 -command {set choice 6}");
 cmd(inter, "$w add command -label \"Compile and Run Model...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r");
-cmd(inter, "$w add command -label \"gdb Debug\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g");
-cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Show Equations File\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e");
-cmd(inter, "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}");
-cmd(inter, "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}");
-cmd(inter, "$w add command -label \"Show Description\" -underline 1 -state disabled -command {set choice 5} -accelerator Ctrl+d");
+cmd(inter, "$w add command -label \"Compile Model\" -state disabled -underline 2 -command {set choice 6} -accelerator Ctrl+p");
+cmd(inter, "$w add command -label \"GDB Debugger\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g");
+cmd(inter, "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command {set choice 62}");
 cmd(inter, "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"System Compilation Options...\" -command {set choice 47}");
-cmd(inter, "$w add command -label \"Model Compilation Options...\" -state disabled -command {set choice 48}");
-cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
+cmd(inter, "$w add command -label \"Show Description\" -underline 5 -state disabled -command {set choice 5} -accelerator Ctrl+d");
+cmd(inter, "$w add command -label \"Show Equations\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e");
+cmd(inter, "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}");
+cmd(inter, "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Create 'No Window' Version\" -command {set choice 62}");
+cmd(inter, "$w add command -label \"Model Compilation Options...\" -underline 2 -state disabled -command {set choice 48}");
+cmd(inter, "$w add command -label \"System Compilation Options...\" -underline 0 -command {set choice 47}");
+cmd(inter, "$w add separator");
+cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
+cmd(inter, "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro");
 
 cmd(inter, "menu $w.macro -tearoff 0");
 cmd(inter, "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}");
@@ -710,11 +694,12 @@ cmd(inter, "bind .f.t.t <Control-r> {set choice 2}");
 cmd(inter, "bind .f.t.t <Control-e> {set choice 8}");
 cmd(inter, "bind .f.t.t <Control-KeyRelease-o> {if {$tk_strictMotif == 0} {set a [.f.t.t index insert]; .f.t.t delete \"$a lineend\"} {}; set choice 15; break}");
 cmd(inter, "bind .f.t.t <Control-q> {set choice 1}");
-//cmd(inter, "bind .f.t.t <Control-p> {set choice 32}");
+cmd(inter, "bind .f.t.t <Control-p> {set choice 6; break}");
 cmd(inter, "bind .f.t.t <Control-u> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-m> {set choice 17}");
 cmd(inter, "bind .f.t.t <Control-g> {set choice 13}");
 cmd(inter, "bind .f.t.t <Control-d> {set choice 5; break}");
+cmd(inter, "bind .f.t.t <Control-b> {set choice 33; break}");
 
 
 
@@ -874,7 +859,7 @@ if(argn>1)
      cmd(inter, msg);
      cmd(inter, "set dirname [file dirname \"$filetoload\"]");
      cmd(inter, "set before [.f.t.t get 1.0 end]; .f.hea.file.dat conf -text \"$filename\"");
-    cmd(inter, "wm title . \"LMM - $filename\"");          
+    cmd(inter, "wm title . \"$filename - LMM\"");          
      
      sprintf(msg, "set s [file extension \"$filetoload\"]" );
      cmd(inter, msg);
@@ -895,27 +880,7 @@ if(argn>1)
 
     }
    else
-    {
-    cmd(inter, "toplevel .a");
-    cmd(inter, "label .a.l1 -text \"File:\"");
-    cmd(inter, "label .a.l2 -text \"$filetoload\" -foreground red");
-    cmd(inter, "label .a.l3 -text \"not found\"");
-    cmd(inter, "button .a.ok -text Continue -command {set choice -2}");
-    cmd(inter, "pack .a.l1 .a.l2 .a.l3 .a.ok");
-    choice=0;
-#ifndef DUAL_MONITOR
-    cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-    cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-    cmd(inter, "focus -force .a.ok");
-    cmd(inter, "blocklmm .a");
-    while(choice==0)
-     Tcl_DoOneEvent(0);
-    cmd(inter, "sblocklmm .a");
-    
-    //cmd(inter, "tk_messageBox -type yesno -title \"Warning\" -message \"File\\n$filetoload\\nnot found.\"");
-    } 
+	cmd( inter, "tk_messageBox -parent .f.t.t -type ok -icon error -title \"Error\" -message \"File\\n$filetoload\\nnot found.\"");
    
   }
  else
@@ -957,7 +922,7 @@ if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==
   {
 
 //  cmd(inter, "set answer [tk_dialog .dia \"Save?\" \"Save the file $filename?\" \"\" 0 yes no cancel]");
-  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save file?\" -message \"Recent changes to file '$filename' have not been saved. Do you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
+  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save File?\" -message \"Recent changes to file '$filename' have not been saved. Do you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
   //cmd(inter, " if { $answer == \"yes\"} {set tk_strictMotif 0; set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname]; set tk_strictMotif 1; if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");
   
 //cmd(inter, " if { $answer == \"yes\"} { set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname];  if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");  if(choice==0)
@@ -1007,7 +972,7 @@ cmd(inter, "wm geom . [expr $w]x$h+$x+$y"); // main window geometry setting
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm title .a \"Choose\"");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "wm protocol .a WM_DELETE_WINDOW { set temp 0; .a.b.ok invoke }" );
 
 cmd(inter, "frame .a.f -relief groove -bd 4");
 cmd(inter, "set temp 33");
@@ -1024,19 +989,13 @@ cmd(inter, "pack .a.f.l ");
 cmd(inter, "pack .a.f.r1 .a.f.r2 .a.f.r3 -anchor w -fill x ");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.help -text Help -command {LsdHelp LMM_help.html#introduction}");
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "pack .a.b.ok .a.b.help -side left");
-cmd(inter, "pack  .a.f -fill x -expand yes");
-cmd(inter, "pack .a.b");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#introduction}");
+cmd(inter, "pack .a.b.ok .a.b.help -padx 1 -pady 5 -side left");
+cmd(inter, "pack  .a.f .a.b -fill x");
 cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {set temp 0; .a.b.ok invoke}");
-cmd(inter, "set w .a; wm withdraw $w; update idletasks");
-#ifndef DUAL_MONITOR
-cmd(inter, "set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "set i 1; bind .a <Down> { if { $i < 3 } {incr i; .a.f.r$i invoke} {} }"); 
 cmd(inter, "bind .a <Up> { if { $i > 1 } {incr i -1; .a.f.r$i invoke} {} }");
 cmd(inter, "focus -force .a.f.r1");
@@ -1053,16 +1012,17 @@ cmd(inter, "set choice $temp");
 goto loop;
 }
 
-if(choice==2)
+if ( choice == 2 || choice == 6 )
  {
+/*compile the model, invoking make*/
 /*Run the model in the selection*/
 
-
+bool run = ( choice == 2 ) ? true : false;
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {//this control is obsolete, since  model must be selected in order to arrive here
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected. Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"No model selected. Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1083,7 +1043,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1094,7 +1054,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
     choice=0;
     goto loop;
    }
@@ -1107,7 +1067,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1118,7 +1078,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
     choice=0;
     goto loop;
    }
@@ -1129,19 +1089,18 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "toplevel .t");
   // change window icon
   cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
-  cmd(inter, "wm title .t \"Wait\"");
+  cmd(inter, "wm title .t \"Please Wait\"");
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
-  cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
+  if ( run )
+	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
+  else
+	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2");
-  if( ! strcmp( s, "1" ) )			// auto hide LMM if appropriate
+  if ( run && ! strcmp( s, "1" ) )	// auto hide LMM if appropriate
 	cmd(inter, "wm iconify .");
   cmd(inter, "focus -force .t");
-  cmd(inter, "grab set .t");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+  cmd( inter, "setgeom .t" );
+  cmd(inter, "blocklmm .t");
   cmd(inter, "update");  
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
   if(choice==0)
@@ -1164,6 +1123,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 
    }
+  cmd(inter, "sblocklmm .t");
   cmd(inter, "destroy .t");
 //  cmd(inter, "wm deiconify .");  // only reopen if error
   cmd(inter, "update");
@@ -1204,7 +1164,7 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
    cmd(inter, "label .a.l -text \"Compilation issued an error message, but a model program exists, probably generated with an version of the equation file.\\n.\\nDo you want to run the existing model program anyway?\"");
    cmd(inter, "pack .a.l");
    cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -text Help -command {LsdHelp LMM_help.html#run}");
+   cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#run}");
    cmd(inter, "button .a.b.run -text Run -command {set choice 1}");
    cmd(inter, "button .a.b.norun -text \"Don't run\" -command {set choice 2}");
    cmd(inter, "pack .a.b.run .a.b.norun .a.b.help -side left -expand yes -fill x");
@@ -1246,7 +1206,7 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
    cmd(inter, "label .a.l -text \"Compilation issued an error message.\\nFix the errors and try again\"");
    cmd(inter, "pack .a.l");
    cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -text Help -command {LsdHelp LMM_help.html#run}");
+   cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#run}");
    cmd(inter, "button .a.b.run -text Ok -command {set choice 1}");
    cmd(inter, "pack .a.b.run .a.b.help -side left -expand yes -fill x");
    cmd(inter, "pack .a.b -fill x");
@@ -1263,21 +1223,22 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
    /**************/ 
    }
   else
-  {//no problem
-   strcpy(str1, str+7);
-    cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}");
-    if(choice==1) //unix
-     sprintf(msg,"exec ./%s &",str1);
-    if(choice==2) //win2k
-     sprintf(msg, "exec %s.exe &", str1); //Changed
-    if(choice==3) //win 95/98
-     sprintf(msg, "exec start %s.exe &", str1);
-    if(choice==4)  //win NT
-     sprintf(msg, "exec cmd /c start %s.exe &", str1);
-     
-    cmd(inter, msg);
-    choice=0;
-   } 
+	if ( run )
+    {//no problem
+     strcpy(str1, str+7);
+      cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}");
+      if(choice==1) //unix
+       sprintf(msg,"exec ./%s &",str1);
+      if(choice==2) //win2k
+       sprintf(msg, "exec %s.exe &", str1); //Changed
+      if(choice==3) //win 95/98
+       sprintf(msg, "exec start %s.exe &", str1);
+      if(choice==4)  //win NT
+       sprintf(msg, "exec cmd /c start %s.exe &", str1);
+       
+      cmd(inter, msg);
+      choice=0;
+     } 
  cmd(inter, "cd $RootLsd");
  choice=0;
  cmd(inter, "focus -force .f.t.t");
@@ -1295,7 +1256,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {//this control is obsolete, since  model must be selected in order to arrive here
-     cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
+     cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
   choice=0;
   goto loop;
  }
@@ -1316,8 +1277,8 @@ cmd(inter, "set before [.f.t.t get 1.0 end]");
 cmd(inter, "set filename makefile");
 cmd(inter, ".f.t.t mark set insert 1.0");
 cmd(inter, ".f.hea.file.dat conf -text \"makefile\"");
-cmd(inter, "wm title . \"LMM - makefile\"");
-cmd(inter, "tk_messageBox -title Warning -type ok -default ok -message \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Choose System Compilation options an Model Compilation Options (menu Model).\"");  
+cmd(inter, "wm title . \"Makefile - LMM\"");
+cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Choose System Compilation options in Model Compilation Options (menu Model).\"");  
 choice=0;
 goto loop;
 }
@@ -1341,7 +1302,7 @@ if(s!=NULL && strcmp(s, ""))
   cmd(inter, "set dirname [file dirname $curfilename]");
   cmd(inter, "set filename [file tail $curfilename]");
   cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
-  cmd(inter, "wm title . \"LMM - $filename\"");
+  cmd(inter, "wm title . \"$filename - LMM\"");
  }
  choice=0;
  goto loop;
@@ -1354,7 +1315,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
   choice=0;
   goto loop;
  }
@@ -1373,7 +1334,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "set before [.f.t.t get 1.0 end]");
   cmd(inter, "set filename description.txt");
   cmd(inter, ".f.hea.file.dat conf -text $filename");
-  cmd(inter, "wm title . \"LMM - $filename\"");
+  cmd(inter, "wm title . \"$filename - LMM\"");
   cmd(inter, "catch [unset -nocomplain ud]");
   cmd(inter, "catch [unset -nocomplain udi]");
   cmd(inter, "catch [unset -nocomplain rd]");
@@ -1388,71 +1349,6 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
 }
  
-if(choice==6)
- {
- /*compile the model, invoking make*/
-s=(char *)Tcl_GetVar(inter, "modelname",0);
-if(s==NULL || !strcmp(s, ""))
- {
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
-  choice=0;
-  goto loop;
- }
-
-cmd(inter, "cd $modeldir");
-make_makefile();
-cmd(inter, "if { [file exists makefile] == 1 } {set choice 1} {set choice 0}");
-if(choice==0)
- {
-      cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\"");
-  choice=0;
-  goto loop;
- 
- }
-  delete_compresult_window( );		// close any open compilation results window
-
-  cmd(inter, "toplevel .t");
-  // change window icon
-  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
-  cmd(inter, "wm title .t \"Wait\"");
-  cmd(inter, "label .t.l -text \"Making model.\nThe system is checking the files modified since the last compilation and recompiling as necessary.\nAt the end, the output of the process will appear in the text window and in the file makemessage.txt\"");
-  cmd(inter, "pack .t.l");
-  cmd(inter, "wm iconify .");
-  cmd(inter, "focus -force .t.l");
-  cmd(inter, "grab set .t.l");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  //cmd(inter, "set w .t; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-  
-  cmd(inter, "if {[file isdirectory ../$LsdGnu/bin ] == 1} {set a [../$LsdGnu/bin/make]} {set a \"make\"}");
-
-  cmd(inter, "catch [exec $a 2> makemessage.txt]"); 
-  cmd(inter, "destroy .t");
-  cmd(inter, "wm deiconify .");
-  cmd(inter, "if { [file size makemessage.txt]==0 } {set choice 0} {set choice 1}");
-  if(choice==0)
-   {
-    cmd(inter, "set answer [tk_messageBox -type yesno -message \"Compilation succeeded.\\nRun the model now?\" -title \"Model Compiled\"]"); 
-  s=(char *)Tcl_GetVar(inter, "answer",0);
-
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 2} {set choice 0}");
-  cmd(inter, "cd $RootLsd");
-  goto loop;
-  }
-//continue only if there are messages   
-  create_compresult_window();
-  cmd(inter, "cd $RootLsd");
-
-  cmd(inter, "tk_messageBox -type ok -message \"Compilation issued messages, possibly errors.\\nSee the compilation results.\" -title \"Model Compiled\""); 
-
-
-  choice =0;
-  goto loop;
- }
-
 if(choice==7)
  {
  /*Show compilation result*/
@@ -1460,7 +1356,7 @@ if(choice==7)
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
   choice=0;
   goto loop;
  }
@@ -1486,7 +1382,7 @@ cmd(inter, "lappend udi [.f.t.t index insert]");
   else
   {
 
-   cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No compilation results.\"");
+   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No compilation results.\"");
   choice=0;
   goto loop;
 
@@ -1505,7 +1401,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-       cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
+       cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
   choice=0;
   goto loop;
  }
@@ -1521,7 +1417,7 @@ if(s==NULL || !strcmp(s, ""))
   if(f==NULL)
    {
    
-    cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\\nAdd a makefile to model $modelname\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\nAdd a makefile to model $modelname.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1532,7 +1428,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
     choice=0;
     goto loop;
    }
@@ -1603,22 +1499,19 @@ cmd(inter, "wm protocol .search_line WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .search_line \"Goto Line\"");
 cmd(inter, "wm transient .search_line .");
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
-cmd(inter, "entry .search_line.e -width 30 -textvariable line");
-cmd(inter, "button .search_line.ok -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
-cmd(inter, "button .search_line.esc -text Close -command {sblocklmm .search_line}");
-cmd(inter, "bind .search_line <KeyPress-Return> {.search_line.ok invoke}");
-cmd(inter, "bind .search_line <KeyPress-Escape> {.search_line.esc invoke}");
+cmd(inter, "entry .search_line.e -justify center -width 10 -textvariable line");
+cmd(inter, "frame .search_line.b");
+cmd(inter, "button .search_line.b.ok -padx 25 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
+cmd(inter, "button .search_line.b.esc -padx 15 -text Cancel -command {sblocklmm .search_line}");
+cmd(inter, "bind .search_line <KeyPress-Return> {.search_line.b.ok invoke}");
+cmd(inter, "bind .search_line <KeyPress-Escape> {.search_line.b.esc invoke}");
 
-cmd(inter, "pack .search_line.l .search_line.e .search_line.ok .search_line.esc -fill y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .search_line; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .search_line; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-//cmd(inter, "set w .search_line; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-  
+cmd(inter, "pack .search_line.b.ok .search_line.b.esc -padx 1 -pady 5 -side left");
+cmd(inter, "pack .search_line.l .search_line.e .search_line.b");
+cmd( inter, "setgeom .search_line" );
 
 cmd(inter, "focus -force .search_line.e");
+cmd(inter, "blocklmm .search_line");
 choice=0;
 goto loop;
 }
@@ -1644,25 +1537,23 @@ cmd(inter, "checkbutton .find.c -text \"Case Sensitive\" -variable docase");
 cmd(inter, "radiobutton .find.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command {set endsearch end}");
 cmd(inter, "radiobutton .find.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
 
-cmd(inter, "button .find.ok -text Ok -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; sblocklmm .find} {.find.e selection range 0 end; bell}}");
+cmd(inter, "frame .find.b");
+cmd(inter, "button .find.b.ok -padx 15 -text Search -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; sblocklmm .find} {.find.e selection range 0 end; bell}}");
 
 cmd(inter, "bind .find.e <Up> {if { $curcounter >= 0} {incr curcounter -1; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 cmd(inter, "bind .find.e <Down> {if { $curcounter <= $lfindcounter} {incr curcounter; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 
-cmd(inter, "button .find.esc -text Cancel -command {sblocklmm .find}");
+cmd(inter, "button .find.b.esc -padx 15 -text Cancel -command {sblocklmm .find}");
 
 
-cmd(inter, "bind .find <KeyPress-Return> {.find.ok invoke}");
-cmd(inter, "bind .find <KeyPress-Escape> {.find.esc invoke}");
+cmd(inter, "bind .find <KeyPress-Return> {.find.b.ok invoke}");
+cmd(inter, "bind .find <KeyPress-Escape> {.find.b.esc invoke}");
 
-cmd(inter, "pack .find.l .find.e .find.r1 .find.r2 .find.c .find.ok .find.esc");
+cmd(inter, "pack .find.b.ok .find.b.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .find.l .find.e .find.r1 .find.r2 .find.c -fill x");
+cmd(inter, "pack .find.b");
 
-//cmd(inter, "set w .l; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .find; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .find; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .find" );
 cmd(inter, "blocklmm .find");
 cmd(inter, "focus -force .find.e");
 
@@ -1686,7 +1577,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-       cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"No model selected.\"");
+       cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
   choice=0;
   goto loop;
  }
@@ -1711,7 +1602,7 @@ if(s==NULL || !strcmp(s, ""))
   
   if(f==NULL)
    {
-    cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' for model $modelname not found.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' for model '$modelname' not found.\"");
     choice=0;
     cmd(inter, "cd $RootLsd");
     goto loop;
@@ -1720,7 +1611,7 @@ if(s==NULL || !strcmp(s, ""))
   while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
     choice=0;
     goto loop;
    }
@@ -1778,7 +1669,7 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
 	{
 		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 		{
-			cmd( inter, "set answer [t k_messageBox -title Warning -icon warning -type okcancel -default cancel -message \"The executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if { $answer == ok } { set choice 1 } { set choice 2 }" );
+			cmd( inter, "set answer [t k_messageBox -title Warning -icon warning -type okcancel -default cancel -message \"The executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if { string equal -nocase $answer ok } { set choice 1 } { set choice 2 }" );
 			if ( choice == 2 )
 			{
 				choice = 0;
@@ -1793,7 +1684,7 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
    } 
   else
    {//executable not found
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"Executable not found. Compile the model before running it in the GDB debugger.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"Executable not found. Compile the model before running it in the GDB debugger.\"");
   choice=0;
   goto loop;
     choice=0;
@@ -1817,7 +1708,7 @@ choice=0;
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New model or group?\"");
+cmd(inter, "wm title .a \"New Model or Group\"");
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Current group:\\n$modelgroup\"");
 cmd(inter, "frame .a.f -relief groove");
@@ -1826,21 +1717,18 @@ cmd(inter, "set temp 1");
 cmd(inter, "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -justify left -relief groove -anchor w");
 cmd(inter, "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -justify left -relief groove -anchor w");
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
-cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w -fill x");
-cmd(inter, "pack .a.b.ok .a.b.esc -side left");
-cmd(inter, "pack .a.tit .a.f .a.b");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.f.r1 .a.f.r2 -fill x");
+cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.tit .a.f -fill x");
+cmd(inter, "pack .a.b");
 cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "bind .a <Up> {.a.f.r1 invoke}");
 cmd(inter, "bind .a <Down> {.a.f.r2 invoke}");
 
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -1859,7 +1747,7 @@ if(choice==2)
 {
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New group\"");
+cmd(inter, "wm title .a \"New Group\"");
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Create a new group in group:\\n $modelgroup\"");
 
@@ -1878,18 +1766,14 @@ cmd(inter, "text .a.tdes -width 30 -heig 3");
 cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.esc -side left -fill x");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.tit .a.mname .a.ename .a.mdir .a.edir .a.ldes .a.tdes -anchor w");
+cmd(inter, "pack .a.tit .a.mname .a.ename .a.mdir .a.edir .a.ldes .a.tdes");
 cmd(inter, "pack .a.b");
 
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.ename");
 cmd(inter, ".a.ename selection range 0 end");
 
@@ -1916,7 +1800,7 @@ if(choice==-1)
   goto here_newgroup;
  } 
 //control for existing directory
-cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $groupdir/$mdir\\(possibly there is already such a directory).\\nCreation of new group aborted\"; set choice 3} {}");
+cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $groupdir/$mdir\\n(possibly there is already such a directory).\\nCreation of new group aborted.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, "sblocklmm .a");
   choice=0;
@@ -1942,7 +1826,7 @@ else
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New model\"");
+cmd(inter, "wm title .a \"New Model\"");
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.tit -text \"Create a new model in group:\\n $modelgroup\"");
 
@@ -1962,22 +1846,16 @@ cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
 cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
-cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.esc -side left -fill x");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left -fill x");
 
-cmd(inter, "pack .a.tit .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir -anchor w");
+cmd(inter, "pack .a.tit .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
 cmd(inter, "pack .a.b");
 
-
-
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.ename");
 cmd(inter, ".a.ename selection range 0 end");
 
@@ -2040,14 +1918,14 @@ for(i=0; i<num; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model $mname (ver. $mver) because it already exists (directory: $errdir)\"");
+ {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
   choice=0;
   goto loop_copy_new;
  } 
 if(choice==4)
  {
  choice=0;
- cmd(inter, "set answer [tk_messageBox -type yesno -title \"Warning\" -icon warning -message \"Warning: a model $mname already exists (ver. $mver). If you want the new model to inherit the same equations, data etc. of that model you should cancel this operation (choose 'No'), and use the 'Copy' command in the models' Browser. Press 'Yes' to continue creating a new (empty) model '$mname'.\"]");
+ cmd(inter, "set answer [tk_messageBox -type yesno -title \"Warning\" -icon warning -message \"Warning: a model '$mname' already exists (ver. $mver). If you want the new model to inherit the same equations, data etc. of that model you should cancel this operation (choose 'No'), and use the 'Copy' command in the Model Browser. Press 'Yes' to continue creating a new (empty) model '$mname'.\"]");
 
 
   s=(char *)Tcl_GetVar(inter, "answer",0);
@@ -2122,18 +2000,19 @@ cmd(inter, "close $f");
 //cmd(inter, "if { $tcl_platform(platform) == \"windows\" } {file copy $RootLsd/$LsdGnu/bin/crt0.o $modeldir} {}");
 
 cmd(inter, "cd $RootLsd");
+cmd(inter, ".m.model entryconf 3 -state normal");
 cmd(inter, ".m.model entryconf 4 -state normal");
 cmd(inter, ".m.model entryconf 5 -state normal");
-cmd(inter, ".m.model entryconf 7 -state normal");	
-cmd(inter, ".m.model entryconf 8 -state normal");
+cmd(inter, ".m.model entryconf 6 -state normal");
+cmd(inter, ".m.model entryconf 7 -state normal");
 cmd(inter, ".m.model entryconf 9 -state normal");
 cmd(inter, ".m.model entryconf 10 -state normal");
 cmd(inter, ".m.model entryconf 11 -state normal");
-cmd(inter, ".m.model entryconf 13 -state normal");
+cmd(inter, ".m.model entryconf 12 -state normal");
 cmd(inter, ".m.model entryconf 14 -state normal");
 
 
-cmd(inter, "tk_messageBox -type ok -title \"Model created\" -message \"New model $mname (ver. $mver) successfully created (directory: $dirname)\"");
+cmd(inter, "tk_messageBox -type ok -title \"Model created\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
 
 choice=49;
 goto loop;
@@ -2155,7 +2034,7 @@ cmd(inter, "if {[file exists $brr] == 1} {set choice 1} {set choice 0}");
 if(choice==1)
  {
   cmd(inter, ".f.t.t delete 1.0 end; set file [open $brr]; .f.t.t insert end [read -nonewline $file]; .f.t.t edit reset; close $file; set before [.f.t.t get 1.0 end]; set dirname [file dirname $brr]; set filename [file tail $brr]; .f.hea.file.dat conf -text \"$filename\"");
-    cmd(inter, "wm title . \"LMM - $filename\"");          
+    cmd(inter, "wm title . \"$filename - LMM\"");          
 
  }
 else
@@ -2362,7 +2241,6 @@ cmd(inter, "if { [winfo exists .l]==1} {.l.m.file invoke 1} { }");
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .l .");
-cmd(inter, "grab set .l");
 cmd(inter, "wm title .l \"Replace Text\"");
 //cmd(inter, "set textsearch \"\"");
 cmd(inter, "label .l.l -text \"Type the text to search\"");
@@ -2374,27 +2252,24 @@ cmd(inter, "radiobutton .l.r1 -text \"Down\" -variable dirsearch -value \"-forwa
 cmd(inter, "radiobutton .l.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
 cmd(inter, "checkbutton .l.c -text \"Case Sensitive\" -variable docase");
 
-cmd(inter, "button .l.ok -text Search -command {if { [string length \"$textsearch\"]==0} {} {.f.t.t tag remove found 1.0 end; if {$docase==1} {set case \"-exact\"} {set case -nocase}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add found $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {.f.t.t mark set insert \"$cur + $length char\" } {.f.t.t mark set insert $cur}; update; .f.t.t see $cur; .l.repl conf -state normal; .l.all conf -state normal} {.l.all conf -state disabled; .l.repl conf -state disabled}}}");
+cmd(inter, "frame .l.b1");
+cmd(inter, "button .l.b1.repl -padx 12 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.ok invoke} {}}");
+cmd(inter, "button .l.b1.all -padx 11 -state disabled -text \"Repl. All\" -command {set choice 4}");
+cmd(inter, "frame .l.b2");
+cmd(inter, "button .l.b2.ok -padx 15 -text Search -command {if { [string length \"$textsearch\"]==0} {} {.f.t.t tag remove found 1.0 end; if {$docase==1} {set case \"-exact\"} {set case -nocase}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add found $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {.f.t.t mark set insert \"$cur + $length char\" } {.f.t.t mark set insert $cur}; update; .f.t.t see $cur; .l.b1.repl conf -state normal; .l.b1.all conf -state normal} {.l.b1.all conf -state disabled; .l.b1.repl conf -state disabled}}}");
+cmd(inter, "button .l.b2.esc -padx 15 -text Cancel -command {focus -force .f.t.t; set choice 5}");
+cmd(inter, "bind .l <KeyPress-Return> {.l.b2.ok invoke}");
+cmd(inter, "bind .l <KeyPress-Escape> {.l.b2.esc invoke}");
 
-cmd(inter, "button .l.repl -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.ok invoke} {}}");
-cmd(inter, "button .l.all -state disabled -text \"Repl. All\" -command {set choice 4}");
-cmd(inter, "button .l.esc -text Close -command {focus -force .f.t.t; set choice 5}");
-cmd(inter, "bind .l <KeyPress-Return> {.l.ok invoke}");
-cmd(inter, "bind .l <KeyPress-Escape> {.l.esc invoke}");
+cmd(inter, "pack .l.b1.repl .l.b1.all -padx 10 -pady 5 -side left");
+cmd(inter, "pack .l.b2.ok .l.b2.esc -padx 10 -pady 5 -side left");
+cmd(inter, "pack .l.l .l.e .l.r .l.s .l.r1 .l.r2 .l.c");
+cmd(inter, "pack .l.b1 .l.b2");
 
-
-cmd(inter, "pack .l.l .l.e .l.r .l.s .l.r1 .l.r2 .l.c .l.ok .l.repl .l.all .l.esc");
-
-
-//cmd(inter, "set w .l; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .l" );
 cmd(inter, "focus -force .l.e");
 cmd(inter, ".f.t.t tag conf found -background red -foreground white");
-cmd(inter, "wm transient .l .");
+cmd(inter, "blocklmm .l");
 choice=0;
 
 here:
@@ -2417,7 +2292,7 @@ if(choice!=0)
   goto here;
  }
 
-cmd(inter, "grab release .l");
+cmd(inter, "sblocklmm .l");
 cmd(inter, "focus -force .f.t.t");
 cmd(inter, "destroy .l");
 cmd(inter, ".f.t.t tag remove found 1.0 end");
@@ -2439,7 +2314,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert an equation\"");
+cmd(inter, "wm title .a \"Insert an Equation\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
 cmd(inter, "set v_label Label");
@@ -2449,30 +2324,22 @@ cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
 cmd(inter, "frame .a.f -relief groove -bd 2");
 
 cmd(inter, "set isfun 0");
-//cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every Variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other Variable requests this value, it the code is computed.\" -justify left -relief groove");
-//cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this Variable is requested by other Variables' code,\\nbut it is not computed by default. This code is not computed if no Variable\\nneeds this Variable's value.\" -justify left -relief groove");
-//cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w -fill x ");
+cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every Variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other Variable requests this value, it the code is computed.\" -justify left -relief groove");
+cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this Variable is requested by other Variables' code,\\nbut it is not computed by default. This code is not computed if no Variable\\nneeds this Variable's value.\" -justify left -relief groove");
+cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w ");
 
 
 cmd(inter, "frame .a.b");	
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#equation}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
-cmd(inter, "button .a.b.help -text Help -command {LsdHelp lsdfuncMacro.html#equation}");
-cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
-cmd(inter, "pack .a.l1 .a.label .a.f .a.b");
+cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.label .a.f");
+cmd(inter, "pack .a.b");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
-
-
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -2519,7 +2386,7 @@ choice=0;
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert an equation\"");
+cmd(inter, "wm title .a \"Insert an Equation\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
@@ -2532,26 +2399,20 @@ cmd(inter, "frame .a.f -relief groove -bd 2");
 cmd(inter, "set isfun 0");
 cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every Variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other Variable requests this value, it the code is computed.\" -justify left -relief groove");
 cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this Variable is requested by other Variables' code,\\nbut it is not computed by default. This code is not computed if no Variable\\nneeds this Variable's value.\" -justify left -relief groove");
-cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w -fill x ");
+cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w ");
 
 
 cmd(inter, "frame .a.b");	
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#equation}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
-cmd(inter, "button .a.b.help -text Help -command {LsdHelp lsdfunc.html#equation}");
-cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
-cmd(inter, "pack .a.l1 .a.label .a.f .a.b");
+cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.label .a.f");
+cmd(inter, "pack .a.b");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -2604,7 +2465,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'V(...)' command\"");
+cmd(inter, "wm title .a \"Insert a 'V(...)' Command\"");
 
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
@@ -2631,22 +2492,16 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#V}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#V}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -2715,20 +2570,16 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#cal}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#cal}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -2769,7 +2620,7 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'CYCLE' command\"");
+cmd(inter, "wm title .a \"Insert a 'CYCLE' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
@@ -2790,20 +2641,16 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#CYCLE}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#CYCLE}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
@@ -2876,7 +2723,7 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a cycle for\"");
+cmd(inter, "wm title .a \"Insert a 'for' Cycle\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
@@ -2897,20 +2744,16 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#basicc}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#basicc}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
@@ -2951,26 +2794,25 @@ choice=0;
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a Lsd script\"");
+cmd(inter, "wm title .a \"Insert a Lsd Script\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
-cmd(inter, "label .a.tit1 -text \"Insert Lsd Script...\" -foreground #ff0000");
-cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
+cmd(inter, "label .a.tit -text \"Choose one of the following options\nThe interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
 cmd(inter, "radiobutton .a.r.cal -text \"V(...) - request the value of a Variable\" -underline 0 -variable res -value 26");
 cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
-cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.sear -text \"SEARCH - search the first instance an Object type\" -underline 2 -variable res -value 55");
-cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
-cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
+cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.lqs -text \"SORT - sort a group of Objects\" -underline 3 -variable res -value 31");
 cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - add a new Object\" -underline 3 -variable res -value 52");
 cmd(inter, "radiobutton .a.r.delo -text \"DELETE - delete an Object\" -underline 0 -variable res -value 53");
 cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - draw an Object\" -underline 1 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.incr -text \"INCR - increment the value of a Parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"MULT - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
+cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
@@ -2990,24 +2832,18 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
-cmd(inter, "pack .a.tit1 .a.tit2 .a.r .a.f");
+cmd(inter, "pack .a.tit .a.r .a.f");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-cmd(inter, "focus -force .a.f.ok");
+cmd( inter, "setgeom .a" );
+cmd(inter, "focus -force .a.r.cal");
 
 
 //cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
@@ -3041,26 +2877,25 @@ choice=0;
 
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a Lsd script\"");
+cmd(inter, "wm title .a \"Insert a Lsd Script\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
-cmd(inter, "label .a.tit1 -text \"Insert Lsd Script...\" -foreground #ff0000");
-cmd(inter, "label .a.tit2 -text \"Choose one of the following options. The interface will request the necessary information\" -justify left");
+cmd(inter, "label .a.tit -text \"Choose one of the following options. The interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
 cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a Variable\" -underline 0 -variable res -value 26");
 cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
-cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.sear -text \"search - search the first instance an Object type\" -underline 3 -variable res -value 55");
-cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
-cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
+cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of Objects\" -underline 7 -variable res -value 31");
 cmd(inter, "radiobutton .a.r.addo -text \"add_an_object - add a new Object\" -underline 0 -variable res -value 52");
 cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - delete an Object\" -underline 0 -variable res -value 53");
 cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - draw an Object\" -underline 6 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.incr -text \"increment - increment the value of a Parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
+cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
@@ -3080,24 +2915,18 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
-cmd(inter, "pack .a.tit1 .a.tit2 .a.r .a.f");
+cmd(inter, "pack .a.tit .a.r .a.f");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-cmd(inter, "focus -force .a.f.ok");
+cmd( inter, "setgeom .a" );
+cmd(inter, "focus -force .a.r.cal");
 
 
 //cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
@@ -3135,7 +2964,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'INCR' command\"");
+cmd(inter, "wm title .a \"Insert an 'INCR' Command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
@@ -3161,20 +2990,16 @@ cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#INCR}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#INCR}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3214,7 +3039,7 @@ Insert a v[0]=p->increment("Var",0);
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'increment'\"");
+cmd(inter, "wm title .a \"Insert an 'increment' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
@@ -3241,20 +3066,16 @@ cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#increment}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#increment}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3294,7 +3115,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'MULT' command\"");
+cmd(inter, "wm title .a \"Insert a 'MULT' Command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
@@ -3321,21 +3142,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#MULT}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#MULT}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3376,7 +3193,7 @@ Insert a v[0]=p->multiply("Var",0);
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'multiply'\"");
+cmd(inter, "wm title .a \"Insert a 'multiply' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
@@ -3404,21 +3221,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#multiply}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#multiply}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3459,7 +3272,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'WRITE' command\"");
+cmd(inter, "wm title .a \"Insert a 'WRITE' Command\"");
 
 cmd(inter, ".f.t.t conf -state disabled");
 
@@ -3487,22 +3300,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#WRITE}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#WRITE}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3539,7 +3347,7 @@ Insert a p->write("Var",0,0);
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'write' command\"");
+cmd(inter, "wm title .a \"Insert a 'write' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
@@ -3566,22 +3374,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#write}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#write}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -3613,7 +3416,7 @@ Insert a cur=p->search_var_cond("Var",1,0);
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'search_var_cond' command\"");
+cmd(inter, "wm title .a \"Insert a 'search_var_cond' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
@@ -3643,23 +3446,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#search_var_cond}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#search_var_cond}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -3693,7 +3490,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SEARCH_CND' command\"");
+cmd(inter, "wm title .a \"Insert a 'SEARCH_CND' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
 cmd(inter, "set v_obj0 cur");
@@ -3722,22 +3519,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH_CND}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH_CND}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -3777,7 +3569,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SORT' command\"");
+cmd(inter, "wm title .a \"Insert a 'SORT' Command\"");
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
@@ -3804,22 +3596,16 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SORT}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SORT}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
@@ -3865,7 +3651,7 @@ Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
 choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'lsdqsort' command\"");
+cmd(inter, "wm title .a \"Insert a 'lsdqsort' Command\"");
 
 cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
@@ -3893,21 +3679,16 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#lsdqsort}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#lsdqsort}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
@@ -3946,14 +3727,14 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a math operation\"");
+cmd(inter, "wm title .a \"Insert a Math Operation\"");
 
 cmd(inter, "set value1 \"0\"; set value2 \"1\"; set res 1; set str \"UNIFORM($value1,$value2)\"");
 cmd(inter, "label .a.l1 -text \"Minimum\"");
-cmd(inter, "entry .a.e1 -textvariable value1");
+cmd(inter, "entry .a.e1 -justify center -textvariable value1");
 //cmd(inter, "a.e1 selection range 0 end");
 cmd(inter, "label .a.l2 -text \"Maximum\"");
-cmd(inter, "entry .a.e2 -textvariable value2");
+cmd(inter, "entry .a.e2 -justify center -textvariable value2");
 cmd(inter, "pack .a.l1 .a.e1 .a.l2 .a.e2");
 
 cmd(inter, "radiobutton .a.r1 -text \"Uniform Random Draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"UNIFORM($value1,$value2)\"}");
@@ -3970,18 +3751,16 @@ cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -comm
 cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"sqrt($value1)\"}");
 cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\"; set str \"pow($value1,$value2)\"}");
 
-cmd(inter, "button .a.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .a.help -text Help -command {LsdHelp lsdfuncMacro.html#rnd}");
-cmd(inter, "button .a.can -text Cancel -command {set choice 2}");
+cmd(inter, "frame .a.f");	
+cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#rnd}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.r1 .a.r2 .a.r3 .a.r4 .a.r5 .a.r6 .a.r7 .a.r8 .a.r9 .a.r10 .a.r11 .a.r12 .a.r13 -anchor w");
-cmd(inter, "pack .a.ok .a.help .a.can");
+cmd(inter, "pack .a.f");
 choice=0;
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
 
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.e1; .a.e1 selection range 0 end");
 
@@ -4046,7 +3825,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'ADDOBJ' command\"");
+cmd(inter, "wm title .a \"Insert an 'ADDOBJ' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
 cmd(inter, "set v_obj0 cur");
@@ -4076,22 +3855,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#ADDOBJ}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#ADDOBJ}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.numobj .a.l1 .a.v_num .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.numobj .a.l1 .a.v_num .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 
 cmd(inter, "focus -force .a.obj0");
@@ -4162,7 +3936,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'add_an_object' command\"");
+cmd(inter, "wm title .a \"Insert an 'add_an_object' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
 cmd(inter, "set v_obj0 cur");
@@ -4187,23 +3961,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#add_an_object}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#add_an_object}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4237,7 +4005,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'DELETE' command\"");
+cmd(inter, "wm title .a \"Insert a 'DELETE' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
 cmd(inter, "set v_obj0 cur");
@@ -4245,23 +4013,17 @@ cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#DELETE}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#DELETE}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.f");
+cmd(inter, "pack .a.l0 .a.obj0");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4297,7 +4059,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'delete_obj' command\"");
+cmd(inter, "wm title .a \"Insert a 'delete_obj' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
 cmd(inter, "set v_obj0 cur");
@@ -4305,22 +4067,17 @@ cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#delete_obj}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#delete_obj}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.f");
+cmd(inter, "pack .a.l0 .a.obj0");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4357,7 +4114,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'RNDDRAW' command\"");
+cmd(inter, "wm title .a \"Insert a 'RNDDRAW' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
 cmd(inter, "set v_obj0 cur");
@@ -4391,22 +4148,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#RNDDRAW}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#RNDDRAW}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4460,7 +4212,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'draw_rnd' command\"");
+cmd(inter, "wm title .a \"Insert a 'draw_rnd' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
 cmd(inter, "set v_obj0 cur");
@@ -4494,22 +4246,17 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#draw_rnd}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#draw_rnd}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4549,7 +4296,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SEARCH' command\"");
+cmd(inter, "wm title .a \"Insert a 'SEARCH' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
 cmd(inter, "set v_obj0 cur");
@@ -4567,22 +4314,17 @@ cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1 .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4617,7 +4359,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'search' command\"");
+cmd(inter, "wm title .a \"Insert a 'search' Command\"");
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
 cmd(inter, "set v_obj0 cur");
@@ -4635,22 +4377,17 @@ cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#search}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#search}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1 .a.f");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
+cmd(inter, "pack .a.f");
 
-
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
@@ -4686,7 +4423,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SUM'\"");
+cmd(inter, "wm title .a \"Insert a 'SUM' Command\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -4711,21 +4448,16 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SUM}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#SUM}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -4770,7 +4502,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'sum'\"");
+cmd(inter, "wm title .a \"Insert a 'sum' Command\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -4795,20 +4527,16 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#sum}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfunc.html#sum}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj .a.f");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
+cmd(inter, "pack .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
@@ -4914,10 +4642,10 @@ if( choice==4)
   cmd(inter, "if { [lindex $lmn $result] == \"..\" } {set choice 33} {}");
   if(choice==33)
    {
-   cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"You cannot remove this.\"");
+   cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"You cannot remove this.\"");
    goto loop;
    }
-  cmd(inter, "if { [lindex $group $result] == 1} {set message \"Group\\n[lindex $lmn $result] (dir. [lindex $ldn $result])\\n is going to be deleted. Confirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove group?\" -message $message]} {set message \"Model\\n[lindex $lmn $result] ver. [lindex $lver $result] (dir. [lindex $ldn $result])\\n is going to be deleted. Confirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove model?\" -message $message]}");
+  cmd(inter, "if { [lindex $group $result] == 1} {set message \"Group\\n[lindex $lmn $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\nConfirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove group?\" -message $message]} {set message \"Model\\n[lindex $lmn $result] ver. [lindex $lver $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\n Confirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove model?\" -message $message]}");
   cmd(inter, "if {$answer == \"yes\"} {file delete -force [lindex $ldn $result]} {}");
   cmd(inter, "set groupdir [lindex $lrn $result]");
   choice=33;
@@ -4936,14 +4664,15 @@ cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
 cmd(inter, ".f.hea.grp.dat conf -text \"$modelgroup\"");
 cmd(inter, ".f.hea.mod.dat conf -text \"$modelname\"");
 cmd(inter, ".f.hea.ver.dat conf -text \"$version\"");
+cmd(inter, ".m.model entryconf 3 -state normal");
 cmd(inter, ".m.model entryconf 4 -state normal");
 cmd(inter, ".m.model entryconf 5 -state normal");
-cmd(inter, ".m.model entryconf 7 -state normal");	
-cmd(inter, ".m.model entryconf 8 -state normal");
+cmd(inter, ".m.model entryconf 6 -state normal");
+cmd(inter, ".m.model entryconf 7 -state normal");
 cmd(inter, ".m.model entryconf 9 -state normal");
 cmd(inter, ".m.model entryconf 10 -state normal");
 cmd(inter, ".m.model entryconf 11 -state normal");
-cmd(inter, ".m.model entryconf 13 -state normal");
+cmd(inter, ".m.model entryconf 12 -state normal");
 cmd(inter, ".m.model entryconf 14 -state normal");
 
 cmd(inter, "sblocklmm .l");
@@ -4965,8 +4694,8 @@ choice=0;
 cmd(inter, "toplevel .a");
 cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 
-cmd(inter, "wm title .a \"Copy model\"");
-cmd(inter, "label .a.tit -text \"Create a new version of model $modelname (ver. $version)\"");
+cmd(inter, "wm title .a \"Copy Model\"");
+cmd(inter, "label .a.tit -text \"Create a new version of model '$modelname' (ver. $version)\"");
 
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
 cmd(inter, "set mname $modelname");
@@ -4984,20 +4713,15 @@ cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
 cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}"); 
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -text Help -command {LsdHelp LMM_help.html#copy}");
-cmd(inter, "button .a.b.esc -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left -fill x");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#copy}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 
-cmd(inter, "pack .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir -anchor w");
+cmd(inter, "pack .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
 cmd(inter, "pack .a.b");
 
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "blocklmm .a");
 cmd(inter, ".a.ename selection range 0 end");
 cmd(inter, "focus -force .a.ename");
@@ -5018,7 +4742,7 @@ if(choice==2)
  }
 
 //control for existing directory
-cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $mdir.\\nChoose a different name\"; set choice 3} {}");
+cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $mdir.\\nChoose a different name.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, ".a.edir selection range 0 end");
   cmd(inter, "focus -force .a.edir");
@@ -5058,7 +4782,7 @@ for(i=0; i<num && choice!=3; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model $mname (ver. $mver) because it already exists (directory: $errdir)\"");
+ {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
   cmd(inter, ".a.ename selection range 0 end");
   cmd(inter, "focus -force .a.ename");
   choice=0;
@@ -5085,7 +4809,7 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-cmd(inter, "tk_messageBox -type ok -title \"Model copied\" -message \"New model $mname (ver. $mver) successfully created (directory: $dirname)\"");
+cmd(inter, "tk_messageBox -type ok -title \"Model Copied\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
 
 choice=49;
 goto loop;
@@ -5160,7 +4884,7 @@ choice=0;
 cmd(inter, "set ex [file exists $modeldir/modelinfo.txt]");
 cmd(inter, "set choice $ex");
 if(choice==0)
-  cmd(inter, "tk_messageBox -type ok -title \"Warning\" -message \"Cannot find file for model info.\\nPlease, enter the date of creation.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot find file for model info.\\nPlease, check the date of creation.\"");
 
 
 
@@ -5179,7 +4903,7 @@ cmd(inter, "label .a.c.d -text \"Model Directory\"");
 cmd(inter, "set complete_dir [file nativename [file join [pwd] $modeldir]]");
 cmd(inter, "entry .a.c.ed -width 40 -state disabled -textvariable complete_dir");
 
-cmd(inter, "label .a.c.v -text \"Version\"");
+cmd(inter, "label .a.c.v -text Version");
 cmd(inter, "entry .a.c.ev -width 40 -textvariable version");
 
 
@@ -5206,7 +4930,7 @@ f=fopen(s, "r");
 
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\\nAdd a makefile to model $modelname ([pwd])\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\nAdd a makefile to model '$modelname' ([pwd]).\"");
   choice=0;
   cmd(inter, "cd $RootLsd");
   cmd(inter, "if { [winfo exists .a] == 1} {destroy .a} {}");
@@ -5217,7 +4941,7 @@ while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
   choice=0;
   goto loop;
  }
@@ -5235,26 +4959,22 @@ cmd(inter, "set last \"[clock format [file mtime $modeldir/$eqname] -format \"$f
 cmd(inter, "entry .a.c.elast -width 40 -state disabled -textvariable last");
 
 
-cmd(inter, "pack .a.c.n .a.c.en .a.c.v .a.c.ev .a.c.date .a.c.edate .a.c.last .a.c.elast .a.c.d .a.c.ed -anchor w");
+cmd(inter, "pack .a.c.n .a.c.en .a.c.v .a.c.ev .a.c.date .a.c.edate .a.c.last .a.c.elast .a.c.d .a.c.ed");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text \"Ok\" -command {set choice 1}");
-cmd(inter, "button .a.b.esc -text \"Cancel\" -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.esc -side left");
+cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 
 cmd(inter, "pack .a.c .a.b");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
 cmd(inter, "bind .a <Escape> {set choice 2}");
-
-cmd(inter, "focus -force .a.c.en");
 cmd(inter, "bind .a.c.en <Return> {focus -force .a.c.ev}");
 cmd(inter, "bind .a.c.ev <Return> {focus -force .a.b.ok}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 choice=0;
+
+cmd( inter, "setgeom .a" );
+cmd(inter, "focus -force .a.c.en");
 cmd(inter, "blocklmm .a");
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -5291,7 +5011,7 @@ if(choice==39)
  cmd(inter, "set dirname [pwd]");
  cmd(inter, ".f.t.t mark set insert 1.0");
  cmd(inter, ".f.hea.file.dat conf -text \"noname.txt\"");
- cmd(inter, "wm title . \"LMM - nomame.txt\"");
+ cmd(inter, "wm title . \"nomame.txt - LMM\"");
  cmd(inter, "catch [unset -nocomplain ud]");
  cmd(inter, "catch [unset -nocomplain udi]");
  cmd(inter, "catch [unset -nocomplain rd]");
@@ -5386,7 +5106,7 @@ else
 cmd(inter, "if { [winfo exists .l]==1} {tk_messageBox -type ok; .l.m.file invoke 1; } { }"); 
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .l \"System Compilation's Options\"");
+cmd(inter, "wm title .l \"System Compilation Options\"");
 
 cmd(inter, "wm transient .l .");
 cmd(inter, "frame .l.t");
@@ -5401,36 +5121,35 @@ else
 
 cmd(inter, "set lin_default \"TCL_VERSION=8.5\\nTK_VERSION=8.5\\nLSDROOT=[pwd]\\nDUMMY=\\nPATH_TCL_LIB=.\\nPATH_TK_LIB=.\\nPATH_TK_HEADER=\\nPATH_TCL_HEADER=\\nPATH_LIB=.\\nINCLUDE_LIB=\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
 
-cmd(inter, "frame .l.t.d -relief groove -bd 2");
+cmd(inter, "frame .l.t.d");
+cmd(inter, "frame .l.t.d.os");
 
 if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
-  cmd(inter, "button .l.t.d.win -text \" Default Windows x64 \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+  cmd(inter, "button .l.t.d.os.win -padx 2 -text \"Default Windows x64\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 else
-  cmd(inter, "button .l.t.d.win -text \" Default Windows \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+  cmd(inter, "button .l.t.d.os.win -padx 12 -text \"Default Windows\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 
 
-cmd(inter, "button .l.t.d.lin -text \" Default Linux \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
-cmd(inter, "button .l.t.d.mac -text \" Default Mac OS X \" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
-cmd(inter, "pack .l.t.d.win .l.t.d.lin .l.t.d.mac -expand yes -side left");
+cmd(inter, "button .l.t.d.os.lin -padx 22 -text \"Default Linux\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
+cmd(inter, "button .l.t.d.os.mac -padx 12 -text \"Default Mac OSX\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+cmd(inter, "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 1 -pady 5 -side left");
 
-cmd(inter, "frame .l.t.b");
-cmd(inter, "button .l.t.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .l.t.b.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .l.t.b.help -text Help -command {LsdHelp LMM_help.html#compilation_options}");
-cmd(inter, "pack .l.t.b.ok .l.t.b.help .l.t.b.esc -expand yes -side left");
+cmd(inter, "frame .l.t.d.b");
+cmd(inter, "button .l.t.d.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .l.t.d.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
+cmd(inter, "button .l.t.d.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.t.yscroll -side right -fill y");
-cmd(inter, "pack .l.t.text .l.t.d .l.t.b -expand yes -fill both");
+cmd(inter, "pack .l.t.d.os .l.t.d.b");
+cmd(inter, "pack .l.t.text .l.t.d -expand yes -fill both");
 cmd(inter, "pack .l.t");
 
 cmd(inter, ".l.t.text insert end $a");
 
 //cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+
+cmd( inter, "setgeom .l" );
 cmd(inter, "focus -force .l.t.text");
 cmd(inter, "blocklmm .l");
 while(choice==0)
@@ -5483,7 +5202,7 @@ else
 cmd(inter, "if { [winfo exists .l]==1} {.l.m.file invoke 1} { }"); 
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .l \"Model Compilation's Options\"");
+cmd(inter, "wm title .l \"Model Compilation Options\"");
 
 cmd(inter, "wm transient .l .");
 
@@ -5495,31 +5214,29 @@ cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 
 cmd(inter, "set default \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
 
 
-cmd(inter, "frame .l.t.d -relief groove -bd 2");
-cmd(inter, "button .l.t.d.def -text \" Default Values \" -command {.l.t.text delete 1.0 end; .l.t.text insert end \"$default\"}");
+cmd(inter, "frame .l.t.d");
+cmd(inter, "frame .l.t.d.opt");
+cmd(inter, "button .l.t.d.opt.def -padx 30 -text \"Default Values\" -command {.l.t.text delete 1.0 end; .l.t.text insert end \"$default\"}");
 
-//cmd(inter, "button .l.t.d.cle -text \" Clean pre-compiled files \" -command { set mapp [pwd]; cd $RootLsd; cd src; catch [set app [glob *.o]]; set cazzo [llength $app];  catch [foreach i [glob $RootLsd/$LsdSrc/*.o] {catch [file delete -force $i]}]; cd $mapp}");
-cmd(inter, "button .l.t.d.cle -text \" Clean pre-compiled files \" -command { catch [foreach i [glob $RootLsd/$LsdSrc/*.o] {wm title .l $i; catch [file delete -force $i]}]}");
+cmd(inter, "button .l.t.d.opt.cle -padx 2 -text \"Clean Pre-Compiled Files\" -command { if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { foreach i $objs { catch { file delete -force $i } } } }");
 
-cmd(inter, "pack .l.t.d.def -expand yes -side left");
+cmd(inter, "pack .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left");
 
-cmd(inter, "frame .l.t.b");
-cmd(inter, "button .l.t.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .l.t.b.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .l.t.b.help -text Help -command {LsdHelp LMM_help.html#compilation_options}");
+cmd(inter, "frame .l.t.d.b");
+cmd(inter, "button .l.t.d.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .l.t.d.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
+cmd(inter, "button .l.t.d.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
+cmd(inter, "pack .l.t.d.opt .l.t.d.b");
 
-cmd(inter, "pack .l.t.b.ok .l.t.b.help .l.t.b.esc -expand yes -side left");
 cmd(inter, "pack .l.t.yscroll -side right -fill y");
-cmd(inter, "pack .l.t.text .l.t.d .l.t.b -expand yes -fill both");
+cmd(inter, "pack .l.t.text .l.t.d -expand yes -fill both");
 cmd(inter, "pack .l.t");
-//cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
 cmd(inter, ".l.t.text insert end $a");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+
+cmd( inter, "setgeom .l" );
 cmd(inter, "blocklmm .l");
 cmd(inter, "focus -force .l.t.text");
 
@@ -5581,21 +5298,15 @@ cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#changefont}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#changefont}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.f");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -5677,25 +5388,20 @@ cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
 cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
 cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.f.ok}");
 
-cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
-cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
-cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
-cmd(inter, "button .a.f.def -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
-cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
+cmd(inter, "frame .a.f1");
+cmd(inter, "button .a.f1.def -padx 14 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
+cmd(inter, "button .a.f1.help -padx 20 -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
+cmd(inter, "pack .a.f1.def .a.f1.help -padx 10 -pady 5 -side left");
 
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.def .a.f.esc -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.f");
+cmd(inter, "frame .a.f2");
+cmd(inter, "button .a.f2.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f2.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 5 -side left");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.f1 .a.f2");
+cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
+cmd(inter, "bind .a <Escape> {.a.f2.esc invoke}");
 
-//cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -5841,17 +5547,13 @@ cmd(inter, "set init_time [clock seconds]");
 cmd(inter, "toplevel .t");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
-cmd(inter, "wm title .t \"Wait\"");
+cmd(inter, "wm title .t \"Please Wait\"");
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
 cmd(inter, "pack .t.l1 .t.l2");
 cmd(inter, "focus -force .t");
-cmd(inter, "grab set .t");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .t; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd( inter, "setgeom .t" );
+cmd(inter, "blocklmm .t");
 cmd(inter, "update");  
 
 cmd(inter, "cd $modeldir");
@@ -5872,6 +5574,7 @@ else
   cmd(inter, "file delete a.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 }
+cmd(inter, "sblocklmm .t");
 cmd(inter, "destroy .t");
 cmd(inter, "update");
 
@@ -5886,7 +5589,7 @@ if(choice==1)
 }
 cmd(inter, "cd $RootLsd");
 if(choice==1)
-  cmd(inter, "tk_messageBox -type ok -icon error -title \"Generate 'No Window' Version\" -message \"There is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' without errors. The error list is in the file 'makemessage.txt'.\"");
+  cmd(inter, "tk_messageBox -type ok -icon error -title Error -message \"Problem generating 'No Window' version, probably there is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' option without errors. The error list is in the file 'makemessage.txt'.\"");
 else
   cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"");
 choice=0;
@@ -5943,23 +5646,18 @@ cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Change Tab Size\"");
 cmd(inter, "label .a.l1 -text \"Enter the Tab size (in characters)\"");
-cmd(inter, "entry .a.v_num -width 30 -textvariable tabsize");
+cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#changetab}");
+cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp LMM_help.html#changetab}");
-cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -side left");
+cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.f");
 
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-
+cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 cmd(inter, "blocklmm .a");
@@ -6201,155 +5899,6 @@ Tcl_UnlinkVar(inter, "cnt");
 free(hits);
 }
 
-/*	
-void color(int *num)
-{
-int i=0;
-char *s;
-Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
-cmd(inter, "set previ $inicolor");
-cmd(inter, "set beg $inicolor");
-
-while(i==0)
- {
-Tcl_DoOneEvent(0);
-cmd(inter, "set beg $previ");
-cmd(inter, "set a [.f.t.t search \"//\" $previ $endcolor]");
-cmd(inter, "set b [.f.t.t search \"/*\" $previ $endcolor]");
-cmd(inter, "set c [.f.t.t search \"\\\"\" $previ $endcolor]");
-cmd(inter, "if {$a==\"\"} {set a [.f.t.t index $endcolor]} {}");
-cmd(inter, "if {$b==\"\"} {set b [.f.t.t index $endcolor]} {}");
-cmd(inter, "if {$c==\"\"} {set c [.f.t.t index $endcolor]} {}");
-cmd(inter, "if {$a==$b && $b==$c} {set i 1} {}");
-if(i==1)
- {i=0;
- return;
- }
-cmd(inter, "while {$c != \"\" && [string compare [.f.t.t get \"$c-1char\"] \"\\\\\"]==0} {set c [.f.t.t search \"\\\"\" \"$c+1char\" $endcolor]}");
-cmd(inter, "if {$c == \"\" } {set c $endcolor} {}");
-cmd(inter, "if {[.f.t.t compare $a < $b]} {if {[.f.t.t compare $a < $c]} {set previ $a; set i 2} {set previ $c; set i 4}} {if {[.f.t.t compare $b < $c]} {set previ $b; set i 3} {set previ $c; set i 4}}");
-cmd(inter, "if {[string compare $previ \"\"]==0} {set i 1} {}");
-cmd(inter, "scan $previ %d.%d num trash");
-/*
-s=(char *)Tcl_GetVar(inter, "beg",0);
-printf("%s",s);
-
-s=(char *)Tcl_GetVar(inter, "previ",0);
-printf("%s",s);
-* /
- if(i==2)
- {
-  //comment of type //
-  cmd(inter, "scan $previ %d.%d line trash");
-  //cmd(inter, ".f.t.t tag remove str $previ \"$line.end+1char\"");
-  //cmd(inter, ".f.t.t tag remove comment1 $previ \"$line.end+1char\"");
-  cmd(inter, ".f.t.t tag add comment2 $previ \"$line.end+1char\"");
-  cmd(inter, "set previ [.f.t.t index \"$line.end+1char\"]");
-  cmd(inter, "if {[string compare $previ \"\"]==0} {set previ $endcolor; set i 1} {set i 0;}");
- }
-if(i==3)
-  {
-  /*comment of the type /*  ********** * /
-
-  cmd(inter, "set fin [.f.t.t search \"* /\" $previ end]");
-  cmd(inter, "if {[string compare $fin \"\"]==0} {set fin end; set i 1} {set i 0}");
-  //cmd(inter, ".f.t.t tag remove str $previ \"$fin + 2 char\"");
-  //cmd(inter, ".f.t.t tag remove comment2 $previ \"$fin + 2 char\"");
-  cmd(inter, ".f.t.t tag add comment1 $previ \"$fin + 2 char\"");
-  cmd(inter, "set previ [lindex [.f.t.t tag nextrange comment1 $previ] 1]");
-  cmd(inter, "if {[string compare $previ \"\"]==0} {set previ end; set i 1} {set i 0;}");
-
-
-  }
-if(i==4)
- { //in case of strings
-
-  cmd(inter, "scan $previ %d.%d line trash");
-  cmd(inter, "set fin [.f.t.t search \"\\\"\" \"$previ+1char\" $endcolor]");
-  cmd(inter, "if { [string length $fin] == 0} {set fin $line.end} {while {[string length $fin]>0 && [string compare [.f.t.t get \"$fin - 1char\"] \"\\\\\"]==0} {set fin [.f.t.t search \"\\\"\" \"$fin+1char\" $endcolor]; }}");
-  cmd(inter, "if {$fin == \"\"} {set fin $line.end} {}");
-
-  cmd(inter, "if {[.f.t.t compare $fin > $line.end]==1} {set fin $line.end} {}");
-  cmd(inter, ".f.t.t tag remove comment1 $previ \"$fin + 1 char\"");
-  cmd(inter, ".f.t.t tag remove comment2 $previ \"$fin + 1 char\"");
-  cmd(inter, ".f.t.t tag add str $previ \"$fin + 1 char\"");
-//   cmd(inter, "if {[string compare $fin \"\"]==0} {set fin $endcolor; set i 1} {set i 0}");
-  cmd(inter, "set previ \"$fin+1 char\"");
-  i=0;
- }
-
-cmd(inter, "if {[.f.t.t compare $previ >= $endcolor]==1} {set i 1} {}");
-
-}
-
-Tcl_UnlinkVar(inter, "i");
-}
-*/
-
-/*
-Create the makefile for a model, merging:
-1) model_options.txt
-2) src/system_options.txt
-3) src/makefile_base.txt
-*
-
-
-void make_makefile(void)
-{
-FILE *sys, *modopt, *bas, *mak;
-char line[200];
-
-cmd(inter, "set here [pwd]");
-cmd(inter, "cd $RootLsd");
-sys=fopen("src/system_options.txt", "r");
-bas=fopen("src/makefile_base.txt", "r");
-cmd(inter, "cd $here");
-cmd(inter, "pwd");
-modopt=fopen("model_options.txt", "r");
-
-
-if(sys==NULL || modopt==NULL || bas==NULL)
- {
-  cmd(inter, "tk_messageBox -type ok -message \"Cannot open one of the file required for 'makefile' creation.\\n\""); 
-  if(sys!=NULL)
-   fclose(sys);
-  if(modopt!=NULL)
-   fclose(modopt);
-  if(bas!=NULL)
-   fclose(bas);
-
-  return;
-     
- }
-
-mak=fopen("makefile", "w");
-if(mak==NULL)
- {
- cmd(inter, "tk_messageBox -type ok -message \"Cannot create the makefile.\""); 
- cmd(inter, "cd $RootLsd");
- return;
-
- }  
-
-
-while(fgets(line, 200, modopt)!=(char *)NULL)
- fputs(line, mak);
-
-while(fgets(line, 200, sys)!=(char *)NULL)
- fputs(line, mak);
-
-while(fgets(line, 200, bas)!=(char *)NULL)
- fputs(line, mak);
-
-fclose(sys);
-fclose(modopt);
-fclose(mak);
-fclose(bas);
-
- 
-}
-*************/
-
 
 void make_makefile(void)
 {
@@ -6470,31 +6019,24 @@ cmd(inter, "set cerr 0.0");
 cmd(inter, "toplevel .mm");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
-cmd(inter, "label .mm.lab1 -text \"Compilation errors\" -fg red");
-
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\"");
-cmd(inter, "pack .mm.lab1 .mm.lab");
+cmd(inter, "pack .mm.lab");
 
 cmd(inter, "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word; scrollbar .mm.yscroll -command \".mm.t yview\"");
 
+cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm \"+$hmargin+$vmargin\"; wm title .mm \"Compilation Errors\"");
 
-#ifndef DUAL_MONITOR
-cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm -0+0; wm title .mm \"Compilation Errors List\"");
-#else
-cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm +0+0; wm title .mm \"Compilation Errors List\"");
-#endif
-
-cmd(inter, "frame .mm.b -relief groove -bd 2");
+cmd(inter, "frame .mm.b");
 
 cmd(inter, "set error \"error\"");				// error string to be searched
 cmd(inter, "button .mm.b.ferr -text \" Next error \" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }");
 
 cmd(inter, "button .mm.b.perr -text \" Previous error \" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }");
 
-cmd(inter, "pack .mm.b.perr .mm.b.ferr -expand yes -fill x -side left");
+cmd(inter, "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
-cmd(inter, "button .mm.close -text \" Close \" -command {destroy .mm}");
-cmd(inter, "pack .mm.close -side bottom");
+cmd(inter, "button .mm.close -padx 15 -text Cancel -command {destroy .mm}");
+cmd(inter, "pack .mm.close -pady 5 -side bottom");
 
 cmd(inter, "bind .mm <Escape> {destroy .mm}");
 cmd(inter, "focus -force .mm.t");

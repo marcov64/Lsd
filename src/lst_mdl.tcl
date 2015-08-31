@@ -89,10 +89,10 @@ label .l.t.f1.m1.l -text "First model"
 entry .l.t.f1.m1.d -width 50 -textvariable d1
 entry .l.t.f1.m1.f -width 20 -textvariable f1
 bind .l.t.f1.m1.f <3> {set tmp [tk_getOpenFile -initialdir $d1]; if { $tmp!=""} {set f1 [file tail $tmp]} {} }
-button .l.t.f1.m1.i -text Insert -command {slct; if { [info exists sd]} {set d1 "$sd"; set f1 "$sf"} {}}
+button .l.t.f1.m1.i -padx 25 -text Insert -command {slct; if { [info exists sd]} {set d1 "$sd"; set f1 "$sf"} {}}
 pack .l.t.f1.m1.l -anchor nw
 pack .l.t.f1.m1.d .l.t.f1.m1.f -expand yes -fill x
-pack .l.t.f1.m1.i -anchor n
+pack .l.t.f1.m1.i -padx 10 -pady 10 -anchor n
 
 
 frame .l.t.f1.m2 -relief groove -bd 2
@@ -100,19 +100,21 @@ label .l.t.f1.m2.l -text "Second model"
 entry .l.t.f1.m2.d -width 50 -textvariable d2
 entry .l.t.f1.m2.f -width 20 -textvariable f2
 bind .l.t.f1.m2.f <3> {set tmp [tk_getOpenFile -initialdir $d2]; if { $tmp!=""} {set f2 [file tail $tmp]} {} }
-button .l.t.f1.m2.i -text Insert -command {slct; if { [info exists sd]} {set d2 "$sd"; set f2 "$sf"} {}}
+button .l.t.f1.m2.i -padx 25 -text Insert -command {slct; if { [info exists sd]} {set d2 "$sd"; set f2 "$sf"} {}}
 pack .l.t.f1.m2.l -anchor nw
 pack .l.t.f1.m2.d .l.t.f1.m2.f -expand yes -fill x -anchor nw
-pack .l.t.f1.m2.i -anchor n
-
+pack .l.t.f1.m2.i -padx 10 -pady 10 -anchor n
 
 pack .l.t.f1.tit .l.t.f1.m1 .l.t.f1.m2 -expand yes -fill x -anchor n
 pack .l.t.f1 -fill x -anchor n
 
-button .l.t.f1.cmp -text " Compare files " -command {sblocklmm .l; destroy .l; set choice 1}
-button .l.t.f1.cnc -text " Cancel " -command {sblocklmm .l; set d1 ""; destroy .l; set choice -1}
 
-pack .l.t.f1.cmp .l.t.f1.cnc
+frame .l.t.b
+button .l.t.b.cmp -padx 2 -text "Compare files" -command {sblocklmm .l; destroy .l; set choice 1}
+button .l.t.b.cnc -padx 20 -text "Cancel" -command {sblocklmm .l; set d1 ""; destroy .l; set choice -1}
+
+pack .l.t.b.cmp .l.t.b.cnc -padx 10 -pady 10 -side left
+pack .l.t.b
 
 pack .l.l.tit
 
