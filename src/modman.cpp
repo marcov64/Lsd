@@ -59,7 +59,7 @@ The widget of importance are:
 
 
 #define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
-
+#define SHOW_TK_ERR true		// define to show Tk errors as dialogs
 
 Tcl_Interp *inter;
 char msg[1024];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
@@ -201,21 +201,6 @@ void cmd(Tcl_Interp *inter, char *cm)
 
 int code;
 FILE *ferr, *f;
-/*
-Tcl_Obj *o;
-o=Tcl_NewStringObj(cm, strlen(cm));
-code=Tcl_EvalObjEx(inter, o, TCL_EVAL_DIRECT);
-if(code!=TCL_OK)
- {f=fopen("tk_err.err","a");
-  sprintf(msg, "\n%s\n\n%s\n",cm, Tcl_GetStringResult(inter));
-  fprintf(f,"%s", msg);
-  fclose(f);
-  //plog("\nTcl-Tk Error. See file tk_err.err\n");
- }
-
-
-return;
-*/
 
 code=Tcl_Eval(inter, cm);
 
@@ -225,11 +210,13 @@ if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilati
   sprintf(msg, "\nCommand:%s\nProduced message:\n%s\n-----\n",cm, inter->result);
   fprintf(ferr,"%s", msg);
   fclose(ferr);
-//  sprintf(msg, "tk_messageBox -type ok -title \"Lmm error\" -message \"Error in a tk function\"");
-//  cmd(inter, msg);
+#ifdef SHOW_TK_ERR
+  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tk 8.5 error.\\n\\nCommand: %s\\n\\nProduced message:\n%s", cm, inter->result );
+  cmd(inter, msg);
+#endif
  }
-
 }
+
 int errormsg( char *lpszText,  char *lpszTitle)
 {
 
@@ -880,7 +867,7 @@ if(argn>1)
 
     }
    else
-	cmd( inter, "tk_messageBox -parent .f.t.t -type ok -icon error -title \"Error\" -message \"File\\n$filetoload\\nnot found.\"");
+	cmd( inter, "tk_messageBox -parent .f.t.t -type ok -icon error -title Error -message \"File\\n$filetoload\\nnot found.\"");
    
   }
  else
@@ -921,13 +908,9 @@ cmd(inter, "if {[string compare $before $after] != 0} {set tosave 1} {set tosave
 if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {
 
-//  cmd(inter, "set answer [tk_dialog .dia \"Save?\" \"Save the file $filename?\" \"\" 0 yes no cancel]");
-  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save File?\" -message \"Recent changes to file '$filename' have not been saved. Do you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
-  //cmd(inter, " if { $answer == \"yes\"} {set tk_strictMotif 0; set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname]; set tk_strictMotif 1; if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");
-  
-//cmd(inter, " if { $answer == \"yes\"} { set curfile [tk_getSaveFile -initialfile $filename -initialdir $dirname];  if { [string length $curfile] > 0} {set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {}} {if {$answer  == \"cancel\"} {set choice 0} {}}");  if(choice==0)
-cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if {$answer  == \"cancel\"} {set choice 0} {}}");  
-if(choice==0)
+  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save File?\" -message \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
+  cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if {$answer  == \"cancel\"} {set choice 0} {}}");  
+  if(choice==0)
   goto loop;
 
   }
@@ -978,7 +961,7 @@ cmd(inter, "frame .a.f -relief groove -bd 4");
 cmd(inter, "set temp 33");
 cmd(inter, "label .a.f.l -text \"Choose Action\"  -fg red");
 
-cmd(inter, "radiobutton .a.f.r1 -variable temp -value 33 -text \"Browse Models\" -justify left -relief groove -anchor w");
+cmd(inter, "radiobutton .a.f.r1 -variable temp -value 33 -text \"Browse models\" -justify left -relief groove -anchor w");
 
 cmd(inter, "radiobutton .a.f.r2 -variable temp -value 15 -text \"Open a text file.\" -justify left -relief groove -anchor w");
 
@@ -989,8 +972,8 @@ cmd(inter, "pack .a.f.l ");
 cmd(inter, "pack .a.f.r1 .a.f.r2 .a.f.r3 -anchor w -fill x ");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#introduction}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#introduction}");
 cmd(inter, "pack .a.b.ok .a.b.help -padx 1 -pady 5 -side left");
 cmd(inter, "pack  .a.f .a.b -fill x");
 cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
@@ -1022,7 +1005,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {//this control is obsolete, since  model must be selected in order to arrive here
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"No model selected. Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1043,7 +1026,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nUse the 'Model Compilation Options', in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1054,7 +1037,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1067,7 +1050,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -default ok -message \"File 'makefile' not found.\\nUse the Model Compilation Options, in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nUse the 'Model Compilation Options', in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1078,7 +1061,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1164,9 +1147,9 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
    cmd(inter, "label .a.l -text \"Compilation issued an error message, but a model program exists, probably generated with an version of the equation file.\\n.\\nDo you want to run the existing model program anyway?\"");
    cmd(inter, "pack .a.l");
    cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#run}");
-   cmd(inter, "button .a.b.run -text Run -command {set choice 1}");
-   cmd(inter, "button .a.b.norun -text \"Don't run\" -command {set choice 2}");
+   cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#run}");
+   cmd(inter, "button .a.b.run -width -9 -text Run -command {set choice 1}");
+   cmd(inter, "button .a.b.norun -width -9 -text \"Don't run\" -command {set choice 2}");
    cmd(inter, "pack .a.b.run .a.b.norun .a.b.help -side left -expand yes -fill x");
    cmd(inter, "pack .a.b -fill x");
    cmd(inter, "bind .a <Return> {.a.b.norun invoke}");
@@ -1206,8 +1189,8 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
    cmd(inter, "label .a.l -text \"Compilation issued an error message.\\nFix the errors and try again\"");
    cmd(inter, "pack .a.l");
    cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#run}");
-   cmd(inter, "button .a.b.run -text Ok -command {set choice 1}");
+   cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#run}");
+   cmd(inter, "button .a.b.run -width -9 -text Ok -command {set choice 1}");
    cmd(inter, "pack .a.b.run .a.b.help -side left -expand yes -fill x");
    cmd(inter, "pack .a.b -fill x");
    cmd(inter, "bind .a <Return> {.a.b.run invoke}");
@@ -1278,7 +1261,7 @@ cmd(inter, "set filename makefile");
 cmd(inter, ".f.t.t mark set insert 1.0");
 cmd(inter, ".f.hea.file.dat conf -text \"makefile\"");
 cmd(inter, "wm title . \"Makefile - LMM\"");
-cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Choose System Compilation options in Model Compilation Options (menu Model).\"");  
+cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"Direct changes to the 'makefile' will not affect compilation issued through LMM.\\n\\nChoose 'System Compilation Options' and 'Model Compilation Options' in menu Model.\"");  
 choice=0;
 goto loop;
 }
@@ -1288,8 +1271,7 @@ if(choice==4)
  /*Save the file currently shown*/
 
 
-//cmd(inter, "set tk_strictMotif 0; set curfilename [tk_getSaveFile -initialfile $filename -initialdir $dirname]; set tk_strictMotif 1");
-cmd(inter, "set curfilename [tk_getSaveFile -initialfile $filename -initialdir $dirname]");
+cmd(inter, "set curfilename [tk_getSaveFile -title \"Save File\" -initialfile $filename -initialdir $dirname]");
 s=(char *)Tcl_GetVar(inter, "curfilename",0);
 
 if(s!=NULL && strcmp(s, ""))
@@ -1417,7 +1399,7 @@ if(s==NULL || !strcmp(s, ""))
   if(f==NULL)
    {
    
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\nAdd a makefile to model $modelname.\"");
+    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nAdd a makefile to model $modelname.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1428,7 +1410,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1501,8 +1483,8 @@ cmd(inter, "wm transient .search_line .");
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
 cmd(inter, "entry .search_line.e -justify center -width 10 -textvariable line");
 cmd(inter, "frame .search_line.b");
-cmd(inter, "button .search_line.b.ok -padx 25 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
-cmd(inter, "button .search_line.b.esc -padx 15 -text Cancel -command {sblocklmm .search_line}");
+cmd(inter, "button .search_line.b.ok -width -9 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
+cmd(inter, "button .search_line.b.esc -width -9 -text Cancel -command {sblocklmm .search_line}");
 cmd(inter, "bind .search_line <KeyPress-Return> {.search_line.b.ok invoke}");
 cmd(inter, "bind .search_line <KeyPress-Escape> {.search_line.b.esc invoke}");
 
@@ -1533,17 +1515,17 @@ cmd(inter, "label .find.l -text \"Type the text to search\"");
 cmd(inter, "entry .find.e -width 30 -textvariable textsearch");
 cmd(inter, ".find.e selection range 0 end");
 cmd(inter, "set docase 0");
-cmd(inter, "checkbutton .find.c -text \"Case Sensitive\" -variable docase");
+cmd(inter, "checkbutton .find.c -text \"Case sensitive\" -variable docase");
 cmd(inter, "radiobutton .find.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command {set endsearch end}");
 cmd(inter, "radiobutton .find.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
 
 cmd(inter, "frame .find.b");
-cmd(inter, "button .find.b.ok -padx 15 -text Search -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; sblocklmm .find} {.find.e selection range 0 end; bell}}");
+cmd(inter, "button .find.b.ok -width -9 -text Search -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; sblocklmm .find} {.find.e selection range 0 end; bell}}");
 
 cmd(inter, "bind .find.e <Up> {if { $curcounter >= 0} {incr curcounter -1; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 cmd(inter, "bind .find.e <Down> {if { $curcounter <= $lfindcounter} {incr curcounter; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 
-cmd(inter, "button .find.b.esc -padx 15 -text Cancel -command {sblocklmm .find}");
+cmd(inter, "button .find.b.esc -width -9 -text Cancel -command {sblocklmm .find}");
 
 
 cmd(inter, "bind .find <KeyPress-Return> {.find.b.ok invoke}");
@@ -1611,7 +1593,7 @@ if(s==NULL || !strcmp(s, ""))
   while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1640,7 +1622,7 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
    if(choice==5)
     {//Windows 2000
      
-//     cmd(inter, "set answer [tk_messageBox -type yesno -title \"Text-based GDB\" -icon question -message \"Use text-based GDB?\"]");
+//     cmd(inter, "set answer [tk_messageBox -type yesno -title GDB -icon question -default yes -message \"Use text-based GDB?\"]");
 //     cmd(inter, "if {$answer == \"yes\"} {set nowin \"-nw\"} {set nowin \"\"}");
     cmd(inter, "set nowin \"\"");
     sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/$LsdGnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
@@ -1684,7 +1666,7 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
    } 
   else
    {//executable not found
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"Executable not found. Compile the model before running it in the GDB debugger.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"Executable not found.\\n\\nCompile the model before running it in the GDB debugger.\"");
   choice=0;
   goto loop;
     choice=0;
@@ -1717,8 +1699,8 @@ cmd(inter, "set temp 1");
 cmd(inter, "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -justify left -relief groove -anchor w");
 cmd(inter, "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -justify left -relief groove -anchor w");
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f.r1 .a.f.r2 -fill x");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.tit .a.f -fill x");
@@ -1766,8 +1748,8 @@ cmd(inter, "text .a.tdes -width 30 -heig 3");
 cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mdir .a.edir .a.ldes .a.tdes");
@@ -1794,13 +1776,13 @@ if(choice==2)
  }
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
- {cmd(inter, "tk_messageBox -type ok -icon error -message \"Directory name must not contain spaces.\"");
+ {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Directory name must not contain spaces.\"");
   cmd(inter, "focus -force .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
 //control for existing directory
-cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $groupdir/$mdir\\n(possibly there is already such a directory).\\nCreation of new group aborted.\"; set choice 3} {}");
+cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory:\\n$groupdir/$mdir\\n\\nPossibly there is already such a directory.\\nCreation of new group aborted.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, "sblocklmm .a");
   choice=0;
@@ -1846,10 +1828,10 @@ cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
 cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left -fill x");
 
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
@@ -1874,14 +1856,14 @@ if(choice==2)
 
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
- {cmd(inter, "tk_messageBox -type ok -icon error -message \"Directory name must not contain spaces.\"");
+ {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Directory name must not contain spaces.\"");
   cmd(inter, "focus -force .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
 
 //control for existing directory
-cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $mdir\"; set choice 3} {}");
+cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory:\\n$mdir\"; set choice 3} {}");
 if(choice==3)
  {choice=0;
   goto loop_copy_new;
@@ -1918,19 +1900,19 @@ for(i=0; i<num; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
+ {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
   choice=0;
   goto loop_copy_new;
  } 
 if(choice==4)
  {
  choice=0;
- cmd(inter, "set answer [tk_messageBox -type yesno -title \"Warning\" -icon warning -message \"Warning: a model '$mname' already exists (ver. $mver). If you want the new model to inherit the same equations, data etc. of that model you should cancel this operation (choose 'No'), and use the 'Copy' command in the Model Browser. Press 'Yes' to continue creating a new (empty) model '$mname'.\"]");
+ cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"A model '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Copy' command in the Model Browser. Or press 'Ok' to continue creating a new (empty) model '$mname'.\"]");
 
 
   s=(char *)Tcl_GetVar(inter, "answer",0);
 
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
   if(choice==0)
    {cmd(inter, "sblocklmm .a");
     goto loop;
@@ -2024,8 +2006,7 @@ if(choice==15)
 {
 /* open a text file*/
 
-//cmd(inter, "set tk_strictMotif 0; set brr [tk_getOpenFile -initialdir $dirname]; set tk_strictMotif 1");
-cmd(inter, "set brr [tk_getOpenFile -initialdir $dirname]");
+cmd(inter, "set brr [tk_getOpenFile -title \"Load Text File\" -initialdir $dirname]");
 cmd(inter, "if {[string length $brr] == 0} {set choice 0} {set choice 1}");
 if(choice==0)
  goto loop;
@@ -2237,7 +2218,6 @@ if(choice==0)
 
 
 cmd(inter, "set cur \"\"");
-cmd(inter, "if { [winfo exists .l]==1} {.l.m.file invoke 1} { }");
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .l .");
@@ -2250,14 +2230,14 @@ cmd(inter, "entry .l.s -width 30 -textvariable textrepl");
 
 cmd(inter, "radiobutton .l.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command {set endsearch end}");
 cmd(inter, "radiobutton .l.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
-cmd(inter, "checkbutton .l.c -text \"Case Sensitive\" -variable docase");
+cmd(inter, "checkbutton .l.c -text \"Case sensitive\" -variable docase");
 
 cmd(inter, "frame .l.b1");
-cmd(inter, "button .l.b1.repl -padx 12 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.ok invoke} {}}");
-cmd(inter, "button .l.b1.all -padx 11 -state disabled -text \"Repl. All\" -command {set choice 4}");
+cmd(inter, "button .l.b1.repl -width -9 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.ok invoke} {}}");
+cmd(inter, "button .l.b1.all -width -9 -state disabled -text \"Repl. All\" -command {set choice 4}");
 cmd(inter, "frame .l.b2");
-cmd(inter, "button .l.b2.ok -padx 15 -text Search -command {if { [string length \"$textsearch\"]==0} {} {.f.t.t tag remove found 1.0 end; if {$docase==1} {set case \"-exact\"} {set case -nocase}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add found $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {.f.t.t mark set insert \"$cur + $length char\" } {.f.t.t mark set insert $cur}; update; .f.t.t see $cur; .l.b1.repl conf -state normal; .l.b1.all conf -state normal} {.l.b1.all conf -state disabled; .l.b1.repl conf -state disabled}}}");
-cmd(inter, "button .l.b2.esc -padx 15 -text Cancel -command {focus -force .f.t.t; set choice 5}");
+cmd(inter, "button .l.b2.ok -width -9 -text Search -command {if { [string length \"$textsearch\"]==0} {} {.f.t.t tag remove found 1.0 end; if {$docase==1} {set case \"-exact\"} {set case -nocase}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add found $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {.f.t.t mark set insert \"$cur + $length char\" } {.f.t.t mark set insert $cur}; update; .f.t.t see $cur; .l.b1.repl conf -state normal; .l.b1.all conf -state normal} {.l.b1.all conf -state disabled; .l.b1.repl conf -state disabled}}}");
+cmd(inter, "button .l.b2.esc -width -9 -text Cancel -command {focus -force .f.t.t; set choice 5}");
 cmd(inter, "bind .l <KeyPress-Return> {.l.b2.ok invoke}");
 cmd(inter, "bind .l <KeyPress-Escape> {.l.b2.esc invoke}");
 
@@ -2316,7 +2296,7 @@ cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"Insert an Equation\"");
 
-cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
@@ -2324,16 +2304,16 @@ cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
 cmd(inter, "frame .a.f -relief groove -bd 2");
 
 cmd(inter, "set isfun 0");
-cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every Variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other Variable requests this value, it the code is computed.\" -justify left -relief groove");
-cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this Variable is requested by other Variables' code,\\nbut it is not computed by default. This code is not computed if no Variable\\nneeds this Variable's value.\" -justify left -relief groove");
+cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other variable requests this value, it the code is computed.\" -justify left -relief groove");
+cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this variable is requested by other variables' code,\\nbut it is not computed by default. This code is not computed if no variable\\nneeds this variable's value.\" -justify left -relief groove");
 cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w ");
 
 
 cmd(inter, "frame .a.b");	
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#equation}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#equation}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
@@ -2389,7 +2369,7 @@ cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .a \"Insert an Equation\"");
 
 cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l1 -text \"Type below the label of the Variable\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
@@ -2397,16 +2377,16 @@ cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
 cmd(inter, "frame .a.f -relief groove -bd 2");
 
 cmd(inter, "set isfun 0");
-cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every Variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other Variable requests this value, it the code is computed.\" -justify left -relief groove");
-cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this Variable is requested by other Variables' code,\\nbut it is not computed by default. This code is not computed if no Variable\\nneeds this Variable's value.\" -justify left -relief groove");
+cmd(inter, "radiobutton .a.f.r1 -variable isfun -value 0 -text \"Equation:\\nthe code will provide one value for every variable of this type at each time step.\\nThe code is executed only once for each t, re-using the same value if requested many times.\\nEven if no other variable requests this value, it the code is computed.\" -justify left -relief groove");
+cmd(inter, "radiobutton .a.f.r2 -variable isfun -value 1 -text \"Function:\\nthe code is executed again any time this variable is requested by other variables' code,\\nbut it is not computed by default. This code is not computed if no variable\\nneeds this variable's value.\" -justify left -relief groove");
 cmd(inter, "pack .a.f.r1 .a.f.r2 -anchor w ");
 
 
 cmd(inter, "frame .a.b");	
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#equation}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp lsdfunc.html#equation}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
@@ -2492,10 +2472,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#V}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#V}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
@@ -2570,10 +2550,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#cal}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#cal}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
@@ -2641,10 +2621,10 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#CYCLE}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#CYCLE}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
@@ -2744,10 +2724,10 @@ cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#basicc}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#basicc}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
@@ -2801,17 +2781,17 @@ cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options\nThe interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
-cmd(inter, "radiobutton .a.r.cal -text \"V(...) - request the value of a Variable\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26");
+cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of Objects\" -underline 1 -variable res -value 56");
 cmd(inter, "radiobutton .a.r.sear -text \"SEARCH - search the first instance an Object type\" -underline 2 -variable res -value 55");
 cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.lqs -text \"SORT - sort a group of Objects\" -underline 3 -variable res -value 31");
 cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - add a new Object\" -underline 3 -variable res -value 52");
 cmd(inter, "radiobutton .a.r.delo -text \"DELETE - delete an Object\" -underline 0 -variable res -value 53");
 cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - draw an Object\" -underline 1 -variable res -value 54");
-cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
-cmd(inter, "radiobutton .a.r.incr -text \"INCR - increment the value of a Parameter\" -underline 0 -variable res -value 40");
-cmd(inter, "radiobutton .a.r.mult -text \"MULT - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
+cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29");
+cmd(inter, "radiobutton .a.r.incr -text \"INCR - increment the value of a parameter\" -underline 0 -variable res -value 40");
+cmd(inter, "radiobutton .a.r.mult -text \"MULT - multiply the value of a parameter\" -underline 0 -variable res -value 45");
 cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
@@ -2832,9 +2812,9 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
@@ -2884,17 +2864,17 @@ cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options. The interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
-cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a Variable\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a Variable over a set of Objects\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a variable\" -underline 0 -variable res -value 26");
+cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a variable over a set of Objects\" -underline 1 -variable res -value 56");
 cmd(inter, "radiobutton .a.r.sear -text \"search - search the first instance an Object type\" -underline 3 -variable res -value 55");
 cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
 cmd(inter, "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of Objects\" -underline 7 -variable res -value 31");
 cmd(inter, "radiobutton .a.r.addo -text \"add_an_object - add a new Object\" -underline 0 -variable res -value 52");
 cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - delete an Object\" -underline 0 -variable res -value 53");
 cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - draw an Object\" -underline 6 -variable res -value 54");
-cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a Variable or Parameter with a new value\" -underline 0 -variable res -value 29");
-cmd(inter, "radiobutton .a.r.incr -text \"increment - increment the value of a Parameter\" -underline 0 -variable res -value 40");
-cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a Parameter\" -underline 0 -variable res -value 45");
+cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29");
+cmd(inter, "radiobutton .a.r.incr -text \"increment - increment the value of a parameter\" -underline 0 -variable res -value 40");
+cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a parameter\" -underline 0 -variable res -value 45");
 cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
@@ -2915,9 +2895,9 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
@@ -2990,10 +2970,10 @@ cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#INCR}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#INCR}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
@@ -3066,10 +3046,10 @@ cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#increment}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#increment}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
@@ -3142,10 +3122,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#MULT}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#MULT}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3221,10 +3201,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#multiply}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#multiply}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3283,7 +3263,7 @@ cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Label of the Var. or Par. to overwrite\"");
+cmd(inter, "label .a.l2 -text \"Label of the var. or par. to overwrite\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -3300,10 +3280,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#WRITE}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#WRITE}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3374,10 +3354,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#write}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#write}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3446,10 +3426,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#search_var_cond}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#search_var_cond}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3519,10 +3499,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH_CND}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH_CND}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3596,10 +3576,10 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SORT}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#SORT}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
@@ -3679,10 +3659,10 @@ cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#lsdqsort}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#lsdqsort}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
@@ -3737,14 +3717,14 @@ cmd(inter, "label .a.l2 -text \"Maximum\"");
 cmd(inter, "entry .a.e2 -justify center -textvariable value2");
 cmd(inter, "pack .a.l1 .a.e1 .a.l2 .a.e2");
 
-cmd(inter, "radiobutton .a.r1 -text \"Uniform Random Draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"UNIFORM($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r2 -text \"Normal Random Draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance; set str \"norm($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r3 -text \"Integer Uniform Random Draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"rnd_integer($value1, $value2)\"}");
-cmd(inter, "radiobutton .a.r4 -text \"Poisson Draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"poisson($value1)\"}");
-cmd(inter, "radiobutton .a.r5 -text \"Gamma Random Draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"gamma($value1)\"}");
-cmd(inter, "radiobutton .a.r6 -text \"Absolute Value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"abs($value1)\"}");
-cmd(inter, "radiobutton .a.r7 -text \"Minimum Value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"min($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r8 -text \"Maximum Value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"max($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"UNIFORM($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance; set str \"norm($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"rnd_integer($value1, $value2)\"}");
+cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"poisson($value1)\"}");
+cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"gamma($value1)\"}");
+cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"abs($value1)\"}");
+cmd(inter, "radiobutton .a.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"min($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"max($value1,$value2)\"}");
 cmd(inter, "radiobutton .a.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"round($value1)\"}");
 cmd(inter, "radiobutton .a.r10 -text \"Exponential\" -variable res -value 10 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"exp($value1)\"}");
 cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"log($value1)\"}");
@@ -3752,9 +3732,9 @@ cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -co
 cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\"; set str \"pow($value1,$value2)\"}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 18 -text Insert -command {set choice 1}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#rnd}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#rnd}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.r1 .a.r2 .a.r3 .a.r4 .a.r5 .a.r6 .a.r7 .a.r8 .a.r9 .a.r10 .a.r11 .a.r12 .a.r13 -anchor w");
 cmd(inter, "pack .a.f");
@@ -3855,10 +3835,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#ADDOBJ}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#ADDOBJ}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -3911,7 +3891,7 @@ cmd(inter, "if {$v_obj !=\"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNO
 /*
 if(choice!=-3)
  {
- cmd(inter, "tk_messageBox -type ok -title Error -message \"Error: missing information\\nYou need to provide the pointer to an example object when adding more than 1 new objects.\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Missing information.\\n\\nYou need to provide the pointer to an example object when adding more than 1 new objects.\"");
  choice=-3;
  goto here_addobj;
  }
@@ -3961,10 +3941,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#add_an_object}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#add_an_object}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -4013,10 +3993,10 @@ cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#DELETE}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#DELETE}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 
@@ -4067,10 +4047,10 @@ cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#delete_obj}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#delete_obj}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 
@@ -4148,10 +4128,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#RNDDRAW}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#RNDDRAW}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -4246,10 +4226,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#draw_rnd}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#draw_rnd}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -4314,10 +4294,10 @@ cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#SEARCH}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -4377,10 +4357,10 @@ cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#search}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#search}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
@@ -4448,10 +4428,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfuncMacro.html#SUM}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#SUM}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
@@ -4527,10 +4507,10 @@ cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp lsdfunc.html#sum}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html#sum}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
@@ -4642,10 +4622,10 @@ if( choice==4)
   cmd(inter, "if { [lindex $lmn $result] == \"..\" } {set choice 33} {}");
   if(choice==33)
    {
-   cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"You cannot remove this.\"");
+   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"You cannot remove this.\"");
    goto loop;
    }
-  cmd(inter, "if { [lindex $group $result] == 1} {set message \"Group\\n[lindex $lmn $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\nConfirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove group?\" -message $message]} {set message \"Model\\n[lindex $lmn $result] ver. [lindex $lver $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\n Confirm?\"; set answer [tk_messageBox -icon question -type yesno -title \"Remove model?\" -message $message]}");
+  cmd(inter, "if { [lindex $group $result] == 1} {set message \"Group\\n[lindex $lmn $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\nConfirm?\"; set answer [tk_messageBox -icon question -type yesno -default no -title \"Remove group?\" -message $message]} {set message \"Model\\n[lindex $lmn $result] ver. [lindex $lver $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\n Confirm?\"; set answer [tk_messageBox -icon question -type yesno -default no -title \"Remove model?\" -message $message]}");
   cmd(inter, "if {$answer == \"yes\"} {file delete -force [lindex $ldn $result]} {}");
   cmd(inter, "set groupdir [lindex $lrn $result]");
   choice=33;
@@ -4713,9 +4693,9 @@ cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
 cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}"); 
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#copy}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#copy}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 
 cmd(inter, "pack .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
@@ -4742,7 +4722,7 @@ if(choice==2)
  }
 
 //control for existing directory
-cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create directory: $mdir.\\nChoose a different name.\"; set choice 3} {}");
+cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory: $mdir.\\n\\nChoose a different name.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, ".a.edir selection range 0 end");
   cmd(inter, "focus -force .a.edir");
@@ -4782,7 +4762,7 @@ for(i=0; i<num && choice!=3; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title \"Error\" -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
+ {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
   cmd(inter, ".a.ename selection range 0 end");
   cmd(inter, "focus -force .a.ename");
   choice=0;
@@ -4809,7 +4789,7 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-cmd(inter, "tk_messageBox -type ok -title \"Model Copied\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
+cmd(inter, "tk_messageBox -type ok -title \"Model Copy\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
 
 choice=49;
 goto loop;
@@ -4884,7 +4864,7 @@ choice=0;
 cmd(inter, "set ex [file exists $modeldir/modelinfo.txt]");
 cmd(inter, "set choice $ex");
 if(choice==0)
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot find file for model info.\\nPlease, check the date of creation.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot find file for model info.\\n\\nPlease, check the date of creation.\"");
 
 
 
@@ -4930,7 +4910,7 @@ f=fopen(s, "r");
 
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\nAdd a makefile to model '$modelname' ([pwd]).\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nAdd a makefile to model '$modelname' ([pwd]).\"");
   choice=0;
   cmd(inter, "cd $RootLsd");
   cmd(inter, "if { [winfo exists .a] == 1} {destroy .a} {}");
@@ -4941,7 +4921,7 @@ while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted. Check Model and System Compilation options.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
   choice=0;
   goto loop;
  }
@@ -4962,8 +4942,8 @@ cmd(inter, "entry .a.c.elast -width 40 -state disabled -textvariable last");
 cmd(inter, "pack .a.c.n .a.c.en .a.c.v .a.c.ev .a.c.date .a.c.edate .a.c.last .a.c.elast .a.c.d .a.c.ed");
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 
 cmd(inter, "pack .a.c .a.b");
@@ -5103,7 +5083,6 @@ else
   cmd(inter, "set a \"\"");
 
 
-cmd(inter, "if { [winfo exists .l]==1} {tk_messageBox -type ok; .l.m.file invoke 1; } { }"); 
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .l \"System Compilation Options\"");
@@ -5125,19 +5104,19 @@ cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.os");
 
 if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
-  cmd(inter, "button .l.t.d.os.win -padx 2 -text \"Default Windows x64\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+  cmd(inter, "button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 else
-  cmd(inter, "button .l.t.d.os.win -padx 12 -text \"Default Windows\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+  cmd(inter, "button .l.t.d.os.win -width -15 -text \"Default Windows\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 
 
-cmd(inter, "button .l.t.d.os.lin -padx 22 -text \"Default Linux\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
-cmd(inter, "button .l.t.d.os.mac -padx 12 -text \"Default Mac OSX\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
+cmd(inter, "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
+cmd(inter, "button .l.t.d.os.mac -width -15 -text \"Default Mac OSX\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 cmd(inter, "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 1 -pady 5 -side left");
 
 cmd(inter, "frame .l.t.d.b");
-cmd(inter, "button .l.t.d.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .l.t.d.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
-cmd(inter, "button .l.t.d.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .l.t.d.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .l.t.d.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
+cmd(inter, "button .l.t.d.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.t.yscroll -side right -fill y");
 cmd(inter, "pack .l.t.d.os .l.t.d.b");
@@ -5192,14 +5171,13 @@ if(choice==1)
  }
 else
   {
-   cmd(inter, "tk_messageBox -type ok -icon warning -message \"Model compilation options not found. The system will use default values.\" -title \"Warning\"");
+   cmd(inter, "tk_messageBox -type ok -icon warning -message \"Model compilation options not found.\\n\\nThe system will use default values.\" -title Warning");
    cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
 
   }
-cmd(inter, "if { [winfo exists .l]==1} {.l.m.file invoke 1} { }"); 
 cmd(inter, "toplevel .l");
 cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
 cmd(inter, "wm title .l \"Model Compilation Options\"");
@@ -5216,16 +5194,16 @@ cmd(inter, "set default \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g
 
 cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.opt");
-cmd(inter, "button .l.t.d.opt.def -padx 30 -text \"Default Values\" -command {.l.t.text delete 1.0 end; .l.t.text insert end \"$default\"}");
+cmd(inter, "button .l.t.d.opt.def -width -15 -text \"Default Values\" -command {.l.t.text delete 1.0 end; .l.t.text insert end \"$default\"}");
 
-cmd(inter, "button .l.t.d.opt.cle -padx 2 -text \"Clean Pre-Compiled Files\" -command { if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { foreach i $objs { catch { file delete -force $i } } } }");
+cmd(inter, "button .l.t.d.opt.cle -width -15 -text \"Clean Pre-Compiled Files\" -command { if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { foreach i $objs { catch { file delete -force $i } } } }");
 
 cmd(inter, "pack .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left");
 
 cmd(inter, "frame .l.t.d.b");
-cmd(inter, "button .l.t.d.b.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .l.t.d.b.help -padx 20 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
-cmd(inter, "button .l.t.d.b.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .l.t.d.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .l.t.d.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
+cmd(inter, "button .l.t.d.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.t.d.opt .l.t.d.b");
 
@@ -5298,10 +5276,10 @@ cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#changefont}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#changefont}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.f");
@@ -5389,13 +5367,13 @@ cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
 cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.f.ok}");
 
 cmd(inter, "frame .a.f1");
-cmd(inter, "button .a.f1.def -padx 14 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
-cmd(inter, "button .a.f1.help -padx 20 -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
+cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
+cmd(inter, "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
 cmd(inter, "pack .a.f1.def .a.f1.help -padx 10 -pady 5 -side left");
 
 cmd(inter, "frame .a.f2");
-cmd(inter, "button .a.f2.ok -padx 25 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.f2.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f2.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f2.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.f1 .a.f2");
 cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
@@ -5649,10 +5627,10 @@ cmd(inter, "label .a.l1 -text \"Enter the Tab size (in characters)\"");
 cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -padx 25 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.help -padx 20 -text Help -command {LsdHelp LMM_help.html#changetab}");
-cmd(inter, "button .a.f.esc -padx 15 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#changetab}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.f");
@@ -6029,13 +6007,13 @@ cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill b
 cmd(inter, "frame .mm.b");
 
 cmd(inter, "set error \"error\"");				// error string to be searched
-cmd(inter, "button .mm.b.ferr -text \" Next error \" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }");
+cmd(inter, "button .mm.b.ferr -width -9 -text \"Next Error\" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }");
 
-cmd(inter, "button .mm.b.perr -text \" Previous error \" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }");
+cmd(inter, "button .mm.b.perr -width -9 -text \"Previous Error\" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }");
 
 cmd(inter, "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
-cmd(inter, "button .mm.close -padx 15 -text Cancel -command {destroy .mm}");
+cmd(inter, "button .mm.close -width -9 -text Cancel -command {destroy .mm}");
 cmd(inter, "pack .mm.close -pady 5 -side bottom");
 
 cmd(inter, "bind .mm <Escape> {destroy .mm}");
