@@ -160,7 +160,7 @@ sprintf(ch, "append list_%s \"Object %s :\n\n\"",t->label, t->label);
 cmd(inter,ch);
 
 if(t->v==NULL)
- {sprintf(ch, "append list_%s \"(No Variables)\"", t->label);
+ {sprintf(ch, "append list_%s \"(no variables)\"", t->label);
   cmd(inter, ch);
  }
 for(cv=t->v; cv!=NULL; cv=cv->next)

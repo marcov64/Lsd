@@ -93,9 +93,9 @@ if( (f=fopen(equation_name,"r"))==NULL)
   cmd(inter, "label .warn_eq.lab3 -text \"not found (check equation file name)\"");
   cmd(inter, "pack .warn_eq.lab1 .warn_eq.lab2 .warn_eq.lab3");
   cmd(inter, "frame .warn_eq.b");
-  cmd(inter, "button .warn_eq.b.s -text Search -command {set res [tk_getOpenFile -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]; set choice 1}");
-  cmd(inter, "button .warn_eq.b.c -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .warn_eq.b.s .warn_eq.b.c -side left");
+  cmd(inter, "button .warn_eq.b.s -width -9 -text Search -command {set res [tk_getOpenFile -title \"Load Equation File\" -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]; set choice 1}");
+  cmd(inter, "button .warn_eq.b.esc -width -9 -text Cancel -command {set choice 2}");
+  cmd(inter, "pack .warn_eq.b.s .warn_eq.b.esc -side left");
   cmd(inter, "pack .warn_eq.b");
   while(*choice==0)
    Tcl_DoOneEvent(0);
@@ -160,7 +160,7 @@ cmd(inter, msg);
 
 sprintf(msg, "set w .eq_%s", lab);
 cmd(inter, msg);
-sprintf(msg, "wm title .eq_%s \"Var - %s - Equation\"", lab, lab);
+sprintf(msg, "wm title .eq_%s \"%s Equation\"", lab, lab);
 cmd(inter, msg);
 cmd(inter, "frame $w.f");
 cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
@@ -171,9 +171,9 @@ cmd(inter, "pack $w.f.yscroll -side right -fill y");
 cmd(inter, "pack $w.f.xscroll -side bottom -fill x");
 cmd(inter, "pack $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f -expand yes -fill both");
-sprintf(msg, "button $w.close -text Close -command {destroy .eq_%s}", lab);
+sprintf(msg, "button $w.close -width -9 -text Close -command {destroy .eq_%s}", lab);
 cmd(inter, msg);
-sprintf(msg, "button $w.search -text Search -command {set cur [.eq_%s.f.text index insert]; toplevel $w.s; wm transient $w.s .; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -text Search -command {set cur [.eq_%s.f.text search -count length $s $cur end]; if {[string length $cur] > 0} {.eq_%s.f.text tag add sel $cur \"$cur + $length char\"; .eq_%s.f.text mark set insert \"$cur + $length char\" ;update; destroy $w.s; .eq_%s.f.text see $cur} { destroy $w.s}}; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}}",lab, lab, lab, lab, lab);
+sprintf(msg, "button $w.search -width -9 -text Search -command {set cur [.eq_%s.f.text index insert]; toplevel $w.s; wm transient $w.s .; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -width -9 -text Search -command {set cur [.eq_%s.f.text search -count length $s $cur end]; if {[string length $cur] > 0} {.eq_%s.f.text tag add sel $cur \"$cur + $length char\"; .eq_%s.f.text mark set insert \"$cur + $length char\" ;update; destroy $w.s; .eq_%s.f.text see $cur} { destroy $w.s}}; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}}",lab, lab, lab, lab, lab);
 cmd(inter, msg);
 
 cmd(inter, "pack $w.search $w.close");
@@ -363,9 +363,9 @@ cmd(inter, "wm transient $list .");
 sprintf(msg, "wm title $list \"%s Users\"", lab);
 cmd(inter, msg);
 cmd(inter, "listbox $list.l ");
-sprintf(msg, "button $list.close -text Close -command {destroy .list_%s}", lab);
+sprintf(msg, "button $list.close -width -9 -text Close -command {destroy .list_%s}", lab);
 cmd(inter, msg);
-sprintf(msg, "label $list.l1 -text \"List of Variables whose equations contain:\\n%s\\nDouble-click on a label to observe the Variable\"", lab);
+sprintf(msg, "label $list.l1 -text \"List of variables whose equations contain:\\n%s\\nDouble-click on a label to observe the variable\"", lab);
 cmd(inter, msg);
 
 sprintf(msg, "pack $list.l1 $list.l $list.close",lab);
@@ -432,9 +432,9 @@ cmd(inter, "wm transient $list .");
 sprintf(msg, "wm title $list \"Used in %s\"", lab);
 cmd(inter, msg);
 cmd(inter, "listbox $list.l");
-sprintf(msg, "button $list.close -text Close -command {destroy .listusing_%s}", lab);
+sprintf(msg, "button $list.close -width -9 -text Close -command {destroy .listusing_%s}", lab);
 cmd(inter, msg);
-sprintf(msg, "label $list.l1 -text \"List of Vars/Pars used in the equation for:\\n%s\\nDouble-click on a label to observe the Var/Par\"", lab);
+sprintf(msg, "label $list.l1 -text \"List of vars./pars. used in the equation for:\\n%s\\nDouble-click on a label to observe the var./par.\"", lab);
 cmd(inter, msg);
 
 sprintf(msg, "pack $list.l1 $list.l $list.close",lab);

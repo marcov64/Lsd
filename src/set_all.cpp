@@ -143,7 +143,7 @@ res=1;
 value1=0;
 value2=0;
 
-cmd(inter, "wm title . \"Lsd - Set All initialization\"");
+cmd(inter, "wm title . \"Set All Initialization\"");
 cv=r->search_var(NULL, lab);
 
 
@@ -186,22 +186,22 @@ cmd(inter, "bind .f1.rd.f2.r2 <Return> { .f1.val.e1 selection range 0 end; focus
 
 cmd(inter, "set step_in 1");
 cmd(inter, "pack .f1.rd.f2.r2 -side left");
-cmd(inter, "radiobutton .f1.rd.r4 -text \"Increasing (Groups) \" -variable res -value 4 -command {.f1.val.l1 conf -text \"Start\"; .f1.val.l2 conf -text \"Step\"}");
+cmd(inter, "radiobutton .f1.rd.r4 -text \"Increasing (groups) \" -variable res -value 4 -command {.f1.val.l1 conf -text \"Start\"; .f1.val.l2 conf -text \"Step\"}");
 cmd(inter, "bind .f1.rd.r4 <Up> {focus -force .f1.rd.f2.r2; .f1.rd.f2.r2 invoke}");
 cmd(inter, "bind .f1.rd.r4 <Down> {focus -force .f1.rd.r3; .f1.rd.r3 invoke}");
 cmd(inter, "bind .f1.rd.r4 <Return> {.f1.val.e1 selection range 0 end; focus .f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r3 -text \"Random (Uniform) \" -variable res -value 3 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
+cmd(inter, "radiobutton .f1.rd.r3 -text \"Random (uniform) \" -variable res -value 3 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
 cmd(inter, "bind .f1.rd.r3 <Up> {focus -force .f1.rd.r4; .f1.rd.r4 invoke}");
 cmd(inter, "bind .f1.rd.r3 <Down> {focus -force .f1.rd.r8; .f1.rd.r8 invoke}");
 cmd(inter, "bind .f1.rd.r3 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r8 -text \"Random Integer (Uniform) \" -variable res -value 8 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
+cmd(inter, "radiobutton .f1.rd.r8 -text \"Random integer (uniform) \" -variable res -value 8 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
 cmd(inter, "bind .f1.rd.r8 <Up> {focus -force .f1.rd.r3; .f1.rd.r3 invoke}");
 cmd(inter, "bind .f1.rd.r8 <Down> {focus -force .f1.rd.r5; .f1.rd.r5 invoke}");
 cmd(inter, "bind .f1.rd.r8 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r5 -text \"Random (Normal) \" -variable res -value 5 -command {.f1.val.l1 conf -text \"Mean\"; .f1.val.l2 conf -text \"Std Dev\"}");
+cmd(inter, "radiobutton .f1.rd.r5 -text \"Random (normal) \" -variable res -value 5 -command {.f1.val.l1 conf -text \"Mean\"; .f1.val.l2 conf -text \"Std Dev\"}");
 cmd(inter, "bind .f1.rd.r5 <Up> {focus -force .f1.rd.r8; .f1.rd.r8 invoke}");
 cmd(inter, "bind .f1.rd.r5 <Down> {focus -force .f1.rd.r7; .f1.rd.r7 invoke}");
 cmd(inter, "bind .f1.rd.r5 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
@@ -211,7 +211,7 @@ cmd(inter, "radiobutton .f1.rd.r7 -text \"File\" -variable res -value 7 -command
 cmd(inter, "bind .f1.rd.r7 <Up> {focus -force .f1.rd.r5; .f1.rd.r5 invoke}");
 cmd(inter, "bind .f1.rd.r7 <Return> {.f1.val.e1 selection range 0 end; focus .f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r10 -text \"Sensitivity Analysis\" -variable res -value 10 -command {.f1.val.l1 conf -text \"Number of values\"; .f1.val.l2 conf -text \"(no use)\"}");
+cmd(inter, "radiobutton .f1.rd.r10 -text \"Sensitivity analysis\" -variable res -value 10 -command {.f1.val.l1 conf -text \"Number of values\"; .f1.val.l2 conf -text \"(no use)\"}");
 
 
 cmd(inter, "pack .f1.rd.l .f1.rd.r1 .f1.rd.r9 .f1.rd.f2 .f1.rd.r4 .f1.rd.r3 .f1.rd.r8 .f1.rd.r5 .f1.rd.r7 .f1.rd.r10 -anchor w");
@@ -242,7 +242,7 @@ cmd(inter, "frame .f2.s -relief groove -bd 2");
 cmd(inter, "set to_all 1");
 cmd(inter, "label .f2.s.tit -text \"Extension of initialization\" -fg red");
 cmd(inter, "pack .f2.s.tit");
-cmd(inter, "radiobutton .f2.s.all -text \"Apply to every object \" -variable to_all -value 1");
+cmd(inter, "radiobutton .f2.s.all -text \"Apply to every object\" -variable to_all -value 1");
 
 cmd(inter, "bind .f2.s.all <1> {.f2.s.sel.to conf -state disabled; .f2.s.sel.from conf -state disabled}");
 cmd(inter, "bind .f2.s.all <Down> {.f2.s.sel.to conf -state normal; .f2.s.sel.from conf -state normal;focus -force .f2.s.sel.sel; .f2.s.sel.sel invoke};");
@@ -290,9 +290,9 @@ cmd(inter, "pack .f2.rnd .f2.fr .f2.s .f2.ud -anchor w -expand yes -fill both");
 cmd(inter, "pack .head");
 cmd(inter, "pack .f1 .f2 -side left");
 cmd(inter, "frame .f2.b");
-cmd(inter, "button .f2.b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .f2.b.help -text Help -command {LsdHelp mdatainit.html#setall}");
-cmd(inter, "button .f2.b.can -text Cancel -command {set choice 2}");
+cmd(inter, "button .f2.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .f2.b.help -width -9 -text Help -command {LsdHelp mdatainit.html#setall}");
+cmd(inter, "button .f2.b.can -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .f2.b.ok .f2.b.help .f2.b.can -side left");
 cmd(inter, "pack .f2.b -side bottom");
@@ -361,7 +361,7 @@ case 10:
 	{
 		if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
 		{
-			cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
+			cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
 			break;		// abort command
 		}
         rsense=cs=new sense;
@@ -381,7 +381,7 @@ case 10:
 		{
 			if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
 			{
-				cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
+				cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
 				break;		// abort command
 			}
 			for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
@@ -836,9 +836,9 @@ cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l -text \"Insert file name\"");
 cmd(inter, "entry .a.e -width 50 -textvariable filename");
 *choice=0;
-cmd(inter, "button .a.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .a.esc -text Escape -command {set choice 2}");
-cmd(inter, "button .a.se -text Search -command {set filename [tk_getOpenFile -filetypes {{{\"Text Files\"} {.txt}}}]; raise .a; focus -force .a}");
+cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.se -width -9 -text Search -command {set filename [tk_getOpenFile -title \"Load Text File\" -filetypes {{{\"Text Files\"} {.txt}}}]; raise .a; focus -force .a}");
 cmd(inter, "pack .a.l .a.e .a.se .a.ok .a.esc ");
 #ifndef DUAL_MONITOR
 cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
@@ -1189,11 +1189,11 @@ cmd(inter, msg);
 cmd(inter, "pack $a.lab");
 cmd(inter, "text $a.t; pack $a.t"); 
 cmd(inter, "frame $a.fb -relief groove -bd 2");
-cmd(inter, "button $a.fb.ok -text \" Ok \" -command {set choice 1}");
-cmd(inter, "button $a.fb.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "button $a.fb.del -text \" Delete Values \" -command {$a.t delete 0.0 end}");
-cmd(inter, "button $a.fb.paste -text \" Paste Clipboard \" -command {tk_textPaste}");
-cmd(inter, "button $a.fb.rem -text \" Remove Var. from Analysis \" -command {set choice 3}");
+cmd(inter, "button $a.fb.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $a.fb.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "button $a.fb.del -width -9 -text \"Delete Values\" -command {$a.t delete 0.0 end}");
+cmd(inter, "button $a.fb.paste -width -9 -text \"Paste Clipboard\" -command {tk_textPaste}");
+cmd(inter, "button $a.fb.rem -width -9 -text \"Remove var. from analysis\" -command {set choice 3}");
 cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.del $a.fb.paste $a.fb.rem -side left");
 cmd(inter, "pack $a.fb");
 cmd(inter, "focus -force .des.t");
@@ -1270,7 +1270,7 @@ for(i=0; i<s->nvalues;)
   tok=strtok(sss, SEP);		// accepts several separators
   if(tok==NULL)		// finished too early?
   {
-	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -default ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
+	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
 	  *choice=0;
 	  cmd(inter, "focus -force .des.t");
 	  break;

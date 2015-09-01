@@ -444,7 +444,7 @@ if(search_step>100)
   }
 */
 if(curr==NULL)
- {sprintf(msg, "\nSearch for Variable or Parameter %s failed in (Object %s)",l, label);
+ {sprintf(msg, "\nSearch for variable or parameter %s failed in (Object %s)",l, label);
  plog(msg);
  error_hard();
  quit=2;
@@ -582,7 +582,7 @@ if( caller!=up)
 	 {
    if(no_error==0)
    {
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s': the model does not contain any element '%s'.\n\nYou need either to add the element '%s' to the model, or remove its reference in the equation for '%s'.\nIf you think that the element is included in the model, then you likely spelled its label differently in the equation's code and in the model configuration.\n\nClick to abort the program, or to inspect the model at the time of the error.\"",stacklog->label, l, l, l, stacklog->label); 
+   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s': the model does not contain any element '%s'.\n\nYou need either to add the element '%s' to the model, or remove its reference in the equation for '%s'.\nIf you think that the element is included in the model, then you likely spelled its label differently in the equation's code and in the model configuration.\n\nClick to abort the program, or to inspect the model at the time of the error.\"",stacklog->label, l, l, l, stacklog->label); 
    #ifndef NO_WINDOW
      cmd(inter, msg); 
    #else
@@ -1032,7 +1032,7 @@ if(this==NULL)
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
-{sprintf(msg, "\nError S02: Variable %s not found trying to sum it up", lab);
+{sprintf(msg, "\nError: variable %s not found trying to sum it up", lab);
  plog(msg);
  error_hard();
  quit=2;
@@ -1073,7 +1073,7 @@ if(this==NULL)
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
- {sprintf(msg, "\nError S03: Variable %s not found in overall_max", lab);
+ {sprintf(msg, "\nError: variable %s not found in overall_max", lab);
   plog(msg);
   error_hard();
   quit=2;
@@ -1113,7 +1113,7 @@ if(this==NULL)
 cur_v=search_var(this, lab);
 
 if(cur_v==NULL)
-{sprintf(msg, "\nError S04: Variable %s not found in wgh_aver", lab);
+{sprintf(msg, "\nError: variable %s not found in wgh_aver", lab);
  plog(msg);
  error_hard();
  quit=2;
@@ -1121,7 +1121,7 @@ if(cur_v==NULL)
 }
 cur_v=search_var(this, lab2);
 if(cur_v==NULL)
-{sprintf(msg, "\nError S05: Variable %s not found in wgh_aver", lab2);
+{sprintf(msg, "\nError: variable %s not found in wgh_aver", lab2);
  plog(msg);
  error_hard();
  quit=2;
@@ -2280,7 +2280,7 @@ if(running==0)
  return;
 sprintf(msg, "\n\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
 plog(msg);
-sprintf(msg, "\nOffending code contained in the equation for Variable: %s\n", stacklog->vs->label);
+sprintf(msg, "\nOffending code contained in the equation for variable: %s\n", stacklog->vs->label);
 plog(msg);
 
 print_stack();
@@ -2314,8 +2314,8 @@ cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd progr
 cmd(inter, "pack .cazzo.e.r .cazzo.e.a .cazzo.e.d .cazzo.e.e -anchor w");
 
 cmd(inter, "frame .cazzo.b");
-cmd(inter, "button .cazzo.b.ok -text \" Ok \" -command {set choice 1}");
-cmd(inter, "button .cazzo.b.help -text \" Help \" -command {LsdHelp debug.html#crash}");
+cmd(inter, "button .cazzo.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .cazzo.b.help -width -9 -text Help -command {LsdHelp debug.html#crash}");
 cmd(inter, "pack .cazzo.b.ok .cazzo.b.help ");
 
 cmd(inter, "pack .cazzo.e .cazzo.b  -fill both -expand yes");
@@ -2406,7 +2406,7 @@ void print_stack(void)
 {
 lsdstack *app;
 
-plog("\nList of Variables currently under computation.\n(the first-level Variable is computed by the simulation manager, \nwhile possible other Variables are triggered by the lower level ones \nbecause necessary for completing their computation)");
+plog("\nList of variables currently under computation.\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)");
 plog("\n\nLevel\tVariable Label");
 for(app=stacklog; app!=NULL; app=app->prev)
  {
@@ -2687,7 +2687,7 @@ for(cb=b; cb!=NULL; cb=cb->next)
 if(cb==NULL)
  {
    #ifndef NO_WINDOW
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
+   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
      cmd(inter, msg); 
      plog(msg);
    
@@ -2703,7 +2703,7 @@ if(cb==NULL)
 if(cb->mn==NULL)
  {
    #ifndef NO_WINDOW
-    sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
+    sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\\n\\nTurbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
      cmd(inter, msg); 
      plog(msg);
    
@@ -2741,7 +2741,7 @@ for(cb=b; cb!=NULL; cb=cb->next)
 if(cb==NULL)
  {
    #ifndef NO_WINDOW
-   sprintf(msg, "tk_messageBox -type ok -title \"Unrecoverable error\" -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
+   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
      cmd(inter, msg); 
      plog(msg);
    

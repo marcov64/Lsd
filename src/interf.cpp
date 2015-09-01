@@ -297,7 +297,7 @@ if(choice==-1)
    create_logwindow();
  choice=0;
  }
- 
+
 
 sprintf(msg, "wm title . \"%s - Lsd Browser\"",simul_name);
 cmd(inter, msg);
@@ -357,7 +357,7 @@ BROWSE
 ****************************************************/
 int browse(object *r, int *choice)
 {
-char ch[10000];
+char ch[10000], ch1[10000];
 variable *ap_v;
 int count, heightB, widthB;
 object *ap_o;
@@ -442,33 +442,46 @@ cmd(inter, "bind .l.s.son_name <Left> {focus -force .l.v.c.var_name; set listfoc
 //cmd(inter, "bind .l.s.son_name <Down> {.l.s.son_name selection clear 0 end; .l.s.son_name selection set active}");
 
 cmd(inter, "frame .l.up_name");
-cmd(inter, "label .l.up_name.d -text \"Parent Object: \"");
-if( r->up==NULL)
-  cmd(inter, "label .l.up_name.n -text \"(No Parent)\"");
+strcpy( ch1, "button .l.up_name.d -text \"Parent Object:\" -relief flat" );
+strcpy( ch, "button .l.up_name.n -relief flat -text \"" );
+if( r->up==NULL )
+{
+  strcat( ch1, " -command { }" );
+  strcat( ch, "(none)\" -command { }" );
+}
 else
- { strcpy(ch,"button .l.up_name.n -text \"");
-	strcat(ch, (r->up)->label);
-	strcat(ch, "\" -command {set itemfocus 0; set choice 5; } -foreground red -relief flat");
-	cmd(inter, ch);
-
+ { 
+  strcat( ch1, " -command { set itemfocus 0; set choice 5 }" );
+  strcat( ch, ( r->up )->label );
+  strcat( ch, "\" -command { set itemfocus 0; set choice 5 } -foreground red" );
  }
+cmd( inter, ch1 );
+cmd( inter, ch );
 
 cmd(inter, "bind . <KeyPress-u> {catch {.l.up_name.n invoke}   }");
 
 cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
+cmd( inter, "pack .l.up_name" );
 
 cmd(inter, "frame .l.tit -relief raised -bd 2");
-//cmd(inter, "label .l.tit.lab -text \"Object Label: \" -font {System 12 bold}");
-cmd(inter, "label .l.tit.lab -text \"Object: \"");
-strcpy(ch, "button .l.tit.but -text ");
+strcpy( ch1, "button .l.tit.lab -padx 2 -text \"Object:\" -relief flat" );
+strcpy( ch, "button .l.tit.but -padx 2 -foreground red -relief flat -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
- strcat(ch, " -command {set choice 6} -foreground red -relief flat");
+{
+ strcat( ch1, " -command { set choice 6 }" );
+ strcat( ch, " -command { set choice 6 }" );
+}
 else
- strcat(ch, " -command {} -foreground red -relief flat");
+{
+ strcat( ch1, " -command { }" );
+ strcat( ch, " -command { }" );
+}
+cmd( inter, ch1 );
 cmd(inter, ch);
  
 cmd(inter, "pack .l.tit.lab .l.tit.but -side left");
+cmd( inter, "pack .l.tit -pady 2" );
 
 
 cmd(inter, "menu .m -tearoff 0");
@@ -476,47 +489,47 @@ cmd(inter, "menu .m -tearoff 0");
 cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
-cmd(inter, "$w add command -label Load -command {set choice 17} -underline 0 -accelerator Ctrl+L");
-cmd(inter, "$w add command -label \"Re-Load\" -command {set choice 38} -underline 0 -accelerator Ctrl+W");
+cmd(inter, "$w add command -label \"Load...\" -command {set choice 17} -underline 0 -accelerator Ctrl+L");
+cmd(inter, "$w add command -label \"Reload\" -command {set choice 38} -underline 0 -accelerator Ctrl+W");
 cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Ctrl+S");
-cmd(inter, "$w add command -label \"Save As\" -command {set choice 73} -underline 5");
+cmd(inter, "$w add command -label \"Save As...\" -command {set choice 73} -underline 5");
 cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Ctrl+E");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Load Sensitivity Data\" -command {set choice 64} -underline 17");
-cmd(inter, "$w add command -label \"Save Sensitivity Data\" -command {set choice 65} -underline 1");
+cmd(inter, "$w add command -label \"Load Sensitivity...\" -command {set choice 64} -underline 17");
+cmd(inter, "$w add command -label \"Save Sensitivity...\" -command {set choice 65} -underline 1");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Ctrl+Q");
 
 cmd(inter, "set w .m.model");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Add a Variable\" -command {set param 0; set choice 2} -underline 6 -accelerator Ctrl+V");
-cmd(inter, "$w add command -label \"Add a Parameter\" -command {set param 1; set choice 2} -underline 6 -accelerator Ctrl+P");
-cmd(inter, "$w add command -label \"Add a Function\" -command {set param 2; set choice 2} -underline 8 -accelerator Ctrl+N");
-cmd(inter, "$w add command -label \"Add a Descending Object\" -command {set choice 3} -underline 6 -accelerator Ctrl+D");
-cmd(inter, "$w add command -label \"Insert New Parent\" -command {set choice 32} -underline 9");
+cmd(inter, "$w add command -label \"Add Variable...\" -command {set param 0; set choice 2} -underline 6 -accelerator Ctrl+V");
+cmd(inter, "$w add command -label \"Add Parameter...\" -command {set param 1; set choice 2} -underline 6 -accelerator Ctrl+P");
+cmd(inter, "$w add command -label \"Add Function...\" -command {set param 2; set choice 2} -underline 8 -accelerator Ctrl+N");
+cmd(inter, "$w add command -label \"Add Descending Object...\" -command {set choice 3} -underline 6 -accelerator Ctrl+D");
+cmd(inter, "$w add command -label \"Insert New Parent...\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Change Object\" -command {set choice 6} -underline 0");
+cmd(inter, "$w add command -label \"Change Object...\" -command {set choice 6} -underline 0");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Set Equation File Name\" -command {set choice 28} -underline 2 -accelerator Ctrl+U");
-cmd(inter, "$w add checkbutton -label \"Ignore Equation File Controls \" -variable ignore_eq_file -command {set choice 54} -underline 0");
-cmd(inter, "$w add command -label \"Upload Equation File \" -command {set choice 51} -underline 0");
-cmd(inter, "$w add command -label \"Offload Equation File \" -command {set choice 52} -underline 0");
-cmd(inter, "$w add command -label \"Compare Equation Files \" -command {set choice 53} -underline 2");
+cmd(inter, "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U");
+cmd(inter, "$w add checkbutton -label \"Ignore Equation File Controls\" -variable ignore_eq_file -command {set choice 54} -underline 0");
+cmd(inter, "$w add command -label \"Upload Equation File\" -command {set choice 51} -underline 0");
+cmd(inter, "$w add command -label \"Offload Equation File...\" -command {set choice 52} -underline 0");
+cmd(inter, "$w add command -label \"Compare Equation Files...\" -command {set choice 53} -underline 2");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Generate Auto Descriptions \" -command {set choice 43} -underline 7");
-cmd(inter, "$w add command -label \"Create Model Report \" -command {set choice 36} -underline 7 -accelerator Ctrl+C");
-cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57} -underline 9");
+cmd(inter, "$w add command -label \"Create Auto Descriptions\" -command {set choice 43} -underline 7");
+cmd(inter, "$w add command -label \"Create Model Report...\" -command {set choice 36} -underline 7 -accelerator Ctrl+C");
+cmd(inter, "$w add command -label \"Create LaTex report\" -command {set choice 57} -underline 9");
 
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Find Element in Model\" -command {set choice 50} -underline 0 -accelerator Ctrl+F");
+cmd(inter, "$w add command -label \"Find Element...\" -command {set choice 50} -underline 0 -accelerator Ctrl+F");
 cmd(inter, "$w add checkbutton -label \"Enable Structure Window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Ctrl+Tab");
 
 cmd(inter, "set w .m.data");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Data -menu $w -underline 0");
+cmd(inter, "$w add command -label \"Initial Values...\" -command {set choice 21} -underline 0 -accelerator Ctrl+I");
 cmd(inter, "$w add cascade -label \"Set Number of Objects\" -underline 0 -menu $w.setobj");
-cmd(inter, "$w add command -label \"Initial Values\" -command {set choice 21} -underline 0 -accelerator Ctrl+I");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add cascade -label \"Configure Sensitivity Analysis\" -underline 0 -menu $w.setsens");
 cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
@@ -525,9 +538,9 @@ cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set ch
 
 cmd(inter, "$w add separator");
 
-cmd(inter, "$w add command -label \"Analysis of Results\" -command {set choice 26} -underline 0 -accelerator Ctrl+A");
-cmd(inter, "$w add command -label \"Save Results\" -command {set choice 37}  -underline 5 -accelerator Ctrl+Z");
-cmd(inter, "$w add command -label \"Data Browse\" -command {set choice 34} -underline 5 -accelerator Ctrl+B");
+cmd(inter, "$w add command -label \"Analysis of Results...\" -command {set choice 26} -underline 0 -accelerator Ctrl+A");
+cmd(inter, "$w add command -label \"Save Results...\" -command {set choice 37}  -underline 5 -accelerator Ctrl+Z");
+cmd(inter, "$w add command -label \"Data Browse...\" -command {set choice 34} -underline 5 -accelerator Ctrl+B");
 
 cmd(inter, "set w .m.data.setobj");
 cmd(inter, "menu $w -tearoff 0");
@@ -546,6 +559,7 @@ cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R");
 cmd(inter, "$w add command -label \"Start 'No Window' Batch\" -command {set choice 69} -underline 0");
+cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Simulation Settings\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
 
@@ -558,7 +572,7 @@ cmd(inter, "$w add command -label \"Show Elements to Save\" -command {set choice
 cmd(inter, "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17");
 cmd(inter, "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Remove Runtime Plots\" -command {set choice 40} -underline 8");
+cmd(inter, "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 8");
 
 cmd(inter, "set w .m.help");
 cmd(inter, "menu $w -tearoff 0");
@@ -645,8 +659,6 @@ cmd(inter, ". configure -menu .m");
 
 
 cmd(inter, "pack .l.v.c.var_name -fill both -expand yes");
-//cmd(inter, "pack .l.v.lab .l.v.c -fill both -expand yes");
-//cmd(inter, "pack .l.s.lab .l.s.son_name -fill both -expand yes");
 cmd(inter, "pack .l.v.lab -fill x");
 cmd(inter, "pack .l.v.c -fill both -expand yes");
 cmd(inter, "pack .l.s.lab -fill x");
@@ -656,10 +668,6 @@ cmd(inter, "pack .l.up_name .l.tit");
 cmd(inter, "pack .l.v .l.s -side left -fill both -expand yes");
 
 cmd(inter, "pack .l -fill both -expand yes");
-
-//cmd(inter, "focus -force .l.v.c.var_name");
-//cmd(inter, "update");
-
 
 
 *choice=0;
@@ -746,24 +754,26 @@ if(actual_steps>0)
    {
      cmd(inter, "toplevel .warn");
 	 cmd(inter, "wm transient .warn .");
+	 cmd(inter, "wm title .warn Warning");
 	 #ifdef DUAL_MONITOR
 	 cmd(inter, "wm geometry .warn +[expr [winfo x .] + 20]+[expr [winfo y .] + 20]");
 	 #endif
      cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently loaded is the last step of the previous run.\nThe requested operation makes no sense on the final data of a simulation.\nChoose one of the followig options.\"");
      cmd(inter, "pack .warn.l");
      cmd(inter, "set temp 38");
-     cmd(inter, "radiobutton .warn.reload -variable temp -value 38 -text \"Reload the current initial configuration\" -justify left -relief groove -bd 2 -anchor w");
-     cmd(inter, "radiobutton .warn.load -variable temp -value 17 -text \"Load a new initial configuration\" -justify left -relief groove -bd 2 -anchor w");     
-     cmd(inter, "radiobutton .warn.ar -variable temp -value 26 -text \"Analyse the results\" -justify left -relief groove -bd 2 -anchor w");     
+     cmd(inter, "frame .warn.f -relief groove -bd 2");
+     cmd(inter, "radiobutton .warn.f.reload -variable temp -value 38 -text \"Reload the current initial configuration\" -justify left -anchor w");
+     cmd(inter, "radiobutton .warn.f.load -variable temp -value 17 -text \"Load a new initial configuration\" -justify left -anchor w");     
+     cmd(inter, "radiobutton .warn.f.ar -variable temp -value 26 -text \"Analyse the results\" -justify left -anchor w");     
 
-   cmd(inter, "pack .warn.reload .warn.load .warn.ar -anchor w -fill x ");
+   cmd(inter, "pack .warn.f.reload .warn.f.load .warn.f.ar -anchor w -fill x ");
    cmd(inter, "frame .warn.b");
-   cmd(inter, "button .warn.b.ok -text \" Ok \" -command {set choice 1}");
-   cmd(inter, "button .warn.b.esc -text \" Cancel \" -command {set choice 2}");
-   cmd(inter, "button .warn.b.help -text \" Help \" -command {LsdHelp QuickHelp.html#problem}");
+   cmd(inter, "button .warn.b.ok -width -9 -text Ok -command {set choice 1}");
+   cmd(inter, "button .warn.b.help -width -9 -text Help -command {LsdHelp QuickHelp.html#problem}");
+   cmd(inter, "button .warn.b.esc -width -9 -text Cancel -command {set choice 2}");
    cmd(inter, "pack .warn.b.ok .warn.b.help .warn.b.esc -side left");
-   cmd(inter, "pack .warn.b");
-   
+   cmd(inter, "pack .warn.f .warn.b -fill x");
+  
    *choice=0;
    cmd(inter, "focus -force .warn.b.ok");
 
@@ -826,13 +836,13 @@ cmd(inter, "destroy .m .l");
 Tcl_LinkVar(inter, "copy_param", (char *) &param, TCL_LINK_INT);
 cmd(inter, "set copy_param $param");
 
-cmd(inter, "button .ok -text Ok -command {set done 1}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
 cmd(inter, "bind .ok <Return> {.ok invoke}");
-cmd(inter, "button .cancel -text Cancel -command {set done 2}");
 if(param==0)
- cmd(inter, "button .help -text Help -command {LsdHelp menumodel.html#AddAVar}");
+ cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddAVar}");
 else
- cmd(inter, "button .help -text Help -command {LsdHelp menumodel.html#AddAPar}");
+ cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddAPar}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 
@@ -855,11 +865,11 @@ if(param==0)
 
 cmd(inter, "set num 0");
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new Variable in Object %s\"", r->label);
+sprintf(msg, "label .l -text \"Insert a new variable in object %s\"", r->label);
 cmd(inter, msg);
 cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Variable Name: \"");
-cmd(inter, "label .f.lab_num -text \" Maximum lags used\"");
+cmd(inter, "label .f.lab_ent -text \"New variable name\"");
+cmd(inter, "label .f.lab_num -text \"Maximum lags used\"");
 cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "entry .f.ent_num -width 2 -relief sunken -textvariable num");
 
@@ -869,7 +879,7 @@ cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .f.ent_num; .f.ent_n
 cmd(inter, "bind .f.ent_num <KeyPress-Return> {focus -force .ok}");
 cmd(inter, "pack .f.lab_ent .f.ent_var .f.lab_num .f.ent_num -side left");
 cmd(inter, "pack .l .f .d ");
-cmd(inter, "pack .ok .help .cancel -side left -expand yes");
+cmd(inter, "pack .ok .help .can -side left -expand yes");
 cmd(inter, "focus -force .f.ent_var");
 }
 
@@ -878,11 +888,11 @@ if(param==2)
 
 cmd(inter, "set num 0");
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new Function in Object %s\"", r->label);
+sprintf(msg, "label .l -text \"Insert a new function in object %s\"", r->label);
 cmd(inter, msg);
 cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Function Name: \"");
-cmd(inter, "label .f.lab_num -text \" Maximum lags used\"");
+cmd(inter, "label .f.lab_ent -text \"New Function Name\"");
+cmd(inter, "label .f.lab_num -text \"Maximum lags used\"");
 cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "entry .f.ent_num -width 2 -relief sunken -textvariable num");
 
@@ -892,24 +902,24 @@ cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .f.ent_num; .f.ent_n
 cmd(inter, "bind .f.ent_num <KeyPress-Return> {focus -force .ok}");
 cmd(inter, "pack .f.lab_ent .f.ent_var .f.lab_num .f.ent_num -side left");
 cmd(inter, "pack .l .f .d ");
-cmd(inter, "pack .ok .help .cancel -side left -expand yes");
+cmd(inter, "pack .ok .help .can -side left -expand yes");
 cmd(inter, "focus -force .f.ent_var");
 }
 
 if(param==1)
 { //insert a parameter
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new Parameter in Object %s\"", r->label);
+sprintf(msg, "label .l -text \"Insert a new parameter in object %s\"", r->label);
 cmd(inter, msg);
 cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Parameter Name: \"");
+cmd(inter, "label .f.lab_ent -text \"New Parameter Name\"");
 cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
 
 
 cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .ok}");
 cmd(inter, "pack .f.lab_ent .f.ent_var -side left");
-cmd(inter, "pack .l .f .d -anchor w");
-cmd(inter, "pack .ok .help .cancel -side left -expand yes");
+cmd(inter, "pack .l .f .d");
+cmd(inter, "pack .ok .help .can -side left -expand yes");
 cmd(inter, "focus -force .f.ent_var");
 }
 //cmd(inter, "raise .");
@@ -923,7 +933,7 @@ cmd(inter, "set text_description [.d.f.text get 1.0 end]");
 
 cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 
- cmd(inter, "destroy .l .f .d .ok .cancel .help");
+ cmd(inter, "destroy .l .f .d .ok .can .help");
 if(done==1)
  {
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
@@ -939,7 +949,8 @@ if(sl!=0)
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab, cur);
  if(done==1)
-   {cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
+   {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"" );
     return r;
    }
 
@@ -998,9 +1009,9 @@ break;
 //Add a Descendent type to the object and assigns the number of its instances.
 case 3:
 cmd(inter, "destroy .m .l");
-cmd(inter, "button .ok -text Ok -command {set done 1}");
-cmd(inter, "button .cancel -text Cancel -command {set done 2}");
-cmd(inter, "button .help -text Help -command {LsdHelp menumodel.html#AddADesc}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddADesc}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 
 
@@ -1017,7 +1028,7 @@ cmd(inter, "pack .f.lab_ent .f.ent_var -side left");
 
 cmd(inter, "bind .f.ent_var <KeyPress-Return> {set done 1}");
 
-cmd(inter, "pack .tit .f .ok .help .cancel");
+cmd(inter, "pack .tit .f .ok .help .can -side left");
 cmd(inter, "focus .f.ent_var");
 
 cmd(inter, "set w .d");
@@ -1048,7 +1059,7 @@ if(done==1)
  strcpy(lab, lab1);
  if(strlen(lab)==0)
   {
-   cmd(inter, "destroy .ok .d .cancel .f .help .tit");
+   cmd(inter, "destroy .ok .d .can .f .help .tit");
    Tcl_UnlinkVar(inter, "done");
    cmd(inter, "unset lab done"); 
    *choice=0;
@@ -1057,7 +1068,7 @@ if(done==1)
  cmd(inter, "set done [string is graph \"$lab\"]");
  if(done==0)
   {
-   cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The label contains forbidden characters, like spaces.\\nInsert a new label.\"");
+   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The label contains forbidden characters, like spaces.\\n\\nChoose a different label and try again.\"");
    cmd(inter, "focus .f.ent_var; .f.ent_var selection range 0 end");
    goto here_newobject;
   }
@@ -1074,9 +1085,9 @@ if(done==1)
    unsavedChange = true;		// signal unsaved change
   }
  else
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
  }
-cmd(inter, "destroy .ok .d .cancel .f .help .tit");
+cmd(inter, "destroy .ok .d .can .f .help .tit");
 Tcl_UnlinkVar(inter, "done");
 cmd(inter, "unset lab done");
 
@@ -1089,7 +1100,7 @@ Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 if(r->up==NULL)
  {
   cmd(inter, "label .l -text \"Cannot insert a parent of Root.\\nThe new Object will contain all current descendants from Root.\"");
-  cmd(inter, "button .ok -text \" Ok \" -command {set done 1}");
+  cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
   cmd(inter, "pack .l .ok");
   cmd(inter, "bind . <KeyPress-Return> {set done 1}");
   set_window_size();
@@ -1098,9 +1109,9 @@ if(r->up==NULL)
   done=0;
   cmd(inter, "destroy .l .ok");
  }
-cmd(inter, "button .ok -text Ok -command {set done 1}");
-cmd(inter, "button .cancel -text Cancel -command {set done 2}");
-cmd(inter, "button .help -text Help -command {LsdHelp menumodel.html#InsertAParent}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#InsertAParent}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 
 
 if(r->up!=NULL)
@@ -1113,7 +1124,7 @@ cmd(inter, "set lab \"\"");
 cmd(inter, "entry .ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "bind . <KeyPress-Return> {set done 1}");
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
-cmd(inter, "pack .lab_ent .ent_var .ok .help .cancel");
+cmd(inter, "pack .lab_ent .ent_var .ok .help .can");
 cmd(inter, "focus .ent_var");
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 cmd(inter, "bind . <KeyPress-Return> {set done 1}");
@@ -1142,8 +1153,8 @@ if(done==1)
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab1, cur); //check that the label does not exist already
  if(done==1)
-   {cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
-    cmd(inter, "destroy .d .ok .help .cancel .lab_ent .ent_var");
+   {cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
+    cmd(inter, "destroy .d .ok .help .can .lab_ent .ent_var");
     Tcl_UnlinkVar(inter, "done");
     cmd(inter, "unset lab done");
     return r;
@@ -1183,7 +1194,7 @@ if(done==1)
 
  unsavedChange = true;		// signal unsaved change
 
-cmd(inter, "destroy .d .ok .cancel .help .lab_ent .ent_var");
+cmd(inter, "destroy .d .ok .help .can .lab_ent .ent_var");
 Tcl_UnlinkVar(inter, "done");
 cmd(inter, "unset lab done");
 
@@ -1241,16 +1252,16 @@ sscanf(lab1, "%s", lab_old);
 
 
 cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -text Continue -command {set choice 1}");
-cmd(inter, "button .b.del -text DELETE -command {set choice 3}");
-cmd(inter, "button .b.cancel -text Cancel -command {set choice 2}");
-cmd(inter, "button .b.help -text Help -command {LsdHelp menumodel.html#ChangeObjName}");
-cmd(inter, "pack .b.ok .b.del .b.help .b.cancel -side left -fill x -expand yes");
+cmd(inter, "button .b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .b.del -width -9 -text Delete -command {set choice 3}");
+cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp menumodel.html#ChangeObjName}");
+cmd(inter, "button .b.can -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .b.ok .b.del .b.help .b.can -side left -fill x -expand yes");
 
 cmd(inter, "frame .b1");
 sprintf(msg, "set to_compute %d",r->to_compute);
 cmd(inter, msg);
-cmd(inter, "checkbutton .b1.com -text \"Compute: require the simulation to compute the Vars. in this Object.\" -variable to_compute -anchor w");
+cmd(inter, "checkbutton .b1.com -text \"Compute: require the simulation to compute the vars. in this Object.\" -variable to_compute -anchor w");
 cmd(inter, "pack .b1.com -anchor w");
 
 cur_descr=search_description(lab_old);
@@ -1297,13 +1308,13 @@ cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
 
 cmd(inter, "label .h.lab_ent -text \"Object\"");
 
-cmd(inter, "button .h.prop -text \"Change Name\" -command {set choice 5}" );
+cmd(inter, "button .h.prop -width -9 -text \"Change Name\" -command {set choice 5}" );
 cmd(inter, "bind .h <Double-1> {set choice 5}");
 cmd(inter, "bind .h.lab_ent <Double-1> {set choice 5}");
 cmd(inter, "bind .h.ent_var <Double-1> {set choice 5}");
 cmd(inter, "bind .h.ent_var <KeyPress-c> {.b1.com invoke}");
 cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop");
-cmd(inter, "pack .h .b1 .b .desc -fill x -expand yes");
+cmd(inter, "pack .h .b1 .desc .b -fill x -expand yes");
 cmd(inter, "focus -force .h.ent_var");
 cmd(inter, "bind . <Control-d> {}");
 cmd(inter, "bind . <Control-z> {}");
@@ -1331,7 +1342,7 @@ if(*choice==5 || *choice==3)
 {
 if(*choice==3)
 {
-	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n\n$lab\"]");
+	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n$lab\"]");
 	 cmd(inter, "switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
 	 if(*choice == 1)				// simulate a name change
 		cmd(inter, "set lab \"\"");	// to empty string (delete)
@@ -1342,8 +1353,8 @@ cmd(inter, "label .l -text \"New Label for Object $lab\"");
 cmd(inter, "entry .e -width 30 -textvariable lab");
 cmd(inter, "pack .l .e -anchor w");
 cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .b.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .b.ok .b.esc -side left");
 cmd(inter, "pack .b");
 cmd(inter, "focus -force .e");
@@ -1370,7 +1381,7 @@ if(strlen(lab1)!=0)
    for(cur=r; cur->up!=NULL; cur=cur->up);
    done=check_label(lab, cur); //check that the label does not exist already
    if(done==1)
-     cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
+     cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
 
   }
  else
@@ -1426,7 +1437,7 @@ lab1=(char *)Tcl_GetVar(inter, "res",0);
 
 sscanf(lab1, "%s", lab_old);
 
-if(!strcmp(lab1, "(no Variables)"))
+if(!strcmp(lab1, "(no variables)"))
  {
   *choice=0;
   return r;
@@ -1443,12 +1454,6 @@ num=cv->debug=='d'?1:0;
 plot=cv->plot;
 savei=cv->savei;
  
-
-cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -text Continue -command {set done 1}");
-cmd(inter, "button .b.cancel -text Cancel -command {set done 2}");
-cmd(inter, "button .b.help -text Help -command {LsdHelp Browser.html#variables}");
-cmd(inter, "pack .b.ok .b.help .b.cancel -side left -fill x -expand yes");
 
 cmd(inter, "frame .b1");
 cmd(inter, "checkbutton .b1.deb -text \"Debug: allow interruption after this equation\" -variable debug -anchor w");
@@ -1530,12 +1535,11 @@ cmd(inter, ch);
  cmd(inter, "$w.f.text delete \"end - 1 char\"");
  cmd(inter, "pack $w.opt -expand yes -fill x");
  cmd(inter, "frame $w.b");
-// cmd(inter, "button $w.b.save -text \"Save Description\" -command {set text_description [.desc.f.text get 1.0 end];set done 6}");
- cmd(inter, "button $w.b.eq -text \"See code\" -command {set done 3}");
- cmd(inter, "button $w.b.auto_doc -text \"Auto Docum.\" -command {set done 9}");
- cmd(inter, "button $w.b.us -text \"Eq. using this element\" -command {set done 4}");
- cmd(inter, "button $w.b.using -text \"Elements used\" -command {set done 7}");
- cmd(inter, "button $w.b.del -text \"DELETE element\" -command {set done 10}");
+ cmd(inter, "button $w.b.eq -width -9 -text \"See Code\" -command {set done 3}");
+ cmd(inter, "button $w.b.auto_doc -width -9 -text \"Auto Doc.\" -command {set done 9}");
+ cmd(inter, "button $w.b.us -width -9 -text \"Eq. Using Element\" -command {set done 4}");
+ cmd(inter, "button $w.b.using -width -9 -text \"Elements Used\" -command {set done 7}");
+ cmd(inter, "button $w.b.del -width -9 -text \"Delete Element\" -command {set done 10}");
  if(!strcmp(cur_descr->type, "Parameter"))
    cmd(inter, "pack $w.b.auto_doc $w.b.us $w.b.del -side left -expand yes -fill both");
  else
@@ -1569,27 +1573,21 @@ cmd(inter, ch);
    cmd(inter, "pack $w.i.int $w.i.text -anchor w -expand yes -fill both");
    cmd(inter, "pack $w.i -anchor w -expand yes -fill both");
    cmd(inter, "frame $w.b2");
-   cmd(inter, "button $w.b2.setall -text \"Initialize\" -command {set done 11}" );
-   cmd(inter, "button $w.b2.sens -text \"Sensitivity Analysis\" -command {set done 12}" );
+   cmd(inter, "button $w.b2.setall -width -9 -text \"Initialize\" -command {set done 11}" );
+   cmd(inter, "button $w.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
    cmd(inter, "pack $w.b2.setall $w.b2.sens -side left -expand yes -fill both");
    cmd(inter, "pack $w.b2 -anchor w -expand yes -fill both");
    cmd(inter, "bind .desc.f.text <Control-i> {focus -force .desc.i.text}");
    cmd(inter, "bind .desc.i.text <Control-z> {set done 1}");   
    }
 
-
-
-/*
-if(cv->param==0)
- {
-  cmd(inter, "button .b.eq -text Equation -command {set done 3}");
-  cmd(inter, "pack .b.deb .b.sav .b.plt .b.ch .b.eq .b.descr .b.used .b.ok .b.help .b.cancel ");
- }
-else
-*/
-
-
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
+
+cmd(inter, "frame .b");
+cmd(inter, "button .b.ok -width -9 -text Ok -command {set done 1}");
+cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp Browser.html#variables}");
+cmd(inter, "button .b.can -width -9 -text Cancel -command {set done 2}");
+cmd(inter, "pack .b.ok .b.help .b.can -side left -fill x -expand yes");
 
 cmd(inter, "frame .h -bd 2 -relief groove");
 cmd(inter, "label .h.ent_var -width 30 -relief sunken -fg red -text $vname");
@@ -1608,13 +1606,13 @@ sprintf(msg, "set obj_name %s", cv->up->label);
 cmd(inter, msg);
 cmd(inter, "label .h.obj -text \"in Object $obj_name\"");
 
-cmd(inter, "button .h.prop -text \"Properties\" -command {set done 5}" );
+cmd(inter, "button .h.prop -width -9 -text \"Properties\" -command {set done 5}" );
 cmd(inter, "bind .h <Double-1> {set done 5}");
 cmd(inter, "bind .h.lab_ent <Double-1> {set done 5}");
 cmd(inter, "bind .h.ent_var <Double-1> {set done 5}");
 cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop .h.obj");
-cmd(inter, "pack .h .b1 .b .desc -fill x -expand yes");
-cmd(inter, "focus .b1	");
+cmd(inter, "pack .h .b1 .desc .b -fill x -expand yes");
+cmd(inter, "focus .b1");
 cmd(inter, "bind .b1 <Control-d> {focus -force .desc.f.text}");
 cmd(inter, "bind .desc.f.text <Control-z> {set done 1}");   
 
@@ -1699,7 +1697,7 @@ if(done==5||done==10)	// treat also express delete button
  {
  if(done==10)
  {
-	 cmd(inter, "set answer [tk_messageBox -title \"Delete Element\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n\n$vname\"]");
+	 cmd(inter, "set answer [tk_messageBox -title \"Delete Element\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n$vname\"]");
 	 cmd(inter, "switch -- $answer {ok {set done 1} cancel {set done 2}}");
 	 if(done == 1)
 	 {
@@ -1727,7 +1725,7 @@ if(done==5||done==10)	// treat also express delete button
  cmd(inter, "radiobutton .m.mov -text \"Move to another Object\" -variable nature -value 4");
  sprintf(msg, "set movelabel %s", r->label);
  cmd(inter, msg);
- cmd(inter, "button .m.whe -text \"$movelabel\" -command {set nature 4; set done 3}");
+ cmd(inter, "button .m.whe -width -9 -text \"$movelabel\" -command {set nature 4; set done 3}");
  cmd(inter, "pack .m.mov .m.whe -side left");
 
 
@@ -1745,9 +1743,9 @@ if(done==5||done==10)	// treat also express delete button
  cmd(inter, "pack .f.fun");
  
  cmd(inter, "frame .b");
- cmd(inter, "button .b.ok -text Ok -command {set done 1}");
- cmd(inter, "button .b.esc -text Cancel -command {set done 2}");
- cmd(inter, "button .b.help -text \" Help \" -command {LsdHelp Browser.html#change_nature}");
+ cmd(inter, "button .b.ok -width -9 -text Ok -command {set done 1}");
+ cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp Browser.html#change_nature}");
+ cmd(inter, "button .b.esc -width -9 -text Cancel -command {set done 2}");
  cmd(inter, "pack .b.ok .b.help .b.esc -side left");
  cmd(inter, "pack .l .m .v .p .f -anchor w");
  cmd(inter, "pack .b");
@@ -1826,7 +1824,7 @@ if(strcmp(lab, lab_old) )
   done=check_label(lab, cur);
 
   if(done==1)
-   {cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"The new label already exists in the model.\"");
+   {cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
     cmd(inter, "destroy .b .lab_ent .ent_var");
     Tcl_UnlinkVar(inter, "done");
     Tcl_UnlinkVar(inter, "save");
@@ -1909,7 +1907,7 @@ if(done==1)
    for(cur=r; cur!=NULL; cur=cur->up)
     if(cur->to_compute==0)
      {
-       sprintf(msg, "tk_messageBox -type ok -title Warning -message \"Warning: item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", lab_old, cur->label);
+       sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", lab_old, cur->label);
    cmd(inter, msg);
      }
    }
@@ -1936,7 +1934,7 @@ if ( ( done == 11 || done == 12 ) && cv->param == 0 && cv->num_lag > 1 )
 	// confirm which lag to use
 	cmd( inter, "toplevel .s" );
 	cmd( inter, "wm transient .s ." );
-	cmd( inter, "wm title .s \"Select lag\"" );
+	cmd( inter, "wm title .s \"Select Lag\"" );
 	cmd( inter, "frame .s.i -relief groove -bd 2" );
 	cmd( inter, "label .s.i.l -text \"Type the number of the lag to edit.\"" );
 	cmd( inter, "set lag \"1\"" );
@@ -1945,8 +1943,8 @@ if ( ( done == 11 || done == 12 ) && cv->param == 0 && cv->num_lag > 1 )
 	sprintf( msg, "label .s.i.w -text \"Valid values are: 1 to %d\" -fg red", cv->num_lag );
 	cmd( inter, msg );
 	cmd( inter, "pack .s.i.l .s.i.e .s.i.w" );
-	cmd( inter, "button .s.ok -text Ok -command {set choice $lag}" );
-	cmd( inter, "button .s.esc -text Cancel -command {set choice 0}" );
+	cmd( inter, "button .s.ok -width -9 -text Ok -command {set choice $lag}" );
+	cmd( inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}" );
 	cmd( inter, "pack .s.i .s.ok .s.esc -fill x");
 	cmd( inter, "bind .s <KeyPress-Return> {set choice $lag}" );
 	cmd( inter, "bind .s <KeyPress-Escape> {set choice 0}" );
@@ -1963,7 +1961,7 @@ if ( ( done == 11 || done == 12 ) && cv->param == 0 && cv->num_lag > 1 )
 	// abort if necessary
 	if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
 	{
-		cmd( inter, "tk_messageBox -title \"Select lag\" -icon error -type ok -default ok -message \"Invalid lag selected.\n\nSelect a valid lag value for the variable or change the number of lagged values for this variable.\"" );
+		cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid lag selected.\n\nSelect a valid lag value for the variable or change the number of lagged values for this variable.\"" );
 		done = 1;
 	}
 }
@@ -2051,37 +2049,16 @@ cmd(inter, "destroy .m .l");
 *choice=0;
 
 if(actual_steps>0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm iconify .");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "wm title .warn \"Warning\"");
-  cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently available is the last step of the previous run.\nLoad a new configuration (or re-load the previous one) to run a simulation\"");
-  cmd(inter, "frame .warn.f");
-  cmd(inter, "button .warn.f.ok -text \" Ok \" -command {set choice 1}");
-
-  cmd(inter, "pack .warn.f.ok");
-  cmd(inter, "pack .warn.l .warn.f");
-  cmd(inter, "focus -force .warn");
-  cmd(inter, "bind .warn <KeyPress-Return> {.warn.f.ok invoke}");
-  cmd(inter, "bind .warn <KeyPress-Escape> {.warn.f.ok invoke}");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
-  cmd(inter, "wm deiconify .");  
+ {
+	cmd( inter, "tk_messageBox -title Warning -icon warning -type ok -message \"Simulation just run.\n\nThe configuration currently available is the last step of the previous run.\nLoad a new configuration (or reload the previous one) to run a simulation.\"" );
   return r;
  }
 
 if(struct_loaded==0)
  break;
-cmd(inter, "button .ok -text Ok -command {set choice 1}");
-cmd(inter, "button .cancel -text Cancel -command {set choice 2}");
-cmd(inter, "button .help -text Help -command {LsdHelp menurun.html#run}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menurun.html#run}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}");
 sprintf(ch, "label .war1 -text \"Running the model configuration:\"");
 cmd(inter, ch);
 sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
@@ -2138,7 +2115,7 @@ cmd(inter, "set wind \".war1 .war2 .war3 .tosave\"");
 cmd(inter, "foreach i $wind {pack $i}");
 }
 
-cmd(inter, "pack .ok .help .cancel");
+cmd(inter, "pack .ok .help .can");
 cmd(inter, "bind . <KeyPress-Return> {.ok invoke}");
 cmd(inter, "bind . <KeyPress-Escape> {.cancel invoke}");
 cmd(inter, "focus -force .");
@@ -2151,7 +2128,7 @@ Tcl_UnlinkVar(inter, "no_res");
 cmd(inter, "bind . <KeyPress-Return> {}");
 cmd(inter, "bind . <KeyPress-Escape> {}");
 cmd(inter, "foreach i $wind {destroy $i}");
-cmd(inter, "destroy .ok .help .cancel");
+cmd(inter, "destroy .ok .help .can");
 if(*choice==2)
   break;
 
@@ -2176,14 +2153,14 @@ if(f==NULL)
   sprintf(msg, "label .l2 -text \"File %s.lsd cannot be opened. Check if the drive or the file is set READ-ONLY\"",simul_name);
   cmd(inter, msg);
   cmd(inter, "label .l3 -text \"Press Continue to run the simulation without saving the initialization file\"");
-  cmd(inter, "label .l4 -text \"Press Abort to return to the Lsd Browser\"");
+  cmd(inter, "label .l4 -text \"Press Cancel to return to the Lsd Browser\"");
   cmd(inter, "frame .b");
-  cmd(inter, "button .b.c -text Continue -command {set choice 1}");
-  cmd(inter, "button .b.a -text Abort -command {set choice 2}");
+  cmd(inter, "button .b.ok -width -9 -text Continue -command {set choice 1}");
+  cmd(inter, "button .b.esc -width -9 -text Cancel -command {set choice 2}");
   cmd(inter, "bind . <KeyPress-Return> {set choice 1}");
   cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
 
-  cmd(inter, "pack .b.c .b.a -side left");
+  cmd(inter, "pack .b.ok .b.esc -side left");
   cmd(inter, "pack .l1 .l2 .l3 .l4 .b");
   set_window_size();
   while(*choice==0)
@@ -2260,12 +2237,12 @@ sprintf(lab, "set res %s", simul_name);
 cmd(inter, lab);
 cmd(inter, "destroy .l .m");
 cmd(inter, "frame .d");
-cmd(inter, "button .ok -text Ok -command {set done 1}");
-cmd(inter, "button .cancel -text Cancel -command {set done 2}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 cmd(inter, "entry .d.ent_var -width 20 -relief sunken -textvariable res");
 cmd(inter, ".d.ent_var selection range 0 end");
 cmd(inter, "label .d.lab_ent -text \"New Simulation name: \"");
-sprintf(msg, "button .search -text \"Browse\" -command {set tk_strictMotif 0; set bah [tk_getSaveFile -title \"Browse Lsd Files\" -initialdir $path -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }];set tk_strictMotif 1; if {[string length $bah] > 0} {set res $bah} {set done 2}; .d.ent_var selection range 0 end; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]}");
+sprintf(msg, "button .search -width -9 -text \"Browse\" -command {set tk_strictMotif 0; set bah [tk_getSaveFile -title \"Save Lsd File\" -initialdir $path -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }];set tk_strictMotif 1; if {[string length $bah] > 0} {set res $bah} {set done 2}; .d.ent_var selection range 0 end; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]}");
 cmd(inter, msg);
 cmd(inter, "label .d.lab_path -text Path");
 cmd(inter, "entry .d.ent_path -width 60 -relief sunken -textvariable path");
@@ -2275,7 +2252,7 @@ else
  sprintf(msg, "set path [pwd]");
 cmd(inter, msg);
 cmd(inter, "pack .d.lab_ent .d.ent_var .d.lab_path .d.ent_path -anchor w");
-cmd(inter, "pack .d .search .ok .cancel");
+cmd(inter, "pack .d .search .ok .can");
 cmd(inter, "focus .d.ent_var");
 cmd(inter, "bind . <KeyPress-Return> {set done 1}");
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
@@ -2283,7 +2260,7 @@ cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 set_window_size();
 while(done==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "destroy .ok .cancel .search .d");
+cmd(inter, "destroy .ok .can .search .d");
 Tcl_UnlinkVar(inter, "done");
 
 lab1=(char *)Tcl_GetVar(inter, "bah",0);
@@ -2340,16 +2317,16 @@ case 38: //quick reload
 
      if(*choice==17)
       {  
-       cmd(inter, "button .ok -text Empty -command {set choice 1}");
+       cmd(inter, "button .ok -width -9 -text Empty -command {set choice 1}");
        cmd(inter,  "label .war -text \"WARNING: a model is already loaded in memory \\nPress Empty to remove the old model \\nor\\nCancel\"");
-       cmd(inter, "button .canc -text Cancel -command {set choice 2}");
-       cmd(inter, "pack .war .ok .canc");
+       cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}");
+       cmd(inter, "pack .war .ok .can");
        cmd(inter, "bind . <KeyPress-Return> {set choice 1}");
        cmd(inter, "bind . <KeyPress-Cancel> {set choice 2}");
        set_window_size();
 	    while(*choice==0)
   		   Tcl_DoOneEvent(0);
-	    cmd(inter, "destroy .war .ok .canc");
+	    cmd(inter, "destroy .war .ok .can");
        if(*choice==2)
         {
          break;
@@ -2390,11 +2367,8 @@ if(*choice==17)
    sprintf(msg, "set path [pwd]");
   cmd(inter, msg);
   cmd(inter, "cd $path");
-  //sprintf(msg, "set tk_strictMotif 0; set bah [tk_getOpenFile -initialdir $path -title \"Load Lsd Files\" -defaultextension \".lsd\" -initialfile $res  -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }];set tk_strictMotif 1");
-  
   cmd(inter, "set a \"\"");
-  sprintf(msg, " set bah [tk_getOpenFile  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
-  //sprintf(msg, "set bah [tk_getSaveFile -title \"Save Lsd Model\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
+  sprintf(msg, " set bah [tk_getOpenFile -title \"Load Lsd File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
 
   cmd(inter, msg);
   
@@ -2440,7 +2414,7 @@ if(*choice==17)
 	f=fopen(struct_file, "r");
 	if(f==NULL)
 	 {
-     cmd(inter, "button .ok -text Ok -command {set choice 1}");
+     cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
      if(strlen(path)>0)
 	   sprintf(msg, "label .war -text \"WARNING: file for model \\n %s \\nnot found in directory %s\"", simul_name, path);
      else
@@ -2571,7 +2545,7 @@ if(*choice==17)
     lsd_eq_file[i-1]=lsd_eq_file[i];  
     if(ignore_eq_file==0 && strcmp(lsd_eq_file, eq_file)!=0)
      {
-      cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"Warning.\\nThe configuration file loaded has been previously run with equations different from those used to create the Lsd model program.\\nThe changes may affect the simulation results. You can offload the original equations in a new equation file and compare differences using TkDiff in LMM (menu Edit).\"");
+      cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The configuration file loaded has been previously run with equations different from those used to create the Lsd model program.\\n\\nThe changes may affect the simulation results. You can offload the original equations in a new equation file and compare differences using TkDiff in LMM (menu File).\"");
 
      }  
     }  
@@ -2599,16 +2573,16 @@ case 18:
    cmd(inter, "destroy .l .m");
 
    if(struct_loaded==0)
-	  { cmd(inter, "button .ok -text Empty -command {set done 1}");
+	  { cmd(inter, "button .ok -width -9 -text Empty -command {set done 1}");
        cmd(inter,  "label .war -text \"WARNING: no model to save \\nPress Empty to save an empty model \\nor\\nCancel to return\"");
-       cmd(inter, "button .canc -text Cancel -command {set done 2}");
-       cmd(inter, "pack .war .ok .canc");
+       cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
+       cmd(inter, "pack .war .ok .can");
        cmd(inter, "bind . <KeyPress-Return> {set done 1}");
        cmd(inter, "bind . <KeyPress-Cancel> {set done 2}");
        set_window_size();
 	    while(done==0)
 		  Tcl_DoOneEvent(0);
-	    cmd(inter, "destroy .war .ok .canc");
+	    cmd(inter, "destroy .war .ok .can");
        if(done==2)
         {Tcl_UnlinkVar(inter, "done");
          break;
@@ -2616,16 +2590,16 @@ case 18:
 		saveAs = true;	// require file name to save
      }
    if(actual_steps>0)
-	  { cmd(inter, "button .ok -text Save -command {set done 1}");
+	  { cmd(inter, "button .ok -width -9 -text Save -command {set done 1}");
        cmd(inter,  "label .war -text \"WARNING: The presently loaded model is the final state of a simulation run\\nPress Save to save is anyway \\nor\\nCancel to abort saving\"");
-       cmd(inter, "button .canc -text Cancel -command {set done 2}");
-       cmd(inter, "pack .war .ok .canc");
+       cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
+       cmd(inter, "pack .war .ok .can");
        cmd(inter, "bind . <KeyPress-Return> {set done 1}");
        cmd(inter, "bind . <KeyPress-Cancel> {set done 2}");
        set_window_size();
 	    while(done==0)
 		  Tcl_DoOneEvent(0);
-	    cmd(inter, "destroy .war .ok .canc");
+	    cmd(inter, "destroy .war .ok .can");
        if(done==2)
         {Tcl_UnlinkVar(inter, "done");
          break;
@@ -2696,15 +2670,15 @@ if(f==NULL)
   sprintf(msg, "label .l2 -text \"File %s.lsd cannot be opened for writing. Check if the drive or the file is set READ-ONLY\"",simul_name);
   cmd(inter, msg);
   cmd(inter, "label .l3 -text \"The model is NOT saved! Change file name or select a drive with write permission\"");
-  cmd(inter, "button .b -text Ok -command {set choice 1}");
-  cmd(inter, "pack .l1 .l2 .l3 .b");
+  cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+  cmd(inter, "pack .l1 .l2 .l3 .ok");
   cmd(inter, "bind . <KeyPress-Return> {set choice 1}");
   set_window_size();
   while(*choice==0)
    Tcl_DoOneEvent(0);
 
   *choice=0;
-  cmd(inter, "destroy .l1 .l2 .l3 .b");
+  cmd(inter, "destroy .l1 .l2 .l3 .ok");
  }
 else
  {
@@ -2755,25 +2729,8 @@ case 19:
 *choice=0;
 cmd(inter, "destroy .l .m");
 if(actual_steps>0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "wm title .warn \"Error\"");
-  cmd(inter, "label .warn.l1 -text \"Error\" -foreground red");
-  cmd(inter, "label .warn.l -text \"Simulation already run\nLoad again the model to make changes to the Object's numbers\"");
-  cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
-  cmd(inter, "button .warn.help -text Help -command {LsdHelp QuickHelp.html#problem}");
-  cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
-  cmd(inter, "focus -force .warn");
-  cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
-#ifndef DUAL_MONITOR
- cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
- cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
+ {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the Object's numbers.\"" );
   return r;
  }
 
@@ -2795,25 +2752,8 @@ case 21:
 *choice=0;
 cmd(inter, "destroy .l .m");
 if(actual_steps>0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm title .warn \"Error\"");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "label .warn.l1 -text \"Error\" -foreground red");
-  cmd(inter, "label .warn.l -text \"Simulation already run\nLoad again the model to make changes to the initial values\"");
-  cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
-  cmd(inter, "button .warn.help -text Help -command {LsdHelp QuickHelp.html#problem}");
-  cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
-  cmd(inter, "focus -force .warn");
-  cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
+ {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the initial values.\"" );
   return r;
  }
 
@@ -2896,13 +2836,13 @@ case 22:
         cmd(inter, "pack .f.c.l2 .f.c.e2 -side left -anchor w");
 
         cmd(inter, "frame .f.d -bd 2");
-		  cmd(inter, "label .f.d.l2 -width 25 -text \"Insert Debugger at:\"");
+		  cmd(inter, "label .f.d.l2 -width 25 -text \"Insert Debugger at\"");
 		  cmd(inter, "entry .f.d.e2 -textvariable when_debug -width 8");
 		  cmd(inter, ".f.d.e2 selection range 0 end");
         cmd(inter, "pack .f.d.l2 .f.d.e2 -side left -anchor w");
 
         cmd(inter, "frame .f.e -bd 2");
-		  cmd(inter, "label .f.e.l2 -width 25 -text \"Print until stack:\"");
+		  cmd(inter, "label .f.e.l2 -width 25 -text \"Print until stack\"");
        sprintf(msg, "set stack_info %d", stackinfo_flag);
         cmd(inter, msg);
 		  cmd(inter, "entry .f.e.e2 -textvariable stack_info -width 8");
@@ -2910,9 +2850,9 @@ case 22:
         cmd(inter, "pack .f.e.l2 .f.e.e2 -side left -anchor w");
 
 		  cmd(inter, "frame .b");
-		  cmd(inter, "button .b.ok -text \" Ok \" -command {set choice 1}");
-		  cmd(inter, "button .b.esc -text \" Cancel \" -command {set choice 2}");
-		  cmd(inter, "button .b.help -text \" Help \" -command {LsdHelp menurun.html#simsetting}");
+		  cmd(inter, "button .b.ok -width -9 -text Ok -command {set choice 1}");
+		  cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp menurun.html#simsetting}");
+		  cmd(inter, "button .b.esc -width -9 -text Cancel -command {set choice 2}");
 		  cmd(inter, "pack .b.ok .b.help .b.esc -side left");
         cmd(inter, "pack .f.a .f.b .f.c .f.d .f.e -anchor w");
 		  cmd(inter, "pack .tit .f .b ");
@@ -2968,25 +2908,8 @@ case 25:
 *choice=0;
 cmd(inter, "destroy .l .m");
 if(actual_steps>0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm title .warn \"Error\"");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "label .warn.l1 -text \"Error\" -foreground red");
-  cmd(inter, "label .warn.l -text \"Simulation already run\nLoad again the model to make changes to the initial values\"");
-  cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
-  cmd(inter, "button .warn.help -text Help -command {LsdHelp QuickHelp.html#problem}");
-  cmd(inter, "pack .warn.l1 .warn.l .warn.b .warn.help");
-  cmd(inter, "focus -force .warn");
-  cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
+ {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the initial values.\"" );
   return r;
  }
 
@@ -3015,8 +2938,8 @@ case 27:
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all debugging information?\"");
-			cmd(inter, "button .w.ok -text Ok -command {set choice 1}");
-			cmd(inter, "button .w.can -text Cancel -command {set choice 2}");
+			cmd(inter, "button .w.ok -width -9 -text Ok -command {set choice 1}");
+			cmd(inter, "button .w.can -width -9 -text Cancel -command {set choice 2}");
 			cmd(inter, "pack .w.b .w.ok .w.can");
 			cmd(inter, "pack .w");
 			cmd(inter, "bind . <KeyPress-Return> {.w.ok invoke}");
@@ -3039,9 +2962,9 @@ case 27:
 case 28:
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 cmd(inter, "destroy .l .m");
-cmd(inter, "button .ok -text Ok -command {set done 1}");
-cmd(inter, "button .cancel -text Cancel -command {set done 2}");
-cmd(inter, "button .help -text Help -command {LsdHelp menumodel.html#setequation}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#setequation}");
+cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 
 sprintf(msg, "set res \"%s\"", equation_name);
 cmd(inter, msg);
@@ -3053,9 +2976,9 @@ cmd(inter, "bind . <KeyPress-Return> {set done 1}");
 cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 
 cmd(inter, "label .lab_ent -text \"New Equation file name: \"");
-cmd(inter, "button .search -text \"Search File\" -command {set res [file tail [tk_getOpenFile -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]; .ent_var selection range 0 end}");
+cmd(inter, "button .search -width -9 -text \"Search File\" -command {set res [file tail [tk_getOpenFile -title \"Load Equation File\" -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]; .ent_var selection range 0 end}");
 
-cmd(inter, "pack .lab_ent .ent_var .search .ok .help .cancel");
+cmd(inter, "pack .lab_ent .ent_var .search .ok .help .can");
 cmd(inter, "focus .ent_var");
 set_window_size();
 while(done==0)
@@ -3070,7 +2993,7 @@ equation_name=new char[strlen(lab)+1];
 strcpy(equation_name, lab);
 unsavedChange = true;		// signal unsaved change
 }
-cmd(inter, "destroy .ok .cancel .lab_ent .search .help .ent_var");
+cmd(inter, "destroy .ok .can .lab_ent .search .help .ent_var");
 Tcl_UnlinkVar(inter, "done");
 break;
 
@@ -3095,8 +3018,8 @@ case 30:
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all saving information?\\nNo data will be saved\"");
-			cmd(inter, "button .w.ok -text Ok -command {set choice 1}");
-			cmd(inter, "button .w.can -text Cancel -command {set choice 2}");
+			cmd(inter, "button .w.ok -width -9 -text Ok -command {set choice 1}");
+			cmd(inter, "button .w.can -width -9 -text Cancel -command {set choice 2}");
 			cmd(inter, "pack .w.b .w.ok .w.can");
 			cmd(inter, "pack .w");
 			cmd(inter, "bind . <KeyPress-Return> {.w.ok invoke}");
@@ -3122,7 +3045,7 @@ case 39:
 			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
-         plog("\n\nVariables and Parameters saved:\n");
+         plog("\n\nVariables and parameters saved:\n");
 			show_save(n);
       cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 			return r;
@@ -3132,7 +3055,7 @@ case 42:
 			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
-         plog("\n\nVariables and Parameters containing results:\n");
+         plog("\n\nVariables and parameters containing results:\n");
 			show_observe(n);
       cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 			return r;
@@ -3143,7 +3066,7 @@ case 49:
 			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
-         plog("\n\nVariables and Parameters relevant to initialize:\n");
+         plog("\n\nVariables and parameters relevant to initialize:\n");
 			show_initial(n);
       cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 			return r;
@@ -3168,8 +3091,8 @@ case 31:
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all plotting information?\\nNo data will be plotted\"");
-			cmd(inter, "button .w.ok -text Ok -command {set choice 1}");
-			cmd(inter, "button .w.can -text Cancel -command {set choice 2}");
+			cmd(inter, "button .w.ok -width -9 -text Ok -command {set choice 1}");
+			cmd(inter, "button .w.can -width -9 -text Cancel -command {set choice 2}");
 			cmd(inter, "pack .w.b .w.ok .w.can");
 			cmd(inter, "pack .w");
 			cmd(inter, "bind . <KeyPress-Return> {.w.ok invoke}");
@@ -3197,29 +3120,13 @@ case 33:
 cmd(inter, "destroy .l .m");
 if(r->up==NULL)
  {
-  cmd(inter, "tk_messageBox -type ok -message \"You cannot create many copies of the 'Root' object.\nConsider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"You cannot create copies of the 'Root' object.\n\nConsider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"");
   *choice=0;
   return r;
  }
 if(actual_steps>0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm title .warn \"Warning\"");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "label .warn.l1 -text \"Warning\" -foreground red");
-  cmd(inter, "label .warn.l -text \"Simulation already run\nLoad again the model to make changes to the Object's numbers\"");
-  cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
-  cmd(inter, "pack .warn.l1 .warn.l .warn.b");
-  cmd(inter, "focus -force .warn");
-  cmd(inter, "bind .warn <KeyPress-Return> {.warn.b invoke}");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
+ {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\n\nLoad again the model to make changes to the Object's numbers.\"" );
   return r;
  }
 
@@ -3227,23 +3134,23 @@ if(actual_steps>0)
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 sprintf(msg, "set num %d",num);
 cmd(inter, msg);
-cmd(inter, "label .l1 -text \"Insert new number of Instances for all groups of Objects\"");
+cmd(inter, "label .l1 -text \"Insert new number of instances for all groups of Objects\"");
 sprintf(msg, "label .l2 -text \"%s\"",r->label);
 cmd(inter, msg);
-cmd(inter, "label .l3 -text \"Warning: All groups of these objects will be affected\"");
+cmd(inter, "label .l3 -text \"Warning: All groups of these Objects will be affected\"");
 cmd(inter, "entry .ent -width 20 -relief sunken -textvariable num");
 
 cmd(inter, "frame .cp -relief groove -bd 2");
 cmd(inter, "label .cp.l -text \"Copy from instance: \"");
 cmd(inter, "set cfrom 1");
 cmd(inter, "entry .cp.e -textvariable cfrom -width 10");
-cmd(inter, "button .cp.compute -text Compute -command {set conf 1; set choice 3}");
+cmd(inter, "button .cp.compute -width -9 -text Compute -command {set conf 1; set choice 3}");
 cmd(inter, "pack .cp.l .cp.e .cp.compute -side left");
 
-cmd(inter, "button .ok -text Ok -command {set choice 1}");
-cmd(inter, "button .can -text Cancel -command {set choice 2}"); 
-cmd(inter, "button .hel -text Help -command {LsdHelp mdataobjn.html#this}"); 
-cmd(inter, "pack .l1 .l2 .l3 .cp .ent .ok .hel .can");
+cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp mdataobjn.html#this}"); 
+cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}"); 
+cmd(inter, "pack .l1 .l2 .l3 .cp .ent .ok .help .can");
 cmd(inter, "bind .ent <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .ent <KeyPress-Escape> {set choice 2}");
 cmd(inter, ".ent selection range 0 end");
@@ -3317,22 +3224,8 @@ case 37:
 *choice=0;
 cmd(inter, "destroy .l .m");
 if(actual_steps==0)
- {cmd(inter, "toplevel .warn");
-  cmd(inter, "wm title .warn \"Warning\"");
-  cmd(inter, "wm transient .warn .");
-  cmd(inter, "label .warn.l -text \"Simulation not run\"");
-  cmd(inter, "button .warn.b -text Ok -command {set choice 1}");
-  cmd(inter, "pack .warn.l .warn.b");
-  cmd(inter, "focus -force .warn.b");
-#ifndef DUAL_MONITOR
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");  
-#else
-  cmd(inter, "set w .warn; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");  
-#endif
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  *choice=0;
-  cmd(inter, "destroy .warn");
+ {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation not run, there is nothing to save.\\n\\nPlease select the menu option 'Run'/'Run' before using this option.\"" );
   return r;
  }
 
@@ -3345,10 +3238,10 @@ if(actual_steps==0)
   cmd(inter, "entry .n.e -width 20 -relief sunken -textvariable lab");
   cmd(inter, "set dozip 0");
   cmd(inter, "checkbutton .n.dozip -text \"Generate zipped results file\" -variable dozip");
-  cmd(inter, "button .n.b -text Ok -command {set choice 1}");
-  cmd(inter, "button .n.c -text Cancel -command {set choice 2}");
+  cmd(inter, "button .n.ok -width -9 -text Ok -command {set choice 1}");
+  cmd(inter, "button .n.can -width -9 -text Cancel -command {set choice 2}");
   cmd(inter, "focus -force .n.e");
-  cmd(inter, "pack .n.l .n.e .n.dozip .n.b .n.c");
+  cmd(inter, "pack .n.l .n.e .n.dozip .n.ok .n.can");
   cmd(inter, "bind .n <KeyPress-Return> {set choice 1}");
   cmd(inter, "bind .n <KeyPress-Escape> {set choice 2}");
 #ifndef DUAL_MONITOR
@@ -3456,14 +3349,12 @@ cmd(inter, "destroy .l .m");
 
 *choice=0;
 
-cmd(inter, "wm iconify .");
-cmd(inter, "set answer [tk_messageBox -message \"The automatic documentation will replace any previous documentation.\\nDo you want to proceed?\" -type yesno -title Warning -icon warning]");
-cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 0} {set choice 1}");
+cmd(inter, "set answer [tk_messageBox -message \"The automatic documentation will replace any previous documentation.\\n\\nDo you want to proceed?\" -type okcancel -title Warning -icon warning -default cancel]");
+cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
 
 
 if(*choice==1)
  {
-  cmd(inter, "wm deiconify .");
   *choice=0;
   break;
  } 
@@ -3480,10 +3371,10 @@ cmd(inter, "radiobutton .warn.o.var -text Variables -variable x -value 1");
 cmd(inter, "radiobutton .warn.o.all -text \"All elements\" -variable x -value 2");
 cmd(inter, "pack .warn.o.var .warn.o.all -anchor w");
 cmd(inter, "frame .warn.f");
-cmd(inter, "button .warn.f.ok -text \" Ok \" -command {set choice 1}");
-cmd(inter, "button .warn.f.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "button .warn.f.hlp -text \" Help \" -command {LsdHelp menumodel.html#auto_docu}");
-cmd(inter, "pack .warn.f.ok .warn.f.hlp .warn.f.esc -side left");
+cmd(inter, "button .warn.f.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .warn.f.help -width -9 -text Help -command {LsdHelp menumodel.html#auto_docu}");
+cmd(inter, "button .warn.f.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .warn.f.ok .warn.f.help .warn.f.esc -side left");
 cmd(inter, "pack .warn.l .warn.o .warn.f");
 
 cmd(inter, "focus -force .warn.f.ok");
@@ -3522,11 +3413,11 @@ sprintf(msg, "set choice [file exists %s]", name_rep);
 cmd(inter, msg);
 if(*choice == 0)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\nYou may create a model report file from menu Model.\\nDo you want to look for another HTML file?\" -type yesno -title Warning -icon warning]");
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
- cmd(inter, "set fname [tk_getOpenFile -title \"Load HTML File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set fname [file tail $fname]; set choice 1}");
  if(*choice == 0)
   break;
@@ -3596,12 +3487,12 @@ cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -text Ok -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
-cmd(inter, "button .a.f.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#V}");
+cmd(inter, "button .a.f.def -width -9 -text Default -command {set temp_var mozilla}");
+cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
-cmd(inter, "button .a.f.help -text Help -command {LsdHelp lsdfuncMacro.html#V}");
-cmd(inter, "button .a.f.def -text Default -command {set temp_var mozilla}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.def .a.f.esc -side left");
@@ -3634,14 +3525,14 @@ case 50: //find an element of the model
 cmd(inter, "destroy .l .m");
 cmd(inter, "toplevel .s");
 cmd(inter, "wm transient .s .");
-cmd(inter, "wm title .s \"Find element\"");
+cmd(inter, "wm title .s \"Find Element\"");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Type the initial letters of the variable or parameter. The system will propose a name.\nPress Enter when the desired label appears.\"");
 cmd(inter, "set bidi \"\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
 cmd(inter, "pack .s.i.l .s.i.e");
-cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .s.i .s.ok .s.esc");
 cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
@@ -3695,15 +3586,15 @@ cmd(inter, "wm title .a \"Set Lattice Updating\"");
 cmd(inter, "label .a.l -text \"Type of lattice updating\" -fg red");
 cmd(inter, "pack .a.l");
 cmd(inter, "frame .a.v");
-cmd(inter, "radiobutton .a.v.r1 -text \"Lattice updating type 1. More efficient when the a cell changes many times\" -variable lattype -value 1\"");
-cmd(inter, "radiobutton .a.v.r2 -text \"Lattice updating type 2. More efficient when cells change rarely\" -variable lattype -value 2\"");
+cmd(inter, "radiobutton .a.v.r1 -text \"Lattice updating type 1 (more efficient when the a cell changes many times)\" -variable lattype -value 1\"");
+cmd(inter, "radiobutton .a.v.r2 -text \"Lattice updating type 2 (more efficient when cells change rarely)\" -variable lattype -value 2\"");
 
 cmd(inter, "pack .a.v.r1 .a.v.r2 -anchor w");
 
 cmd(inter, "pack .a.v -side left -fill y -fill x");
 
 
-cmd(inter, "button .a.ok -text \" Ok \" -command {set choice 1}");
+cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "pack .a.ok -side bottom");
 
 while(*choice==0)
@@ -3724,8 +3615,8 @@ if(!strcmp(eq_file, lsd_eq_file))
   *choice=0;
   break;
  }
-cmd(inter, "set answer [tk_messageBox -title Warning -icon warning -message \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program.\\nPress Ok to confirm.\" -type okcancel ]");
-cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1} {set choice 0}");
+cmd(inter, "set answer [tk_messageBox -title Warning -icon warning -message \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program.\\n\\nPress Ok to confirm.\" -type okcancel -default cancel]");
+cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
 strcpy(lsd_eq_file, eq_file);
@@ -3762,7 +3653,7 @@ if(strlen(lab)==0)
 f=fopen(lab, "wt");  // use text mode for Windows better compatibility
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
-cmd(inter, "tk_messageBox -title Warning -icon warning -message \"The new equation file\\n$res1\\nhas been created.\\nYou need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
+cmd(inter, "tk_messageBox -title Warning -icon warning -message \"The new equation file\\n$res1\\nhas been created.\\n\\nYou need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
 *choice=0;
 break;
 
@@ -3901,7 +3792,7 @@ if (rsense!=NULL)
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 	
 *choice=0;
 return r;
@@ -3937,7 +3828,7 @@ if (rsense!=NULL)
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 *choice=0;
 return r;
@@ -3963,7 +3854,7 @@ if (rsense!=NULL)
 	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
 	cmd(inter, "toplevel .s");
 	cmd(inter, "wm transient .s .");
-	cmd(inter, "wm title .s \"Num. of MC samples\"");
+	cmd(inter, "wm title .s \"Num. of MC Samples\"");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas % of sensitivity space size.\n(from 0 to 100)\"");
 	cmd(inter, "set sizMC \"10.0\"");
@@ -3971,8 +3862,8 @@ if (rsense!=NULL)
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"Requesting a too big\nsample is not recommended.\nThe sample size represents the\napproximated target average.\"");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
-	cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
+	cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+	cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}");
 	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
 	cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
 	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
@@ -4014,7 +3905,7 @@ if (rsense!=NULL)
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 *choice=0;
 return r;
@@ -4045,9 +3936,9 @@ if (rsense!=NULL)
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"The file must be located\nin the same folder of the\nselected configuration file.\nThe file must be in CSV\nformat with NO empty lines.\"");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
-	cmd(inter, "button .s.ok -text \"From File\" -command {set choice 1}");
-	cmd(inter, "button .s.int -text Built-in -command {set choice 2}");
-	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
+	cmd(inter, "button .s.ok -width -9 -text \"From File\" -command {set choice 1}");
+	cmd(inter, "button .s.int -width -9 -text Built-in -command {set choice 2}");
+	cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}");
 	cmd(inter, "pack .s.i .s.ok .s.int .s.esc -fill x");
 	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
 	cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
@@ -4097,7 +3988,7 @@ end72:
 	delete NOLHdoe;
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 *choice=0;
 return r;
@@ -4135,7 +4026,7 @@ case 64:
 	cmd(inter, msg);
 	cmd(inter, "cd $path");
 	// open dialog box to get file name & folder
-	sprintf(msg, " set bah [tk_getOpenFile -title \"Load Sensitivity Analysis Data\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
+	sprintf(msg, " set bah [tk_getOpenFile -title \"Load Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
 	cmd(inter, msg);
 	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
@@ -4228,7 +4119,7 @@ case 65:
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to save.\\n\\nBefore using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Init. Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to save.\\n\\nBefore using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 		break;
 	}
 	// default file name and path
@@ -4241,7 +4132,7 @@ case 65:
 	cmd(inter, msg);
 	cmd(inter, "cd $path");
 	// open dialog box to get file name & folder
-	sprintf(msg, " set bah [tk_getSaveFile -title \"Save Sensitivity Analysis Data\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
+	sprintf(msg, "set bah [tk_getSaveFile -title \"Save Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
 	cmd(inter, msg);
 	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
@@ -4370,7 +4261,7 @@ case 68:
 
 	if ((f=fopen(ch, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM first.\"");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu first.\"");
 		break;
 	}
 	fclose(f);
@@ -4402,7 +4293,7 @@ case 68:
 			sprintf(msg, "set path [pwd]");
 		cmd(inter, msg);
 		// open dialog box to get file name & folder
-		sprintf(msg, " set bah [tk_getOpenFile -title \"Load first sensitivity analysis configuration file\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
+		sprintf(msg, " set bah [tk_getOpenFile -title \"Load First SA Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
 		cmd(inter, msg);
 		cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; set choice [string range $res $numpos end]; set res [string range $res 0 [expr $numpos - 2]]} {set choice 0}");
 		if(*choice == 0)
@@ -4427,18 +4318,18 @@ case 68:
 	// confirm number of cores to use
 	cmd(inter, "toplevel .s");
 	cmd(inter, "wm transient .s .");
-	cmd(inter, "wm title .s \"Num. of CPU cores\"");
+	cmd(inter, "wm title .s \"Num. of CPU Cores\"");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "label .s.i.l -text \"Type the number of parallel processes to use.\"");
 	cmd(inter, "set cores \"4\"");
-	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable cores");
+	cmd(inter, "entry .s.i.e -justify center -textvariable cores");
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"Using a number higher than the number\nof processors/cores is not recommended.\"");
 	cmd(inter, "set dozip 0");
 	cmd(inter, "checkbutton .s.i.dozip -text \"Generate zipped files\" -variable dozip");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w .s.i.dozip");
-	cmd(inter, "button .s.ok -text Ok -command {set choice $cores}");
-	cmd(inter, "button .s.esc -text Cancel -command {set choice 0}");
+	cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice $cores}");
+	cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}");
 	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
 	cmd(inter, "bind .s <KeyPress-Return> {set choice $cores}");
 	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
@@ -4517,7 +4408,7 @@ case 68:
 	}
 
 	// ask if script/batch should be executed right away
-	cmd(inter, "set answer [tk_messageBox -type okcancel -icon question -default cancel -title \"Sensitivity Analysis\" -message \"The script/batch for running the sensitivity configuration files was saved.\n\nPress 'Ok' if you want to start the script/batch as separated processes right now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}"); 
+	cmd(inter, "set answer [tk_messageBox -type yesno -icon question -default no -title \"Sensitivity Analysis\" -message \"The script/batch for running the sensitivity configuration files was saved.\n\nPress 'Yes' if you want to start the script/batch as separated processes right now or 'No' to return.\"]; switch -- $answer {yes {set choice 1} no {set choice 2}}"); 
 	if(*choice == 2)
 		break;
 
@@ -4548,8 +4439,8 @@ case 69:
 	}
 
 	// confirm overwriting current configuration
-	cmd(inter, "button .ok -text Ok -command {set choice 1}");
-	cmd(inter, "button .cancel -text Cancel -command {set choice 2}");
+	cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+	cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}");
 	cmd(inter, "label .war1 -text \"Starting 'No Window' batch for the model configuration:\"");
 	sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
 	cmd(inter, ch);
@@ -4576,7 +4467,7 @@ case 69:
 		cmd(inter, "set wind \".war1 .war2 .war4 .war5 .war6 .war7 .war8 .tosave\"");
 	}
 	
-	cmd(inter, "foreach i $wind {pack $i}; pack .ok .cancel; ");
+	cmd(inter, "foreach i $wind {pack $i}; pack .ok .can; ");
 	cmd(inter, "bind . <KeyPress-Return> {.ok invoke}; bind . <KeyPress-Escape> {.cancel invoke}");
 	cmd(inter, "focus -force .");
 	set_window_size();
@@ -4586,7 +4477,7 @@ case 69:
 		Tcl_DoOneEvent(0);
 	
 	cmd(inter, "bind . <KeyPress-Return> {}; bind . <KeyPress-Escape> {}");
-	cmd(inter, "foreach i $wind {destroy $i}; destroy .ok .cancel");
+	cmd(inter, "foreach i $wind {destroy $i}; destroy .ok .can");
 	
 	if(*choice==2)
 		break;
@@ -4603,7 +4494,7 @@ case 69:
 	f=fopen(struct_file, "w");
 	if(f==NULL)
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Configuration file  cannot be opened.\n\nCheck if the file is set READ-ONLY.");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"Configuration file cannot be opened.\n\nCheck if the file is set READ-ONLY.");
 		break;
 	}
 	else							// run save procedure
@@ -4952,7 +4843,7 @@ bridge *cb;
   {
   if(cv->save==1)
    {
-   sprintf(msg, "tk_messageBox -type ok -title Warning -message \"Warning: item '%s' set to be saved, but will not be available, since object '%s' is set to be not computed.\"", cv->label, l);
+   sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item '%s' set to be saved, but will not be available, since object '%s' is set to be not computed.\"", cv->label, l);
    cmd(inter, msg);
    } 
    }
@@ -4995,7 +4886,7 @@ cmd(inter, "raise .a .; focus -force .a.v.lb; grab set .a");
 cmd(inter, ".a.v.lb selection set 0");
 cmd(inter, "set choice 0");
 
-cmd(inter, "button .a.ok -text \" Ok \" -command {set done1 1}");
+cmd(inter, "button .a.ok -width -9 -text Ok -command {set done1 1}");
 
 cmd(inter, "bind .a.v.lb <Double-1> {.a.ok invoke}");
 cmd(inter, "pack .a.v .a.ok");

@@ -234,7 +234,7 @@ if(param==1 ) //it is a parameter
   return val[0];
  }
 if(num_lag<lag ) //check lag error
- {sprintf(msg, "\nLag error (during execution of equation for '%s'):\nVariable or Function '%s' requested with lag=%d but declared with lag=%d\n. There two possible fixes:\n- change the model configuration, declaring '%s' with at least %d lags, or\n- change the code of '%s' requesting the value of '%s' with maximum %d lags.\n\n", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
+ {sprintf(msg, "\nLag error (during execution of equation for '%s'):\nvariable or function '%s' requested with lag=%d but declared with lag=%d\n. There two possible fixes:\n- change the model configuration, declaring '%s' with at least %d lags, or\n- change the code of '%s' requesting the value of '%s' with maximum %d lags.\n\n", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
   plog(msg);
   error_hard();
   quit=2;

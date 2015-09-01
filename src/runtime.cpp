@@ -250,7 +250,7 @@ cmd(inter, "$activeplot.c.yscale create text 2 2 -font {{MS Times New Roman} 10}
 cmd(inter, "$activeplot.c.yscale create text 2 150 -font {{MS Times New Roman} 10} -anchor w -text \"\" -tag medy");
 cmd(inter, "$activeplot.c.yscale create text 2 300 -font {{MS Times New Roman} 10} -anchor sw -text \"\" -tag ymin");
 cmd(inter, "set posiziona 0");
-cmd(inter, "button $activeplot.c.yscale.go -text \"Center\" -command {set oldposiziona $posiziona; set posiziona 1}");
+cmd(inter, "button $activeplot.c.yscale.go -width -9 -text \"Center\" -command {set oldposiziona $posiziona; set posiziona 1}");
 cmd(inter, "$activeplot.c.c.cn conf -xscrollincrement 1");
 cmd(inter, "bind $activeplot.c.yscale.go <3> {set posiziona 2}");
 cmd(inter, "pack $activeplot.c.yscale.go -anchor nw -expand yes -fill both");

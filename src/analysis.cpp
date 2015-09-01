@@ -230,12 +230,12 @@ sprintf(msg, "wm title .ask \"File or Simulation?\"");
 cmd(inter, msg);
 cmd(inter, "label .ask.l -text \"Use data from a previously saved file or from last simulation?\"");
 cmd(inter, "frame .ask.b");
-cmd(inter, "button .ask.b.file -text File -command {set choice 1}");
-cmd(inter, "button .ask.b.sim -text Simulation -command {set choice 2}");
+cmd(inter, "button .ask.b.file -width -9 -text File -command {set choice 1}");
+cmd(inter, "button .ask.b.sim -width -9 -text Simulation -command {set choice 2}");
 cmd(inter, "pack .ask.b.file .ask.b.sim -side left");
 cmd(inter, "frame .ask.c");
-cmd(inter, "button .ask.c.can -text Cancel -command {set choice 3}");
-cmd(inter, "button .ask.c.help -text Help -command {LsdHelp menudata.html#analres}");
+cmd(inter, "button .ask.c.help -width -9 -text Help -command {LsdHelp menudata.html#analres}");
+cmd(inter, "button .ask.c.can -width -9 -text Cancel -command {set choice 3}");
 cmd(inter, "pack .ask.c.help .ask.c.can -side left");
 cmd(inter, "pack .ask.l .ask.b .ask.c");
 cmd(inter, "bind .ask <KeyPress-f> {.ask.b.file invoke}");
@@ -250,7 +250,7 @@ while(*choice==0)
 cmd(inter, "destroy .ask");
 }
 if(*choice==1 || actual_steps==0)
-  {sprintf(msg, "set lab [tk_getOpenFile -initialdir [pwd] -filetypes {{{Lsd Result Files} {.res}} {{Lsd Total Files} {.tot}} {{All Files} {*}} }]");
+  {sprintf(msg, "set lab [tk_getOpenFile -title \"Load Results File\" -initialdir [pwd] -filetypes {{{Lsd Result Files} {.res}} {{Lsd Total Files} {.tot}} {{All Files} {*}} }]");
    cmd(inter, msg);
   }
 
@@ -373,15 +373,15 @@ cmd(inter, "bind . <KeyPress-Delete> {set n_it [.f.vars.pl.v curselection]; if {
 
 cmd(inter, "frame .f.vars.b");
 cmd(inter, "set f .f.vars.b");
-cmd(inter, "button $f.in -text > -command {set choice 6}");
-cmd(inter, "button $f.out -state disabled -text < -command {set choice 7}");
-cmd(inter, "button $f.sort -text \"Sort \u25b2\" -command {set choice 5}");
-cmd(inter, "button $f.unsort -text \"Un-sort\" -command {set choice 14}");
-cmd(inter, "button $f.sortend -text \"Sort (End)\" -command {set choice 15}");
-cmd(inter, "button $f.sortdesc -text \"Sort \u25bc\" -command {set choice 38}");
-cmd(inter, "button $f.empty -text Clear -command {set choice 8}");
+cmd(inter, "button $f.in -width -9 -text > -command {set choice 6}");
+cmd(inter, "button $f.out -width -9 -state disabled -text < -command {set choice 7}");
+cmd(inter, "button $f.sort -width -9 -text \"Sort \u25b2\" -command {set choice 5}");
+cmd(inter, "button $f.unsort -width -9 -text \"Un-sort\" -command {set choice 14}");
+cmd(inter, "button $f.sortend -width -9 -text \"Sort (end)\" -command {set choice 15}");
+cmd(inter, "button $f.sortdesc -width -9 -text \"Sort \u25bc\" -command {set choice 38}");
+cmd(inter, "button $f.empty -width -9 -text Clear -command {set choice 8}");
 
-cmd(inter, "button $f.add -text \"Add series\" -command {set choice 24}");
+cmd(inter, "button $f.add -width -9 -text \"Add Series\" -command {set choice 24}");
 
 cmd(inter, "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.add $f.empty -fill x");
 
@@ -429,7 +429,7 @@ cmd(inter, "set auto 1");
 autom=1;
 Tcl_LinkVar(inter, "auto", (char *) &autom, TCL_LINK_INT);
 
-cmd(inter, "checkbutton .f.sc.auto -text \"Y Self-scaling\" -variable auto -command {if {$auto==1} {.f.sc.max conf -state disabled; .f.sc.min conf -state disabled} {.f.sc.max conf -state normal; .f.sc.min conf -state normal}}");
+cmd(inter, "checkbutton .f.sc.auto -text \"Y self-scaling\" -variable auto -command {if {$auto==1} {.f.sc.max conf -state disabled; .f.sc.min conf -state disabled} {.f.sc.max conf -state normal; .f.sc.min conf -state normal}}");
 Tcl_LinkVar(inter, "maxy", (char *) &maxy, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "miny", (char *) &miny, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "logs", (char *) &logs, TCL_LINK_INT);
@@ -470,7 +470,7 @@ pdigits=4;
 cmd(inter, "frame .f.tit -relief groove -bd 2");
 cmd(inter, "label .f.tit.l -text Title");
 cmd(inter, "entry .f.tit.e -textvariable tit -width 50");
-cmd(inter, "checkbutton .f.tit.allblack -text \"No Colors\" -variable allblack");
+cmd(inter, "checkbutton .f.tit.allblack -text \"No colors\" -variable allblack");
 cmd(inter, "checkbutton .f.tit.grid -text \"Grids\" -variable grid");
 cmd(inter, "frame .f.tit.lp");
 cmd(inter, "radiobutton .f.tit.lp.line -text \"Lines\" -variable line_point -value 1");
@@ -492,17 +492,17 @@ cmd(inter, "pack .f.tit");
 
 
 cmd(inter, "frame .b");
-cmd(inter, "button .b.lat -text \"Lattice\" -command {set choice 23}");
-cmd(inter, "button .b.ts -text \"Plot\" -command {set choice 1}");
-cmd(inter, "button .b.sv -text \"Save Data\" -command {set choice 10}");
-cmd(inter, "button .b.sp -text \"Print Data\" -command {set choice 36}");
-cmd(inter, "button .b.st -text \"Statistics\" -command {set choice 12}");
-cmd(inter, "button .b.fr -text \"Histograms\" -command {set choice 32}");
-cmd(inter, "button .b.dump -text \"Postscript\" -command {set choice 11}");
+cmd(inter, "button .b.lat -width -9 -text Lattice -command {set choice 23}");
+cmd(inter, "button .b.ts -width -9 -text Plot -command {set choice 1}");
+cmd(inter, "button .b.sv -width -9 -text \"Save Data\" -command {set choice 10}");
+cmd(inter, "button .b.sp -width -9 -text \"Print Data\" -command {set choice 36}");
+cmd(inter, "button .b.st -width -9 -text Statistics -command {set choice 12}");
+cmd(inter, "button .b.fr -width -9 -text Histograms -command {set choice 32}");
+cmd(inter, "button .b.dump -width -9 -text Postscript -command {set choice 11}");
 
 cmd(inter, "frame .b.tc");
-cmd(inter, "radiobutton .b.tc.time -text \"Time Series\" -variable tc -value 1");
-cmd(inter, "radiobutton .b.tc.cross -text \"Cross Section\" -variable tc -value 2");
+cmd(inter, "radiobutton .b.tc.time -text \"Time series\" -variable tc -value 1");
+cmd(inter, "radiobutton .b.tc.cross -text \"Cross section\" -variable tc -value 2");
 cmd(inter, "pack .b.tc.time .b.tc.cross -anchor w");
 
 cmd(inter, "frame .b.xy");
@@ -560,7 +560,7 @@ cmd(inter, "bind . <Control-i> {set choice 34}");
 if(num_var==0)
  {
   set_window_size();
-  cmd(inter, "tk_messageBox -type ok -title \"No Series\" -message \"Apparently there are no series available from a recent simulation run.\\nClick on button \'Add Series\' to select series to analyse from previously saved files or current state of the model. \\nIf you expected data from a simulation that are not available you probably forgot to select series to save, or set the Objects containing them to be not computed.\"");  
+  cmd(inter, "tk_messageBox -type ok -title \"No Series\" -icon warning -message \"Apparently there are no series available from a recent simulation run.\\n\\nClick on button \'Add Series\' to select series to analyse from previously saved files or current state of the model. \\nIf you expected data from a simulation that are not available you probably forgot to select series to save, or set the objects containing them to be not computed.\"");  
  }
 there :
 set_window_size();
@@ -592,7 +592,7 @@ case 1:
   cmd(inter, "set choice [.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
    {
-   cmd(inter, "tk_messageBox -type ok -title \"No Series\" -message \"No series selected.\\nPlace some series in the Series Selected listbox.\"");
+   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nPlace some series in the Series Selected listbox.\"");
    goto there;
    }
   cur_plot++;
@@ -621,10 +621,10 @@ case 1:
 //exit
 case 2:
 ///plog("here 1\n");
-cmd(inter, "set answer [tk_messageBox -type yesno -title \"Warning\" -message \"Do you really want to exit Analysis of Results?\\nAll the graphs created will be lost.\"]");
+cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"Do you really want to exit Analysis of Results?\\n\\nAll the graphs created will be lost.\"]");
 app=(char *)Tcl_GetVar(inter, "answer",0);
 
-cmd(inter, "if {[string compare $answer \"yes\"] == 0} { } {set choice 0}");
+cmd(inter, "if {[string compare $answer \"ok\"] == 0} { } {set choice 0}");
 if(*choice==0)
   goto there;
 cmd(inter, "bind . <Control-x> {}");
@@ -725,7 +725,7 @@ case 36: //Print the data series in the log window
 case 37: //set options for gnuplot
 cmd(inter, "toplevel .a");
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Gnuplot options\"");
+cmd(inter, "wm title .a \"Gnuplot Options\"");
 cmd(inter, "label .a.l -text \"Set options for gnuplot\" -fg red");
 cmd(inter, "frame .a.t -relief groove -bd 2");
 cmd(inter, "label .a.t.l -text \"Terminal \"");
@@ -741,9 +741,9 @@ cmd(inter, "text .a.o.t -height 10 -width 30");
 cmd(inter, ".a.o.t insert end \"$gpooptions\"");
 cmd(inter, "pack .a.o.l .a.o.t");
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.default -text \"Default\" -command {set choice 3}");
-cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
-cmd(inter, "button .a.b.help -text \" Help \" -command {LsdHelp mdatares.html#gpoptions}");
+cmd(inter, "button .a.b.default -width -9 -text Default -command {set choice 3}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#gpoptions}");
 cmd(inter, "pack .a.b.default .a.b.ok .a.b.help -side left");
 cmd(inter, "pack .a.l .a.t .a.d .a.o .a.b -fill x");
 //cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
@@ -886,11 +886,11 @@ sprintf(msg, "set choice [file exists %s]", name_rep);
 cmd(inter, msg);
 if(*choice == 0)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\nYou may create a model report file from menu Model.\\nDo you want to look for another HTML file?\" -type yesno -title Warning -icon warning]");
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   goto there;
- cmd(inter, "set fname [tk_getOpenFile -title \"Load HTML File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set choice 0}");
  if(*choice == 0)
   goto there;
@@ -933,7 +933,7 @@ case 25:
 case 26:
 *choice=0;
  cmd(inter, "toplevel .a");
- cmd(inter, "wm title .a \"Edit label\"");
+ cmd(inter, "wm title .a \"Edit Label\"");
  cmd(inter, "wm geometry .a +$hereX+$hereY");
  cmd(inter, "wm transient .a $ccanvas");
  cmd(inter, "label .a.l -text \"New label for the selected label\"");
@@ -950,7 +950,7 @@ case 26:
  cmd(inter, "entry .a.format.e.dim -textvariable idim -width 4");
   cmd(inter, "entry .a.format.e.sty -textvariable istyle -width 10");
  cmd(inter, "set icolor [$ccanvas itemcget selected -fill]");  
- cmd(inter, "button .a.format.e.color -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.format.e.color configure -foreground $icolor; focus -force .a.format.e.color}");
+ cmd(inter, "button .a.format.e.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.format.e.color configure -foreground $icolor; focus -force .a.format.e.color}");
 
  cmd(inter, "bind .a.format.e.font <Return> {.a.b.ok invoke}");
  cmd(inter, "bind .a.format.e.dim <Return> {.a.b.ok invoke}");
@@ -968,8 +968,8 @@ case 26:
 
  cmd(inter, "frame .a.b");
  
- cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
- cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
+ cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
  cmd(inter, "pack .a.b.ok .a.b.esc -side left");
  cmd(inter, "pack .a.l .a.e .a.format .a.b");
  cmd(inter, ".a.e selection range 0 end");
@@ -1010,15 +1010,15 @@ case 27:
 *choice=0;
  cmd(inter, "toplevel .a");
  cmd(inter, "wm geometry .a +$hereX+$hereY");
- cmd(inter, "wm title .a \"Insert new labels\"");
+ cmd(inter, "wm title .a \"New Labels\"");
  cmd(inter, "wm transient .a $ncanvas");
  cmd(inter, "label .a.l -text \"New label\"");
  cmd(inter, "set itext \"new text\"");
  cmd(inter, "entry .a.e -textvariable itext -width 30");
  cmd(inter, "frame .a.b");
  
- cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
- cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
+ cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
  cmd(inter, "pack .a.b.ok .a.b.esc -side left");
  cmd(inter, "pack .a.l .a.e .a.b");
  cmd(inter, ".a.e selection range 0 end");
@@ -1060,7 +1060,7 @@ Edit line's color
 *choice=0;
 /*
  cmd(inter, "toplevel .a");
- cmd(inter, "wm title .a \"Edit lines\"");
+ cmd(inter, "wm title .a \"Edit Lines\"");
  cmd(inter, "wm geometry .a +$hereX+$hereY");
  cmd(inter, "wm transient .a $ccanvas");
  cmd(inter, "label .a.l -text \"New label for the selected series\"");
@@ -1079,11 +1079,11 @@ Edit line's color
  
  cmd(inter, "pack .a.format.font .a.format.dim -side left");
  cmd(inter, "set icolor [$ccanvas itemcget selected -fill]");
- cmd(inter, "button .a.color -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.color configure -foreground $icolor; focus -force .a.color}");
+ cmd(inter, "button .a.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.color configure -foreground $icolor; focus -force .a.color}");
  cmd(inter, "frame .a.b");
  
- cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
- cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
+ cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
  cmd(inter, "pack .a.b.ok .a.b.esc -side left");
  cmd(inter, "pack .a.l .a.e .a.format .a.color .a.b");
  cmd(inter, ".a.e selection range 0 end");
@@ -1149,10 +1149,10 @@ exist_selection:
   cmd(inter, "wm transient .w .");
   cmd(inter, "bind .w <Destroy> {set choice 2}");
   cmd(inter, "label .w.l -text \"Select one graph\"");
-  cmd(inter, "button .w.o -text Ok -command {set choice 1}");
-  cmd(inter, "button .w.c -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .w.l .w.o .w.c");
-  cmd(inter, "focus -force .w.o");
+  cmd(inter, "button .w.ok -width -9 -text Ok -command {set choice 1}");
+  cmd(inter, "button .w.can -width -9 -text Cancel -command {set choice 2}");
+  cmd(inter, "pack .w.l .w.ok .w.can");
+  cmd(inter, "focus -force .w.ok");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
@@ -1179,7 +1179,7 @@ cmd(inter, "scan $it %d)%s a b");
 cmd(inter, "set choice [winfo exist .f.new$a]");
 if(*choice == 0)
  {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"The selected graph does not exist anymore.\nIf you closed the window of the graph, then re-create it.\nIf the graph is a high-quality scatter plot, use the gnuplot facilities to export it (use the right button of the mouse).\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"The selected graph does not exist anymore.\n\nIf you closed the window of the graph, then re-create it.\nIf the graph is a high-quality scatter plot, use the gnuplot facilities to export it (use the right button of the mouse).\"");
   Tcl_UnlinkVar(inter, "res");
   goto there;  
  }
@@ -1191,12 +1191,12 @@ cmd(inter, "wm transient .filename .");
 cmd(inter, "bind .filename <Destroy> {set choice 2}");
 cmd(inter, "label .filename.l -text \"Save the graph\\n$it\"");
 cmd(inter, "frame .filename.b");
-cmd(inter, "button .filename.b.ok -text Ok -bd 2 -command {if {[string length $fn] > 0 } {set choice 1} {set choice 3} }");
-cmd(inter, "button .filename.b.c -text Cancel -bd 2 -command {set choice 2}");
+cmd(inter, "button .filename.b.ok -width -9 -text Ok -bd 2 -command {if {[string length $fn] > 0 } {set choice 1} {set choice 3} }");
+cmd(inter, "button .filename.b.can -width -9 -text Cancel -bd 2 -command {set choice 2}");
 cmd(inter, "bind .filename <KeyPress-Return> {.filename.b.ok invoke} ");
-cmd(inter, "bind .filename <KeyPress-Escape> {.filename.b.c invoke}");
+cmd(inter, "bind .filename <KeyPress-Escape> {.filename.b.can invoke}");
 cmd(inter, "bind .filename <Destroy> {set choice 2}");
-cmd(inter, "button .filename.s -text \"Choose File\" -command {set fn1 [tk_getSaveFile -title \"Graph File Name\" -defaultextension \"eps\" -initialfile $fn -filetypes {{{Encapsulated Ps} {.eps}} {{All Files} {*}}}]; raise .filename ; if {[string length $fn1] == 0} {} {set fn $fn1}}");
+cmd(inter, "button .filename.s -width -9 -text \"Choose File\" -command {set fn1 [tk_getSaveFile -title \"Save Graph File\" -defaultextension \"eps\" -initialfile $fn -filetypes {{{Encapsulated Ps} {.eps}} {{All Files} {*}}}]; raise .filename ; if {[string length $fn1] == 0} {} {set fn $fn1}}");
 //cmd(inter, "set fn \"Lsdplot.eps\"");
 cmd(inter, "set fn \"$b.eps\"");
 cmd(inter, "entry  .filename.e -width 40 -relief sunken -textvariable fn");
@@ -1230,7 +1230,7 @@ cmd(inter, "set choice $a");
 if(graph_l[*choice]==graph_nl[*choice])
  cmd(inter, ".filename.lab conf -state disabled");
 
-cmd(inter, "pack .filename.b.ok .filename.b.c -side left");
+cmd(inter, "pack .filename.b.ok .filename.b.can -side left");
 cmd(inter, "pack .filename.l .filename.lab .filename.r $r.ldim $r.dim .filename.e .filename.s .filename.b");
 //cmd(inter, "raise .filename");
 *choice=0;
@@ -1308,7 +1308,7 @@ case 17:
   *choice=1;
   cmd(inter, "set choice [.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
-   { cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"No Series Selected.\\nPlace some of series available for the analysis\\nin the central listbox.\"");
+   { cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No Series Selected.\\n\\nPlace some of series available for the analysis\\nin the central listbox.\"");
     goto there;
    }
   cur_plot++;
@@ -1388,8 +1388,8 @@ case 19:
 
 case 20:
 //remove a graph
-cmd(inter, "set answer [tk_messageBox -type yesno -title \"Delete Graph?\" -message \"Press Yes to delete graph:\\n$tit\"]");
-cmd(inter, "if {[string compare $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
+cmd(inter, "set answer [tk_messageBox -type okcancel -title \"Delete Graph?\" -message \"Press 'Ok' to delete graph:\\n$tit\" -icon warning -default cancel]");
+cmd(inter, "if {[string compare $answer \"ok\"] == 0} { set choice 1} {set choice 0}");
 if(*choice==0)
  goto there;
 cmd(inter, "scan $it %d)%s a b");
@@ -1427,7 +1427,7 @@ for(i=0; i<10; i++)
   cmd(inter, msg);
  }
 cmd(inter, "pack .a.l1 .a.l2 -side left");
-cmd(inter, "button .a.ok -text Ok -command {set choice 2}");
+cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 2}");
 cmd(inter, "pack .a.ok -side bottom");
 #ifndef DUAL_MONITOR
 cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
@@ -1475,7 +1475,7 @@ sequence
   cmd(inter, "set choice [.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
    {
-   cmd(inter, "tk_messageBox -type ok -title \"No Series\" -message \"No series selected.\\nPlace some series in the Series Selected listbox.\"");
+   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nPlace some series in the Series Selected listbox.\"");
    goto there;
    }
   cur_plot++;
@@ -1504,7 +1504,7 @@ Insert series not saved from the current model.
 
 cmd(inter, "set choice [.f.vars.ch.v size]");
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Choose data source\"");
+cmd(inter, "wm title .s \"Choose Data Source\"");
 cmd(inter, "wm transient .s .");
 cmd(inter, "label .s.l -text \"Select the source of additional series\"");
 cmd(inter, "set bidi 0");
@@ -1518,12 +1518,12 @@ if(*choice>0)
 cmd(inter, "bind .s.i.f <Up> {set bidi 0; focus -force .s.i.m}");
 
 
-cmd(inter, "radiobutton .s.i.a -text \"Create Mov.Average Series from selected\" -variable bidi -value 5");
+cmd(inter, "radiobutton .s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
 cmd(inter, "bind .s.i.a <Down> {set bidi 4; focus -force .s.i.c}");
 cmd(inter, "bind .s.i.a <Up> {set bidi 1; focus -force .s.i.f}");
 
 
-cmd(inter, "radiobutton .s.i.c -text \"Create One Serie from selected series\" -variable bidi -value 4");
+cmd(inter, "radiobutton .s.i.c -text \"Create one serie from selected series\" -variable bidi -value 4");
 cmd(inter, "bind .s.i.c <Up> {set bidi 5; focus -force .s.i.a}");
 
 if(*choice>0)
@@ -1532,9 +1532,9 @@ else
  cmd(inter, "pack .s.i.m .s.i.f  -anchor w");
 
 cmd(inter, "pack .s.l .s.i");
-cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .s.help -text \" Help \" -command {LsdHelp mdatares.html#add_series}");
+cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
+cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .s.i .s.ok .s.help .s.esc");
 cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
@@ -1572,11 +1572,11 @@ if(*choice==5)
 if(*choice==1 || *choice==3)
  {
  
-  cmd(inter, "set lab [tk_getOpenFile -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {.res}} {{Lsd Total Files} {.tot}} {{All Files} {*}} }]");
+  cmd(inter, "set lab [tk_getOpenFile -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {.res}} {{Lsd Total Files} {.tot}} {{All Files} {*}} }]");
   cmd(inter, "set choice [llength $lab]");
   if(*choice==0 )
    {//no file selected
-    //cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"No files matching pattern '$nfiles' found.\"");
+    //cmd(inter, "tk_messageBox -type ok -title -title Error -icon error -message \"No files matching pattern '$nfiles' found.\"");
     goto there; 
    }
   h=*choice;
@@ -1604,15 +1604,15 @@ if(*choice==1 || *choice==3)
  
  }
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Insert series\"");
+cmd(inter, "wm title .s \"Series Selection\"");
 cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Type the label of the series to insert (self-completion)\"");
 cmd(inter, "set bidi \"\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
 cmd(inter, "pack .s.i.l .s.i.e");
-cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .s.i .s.ok .s.esc");
 cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
@@ -1659,11 +1659,11 @@ cmd(inter, "set i [llength [split $c {_}]]");
 cmd(inter, "set ntag $i");
 cmd(inter, "set ssys 2");
 cmd(inter, "toplevel .a");
-cmd(inter, "wm title .a \"Add a batch of items\"");
+cmd(inter, "wm title .a \"Select Series\"");
 cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.tit  -relief groove -bd 2");
-cmd(inter, "label .a.tit.l -text \"Select series with label : \"");
+cmd(inter, "label .a.tit.l -text \"Select series with label: \"");
 cmd(inter, "label .a.tit.s -text \"$b\" -foreground red");
 cmd(inter, "pack .a.tit.l .a.tit.s -side left");
 
@@ -1717,10 +1717,9 @@ cmd(inter, "set cond 1");
 
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
-
-cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "button .a.b.help -text \" Help \" -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
 
 cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
@@ -1928,7 +1927,7 @@ cmd(inter, "set c [lindex $a 1]"); //get the tag value
 cmd(inter, "set i [llength [split $c {_}]]");
 cmd(inter, "set ssys 2");
 cmd(inter, "toplevel .a");
-cmd(inter, "wm title .a \"Remove a batch of items\"");
+cmd(inter, "wm title .a \"Remove Series\"");
 cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.tit  -relief groove -bd 2");
@@ -1987,10 +1986,9 @@ cmd(inter, "set cond 1");
 
 
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -text \" Ok \" -command {set choice 1}");
-
-cmd(inter, "button .a.b.esc -text \" Cancel \" -command {set choice 2}");
-cmd(inter, "button .a.b.help -text \" Help \" -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
 
 cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
@@ -2218,9 +2216,9 @@ double **data,**logdata;
 
 if(nv>1000)
  {
-  cmd(inter, "set answer [tk_messageBox -type yesno -message \"You selected $nv series to be plotted. So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nDo you want to continue anyway?\"]" );
+  cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"You selected $nv series to be plotted.\n\n So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nPress 'Ok' to continue anyway?\"]" );
   *choice=0;
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1 } {set choice 22}");
+  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1 } {set choice 22}");
   if(*choice==22)
    return;
   
@@ -3269,7 +3267,7 @@ cmd(inter, "toplevel .s");
 cmd(inter, "wm protocol .s WM_DELETE_WINDOW {set choice 2}");
 cmd(inter, "wm transient .s .");
 cmd(inter, "set p .s");
-cmd(inter, "wm title $p \"Select Cases for Cross section analysis\"");
+cmd(inter, "wm title $p \"Cases for Cross Section Analysis\"");
 //cmd(inter, "raise $p");
 //cmd(inter, "frame $p.rd");
 
@@ -3301,18 +3299,18 @@ cmd(inter, "frame .s.fb -relief groove -bd 2");
 cmd(inter, "set p .s.fb");
 
 cmd(inter, "bind .s.i.e <KeyPress-Return> {$p.add invoke}");
-cmd(inter, "button $p.add -text Add -command {.s.i.lb insert end $bidi; incr count 1; focus .s.i.e; .s.i.e selection range 0 end; .s.i.lb selection set end }");
-cmd(inter, "button $p.del -text Delete -command {.s.i.lb delete [.s.i.lb curselection]; incr count -1; focus .s.i.e; .s.i.e selection range 0 end }");
-cmd(inter, "button $p.can -text Abort -command {set choice 2}");
-cmd(inter, "button $p.end -text Continue -command {set choice 1}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#crosssection}");
+cmd(inter, "button $p.add -width -9 -text Add -command {.s.i.lb insert end $bidi; incr count 1; focus .s.i.e; .s.i.e selection range 0 end; .s.i.lb selection set end }");
+cmd(inter, "button $p.del -width -9 -text Delete -command {.s.i.lb delete [.s.i.lb curselection]; incr count -1; focus .s.i.e; .s.i.e selection range 0 end }");
+cmd(inter, "button $p.end -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#crosssection}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.add $p.del $p.end $p.help $p.can -expand yes -fill x -anchor n");
 
 cmd(inter, "frame .s.s -relief groove -bd 2");
 cmd(inter, "label .s.s.l -text \"Use series in the same order as selected\"");
-cmd(inter, "button .s.s.up -text \"Sort Ascending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to increasing values at time: [selection get]\"; set dir 1}");
-cmd(inter, "button .s.s.down -text \"Sort Descending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to decreasing values at time: [selection get]\"; set dir -1}");
-cmd(inter, "button .s.s.nosort -text \"No Sort\" -command {.s.s.l config -text \"Use series in the same order as selected\"; set dir 0}");
+cmd(inter, "button .s.s.up -width -9 -text \"Sort Ascending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to increasing values at time: [selection get]\"; set dir 1}");
+cmd(inter, "button .s.s.down -width -9 -text \"Sort Descending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to decreasing values at time: [selection get]\"; set dir -1}");
+cmd(inter, "button .s.s.nosort -width -9 -text \"No Sort\" -command {.s.s.l config -text \"Use series in the same order as selected\"; set dir 0}");
 cmd(inter, "pack .s.s.l .s.s.up .s.s.down .s.s.nosort -anchor n");
 
 cmd(inter, "pack .s.i .s.fb .s.s -side left -anchor n");
@@ -3333,7 +3331,7 @@ while(*choice==0)
 if(*choice==2)
  goto end;
 
-cmd(inter, "if { [.s.i.lb size] == 0 } {tk_messageBox -type ok -title \"Warning\" -message \"No time step has been selected.\\nNo graph will be created\";set choice 2} { }");
+cmd(inter, "if { [.s.i.lb size] == 0 } {tk_messageBox -type ok -title Error -icon error -message \"No time step has been selected.\\n\\nNo graph will be created.\";set choice 2} { }");
 cmd(inter, "set num_t [.s.i.lb size]");
 cmd(inter, "set list_times [.s.i.lb get 0 end]");
 
@@ -3453,7 +3451,7 @@ double *d, app;
 
 return vs[id].data;
 
-sprintf(msg, "tk_messageBox -type ok -message \"System error: series %d not found. To continue the very first series is returned.\"", id);
+sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"System error: series %d not found.\\n\\nTo continue the very first series is returned.\"", id);
 cmd(inter, msg);
 return vs[0].data;
 }
@@ -3475,7 +3473,7 @@ for(i=0; i<num_var ; i++)
 
  }
 
-cmd(inter, "tk_messageBox -type ok -title \"Data not found\" -message \"Bad crash...\"");
+cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Data not found.\n\nLsd crashed...\"");
 exit(0);
 f=fopen(filename, "r");
 for(i=0, done=0; i<num_var; i++)
@@ -3835,7 +3833,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
@@ -3872,11 +3870,11 @@ cmd(inter, "toplevel .lab");
 cmd(inter, "wm title .lab \"Saving Data\"");
 cmd(inter, "wm transient .lab . ");
 cmd(inter, "frame .lab.f");
-cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd Result File\" -variable typelab -value 3");
-cmd(inter, "radiobutton .lab.f.nolsd -text \"Text File\" -variable typelab -value 4");
-cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
-cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
+cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
+cmd(inter, "radiobutton .lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
+cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .lab.f.lsd .lab.f.nolsd -anchor w");
 cmd(inter, "pack .lab.f .lab.ok .lab.help .lab.esc");
@@ -3911,7 +3909,7 @@ cmd(inter, "frame .lab.f -relief groove -bd 2");
 cmd(inter, "label .lab.f.tit -text \"Labels to use\" -foreground red");
 
 cmd(inter, "radiobutton .lab.f.orig -text Original -variable typelab -value 1");
-cmd(inter, "radiobutton .lab.f.new -text \"New Names\" -variable typelab -value 2");
+cmd(inter, "radiobutton .lab.f.new -text \"New names\" -variable typelab -value 2");
 cmd(inter, "set newlab \"\"");
 cmd(inter, "entry .lab.f.en -textvariable newlab");
 cmd(inter, "set gp 0");
@@ -3923,13 +3921,13 @@ cmd(inter, "label .lab.d.tit -text \"Columns delimiter\" -foreground red");
 
 cmd(inter, "frame .lab.d.r");
 del=1;
-cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab Delimited\" -variable deli -value 1");
-cmd(inter, "radiobutton .lab.d.r.oth -text \"Other Delimiter\" -variable deli -value 2");
+cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
+cmd(inter, "radiobutton .lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
 cmd(inter, "set delimiter \"\"");
 cmd(inter, "entry .lab.d.r.del -textvariable delimiter");
 cmd(inter, "bind .lab.d.r.del <FocusIn> {.lab.d.r.oth invoke}");
 
-cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed Length Columns\" -variable deli -value 3");
+cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
 numcol=16;
 cmd(inter, "entry .lab.d.r.ecol -textvariable numcol");
 cmd(inter, "bind .lab.d.r.ecol <FocusIn> {.lab.d.r.col invoke}");
@@ -3940,15 +3938,15 @@ cmd(inter, "pack .lab.d.tit .lab.d.r -anchor w");
 
 cmd(inter, "frame .lab.gen -relief groove -bd 2");
 cmd(inter, "label .lab.gen.tit -text \"General Options\" -foreground red");
-cmd(inter, "checkbutton .lab.gen.fr -text \"Variables in First Row\" -variable fr");
-cmd(inter, "label .lab.gen.miss -text \"Missing Values\"");
+cmd(inter, "checkbutton .lab.gen.fr -text \"Names in first row\" -variable fr");
+cmd(inter, "label .lab.gen.miss -text \"Missing values\"");
 cmd(inter, "set misval \"n/a\"");
 cmd(inter, "entry .lab.gen.mis_val -textvariable misval");
 cmd(inter, "pack .lab.gen.tit .lab.gen.fr .lab.gen.miss .lab.gen.mis_val -anchor w");
-cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
+cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
 cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
 *choice=0;
 cmd(inter, "focus .lab");
@@ -3976,9 +3974,9 @@ strcpy(misval,app);
 }
 
 if(type_res==4)
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Data File Name\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
+  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
 else
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Data File Name\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
+  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
 cmd(inter, msg);
 app=(char *)Tcl_GetVar(inter, "bah",0);
 strcpy(msg, app);
@@ -4612,14 +4610,14 @@ nv=*choice;
 *choice=0;
 if(nv==0)
  {
- cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"No series selected.\\nBring some series in the 'Vars. to plot' listbox.\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nBring some series in the Selected Series listbox.\"");
  return;
  }
 
 if(nv>2)
  {
  cmd(inter, "toplevel .s");
- cmd(inter, "wm title .s \"2D or 3D?\"");
+ cmd(inter, "wm title .s \"Graph Type\"");
  cmd(inter, "wm transient .s .");
 
  cmd(inter, "label .s.l -text \"Choose the type of graph\"");
@@ -4636,7 +4634,7 @@ cmd(inter, "frame .s.o -relief groove -bd 2");
 cmd(inter, "label .s.o.l -text \"Select 3D options\"");
 
 cmd(inter, "if { [info exist box]==1} {} {set box 0}");
-cmd(inter, "radiobutton .s.o.a -text \"Use 1st and 2nd vars as plane\" -variable box -value 0 -anchor w");
+cmd(inter, "radiobutton .s.o.a -text \"Use 1st and 2nd vars. as plane\" -variable box -value 0 -anchor w");
 cmd(inter, "radiobutton .s.o.c -text \"Use time and 1st var. as plane\" -variable box -value 2 -anchor w");
 cmd(inter, "radiobutton .s.o.b -text \"Use time and rank as plane\" -variable box -value 1 -anchor w");
 cmd(inter, "checkbutton .s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
@@ -4653,9 +4651,9 @@ cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
 
  cmd(inter, "frame .s.b");
  cmd(inter, "set p .s.b");
- cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
- cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
- cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#3dTime}");
+ cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#3dTime}");
+ cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
  cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
  
  cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
@@ -5093,7 +5091,7 @@ nv=*choice;
 *choice=0;
 if(nv==0)
  {
- cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"No series selected.\\nBring some series in the 'Vars. to plot' listbox.\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nBring some series in the Selected Series listbox.\"");
  return;
  }
 
@@ -5249,9 +5247,9 @@ cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
 
 cmd(inter, "frame .s.b");
 cmd(inter, "set p .s.b");
-cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
-cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#3dCrossSection}");
+cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#3dCrossSection}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
@@ -5296,7 +5294,7 @@ cmd(inter, "destroy .s");
 
 if(nv%block_length!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Block length is incorrect. It should be an exact divisor of the number of Variables.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Block length is incorrect.\\n\\nIt should be an exact divisor of the number of Variables.\"");
   goto end;
  }
 
@@ -5502,7 +5500,7 @@ int i, nv, j, k, *start, *end, done, nlags;
 cmd(inter, "set choice [.f.vars.ch.v size]");
 if(*choice!=1)
  {
- cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Wrong number of series.\\nOne and only one series must be selected\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nOne and only one series must be selected.\"");
  return;
  }
 
@@ -5591,7 +5589,7 @@ for(done=0, i=0; i<nv; i++)
 cmd(inter, "set bidi 1");
 cmd(inter, "toplevel .s");
 cmd(inter, "wm transient .s .");
-cmd(inter, "wm title .s \"Lags to plot\"");
+cmd(inter, "wm title .s \"Lags Selection\"");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert number of lags\"");
 cmd(inter, "entry .s.i.e -textvariable bidi");
@@ -5608,9 +5606,9 @@ cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x");
 
 cmd(inter, "frame .s.b");
 cmd(inter, "set p .s.b");
-cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
-cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#plot}");
+cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#plot}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
@@ -5790,7 +5788,7 @@ cmd(inter, "canvas $p.f.plots -height 430 -width 640 -bg white");
 cmd(inter, "pack $p.f.plots");
 cmd(inter, "pack $p.f");
 cmd(inter, "update");
-//cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Step 2\\n\"");
+//cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 2\\n\"");
 shrink_gnufile();
 cmd(inter, "file delete plot.file; file rename plot_clean.file plot.file");
 
@@ -5798,7 +5796,7 @@ cmd(inter, "file delete plot.file; file rename plot_clean.file plot.file");
 //cmd(inter, "if { $stat_data(size) > 500000} {set choice 1} {set choice 0}");
 if(type==0)
 {
-  cmd(inter, "set answer [tk_messageBox -type yesno -title \"Option\" -message \"The requested graph may be generated with higher quality by using Gnuplot external from Lsd.\\nPress 'Yes' to generate a low-quality graph within Lsd or 'No' to generate a high-quality graph with Gnuplot.\"]");
+  cmd(inter, "set answer [tk_messageBox -type yesno -title Option -icon question -default yes -message \"The requested graph may be generated with higher quality by using Gnuplot external from Lsd.\\n\\nPress 'Yes' to generate a low-quality graph within Lsd or 'No' to generate a high-quality graph with Gnuplot.\"]");
   cmd(inter, "if {[string compare $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
   if(*choice ==0)
    type=2;
@@ -5825,10 +5823,10 @@ cmd(inter, "update");
 cmd(inter, "update idletasks");
 cmd(inter, "set choice 0");
 
-// cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Step 3\\n\"");
+// cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 3\\n\"");
   cmd(inter, "catch [gnuplot $p.f.plots]");
 cmd(inter, "catch [rename gnuplot \"\"]");
-// cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Step 4\\n\"");
+// cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 4\\n\"");
 
 }
 
@@ -5848,7 +5846,7 @@ cmd(inter, "set choice [.f.vars.ch.v size]");
 /*
 if(*choice!=1)
  {
- cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Wrong number of series.\\nOne and only one series must be selected\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nOne and only one series must be selected.\"");
  return;
  }
 */
@@ -5878,7 +5876,7 @@ for(i=0; i<nv; i++)
 
 cmd(inter, "set bidi 1");
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Insert\"");
+cmd(inter, "wm title .s \"Lattice Definition\"");
 cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert number of columns\"");
@@ -5906,9 +5904,9 @@ cmd(inter, "pack .s.y.l .s.y.e");
 
 cmd(inter, "frame .s.b");
 cmd(inter, "set p .s.b");
-cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
-cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#lattice}");
+cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#lattice}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
@@ -5947,7 +5945,7 @@ ncol=*choice;
 nlin=nv/ncol;
 if(nlin*ncol!=nv)
  {
- cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Wrong number of columns.\"");
+ cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of columns.\"");
  cur_plot--;
  *choice=1;
  goto end;
@@ -6080,7 +6078,7 @@ bin *cl;
 cmd(inter, "set choice [.f.vars.ch.v size]");
 if(*choice!=1)
  {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Wrong number of series.\\nFor Time Series histograms select only one series.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nFor Time Series histograms select only one series.\"");
   cur_plot--;
   sprintf(msg, ".f.vars.pl.v delete %d",cur_plot);
   cmd(inter, msg);
@@ -6124,7 +6122,7 @@ sprintf(msg, "set bidi %d", 100<tot?100:(int)tot);
 cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Number of classes\"");
+cmd(inter, "wm title .s \"Number of Classes\"");
 cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.i -relief groove -bd 2");
 cmd(inter, "label .s.i.l -text \"Insert the number of classes to use\"");
@@ -6141,9 +6139,9 @@ cmd(inter, "pack .s.i.l .s.i.e .s.i.norm .s.i.st -anchor w");
 
 cmd(inter, "frame .s.b");
 cmd(inter, "set p .s.b");
-cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
-cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#seq_xy}");
+cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#seq_xy}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
@@ -6584,7 +6582,7 @@ cmd(inter, "set choice [.f.vars.ch.v size]");
 nv=*choice;
 if(nv<2)
 {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Wrong number of series.\\nFor Cross Section histograms select more than 2 series.\"");
+  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nFor Cross Section histograms select more than 2 series.\"");
   cur_plot--;
   sprintf(msg, ".f.vars.pl.v delete %d",cur_plot);
   cmd(inter, msg);
@@ -6648,7 +6646,7 @@ sprintf(msg, "set time %d", end[0]);
 cmd(inter, msg);
 
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Number of classes\"");
+cmd(inter, "wm title .s \"Number of Classes\"");
 cmd(inter, "wm transient .s .");
 cmd(inter, "frame .s.t -relief groove -bd 2");
 cmd(inter, "label .s.t.l -text \"Insert the time step to use\"");
@@ -6670,9 +6668,9 @@ cmd(inter, "pack .s.i.l .s.i.e .s.i.norm .s.i.st -anchor w");
 
 cmd(inter, "frame .s.b");
 cmd(inter, "set p .s.b");
-cmd(inter, "button $p.ok -text Ok -command {set choice 1}");
-cmd(inter, "button $p.can -text Cancel -command {set choice 2}");
-cmd(inter, "button $p.help -text Help -command {LsdHelp mdatares.html#seq_xy}");
+cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#seq_xy}");
+cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
@@ -7160,14 +7158,14 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
 
 
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Select elaborations\"");
+cmd(inter, "wm title .s \"Elaboration Selection\"");
 cmd(inter, "wm transient .s .");
 
 cmd(inter, "frame .s.o -relief groove -bd 2");
@@ -7210,7 +7208,7 @@ cmd(inter, "entry .s.i.ci.p -width 4 -textvariable confi");
 cmd(inter, "pack .s.i.ci.c .s.i.ci.x .s.i.ci.p -side left");
 /*
 cmd(inter, "frame .s.i.ma");
-cmd(inter, "radiobutton .s.i.ma.ma -text \"Mov. Average\" -variable bidi -command {set headname \"MovA\"; set vname $headname$basename; .s.nv selection range 0 end} -value 8");
+cmd(inter, "radiobutton .s.i.ma.ma -text \"Mov. average\" -variable bidi -command {set headname \"MovA\"; set vname $headname$basename; .s.nv selection range 0 end} -value 8");
 cmd(inter, "label .s.i.ma.x -text \" range \"");
 confi=1.96;
 cmd(inter, "entry .s.i.ma.p -width 4 -textvariable confi");
@@ -7239,9 +7237,9 @@ cmd(inter, "label .s.tnv -text \"New series tag\" -fg red");
 cmd(inter, "entry .s.tv -width 20 -textvariable vtag");
 cmd(inter, "pack .s.tnv .s.tv");
 
-cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .s.help -text \" Help \" -command {LsdHelp mdatares.html#create_series}");
+cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_series}");
+cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .s.i .s.ok .s.help .s.esc");
 cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
@@ -7514,10 +7512,10 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Mov.Av. Range\"");
+cmd(inter, "wm title .s \"Mov. Average Range\"");
 cmd(inter, "wm transient .s .");
 
 cmd(inter, "frame .s.o -relief groove -bd 2");
@@ -7530,9 +7528,9 @@ cmd(inter, "pack .s.o.th");
 cmd(inter, "pack .s.o");
 
 
-cmd(inter, "button .s.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -text Cancel -command {set choice 2}");
-cmd(inter, "button .s.help -text \" Help \" -command {LsdHelp mdatares.html#create_maverag}");
+cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_maverag}");
+cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .s.ok .s.help .s.esc");
 cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
@@ -7686,7 +7684,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
@@ -7723,14 +7721,14 @@ cmd(inter, "toplevel .lab");
 cmd(inter, "wm title .lab \"Saving Data\"");
 cmd(inter, "wm transient .lab . ");
 cmd(inter, "frame .lab.f -relief groove -bd 2");
-cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd Result File\" -variable typelab -value 3");
-cmd(inter, "radiobutton .lab.f.nolsd -text \"Text File\" -variable typelab -value 4");
+cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
+cmd(inter, "radiobutton .lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
 cmd(inter, "set dozip 0");
 cmd(inter, "checkbutton .lab.dozip -text \"Generate zipped file\" -variable dozip");
 
-cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
-cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
+cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .lab.f.lsd .lab.f.nolsd -anchor w");
 #ifdef LIBZ
@@ -7773,7 +7771,7 @@ cmd(inter, "frame .lab.f -relief groove -bd 2");
 cmd(inter, "label .lab.f.tit -text \"Labels to use\" -foreground red");
 
 cmd(inter, "radiobutton .lab.f.orig -text Original -variable typelab -value 1");
-cmd(inter, "radiobutton .lab.f.new -text \"New Names\" -variable typelab -value 2");
+cmd(inter, "radiobutton .lab.f.new -text \"New names\" -variable typelab -value 2");
 cmd(inter, "set newlab \"\"");
 cmd(inter, "entry .lab.f.en -textvariable newlab");
 cmd(inter, "set gp 0");
@@ -7785,13 +7783,13 @@ cmd(inter, "label .lab.d.tit -text \"Columns delimiter\" -foreground red");
 
 cmd(inter, "frame .lab.d.r");
 del=1;
-cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab Delimited\" -variable deli -value 1");
-cmd(inter, "radiobutton .lab.d.r.oth -text \"Other Delimiter\" -variable deli -value 2");
+cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
+cmd(inter, "radiobutton .lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
 cmd(inter, "set delimiter \"\"");
 cmd(inter, "entry .lab.d.r.del -textvariable delimiter");
 cmd(inter, "bind .lab.d.r.del <FocusIn> {.lab.d.r.oth invoke}");
 
-cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed Length Columns\" -variable deli -value 3");
+cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
 numcol=16;
 cmd(inter, "entry .lab.d.r.ecol -textvariable numcol");
 cmd(inter, "bind .lab.d.r.ecol <FocusIn> {.lab.d.r.col invoke}");
@@ -7802,15 +7800,15 @@ cmd(inter, "pack .lab.d.tit .lab.d.r -anchor w");
 
 cmd(inter, "frame .lab.gen -relief groove -bd 2");
 cmd(inter, "label .lab.gen.tit -text \"General Options\" -foreground red");
-cmd(inter, "checkbutton .lab.gen.fr -text \"Variables in First Row\" -variable fr");
-cmd(inter, "label .lab.gen.miss -text \"Missing Values\"");
+cmd(inter, "checkbutton .lab.gen.fr -text \"Names in first row\" -variable fr");
+cmd(inter, "label .lab.gen.miss -text \"Missing values\"");
 cmd(inter, "set misval \"n/a\"");
 cmd(inter, "entry .lab.gen.mis_val -textvariable misval");
 cmd(inter, "pack .lab.gen.tit .lab.gen.fr .lab.gen.miss .lab.gen.mis_val -anchor w");
-cmd(inter, "button .lab.help -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -text Cancel -command {set choice 2}");
+cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter ,"button .lab.ok -text Proceed -command {set choice 1}");
 cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
 *choice=0;
 cmd(inter, "focus .lab");
@@ -7838,9 +7836,9 @@ strcpy(misval,app);
 }
 
 if(type_res==4)
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Data File Name\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
+  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
 else
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Data File Name\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
+  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
 cmd(inter, msg);
 app=(char *)Tcl_GetVar(inter, "bah",0);
 strcpy(msg, app);
@@ -8125,7 +8123,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title \"Warning\" -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];

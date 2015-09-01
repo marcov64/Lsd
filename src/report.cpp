@@ -103,8 +103,10 @@ cmd(inter, "set choice [file exists $mrep]");
 cmd(inter, "wm iconify .");
 if(*choice == 1)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model Report already exists.\\nIf you do not change the file name you are going to overwrite it.\\n\" -type ok -title Warning -icon warning]");
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 0} {set choice 1}");
+  cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\\n\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
+  if ( *choice == 1 )
+	  return;
  }
 
 
@@ -113,6 +115,7 @@ if(*choice == 1)
 cmd(inter, "toplevel .w");
 cmd(inter, "wm title .w \"Report Generation\"");
 cmd(inter, "wm transient .w .");
+cmd(inter, "wm protocol .w WM_DELETE_WINDOW { }");
 cmd(inter, "label .w.l1 -text \"Report Generation\" -font {System 14 bold}");
 cmd(inter, "frame .w.f");
 cmd(inter, "label .w.f.l -text \"Model title: \"");
@@ -134,34 +137,35 @@ cmd(inter, "pack .w.l.opt");
 
 
 cmd(inter, "frame .w.b");
-cmd(inter, "button .w.b.b1 -text Ok -underline 0 -command {set choice 1}");
-cmd(inter, "button .w.b.b2 -text \"New Name\" -underline 0 -command {set res [tk_getSaveFile -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2}");
-cmd(inter, "button .w.b.b3 -text Cancel -underline 0 -command {set choice 3}");
-cmd(inter, "button .w.b.b4 -text Help -command {LsdHelp menumodel.html#createreport}");
+cmd(inter, "button .w.b.ok -width -9 -text Ok -underline 0 -command {set choice 1}");
+cmd(inter, "button .w.b.b2 -width -9 -text \"New Name\" -underline 0 -command {set res [tk_getSaveFile -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2}");
+cmd(inter, "button .w.b.help -width -9 -text Help -command {LsdHelp menumodel.html#createreport}");
+cmd(inter, "button .w.b.esc -width -9 -text Cancel -underline 0 -command {set choice 3}");
 
-cmd(inter, "pack .w.b.b1 .w.b.b2 .w.b.b3 .w.b.b4 -side left");
-cmd(inter, "bind .w <Control-o> {.w.b.b1 invoke}");
+cmd(inter, "pack .w.b.ok .w.b.b2 .w.b.help .w.b.esc -side left");
+
+cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}");
 
 
 cmd(inter, "bind .w <Control-n> {.w.b.b2 invoke}");
-cmd(inter, "bind .w <Control-c> {.w.b.b3 invoke}");
-cmd(inter, "bind .w <KeyPress-Escape> {.w.b.b3 invoke}");
+cmd(inter, "bind .w <Control-c> {.w.b.esc invoke}");
+cmd(inter, "bind .w <KeyPress-Escape> {.w.b.esc invoke}");
 
-cmd(inter, "checkbutton .w.code -text \"Include Equations' Code\" -underline 8 -variable code");
+cmd(inter, "checkbutton .w.code -text \"Include equations code\" -underline 8 -variable code");
 cmd(inter, "bind .w <Control-e> {.w.code invoke}");
-cmd(inter, "checkbutton .w.init -text \"Include Initial Values\" -underline 8 -variable init");
+cmd(inter, "checkbutton .w.init -text \"Include initial values\" -underline 8 -variable init");
 cmd(inter, "bind .w <Control-i> {.w.init invoke}");
 
 
 
 
 cmd(inter, "frame .w.s -bd 2 -relief groove");
-cmd(inter, "label .w.s.lab -text \"Extra Sections\"");
+cmd(inter, "label .w.s.lab -text \"Extra sections\"");
 cmd(inter, "frame .w.s.e1 -bd 2 -relief groove");
-cmd(inter, "label .w.s.e1.lab -text \"First Extra Section\"");
+cmd(inter, "label .w.s.e1.lab -text \"First extra section\"");
 cmd(inter, "set es1 1");
 cmd(inter, "frame .w.s.e1.c");
-cmd(inter, "checkbutton .w.s.e1.c.c -text \"Include Section 1\" -variable es1 -command {if {$es1==1} {.w.s.e1.header.tit conf -state normal; .w.s.e1.file.tit conf -state normal} {.w.s.e1.header.tit conf -state disabled; .w.s.e1.file.tit conf -state disabled}}");
+cmd(inter, "checkbutton .w.s.e1.c.c -text \"Include section 1\" -variable es1 -command {if {$es1==1} {.w.s.e1.header.tit conf -state normal; .w.s.e1.file.tit conf -state normal} {.w.s.e1.header.tit conf -state disabled; .w.s.e1.file.tit conf -state disabled}}");
 cmd(inter, "set html1 0");
 cmd(inter, "checkbutton .w.s.e1.c.h -text \"Accept HTML formatting tags\" -variable html1");
 cmd(inter, "pack .w.s.e1.c.c .w.s.e1.c.h -side left -fill x");
@@ -172,10 +176,10 @@ cmd(inter, "entry .w.s.e1.header.tit -width 50  -textvariable tit1");
 cmd(inter, "pack .w.s.e1.header.tlab .w.s.e1.header.tit -side left");
 
 cmd(inter, "frame .w.s.e1.file");
-cmd(inter, "label .w.s.e1.file.tlab -text \"File Name\"");
+cmd(inter, "label .w.s.e1.file.tlab -text \"File name\"");
 cmd(inter, "set file1 description.txt");
 cmd(inter, "entry .w.s.e1.file.tit -width 50 -textvariable file1");
-cmd(inter, "button .w.s.e1.file.new -text \"Search File\" -command {set file1 [tk_getOpenFile -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
 cmd(inter, "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
@@ -184,24 +188,24 @@ cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
 
 
 cmd(inter, "frame .w.s.e2 -bd 2 -relief groove");
-cmd(inter, "label .w.s.e2.lab -text \"Second Extra Section\"");
+cmd(inter, "label .w.s.e2.lab -text \"Second extra section\"");
 cmd(inter, "frame .w.s.e2.c");
-cmd(inter, "checkbutton .w.s.e2.c.c -text \"Include Section 2\" -variable es2 -command {if {$es2==1} {.w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal} {.w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled}}");
+cmd(inter, "checkbutton .w.s.e2.c.c -text \"Include section 2\" -variable es2 -command {if {$es2==1} {.w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal} {.w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled}}");
 cmd(inter, "set html2 0");
 cmd(inter, "checkbutton .w.s.e2.c.h -text \"Accept HTML formatting tags\" -variable html2");
 cmd(inter, "pack .w.s.e2.c.c .w.s.e2.c.h -side left -fill x");
 
 cmd(inter, "frame .w.s.e2.header");
-cmd(inter, "label .w.s.e2.header.tlab -text \"Title for Section 2 \"");
+cmd(inter, "label .w.s.e2.header.tlab -text \"Title for section 2 \"");
 cmd(inter, "set tit2 Comments");
 cmd(inter, "entry .w.s.e2.header.tit -width 50 -state disabled -textvariable tit2");
 cmd(inter, "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left");
 
 cmd(inter, "frame .w.s.e2.file");
-cmd(inter, "label .w.s.e2.file.tlab -text \"File Name\"");
+cmd(inter, "label .w.s.e2.file.tlab -text \"File name\"");
 cmd(inter, "set file2 comments.txt");
 cmd(inter, "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2");
-cmd(inter, "button .w.s.e2.file.new -text \"Search File\" -command {set file2 [tk_getOpenFile -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
 cmd(inter, "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w ");
@@ -217,7 +221,7 @@ Tcl_LinkVar(inter, "es2", (char *) &es2, TCL_LINK_INT);
 cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
 
 cmd(inter, "pack .w.l1 .w.f .w.l .w.s .w.b");
-cmd(inter, "focus -force .w.b.b1");
+cmd(inter, "focus -force .w.b.ok");
 sprintf(msg, "set code %d", code);
 cmd(inter, msg);
 sprintf(msg, "set init %d", init);
@@ -226,9 +230,9 @@ cmd(inter, msg);
 Tcl_LinkVar(inter, "code", (char *) &code, TCL_LINK_INT);
 Tcl_LinkVar(inter, "init", (char *) &init, TCL_LINK_INT);
 
-cmd(inter, "focus -force .w.b.b1");
-cmd(inter, "bind .w <Return> {.w.b.b1 invoke}");
-cmd(inter, "bind .w <Escape> {.w.b.b3 invoke}");
+cmd(inter, "focus -force .w.b.ok");
+cmd(inter, "bind .w <Return> {.w.b.ok invoke}");
+cmd(inter, "bind .w <Escape> {.w.b.esc invoke}");
 
 here_create_report:
   while(*choice==0)
@@ -271,9 +275,9 @@ if( (ffun=fopen(equation_name,"r"))==NULL)
   cmd(inter, "label .warn_eq.lab3 -text \"not found\"");
   cmd(inter, "pack .warn_eq.lab1 .warn_eq.lab2 .warn_eq.lab3");
   cmd(inter, "frame .warn_eq.b");
-  cmd(inter, "button .warn_eq.b.s -text Search -command {set res [file tail [tk_getOpenFile -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]; set choice 1}");
-  cmd(inter, "button .warn_eq.b.c -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .warn_eq.b.s .warn_eq.b.c -side left");
+  cmd(inter, "button .warn_eq.b.s -width -9 -text Search -command {set res [file tail [tk_getOpenFile -title \"Load Equation File\" -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]; set choice 1}");
+  cmd(inter, "button .warn_eq.b.esc -width -9 -text Cancel -command {set choice 2}");
+  cmd(inter, "pack .warn_eq.b.s .warn_eq.b.esc -side left");
   cmd(inter, "pack .warn_eq.b");
   while(*choice==0)
    Tcl_DoOneEvent(0);
@@ -885,9 +889,9 @@ if(num==0)
  fprintf(frep, "(no Variables)");
 }
 if(flag_all==1) //initial listing
- fprintf(frep, "<BR><BR><I><U>List of Parameters</I></U>: &nbsp; <BR>\n");
+ fprintf(frep, "<BR><BR><I><U>List of parameters</I></U>: &nbsp; <BR>\n");
 else
- fprintf(frep, "<BR><I>List of Parameters:</I> &nbsp;");
+ fprintf(frep, "<BR><I>List of parameters:</I> &nbsp;");
 
 cmd(inter, "lappend rawlist"); //create the list if not existed
 cmd(inter, "unset rawlist"); //empty the list
@@ -917,7 +921,7 @@ for(i=0; i<num; i++)
  }
 
 if(num==0)
- fprintf(frep, "(no Parameters)");
+ fprintf(frep, "(no parameters)");
 else
  cmd(inter, "unset app");
 }
@@ -990,7 +994,7 @@ create_table_init(r);
 
 fprintf(frep, "<HR WIDTH=\"100%%\">");
 count=0;
-fprintf(frep, "<BR><A NAME=\"_INITIALVALUES_\"><H1>Initial Values</I></H1></A><BR>\n");
+fprintf(frep, "<BR><A NAME=\"_INITIALVALUES_\"><H1>Initial values</I></H1></A><BR>\n");
 fprintf(frep, "<I><U>Object Structure</I></U><BR>\n");
 
 write_str(r, frep, count, "_i_");
@@ -1273,7 +1277,7 @@ f=fopen(msg,"w");
 fprintf(f, "<html> <head> </head > <body bgcolor=\"#D6A9FE\"> <center>");
 fprintf(f, "<a href=\"body_%s#_DESCRIPTION_\" target=body>Description</a> &nbsp", t);
 fprintf(f, "<a href=\"body_%s#_MODEL_STRUCTURE_\" target=body>Summary</a> &nbsp", t);
-fprintf(f, "<a href=\"body_%s#_INITIALVALUES_\" target=body>Initial Values</a> &nbsp", t);
+fprintf(f, "<a href=\"body_%s#_INITIALVALUES_\" target=body>Initial values</a> &nbsp", t);
 fprintf(f, "<a href=\"body_%s#_DETAILS_\" target=body>Details</a> &nbsp", t);
 
 fprintf(f, "</body> </html>");

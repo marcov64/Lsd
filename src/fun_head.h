@@ -140,7 +140,7 @@ FILE *f;
 
 #define MODELEND sprintf(msg, "\nFunction for %s not found", label); \
 plog(msg); \
-sprintf(msg, "tk_messageBox -type ok -icon error -message \"Error trying to compute variable '%s': Equation not found.\n\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly.\n\nCheck the Lsd help.\"", label, label); \
+sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error trying to compute variable '%s': equation not found.\n\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly.\n\nCheck the Lsd help.\"", label, label); \
 cmd(inter, msg); \
 quit=2; \
 return -1; \

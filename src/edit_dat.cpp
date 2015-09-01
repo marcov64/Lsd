@@ -106,8 +106,8 @@ void set_window_size(void);
 int set_focus;
 #ifdef DUAL_MONITOR
 // Main window constraints
-char widthDE[]="800";			// horizontal size in pixels
-char heightDE[]="700";			// vertical size in pixels
+char widthDE[]="900";			// horizontal size in pixels
+char heightDE[]="600";			// vertical size in pixels
 #endif
 
 /****************************************************
@@ -130,7 +130,7 @@ cmd(inter, "bind . <KeyPress-Return> {}");
 cmd(inter, "bind . <KeyPress-Escape> {.boh.ok invoke}");
 *choice=0;
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
-cmd(inter, "wm title . \"Lsd - Data Editor\"");
+cmd(inter, "wm title . \"Lsd Data Editor\"");
 //cmd(inter, "wm resizable . 0 0");
 #ifdef DUAL_MONITOR
 Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
@@ -153,7 +153,7 @@ ch1[17]=0;
 sprintf(ch, "label $w.tit_empty -width 36 -relief raised -text \"Object %-17s \" -borderwidth 4", ch1);
 cmd(inter, ch);
 cmd(inter, "bind $w.tit_empty <Button-1> {set choice 4}");
-sprintf(ch,"bind $w.tit_empty <Enter> {set msg \"Click to edit Objects' Number\"}");
+sprintf(ch,"bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}");
 cmd(inter, ch);
 cmd(inter, "bind $w.tit_empty <Leave> {set msg \"\"}");
 cmd(inter, "$w window create end -window $w.tit_empty");
@@ -180,8 +180,8 @@ cmd(inter, "label .msg -textvariable msg -anchor w");
 cmd(inter, "pack .msg");
 
 cmd(inter, "frame .boh");
-cmd(inter, "button .boh.ok -text Ok -command {set choice 1}");
-cmd(inter, "button .boh.help -text Help -command {LsdHelp mdatainit.html}");
+cmd(inter, "button .boh.ok -width -9 -text Done -command {set choice 1}");
+cmd(inter, "button .boh.help -width -9 -text Help -command {LsdHelp mdatainit.html}");
 cmd(inter, "pack .boh.ok .boh.help -side left");
 cmd(inter, "pack .boh");
 
@@ -388,7 +388,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 		cmd(inter, ch);
 		sprintf(ch, "bind $w.tit_t%s <Leave> {set msg \" \"}", cv1->label);
 		cmd(inter, ch);
-	sprintf(ch, "button $w.b%s_%d -width 9 -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j,cv1->label );
+	sprintf(ch, "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j,cv1->label );
 	cmd(inter, ch);
 	sprintf(ch, "$w window create end -window $w.b%s_%d", cv1->label, j);
 		 cmd(inter, ch);
@@ -408,7 +408,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 		 cmd(inter, ch);
 		 sprintf(ch, "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j);
 		 cmd(inter, ch);
-	sprintf(ch, "button $w.b%s_%d -width 9 -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j,cv1->label, j);
+	sprintf(ch, "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j,cv1->label, j);
 	cmd(inter, ch);
 	sprintf(ch, "$w window create end -window $w.b%s_%d", cv1->label, j);
        cmd(inter, ch);
@@ -437,7 +437,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
        {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%sp;$w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
         cmd(inter, ch);
        }
-      sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: Param %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
+      sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: Param. %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
       cmd(inter, ch);
       sprintf(ch, "bind $w.c%d_v%sp <FocusOut> {set msg \" \"}", i, cv->label);
       cmd(inter, ch);

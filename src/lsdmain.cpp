@@ -377,7 +377,7 @@ Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}");
 if(debug_flag==1)
  {
- cmd(inter, "tk_messageBox -icon error -type ok -message \"The directory containing the model is:\n[pwd]\n It appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory. \"");
+ cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The directory containing the model is:\n[pwd]\nIt appears to include spaces.\\n\\nThis will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory. \"");
  exit(1);
  
  }
@@ -387,7 +387,7 @@ cmd(inter, "set RootLsd [pwd]");
 lsdroot=getenv("LSDROOT");
 if(lsdroot==NULL)
  {
- cmd(inter, "tk_messageBox -icon error -type ok -message \"LSDROOT not set. Program aborted.\"");
+ cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set.\\n\\nProgram aborted.\"");
  exit(1);
  }
 sprintf(msg, "set RootLsd \"%s\"",lsdroot);
@@ -416,7 +416,7 @@ if(done==1)
  }
 else
  { 
-  cmd(inter, "tk_messageBox -title Warning -type ok -message \"The system could not locate the LMM system options.\\nIt may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
+  cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"The system could not locate the LMM system options.\\n\\nIt may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
  }
 
 Tcl_UnlinkVar(inter, "done");
@@ -650,7 +650,7 @@ if(no_more_memory==1)
  fclose(f);
  f=NULL;
  root->load_param(struct_file, 1, f);
-  sprintf(msg, "tk_messageBox -type ok -icon warning -title \"Not enough memory\" -message \"Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\"", series_saved, max_step);
+  sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"Not enough memory: too many series saved for the memory available.\\n\\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\"", series_saved, max_step);
  cmd(inter, msg);
 #else
  printf("Not enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.", series_saved, max_step);
@@ -821,7 +821,7 @@ cmd(inter, "if {[info exists activeplot] == 1} {if {[winfo exists $activeplot] =
 #endif
 
 close_sim();
-plog("\nResetting Variables with the end value. Wait... ");
+plog("\nSetting variables with the end value. Wait... ");
 
 
 #ifndef NO_WINDOW 
@@ -1030,9 +1030,9 @@ for(var=root->v; var!=NULL; var=var->next)
 		plog(msg);
 		plog("Use the Data Editor to set its values\n");
      if(var->param==1)
-       sprintf(msg, "tk_messageBox -type ok -icon warning -title \"Data not loaded\" -message \"The simulation cannot start because parameter:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu Data-Init.Values.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because parameter:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
      else
-       sprintf(msg, "tk_messageBox -type ok -icon warning -title \"Data not loaded\" -message \"The simulation cannot start because a lagged value for variable:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu Data-Init.Values.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because a lagged value for variable:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
      #ifndef NO_WINDOW   
      cmd(inter, msg);  
      #endif
@@ -1331,12 +1331,12 @@ cmd(inter, "bind .log <KeyPress-Escape> {focus -force .}");
 
 cmd(inter, "set w .log.but");
 cmd(inter, "frame $w");
-cmd(inter, "button $w.stop -text Stop -command {set done_in 1}");
-cmd(inter, "button $w.speed -text Fast -command {set done_in 2}");
-cmd(inter, "button $w.obs -text Observe -command {set done_in 4}");
-cmd(inter, "button $w.deb -text Debug -command {set done_in 3}");
-cmd(inter, "button $w.help -text Help -command {LsdHelp Log.html}");
-cmd(inter, "button $w.copy -text Copy -command {tk_textCopy .log.text.text}");
+cmd(inter, "button $w.stop -width -9 -text Stop -command {set done_in 1}");
+cmd(inter, "button $w.speed -width -9 -text Fast -command {set done_in 2}");
+cmd(inter, "button $w.obs -width -9 -text Observe -command {set done_in 4}");
+cmd(inter, "button $w.deb -width -9 -text Debug -command {set done_in 3}");
+cmd(inter, "button $w.help -width -9 -text Help -command {LsdHelp Log.html}");
+cmd(inter, "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text}");
 
 cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -side left");
 cmd(inter, "pack $w");
@@ -1490,7 +1490,7 @@ void signal_handler(int signum)
 	printf("FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
 #else
 	char msg2[1000];
-	sprintf(msg2, "tk_messageBox -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'gdb debug' option.\n\nLsd is aborting...\"", msg);
+	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debug' menu option.\n\nLsd is aborting...\"", msg);
 	cmd(inter, msg2);
 #endif
 

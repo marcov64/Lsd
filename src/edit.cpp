@@ -112,7 +112,7 @@ Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "result", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "max_depth", (char *) &max_depth, TCL_LINK_INT);
-cmd(inter, "wm title . \"Lsd - Objects' Number Editor\"");
+cmd(inter, "wm title . \"Lsd Object Number Editor\"");
 
 strcpy(lab_view,"");
 strcpy(tag_view,"");
@@ -143,12 +143,12 @@ while(*choice==0)
 
   cmd(inter, "label .f.tmd -text \" Show hierarchical level: \"");
   cmd(inter, "entry .f.emd -textvariable max_depth -width 5");
-  cmd(inter, "button .f.ud -text Update -command {set choice 4}");
+  cmd(inter, "button .f.ud -width -9 -text Update -command {set choice 4}");
   cmd(inter, "pack .f.tmd .f.emd .f.ud -side left");
 
   cmd(inter, "frame .fb");
-  cmd(inter, "button .fb.ok -text Exit -command {set choice 1; set result -1}");
-  cmd(inter, "button .fb.help -text Help -command {LsdHelp mdataobjn.html}");
+  cmd(inter, "button .fb.ok -width -9 -text Done -command {set choice 1; set result -1}");
+  cmd(inter, "button .fb.help -width -9 -text Help -command {LsdHelp mdataobjn.html}");
   cmd(inter, "pack .fb.ok .fb.help -side left");
 
   cmd(inter, "pack .msglab .f .fb");
@@ -283,7 +283,7 @@ for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
 
 	 sprintf(ch,"bind $t.lab$i <Button-1> {set obj_name %s; set choice 3}", c->label);
 	 cmd(inter, ch);
-	 sprintf(ch,"bind $t.lab$i <Enter> {set msg \"Click here to edit initial Values for %s\"}", c->label);
+	 sprintf(ch,"bind $t.lab$i <Enter> {set msg \"Click here to edit initial values for %s\"}", c->label);
 	 cmd(inter, ch);
 	 cmd(inter, "bind $t.lab$i <Leave> {set msg \"\"}");
    Tcl_DoOneEvent(0);
@@ -322,7 +322,7 @@ cmd(inter, "toplevel .b");
 cmd(inter, "wm geometry .b +130+100");
 cmd(inter, "set conf 0");
 cmd(inter, "wm transient .b .");
-cmd(inter, "wm title .b \"Select instance number\"");
+cmd(inter, "wm title .b \"Instance Number\"");
 sprintf(msg, "label .b.l -anchor w -justify left -text \"Determine the sequential number of the instance of '%s' \\nby setting the sequential number of the containing objects.\\nPressing 'Compute' will give the sequential number.\\npressing 'Exit' will copy the number and exit.\"", c->label);
 cmd(inter, msg);
 cmd(inter, "frame .b.f");
@@ -359,11 +359,11 @@ for(j--, cur=c; cur->up!=NULL; cur=cur->up, j--)
 sprintf(msg, "label .b.res -relief groove -bd 4 -text \"Instance chosen is num: %d\"",i);
 cmd(inter, msg);
 res=i;
-cmd(inter, "button .b.com -text \" Compute \" -command {set cconf 1; set choice 2}");
+cmd(inter, "button .b.com -width -9 -text Compute -command {set cconf 1; set choice 2}");
 cmd(inter, "bind .b.com <Return> {.b.com invoke}");
 cmd(inter, "bind .b <Escape> {.b.ok invoke}");
-cmd(inter, "button .b.ok -text \" Exit \" -command {set cconf 1; set choice 1}");
-cmd(inter, "button .b.help -text Help -command {LsdHelp mdataobjn.html#SelectionInstance}");
+cmd(inter, "button .b.ok -width -9 -text Quit -command {set cconf 1; set choice 1}");
+cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp mdataobjn.html#SelectionInstance}");
 cmd(inter, "pack .b.l .b.f .b.res .b.com .b.ok .b.help");
 
 here_ccompute:
@@ -439,7 +439,7 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm geometry .a +100+100");
 cmd(inter, "set conf 0");
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Change number of Objects\"");
+cmd(inter, "wm title .a \"Number of Objects\"");
 
 
 *choice=0;
@@ -449,7 +449,7 @@ sprintf(msg, "label .a.l -text \" Number of %s in %s %s \"", c->label, c->up->la
 cmd(inter, msg);
 cmd(inter, "entry .a.e -textvariable num -width 10");
 cmd(inter, "bind .a.e <KeyPress-Return> {.a.ok invoke}");
-cmd(inter, "button .a.ok -text Ok -command {set conf 1; set choice 1}");
+cmd(inter, "button .a.ok -width -9 -text Ok -command {set conf 1; set choice 1}");
 
 cmd(inter, "frame .a.ef -relief groove -bd 2");
 cmd(inter, "label .a.ef.l -text \"Groups to be modified\"");
@@ -498,14 +498,14 @@ cmd(inter, "frame .a.cp -relief groove -bd 2");
 cmd(inter, "label .a.cp.l -text \"Copy from instance: \"");
 cmd(inter, "set cfrom 1");
 cmd(inter, "entry .a.cp.e -textvariable cfrom -width 10");
-cmd(inter, "button .a.cp.compute -text Compute -command {set conf 1; set choice 3}");
+cmd(inter, "button .a.cp.compute -width -9 -text Compute -command {set conf 1; set choice 3}");
 cmd(inter, "pack .a.cp.l .a.cp.e .a.cp.compute -side left");
  cmd(inter, ".a.e selection range 0 end");
- cmd(inter, "button .a.can -text Cancel -command {set conf 1; set choice 2}");
- cmd(inter, "button .a.help -text Help -command {LsdHelp mdataobjn.html#modifyNumberObj}");
+ cmd(inter, "button .a.help -width -9 -text Help -command {LsdHelp mdataobjn.html#modifyNumberObj}");
+ cmd(inter, "button .a.can -width -9 -text Cancel -command {set conf 1; set choice 2}");
  cmd(inter, "bind .a <KeyPress-Return> {set choice 1}");
  cmd(inter, "bind .a <KeyPress-Escape> {set choice 2}");
-		 cmd(inter, "pack .a.l .a.e .a.cp .a.ef .a.ok .a.can .a.help ");
+		 cmd(inter, "pack .a.l .a.e .a.cp .a.ef .a.ok .a.help .a.can");
 
 		 cmd(inter, "focus .a.e");
  cmd(inter, "bind .a <Destroy> {set conf 1; set choice 2}");
@@ -638,10 +638,10 @@ cmd(inter, "toplevel .a");
 cmd(inter, "wm geometry .a +100+100");
 cmd(inter, "set conf 0");
 cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Remove Objects\"");
+cmd(inter, "wm title .a \"Delete Objects\"");
 
 
-sprintf(ch, "label .a.txt1 -text \" Do you want to eliminate the last \"");
+sprintf(ch, "label .a.txt1 -text \" Do you want to delete the last \"");
 cmd(inter, ch);
 
 sprintf(ch, "label .a.txt2 -text %d", actual-desired);
@@ -649,14 +649,14 @@ cmd(inter, ch);
 sprintf(ch, "label .a.txt3 -text \"or you want to choose them?\"");
 cmd(inter, ch);
 cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.last -text Last -command {set choice 1}");
-cmd(inter, "button .a.b.choose -text Choose -command {set choice 2}");
-cmd(inter, "button .a.cancel -text Cancel -command {set choice 3}");
-cmd(inter, "button .a.help -text Help -command {LsdHelp mdataobjn.html#pick_remove}");
+cmd(inter, "button .a.b.last -width -9 -text Last -command {set choice 1}");
+cmd(inter, "button .a.b.choose -width -9 -text Choose -command {set choice 2}");
+cmd(inter, "button .a.help -width -9 -text Help -command {LsdHelp mdataobjn.html#pick_remove}");
+cmd(inter, "button .a.can -width -9 -text Cancel -command {set choice 3}");
 cmd(inter, "pack .a.b.last .a.b.choose -side left");
 
-cmd(inter, "pack .a.txt1 .a.txt2 .a.txt3 .a.b .a.help .a.cancel");
-cmd(inter, "bind .a <Destroy> {.a.cancel invoke}");
+cmd(inter, "pack .a.txt1 .a.txt2 .a.txt3 .a.b .a.help .a.can");
+cmd(inter, "bind .a <Destroy> {.a.can invoke}");
 cmd(inter, "bind .log <Destroy> {set choice 35}");
 
 while(*choice==0)
@@ -688,20 +688,20 @@ else
   cmd(inter, "wm geometry .a +100+100");
   cmd(inter, "set conf 0");
   cmd(inter, "wm transient .a .");
-  cmd(inter, "wm title .a \"Pick obj. to eliminate\"");
+  cmd(inter, "wm title .a \"Delete Objects\"");
 
   sprintf(ch, "label .a.tit -text \"Insert elements of %s to delete\"", (*r)->label);
   cmd(inter, ch);
 	 cmd(inter, "label .a.tit1 -text \"$i' element\"");
     cmd(inter, "entry .a.e -width 6 -textvariable val");
     cmd(inter, "bind .a.e <KeyPress-Return> {.a.ok invoke}");
-	 cmd(inter, "button .a.ok -text Ok -command {set choice 1}");
-    cmd(inter, "button .a.canc -text Cancel -command {set choice 2}");
-    cmd(inter, "button .a.help -text Help -command {LsdHelp mdataobjn.html#pick_remove}");
-	 cmd(inter, "pack .a.tit .a.tit1 .a.e .a.ok .a.help .a.canc");
+	 cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 1}");
+    cmd(inter, "button .a.help -width -9 -text Help -command {LsdHelp mdataobjn.html#pick_remove}");
+    cmd(inter, "button .a.can -width -9 -text Cancel -command {set choice 2}");
+	 cmd(inter, "pack .a.tit .a.tit1 .a.e .a.ok .a.help .a.can");
     cmd(inter, "focus .a.e");
     cmd(inter, ".a.e selection range 0 end");
-    cmd(inter, "bind .a <Destroy> {.a.canc invoke}");
+    cmd(inter, "bind .a <Destroy> {.a.can invoke}");
     cmd(inter, "bind .log <Destroy> {set choice 35}");
   
   last=0;

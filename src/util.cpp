@@ -1250,7 +1250,7 @@ double betacdf( double alpha, double beta, double x )
 void error(char *m)
 {
 char app[1100];
-sprintf(app, "tk_messageBox -type ok -title \"Lsd error\" -message \"%s\"",m );
+sprintf(app, "tk_messageBox -type ok -title Error -icon error -message \"%s\"",m );
 #ifndef NO_WINDOW
 cmd(inter, app);
 #else
@@ -1729,15 +1729,15 @@ if(i==1)
  sprintf(msg, "$w.f.text insert end \"%s\"",cur->text);
  cmd(inter, msg);
  cmd(inter, "frame $w.b");
- sprintf(msg, "button $w.b.close -text Close -command {destroy .desc_%s}",lab);
+ sprintf(msg, "button $w.b.close -width -9 -text Close -command {destroy .desc_%s}",lab);
  cmd(inter, msg); 
- sprintf(msg, "button $w.b.save -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}",lab, lab, lab);
+ sprintf(msg, "button $w.b.save -width -9 -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}",lab, lab, lab);
  cmd(inter, msg); 
- sprintf(msg, "button $w.b.eq -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}",lab, lab);
+ sprintf(msg, "button $w.b.eq -width -9 -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}",lab, lab);
  cmd(inter, msg); 
- sprintf(msg, "button $w.b.us -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}",lab, lab);
+ sprintf(msg, "button $w.b.us -width -9 -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}",lab, lab);
  cmd(inter, msg); 
- sprintf(msg, "button $w.b.help -text Help -command {LsdHelp equation.html; set raise_description 1}");
+ sprintf(msg, "button $w.b.help -width -9 -text Help -command {LsdHelp equation.html; set raise_description 1}");
  cmd(inter, msg); 
 
 
@@ -1901,13 +1901,13 @@ cmd(inter, "if {[winfo exists .lat]==1} {destroy .lat} {}");
 //create the window with the lattice, roughly 600 pixels as maximum dimension
 cmd(inter, "toplevel .lat");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .lat @$RootLsd/$LsdSrc/lsd.xbm} {}");
-sprintf(msg, "wm title .lat \"Lsd lattice (%.0lf x %.0lf)\"",nrow, ncol);
+sprintf(msg, "wm title .lat \"Lsd Lattice (%.0lf x %.0lf)\"",nrow, ncol);
 cmd(inter, msg);
 
 cmd(inter, "set lat_update 1");
 cmd(inter, "bind .lat <1> {if {$lat_update == 1 } {set lat_update 0; } {set lat_update 1} }");
-cmd(inter, "bind .lat <3> {set a [tk_getSaveFile ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
-cmd(inter, "bind .lat <2> {set a [tk_getSaveFile ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
+cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
+cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 
 //sprintf(msg, "canvas .lat.c -height %d -width %d -bg $c%d", (int)(dim*nrow), (int)(dim*ncol),init_color);
 if(init_color==1001)
@@ -2059,7 +2059,7 @@ char lab[200];
 f=fopen("makefile", "r");
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon warning -type ok -default ok -message \"File 'makefile' not found.\\nCannot upload the equation file.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nCannot upload the equation file.\"");
   return;
  }
 fscanf(f, "%s", lab);
@@ -2067,7 +2067,7 @@ while(strncmp(lab, "FUN=", 4) && fscanf(f, "%s", lab)!=EOF);
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"Makefile corrupted. Check Model Compilation options.\"");
+  cmd(inter, "tk_messageBox -type ok -title -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in LMM menu Model.\"");
   return;
  }
 

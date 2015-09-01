@@ -147,7 +147,7 @@ Tcl_LinkVar(inter, "value", (char *) &app_res, TCL_LINK_DOUBLE);
 
 if(lab!=NULL)
 {
-cmd(inter, "wm title . \"Lsd - Debugger\"");
+cmd(inter, "wm title . \"Lsd Debugger\"");
 cmd(inter, "frame .v -border 6");
 strcpy(ch,"label .v.name -width 50 -text ");
 if(interact_flag==0)
@@ -171,21 +171,21 @@ cmd(inter, "pack .v.name .v.val .v.time -side left");
 
 }
 else
- cmd(inter, "wm title . \"Lsd - Instance Data Browser\"");
+ cmd(inter, "wm title . \"Lsd Instance Data Browser\"");
 cmd(inter, "frame .b -border 6");
 cmd(inter, "frame .b.move");
 cmd(inter, "frame .b.act");
 
 if(lab!=NULL)
 {
-cmd(inter, "button .b.act.ok -text Step -command {set choice 1; set done_in 3} -underline 0");
-cmd(inter, "button .b.act.prn_stck -text \"Print Stack\" -command {set choice 13}");
-cmd(inter, "button .b.act.prn_v -text \"v\\\[...\\]\" -command {set choice 15}");
+cmd(inter, "button .b.act.ok -width -9 -text Step -command {set choice 1; set done_in 3} -underline 0");
+cmd(inter, "button .b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}");
+cmd(inter, "button .b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}");
 
-cmd(inter, "button .b.act.run -text Run -command {set choice 2} -underline 0");
-cmd(inter, "button .b.act.until -text Until -command {set choice 16} -underline 3");
-cmd(inter, "button .b.act.exit -text Quit -command {set choice 7} -underline 0");
-cmd(inter, "button .b.act.an -text Analysis -command {set choice 11} -underline 0");
+cmd(inter, "button .b.act.run -width -9 -text Run -command {set choice 2} -underline 0");
+cmd(inter, "button .b.act.until -width -9 -text Until -command {set choice 16} -underline 3");
+cmd(inter, "button .b.act.exit -width -9 -text Quit -command {set choice 7} -underline 0");
+cmd(inter, "button .b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0");
 
 sprintf(msg, "set stack_flag %d",stackinfo_flag);
 cmd(inter, msg);
@@ -193,25 +193,25 @@ cmd(inter, "frame .b.act.stack");
 cmd(inter, "label .b.act.stack.l -text \"Print stack level: \"");
 cmd(inter, "entry .b.act.stack.e -width 3 -relief sunken -textvariable stack_flag");
 cmd(inter, "pack .b.act.stack.l .b.act.stack.e -side left");
-//cmd(inter, "checkbutton .b.act.stack -text \"Stack Info\" -variable stack_flag");
+//cmd(inter, "checkbutton .b.act.stack -text \"Stack info\" -variable stack_flag");
 cmd(inter, "pack .b.act.stack .b.act.prn_stck .b.act.prn_v .b.act.ok .b.act.until .b.act.run .b.act.exit .b.act.an -side left");
 }
 else
 {
-cmd(inter, "button .b.act.exit -text \"Quit Data Browse\" -command {set choice 7} -underline 0");
+cmd(inter, "button .b.act.exit -width -9 -text \"Quit\" -command {set choice 7} -underline 0");
 cmd(inter, "pack .b.act.exit");
 }
 
-cmd(inter, "button .b.move.up -text \"Up\" -command {set choice 3} -underline 0");
-cmd(inter, "button .b.move.broth -text \"Next\" -command {set choice 4} -underline 0");
-cmd(inter, "button .b.move.hypern -text \"Next Type\" -command {set choice 5} -underline 5");
-cmd(inter, "button .b.move.last -text \"Last\" -command {set choice 14} -underline 0");
-cmd(inter, "button .b.move.down -text \"Down\" -command {set choice 6} -underline 0");
-cmd(inter, "button .b.move.prev -text \"Prev.\" -command {set choice 12} -underline 0");
-cmd(inter, "button .b.move.call -text \"Caller\" -command {set choice 9} -underline 0");
-cmd(inter, "button .b.move.hook -text \"Hook\" -command {set choice 21} -underline 0");
-cmd(inter, "button .b.move.net -text \"Network\" -command {set choice 22} -underline 3");
-cmd(inter, "button .b.move.search -text \"Search for\" -command {set choice 10} -underline 7");
+cmd(inter, "button .b.move.up -width -9 -text \"Up\" -command {set choice 3} -underline 0");
+cmd(inter, "button .b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0");
+cmd(inter, "button .b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5");
+cmd(inter, "button .b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0");
+cmd(inter, "button .b.move.down -width -9 -text \"Down\" -command {set choice 6} -underline 0");
+cmd(inter, "button .b.move.prev -width -9 -text \"Prev.\" -command {set choice 12} -underline 0");
+cmd(inter, "button .b.move.call -width -9 -text \"Caller\" -command {set choice 9} -underline 0");
+cmd(inter, "button .b.move.hook -width -9 -text \"Hook\" -command {set choice 21} -underline 0");
+cmd(inter, "button .b.move.net -width -9 -text \"Network\" -command {set choice 22} -underline 3");
+cmd(inter, "button .b.move.search -width -9 -text \"Search\" -command {set choice 10} -underline 7");
 
 cmd(inter, "pack .b.move.up .b.move.broth .b.move.hypern .b.move.last .b.move.down .b.move.prev .b.move.call .b.move.hook .b.move.net .b.move.search -side left");
 cmd(inter, "pack .b.act .b.move -side top");
@@ -415,7 +415,7 @@ case 22:
 	cmd(inter, "pack .a.l6 -anchor w");
 	cmd(inter, "text .a.t -width 15 -yscrollcommand \".a.yscroll set\" -wrap word");
 	cmd(inter, "scrollbar .a.yscroll -command \".a.t yview\"");
-	cmd(inter, "button .a.c -text Close -command {destroy .a}"); 
+	cmd(inter, "button .a.c -width -9 -text Close -command {destroy .a}"); 
 	cmd(inter, "pack .a.yscroll -side right -fill y");
 	cmd(inter, "pack .a.t -expand yes -fill both");
 	cmd(inter, "pack .a.c");
@@ -491,13 +491,13 @@ Tcl_LinkVar(inter, "condition", (char *) &cond, TCL_LINK_INT);
 cond=1;
 choice=0;
 i=1;
-cmd(inter, "label .l1 -text \"Search for Obj. containing Var.\"");
+cmd(inter, "label .l1 -text \"Search for obj. containing var.\"");
 //cmd(inter, "set en \"\"");
 cmd(inter, "entry .e1 -width 10 -relief sunken -textvariable en");
 cmd(inter, "label .l2 -text \"with value\"");
 cmd(inter, "entry .e2 -width 10 -relief sunken -textvariable value_search");
-cmd(inter, "button .ok -text Ok -command {set choice 1}");
-cmd(inter, "button .esc -text Cancel -command {set choice 2}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "frame .cond");
 cmd(inter, "radiobutton .cond.eq -text \" = \" -variable condition -value 1");
@@ -663,12 +663,12 @@ choice=0;
 cv=r->search_var(NULL, ch1);
 i=cv->last_update;
 count=(cv->debug=='d'?1:0);
-cmd(inter,"button .ok -text Done -command {set choice 1}");
-cmd(inter, "button .cond -text \"Set Conditional Break\" -command {set choice 7}");
-cmd(inter, "button .eq -text Equation -command {set choice 8}");
-cmd(inter, "button .help -text Help -command {LsdHelp debug.html#content}");
+cmd(inter,"button .ok -width -9 -text Done -command {set choice 1}");
+cmd(inter, "button .eq -width -9 -text Equation -command {set choice 8}");
 if(cv->param==0 || cv->param==2)
- cmd(inter, "button .exec -text \"Execute\" -command {set choice 9}");
+ cmd(inter, "button .exec -width -9 -text \"Execute\" -command {set choice 9}");
+cmd(inter, "button .cond -width -9 -text \"Set Conditional Break\" -command {set choice 7}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp debug.html#content}");
 cmd(inter, "frame .past");
 cmd(inter, "frame .past.tit");
 cmd(inter, "label .past.tit.lab -text \"Values of: $res\"");
@@ -700,7 +700,7 @@ for(i=0; i<cv->num_lag+1; i++)
     cmd(inter, "label .past.l$i.n$i -text \"Value: \"");
   cmd(inter, "entry .past.l$i.e$i -width 10 -textvariable val$i");
   
-  sprintf(msg, "button .past.l$i.sa -text \"Set All\" -command {set sa %i; set choice 10}", i);
+  sprintf(msg, "button .past.l$i.sa -width -9 -text \"Set All\" -command {set sa %i; set choice 10}", i);
   cmd(inter, msg);
   cmd(inter, "pack .past.l$i.n$i .past.l$i.e$i .past.l$i.sa -side left");
   cmd(inter, "pack .past.l$i");
@@ -801,9 +801,9 @@ break;
 case 15:
 cmd(inter, "set a [winfo exists .a]");
 cmd(inter, "if { $a==1} {destroy .a} {}");
-//cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm geom .a -0+0; wm title .a \"Equation Intermediate Values\"; raise .a");
+//cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -width -9 -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm geom .a -0+0; wm title .a \"Equation Intermediate Values\"; raise .a");
 
-cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm title .a \"Equation Intermediate Values\"; wm transient .a .; raise .a");
+cmd(inter, "toplevel .a; text .a.t -width 20 -yscrollcommand \".a.yscroll set\" -wrap word; scrollbar .a.yscroll -command \".a.t yview\"; button .a.c -text -width -9 Close -command {destroy .a}; pack .a.yscroll -side right -fill y; pack .a.t -expand yes -fill both; pack .a.c; wm title .a \"Equation Intermediate Values\"; wm transient .a .; raise .a");
 
 cmd(inter, ".a.t tag configure v -foreground red");
 //cmd(inter, "align .a .");
@@ -829,8 +829,8 @@ sprintf(msg, "set when_debug %d",t+1);
 cmd(inter, msg);
 cmd(inter, "entry .val -width 10 -relief sunken -textvariable when_debug");
 cmd(inter, ".val selection range 0 end");
-cmd(inter, "button .ok -text Ok -command {set choice 1}");
-cmd(inter, "button .help -text Help -command {LsdHelp debug.html#until}");
+cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .help -width -9 -text Help -command {LsdHelp debug.html#until}");
 cmd(inter, "pack .l .val .ok .help");
 cmd(inter, "bind . <KeyPress-Return> {set choice 1}");
 
@@ -868,7 +868,7 @@ cmd(inter, msg);
 cmd(inter, "set choice [file exists $name_rep]");
 
 cmd(inter, "if {$choice == 1} {LsdHtml $name_rep} {}");
-cmd(inter, "if {$choice == 0} {tk_messageBox -type ok -title \"No report\" -message \"Report file not available.\\nYou can create the report in menu Model.\"} {}");
+cmd(inter, "if {$choice == 0} {tk_messageBox -type ok -title Error -icon error -message \"Report file not available.\\n\\nYou can create the report in menu Model.\"} {}");
 choice=0;
 break;
 
@@ -1041,12 +1041,12 @@ strcat(ch, "\"");
 cmd(inter, ch);       
 cmd(inter, "entry .cond -relief sunken -textvariable cond_val");
 cmd(inter, "frame .c");
-cmd(inter, "button .c.eq -text \" = \" -command {set cond 1}");
-cmd(inter, "button .c.min -text \" < \" -command {set cond 2}");
-cmd(inter, "button .c.max -text \" > \" -command {set cond 3}");
-cmd(inter, "button .no -text \"No Condition\" -command {set cond 0}");
+cmd(inter, "button .c.eq -width -9 -text \" = \" -command {set cond 1}");
+cmd(inter, "button .c.min -width -9 -text \" < \" -command {set cond 2}");
+cmd(inter, "button .c.max -width -9 -text \" > \" -command {set cond 3}");
+cmd(inter, "button .no -width -9 -text \"No Condition\" -command {set cond 0}");
 
-cmd(inter, "button .done -text Done -command {set choice 1}");
+cmd(inter, "button .done -width -9 -text Done -command {set choice 1}");
 cmd(inter, "pack .c.min .c.eq .c.max -side left");
 cmd(inter, "pack .name .cnd_type .c .cond .no .done -side top");
 

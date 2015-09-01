@@ -194,7 +194,7 @@ bind .l <Down> {if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {set app
 ################################
 proc copy i {
 global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
-if { [lindex $group $i] == 1  } {tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" } {
+if { [lindex $group $i] == 1  } {tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups." } {
 
 set memory 1
 
@@ -219,12 +219,12 @@ if { [lindex $lmn $i] == "<UP>" } {return } {}
 if { [lindex $group $i] == 1} {set item group} {set item model}
 
 if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
- set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -message "Do you want to permanently delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?\n"]
+ set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to permanently delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
  file delete -force [ lindex $ldn $i ]
  destroy .l
  showmodel [lindex $lrn $i]
 } {
-set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -message "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?\n"]
+set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
 
 if { $answer == "yes" } {
  set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
@@ -274,8 +274,8 @@ pack .l.t.yscroll -side right -fill y
 pack .l.t.text -expand yes -fill both
 pack .l.t
 frame .l.b
-button .l.b.ok -padx 25 -text Ok -command {set app "[.l.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.t.text get 0.0 end]; close $f; destroy .l; showmodel [lindex $lrn $result]}
-button .l.b.esc -padx 15 -text Cancel -command {destroy .l; showmodel [lindex $lrn $result]}
+button .l.b.ok -width -9 -text Ok -command {set app "[.l.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.t.text get 0.0 end]; close $f; destroy .l; showmodel [lindex $lrn $result]}
+button .l.b.esc -width -9 -text Cancel -command {destroy .l; showmodel [lindex $lrn $result]}
 pack .l.b.ok .l.b.esc -padx 10 -pady 10 -side left
 pack .l.b
 
@@ -340,8 +340,8 @@ pack .l.t.text -expand yes -fill both
 pack .l.t
 frame .l.b
 
-button .l.b.ok -padx 25 -text Ok -command {set choiceSM 1}
-button .l.b.esc -padx 15 -text Cancel -command {set choiceSM 2}
+button .l.b.ok -width -9 -text Ok -command {set choiceSM 1}
+button .l.b.esc -width -9 -text Cancel -command {set choiceSM 2}
 pack .l.b.ok .l.b.esc -padx 10 -pady 10 -side left
 pack .l.b
 
@@ -364,10 +364,10 @@ if { $choiceSM == 2 } { } {
   set appl [.l.n get]
   set appdsc "[.l.t.text get 1.0 end]"
   
-  set confirm [tk_messageBox -parent .l -type yesno -icon info -title Confirm -message "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
+  set confirm [tk_messageBox -parent .l -type okcancel -icon warning -title Confirm -default cancel -message "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
   if { $confirm == "yes" } {
     set app [file exists $pastedir/$appd]
-    if { $app == 1} {tk_messageBox -parent .l -title Error -icon error -type ok -message "Directory $pastedir/$appd already exists. Specify a different directory." } {
+    if { $app == 1} {tk_messageBox -parent .l -title Error -icon error -type ok -message "Directory $pastedir/$appd already exists.\n\nSpecify a different directory." } {
        #viable directory name 
        file mkdir $pastedir/$appd
        set copylist [glob $copydir/*]
