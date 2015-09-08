@@ -410,11 +410,11 @@ cmd( inter, "label .f.com.selec -width 36" );
 cmd( inter, "label .f.com.graph -width 28" );
 cmd( inter, "pack .f.com.nvar .f.com.ncas .f.com.pad .f.com.selec .f.com.graph -side left" );
 cmd(inter, "frame .f.ft");
-cmd(inter, "label .f.ft.minc -text \"From case:\"");
+cmd(inter, "label .f.ft.minc -text \"From case: \"");
 Tcl_LinkVar(inter, "minc", (char *) &min_c, TCL_LINK_INT);
 cmd(inter, "entry .f.ft.mnc -width 10 -relief sunken -textvariable minc -state disabled");
 
-cmd(inter, "label .f.ft.maxc -text \" to case:\"");
+cmd(inter, "label .f.ft.maxc -text \" to case: \"");
 Tcl_LinkVar(inter, "maxc", (char *) &max_c, TCL_LINK_INT);
 cmd(inter, "entry .f.ft.mxc -width 10 -relief sunken -textvariable maxc -state disabled");
 cmd(inter, "set auto_x 1");
@@ -624,7 +624,7 @@ case 2:
 cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"Do you really want to exit Analysis of Results?\\n\\nAll the graphs created will be lost.\"]");
 app=(char *)Tcl_GetVar(inter, "answer",0);
 
-cmd(inter, "if {[string compare $answer \"ok\"] == 0} { } {set choice 0}");
+cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { } {set choice 0}");
 if(*choice==0)
   goto there;
 cmd(inter, "bind . <Control-x> {}");
@@ -887,7 +887,7 @@ cmd(inter, msg);
 if(*choice == 0)
  {
   cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
-  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   goto there;
  cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
@@ -1389,7 +1389,7 @@ case 19:
 case 20:
 //remove a graph
 cmd(inter, "set answer [tk_messageBox -type okcancel -title \"Delete Graph?\" -message \"Press 'Ok' to delete graph:\\n$tit\" -icon warning -default cancel]");
-cmd(inter, "if {[string compare $answer \"ok\"] == 0} { set choice 1} {set choice 0}");
+cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { set choice 1} {set choice 0}");
 if(*choice==0)
  goto there;
 cmd(inter, "scan $it %d)%s a b");
@@ -1931,7 +1931,7 @@ cmd(inter, "wm title .a \"Remove Series\"");
 cmd(inter, "wm transient .a .");
 
 cmd(inter, "frame .a.tit  -relief groove -bd 2");
-cmd(inter, "label .a.tit.l -text \"Select series with label : \"");
+cmd(inter, "label .a.tit.l -text \"Select series with label: \"");
 cmd(inter, "label .a.tit.s -text \"$b\" -foreground red");
 cmd(inter, "pack .a.tit.l .a.tit.s -side left");
 
@@ -2218,7 +2218,7 @@ if(nv>1000)
  {
   cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"You selected $nv series to be plotted.\n\n So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nPress 'Ok' to continue anyway?\"]" );
   *choice=0;
-  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1 } {set choice 22}");
+  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1 } {set choice 22}");
   if(*choice==22)
    return;
   
@@ -2740,7 +2740,7 @@ for(x02=0; i<=max_c; i++)
  }
 
  sprintf(msg, "%d", i);
-cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Case num:\" -anchor w ");
+cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Case num: \" -anchor w ");
 if(logs)
  cmd(inter, "$p create text 360 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w ");
 else
@@ -5217,7 +5217,7 @@ cmd(inter, msg);
 
 cmd(inter, "set numv 1");
 cmd(inter, "frame .s.v -relief groove -bd 2");
-cmd(inter, "label .s.v.l -text \"Number of dependent variables:\"");
+cmd(inter, "label .s.v.l -text \"Number of dependent variables: \"");
 cmd(inter, "entry .s.v.e -textvariable numv");
 cmd(inter, "label .s.v.n -text \"Num. of points: $blength\"");
 cmd(inter, "pack .s.v.l .s.v.e .s.v.n -expand yes -fill x");
@@ -5797,7 +5797,7 @@ cmd(inter, "file delete plot.file; file rename plot_clean.file plot.file");
 if(type==0)
 {
   cmd(inter, "set answer [tk_messageBox -type yesno -title Option -icon question -default yes -message \"The requested graph may be generated with higher quality by using Gnuplot external from Lsd.\\n\\nPress 'Yes' to generate a low-quality graph within Lsd or 'No' to generate a high-quality graph with Gnuplot.\"]");
-  cmd(inter, "if {[string compare $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare -nocase $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
   if(*choice ==0)
    type=2;
   else
@@ -6550,7 +6550,7 @@ if(*choice==1)
     
 
 
-//cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Class num:\" -anchor w ");
+//cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Class num: \" -anchor w ");
 //cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Freq: \" -anchor w ");
 
 
@@ -7111,7 +7111,7 @@ if(*choice==1)
     
 
 
-//cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Class num:\" -anchor w ");
+//cmd(inter, "$p create text 200 420 -font {Times 10 normal} -text \"Class num: \" -anchor w ");
 //cmd(inter, "$p create text 380 420 -font {Times 10 normal} -text \"Freq: \" -anchor w ");
 
 

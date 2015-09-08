@@ -81,6 +81,8 @@ if { [ file isdirectory $pippo ] != 1 } {
  set pippo $RootLsd
 }
 cd $pippo
+if { [string compare $pippo $RootLsd] != 0 } {.l.l.l insert end "<UP>"; lappend lver "-1"; lappend group 1; lappend lmd "Return to group: [file dirname $modelgroup]"; lappend lrn [pwd]; lappend ldn "[file dirname $pippo]"; lappend lmn "<UP>"} {}
+
 set dir [glob *]
 
 foreach i $dir {
@@ -122,7 +124,6 @@ foreach i $dir {
  }
 
 
-if { [string compare $pippo $RootLsd] != 0 } {.l.l.l insert end "<UP>"; lappend lver "-1"; lappend group 1; lappend lmd "Return to group: [file dirname $modelgroup]"; lappend lrn [pwd]; lappend ldn "[file dirname $pippo]"; lappend lmn "<UP>"} {}
 .l.t.text conf -state normal
 .l.t.text insert end "[lindex $lmd 0]"
 .l.t.text conf -state disable

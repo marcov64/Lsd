@@ -104,7 +104,7 @@ cmd(inter, "wm iconify .");
 if(*choice == 1)
  {
   cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\\n\" -type okcancel -title Warning -icon warning -default cancel]");
-  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
+  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
   if ( *choice == 1 )
 	  return;
  }

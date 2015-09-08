@@ -322,7 +322,7 @@ if(choice==-1)
 if ( unsavedChange )
 	sprintf(msg, "wm title . \"*%s - Lsd Browser\"",simul_name);
 else
-sprintf(msg, "wm title . \"%s - Lsd Browser\"",simul_name);
+	sprintf(msg, "wm title . \"%s - Lsd Browser\"",simul_name);
 cmd(inter, msg);
 
 for(cur=cr; cur->up!=NULL; cur=cur->up);
@@ -485,7 +485,7 @@ cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
 cmd( inter, "pack .l.up_name" );
 
 cmd(inter, "frame .l.tit -relief raised -bd 2");
-strcpy( ch1, "button .l.tit.lab -padx 2 -text \"Object:\" -relief flat" );
+strcpy( ch1, "button .l.tit.lab -padx 2 -text \"Object: \" -relief flat" );
 strcpy( ch, "button .l.tit.but -padx 2 -foreground red -relief flat -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
@@ -794,7 +794,7 @@ if(actual_steps>0)
    cmd(inter, "pack .warn.f .warn.b -fill x");
   
    *choice=0;
-
+   
    cmd(inter, "focus -force .warn.b.ok");
    cmd(inter, "bind .warn <Return> {set choice 1}");
    cmd(inter, "bind .warn <Escape> {set choice 2}");   
@@ -952,7 +952,7 @@ if ( done == 2 )
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newelem;
-   }
+}
 
  if(done==0)
  {
@@ -1057,12 +1057,12 @@ if(done==1)
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab, cur); //check that the label does not exist already
  if(done==1)
-  {
+   {
 	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newobject;
-  }
+   }
  if(done==2)
   {
    cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
@@ -1071,16 +1071,15 @@ if(done==1)
    goto here_newobject;
   }
 
- if(done==0)
-  {r->add_obj(lab, 1, 1);
-   cmd(inter, "set text_description [.d.f.text get 1.0 end]");  
-   cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available )\"} {}");
-   lab1=(char *)Tcl_GetVar(inter, "text_description",0);
-   add_description(lab, "Object", lab1);
+ r->add_obj(lab, 1, 1);
+ cmd(inter, "set text_description [$T.d.f.text get 1.0 end]");  
+ cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}");
+ lab1=(char *)Tcl_GetVar(inter, "text_description",0);
+ add_description(lab, "Object", lab1);
 
-   unsavedChange = true;		// signal unsaved change
+ unsavedChange = true;		// signal unsaved change
  redrawRoot = true;			// force browser redraw
-  }
+ }
 
 here_endobject:
 cmd( inter, "destroytop $T" );
@@ -1165,7 +1164,7 @@ if(done==1)
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newparent;
-   }
+  }
 
  if(r->up==NULL)
   {
@@ -1194,8 +1193,8 @@ if(done==1)
 
  }
 
- cmd(inter, "set text_description [.d.f.text get 1.0 end]");  
- cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available )\"} {}");
+ cmd(inter, "set text_description [$T.d.f.text get 1.0 end]");  
+ cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}");
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
 
@@ -1357,7 +1356,7 @@ if(*choice==1|| *choice==5 || *choice==3)
 
 unsavedChange = true;		// signal unsaved change
 change_descr_text(lab_old);
-  
+
 if(*choice==5 || *choice==3)
 {
 if(*choice==3)
@@ -1386,13 +1385,15 @@ while(*choice==0)
 
 if ( *choice == 1 )
 {
-
- strcpy(lab, lab1);
- if(strcmp(lab, r->label) )
-  {
-   for(cur=r; cur->up!=NULL; cur=cur->up);
-   done=check_label(lab, cur); //check that the label does not exist already
-   if(done==1)
+	lab1= ( char * ) Tcl_GetVar( inter, "lab", 0 );
+	strcpy( lab, lab1 );
+	if ( strlen( lab ) == 0 )
+		goto here_newname;
+	if( strcmp( lab, r->label ) )
+	{
+		for( cur = r; cur->up != NULL; cur = cur->up );
+		done = check_label( lab, cur );
+		if(done==1)
 		{
 			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
 			cmd(inter, "focus $TT.e; $TT.e selection range 0 end");
@@ -1405,8 +1406,8 @@ if ( *choice == 1 )
 			goto here_newname;
 		}
 
-  }
- else
+	}
+	else
 		*choice = 2;
 }
 cmd( inter, "destroytop $TT" );
@@ -1490,7 +1491,7 @@ save=cv->save;
 num=cv->debug=='d'?1:0;
 plot=cv->plot;
 savei=cv->savei;
- 
+
 cmd( inter, "set T .top" );
 cmd( inter, "newtop . $T \"Change Element\" { set done 2 }" );
 
@@ -1829,7 +1830,7 @@ if(strcmp(lab, lab_old) )
 	{
 		cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 		goto here_endelem;
-   }
+	}
  }
  if(nature==3)
   change_descr_lab(lab_old, lab, "", "", "");
@@ -2053,7 +2054,7 @@ if(struct_loaded==0)
 cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menurun.html#run}");
 cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}");
-sprintf(ch, "label .war1 -text \"Running the model configuration:\"");
+sprintf(ch, "label .war1 -text \"Running the model configuration: \"");
 cmd(inter, ch);
 sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
 cmd(inter, ch);
@@ -2070,7 +2071,7 @@ cmd(inter, ch);
 sprintf(ch, "label .war4 -text \"Steps for each simulation (max): %d\"", max_step);
 cmd(inter, ch);
 
-sprintf(ch, "label .war5 -text \"Result files (single simulation):\"");
+sprintf(ch, "label .war5 -text \"Result files (single simulation): \"");
 cmd(inter, ch);
 sprintf(ch, "label .war6 -text \"from %s_%d.res to %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
 cmd(inter, ch);
@@ -2081,7 +2082,7 @@ Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
 cmd(inter, "checkbutton .nores -text \"Skip generating result files\" -variable no_res");
 cmd(inter, "checkbutton .dozip -text \"Generate zipped files\" -variable dozip");
 
-cmd(inter, "label .war7 -text \"Total file (last steps):\"");
+cmd(inter, "label .war7 -text \"Total file (last steps): \"");
 sprintf(ch, "label .war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
 cmd(inter, ch);
 sprintf(msg, "set choice [file exist %s_%d_%d.tot] ", simul_name, seed, seed+sim_num-1);
@@ -3315,7 +3316,7 @@ case 43:
 *choice=0;
 
 cmd(inter, "set answer [tk_messageBox -message \"The automatic documentation will replace any previous documentation.\\n\\nDo you want to proceed?\" -type okcancel -title Warning -icon warning -default cancel]");
-cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
+cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
 
 
 if(*choice==1)
@@ -3378,7 +3379,7 @@ cmd(inter, msg);
 if(*choice == 0)
  {
   cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
-  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
  cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
@@ -3503,7 +3504,7 @@ cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo scree
 #endif
 *choice=0;
 cmd(inter, "focus .s.i.e");
-cmd(inter, "bind .s.i.e <KeyRelease> {if { %N < 256 } { set b [.s.i.e index insert]; set c [.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .s.i.e delete 0 end; .s.i.e insert 0 $d; .s.i.e index $b; .s.i.e selection range $b end } { } } { } }");
+cmd(inter, "bind .s.i.e <KeyRelease> {if { %N < 256 && [ info exists ModeElem] } { set b [.s.i.e index insert]; set c [.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .s.i.e delete 0 end; .s.i.e insert 0 $d; .s.i.e index $b; .s.i.e selection range $b end } { } } { } }");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 cmd(inter, "destroy .s");
@@ -4377,15 +4378,15 @@ case 69:
 	// confirm overwriting current configuration
 	cmd(inter, "button .ok -width -9 -text Ok -command {set choice 1}");
 	cmd(inter, "button .can -width -9 -text Cancel -command {set choice 2}");
-	cmd(inter, "label .war1 -text \"Starting 'No Window' batch for the model configuration:\"");
+	cmd(inter, "label .war1 -text \"Starting 'No Window' batch for the model configuration: \"");
 	sprintf(ch, "label .war2 -text \"%s\" -fg red", simul_name);
 	cmd(inter, ch);
 	sprintf(ch, "label .war3 -text \"Number of simulations: %d\"", sim_num);
 	cmd(inter, ch);
 	sprintf(ch, "label .war4 -text \"Time steps (max): %d\"", max_step);
 	cmd(inter, ch);
-	cmd(inter, "label .war5 -text \"Results file(s) (single simulation):\"");
-	cmd(inter, "label .war7 -text \"Total file (last steps):\"");
+	cmd(inter, "label .war5 -text \"Results file(s) (single simulation): \"");
+	cmd(inter, "label .war7 -text \"Total file (last steps): \"");
 	sprintf(ch, "label .war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
 	cmd(inter, ch);
 	cmd(inter, "label .tosave -text \"\\nYou are going to overwrite the existing configuration file\\nand any results files in the destination folder\\n\"");
@@ -4739,6 +4740,7 @@ delete_bridge(d);
 /****************************************************
 CHECK_LABEL
 Control that the label l does not already exist in the model
+Also prevents invalid characters in the names
 ****************************************************/
 int check_label(char *l, object *r)
 {
@@ -4746,6 +4748,11 @@ object *cur;
 variable *cv;
 bridge *cb;
 
+Tcl_SetVar( inter, "nameVar", l, 0 );
+ cmd( inter, "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $nameVar ] { set answer 1 } { set answer 0 }" );
+const char *answer = Tcl_GetVar( inter, "answer", 0 );
+if ( *answer == '0' )
+	return 2;				// error if invalid characters (incl. spaces)
 
 if(!strcmp(l, r->label) )
  return 1;
@@ -4763,6 +4770,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  if(check_label(l, cur)==1)
    return 1;
 } 
+
 return 0;
 }
 
@@ -5011,7 +5019,7 @@ bool discard_change( bool checkSense, bool senseOnly )
 				else
 					return true;		// checking sensitivity data is disabled
 
-	cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
+	cmd( inter, "if [ string equal -nocase $answer \"ok\" ] { set ans 1 } { set ans 0 }" );  
 	const char *ans = Tcl_GetVar( inter, "ans", 0 );
 	if ( atoi( ans ) == 1 )
 		return true;

@@ -863,7 +863,7 @@ if(argn>1)
      cmd(inter, msg);
      cmd(inter, "set dirname [file dirname \"$filetoload\"]");
      cmd(inter, "set before [.f.t.t get 1.0 end]; .f.hea.file.dat conf -text \"$filename\"");
-     
+
      sprintf(msg, "set s [file extension \"$filetoload\"]" );
      cmd(inter, msg);
      s=(char *)Tcl_GetVar(inter, "s",0);
@@ -1259,10 +1259,10 @@ if(s==NULL || !strcmp(s, ""))
 	cmd( inter, ".f.t.t insert end \"Model $modelname (ver. $version)\"" );
   }
 
-   cmd(inter, ".f.t.t edit reset");
-   sourcefile=0;
-   cmd(inter, ".f.t.t mark set insert 1.0");
-   cmd(inter, "focus -force .f.t.t");
+  cmd(inter, ".f.t.t edit reset");
+  sourcefile=0;
+  cmd(inter, ".f.t.t mark set insert 1.0");
+  cmd(inter, "focus -force .f.t.t");
 
   cmd(inter, ".f.hea.file.dat conf -text $filename");
   cmd(inter, "wm title . \"$filename - LMM\"");
@@ -1815,7 +1815,7 @@ for(i=0; i<num; i++)
   cmd(inter, msg);
   s=(char *)Tcl_GetVar(inter, "curdir",0);
   strcpy(str, s);
-  if(strcmp(str,"___") && strcmp(str, "gnu") && strcmp(str, "src") && strcmp(str, "Manual") )
+  if(strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
    {
     cmd(inter, "set ex [file exists $curdir/modelinfo.txt]");
     cmd(inter, "if { $ex == 0 } {set choice 0} {set choice 1}");
@@ -1848,7 +1848,7 @@ if(choice==4)
 
   s=(char *)Tcl_GetVar(inter, "answer",0);
 
-  cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
   if(choice==0)
    {cmd(inter, "destroytop .a");
     goto loop;
@@ -1879,7 +1879,7 @@ else
 
 //create the empty equation file
 cmd(inter, "file copy $RootLsd/$LsdSrc/$fun_base $modeldir/fun_$mdir.cpp"); 
-
+ 
 
 cmd(inter, "cd $dirname");
 
@@ -2546,8 +2546,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-//cmd(inter, ".f.t.t insert insert \"for($v_obj=$v_par->search(\\\"$v_label\\\"); $v_obj!=NULL; $v_obj=go_brother($v_obj) )\\n\"");
-cmd(inter, "if { $v_par == \"p\"} {.f.t.t insert insert \"CYCLE($v_obj, \\\"$v_label\\\")\\n\"} {.f.t.t insert insert \"CYCLES($v_par, $v_obj, \\\"$v_label\\\")\\n\"}");
+cmd(inter, "if { $v_par == \"p\"} {.f.t.t insert insert \"CYCLE($v_obj,\\\"$v_label\\\")\\n\"} {.f.t.t insert insert \"CYCLES($v_par, $v_obj,\\\"$v_label\\\")\\n\"}");
 //cmd(inter, ".f.t.t insert insert \" {\\n  \\n }\\n\""); 
 //Trying making automatic indent in cycles
 
@@ -2645,7 +2644,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-cmd(inter, ".f.t.t insert insert \"for($v_obj=$v_par->search(\\\"$v_label\\\"); $v_obj!=NULL; $v_obj=go_brother($v_obj) )\\n\"");
+cmd(inter, ".f.t.t insert insert \"for($v_obj=$v_par->search(\\\"$v_label\\\");$v_obj!=NULL;$v_obj=go_brother($v_obj))\\n\"");
 cmd(inter, ".f.t.t insert insert \" {\\n  \\n }\\n\"");
 cmd(inter, ".f.t.t mark set insert \"$a + 2 line + 2 char\"");
 
@@ -3234,7 +3233,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num, $v_lag);\"");
+cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num,$v_lag);\"");
 //cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
@@ -3301,7 +3300,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
+cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num,$v_lag);\"");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3445,8 +3444,8 @@ if(choice==1)
 else
   cmd(inter, "set direction \"DOWN\"");
 
-cmd(inter, "if {$v_obj1 ==\"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"$direction\\\");\"} {}");
-cmd(inter, "if {$v_obj1 !=\"p\"} {.f.t.t insert insert \"SORTS($v_obj1,\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"$direction\\\");\"} {}");
+cmd(inter, "if {$v_obj1 ==\"p\"} {.f.t.t insert insert \"SORT(\\\"$v_obj0\\\",\\\"$v_label\\\",\\\"$direction\\\");\"} {}");
+cmd(inter, "if {$v_obj1 !=\"p\"} {.f.t.t insert insert \"SORTS($v_obj1,\\\"$v_obj0\\\",\\\"$v_label\\\",\\\"$direction\\\");\"} {}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3513,9 +3512,9 @@ cmd(inter, "set choice $v_direction");
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 if(choice==1)
-  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"UP\\\");\"");
+  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\",\\\"UP\\\");\"");
 else
-  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"DOWN\\\");\"");
+  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\",\\\"DOWN\\\");\"");
 
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
@@ -3541,7 +3540,7 @@ cmd(inter, "pack .a.l1 .a.e1 .a.l2 .a.e2");
 
 cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"UNIFORM($value1,$value2)\"}");
 cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance; set str \"norm($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"rnd_integer($value1, $value2)\"}");
+cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"rnd_integer($value1,$value2)\"}");
 cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"poisson($value1)\"}");
 cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"gamma($value1)\"}");
 cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"abs($value1)\"}");
@@ -3582,7 +3581,7 @@ case 1: cmd(inter, "set str \"UNIFORM($value1,$value2)\"");
 break;
 case 2: cmd(inter, "set str \"norm($value1,$value2)\"");
 break;
-case 3: cmd(inter, "set str \"rnd_integer($value1, $value2)\"");
+case 3: cmd(inter, "set str \"rnd_integer($value1,$value2)\"");
 break;
 case 4: cmd(inter, "set str \"poisson($value1)\"");
 break;
@@ -3700,7 +3699,7 @@ cmd(inter, "if {$v_obj !=\"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNO
 cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
 cmd(inter, "if {$v_obj !=\"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj,\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
 
- }
+}
 
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
@@ -4035,9 +4034,9 @@ cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
 
 if(choice==1)
-  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag);\\n\"");
+  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag);\\n\"");
 else
-  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"");
+  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag,$v_tot);\\n\"");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -5456,7 +5455,7 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,2}]|cur(l)?\[0-9]?",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|init_lattice|update_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|abs|min|max|round|exp|log|sqrt|pow|init_lattice|update_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
