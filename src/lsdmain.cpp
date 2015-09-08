@@ -1026,13 +1026,13 @@ for(var=root->v; var!=NULL; var=var->next)
       var->save=0;
     }
 	if(var->data_loaded=='-')
-	  {sprintf(msg,"\nData for %s in Object %s not loaded\n", var->label, root->label);
+	  {sprintf(msg,"\nData for %s in object %s not loaded\n", var->label, root->label);
 		plog(msg);
-		plog("Use the Data Editor to set its values\n");
+		plog("Use the Initial Values editor to set its values\n");
      if(var->param==1)
-       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because parameter:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
      else
-       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because a lagged value for variable:\n'%s' (Object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
      #ifndef NO_WINDOW   
      cmd(inter, msg);  
      #endif
@@ -1386,7 +1386,7 @@ for(cur=r->b->head; cur!=NULL; cur=skip_next_obj(cur, &i) )
    i=1;
  if(i==0)
  {
-  sprintf(msg, "\nError in bridges: Object %s has no bridge\\n",cur->label);
+  sprintf(msg, "\nError in bridges: object %s has no bridge\\n",cur->label);
   plog(msg);
  } 
    

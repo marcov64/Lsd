@@ -27,7 +27,6 @@ global lmn lmd ldn lrn group result choiceSM lver modelgroup RootLsd memory
 
 
 
-set choiceSM 1
 unset lmn
 lappend lmn
 unset lver
@@ -43,10 +42,13 @@ unset group
 lappend group
 
 set choiceSM 0
-toplevel .l
-wm protocol .l WM_DELETE_WINDOW { set result -1; sblocklmm .l; bind .f.t.t <Enter> {} ; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t; set choiceSM 2 }
-wm title .l "Lsd Models"
-wm transient .l .
+if [ winfo exists .l ] {
+	destroy .l.l .l.t
+	set menuOk 1
+} { 
+	newtop . .l "Lsd Model Browser" { .l.m.file invoke 2 }
+	set menuOk 0
+}
 
 frame .l.l -relief groove -bd 2
 #if { [string compare "$modelgroup" "."] == 0 } {set modelgroup "(no group)"} {}
@@ -69,11 +71,6 @@ pack .l.l.tit
 pack .l.l.vs -side right -fill y
 pack .l.l.l -expand yes -fill both
 pack .l.l .l.t -expand yes -fill both -side left
-
-# call procedure to adjust geometry and block lmm window
-setgeom .l centerS
-blocklmm .l
-
 
 bind .l.l.l <1> {.l.l.l selection set [.l.l.l nearest %y]; .l.t.text delete 0.0 end; .l.t.text insert end "[lindex $lmd [.l.l.l nearest %y] ]"}
 
@@ -133,17 +130,16 @@ if { [string compare $pippo $RootLsd] != 0 } {.l.l.l insert end "<UP>"; lappend 
 .l.l.l selection set 0
 
 cd $curdir
-bind .f.t.t <Enter> {focus -force .l};  wm transient .l .; focus -force .l;
-#.f.t.t conf -state disabled
 
+if { ! $menuOk } { # only redraw menu/window if needed
 
 menu .l.m -tearoff 0 -relief groove -bd 2
 set m .l.m.file 
 menu $m -tearoff 0
 .l.m add cascade -label File -menu $m -underline 0
-$m add command -label "Select Model" -underline 0 -accelerator Enter -command {set result [.l.l.l curselection]; if { [lindex $group $result] == 1 } { if { [lindex $lmn $result] == "<UP>"} {set modelgroup [file dirname $modelgroup]} {set modelgroup [lindex $lmn $result]}; sblocklmm .l; bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  showmodel [lindex $ldn $result]} { sblocklmm .l; bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  set choiceSM 1} }
-$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { sblocklmm .l; bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t;  set choiceSM 14} 
-$m add command -label Quit -underline 0 -accelerator Escape -command {set result -1; sblocklmm .l; bind .f.t.t <Enter> {}; .f.t.t conf -state normal; destroy .l; focus -force .f.t.t; set choiceSM 2 }
+$m add command -label "Select Model" -underline 0 -accelerator Enter -command {set result [.l.l.l curselection]; if { [lindex $group $result] == 1 } { if { [lindex $lmn $result] == "<UP>"} {set modelgroup [file dirname $modelgroup]} {set modelgroup [lindex $lmn $result]}; showmodel [lindex $ldn $result]} { destroytop .l; set choiceSM 1} }
+$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { destroytop .l; set memory 0; set choiceSM 14} 
+$m add command -label Quit -underline 0 -accelerator Escape -command {set result -1; destroytop .l; set memory 0; set choiceSM 2 }
 
 
 set m .l.m.edit 
@@ -161,6 +157,12 @@ menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Help -menu $m -underline 0
 $m add command -label "Help" -underline 0 -accelerator F1 -command {LsdHelp LMM_help.html#select}
 
+.l configure -menu .l.m
+
+# call procedure to adjust geometry and block lmm window, if fresh new window
+showtop .l centerS
+}
+
 bind .l <F1> {.l.m.help invoke 0}
 bind .l <Control-c> {.l.m.edit invoke 1}
 bind .l <Control-C> {.l.m.edit invoke 1}
@@ -177,11 +179,6 @@ bind .l.l.l <1> {.l.l.l selection clear 0 end; .l.l.l selection set [.l.l.l near
 bind .l <Up> {if { [.l.l.l curselection] > 0 } {set app [expr [.l.l.l curselection] - 1]; .l.l.l selection clear 0 end; .l.l.l selection set $app; .l.t.text conf -state normal;.l.t.text delete 0.0 end; .l.t.text insert end "[lindex $lmd $app ]"; .l.t.text conf -state disable } {} }
 
 bind .l <Down> {if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {set app [expr [.l.l.l curselection] + 1]; .l.l.l selection clear 0 end; .l.l.l selection set $app; .l.t.text conf -state normal;.l.t.text delete 0.0 end;  .l.t.text insert end "[lindex $lmd $app ]"; .l.t.text conf -state disable } {} }
-
-
-
-
-.l configure -menu .l.m
 
 }
 
@@ -212,7 +209,10 @@ set copydscr [lindex $lmd $i]
 # Remove a model/group, placing it in a trashbin
 ################################
 proc delete i {
-global lrn ldn lmn group RootLsd
+global lrn ldn lmn group RootLsd memory
+
+set memory 0
+.l.m.edit entryconf 2 -state disabled
 
 if { [lindex $lmn $i] == "<UP>" } {return } {}
 
@@ -221,7 +221,6 @@ if { [lindex $group $i] == 1} {set item group} {set item model}
 if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
  set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to permanently delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
  file delete -force [ lindex $ldn $i ]
- destroy .l
  showmodel [lindex $lrn $i]
 } {
 set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
@@ -234,14 +233,13 @@ if { $answer == "yes" } {
  puts $f "Deleted Models"
  close $f
  set f [open $RootLsd/trashbin/description.txt w]
- puts $f "Folder containing deleted models.\n\nModels here can only be deleted using OS tools."
+ puts $f "Folder containing deleted models.\n"
  close $f
  set modelName [ string range [ lindex $ldn $i ] [ expr [ string last / [ lindex $ldn $i ] ] + 1 ] end ]
  if { [ file exists $RootLsd/trashbin/$modelName ] } {
   file delete -force $RootLsd/trashbin/$modelName
  }
  file rename -force [lindex $ldn $i] $RootLsd/trashbin/$modelName
- destroy .l
  showmodel [lindex $lrn $i]
  } {}
  }
@@ -251,43 +249,43 @@ if { $answer == "yes" } {
 # Edit the model/group name and description
 ################################
 proc edit i {
-global lrn ldn lmn group lmd result
+global lrn ldn lmn group lmd result memory
 
-destroy .l
-toplevel .l
+set memory 0
+.l.m.edit entryconf 2 -state disabled
 
-wm transient .l .
-wm title .l "Edit"
+newtop .l .l.e "Edit" { .l.e.b.esc invoke }
+
 if { [lindex $group $i] == 1} {set item group} {set item model}
-label .l.ln -text "Insert new label for the $item [lindex $lmn $i]"
+label .l.e.ln -text "Insert new label for the $item [lindex $lmn $i]"
 set app "[lindex $lmn $i]"
 
-entry .l.n -width 30
-.l.n insert 1 "[file tail [lindex $lmn $i]]"
-label .l.ld -text "Insert a new description"
-frame .l.t
-scrollbar .l.t.yscroll -command ".l.t.text yview"
-text .l.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
+entry .l.e.n -width 30
+.l.e.n insert 1 "[file tail [lindex $lmn $i]]"
+label .l.e.ld -text "Insert a new description"
+frame .l.e.t
+scrollbar .l.e.t.yscroll -command ".l.e.t.text yview"
+text .l.e.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.e.t.yscroll set"
 
-pack .l.ln .l.n .l.ld -fill x
-pack .l.t.yscroll -side right -fill y
-pack .l.t.text -expand yes -fill both
-pack .l.t
-frame .l.b
-button .l.b.ok -width -9 -text Ok -command {set app "[.l.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.t.text get 0.0 end]; close $f; destroy .l; showmodel [lindex $lrn $result]}
-button .l.b.esc -width -9 -text Cancel -command {destroy .l; showmodel [lindex $lrn $result]}
-pack .l.b.ok .l.b.esc -padx 10 -pady 10 -side left
-pack .l.b
+pack .l.e.ln .l.e.n .l.e.ld -fill x
+pack .l.e.t.yscroll -side right -fill y
+pack .l.e.t.text -expand yes -fill both
+pack .l.e.t
+frame .l.e.b
+button .l.e.b.ok -width -9 -text Ok -command {set app "[.l.e.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.e.t.text get 0.0 end]; close $f; destroytop .l.e; showmodel [lindex $lrn $result]}
+button .l.e.b.esc -width -9 -text Cancel -command {destroytop .l.e; showmodel [lindex $lrn $result]}
+pack .l.e.b.ok .l.e.b.esc -padx 10 -pady 10 -side left
+pack .l.e.b
 
-.l.t.text insert end "[lindex $lmd $i]"
+.l.e.t.text insert end "[lindex $lmd $i]"
 set result $i
-focus -force .l.n
-.l.n selection range 0 end
-bind .l.n <Return> {focus -force .l.t.text; .l.t.text mark set insert 1.0}
-bind .l <Escape> {.l.b.esc invoke}
-bind .l.t.text <Control-e> {.l.b.ok invoke}
+focus -force .l.e.n
+.l.e.n selection range 0 end
+bind .l.e.n <Return> {focus -force .l.e.t.text; .l.e.t.text mark set insert 1.0}
+bind .l.e <Escape> {.l.e.b.esc invoke}
+bind .l.e.t.text <Control-e> {.l.e.b.ok invoke}
 
-setgeom .l centerS
+showtop .l.e centerS
 }
 
 
@@ -296,7 +294,7 @@ setgeom .l centerS
 # Paste a previously copied model/group
 ################################
 proc paste i {
-global copydir copyver copylabel copydscr lrn memory modelgroup lmn lver lmd choiceSM
+global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM
 
 set pastedir [lindex $lrn $i]
 
@@ -306,68 +304,65 @@ set pastedir [lindex $lrn $i]
 
 
 
-destroy .l
-toplevel .l
-wm transient .l .
+newtop .l .l.p "Paste Model" { .l.b.esc invoke }
 
 update
-wm title .l "Paste Model"
 
 
-label .l.ln -text "Insert a label for the copy of model: $copylabel"
-entry .l.n -width 30
-.l.n insert 0 "$copylabel"
+label .l.p.ln -text "Insert a label for the copy of model: $copylabel"
+entry .l.p.n -width 30
+.l.p.n insert 0 "$copylabel"
 
-label .l.lv -text "Insert a new version number for the new model"
-entry .l.v -width 30
-.l.v insert 0 "$copyver"
+label .l.p.lv -text "Insert a new version number for the new model"
+entry .l.p.v -width 30
+.l.p.v insert 0 "$copyver"
 
-label .l.ld -text "Insert a directory name for the new model to be created in [lindex $lrn $i]"
-entry .l.d -width 30
-.l.d insert 0 "[file tail $copydir]"
+label .l.p.ld -text "Insert a directory name for the new model to be created in [lindex $lrn $i]"
+entry .l.p.d -width 30
+.l.p.d insert 0 "[file tail $copydir]"
 
-label .l.ldsc -text "Insert a description for the new model"
+label .l.p.ldsc -text "Insert a description for the new model"
 
-frame .l.t
-scrollbar .l.t.yscroll -command ".l.t.text yview"
-text .l.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
-.l.t.text insert end "$copydscr"
+frame .l.p.t
+scrollbar .l.p.t.yscroll -command ".l.p.t.text yview"
+text .l.p.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.p.t.yscroll set"
+.l.p.t.text insert end "$copydscr"
 
-pack .l.ln .l.n .l.lv .l.v .l.ld .l.d .l.ldsc -fill x
+pack .l.p.ln .l.p.n .l.p.lv .l.p.v .l.p.ld .l.p.d .l.p.ldsc -fill x
 
-pack .l.t.yscroll -side right -fill y
-pack .l.t.text -expand yes -fill both
-pack .l.t
-frame .l.b
+pack .l.p.t.yscroll -side right -fill y
+pack .l.p.t.text -expand yes -fill both
+pack .l.p.t
+frame .l.p.b
 
-button .l.b.ok -width -9 -text Ok -command {set choiceSM 1}
-button .l.b.esc -width -9 -text Cancel -command {set choiceSM 2}
-pack .l.b.ok .l.b.esc -padx 10 -pady 10 -side left
-pack .l.b
+button .l.p.b.ok -width -9 -text Ok -command {set choiceSM 1}
+button .l.p.b.esc -width -9 -text Cancel -command {set choiceSM 2}
+pack .l.p.b.ok .l.p.b.esc -padx 10 -pady 10 -side left
+pack .l.p.b
 
 
-setgeom .l centerS
-raise .l
-focus -force .l.n
-bind .l.n <Return> {focus -force .l.v}
-bind .l.v <Return> {focus -force .l.d}
-bind .l.d <Return> {focus -force .l.b.ok}
-bind .l.b.ok <Return> {.l.b.ok invoke}
-bind .l <Escape> {.l.b.esc invoke}
+showtop .l.p centerS
+
+focus -force .l.p.n
+bind .l.p.n <Return> {focus -force .l.p.v}
+bind .l.p.v <Return> {focus -force .l.p.d}
+bind .l.p.d <Return> {focus -force .l.p.b.ok}
+bind .l.p.b.ok <Return> {.l.p.b.ok invoke}
+bind .l.p <Escape> {.l.p.b.esc invoke}
 
 tkwait variable choiceSM
 
 if { $choiceSM == 2 } { } {
 
-  set appd [.l.d get]
-  set appv [.l.v get]
-  set appl [.l.n get]
-  set appdsc "[.l.t.text get 1.0 end]"
+  set appd [.l.p.d get]
+  set appv [.l.p.v get]
+  set appl [.l.p.n get]
+  set appdsc "[.l.p.t.text get 1.0 end]"
   
-  set confirm [tk_messageBox -parent .l -type okcancel -icon warning -title Confirm -default cancel -message "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
-  if { $confirm == "yes" } {
+  set confirm [tk_messageBox -parent .l.p -type okcancel -icon warning -title Confirm -default cancel -message "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
+  if { $confirm == "ok" } {
     set app [file exists $pastedir/$appd]
-    if { $app == 1} {tk_messageBox -parent .l -title Error -icon error -type ok -message "Directory $pastedir/$appd already exists.\n\nSpecify a different directory." } {
+    if { $app == 1} {tk_messageBox -parent .l.p -title Error -icon error -type ok -message "Directory $pastedir/$appd already exists.\n\nSpecify a different directory." } {
        #viable directory name 
        file mkdir $pastedir/$appd
        set copylist [glob $copydir/*]
@@ -385,11 +380,8 @@ if { $choiceSM == 2 } { } {
   
 } {}
 }
-destroy .l
+destroytop .l.p
 set choiceSM 0
 showmodel [lindex $lrn $i]
 
 }
-
-#set RootLsd [pwd]; frame .f; frame .f.t; text .f.t.t; destroy .l; proc showmodel {} {}; source src/showmodel.tcl; showmodel [pwd]
-#destroy .l; proc showmodel {} {}; source src/showmodel.tcl; showmodel [pwd]

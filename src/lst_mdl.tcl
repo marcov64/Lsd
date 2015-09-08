@@ -66,9 +66,7 @@ unset sf
 lst_mdl
 
 
-toplevel .l
-wm protocol .l WM_DELETE_WINDOW { set choice -1; sblocklmm .l}
-wm title .l "Lsd Models"
+newtop . .l "Lsd Models" { set choice -1; destroytop .l }
 
 frame .l.l -relief groove -bd 2
 label .l.l.tit -text "List of models" -fg red
@@ -110,8 +108,8 @@ pack .l.t.f1 -fill x -anchor n
 
 
 frame .l.t.b
-button .l.t.b.cmp -width -9 -text "Compare Files" -command {sblocklmm .l; destroy .l; set choice 1}
-button .l.t.b.cnc -width -9 -text "Cancel" -command {sblocklmm .l; set d1 ""; destroy .l; set choice -1}
+button .l.t.b.cmp -width -9 -text "Compare Files" -command {destroytop .l; set choice 1}
+button .l.t.b.cnc -width -9 -text "Cancel" -command {destroytop .l; set d1 ""; set choice -1}
 
 pack .l.t.b.cmp .l.t.b.cnc -padx 10 -pady 10 -side left
 pack .l.t.b
@@ -133,9 +131,7 @@ incr j
 #single monitor version
 #set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w
 #dual monitor version
-set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w
-
-blocklmm .l
+showtop .l centerS
 }
 
 proc slct {} {

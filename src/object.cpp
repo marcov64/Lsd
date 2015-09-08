@@ -444,7 +444,7 @@ if(search_step>100)
   }
 */
 if(curr==NULL)
- {sprintf(msg, "\nSearch for variable or parameter %s failed in (Object %s)",l, label);
+ {sprintf(msg, "\nSearch for variable or parameter %s failed in (object %s)",l, label);
  plog(msg);
  error_hard();
  quit=2;
@@ -1808,7 +1808,7 @@ if(cur_v==NULL)
  }
 cur=cur_v->up;
 if(strcmp(obj, cur->label))
- {sprintf(msg, "Error: variable %s not contained in Object %s to be sorted", var, obj);
+ {sprintf(msg, "Error: variable %s not contained in object %s to be sorted", var, obj);
   plog(msg);
  error_hard();
   quit=2;
@@ -1816,7 +1816,7 @@ if(strcmp(obj, cur->label))
  }
 
 if(cur->up==NULL)
- {sprintf(msg, "Error: sort for Object %s aborted", obj);
+ {sprintf(msg, "Error: sort for object %s aborted", obj);
   plog(msg);
   error_hard();
   quit=2;
@@ -1966,7 +1966,7 @@ if(cur_v1==NULL)
  }
 cur=cur_v1->up;
 if(strcmp(obj, cur->label))
- {sprintf(msg, "Error: variable %s not contained in Object %s to be sorted", var1, obj);
+ {sprintf(msg, "Error: variable %s not contained in object %s to be sorted", var1, obj);
   plog(msg);
   error_hard();
   quit=2;
@@ -1974,7 +1974,7 @@ if(strcmp(obj, cur->label))
  }
 
 if(cur->up==NULL)
- {sprintf(msg, "Error: sort for Object %s aborted", obj);
+ {sprintf(msg, "Error: sort for object %s aborted", obj);
   plog(msg);
   error_hard();
   quit=2;
@@ -2083,7 +2083,7 @@ for(a=0 ; cur!=NULL; cur=cur->next )
 if(isinf(a)==1)
    {sprintf(msg, "Warning (eq. for '%s'): sum of values for '%s' is too high.\n", stacklog->vs->label, lv);
     plog(msg);
-    sprintf(msg, "The first Object '%s' of the list is used\n",lo);
+    sprintf(msg, "The first object '%s' of the list is used\n",lo);
     plog(msg);
     return(cur1);
    }
@@ -2094,7 +2094,7 @@ while(b==a) //avoid RND ==1
   if(a==0)
    {sprintf(msg, "Warning (eq. for '%s'): draw random on '%s' with Prob.=0 for each element\n", stacklog->vs->label, lv);
     plog(msg);
-    sprintf(msg, "The first Object '%s' of the list is used\n",lo);
+    sprintf(msg, "The first object '%s' of the list is used\n",lo);
     plog(msg);
     return(cur1);
    }
@@ -2212,7 +2212,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
   break;
 
 if(cv==NULL)
- {sprintf(msg, "\nError in increment:\n variable %s not contained in Object %s", lv, label);
+ {sprintf(msg, "\nError in increment:\n variable %s not contained in object %s", lv, label);
   plog(msg);
   error_hard();
   quit=2;
@@ -2256,7 +2256,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
   break;
 
 if(cv==NULL)
- {sprintf(msg, "Error in multiply:\n variable %s not contained in Object %s", lv, label);
+ {sprintf(msg, "Error in multiply:\n variable %s not contained in object %s", lv, label);
   plog(msg);
   error_hard();
   quit=2;

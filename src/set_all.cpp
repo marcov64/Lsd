@@ -157,7 +157,7 @@ else
   sprintf(ch, "label .head.l -text \"Var: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
 cmd(inter, ch);
 
-sprintf(ch, "label .head.lo -text \"contained in Object %s\"", cv->up->label);
+sprintf(ch, "label .head.lo -text \"contained in object %s\"", cv->up->label);
 cmd(inter, ch);
 
 cmd(inter, "pack .head.lg .head.l .head.lo");
@@ -647,15 +647,15 @@ case 4: cv=r->search_var(NULL, lab);
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances increasing from %g with steps %g re-starting for each group of Objects.", i-1, value1, value2);
+        {sprintf(msg, " All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
          if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of Objects.",cd->init, cases_from, cases_to, value1, value2);
+           sprintf(msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of Objects.", cases_from, cases_to, value1, value2);
+           sprintf(msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cases_from, cases_to, value1, value2);
            
          change_descr_lab(lab, "", "", "", msg);        
         }  
@@ -876,7 +876,7 @@ if(l!=(char *)NULL && strcmp(l, ""))
 		  }
      }
      if(cur!=NULL || kappa!=EOF)
-      plog("Problem loading data. The file may contain a different number of values compared to the Objects to initialize.\n");
+      plog("Problem loading data. The file may contain a different number of values compared to the objects to initialize.\n");
       if( update_description==1)
       {
       cd=search_description(lab);

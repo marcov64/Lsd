@@ -406,26 +406,27 @@ cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global Root
  
 cmd(inter, "proc lmmraise {win ent} {wm focusmodel . active; if { $ent!=\"\"} {focus -force $ent} {focus -force $win}; wm focusmodel . passive}");
 
-cmd(inter, "proc blocklmm w { wm transient $w [ winfo parent $w ]; raise $w; focus -force [focus -lastfor $w]; grab set $w }");
-cmd(inter, "proc sblocklmm w { grab release $w; destroy $w; focus -force .f.t.t }");
-
 #ifdef DUAL_MONITOR
 /* procedures to adjust window positioning (settings for dual and single monitor setups). Three types for positioning:
 	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
 	centerW: center over the parent window (in any display)
-	topleft: put over the top left corner of parent window (below menu bar)
+	topleftW: put over the top left corner of parent window (below menu bar)
 */
 // check if window center is in primary display
 cmd( inter, "proc primdisp w { if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } { return true } { return false } } " );
 // compute x and y coordinates of new window according to the types
-cmd( inter, "proc getx { w type } { switch $type { centerS { return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ] } centerW { return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ] } topleft { return [ expr [ winfo x [ winfo parent $w ] ] + 5 ] } } }" );
-cmd( inter, "proc gety { w type } { switch $type { centerS { return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ] } centerW { return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ] } topleft { return [ expr [ winfo y [ winfo parent $w ] ] + 50 ] } } }" );
+cmd( inter, "proc getx { w pos } { switch $pos { centerS { return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ] } centerW { return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ] } topleftS { global hmargin; return $hmargin } topleftW { return [ expr [ winfo x [ winfo parent $w ] ] + 5 ] } } }" );
+cmd( inter, "proc gety { w pos } { switch $pos { centerS { return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ] } centerW { return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ] } topleftS { global vmargin; return $vmargin } topleftW { return [ expr [ winfo y [ winfo parent $w ] ] + 50 ] } } }" );
 // configure the window
-cmd( inter, "proc setgeom { w { type centerW } } { wm withdraw $w; update idletasks; if { [ string equal $type centerS ] && ! [ primdisp [ winfo parent $w ] ] } { set type centerW }; set x [ getx $w $type ]; set y [ gety $w $type ]; wm geom $w +$x+$y; update; wm deiconify $w; wm transient $w [ winfo parent $w ] }" );
+cmd( inter, "proc showtop { w { pos centerW } { resizeX no } { resizeY no } { grab yes } } { wm withdraw $w; update idletasks; if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } { set pos centerW }; set x [ getx $w $pos ]; set y [ gety $w $pos ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; if $grab { global lstGrab; lappend lstGrab \"$w [ grab current $w ]\"; grab set $w }; focus -force [focus -lastfor $w] }" );
 #else
 // old centering procedure (doesn't work well for dual monitor), probably obsolete
-cmd( inter, "proc setgeom { w { type window_center } } { wm withdraw $w; update idletasks; set x [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 - [ winfo vrootx [ winfo parent $w ] ] ]; set y [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 - [ winfo vrooty [ winfo parent $w ] ] ]; wm geom $w +$x+$y; update; wm deiconify $w }");
+cmd( inter, "proc showtop { w { pos centerW } { resizeX no } { resizeY no } } { wm withdraw $w; update idletasks; set x [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 - [ winfo vrootx [ winfo parent $w ] ] ]; set y [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 - [ winfo vrooty [ winfo parent $w ] ] ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; global lstGrab; lappend lstGrab { $w [ grab current $w ] }; grab set $w }");
 #endif
+
+// procedures for create and destroy top level new windows
+cmd( inter, "proc newtop { parent w { name \"\" } { destroy { } } } { toplevel $w; if { $parent != \"\" } { wm transient $w $parent }; wm title $w $name; wm protocol $w WM_DELETE_WINDOW $destroy }" );
+cmd( inter, "proc destroytop w { global lstGrab; set igrab [ lsearch -glob $lstGrab \"$w *\" ]; if { $igrab >= 0 } { grab release $w; set grabPar [ string range [ lindex $lstGrab $igrab ] [ expr [ string first \" \" [ lindex $lstGrab $igrab ] ] + 1 ] end ]; if { $grabPar != \"\" } { grab set $grabPar }; set lstGrab [ lreplace $lstGrab $igrab $igrab ] }; set parent [ winfo parent $w ]; if { $parent == \".\" } { focus -force .f.t.t } { focus -force $parent }; destroy $w; update }" );
 
 // procedures to adjust tab size according to font type and size and text wrapping
 cmd( inter, "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
@@ -607,7 +608,7 @@ cmd(inter, "pack .f.hea.grp.tit .f.hea.grp.dat -side left");
 
 cmd(inter, "frame .f.hea.mod");
 cmd(inter, "label .f.hea.mod.tit -text \"Model: \" -fg red");
-cmd(inter, "label .f.hea.mod.dat -text \"(No model)\"");
+cmd(inter, "label .f.hea.mod.dat -text \"(no model)\"");
 cmd(inter, "pack .f.hea.mod.tit .f.hea.mod.dat -side left");
 
 cmd(inter, "frame .f.hea.ver");
@@ -617,7 +618,7 @@ cmd(inter, "pack .f.hea.ver.tit .f.hea.ver.dat -side left");
 
 cmd(inter, "frame .f.hea.file");
 cmd(inter, "label .f.hea.file.tit -text \"File: \" -fg red");
-cmd(inter, "label .f.hea.file.dat -text \"(No file)\"");
+cmd(inter, "label .f.hea.file.dat -text \"(no file)\"");
 cmd(inter, "pack .f.hea.file.tit .f.hea.file.dat -side left");
 
 cmd(inter, "frame .f.hea.line");
@@ -873,10 +874,6 @@ if(argn>1)
  else
   choice= -2; 
   
-
-
-
-
 cmd(inter, "set tcl_nonwordchars \\\"");
 cmd(inter, "focus -force .f.t.t");
 //cmd(inter, "bind .f.t.t <Control-o> {; set choice 15}");
@@ -953,23 +950,22 @@ cmd(inter, "wm geom . [expr $w]x$h+$x+$y"); // main window geometry setting
 //cmd(inter, "tk_messageBox -type ok -message \"screenwidth=$sw\\nreqwidth=$w\\nvrootx=$vx\\nscreenheight=$sh\\nreqheight=$h\\nvrooty=$vy\\nx=$x\\ny=$y\"");
 #endif
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm title .a \"Choose\"");
-cmd( inter, "wm protocol .a WM_DELETE_WINDOW { set temp 0; .a.b.ok invoke }" );
+cmd( inter, "newtop . .a \"Welcome\" { set temp 0; .a.b.ok invoke }" );
 
-cmd(inter, "frame .a.f -relief groove -bd 4");
+cmd(inter, "frame .a.f");
 cmd(inter, "set temp 33");
 cmd(inter, "label .a.f.l -text \"Choose Action\"  -fg red");
 
-cmd(inter, "radiobutton .a.f.r1 -variable temp -value 33 -text \"Browse models\" -justify left -relief groove -anchor w");
+cmd(inter, "frame .a.f.b -relief groove -bd 2");
+cmd(inter, "radiobutton .a.f.b.r1 -variable temp -value 33 -text \"Manage models\" -justify left -anchor w");
 
-cmd(inter, "radiobutton .a.f.r2 -variable temp -value 15 -text \"Open a text file.\" -justify left -relief groove -anchor w");
+cmd(inter, "radiobutton .a.f.b.r2 -variable temp -value 15 -text \"Open text file\" -justify left -anchor w");
 
-cmd(inter, "radiobutton .a.f.r3 -variable temp -value 0 -text \"Create a new text file.\" -justify left -relief groove -anchor w");
+cmd(inter, "radiobutton .a.f.b.r3 -variable temp -value 0 -text \"Create new text file\" -justify left -anchor w");
 
 
-cmd(inter, "pack .a.f.l ");
-cmd(inter, "pack .a.f.r1 .a.f.r2 .a.f.r3 -anchor w -fill x ");
+cmd(inter, "pack .a.f.b.r1 .a.f.b.r2 .a.f.b.r3 -anchor w -fill x ");
+cmd(inter, "pack .a.f.l .a.f.b -fill x");
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -978,14 +974,14 @@ cmd(inter, "pack .a.b.ok .a.b.help -padx 1 -pady 5 -side left");
 cmd(inter, "pack  .a.f .a.b -fill x");
 cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {set temp 0; .a.b.ok invoke}");
-cmd( inter, "setgeom .a" );
-cmd(inter, "set i 1; bind .a <Down> { if { $i < 3 } {incr i; .a.f.r$i invoke} {} }"); 
-cmd(inter, "bind .a <Up> { if { $i > 1 } {incr i -1; .a.f.r$i invoke} {} }");
-cmd(inter, "focus -force .a.f.r1");
-cmd(inter, "blocklmm .a");
+cmd(inter, "set i 1; bind .a <Down> { if { $i < 3 } {incr i; .a.f.b.r$i invoke} {} }"); 
+cmd(inter, "bind .a <Up> { if { $i > 1 } {incr i -1; .a.f.b.r$i invoke} {} }");
+cmd(inter, "focus -force .a.f.b.r1");
+
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 cmd(inter, "set choice $temp");
 
@@ -1066,25 +1062,22 @@ if(s==NULL || !strcmp(s, ""))
     goto loop;
    }
 
-  s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
-
   cmd(inter, "set init_time [clock seconds]"); 
-  cmd(inter, "toplevel .t");
+  cmd( inter, "newtop \"\" .t \"Please Wait\"" );
   // change window icon
   cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
-  cmd(inter, "wm title .t \"Please Wait\"");
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
   if ( run )
 	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
   else
 	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2");
+  cmd(inter, "focus -force .t");
+  cmd( inter, "showtop .t centerS" );
+    s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
   if ( run && ! strcmp( s, "1" ) )	// auto hide LMM if appropriate
 	cmd(inter, "wm iconify .");
-  cmd(inter, "focus -force .t");
-  cmd( inter, "setgeom .t" );
-  cmd(inter, "blocklmm .t");
-  cmd(inter, "update");  
+
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
   if(choice==0)
     cmd(inter, "set result \"[catch [exec make -fmakefile 2> makemessage.txt]]\""); 
@@ -1106,10 +1099,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 
    }
-  cmd(inter, "sblocklmm .t");
-  cmd(inter, "destroy .t");
-//  cmd(inter, "wm deiconify .");  // only reopen if error
-  cmd(inter, "update");
+  cmd(inter, "destroytop .t");
   
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}");
   
@@ -1130,80 +1120,6 @@ if(s==NULL || !strcmp(s, ""))
    { //problem
    cmd(inter, "wm deiconify .");  // only reopen if error
    create_compresult_window();
-/* 
-Old message, offering to run an existing executable. Never used in 10 years, better to scrap it
-   
-  sprintf(msg, "if { [file exist %s$add_exe]==0 } {set choice 1} {set choice 0}", str+7);
-  cmd(inter, msg);
-   if(choice==1)
-    {//the exe exists
-   
-   create_compresult_window();
-   
-   choice=0;
-   cmd(inter, "toplevel .a");
-   cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-   cmd(inter, "wm title .a \"Warning\"");
-   cmd(inter, "label .a.l -text \"Compilation issued an error message, but a model program exists, probably generated with an version of the equation file.\\n.\\nDo you want to run the existing model program anyway?\"");
-   cmd(inter, "pack .a.l");
-   cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#run}");
-   cmd(inter, "button .a.b.run -width -9 -text Run -command {set choice 1}");
-   cmd(inter, "button .a.b.norun -width -9 -text \"Don't run\" -command {set choice 2}");
-   cmd(inter, "pack .a.b.run .a.b.norun .a.b.help -side left -expand yes -fill x");
-   cmd(inter, "pack .a.b -fill x");
-   cmd(inter, "bind .a <Return> {.a.b.norun invoke}");
-   cmd(inter, "bind .a <Escape> {.a.b.norun invoke}");
-   choice=0;
-   cmd(inter, "toplevel .a");
-   cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-   cmd(inter, "wm title .a \"Warning\"");
-   cmd(inter, "label .a.l -text \"Compilation failed. Read the compiler's message to fix the errors.\"");
-   cmd(inter, "pack .a.l");
-   cmd(inter, "frame .a.b");
- 
-   cmd(inter, "focus -force .a.b.norun");
-   cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-   //cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-   cmd(inter, "blocklmm .a");
-   while(choice==0)
-    Tcl_DoOneEvent(0);
-   cmd(inter, "sblocklmm .a");
-   
-      if(choice==2)
-       {cmd(inter, "cd $RootLsd"); 
-        choice=0;
-        goto loop;
-       } 
-      
-    }   
-   else
-    {//no exe file
-    
-   create_compresult_window();
-
-   choice=0;
-   cmd(inter, "toplevel .a");
-   cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-   cmd(inter, "wm title .a \"Compilation Error\"");
-   cmd(inter, "label .a.l -text \"Compilation issued an error message.\\nFix the errors and try again\"");
-   cmd(inter, "pack .a.l");
-   cmd(inter, "frame .a.b");
-   cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#run}");
-   cmd(inter, "button .a.b.run -width -9 -text Ok -command {set choice 1}");
-   cmd(inter, "pack .a.b.run .a.b.help -side left -expand yes -fill x");
-   cmd(inter, "pack .a.b -fill x");
-   cmd(inter, "bind .a <Return> {.a.b.run invoke}");
-   cmd(inter, "bind .a <Escape> {.a.b.run invoke}");
-   cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-   //cmd(inter, "set w .a; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y");
-   cmd(inter, "blocklmm .a");
-   while(choice==0)
-    Tcl_DoOneEvent(0);
-   cmd(inter, "sblocklmm .a");
-  
-    } 
-   /**************/ 
    }
   else
 	if ( run )
@@ -1224,7 +1140,6 @@ Old message, offering to run an existing executable. Never used in 10 years, bet
      } 
  cmd(inter, "cd $RootLsd");
  choice=0;
- cmd(inter, "focus -force .f.t.t");
  goto loop;
  }
 
@@ -1476,24 +1391,23 @@ if(choice==0)
  goto loop;
 
 cmd(inter, "set line \"\"");
-cmd(inter, "toplevel .search_line");
-cmd(inter, "wm protocol .search_line WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .search_line \"Goto Line\"");
-cmd(inter, "wm transient .search_line .");
+cmd( inter, "newtop . .search_line \"Goto Line\" { .search_line.b.esc invoke }" );
+
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
 cmd(inter, "entry .search_line.e -justify center -width 10 -textvariable line");
 cmd(inter, "frame .search_line.b");
-cmd(inter, "button .search_line.b.ok -width -9 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {.f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroy .search_line; sblocklmm .search_line } }");
-cmd(inter, "button .search_line.b.esc -width -9 -text Cancel -command {sblocklmm .search_line}");
+cmd(inter, "button .search_line.b.ok -width -9 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {if [ string is integer $line ] { .f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroytop .search_line } { destroytop .search_line; tk_messageBox -type ok -title Error -icon error -message \"Invalid value.\n\nPlease check that a valid integer is used.\" } } }");
+cmd(inter, "button .search_line.b.esc -width -9 -text Cancel -command {destroytop .search_line}");
 cmd(inter, "bind .search_line <KeyPress-Return> {.search_line.b.ok invoke}");
 cmd(inter, "bind .search_line <KeyPress-Escape> {.search_line.b.esc invoke}");
 
 cmd(inter, "pack .search_line.b.ok .search_line.b.esc -padx 1 -pady 5 -side left");
-cmd(inter, "pack .search_line.l .search_line.e .search_line.b");
-cmd( inter, "setgeom .search_line" );
+cmd(inter, "pack .search_line.l .search_line.e");
+cmd(inter, "pack .search_line.b -side right");
 
 cmd(inter, "focus -force .search_line.e");
-cmd(inter, "blocklmm .search_line");
+
+cmd( inter, "showtop .search_line" );
 choice=0;
 goto loop;
 }
@@ -1506,10 +1420,7 @@ if(choice==0)
  goto loop;
 
 cmd(inter, "set curcounter $lfindcounter");
-cmd(inter, "toplevel .find");
-cmd(inter, "wm transient .find .");
-cmd(inter, "wm protocol .find WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .find \"Search Text\"");
+cmd( inter, "newtop . .find \"Search Text\" { .find.b.esc invoke }" );
 
 cmd(inter, "label .find.l -text \"Type the text to search\"");
 cmd(inter, "entry .find.e -width 30 -textvariable textsearch");
@@ -1520,12 +1431,12 @@ cmd(inter, "radiobutton .find.r1 -text \"Down\" -variable dirsearch -value \"-fo
 cmd(inter, "radiobutton .find.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
 
 cmd(inter, "frame .find.b");
-cmd(inter, "button .find.b.ok -width -9 -text Search -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; sblocklmm .find} {.find.e selection range 0 end; bell}}");
+cmd(inter, "button .find.b.ok -width -9 -text Search -command {incr lfindcounter; set curcounter $lfindcounter; lappend lfind \"$textsearch\"; if {$docase==1} {set case \"-exact\"} {set case \"-nocase\"}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; destroytop .find} {.find.e selection range 0 end; bell}}");
 
 cmd(inter, "bind .find.e <Up> {if { $curcounter >= 0} {incr curcounter -1; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 cmd(inter, "bind .find.e <Down> {if { $curcounter <= $lfindcounter} {incr curcounter; set textsearch \"[lindex $lfind $curcounter]\"; .find.e selection range 0 end;} {}}");
 
-cmd(inter, "button .find.b.esc -width -9 -text Cancel -command {sblocklmm .find}");
+cmd(inter, "button .find.b.esc -width -9 -text Cancel -command {destroytop .find}");
 
 
 cmd(inter, "bind .find <KeyPress-Return> {.find.b.ok invoke}");
@@ -1533,13 +1444,12 @@ cmd(inter, "bind .find <KeyPress-Escape> {.find.b.esc invoke}");
 
 cmd(inter, "pack .find.b.ok .find.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .find.l .find.e .find.r1 .find.r2 .find.c -fill x");
-cmd(inter, "pack .find.b");
+cmd(inter, "pack .find.b -side right");
 
-cmd( inter, "setgeom .find" );
-cmd(inter, "blocklmm .find");
 cmd(inter, "focus -force .find.e");
 
 choice=0;
+cmd( inter, "showtop .find" );
 goto loop;
 }
 
@@ -1547,7 +1457,7 @@ if(choice==12)
 {
 /* Search again the same pattern in the text*/
 
-cmd(inter, "if {$textsearch ==\"\"} {} {.f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search -count length $dirsearch $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\";if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; destroy .l; ;focus -force .f.t.t; } {}}");
+cmd(inter, "if {$textsearch ==\"\"} {} {.f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search -count length $dirsearch $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add sel $cur \"$cur + $length char\";if {[string compare $endsearch end]==0} {} {set length 0}; .f.t.t mark set insert \"$cur + $length char\" ; update; .f.t.t see $cur; destroytop .l } {}}");
 choice=0;
 goto loop;
 }
@@ -1688,49 +1598,44 @@ if(choice==14)
 choice=0;
 
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New Model or Group\"");
-cmd(inter, "wm transient .a .");
+cmd( inter, "newtop . .a \"New Model or Group\" { .a.b.esc invoke }" );
+
 cmd(inter, "label .a.tit -text \"Current group:\\n$modelgroup\"");
-cmd(inter, "frame .a.f -relief groove");
+cmd(inter, "frame .a.f -relief groove -bd 2");
 
 cmd(inter, "set temp 1");
-cmd(inter, "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -justify left -relief groove -anchor w");
-cmd(inter, "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -justify left -relief groove -anchor w");
+cmd(inter, "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -justify left -anchor w");
+cmd(inter, "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -justify left -anchor w");
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f.r1 .a.f.r2 -fill x");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.tit .a.f -fill x");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "bind .a <Up> {.a.f.r1 invoke}");
 cmd(inter, "bind .a <Down> {.a.f.r2 invoke}");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+cmd(inter, "destroytop .a");
 
 
 //operation cancelled
 if(choice==2)
- {cmd(inter, "sblocklmm .a");
+ {
   choice=0;
   goto loop;
  }
 
-cmd(inter, "sblocklmm .a");
 cmd(inter, "set choice $temp");
 if(choice==2)
 {
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New Group\"");
-cmd(inter, "wm transient .a .");
+cmd( inter, "newtop . .a \"New Group\" { .a.b.esc invoke }" );
+
 cmd(inter, "label .a.tit -text \"Create a new group in group:\\n $modelgroup\"");
 
 cmd(inter, "label .a.mname -text \"Insert new group name\"");
@@ -1749,18 +1654,17 @@ cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
 cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mdir .a.edir .a.ldes .a.tdes");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.ename");
 cmd(inter, ".a.ename selection range 0 end");
 
-
-cmd(inter, "blocklmm .a");
+cmd( inter, "showtop .a" );
 here_newgroup:
 choice=0;
 while(choice==0)
@@ -1770,7 +1674,7 @@ cmd(inter, "if {[string length $mdir] == 0 || [string length $mname]==0} {set ch
 
 //operation cancelled
 if(choice==2)
- {cmd(inter, "sblocklmm .a");
+ {cmd(inter, "destroytop .a");
   choice=0;
   goto loop;
  }
@@ -1784,7 +1688,7 @@ if(choice==-1)
 //control for existing directory
 cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory:\\n$groupdir/$mdir\\n\\nPossibly there is already such a directory.\\nCreation of new group aborted.\"; set choice 3} {}");
 if(choice==3)
- {cmd(inter, "sblocklmm .a");
+ {cmd(inter, "destroytop .a");
   choice=0;
   goto loop;
  } 
@@ -1798,7 +1702,7 @@ cmd(inter, "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $
 cmd(inter, "set f [open description.txt w]; puts -nonewline $f \"[.a.tdes get 0.0 end]\"; close $f");
 cmd(inter, "set modelgroup $modelgroup/$mname");
 
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 //end of creation of a new group
 }
 else
@@ -1806,10 +1710,8 @@ else
 
 //create a new model
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"New Model\"");
-cmd(inter, "wm transient .a .");
+cmd( inter, "newtop . .a \"New Model\" { .a.b.esc invoke }" );
+
 cmd(inter, "label .a.tit -text \"Create a new model in group:\\n $modelgroup\"");
 
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
@@ -1833,23 +1735,22 @@ cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left -fill x");
-
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.ename");
 cmd(inter, ".a.ename selection range 0 end");
 
+cmd( inter, "showtop .a" );
+
 loop_copy_new:
-cmd(inter, "blocklmm .a");
 while(choice==0)
  Tcl_DoOneEvent(0);
 
 cmd(inter, "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2} {}");
 //operation cancelled
 if(choice==2)
- {cmd(inter, "sblocklmm .a");
+ {cmd(inter, "destroytop .a");
   choice=0;
   goto loop;
  }
@@ -1914,7 +1815,7 @@ if(choice==4)
 
   cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
   if(choice==0)
-   {cmd(inter, "sblocklmm .a");
+   {cmd(inter, "destroytop .a");
     goto loop;
    } 
  } 
@@ -1929,7 +1830,7 @@ cmd(inter, "set version $mver");
 cmd(inter, ".f.hea.mod.dat conf -text \"$modelname\"");
 cmd(inter, ".f.hea.ver.dat conf -text \"$version\"");
 cmd(inter, ".f.hea.grp.dat conf -text \"$modelgroup\"");
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 
 cmd(inter, "file mkdir $dirname");
@@ -2218,10 +2119,8 @@ if(choice==0)
 
 
 cmd(inter, "set cur \"\"");
-cmd(inter, "toplevel .l");
-cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
-cmd(inter, "wm transient .l .");
-cmd(inter, "wm title .l \"Replace Text\"");
+cmd( inter, "newtop . .l \"Replace Text\" { .l.b2.esc invoke }" );
+
 //cmd(inter, "set textsearch \"\"");
 cmd(inter, "label .l.l -text \"Type the text to search\"");
 cmd(inter, "entry .l.e -width 30 -textvariable textsearch");
@@ -2233,25 +2132,25 @@ cmd(inter, "radiobutton .l.r2 -text \"Up\" -variable dirsearch -value \"-backwar
 cmd(inter, "checkbutton .l.c -text \"Case sensitive\" -variable docase");
 
 cmd(inter, "frame .l.b1");
-cmd(inter, "button .l.b1.repl -width -9 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.ok invoke} {}}");
+cmd(inter, "button .l.b1.repl -width -9 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.b2.ok invoke} {}}");
 cmd(inter, "button .l.b1.all -width -9 -state disabled -text \"Repl. All\" -command {set choice 4}");
 cmd(inter, "frame .l.b2");
 cmd(inter, "button .l.b2.ok -width -9 -text Search -command {if { [string length \"$textsearch\"]==0} {} {.f.t.t tag remove found 1.0 end; if {$docase==1} {set case \"-exact\"} {set case -nocase}; .f.t.t tag remove sel 1.0 end; set cur [.f.t.t index insert]; set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; if {[string length $cur] > 0} {.f.t.t tag add found $cur \"$cur + $length char\"; if {[string compare $endsearch end]==0} {.f.t.t mark set insert \"$cur + $length char\" } {.f.t.t mark set insert $cur}; update; .f.t.t see $cur; .l.b1.repl conf -state normal; .l.b1.all conf -state normal} {.l.b1.all conf -state disabled; .l.b1.repl conf -state disabled}}}");
 cmd(inter, "button .l.b2.esc -width -9 -text Cancel -command {focus -force .f.t.t; set choice 5}");
 cmd(inter, "bind .l <KeyPress-Return> {.l.b2.ok invoke}");
 cmd(inter, "bind .l <KeyPress-Escape> {.l.b2.esc invoke}");
-
 cmd(inter, "pack .l.b1.repl .l.b1.all -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.b2.ok .l.b2.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.l .l.e .l.r .l.s .l.r1 .l.r2 .l.c");
-cmd(inter, "pack .l.b1 .l.b2");
+cmd(inter, "pack .l.b1");
+cmd(inter, "pack .l.b2 -side right");
 
-cmd( inter, "setgeom .l" );
 cmd(inter, "focus -force .l.e");
 cmd(inter, ".f.t.t tag conf found -background red -foreground white");
-cmd(inter, "blocklmm .l");
+
 choice=0;
 
+cmd( inter, "showtop .l" );
 here:
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -2272,9 +2171,8 @@ if(choice!=0)
   goto here;
  }
 
-cmd(inter, "sblocklmm .l");
-cmd(inter, "focus -force .f.t.t");
-cmd(inter, "destroy .l");
+cmd(inter, "destroytop .l");
+
 cmd(inter, ".f.t.t tag remove found 1.0 end");
 color(shigh, 0, 0);				// reevaluate colors
 choice=0;
@@ -2290,11 +2188,7 @@ Insert a Lsd equation
 
 choice=0;
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert an Equation\"");
+cmd( inter, "newtop . .a \"Insert an Equation\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
@@ -2317,15 +2211,15 @@ cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
-cmd(inter, "blocklmm .a");
+
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -2364,11 +2258,8 @@ Insert a Lsd equation
 choice=0;
 
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert an Equation\"");
+cmd( inter, "newtop . .a \"Insert an Equation\" { .a.b.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
@@ -2390,16 +2281,15 @@ cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
-cmd(inter, "blocklmm .a");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -2441,12 +2331,7 @@ if(choice==26 && macro==1)
 Insert a v[0]=p->cal("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'V(...)' Command\"");
-
+cmd( inter, "newtop . .a \"Insert a 'V(...)' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -2479,15 +2364,16 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
-cmd(inter, "blocklmm .a");
+
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -2522,10 +2408,8 @@ if(choice==26 && macro==0)
 Insert a v[0]=p->cal("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'cal'\"");
-cmd(inter, "wm transient .a .");
+cmd( inter, "newtop . .a \"Insert a 'cal'\" { .a.f.esc invoke }" );
+
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -2557,16 +2441,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -2598,12 +2481,9 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'CYCLE' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'CYCLE' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
@@ -2628,16 +2508,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -2701,12 +2580,9 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'for' Cycle\"");
+cmd( inter, "newtop . .a \"Insert a 'for' Cycle\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l1 -text \"Type below the label of the Object to cycle through\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
@@ -2731,16 +2607,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -2772,27 +2647,24 @@ Insert a Lsd script, to be used in Lsd equations' code
 
 choice=0;
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a Lsd Script\"");
+cmd( inter, "newtop . .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options\nThe interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
 cmd(inter, "radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of Objects\" -underline 1 -variable res -value 56");
-cmd(inter, "radiobutton .a.r.sear -text \"SEARCH - search the first instance an Object type\" -underline 2 -variable res -value 55");
-cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
-cmd(inter, "radiobutton .a.r.lqs -text \"SORT - sort a group of Objects\" -underline 3 -variable res -value 31");
-cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - add a new Object\" -underline 3 -variable res -value 52");
-cmd(inter, "radiobutton .a.r.delo -text \"DELETE - delete an Object\" -underline 0 -variable res -value 53");
-cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - draw an Object\" -underline 1 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.sear -text \"SEARCH - search the first instance an object type\" -underline 2 -variable res -value 55");
+cmd(inter, "radiobutton .a.r.scnd -text \"SEARCH_CND - conditional search a specific object in the model\" -underline 0 -variable res -value 30");
+cmd(inter, "radiobutton .a.r.lqs -text \"SORT - sort a group of objects\" -underline 3 -variable res -value 31");
+cmd(inter, "radiobutton .a.r.addo -text \"ADDOBJ - add a new object\" -underline 3 -variable res -value 52");
+cmd(inter, "radiobutton .a.r.delo -text \"DELETE - delete an object\" -underline 0 -variable res -value 53");
+cmd(inter, "radiobutton .a.r.rndo -text \"RNDDRAW - draw an object\" -underline 1 -variable res -value 54");
 cmd(inter, "radiobutton .a.r.wri -text \"WRITE - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.incr -text \"INCR - increment the value of a parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"MULT - multiply the value of a parameter\" -underline 0 -variable res -value 45");
-cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
+cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
@@ -2812,27 +2684,25 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
-cmd(inter, "pack .a.tit .a.r .a.f");
+cmd(inter, "pack .a.tit .a.r");
+cmd(inter, "pack .a.f -side right");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.r.cal");
-
 
 //cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
 
-cmd(inter, "blocklmm .a");
-
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -2855,27 +2725,24 @@ Insert a Lsd script, to be used in Lsd equations' code
 
 choice=0;
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a Lsd Script\"");
+cmd( inter, "newtop . .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options. The interface will request the necessary information\" -justify center");
 cmd(inter, "frame .a.r -bd 2 -relief groove");
 cmd(inter, "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25");
 cmd(inter, "radiobutton .a.r.cal -text \"cal - request the value of a variable\" -underline 0 -variable res -value 26");
-cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a variable over a set of Objects\" -underline 1 -variable res -value 56");
-cmd(inter, "radiobutton .a.r.sear -text \"search - search the first instance an Object type\" -underline 3 -variable res -value 55");
-cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific Object in the model\" -underline 0 -variable res -value 30");
-cmd(inter, "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of Objects\" -underline 7 -variable res -value 31");
-cmd(inter, "radiobutton .a.r.addo -text \"add_an_object - add a new Object\" -underline 0 -variable res -value 52");
-cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - delete an Object\" -underline 0 -variable res -value 53");
-cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - draw an Object\" -underline 6 -variable res -value 54");
+cmd(inter, "radiobutton .a.r.sum -text \"sum - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56");
+cmd(inter, "radiobutton .a.r.sear -text \"search - search the first instance an object type\" -underline 3 -variable res -value 55");
+cmd(inter, "radiobutton .a.r.scnd -text \"search_var_cond - conditional search a specific object in the model\" -underline 0 -variable res -value 30");
+cmd(inter, "radiobutton .a.r.lqs -text \"lsdqsort - sort a group of objects\" -underline 7 -variable res -value 31");
+cmd(inter, "radiobutton .a.r.addo -text \"add_n_objects2 - add new objects\" -underline 0 -variable res -value 52");
+cmd(inter, "radiobutton .a.r.delo -text \"delete_obj - delete an object\" -underline 0 -variable res -value 53");
+cmd(inter, "radiobutton .a.r.rndo -text \"draw_rnd - draw an object\" -underline 6 -variable res -value 54");
 cmd(inter, "radiobutton .a.r.wri -text \"write - overwrite a variable or parameter with a new value\" -underline 0 -variable res -value 29");
 cmd(inter, "radiobutton .a.r.incr -text \"increment - increment the value of a parameter\" -underline 0 -variable res -value 40");
 cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a parameter\" -underline 0 -variable res -value 45");
-cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of Objects\" -underline 0 -variable res -value 27");
+cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
@@ -2895,29 +2762,27 @@ cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
-cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.html#LsdScript}");
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.r.equ .a.r.cal .a.r.sum .a.r.sear .a.r.scnd .a.r.lqs .a.r.addo .a.r.delo .a.r.rndo .a.r.wri .a.r.incr .a.r.mult .a.r.for .a.r.math -anchor w");
-cmd(inter, "pack .a.tit .a.r .a.f");
+cmd(inter, "pack .a.tit .a.r");
+cmd(inter, "pack .a.f -side right");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.r.cal");
-
 
 //cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
 
-
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.f.ok");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -2940,11 +2805,7 @@ if(choice==40 && macro==1)
 Insert a v[0]=p->increment("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert an 'INCR' Command\"");
+cmd( inter, "newtop . .a \"Insert an 'INCR' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
@@ -2977,16 +2838,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -3017,11 +2877,8 @@ if(choice==40 && macro==0)
 Insert a v[0]=p->increment("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert an 'increment' Command\"");
+cmd( inter, "newtop . .a \"Insert an 'increment' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -3053,16 +2910,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3081,6 +2937,7 @@ if(num!=-1)
 
 cmd(inter, "unset v_num");
 cmd(inter, "savCurIni");	// save data for recolor
+choice=23;	// do syntax coloring
 goto loop;
 }
 
@@ -3091,11 +2948,7 @@ if(choice==45 && macro==1)
 Insert a v[0]=p->multiply("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'MULT' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'MULT' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
@@ -3130,16 +2983,15 @@ cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3171,11 +3023,8 @@ if(choice==45 && macro==0)
 Insert a v[0]=p->multiply("Var",0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'multiply' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'multiply' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -3207,18 +3056,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3248,13 +3095,7 @@ if(choice==29 && macro==1)
 Insert a p->write("Var",0,0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'WRITE' Command\"");
-
-cmd(inter, ".f.t.t conf -state disabled");
+cmd( inter, "newtop . .a \"Insert a 'WRITE' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
@@ -3273,7 +3114,7 @@ cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
 cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
 
-cmd(inter, "label .a.l4 -text \"Object containing the Var or Par to write\"");
+cmd(inter, "label .a.l4 -text \"Object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
@@ -3286,18 +3127,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  { 
@@ -3325,11 +3164,8 @@ if(choice==29 && macro==0)
 Insert a p->write("Var",0,0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'write' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'write' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
 cmd(inter, "set v_num 0");
@@ -3337,7 +3173,7 @@ cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par to write\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to write\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -3347,7 +3183,7 @@ cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
 cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
 
-cmd(inter, "label .a.l4 -text \"Type below the object containing the Var or Par to write\"");
+cmd(inter, "label .a.l4 -text \"Type below the object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
@@ -3360,18 +3196,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3394,12 +3228,9 @@ if(choice==30 && macro==0)
 Insert a cur=p->search_var_cond("Var",1,0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'search_var_cond' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'search_var_cond' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
@@ -3409,7 +3240,7 @@ cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par to search for\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -3432,18 +3263,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3466,13 +3295,9 @@ if(choice==30 && macro==1)
 Insert a cur=p->search_var_cond("Var",1,0);
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'SEARCH_CND' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SEARCH_CND' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object found\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
@@ -3482,7 +3307,7 @@ cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par to search for\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -3505,18 +3330,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3531,8 +3354,6 @@ cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0
 cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDS($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
 cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDLS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-cmd(inter, "destroy .a");
-
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3545,23 +3366,19 @@ if(choice==31 && macro==1)
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'SORT' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SORT' Command\"");
-
-cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
+cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.obj0; .a.obj0 selection range 0 end}");
 
-cmd(inter, "label .a.l0 -text \"Type below label of the Objects to be sorted\"");
+cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
 cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par whose values are to be sorted\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.r_up}");
@@ -3583,16 +3400,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3603,12 +3419,6 @@ if(choice==2)
 cmd(inter, "set choice $v_direction");
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-/*
-if(choice==1)
-  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"UP\\\");\"");
-else
-  cmd(inter, ".f.t.t insert insert \"$v_obj1->lsdqsort(\\\"$v_obj0\\\",\\\"$v_label\\\", \\\"DOWN\\\");\"");
-********/
 
 if(choice==1)
   cmd(inter, "set direction \"UP\"");
@@ -3629,22 +3439,19 @@ if(choice==31 && macro==0)
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"Insert a 'lsdqsort' Command\"");
+cmd( inter, "newtop . .a \"Insert a 'lsdqsort' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l1 -text \"Type below the object containing the Objects to be sorted\"");
+cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.obj0; .a.obj0 selection range 0 end}");
 
-cmd(inter, "label .a.l0 -text \"Type below label of the Objects to be sorted\"");
+cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
 cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par whose values are to be sorted\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.r_up}");
@@ -3666,16 +3473,15 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -3703,11 +3509,7 @@ if(choice==51)
 /*
 Insert a math function
 */
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a Math Operation\"");
+cmd( inter, "newtop . .a \"Insert a Math Operation\" { .a.f.esc invoke }" );
 
 cmd(inter, "set value1 \"0\"; set value2 \"1\"; set res 1; set str \"UNIFORM($value1,$value2)\"");
 cmd(inter, "label .a.l1 -text \"Minimum\"");
@@ -3732,21 +3534,21 @@ cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -co
 cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\"; set str \"pow($value1,$value2)\"}");
 
 cmd(inter, "frame .a.f");	
-cmd(inter, "button .a.f.ok -width -9 -text Insert -command {set choice 1}");
+cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro.html#rnd}");
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.r1 .a.r2 .a.r3 .a.r4 .a.r5 .a.r6 .a.r7 .a.r8 .a.r9 .a.r10 .a.r11 .a.r12 .a.r13 -anchor w");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 choice=0;
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.e1; .a.e1 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  { 
   choice=0;
@@ -3801,34 +3603,30 @@ Insert a add_an_obj;
 */
 here_addobj:
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert an 'ADDOBJ' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert an 'ADDOBJ' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Object to create\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.numobj; .a.numobj selection range 0 end}");
 
-cmd(inter, "label .a.l3 -text \"Type below the number of Objects to create\"");
+cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
 cmd(inter, "set numobj \"1\"");
 cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
 cmd(inter, "bind .a.numobj <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the pointer to an example Object to copy its initialization, if any.\"");
+cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object to copy its initialization, if any.\"");
 cmd(inter, "set v_num \"cur\"");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
 
-cmd(inter, "label .a.l4 -text \"Type below the parent Object containing the new Object(s)\"");
+cmd(inter, "label .a.l4 -text \"Type below the parent object containing the new object(s)\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
@@ -3841,24 +3639,19 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.numobj .a.l1 .a.v_num .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
-
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
+cmd(inter, "pack .a.f -side right");
 
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
  
-
-
 choice=0;
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+cmd(inter, "destroytop .a");
  
  
-cmd(inter, "sblocklmm .a");
 if(choice==2)
  {
   
@@ -3872,7 +3665,6 @@ cmd(inter, "if {$v_obj0 != \"\"} {.f.t.t insert insert $v_obj0; .f.t.t insert in
 
 if(choice ==1)
 {
-cmd(inter, "sblocklmm .a");
 //cmd(inter, ".f.t.t insert insert \"$v_obj0 \"");
 cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\"} {}");
 cmd(inter, "if {$v_obj ==\"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\",$v_num);\"} {}");
@@ -3888,19 +3680,9 @@ cmd(inter, "if {$v_obj !=\"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNO
 cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
 cmd(inter, "if {$v_obj !=\"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj,\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
 
-/*
-if(choice!=-3)
- {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Missing information.\\n\\nYou need to provide the pointer to an example object when adding more than 1 new objects.\"");
- choice=-3;
- goto here_addobj;
  }
-*/  
-}
 
 
-
-cmd(inter, "sblocklmm .a");
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
 goto loop;
@@ -3912,29 +3694,30 @@ if(choice==52 && macro==0)
 Insert a add_an_obj;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert an 'add_n_objects2' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert an 'add_an_object' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new Object created\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the pointer to an example Object, if available\"");
+cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object, if available\"");
 cmd(inter, "set v_num \"\"");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Object to create\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
 
 
-cmd(inter, "label .a.l4 -text \"Type below the parent Object where to add the new Object\"");
+cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
+cmd(inter, "set numobj \"1\"");
+cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
+cmd(inter, "bind .a.numobj <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+
+cmd(inter, "label .a.l4 -text \"Type below the parent object where to add the new object\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
@@ -3947,18 +3730,17 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
+cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.numobj .a.l4 .a.obj");
+cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
-
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -3967,7 +3749,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-cmd(inter, "if {$v_num==\"\" } { .f.t.t insert insert \"$v_obj0=$v_obj->add_an_object(\\\"$v_label\\\");\\n\"} {.f.t.t insert insert \"$v_obj0=$v_obj->add_an_object(\\\"$v_label\\\",$v_num);\\n\"}");
+cmd(inter, "if {$v_num==\"\" } { .f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj);\\n\"} {.f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj,$v_num);\\n\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3981,13 +3763,9 @@ if(choice==53 && macro==1)
 Insert a delete_obj;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'DELETE' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'DELETE' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
+cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
@@ -3999,18 +3777,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -4035,13 +3811,9 @@ if(choice==53 && macro==0)
 Insert a delete_obj;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'delete_obj' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'delete_obj' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the pointer of the Object to delete\"");
+cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
@@ -4053,18 +3825,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -4090,23 +3860,19 @@ if(choice==54 && macro==1)
 Insert a RNDDRAW
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'RNDDRAW' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'RNDDRAW' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the label of the Objects to draw\"");
-cmd(inter, "set v_num Object");
+cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
+cmd(inter, "set v_num object");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par to be used as proxies for probabilities\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -4116,7 +3882,7 @@ cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
 cmd(inter, "bind .a.lag <Return> {focus -force .a.tot; .a.tot selection range 0 end}");
 
-cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the Var or Par, if available\"");
+cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
 cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
 cmd(inter, "bind .a.tot <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
@@ -4134,18 +3900,17 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -4188,23 +3953,19 @@ if(choice==54 && macro==0)
 Insert a RNDDRAW
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'draw_rnd' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'draw_rnd' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the Object drawn\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the label of the Objects to draw\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
 cmd(inter, "set v_num Object");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the label of the Var or Par to be used as proxies for probabilities\"");
+cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
 cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
@@ -4214,7 +3975,7 @@ cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
 cmd(inter, "bind .a.lag <Return> {focus -force .a.tot; .a.tot selection range 0 end}");
 
-cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the Var or Par, if available\"");
+cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
 cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
 cmd(inter, "bind .a.tot <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
@@ -4232,18 +3993,17 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -4272,23 +4032,19 @@ if(choice==55&& macro==1)
 Insert a SEARCH;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'SEARCH' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SEARCH' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.lab; .a.lab selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the label of the Object to search\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
 cmd(inter, "set v_lab Object");
 cmd(inter, "entry .a.lab -width 20 -textvariable v_lab");
 cmd(inter, "bind .a.lab <Return> {focus -force .a.obj1; .a.obj1 selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent Object where to start the search\"");
+cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
@@ -4300,18 +4056,17 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfuncMacro
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -4335,23 +4090,19 @@ if(choice==55&& macro==0)
 Insert a SEARCH;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'search' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'search' Command\"");
-
-cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found Object\"");
+cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus -force .a.lab; .a.lab selection range 0 end}");
 
-cmd(inter, "label .a.l1 -text \"Type below the label of the Object to search\"");
+cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
 cmd(inter, "set v_lab Object");
 cmd(inter, "entry .a.lab -width 20 -textvariable v_lab");
 cmd(inter, "bind .a.lab <Return> {focus -force .a.obj1; .a.obj1 selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent Object where to start the search\"");
+cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
 cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
@@ -4363,18 +4114,16 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp lsdfunc.html
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==2)
  {
@@ -4399,11 +4148,8 @@ if(choice==56 && macro==1)
 Insert a SUM;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'SUM' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'SUM' Command\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -4435,16 +4181,16 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -4478,11 +4224,8 @@ if(choice==56 && macro==0)
 Insert a p->sum;
 */
 choice=0;
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Insert a 'sum' Command\" { .a.f.esc invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Insert a 'sum' Command\"");
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
 sprintf(msg, "set v_num %d", v_counter);
@@ -4514,16 +4257,16 @@ cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
-cmd(inter, "pack .a.f");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -4604,7 +4347,7 @@ cmd(inter, "showmodel $groupdir");
 while(choice==0 && num==0)
  Tcl_DoOneEvent(0);
 
-cmd(inter, "if {[winfo exists .l]==1} {destroy .l; bind .f.t.t <Enter> {}} {}");
+cmd(inter, "if {[winfo exists .l]==1} {destroytop .l; bind .f.t.t <Enter> {}} {}");
 choice=num;
 
 Tcl_UnlinkVar(inter, "choiceSM");
@@ -4655,9 +4398,7 @@ cmd(inter, ".m.model entryconf 11 -state normal");
 cmd(inter, ".m.model entryconf 12 -state normal");
 cmd(inter, ".m.model entryconf 14 -state normal");
 
-cmd(inter, "sblocklmm .l");
-cmd(inter, "set before [.f.t.t get 0.0 end]"); //avoid to re-issue a warning for non saved files
-choice=50;
+choice=50;		// load description file
 goto loop;
 }
 
@@ -4671,10 +4412,8 @@ if(choice==41)
 choice=0;
 
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Copy Model\" { .a.b.esc invoke }" );
 
-cmd(inter, "wm title .a \"Copy Model\"");
 cmd(inter, "label .a.tit -text \"Create a new version of model '$modelname' (ver. $version)\"");
 
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
@@ -4696,16 +4435,15 @@ cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#copy}");
 cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
 cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
-
 cmd(inter, "pack .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .a.b -side right");
 
-cmd( inter, "setgeom .a" );
-cmd(inter, "blocklmm .a");
 cmd(inter, ".a.ename selection range 0 end");
 cmd(inter, "focus -force .a.ename");
 
+cmd( inter, "showtop .a" );
 loop_copy:
 
 
@@ -4716,7 +4454,7 @@ while(choice==0)
 //operation cancelled
 if(choice==2)
  {
-  cmd(inter, "sblocklmm .a");  
+  cmd(inter, "destroytop .a");  
   choice=0;
   goto loop;
  }
@@ -4778,7 +4516,7 @@ cmd(inter, "set version $mver");
 
 cmd(inter, ".f.hea.mod.dat conf -text \"$modelname\"");
 cmd(inter, ".f.hea.ver.dat conf -text \"$version\"");
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 cmd(inter, "set ex [file exists $dirname/modelinfo.txt]");
 cmd(inter, "if { $ex == 0 } {set choice 0} {set choice 1}");
 if(choice==1)
@@ -4869,11 +4607,8 @@ if(choice==0)
 
 
   
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
+cmd( inter, "newtop . .a \"Model Info\" { .a.b.ok invoke }" );
 
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Model Info\"");
 cmd(inter, "frame .a.c");
 
 cmd(inter, "label .a.c.n -text \"Model Name\"");
@@ -4913,7 +4648,7 @@ if(f==NULL)
   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nAdd a makefile to model '$modelname' ([pwd]).\"");
   choice=0;
   cmd(inter, "cd $RootLsd");
-  cmd(inter, "if { [winfo exists .a] == 1} {destroy .a} {}");
+  cmd(inter, "if { [winfo exists .a] == 1} {destroytop .a} {}");
   goto loop;
  }
 fscanf(f, "%s", str);
@@ -4945,20 +4680,20 @@ cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
-
-cmd(inter, "pack .a.c .a.b");
+cmd(inter, "pack .a.c");
+cmd(inter, "pack .a.b -side right");
 cmd(inter, "bind .a <Escape> {set choice 2}");
 cmd(inter, "bind .a.c.en <Return> {focus -force .a.c.ev}");
 cmd(inter, "bind .a.c.ev <Return> {focus -force .a.b.ok}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 choice=0;
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.c.en");
-cmd(inter, "blocklmm .a");
+
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
 
 if(choice==1)
  {
@@ -5083,11 +4818,8 @@ else
   cmd(inter, "set a \"\"");
 
 
-cmd(inter, "toplevel .l");
-cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .l \"System Compilation Options\"");
+cmd( inter, "newtop . .l \"System Compilation Options\" { .l.t.d.b.esc invoke }" );
 
-cmd(inter, "wm transient .l .");
 cmd(inter, "frame .l.t");
 
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
@@ -5119,7 +4851,8 @@ cmd(inter, "button .l.t.d.b.help -width -9 -text Help -command {LsdHelp LMM_help
 cmd(inter, "button .l.t.d.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
 cmd(inter, "pack .l.t.yscroll -side right -fill y");
-cmd(inter, "pack .l.t.d.os .l.t.d.b");
+cmd(inter, "pack .l.t.d.os");
+cmd(inter, "pack .l.t.d.b -side right");
 cmd(inter, "pack .l.t.text .l.t.d -expand yes -fill both");
 cmd(inter, "pack .l.t");
 
@@ -5128,12 +4861,11 @@ cmd(inter, ".l.t.text insert end $a");
 //cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
 
-cmd( inter, "setgeom .l" );
 cmd(inter, "focus -force .l.t.text");
-cmd(inter, "blocklmm .l");
+
+cmd( inter, "showtop .l" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-
 
 if(choice==1)
  {
@@ -5144,7 +4876,8 @@ if(choice==1)
  }
 else
  choice=0; 
-cmd(inter, "sblocklmm .l");
+
+cmd(inter, "destroytop .l");
 
 goto loop;
 
@@ -5178,11 +4911,7 @@ else
    cmd(inter, "close $f");
 
   }
-cmd(inter, "toplevel .l");
-cmd(inter, "wm protocol .l WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .l \"Model Compilation Options\"");
-
-cmd(inter, "wm transient .l .");
+cmd( inter, "newtop . .l \"Model Compilation Options\" { .l.t.d.b.esc invoke }" );
 
 cmd(inter, "frame .l.t");
 
@@ -5205,8 +4934,8 @@ cmd(inter, "button .l.t.d.b.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .l.t.d.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#compilation_options}");
 cmd(inter, "button .l.t.d.b.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .l.t.d.b.ok .l.t.d.b.help .l.t.d.b.esc -padx 10 -pady 5 -side left");
-cmd(inter, "pack .l.t.d.opt .l.t.d.b");
-
+cmd(inter, "pack .l.t.d.opt");
+cmd(inter, "pack .l.t.d.b -side right");
 cmd(inter, "pack .l.t.yscroll -side right -fill y");
 cmd(inter, "pack .l.t.text .l.t.d -expand yes -fill both");
 cmd(inter, "pack .l.t");
@@ -5214,14 +4943,12 @@ cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
 cmd(inter, ".l.t.text insert end $a");
 
-cmd( inter, "setgeom .l" );
-cmd(inter, "blocklmm .l");
 cmd(inter, "focus -force .l.t.text");
 
 cmd(inter, "set cazzo 0");
+cmd( inter, "showtop .l" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-
 
 if(choice==1)
  {
@@ -5233,8 +4960,9 @@ if(choice==1)
 else
  choice=0; 
 //cmd(inter, "set choice $cazzo");
-cmd(inter, "sblocklmm .l");
 cmd(inter, "cd $RootLsd");
+
+cmd(inter, "destroytop .l");
 
 goto loop;
 
@@ -5265,10 +4993,8 @@ if(choice==59)
 {
 //Change font
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Change Font\"");
+cmd( inter, "newtop . .a \"Change Font\" { .a.f.esc invoke }" );
+
 cmd(inter, "label .a.l1 -text \"Enter the font name you wish to use\"");
 
 cmd(inter, "entry .a.v_num -width 30 -textvariable fonttype");
@@ -5282,16 +5008,17 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.htm
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.f");
+cmd(inter, "pack .a.l1 .a.v_num");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
-cmd(inter, "blocklmm .a");
 choice=0;
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
  {
   choice=0;
@@ -5322,15 +5049,13 @@ cmd(inter, "set temp_var8 $wrap");
 cmd(inter, "set temp_var9 $shigh");
 cmd(inter, "set temp_var10 $autoHide");
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm title .a \"LMM Options\"");
-cmd(inter, "wm transient .a .");
+cmd( inter, "newtop . .a \"LMM Options\" { .a.f2.esc invoke }" );
+
 cmd(inter, "label .a.l1 -text \"Terminal to use for the GDB debugger\"");
 cmd(inter, "entry .a.v_num -width 30 -textvariable temp_var1");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.v_num2; .a.v_num2 selection range 0 end}");
 
-cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages.\"");
+cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages\"");
 cmd(inter, "entry .a.v_num2 -width 30 -textvariable temp_var2");
 cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.v_num4; .a.v_num4 selection range 0 end}");
 
@@ -5375,18 +5100,21 @@ cmd(inter, "frame .a.f2");
 cmd(inter, "button .a.f2.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f2.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 5 -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.f1 .a.f2");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10");
+cmd(inter, "pack .a.f1");
+cmd(inter, "pack .a.f2");
 cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f2.esc invoke}");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
-cmd(inter, "blocklmm .a");
+
 choice=0;
+cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==1)
  {
  cmd(inter, "set Terminal $temp_var1");
@@ -5522,17 +5250,16 @@ if(strncmp(str, "TARGET=", 7)!=0)
 strcat(str,"NW");
 cmd(inter, msg);
 cmd(inter, "set init_time [clock seconds]"); 
-cmd(inter, "toplevel .t");
+
+cmd( inter, "newtop . .t \"Please Wait\"" );
+
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
-cmd(inter, "wm title .t \"Please Wait\"");
+
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
 cmd(inter, "pack .t.l1 .t.l2");
-cmd(inter, "focus -force .t");
-cmd( inter, "setgeom .t" );
-cmd(inter, "blocklmm .t");
-cmd(inter, "update");  
+cmd( inter, "showtop .t" );
 
 cmd(inter, "cd $modeldir");
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1;set add_exe \".exe\"} {set choice 0;set add_exe \"\"}");
@@ -5552,9 +5279,7 @@ else
   cmd(inter, "file delete a.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 }
-cmd(inter, "sblocklmm .t");
-cmd(inter, "destroy .t");
-cmd(inter, "update");
+cmd(inter, "destroytop .t");
 
 cmd(inter, "if { [file size makemessage.txt]==0 } {set choice 0} {set choice 1}");
 if(choice==1)
@@ -5619,11 +5344,9 @@ if(choice==67)
 {
 //Change tab size
 
-cmd(inter, "toplevel .a");
-cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
-cmd(inter, "wm transient .a .");
-cmd(inter, "wm title .a \"Change Tab Size\"");
-cmd(inter, "label .a.l1 -text \"Enter the Tab size (in characters)\"");
+cmd( inter, "newtop . .a \"Change Tab Size\" { .a.f.esc invoke }" );
+
+cmd(inter, "label .a.l1 -text \"Enter the tab size (characters)\"");
 cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
 cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
 cmd(inter, "frame .a.f");
@@ -5633,16 +5356,18 @@ cmd(inter, "button .a.f.help -width -9 -text Help -command {LsdHelp LMM_help.htm
 cmd(inter, "button .a.f.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.f");
+cmd(inter, "pack .a.l1 .a.v_num");
+cmd(inter, "pack .a.f -side right");
 
-cmd( inter, "setgeom .a" );
 cmd(inter, "focus -force .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
-cmd(inter, "blocklmm .a");
+
 choice=0;
+cmd( inter, "showtop .a" );
 while(choice==0)
 	Tcl_DoOneEvent(0);
-cmd(inter, "sblocklmm .a");
+cmd(inter, "destroytop .a");
+
 if(choice==2)
 {
 	choice=0;
@@ -5683,13 +5408,13 @@ if ( choice == 69 )
 	cmd( inter, ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( inter, ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
 	cmd( inter, ".v.i add command -label \"search_var_cond(...)\" -command {set choice 30} -accelerator Ctrl+S" );
-	cmd( inter, ".v.i add command -label \"Search(...)\" -command {set choice 55} -accelerator Ctrl+A" );
+	cmd( inter, ".v.i add command -label \"search(...)\" -command {set choice 55} -accelerator Ctrl+A" );
 	cmd( inter, ".v.i add command -label \"write(...)\" -command {set choice 29} -accelerator Ctrl+W" );
 	cmd( inter, ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( inter, ".v.i add command -label \"lsdqsort(...)\" -command {set choice 31} -accelerator Ctrl+T" );
-	cmd( inter, ".v.i add command -label \"Add a new object\" -command {set choice 52} -accelerator Ctrl+O" );
-	cmd( inter, ".v.i add command -label \"Delete an object\" -command {set choice 53} -accelerator Ctrl+D" );
-	cmd( inter, ".v.i add command -label \"Draw random an object\" -command {set choice 54} -accelerator Ctrl+N" );
+	cmd( inter, ".v.i add command -label \"add_n_objects2\" -command {set choice 52} -accelerator Ctrl+O" );
+	cmd( inter, ".v.i add command -label \"delete_obj\" -command {set choice 53} -accelerator Ctrl+D" );
+	cmd( inter, ".v.i add command -label \"draw_rnd\" -command {set choice 54} -accelerator Ctrl+N" );
 	cmd( inter, ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
 	cmd( inter, ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
 	cmd( inter, ".v.i add command -label \"Math operation\" -command {set choice 51} -accelerator Ctrl+H" );
@@ -5990,11 +5715,11 @@ fclose(f);
 void create_compresult_window(void)
 {
 
-cmd(inter, "set a [winfo exists .mm]");
-cmd(inter, "if {$a==1} {destroy .mm} {}");
+delete_compresult_window();
 
 cmd(inter, "set cerr 0.0");
-cmd(inter, "toplevel .mm");
+
+cmd( inter, "newtop \"\" .mm \"Compilation Errors\" { destroytop .mm }" );
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\"");
@@ -6002,7 +5727,7 @@ cmd(inter, "pack .mm.lab");
 
 cmd(inter, "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word; scrollbar .mm.yscroll -command \".mm.t yview\"");
 
-cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both; wm geom .mm \"+$hmargin+$vmargin\"; wm title .mm \"Compilation Errors\"");
+cmd(inter, "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both");
 
 cmd(inter, "frame .mm.b");
 
@@ -6013,11 +5738,12 @@ cmd(inter, "button .mm.b.perr -width -9 -text \"Previous Error\" -command {set e
 
 cmd(inter, "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
-cmd(inter, "button .mm.close -width -9 -text Cancel -command {destroy .mm}");
-cmd(inter, "pack .mm.close -pady 5 -side bottom");
-
-cmd(inter, "bind .mm <Escape> {destroy .mm}");
+cmd(inter, "button .mm.close -width -9 -text Cancel -command {destroytop .mm}");
+cmd(inter, "pack .mm.close -padx 10 -pady 5 -side right");
+cmd(inter, "bind .mm <Escape> {destroytop .mm}");
+cmd( inter, "showtop .mm topleftS no no no" );
 cmd(inter, "focus -force .mm.t");
+
 cmd(inter, "set file [open $modeldir/makemessage.txt]");
 cmd(inter, ".mm.t insert end [read $file]");
 cmd(inter, "close $file");
@@ -6029,5 +5755,5 @@ cmd(inter, "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $c
 void delete_compresult_window( void )
 {
 	cmd( inter, "set a [winfo exists .mm]" );
-	cmd( inter, "if { $a == 1 } { destroy .mm } { }" );
+	cmd( inter, "if { $a == 1 } { destroytop .mm } { }" );
 }

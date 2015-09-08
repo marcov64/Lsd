@@ -238,6 +238,8 @@ int strWindowOn=1;			// control the presentation of the model structure window
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedChange = false;	// control for unsaved changes in configuration
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
+bool redrawRoot = true;		// control for redrawing root window (.)
+
  
 /****************************************************
 CREATE
@@ -254,8 +256,31 @@ cmd( inter, "proc save_top_size { } { scan [ wm geometry . ] \"%dx%d%*s\" w h; v
 cmd( inter, "proc restore_top_size { } { variable wB; variable hB; scan [ wm geometry . ] \"%dx%d%*s\" w h; if { $wB != $w || $hB != $h } { wm geometry . \"[ expr $wB ]x$hB\" } }" );
 // set and save top window initial configuration (run only once)
 cmd( inter, "if { [ info exists wB ] == 0 || [ info exists wB ] == 0 } { wm geometry . \"[ expr $widthB ]x$heightB\"; scan [ wm geometry . ] \"%dx%d%*s\" wB hB }" );
+
+/* procedures to adjust window positioning (settings for dual and single monitor setups). Three types for positioning:
+	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
+	centerW: center over the parent window (in any display)
+	topleftW: put over the top left corner of parent window (below menu bar)
+*/
+// check if window center is in primary display
+cmd( inter, "proc primdisp w { if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } { return true } { return false } } " );
+// compute x and y coordinates of new window according to the types
+cmd( inter, "proc getx { w pos } { switch $pos { centerS { return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ] } centerW { return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ] } topleftW { return [ expr [ winfo x [ winfo parent $w ] ] + 5 ] } } }" );
+cmd( inter, "proc gety { w pos } { switch $pos { centerS { return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ] } centerW { return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ] } topleftW { return [ expr [ winfo y [ winfo parent $w ] ] + 50 ] } } }" );
+// configure the window
+cmd( inter, "proc showtop { w { pos centerS } { resizeX no } { resizeY no } } { wm withdraw $w; update idletasks; if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } { set pos topleftW }; set x [ getx $w $pos ]; set y [ gety $w $pos ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; global lstGrab; lappend lstGrab \"$w [ grab current $w ]\"; grab set $w }" );
+#else
+// old centering procedure (doesn't work well for dual monitor), probably obsolete
+cmd( inter, "proc showtop { w { pos centerS } { resizeX no } { resizeY no } } { wm withdraw $w; update idletasks; set x [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 - [ winfo vrootx [ winfo parent $w ] ] ]; set y [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 - [ winfo vrooty [ winfo parent $w ] ] ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; global lstGrab; lappend lstGrab { $w [ grab current $w ] }; grab set $w }");
 #endif
 
+// procedures for create and destroy top level new windows
+cmd( inter, "proc newtop { parent w { name \"\" } { destroy { } } } { toplevel $w; if { $parent != \"\" } { wm transient $w $parent }; wm title $w $name; wm protocol $w WM_DELETE_WINDOW $destroy }" );
+cmd( inter, "proc destroytop w { if [ winfo exists $w ] { global lstGrab; set igrab [ lsearch -glob $lstGrab \"$w *\" ]; if { $igrab >= 0 } { grab release $w; set grabPar [ string range [ lindex $lstGrab $igrab ] [ expr [ string first \" \" [ lindex $lstGrab $igrab ] ] + 1 ] end ]; if { $grabPar != \"\" } { grab set $grabPar }; set lstGrab [ lreplace $lstGrab $igrab $igrab ] }; focus -force [ winfo parent $w ]; destroy $w; update } }" );
+
+// procedures to create standard button sets
+cmd( inter, "proc okhelpcancel { w fr comOk comHelp comCancel } { frame $w.$fr; button $w.$fr.ok -width -9 -text Ok -command $comOk; button $w.$fr.help -width -9 -text Help -command $comHelp; button $w.$fr.can -width -9 -text Cancel -command $comCancel; bind $w.$fr.ok <KeyPress-Return> \"$w.$fr.ok invoke\"; bind $w.$fr.help <KeyPress-Return> \"$w.$fr.help invoke\"; bind $w.$fr.can <KeyPress-Return> \"$w.$fr.can invoke\"; bind $w <KeyPress-Escape> \"$w.$fr.can invoke\"; pack $w.$fr.ok $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left; pack $w.$fr -side right }");
+cmd( inter, "proc okcancel { w fr comOk comCancel } { frame $w.$fr; button $w.$fr.ok -width -9 -text Ok -command $comOk; button $w.$fr.can -width -9 -text Cancel -command $comCancel; bind $w.$fr.ok <KeyPress-Return> \"$w.$fr.ok invoke\"; bind $w.$fr.can <KeyPress-Return> \"$w.$fr.can invoke\"; bind $w <KeyPress-Escape> \"$w.$fr.can invoke\"; pack $w.$fr.ok $w.$fr.can -padx 10 -pady 10 -side left; pack $w.$fr -side right }");
 
 
 cmd(inter, "set listfocus 1");
@@ -264,13 +289,9 @@ cmd(inter, "set itemfocus 0");
 cmd(inter, "set choice -1");
 cmd(inter, "set c \"\"");
 Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
-//Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
-
-
 Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
-//cmd(inter, "wm focusmodel . active");
 choice_g=choice=0;
-cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1; focus -force .log} {set choice -1}");
+cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1; raise .log; focus -force .log} {set choice -1}");
 cmd(inter, "wm resizable . 1 1");
 cmd(inter, "set cur 0"); //Set yview for vars listbox
 
@@ -312,37 +333,28 @@ else
      show_graph(cr);
  if(message_logged==1)
   {
-  cmd(inter, "wm deiconify .log");
+  cmd(inter, "wm deiconify .log; raise .log; focus -force .log");
   message_logged=0;
   }    
  }    
 
+cmd(inter, "raise .; focus -force .");
 cmd(inter, "bind . <KeyPress-Escape> {}");
 cmd(inter, "bind . <KeyPress-Return> {}");
-//Draw the browser onto the ROOT Object
-
 cmd(inter, "bind . <Destroy> {set choice 35}");
 cmd(inter, "bind .log <Destroy> {set choice 35}");
+
+redrawRoot = true;				// assume redraw will be required  (temporary while not all old windows converted)
+
 if(choice!=55)
   choice=browse(cr, &choice);
 
-/*
-if(choice!=35)
- cmd(inter, "wm resizable . 0 0");
-*/
-//Perform the task selected
-//cmd(inter, "set ugo 2");
-//cmd(inter, "set ugo [winfo exists .model_str]");
-//cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
+cmd(inter, "destroy .m .l");	// force main window rebuilt (temporary while not all old windows converted)
+
 cr=operate( &choice, cr);
-
-//Delete the graphical representation
-
 
 }
 Tcl_UnlinkVar(inter,"save_option");
-//cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
-//Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "choice_g");
 
 cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
@@ -365,7 +377,11 @@ bridge *cb;
 
 if(*choice!=7 && *choice!=50 && *choice!=55)
  *choice=0;
-//cmd(inter, "focus -force .");
+
+if ( redrawRoot )		// avoids redrawing if not required
+{
+cmd(inter, "destroy .l");
+
 cmd(inter, "frame .l -relief groove -bd 2");
 cmd(inter, "frame .l.v -relief groove -bd 2");
 cmd(inter, "frame .l.s -relief groove -bd 2");
@@ -376,7 +392,6 @@ cmd(inter, "frame .l.v.c");
 cmd(inter, "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"");
 cmd(inter, "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"");
 
-cmd(inter, "bind .l.v.c.var_name <Return> {set res [.l.v.c.var_name curselection]; set cur $res; if {$res !=\"\"} {set res [ .l.v.c.var_name get $res]; set listfocus 1; set itemfocus $cur ; set choice 7} {}}");
 cmd(inter, "bind .l.v.c.var_name <Right> {focus -force .l.s.son_name; .l.s.son_name selection set 0}");
 
 if(r->v==NULL)
@@ -412,13 +427,13 @@ else
   }
 if(r->v!=NULL)
   {cmd(inter, "bind .l.v.c.var_name <Double-Button-1> {set res [selection get]; set choice 7; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; }");
-	cmd(inter, "bind .l.v.c.var_name <Button-3> {.l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; set vname [selection get]; set choice 29; set cur [.l.v.c.var_name cur]}");
+	cmd(inter, "bind .l.v.c.var_name <Button-3> {.l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; set res [selection get]; set choice 7; set cur [.l.v.c.var_name cur]}");
 	cmd(inter, "bind .l.v.c.var_name <Button-2> {.l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [.l.v.c.var_name cur]; set vname [selection get]; set choice 29; set cur [.l.v.c.var_name cur]}");
+	cmd(inter, "bind .l.v.c.var_name <Return> {set res [.l.v.c.var_name curselection]; set cur $res; if {$res !=\"\"} {set res [ .l.v.c.var_name get $res]; set listfocus 1; set itemfocus $cur ; set choice 7} {}}");
 	cmd( inter, "bind .l.v.c.var_name <Control-Up> { if { ! [ catch { set vname [ selection get ] } ] } { set listfocus 1; set choice 58; set itemfocus [ .l.v.c.var_name curselection ]; incr itemfocus -1 } }" );
 	cmd( inter, "bind .l.v.c.var_name <Control-Down> { if { ! [ catch { set vname [ selection get ] } ] } { set listfocus 1; set choice 59; set itemfocus [ .l.v.c.var_name curselection ]; incr itemfocus } }" );
   }
 cmd(inter, ".l.v.c.var_name yview $cur");
-
 
 cmd(inter, "pack .l.v.c.v_scroll -side right -fill y");
 cmd(inter, "listbox .l.s.son_name");
@@ -432,17 +447,22 @@ else
    cmd(inter, ch);
 	}
 if(r->b!=NULL)
-  cmd(inter, "bind .l.s.son_name <Double-Button-1> {set res [selection get]; set choice 4}");
-cmd(inter, "bind .l.s.son_name <Return> {set res [.l.s.son_name curselection]; if {$res !=\"\"} {set res [ .l.s.son_name get $res]; set choice 4} {}}");
-cmd( inter, "bind .l.s.son_name <Control-Up> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 60; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus -1; .log.text.text.internal insert end \"$cur\"} }" );
-cmd( inter, "bind .l.s.son_name <Control-Down> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 61; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus; .log.text.text.internal insert end \"$cur\"} }" );
-
+{
+  cmd( inter, "bind .l.s.son_name <Double-Button-1> { set res [ selection get ]; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; set choice 4 }" );
+  cmd( inter, "set editCurrObj 1");
+  cmd( inter, "bind .l.s.son_name <Button-3> { .l.s.son_name selection clear 0 end; .l.s.son_name selection set @%x,%y; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; set vname [ selection get ]; set editCurrObj 0; set choice 6 }" );
+  cmd( inter, "bind .l.s.son_name <Return> { set res [ selection get ]; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; set choice 4 }" );
+  cmd( inter, "bind .l.s.son_name <Control-Up> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 60; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus -1} }" );
+  cmd( inter, "bind .l.s.son_name <Control-Down> { if { ! [ catch { set vname [ selection get ] } ] } { set choice 61; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; incr itemfocus} }" );
+}
+cmd( inter, "bind .l.s.son_name <BackSpace> { set res [ .l.s.son_name curselection ]; set itemfocus 0; set choice 5 }" );
+cmd( inter, "bind .l.s.son_name <Button-2> { .l.s.son_name selection clear 0 end; .l.s.son_name selection set @%x,%y; set res [ selection get ]; set choice 5 }" );
 cmd(inter, "bind .l.s.son_name <Left> {focus -force .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0}");
 
 //cmd(inter, "bind .l.s.son_name <Down> {.l.s.son_name selection clear 0 end; .l.s.son_name selection set active}");
 
 cmd(inter, "frame .l.up_name");
-strcpy( ch1, "button .l.up_name.d -text \"Parent Object:\" -relief flat" );
+strcpy( ch1, "button .l.up_name.d -text \"Parent object: \" -relief flat" );
 strcpy( ch, "button .l.up_name.n -relief flat -text \"" );
 if( r->up==NULL )
 {
@@ -483,7 +503,13 @@ cmd(inter, ch);
 cmd(inter, "pack .l.tit.lab .l.tit.but -side left");
 cmd( inter, "pack .l.tit -pady 2" );
 
-
+// avoid redrawing the menu if it already exists and is configured
+cmd(inter, "set existMenu [ winfo exists .m ]");
+cmd(inter, "set confMenu [ . cget -menu ]");
+if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
+	 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".m" ) )
+{
+cmd(inter, "destroy .m");
 cmd(inter, "menu .m -tearoff 0");
 
 cmd(inter, "set w .m.file");
@@ -509,6 +535,7 @@ cmd(inter, "$w add command -label \"Add Function...\" -command {set param 2; set
 cmd(inter, "$w add command -label \"Add Descending Object...\" -command {set choice 3} -underline 6 -accelerator Ctrl+D");
 cmd(inter, "$w add command -label \"Insert New Parent...\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
+cmd( inter, "$w add command -label \"Change Element...\" -command { set res [ .l.v.c.var_name curselection ]; set cur $res; if { $res !=\"\" } { set res [ .l.v.c.var_name get $res ]; set listfocus 1; set itemfocus $cur ; set choice 7 } } -underline 7" );
 cmd(inter, "$w add command -label \"Change Object...\" -command {set choice 6} -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U");
@@ -656,7 +683,7 @@ cmd(inter, "bind $c <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set ch
 }
 
 cmd(inter, ". configure -menu .m");
-
+}
 
 cmd(inter, "pack .l.v.c.var_name -fill both -expand yes");
 cmd(inter, "pack .l.v.lab -fill x");
@@ -668,7 +695,6 @@ cmd(inter, "pack .l.up_name .l.tit");
 cmd(inter, "pack .l.v .l.s -side left -fill both -expand yes");
 
 cmd(inter, "pack .l -fill both -expand yes");
-
 
 *choice=0;
 
@@ -707,17 +733,13 @@ cmd(inter, "set posXLog [expr $posX + $widthB +40]");
 cmd(inter, "wm geometry .log +$posXLog+$posY");	
 #endif
 
-//cmd(inter, ".l.v.c.var_name selection set $cur");
-//cmd(inter, ".l.v.c.var_name activate $cur");
-
 cmd(inter, "update");
 cmd(inter, "if { [info exists ModElem]==1 } {set ModElem [lsort -dictionary $ModElem]} {}");
 main_cycle:
-//cmd(inter, "focus -force .");
 
 cmd(inter, "if { $listfocus == 1} {focus -force .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
 cmd(inter, "if { $listfocus == 2} {focus -force .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
-//cmd(inter, ".log.text.text.internal insert end \"\\nListfocus $listfocus; itemfocus $itemfocus\"");
+
 if(*choice==50)
  {cmd(inter, "raise .log .");
   *choice=0;
@@ -727,6 +749,7 @@ if(*choice==50)
 // just restore size, if needed
 cmd( inter, "restore_top_size" );		// restore top window size, if changed
 #endif
+}
 
 while(*choice==0 && choice_g==0)
  Tcl_DoOneEvent(0);
@@ -752,12 +775,7 @@ if(actual_steps>0)
  {
   if(*choice==1 || *choice==2 || *choice==3 || *choice==32 || *choice==6 || *choice==7 || *choice==28 || *choice==36 || *choice==43 || *choice==21 || *choice==19 || *choice==33 || *choice==22 || *choice==27 || *choice==30 || *choice==31 || *choice==25 || *choice==64 || *choice==65 || *choice==68 || *choice==69 )
    {
-     cmd(inter, "toplevel .warn");
-	 cmd(inter, "wm transient .warn .");
-	 cmd(inter, "wm title .warn Warning");
-	 #ifdef DUAL_MONITOR
-	 cmd(inter, "wm geometry .warn +[expr [winfo x .] + 20]+[expr [winfo y .] + 20]");
-	 #endif
+     cmd(inter, "newtop . .warn Warning");
      cmd(inter, "label .warn.l -text \"Simulation just run.\nThe configuration currently loaded is the last step of the previous run.\nThe requested operation makes no sense on the final data of a simulation.\nChoose one of the followig options.\"");
      cmd(inter, "pack .warn.l");
      cmd(inter, "set temp 38");
@@ -775,13 +793,15 @@ if(actual_steps>0)
    cmd(inter, "pack .warn.f .warn.b -fill x");
   
    *choice=0;
-   cmd(inter, "focus -force .warn.b.ok");
 
-   cmd(inter, "bind .warn <Return> {.warn.b.ok invoke}");
-   cmd(inter, "bind .warn <Escape> {.warn.b.esc invoke}");   
+   cmd(inter, "focus -force .warn.b.ok");
+   cmd(inter, "bind .warn <Return> {set choice 1}");
+   cmd(inter, "bind .warn <Escape> {set choice 2}");   
+   cmd(inter, "showtop .warn");
    while(*choice==0 && choice_g==0)
      Tcl_DoOneEvent(0);
-   cmd(inter, "destroy .warn");
+   cmd(inter, "destroytop .warn");
+
    if(*choice==1)
      cmd(inter, "set choice $temp");
    else 
@@ -791,16 +811,12 @@ if(actual_steps>0)
 
    }
   } 
-//cmd(inter, "set posX [winfo x .]");
-
-//cmd(inter, "set posY [winfo y .]");
  
 if(*choice!=35)
 {cmd(inter, "if {[winfo exists .]==1} {bind . <Destroy> {}} {}");
  cmd(inter, "if {[winfo exists $c]==1} {bind $c <Destroy> {}} {}");
  cmd(inter,"if {[winfo exists .list]==1} {destroy .list} {}");
 }
-
 
 return *choice;
 }
@@ -825,38 +841,17 @@ double fake=0;
 sense *cs;
 
 description *cur_descr;
-//filled up to 45
+
 switch(*choice)
 {
 //Add a Variable to the current object
 case 2:
 
+cmd( inter, "set T .top" );
+cmd( inter, "newtop . $T \"Add Element\" { set done 2 }" );
 
-cmd(inter, "destroy .m .l");
 Tcl_LinkVar(inter, "copy_param", (char *) &param, TCL_LINK_INT);
 cmd(inter, "set copy_param $param");
-
-cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
-cmd(inter, "bind .ok <Return> {.ok invoke}");
-if(param==0)
- cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddAVar}");
-else
- cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddAPar}");
-cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
-
-cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
-
-cmd(inter, "set w .d");
-cmd(inter, "frame .d");
-cmd(inter, "frame $w.f");
-cmd(inter, "label $w.f.lab -text \"Description\"");
-cmd(inter, "pack $w.f.lab");
-cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
-cmd(inter, "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
-cmd(inter, "pack $w.f.yscroll -side right -fill y");
-cmd(inter, "pack $w.f.text -expand yes -fill both");
-cmd(inter, "pack $w.f");
-
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
@@ -865,22 +860,17 @@ if(param==0)
 
 cmd(inter, "set num 0");
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new variable in object %s\"", r->label);
+sprintf(msg, "label $T.l -text \"Insert a new variable in object: %s\" -fg red", r->label);
 cmd(inter, msg);
-cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New variable name\"");
-cmd(inter, "label .f.lab_num -text \"Maximum lags used\"");
-cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
-cmd(inter, "entry .f.ent_num -width 2 -relief sunken -textvariable num");
+cmd(inter, "frame $T.f");
+cmd(inter, "label $T.f.lab_ent -text \"New variable name: \"");
+cmd(inter, "label $T.f.lab_num -text \"Maximum lags used: \"");
+cmd(inter, "label $T.f.sp -text \"     \"");
+cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
+cmd(inter, "entry $T.f.ent_num -width 2 -relief sunken -textvariable num");
 
-
-
-cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .f.ent_num; .f.ent_num selection range 0 end}");
-cmd(inter, "bind .f.ent_num <KeyPress-Return> {focus -force .ok}");
-cmd(inter, "pack .f.lab_ent .f.ent_var .f.lab_num .f.ent_num -side left");
-cmd(inter, "pack .l .f .d ");
-cmd(inter, "pack .ok .help .can -side left -expand yes");
-cmd(inter, "focus -force .f.ent_var");
+cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left");
 }
 
 if(param==2)
@@ -888,61 +878,61 @@ if(param==2)
 
 cmd(inter, "set num 0");
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new function in object %s\"", r->label);
+sprintf(msg, "label $T.l -text \"Insert a new function in object: %s\" -fg red", r->label);
 cmd(inter, msg);
-cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Function Name\"");
-cmd(inter, "label .f.lab_num -text \"Maximum lags used\"");
-cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
-cmd(inter, "entry .f.ent_num -width 2 -relief sunken -textvariable num");
+cmd(inter, "frame $T.f");
+cmd(inter, "label $T.f.lab_ent -text \"New Function Name: \"");
+cmd(inter, "label $T.f.lab_num -text \"Maximum lags used: \"");
+cmd(inter, "label $T.f.sp -text \"     \"");
+cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
+cmd(inter, "entry $T.f.ent_num -width 2 -relief sunken -textvariable num");
 
-
-
-cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .f.ent_num; .f.ent_num selection range 0 end}");
-cmd(inter, "bind .f.ent_num <KeyPress-Return> {focus -force .ok}");
-cmd(inter, "pack .f.lab_ent .f.ent_var .f.lab_num .f.ent_num -side left");
-cmd(inter, "pack .l .f .d ");
-cmd(inter, "pack .ok .help .can -side left -expand yes");
-cmd(inter, "focus -force .f.ent_var");
+cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left");
 }
 
 if(param==1)
 { //insert a parameter
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .l -text \"Insert a new parameter in object %s\"", r->label);
+sprintf(msg, "label $T.l -text \"Insert a new parameter in object: %s\" -fg red", r->label);
 cmd(inter, msg);
-cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Parameter Name\"");
-cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
+cmd(inter, "frame $T.f");
+cmd(inter, "label $T.f.lab_ent -text \"New Parameter Name: \"");
+cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 
-
-cmd(inter, "bind .f.ent_var <KeyPress-Return> {focus -force .ok}");
-cmd(inter, "pack .f.lab_ent .f.ent_var -side left");
-cmd(inter, "pack .l .f .d");
-cmd(inter, "pack .ok .help .can -side left -expand yes");
-cmd(inter, "focus -force .f.ent_var");
+cmd(inter, "pack $T.f.lab_ent $T.f.ent_var -side left");
 }
-//cmd(inter, "raise .");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
 
-cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
+cmd(inter, "set w $T.d");
+cmd(inter, "frame $w");
+cmd(inter, "frame $w.f -bd 2 -relief groove");
+cmd(inter, "label $w.f.lab -text \"Description\"");
+cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
+cmd(inter, "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
+cmd(inter, "pack $w.f.yscroll -side right -fill y");
+cmd(inter, "pack $w.f.lab $w.f.text -expand yes -fill both");
+cmd(inter, "pack $w.f");
 
-set_window_size();
+cmd(inter, "pack $T.l $T.f $T.d -pady 5");
+if(param==0)
+	cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAVar } { set done 2 }" );
+else
+	if ( param == 1 )
+		cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAPar } { set done 2 }" );
+	else
+		cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html } { set done 2 }" );
+cmd(inter, "focus -force $T.f.ent_var");
+
+cmd( inter, "showtop $T centerS" );
+here_newelem:
 while(done==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "set text_description [.d.f.text get 1.0 end]");
 
-cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
-
- cmd(inter, "destroy .l .f .d .ok .can .help");
 if(done==1)
  {
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
 strcpy(lab, lab1);
-for(i=0; lab[i]!=(char )NULL; i++)
- if(lab[i]==' ')
-  {lab[i]=(char)NULL;
-   break ;
-  } 
 sl=strlen(lab);
 if(sl!=0)
  {
@@ -950,12 +940,22 @@ if(sl!=0)
  done=check_label(lab, cur);
  if(done==1)
    {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"" );
-    return r;
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newelem;
+   }
+if ( done == 2 )
+{
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newelem;
    }
 
  if(done==0)
  {
+ cmd(inter, "set text_description [$T.d.f.text get 1.0 end]");
  cmd(inter, "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}");
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  if(param==1)
@@ -991,6 +991,9 @@ if(sl!=0)
 
  }
 
+cmd( inter, "destroytop $T" );
+redrawRoot = ( done == 2 ) ? false : true;
+
 cmd(inter, "unset lab done");
 
 if(done!=2)
@@ -1002,78 +1005,70 @@ Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "copy_param");
 
-
 break;
 
 
 //Add a Descendent type to the object and assigns the number of its instances.
 case 3:
-cmd(inter, "destroy .m .l");
-cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
-cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#AddADesc}");
-cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
-cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
 
+redrawRoot = false;					// assume no browser redraw
+
+cmd( inter, "set T .top" );
+cmd( inter, "newtop . $T \"Add Object\" { set done 2 }" );
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
 cmd(inter, "set lab \"\"");
-sprintf(msg, "label .tit -text \"Add a new Object type descending from: %s\"",r->label);
+sprintf(msg, "label $T.tit -text \"Add a new object type descending from: %s\" -fg red",r->label);
 cmd(inter, msg);
-cmd(inter, "frame .f");
-cmd(inter, "label .f.lab_ent -text \"New Object Name: \"");
-cmd(inter, "entry .f.ent_var -width 20 -relief sunken -textvariable lab");
-cmd(inter, "pack .f.lab_ent .f.ent_var -side left");
+cmd(inter, "frame $T.f");
+cmd(inter, "label $T.f.lab_ent -text \"New object name: \"");
+cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
+cmd(inter, "pack $T.f.lab_ent $T.f.ent_var -side left");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
 
-
-cmd(inter, "bind .f.ent_var <KeyPress-Return> {set done 1}");
-
-cmd(inter, "pack .tit .f .ok .help .can -side left");
-cmd(inter, "focus .f.ent_var");
-
-cmd(inter, "set w .d");
-cmd(inter, "frame .d");
-cmd(inter, "frame $w.f");
+cmd(inter, "set w $T.d");
+cmd(inter, "frame $w");
+cmd(inter, "frame $w.f -bd 2 -relief groove");
 cmd(inter, "label $w.f.lab -text \"Description\"");
-cmd(inter, "pack $w.f.lab");
 cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
 cmd(inter, "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
 cmd(inter, "bind $w.f.text <KeyPress-Return> {}");
 cmd(inter, "pack $w.f.yscroll -side right -fill y");
-cmd(inter, "pack $w.f.text -expand yes -fill both");
+cmd(inter, "pack $w.f.lab $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f");
-cmd(inter, "pack .d");
 
-cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
-//cmd(inter, "wm iconify .log");
+cmd(inter, "pack $T.tit $T.f $w -pady 5");
+cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddADesc } { set done 2 }" );
+cmd(inter, "focus $T.f.ent_var");
 
-set_window_size();
+cmd( inter, "showtop $T centerS" );
 here_newobject:
 while(done==0)
  Tcl_DoOneEvent(0);
 
-cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 if(done==1)
 {
  lab1=(char *)Tcl_GetVar(inter, "lab",0);
  strcpy(lab, lab1);
  if(strlen(lab)==0)
-  {
-   cmd(inter, "destroy .ok .d .can .f .help .tit");
-   Tcl_UnlinkVar(inter, "done");
-   cmd(inter, "unset lab done"); 
-   *choice=0;
-   return(r);
-  }
- cmd(inter, "set done [string is graph \"$lab\"]");
- if(done==0)
-  {
-   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The label contains forbidden characters, like spaces.\\n\\nChoose a different label and try again.\"");
-   cmd(inter, "focus .f.ent_var; .f.ent_var selection range 0 end");
-   goto here_newobject;
-  }
+	goto here_endobject;
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab, cur); //check that the label does not exist already
+ if(done==1)
+  {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newobject;
+  }
+ if(done==2)
+  {
+   cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newobject;
+  }
 
  if(done==0)
   {r->add_obj(lab, 1, 1);
@@ -1083,66 +1078,68 @@ if(done==1)
    add_description(lab, "Object", lab1);
 
    unsavedChange = true;		// signal unsaved change
+ redrawRoot = true;			// force browser redraw
   }
- else
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
- }
-cmd(inter, "destroy .ok .d .can .f .help .tit");
+
+here_endobject:
+cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "done");
 cmd(inter, "unset lab done");
 
 break;
 
+
 //Insert a parent Object just above the current object
 case 32:
-cmd(inter, "destroy .m .l");
+
+redrawRoot = false;					// assume no browser redraw
+
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
+
 if(r->up==NULL)
  {
-  cmd(inter, "label .l -text \"Cannot insert a parent of Root.\\nThe new Object will contain all current descendants from Root.\"");
-  cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
-  cmd(inter, "pack .l .ok");
-  cmd(inter, "bind . <KeyPress-Return> {set done 1}");
-  set_window_size();
-  while(done==0)
-   Tcl_DoOneEvent(0);
+  cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -title Warning -icon warning -message \"Cannot insert a parent of Root.\\n\\nPress 'Ok' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer \"ok\" ] { set done 1 } { set done 2 }" );
+  if ( done == 2 )
+  {
+   Tcl_UnlinkVar(inter, "done");
+   cmd(inter, "unset done"); 
+   break;
+  }
   done=0;
-  cmd(inter, "destroy .l .ok");
  }
-cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
-cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#InsertAParent}");
-cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
 
+cmd( inter, "set T .top" );
+cmd( inter, "newtop . $T \"Insert Parent\" { set done 2 }" );
 
+cmd(inter, "frame $T.f");
 if(r->up!=NULL)
-  sprintf(msg, "label .lab_ent -text \"Insert a new Object parent of %s and descending from %s\"", r->label, r->up->label);
+  sprintf(msg, "label $T.f.lab_ent -text \"Insert the name of the new object\\n(parent of %s and descending from %s)\"", r->label, r->up->label);
 else
-  sprintf(msg, "label .lab_ent -text \"Insert the new Object label\"");
+  sprintf(msg, "label $T.f.lab_ent -text \"Insert the name of the new object\"");
 
 cmd(inter, msg);
 cmd(inter, "set lab \"\"");
-cmd(inter, "entry .ent_var -width 20 -relief sunken -textvariable lab");
-cmd(inter, "bind . <KeyPress-Return> {set done 1}");
-cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
-cmd(inter, "pack .lab_ent .ent_var .ok .help .can");
-cmd(inter, "focus .ent_var");
-cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
-cmd(inter, "bind . <KeyPress-Return> {set done 1}");
+cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
+cmd(inter, "pack $T.f.lab_ent $T.f.ent_var");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
 
-cmd(inter, "set w .d");
-cmd(inter, "frame .d");
-cmd(inter, "frame $w.f");
+cmd(inter, "set w $T.d");
+cmd(inter, "frame $w");
+cmd(inter, "frame $w.f -bd 2 -relief groove");
 cmd(inter, "label $w.f.lab -text \"Description\"");
-cmd(inter, "pack $w.f.lab");
 cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
 cmd(inter, "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
 cmd(inter, "bind $w.f.text <KeyPress-Return> {}");
 cmd(inter, "pack $w.f.yscroll -side right -fill y");
-cmd(inter, "pack $w.f.text -expand yes -fill both");
+cmd(inter, "pack $w.f.lab $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f");
-cmd(inter, "pack .d");
 
-set_window_size();
+cmd(inter, "pack $T.f $w -pady 5");
+cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#InsertAParent } { set done 2 }" );
+cmd(inter, "focus $T.f.ent_var");
+
+cmd( inter, "showtop $T centerS" );
+here_newparent:
 while(done==0)
  Tcl_DoOneEvent(0);
 
@@ -1150,14 +1147,23 @@ if(done==1)
 {
  lab1=(char *)Tcl_GetVar(inter, "lab",0);
  strcpy(lab, lab1);
+ if(strlen(lab)==0)
+	goto here_endparent;
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab1, cur); //check that the label does not exist already
  if(done==1)
-   {cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
-    cmd(inter, "destroy .d .ok .help .can .lab_ent .ent_var");
-    Tcl_UnlinkVar(inter, "done");
-    cmd(inter, "unset lab done");
-    return r;
+   {
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newparent;
+   }
+ if(done==2)
+  {
+   cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
+   done = 0;
+   goto here_newparent;
    }
 
  if(r->up==NULL)
@@ -1193,27 +1199,25 @@ if(done==1)
  add_description(lab, "Object", lab1);
 
  unsavedChange = true;		// signal unsaved change
+ redrawRoot = true;			// force browser redraw
 
-cmd(inter, "destroy .d .ok .help .can .lab_ent .ent_var");
+here_endparent:
+cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "done");
 cmd(inter, "unset lab done");
 
-//done=reset_bridges(root);
-*choice=0;
-
 break;
+
 
 //Move browser to show one of the descendant object
 case 4:
 
-cmd(inter, "destroy .m .l");
-
 *choice=0;
+redrawRoot = false;					// assume no browser redraw
 
 lab1=(char *)Tcl_GetVar(inter, "res",0);
 
-
-if(!strcmp(lab1, "(no Objects)") )
+if(!strcmp(lab1, "(none)") )
  return(r);
  
 n=r->search(lab1);
@@ -1223,60 +1227,78 @@ if(n==NULL)
   return r;
  }
 //else
+cmd( inter, "set listfocus 2; set itemfocus 0" );
 strcpy(lastObj,lab1);		// save last shown object for quick reload (choice=38)
+redrawRoot = true;			// force browser redraw
 return (n);
-
 
 
 //Move browser to show the parent object
 case 5:
-cmd(inter, "destroy .m .l");
+
+*choice=0;
+redrawRoot = false;					// assume no browser redraw
+
 if(r->up==NULL)
  return r;
 for(i=0, cb=r->up->b; cb->head!=r; cb=cb->next, i++);
 sprintf(msg, "set listfocus 2; set itemfocus %d", i);
 cmd(inter, msg); 
 strcpy(lastObj,r->up->label);		// save last shown object for quick reload (choice=38)
+redrawRoot = true;					// force browser redraw
 return r->up;
 
 
 //Edit current Object's name and give the option to disable the computation
 case 6:
-cmd(inter, "destroy .m .l");
-sprintf(msg, "set lab %s", r->label);
+
+redrawRoot = false;					// assume no browser redraw
+
+sprintf( msg, "if { [ info exists editCurrObj ] && [ info exists vname ] } { if $editCurrObj { set lab %s } { set lab $vname } } { set lab %s } ", r->label, r->label );
 cmd(inter, msg);
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
-
 sscanf(lab1, "%s", lab_old);
 
+if ( strcmp( r->label, lab_old ) )		// check if not current variable
+{
+	cur1 = r;
+	r = r->search(lab_old);				// yes: set pointer to vname
+	if ( r == NULL )
+	{
+		sprintf( ch, "\nDescendant %s not found", lab_old );
+		plog(ch);
+		break;
+	}
+}
+else
+{
+	if ( ! strcmp( r->label, "Root" ) )	// cannot change Root
+		break;
+	cur1 = NULL;
+}
 
+cmd( inter, "set T .top" );
+cmd( inter, "newtop . $T \"Object Properties\" { set choice 2 }" );
 
-cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .b.del -width -9 -text Delete -command {set choice 3}");
-cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp menumodel.html#ChangeObjName}");
-cmd(inter, "button .b.can -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .b.ok .b.del .b.help .b.can -side left -fill x -expand yes");
-
-cmd(inter, "frame .b1");
+cmd(inter, "frame $T.b1");
 sprintf(msg, "set to_compute %d",r->to_compute);
 cmd(inter, msg);
-cmd(inter, "checkbutton .b1.com -text \"Compute: require the simulation to compute the vars. in this Object.\" -variable to_compute -anchor w");
-cmd(inter, "pack .b1.com -anchor w");
+cmd(inter, "checkbutton $T.b1.com -text \"Compute: require the simulation to compute the variables in this object.\" -variable to_compute -anchor w");
+cmd(inter, "pack $T.b1.com -anchor w");
 
 cur_descr=search_description(lab_old);
 if(cur_descr==NULL)
   {
    add_description(lab_old, "Object", "(no description available)");
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab_old);
+   sprintf(msg, "\nWarning! description for '%s' not found. New one created.", lab_old);
    plog(msg);
    cur_descr=search_description(lab_old);
   } 
   
-cmd(inter, "set w .desc");
-cmd(inter, "frame $w -bd 2 -relief groove");
-cmd(inter, "frame $w.f");
-cmd(inter, "label $w.f.int -text \"Description of Object: $lab\"");
+cmd(inter, "set w $T.desc");
+cmd(inter, "frame $w");
+cmd(inter, "frame $w.f -bd 2 -relief groove");
+cmd(inter, "label $w.f.int -text \"Description\"");
 cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
 cmd(inter, "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
 cmd(inter, "pack $w.f.yscroll -side right -fill y");
@@ -1286,12 +1308,12 @@ cmd(inter, "pack $w.f");
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      sprintf(msg, ".desc.f.text insert end \"%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
     else
      {
-      sprintf(msg, ".desc.f.text insert end \"\\%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"\\%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
 
@@ -1300,79 +1322,68 @@ cmd(inter, "pack $w.f");
 cmd(inter, "pack $w.f -fill x -expand yes");
 
 
-cmd(inter, "frame .h -bd 2 -relief groove");
-cmd(inter, "label .h.ent_var -width 30 -relief sunken -fg red -text $lab");
+cmd(inter, "frame $T.h");
+cmd(inter, "label $T.h.ent_var -width 30 -relief sunken -fg red -text $lab");
+cmd(inter, "bind $T.h.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
 
-cmd(inter, "bind .h.ent_var <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
+cmd(inter, "label $T.h.lab_ent -text \"Object\"");
 
-cmd(inter, "label .h.lab_ent -text \"Object\"");
+cmd(inter, "frame $T.h.b");
+cmd(inter, "button $T.h.b.prop -width -9 -text \"Change Name\" -command {set choice 5}" );
+cmd(inter, "button $T.h.b.del -width -9 -text Delete -command {set choice 3}");
+cmd(inter, "pack $T.h.b.prop $T.h.b.del -padx 10 -pady 5 -side left");
 
-cmd(inter, "button .h.prop -width -9 -text \"Change Name\" -command {set choice 5}" );
-cmd(inter, "bind .h <Double-1> {set choice 5}");
-cmd(inter, "bind .h.lab_ent <Double-1> {set choice 5}");
-cmd(inter, "bind .h.ent_var <Double-1> {set choice 5}");
-cmd(inter, "bind .h.ent_var <KeyPress-c> {.b1.com invoke}");
-cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop");
-cmd(inter, "pack .h .b1 .desc .b -fill x -expand yes");
-cmd(inter, "focus -force .h.ent_var");
-cmd(inter, "bind . <Control-d> {}");
-cmd(inter, "bind . <Control-z> {}");
-cmd(inter, "bind .h.ent_var <Control-d> {focus -force .desc.f.text}");
-cmd(inter, "bind .desc.f.text <Control-z> {set choice 1}");
-//cmd(inter, "wm resizable . 0 0 ");
-cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
+cmd(inter, "bind $T.h <Double-1> {set choice 5}");
+cmd(inter, "bind $T.h <KeyPress-c> \"$T.b1.com invoke\"");
+cmd(inter, "bind $T.h <KeyPress-Delete> {set choice 3}");
+cmd(inter, "bind $T <Control-d> {}");
+cmd(inter, "bind $T <Control-z> {}");
+cmd(inter, "bind $T.h.ent_var <Control-d> \"focus -force $T.desc.f.text\"");
+cmd(inter, "bind $T.desc.f.text <Control-z> {set choice 1}");
+cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.b");
+
+cmd(inter, "pack $T.h $T.b1 $w -pady 5 -fill x -expand yes");
+cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
+cmd(inter, "focus -force $T.h.ent_var");
+
 *choice=0;
-set_window_size();
+cmd( inter, "showtop $T centerS" );
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
-cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
-
-cmd(inter, "set text_description \"[.desc.f.text get 1.0 end]\"");
-cmd(inter, "destroy .h .b1 .b .desc");
 if(*choice==1|| *choice==5 || *choice==3)
 {
 
-change_descr_text(lab_old);
-
 unsavedChange = true;		// signal unsaved change
+change_descr_text(lab_old);
   
 if(*choice==5 || *choice==3)
 {
 if(*choice==3)
 {
-	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n$lab\"]");
+	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default cancel -message \"Press 'Ok' to confirm deleting:\n$lab\n\nNote that all descendents will be also deleted!\"]");
 	 cmd(inter, "switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
 	 if(*choice == 1)				// simulate a name change
 		cmd(inter, "set lab \"\"");	// to empty string (delete)
 }
 else
 {
-cmd(inter, "label .l -text \"New Label for Object $lab\"");
-cmd(inter, "entry .e -width 30 -textvariable lab");
-cmd(inter, "pack .l .e -anchor w");
-cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .b.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .b.ok .b.esc -side left");
-cmd(inter, "pack .b");
-cmd(inter, "focus -force .e");
-*choice=0;
+cmd( inter, "set TT .top.top" );
+cmd( inter, "newtop $T $TT \"Change Name\" { set choice 2 }" );
+cmd(inter, "label $TT.l -text \"New name for object: $lab\"");
+cmd(inter, "entry $TT.e -width 30 -textvariable lab");
+cmd(inter, "pack $TT.l $TT.e -anchor w");
 
-set_window_size();
+cmd( inter, "okcancel $TT b { set choice 1 } { set choice 2 }" );
+cmd(inter, "focus -force $TT.e");
+
+cmd( inter, "showtop $TT centerS" );
+here_newname:
+*choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "destroy .l .e .b");
-}
- if(*choice==2)
-  {
-   *choice=0;
-   return r;
-  }
 
-lab1=(char *)Tcl_GetVar(inter, "lab",0);
-if(strlen(lab1)!=0)
+if ( *choice == 1 )
 {
 
  strcpy(lab, lab1);
@@ -1381,17 +1392,36 @@ if(strlen(lab1)!=0)
    for(cur=r; cur->up!=NULL; cur=cur->up);
    done=check_label(lab, cur); //check that the label does not exist already
    if(done==1)
-     cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
+		{
+			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+			cmd(inter, "focus $TT.e; $TT.e selection range 0 end");
+			goto here_newname;
+		}
+		if(done==2)
+		{
+			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd(inter, "focus $TT.e; $TT.e selection range 0 end");
+			goto here_newname;
+		}
 
   }
  else
-  done=0;
- if(strcmp(lab, r->label) && done==0)
+		*choice = 2;
+}
+cmd( inter, "destroytop $TT" );
+}
+
+if(*choice==2)
+	goto here_endobjprop;
+
+if(strlen(lab1)!=0)
+{
+
+ if(strcmp(lab, r->label))
   {
    change_descr_lab(r->label, lab, "", "", "");
    r->chg_lab(lab);
-   *choice=0;
-   return r;
+   goto here_endobjprop;
   }
 }
 else //Delete the Object !
@@ -1401,8 +1431,7 @@ else //Delete the Object !
   for(cv=cur->v; cv!=NULL; cv=cv->next)
     change_descr_lab(cv->label,"" , "", "", "");
   wipe_out(cur);
-   *choice=0;
-   return r;
+  goto here_endobjprop;
 
  }
 }//end of *choice==5
@@ -1419,29 +1448,36 @@ if(*choice==0)
 {
 control_tocompute(r, r->label);
 }
+cmd(inter, "set text_description \"[$T.desc.f.text get 1.0 end]\"");
+cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}");
+lab1=(char *)Tcl_GetVar(inter, "text_description",0);
+add_description(lab, "Object", lab1);
+
+here_endobjprop:
+
+redrawRoot = true;			// force browser redraw
 }//end of *choice==1 || *choice==5
 
-*choice=0;
-return r;
 
+if ( cur1 != NULL )			// restore original showing object
+	r = cur1;
+cmd( inter, "destroytop $T" );
+
+break;
 
 
 //Edit variable name and set debug/saving/plot flags
 case 7:
-int savei;
 
-cmd(inter, "destroy .m .l");
-cmd(inter, "update");
+int savei;
 
 lab1=(char *)Tcl_GetVar(inter, "res",0);
 
 sscanf(lab1, "%s", lab_old);
 
-if(!strcmp(lab1, "(no variables)"))
- {
-  *choice=0;
-  return r;
- }
+if(!strcmp(lab1, "(none)"))
+  break;
+
 cv=r->search_var(NULL, lab_old);
 Tcl_LinkVar(inter, "debug", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "save", (char *) &save, TCL_LINK_INT);
@@ -1454,26 +1490,26 @@ num=cv->debug=='d'?1:0;
 plot=cv->plot;
 savei=cv->savei;
  
+cmd( inter, "set T .top" );
+cmd( inter, "newtop . $T \"Change Element\" { set done 2 }" );
 
-cmd(inter, "frame .b1");
-cmd(inter, "checkbutton .b1.deb -text \"Debug: allow interruption after this equation\" -variable debug -anchor w");
-cmd(inter, "checkbutton .b1.sav -text \"Save: save these series for later analysis\" -variable save -anchor w");
-cmd(inter, "checkbutton .b1.savi -text \"Save in a separate file each series\" -variable savei -anchor w");
+cmd(inter, "frame $T.b1");
+cmd(inter, "checkbutton $T.b1.sav -text \"Save: save the series for later analysis\" -variable save -anchor w");
+cmd(inter, "checkbutton $T.b1.savi -text \"Save file: save the series in a separate file\" -variable savei -anchor w");
+cmd(inter, "checkbutton $T.b1.plt -text \"Run time plot: observe the series during the simulation execution\" -variable plot -anchor w");
+cmd(inter, "checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -anchor w");
 
-cmd(inter, "checkbutton .b1.plt -text \"Run Time Plot: observe these series during the simulation\" -variable plot -anchor w");
-cmd(inter, msg);
 if(cv->param==1)
- cmd(inter, "pack .b1.sav .b1.savi .b1.plt -anchor w");
-if(cv->param==0)
- cmd(inter, "pack .b1.deb .b1.sav .b1.savi .b1.plt -anchor w");
-if(cv->param==2)
- cmd(inter, "pack .b1.deb .b1.sav .b1.savi -anchor w");
+ cmd(inter, "pack $T.b1.sav $T.b1.savi $T.b1.plt -anchor w");
+if(cv->param==0||cv->param==2)
+ cmd(inter, "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb -anchor w");
 
-cmd(inter, "bind .b1 <KeyPress-d> {.b1.deb invoke}");
-cmd(inter, "bind .b1 <KeyPress-s> {.b1.sav invoke}");
-cmd(inter, "bind .b1 <KeyPress-p> {.b1.plt invoke}");
-cmd(inter, "bind .b1 <KeyPress-i> {.desc.opt.ini invoke}");
-cmd(inter, "bind .b1 <KeyPress-o> {.desc.opt.obs invoke}");
+cmd(inter, "bind $T.b1 <KeyPress-d> \"$T.b1.deb invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-s> \"$T.b1.sav invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-f> \"$T.b1.savi invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-p> \"$T.b1.plt invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-i> \"$T.desc.opt.ini invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-o> \"$T.desc.opt.obs invoke\"");
 
 sprintf(ch, "set vname %s", lab_old);
 cmd(inter, ch);
@@ -1486,18 +1522,15 @@ cmd(inter, ch);
      add_description(lab_old, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(lab_old, "Function", "(no description available)");  
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab_old);
+   sprintf(msg, "\nWarning! description for '%s' not found. New one created.", lab_old);
    plog(msg);
    cur_descr=search_description(lab_old);
   } 
 
- cmd(inter, "set w .desc");
- cmd(inter, "frame $w -bd 2 -relief groove");
- cmd(inter, "frame $w.f");
- if(!strcmp(cur_descr->type,"Parameter") )
-   cmd(inter, "label $w.f.int -text \"Description of Parameter $vname\"");
- else
-   cmd(inter, "label $w.f.int -text \"Description of Variable $vname\"");
+ cmd(inter, "set w $T.desc");
+ cmd(inter, "frame $w");
+ cmd(inter, "frame $w.f -bd 2 -relief groove");
+ cmd(inter, "label $w.f.int -text \"Description\"");
 
   cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
  cmd(inter, "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
@@ -1508,12 +1541,12 @@ cmd(inter, ch);
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      sprintf(msg, ".desc.f.text insert end \"%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
     else
      {
-      sprintf(msg, ".desc.f.text insert end \"\\%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"\\%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
 
@@ -1526,8 +1559,8 @@ cmd(inter, ch);
  
  cmd(inter, "label $w.opt.l -text \"In model documentation set the element to be: \"");
  cmd(inter, "pack $w.opt.l -side left");
- cmd(inter, "checkbutton $w.opt.obs -text \"Observe\" -variable observe -anchor w");
- cmd(inter, "checkbutton $w.opt.ini -text \"Initialize\" -variable initial -anchor w"); 
+ cmd(inter, "checkbutton $w.opt.obs -text \"Observed\" -variable observe -anchor w");
+ cmd(inter, "checkbutton $w.opt.ini -text \"Initialized\" -variable initial -anchor w"); 
  if(cv->param==1 || cv->num_lag>0)
   cmd(inter, "pack $w.opt.obs $w.opt.ini -side left -anchor w");
  else
@@ -1535,20 +1568,19 @@ cmd(inter, ch);
  cmd(inter, "$w.f.text delete \"end - 1 char\"");
  cmd(inter, "pack $w.opt -expand yes -fill x");
  cmd(inter, "frame $w.b");
- cmd(inter, "button $w.b.eq -width -9 -text \"See Code\" -command {set done 3}");
+ cmd(inter, "button $w.b.eq -width -9 -text \"View Code\" -command {set done 3}");
  cmd(inter, "button $w.b.auto_doc -width -9 -text \"Auto Doc.\" -command {set done 9}");
- cmd(inter, "button $w.b.us -width -9 -text \"Eq. Using Element\" -command {set done 4}");
+ cmd(inter, "button $w.b.us -width -9 -text \"Using Element\" -command {set done 4}");
  cmd(inter, "button $w.b.using -width -9 -text \"Elements Used\" -command {set done 7}");
- cmd(inter, "button $w.b.del -width -9 -text \"Delete Element\" -command {set done 10}");
  if(!strcmp(cur_descr->type, "Parameter"))
-   cmd(inter, "pack $w.b.auto_doc $w.b.us $w.b.del -side left -expand yes -fill both");
+   cmd(inter, "pack $w.b.auto_doc $w.b.us -padx 10 -pady 5 -side left");
  else
-   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using $w.b.del -side left -expand yes -fill both");
- cmd(inter, "pack $w.f $w.b -fill x -expand yes");
+   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using -padx 10 -pady 5  -side left -fill both");
+ cmd(inter, "pack $w.f $w.b");
  if(cv->param==1 || cv->num_lag>0)
   {
-   cmd(inter, "frame $w.i");
-   cmd(inter, "label $w.i.int -text \"Comments on the initial values of '$vname'\"");
+   cmd(inter, "frame $w.i -bd 2 -relief groove");
+   cmd(inter, "label $w.i.int -text \"Comments on the initial values of: $vname\"");
    cmd(inter, "scrollbar $w.i.yscroll -command \"$w.i.text yview\"");
    cmd(inter, "text $w.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.i.yscroll set\"");
    cmd(inter, "pack $w.i.yscroll -side right -fill y");
@@ -1558,69 +1590,64 @@ cmd(inter, ch);
       {
       if(cur_descr->init[i]!='[' && cur_descr->init[i]!=']' && cur_descr->init[i]!='{' && cur_descr->init[i]!='}' && cur_descr->init[i]!='\"' )
         {
-         sprintf(msg, ".desc.i.text insert end \"%c\"", cur_descr->init[i]);
+         sprintf(msg, "$w.i.text insert end \"%c\"", cur_descr->init[i]);
          cmd(inter, msg);
         }
        else
         {
-         sprintf(msg, ".desc.i.text insert end \"\\%c\"", cur_descr->init[i]);
+         sprintf(msg, "$w.i.text insert end \"\\%c\"", cur_descr->init[i]);
          cmd(inter, msg);
         }
    
       }
-     cmd(inter, ".desc.i.text delete \"end - 1 char\"");
+     cmd(inter, "$w.i.text delete \"end - 1 char\"");
     }
    cmd(inter, "pack $w.i.int $w.i.text -anchor w -expand yes -fill both");
-   cmd(inter, "pack $w.i -anchor w -expand yes -fill both");
+   cmd(inter, "pack $w.i -pady 5 -anchor w -expand yes -fill both");
    cmd(inter, "frame $w.b2");
    cmd(inter, "button $w.b2.setall -width -9 -text \"Initialize\" -command {set done 11}" );
    cmd(inter, "button $w.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
-   cmd(inter, "pack $w.b2.setall $w.b2.sens -side left -expand yes -fill both");
-   cmd(inter, "pack $w.b2 -anchor w -expand yes -fill both");
-   cmd(inter, "bind .desc.f.text <Control-i> {focus -force .desc.i.text}");
-   cmd(inter, "bind .desc.i.text <Control-z> {set done 1}");   
+   cmd(inter, "pack $w.b2.setall $w.b2.sens -padx 10 -pady 5 -side left");
+   cmd(inter, "pack $w.b2");
+   cmd(inter, "bind $w.f.text <Control-i> {focus -force $w.i.text}");
+   cmd(inter, "bind $w.i.text <Control-z> {set done 1}");   
    }
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
-cmd(inter, "frame .b");
-cmd(inter, "button .b.ok -width -9 -text Ok -command {set done 1}");
-cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp Browser.html#variables}");
-cmd(inter, "button .b.can -width -9 -text Cancel -command {set done 2}");
-cmd(inter, "pack .b.ok .b.help .b.can -side left -fill x -expand yes");
+cmd(inter, "frame $T.h");
+cmd(inter, "label $T.h.ent_var -width 30 -relief sunken -fg red -text $vname");
 
-cmd(inter, "frame .h -bd 2 -relief groove");
-cmd(inter, "label .h.ent_var -width 30 -relief sunken -fg red -text $vname");
-
-cmd(inter, "bind .b1 <KeyPress-Return> {set done 1}");
-cmd(inter, "bind . <KeyPress-Escape> {set done 2}");
+cmd(inter, "bind $T.b1 <KeyPress-Return> {set done 1}");
+cmd(inter, "bind $T <KeyPress-Escape> {set done 2}");
 
 if(cv->param==0)
-  cmd(inter, "label .h.lab_ent -text \"Variable\"");
+  cmd(inter, "label $T.h.lab_ent -text \"Variable\"");
 if(cv->param==1)
-  cmd(inter, "label .h.lab_ent -text \"Parameter\"");
+  cmd(inter, "label $T.h.lab_ent -text \"Parameter\"");
 if(cv->param==2)
-  cmd(inter, "label .h.lab_ent -text \"Function\"");
+  cmd(inter, "label $T.h.lab_ent -text \"Function\"");
 
 sprintf(msg, "set obj_name %s", cv->up->label);
 cmd(inter, msg);
-cmd(inter, "label .h.obj -text \"in Object $obj_name\"");
+cmd(inter, "label $T.h.obj -text \"in object $obj_name\"");
 
-cmd(inter, "button .h.prop -width -9 -text \"Properties\" -command {set done 5}" );
-cmd(inter, "bind .h <Double-1> {set done 5}");
-cmd(inter, "bind .h.lab_ent <Double-1> {set done 5}");
-cmd(inter, "bind .h.ent_var <Double-1> {set done 5}");
-cmd(inter, "pack .h.lab_ent .h.ent_var .h.prop .h.obj");
-cmd(inter, "pack .h .b1 .desc .b -fill x -expand yes");
-cmd(inter, "focus .b1");
-cmd(inter, "bind .b1 <Control-d> {focus -force .desc.f.text}");
-cmd(inter, "bind .desc.f.text <Control-z> {set done 1}");   
+cmd(inter, "frame $T.h.b");
+cmd(inter, "button $T.h.b.prop -width -9 -text \"Properties\" -command {set done 5}" );
+cmd(inter, "button $T.h.b.del -width -9 -text \"Delete\" -command {set done 10}");
+cmd(inter, "bind $T.h <Double-1> {set done 5}");
+cmd(inter, "pack $T.h.b.prop $T.h.b.del -padx 10 -pady 5 -side left");
+cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.obj $T.h.b");
+cmd(inter, "pack $T.h $T.b1 $w -pady 5 -fill x -expand yes");
+cmd(inter, "bind $T.h <KeyPress-Delete> {set done 10}");
+cmd(inter, "bind $T.b1 <Control-d> {focus -force $w.f.text}");
+cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}");   
 
+cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#variables } { set done 2 }" );
 
-//cmd(inter, "wm resizable . 0 0 ");
-cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
+cmd(inter, "showtop $T centerS");
+cmd(inter, "focus $T.b1");
 cycle_var:
-set_window_size();
 while(done==0)
  Tcl_DoOneEvent(0);
 
@@ -1643,18 +1670,18 @@ if(done == 7)
 if(done == 9) 
  {
   auto_document(choice, lab_old, "ALL");
-  cmd(inter, ".desc.f.text delete 1.0 end");
+  cmd(inter, "$w.f.text delete 1.0 end");
 
   for(i=0; cur_descr->text[i]!=(char)NULL; i++)
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      sprintf(msg, ".desc.f.text insert end \"%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
     else
      {
-      sprintf(msg, ".desc.f.text insert end \"\\%c\"", cur_descr->text[i]);
+      sprintf(msg, "$w.f.text insert end \"\\%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
       
@@ -1666,33 +1693,24 @@ if(done == 7 || done == 4 || done == 3 || done == 9)
   done=0;
   goto cycle_var;
  }
-cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
-cmd(inter, "bind . <KeyPress-d> {}");
-cmd(inter, "bind . <KeyPress-s> {}");
-cmd(inter, "bind . <KeyPress-p> {}");
+
+ cmd( inter, "destroytop $T" );
 
 if(done==1) 
   {
-   cmd(inter, "set text_description \"[.desc.f.text get 1.0 end]\"");
+   cmd(inter, "set text_description \"[$w.f.text get 1.0 end]\"");
    change_descr_text(lab_old);
    if(cv->param==1 || cv->num_lag>0)
-    {cmd(inter, "set text_description \"[.desc.i.text get 1.0 end]\"");
+    {cmd(inter, "set text_description \"[$w.i.text get 1.0 end]\"");
      change_init_text(lab_old);
     }
   
   unsavedChange = true;		// signal unsaved change
   }
-if(done==3 )
- {done=0;
-  goto cycle_var;
- } 
-//cmd(inter, "wm resizable . 1 1 ");
 
-cmd(inter, "destroy .desc .b .b1 .h");
 if(done==8)
- {
- return r;
- }
+	goto here_endelem;
+
 if(done==5||done==10)	// treat also express delete button
  {
  if(done==10)
@@ -1716,44 +1734,40 @@ if(done==5||done==10)	// treat also express delete button
  sprintf(msg, "set numlag %d", cv->num_lag);
  cmd(inter, msg);
  
- cmd(inter, "frame .l");
- cmd(inter, "radiobutton .l.var -text \"Change label\" -variable nature -value 3");
- cmd(inter, "entry .l.e -width 30 -textvariable vname");
- cmd(inter, "bind .l.e <1> {.l.var invoke}");
- cmd(inter, "pack .l.var .l.e -side left");
- cmd(inter, "frame .m");
- cmd(inter, "radiobutton .m.mov -text \"Move to another Object\" -variable nature -value 4");
+ cmd( inter, "set TT .top" );
+ cmd( inter, "newtop . $TT \"Properties\" { set done 2 }" );
+ 
+ cmd(inter, "frame $TT.l");
+ cmd(inter, "radiobutton $TT.l.var -text \"Change Name\" -variable nature -value 3");
+ cmd(inter, "entry $TT.l.e -width 30 -textvariable vname");
+ cmd(inter, "bind $TT.l.e <1> \"$TT.l.var invoke\"");
+ cmd(inter, "pack $TT.l.var $TT.l.e -side left");
+ cmd(inter, "frame $TT.m");
+ cmd(inter, "radiobutton $TT.m.mov -text \"Move to another object\" -variable nature -value 4");
  sprintf(msg, "set movelabel %s", r->label);
  cmd(inter, msg);
- cmd(inter, "button .m.whe -width -9 -text \"$movelabel\" -command {set nature 4; set done 3}");
- cmd(inter, "pack .m.mov .m.whe -side left");
+ cmd(inter, "button $TT.m.whe -width -9 -text \"$movelabel\" -command {set nature 4; set done 3}");
+ cmd(inter, "pack $TT.m.mov $TT.m.whe -side left");
 
-
-
- cmd(inter, "frame .v");
- cmd(inter, "radiobutton .v.var -text Variable -variable nature -value 0");
- cmd(inter, "label .v.l -text Lags");
- cmd(inter, "entry .v.e -width 3 -textvariable numlag");
- cmd(inter, "pack .v.var .v.l .v.e -side left");
- cmd(inter, "frame .p");
- cmd(inter, "radiobutton .p.par -text Parameter -variable nature -value 1");
- cmd(inter, "pack .p.par");
- cmd(inter, "frame .f");
- cmd(inter, "radiobutton .f.fun -text Function -variable nature -value 2");
- cmd(inter, "pack .f.fun");
+ cmd(inter, "frame $TT.v");
+ cmd(inter, "radiobutton $TT.v.var -text Variable -variable nature -value 0");
+ cmd(inter, "label $TT.v.l -text Lags");
+ cmd(inter, "entry $TT.v.e -width 3 -textvariable numlag");
+ cmd(inter, "pack $TT.v.var $TT.v.l $TT.v.e -side left");
+ cmd(inter, "frame $TT.p");
+ cmd(inter, "radiobutton $TT.p.par -text Parameter -variable nature -value 1");
+ cmd(inter, "pack $TT.p.par");
+ cmd(inter, "frame $TT.f");
+ cmd(inter, "radiobutton $TT.f.fun -text Function -variable nature -value 2");
+ cmd(inter, "pack $TT.f.fun");
  
- cmd(inter, "frame .b");
- cmd(inter, "button .b.ok -width -9 -text Ok -command {set done 1}");
- cmd(inter, "button .b.help -width -9 -text Help -command {LsdHelp Browser.html#change_nature}");
- cmd(inter, "button .b.esc -width -9 -text Cancel -command {set done 2}");
- cmd(inter, "pack .b.ok .b.help .b.esc -side left");
- cmd(inter, "pack .l .m .v .p .f -anchor w");
- cmd(inter, "pack .b");
- cmd(inter, "bind . <KeyPress-Return> {.b.ok invoke}");
- cmd(inter, "bind .l.e <KeyPress-Return> {.b.ok invoke}");
- cmd(inter, "bind . <KeyPress-Escape> {.b.esc invoke}"); 
+ cmd(inter, "pack $TT.l $TT.m $TT.v $TT.p $TT.f -anchor w");
+ cmd( inter, "okhelpcancel $TT b { set done 1 } { LsdHelp menumodel.html#change_nature } { set done 2 }" );
+ cmd(inter, "bind $TT <KeyPress-Return> {set done 1}");
+ cmd(inter, "bind $TT.l.e <KeyPress-Return> {set done 1}");
+ cmd(inter, "bind $TT <KeyPress-Escape> {set done 2}"); 
  done=0;
- set_window_size();
+ cmd(inter, "showtop $TT");
  }
  here_changenature:
  while(done==0)
@@ -1762,27 +1776,15 @@ if(done==5||done==10)	// treat also express delete button
  if(done==3)
   {
   choose_object();
-  cmd(inter, ".m.whe configure -text \"$movelabel\"");
+  cmd(inter, "$TT.m.whe configure -text \"$movelabel\"");
   done=0;
   goto here_changenature; 
   }
- cmd(inter,  "destroy .l .m .v .p .b .f"); 
- cmd(inter, "bind . <KeyPress-Return> {}");
- cmd(inter, "bind . <KeyPress-Escape> {}"); 
 
+ cmd( inter, "destroytop $TT" );
 
 if(done==2)
- {
-  Tcl_UnlinkVar(inter, "done");
-  Tcl_UnlinkVar(inter, "save");
-  Tcl_UnlinkVar(inter, "savei");
-  Tcl_UnlinkVar(inter, "debug");
-  Tcl_UnlinkVar(inter, "plot");
-  *choice=0;
-  cmd(inter, "destroy .v .p .b");
-  return r;
-
- }
+	goto here_endelem;
   
 unsavedChange = true;		// signal unsaved change
 
@@ -1794,16 +1796,8 @@ if(nature==4)
   sprintf(msg, "set done [string equal $movelabel %s]", r->label);
   cmd(inter, msg);
   if(done==1)
-   {
-    Tcl_UnlinkVar(inter, "done");
-    Tcl_UnlinkVar(inter, "save");
-    Tcl_UnlinkVar(inter, "savei");
-    Tcl_UnlinkVar(inter, "debug");
-    Tcl_UnlinkVar(inter, "plot");
-    *choice=0;
-    cmd(inter, "destroy .v .p .b");
-    return r;
-   } 
+	goto here_endelem;
+
   lab1=(char *)Tcl_GetVar(inter, "movelabel",0); 
   cv=r->search_var(NULL, lab_old);
   if(cv->param==1 || cv->num_lag>0) 
@@ -1818,21 +1812,22 @@ if(nature==3 || nature ==4)
 {
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 strcpy(lab, lab1);
+if ( strlen( lab ) == 0 )
+	goto here_endelem;
 if(strcmp(lab, lab_old) )
  {
   for(cur=r; cur->up!=NULL; cur=cur->up);
   done=check_label(lab, cur);
 
   if(done==1)
-   {cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The new label already exists in the model.\\n\\nChoose a different label and try again.\"");
-    cmd(inter, "destroy .b .lab_ent .ent_var");
-    Tcl_UnlinkVar(inter, "done");
-    Tcl_UnlinkVar(inter, "save");
-    Tcl_UnlinkVar(inter, "savei");
-    Tcl_UnlinkVar(inter, "debug");
-    Tcl_UnlinkVar(inter, "plot");
-    *choice=0;
-    return r;
+   {
+		cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+		goto here_endelem;
+   }
+	if(done==2)
+	{
+		cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+		goto here_endelem;
    }
  }
  if(nature==3)
@@ -1932,28 +1927,24 @@ lag = 0;							// lag option for the next cases (first lag)
 if ( ( done == 11 || done == 12 ) && cv->param == 0 && cv->num_lag > 1 )
 {									// more than one lag to choose?
 	// confirm which lag to use
-	cmd( inter, "toplevel .s" );
-	cmd( inter, "wm transient .s ." );
-	cmd( inter, "wm title .s \"Select Lag\"" );
-	cmd( inter, "frame .s.i -relief groove -bd 2" );
-	cmd( inter, "label .s.i.l -text \"Type the number of the lag to edit.\"" );
+	cmd( inter, "set TT .top" );
+	cmd( inter, "newtop . $TT \"Lag\" {set choice 0}" );
+	cmd( inter, "frame $TT.i" );
+	cmd( inter, "label $TT.i.l -text \"Type the number of the lag to edit\"" );
 	cmd( inter, "set lag \"1\"" );
-	cmd( inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable lag" );
-	cmd( inter, ".s.i.e selection range 0 end" );
-	sprintf( msg, "label .s.i.w -text \"Valid values are: 1 to %d\" -fg red", cv->num_lag );
+	cmd( inter, "entry $TT.i.e -justify center -textvariable lag" );
+	cmd( inter, "$TT.i.e selection range 0 end" );
+	sprintf( msg, "label $TT.i.w -text \"Valid values are: 1 to %d\" -fg red", cv->num_lag );
 	cmd( inter, msg );
-	cmd( inter, "pack .s.i.l .s.i.e .s.i.w" );
-	cmd( inter, "button .s.ok -width -9 -text Ok -command {set choice $lag}" );
-	cmd( inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}" );
-	cmd( inter, "pack .s.i .s.ok .s.esc -fill x");
-	cmd( inter, "bind .s <KeyPress-Return> {set choice $lag}" );
-	cmd( inter, "bind .s <KeyPress-Escape> {set choice 0}" );
-	cmd( inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w" );
+	cmd( inter, "pack $TT.i.l $TT.i.e $TT.i.w" );
+	cmd( inter, "pack $TT.i" );
+	cmd( inter, "okcancel $TT b {set choice $lag} {set choice 0}");
 	*choice=-1;
-	cmd( inter, "focus .s.i.e" );
+	cmd( inter, "focus $TT.i.e" );
+	cmd( inter, "showtop $TT" );
 	while ( *choice == -1 )		// wait for user action
 		Tcl_DoOneEvent( 0 );
-	cmd( inter, "destroy .s" );
+	cmd( inter, "destroytop $TT" );
 	
 	lag = abs( *choice ) - 1;	// try to extract chosed lag
 	*choice = 0;
@@ -2034,18 +2025,20 @@ if ( done == 12 )
 	*choice = 0;
 }
 
+here_endelem:
+redrawRoot = ( done == 2 ) ? false : true;
+
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "save");
 Tcl_UnlinkVar(inter, "savei");
 Tcl_UnlinkVar(inter, "debug");
 Tcl_UnlinkVar(inter, "plot");
 
-return r;
+break;
 
 
 //Exit the browser and run the simulation
 case 1:
-cmd(inter, "destroy .m .l");
 *choice=0;
 
 if(actual_steps>0)
@@ -2117,7 +2110,7 @@ cmd(inter, "foreach i $wind {pack $i}");
 
 cmd(inter, "pack .ok .help .can");
 cmd(inter, "bind . <KeyPress-Return> {.ok invoke}");
-cmd(inter, "bind . <KeyPress-Escape> {.cancel invoke}");
+cmd(inter, "bind . <KeyPress-Escape> {.can invoke}");
 cmd(inter, "focus -force .");
 set_window_size();
 *choice=0;
@@ -2224,7 +2217,6 @@ return(n);
 case 11:
 	if ( discard_change( ) )	// unsaved configuration changes ?
 		myexit(0);
-	cmd(inter, "destroy .m .l");
 	*choice=0;
    break;
 
@@ -2235,7 +2227,6 @@ case 16:
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 sprintf(lab, "set res %s", simul_name);
 cmd(inter, lab);
-cmd(inter, "destroy .l .m");
 cmd(inter, "frame .d");
 cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
 cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
@@ -2308,7 +2299,6 @@ break;
 //Load a model
 case 17:
 case 38: //quick reload
-   cmd(inter, "destroy .l .m");
 
    if(struct_loaded==1)
 	  { 
@@ -2570,7 +2560,6 @@ case 18:
 	saveAs = ( *choice == 73 ) ? true : false;
 
 	Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-   cmd(inter, "destroy .l .m");
 
    if(struct_loaded==0)
 	  { cmd(inter, "button .ok -width -9 -text Empty -command {set done 1}");
@@ -2727,10 +2716,9 @@ else
 //Edit Objects' numbers
 case 19:
 *choice=0;
-cmd(inter, "destroy .l .m");
 if(actual_steps>0)
  {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the Object's numbers.\"" );
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the object's numbers.\"" );
   return r;
  }
 
@@ -2750,7 +2738,6 @@ cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 case 21:
 
 *choice=0;
-cmd(inter, "destroy .l .m");
 if(actual_steps>0)
  {
 	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the initial values.\"" );
@@ -2761,7 +2748,6 @@ if(actual_steps>0)
 cmd(inter, "bind . <KeyPress-Return> {}");
 
 for(n=r; n->up!=NULL; n=n->up);
-cmd(inter, "destroy .l .m");
 
 
 cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
@@ -2773,7 +2759,6 @@ break;
 
 //Empty the model
 case 20:
-      cmd(inter, "destroy .l .m");
 	  if ( ! discard_change( ) )	// check for unsaved configuration changes
 	  {
 		*choice = 0;
@@ -2783,7 +2768,6 @@ case 20:
 	  cmd( inter, "if { [ winfo exists .model_str ] == 1 } { wm withdraw .model_str }");
 	  
       for(n=r; n->up!=NULL; n=n->up);
-		  cmd(inter, "destroy .l .m");
 		  n->empty();
       empty_cemetery();
       lsd_eq_file[0]=(char)NULL;
@@ -2807,7 +2791,6 @@ case 20:
 
 //Simulation manager: sets seeds, number of steps, number of simulations
 case 22:
-		  cmd(inter, "destroy .l .m");
   		  *choice=0;
 		  // save previous values to allow canceling operation
 		  temp[1] = sim_num; 
@@ -2817,7 +2800,7 @@ case 22:
 		  Tcl_LinkVar(inter, "sim_num", (char *) &sim_num, TCL_LINK_INT);
 		  Tcl_LinkVar(inter, "seed", (char *) &seed, TCL_LINK_INT);
 		  Tcl_LinkVar(inter, "max_step", (char *) &max_step, TCL_LINK_INT);
-        cmd(inter, "label .tit -text \"Set Simulation Settings\" -font {System 14 bold}");
+        cmd(inter, "label .tit -text \"Simulation Settings\" -font {System 14 bold}");
         cmd(inter, "frame .f -relief groove -bd 2");
         cmd(inter, "frame .f.a -bd 2");
 		  cmd(inter, "label .f.a.l -width 25 -text \"Number of Simulations\"");
@@ -2863,7 +2846,7 @@ case 22:
         cmd(inter, "bind .f.d.e2 <KeyPress-Return> {focus .f.e.e2; .f.e.e2 selection range 0 end}");
         cmd(inter, "bind .f.e.e2 <KeyPress-Return>  {focus .b.ok}");
         cmd(inter, "bind .b.ok <KeyPress-Return> {set choice 1}");
-        cmd(inter, "bind .b.esc <KeyPress-Escape> {set choice 2}");
+        cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
 
      set_window_size();
 		  while(*choice==0)
@@ -2893,7 +2876,6 @@ case 22:
 
 //Move browser to Object pointed on the graphical model map
 case 24:
-			cmd(inter, "destroy .l .m");
 		  *choice=0;
 
 		    if(res_g==NULL)
@@ -2906,7 +2888,6 @@ case 24:
 //Edit initial values of Objects pointed on the graphical map
 case 25:
 *choice=0;
-cmd(inter, "destroy .l .m");
 if(actual_steps>0)
  {
 	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\\n\\nLoad again the model to make changes to the initial values.\"" );
@@ -2927,14 +2908,12 @@ cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
 
 //Enter the analysis of results module
 case 26:
-			cmd(inter, "destroy .l .m");
 			analysis(choice);
 			*choice=0;
 			return r;
 
 //Remove all the debugging flags
 case 27:
-			cmd(inter, "destroy .l .m");
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all debugging information?\"");
@@ -2961,7 +2940,6 @@ case 27:
 //Change Equation File from which to take the code to show
 case 28:
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-cmd(inter, "destroy .l .m");
 cmd(inter, "button .ok -width -9 -text Ok -command {set done 1}");
 cmd(inter, "button .help -width -9 -text Help -command {LsdHelp menumodel.html#setequation}");
 cmd(inter, "button .can -width -9 -text Cancel -command {set done 2}");
@@ -2999,7 +2977,6 @@ break;
 
 //Shortcut to show Info window (former equation). REMOVED
 case 29:
-cmd(inter, "destroy .m .l");
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 sscanf(lab1, "%s", lab_old);
@@ -3014,7 +2991,6 @@ return r;
 //Remove all the save flags
 case 30:
 
-			cmd(inter, "destroy .l .m");
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all saving information?\\nNo data will be saved\"");
@@ -3042,7 +3018,6 @@ case 30:
 
 //Show variables to be saved
 case 39:
-			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
          plog("\n\nVariables and parameters saved:\n");
@@ -3052,7 +3027,6 @@ case 39:
 			break;
 //Show variables to be observed
 case 42:
-			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
          plog("\n\nVariables and parameters containing results:\n");
@@ -3063,7 +3037,6 @@ case 42:
 
 //Show variables to be initialized
 case 49:
-			cmd(inter, "destroy .l .m");
          *choice=50;
 			for(n=r; n->up!=NULL; n=n->up);
          plog("\n\nVariables and parameters relevant to initialize:\n");
@@ -3075,7 +3048,6 @@ case 49:
 
 //Remove Runtime Plots
 case 40:
-			cmd(inter, "destroy .l .m");
          *choice=0;
          cmd(inter, "set a [split [winfo children .] ]");
          cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
@@ -3087,7 +3059,6 @@ case 40:
 //Remove all the plot flags
 case 31:
 
-			cmd(inter, "destroy .l .m");
          *choice=0;
 			cmd(inter, "frame .w");
 			cmd(inter, "label .w.b -text \"Confirm the removal of all plotting information?\\nNo data will be plotted\"");
@@ -3117,7 +3088,6 @@ case 31:
 //in the browser
 case 33:
 *choice=0;
-cmd(inter, "destroy .l .m");
 if(r->up==NULL)
  {
   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"You cannot create copies of the 'Root' object.\n\nConsider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"");
@@ -3126,7 +3096,7 @@ if(r->up==NULL)
  }
 if(actual_steps>0)
  {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\n\nLoad again the model to make changes to the Object's numbers.\"" );
+	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation already run\n\nLoad again the model to make changes to the object's numbers.\"" );
   return r;
  }
 
@@ -3134,10 +3104,10 @@ if(actual_steps>0)
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 sprintf(msg, "set num %d",num);
 cmd(inter, msg);
-cmd(inter, "label .l1 -text \"Insert new number of instances for all groups of Objects\"");
+cmd(inter, "label .l1 -text \"Insert new number of instances for all groups of objects\"");
 sprintf(msg, "label .l2 -text \"%s\"",r->label);
 cmd(inter, msg);
-cmd(inter, "label .l3 -text \"Warning: All groups of these Objects will be affected\"");
+cmd(inter, "label .l3 -text \"Warning: All groups of these objects will be affected\"");
 cmd(inter, "entry .ent -width 20 -relief sunken -textvariable num");
 
 cmd(inter, "frame .cp -relief groove -bd 2");
@@ -3194,7 +3164,6 @@ break;
 
 //Browse through the model instance by instance
 case 34:
-cmd(inter, "destroy .l .m");
 *choice=0;
 cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 deb(r, NULL,NULL,&fake);
@@ -3212,7 +3181,6 @@ break;
 case 36:
 //create model report
 for(n=r; n->up!=NULL; n=n->up);
-cmd(inter, "destroy .l .m");
 cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 report(choice, n);
 cmd(inter, "if { [winfo exists $c] == 1} {wm deiconify $c} {}");
@@ -3222,7 +3190,6 @@ return r;
 //save result
 case 37:
 *choice=0;
-cmd(inter, "destroy .l .m");
 if(actual_steps==0)
  {
 	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation not run, there is nothing to save.\\n\\nPlease select the menu option 'Run'/'Run' before using this option.\"" );
@@ -3298,7 +3265,6 @@ break;
 case 380:
         *choice=0;
         t=0;
-		  cmd(inter, "destroy .l .m");
         if(struct_loaded==0)
           break;
         for(n=r; n->up!=NULL; n=n->up);
@@ -3336,7 +3302,6 @@ case 380:
 */
 case 41:
 //help on lsd
-cmd(inter, "destroy .l .m");
 
 cmd(inter, "LsdHelp QuickHelp.html");
 *choice=0;
@@ -3345,7 +3310,6 @@ break;
 
 case 43:
 //Create automatically the documentation
-cmd(inter, "destroy .l .m");
 
 *choice=0;
 
@@ -3407,7 +3371,6 @@ break;
 
 case 44:
 //see model report
-cmd(inter, "destroy .l .m");
 sprintf(name_rep, "report_%s.html", simul_name);
 sprintf(msg, "set choice [file exists %s]", name_rep);
 cmd(inter, msg);
@@ -3444,7 +3407,6 @@ break;
 
 case 45:
 //save descriptions
-cmd(inter, "destroy .l .m");
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 strcpy(lab, lab1);
 
@@ -3456,7 +3418,6 @@ break;
 
 case 46:
 //show the equation of a variable 
-cmd(inter, "destroy .l .m");
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 strcpy(lab, lab1);
 show_eq(lab, choice);
@@ -3465,7 +3426,6 @@ break;
 
 case 47:
 //show the equations where vname is used 
-cmd(inter, "destroy .l .m");
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 strcpy(lab, lab1);
 
@@ -3516,13 +3476,11 @@ if(*choice==1)
  cmd(inter, "set HtmlBrowser $temp_var");
 
 cmd(inter, "destroy .a");
-cmd(inter, "destroy .l .m");
 *choice=0;
 break;
 
 
 case 50: //find an element of the model
-cmd(inter, "destroy .l .m");
 cmd(inter, "toplevel .s");
 cmd(inter, "wm transient .s .");
 cmd(inter, "wm title .s \"Find Element\"");
@@ -3555,7 +3513,6 @@ if(*choice==2)
 
 case 55: //arrive here from the list of vars used.
 if(*choice==55)
- cmd(inter, "destroy .l .m");
 *choice=0;
 lab1=(char *)Tcl_GetVar(inter, "bidi",0);
 strcpy(msg,lab1);
@@ -3574,7 +3531,6 @@ break;
 case 5600: //choose lattice type of updating
 
 *choice=0;
-cmd(inter, "destroy .l .m");
 
 Tcl_LinkVar(inter, "lattype", (char *) &done, TCL_LINK_INT);
 done=lattice_type;
@@ -3609,14 +3565,13 @@ case 51: //upload in memory current equation file
 /*
 replace lsd_eq_file with the eq_file. That is, make appear actually used equation file as the one used for the current configuration
 */
-cmd(inter, "destroy .l .m");
 if(!strcmp(eq_file, lsd_eq_file))
  {//no need to do anything
   *choice=0;
   break;
  }
 cmd(inter, "set answer [tk_messageBox -title Warning -icon warning -message \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program.\\n\\nPress Ok to confirm.\" -type okcancel -default cancel]");
-cmd(inter, "if {[string compare $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
+cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
 strcpy(lsd_eq_file, eq_file);
@@ -3630,11 +3585,9 @@ Used to re-generate the equations used for the current configuration file
 */
 if(strlen(lsd_eq_file)==0 || !strcmp(eq_file, lsd_eq_file) )
  {cmd(inter, "tk_messageBox -title Warning -icon warning -message \"There are no equations to be offloaded differing from the current equation file.\" -type ok");
- cmd(inter, "destroy .l .m");
  *choice=0;
  break;
  }
-cmd(inter, "destroy .l .m");
 
 sprintf(msg, "set res fun_%s.cpp", simul_name);
 cmd(inter, msg);
@@ -3662,7 +3615,6 @@ case 53: //Compare equation files
 /*
 
 */
-cmd(inter, "destroy .l .m");
 if ( strlen( lsd_eq_file ) == 0 || ! discard_change( ) )	// esc or unsaved configuration?)
  {*choice=0;
   break;
@@ -3680,7 +3632,6 @@ break;
 
 case 54:
  //toggle ignore eq. file controls
-cmd(inter, "destroy .l .m");
 cmd(inter, "set choice $ignore_eq_file");
 ignore_eq_file=*choice;
 *choice=0;
@@ -3688,14 +3639,12 @@ break;
 
 case 56:
  //toggle fast lattice updating
-cmd(inter, "destroy .l .m");
 cmd(inter, "set choice $lattype");
 lattice_type=*choice;
 *choice=0;
 break; 
 
 case 57:
-cmd(inter, "destroy .l .m");
 
 f=fopen("tex_report.tex", "wt");
 fprintf(f,"\\newcommand{\\lsd}[1] {\\textit{#1}}\n");
@@ -3708,7 +3657,6 @@ fclose(f);
 break;
 
 case 58:
-cmd(inter, "destroy .m .l");
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 sscanf(lab1, "%s", lab_old);
@@ -3721,7 +3669,6 @@ unsavedChange = true;		// signal unsaved change
 return r;
 
 case 59:
-cmd(inter, "destroy .m .l");
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 sscanf(lab1, "%s", lab_old);
@@ -3734,7 +3681,6 @@ unsavedChange = true;		// signal unsaved change
 return r;
 
 case 60:
-cmd(inter, "destroy .m .l");
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 sscanf(lab1, "%s", lab_old);
@@ -3747,7 +3693,6 @@ unsavedChange = true;		// signal unsaved change
 return r;
 
 case 61:
-cmd(inter, "destroy .m .l");
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 sscanf(lab1, "%s", lab_old);
@@ -3761,7 +3706,6 @@ return r;
 
 //Create parallel sensitivity analysis configuration
 case 62:
-cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
   {
@@ -3799,7 +3743,6 @@ return r;
 
 //Create sequential sensitivity analysis configuration
 case 63:
-cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
@@ -3835,7 +3778,6 @@ return r;
 
 //Create Monte Carlo (MC) random sensitivity analysis sampling configuration
 case 71:
-cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
@@ -3912,7 +3854,6 @@ return r;
 
 //Create Near Orthogonal Latin Hypercube (NOLH) sensitivity analysis sampling configuration
 case 72:
-cmd(inter, "destroy .m .l");
 
 if (rsense!=NULL) 
 {
@@ -3995,7 +3936,6 @@ return r;
 
 //Load a sensitivity analysis configuration
 case 64:
-	cmd(inter, "destroy .l .m");
 	
 	// check a model is already loaded
 	if(struct_loaded==0)
@@ -4114,7 +4054,6 @@ case 64:
 
 //Save a sensitivity analysis configuration
 case 65:
-	cmd(inter, "destroy .l .m");
 
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
@@ -4176,7 +4115,6 @@ case 65:
 
 //Show sensitivity analysis configuration
 case 66:
-	cmd(inter, "destroy .l .m");
 	*choice=50;
 
 	// check for existing sensitivity data loaded
@@ -4208,7 +4146,6 @@ case 66:
 
 //Remove sensitivity analysis configuration
 case 67:
-	cmd(inter, "destroy .l .m");
 	*choice=0;
 
 	// check for existing sensitivity data loaded
@@ -4230,7 +4167,6 @@ case 67:
 	
 //Create batch for serial sensitivity analysis job and optionally run it
 case 68:
-	cmd(inter, "destroy .l .m");
 
 	// check a model is already loaded
 	if(struct_loaded==0)
@@ -4429,7 +4365,6 @@ break;
 
 //Start NO WINDOW job as a separate background process
 case 69:
-	cmd(inter, "destroy .l .m");
 
 	// check a model is already loaded
 	if(struct_loaded==0)
@@ -4468,7 +4403,7 @@ case 69:
 	}
 	
 	cmd(inter, "foreach i $wind {pack $i}; pack .ok .can; ");
-	cmd(inter, "bind . <KeyPress-Return> {.ok invoke}; bind . <KeyPress-Escape> {.cancel invoke}");
+	cmd(inter, "bind . <KeyPress-Return> {.ok invoke}; bind . <KeyPress-Escape> {.can invoke}");
 	cmd(inter, "focus -force .");
 	set_window_size();
 	
@@ -4565,7 +4500,6 @@ break;
 
 // toggle the state of the model structure windows
 case 70:
-	cmd(inter, "destroy .l .m");
 break;
 
 default:
@@ -4873,7 +4807,7 @@ cmd(inter, "wm protocol .a WM_DELETE_WINDOW { }");
 cmd(inter, "wm transient .a .");
 cmd(inter, "wm title .a \"\"");
 
-cmd(inter, "label .a.l -text \"List of Objects\"");
+cmd(inter, "label .a.l -text \"List of objects\"");
 cmd(inter, "pack .a.l");
 cmd(inter, "frame .a.v");
 cmd(inter, "scrollbar .a.v.v_scroll -command \".a.v.lb yview\"");

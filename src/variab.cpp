@@ -262,7 +262,7 @@ else
 stack++;
 
 if(under_computation==1)
- {sprintf(msg, "\nDead lock! An equation requested its own value while computing its current value.\n\nEquation for:\n%s\nrequested by Object:\n%s\n\n",label, caller==NULL?"(No label)":((object *)caller)->label);
+ {sprintf(msg, "\nDead lock! An equation requested its own value while computing its current value.\n\nEquation for:\n%s\nrequested by object:\n%s\n\n",label, caller==NULL?"(No label)":((object *)caller)->label);
   plog(msg);
   error_hard();
   quit=2;
@@ -301,7 +301,7 @@ if(!fast)				// not running in fast mode?
 	}
 	catch(std::exception& exc)
 	{
-		sprintf(msg, "\nException! An exception of type:\n '%s'\n was detected while computing the Equation for:\n %s\nrequested by Object:\n %sn\n", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
+		sprintf(msg, "\nException! An exception of type:\n '%s'\n was detected while computing the equation for:\n %s\nrequested by object:\n %sn\n", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
 		plog(msg);
 		error_hard();
 		quit=2;
@@ -309,7 +309,7 @@ if(!fast)				// not running in fast mode?
 	}
 	catch(...)
 	{
-		sprintf(msg, "\nException! An unknown problem was detected while computing the Equation for:\n %s\nrequested by Object:\n %s\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
+		sprintf(msg, "\nException! An unknown problem was detected while computing the equation for:\n %s\nrequested by object:\n %s\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
 		plog(msg);
 		error_hard();
 		quit=2;

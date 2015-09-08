@@ -85,9 +85,7 @@ if(strcmp(msg, "yes"))
 start:
 if( (f=fopen(equation_name,"r"))==NULL)
  {*choice=0;
-  cmd(inter, "toplevel .warn_eq");
-  cmd(inter, "wm transient .warn_eq .");
-  cmd(inter, "label .warn_eq.lab1 -text \"Equation file\"");
+  cmd( inter, "newtop .top .warn_eq \"Equation file\" {set choice 2}" );
   sprintf(msg, "label .warn_eq.lab2 -text \"%s\" -foreground red", equation_name);
   cmd(inter, msg);
   cmd(inter, "label .warn_eq.lab3 -text \"not found (check equation file name)\"");
@@ -97,9 +95,10 @@ if( (f=fopen(equation_name,"r"))==NULL)
   cmd(inter, "button .warn_eq.b.esc -width -9 -text Cancel -command {set choice 2}");
   cmd(inter, "pack .warn_eq.b.s .warn_eq.b.esc -side left");
   cmd(inter, "pack .warn_eq.b");
+  cmd( inter, "showtop .warn_eq" );
   while(*choice==0)
    Tcl_DoOneEvent(0);
-  cmd(inter, "destroy .warn_eq");
+  cmd(inter, "destroytop .warn_eq");
 if(*choice==1)
  {
  app=(char *)Tcl_GetVar(inter, "res",0);
@@ -150,30 +149,23 @@ if(done==0)
   }
 //fgets(c1_lab, 399, f);
 
-sprintf(msg, "toplevel .eq_%s", lab);
-cmd(inter, msg);
-
-sprintf(msg, "wm transient .eq_%s .", lab);
-cmd(inter, msg);
-sprintf(msg, "wm resizable .eq_%s 1 1", lab);
+sprintf( msg, "newtop .top .eq_%s \"%s Equation\" \".eq_%s.close\"", lab , lab, lab );
 cmd(inter, msg);
 
 sprintf(msg, "set w .eq_%s", lab);
 cmd(inter, msg);
-sprintf(msg, "wm title .eq_%s \"%s Equation\"", lab, lab);
-cmd(inter, msg);
 cmd(inter, "frame $w.f");
 cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
 cmd(inter, "scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"");
-
-cmd(inter, "text $w.f.text -wrap none -relief sunken -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"");
+cmd( inter, "set tabwidth \"[ expr { 4 * [ font measure Courier 0 ] } ] left\"" );
+cmd( inter, "text $w.f.text -wrap none -tabs $tabwidth -tabstyle wordprocessor -relief sunken -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
 cmd(inter, "pack $w.f.yscroll -side right -fill y");
 cmd(inter, "pack $w.f.xscroll -side bottom -fill x");
 cmd(inter, "pack $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f -expand yes -fill both");
-sprintf(msg, "button $w.close -width -9 -text Close -command {destroy .eq_%s}", lab);
+sprintf(msg, "button $w.close -width -9 -text Close -command {destroytop .eq_%s}", lab);
 cmd(inter, msg);
-sprintf(msg, "button $w.search -width -9 -text Search -command {set cur [.eq_%s.f.text index insert]; toplevel $w.s; wm transient $w.s .; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -width -9 -text Search -command {set cur [.eq_%s.f.text search -count length $s $cur end]; if {[string length $cur] > 0} {.eq_%s.f.text tag add sel $cur \"$cur + $length char\"; .eq_%s.f.text mark set insert \"$cur + $length char\" ;update; destroy $w.s; .eq_%s.f.text see $cur} { destroy $w.s}}; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}}",lab, lab, lab, lab, lab);
+sprintf(msg, "button $w.search -width -9 -text Search -command {set cur [$w.f.text index insert]; newtop $w $w.s \"destroytop $w.s\"; label $w.s.l -text Search; entry $w.s.e -textvariable s; focus $w.s.e; button $w.s.b -width -9 -text Ok -command {destroytop $w.s; set cur [$w.f.text search -count length $s $cur]; if {[string length $cur] > 0} {set ends \"$cur + $length char\"; $w.f.text tag remove sel 1.0 end; $w.f.text tag add sel $cur \"$cur + $length char\"; update; $w.f.text see $cur} }; pack $w.s.l $w.s.e $w.s.b; bind $w.s <KeyPress-Return> {$w.s.b invoke}; showtop $w.s }");
 cmd(inter, msg);
 
 cmd(inter, "pack $w.search $w.close");
@@ -336,7 +328,7 @@ cmd(inter, msg);
 sprintf(c2_lab, "bind .eq_%s.f.text <Double-1> {.eq_%s.f.text tag remove sel 0.0 end; set a @%%x,%%y; .eq_%s.f.text tag add sel \"$a wordstart\" \"$a wordend\"; set res [.eq_%s.f.text get sel.first sel.last]; set choice 29 }",lab, lab, lab, lab);
 cmd(inter, c2_lab);
 
-
+cmd( inter, "showtop $w centerS 1" );
 }
 
 

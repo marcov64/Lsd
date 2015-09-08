@@ -395,17 +395,17 @@ case 22:
 	cmd(inter, "set a [winfo exists .a]");
 	cmd(inter, "if { $a==1} {destroy .a} {}");
 	cmd(inter, "toplevel .a");
-	cmd(inter, "label .a.l1 -text \"Node id:\"");
+	cmd(inter, "label .a.l1 -text \"Node id: \"");
 	sprintf(msg, "label .a.l2 -foreground red -text \"%d\"", r->node->id);
 	cmd(inter, msg); 
-	cmd(inter, "label .a.l3 -text \"Num. links out:\"");
+	cmd(inter, "label .a.l3 -text \"Num. links out: \"");
 	sprintf(msg, "label .a.l4 -foreground red -text \"%d\"", r->node->nLinks);
 	cmd(inter, msg); 
-	cmd(inter, "label .a.l5 -text \"Outgoing links:\"");
+	cmd(inter, "label .a.l5 -text \"Outgoing links: \"");
 	cmd(inter, "label .a.l6 -text \"dest. id          (weight)\" -foreground red");
 	if(r->node->name != NULL)		// is node named?
 	{
-		cmd(inter, "label .a.l7 -text \"Node name:\"");
+		cmd(inter, "label .a.l7 -text \"Node name: \"");
 		sprintf(msg, "label .a.l8 -foreground red -text \"%s\"", r->node->name);
 		cmd(inter, msg); 
 		cmd(inter, "pack .a.l7 .a.l8 .a.l1 .a.l2 .a.l3 .a.l4 .a.l5");
@@ -898,7 +898,7 @@ object *ap_o;
 cmd(inter, "frame .t -relief groove -bd 2");
 
 
-cmd(inter, "label .t.obj -relief raise -bd 2 -text \"Object instance:\" ");
+cmd(inter, "label .t.obj -relief raise -bd 2 -text \"Object instance: \" ");
 if(r->up!=NULL)
 {
  cmd(inter, "bind .t.obj <Button-1> {if {[winfo exist .w]==1} {destroy .w} {}; set choice 17}");
@@ -907,7 +907,7 @@ if(r->up!=NULL)
 } 
 
 /*
-strcpy(ch, "label .t.obj -text \"Object Name (ascendants and instance numbers):\" ");
+strcpy(ch, "label .t.obj -text \"Object Name (ascendants and instance numbers): \" ");
 
 strcat(ch, r->label);
 this_instance_number(r);
