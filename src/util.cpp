@@ -74,6 +74,7 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 #include <ctype.h>
+#include <time.h>
 
 extern char *simul_file;
 extern char *struct_file;
@@ -114,57 +115,34 @@ void save_single(variable *vcv);
 /****************************************************
 CMD
 ****************************************************/
+bool firstCall = true;
+
 void cmd(Tcl_Interp *inter, char const *cm)
 {
 
 int code;
 FILE *f;
-
-/**
-The following code works (and much faster), only under win2k with tcl8.0. Under Linux and Tcl8.3 it crashes badly.
-*
-Tcl_Obj *o;
-o=Tcl_NewStringObj(cm, strlen(cm));
-code=Tcl_EvalObjEx(inter, o, TCL_EVAL_DIRECT);
-if(code!=TCL_OK)
- {f=fopen("tk_err.err","a");
-  sprintf(msg, "\n%s\n\n%s\n",cm, Tcl_GetStringResult(inter));
-  fprintf(f,"%s", msg);
-  fclose(f);
-  plog("\nTcl-Tk Error. See file tk_err.err\n");
- }
-
-
-return;
-/**/
-//code=Tcl_VarEval(inter, cm, NULL);
-code=Tcl_Eval(inter, cm);
-
-if(code!=TCL_OK)
- {f=fopen("tk_err.err","a");
-  sprintf(msg, "\n%s\n\n%s\n",cm, Tcl_GetStringResult(inter));
-  fprintf(f,"%s", msg);
-  fclose(f);
-  plog("\nTcl-Tk Error. See file tk_err.err\n");
- }
-
-}
-
-/****************************************************
-CMD
-****************************************************/
-void cmd(char *cm)
-{
-
-int code;
-FILE *f;
+time_t rawtime;
+struct tm *timeinfo;
+char ftime[80];
 
 //code=Tcl_VarEval(inter, cm, NULL);
 code=Tcl_Eval(inter, cm);
 
 if(code!=TCL_OK)
  {f=fopen("tk_err.err","a");
-  sprintf(msg, "\n%s\n\n%s\n",cm, Tcl_GetStringResult(inter));
+
+  time( &rawtime );
+  timeinfo = localtime( &rawtime );
+  strftime ( ftime, 80, "%F %T", timeinfo );
+
+  if ( firstCall )
+  {
+	  firstCall = false;
+	  sprintf( msg, "\n\n====================> NEW TCL SESSION\n", ftime );
+	  fprintf(f,"%s", msg);
+  }
+  sprintf( msg, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
   fprintf(f,"%s", msg);
   fclose(f);
   plog("\nTcl-Tk Error. See file tk_err.err\n");

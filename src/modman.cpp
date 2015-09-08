@@ -196,22 +196,38 @@ return app;
 /****************************************************
 CMD
 ****************************************************/
+bool firstCall = true;
+
 void cmd(Tcl_Interp *inter, char *cm)
 {
 
 int code;
-FILE *ferr, *f;
+FILE *f;
+time_t rawtime;
+struct tm *timeinfo;
+char ftime[80];
 
 code=Tcl_Eval(inter, cm);
 
 if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilation errors
  {
-  ferr=fopen("tk_err.err","a");
-  sprintf(msg, "\nCommand:%s\nProduced message:\n%s\n-----\n",cm, inter->result);
-  fprintf(ferr,"%s", msg);
-  fclose(ferr);
+  f=fopen("tk_err.err","a");
+
+  time( &rawtime );
+  timeinfo = localtime( &rawtime );
+  strftime ( ftime, 80, "%F %T", timeinfo );
+
+  if ( firstCall )
+  {
+	  firstCall = false;
+	  sprintf( msg, "\n\n====================> NEW TCL SESSION\n", ftime );
+	  fprintf(f,"%s", msg);
+  }
+  sprintf( msg, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
+  fprintf(f,"%s", msg);
+  fclose(f);
 #ifdef SHOW_TK_ERR
-  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tk 8.5 error.\\n\\nCommand: %s\\n\\nProduced message:\n%s", cm, inter->result );
+  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message {Tk 8.5 error.\n\nPlease send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s}", cm, inter->result );
   cmd(inter, msg);
 #endif
  }
