@@ -478,7 +478,7 @@ cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
 cmd(inter, "$w add command -label \"New Text File\" -command { set choice 39} -underline 0");
 cmd(inter, "$w add command -label \"Open...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o");
-cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}} -underline 0 -accelerator Ctrl+s");
+cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 0 -accelerator Ctrl+s");
 cmd(inter, "$w add command -label \"Save As...\" -command {set choice 4} -underline 5 -accelerator Ctrl+a");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"TkDiff...\" -command {set choice 57} -underline 0");
@@ -692,7 +692,7 @@ cmd(inter, "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; 
 
 cmd(inter, "bind .f.t.t <Control-f> {set choice 11}");
 cmd(inter, "bind .f.t.t <F3> {set choice 12}");
-cmd(inter, "bind .f.t.t <Control-s> { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]} {}}"); 
+cmd(inter, "bind .f.t.t <Control-s> { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}}"); 
 cmd(inter, "bind .f.t.t <Control-a> { set choice 4}");
 cmd(inter, "bind .f.t.t <Control-r> {set choice 2}");
 cmd(inter, "bind .f.t.t <Control-e> {set choice 8}");
@@ -863,7 +863,6 @@ if(argn>1)
      cmd(inter, msg);
      cmd(inter, "set dirname [file dirname \"$filetoload\"]");
      cmd(inter, "set before [.f.t.t get 1.0 end]; .f.hea.file.dat conf -text \"$filename\"");
-    cmd(inter, "wm title . \"$filename - LMM\"");          
      
      sprintf(msg, "set s [file extension \"$filetoload\"]" );
      cmd(inter, msg);
@@ -899,16 +898,20 @@ cmd(inter, "set trash [bind .f.t.t]");
 cmd(inter, ".f.t.t insert end \"$trash\"");
 */
 
-
 cmd(inter, "set lfindcounter -1");
+
 loop:
 
+// indicate file save status in titlebar
+if ( tosave )
+	cmd( inter, "wm title . \"*$filename - LMM\"" );
+else
+	cmd( inter, "wm title . \"$filename - LMM\"" );
 
 loop_help:
+
 while(choice==0)
  Tcl_DoOneEvent(0);
-cmd(inter, "set b [.f.t.t tag ranges sel]");
-cmd(inter, "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}");
 
 if(choice==-1)
  {
@@ -916,13 +919,18 @@ if(choice==-1)
   exit(0);
  }
 
-cmd(inter, "if { [winfo exists .]==1} {set after [.f.t.t get 1.0 end]} { set after $before}");
-cmd(inter, "if {[string compare $before $after] != 0} {set tosave 1} {set tosave 0}");
+cmd(inter, "set b [.f.t.t tag ranges sel]");
+cmd(inter, "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}");
+
+// update the file changes status
+cmd( inter, "if [ winfo exists . ] { set after [ .f.t.t get 1.0 end] } { set after $before }" );
+cmd( inter, "if [ string compare $before $after ] { set tosave 1 } { set tosave 0 }" );
+
 if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {
 
   cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save File?\" -message \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
-  cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if {$answer  == \"cancel\"} {set choice 0} {}}");  
+  cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal -nocase $answer \"cancel\"] {set choice 0} {}}");  
   if(choice==0)
   goto loop;
 
@@ -935,11 +943,6 @@ if(choice==1)
   exit(0);
  }
 
-if(tosave==2)
- {choice=0;
-  goto loop;
- } 
-  
 if(choice==-2)
 {
 /*

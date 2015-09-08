@@ -319,11 +319,12 @@ if(choice==-1)
  choice=0;
  }
 
-
+if ( unsavedChange )
+	sprintf(msg, "wm title . \"*%s - Lsd Browser\"",simul_name);
+else
 sprintf(msg, "wm title . \"%s - Lsd Browser\"",simul_name);
 cmd(inter, msg);
 
-cmd(inter, "focus -force .");
 for(cur=cr; cur->up!=NULL; cur=cur->up);
 
 if(cur->v==NULL && cur->b==NULL)
