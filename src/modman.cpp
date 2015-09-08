@@ -1236,21 +1236,37 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
+  cmd(inter, "set filename description.txt");
+  
   cmd(inter, ".f.t.t delete 0.0 end");
-  cmd(inter, "if [file exists $modeldir/description.txt]==1 {set choice 1} {set choice 0}");
+  cmd( inter, "set choice 0; if { [ file exists $modeldir/$filename ] } { set choice 1; if { [ file size $modeldir/$filename ] <= 2 } { set choice 0; file delete $modeldir/$filename } }" );
  if(choice==1)
   {cmd(inter, "set file [open $modeldir/description.txt]");
    cmd(inter, ".f.t.t insert end [read -nonewline $file]");
    cmd(inter, "close $file");
+   cmd(inter, "set before [.f.t.t get 1.0 end]");
+  }
+  else		// if no description, ask if the user wants to create it or not
+  {
+	cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon question -message \"There is no valid description file ('description.txt') set for the model.\\n\\nPress 'Ok' to create a description file or 'Cancel' to show the equations file.\" ]" );
+	cmd( inter, " if [ string equal -nocase $answer \"ok\" ] { set choice 1 } { set choice 2 } " );
+	if ( choice == 2 )
+	{
+		cmd( inter, " set filename \"\" " );
+		choice = 8;		// load equations file
+		goto loop;
+	}
+	cmd( inter, ".f.t.t insert end \"Model $modelname (ver. $version)\"" );
+  }
+
    cmd(inter, ".f.t.t edit reset");
    sourcefile=0;
    cmd(inter, ".f.t.t mark set insert 1.0");
    cmd(inter, "focus -force .f.t.t");
-  }
-  cmd(inter, "set before [.f.t.t get 1.0 end]");
-  cmd(inter, "set filename description.txt");
+
   cmd(inter, ".f.hea.file.dat conf -text $filename");
   cmd(inter, "wm title . \"$filename - LMM\"");
+  
   cmd(inter, "catch [unset -nocomplain ud]");
   cmd(inter, "catch [unset -nocomplain udi]");
   cmd(inter, "catch [unset -nocomplain rd]");
@@ -1860,27 +1876,12 @@ if(macro==1)
 else 
  cmd(inter, "set fun_base \"fun_baseC.cpp\"");
 
-cmd(inter, "file copy $RootLsd/$LsdSrc/$fun_base $modeldir"); 
- 
+
+//create the empty equation file
+cmd(inter, "file copy $RootLsd/$LsdSrc/$fun_base $modeldir/fun_$mdir.cpp"); 
+
 
 cmd(inter, "cd $dirname");
-
-
-//insert the empty equation file
-
-
-cmd(inter, ".f.t.t delete 0.0 end");
-cmd(inter, "set file [open $fun_base]");
-cmd(inter, ".f.t.t insert end [read -nonewline $file]");
-cmd(inter, "close $file");
-cmd(inter, ".f.t.t edit reset");
-cmd(inter, "cd $modeldir");
-cmd(inter, "file delete $fun_base");
-cmd(inter, "set f [open fun_$mdir.cpp w]");
-cmd(inter, "puts -nonewline $f [.f.t.t get 0.0 end]");
-cmd(inter, "close $f");
-cmd(inter, "set filename fun_$mdir.cpp");
-cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
 
 //create the model_options.txt file
 cmd(inter, "set dir [glob *.cpp]");
@@ -1899,7 +1900,6 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-//cmd(inter, "if { $tcl_platform(platform) == \"windows\" } {file copy $RootLsd/$LsdGnu/bin/crt0.o $modeldir} {}");
 
 cmd(inter, "cd $RootLsd");
 cmd(inter, ".m.model entryconf 3 -state normal");
@@ -1914,9 +1914,10 @@ cmd(inter, ".m.model entryconf 12 -state normal");
 cmd(inter, ".m.model entryconf 14 -state normal");
 
 
-cmd(inter, "tk_messageBox -type ok -title \"Model created\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
+cmd(inter, "tk_messageBox -type ok -title \"Model Created\" -icon info -message \"New model '$mname' (ver. $mver) successfully created.\\n\\nDirectory:\n$dirname\"");
 
-choice=49;
+cmd(inter, "set before [.f.t.t get 0.0 end]"); //avoid to re-issue a warning for non saved files
+choice=50;
 goto loop;
 
 }
@@ -4379,30 +4380,12 @@ if(choice == 14)
  { //create a new model/group
  goto loop;
  }
-if( choice==4)
- {
-  cmd(inter, "if { [lindex $lmn $result] == \"..\" } {set choice 33} {}");
-  if(choice==33)
-   {
-   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"You cannot remove this.\"");
-   goto loop;
-   }
-  cmd(inter, "if { [lindex $group $result] == 1} {set message \"Group\\n[lindex $lmn $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\nConfirm?\"; set answer [tk_messageBox -icon question -type yesno -default no -title \"Remove group?\" -message $message]} {set message \"Model\\n[lindex $lmn $result] ver. [lindex $lver $result] (dir. [lindex $ldn $result])\\n is going to be deleted.\\n Confirm?\"; set answer [tk_messageBox -icon question -type yesno -default no -title \"Remove model?\" -message $message]}");
-  cmd(inter, "if {$answer == \"yes\"} {file delete -force [lindex $ldn $result]} {}");
-  cmd(inter, "set groupdir [lindex $lrn $result]");
-  choice=33;
-  goto loop;
- } 
+
 cmd(inter, "set modelname [lindex $lmn $result]");
 cmd(inter, "set version [lindex $lver $result]");
 cmd(inter, "set modeldir [lindex $ldn $result]");
 cmd(inter, "set dirname $modeldir");
-cmd(inter, "set filename \"description.txt\"");
 
-cmd(inter, ".f.t.t delete 0.0 end");
-cmd(inter, "if { [file exists $modeldir/description.txt] == 1} {set f [open $modeldir/description.txt]; .f.t.t insert end \"[read -nonewline $f]\"; .f.t.t edit reset; close $f} {.f.t.t insert end \"Model $modelname (ver. $version)\\n\"; .f.t.t edit reset}");
-
-cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
 cmd(inter, ".f.hea.grp.dat conf -text \"$modelgroup\"");
 cmd(inter, ".f.hea.mod.dat conf -text \"$modelname\"");
 cmd(inter, ".f.hea.ver.dat conf -text \"$version\"");
@@ -4808,8 +4791,8 @@ cmd(inter, "close $f");
 cmd(inter, "cd $RootLsd");
 if(choice==46)
   choice=0; //just create the makefile
-if(choice==49) //after this show the equation file (and a model is created)
-  choice=8;
+if(choice==49) //after this show the description file (and a model is created)
+  choice=50;
   
 goto loop;
 
