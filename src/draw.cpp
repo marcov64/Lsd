@@ -75,6 +75,14 @@ int range_type=90;
 int step_level=15;
 int step=10;
 
+int h0 = 255;					// initial horizontal position
+int v0 = 10;					// initial vertical position
+float hpan0 = 0.35;				// initial horizontal scroll %
+int hsz = 600;					// horizontal window size in pixels
+int vsz = 400;					// vertical window size in pixels
+int hcvsz = 1920;				// horizontal canvas size
+int vcvsz = 1080;				// vertical canvas size
+
 
 /****************************************************
 SHOW_GRAPH
@@ -83,6 +91,7 @@ SHOW_GRAPH
 
 void show_graph( object *t)
 {
+char msg[300];
 object *top;
 
 //return;
@@ -94,42 +103,55 @@ if(!strWindowOn)	// model structure window is deactivated?
 	return;
 }
 
-#ifdef DUAL_MONITOR
-// better adjusts position for X11
-cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c}}");
+cmd(inter, "if {[winfo exists $c.f]==1} {wm deiconify $c; destroy $c.f} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c}}");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $c @$RootLsd/$LsdSrc/lsd.xbm} {}");
-#else
-//cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .}}");
-//cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .; bind $c <FocusIn> {focus -force .l.v.c.var_name}}}");cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; wm iconify .log; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c; wm iconify .log} {toplevel $c; wm transient $c .; bind $c <FocusIn> {focus -force .l.v.c.var_name}}}");
-cmd(inter, "if {[winfo exists $c.c]==1} {wm deiconify $c; destroy $c.c} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c; wm transient $c .}}");
-#endif
 
 cmd(inter, "wm title $c \"Lsd Model Structure\"");
-
-//cmd(inter, "bind $c <Destroy> {set choice 35}");
-// if window is closed, do it properly in 'interf.cpp'
 cmd(inter, "wm protocol $c WM_DELETE_WINDOW {set strWindowOn 0; set choice 70}");
-cmd(inter, "canvas $c.c -width 15.c -height 10.c");
-cmd(inter, "pack $c.c");
-cmd(inter, "bind $c.c <1> {.log.text.text.internal insert end 1}");
+
+cmd(inter, "frame $c.f");
+cmd(inter, "scrollbar $c.f.vs -command \"$c.f.c yview\"");
+cmd(inter, "scrollbar $c.f.hs -orient horiz -command \"$c.f.c xview\"");
+sprintf( msg, "canvas $c.f.c -width %d -height %d -yscrollcommand \"$c.f.vs set\" -xscrollcommand \"$c.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
+cmd( inter, msg );
+cmd(inter, "pack $c.f.vs -side right -fill y");
+cmd(inter, "pack $c.f.hs -side bottom -fill x");
+cmd(inter, "pack $c.f.c -expand yes -fill both");
+cmd(inter, "pack $c.f -expand yes -fill both");
+sprintf( msg, "$c.f.c xview moveto %f", hpan0 );
+cmd( inter, msg );
+
 for(top=t; top->up!=NULL; top=top->up);
 
 cmd(inter, "set color white");
-draw_obj(inter, t, top, 10, 70, 0);
-//cmd(inter, ".log.text.text.internal insert end \"[bind $c.c]\"");
-cmd(inter, "bind $c.c <1> {set choice_g 24}");
-cmd(inter, "bind $c.c <2> {set choice_g 25}");
-cmd(inter, "bind $c.c <3> {set choice_g 25}");
-#ifdef DUAL_MONITOR
-// better adjusts position for X11
+draw_obj(inter, t, top, v0, h0, 0);
+cmd( inter, "bind $c.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
+cmd( inter, "bind $c.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
+cmd( inter, "bind $c.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
+
+cmd( inter, "menu $c.f.c.v -tearoff 0" );
+cmd( inter, "$c.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+cmd( inter, "$c.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
+cmd( inter, "$c.f.c.v add separator" );
+cmd( inter, "$c.f.c.v add cascade -label Add -menu $c.f.c.v.a");
+cmd( inter, "$c.f.c.v add separator" );
+cmd( inter, "$c.f.c.v add command -label Change -command { set choice 6 }" );
+cmd( inter, "$c.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
+cmd( inter, "$c.f.c.v add command -label Delete -command { set choice 74 }" );
+cmd( inter, "$c.f.c.v add separator" );
+cmd( inter, "$c.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
+cmd( inter, "$c.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+cmd( inter, "menu $c.f.c.v.a -tearoff 0" );
+cmd( inter, "$c.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
+cmd( inter, "$c.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
+cmd( inter, "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
+cmd( inter, "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
+
 cmd(inter, "set posXstr [expr [winfo x .] + $posX + $widthB]");
 cmd(inter, "set posYstr [winfo y .]");
-cmd(inter, "wm geometry $c +$posXstr+$posYstr"); 
+sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
+cmd( inter, msg );
 cmd(inter, "lower $c .");
-#else
-cmd(inter, "wm geometry $c +$posXLog+$posY"); 
-//cmd(inter, "lower $c .");
-#endif
 
 }
 
@@ -156,7 +178,7 @@ x=center;
 //writing to appear on the left of the window
 sprintf(ch, "set list_%s \"\"", t->label);
 cmd(inter, ch);
-sprintf(ch, "append list_%s \"Object %s :\n\n\"",t->label, t->label);
+sprintf(ch, "append list_%s \"Object: %s\n\n\"",t->label, t->label);
 cmd(inter,ch);
 
 if(t->v==NULL)
@@ -196,7 +218,6 @@ if(t->up!=NULL)
 
   }
 
-//for(i=0, cur=t->son; cur!=NULL; cur=skip_next_obj(cur, &num),num=0, i++);
 for(i=0, cb=t->b; cb!=NULL; cb=cb->next, i++);
 if(range_type>=15) //Here is changed. Placed a limit
   range_type-=15;
@@ -209,7 +230,6 @@ else
 
 if(t->up==NULL)
  level-=step_level;
-//for(i=begin-range_type/2, cur=t->son; cur!=NULL; cur=skip_next_obj(cur, &num),num=0,  i+=step_type)
 for(i=begin-range_type/2, cb=t->b; cb!=NULL; cb=cb->next,  i+=step_type)
  if(cb->head!=NULL)
    draw_obj(inter, blk, cb->head, level+step_level, i, center);
@@ -231,8 +251,8 @@ char ch[1000];
 //Tcl_LinkVar(inter, "y1", (char *) &y1, TCL_LINK_INT);
 //Tcl_LinkVar(inter, "y2", (char *) &y2, TCL_LINK_INT);
 
-//sprintf(ch, "$c.c create oval $x1.m $y1.m $x2.m $y2.m -tags node -tags %s -fill $color", str);
-sprintf(ch, "$c.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str);
+//sprintf(ch, "$c.f.c create oval $x1.m $y1.m $x2.m $y2.m -tags node -tags %s -fill $color", str);
+sprintf(ch, "$c.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str);
 cmd(inter, ch);
 
 //Tcl_UnlinkVar(inter, "x1");
@@ -256,8 +276,8 @@ void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
 //Tcl_LinkVar(inter, "y1", (char *) &y1, TCL_LINK_INT);
 //Tcl_LinkVar(inter, "y2", (char *) &y2, TCL_LINK_INT);
 
-// cmd(inter, "$c.c create line $x1.m $y1.m $x2.m $y2.m -tags node");
-    sprintf(ch, "$c.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2);
+// cmd(inter, "$c.f.c create line $x1.m $y1.m $x2.m $y2.m -tags node");
+    sprintf(ch, "$c.f.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2);
 cmd(inter, ch);
 
 //Tcl_UnlinkVar(inter, "x1");
@@ -281,60 +301,45 @@ const char *bah;
 //Tcl_LinkVar(inter, "x", (char *) &x, TCL_LINK_INT);
 //Tcl_LinkVar(inter, "y", (char *) &y, TCL_LINK_INT);
 
-//text for node name
-//strcpy(ch, "$c.c create text ");
-//strcat(ch, "$x.m $y.m -font {{MS Times New Roman} 10} -text \"");
-//strcat(ch, str);
-//strcat(ch, "\" -tags node -fill red");
-//strcat(ch, " -tags ");
-//strcat(ch, str2);
-sprintf(ch, "$c.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s",x,y,str,str2 );
+sprintf(ch, "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s",x,y,str,str2 );
 cmd(inter, ch);
 
 //text for node numerosity
 y+=8;
-//strcpy(ch, "$c.c create text ");
-//strcat(ch, "$x.m $y.m -font {{MS Times New Roman} 10} -text \"");
-//strcat(ch, n);
-//strcat(ch, "\" -tags node -fill black");
-//strcat(ch, " -tags ");
-//strcat(ch, str2);
-
-sprintf(ch, "$c.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s",x,y,n,str2 );
-
+sprintf(ch, "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s",x,y,n,str2 );
 cmd(inter, ch);
 
 /*
-sprintf(ch, "$c.c bind %s <Enter> {$c.c create text 2 1 -font {{MS Times New Roman} 10} -text $%s -anchor nw -tags list}", str2, str2);
+sprintf(ch, "$c.f.c bind %s <Enter> {$c.f.c create text 2 1 -font {{MS Times New Roman} 10} -text $%s -anchor nw -tags list}", str2, str2);
 cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <Leave> {$c.c delete list}", str2);
+sprintf(ch, "$c.f.c bind %s <Leave> {$c.f.c delete list}", str2);
 cmd(inter, ch);
 */
-sprintf(ch, "$c.c bind %s <Enter> {set res_g %s; if {[winfo exists .list]==1} {destroy .list} {};toplevel .list ; wm transient .list .; label .list.l -text \"$list_%s\" -justify left; pack .list.l;  align .list . }", str2, str2, str2);
+sprintf(ch, "$c.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $c; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $c }", str2, str2, str2);
 cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <Leave> {destroy .list}", str2);
+sprintf(ch, "$c.f.c bind %s <Leave> {unset res_g; destroy .list}", str2);
 cmd(inter, ch);
 
-sprintf(ch, "$c.c bind %s <Double-1> {set res_g %s; set choice_g 24}", str2, str2);
+//sprintf(ch, "$c.f.c bind %s <Double-1> {set res_g %s; set choice_g 24}", str2, str2);
 //cmd(inter, ch);
-bah=Tcl_GetStringResult(inter);
-sprintf(ch, "$c.c bind %s <Button-3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+//bah=Tcl_GetStringResult(inter);
+//sprintf(ch, "$c.f.c bind %s <Button-3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+//sprintf(ch, "$c.f.c bind %s <3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
-sprintf(ch, "$c.c bind %s <2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
-//cmd(inter, ch);
-
-sprintf(ch, "$c.c bind %s <Button-2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
+//sprintf(ch, "$c.f.c bind %s <2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
 
-sprintf(ch, "$c.c bind %s <Shift-Button-1> {set res_g %s; set choice_g 25;}", str2, str2);
+//sprintf(ch, "$c.f.c bind %s <Button-2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
 //cmd(inter, ch);
 
-//sprintf(ch, ".log.text.text.internal insert end [$c.c bind %s <2>]; .log.text.text.internal inser end \\n", str2);
+//sprintf(ch, "$c.f.c bind %s <Shift-Button-1> {set res_g %s; set choice_g 25;}", str2, str2);
 //cmd(inter, ch);
 
-bah=Tcl_GetStringResult(inter);
+//sprintf(ch, ".log.text.text.internal insert end [$c.f.c bind %s <2>]; .log.text.text.internal inser end \\n", str2);
+//cmd(inter, ch);
+
+//bah=Tcl_GetStringResult(inter);
 
 //Tcl_UnlinkVar(inter, "x");
 //Tcl_UnlinkVar(inter, "y");
