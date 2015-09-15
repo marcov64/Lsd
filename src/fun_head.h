@@ -131,6 +131,7 @@ FILE *f;
 
 // workaround for STL bug on definitions of isnan/isinf in C++11
 #if ( defined ( __cplusplus ) && __cplusplus >= 201103L )
+#include <algorithm>
 #define NAMESPACE std::
 #else
 #define NAMESPACE
