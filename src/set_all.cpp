@@ -103,7 +103,6 @@ void plog(char const *msg);
 description *search_description(char *lab);
 void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
 int compute_copyfrom(object *c, int *choice);
-void set_window_size(void);
 void add_description(char const *lab, char const *type, char const *text);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
 void save_description(object *r, FILE *f);
@@ -138,175 +137,171 @@ Tcl_LinkVar(inter, "res", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "value1", (char *) &value1, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "value2", (char *) &value2, TCL_LINK_DOUBLE);
 
-
 res=1;
-value1=0;
 value2=0;
 
-cmd(inter, "wm title . \"Set All Initialization\"");
+cmd( inter, "set sa .sa" );
+cmd( inter, "newtop .sa \"Set All Initialization\" { set choice 2 }" );
+
 cv=r->search_var(NULL, lab);
 
-
-
-cmd(inter, "frame .f1");
-cmd(inter, "frame .head");
-cmd(inter, "label .head.lg -text \"Set initial values for every copy of \"");
+cmd(inter, "frame .sa.f1");
+cmd(inter, "frame .sa.head");
+cmd(inter, "label .sa.head.lg -text \"Set initial values for every copy of\"");
 if(cv->param==1)
-  sprintf(ch, "label .head.l -text \"Parameter %s\" -fg red", lab);
+{
+  sprintf(ch, "label .sa.head.l -text \"Parameter: %s\" -fg red", lab);
+  value1 = cv->val[0];		// preload the existing value of the first object
+}
 else
-  sprintf(ch, "label .head.l -text \"Var: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
+{
+  if(cv->param==2)
+    sprintf(ch, "label .sa.head.l -text \"Function: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
+  else
+    sprintf(ch, "label .sa.head.l -text \"Variable: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
+  value1 = cv->val[0];		// preload the existing value of the first object
+}
+  
 cmd(inter, ch);
 
-sprintf(ch, "label .head.lo -text \"contained in object %s\"", cv->up->label);
+sprintf(ch, "label .sa.head.lo -text \"Contained in object: %s\"", cv->up->label);
 cmd(inter, ch);
 
-cmd(inter, "pack .head.lg .head.l .head.lo");
+cmd(inter, "pack .sa.head.lg .sa.head.l .sa.head.lo");
 
 cmd(inter, "set value 1");
-cmd(inter, "frame .f1.rd -relief groove -bd 2");
+cmd(inter, "frame .sa.f1.rd -relief groove -bd 2");
 
-cmd(inter, "label .f1.rd.l -text \"Available initialization functions\" -fg red");
+cmd(inter, "label .sa.f1.rd.l -text \"Initialization functions\" -fg red");
+cmd(inter, "pack .sa.f1.rd.l");
 
-cmd(inter, "radiobutton .f1.rd.r1 -text \"Equal to \" -variable res -value 1 -command { .f1.val.l1 conf -text \"Value\"; .f1.val.l2 conf -text \"(no use)\"}");
-cmd(inter, "bind .f1.rd.r1 <Down> {focus -force .f1.rd.r9; .f1.rd.r9 invoke}");
-cmd(inter, "bind .f1.rd.r1 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "radiobutton .sa.f1.rd.r1 -text \"Equal to \" -variable res -value 1 -command { .sa.f1.val.l1 conf -text \"Value\"; .sa.f1.val.l2 conf -text \"(no use)\"}");
+cmd(inter, "bind .sa.f1.rd.r1 <Down> {focus -force .sa.f1.rd.r9; .sa.f1.rd.r9 invoke}");
+cmd(inter, "bind .sa.f1.rd.r1 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r9 -text \"Range \" -variable res -value 9 -command { .f1.val.l1 conf -text \"Minimum\"; .f1.val.l2 conf -text \"Maximum\"}");
-cmd(inter, "bind .f1.rd.r9 <Down> {focus -force .f1.rd.f2.r2; .f1.rd.f2.r2 invoke}");
-cmd(inter, "bind .f1.rd.r9 <Up> {focus -force .f1.rd.r1; .f1.rd.r1 invoke}");
-cmd(inter, "bind .f1.rd.r9 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "radiobutton .sa.f1.rd.r9 -text \"Range \" -variable res -value 9 -command { .sa.f1.val.l1 conf -text \"Minimum\"; .sa.f1.val.l2 conf -text \"Maximum\"}");
+cmd(inter, "bind .sa.f1.rd.r9 <Down> {focus -force .sa.f1.rd.f2.r2; .sa.f1.rd.f2.r2 invoke}");
+cmd(inter, "bind .sa.f1.rd.r9 <Up> {focus -force .sa.f1.rd.r1; .sa.f1.rd.r1 invoke}");
+cmd(inter, "bind .sa.f1.rd.r9 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
+cmd(inter, "frame .sa.f1.rd.f2");
+cmd(inter, "radiobutton .sa.f1.rd.f2.r2 -text \"Increasing \" -variable res -value 2 -command { .sa.f1.val.l1 conf -text \"Start\"; .sa.f1.val.l2 conf -text \"Step\"}");
+cmd(inter, "bind .sa.f1.rd.f2.r2 <Down> {focus -force .sa.f1.rd.r4; .sa.f1.rd.r4 invoke}");
+cmd(inter, "bind .sa.f1.rd.f2.r2 <Up> {focus -force .sa.f1.rd.r9; .sa.f1.rd.r9 invoke}");
 
-cmd(inter, "frame .f1.rd.f2");
-cmd(inter, "radiobutton .f1.rd.f2.r2 -text \"Increasing \" -variable res -value 2 -command { .f1.val.l1 conf -text \"Start\"; .f1.val.l2 conf -text \"Step\"}");
-cmd(inter, "bind .f1.rd.f2.r2 <Down> {focus -force .f1.rd.r4; .f1.rd.r4 invoke}");
-cmd(inter, "bind .f1.rd.f2.r2 <Up> {focus -force .f1.rd.r9; .f1.rd.r9 invoke}");
-
-cmd(inter, "bind .f1.rd.f2.r2 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "bind .sa.f1.rd.f2.r2 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
 cmd(inter, "set step_in 1");
-cmd(inter, "pack .f1.rd.f2.r2 -side left");
-cmd(inter, "radiobutton .f1.rd.r4 -text \"Increasing (groups) \" -variable res -value 4 -command {.f1.val.l1 conf -text \"Start\"; .f1.val.l2 conf -text \"Step\"}");
-cmd(inter, "bind .f1.rd.r4 <Up> {focus -force .f1.rd.f2.r2; .f1.rd.f2.r2 invoke}");
-cmd(inter, "bind .f1.rd.r4 <Down> {focus -force .f1.rd.r3; .f1.rd.r3 invoke}");
-cmd(inter, "bind .f1.rd.r4 <Return> {.f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "pack .sa.f1.rd.f2.r2 -side left");
+cmd(inter, "radiobutton .sa.f1.rd.r4 -text \"Increasing (groups) \" -variable res -value 4 -command {.sa.f1.val.l1 conf -text \"Start\"; .sa.f1.val.l2 conf -text \"Step\"}");
+cmd(inter, "bind .sa.f1.rd.r4 <Up> {focus -force .sa.f1.rd.f2.r2; .sa.f1.rd.f2.r2 invoke}");
+cmd(inter, "bind .sa.f1.rd.r4 <Down> {focus -force .sa.f1.rd.r3; .sa.f1.rd.r3 invoke}");
+cmd(inter, "bind .sa.f1.rd.r4 <Return> {.sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r3 -text \"Random (uniform) \" -variable res -value 3 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
-cmd(inter, "bind .f1.rd.r3 <Up> {focus -force .f1.rd.r4; .f1.rd.r4 invoke}");
-cmd(inter, "bind .f1.rd.r3 <Down> {focus -force .f1.rd.r8; .f1.rd.r8 invoke}");
-cmd(inter, "bind .f1.rd.r3 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "radiobutton .sa.f1.rd.r3 -text \"Random (uniform) \" -variable res -value 3 -command { .sa.f1.val.l1 conf -text \"Min\"; .sa.f1.val.l2 conf -text \"Max\"}");
+cmd(inter, "bind .sa.f1.rd.r3 <Up> {focus -force .sa.f1.rd.r4; .sa.f1.rd.r4 invoke}");
+cmd(inter, "bind .sa.f1.rd.r3 <Down> {focus -force .sa.f1.rd.r8; .sa.f1.rd.r8 invoke}");
+cmd(inter, "bind .sa.f1.rd.r3 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r8 -text \"Random integer (uniform) \" -variable res -value 8 -command { .f1.val.l1 conf -text \"Min\"; .f1.val.l2 conf -text \"Max\"}");
-cmd(inter, "bind .f1.rd.r8 <Up> {focus -force .f1.rd.r3; .f1.rd.r3 invoke}");
-cmd(inter, "bind .f1.rd.r8 <Down> {focus -force .f1.rd.r5; .f1.rd.r5 invoke}");
-cmd(inter, "bind .f1.rd.r8 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "radiobutton .sa.f1.rd.r8 -text \"Random integer (uniform) \" -variable res -value 8 -command { .sa.f1.val.l1 conf -text \"Min\"; .sa.f1.val.l2 conf -text \"Max\"}");
+cmd(inter, "bind .sa.f1.rd.r8 <Up> {focus -force .sa.f1.rd.r3; .sa.f1.rd.r3 invoke}");
+cmd(inter, "bind .sa.f1.rd.r8 <Down> {focus -force .sa.f1.rd.r5; .sa.f1.rd.r5 invoke}");
+cmd(inter, "bind .sa.f1.rd.r8 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r5 -text \"Random (normal) \" -variable res -value 5 -command {.f1.val.l1 conf -text \"Mean\"; .f1.val.l2 conf -text \"Std Dev\"}");
-cmd(inter, "bind .f1.rd.r5 <Up> {focus -force .f1.rd.r8; .f1.rd.r8 invoke}");
-cmd(inter, "bind .f1.rd.r5 <Down> {focus -force .f1.rd.r7; .f1.rd.r7 invoke}");
-cmd(inter, "bind .f1.rd.r5 <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "radiobutton .sa.f1.rd.r5 -text \"Random (normal) \" -variable res -value 5 -command {.sa.f1.val.l1 conf -text \"Mean\"; .sa.f1.val.l2 conf -text \"Std Dev\"}");
+cmd(inter, "bind .sa.f1.rd.r5 <Up> {focus -force .sa.f1.rd.r8; .sa.f1.rd.r8 invoke}");
+cmd(inter, "bind .sa.f1.rd.r5 <Down> {focus -force .sa.f1.rd.r7; .sa.f1.rd.r7 invoke}");
+cmd(inter, "bind .sa.f1.rd.r5 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
+cmd(inter, "radiobutton .sa.f1.rd.r7 -text \"File\" -variable res -value 7 -command { .sa.f1.val.l1 conf -text \"(no use)\"; .sa.f1.val.l2 conf -text \"(no use)\"}");
+cmd(inter, "bind .sa.f1.rd.r7 <Up> {focus -force .sa.f1.rd.r5; .sa.f1.rd.r5 invoke}");
+cmd(inter, "bind .sa.f1.rd.r7 <Return> {.sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-cmd(inter, "radiobutton .f1.rd.r7 -text \"File\" -variable res -value 7 -command { .f1.val.l1 conf -text \"(no use)\"; .f1.val.l2 conf -text \"(no use)\"}");
-cmd(inter, "bind .f1.rd.r7 <Up> {focus -force .f1.rd.r5; .f1.rd.r5 invoke}");
-cmd(inter, "bind .f1.rd.r7 <Return> {.f1.val.e1 selection range 0 end; focus .f1.val.e1}");
+cmd(inter, "pack .sa.f1.rd.r1 .sa.f1.rd.r9 .sa.f1.rd.f2 .sa.f1.rd.r4 .sa.f1.rd.r3 .sa.f1.rd.r8 .sa.f1.rd.r5 .sa.f1.rd.r7 -anchor w");
 
-cmd(inter, "radiobutton .f1.rd.r10 -text \"Sensitivity analysis\" -variable res -value 10 -command {.f1.val.l1 conf -text \"Number of values\"; .f1.val.l2 conf -text \"(no use)\"}");
+cmd(inter, "bind .sa.f1.rd <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
 
-
-cmd(inter, "pack .f1.rd.l .f1.rd.r1 .f1.rd.r9 .f1.rd.f2 .f1.rd.r4 .f1.rd.r3 .f1.rd.r8 .f1.rd.r5 .f1.rd.r7 .f1.rd.r10 -anchor w");
-
-cmd(inter, "bind .f1.rd <Return> { .f1.val.e1 selection range 0 end; focus .f1.val.e1}");
-
+cmd(inter, "frame .sa.f1.val -relief groove -bd 2");
+cmd(inter, "label .sa.f1.val.l -text \"Numerical data for initialization\" -fg red");
+cmd(inter, "label .sa.f1.val.l1 -text \"Value 1\"");
+cmd(inter, "entry .sa.f1.val.e1 -textvariable value1");
+cmd(inter, "label .sa.f1.val.l2 -text \"Value 2\"");
+cmd(inter, "entry .sa.f1.val.e2 -textvariable value2");
+cmd(inter, "pack .sa.f1.val.l .sa.f1.val.l1 .sa.f1.val.e1 .sa.f1.val.l2 .sa.f1.val.e2 -expand yes -fill x");
 
 cmd(inter, "set rnd_seed 1");
 cmd(inter, "set use_seed 0");
-cmd(inter, "frame .f1.val -relief groove -bd 2");
-cmd(inter, "frame .f2");
-cmd(inter, "frame .f2.rnd -relief groove -bd 2");
-cmd(inter, "label .f2.rnd.l -text \"Random generator settings\" -fg red");
-cmd(inter, "checkbutton .f2.rnd.f -text \"Reset the generator\" -variable use_seed");
-cmd(inter, "label .f2.rnd.l1 -text \"Seed used\"");
-cmd(inter, "entry .f2.rnd.e1 -textvariable rnd_seed");
-cmd(inter, "pack .f2.rnd.l .f2.rnd.f .f2.rnd.l1 .f2.rnd.e1 -expand yes -fill x");
+cmd(inter, "frame .sa.f2");
+cmd(inter, "frame .sa.f2.rnd -relief groove -bd 2");
+cmd(inter, "label .sa.f2.rnd.l -text \"Random number generator settings\" -fg red");
+cmd(inter, "checkbutton .sa.f2.rnd.f -text \"Reset the generator\" -variable use_seed");
+cmd(inter, "frame .sa.f2.rnd.le");
+cmd(inter, "label .sa.f2.rnd.le.l1 -text \"Seed used \"");
+cmd(inter, "entry .sa.f2.rnd.le.e1 -width 6 -textvariable rnd_seed");
+cmd(inter, "pack .sa.f2.rnd.le.l1 .sa.f2.rnd.le.e1 -side left");
+cmd(inter, "pack .sa.f2.rnd.l .sa.f2.rnd.f");
+cmd(inter, "pack .sa.f2.rnd.l .sa.f2.rnd.f");
+cmd(inter, "pack .sa.f2.rnd.le");
+cmd(inter, "pack .sa.f2.rnd -pady 2 -expand yes -fill x");
 
+cmd(inter, "frame .sa.f2.fr -relief groove -bd 2");
+cmd(inter, "label .sa.f2.fr.tit -text \"Frequency\" -fg red");
 
-cmd(inter, "label .f1.val.l -text \"Numerical data for initialization\" -fg red");
-cmd(inter, "label .f1.val.l1 -text \"Value 1\"");
-cmd(inter, "entry .f1.val.e1 -textvariable value1");
-cmd(inter, "label .f1.val.l2 -text \"Value 2\"");
-cmd(inter, "entry .f1.val.e2 -textvariable value2");
-cmd(inter, "pack .f1.val.l .f1.val.l1 .f1.val.e1 .f1.val.l2 .f1.val.e2 -expand yes -fill x");
+cmd(inter, "label .sa.f2.fr.l -text \"Apply every\"");
+cmd(inter, "entry .sa.f2.fr.e -width 6 -textvariable step_in");
+cmd(inter, "label .sa.f2.fr.l1 -text \"objects \"");
+cmd(inter, "checkbutton .sa.f2.fr.f -text \"Fill in\" -variable fill");
+cmd(inter, "pack .sa.f2.fr.tit");
+cmd(inter, "pack  .sa.f2.fr.l .sa.f2.fr.e .sa.f2.fr.l1 .sa.f2.fr.f -padx 5 -side left");
+cmd(inter, "pack  .sa.f2.fr -pady 2 -fill x");
 
-cmd(inter, "frame .f2.s -relief groove -bd 2");
+cmd(inter, "frame .sa.f2.s -relief groove -bd 2");
 cmd(inter, "set to_all 1");
-cmd(inter, "label .f2.s.tit -text \"Extension of initialization\" -fg red");
-cmd(inter, "pack .f2.s.tit");
-cmd(inter, "radiobutton .f2.s.all -text \"Apply to every object\" -variable to_all -value 1");
-
-cmd(inter, "bind .f2.s.all <1> {.f2.s.sel.to conf -state disabled; .f2.s.sel.from conf -state disabled}");
-cmd(inter, "bind .f2.s.all <Down> {.f2.s.sel.to conf -state normal; .f2.s.sel.from conf -state normal;focus -force .f2.s.sel.sel; .f2.s.sel.sel invoke};");
-cmd(inter, "bind .f2.s.all <Return> {focus -force .f2.b.ok}");
-
-cmd(inter, "frame .f2.s.sel");
-cmd(inter, "radiobutton .f2.s.sel.sel -text \"Apply to a group of objects\\n (use right button on cells)\" -variable to_all -value 2");
-cmd(inter, "bind .f2.s.sel.sel <1> {.f2.s.sel.to conf -state normal; .f2.s.sel.from conf -state normal}");
-cmd(inter, "pack .f2.s.sel.sel");
+cmd(inter, "label .sa.f2.s.tit -text \"Extension of initialization\" -fg red");
+cmd(inter, "pack .sa.f2.s.tit");
+cmd(inter, "frame .sa.f2.s.sel");
+cmd(inter, "radiobutton .sa.f2.s.sel.all -text \"Apply to every object\" -variable to_all -value 1 -command { .sa.f2.s.sel2.to conf -state disabled; .sa.f2.s.sel2.from conf -state disabled; bind .sa.f2.s.sel2.from <Button-3> { }; bind .sa.f2.s.sel2.to <Button-3> { } }");
+cmd(inter, "radiobutton .sa.f2.s.sel.sel -text \"Apply to a group of objects\" -variable to_all -value 2 -command { .sa.f2.s.sel2.to conf -state normal; .sa.f2.s.sel2.from conf -state normal; bind .sa.f2.s.sel2.from <Button-3> {set choice 9}; bind .sa.f2.s.sel2.to <Button-3> { set choice 10 } }");
+cmd(inter, "pack .sa.f2.s.sel.all .sa.f2.s.sel.sel -anchor w");
+cmd(inter, "pack .sa.f2.s.sel -anchor w");
+cmd(inter, "frame .sa.f2.s.sel2");
 cmd(inter, "set cases_from 1; set cases_to 10000");
-cmd(inter, "label .f2.s.sel.lfrom -text \" From: \"");
-cmd(inter, "entry .f2.s.sel.from -width 5 -textvariable cases_from -state disabled");
-cmd(inter, "label .f2.s.sel.lto -text \" to: \"");
-cmd(inter, "entry .f2.s.sel.to -width 5 -textvariable cases_to -state disabled");
-cmd(inter, "bind .f2.s.sel.sel <Return> {focus -force .f2.b.ok}");
-cmd(inter, "bind .f2.s.sel.sel <Right> {focus -force .f2.s.sel.from}");
-cmd(inter, "bind .f2.s.sel.from <Return> {focus -force .f2.s.sel.to}");
-cmd(inter, "bind .f2.s.sel.from <Button-3> {set choice 9}");
-cmd(inter, "bind .f2.s.sel.to <Button-3> {set choice 10}");
-//cmd(inter, "bind .f2.s.sel.to <Left> {focus -force .f2.s.sel.from}");
-cmd(inter, "bind .f2.s.sel.from <Left> {focus -force .f2.s.sel.sel}");
-cmd(inter, "bind .f2.s.sel.sel <Up> {focus -force .f2.s.all}");
-cmd(inter, "bind .f2.s.sel.to <Return> {focus -force .f2.b.ok}");
+cmd(inter, "label .sa.f2.s.sel2.lfrom -text \" From: \"");
+cmd(inter, "entry .sa.f2.s.sel2.from -width 5 -textvariable cases_from -state disabled");
+cmd(inter, "label .sa.f2.s.sel2.lto -text \" to: \"");
+cmd(inter, "entry .sa.f2.s.sel2.to -width 5 -textvariable cases_to -state disabled");
+cmd(inter, "label .sa.f2.s.sel2.obs -text \"(use right button on cells)\"");
+cmd(inter, "pack .sa.f2.s.sel2.lfrom .sa.f2.s.sel2.from .sa.f2.s.sel2.lto .sa.f2.s.sel2.to .sa.f2.s.sel2.obs -side left");
+cmd(inter, "pack .sa.f2.s.sel2");
+cmd(inter, "pack .sa.f2.s -pady 2 -expand yes -fill x");
 
-cmd(inter, "pack .f2.s.sel.lfrom .f2.s.sel.from .f2.s.sel.lto .f2.s.sel.to -side left");
-cmd(inter, "pack .f2.s.all .f2.s.sel -anchor w");
+cmd(inter, "bind .sa.f2.s.sel.all <Return> {focus -force .sa.f2.b.ok}");
+cmd(inter, "bind .sa.f2.s.sel.sel <Return> {focus -force .sa.f2.b.ok}");
+cmd(inter, "bind .sa.f2.s.sel2.from <Return> {focus -force .sa.f2.s.sel2.to}");
+cmd(inter, "bind .sa.f2.s.sel2.to <Return> {focus -force .sa.f2.b.ok}");
 
 cmd(inter, "set update_d 1");
-cmd(inter, "checkbutton .f2.ud -text \"Update description\" -variable update_d");
+cmd(inter, "checkbutton .sa.f2.ud -text \"Update description\" -variable update_d");
 
-cmd(inter, "frame .f2.fr -relief groove -bd 2");
-cmd(inter, "label .f2.fr.tit -text \"Frequency\" -fg red");
+cmd(inter, "bind .sa <KeyPress-Escape> {set choice 2}");
+cmd(inter, "pack .sa.f1.rd .sa.f1.val");
+cmd(inter, "pack .sa.f2.rnd .sa.f2.fr .sa.f2.s .sa.f2.ud -anchor w -expand yes -fill both");
 
-cmd(inter, "label .f2.fr.l -text \"Apply every \"");
-cmd(inter, "entry .f2.fr.e -width 6 -textvariable step_in");
-cmd(inter, "label .f2.fr.l1 -text \" objects\"");
-cmd(inter, "checkbutton .f2.fr.f -text \"Fill in\" -variable fill");
-cmd(inter, "pack .f2.fr.tit");
-cmd(inter, "pack  .f2.fr.l .f2.fr.e .f2.fr.l1 .f2.fr.f -side left  -expand yes -fill both");
+cmd(inter, "pack .sa.head");
+cmd(inter, "pack .sa.f1 .sa.f2 -side left -expand yes -fill y");
 
-cmd(inter, "bind . <KeyPress-Escape> {set choice 2}");
-cmd(inter, "pack .f1.rd .f1.val");
-cmd(inter, "pack .f2.rnd .f2.fr .f2.s .f2.ud -anchor w -expand yes -fill both");
+cmd( inter, "okhelpcancel .sa.f2 b { set choice 1 } { LsdHelp mdatainit.html#setall } { set choice 2 }" );
+cmd(inter, "showtop .sa");
+cmd(inter, "focus -force .sa.f1.rd.r1; .sa.f1.rd.r1 invoke");
+//cmd(inter, "bind .sa.f1.val.e1 <KeyPress-Return> { .sa.f1.val.e2 selection range 0 end; focus .sa.f1.val.e2}");
+//cmd(inter, "bind .sa.f1.val.e2 <KeyPress-Return> {focus -force .sa.f2.s.all; .sa.f2.s.all invoke}");
+cmd(inter, ".sa.f1.rd.r1 invoke");
+cmd(inter, ".sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1");	// speed-up data entry focusing first data field
+cmd(inter, "bind .sa.f1.val.e1 <KeyPress-Return> { set choice 1 }");
+cmd(inter, "bind .sa.f1.val.e2 <KeyPress-Return> { set choice 1 }");
 
-cmd(inter, "pack .head");
-cmd(inter, "pack .f1 .f2 -side left");
-cmd(inter, "frame .f2.b");
-cmd(inter, "button .f2.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .f2.b.help -width -9 -text Help -command {LsdHelp mdatainit.html#setall}");
-cmd(inter, "button .f2.b.can -width -9 -text Cancel -command {set choice 2}");
-
-cmd(inter, "pack .f2.b.ok .f2.b.help .f2.b.can -side left");
-cmd(inter, "pack .f2.b -side bottom");
-cmd(inter, "focus -force .f1.rd.r1; .f1.rd.r1 invoke");
-//cmd(inter, "bind .f1.val.e1 <KeyPress-Return> { .f1.val.e2 selection range 0 end; focus .f1.val.e2}");
-//cmd(inter, "bind .f1.val.e2 <KeyPress-Return> {focus -force .f2.s.all; .f2.s.all invoke}");
-cmd(inter, "bind .f2.b.ok <KeyPress-Return> {.f2.b.ok invoke}");
-cmd(inter, ".f1.rd.r1 invoke");
-cmd(inter, ".f1.val.e1 selection range 0 end; focus .f1.val.e1");	// speed-up data entry focusing first data field
-cmd(inter, "bind .f1.val.e1 <KeyPress-Return> {.f2.b.ok invoke}");
-cmd(inter, "bind .f1.val.e2 <KeyPress-Return> {.f2.b.ok invoke}");
-
+*choice = 0;
 here_setall:
-set_window_size();
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
@@ -330,9 +325,8 @@ if(*choice==10)
  goto here_setall;
 }
 
+cmd(inter, "destroytop .sa");
 
-
-cmd(inter, "destroy .head .f1 .f2 .b");
 if( (*choice==1 && res!=0) || *choice==9 || *choice==10)
 {
 
@@ -353,94 +347,6 @@ update_description=*choice;
 
 switch(res)
 {
-// Sensitivity Analysis
-case 10: 
-	exist = false;
-	sense *ps;
-    if (rsense==NULL) 
-	{
-		if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
-		{
-			cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
-			break;		// abort command
-		}
-        rsense=cs=new sense;
-    }
-    else
-    {
-		// check if sensitivity data for the variable already exists 
-		for ( cs = rsense, ps = NULL; cs != NULL; ps = cs, cs = cs->next )
-			if ( ! strcmp( cs->label, lab ) && 
-				 ( cs->param == 1 || cs->lag == lag ) )
-			{
-				exist = true;
-				break;	// get out of the for loop
-			}
-			
-		if ( ! exist )	// if new variable, append at the end of the list
-		{
-			if ( ( int ) value1 < 2 )		// is it a valid number of parameters?
-			{
-				cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"Invalid number of values.\n\nYou need at least 2 values to perform sensitivity analysis.\"");
-				break;		// abort command
-			}
-			for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
-			cs->next = new sense;	// create new variable
-			ps = cs;	// keep previous sensitivity variable
-			cs = cs->next;
-		}
-	}
-
-	if ( ! exist )	// do only for new variables in the list
-	{
-		cs->label=new char[strlen(lab)+1];
-		strcpy(cs->label,lab);
-		cs->next=NULL;
-		cs->nvalues=(int)value1;
-		cs->v=new double[(int)value1];
-		cs->entryOk = false;			// no valid data yet
-	}
-	else
-	{
-		// do if changed number of values (0 values mean edit)
-		if ( cs->nvalues != ( int ) value1 && ( int ) value1 != 0 )
-		{
-			// copy old values as possible
-			double *nv = new double[ ( int ) value1 ];
-			for ( i = 0; i < ( int ) value1; i++ )
-			{
-				if ( i < cs->nvalues )	// copy only the existing ones
-					nv[ i ] = cs->v[ i ];
-				else
-					nv[ i ] = 0.;
-			}
-	
-			delete [ ] cs->v;				// free old storage of values
-			cs->nvalues = ( int ) value1;
-			cs->v = nv;
-		}
-		cs->entryOk = true;					// valid data already there
-	}
-
-	// save type and specific lag in this case
-    cv=r->search_var(NULL, lab);
-	cs->param=cv->param;
-	cs->lag = lag;
-	
-    dataentry_sensitivity(choice, cs, cs->nvalues);	// ask values to the user
-	
-	if ( ! cs->entryOk )	// data entry failed?
-	{
-		if( rsense == cs )	// is it the first variable?
-			rsense = cs->next;	// update list root
-		else
-			ps->next = cs->next;// remove from sensitivity list
-		delete [ ] cs->v, cs->label;	// free space
-		delete cs;
-	}
-	else
-	  unsavedSense = true;		// signal unsaved sensitivity change
-    break;
 //Equal 
 case 1:
      cmd(inter, "set choice $fill");
@@ -477,7 +383,7 @@ case 1:
       } 
     
       if(to_all==1)
-        {sprintf(msg, " All %d instances equal to %g.", i-1, value1);
+        {sprintf(msg, "All %d instances equal to %g.", i-1, value1);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -541,7 +447,7 @@ case 9:
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances set ranging from %g to %g (i.e. increments of %g).", i-1, value1, value2, value);
+        {sprintf(msg, "All %d instances set ranging from %g to %g (i.e. increments of %g).", i-1, value1, value2, value);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -557,7 +463,6 @@ case 9:
 		  break;
 
 case 2: //increasing
-    
      
      cv=r->search_var(NULL, lab);
   	  cv->data_loaded='+';
@@ -597,7 +502,7 @@ case 2: //increasing
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i-1, value1, value2, *choice);
+        {sprintf(msg, "All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i-1, value1, value2, *choice);
          change_descr_lab(lab, "", "", "", msg);
         }
       else
@@ -611,7 +516,9 @@ case 2: //increasing
         }
   		unsavedChange = true;		// signal unsaved change
         break;
-case 4: cv=r->search_var(NULL, lab);
+		
+case 4: 
+		cv=r->search_var(NULL, lab);
 		  for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
         {
       if(to_all==1 || (cases_from<=i && cases_to>=i))
@@ -647,7 +554,7 @@ case 4: cv=r->search_var(NULL, lab);
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
+        {sprintf(msg, "All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -700,7 +607,7 @@ case 3:
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances set to random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
+        {sprintf(msg, "All %d instances set to random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -717,9 +624,8 @@ case 3:
   		unsavedChange = true;		// signal unsaved change
 
 		  break;
+		  
 case 5: 
-      
-      
      cmd(inter, "set choice $fill");
      fill=*choice;
      cmd(inter, "set choice $step_in");
@@ -755,7 +661,7 @@ case 5:
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
+        {sprintf(msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -764,7 +670,7 @@ case 5:
          if(cd->init!=NULL)
            sprintf(msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, " Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2);         
+           sprintf(msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2);         
            change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -772,8 +678,9 @@ case 5:
 
 		  break;
 
-case 6: cv=r->search_var(NULL, lab);
-		  cv->data_loaded='+';
+case 6: 
+		cv=r->search_var(NULL, lab);
+		cv->data_loaded='+';
         for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label),i++)
         {
        if(to_all==1 || (cases_from<=i && cases_to>=i))
@@ -811,7 +718,7 @@ case 6: cv=r->search_var(NULL, lab);
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances set to %g skipping %g instances.", i-1, value1, value2);
+        {sprintf(msg, "All %d instances set to %g skipping %g instances.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -819,7 +726,7 @@ case 6: cv=r->search_var(NULL, lab);
          if(cd->init!=NULL)
            sprintf(msg, "%s Instances from %d to %d set to %g skipping %g instances.",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, " Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2);         
+           sprintf(msg, "Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -829,30 +736,10 @@ case 6: cv=r->search_var(NULL, lab);
 
 
 case 7:
-
-cmd(inter, "set oldpath [pwd]");
-cmd(inter, "toplevel .a");
-cmd(inter, "wm transient .a .");
-cmd(inter, "label .a.l -text \"Insert file name\"");
-cmd(inter, "entry .a.e -width 50 -textvariable filename");
-*choice=0;
-cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "button .a.se -width -9 -text Search -command {set filename [tk_getOpenFile -title \"Load Text File\" -filetypes {{{\"Text Files\"} {.txt}}}]; raise .a; focus -force .a}");
-cmd(inter, "pack .a.l .a.e .a.se .a.ok .a.esc ");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-cmd(inter, "raise .a");
-while(*choice==0)
-  Tcl_DoOneEvent(0);
-cmd(inter, "destroy .a");
-if(*choice==2)
- break;
-l=(char *)Tcl_GetVar(inter, "filename",0);
-if(l!=(char *)NULL && strcmp(l, ""))
+  cmd(inter, "set oldpath [pwd]");
+  cmd( inter, "set filename [ tk_getOpenFile -title \"Select Text File\" -filetypes { { { \"Text Files\" } {.txt} } } ]" );
+  l=(char *)Tcl_GetVar(inter, "filename",0);
+  if(l!=(char *)NULL && strcmp(l, ""))
  { cmd(inter, "cd [file dirname $filename]");
    cmd(inter, "set fn [file tail $filename]");
    l=(char *)Tcl_GetVar(inter, "fn",0);
@@ -895,7 +782,7 @@ if(l!=(char *)NULL && strcmp(l, ""))
       } 
       
       if(to_all==1)
-        {sprintf(msg, " All %d instances set with data from file %s.", i-1, l);
+        {sprintf(msg, "All %d instances set with data from file %s.", i-1, l);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -904,19 +791,18 @@ if(l!=(char *)NULL && strcmp(l, ""))
          if(cd->init!=NULL)
          sprintf(msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l);
          else
-           sprintf(msg, " Instances from %d to %d with data from file %s", cases_from, cases_to, l);         
+           sprintf(msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
 
     
     }
-   }
   unsavedChange = true;		// signal unsaved change
+   }
 break;
 
 case 8:
-     
      cmd(inter, "set choice $fill");
      fill=*choice;
      cmd(inter, "set choice $step_in");
@@ -952,7 +838,7 @@ case 8:
       } 
 
       if(to_all==1)
-        {sprintf(msg, " All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
+        {sprintf(msg, "All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
@@ -1177,26 +1063,25 @@ char *lab, *sss = NULL, *tok = NULL;
 FILE *f;
 
 *choice=0;
-cmd(inter, "toplevel .des");
-cmd(inter, "wm transient .des .");
-cmd(inter, "set a .des");
-cmd(inter, "wm title .des \"Sensitivity Analysis\"");
+cmd(inter, "set sens .sens");
+cmd(inter, "newtop .sens \"Sensitivity Analysis\" { set choice 2 }");
+
 if ( nval > 0)								// number of values defined (0=no)?
-	sprintf(msg, "label $a.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\" -foreground red",s->nvalues,s->label);
+	sprintf(msg, "label .sens.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\"",s->nvalues,s->label);
 else
-	sprintf(msg, "label $a.lab -text \"Enter the desired values (at least 2) for \'%s\' (most separators accepted)\" -foreground red",s->label);
+	sprintf(msg, "label .sens.lab -text \"Enter the desired values (at least 2) for \'%s\' (most separators accepted)\"",s->label);
 cmd(inter, msg);
-cmd(inter, "pack $a.lab");
-cmd(inter, "text $a.t; pack $a.t"); 
-cmd(inter, "frame $a.fb -relief groove -bd 2");
-cmd(inter, "button $a.fb.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button $a.fb.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "button $a.fb.del -width -9 -text \"Delete Values\" -command {$a.t delete 0.0 end}");
-cmd(inter, "button $a.fb.paste -width -9 -text \"Paste Clipboard\" -command {tk_textPaste}");
-cmd(inter, "button $a.fb.rem -width -9 -text \"Remove var. from analysis\" -command {set choice 3}");
-cmd(inter, "pack $a.fb.ok $a.fb.esc $a.fb.del $a.fb.paste $a.fb.rem -side left");
-cmd(inter, "pack $a.fb");
-cmd(inter, "focus -force .des.t");
+cmd(inter, "pack .sens.lab -pady 5");
+cmd(inter, "text .sens.t; pack .sens.t"); 
+cmd(inter, "frame .sens.fb");
+cmd(inter, "button .sens.fb.paste -width -9 -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}");
+cmd(inter, "button .sens.fb.del -width -9 -text \"Delete Values\" -command {.sens.t delete 0.0 end}");
+cmd(inter, "button .sens.fb.rem -width -9 -text \"Remove from Analysis\" -command {set choice 3}");
+cmd(inter, "pack .sens.fb.paste .sens.fb.del .sens.fb.rem -padx 10 -pady 10 -side left");
+cmd(inter, "pack .sens.fb");
+cmd( inter, "okcancel .sens fb2 { set choice 1 } { set choice 2 }" );
+cmd(inter, "bind .sens.fb2.ok <KeyPress-Return> {set choice 1}");
+cmd(inter, "focus -force .sens.t");
 
 if ( s->entryOk )	// is there valid data from a previous data entry?
 {
@@ -1209,10 +1094,12 @@ if ( s->entryOk )	// is there valid data from a previous data entry?
 		strcat( sss, tok );					// to the string
 	}
 	Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
-	cmd(inter, "$a.t insert 0.0 $sss");		// insert string in entry window
+	cmd(inter, ".sens.t insert 0.0 $sss");		// insert string in entry window
 	delete [] tok, sss;
 }
-		
+
+cmd( inter, "showtop .sens" );
+
 do			// finish only after reading all values
 {
 
@@ -1227,11 +1114,11 @@ if ( *choice == 3 )	// force error to delete variable from list
 
 if(*choice==2)
  {
-  cmd(inter, "destroy $a");
+  cmd( inter, "destroytop .sens" );
   return; 
  }
 
- cmd(inter, "set sss [$a.t get 0.0 end]");
+ cmd(inter, "set sss [.sens.t get 0.0 end]");
 sss=(char*)Tcl_GetVar(inter,"sss",0);
 
 if ( nval == 0 )					// undefined number of values?
@@ -1272,7 +1159,7 @@ for(i=0; i<s->nvalues;)
   {
 	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
 	  *choice=0;
-	  cmd(inter, "focus -force .des.t");
+	  cmd(inter, "focus -force .sens.t");
 	  break;
   }
   sss=NULL;
@@ -1283,7 +1170,7 @@ while( tok == NULL || i < 2 );	// require enough values (if more, extra ones are
 	
 s->entryOk = true;	// flag valid data
 
-cmd(inter, "destroy $a");
+cmd( inter, "destroytop .sens" );
 }
 
 

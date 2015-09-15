@@ -58,7 +58,6 @@ The widget of importance are:
 #include <sys/stat.h>
 
 
-#define DUAL_MONITOR true		// define this variable to better handle dual-monitor setups
 #define SHOW_TK_ERR true		// define to show Tk errors as dialogs
 
 Tcl_Interp *inter;
@@ -81,7 +80,6 @@ void signal(char *s);
 void create_compresult_window(void);
 void delete_compresult_window( void );
 
-#ifdef DUAL_MONITOR
 // Main window constraints
 char hsize[]="800";			// horizontal size in pixels
 char vsize[]="600";			// vertical minimum size in pixels
@@ -90,8 +88,7 @@ char vmargin[]="20";		// vertical margins from the screen borders
 char bordsize[]="4";		// width of windows borders
 char tbarsize[]="80";		// size in pixels of bottom taskbar (exclusion area)
 							// Windows 7+ = 82
-#endif
-								
+
 int main(int argn, char **argv)
 {
 /*
@@ -186,7 +183,7 @@ if((res=Tk_Init(app))!=TCL_OK)
   char estring[255];
   sprintf(estring,"Tk Error = %d : %s\n",res,app->result);
   errormsg(estring,NULL);
-  exit(1);
+  exit(2);
  }
 
 //cmd(app, "tk_messageBox -type ok -message \"[lindex [array get env PATH] 1]\"");
@@ -237,7 +234,7 @@ int errormsg( char *lpszText,  char *lpszTitle)
 {
 
 printf("\n%s", (char *)lpszText);
-exit(1);
+exit(3);
 }
 
 
@@ -366,7 +363,7 @@ if(choice==1)
  {
  cmd(inter, "wm iconify .");
  cmd(inter, "tk_messageBox -icon error -title \"Installation Error\" -type ok -message \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd model.\n\nThe Lsd directory must be located where there are no spaces in the full path name.\n\nMove all the Lsd directory in another directory.\n\nIf exists, delete the 'system_options.txt' file from the \\src directory. \"");
- exit(1);
+ exit(4);
  
  }
 
@@ -392,57 +389,10 @@ if(choice==1)
     cmd(inter, "close $f");
     cmd(inter, "close $f1");    
  }
-else
- {
-  //control the Lsdroot
- /*REMOVED, DYNAMIC SETTING OF LSD ROOT INCLUDED IN THE MAKE_MAKEFILE
-  cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt r]");
-  cmd(inter, "set i -1");
-  cmd(inter, "while {$i<0} { gets $f a; if { [eof $f] == 1} {set i 999} {set i [string first \"LSDROOT=\" $a] } }");
-  cmd(inter, "if { $i == 999} {set choice 0 }  {set choice 1} ");
-  if(choice==0)
-   { cmd(inter, "tk_messageBox -icon error -title \"Installation Problem\" -type ok -message \"The system compilation options appear not compatible with the installation.\nUse 's' menu entry in menu 'Run' to fix the error, or the model compilation will cause errors.\"");
-    choice=47;
-   }
-  else
-   {
-    cmd(inter, "set j [expr $i + 8]; set b [string range $a $j end]; set c [string tolower $b]");
-    cmd(inter, "if { [string compare $c [string tolower [pwd]]] == 0} {set choice 1 } {set choice 0}");
-    if(choice==0)
-   { cmd(inter, "tk_messageBox -icon error -title \"Installation Problem\" -type ok -message \"The system compilation options appear not compatible with the installation:\n- current directory is '[pwd]'\n- recorded directory is '$b'\nUse 'System Compilation Options' menu entry in menu 'Run' to fix the error, or the model compilation will cause errors.\"");
-    choice=47;
-   }
-     
-   } 
- */
- } 
 
 cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global RootLsd; set here [pwd]; cd $RootLsd; cd Manual; set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {catch [exec $HtmlBrowser $b &]} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.2\" } {exec cmd.exe /c start $b &} { if {$tcl_platform(osVersion) == \"5.2\"} {cmd.exe /c $b &} {catch [exec openhelp.bat &]} }} {exec start $b &}}; cd $here }");
-
  
 cmd(inter, "proc lmmraise {win ent} {wm focusmodel . active; if { $ent!=\"\"} {focus -force $ent} {focus -force $win}; wm focusmodel . passive}");
-
-#ifdef DUAL_MONITOR
-/* procedures to adjust window positioning (settings for dual and single monitor setups). Three types for positioning:
-	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
-	centerW: center over the parent window (in any display)
-	topleftW: put over the top left corner of parent window (below menu bar)
-*/
-// check if window center is in primary display
-cmd( inter, "proc primdisp w { if { [ winfo rootx $w ] > 0 && [ winfo rootx $w ] < [ winfo screenwidth $w ] && [ winfo rooty $w ] > 0 && [ winfo rooty $w ] < [ winfo screenheight $w ] } { return true } { return false } } " );
-// compute x and y coordinates of new window according to the types
-cmd( inter, "proc getx { w pos } { switch $pos { centerS { return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ] } centerW { return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ] } topleftS { global hmargin; return $hmargin } topleftW { return [ expr [ winfo x [ winfo parent $w ] ] + 5 ] } } }" );
-cmd( inter, "proc gety { w pos } { switch $pos { centerS { return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ] } centerW { return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ] } topleftS { global vmargin; return $vmargin } topleftW { return [ expr [ winfo y [ winfo parent $w ] ] + 50 ] } } }" );
-// configure the window
-cmd( inter, "proc showtop { w { pos centerW } { resizeX no } { resizeY no } { grab yes } } { wm withdraw $w; update idletasks; if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } { set pos centerW }; set x [ getx $w $pos ]; set y [ gety $w $pos ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; if $grab { global lstGrab; lappend lstGrab \"$w [ grab current $w ]\"; grab set $w }; focus -force [focus -lastfor $w] }" );
-#else
-// old centering procedure (doesn't work well for dual monitor), probably obsolete
-cmd( inter, "proc showtop { w { pos centerW } { resizeX no } { resizeY no } } { wm withdraw $w; update idletasks; set x [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 - [ winfo vrootx [ winfo parent $w ] ] ]; set y [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 - [ winfo vrooty [ winfo parent $w ] ] ]; wm geom $w +$x+$y; wm resizable $w $resizeX $resizeY; wm deiconify $w; raise $w; update; global lstGrab; lappend lstGrab { $w [ grab current $w ] }; grab set $w }");
-#endif
-
-// procedures for create and destroy top level new windows
-cmd( inter, "proc newtop { parent w { name \"\" } { destroy { } } } { toplevel $w; if { $parent != \"\" } { wm transient $w $parent }; wm title $w $name; wm protocol $w WM_DELETE_WINDOW $destroy }" );
-cmd( inter, "proc destroytop w { global lstGrab; set igrab [ lsearch -glob $lstGrab \"$w *\" ]; if { $igrab >= 0 } { grab release $w; set grabPar [ string range [ lindex $lstGrab $igrab ] [ expr [ string first \" \" [ lindex $lstGrab $igrab ] ] + 1 ] end ]; if { $grabPar != \"\" } { grab set $grabPar }; set lstGrab [ lreplace $lstGrab $igrab $igrab ] }; set parent [ winfo parent $w ]; if { $parent == \".\" } { focus -force .f.t.t } { focus -force $parent }; destroy $w; update }" );
 
 // procedures to adjust tab size according to font type and size and text wrapping
 cmd( inter, "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
@@ -461,8 +411,14 @@ cmd(inter, "set currentdoc \"\"");
 cmd(inter, "set v_num 0");
 cmd(inter, "set macro 1");
 cmd(inter, "set shigh_temp $shigh");
-cmd(inter, "source $RootLsd/$LsdSrc/showmodel.tcl");
-cmd(inter, "source $RootLsd/$LsdSrc/lst_mdl.tcl");
+cmd(inter, "set alignMode \"LMM\"");
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }");
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( inter, "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Some critical Tcl files ($choice) are missing or corrupted.\\n\\nPlease check your instalation and reinstall Lsd if required.\\n\\nLsd is aborting now.\" }" );
+if ( choice != 0 )
+	exit( 10 + choice );
+
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_INT);
 Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_INT);
@@ -758,7 +714,7 @@ cmd(inter, ".v add cascade -label \"Lsd Script\" -menu .v.i");
 cmd(inter, ".v add command -label \"Insert Lsd Script...\" -command {set choice 28}");
 cmd(inter, ".v add command -label \"Indent Selection\" -command {set choice 42}");
 cmd(inter, ".v add command -label \"De-indent Selection\" -command {set choice 43}");
-cmd(inter, ".v add command -label \"Place a Break and Run gdb\" -command {set choice 58}");
+cmd(inter, ".v add command -label \"Place Break & Run GDB\" -command {set choice 58}");
 
 cmd(inter, ".v add separator");
 cmd(inter, ".v add command -label \"Find...\" -command {set choice 11}");
@@ -916,7 +872,7 @@ while(choice==0)
 if(choice==-1)
  {
   Tcl_Exit(0);
-  exit(0);
+  exit(5);
  }
 
 cmd(inter, "set b [.f.t.t tag ranges sel]");
@@ -951,7 +907,6 @@ Initial stuff. Don't ask me why, it does not work if it is placed before the loo
 
 choice=0;
 
-#ifdef DUAL_MONITOR
 Tcl_SetVar(inter, "hsize", hsize, 0);		// horizontal size in pixels
 Tcl_SetVar(inter, "vsize", vsize, 0);		// vertical minimum size in pixels
 Tcl_SetVar(inter, "hmargin", hmargin, 0);	// horizontal right margin from the screen borders
@@ -964,19 +919,14 @@ cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsize + 2*$bordsize + $hmargin)
 cmd(inter, "set y [expr ([winfo screenheight .]-$tbarsize)/2 - $bordsize - $h/2]");
 cmd(inter, "wm geom . [expr $w]x$h+$x+$y"); // main window geometry setting
 
-//cmd(inter, "set sw [expr [winfo screenwidth .]]; set vx [expr [winfo vrootx .]]");
-//cmd(inter, "set sh [expr [winfo screenheight .]]; set vy [expr [winfo vrooty .]]");
-//cmd(inter, "tk_messageBox -type ok -message \"screenwidth=$sw\\nreqwidth=$w\\nvrootx=$vx\\nscreenheight=$sh\\nreqheight=$h\\nvrooty=$vy\\nx=$x\\ny=$y\"");
-#endif
-
-cmd( inter, "newtop . .a \"Welcome\" { set temp 0; .a.b.ok invoke }" );
+cmd( inter, "newtop .a \"Welcome\" { set temp 0; .a.b.ok invoke }" );
 
 cmd(inter, "frame .a.f");
 cmd(inter, "set temp 33");
 cmd(inter, "label .a.f.l -text \"Choose Action\"  -fg red");
 
 cmd(inter, "frame .a.f.b -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f.b.r1 -variable temp -value 33 -text \"Manage models\" -justify left -anchor w");
+cmd(inter, "radiobutton .a.f.b.r1 -variable temp -value 33 -text \"Browse models\" -justify left -anchor w");
 
 cmd(inter, "radiobutton .a.f.b.r2 -variable temp -value 15 -text \"Open text file\" -justify left -anchor w");
 
@@ -1082,7 +1032,7 @@ if(s==NULL || !strcmp(s, ""))
    }
 
   cmd(inter, "set init_time [clock seconds]"); 
-  cmd( inter, "newtop \"\" .t \"Please Wait\"" );
+  cmd( inter, "newtop .t \"Please Wait\" \"\" \"\"" );
   // change window icon
   cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
@@ -1253,6 +1203,7 @@ if(s==NULL || !strcmp(s, ""))
 	if ( choice == 2 )
 	{
 		cmd( inter, " set filename \"\" " );
+		cmd( inter, "set before [.f.t.t get 0.0 end]" );
 		choice = 8;		// load equations file
 		goto loop;
 	}
@@ -1426,7 +1377,7 @@ if(choice==0)
  goto loop;
 
 cmd(inter, "set line \"\"");
-cmd( inter, "newtop . .search_line \"Goto Line\" { .search_line.b.esc invoke }" );
+cmd( inter, "newtop .search_line \"Goto Line\" { .search_line.b.esc invoke }" );
 
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
 cmd(inter, "entry .search_line.e -justify center -width 10 -textvariable line");
@@ -1455,7 +1406,7 @@ if(choice==0)
  goto loop;
 
 cmd(inter, "set curcounter $lfindcounter");
-cmd( inter, "newtop . .find \"Search Text\" { .find.b.esc invoke }" );
+cmd( inter, "newtop .find \"Search Text\" { .find.b.esc invoke }" );
 
 cmd(inter, "label .find.l -text \"Type the text to search\"");
 cmd(inter, "entry .find.e -width 30 -textvariable textsearch");
@@ -1633,7 +1584,7 @@ if(choice==14)
 choice=0;
 
 
-cmd( inter, "newtop . .a \"New Model or Group\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"New Model or Group\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.tit -text \"Current group:\\n$modelgroup\"");
 cmd(inter, "frame .a.f -relief groove -bd 2");
@@ -1669,7 +1620,7 @@ if(choice==2)
 cmd(inter, "set choice $temp");
 if(choice==2)
 {
-cmd( inter, "newtop . .a \"New Group\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"New Group\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.tit -text \"Create a new group in group:\\n $modelgroup\"");
 
@@ -1745,7 +1696,7 @@ else
 
 //create a new model
 choice=0;
-cmd( inter, "newtop . .a \"New Model\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"New Model\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.tit -text \"Create a new model in group:\\n $modelgroup\"");
 
@@ -2139,7 +2090,7 @@ if(choice==0)
 
 
 cmd(inter, "set cur \"\"");
-cmd( inter, "newtop . .l \"Replace Text\" { .l.b2.esc invoke }" );
+cmd( inter, "newtop .l \"Replace Text\" { .l.b2.esc invoke }" );
 
 //cmd(inter, "set textsearch \"\"");
 cmd(inter, "label .l.l -text \"Type the text to search\"");
@@ -2208,7 +2159,7 @@ Insert a Lsd equation
 
 choice=0;
 
-cmd( inter, "newtop . .a \"Insert an Equation\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an Equation\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
@@ -2278,7 +2229,7 @@ Insert a Lsd equation
 choice=0;
 
 
-cmd( inter, "newtop . .a \"Insert an Equation\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an Equation\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
@@ -2351,7 +2302,7 @@ if(choice==26 && macro==1)
 Insert a v[0]=p->cal("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'V(...)' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'V(...)' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -2428,7 +2379,7 @@ if(choice==26 && macro==0)
 Insert a v[0]=p->cal("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'cal'\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'cal'\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -2501,7 +2452,7 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'CYCLE' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'CYCLE' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
@@ -2599,7 +2550,7 @@ Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'for' Cycle\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'for' Cycle\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
@@ -2666,7 +2617,7 @@ Insert a Lsd script, to be used in Lsd equations' code
 
 choice=0;
 
-cmd( inter, "newtop . .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
 
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options\nThe interface will request the necessary information\" -justify center");
@@ -2744,7 +2695,7 @@ Insert a Lsd script, to be used in Lsd equations' code
 
 choice=0;
 
-cmd( inter, "newtop . .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a Lsd Script\" { .a.f.esc invoke }" );
 
 cmd(inter, "set res 26");
 cmd(inter, "label .a.tit -text \"Choose one of the following options. The interface will request the necessary information\" -justify center");
@@ -2824,7 +2775,7 @@ if(choice==40 && macro==1)
 Insert a v[0]=p->increment("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert an 'INCR' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an 'INCR' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
@@ -2896,7 +2847,7 @@ if(choice==40 && macro==0)
 Insert a v[0]=p->increment("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert an 'increment' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an 'increment' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the increment\"");
 
@@ -2967,7 +2918,7 @@ if(choice==45 && macro==1)
 Insert a v[0]=p->multiply("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'MULT' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'MULT' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
@@ -3042,7 +2993,7 @@ if(choice==45 && macro==0)
 Insert a v[0]=p->multiply("Var",0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'multiply' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'multiply' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result after the multiplication\"");
 
@@ -3114,7 +3065,7 @@ if(choice==29 && macro==1)
 Insert a p->write("Var",0,0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'WRITE' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'WRITE' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
@@ -3183,7 +3134,7 @@ if(choice==29 && macro==0)
 Insert a p->write("Var",0,0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'write' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'write' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
@@ -3247,7 +3198,7 @@ if(choice==30 && macro==0)
 Insert a cur=p->search_var_cond("Var",1,0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'search_var_cond' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'search_var_cond' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
@@ -3314,7 +3265,7 @@ if(choice==30 && macro==1)
 Insert a cur=p->search_var_cond("Var",1,0);
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'SEARCH_CND' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'SEARCH_CND' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
@@ -3385,7 +3336,7 @@ if(choice==31 && macro==1)
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'SORT' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'SORT' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
@@ -3458,7 +3409,7 @@ if(choice==31 && macro==0)
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'lsdqsort' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'lsdqsort' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
@@ -3528,7 +3479,7 @@ if(choice==51)
 /*
 Insert a math function
 */
-cmd( inter, "newtop . .a \"Insert a Math Operation\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a Math Operation\" { .a.f.esc invoke }" );
 
 cmd(inter, "set value1 \"0\"; set value2 \"1\"; set res 1; set str \"UNIFORM($value1,$value2)\"");
 cmd(inter, "label .a.l1 -text \"Minimum\"");
@@ -3622,7 +3573,7 @@ Insert a add_an_obj;
 */
 here_addobj:
 
-cmd( inter, "newtop . .a \"Insert an 'ADDOBJ' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an 'ADDOBJ' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
@@ -3713,7 +3664,7 @@ if(choice==52 && macro==0)
 Insert a add_an_obj;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert an 'add_n_objects2' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert an 'add_n_objects2' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
@@ -3782,7 +3733,7 @@ if(choice==53 && macro==1)
 Insert a delete_obj;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'DELETE' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'DELETE' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
@@ -3830,7 +3781,7 @@ if(choice==53 && macro==0)
 Insert a delete_obj;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'delete_obj' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'delete_obj' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
@@ -3879,7 +3830,7 @@ if(choice==54 && macro==1)
 Insert a RNDDRAW
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'RNDDRAW' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'RNDDRAW' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
@@ -3972,7 +3923,7 @@ if(choice==54 && macro==0)
 Insert a RNDDRAW
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'draw_rnd' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'draw_rnd' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
@@ -4051,7 +4002,7 @@ if(choice==55&& macro==1)
 Insert a SEARCH;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'SEARCH' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'SEARCH' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
@@ -4109,7 +4060,7 @@ if(choice==55&& macro==0)
 Insert a SEARCH;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'search' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'search' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
@@ -4167,7 +4118,7 @@ if(choice==56 && macro==1)
 Insert a SUM;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'SUM' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'SUM' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -4243,7 +4194,7 @@ if(choice==56 && macro==0)
 Insert a p->sum;
 */
 choice=0;
-cmd( inter, "newtop . .a \"Insert a 'sum' Command\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Insert a 'sum' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign the result\"");
 
@@ -4413,7 +4364,7 @@ if(choice==41)
 choice=0;
 
 
-cmd( inter, "newtop . .a \"Copy Model\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"Copy Model\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.tit -text \"Create a new version of model '$modelname' (ver. $version)\"");
 
@@ -4608,7 +4559,7 @@ if(choice==0)
 
 
   
-cmd( inter, "newtop . .a \"Model Info\" { .a.b.ok invoke }" );
+cmd( inter, "newtop .a \"Model Info\" { .a.b.ok invoke }" );
 
 cmd(inter, "frame .a.c");
 
@@ -4819,7 +4770,7 @@ else
   cmd(inter, "set a \"\"");
 
 
-cmd( inter, "newtop . .l \"System Compilation Options\" { .l.t.d.b.esc invoke }" );
+cmd( inter, "newtop .l \"System Compilation Options\" { .l.t.d.b.esc invoke }" );
 
 cmd(inter, "frame .l.t");
 
@@ -4912,7 +4863,7 @@ else
    cmd(inter, "close $f");
 
   }
-cmd( inter, "newtop . .l \"Model Compilation Options\" { .l.t.d.b.esc invoke }" );
+cmd( inter, "newtop .l \"Model Compilation Options\" { .l.t.d.b.esc invoke }" );
 
 cmd(inter, "frame .l.t");
 
@@ -4994,7 +4945,7 @@ if(choice==59)
 {
 //Change font
 
-cmd( inter, "newtop . .a \"Change Font\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Change Font\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Enter the font name you wish to use\"");
 
@@ -5050,7 +5001,7 @@ cmd(inter, "set temp_var8 $wrap");
 cmd(inter, "set temp_var9 $shigh");
 cmd(inter, "set temp_var10 $autoHide");
 
-cmd( inter, "newtop . .a \"LMM Options\" { .a.f2.esc invoke }" );
+cmd( inter, "newtop .a \"LMM Options\" { .a.f2.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Terminal to use for the GDB debugger\"");
 cmd(inter, "entry .a.v_num -width 30 -textvariable temp_var1");
@@ -5252,7 +5203,7 @@ strcat(str,"NW");
 cmd(inter, msg);
 cmd(inter, "set init_time [clock seconds]"); 
 
-cmd( inter, "newtop . .t \"Please Wait\"" );
+cmd( inter, "newtop .t \"Please Wait\"" );
 
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
@@ -5345,7 +5296,7 @@ if(choice==67)
 {
 //Change tab size
 
-cmd( inter, "newtop . .a \"Change Tab Size\" { .a.f.esc invoke }" );
+cmd( inter, "newtop .a \"Change Tab Size\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Enter the tab size (characters)\"");
 cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
@@ -5720,7 +5671,7 @@ delete_compresult_window();
 
 cmd(inter, "set cerr 0.0");
 
-cmd( inter, "newtop \"\" .mm \"Compilation Errors\" { destroytop .mm }" );
+cmd( inter, "newtop .mm \"Compilation Errors\" { destroytop .mm } \"\"" );
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\"");
@@ -5739,7 +5690,7 @@ cmd(inter, "button .mm.b.perr -width -9 -text \"Previous Error\" -command {set e
 
 cmd(inter, "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
-cmd(inter, "button .mm.close -width -9 -text Cancel -command {destroytop .mm}");
+cmd(inter, "button .mm.close -width -9 -text Done -command {destroytop .mm}");
 cmd(inter, "pack .mm.close -padx 10 -pady 5 -side right");
 cmd(inter, "bind .mm <Escape> {destroytop .mm}");
 cmd( inter, "showtop .mm topleftS no no no" );

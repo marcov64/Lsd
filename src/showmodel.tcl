@@ -46,7 +46,7 @@ if [ winfo exists .l ] {
 	destroy .l.l .l.t
 	set menuOk 1
 } { 
-	newtop . .l "Lsd Model Browser" { .l.m.file invoke 2 }
+	newtop .l "Lsd Model Browser" { .l.m.file invoke 2 }
 	set menuOk 0
 }
 
@@ -255,7 +255,7 @@ global lrn ldn lmn group lmd result memory
 set memory 0
 .l.m.edit entryconf 2 -state disabled
 
-newtop .l .l.e "Edit" { .l.e.b.esc invoke }
+newtop .l.e "Edit" { .l.e.b.esc invoke }
 
 if { [lindex $group $i] == 1} {set item group} {set item model}
 label .l.e.ln -text "Insert new label for the $item [lindex $lmn $i]"
@@ -305,7 +305,7 @@ set pastedir [lindex $lrn $i]
 
 
 
-newtop .l .l.p "Paste Model" { .l.b.esc invoke }
+newtop .l.p "Paste Model" { .l.b.esc invoke }
 
 update
 

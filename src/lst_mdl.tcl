@@ -66,7 +66,7 @@ unset sf
 lst_mdl
 
 
-newtop . .l "Lsd Models" { set choice -1; destroytop .l }
+newtop .l "Lsd Models" { set choice -1; destroytop .l }
 
 frame .l.l -relief groove -bd 2
 label .l.l.tit -text "List of models" -fg red

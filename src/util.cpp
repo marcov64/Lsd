@@ -2019,16 +2019,6 @@ strcpy(s, app);
 }
 
 #ifndef NO_WINDOW
-void set_window_size(void)
-{
-cmd(inter, "update");
-cmd(inter, "set reqw [winfo reqw .]");
-cmd(inter, "set reqh [winfo reqh .]");
-cmd(inter, "set reqsize [format %dx%d $reqw $reqh]");
-cmd(inter, "wm geom . $reqsize");
-
-}
-
 void read_eq_filename(char *s)
 {
 FILE *f;

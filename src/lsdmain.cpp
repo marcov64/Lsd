@@ -198,13 +198,11 @@ int findex, fend;
 int batch_sequential=0;
 int fast=0;		// make fast persistent across runs
 bool dozip = false;			// compressed results file flag
-#ifdef DUAL_MONITOR
 // Main window constraints
 char hsize[]="400";			// horizontal size in pixels
 char vsize[]="620";			// vertical minimum size in pixels
 char hmargin[]="20";		// horizontal right margin from the screen borders
 char vmargin[]="20";		// vertical margins from the screen borders
-#endif
 
 /*********************************
 LSD MAIN
@@ -235,7 +233,7 @@ fend=0;		// no file number limit
 if(argn<3)
  {
   printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n");
-  exit(0);
+  exit(1);
  }
 else
  {
@@ -274,7 +272,7 @@ else
   
   if(done==0)
    {  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n", argv[i][0], argv[i][1]);
-    exit(0);
+    exit(2);
    }
   }
  } 
@@ -339,7 +337,7 @@ else
 if(f==NULL)
  {
   printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
-  exit(0);
+  exit(3);
  }
 fclose(f);
 #else 
@@ -367,7 +365,7 @@ sprintf(msg, "cd \"%s\"", exec_path);
 cmd(inter, msg);
 
 if(inter==NULL)
- myexit(1);
+ myexit(4);
 
 Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug_flag", (char *) &debug_flag, TCL_LINK_INT);
@@ -378,7 +376,7 @@ cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set
 if(debug_flag==1)
  {
  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The directory containing the model is:\n[pwd]\nIt appears to include spaces.\\n\\nThis will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory. \"");
- exit(1);
+ exit(5);
  
  }
 
@@ -388,7 +386,7 @@ lsdroot=getenv("LSDROOT");
 if(lsdroot==NULL)
  {
  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set.\\n\\nProgram aborted.\"");
- exit(1);
+ exit(6);
  }
 sprintf(msg, "set RootLsd \"%s\"",lsdroot);
 len=strlen(msg);
@@ -435,13 +433,11 @@ cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wi
 // set window icon
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/lsd.xbm}");
 // set position parameters now
-#ifdef DUAL_MONITOR
 Tcl_SetVar(inter, "widthB", hsize, 0);		// horizontal size in pixels
 Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
 Tcl_SetVar(inter, "posX", hmargin, 0);		// horizontal right margin from the screen borders
 Tcl_SetVar(inter, "posY", vmargin, 0);		// vertical margins from the screen borders
 cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
-#endif
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -514,18 +510,13 @@ stacklog->vs=NULL;
 strcpy(stacklog->label, "Lsd Simulation Manager");
 
 #ifndef NO_WINDOW
-#ifndef DUAL_MONITOR
-cmd(inter, "set widthB 400");
-cmd(inter, "set heightB 454");
-cmd(inter, "set posX 50");
-cmd(inter, "set posY 46");
-#endif
-cmd(inter, "source $RootLsd/$LsdSrc/align.tcl");
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"File 'src/align.tcl' is missing or corrupted.\\n\\nPlease check your instalation and reinstall Lsd if required.\\n\\nLsd is aborting now.\" }" );
+if ( choice != 0 )
+	exit( 7 + choice );
+
 while(1)
 {
 root=create( root);
-cmd(inter, "wm iconify .");
-
 no_more_memory=0;
 series_saved=0;
 try {
@@ -599,6 +590,9 @@ for(i=1; i<=sim_num && quit!=2; i++)
 
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
 #ifndef NO_WINDOW
+// disable main window widgets
+cmd( inter, "wm state . withdrawn" );
+
 prepare_plot(root, i);
 
 if(done_in==2 && cur_plt>0)
@@ -627,7 +621,7 @@ if(i>1 || batch_sequential_loop)
   {
    sprintf(msg, "\nFile %s not found.\n",struct_file);
    plog(msg);
-   exit(0);
+   exit(9);
   }
  root->load_struct(f);
  fscanf(f, "%s", msg); //should be DATA
@@ -654,22 +648,17 @@ if(no_more_memory==1)
  cmd(inter, msg);
 #else
  printf("Not enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.", series_saved, max_step);
- exit(0);
+ exit(10);
  #endif
  return;
  }
  
-// deb(root->son, NULL, "stop 3", &app);
 //new random routine' initialization
 init_random(seed);
 
 seed++;
 stack=0;
 
-#ifndef NO_WINDOW 
-cmd(inter, "bind .log <Destroy> {set done_in 35}");
-cmd(inter, "if {[winfo exists $c]==1} {bind $c <Destroy> {set done_in 35}} {}");
-#endif
 posiziona=0;
 running=1;
 actual_steps=0;
@@ -679,7 +668,10 @@ for(t=1; quit==0 && t<=max_step;t++ )
  {
 // control_bridge(root);
   if(when_debug==t)
+  {
     debug_flag=1;
+	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb }" );
+  }
   cur_plt=0;
   root->update();
 
@@ -726,8 +718,6 @@ case 2:
  debug_flag=0;
  cmd(inter, "set a [split [winfo children .] ]");
  cmd(inter, " foreach i $a {if [string match .plt* $i] {wm iconify $i}}");
-// sprintf(msg, "if { [winfo exist .plt%d]} {wm iconify .plt%d} {}", i, i);
-// cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}",i, i);
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
@@ -740,8 +730,6 @@ case 4:
  fast=0;
  cmd(inter, "set a [split [winfo children .] ]");
  cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i}}");
-// sprintf(msg, "if { [winfo exist .plt%d]} {wm deiconify .plt%d} {}", i, i);
-// cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}",i, i);
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}",i, i);
@@ -759,11 +747,12 @@ break;
 
 case 3:
 debug_flag=1;
+cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb }" );
 done_in=0;
 break;
 
 case 35:
-myexit(0);
+myexit(11);
 break;
 
 case 6:
@@ -818,6 +807,9 @@ else
 cmd(inter, "update");
 // allow for run time plot window destruction
 cmd(inter, "if {[info exists activeplot] == 1} {if {[winfo exists $activeplot] == 1} {wm protocol $activeplot WM_DELETE_WINDOW \"\"}}");
+
+// enable main window widgets
+cmd( inter, "wm state . normal" );
 #endif
 
 close_sim();
@@ -1114,6 +1106,7 @@ cmd(inter, app);
 cmd(inter, ".log.text.text.internal see end");
 //cmd(inter, "raise .log");
 //cmd(inter, "update");
+
 #else
  printf("\n%s", cm);
 #endif 
@@ -1157,7 +1150,7 @@ if(Tcl_Init(app)!=TCL_OK)
     fprintf(f,"Environmental variable 'LSDROOT' is not set, probably because you are using Win95/98/ME and no environmental space is available.\nTo fix the problem see in the LMM manual in the section concerning the compilation errors.");
     fclose(f);
     cmd(app, "set a [pwd]");
-    exit(1);
+    exit(12);
    }
    
   sprintf(msg, "set tcl_library {%s/gnu/lib/tcl8.3}", lsdroot);
@@ -1168,7 +1161,7 @@ if(Tcl_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
-    exit(1);
+    exit(13);
    }
 
 
@@ -1180,7 +1173,7 @@ if(Tk_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
-    exit(1);
+    exit(14);
    }
 
 
@@ -1311,8 +1304,7 @@ cmd(inter, "wm title .log \"Log\"");
 cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
 cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
 cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");
-//cmd(inter, "$w.text configure -tabs {3.5c 5.5c 7.5c 9.5c 11.5c}");
-cmd(inter, "$w.text configure -tabs {5c 7.5c 10c 12.5c 15c 17.5c 20c}"); // fix misalignment
+cmd(inter, "$w.text configure -tabs {5c 7.5c 10c 12.5c 15c 17.5c 20c}");
 cmd(inter, "$w.text tag configure highlight -foreground red");
 cmd(inter, "$w.text tag configure tabel");
 
@@ -1331,32 +1323,28 @@ cmd(inter, "bind .log <KeyPress-Escape> {focus -force .}");
 
 cmd(inter, "set w .log.but");
 cmd(inter, "frame $w");
-cmd(inter, "button $w.stop -width -9 -text Stop -command {set done_in 1}");
-cmd(inter, "button $w.speed -width -9 -text Fast -command {set done_in 2}");
-cmd(inter, "button $w.obs -width -9 -text Observe -command {set done_in 4}");
-cmd(inter, "button $w.deb -width -9 -text Debug -command {set done_in 3}");
-cmd(inter, "button $w.help -width -9 -text Help -command {LsdHelp Log.html}");
-cmd(inter, "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text}");
+cmd(inter, "button $w.stop -width -9 -text Stop -command {set done_in 1} -underline 0");
+cmd(inter, "button $w.speed -width -9 -text Fast -command {set done_in 2} -underline 0");
+cmd(inter, "button $w.obs -width -9 -text Observe -command {set done_in 4} -underline 0");
+cmd(inter, "button $w.deb -width -9 -text Debug -command {set done_in 3} -underline 0");
+cmd(inter, "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0");
+cmd(inter, "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0");
 
-cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -side left");
+cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -padx 10 -pady 10 -side left");
 cmd(inter, "pack $w");
-#ifdef DUAL_MONITOR
-// better adjusts position for X11
+
 cmd(inter, "update idletasks");
 cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
 cmd(inter, "set posYLog [expr [winfo screenheight .log] - 4 * $posY - [winfo reqheight .log]]");
 cmd(inter, "wm geometry .log +$posXLog+$posYLog; update idletasks");	
-#else
-//cmd(inter, "set posX [winfo x .]");
-cmd(inter, "set posXLog [expr $posX + 340]");
-//cmd(inter, "set posY [winfo y .]");
-cmd(inter, "wm geometry .log +$posXLog+$posY");
-#endif
 cmd( inter, "focus -force .log" );
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
 cmd( inter, "rename .log.text.text .log.text.text.internal" );
 cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
+
+// a Tcl/Tk version of plog
+cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm }" );
 }
 
 #endif
@@ -1494,5 +1482,5 @@ void signal_handler(int signum)
 	cmd(inter, msg2);
 #endif
 
-	exit(signum);			// abort program
+	exit(-signum);			// abort program
 }

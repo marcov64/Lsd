@@ -110,9 +110,6 @@ LSDMAIN.CPP print  message string m in the Log screen.
 - void analysis(int *choice);
 ANALYSIS.CPP analysis of result files
 
-- void show_eq(char *lab);
-SHOW_EQ.CPP shows one equation for variable lab
-
 - object *skip_next_obj(object *t, int *i);
 UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object

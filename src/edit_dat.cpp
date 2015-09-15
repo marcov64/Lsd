@@ -102,13 +102,13 @@ void link_data(object *root, char *lab);
 void set_all(int *choice, object *r, char *lab, int lag);
 void set_obj_number(object *r, int *choice);
 void myexit(int code);
-void set_window_size(void);
 int set_focus;
-#ifdef DUAL_MONITOR
+// flags to avoid recursive usage (confusing and tk windows are not ready)
+bool in_edit_data = false;
+extern bool in_set_obj;
 // Main window constraints
-char widthDE[]="900";			// horizontal size in pixels
+char widthDE[]="800";			// horizontal size in pixels
 char heightDE[]="600";			// vertical size in pixels
-#endif
 
 /****************************************************
 EDIT_DATA
@@ -123,38 +123,38 @@ variable *cv;
 int i, counter, lag;
 
 
-sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 10; set cbd 1 } {set cwidth 8; set cbd 0}");
-cmd(inter, msg);
-
-cmd(inter, "bind . <KeyPress-Return> {}");
-cmd(inter, "bind . <KeyPress-Escape> {.boh.ok invoke}");
+cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 10; set cbd 1 } {set cwidth 8; set cbd 0}");
 *choice=0;
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
-cmd(inter, "wm title . \"Lsd Data Editor\"");
-//cmd(inter, "wm resizable . 0 0");
-#ifdef DUAL_MONITOR
 Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
 Tcl_SetVar(inter, "heightDE", heightDE, 0);		// vertical minimum size in pixels
-cmd(inter, "if {[info exists lastSizeDE]==0} {set lastSizeDE \"[expr $widthDE]x$heightDE\"}");
-#endif
+
+cmd( inter, "set ini .ini" );
+cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini centerS 1 1 1 $widthDE $heightDE }" );
+
 cmd(inter, "set position 1.0");
+in_edit_data = true;
+
 while(*choice==0)
 {
+// reset title and destroy command because may be coming from set_obj_number
+cmd( inter, "settop .ini \"Lsd Data Editor\" { set choice 1 }" );
+
 //find first object->label==obj_name;
 first=root->search(obj_name);
-cmd(inter, "frame .b");
-cmd(inter, "set w .b.tx");
-cmd(inter, "scrollbar .b.ys -command \".b.tx yview\"");
-cmd(inter, "scrollbar .b.xs -command \".b.tx xview\" -orient horizontal");
-cmd(inter, "text $w -yscrollcommand \".b.ys set\" -xscrollcommand \".b.xs set\" -wrap none");
-cmd(inter, ".b.tx conf -cursor arrow");
+cmd(inter, "frame .ini.b");
+cmd(inter, "set w .ini.b.tx");
+cmd(inter, "scrollbar .ini.b.ys -command \".ini.b.tx yview\"");
+cmd(inter, "scrollbar .ini.b.xs -command \".ini.b.tx xview\" -orient horizontal");
+cmd(inter, "text $w -yscrollcommand \".ini.b.ys set\" -xscrollcommand \".ini.b.xs set\" -wrap none");
+cmd(inter, ".ini.b.tx conf -cursor arrow");
 strncpy(ch1, obj_name, 17 );
 ch1[17]=0;
-sprintf(ch, "label $w.tit_empty -width 36 -relief raised -text \"Object %-17s \" -borderwidth 4", ch1);
+sprintf(ch, "label $w.tit_empty -width 32 -relief raised -text \"Object: %-17s \" -borderwidth 4", ch1);
 cmd(inter, ch);
 cmd(inter, "bind $w.tit_empty <Button-1> {set choice 4}");
-sprintf(ch,"bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}");
-cmd(inter, ch);
+if ( ! in_set_obj )				// show only if not already recursing
+	cmd( inter,"bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}" );
 cmd(inter, "bind $w.tit_empty <Leave> {set msg \"\"}");
 cmd(inter, "$w window create end -window $w.tit_empty");
 
@@ -171,58 +171,47 @@ cmd(inter, "$w insert end \\n");
 set_focus=0;
 link_data(root, obj_name);
 cmd(inter, "$w see $position");
-cmd(inter, "pack .b.ys -side right -fill y");
-cmd(inter, "pack .b.xs -side bottom -fill x");
-cmd(inter, "pack .b.tx -expand yes -fill both");
-cmd(inter, "pack .b  -expand yes -fill both");
+cmd(inter, "pack .ini.b.ys -side right -fill y");
+cmd(inter, "pack .ini.b.xs -side bottom -fill x");
+cmd(inter, "pack .ini.b.tx -expand yes -fill both");
+cmd(inter, "pack .ini.b  -expand yes -fill both");
 
-cmd(inter, "label .msg -textvariable msg -anchor w");
-cmd(inter, "pack .msg");
+cmd(inter, "label .ini.msg -textvariable msg -anchor w");
+cmd(inter, "pack .ini.msg");
 
-cmd(inter, "frame .boh");
-cmd(inter, "button .boh.ok -width -9 -text Done -command {set choice 1}");
-cmd(inter, "button .boh.help -width -9 -text Help -command {LsdHelp mdatainit.html}");
-cmd(inter, "pack .boh.ok .boh.help -side left");
-cmd(inter, "pack .boh");
+cmd( inter, "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
 
 cmd(inter, "$w configure -state disabled");
-cmd(inter, "bind . <KeyPress-Escape> {set choice 1}");
-cmd(inter, "bind . <Destroy> {set choice 35}");
-cmd(inter, "bind .log <Destroy> {set choice 35}");
+cmd(inter, "bind .ini <KeyPress-Escape> {set choice 1}");
 
-
-#ifdef DUAL_MONITOR
-cmd(inter, "wm geometry . $lastSizeDE; update");
-#else
-set_window_size();
-#endif
 if(set_focus==1)
   cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
 
- while(*choice==0)
+noredraw:
+while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-cmd(inter, "set lastSizeDE [wm geometry .]"); 	// save window geometry
+if ( *choice == 4 && in_set_obj )		// avoid recursion
+{
+	*choice = 0;
+	goto noredraw;
+}
 
 //clean up
-if(*choice==35)
- myexit(0);
-cmd(inter, "bind . <Destroy> {}");
-cmd(inter, "bind .log <Destroy> {}");
 
 strcpy(ch, "");
 i=0;
 clean_cell(root, ch, obj_name);
-cmd(inter, "destroy .b .boh .msg");
+cmd(inter, "destroy .ini.b .ini.boh .ini.msg");
 
 
 if(*choice==2)
  {
   l=(char *)Tcl_GetVar(inter, "var-S-A",0);
   strcpy(ch, l);
-  *choice=0;
+  *choice = 2;		// set data editor window parent
   set_all(choice,first, ch, lag);
-  cmd(inter, "bind . <KeyPress-Return> {}");
+  cmd(inter, "bind .ini <KeyPress-Return> {}");
   *choice=0;
 
 
@@ -234,9 +223,10 @@ if(*choice==4)
  }
 
 }
-Tcl_UnlinkVar(inter, "lag");
-//cmd(inter, "unset lag");
 
+in_edit_data = false;
+
+Tcl_UnlinkVar(inter, "lag");
 }
 
 /****************************************************
@@ -302,18 +292,7 @@ if(!strcmp(c->label, lab))
 else
  strcpy(ch2, "  ");
 
-//sprintf(ch, "label $w.c%d_tit -relief groove -width 8 -bd 1 -text \"%9s\"", *incr ,ch2);
-
-/*
-if(*incr%2!=0)
- sprintf(ch, "label $w.c%d_tit -width 8 -bd 1 -text \"%s\"", *incr ,ch2);
-else
- sprintf(ch, "label $w.c%d_tit -width 8 -bd 2 -text \"%s\"", *incr ,ch2); 
-*/
-
-//sprintf(ch, "label $w.c%d_tit -width 9 -bd 1 -text \"%s\"", *incr ,ch2); 
-	
-sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
+sprintf(ch, "label $w.c%d_tit -width $cwidth -bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
 cmd(inter, ch);
 sprintf(ch, "$w window create end -window $w.c%d_tit", *incr);
 cmd(inter, ch);
@@ -380,7 +359,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
  if(cv1->param==1)
     { strncpy(ch1, cv1->label, 18);
       ch1[18]=0;
-      sprintf(ch, "label $w.tit_t%s -anchor w -width 25 -text \"Param: %-18s\" -borderwidth 4", cv1->label, ch1);
+      sprintf(ch, "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-18s\" -borderwidth 4", cv1->label, ch1);
       cmd(inter, ch);
       sprintf(ch, "$w window create end -window $w.tit_t%s", cv1->label);
       cmd(inter, ch);
@@ -404,7 +383,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 		 cmd(inter, ch);
 		 sprintf(ch, "$w window create end -window $w.tit_t%s_%d", cv1->label, j);
 		 cmd(inter, ch);
-		 sprintf(ch, "bind $w.tit_t%s_%d <Enter> {set msg \"Var: %s with lag %d\" }", cv1->label, j, cv1->label, j+1);
+		 sprintf(ch, "bind $w.tit_t%s_%d <Enter> {set msg \"Variable: %s with lag %d\" }", cv1->label, j, cv1->label, j+1);
 		 cmd(inter, ch);
 		 sprintf(ch, "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j);
 		 cmd(inter, ch);
@@ -437,7 +416,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
        {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%sp;$w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
         cmd(inter, ch);
        }
-      sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: Param. %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
+      sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: parameter %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
       cmd(inter, ch);
       sprintf(ch, "bind $w.c%d_v%sp <FocusOut> {set msg \" \"}", i, cv->label);
       cmd(inter, ch);
@@ -464,7 +443,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
        {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d;$w.c%d_v%s_%d selection range 0 end;$w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
         cmd(inter, ch);
        }
-      sprintf(ch, "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: Var %s lag %d in %s $tag_%d\"}",i,cv->label,j,cv->label,j+1,cur1->label,i);
+      sprintf(ch, "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: variable %s (lag %d) in %s $tag_%d\"}",i,cv->label,j,cv->label,j+1,cur1->label,i);
       cmd(inter, ch);
       sprintf(ch, "bind $w.c%d_v%s_%d <FocusOut> {set msg \" \"}",i,cv->label,j);
       cmd(inter, ch);
