@@ -112,7 +112,7 @@ button .l.t.b.cmp -width -9 -text "Compare Files" -command {destroytop .l; set c
 button .l.t.b.cnc -width -9 -text "Cancel" -command {destroytop .l; set d1 ""; set choice -1}
 
 pack .l.t.b.cmp .l.t.b.cnc -padx 10 -pady 10 -side left
-pack .l.t.b
+pack .l.t.b -side bottom -anchor e
 
 pack .l.l.tit
 

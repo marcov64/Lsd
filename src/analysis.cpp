@@ -756,11 +756,11 @@ case 9:
      goto there;
     }
     cur_plot++;
-//    cmd(inter, ".b.cs conf -state disabled");
+//    cmd(inter, ".da.b.cs conf -state disabled");
     cmd(inter, "set exttit \"$cur_plot) $tit\"");
     *choice=0;
     plot_cross(choice);
-//    cmd(inter, ".b.cs conf -state normal");
+//    cmd(inter, ".da.b.cs conf -state normal");
 
     *choice=0;
 
@@ -1238,7 +1238,7 @@ case 17:
     goto there;
    }
   cur_plot++;
-  cmd(inter, ".b.ts conf -text Stop");
+  cmd(inter, ".da.b.ts conf -text Stop");
 
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
   if(*choice>1)
@@ -1250,7 +1250,7 @@ case 17:
    *choice=0;
    plot_phase_diagram(choice);
    }
-  cmd(inter, ".b.ts conf -text \"Plot\"");
+  cmd(inter, ".da.b.ts conf -text \"Plot\"");
   if(*choice==2)
    {
    *choice=0;
@@ -1273,11 +1273,11 @@ case 18:
   if(*choice==0) //No variables to plot defined
    goto there;
   cur_plot++;
-  cmd(inter, ".b.ts conf -text Stop");
+  cmd(inter, ".da.b.ts conf -text Stop");
   *choice=0;
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
   plot_cs_xy(choice);
-  cmd(inter, ".b.ts conf -text \"Plot\"");
+  cmd(inter, ".da.b.ts conf -text \"Plot\"");
   if(*choice==2)
     {*choice=0;
      goto there;
@@ -1300,11 +1300,11 @@ case 19:
   if(*choice==0) //No variables to plot defined
    goto there;
   cur_plot++;
-  cmd(inter, ".b.ts conf -text Stop");
+  cmd(inter, ".da.b.ts conf -text Stop");
   *choice=0;
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
   plot_phase_diagram(choice);
-  cmd(inter, ".b.ts conf -text \"Plot\"");
+  cmd(inter, ".da.b.ts conf -text \"Plot\"");
 
   *choice=0;
   cmd(inter, ".da.f.vars.pl.v insert end $exttit");
@@ -2328,7 +2328,7 @@ cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
-cmd(inter, "bind $p <Double-Button-1> { raise .; focus -force .b.ts}");
+cmd(inter, "bind $p <Double-Button-1> { raise .da; focus -force .da.b.ts}");
 sprintf(msg, "wm protocol $p WM_DELETE_WINDOW { wm withdraw .da.f.new%d}", cur_plot);
 cmd(inter, msg);
 cmd(inter, "frame $p.f -width 640 -height 430");
@@ -2887,7 +2887,7 @@ cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
 
-cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
+cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
 
@@ -6207,7 +6207,7 @@ cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
-cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
+cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
 
@@ -6775,7 +6775,7 @@ cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
-cmd(inter, "bind $p <Double-Button-1> {raise .; focus -force .b.ts}");
+cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
 
