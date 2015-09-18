@@ -74,13 +74,9 @@ void init_canvas(void);
 void init_plot(int i, int id_sim);
 void cmd(Tcl_Interp *inter, char const *cc);
 
-
-#ifdef DUAL_MONITOR
 // better adjusts position for X11
 int shift=20;		// new window shift
 char intval[16];	// string buffer
-#endif
-
 
 extern char msg[];
 extern Tcl_Interp *inter;
@@ -90,6 +86,9 @@ extern int max_step;
 extern int cur_plt;
 extern int t;
 extern int plot_flag;
+extern char *simul_name;	// simulation name to use in title bar
+extern bool unsavedChange;	// control for unsaved changes in configuration
+
 double ymin;
 double ymax;
 double *old_val;
@@ -110,7 +109,7 @@ ymax=ymin=0;
 strcpy(lab, "");
 
 count(r, &i);
-sprintf(msg, "\n\nSimulation %d running ...\n", id_sim);
+sprintf(msg, "\nSimulation %d running ...\n", id_sim);
 plog(msg);
 cmd(inter, "update");
 
@@ -202,17 +201,13 @@ cmd(inter, "wm resizable $activeplot 1 0");
 // allow for run time plot window destruction
 cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW {set done_in 5}");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $activeplot @$RootLsd/$LsdSrc/lsd.xbm} {}");
-#ifdef DUAL_MONITOR
 i=(id_sim)*shift;				// calculate window shift position
 sprintf(intval,"%i",i);
 Tcl_SetVar(inter, "shift", intval, 0);
 cmd(inter, "set posXrt [expr $posXstr + $shift]");
 cmd(inter, "set posYrt [expr $posYstr + $shift]");
 cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
-#else
-cmd(inter, "wm geometry $activeplot +0+340");
-#endif
-sprintf(msg,"wm title $activeplot \"%d Run Time Plot\"", id_sim);
+sprintf(msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsavedChange ? "*" : "", simul_name, id_sim);
 cmd(inter,msg);
 cmd(inter, "frame $activeplot.c");
 cmd(inter, "frame $activeplot.c.c  ");

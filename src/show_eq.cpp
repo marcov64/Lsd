@@ -391,7 +391,7 @@ else
 
 fclose(f);
 
-cmd( inter, "showtop $list centerS 0 1" );
+cmd( inter, "showtop $list centerW 0 1" );
 }
 
 /****************************************************
@@ -437,7 +437,7 @@ if(*choice!=0)
 else
  cmd(inter, "$list.l insert end \"(none)\"");
 
-cmd( inter, "showtop $list centerS 0 1" );
+cmd( inter, "showtop $list centerW 0 1" );
 }
 
 

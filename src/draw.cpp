@@ -70,6 +70,8 @@ void put_line(Tcl_Interp *interp, int x1, int y1, int x2, int y2);
 void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
 
 extern int strWindowOn;		// control the presentation of the model structure window
+extern char *simul_name;	// simulation name to use in title bar
+extern bool unsavedChange;	// control for unsaved changes in configuration
 
 int range_type=90;
 int step_level=15;
@@ -94,65 +96,75 @@ void show_graph( object *t)
 char msg[300];
 object *top;
 
-//return;
 cmd(inter, "set c .model_str");
 
 if(!strWindowOn)	// model structure window is deactivated?
 {
-	cmd(inter, "if {[winfo exists $c]==1} {wm withdraw $c; wm deiconify $c; destroy $c}");
+	cmd( inter, "if [ winfo exists $c ] { destroy $c }" );
 	return;
 }
 
-cmd(inter, "if {[winfo exists $c.f]==1} {wm deiconify $c; destroy $c.f} {if {[winfo exists $c]==1} {wm deiconify $c} {toplevel $c}}");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $c @$RootLsd/$LsdSrc/lsd.xbm} {}");
-
-cmd(inter, "wm title $c \"Lsd Model Structure\"");
-cmd(inter, "wm protocol $c WM_DELETE_WINDOW {set strWindowOn 0; set choice 70}");
-
-cmd(inter, "frame $c.f");
-cmd(inter, "scrollbar $c.f.vs -command \"$c.f.c yview\"");
-cmd(inter, "scrollbar $c.f.hs -orient horiz -command \"$c.f.c xview\"");
-sprintf( msg, "canvas $c.f.c -width %d -height %d -yscrollcommand \"$c.f.vs set\" -xscrollcommand \"$c.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
-cmd( inter, msg );
-cmd(inter, "pack $c.f.vs -side right -fill y");
-cmd(inter, "pack $c.f.hs -side bottom -fill x");
-cmd(inter, "pack $c.f.c -expand yes -fill both");
-cmd(inter, "pack $c.f -expand yes -fill both");
-sprintf( msg, "$c.f.c xview moveto %f", hpan0 );
-cmd( inter, msg );
-
+cmd(inter, "set color white");
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd(inter, "set color white");
-draw_obj(inter, t, top, v0, h0, 0);
-cmd( inter, "bind $c.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
-cmd( inter, "bind $c.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
-cmd( inter, "bind $c.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
+cmd( inter, "set strExist [ winfo exists $c.f.c ]" );
+if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
+{
+	cmd( inter, "if [ winfo exists $c ] { destroy $c}" );
+	cmd( inter, "toplevel $c" );
+	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap $c @$RootLsd/$LsdSrc/lsd.xbm }" );
+	cmd( inter, "wm protocol $c WM_DELETE_WINDOW { set strWindowOn 0; set choice 70 }" );
 
-cmd( inter, "menu $c.f.c.v -tearoff 0" );
-cmd( inter, "$c.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
-cmd( inter, "$c.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
-cmd( inter, "$c.f.c.v add separator" );
-cmd( inter, "$c.f.c.v add cascade -label Add -menu $c.f.c.v.a");
-cmd( inter, "$c.f.c.v add separator" );
-cmd( inter, "$c.f.c.v add command -label Change -command { set choice 6 }" );
-cmd( inter, "$c.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
-cmd( inter, "$c.f.c.v add command -label Delete -command { set choice 74 }" );
-cmd( inter, "$c.f.c.v add separator" );
-cmd( inter, "$c.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
-cmd( inter, "$c.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
-cmd( inter, "menu $c.f.c.v.a -tearoff 0" );
-cmd( inter, "$c.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-cmd( inter, "$c.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-cmd( inter, "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
-cmd( inter, "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
+	cmd(inter, "frame $c.f");
+	cmd(inter, "scrollbar $c.f.vs -command \"$c.f.c yview\"");
+	cmd(inter, "scrollbar $c.f.hs -orient horiz -command \"$c.f.c xview\"");
+	sprintf( msg, "canvas $c.f.c -width %d -height %d -yscrollcommand \"$c.f.vs set\" -xscrollcommand \"$c.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
+	cmd( inter, msg );
+	cmd(inter, "pack $c.f.vs -side right -fill y");
+	cmd(inter, "pack $c.f.hs -side bottom -fill x");
+	cmd(inter, "pack $c.f.c -expand yes -fill both");
+	cmd(inter, "pack $c.f -expand yes -fill both");
+	sprintf( msg, "$c.f.c xview moveto %f", hpan0 );
+	cmd( inter, msg );
 
-cmd(inter, "set posXstr [expr [winfo x .] + $posX + $widthB]");
-cmd(inter, "set posYstr [winfo y .]");
-sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
+	draw_obj(inter, t, top, v0, h0, 0);
+
+	cmd( inter, "bind $c.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
+	cmd( inter, "bind $c.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
+	cmd( inter, "bind $c.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
+
+	cmd( inter, "menu $c.f.c.v -tearoff 0" );
+	cmd( inter, "$c.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+	cmd( inter, "$c.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
+	cmd( inter, "$c.f.c.v add separator" );
+	cmd( inter, "$c.f.c.v add command -label Change -command { set choice 6 }" );
+	cmd( inter, "$c.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
+	cmd( inter, "$c.f.c.v add command -label Delete -command { set choice 74 }" );
+	cmd( inter, "$c.f.c.v add separator" );
+	cmd( inter, "$c.f.c.v add cascade -label Add -menu $c.f.c.v.a");
+	cmd( inter, "$c.f.c.v add separator" );
+	cmd( inter, "$c.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
+	cmd( inter, "$c.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+	cmd( inter, "menu $c.f.c.v.a -tearoff 0" );
+	cmd( inter, "$c.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
+	cmd( inter, "$c.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
+	cmd( inter, "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
+	cmd( inter, "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
+
+	cmd(inter, "set posXstr [expr [winfo x .] + $posX + $widthB]");
+	cmd(inter, "set posYstr [winfo y .]");
+	sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
+	cmd( inter, msg );
+}
+else	// or just update canvas
+{
+	cmd( inter, "$c.f.c delete all" );
+	draw_obj(inter, t, top, v0, h0, 0);
+}
+
+sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsavedChange ? "*" : "", simul_name );
 cmd( inter, msg );
-cmd(inter, "lower $c .");
-
+cmd(inter, "wm deiconify $c; lower $c .");
 }
 
 
@@ -317,7 +329,7 @@ cmd(inter, ch);
 */
 sprintf(ch, "$c.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $c; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $c }", str2, str2, str2);
 cmd(inter, ch);
-sprintf(ch, "$c.f.c bind %s <Leave> {unset res_g; destroy .list}", str2);
+sprintf(ch, "$c.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2);
 cmd(inter, ch);
 
 //sprintf(ch, "$c.f.c bind %s <Double-1> {set res_g %s; set choice_g 24}", str2, str2);

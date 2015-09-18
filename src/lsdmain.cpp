@@ -76,7 +76,7 @@ position of the file is just after str.
 #include <tk.h>
 void cmd(Tcl_Interp *inter, char  const *cc);
 Tcl_Interp *InterpInitWin(char *tcl_dir);
-
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 Tcl_Interp *inter;
 #endif
 
@@ -99,6 +99,7 @@ int add_to_tot=0;
 int plot_flag=1;
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool firstRes = true;		// flag to mark first results file (init grand total file)
+bool unsavedData = false;	// flag unsaved simulation results
 double refresh=1.01;
 char *eq_file=NULL;
 char lsd_eq_file[200000];
@@ -161,7 +162,6 @@ void delete_mn(mnode *mn);
 void scan_mn(object *c);
 char *clean_file(char *);
 char *clean_path(char *);
-int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 
 char *upload_eqfile(void);
 lsdstack *stacklog;
@@ -667,11 +667,13 @@ start = clock();
 for(t=1; quit==0 && t<=max_step;t++ )
  {
 // control_bridge(root);
+#ifndef NO_WINDOW 
   if(when_debug==t)
   {
     debug_flag=1;
 	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb }" );
   }
+#endif
   cur_plt=0;
   root->update();
 
@@ -788,6 +790,7 @@ cmd(inter, "update");
 
 
 actual_steps=t-1;
+unsavedData = true;				// flag unsaved simulation results
 
 running=0;
 if(quit==1) //For multiple simulation runs you need to reset quit
@@ -813,7 +816,7 @@ cmd( inter, "wm state . normal" );
 #endif
 
 close_sim();
-plog("\nSetting variables with the end value. Wait... ");
+plog("\nSetting variables with the end value... ");
 
 
 #ifndef NO_WINDOW 
@@ -932,32 +935,6 @@ delete rf;										// close file and delete object
   } 
 }
 }
-/*
-if(strlen(path)>0)
-  sprintf(msg, "%s/%s_.lsd", path, simul_name);
-else
-  sprintf(msg, "%s_.lsd", simul_name);
-f=fopen(msg, "w");
-strcpy(msg, "");
-
-root->save_struct(f,msg);
-fprintf(f, "\nDATA\n");
-root->save_param(f);
-fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n", sim_num, seed, max_step, equation_name);
-fclose(f);
-
-root->empty();
-root->init(NULL, "Root");
-if(strlen(path)>0)
- sprintf(msg, "%s/%s.lsd",path, simul_name);
-else
- sprintf(msg, "%s.lsd",simul_name);
-
-f=fopen(msg, "r");
-root->load_struct(f);
-fclose(f);
-root->load_param(msg, 1);
-*/
 
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done_in");
@@ -1300,7 +1277,7 @@ cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$Ro
 cmd( inter, "wm protocol .log WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");
-cmd(inter, "wm title .log \"Log\"");
+cmd(inter, "wm title .log \"Lsd Log\"");
 cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
 cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
 cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");

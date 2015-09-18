@@ -2278,6 +2278,7 @@ double app=0;
 object *cur;
 if(running==0)
  return;
+
 sprintf(msg, "\n\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
 plog(msg);
 sprintf(msg, "\nOffending code contained in the equation for variable: %s\n", stacklog->vs->label);
@@ -2286,45 +2287,30 @@ plog(msg);
 print_stack();
 
 #ifndef NO_WINDOW
-//Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
+cmd(inter, "wm deiconify .");
+
 loop:
 
 choice=0;
-cmd(inter, "toplevel .cazzo");
-
-cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {wm iconbitmap .cazzo @$RootLsd/$LsdSrc/lsd.xbm}");
-
-cmd(inter, "wm title .cazzo Error");
-//cmd(inter, "label .cazzo.err.l -text \"Fatal error: see message in Log\"");
-
+cmd( inter, "newtop .cazzo Error { set err 1 }" );
 
 cmd(inter, "frame .cazzo.t");
-cmd(inter, "label .cazzo.t.l -text \"Fatal error\" -foreground red");
-cmd(inter, "pack .cazzo.t.l ");
-cmd(inter, "label .cazzo.t.l1 -text \"A fatal error occurred during the simulation run. Information about the error\nand on the state of the model are reported in the Log window.\nChoose one of the following options to continue.\" -anchor w -justify left");
+cmd(inter, "label .cazzo.t.l -text \"An error occurred during the simulation run.\n\nInformation about the error and on the state of the model are reported\nin the log window.\"");
+cmd(inter, "pack .cazzo.t.l -pady 10");
+cmd(inter, "label .cazzo.t.l1 -text \"Choose one of the following options to continue\"");
 cmd(inter, "pack .cazzo.t.l1 -expand yes -fill both");
 cmd(inter, "pack .cazzo.t");
 cmd(inter, "set err 4");
 cmd(inter, "frame .cazzo.e -relief groove -bd 2");
-cmd(inter, "radiobutton .cazzo.e.r -variable err -value 4 -text \"Return to Lsd Browser: choose this option to edit the model configuration.\"");
-cmd(inter, "radiobutton .cazzo.e.a -variable err -value 2 -text \"Analysis of Results: observe data series produced so far and return here.\"");
+cmd(inter, "radiobutton .cazzo.e.r -variable err -value 4 -text \"Return to Lsd browser: choose this option to edit the model configuration.\"");
+cmd(inter, "radiobutton .cazzo.e.a -variable err -value 2 -text \"Analysis of results: observe data series produced so far and return here.\"");
 cmd(inter, "radiobutton .cazzo.e.d -variable err -value 3 -text \"Data browse: observe model values and return here.\"");
-cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd program: choose this option to edit equations' code.\"");
+cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code.\"");
 
 cmd(inter, "pack .cazzo.e.r .cazzo.e.a .cazzo.e.d .cazzo.e.e -anchor w");
+cmd(inter, "pack .cazzo.e  -fill both -expand yes");
 
-cmd(inter, "frame .cazzo.b");
-cmd(inter, "button .cazzo.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .cazzo.b.help -width -9 -text Help -command {LsdHelp debug.html#crash}");
-cmd(inter, "pack .cazzo.b.ok .cazzo.b.help ");
-
-cmd(inter, "pack .cazzo.e .cazzo.b  -fill both -expand yes");
-
-
-
-
-cmd(inter, "raise .cazzo");
-cmd(inter, "focus -force .cazzo.e.r");
+cmd( inter, "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
 cmd(inter, "bind .cazzo.e.r <Down> {focus -force .cazzo.e.a; .cazzo.e.a invoke}");
 cmd(inter, "bind .cazzo.e.a <Down> {focus -force .cazzo.e.d; .cazzo.e.d invoke}");
@@ -2338,23 +2324,18 @@ cmd(inter, "bind .cazzo.e.r <Return> {.cazzo.b.ok invoke}");
 cmd(inter, "bind .cazzo.e.a <Return> {.cazzo.b.ok invoke}");
 cmd(inter, "bind .cazzo.e.d <Return> {.cazzo.b.ok invoke}");
 cmd(inter, "bind .cazzo.e.e <Return> {.cazzo.b.ok invoke}");
-cmd(inter, "bind .cazzo <Destroy> {set err 1}");
 cmd(inter, "bind .cazzo.e <Return> {.cazzo.b.ok.invoke}");
 
-cmd(inter, "bind .log <Destroy> {set err 1}");
+cmd(inter, "showtop .cazzo 0 0 0");
 
-//cmd(inter, "set w .cazzo; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
 while(choice==0)
  Tcl_DoOneEvent(0);
 
 cmd(inter, "set choice $err");
-cmd(inter, "destroy .cazzo");
-//cmd(inter, "destroy .e .b .t");
-cmd(inter, "wm deiconify .");
+cmd(inter, "destroytop .cazzo");
 
 if(choice==4)
  {
-  //Tcl_UnlinkVar(inter, "choice");
   actual_steps=t;
   reset_end(root);
   close_sim();
@@ -2369,25 +2350,23 @@ if(choice==2)
  {
   actual_steps=t;
   reset_end(root);
-  cmd(inter, "destroy .err .laberr");
-  cmd(inter, "wm deiconify .");
+  cmd(inter, "wm withdraw .");
   analysis(&choice);
-  cmd(inter, "bind . <Destroy> {}");
-  cmd(inter, "wm iconify .");
+  cmd(inter, "wm deiconify .");
   goto loop;
 
  }
 if(choice==3)
  {
-  cmd(inter, "destroy .err .laberr");
-  cmd(inter, "wm deiconify .");
   app=stacklog->vs->val[0];
   if(stacklog->prev->vs==NULL)
     deb(stacklog->vs->up, NULL, stacklog->vs->label, &app);
   else
+  {
+	cmd(inter, "wm withdraw .");
     deb(stacklog->vs->up, stacklog->prev->vs->up, stacklog->vs->label, &app);  
-  cmd(inter, "bind . <Destroy> {}");
-  cmd(inter, "wm iconify .");
+	cmd(inter, "wm deiconify .");
+  }
   goto loop;
 
  }
@@ -2395,7 +2374,7 @@ if(choice==3)
 #else
  printf("\nHard error. Abort\n");
 #endif
-myexit(1);
+myexit(99);
 
 }
 

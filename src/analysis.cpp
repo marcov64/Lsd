@@ -153,7 +153,7 @@ extern char *simul_name;
 extern char name_rep[400];
 extern int seed;
 extern int done_in;
-
+extern bool unsavedChange;	// control for unsaved changes in configuration
 
 int num_var;
 int num_c;
@@ -243,7 +243,7 @@ file_counter=0;
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
 cmd( inter, "set da .da");
-sprintf(msg, "newtop .da \"%s - Data Analysis\" { set choice 2 }", simul_name);
+sprintf(msg, "newtop .da \"%s%s - Lsd Results Analysis\" { set choice 2 } \"\"", unsavedChange ? "*" : "", simul_name);
 cmd(inter, msg);
 
 cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");
@@ -479,7 +479,7 @@ cmd(inter, "bind .da <Control-c> {.da.f.vars.b.empty invoke}");
 cmd(inter, "bind .da <Control-a> {set choice 24}");
 cmd(inter, "bind .da <Control-i> {set choice 34}");
 
-cmd( inter, "showtop .da topleftW");
+cmd( inter, "showtop .da topleftW 0 0 0");
 
 if(num_var==0)
   cmd(inter, "tk_messageBox -type ok -title \"No Series\" -icon warning -message \"Apparently there are no series available from a recent simulation run.\\n\\nClick on button \'Add Series\' to select series to analyse from previously saved files or current state of the model. \\nIf you expected data from a simulation that are not available you probably forgot to select series to save, or set the objects containing them to be not computed.\"");  
@@ -537,6 +537,7 @@ case 1:
   graph_l[cur_plot]=390; //height of graph with labels
   graph_nl[cur_plot]=325; //height of graph with labels  
 
+  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 //exit
@@ -638,30 +639,30 @@ case 36: //Print the data series in the log window
    *choice=0;
    goto there;
 case 37: //set options for gnuplot
-cmd(inter, "toplevel .a");
-cmd(inter, "wm transient .a .da");
-cmd(inter, "wm title .a \"Gnuplot Options\"");
-cmd(inter, "label .a.l -text \"Set options for gnuplot\" -fg red");
-cmd(inter, "frame .a.t -relief groove -bd 2");
-cmd(inter, "label .a.t.l -text \"Terminal \"");
-cmd(inter, "entry .a.t.e -textvariable gpterm -width 12");
-cmd(inter, "pack .a.t.l .a.t.e -side left -anchor w");
-cmd(inter, "frame .a.d -relief groove -bd 2");
-cmd(inter, "label .a.d.l -text \"Grid details \"");
-cmd(inter, "entry .a.d.e -textvariable gpdgrid3d -width 12");
-cmd(inter, "pack .a.d.l .a.d.e -side left -anchor w");
-cmd(inter, "frame .a.o -relief groove -bd 2");
-cmd(inter, "label .a.o.l -text \"Other options\"");
-cmd(inter, "text .a.o.t -height 10 -width 30");
-cmd(inter, ".a.o.t insert end \"$gpooptions\"");
-cmd(inter, "pack .a.o.l .a.o.t");
-cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.default -width -9 -text Default -command {set choice 3}");
-cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#gpoptions}");
-cmd(inter, "pack .a.b.default .a.b.ok .a.b.help -side left");
-cmd(inter, "pack .a.l .a.t .a.d .a.o .a.b -fill x");
-//cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
+cmd(inter, "toplevel .da.a");
+cmd(inter, "wm transient .da.a .da");
+cmd(inter, "wm title .da.a \"Gnuplot Options\"");
+cmd(inter, "label .da.a.l -text \"Set options for gnuplot\" -fg red");
+cmd(inter, "frame .da.a.t -relief groove -bd 2");
+cmd(inter, "label .da.a.t.l -text \"Terminal \"");
+cmd(inter, "entry .da.a.t.e -textvariable gpterm -width 12");
+cmd(inter, "pack .da.a.t.l .da.a.t.e -side left -anchor w");
+cmd(inter, "frame .da.a.d -relief groove -bd 2");
+cmd(inter, "label .da.a.d.l -text \"Grid details \"");
+cmd(inter, "entry .da.a.d.e -textvariable gpdgrid3d -width 12");
+cmd(inter, "pack .da.a.d.l .da.a.d.e -side left -anchor w");
+cmd(inter, "frame .da.a.o -relief groove -bd 2");
+cmd(inter, "label .da.a.o.l -text \"Other options\"");
+cmd(inter, "text .da.a.o.t -height 10 -width 30");
+cmd(inter, ".da.a.o.t insert end \"$gpooptions\"");
+cmd(inter, "pack .da.a.o.l .da.a.o.t");
+cmd(inter, "frame .da.a.b");
+cmd(inter, "button .da.a.b.default -width -9 -text Default -command {set choice 3}");
+cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#gpoptions}");
+cmd(inter, "pack .da.a.b.default .da.a.b.ok .da.a.b.help -side left");
+cmd(inter, "pack .da.a.l .da.a.t .da.a.d .da.a.o .da.a.b -fill x");
+//cmd(inter, "bind .da.a <Return> {.da.a.b.ok invoke}");
 gpoptions :
 
 *choice=0;
@@ -671,12 +672,12 @@ while(*choice==0)
 if(*choice==3)
  {
   cmd(inter, "set gpdgrid3d \"60,60,3\"; set gpooptions \"set ticslevel 0.0\"");
-  cmd(inter, ".a.o.t delete 1.0 end; .a.o.t insert end \"$gpooptions\"");
+  cmd(inter, ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gpooptions\"");
   cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} { set gpterm \"x11\"}");
   goto gpoptions;
  }
-cmd(inter, "set gpooptions [.a.o.t get 0.0 end]"); 
-cmd(inter, "destroy .a");
+cmd(inter, "set gpooptions [.da.a.o.t get 0.0 end]"); 
+cmd(inter, "destroy .da.a");
 *choice=0;
 goto there;
  
@@ -716,6 +717,7 @@ case 6:
   *choice=0;
   cmd(inter, "set tit [.da.f.vars.ch.v get 0]");
 
+  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
   goto there;
 
 //Remove the vars. selected from the variables to plot
@@ -725,12 +727,16 @@ case 7:
   cmd(inter, "foreach i [.da.f.vars.ch.v curselection] {.da.f.vars.ch.v delete [expr $i - $steps]; incr steps}");
   cmd(inter, "if [.da.f.vars.ch.v size]==0 {$f.out conf -state disabled}");
   *choice=0;
+
+  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
   goto there;
 
 //Remove all the variables from the list of vars to plot
 case 8:
   cmd(inter, ".da.f.vars.ch.v delete 0 end");
   *choice=0;
+
+  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
   goto there;
 
 //Plot the cross-section graph. That is, the vars selected form
@@ -760,6 +766,7 @@ case 9:
     graph_l[cur_plot]=390; //height of graph with labels
     graph_nl[cur_plot]=325; //height of graph with labels  
 
+    cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
     goto there;
 
 //Brutally shut down the system
@@ -835,6 +842,7 @@ case 10:
 //Statistics
 case 12:
  statistics(choice);
+ cmd( inter, "raise .log");
  *choice=0;
  goto there;
 
@@ -847,49 +855,49 @@ case 25:
 //Edit labels
 case 26:
 *choice=0;
- cmd(inter, "toplevel .a");
- cmd(inter, "wm title .a \"Edit Label\"");
- cmd(inter, "wm geometry .a +$hereX+$hereY");
- cmd(inter, "wm transient .a $ccanvas");
- cmd(inter, "label .a.l -text \"New label for the selected label\"");
+ cmd(inter, "toplevel .da.a");
+ cmd(inter, "wm title .da.a \"Edit Label\"");
+ cmd(inter, "wm geometry .da.a +$hereX+$hereY");
+ cmd(inter, "wm transient .da.a $ccanvas");
+ cmd(inter, "label .da.a.l -text \"New label for the selected label\"");
  cmd(inter, "set itext [$ccanvas itemcget selected -text]");
- cmd(inter, "entry .a.e -textvariable itext -width 30");
- cmd(inter, "frame .a.format -relief groove -bd 2");
- cmd(inter, "label .a.format.tit -text \"Font name, size, style and color\"");
- cmd(inter, "pack .a.format.tit");
+ cmd(inter, "entry .da.a.e -textvariable itext -width 30");
+ cmd(inter, "frame .da.a.format -relief groove -bd 2");
+ cmd(inter, "label .da.a.format.tit -text \"Font name, size, style and color\"");
+ cmd(inter, "pack .da.a.format.tit");
  cmd(inter, "set ifont [lindex [$ccanvas itemcget selected -font] 0]");
  cmd(inter, "set idim [lindex [$ccanvas itemcget selected -font] 1]");
  cmd(inter, "set istyle [lindex [$ccanvas itemcget selected -font] 2]");
- cmd(inter, "frame .a.format.e");
- cmd(inter, "entry .a.format.e.font -textvariable ifont -width 30");
- cmd(inter, "entry .a.format.e.dim -textvariable idim -width 4");
-  cmd(inter, "entry .a.format.e.sty -textvariable istyle -width 10");
+ cmd(inter, "frame .da.a.format.e");
+ cmd(inter, "entry .da.a.format.e.font -textvariable ifont -width 30");
+ cmd(inter, "entry .da.a.format.e.dim -textvariable idim -width 4");
+  cmd(inter, "entry .da.a.format.e.sty -textvariable istyle -width 10");
  cmd(inter, "set icolor [$ccanvas itemcget selected -fill]");  
- cmd(inter, "button .a.format.e.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.format.e.color configure -foreground $icolor; focus -force .a.format.e.color}");
+ cmd(inter, "button .da.a.format.e.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .da.a.format.e.color configure -foreground $icolor; focus -force .da.a.format.e.color}");
 
- cmd(inter, "bind .a.format.e.font <Return> {.a.b.ok invoke}");
- cmd(inter, "bind .a.format.e.dim <Return> {.a.b.ok invoke}");
+ cmd(inter, "bind .da.a.format.e.font <Return> {.da.a.b.ok invoke}");
+ cmd(inter, "bind .da.a.format.e.dim <Return> {.da.a.b.ok invoke}");
  
- cmd(inter, "pack .a.format.e.font .a.format.e.dim .a.format.e.sty .a.format.e.color -side left");
+ cmd(inter, "pack .da.a.format.e.font .da.a.format.e.dim .da.a.format.e.sty .da.a.format.e.color -side left");
 
- cmd(inter, "frame .a.format.fall");
+ cmd(inter, "frame .da.a.format.fall");
  cmd(inter, "set fontall 0");
  cmd(inter, "set colorall 0");
- cmd(inter, "checkbutton .a.format.fall.font -text \"Apply font to all text items\" -variable fontall");
- cmd(inter, "checkbutton .a.format.fall.color -text \"Apply color to all text items\" -variable colorall");
+ cmd(inter, "checkbutton .da.a.format.fall.font -text \"Apply font to all text items\" -variable fontall");
+ cmd(inter, "checkbutton .da.a.format.fall.color -text \"Apply color to all text items\" -variable colorall");
 
- cmd(inter, "pack .a.format.fall.font .a.format.fall.color -anchor w");
- cmd(inter, "pack .a.format.e .a.format.fall -anchor w");
+ cmd(inter, "pack .da.a.format.fall.font .da.a.format.fall.color -anchor w");
+ cmd(inter, "pack .da.a.format.e .da.a.format.fall -anchor w");
 
- cmd(inter, "frame .a.b");
+ cmd(inter, "frame .da.a.b");
  
- cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
- cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
- cmd(inter, "pack .a.b.ok .a.b.esc -side left");
- cmd(inter, "pack .a.l .a.e .a.format .a.b");
- cmd(inter, ".a.e selection range 0 end");
- cmd(inter, "focus -force .a.e");
- cmd(inter, "bind .a.e <Return> {.a.b.ok invoke}");
+ cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}");
+ cmd(inter, "pack .da.a.b.ok .da.a.b.esc -side left");
+ cmd(inter, "pack .da.a.l .da.a.e .da.a.format .da.a.b");
+ cmd(inter, ".da.a.e selection range 0 end");
+ cmd(inter, "focus -force .da.a.e");
+ cmd(inter, "bind .da.a.e <Return> {.da.a.b.ok invoke}");
  
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -914,7 +922,7 @@ if(*choice==1)
  } 
  
 cmd(inter, "$ccanvas dtag selected"); 
-cmd(inter, "destroy .a"); 
+cmd(inter, "destroy .da.a"); 
 cmd(inter, "focus -force $ccanvas");
  *choice=0;
  goto there;
@@ -923,26 +931,26 @@ cmd(inter, "focus -force $ccanvas");
 //New labels
 case 27:
 *choice=0;
- cmd(inter, "toplevel .a");
- cmd(inter, "wm geometry .a +$hereX+$hereY");
- cmd(inter, "wm title .a \"New Labels\"");
- cmd(inter, "wm transient .a $ncanvas");
- cmd(inter, "label .a.l -text \"New label\"");
+ cmd(inter, "toplevel .da.a");
+ cmd(inter, "wm geometry .da.a +$hereX+$hereY");
+ cmd(inter, "wm title .da.a \"New Labels\"");
+ cmd(inter, "wm transient .da.a $ncanvas");
+ cmd(inter, "label .da.a.l -text \"New label\"");
  cmd(inter, "set itext \"new text\"");
- cmd(inter, "entry .a.e -textvariable itext -width 30");
- cmd(inter, "frame .a.b");
+ cmd(inter, "entry .da.a.e -textvariable itext -width 30");
+ cmd(inter, "frame .da.a.b");
  
- cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
- cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
- cmd(inter, "pack .a.b.ok .a.b.esc -side left");
- cmd(inter, "pack .a.l .a.e .a.b");
- cmd(inter, ".a.e selection range 0 end");
- cmd(inter, "focus -force .a.e");
- cmd(inter, "bind .a.e <Return> {.a.b.ok invoke}");
+ cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}");
+ cmd(inter, "pack .da.a.b.ok .da.a.b.esc -side left");
+ cmd(inter, "pack .da.a.l .da.a.e .da.a.b");
+ cmd(inter, ".da.a.e selection range 0 end");
+ cmd(inter, "focus -force .da.a.e");
+ cmd(inter, "bind .da.a.e <Return> {.da.a.b.ok invoke}");
  
   while(*choice==0)
 	Tcl_DoOneEvent(0);
-cmd(inter, "destroy .a"); 
+cmd(inter, "destroy .da.a"); 
 if(*choice==2)
 {
 
@@ -974,36 +982,36 @@ Edit line's color
 */
 *choice=0;
 /*
- cmd(inter, "toplevel .a");
- cmd(inter, "wm title .a \"Edit Lines\"");
- cmd(inter, "wm geometry .a +$hereX+$hereY");
- cmd(inter, "wm transient .a $ccanvas");
- cmd(inter, "label .a.l -text \"New label for the selected series\"");
+ cmd(inter, "toplevel .da.a");
+ cmd(inter, "wm title .da.a \"Edit Lines\"");
+ cmd(inter, "wm geometry .da.a +$hereX+$hereY");
+ cmd(inter, "wm transient .da.a $ccanvas");
+ cmd(inter, "label .da.a.l -text \"New label for the selected series\"");
  cmd(inter, "set itext [$ccanvas itemcget selected -text]");
- cmd(inter, "entry .a.e -textvariable itext -width 30");
- cmd(inter, "frame .a.format -relief groove -bd 2");
- cmd(inter, "label .a.format.tit -text \"Font name and dim.\"");
- cmd(inter, "pack .a.format.tit");
+ cmd(inter, "entry .da.a.e -textvariable itext -width 30");
+ cmd(inter, "frame .da.a.format -relief groove -bd 2");
+ cmd(inter, "label .da.a.format.tit -text \"Font name and dim.\"");
+ cmd(inter, "pack .da.a.format.tit");
  cmd(inter, "set ifont [lindex [$ccanvas itemcget selected -font] 0]");
  cmd(inter, "set idim [lindex [$ccanvas itemcget selected -font] 1]");
  
- cmd(inter, "entry .a.format.font -textvariable ifont -width 30");
- cmd(inter, "entry .a.format.dim -textvariable idim -width 4");
- cmd(inter, "bind .a.format.font <Return> {.a.b.ok invoke}");
- cmd(inter, "bind .a.format.dim <Return> {.a.b.ok invoke}");
+ cmd(inter, "entry .da.a.format.font -textvariable ifont -width 30");
+ cmd(inter, "entry .da.a.format.dim -textvariable idim -width 4");
+ cmd(inter, "bind .da.a.format.font <Return> {.da.a.b.ok invoke}");
+ cmd(inter, "bind .da.a.format.dim <Return> {.da.a.b.ok invoke}");
  
- cmd(inter, "pack .a.format.font .a.format.dim -side left");
+ cmd(inter, "pack .da.a.format.font .da.a.format.dim -side left");
  cmd(inter, "set icolor [$ccanvas itemcget selected -fill]");
- cmd(inter, "button .a.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .a.color configure -foreground $icolor; focus -force .a.color}");
- cmd(inter, "frame .a.b");
+ cmd(inter, "button .da.a.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .da.a.color configure -foreground $icolor; focus -force .da.a.color}");
+ cmd(inter, "frame .da.a.b");
  
- cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
- cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
- cmd(inter, "pack .a.b.ok .a.b.esc -side left");
- cmd(inter, "pack .a.l .a.e .a.format .a.color .a.b");
- cmd(inter, ".a.e selection range 0 end");
- cmd(inter, "focus -force .a.e");
- cmd(inter, "bind .a.e <Return> {.a.b.ok invoke}");
+ cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+ cmd(inter, "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}");
+ cmd(inter, "pack .da.a.b.ok .da.a.b.esc -side left");
+ cmd(inter, "pack .da.a.l .da.a.e .da.a.format .da.a.color .da.a.b");
+ cmd(inter, ".da.a.e selection range 0 end");
+ cmd(inter, "focus -force .da.a.e");
+ cmd(inter, "bind .da.a.e <Return> {.da.a.b.ok invoke}");
  
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -1059,20 +1067,20 @@ case 11:
 
 exist_selection:
 *choice=0;
-  cmd(inter, "toplevel .w");
-  cmd(inter, "wm title .w \"Save Lsd Graph\"");
-  cmd(inter, "wm transient .w .da");
-  cmd(inter, "bind .w <Destroy> {set choice 2}");
-  cmd(inter, "label .w.l -text \"Select one graph\"");
-  cmd(inter, "button .w.ok -width -9 -text Ok -command {set choice 1}");
-  cmd(inter, "button .w.can -width -9 -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .w.l .w.ok .w.can");
-  cmd(inter, "focus -force .w.ok");
+  cmd(inter, "toplevel .da.a");
+  cmd(inter, "wm title .da.a \"Save Lsd Graph\"");
+  cmd(inter, "wm transient .da.a .da");
+  cmd(inter, "bind .da.a <Destroy> {set choice 2}");
+  cmd(inter, "label .da.a.l -text \"Select one graph\"");
+  cmd(inter, "button .da.a.ok -width -9 -text Ok -command {set choice 1}");
+  cmd(inter, "button .da.a.can -width -9 -text Cancel -command {set choice 2}");
+  cmd(inter, "pack .da.a.l .da.a.ok .da.a.can");
+  cmd(inter, "focus -force .da.a.ok");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-cmd(inter, "bind .w <Destroy> {}");
-cmd(inter, "destroy .w");
+cmd(inter, "bind .da.a <Destroy> {}");
+cmd(inter, "destroy .da.a");
 if(*choice==2)
    {*choice=0;
     goto there;
@@ -1099,22 +1107,22 @@ if(*choice == 0)
   goto there;  
  }
 cmd(inter, "set cazzo $a");
-cmd(inter, "toplevel .filename");
-cmd(inter, "set r .filename");
-cmd(inter, "wm title .filename \"Save Lsd Graph\"");
-cmd(inter, "wm transient .filename .da");
-cmd(inter, "bind .filename <Destroy> {set choice 2}");
-cmd(inter, "label .filename.l -text \"Save the graph\\n$it\"");
-cmd(inter, "frame .filename.b");
-cmd(inter, "button .filename.b.ok -width -9 -text Ok -bd 2 -command {if {[string length $fn] > 0 } {set choice 1} {set choice 3} }");
-cmd(inter, "button .filename.b.can -width -9 -text Cancel -bd 2 -command {set choice 2}");
-cmd(inter, "bind .filename <KeyPress-Return> {.filename.b.ok invoke} ");
-cmd(inter, "bind .filename <KeyPress-Escape> {.filename.b.can invoke}");
-cmd(inter, "bind .filename <Destroy> {set choice 2}");
-cmd(inter, "button .filename.s -width -9 -text \"Choose File\" -command {set fn1 [tk_getSaveFile -title \"Save Graph File\" -defaultextension \"eps\" -initialfile $fn -filetypes {{{Encapsulated Ps} {.eps}} {{All Files} {*}}}]; raise .filename ; if {[string length $fn1] == 0} {} {set fn $fn1}}");
+cmd(inter, "toplevel .da.file");
+cmd(inter, "set r .da.file");
+cmd(inter, "wm title .da.file \"Save Lsd Graph\"");
+cmd(inter, "wm transient .da.file .da");
+cmd(inter, "bind .da.file <Destroy> {set choice 2}");
+cmd(inter, "label .da.file.l -text \"Save the graph\\n$it\"");
+cmd(inter, "frame .da.file.b");
+cmd(inter, "button .da.file.b.ok -width -9 -text Ok -bd 2 -command {if {[string length $fn] > 0 } {set choice 1} {set choice 3} }");
+cmd(inter, "button .da.file.b.can -width -9 -text Cancel -bd 2 -command {set choice 2}");
+cmd(inter, "bind .da.file <KeyPress-Return> {.da.file.b.ok invoke} ");
+cmd(inter, "bind .da.file <KeyPress-Escape> {.da.file.b.can invoke}");
+cmd(inter, "bind .da.file <Destroy> {set choice 2}");
+cmd(inter, "button .da.file.s -width -9 -text \"Choose File\" -command {set fn1 [tk_getSaveFile -title \"Save Graph File\" -defaultextension \"eps\" -initialfile $fn -filetypes {{{Encapsulated Ps} {.eps}} {{All Files} {*}}}]; raise .da.file ; if {[string length $fn1] == 0} {} {set fn $fn1}}");
 //cmd(inter, "set fn \"Lsdplot.eps\"");
 cmd(inter, "set fn \"$b.eps\"");
-cmd(inter, "entry  .filename.e -width 40 -relief sunken -textvariable fn");
+cmd(inter, "entry  .da.file.e -width 40 -relief sunken -textvariable fn");
 cmd(inter, "set cm \"color\"");
 cmd(inter, "frame $r.r");
 cmd(inter, "frame $r.r.col -bd 2");
@@ -1136,18 +1144,18 @@ cmd(inter, "pack $r.r.pos.p1 $r.r.pos.p2");
 cmd(inter, "pack $r.r.col $r.r.pos -side left");
 
 cmd(inter, "set heightpost 1");
-//cmd(inter, "checkbutton .filename.lab -text \"Include graph labels\" -variable heightpost -onvalue 390 -offvalue 325");
+//cmd(inter, "checkbutton .da.file.lab -text \"Include graph labels\" -variable heightpost -onvalue 390 -offvalue 325");
 cmd(inter, "scan $it %d)%s a b");
 
 
-cmd(inter, "checkbutton .filename.lab -text \"Include graph labels\" -variable heightpost -onvalue 1 -offvalue 0");
+cmd(inter, "checkbutton .da.file.lab -text \"Include graph labels\" -variable heightpost -onvalue 1 -offvalue 0");
 cmd(inter, "set choice $a");
 if(graph_l[*choice]==graph_nl[*choice])
- cmd(inter, ".filename.lab conf -state disabled");
+ cmd(inter, ".da.file.lab conf -state disabled");
 
-cmd(inter, "pack .filename.b.ok .filename.b.can -side left");
-cmd(inter, "pack .filename.l .filename.lab .filename.r $r.ldim $r.dim .filename.e .filename.s .filename.b");
-//cmd(inter, "raise .filename");
+cmd(inter, "pack .da.file.b.ok .da.file.b.can -side left");
+cmd(inter, "pack .da.file.l .da.file.lab .da.file.r $r.ldim $r.dim .da.file.e .da.file.s .da.file.b");
+//cmd(inter, "raise .da.file");
 *choice=0;
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -1155,15 +1163,15 @@ cmd(inter, "pack .filename.l .filename.lab .filename.r $r.ldim $r.dim .filename.
 Tcl_UnlinkVar(inter, "res");
 
 if(*choice==3)
- {cmd(inter, "bind .filename <Destroy> {}");
-  cmd(inter, "destroy .filename");
+ {cmd(inter, "bind .da.file <Destroy> {}");
+  cmd(inter, "destroy .da.file");
   *choice=11;
   goto there;
  }
 if(*choice==2)
  {*choice=0;
-  cmd(inter, "bind .filename <Destroy> {}");
-  cmd(inter, "destroy .filename");
+  cmd(inter, "bind .da.file <Destroy> {}");
+  cmd(inter, "destroy .da.file");
   goto there;
  }
 
@@ -1212,8 +1220,8 @@ else
 }
   app=(char *)Tcl_GetVar(inter, "fn",0);
 
-  cmd(inter, "bind .filename <Destroy> {}");
-  cmd(inter, "destroy .filename");
+  cmd(inter, "bind .da.file <Destroy> {}");
+  cmd(inter, "destroy .da.file");
 
  *choice=0;
  goto there;
@@ -1251,6 +1259,7 @@ case 17:
   graph_l[cur_plot]=430; //height of graph with labels
   graph_nl[cur_plot]=430; //height of graph without labels  
   
+  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
   *choice=0;
   goto there;
 
@@ -1278,6 +1287,7 @@ case 18:
   graph_l[cur_plot]=430; //height of graph with labels
   graph_nl[cur_plot]=430; //height of graph with labels  
   
+  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 //phase diagram //REMOVED, since P.D is activated elsewhere
@@ -1299,6 +1309,7 @@ case 19:
   graph_l[cur_plot]=430; //height of graph with labels
   graph_nl[cur_plot]=430; //height of graph with labels  
 
+  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 case 20:
@@ -1310,6 +1321,8 @@ if(*choice==0)
 cmd(inter, "scan $it %d)%s a b");
 cmd(inter, "set ex [winfo exists .da.f.new$a]");
 cmd(inter, "if { $ex == 1 } {destroy .da.f.new$a; .da.f.vars.pl.v delete $n_it} {.da.f.vars.pl.v delete $n_it}");
+
+cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
 *choice=0;
 goto there;
 
@@ -1317,38 +1330,35 @@ goto there;
 case 21:
 //set personal colors
 *choice=0;
-cmd(inter, "toplevel .a -background white");
-cmd(inter, "wm title .a \"\"");
-cmd(inter, "wm transient .a .da");
+cmd(inter, "toplevel .da.a -background white");
+cmd(inter, "wm title .da.a \"\"");
+cmd(inter, "wm transient .da.a .da");
 
-cmd(inter, "frame .a.l1");
-cmd(inter, "frame .a.l2");
+cmd(inter, "frame .da.a.l1");
+cmd(inter, "frame .da.a.l2");
 for(i=0; i<10; i++)
  {
-  sprintf(msg, "label .a.l1.c%d -text \"%d) ___\" -fg $c%d  -bg white", i, i+1, i);
+  sprintf(msg, "label .da.a.l1.c%d -text \"%d) ___\" -fg $c%d  -bg white", i, i+1, i);
   cmd(inter, msg);
-  sprintf(msg, "pack .a.l1.c%d -anchor e", i);
+  sprintf(msg, "pack .da.a.l1.c%d -anchor e", i);
   cmd(inter, msg);
-  sprintf(msg, "bind .a.l1.c%d <Button-1> {set n_col %d; set col $c%d; set choice 1}", i, i, i);
+  sprintf(msg, "bind .da.a.l1.c%d <Button-1> {set n_col %d; set col $c%d; set choice 1}", i, i, i);
   cmd(inter, msg);
  }
 for(i=0; i<10; i++)
  {
-  sprintf(msg, "label .a.l2.c%d -text \"%d) ___\" -fg $c%d -bg white", i, i+11, i+10);
+  sprintf(msg, "label .da.a.l2.c%d -text \"%d) ___\" -fg $c%d -bg white", i, i+11, i+10);
   cmd(inter, msg);
-  sprintf(msg, "pack .a.l2.c%d -anchor e", i);
+  sprintf(msg, "pack .da.a.l2.c%d -anchor e", i);
   cmd(inter, msg);
-  sprintf(msg, "bind .a.l2.c%d <Button-1> {set n_col %d; set col $c%d; set choice 1}", i, i+10, i+10);
+  sprintf(msg, "bind .da.a.l2.c%d <Button-1> {set n_col %d; set col $c%d; set choice 1}", i, i+10, i+10);
   cmd(inter, msg);
  }
-cmd(inter, "pack .a.l1 .a.l2 -side left");
-cmd(inter, "button .a.ok -width -9 -text Ok -command {set choice 2}");
-cmd(inter, "pack .a.ok -side bottom");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "pack .da.a.l1 .da.a.l2 -side left");
+cmd(inter, "button .da.a.ok -width -9 -text Ok -command {set choice 2}");
+cmd(inter, "pack .da.a.ok -side bottom");
+cmd(inter, "set w .da.a; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 set_col:
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -1362,15 +1372,15 @@ if(*choice==1)
   {
    cmd(inter, "set c$n_col $a");
    cmd(inter, "if {$n_col >= 10 } {set fr 2; set n [expr $n_col-10]} {set fr 1; set n $n_col}");
-   cmd(inter, ".a.l$fr.c$n conf -fg $a");
+   cmd(inter, ".da.a.l$fr.c$n conf -fg $a");
   }
  *choice=0;
-// cmd(inter, "raise .a");
+// cmd(inter, "raise .da.a");
  goto set_col;
  }
 
 *choice=0;
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
 goto there;
 
 
@@ -1397,7 +1407,7 @@ sequence
   *choice=0;
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
   plot_lattice(choice);
-  cmd(inter, "destroy .s");
+  cmd(inter, "destroy .da.s");
   if(*choice==0)
     {
 
@@ -1409,6 +1419,8 @@ sequence
     }
   else
     *choice=0;
+
+  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 case 24:
@@ -1418,52 +1430,49 @@ Insert series not saved from the current model.
   i=0;
 
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Choose Data Source\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "label .s.l -text \"Select the source of additional series\"");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Choose Data Source\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "label .da.s.l -text \"Select the source of additional series\"");
 cmd(inter, "set bidi 0");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "radiobutton .s.i.m -text \"Current model configuration\" -variable bidi -value 0");
-cmd(inter, "bind .s.i.m <Down> {set bidi 1; focus -force .s.i.f}");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "radiobutton .da.s.i.m -text \"Current model configuration\" -variable bidi -value 0");
+cmd(inter, "bind .da.s.i.m <Down> {set bidi 1; focus -force .da.s.i.f}");
 
-cmd(inter, "radiobutton .s.i.f -text \"File(s) of saved results\" -variable bidi -value 1");
+cmd(inter, "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1");
 if(*choice>0)
-  cmd(inter, "bind .s.i.f <Down> {set bidi 5; focus -force .s.i.a}");
-cmd(inter, "bind .s.i.f <Up> {set bidi 0; focus -force .s.i.m}");
+  cmd(inter, "bind .da.s.i.f <Down> {set bidi 5; focus -force .da.s.i.a}");
+cmd(inter, "bind .da.s.i.f <Up> {set bidi 0; focus -force .da.s.i.m}");
 
 
-cmd(inter, "radiobutton .s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
-cmd(inter, "bind .s.i.a <Down> {set bidi 4; focus -force .s.i.c}");
-cmd(inter, "bind .s.i.a <Up> {set bidi 1; focus -force .s.i.f}");
+cmd(inter, "radiobutton .da.s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
+cmd(inter, "bind .da.s.i.a <Down> {set bidi 4; focus -force .da.s.i.c}");
+cmd(inter, "bind .da.s.i.a <Up> {set bidi 1; focus -force .da.s.i.f}");
 
 
-cmd(inter, "radiobutton .s.i.c -text \"Create one serie from selected series\" -variable bidi -value 4");
-cmd(inter, "bind .s.i.c <Up> {set bidi 5; focus -force .s.i.a}");
+cmd(inter, "radiobutton .da.s.i.c -text \"Create one serie from selected series\" -variable bidi -value 4");
+cmd(inter, "bind .da.s.i.c <Up> {set bidi 5; focus -force .da.s.i.a}");
 
 if(*choice>0)
- cmd(inter, "pack .s.i.m .s.i.f .s.i.a .s.i.c -anchor w");
+ cmd(inter, "pack .da.s.i.m .da.s.i.f .da.s.i.a .da.s.i.c -anchor w");
 else
- cmd(inter, "pack .s.i.m .s.i.f  -anchor w");
+ cmd(inter, "pack .da.s.i.m .da.s.i.f  -anchor w");
 
-cmd(inter, "pack .s.l .s.i");
-cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
-cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .da.s.l .da.s.i");
+cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
+cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .s.i .s.ok .s.help .s.esc");
-cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "pack .da.s.i .da.s.ok .da.s.help .da.s.esc");
+cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
-cmd(inter, "focus -force .s.i.m");
+cmd(inter, "focus -force .da.s.i.m");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  {*choice=0;
   goto there;
@@ -1518,44 +1527,42 @@ if(*choice==1 || *choice==3)
   goto there;
  
  }
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Series Selection\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Type the label of the series to insert (self-completion)\"");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Series Selection\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Type the label of the series to insert (self-completion)\"");
 cmd(inter, "set bidi \"\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
-cmd(inter, "pack .s.i.l .s.i.e");
-cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd(inter, "pack .da.s.i.l .da.s.i.e");
+cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .s.i .s.ok .s.esc");
-cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "pack .da.s.i .da.s.ok .da.s.esc");
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
-cmd(inter, "focus .s.i.e");
-cmd(inter, "bind .s.i.e <KeyRelease> {if { %N < 256} { set b [.s.i.e index insert]; set c [.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .s.i.e delete 0 end; .s.i.e insert 0 $d; .s.i.e index $b; .s.i.e selection range $b end } { } } { } }");
+cmd(inter, "focus .da.s.i.e");
+cmd(inter, "bind .da.s.i.e <KeyRelease> {if { %N < 256} { set b [.da.s.i.e index insert]; set c [.da.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .da.s.i.e delete 0 end; .da.s.i.e insert 0 $d; .da.s.i.e index $b; .da.s.i.e selection range $b end } { } } { } }");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  {*choice=0;
   goto there;
  }
-cmd(inter, "toplevel .s");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "label .s.l -text \"Inserting new series\"");
-cmd(inter, "pack .s.l");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "label .da.s.l -text \"Inserting new series\"");
+cmd(inter, "pack .da.s.l");
 app=(char *)Tcl_GetVar(inter, "bidi",0);
 strcpy(lab,app);
 insert_data_nosave(root, lab, &i);
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 cmd(inter, "set tit [.da.f.vars.ch.v get 0]");
+cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 *choice=0;
 goto there;
 
@@ -1573,77 +1580,77 @@ cmd(inter, "set c [lindex $a 1]"); //get the tag value
 cmd(inter, "set i [llength [split $c {_}]]");
 cmd(inter, "set ntag $i");
 cmd(inter, "set ssys 2");
-cmd(inter, "toplevel .a");
-cmd(inter, "wm title .a \"Select Series\"");
-cmd(inter, "wm transient .a .da");
+cmd(inter, "toplevel .da.a");
+cmd(inter, "wm title .da.a \"Select Series\"");
+cmd(inter, "wm transient .da.a .da");
 
-cmd(inter, "frame .a.tit  -relief groove -bd 2");
-cmd(inter, "label .a.tit.l -text \"Select series with label: \"");
-cmd(inter, "label .a.tit.s -text \"$b\" -foreground red");
-cmd(inter, "pack .a.tit.l .a.tit.s -side left");
+cmd(inter, "frame .da.a.tit  -relief groove -bd 2");
+cmd(inter, "label .da.a.tit.l -text \"Select series with label: \"");
+cmd(inter, "label .da.a.tit.s -text \"$b\" -foreground red");
+cmd(inter, "pack .da.a.tit.l .da.a.tit.s -side left");
 
-cmd(inter, "frame .a.f1 -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f1.c -text \"Select all the series\" -variable ssys -value 2");
-cmd(inter, "bind .a.f1.c <Down> {focus -force .a.f.c; .a.f.c invoke}");
-cmd(inter, "bind .a.f1.c <Return> {.a.f1.c invoke; focus -force .a.b.ok}");
-cmd(inter, "pack .a.f1.c -anchor w");
+cmd(inter, "frame .da.a.f1 -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f1.c -text \"Select all the series\" -variable ssys -value 2");
+cmd(inter, "bind .da.a.f1.c <Down> {focus -force .da.a.f.c; .da.a.f.c invoke}");
+cmd(inter, "bind .da.a.f1.c <Return> {.da.a.f1.c invoke; focus -force .da.a.b.ok}");
+cmd(inter, "pack .da.a.f1.c -anchor w");
 
 
-cmd(inter, "frame .a.f2 -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f2.s -text \"Select for values of another series\" -variable ssys -value 3");
-cmd(inter, "bind .a.f2.s <Up> {focus -force .a.f.c; .a.f.c invoke}");
-cmd(inter, "bind .a.f2.s <Return> {focus -force .a.f2.f.e; .a.f2.f.e selection range 0 end}");
-cmd(inter, "frame .a.f2.f");
-cmd(inter, "label .a.f2.f.l -text \"Label: \"");
-cmd(inter, "entry .a.f2.f.e -width 20 -relief sunken -textvariable svar");
-cmd(inter, "bind .a.f2.f.e <KeyRelease> {if { %N < 256} { set bb1 [.a.f2.f.e index insert]; set bc1 [.a.f2.f.e get]; set bf1 [lsearch -glob $ModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $ModElem $bf1]; .a.f2.f.e delete 0 end; .a.f2.f.e insert 0 $bd1; .a.f2.f.e index $bb1; .a.f2.f.e selection range $bb1 end } { } } { } }");
-cmd(inter, "bind .a.f2.f.e <Return> {focus -force .a.f2.f.e1; .a.f2.f.e1 selection range 0 end}");
-cmd(inter, "label .a.f2.f.t -text \"Time step: \"");
+cmd(inter, "frame .da.a.f2 -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f2.s -text \"Select for values of another series\" -variable ssys -value 3");
+cmd(inter, "bind .da.a.f2.s <Up> {focus -force .da.a.f.c; .da.a.f.c invoke}");
+cmd(inter, "bind .da.a.f2.s <Return> {focus -force .da.a.f2.f.e; .da.a.f2.f.e selection range 0 end}");
+cmd(inter, "frame .da.a.f2.f");
+cmd(inter, "label .da.a.f2.f.l -text \"Label: \"");
+cmd(inter, "entry .da.a.f2.f.e -width 20 -relief sunken -textvariable svar");
+cmd(inter, "bind .da.a.f2.f.e <KeyRelease> {if { %N < 256} { set bb1 [.da.a.f2.f.e index insert]; set bc1 [.da.a.f2.f.e get]; set bf1 [lsearch -glob $ModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $ModElem $bf1]; .da.a.f2.f.e delete 0 end; .da.a.f2.f.e insert 0 $bd1; .da.a.f2.f.e index $bb1; .da.a.f2.f.e selection range $bb1 end } { } } { } }");
+cmd(inter, "bind .da.a.f2.f.e <Return> {focus -force .da.a.f2.f.e1; .da.a.f2.f.e1 selection range 0 end}");
+cmd(inter, "label .da.a.f2.f.t -text \"Time step: \"");
 cmd(inter, "if { [info exist tvar]==1} {} {set tvar 0}");
-cmd(inter, "entry .a.f2.f.e1 -width 7 -relief sunken -textvariable tvar");
-cmd(inter, "bind .a.f2.f.e1 <Return> {focus -force .a.f2.c.e; .a.f2.c.e selection range 0 end }");
-cmd(inter, "pack .a.f2.f.l .a.f2.f.e .a.f2.f.t .a.f2.f.e1 -side left");
-cmd(inter, "frame .a.f2.c");
-cmd(inter, "label .a.f2.c.l -text \"Comparison value: \"");
-cmd(inter, "entry .a.f2.c.e -width 12 -relief sunken -textvariable compvalue");
-cmd(inter, "bind .a.f2.c.e <Return> {focus -force .a.b.ok}");
-cmd(inter, "pack .a.f2.c.l .a.f2.c.e -side left");
-cmd(inter, "pack .a.f2.s .a.f2.f .a.f2.c -anchor w");
+cmd(inter, "entry .da.a.f2.f.e1 -width 7 -relief sunken -textvariable tvar");
+cmd(inter, "bind .da.a.f2.f.e1 <Return> {focus -force .da.a.f2.c.e; .da.a.f2.c.e selection range 0 end }");
+cmd(inter, "pack .da.a.f2.f.l .da.a.f2.f.e .da.a.f2.f.t .da.a.f2.f.e1 -side left");
+cmd(inter, "frame .da.a.f2.c");
+cmd(inter, "label .da.a.f2.c.l -text \"Comparison value: \"");
+cmd(inter, "entry .da.a.f2.c.e -width 12 -relief sunken -textvariable compvalue");
+cmd(inter, "bind .da.a.f2.c.e <Return> {focus -force .da.a.b.ok}");
+cmd(inter, "pack .da.a.f2.c.l .da.a.f2.c.e -side left");
+cmd(inter, "pack .da.a.f2.s .da.a.f2.f .da.a.f2.c -anchor w");
 
 
-cmd(inter, "frame .a.f -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f.c -text \"Select for series' tags\" -variable ssys -value 1");
-cmd(inter, "bind .a.f.c <Up> {focus -force .a.f1.c; .a.f1.c invoke}");
-cmd(inter, "bind .a.f.c <Down> {focus -force .a.f2.s; .a.f2.s invoke}");
-cmd(inter, "pack .a.f.c -anchor w");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {label .a.f.s$x -text \" - \"} {}; entry .a.f.e$x -width 4 -relief sunken -textvariable v$x}");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {pack .a.f.s$x -side left} {}; pack .a.f.e$x -side left; bind .a.f.e$x <Return> {focus -force .a.b.ok}}");
+cmd(inter, "frame .da.a.f -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f.c -text \"Select for series' tags\" -variable ssys -value 1");
+cmd(inter, "bind .da.a.f.c <Up> {focus -force .da.a.f1.c; .da.a.f1.c invoke}");
+cmd(inter, "bind .da.a.f.c <Down> {focus -force .da.a.f2.s; .da.a.f2.s invoke}");
+cmd(inter, "pack .da.a.f.c -anchor w");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {label .da.a.f.s$x -text \" - \"} {}; entry .da.a.f.e$x -width 4 -relief sunken -textvariable v$x}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {pack .da.a.f.s$x -side left} {}; pack .da.a.f.e$x -side left; bind .da.a.f.e$x <Return> {focus -force .da.a.b.ok}}");
 
 
-cmd(inter, "frame .a.c -relief groove -bd 2");
-cmd(inter, "label .a.c.l -text \"Set the condition to meet\"");
-cmd(inter, "radiobutton .a.c.eq -text \"Equal to: =\" -variable cond -value 1");
-cmd(inter, "radiobutton .a.c.geq -text \"Larger or equal to: >=\" -variable cond -value 2");
-cmd(inter, "radiobutton .a.c.g -text \"Larger: >\" -variable cond -value 3");
-cmd(inter, "radiobutton .a.c.seq -text \"Smaller or equal to <=\" -variable cond -value 4");
-cmd(inter, "radiobutton .a.c.s -text \"Smaller: <\" -variable cond -value 5");
-cmd(inter, "pack .a.c.l .a.c.eq .a.c.geq .a.c.g .a.c.seq .a.c.s -anchor w");
+cmd(inter, "frame .da.a.c -relief groove -bd 2");
+cmd(inter, "label .da.a.c.l -text \"Set the condition to meet\"");
+cmd(inter, "radiobutton .da.a.c.eq -text \"Equal to: =\" -variable cond -value 1");
+cmd(inter, "radiobutton .da.a.c.geq -text \"Larger or equal to: >=\" -variable cond -value 2");
+cmd(inter, "radiobutton .da.a.c.g -text \"Larger: >\" -variable cond -value 3");
+cmd(inter, "radiobutton .da.a.c.seq -text \"Smaller or equal to <=\" -variable cond -value 4");
+cmd(inter, "radiobutton .da.a.c.s -text \"Smaller: <\" -variable cond -value 5");
+cmd(inter, "pack .da.a.c.l .da.a.c.eq .da.a.c.geq .da.a.c.g .da.a.c.seq .da.a.c.s -anchor w");
 cmd(inter, "set cond 1");
 
 
-cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
-cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
+cmd(inter, "frame .da.a.b");
+cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .da.a.b.ok .da.a.b.help .da.a.b.esc -side left");
 
-cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .da.a.tit .da.a.f1 .da.a.f .da.a.f2 .da.a.c -anchor w -expand yes -fill x");
+cmd(inter, "pack .da.a.b");
 *choice=0;
 
-cmd(inter, "focus -force .a.f1.c; .a.f.e0 selection range 0 end");
-cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
+cmd(inter, "focus -force .da.a.f1.c; .da.a.f.e0 selection range 0 end");
+cmd(inter, "bind .da.a.b.ok <Return> {.da.a.b.ok invoke}");
+cmd(inter, "bind .da.a <Escape> {.da.a.b.esc invoke}");
 
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -1653,7 +1660,7 @@ if(*choice==2)
 {
 *choice=0;
 
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
 goto there;
 
 }
@@ -1662,11 +1669,12 @@ cmd(inter, "if {[.da.f.vars.ch.v get 0] == \"\"} {set tit \"\"} {}");
 cmd(inter, "set choice $ssys");
 if(*choice==2)
  {
- cmd(inter, "destroy .a");
+ cmd(inter, "destroy .da.a");
  cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
  cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.f.vars.ch.v insert end \"$i\"  } {}}");
  cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
  cmd(inter, ".da.f.vars.b.out conf -state normal");
+ cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
  *choice=0;
  goto there;
  }
@@ -1678,7 +1686,7 @@ i=*choice;
 
 cmd(inter, ".da.f.vars.b.out conf -state normal");
 *choice=-1;
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {[.a.f.e$x get]!=\"\"} {set choice $x; set xval [.a.f.e$x get]} {}}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {[.da.a.f.e$x get]!=\"\"} {set choice $x; set xval [.da.a.f.e$x get]} {}}");
 if(*choice==-1)
 {
 cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
@@ -1735,7 +1743,9 @@ case 5:
  
 cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
 cmd(inter, ".da.f.vars.b.out conf -state normal");
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
+
+cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 *choice=0;
 goto there;
 }
@@ -1815,16 +1825,11 @@ for(i=0; i<j; i++)
 
  }
 cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
 
 }
 
-
-
-
-
-
-
+cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 
 *choice=0;
 goto there;
@@ -1841,78 +1846,78 @@ cmd(inter, "set b [lindex $a 0]");
 cmd(inter, "set c [lindex $a 1]"); //get the tag value
 cmd(inter, "set i [llength [split $c {_}]]");
 cmd(inter, "set ssys 2");
-cmd(inter, "toplevel .a");
-cmd(inter, "wm title .a \"Remove Series\"");
-cmd(inter, "wm transient .a .da");
+cmd(inter, "toplevel .da.a");
+cmd(inter, "wm title .da.a \"Remove Series\"");
+cmd(inter, "wm transient .da.a .da");
 
-cmd(inter, "frame .a.tit  -relief groove -bd 2");
-cmd(inter, "label .a.tit.l -text \"Select series with label: \"");
-cmd(inter, "label .a.tit.s -text \"$b\" -foreground red");
-cmd(inter, "pack .a.tit.l .a.tit.s -side left");
+cmd(inter, "frame .da.a.tit  -relief groove -bd 2");
+cmd(inter, "label .da.a.tit.l -text \"Select series with label: \"");
+cmd(inter, "label .da.a.tit.s -text \"$b\" -foreground red");
+cmd(inter, "pack .da.a.tit.l .da.a.tit.s -side left");
 
-cmd(inter, "frame .a.f1 -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f1.c -text \"Select all the series\" -variable ssys -value 2");
-cmd(inter, "bind .a.f1.c <Down> {focus -force .a.f.c; .a.f.c invoke}");
-cmd(inter, "bind .a.f1.c <Return> {.a.f1.c invoke; focus -force .a.b.ok}");
-cmd(inter, "pack .a.f1.c -anchor w");
+cmd(inter, "frame .da.a.f1 -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f1.c -text \"Select all the series\" -variable ssys -value 2");
+cmd(inter, "bind .da.a.f1.c <Down> {focus -force .da.a.f.c; .da.a.f.c invoke}");
+cmd(inter, "bind .da.a.f1.c <Return> {.da.a.f1.c invoke; focus -force .da.a.b.ok}");
+cmd(inter, "pack .da.a.f1.c -anchor w");
 
 
-cmd(inter, "frame .a.f2 -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f2.s -text \"Select for values of another series\" -variable ssys -value 3");
-cmd(inter, "bind .a.f2.s <Up> {focus -force .a.f.c; .a.f.c invoke}");
-cmd(inter, "bind .a.f2.s <Return> {focus -force .a.f2.f.e; .a.f2.f.e selection range 0 end}");
-cmd(inter, "frame .a.f2.f");
-cmd(inter, "label .a.f2.f.l -text \"Label: \"");
-cmd(inter, "entry .a.f2.f.e -width 20 -relief sunken -textvariable svar");
-cmd(inter, "bind .a.f2.f.e <KeyRelease> {if { %N < 256} { set bb1 [.a.f2.f.e index insert]; set bc1 [.a.f2.f.e get]; set bf1 [lsearch -glob $ModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $ModElem $bf1]; .a.f2.f.e delete 0 end; .a.f2.f.e insert 0 $bd1; .a.f2.f.e index $bb1; .a.f2.f.e selection range $bb1 end } { } } { } }");
-cmd(inter, "bind .a.f2.f.e <Return> {focus -force .a.f2.f.e1; .a.f2.f.e1 selection range 0 end}");
-cmd(inter, "label .a.f2.f.t -text \"Time step: \"");
+cmd(inter, "frame .da.a.f2 -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f2.s -text \"Select for values of another series\" -variable ssys -value 3");
+cmd(inter, "bind .da.a.f2.s <Up> {focus -force .da.a.f.c; .da.a.f.c invoke}");
+cmd(inter, "bind .da.a.f2.s <Return> {focus -force .da.a.f2.f.e; .da.a.f2.f.e selection range 0 end}");
+cmd(inter, "frame .da.a.f2.f");
+cmd(inter, "label .da.a.f2.f.l -text \"Label: \"");
+cmd(inter, "entry .da.a.f2.f.e -width 20 -relief sunken -textvariable svar");
+cmd(inter, "bind .da.a.f2.f.e <KeyRelease> {if { %N < 256} { set bb1 [.da.a.f2.f.e index insert]; set bc1 [.da.a.f2.f.e get]; set bf1 [lsearch -glob $ModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $ModElem $bf1]; .da.a.f2.f.e delete 0 end; .da.a.f2.f.e insert 0 $bd1; .da.a.f2.f.e index $bb1; .da.a.f2.f.e selection range $bb1 end } { } } { } }");
+cmd(inter, "bind .da.a.f2.f.e <Return> {focus -force .da.a.f2.f.e1; .da.a.f2.f.e1 selection range 0 end}");
+cmd(inter, "label .da.a.f2.f.t -text \"Time step: \"");
 cmd(inter, "if { [info exist tvar]==1} {} {set tvar 0}");
-cmd(inter, "entry .a.f2.f.e1 -width 7 -relief sunken -textvariable tvar");
-cmd(inter, "bind .a.f2.f.e1 <Return> {focus -force .a.f2.c.e; .a.f2.c.e selection range 0 end }");
-cmd(inter, "pack .a.f2.f.l .a.f2.f.e .a.f2.f.t .a.f2.f.e1 -side left");
-cmd(inter, "frame .a.f2.c");
-cmd(inter, "label .a.f2.c.l -text \"Comparison value: \"");
+cmd(inter, "entry .da.a.f2.f.e1 -width 7 -relief sunken -textvariable tvar");
+cmd(inter, "bind .da.a.f2.f.e1 <Return> {focus -force .da.a.f2.c.e; .da.a.f2.c.e selection range 0 end }");
+cmd(inter, "pack .da.a.f2.f.l .da.a.f2.f.e .da.a.f2.f.t .da.a.f2.f.e1 -side left");
+cmd(inter, "frame .da.a.f2.c");
+cmd(inter, "label .da.a.f2.c.l -text \"Comparison value: \"");
 cmd(inter, "if {[info exist comvalue]==1} {} {set compvalue 1}");
-cmd(inter, "entry .a.f2.c.e -width 12 -relief sunken -textvariable compvalue");
-cmd(inter, "bind .a.f2.c.e <Return> {focus -force .a.b.ok}");
-cmd(inter, "pack .a.f2.c.l .a.f2.c.e -side left");
-cmd(inter, "pack .a.f2.s .a.f2.f .a.f2.c -anchor w");
+cmd(inter, "entry .da.a.f2.c.e -width 12 -relief sunken -textvariable compvalue");
+cmd(inter, "bind .da.a.f2.c.e <Return> {focus -force .da.a.b.ok}");
+cmd(inter, "pack .da.a.f2.c.l .da.a.f2.c.e -side left");
+cmd(inter, "pack .da.a.f2.s .da.a.f2.f .da.a.f2.c -anchor w");
 
 
-cmd(inter, "frame .a.f -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f.c -text \"Select for series' tags\" -variable ssys -value 1");
-cmd(inter, "bind .a.f.c <Up> {focus -force .a.f1.c; .a.f1.c invoke}");
-cmd(inter, "bind .a.f.c <Down> {focus -force .a.f2.s; .a.f2.s invoke}");
-cmd(inter, "pack .a.f.c -anchor w");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {label .a.f.s$x -text \" - \"} {}; entry .a.f.e$x -width 4 -relief sunken -textvariable v$x}");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {pack .a.f.s$x -side left} {}; pack .a.f.e$x -side left; bind .a.f.e$x <Return> {focus -force .a.b.ok}}");
+cmd(inter, "frame .da.a.f -relief groove -bd 2");
+cmd(inter, "radiobutton .da.a.f.c -text \"Select for series' tags\" -variable ssys -value 1");
+cmd(inter, "bind .da.a.f.c <Up> {focus -force .da.a.f1.c; .da.a.f1.c invoke}");
+cmd(inter, "bind .da.a.f.c <Down> {focus -force .da.a.f2.s; .da.a.f2.s invoke}");
+cmd(inter, "pack .da.a.f.c -anchor w");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {label .da.a.f.s$x -text \" - \"} {}; entry .da.a.f.e$x -width 4 -relief sunken -textvariable v$x}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {$x > 0} {pack .da.a.f.s$x -side left} {}; pack .da.a.f.e$x -side left; bind .da.a.f.e$x <Return> {focus -force .da.a.b.ok}}");
 
 
-cmd(inter, "frame .a.c -relief groove -bd 2");
-cmd(inter, "label .a.c.l -text \"Set the condition to meet\"");
-cmd(inter, "radiobutton .a.c.eq -text \"Equal to: =\" -variable cond -value 1");
-cmd(inter, "radiobutton .a.c.geq -text \"Larger or equal to: >=\" -variable cond -value 2");
-cmd(inter, "radiobutton .a.c.g -text \"Larger: >\" -variable cond -value 3");
-cmd(inter, "radiobutton .a.c.seq -text \"Smaller or equal to <=\" -variable cond -value 4");
-cmd(inter, "radiobutton .a.c.s -text \"Smaller: <\" -variable cond -value 5");
-cmd(inter, "pack .a.c.l .a.c.eq .a.c.geq .a.c.g .a.c.seq .a.c.s -anchor w");
+cmd(inter, "frame .da.a.c -relief groove -bd 2");
+cmd(inter, "label .da.a.c.l -text \"Set the condition to meet\"");
+cmd(inter, "radiobutton .da.a.c.eq -text \"Equal to: =\" -variable cond -value 1");
+cmd(inter, "radiobutton .da.a.c.geq -text \"Larger or equal to: >=\" -variable cond -value 2");
+cmd(inter, "radiobutton .da.a.c.g -text \"Larger: >\" -variable cond -value 3");
+cmd(inter, "radiobutton .da.a.c.seq -text \"Smaller or equal to <=\" -variable cond -value 4");
+cmd(inter, "radiobutton .da.a.c.s -text \"Smaller: <\" -variable cond -value 5");
+cmd(inter, "pack .da.a.c.l .da.a.c.eq .da.a.c.geq .da.a.c.g .da.a.c.seq .da.a.c.s -anchor w");
 cmd(inter, "set cond 1");
 
 
-cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
-cmd(inter, "button .a.b.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -side left");
+cmd(inter, "frame .da.a.b");
+cmd(inter, "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.a.b.help -width -9 -text Help -command {LsdHelp mdatares.html#batch_sel}");
+cmd(inter, "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .da.a.b.ok .da.a.b.help .da.a.b.esc -side left");
 
-cmd(inter, "pack .a.tit .a.f1 .a.f .a.f2 .a.c -anchor w -expand yes -fill x");
-cmd(inter, "pack .a.b");
+cmd(inter, "pack .da.a.tit .da.a.f1 .da.a.f .da.a.f2 .da.a.c -anchor w -expand yes -fill x");
+cmd(inter, "pack .da.a.b");
 *choice=0;
 
-cmd(inter, "focus -force .a.f1.c; .a.f.e0 selection range 0 end");
-cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
-cmd(inter, "bind .a <Escape> {.a.b.esc invoke}");
+cmd(inter, "focus -force .da.a.f1.c; .da.a.f.e0 selection range 0 end");
+cmd(inter, "bind .da.a.b.ok <Return> {.da.a.b.ok invoke}");
+cmd(inter, "bind .da.a <Escape> {.da.a.b.esc invoke}");
 
   while(*choice==0)
 	Tcl_DoOneEvent(0);
@@ -1921,7 +1926,7 @@ if(*choice==2)
 {
 *choice=0;
 
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
 goto there;
 
 }
@@ -1930,11 +1935,13 @@ goto there;
 cmd(inter, "set choice $ssys");
 if(*choice==2)
  {
- cmd(inter, "destroy .a");
+ cmd(inter, "destroy .da.a");
  cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
  cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.f.vars.ch.v selection set $myc  } {}; incr myc}");
 // cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
  cmd(inter, ".da.f.vars.b.out conf -state normal");
+
+ cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
  *choice=0;
  goto there;
  }
@@ -1946,7 +1953,7 @@ i=*choice;
 
 cmd(inter, ".da.f.vars.b.out conf -state normal");
 *choice=-1;
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {[.a.f.e$x get]!=\"\"} {set choice $x; set xval [.a.f.e$x get]} {}}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {	if {[.da.a.f.e$x get]!=\"\"} {set choice $x; set xval [.da.a.f.e$x get]} {}}");
 if(*choice==-1)
 {
 cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
@@ -1996,7 +2003,9 @@ case 5:
  
 //cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
 cmd(inter, ".da.f.vars.b.out conf -state normal");
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
+
+cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 *choice=0;
 goto there;
 }
@@ -2063,17 +2072,11 @@ for(i=0; i<j; i++)
 
  }
 //cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
-cmd(inter, "destroy .a");
+cmd(inter, "destroy .da.a");
 Tcl_UnlinkVar(inter, "compvalue");
 }
 
-
-
-
-
-
-
-
+cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 *choice=0;
 goto there;
 
@@ -2100,6 +2103,7 @@ type_graph[cur_plot]=0; //Lsd standard graph
 graph_l[cur_plot]=325; //height of graph with labels
 graph_nl[cur_plot]=325; //height of graph with labels  
 
+cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
 goto there;
 
 
@@ -3178,10 +3182,10 @@ SET_CS_DATA
 void set_cs_data(int *choice)
 {
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm protocol .s WM_DELETE_WINDOW {set choice 2}");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "set p .s");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm protocol .da.s WM_DELETE_WINDOW {set choice 2}");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "set p .da.s");
 cmd(inter, "wm title $p \"Cases for Cross Section Analysis\"");
 //cmd(inter, "raise $p");
 //cmd(inter, "frame $p.rd");
@@ -3197,48 +3201,48 @@ switch(res)
 case 1:
 *choice=0;
 /********/
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert time steps to use\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
-cmd(inter, "label .s.i.l1 -text \"Time steps selected\"");
-cmd(inter, "listbox .s.i.lb");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert time steps to use\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd(inter, "label .da.s.i.l1 -text \"Time steps selected\"");
+cmd(inter, "listbox .da.s.i.lb");
 cmd(inter, "set bidi $maxc");
 cmd(inter, "set res 0");
 cmd(inter, "set dir 0");
 cmd(inter, "set count 0");
 cmd(inter, "set sfrom -1");
 cmd(inter, "set sto -1");
-cmd(inter, "pack .s.i.l .s.i.e .s.i.l1 .s.i.lb");
+cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.l1 .da.s.i.lb");
 
-cmd(inter, "frame .s.fb -relief groove -bd 2");
-cmd(inter, "set p .s.fb");
+cmd(inter, "frame .da.s.fb -relief groove -bd 2");
+cmd(inter, "set p .da.s.fb");
 
-cmd(inter, "bind .s.i.e <KeyPress-Return> {$p.add invoke}");
-cmd(inter, "button $p.add -width -9 -text Add -command {.s.i.lb insert end $bidi; incr count 1; focus .s.i.e; .s.i.e selection range 0 end; .s.i.lb selection set end }");
-cmd(inter, "button $p.del -width -9 -text Delete -command {.s.i.lb delete [.s.i.lb curselection]; incr count -1; focus .s.i.e; .s.i.e selection range 0 end }");
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {$p.add invoke}");
+cmd(inter, "button $p.add -width -9 -text Add -command {.da.s.i.lb insert end $bidi; incr count 1; focus .da.s.i.e; .da.s.i.e selection range 0 end; .da.s.i.lb selection set end }");
+cmd(inter, "button $p.del -width -9 -text Delete -command {.da.s.i.lb delete [.da.s.i.lb curselection]; incr count -1; focus .da.s.i.e; .da.s.i.e selection range 0 end }");
 cmd(inter, "button $p.end -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#crosssection}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.add $p.del $p.end $p.help $p.can -expand yes -fill x -anchor n");
 
-cmd(inter, "frame .s.s -relief groove -bd 2");
-cmd(inter, "label .s.s.l -text \"Use series in the same order as selected\"");
-cmd(inter, "button .s.s.up -width -9 -text \"Sort Ascending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to increasing values at time: [selection get]\"; set dir 1}");
-cmd(inter, "button .s.s.down -width -9 -text \"Sort Descending\" -command {set res [.s.i.lb curselection]; .s.s.l config -text \"User series according to decreasing values at time: [selection get]\"; set dir -1}");
-cmd(inter, "button .s.s.nosort -width -9 -text \"No Sort\" -command {.s.s.l config -text \"Use series in the same order as selected\"; set dir 0}");
-cmd(inter, "pack .s.s.l .s.s.up .s.s.down .s.s.nosort -anchor n");
+cmd(inter, "frame .da.s.s -relief groove -bd 2");
+cmd(inter, "label .da.s.s.l -text \"Use series in the same order as selected\"");
+cmd(inter, "button .da.s.s.up -width -9 -text \"Sort Ascending\" -command {set res [.da.s.i.lb curselection]; .da.s.s.l config -text \"User series according to increasing values at time: [selection get]\"; set dir 1}");
+cmd(inter, "button .da.s.s.down -width -9 -text \"Sort Descending\" -command {set res [.da.s.i.lb curselection]; .da.s.s.l config -text \"User series according to decreasing values at time: [selection get]\"; set dir -1}");
+cmd(inter, "button .da.s.s.nosort -width -9 -text \"No Sort\" -command {.da.s.s.l config -text \"Use series in the same order as selected\"; set dir 0}");
+cmd(inter, "pack .da.s.s.l .da.s.s.up .da.s.s.down .da.s.s.nosort -anchor n");
 
-cmd(inter, "pack .s.i .s.fb .s.s -side left -anchor n");
-cmd(inter, "focus .s.i.e; .s.i.e selection range 0 end");
+cmd(inter, "pack .da.s.i .da.s.fb .da.s.s -side left -anchor n");
+cmd(inter, "focus .da.s.i.e; .da.s.i.e selection range 0 end");
 cmd(inter, "set sfrom $bidi");
 cmd(inter, "set sto $bidi");
 cmd(inter, "set sskip 1");
 
-cmd(inter, "bind .s <KeyPress-c> {set choice 1}");
-cmd(inter, "bind .s <Control-f> {set sfrom $bidi}");
-cmd(inter, "bind .s <Control-t> {set sto $bidi}");
-cmd(inter, "bind .s <Control-x> {set sskip $bidi}");
-cmd(inter, "bind .s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.s.i.lb insert end $x} } {}}");
+cmd(inter, "bind .da.s <KeyPress-c> {set choice 1}");
+cmd(inter, "bind .da.s <Control-f> {set sfrom $bidi}");
+cmd(inter, "bind .da.s <Control-t> {set sto $bidi}");
+cmd(inter, "bind .da.s <Control-x> {set sskip $bidi}");
+cmd(inter, "bind .da.s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}");
 
 while(*choice==0)
   Tcl_DoOneEvent(0);
@@ -3246,16 +3250,16 @@ while(*choice==0)
 if(*choice==2)
  goto end;
 
-cmd(inter, "if { [.s.i.lb size] == 0 } {tk_messageBox -type ok -title Error -icon error -message \"No time step has been selected.\\n\\nNo graph will be created.\";set choice 2} { }");
-cmd(inter, "set num_t [.s.i.lb size]");
-cmd(inter, "set list_times [.s.i.lb get 0 end]");
+cmd(inter, "if { [.da.s.i.lb size] == 0 } {tk_messageBox -type ok -title Error -icon error -message \"No time step has been selected.\\n\\nNo graph will be created.\";set choice 2} { }");
+cmd(inter, "set num_t [.da.s.i.lb size]");
+cmd(inter, "set list_times [.da.s.i.lb get 0 end]");
 
 
 end:
 Tcl_UnlinkVar(inter, "res");
 Tcl_UnlinkVar(inter, "dir");
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 return;
 
 }
@@ -3781,26 +3785,23 @@ fr=1;
 strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
-cmd(inter, "toplevel .lab");
-cmd(inter, "wm title .lab \"Saving Data\"");
-cmd(inter, "wm transient .lab .da ");
-cmd(inter, "frame .lab.f");
-cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
-cmd(inter, "radiobutton .lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
-cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "toplevel .da.lab");
+cmd(inter, "wm title .da.lab \"Saving Data\"");
+cmd(inter, "wm transient .da.lab .da ");
+cmd(inter, "frame .da.lab.f");
+cmd(inter, "radiobutton .da.lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
+cmd(inter, "radiobutton .da.lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
+cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .lab.f.lsd .lab.f.nolsd -anchor w");
-cmd(inter, "pack .lab.f .lab.ok .lab.help .lab.esc");
-cmd(inter, "bind .lab <Return> {.lab.ok invoke}");
-cmd(inter, "bind .lab <Escape> {.lab.esc invoke}");
-cmd(inter, "focus .lab");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "pack .da.lab.f.lsd .da.lab.f.nolsd -anchor w");
+cmd(inter, "pack .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
+cmd(inter, "bind .da.lab <Return> {.da.lab.ok invoke}");
+cmd(inter, "bind .da.lab <Escape> {.da.lab.esc invoke}");
+cmd(inter, "focus .da.lab");
+cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
  Tcl_DoOneEvent(0);
 if(*choice==2)
@@ -3808,7 +3809,7 @@ if(*choice==2)
 type_res=typelab;
 
 *choice=0;
-cmd(inter, "destroy .lab.f .lab.ok .lab.help .lab.esc");
+cmd(inter, "destroy .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
 
  
 
@@ -3820,58 +3821,54 @@ Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
 Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
 
 typelab=1;
-cmd(inter, "frame .lab.f -relief groove -bd 2");
-cmd(inter, "label .lab.f.tit -text \"Labels to use\" -foreground red");
+cmd(inter, "frame .da.lab.f -relief groove -bd 2");
+cmd(inter, "label .da.lab.f.tit -text \"Labels to use\" -foreground red");
 
-cmd(inter, "radiobutton .lab.f.orig -text Original -variable typelab -value 1");
-cmd(inter, "radiobutton .lab.f.new -text \"New names\" -variable typelab -value 2");
+cmd(inter, "radiobutton .da.lab.f.orig -text Original -variable typelab -value 1");
+cmd(inter, "radiobutton .da.lab.f.new -text \"New names\" -variable typelab -value 2");
 cmd(inter, "set newlab \"\"");
-cmd(inter, "entry .lab.f.en -textvariable newlab");
+cmd(inter, "entry .da.lab.f.en -textvariable newlab");
 cmd(inter, "set gp 0");
-cmd(inter, "checkbutton .lab.f.gp -text \"Add #\" -variable gp");
-cmd(inter, "bind .lab.f.en <FocusIn> {.lab.f.new invoke}");
-cmd(inter, "pack .lab.f.tit .lab.f.orig .lab.f.new .lab.f.en .lab.f.gp -anchor w");
-cmd(inter, "frame .lab.d -relief groove -bd 2");
-cmd(inter, "label .lab.d.tit -text \"Columns delimiter\" -foreground red");
+cmd(inter, "checkbutton .da.lab.f.gp -text \"Add #\" -variable gp");
+cmd(inter, "bind .da.lab.f.en <FocusIn> {.da.lab.f.new invoke}");
+cmd(inter, "pack .da.lab.f.tit .da.lab.f.orig .da.lab.f.new .da.lab.f.en .da.lab.f.gp -anchor w");
+cmd(inter, "frame .da.lab.d -relief groove -bd 2");
+cmd(inter, "label .da.lab.d.tit -text \"Columns delimiter\" -foreground red");
 
-cmd(inter, "frame .lab.d.r");
+cmd(inter, "frame .da.lab.d.r");
 del=1;
-cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
-cmd(inter, "radiobutton .lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
+cmd(inter, "radiobutton .da.lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
+cmd(inter, "radiobutton .da.lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
 cmd(inter, "set delimiter \"\"");
-cmd(inter, "entry .lab.d.r.del -textvariable delimiter");
-cmd(inter, "bind .lab.d.r.del <FocusIn> {.lab.d.r.oth invoke}");
+cmd(inter, "entry .da.lab.d.r.del -textvariable delimiter");
+cmd(inter, "bind .da.lab.d.r.del <FocusIn> {.da.lab.d.r.oth invoke}");
 
-cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
+cmd(inter, "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
 numcol=16;
-cmd(inter, "entry .lab.d.r.ecol -textvariable numcol");
-cmd(inter, "bind .lab.d.r.ecol <FocusIn> {.lab.d.r.col invoke}");
+cmd(inter, "entry .da.lab.d.r.ecol -textvariable numcol");
+cmd(inter, "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}");
 
 
-cmd(inter, "pack .lab.d.r.tab .lab.d.r.oth .lab.d.r.del .lab.d.r.col .lab.d.r.ecol -anchor w");
-cmd(inter, "pack .lab.d.tit .lab.d.r -anchor w");
+cmd(inter, "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w");
+cmd(inter, "pack .da.lab.d.tit .da.lab.d.r -anchor w");
 
-cmd(inter, "frame .lab.gen -relief groove -bd 2");
-cmd(inter, "label .lab.gen.tit -text \"General Options\" -foreground red");
-cmd(inter, "checkbutton .lab.gen.fr -text \"Names in first row\" -variable fr");
-cmd(inter, "label .lab.gen.miss -text \"Missing values\"");
+cmd(inter, "frame .da.lab.gen -relief groove -bd 2");
+cmd(inter, "label .da.lab.gen.tit -text \"General Options\" -foreground red");
+cmd(inter, "checkbutton .da.lab.gen.fr -text \"Names in first row\" -variable fr");
+cmd(inter, "label .da.lab.gen.miss -text \"Missing values\"");
 cmd(inter, "set misval \"n/a\"");
-cmd(inter, "entry .lab.gen.mis_val -textvariable misval");
-cmd(inter, "pack .lab.gen.tit .lab.gen.fr .lab.gen.miss .lab.gen.mis_val -anchor w");
-cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "entry .da.lab.gen.mis_val -textvariable misval");
+cmd(inter, "pack .da.lab.gen.tit .da.lab.gen.fr .da.lab.gen.miss .da.lab.gen.mis_val -anchor w");
+cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
+cmd(inter, "pack .da.lab.f .da.lab.d .da.lab.gen .da.lab.ok .da.lab.help .da.lab.esc -fill x");
 *choice=0;
-cmd(inter, "focus .lab");
-cmd(inter, "bind .lab <KeyPress-Return> {.lab.ok invoke}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-//cmd(inter, "raise .lab");
+cmd(inter, "focus .da.lab");
+cmd(inter, "bind .da.lab <KeyPress-Return> {.da.lab.ok invoke}");
+cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -3996,7 +3993,7 @@ for(j=min_c; j<=max_c; j++)
 fclose(fsave);
 
 end:
-cmd(inter, "destroy .lab");
+cmd(inter, "destroy .da.lab");
 Tcl_UnlinkVar(inter, "typelab");
 Tcl_UnlinkVar(inter, "numcol");
 Tcl_UnlinkVar(inter, "deli");
@@ -4531,59 +4528,56 @@ if(nv==0)
 
 if(nv>2)
  {
- cmd(inter, "toplevel .s");
- cmd(inter, "wm title .s \"Graph Type\"");
- cmd(inter, "wm transient .s .da");
+ cmd(inter, "toplevel .da.s");
+ cmd(inter, "wm title .da.s \"Graph Type\"");
+ cmd(inter, "wm transient .da.s .da");
 
- cmd(inter, "label .s.l -text \"Choose the type of graph\"");
+ cmd(inter, "label .da.s.l -text \"Choose the type of graph\"");
 
- cmd(inter, "frame .s.d -relief groove -bd 2");
+ cmd(inter, "frame .da.s.d -relief groove -bd 2");
  cmd(inter, "set ndim 2");
- cmd(inter, "radiobutton .s.d.2d -text \"2D graph\" -variable ndim -value 2");
- cmd(inter, "radiobutton .s.d.3d -text \"3D graph \" -variable ndim -value 3");
+ cmd(inter, "radiobutton .da.s.d.2d -text \"2D graph\" -variable ndim -value 2");
+ cmd(inter, "radiobutton .da.s.d.3d -text \"3D graph \" -variable ndim -value 3");
 
- cmd(inter, "pack .s.d.2d .s.d.3d -expand yes -fill x -anchor w");
+ cmd(inter, "pack .da.s.d.2d .da.s.d.3d -expand yes -fill x -anchor w");
 
-cmd(inter, "frame .s.o -relief groove -bd 2");
+cmd(inter, "frame .da.s.o -relief groove -bd 2");
 
-cmd(inter, "label .s.o.l -text \"Select 3D options\"");
+cmd(inter, "label .da.s.o.l -text \"Select 3D options\"");
 
 cmd(inter, "if { [info exist box]==1} {} {set box 0}");
-cmd(inter, "radiobutton .s.o.a -text \"Use 1st and 2nd vars. as plane\" -variable box -value 0 -anchor w");
-cmd(inter, "radiobutton .s.o.c -text \"Use time and 1st var. as plane\" -variable box -value 2 -anchor w");
-cmd(inter, "radiobutton .s.o.b -text \"Use time and rank as plane\" -variable box -value 1 -anchor w");
-cmd(inter, "checkbutton .s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
-cmd(inter, "checkbutton .s.o.p -text \"Draw palette-mapped surface\" -variable pm3d -anchor w");
+cmd(inter, "radiobutton .da.s.o.a -text \"Use 1st and 2nd vars. as plane\" -variable box -value 0 -anchor w");
+cmd(inter, "radiobutton .da.s.o.c -text \"Use time and 1st var. as plane\" -variable box -value 2 -anchor w");
+cmd(inter, "radiobutton .da.s.o.b -text \"Use time and rank as plane\" -variable box -value 1 -anchor w");
+cmd(inter, "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
+cmd(inter, "checkbutton .da.s.o.p -text \"Draw palette-mapped surface\" -variable pm3d -anchor w");
 
-cmd(inter, "pack .s.o.l .s.o.a .s.o.c .s.o.b .s.o.g .s.o.p -expand yes -fill x -anchor w");
+cmd(inter, "pack .da.s.o.l .da.s.o.a .da.s.o.c .da.s.o.b .da.s.o.g .da.s.o.p -expand yes -fill x -anchor w");
 
-cmd(inter, "frame .s.w -relief groove -bd 2");
-cmd(inter, "label .s.w.l -text \"Select window type\"");
+cmd(inter, "frame .da.s.w -relief groove -bd 2");
+cmd(inter, "label .da.s.w.l -text \"Select window type\"");
 cmd(inter, "set wind 1");
-cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
-cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
-cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
+cmd(inter, "radiobutton .da.s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
+cmd(inter, "radiobutton .da.s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
+cmd(inter, "pack .da.s.w.l .da.s.w.g .da.s.w.p -expand yes -fill x -anchor w");
 
- cmd(inter, "frame .s.b");
- cmd(inter, "set p .s.b");
+ cmd(inter, "frame .da.s.b");
+ cmd(inter, "set p .da.s.b");
  cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
  cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#3dTime}");
  cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
  cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
  
- cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
+ cmd(inter, "bind .da.s.b.ok <Return> {.da.s.b.ok invoke}");
 
- cmd(inter, "pack .s.l .s.d .s.o .s.w .s.b -expand yes -fill x");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w"); 
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w"); 
-#endif
+ cmd(inter, "pack .da.s.l .da.s.d .da.s.o .da.s.w .da.s.b -expand yes -fill x");
+ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w"); 
+
 *choice=0;
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 
 if(*choice==2)
  return;
@@ -5096,29 +5090,29 @@ for(done=0, i=1; i<nv; i++)
 sprintf(msg, "set bidi %d", end[0]);
 cmd(inter, msg);
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Options\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert time step to use\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
-cmd(inter, "pack .s.i.l .s.i.e -expand yes -fill x");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Options\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert time step to use\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd(inter, "pack .da.s.i.l .da.s.i.e -expand yes -fill x");
 
-cmd(inter, "frame .s.d -relief groove -bd 2");
+cmd(inter, "frame .da.s.d -relief groove -bd 2");
 
-cmd(inter, "label .s.d.l -text \"Select the type of graph\"");
-cmd(inter, "radiobutton .s.d.2d -text \"2D graph\" -variable ndim -value 2");
-cmd(inter, "radiobutton .s.d.3d -text \"3D graph\" -variable ndim -value 3");
+cmd(inter, "label .da.s.d.l -text \"Select the type of graph\"");
+cmd(inter, "radiobutton .da.s.d.2d -text \"2D graph\" -variable ndim -value 2");
+cmd(inter, "radiobutton .da.s.d.3d -text \"3D graph\" -variable ndim -value 3");
 
-cmd(inter, "pack .s.d.l .s.d.2d .s.d.3d -expand yes -fill x -anchor w");
+cmd(inter, "pack .da.s.d.l .da.s.d.2d .da.s.d.3d -expand yes -fill x -anchor w");
 
-cmd(inter, "frame .s.o -relief groove -bd 2");
+cmd(inter, "frame .da.s.o -relief groove -bd 2");
 
-cmd(inter, "label .s.o.l -text \"Select 3D options\"");
-cmd(inter, "checkbutton .s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
-cmd(inter, "checkbutton .s.o.p -text \"Draw palette-mapped surface\" -variable pm3d -anchor w");
+cmd(inter, "label .da.s.o.l -text \"Select 3D options\"");
+cmd(inter, "checkbutton .da.s.o.g -text \"Use gridded data\" -variable gridd -anchor w");
+cmd(inter, "checkbutton .da.s.o.p -text \"Draw palette-mapped surface\" -variable pm3d -anchor w");
 
-cmd(inter, "pack .s.o.l .s.o.g .s.o.p -expand yes -fill x -anchor w");
+cmd(inter, "pack .da.s.o.l .da.s.o.g .da.s.o.p -expand yes -fill x -anchor w");
 
 cmd(inter, "set ndim 2");
 
@@ -5131,65 +5125,62 @@ else
 cmd(inter, msg); 
 
 cmd(inter, "set numv 1");
-cmd(inter, "frame .s.v -relief groove -bd 2");
-cmd(inter, "label .s.v.l -text \"Number of dependent variables: \"");
-cmd(inter, "entry .s.v.e -textvariable numv");
-cmd(inter, "label .s.v.n -text \"Num. of points: $blength\"");
-cmd(inter, "pack .s.v.l .s.v.e .s.v.n -expand yes -fill x");
-cmd(inter, "bind .s.v.e <KeyRelease> {set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "frame .da.s.v -relief groove -bd 2");
+cmd(inter, "label .da.s.v.l -text \"Number of dependent variables: \"");
+cmd(inter, "entry .da.s.v.e -textvariable numv");
+cmd(inter, "label .da.s.v.n -text \"Num. of points: $blength\"");
+cmd(inter, "pack .da.s.v.l .da.s.v.e .da.s.v.n -expand yes -fill x");
+cmd(inter, "bind .da.s.v.e <KeyRelease> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
 sprintf(msg, "set nnvar %d", nv);
 cmd(inter, msg);
-cmd(inter, "bind .s.v.e <Return> {set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.v.e <Tab> {set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.d.2d <Return> {set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.d.2d <ButtonRelease-1> {set ndim 2; set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.d.3d <ButtonRelease-1> {set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.d.2d <Down> {.s.d.3d invoke; focus -force .s.d.3d; set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
-cmd(inter, "bind .s.d.3d <Up> {.s.d.2d invoke; focus -force .s.d.2d; set ndim 2; set blength [expr $nnvar / ($numv + $ndim-1)]; .s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.v.e <Return> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.v.e <Tab> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.d.2d <Return> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.d.2d <ButtonRelease-1> {set ndim 2; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.d.3d <ButtonRelease-1> {set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.d.2d <Down> {.da.s.d.3d invoke; focus -force .da.s.d.3d; set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
+cmd(inter, "bind .da.s.d.3d <Up> {.da.s.d.2d invoke; focus -force .da.s.d.2d; set ndim 2; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
 
 
-cmd(inter, "frame .s.l -relief groove -bd 2");
-cmd(inter, "label .s.l.l -text \"Select the block length\"");
-cmd(inter, "pack .s.l.l ");
+cmd(inter, "frame .da.s.l -relief groove -bd 2");
+cmd(inter, "label .da.s.l.l -text \"Select the block length\"");
+cmd(inter, "pack .da.s.l.l ");
 
-cmd(inter, "frame .s.w -relief groove -bd 2");
-cmd(inter, "label .s.w.l -text \"Select window type\"");
+cmd(inter, "frame .da.s.w -relief groove -bd 2");
+cmd(inter, "label .da.s.w.l -text \"Select window type\"");
 cmd(inter, "set wind 1");
-cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
-cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
-cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
+cmd(inter, "radiobutton .da.s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
+cmd(inter, "radiobutton .da.s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
+cmd(inter, "pack .da.s.w.l .da.s.w.g .da.s.w.p -expand yes -fill x -anchor w");
 
 
-cmd(inter, "frame .s.b");
-cmd(inter, "set p .s.b");
+cmd(inter, "frame .da.s.b");
+cmd(inter, "set p .da.s.b");
 cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#3dCrossSection}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
-cmd(inter, "bind .s.b.ok <Return> {.s.b.ok invoke}");
+cmd(inter, "bind .da.s.b.ok <Return> {.da.s.b.ok invoke}");
 
-cmd(inter, "pack .s.i .s.d .s.o .s.v .s.w .s.b -expand yes -fill x");
-cmd(inter, "focus .s.i.e; .s.i.e selection range 0 end");
+cmd(inter, "pack .da.s.i .da.s.d .da.s.o .da.s.v .da.s.w .da.s.b -expand yes -fill x");
+cmd(inter, "focus .da.s.i.e; .da.s.i.e selection range 0 end");
 
-//cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-cmd(inter, " .s.i.e selection range 0 end");
-cmd(inter, "bind .s.i.e <KeyPress-Return> {if {$ndim == 2} { focus -force .s.d.2d } {focus -force .s.d.3d}}");
-cmd(inter, "bind .s.d.2d <KeyPress-Return> {.s.v.e selection range 0 end; focus -force .s.v.e}");
-cmd(inter, "bind .s.d.3d <KeyPress-Return> {.s.v.e selection range 0 end; focus -force .s.v.e}");
+//cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, " .da.s.i.e selection range 0 end");
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {if {$ndim == 2} { focus -force .da.s.d.2d } {focus -force .da.s.d.3d}}");
+cmd(inter, "bind .da.s.d.2d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus -force .da.s.v.e}");
+cmd(inter, "bind .da.s.d.3d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus -force .da.s.v.e}");
 
-cmd(inter, "bind .s.v.e <KeyPress-Return> {focus -force .s.b.ok}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "bind .da.s.v.e <KeyPress-Return> {focus -force .da.s.b.ok}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 
 if(*choice==2)
  goto end;
@@ -5205,7 +5196,7 @@ cmd(inter, "set choice $blength");
 block_length=*choice;
 *choice=0;
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 
 if(nv%block_length!=0)
  {
@@ -5502,25 +5493,25 @@ for(done=0, i=0; i<nv; i++)
 } //End for finding min-max
 
 cmd(inter, "set bidi 1");
-cmd(inter, "toplevel .s");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "wm title .s \"Lags Selection\"");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert number of lags\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "wm title .da.s \"Lags Selection\"");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert number of lags\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
 cmd(inter, "set dia 0");
-cmd(inter, "checkbutton .s.i.arrow -text \"Diagonal\" -variable dia");
-cmd(inter, "pack .s.i.l .s.i.e .s.i.arrow");
+cmd(inter, "checkbutton .da.s.i.arrow -text \"Diagonal\" -variable dia");
+cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.arrow");
 
-cmd(inter, "frame .s.w -relief groove -bd 2");
-cmd(inter, "label .s.w.l -text \"Select window type\"");
+cmd(inter, "frame .da.s.w -relief groove -bd 2");
+cmd(inter, "label .da.s.w.l -text \"Select window type\"");
 cmd(inter, "set wind 1");
-cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
-cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
-cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x");
+cmd(inter, "radiobutton .da.s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
+cmd(inter, "radiobutton .da.s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
+cmd(inter, "pack .da.s.w.l .da.s.w.g .da.s.w.p -expand yes -fill x");
 
-cmd(inter, "frame .s.b");
-cmd(inter, "set p .s.b");
+cmd(inter, "frame .da.s.b");
+cmd(inter, "set p .da.s.b");
 cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#plot}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
@@ -5528,22 +5519,19 @@ cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
-cmd(inter, "pack .s.i .s.w .s.b");
-cmd(inter, "focus .s.i.e; .s.i.e selection range 0 end");
+cmd(inter, "pack .da.s.i .da.s.w .da.s.b");
+cmd(inter, "focus .da.s.i.e; .da.s.i.e selection range 0 end");
 
-cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-cmd(inter, " .s.i.e selection range 0 end");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, " .da.s.i.e selection range 0 end");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  goto end;
 sprintf(msg, "set dirxy plotxy_%d", cur_plot);
@@ -5790,35 +5778,35 @@ for(i=0; i<nv; i++)
 
 
 cmd(inter, "set bidi 1");
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Lattice Definition\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert number of columns\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
-cmd(inter, "pack .s.i.l .s.i.e");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Lattice Definition\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert number of columns\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd(inter, "pack .da.s.i.l .da.s.i.e");
 sprintf(msg, "set time %d", end);
 cmd(inter, msg);
-cmd(inter, "frame .s.t -relief groove -bd 2");
-cmd(inter, "label .s.t.l -text \"Insert time step to use\"");
-cmd(inter, "entry .s.t.e -textvariable time");
-cmd(inter, "pack .s.t.l .s.t.e");
+cmd(inter, "frame .da.s.t -relief groove -bd 2");
+cmd(inter, "label .da.s.t.l -text \"Insert time step to use\"");
+cmd(inter, "entry .da.s.t.e -textvariable time");
+cmd(inter, "pack .da.s.t.l .da.s.t.e");
 
 cmd(inter, "set lx 400");
-cmd(inter, "frame .s.x -relief groove -bd 2");
-cmd(inter, "label .s.x.l -text \"Lattice width\"");
-cmd(inter, "entry .s.x.e -textvariable lx");
-cmd(inter, "pack .s.x.l .s.x.e");
+cmd(inter, "frame .da.s.x -relief groove -bd 2");
+cmd(inter, "label .da.s.x.l -text \"Lattice width\"");
+cmd(inter, "entry .da.s.x.e -textvariable lx");
+cmd(inter, "pack .da.s.x.l .da.s.x.e");
 
 cmd(inter, "set ly 400");
-cmd(inter, "frame .s.y -relief groove -bd 2");
-cmd(inter, "label .s.y.l -text \"Lattice heigth\"");
-cmd(inter, "entry .s.y.e -textvariable ly");
-cmd(inter, "pack .s.y.l .s.y.e");
+cmd(inter, "frame .da.s.y -relief groove -bd 2");
+cmd(inter, "label .da.s.y.l -text \"Lattice heigth\"");
+cmd(inter, "entry .da.s.y.e -textvariable ly");
+cmd(inter, "pack .da.s.y.l .da.s.y.e");
 
 
-cmd(inter, "frame .s.b");
-cmd(inter, "set p .s.b");
+cmd(inter, "frame .da.s.b");
+cmd(inter, "set p .da.s.b");
 cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#lattice}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
@@ -5826,25 +5814,22 @@ cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
-cmd(inter, "pack .s.t .s.i .s.x .s.y .s.b");
-cmd(inter, "focus .s.t.e; .s.t.e selection range 0 end");
+cmd(inter, "pack .da.s.t .da.s.i .da.s.x .da.s.y .da.s.b");
+cmd(inter, "focus .da.s.t.e; .da.s.t.e selection range 0 end");
 
 
-cmd(inter, "bind .s.t.e <KeyPress-Return> {focus .s.i.e; .s.i.e selection range 0 end}");
-cmd(inter, "bind .s.i.e <KeyPress-Return> {focus .s.x.e; .s.x.e selection range 0 end}");
-cmd(inter, "bind .s.x.e <KeyPress-Return> {focus .s.y.e; .s.y.e selection range 0 end}");
-cmd(inter, "bind .s.y.e <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "bind .da.s.t.e <KeyPress-Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}");
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {focus .da.s.x.e; .da.s.x.e selection range 0 end}");
+cmd(inter, "bind .da.s.x.e <KeyPress-Return> {focus .da.s.y.e; .da.s.y.e selection range 0 end}");
+cmd(inter, "bind .da.s.y.e <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  {
  cur_plot--;
@@ -6036,24 +6021,24 @@ for(tot=0, i=first; i<=last; i++)	// count number of points excluding NaNs
 sprintf(msg, "set bidi %d", 100<tot?100:(int)tot);
 cmd(inter, msg);
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Number of Classes\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert the number of classes to use\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Number of Classes\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert the number of classes to use\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
 cmd(inter, "set norm 0");
-cmd(inter, "checkbutton .s.i.norm -text \"Interpolate a Normal\" -variable norm");
+cmd(inter, "checkbutton .da.s.i.norm -text \"Interpolate a Normal\" -variable norm");
 cmd(inter, "set stat 0");
-cmd(inter, "checkbutton .s.i.st -text \"Print statistics in Log window\" -variable stat");
-cmd(inter, "pack .s.i.l .s.i.e .s.i.norm .s.i.st -anchor w");
+cmd(inter, "checkbutton .da.s.i.st -text \"Print statistics in Log window\" -variable stat");
+cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.norm .da.s.i.st -anchor w");
 
 
 
 
 
-cmd(inter, "frame .s.b");
-cmd(inter, "set p .s.b");
+cmd(inter, "frame .da.s.b");
+cmd(inter, "set p .da.s.b");
 cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#seq_xy}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
@@ -6061,22 +6046,19 @@ cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
-cmd(inter, "pack .s.i .s.b");
-cmd(inter, "focus .s.i.e; .s.i.e selection range 0 end");
+cmd(inter, "pack .da.s.i .da.s.b");
+cmd(inter, "focus .da.s.i.e; .da.s.i.e selection range 0 end");
 
-//cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-cmd(inter, " .s.i.e selection range 0 end");
-cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+//cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, " .da.s.i.e selection range 0 end");
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {set choice 1}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 
 if(*choice==2)
  {
@@ -6560,29 +6542,29 @@ cmd(inter, msg);
 sprintf(msg, "set time %d", end[0]);
 cmd(inter, msg);
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Number of Classes\"");
-cmd(inter, "wm transient .s .da");
-cmd(inter, "frame .s.t -relief groove -bd 2");
-cmd(inter, "label .s.t.l -text \"Insert the time step to use\"");
-cmd(inter, "entry .s.t.e -textvariable time");
-cmd(inter, "bind .s.t.e <Return> {focus -force .s.i.e; .s.i.e selection range 0 end}");
-cmd(inter, "pack .s.t.l .s.t.e -anchor w");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Number of Classes\"");
+cmd(inter, "wm transient .da.s .da");
+cmd(inter, "frame .da.s.t -relief groove -bd 2");
+cmd(inter, "label .da.s.t.l -text \"Insert the time step to use\"");
+cmd(inter, "entry .da.s.t.e -textvariable time");
+cmd(inter, "bind .da.s.t.e <Return> {focus -force .da.s.i.e; .da.s.i.e selection range 0 end}");
+cmd(inter, "pack .da.s.t.l .da.s.t.e -anchor w");
 
-cmd(inter, "frame .s.i -relief groove -bd 2");
-cmd(inter, "label .s.i.l -text \"Insert the number of classes to use\"");
-cmd(inter, "entry .s.i.e -textvariable bidi");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
+cmd(inter, "label .da.s.i.l -text \"Insert the number of classes to use\"");
+cmd(inter, "entry .da.s.i.e -textvariable bidi");
 cmd(inter, "set norm 0");
-cmd(inter, "checkbutton .s.i.norm -text \"Interpolate a Normal\" -variable norm");
+cmd(inter, "checkbutton .da.s.i.norm -text \"Interpolate a Normal\" -variable norm");
 cmd(inter, "set stat 0");
-cmd(inter, "checkbutton .s.i.st -text \"Print statistics in Log window\" -variable stat");
-cmd(inter, "pack .s.i.l .s.i.e .s.i.norm .s.i.st -anchor w");
+cmd(inter, "checkbutton .da.s.i.st -text \"Print statistics in Log window\" -variable stat");
+cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.norm .da.s.i.st -anchor w");
 
 
 
 
-cmd(inter, "frame .s.b");
-cmd(inter, "set p .s.b");
+cmd(inter, "frame .da.s.b");
+cmd(inter, "set p .da.s.b");
 cmd(inter, "button $p.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#seq_xy}");
 cmd(inter, "button $p.can -width -9 -text Cancel -command {set choice 2}");
@@ -6590,22 +6572,19 @@ cmd(inter, "pack $p.ok $p.help $p.can -side left -expand yes -fill x");
 
 
 
-cmd(inter, "pack .s.t .s.i .s.b");
-cmd(inter, "focus .s.t.e; .s.t.e selection range 0 end");
+cmd(inter, "pack .da.s.t .da.s.i .da.s.b");
+cmd(inter, "focus .da.s.t.e; .da.s.t.e selection range 0 end");
 
-//cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
+//cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
 
-cmd(inter, "bind .s.i.e <KeyPress-Return> {set choice 1}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "bind .da.s.i.e <KeyPress-Return> {set choice 1}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 
 if(*choice==2)
  {
@@ -7079,62 +7058,62 @@ Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
 
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Elaboration Selection\"");
-cmd(inter, "wm transient .s .da");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Elaboration Selection\"");
+cmd(inter, "wm transient .da.s .da");
 
-cmd(inter, "frame .s.o -relief groove -bd 2");
-cmd(inter, "label .s.o.l -text \"Type of scanning\" -fg red");
-cmd(inter, "pack .s.o.l");
+cmd(inter, "frame .da.s.o -relief groove -bd 2");
+cmd(inter, "label .da.s.o.l -text \"Type of scanning\" -fg red");
+cmd(inter, "pack .da.s.o.l");
 cmd(inter, "set bido 1");
-cmd(inter, "radiobutton .s.o.m -text \"Compute over series (same # of cases)\" -variable bido -value 1");
-cmd(inter, "radiobutton .s.o.f -text \"Compute over cases (# cases = # of series)\" -variable bido -value 2");
-cmd(inter, "pack .s.o.m .s.o.f -anchor w");
+cmd(inter, "radiobutton .da.s.o.m -text \"Compute over series (same # of cases)\" -variable bido -value 1");
+cmd(inter, "radiobutton .da.s.o.f -text \"Compute over cases (# cases = # of series)\" -variable bido -value 2");
+cmd(inter, "pack .da.s.o.m .da.s.o.f -anchor w");
 
-cmd(inter, "pack .s.o");
+cmd(inter, "pack .da.s.o");
 
-cmd(inter, "frame .s.f -relief groove -bd 2");
-cmd(inter, "label .s.f.l -text \"Filtering\" -fg red");
-cmd(inter, "pack .s.f.l");
+cmd(inter, "frame .da.s.f -relief groove -bd 2");
+cmd(inter, "label .da.s.f.l -text \"Filtering\" -fg red");
+cmd(inter, "pack .da.s.f.l");
 cmd(inter, "set flt 0");
-cmd(inter, "radiobutton .s.f.n -text \"Use all the data\" -variable flt -value 0");
-cmd(inter, "radiobutton .s.f.s -text \"Ignore small values\" -variable flt -value 1");
-cmd(inter, "radiobutton .s.f.b -text \"Ignore large values\" -variable flt -value 2");
-cmd(inter, "entry .s.f.th -width 21 -textvariable thflt");
-cmd(inter, "pack .s.f.n .s.f.s .s.f.b .s.f.th  -anchor w");
+cmd(inter, "radiobutton .da.s.f.n -text \"Use all the data\" -variable flt -value 0");
+cmd(inter, "radiobutton .da.s.f.s -text \"Ignore small values\" -variable flt -value 1");
+cmd(inter, "radiobutton .da.s.f.b -text \"Ignore large values\" -variable flt -value 2");
+cmd(inter, "entry .da.s.f.th -width 21 -textvariable thflt");
+cmd(inter, "pack .da.s.f.n .da.s.f.s .da.s.f.b .da.s.f.th  -anchor w");
 
-cmd(inter, "pack .s.f");
+cmd(inter, "pack .da.s.f");
 
 cmd(inter, "set bidi 0");
-cmd(inter, "frame .s.i -relief groove -bd 2");
+cmd(inter, "frame .da.s.i -relief groove -bd 2");
 /**/
-cmd(inter, "label .s.i.l -text \"Type of series to create\" -fg red");
+cmd(inter, "label .da.s.i.l -text \"Type of series to create\" -fg red");
 
-cmd(inter, "radiobutton .s.i.m -text \"Average\" -variable bidi -command {set headname \"Av\"; set vname $headname$basename; .s.nv selection range 0 end} -value 1");
-cmd(inter, "radiobutton .s.i.z -text \"Sum\" -variable bidi -command {set headname \"Sum\"; set vname $headname$basename; .s.nv selection range 0 end} -value 5");
-cmd(inter, "radiobutton .s.i.f -text \"Maximum\" -variable bidi -command {set headname \"Max\"; set vname $headname$basename; .s.nv selection range 0 end} -value 2");
-cmd(inter, "radiobutton .s.i.t -text \"Minimum\" -variable bidi -command {set headname \"Min\"; set vname $headname$basename; .s.nv selection range 0 end} -value 3");
-cmd(inter, "radiobutton .s.i.c -text \"Variance\" -variable bidi -command {set headname \"Var\"; set vname $headname$basename; .s.nv selection range 0 end} -value 4");
-cmd(inter, "frame .s.i.ci");
-cmd(inter, "radiobutton .s.i.ci.c -text \"StdDev\" -variable bidi -command {set headname \"CI\"; set vname $headname$basename; .s.nv selection range 0 end} -value 6");
-cmd(inter, "label .s.i.ci.x -text \"x\"");
+cmd(inter, "radiobutton .da.s.i.m -text \"Average\" -variable bidi -command {set headname \"Av\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 1");
+cmd(inter, "radiobutton .da.s.i.z -text \"Sum\" -variable bidi -command {set headname \"Sum\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 5");
+cmd(inter, "radiobutton .da.s.i.f -text \"Maximum\" -variable bidi -command {set headname \"Max\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 2");
+cmd(inter, "radiobutton .da.s.i.t -text \"Minimum\" -variable bidi -command {set headname \"Min\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 3");
+cmd(inter, "radiobutton .da.s.i.c -text \"Variance\" -variable bidi -command {set headname \"Var\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 4");
+cmd(inter, "frame .da.s.i.ci");
+cmd(inter, "radiobutton .da.s.i.ci.c -text \"StdDev\" -variable bidi -command {set headname \"CI\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 6");
+cmd(inter, "label .da.s.i.ci.x -text \"x\"");
 confi=1.96;
-cmd(inter, "entry .s.i.ci.p -width 4 -textvariable confi");
-cmd(inter, "pack .s.i.ci.c .s.i.ci.x .s.i.ci.p -side left");
+cmd(inter, "entry .da.s.i.ci.p -width 4 -textvariable confi");
+cmd(inter, "pack .da.s.i.ci.c .da.s.i.ci.x .da.s.i.ci.p -side left");
 /*
-cmd(inter, "frame .s.i.ma");
-cmd(inter, "radiobutton .s.i.ma.ma -text \"Mov. average\" -variable bidi -command {set headname \"MovA\"; set vname $headname$basename; .s.nv selection range 0 end} -value 8");
-cmd(inter, "label .s.i.ma.x -text \" range \"");
+cmd(inter, "frame .da.s.i.ma");
+cmd(inter, "radiobutton .da.s.i.ma.ma -text \"Mov. average\" -variable bidi -command {set headname \"MovA\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 8");
+cmd(inter, "label .da.s.i.ma.x -text \" range \"");
 confi=1.96;
-cmd(inter, "entry .s.i.ma.p -width 4 -textvariable confi");
-cmd(inter, "pack .s.i.ma.ma .s.i.ma.x .s.i.ma.p -side left");
+cmd(inter, "entry .da.s.i.ma.p -width 4 -textvariable confi");
+cmd(inter, "pack .da.s.i.ma.ma .da.s.i.ma.x .da.s.i.ma.p -side left");
 */
 
-cmd(inter, "radiobutton .s.i.n -text \"Count\" -variable bidi -command {set headname \"Num\"; set vname $headname$basename; .s.nv selection range 0 end} -value 7");
+cmd(inter, "radiobutton .da.s.i.n -text \"Count\" -variable bidi -command {set headname \"Num\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 7");
 
-cmd(inter, "pack .s.i.l .s.i.m .s.i.z .s.i.f .s.i.t .s.i.c .s.i.ci .s.i.n -anchor w");
+cmd(inter, "pack .da.s.i.l .da.s.i.m .da.s.i.z .da.s.i.f .da.s.i.t .da.s.i.c .da.s.i.ci .da.s.i.n -anchor w");
 /**/
-cmd(inter, "pack .s.i");
+cmd(inter, "pack .da.s.i");
 
 
 //cmd(inter, "set vname newvar");
@@ -7143,36 +7122,33 @@ cmd(inter, "set basename [lindex [split $a] 0]");
 cmd(inter, "set headname \"Av\"");
 cmd(inter, "set vname $headname$basename");
 
-cmd(inter, "label .s.lnv -text \"New series label\" -fg red");
-cmd(inter, "entry .s.nv -width 40 -textvariable vname");
-cmd(inter, "pack .s.lnv .s.nv");
+cmd(inter, "label .da.s.lnv -text \"New series label\" -fg red");
+cmd(inter, "entry .da.s.nv -width 40 -textvariable vname");
+cmd(inter, "pack .da.s.lnv .da.s.nv");
 
 cmd(inter, "set vtag 1");
-cmd(inter, "label .s.tnv -text \"New series tag\" -fg red");
-cmd(inter, "entry .s.tv -width 20 -textvariable vtag");
-cmd(inter, "pack .s.tnv .s.tv");
+cmd(inter, "label .da.s.tnv -text \"New series tag\" -fg red");
+cmd(inter, "entry .da.s.tv -width 20 -textvariable vtag");
+cmd(inter, "pack .da.s.tnv .da.s.tv");
 
-cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_series}");
-cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .s.i .s.ok .s.help .s.esc");
-cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_series}");
+cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .da.s.i .da.s.ok .da.s.help .da.s.esc");
+cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
 cmd(inter, "set bidi 1");
-cmd(inter, "focus -force .s.nv");
- cmd(inter, ".s.nv selection range 0 end");
+cmd(inter, "focus -force .da.s.nv");
+ cmd(inter, ".da.s.nv selection range 0 end");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
 Tcl_UnlinkVar(inter,"thflt");
 Tcl_UnlinkVar(inter,"confi");
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  {*choice=0;
   return;
@@ -7429,38 +7405,35 @@ if(nv==0)
 if(logs)
   cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
-cmd(inter, "toplevel .s");
-cmd(inter, "wm title .s \"Mov. Average Range\"");
-cmd(inter, "wm transient .s .da");
+cmd(inter, "toplevel .da.s");
+cmd(inter, "wm title .da.s \"Mov. Average Range\"");
+cmd(inter, "wm transient .da.s .da");
 
-cmd(inter, "frame .s.o -relief groove -bd 2");
-cmd(inter, "label .s.o.l -text \"Set # of (odd) periods\" -fg red");
-cmd(inter, "pack .s.o.l");
+cmd(inter, "frame .da.s.o -relief groove -bd 2");
+cmd(inter, "label .da.s.o.l -text \"Set # of (odd) periods\" -fg red");
+cmd(inter, "pack .da.s.o.l");
 cmd(inter, "set bido 10");
-cmd(inter, "entry .s.o.th -width 6 -textvariable bido");
-cmd(inter, "pack .s.o.th");
+cmd(inter, "entry .da.s.o.th -width 6 -textvariable bido");
+cmd(inter, "pack .da.s.o.th");
 
-cmd(inter, "pack .s.o");
+cmd(inter, "pack .da.s.o");
 
 
-cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_maverag}");
-cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .s.ok .s.help .s.esc");
-cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .s <KeyPress-Escape> {set choice 2}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#create_maverag}");
+cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "pack .da.s.ok .da.s.help .da.s.esc");
+cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 *choice=0;
-cmd(inter, "focus -force .s.o.th");
-cmd(inter, ".s.o.th selection range 0 end");
+cmd(inter, "focus -force .da.s.o.th");
+cmd(inter, ".da.s.o.th selection range 0 end");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-cmd(inter, "destroy .s");
+cmd(inter, "destroy .da.s");
 if(*choice==2)
  {*choice=0;
   return;
@@ -7632,33 +7605,30 @@ fr=1;
 strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 typelab=4;
-cmd(inter, "toplevel .lab");
-cmd(inter, "wm title .lab \"Saving Data\"");
-cmd(inter, "wm transient .lab .da ");
-cmd(inter, "frame .lab.f -relief groove -bd 2");
-cmd(inter, "radiobutton .lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
-cmd(inter, "radiobutton .lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
+cmd(inter, "toplevel .da.lab");
+cmd(inter, "wm title .da.lab \"Saving Data\"");
+cmd(inter, "wm transient .da.lab .da ");
+cmd(inter, "frame .da.lab.f -relief groove -bd 2");
+cmd(inter, "radiobutton .da.lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
+cmd(inter, "radiobutton .da.lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
 cmd(inter, "set dozip 0");
-cmd(inter, "checkbutton .lab.dozip -text \"Generate zipped file\" -variable dozip");
+cmd(inter, "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip");
 
-cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .lab.f.lsd .lab.f.nolsd -anchor w");
+cmd(inter, "pack .da.lab.f.lsd .da.lab.f.nolsd -anchor w");
 #ifdef LIBZ
-cmd(inter, "pack .lab.f  .lab.dozip .lab.ok .lab.help .lab.esc");
+cmd(inter, "pack .da.lab.f  .da.lab.dozip .da.lab.ok .da.lab.help .da.lab.esc");
 #else
-cmd(inter, "pack .lab.f  .lab.ok .lab.help .lab.esc");
+cmd(inter, "pack .da.lab.f  .da.lab.ok .da.lab.help .da.lab.esc");
 #endif
-cmd(inter, "bind .lab <Return> {.lab.ok invoke}");
-cmd(inter, "bind .lab <Escape> {.lab.esc invoke}");
-cmd(inter, "focus .lab");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
+cmd(inter, "bind .da.lab <Return> {.da.lab.ok invoke}");
+cmd(inter, "bind .da.lab <Escape> {.da.lab.esc invoke}");
+cmd(inter, "focus .da.lab");
+cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -7670,7 +7640,7 @@ cmd(inter, "set choice $dozip");
 dozip=*choice;
 
 *choice=0;
-cmd(inter, "destroy .lab.f .lab.ok .lab.help .lab.esc");
+cmd(inter, "destroy .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
 
  
 
@@ -7682,58 +7652,54 @@ Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
 Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
 
 typelab=1;
-cmd(inter, "frame .lab.f -relief groove -bd 2");
-cmd(inter, "label .lab.f.tit -text \"Labels to use\" -foreground red");
+cmd(inter, "frame .da.lab.f -relief groove -bd 2");
+cmd(inter, "label .da.lab.f.tit -text \"Labels to use\" -foreground red");
 
-cmd(inter, "radiobutton .lab.f.orig -text Original -variable typelab -value 1");
-cmd(inter, "radiobutton .lab.f.new -text \"New names\" -variable typelab -value 2");
+cmd(inter, "radiobutton .da.lab.f.orig -text Original -variable typelab -value 1");
+cmd(inter, "radiobutton .da.lab.f.new -text \"New names\" -variable typelab -value 2");
 cmd(inter, "set newlab \"\"");
-cmd(inter, "entry .lab.f.en -textvariable newlab");
+cmd(inter, "entry .da.lab.f.en -textvariable newlab");
 cmd(inter, "set gp 0");
-cmd(inter, "checkbutton .lab.f.gp -text \"Add #\" -variable gp");
-cmd(inter, "bind .lab.f.en <FocusIn> {.lab.f.new invoke}");
-cmd(inter, "pack .lab.f.tit .lab.f.orig .lab.f.new .lab.f.en .lab.f.gp -anchor w");
-cmd(inter, "frame .lab.d -relief groove -bd 2");
-cmd(inter, "label .lab.d.tit -text \"Columns delimiter\" -foreground red");
+cmd(inter, "checkbutton .da.lab.f.gp -text \"Add #\" -variable gp");
+cmd(inter, "bind .da.lab.f.en <FocusIn> {.da.lab.f.new invoke}");
+cmd(inter, "pack .da.lab.f.tit .da.lab.f.orig .da.lab.f.new .da.lab.f.en .da.lab.f.gp -anchor w");
+cmd(inter, "frame .da.lab.d -relief groove -bd 2");
+cmd(inter, "label .da.lab.d.tit -text \"Columns delimiter\" -foreground red");
 
-cmd(inter, "frame .lab.d.r");
+cmd(inter, "frame .da.lab.d.r");
 del=1;
-cmd(inter, "radiobutton .lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
-cmd(inter, "radiobutton .lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
+cmd(inter, "radiobutton .da.lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
+cmd(inter, "radiobutton .da.lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
 cmd(inter, "set delimiter \"\"");
-cmd(inter, "entry .lab.d.r.del -textvariable delimiter");
-cmd(inter, "bind .lab.d.r.del <FocusIn> {.lab.d.r.oth invoke}");
+cmd(inter, "entry .da.lab.d.r.del -textvariable delimiter");
+cmd(inter, "bind .da.lab.d.r.del <FocusIn> {.da.lab.d.r.oth invoke}");
 
-cmd(inter, "radiobutton .lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
+cmd(inter, "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
 numcol=16;
-cmd(inter, "entry .lab.d.r.ecol -textvariable numcol");
-cmd(inter, "bind .lab.d.r.ecol <FocusIn> {.lab.d.r.col invoke}");
+cmd(inter, "entry .da.lab.d.r.ecol -textvariable numcol");
+cmd(inter, "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}");
 
 
-cmd(inter, "pack .lab.d.r.tab .lab.d.r.oth .lab.d.r.del .lab.d.r.col .lab.d.r.ecol -anchor w");
-cmd(inter, "pack .lab.d.tit .lab.d.r -anchor w");
+cmd(inter, "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w");
+cmd(inter, "pack .da.lab.d.tit .da.lab.d.r -anchor w");
 
-cmd(inter, "frame .lab.gen -relief groove -bd 2");
-cmd(inter, "label .lab.gen.tit -text \"General Options\" -foreground red");
-cmd(inter, "checkbutton .lab.gen.fr -text \"Names in first row\" -variable fr");
-cmd(inter, "label .lab.gen.miss -text \"Missing values\"");
+cmd(inter, "frame .da.lab.gen -relief groove -bd 2");
+cmd(inter, "label .da.lab.gen.tit -text \"General Options\" -foreground red");
+cmd(inter, "checkbutton .da.lab.gen.fr -text \"Names in first row\" -variable fr");
+cmd(inter, "label .da.lab.gen.miss -text \"Missing values\"");
 cmd(inter, "set misval \"n/a\"");
-cmd(inter, "entry .lab.gen.mis_val -textvariable misval");
-cmd(inter, "pack .lab.gen.tit .lab.gen.fr .lab.gen.miss .lab.gen.mis_val -anchor w");
-cmd(inter ,"button .lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .lab.esc -width -9 -text Cancel -command {set choice 2}");
+cmd(inter, "entry .da.lab.gen.mis_val -textvariable misval");
+cmd(inter, "pack .da.lab.gen.tit .da.lab.gen.fr .da.lab.gen.miss .da.lab.gen.mis_val -anchor w");
+cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
+cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
+cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
 
-cmd(inter, "pack .lab.f .lab.d .lab.gen .lab.ok .lab.help .lab.esc -fill x");
+cmd(inter, "pack .da.lab.f .da.lab.d .da.lab.gen .da.lab.ok .da.lab.help .da.lab.esc -fill x");
 *choice=0;
-cmd(inter, "focus .lab");
-cmd(inter, "bind .lab <KeyPress-Return> {.lab.ok invoke}");
-#ifndef DUAL_MONITOR
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w");
-#else
-cmd(inter, "set w .lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-#endif
-//cmd(inter, "raise .lab");
+cmd(inter, "focus .da.lab");
+cmd(inter, "bind .da.lab <KeyPress-Return> {.da.lab.ok invoke}");
+cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -7997,7 +7963,7 @@ else
   fclose(fsave);  
 
 end:
-cmd(inter, "destroy .lab");
+cmd(inter, "destroy .da.lab");
 Tcl_UnlinkVar(inter, "typelab");
 Tcl_UnlinkVar(inter, "numcol");
 Tcl_UnlinkVar(inter, "deli");

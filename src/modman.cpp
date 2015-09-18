@@ -217,11 +217,9 @@ if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilati
   if ( firstCall )
   {
 	  firstCall = false;
-	  sprintf( msg, "\n\n====================> NEW TCL SESSION\n", ftime );
-	  fprintf(f,"%s", msg);
+	  fprintf( f, "\n\n====================> NEW TCL SESSION\n" );
   }
-  sprintf( msg, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
-  fprintf(f,"%s", msg);
+  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
   fclose(f);
 #ifdef SHOW_TK_ERR
   sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message {Tk 8.5 error.\n\nPlease send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s}", cm, inter->result );

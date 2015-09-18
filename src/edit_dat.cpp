@@ -88,6 +88,8 @@ EDIT.CPP allows to edit the number of instances in the model
 
 extern Tcl_Interp *inter;
 extern char msg[];
+extern char *simul_name;	// simulation name to use in title bar
+extern bool unsavedChange;	// control for unsaved changes in configuration
 
 void go_next(object **t);
 object *go_brother(object *cur);
@@ -138,7 +140,8 @@ in_edit_data = true;
 while(*choice==0)
 {
 // reset title and destroy command because may be coming from set_obj_number
-cmd( inter, "settop .ini \"Lsd Data Editor\" { set choice 1 }" );
+sprintf( ch, "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsavedChange ? "*" : "", simul_name );
+cmd( inter, ch );
 
 //find first object->label==obj_name;
 first=root->search(obj_name);

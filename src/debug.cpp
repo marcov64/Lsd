@@ -97,6 +97,8 @@ extern lsdstack *stacklog;
 extern double i_values[100];
 int interact_flag=0;
 extern int choice;
+extern char *simul_name;	// simulation name to use in title bar
+extern bool unsavedChange;	// control for unsaved changes in configuration
 
 
 void cmd(Tcl_Interp *inter, char const *cc);
@@ -137,7 +139,8 @@ bridge *cb, *cb1;
 
 Tcl_SetVar( inter, "lab", lab, 0 );
 cmd( inter, "set deb .deb" );
-cmd( inter, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { newtop .deb \"Lsd Data Browser\" { set choice 7 } } { newtop .deb \"Lsd Debugger\" { set choice 7 } \"\" } }" );
+sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { newtop .deb \"%s%s - Lsd Data Browser\" { set choice 7 } } { newtop .deb \"%s%s - Lsd Debugger\" { set choice 7 } \"\" } }", unsavedChange ? "*" : "", simul_name, unsavedChange ? "*" : "", simul_name );
+cmd( inter, msg );
 
 // avoid redrawing the menu if it already exists and is configured
 cmd(inter, "set existMenu [ winfo exists .deb.m ]");
@@ -172,12 +175,12 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 
 	cmd(inter, "button .deb.b.move.up -width -9 -text \"Up\" -command {set choice 3} -underline 0");
 	cmd(inter, "button .deb.b.move.down -width -9 -text \"Down\" -command {set choice 6} -underline 0");
-	cmd(inter, "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0");
 	cmd(inter, "button .deb.b.move.prev -width -9 -text \"Prev.\" -command {set choice 12} -underline 0");
+	cmd(inter, "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0");
 	cmd(inter, "button .deb.b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5");
 	cmd(inter, "button .deb.b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0");
 	cmd(inter, "button .deb.b.move.search -width -9 -text \"Search\" -command {set choice 10} -underline 0");
-	cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.broth .deb.b.move.prev .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left");
+	cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left");
 
 	cmd(inter, "bind .deb <KeyPress-u> {.deb.b.move.up invoke}");
 	cmd(inter, "bind .deb <Up> {.deb.b.move.up invoke}");
@@ -202,16 +205,16 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd(inter, "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set done_in 3} -underline 0");
 		cmd(inter, "button .deb.b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0");
 		cmd(inter, "button .deb.b.act.net -width -9 -text Network -command {set choice 22} -underline 3");
-		cmd(inter, "button .deb.b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}");
 		cmd(inter, "button .deb.b.act.call -width -9 -text Caller -command {set choice 9} -underline 0");
 		cmd(inter, "button .deb.b.act.hook -width -9 -text Hook -command {set choice 21} -underline 0");
+		cmd(inter, "button .deb.b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}");
 		cmd(inter, "button .deb.b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}");
 		cmd(inter, "frame .deb.b.act.stack");
 		cmd(inter, "label .deb.b.act.stack.l -text \"Print stack level: \"");
 		cmd(inter, "entry .deb.b.act.stack.e -width 3 -relief sunken -textvariable stack_flag");
 		cmd(inter, "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left");
 		//cmd(inter, "checkbutton .deb.b.act.stack -text \"Stack info\" -variable stack_flag");
-		cmd(inter, "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.prn_v .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left");
+		cmd(inter, "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left");
 
 		cmd(inter, "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}");
 		cmd(inter, "bind .deb <KeyPress-r> {.deb.b.act.run invoke}");
@@ -226,7 +229,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd(inter, "pack .deb.b.move .deb.b.act -side top");
 	cmd(inter, "pack .deb.b -side right");
 
-	cmd( inter, "showtop .deb topleftW 0 0 0" );
+	cmd( inter, "if [ string equal $lab \"\" ] { showtop .deb topleftW } { showtop .deb topleftW 0 0 0 }" );
 }
 
 app_res=*res;
@@ -361,8 +364,8 @@ case 4: if( r->next!=NULL)
         } 
 
 			break;
-case 21: if( r->hook!=NULL)
-			 choice=deb(r->hook,c, lab, res);
+case 21: if(r->hook!=NULL)
+				choice=deb(r->hook,c, lab, res);
 		  else
 			 choice=0;
 

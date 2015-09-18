@@ -35,13 +35,19 @@ set parWndLst [ list ]
 
 # procedures for create, update and destroy top level new windows
 proc newtop { w { name "" } { destroy { } } { par "." } } {
+	if [ winfo exists $w ] { 
+		destroytop $w
+	}
 	toplevel $w
 	if { $par != "" } {
 		if { $par != "." } {
 			wm transient $w $par 
 		} {
 			global parWndLst
-			if { [ llength $parWndLst ] > 0 } {
+			while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
+					set parWndLst [ lreplace $parWndLst 0 0 ]
+				}
+			if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
 				wm transient $w [ lindex $parWndLst 0 ] 
 			} {
 				wm transient $w .
@@ -50,6 +56,10 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	}
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
+	global tcl_platform
+	if { $tcl_platform(platform) != "windows"} {
+		wm iconbitmap $w @$RootLsd/$LsdSrc/lsd.xbm
+	}
 #	plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst)" 
 }
 
@@ -92,18 +102,22 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		set x [ getx $w $pos ]
 		set y [ gety $w $pos ]
-		if { $sizeX != 0 && $sizeY != 0 } {
-			wm geom $w ${sizeX}x${sizeY}+$x+$y 
-		} {
-			wm geom $w +$x+$y
+		if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
+			if { $sizeX != 0 && $sizeY != 0 } {
+				wm geom $w ${sizeX}x${sizeY}+$x+$y 
+			} {
+				wm geom $w +$x+$y
+			}
 		}
 	}
 	wm resizable $w $resizeX $resizeY
 	set parWndLst [ linsert $parWndLst 0 $w ]
 	if $grab {
 		global lstGrab
-		lappend lstGrab "$w [ grab current $w ]"
-		grab set $w 
+		if { ! [ info exists lstGrab ] || [ lsearch -glob $lstGrab "$w *" ] < 0 } {
+			lappend lstGrab "$w [ grab current $w ]"
+		}
+		grab set $w
 	}
 	wm deiconify $w
 	raise $w
@@ -138,23 +152,6 @@ proc destroytop w {
 		destroy $w
 		update
 #		plog "\ndestroytop (w:$w, parWndLst:$parWndLst)"
-	}
-}
-
-# procedure to save top window size
-proc save_top_size { } {
-	scan [ wm geometry . ] "%dx%d%*s" w h
-	variable wB $w
-	variable hB $h 
-}
-
-# procedure to restore top window size
-proc restore_top_size { } { 
-	variable wB
-	variable hB
-	scan [ wm geometry . ] "%dx%d%*s" w h
-	if { $wB != $w || $hB != $h } {
-		wm geometry . "[ expr $wB ]x$hB"
 	}
 }
 
@@ -234,7 +231,7 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 	pack $w.$fr -side right 
 }
 
-proc ok { w fr comOk comHelp } {
+proc okhelp { w fr comOk comHelp } {
 	frame $w.$fr
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	button $w.$fr.help -width -9 -text Help -command $comHelp
@@ -273,6 +270,21 @@ proc ok { w fr comOk } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
+proc xokhelpcancel { w fr nameX comX comOk comHelp comCancel } {
+	frame $w.$fr
+	button $w.$fr.x -width -9 -text $nameX -command $comX
+	button $w.$fr.ok -width -9 -text Ok -command $comOk
+	button $w.$fr.help -width -9 -text Help -command $comHelp
+	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
+	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	pack $w.$fr.x $w.$fr.ok $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 

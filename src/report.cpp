@@ -100,7 +100,6 @@ sprintf(name_rep, "report_%s.html", simul_name);
 sprintf(msg, "set mrep %s", name_rep);
 cmd(inter, msg);
 cmd(inter, "set choice [file exists $mrep]");
-cmd(inter, "wm iconify .");
 if(*choice == 1)
  {
   cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\\n\" -type okcancel -title Warning -icon warning -default cancel]");
@@ -112,10 +111,8 @@ if(*choice == 1)
 
 *choice=0;
 
-cmd(inter, "toplevel .w");
-cmd(inter, "wm title .w \"Report Generation\"");
-cmd(inter, "wm transient .w .");
-cmd(inter, "wm protocol .w WM_DELETE_WINDOW { }");
+cmd( inter, "newtop .w \"Report Generation\" { set choice 3 }" );
+
 cmd(inter, "label .w.l1 -text \"Report Generation\" -font {System 14 bold}");
 cmd(inter, "frame .w.f");
 cmd(inter, "label .w.f.l -text \"Model title: \"");
@@ -135,29 +132,10 @@ cmd(inter, "checkbutton .w.l.opt.text -text \"Simple text\" -variable ltext");
 cmd(inter, "pack .w.l.opt.l .w.l.opt.popup .w.l.opt.text -anchor w -side left");
 cmd(inter, "pack .w.l.opt");
 
-
-cmd(inter, "frame .w.b");
-cmd(inter, "button .w.b.ok -width -9 -text Ok -underline 0 -command {set choice 1}");
-cmd(inter, "button .w.b.b2 -width -9 -text \"New Name\" -underline 0 -command {set res [tk_getSaveFile -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2}");
-cmd(inter, "button .w.b.help -width -9 -text Help -command {LsdHelp menumodel.html#createreport}");
-cmd(inter, "button .w.b.esc -width -9 -text Cancel -underline 0 -command {set choice 3}");
-
-cmd(inter, "pack .w.b.ok .w.b.b2 .w.b.help .w.b.esc -side left");
-
-cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}");
-
-
-cmd(inter, "bind .w <Control-n> {.w.b.b2 invoke}");
-cmd(inter, "bind .w <Control-c> {.w.b.esc invoke}");
-cmd(inter, "bind .w <KeyPress-Escape> {.w.b.esc invoke}");
-
 cmd(inter, "checkbutton .w.code -text \"Include equations code\" -underline 8 -variable code");
 cmd(inter, "bind .w <Control-e> {.w.code invoke}");
 cmd(inter, "checkbutton .w.init -text \"Include initial values\" -underline 8 -variable init");
 cmd(inter, "bind .w <Control-i> {.w.init invoke}");
-
-
-
 
 cmd(inter, "frame .w.s -bd 2 -relief groove");
 cmd(inter, "label .w.s.lab -text \"Extra sections\"");
@@ -183,9 +161,6 @@ cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {se
 cmd(inter, "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
-
-
-
 
 cmd(inter, "frame .w.s.e2 -bd 2 -relief groove");
 cmd(inter, "label .w.s.e2.lab -text \"Second extra section\"");
@@ -213,15 +188,17 @@ cmd(inter, "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w ");
 Tcl_LinkVar(inter, "es1", (char *) &es1, TCL_LINK_INT);
 Tcl_LinkVar(inter, "es2", (char *) &es2, TCL_LINK_INT);
 
-
-
-
-
-
 cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
 
-cmd(inter, "pack .w.l1 .w.f .w.l .w.s .w.b");
-cmd(inter, "focus -force .w.b.ok");
+cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
+
+cmd( inter, "xokhelpcancel .w b Search { set res [tk_getSaveFile -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
+
+cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}");
+cmd(inter, "bind .w <Control-n> {.w.b.x invoke}");
+cmd(inter, "bind .w <Control-c> {.w.b.can invoke}");
+cmd(inter, "bind .w <Return> {.w.b.ok invoke}");
+
 sprintf(msg, "set code %d", code);
 cmd(inter, msg);
 sprintf(msg, "set init %d", init);
@@ -230,9 +207,8 @@ cmd(inter, msg);
 Tcl_LinkVar(inter, "code", (char *) &code, TCL_LINK_INT);
 Tcl_LinkVar(inter, "init", (char *) &init, TCL_LINK_INT);
 
+cmd(inter, "showtop .w centerS");
 cmd(inter, "focus -force .w.b.ok");
-cmd(inter, "bind .w <Return> {.w.b.ok invoke}");
-cmd(inter, "bind .w <Escape> {.w.b.esc invoke}");
 
 here_create_report:
   while(*choice==0)
@@ -243,45 +219,24 @@ Tcl_UnlinkVar(inter, "init");
 Tcl_UnlinkVar(inter, "es1");
 Tcl_UnlinkVar(inter, "es2");
 
-cmd(inter, "destroy .w");
+cmd(inter, "destroytop .w");
   if(*choice==2)
    { app=(char *)Tcl_GetVar(inter, "res",0);
      strcpy(name_rep, app);
      if(strlen(name_rep)==0)
-      {
-       cmd(inter, "wm deiconify .");
-       return;
-      }
+       goto here_create_report;
      frep=create_frames(name_rep);
    }
   else
    if(*choice==1)
      frep=create_frames(name_rep);
    else
-    {cmd(inter, "wm deiconify .");
      return;
-    }
-
-
 
 start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
- {*choice=0;
-  cmd(inter, "toplevel .warn_eq");
-  cmd(inter, "wm transient .warn_eq .");
-  cmd(inter, "label .warn_eq.lab1 -text \"Equation file\"");
-  sprintf(msg, "label .warn_eq.lab2 -text \"%s\" -foreground red", equation_name);
-  cmd(inter, msg);
-  cmd(inter, "label .warn_eq.lab3 -text \"not found\"");
-  cmd(inter, "pack .warn_eq.lab1 .warn_eq.lab2 .warn_eq.lab3");
-  cmd(inter, "frame .warn_eq.b");
-  cmd(inter, "button .warn_eq.b.s -width -9 -text Search -command {set res [file tail [tk_getOpenFile -title \"Load Equation File\" -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]; set choice 1}");
-  cmd(inter, "button .warn_eq.b.esc -width -9 -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .warn_eq.b.s .warn_eq.b.esc -side left");
-  cmd(inter, "pack .warn_eq.b");
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
-  cmd(inter, "destroy .warn_eq");
+ {
+  cmd( inter, "answer [ tk_messageBox -type okcancel -default ok -icon warning -title Warning -message \"Equation file '%s' not found.\n\nPress 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
 
 if(*choice==1)
  {

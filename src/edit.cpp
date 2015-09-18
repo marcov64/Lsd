@@ -72,6 +72,8 @@ void link_data(object *root, char *lab);
 
 extern Tcl_Interp *inter;
 extern char msg[];
+extern char *simul_name;	// simulation name to use in title bar
+extern bool unsavedChange;	// control for unsaved changes in configuration
 
 void go_next(object **t);
 object *go_brother(object *cur);
@@ -132,7 +134,8 @@ max_depth=1;
 while(*choice==0)
 {
   // reset title and destroy command because may be coming from edit_data
-  cmd( inter, "settop .ini \"Lsd Object Number Editor\" { set choice 1; set result -1 }" );
+  sprintf( ch, "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsavedChange ? "*" : "", simul_name );
+  cmd( inter, ch );
   
   cmd(inter, "frame .ini.obj");
   cmd(inter, "pack .ini.obj -fill both -expand yes");

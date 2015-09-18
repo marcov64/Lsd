@@ -139,11 +139,9 @@ if(code!=TCL_OK)
   if ( firstCall )
   {
 	  firstCall = false;
-	  sprintf( msg, "\n\n====================> NEW TCL SESSION\n", ftime );
-	  fprintf(f,"%s", msg);
+	  fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
   }
-  sprintf( msg, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
-  fprintf(f,"%s", msg);
+  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
   fclose(f);
   plog("\nTcl-Tk Error. See file tk_err.err\n");
  }
@@ -1691,13 +1689,12 @@ if(i==1)
  }
  
  cmd(inter, "set w .desc_$vname");
- cmd(inter, "toplevel $w");
- cmd(inter, "wm transient $w .");
  cur=search_description(lab);
  if(!strcmp(cur->type,"Parameter") )
-   cmd(inter, "wm title $w \"Description: Parameter $vname\"");
+   cmd( inter, "newtop $w \"Description: Parameter $vname\" { destroy .desc_%s }" );
  else
-   cmd(inter, "wm title $w \"Description: Variable $vname\"");  
+   cmd(inter, "newtop $w \"Description: Variable $vname\" { destroy .desc_%s }");  
+
  cmd(inter, "frame $w.f");
  cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
  cmd(inter, "text $w.f.text -wrap word -width 60 -height 5 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
@@ -1707,33 +1704,26 @@ if(i==1)
  sprintf(msg, "$w.f.text insert end \"%s\"",cur->text);
  cmd(inter, msg);
  cmd(inter, "frame $w.b");
- sprintf(msg, "button $w.b.close -width -9 -text Close -command {destroy .desc_%s}",lab);
- cmd(inter, msg); 
  sprintf(msg, "button $w.b.save -width -9 -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}",lab, lab, lab);
  cmd(inter, msg); 
  sprintf(msg, "button $w.b.eq -width -9 -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}",lab, lab);
  cmd(inter, msg); 
  sprintf(msg, "button $w.b.us -width -9 -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}",lab, lab);
  cmd(inter, msg); 
- sprintf(msg, "button $w.b.help -width -9 -text Help -command {LsdHelp equation.html; set raise_description 1}");
- cmd(inter, msg); 
-
-
  if(!strcmp(cur->type, "Parameter"))
-   cmd(inter, "pack $w.b.close $w.b.save $w.b.us $w.b.help -side left -expand yes");
+   cmd(inter, "pack $w.b.save $w.b.us -padx 10 -pady 5 -side left");
  else
-   cmd(inter, "pack $w.b.close $w.b.save $w.b.eq $w.b.us $w.b.help -side left -expand yes");
+   cmd(inter, "pack $w.b.save $w.b.eq $w.b.us -padx 5 -pady 5 -side left");
   
- cmd(inter, "pack $w.b -fill x -expand yes");
-
-
+ cmd(inter, "pack $w.b");
+ 
+ sprintf( msg, "donehelp $w b2 { destroy .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab );
+ cmd(inter, msg); 
 
 sprintf(msg, "set vname %s",lab);
 cmd(inter, msg);
 cmd(inter, "set raise_description 1");
-//cmd(inter, "wm resizable .desc_$vname 0 0");
-cmd(inter, "raise .desc_$vname .");
-
+cmd(inter, "showtop .desc_$vname");
 
 }
 void empty_descr(void)
@@ -1750,7 +1740,7 @@ descr=NULL;
 }
 
 
-void auto_document(int *choice, char const *lab, char const *which)
+void auto_document( int *choice, char const *lab, char const *which, bool append = false )
 {
 FILE *f;
 description *cd;
@@ -1792,6 +1782,13 @@ for(cd=descr; cd!=NULL; cd=cd->next)
          if(str1[i]=='/' && str1[i+1]=='*')
           { done=0; //beginning of a multiline comment
            i+=2;
+		   // discard initial empty line
+		   while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
+				i += 2;
+		   while ( str1[ i ] == '\n' )
+				i++;
+		   if ( str1[ i ] == '\0')
+				continue;
           } 
          if(str1[i]=='/' && str1[i+1]=='/')
           { done=2; //beginning of a single line comment
@@ -1821,16 +1818,16 @@ for(cd=descr; cd!=NULL; cd=cd->next)
    
   } //end of the if(cd==Variable)
   
-  return_where_used(cd->label, str1); 
-  sprintf(msg, "'%s' appears in the equation for: ",cd->label);
-  app[j++]='\n';
   app[j]=(char)NULL; //close the string
-  strcat(app, msg);
-  strcat(app, str1);
-  strcat(app, ".");
+  return_where_used(cd->label, str1); 
+  if ( append && strcmp( cd->text, "(no description available)" ) )
+	sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s.", cd->text, app, cd->label, str1 );
+  else
+  	sprintf( msg, "%s\n'%s' appears in the equation for: %s.", app, cd->label, str1 );
+
   delete[] cd->text;
-  cd->text= new char[strlen(app)+1];
-  strcpy(cd->text, app);
+  cd->text= new char[strlen(msg)+1];
+  strcpy(cd->text, msg);
   } //end of the label to document
  }//end of the for(desc)
 
@@ -1843,7 +1840,7 @@ char *r;
 
 scan_used_lab(lab, &choice);
 cmd(inter, "set l [join [$list.l get 0 end] \", \"]");
-cmd(inter, "destroy $list"); 
+cmd(inter, "destroytop $list"); 
 r=(char *)Tcl_GetVar(inter, "l",0);
 strcpy(s, r);
 
@@ -1877,9 +1874,7 @@ dimH=pixH/nrow;
 dimW=pixW/ncol;
 cmd(inter, "if {[winfo exists .lat]==1} {destroy .lat} {}");
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-cmd(inter, "toplevel .lat");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .lat @$RootLsd/$LsdSrc/lsd.xbm} {}");
-sprintf(msg, "wm title .lat \"Lsd Lattice (%.0lf x %.0lf)\"",nrow, ncol);
+sprintf( msg, "newtop .lat \"Lsd Lattice (%.0lf x %.0lf)\" { destroy .lat }", nrow, ncol );
 cmd(inter, msg);
 
 cmd(inter, "set lat_update 1");
@@ -1887,7 +1882,6 @@ cmd(inter, "bind .lat <1> {if {$lat_update == 1 } {set lat_update 0; } {set lat_
 cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 
-//sprintf(msg, "canvas .lat.c -height %d -width %d -bg $c%d", (int)(dim*nrow), (int)(dim*ncol),init_color);
 if(init_color==1001)
 {
 sprintf(msg, "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW);
