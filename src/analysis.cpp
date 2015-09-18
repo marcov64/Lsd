@@ -453,7 +453,7 @@ cmd(inter, "$w add command -label \"Quit and return to Browser\" -command {set c
 cmd(inter, "set w .da.m.gp");
 cmd(inter, ".da.m add cascade -label Gnuplot -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Gnuplot\" -command {if {$tcl_platform(platform) == \"unix\"} {exec xterm -e gnuplot &} {if {$tcl_platform(os) == \"Windows NT\"} {exec wgnuplot &} {exec start wgnuplot &}}} -underline 0");
+cmd( inter, "$w add command -label \"Gnuplot\" -command { if { $tcl_platform(platform) == \"unix\" } { set answer [ catch { exec xterm -e gnuplot & } ] } { if {$tcl_platform(os) == \"Windows NT\"} { set answer [ catch { exec wgnuplot & } ] } { set answer [ catch { exec start wgnuplot & } ] } }; if { $answer != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$answer' during setup.\n\nPlease check if Gnuplot is set up properly (Linux and Mac only).\" } } -underline 0");
 cmd(inter, "$w add command -label \"Gnuplot Options...\" -command {set choice 37} -underline 8");
 
 
@@ -5649,38 +5649,33 @@ delete[] end;
 void show_plot_gnu(int n, int *choice, int type)
 {
 
-char dirname[200];
-
-cmd(inter, "if { $tcl_platform(platform)==\"unix\" } {set choice 1 } {set choice 0} ");
-if(*choice==1)
-  sprintf(dirname, "plotxy_%d/", cur_plot);
-else
-  sprintf(dirname, "plotxy_%d\\", cur_plot);
-
-
-
-//cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {exec gnuplot gnuplot.lsd} {if {$tcl_platform(os) == \"Windows NT\"} { if { $tcl_platform(os) == \"4.0\" } {exec cmd /c start wgnuplot gnuplot.lsd} {exec wgnuplot gnuplot.lsd} } {exec start wgnuplot gnuplot.lsd}}");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} { if { $tcl_platform(os) == \"4.0\" } {set choice 2} {set choice 3} } {set choice 4}}");
 
 switch (*choice)
 {
 //unix
-case 1: sprintf(msg, "exec gnuplot gnuplot.lsd");
+case 1: sprintf( msg, "set choice [ catch { exec gnuplot gnuplot.lsd } ]" );
 break;
 //Win NT
-case 2: sprintf(msg, "exec cmd /c start wgnuplot gnuplot.lsd");
+case 2: sprintf( msg, "set choice [ catch { exec cmd /c start wgnuplot gnuplot.lsd } ]" );
 break;
 //Win 2K
-case 3: sprintf(msg, "exec wgnuplot gnuplot.lsd");
+case 3: sprintf( msg, "set choice [ catch { exec wgnuplot gnuplot.lsd } ]" );
 break;
 //Win 95/98/ME
-case 4: sprintf(msg, "exec start wgnuplot gnuplot.lsd");
+case 4: sprintf( msg, "set choice [ catch { exec start wgnuplot gnuplot.lsd } ]" );
 break;
-
-
 }
 
 cmd(inter, msg);
+
+if ( *choice != 0 )			// Gnuplot failed
+{
+	cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during setup.\n\nPlease check if you have selected an adequate configuration for the graph and if Gnuplot is set up properly (Linux and Mac only).\"" );
+	*choice=0;
+	return;
+}
+	
 sprintf(msg, "set p .da.f.new%d", n);
 cmd(inter, msg);
 
@@ -5710,22 +5705,18 @@ if(type==0)
    type=1;
 }   
    
-
-
-
 if(type==2)
  {//plot with external gnuplot
- cmd(inter, "destroy $p");
-   cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {exec xterm -e gnuplot gnuplot.gp &} {if {$tcl_platform(os) == \"Windows NT\"} {exec wgnuplot gnuplot.gp &} {exec start wgnuplot gnuplot.gp &}}");
+   cmd(inter, "destroy $p");
+   cmd(inter, "if {$tcl_platform(platform) == \"unix\"} { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } {if {$tcl_platform(os) == \"Windows NT\"} { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }");
+   if ( *choice != 0 )			// Gnuplot failed
+		cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during plotting.\n\nPlease check if you have selected an adequate configuration for the graph.\"" );
  *choice=0;
  return;
  }
 
-
-
 cmd(inter, "source plot.file");
 
-cmd(inter, "update");
 cmd(inter, "update idletasks");
 cmd(inter, "set choice 0");
 
