@@ -468,6 +468,9 @@ cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
 cmd(inter, ".da.m add cascade -label Help -menu $w -underline 0");
 cmd(inter, "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0");
 cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
+cmd( inter, "$w add separator" );
+sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+cmd( inter, msg );
 
 cmd(inter, ".da configure -menu .da.m");
 

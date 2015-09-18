@@ -11,13 +11,15 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
 
-
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <limits.h>
+
+// LSD version strings, for About... boxes and code testing
+#define _LSD_VERSION_ "7.0"
+#define _LSD_DATE_ "August 2015"
 
 // comment the next line to compile without libz. It will not be possible to generate zipped result files.
 #define LIBZ 

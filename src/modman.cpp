@@ -57,6 +57,9 @@ The widget of importance are:
 #include <time.h>
 #include <sys/stat.h>
 
+// LSD version strings, for About... boxes and code testing
+#define _LSD_VERSION_ "7.0"
+#define _LSD_DATE_ "August 2015"
 
 #define SHOW_TK_ERR true		// define to show Tk errors as dialogs
 
@@ -259,7 +262,9 @@ FILE *f;
 //Initialize the tcl interpreter,
 inter=InterpInitWin();
 
-
+//Set variables in TCL interpreter
+Tcl_SetVar( inter, "_LSD_VERSION_", _LSD_VERSION_, 0 );
+Tcl_SetVar( inter, "_LSD_DATE_", _LSD_DATE_, 0 );
 
 if(argn>1)
  {
@@ -535,7 +540,8 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
 
-cmd( inter, "$w add command -label \"About LMM...\" -command { tk_messageBox -type ok -icon info -title \"About LMM\" -message \"Version 7.0 \n\nAugust 2015\" } -underline 0" ); 
+sprintf( msg, "$w add command -label \"About LMM...\" -command { tk_messageBox -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+cmd( inter, msg );
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");

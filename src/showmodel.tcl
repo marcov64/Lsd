@@ -156,7 +156,9 @@ $m add command -label "Delete..." -underline 0 -accelerator Delete -command {del
 set m .l.m.help 
 menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Help -menu $m -underline 0
-$m add command -label "Help" -underline 0 -accelerator F1 -command {LsdHelp LMM_help.html#select}
+$m add command -label "Help" -underline 0 -accelerator F1 -command { LsdHelp LMM_help.html#select }
+$m add separator
+$m add command -label "About Lsd..." -underline 0 -command { tk_messageBox -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" }
 
 .l configure -menu .l.m
 
