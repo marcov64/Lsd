@@ -93,6 +93,8 @@ extern int lattice_type;
 extern int t;
 extern int running;
 extern char nonavail[];	// string for unavailable values
+extern char *path;	// configuration folder path
+
 
 double ran1(long *idum);
 #define RND (double)ran1(&idum)
@@ -120,17 +122,22 @@ bool firstCall = true;
 void cmd(Tcl_Interp *inter, char const *cm)
 {
 
-int code;
-FILE *f;
-time_t rawtime;
-struct tm *timeinfo;
-char ftime[80];
+int code = Tcl_Eval( inter, cm );
 
-//code=Tcl_VarEval(inter, cm, NULL);
-code=Tcl_Eval(inter, cm);
+if( code != TCL_OK )
+ {
+  FILE *f;
+  char fname[ 300 ];
+  time_t rawtime;
+  struct tm *timeinfo;
+  char ftime[ 80 ];
+  
+  if( strlen( path ) > 0 )
+	sprintf( fname, "%s/tk_err.err", path );
+  else
+	sprintf( fname, "tk_err.err" );
 
-if(code!=TCL_OK)
- {f=fopen("tk_err.err","a");
+  f = fopen( fname,"a" );
 
   time( &rawtime );
   timeinfo = localtime( &rawtime );
@@ -142,8 +149,10 @@ if(code!=TCL_OK)
 	  fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
   }
   fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
-  fclose(f);
-  plog("\nTcl-Tk Error. See file tk_err.err\n");
+  fclose( f );
+  plog( "\nTcl-Tk Error. See file '" );
+  plog( fname );
+  plog( "'\n" );
  }
 
 }
