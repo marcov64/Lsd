@@ -39,7 +39,7 @@ extern long idum;
 extern int sim_num;
 extern char *simul_name;	// configuration name being run (for saving networks)
 extern char *path;			// folder where the configuration is
-
+extern bool invalidHooks;	// flag to invalid hooks pointers (set by simulation)
 
 void error(char *);
 double log(double v);

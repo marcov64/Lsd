@@ -3,7 +3,7 @@ SRC_DIR=$(SRC)/
 LSDROOT=.
 DUMMY=
 INCLUDE_LIB=
-SSWITCH_CC=-O2
+SSWITCH_CC=-march=native -mtune=native -O3
 TARGETNW=$(TARGET)NW
 
 $(TARGETNW): $(SRC_DIR)choose.h  model_options.txt $(SRC_DIR)system_options.txt $(SRC_DIR)fun_head.h $(SRC_DIR)main_gnuwin.obj \

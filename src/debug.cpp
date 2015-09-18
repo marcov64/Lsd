@@ -120,6 +120,7 @@ void entry_new_objnum(object *c, int *choice, char const *tag);
 void set_all(int *choice, object *original, char *lab, int lag);
 
 lsdstack *asl=NULL;
+bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
 
 /*******************************************
 DEB
@@ -365,7 +366,30 @@ case 4: if( r->next!=NULL)
 
 			break;
 case 21: if(r->hook!=NULL)
+		{
+			if ( ! invalidHooks )
+			{
+				int lstUpd;
+				// check if the hook contains a valid Lsd object pointer (not very effective, most likely will crash...)
+				try { lstUpd = r->hook->lstCntUpd; }
+				catch ( ... ) {	lstUpd = 0; }
+				
+				if ( lstUpd <= 0 || lstUpd > t )
+				{
+					cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Invalid hook pointer.\n\nCheck if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"");
+					choice = 0;
+					break;
+				}
+				
 				choice=deb(r->hook,c, lab, res);
+			}
+			else
+			{
+				cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"This option is unavailable.\n\nYour code is using non-standard pointers('invalidHooks = true').\"");
+				choice = 0;
+				break;
+			}
+		}
 		  else
 			 choice=0;
 
