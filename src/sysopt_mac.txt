@@ -10,7 +10,7 @@ INCLUDE_LIB=-I/opt/X11/include
 CC=g++
 SRC=src
 EXTRA_PAR=-lz
-SSWITCH_CC=-O2
+SSWITCH_CC=-march=native -O3
 EXT=
 
 # Set the complete option for the libraries to link to the models.

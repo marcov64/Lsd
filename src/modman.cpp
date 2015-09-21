@@ -302,8 +302,8 @@ cmd(inter, "lappend ml $RootLsd");
 cmd(inter, "array set env $ml");
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
-cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
+cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
 
 cmd(inter, "set Terminal $DefaultTerminal");
 cmd(inter, "set HtmlBrowser $DefaultHtmlBrowser");
@@ -311,11 +311,7 @@ cmd(inter, "set fonttype $DefaultFont");
 cmd(inter, "set wish $DefaultWish");
 cmd(inter, "set LsdSrc src");
 
-// Handles Windows 32 and 64-bit versions (at run time)
-if((size_t)-1 > 0xffffffffUL)  // test for 64-bit address space
- cmd(inter, "if {$tcl_platform(os) == \"Windows NT\"} {set LsdGnu gnu64} {set LsdGnu gnu}");
-else
- cmd(inter, "set LsdGnu gnu");
+cmd(inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } {set LsdGnu gnu} {set LsdGnu gnu64}");
 	
 cmd(inter, "set choice [file exist $RootLsd/lmm_options.txt]");
 if(choice==1)
@@ -513,7 +509,7 @@ cmd(inter, "$w add command -label \"Show Equations\" -state disabled -underline 
 cmd(inter, "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}");
 cmd(inter, "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Model Compilation Options...\" -underline 2 -state disabled -command {set choice 48}");
+cmd(inter, "$w add command -label \"Model Compilation Options...\" -underline 4 -state disabled -command {set choice 48}");
 cmd(inter, "$w add command -label \"System Compilation Options...\" -underline 0 -command {set choice 47}");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0");
@@ -683,9 +679,9 @@ cmd(inter, "bind .f.t.t <Control-comma> {set choice 65}");
 cmd(inter, "bind .f.t.t <Control-period> {set choice 66}");
 cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}} {}");
-cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\" && $tcl_platform(platform)!= \"Darwin\"} {bind .f.t.t <Control-c> {tk_textCopy .f.t.t}} {}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}} {}");
-//cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\" && $tcl_platform(platform) != \"Darwin\"} {bind .f.t.t <Control-v> {.f.t.t yview scroll -1 pages; tk_textPaste .f.t.t}} {}");
+cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
+//cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-v> { .f.t.t yview scroll -1 pages; tk_textPaste .f.t.t } }" );
 
 cmd(inter, "bind .f.t.t <KeyPress-Return> {+set choice 16}");
 //cmd(inter, "bind .f.t.t <KeyPress-Return> {+lappend ud [.f.t.t get 0.0 \"end - 1 chars\"]; lappend udi [.f.t.t index insert]}");
@@ -1502,13 +1498,11 @@ if(s==NULL || !strcmp(s, ""))
   if(f!=NULL && f!=(FILE *)EOF)
    {strcpy(str1, str+7);
     
-   //cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"5.0\" || $tcl_platform(osVersion) == \"5.1\" || $tcl_platform(osVersion) == \"5.2\"} {set choice 5} {set choice 4}} {set choice 3}}");
-cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {set choice 5} {set choice 3}}");
+     cmd( inter, "if [ string equal -nocase $tcl_platform(platform) unix ] { set choice 1 } { if [ string equal -nocase $tcl_platform(os) \"Windows NT\" ] { if [ string equal $tcl_platform(osVersion) \"4.0\" ] { set choice 4 } { set choice 5 } } { set choice 3 } }");
    if(choice==3)
     {
      
     cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
-//    sprintf(msg, "exec start /min gdb_bat %s $SETDIR &", str1); //Win 9x
     sprintf(msg, "exec start gdb_batw9x %s &", str1); //Win 9x    
 	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
     }
@@ -1522,8 +1516,6 @@ cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_pl
    if(choice==5)
     {//Windows 2000
      
-//     cmd(inter, "set answer [tk_messageBox -type yesno -title GDB -icon question -default yes -message \"Use text-based GDB?\"]");
-//     cmd(inter, "if {$answer == \"yes\"} {set nowin \"-nw\"} {set nowin \"\"}");
     cmd(inter, "set nowin \"\"");
     sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/$LsdGnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
     cmd(inter, msg);
@@ -4721,10 +4713,13 @@ cmd(inter, "cd $RootLsd");
 cmd(inter, "set choice [file exists $LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {file copy $RootLsd/$LsdSrc/sysopt_windows.txt $RootLsd/$LsdSrc/system_options.txt} {file copy $RootLsd/$LsdSrc/sysopt_linux.txt $RootLsd/$LsdSrc/system_options.txt}");
-   cmd(inter, "set f [open model_options.txt w]");
-   cmd(inter, "puts -nonewline $f $d");
+	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+    cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
+    cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
+    cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
+    cmd(inter, "puts -nonewline $f [read $f1]");
    cmd(inter, "close $f");
+    cmd(inter, "close $f1");    
  }
 choice=0; 
 
@@ -4781,22 +4776,10 @@ cmd(inter, "frame .l.t");
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
 cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 16 -relief sunken -yscrollcommand \".l.t.yscroll set\"");
 
-if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
-  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-march=native -mtune= native -O3\\n\"");
-else
-  cmd(inter, "set win_default \"TCL_VERSION=85\\nTK_VERSION=85\\nLSDROOT=[pwd]\\nDUMMY=mwindows\\nPATH_TCL_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nPATH_TK_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_TCL_HEADER=\\$(LSDROOT)/$LsdGnu/include\\nPATH_LIB=\\$(LSDROOT)/$LsdGnu/lib\\nINCLUDE_LIB=-I\\$(LSDROOT)/$LsdGnu/include\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
-
-cmd(inter, "set lin_default \"TCL_VERSION=8.5\\nTK_VERSION=8.5\\nLSDROOT=[pwd]\\nDUMMY=\\nPATH_TCL_LIB=.\\nPATH_TK_LIB=.\\nPATH_TK_HEADER=\\nPATH_TCL_HEADER=\\nPATH_LIB=.\\nINCLUDE_LIB=\\nCC=g++\\nSRC=src\\nEXTRA_PAR=-lz\\nSSWITCH_CC=-O2\\n\"");
-
 cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.os");
 
-if((size_t)-1 > 0xffffffffUL)  // test for Windows 64-bit 
-  cmd(inter, "button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows64.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
-else
-  cmd(inter, "button .l.t.d.os.win -width -15 -text \"Default Windows\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_windows.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
-
-
+cmd( inter, "if [ string equal -nocase $tcl_platform(machine) intel ] { button .l.t.d.os.win -width -15 -text \"Default Windows x32\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win32.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } { button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win64.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } " ); 
 cmd(inter, "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
 cmd(inter, "button .l.t.d.os.mac -width -15 -text \"Default Mac OSX\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 cmd(inter, "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 1 -pady 5 -side left");
@@ -4851,6 +4834,13 @@ cmd(inter, "set choice [file exists model_options.txt]");
 
 cmd(inter, "set dir [glob *.cpp]");
 cmd(inter, "set b [lindex $dir 0]");
+
+cmd(inter, "set gcc_base \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC_LNK=\"");
+cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native\" }" );
+cmd(inter, "set gcc_conf \"$gcc_base\\n$gcc_par\"");
+cmd(inter, "set gcc_deb \"-g\"");
+cmd(inter, "set gcc_opt \"-O3\"");
+
 if(choice==1)
  {
   cmd(inter, "set f [open model_options.txt r]");
@@ -4861,7 +4851,7 @@ if(choice==1)
 else
   {
    cmd(inter, "tk_messageBox -type ok -icon warning -message \"Model compilation options not found.\\n\\nThe system will use default values.\" -title Warning");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
+   cmd(inter, "set a \"$gcc_conf $gcc_opt\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -4874,16 +4864,15 @@ cmd(inter, "frame .l.t");
 cmd(inter, "scrollbar .l.t.yscroll -command \".l.t.text yview\"");
 cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 10 -relief sunken -yscrollcommand \".l.t.yscroll set\"");
 
-cmd(inter, "set default \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
-
-
 cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.opt");
-cmd(inter, "button .l.t.d.opt.def -width -15 -text \"Default Values\" -command {.l.t.text delete 1.0 end; .l.t.text insert end \"$default\"}");
+cmd(inter, "if { ! [ info exists debug ] } { set debug 0 }; checkbutton .l.t.d.opt.debug -text Debug -variable debug");
+
+cmd( inter, "button .l.t.d.opt.def -width -15 -text \"Default Values\" -command { if { $debug == 0 } { set default \"$gcc_conf $gcc_opt\\n\" } { set default \"$gcc_conf $gcc_deb\\n\" }; .l.t.text delete 1.0 end; .l.t.text insert end \"$default\" }" );
 
 cmd(inter, "button .l.t.d.opt.cle -width -15 -text \"Clean Pre-Compiled Files\" -command { if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { foreach i $objs { catch { file delete -force $i } } } }");
 
-cmd(inter, "pack .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left");
+cmd(inter, "pack .l.t.d.opt.debug .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left");
 
 cmd(inter, "frame .l.t.d.b");
 cmd(inter, "button .l.t.d.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -5584,7 +5573,13 @@ cmd(inter, "close $f");
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {file copy $RootLsd/$LsdSrc/sysopt_windows.txt $RootLsd/$LsdSrc/system_options.txt} {file copy $RootLsd/$LsdSrc/sysopt_linux.txt $RootLsd/$LsdSrc/system_options.txt}");
+	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+    cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
+    cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
+    cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
+    cmd(inter, "puts -nonewline $f [read $f1]");
+    cmd(inter, "close $f");
+    cmd(inter, "close $f1");    
  }
 choice=0; 
 
@@ -5602,7 +5597,6 @@ cmd(inter, "set f [open makefile w]");
 cmd(inter, "puts -nonewline $f $c");
 cmd(inter, "close $f");
 cmd(inter, "update");
-//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/$LsdGnu/bin/crt0.o .} {}");
 }
 
 
@@ -5633,7 +5627,13 @@ cmd(inter, "close $f");
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {file copy $RootLsd/$LsdSrc/sysopt_windows.txt $RootLsd/$LsdSrc/system_options.txt} {file copy $RootLsd/$LsdSrc/sysopt_linux.txt $RootLsd/$LsdSrc/system_options.txt}");
+	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+    cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
+    cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
+    cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
+    cmd(inter, "puts -nonewline $f [read $f1]");
+    cmd(inter, "close $f");
+    cmd(inter, "close $f1");    
  }
 choice=0; 
 
@@ -5641,7 +5641,8 @@ cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt r]");
 cmd(inter, "set d [read -nonewline $f]");
 cmd(inter, "close $f");
 
-cmd(inter, "set f [open $RootLsd/$LsdSrc/makefile_baseNW.txt r]");
+cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW32.txt } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW.txt }" );
+cmd(inter, "set f [open $fnameNW r]");
 cmd(inter, "set b [read -nonewline $f]");
 cmd(inter, "close $f");
 
@@ -5651,7 +5652,6 @@ cmd(inter, "set f [open makefileNW w]");
 cmd(inter, "puts -nonewline $f $c");
 cmd(inter, "close $f");
 cmd(inter, "update");
-//cmd(inter, "if {$tcl_platform(platform) == \"windows\" && [file exists crt0.o] == 0} { file copy $RootLsd/$LsdGnu/bin/crt0.o .} {}");
 }
 
 
