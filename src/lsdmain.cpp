@@ -343,29 +343,15 @@ fclose(f);
 #else 
 Tcl_FindExecutable(argv[0]); 
 inter=InterpInitWin(tcl_dir);
+if(inter==NULL)
+ myexit(4);
+
 eq_file=upload_eqfile();
 lsd_eq_file[0]=(char)NULL;
-/* this does not work with cygwin
-cmd(inter, "pwd");
-sprintf(msg, "%s",*argv);
-if(!strncmp(msg, "//", 2))
- sprintf(str, "%s",msg+3);
-else
- sprintf(str, "%s",msg);
 
-
-
-sprintf(msg, "if {[file exists [file dirname \"%s\"]]==1} {cd [file dirname \"%s\"]} {cd [pwd]}",str, str);
-cmd(inter, msg);
-
-cmd(inter, "pwd");
-*/
 // use the new exec_path variable to change to the model directory
 sprintf(msg, "cd \"%s\"", exec_path);
 cmd(inter, msg);
-
-if(inter==NULL)
- myexit(4);
 
 Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug_flag", (char *) &debug_flag, TCL_LINK_INT);
@@ -381,13 +367,18 @@ if(debug_flag==1)
  }
 
 cmd(inter, "tk appname browser");
-cmd(inter, "set RootLsd [pwd]");
-lsdroot=getenv("LSDROOT");
-if(lsdroot==NULL)
+// check if LSDROOT already exists and use it if so, if not, search the current directory tree
+cmd( inter, "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
+cmd( inter, "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
+lsdroot = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
+if ( lsdroot == NULL || strlen( lsdroot ) == 0 )
  {
- cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set.\\n\\nProgram aborted.\"");
+ cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set, program aborted.\n\nPlease make sure the environment variable LSDROOT points to the directory where Lsd is installed.\"");
  exit(6);
  }
+strcpy( str, lsdroot );
+lsdroot = ( char * ) calloc( strlen( str ) + 1, sizeof ( char ) );
+strcpy( lsdroot, str );
 sprintf(msg, "set RootLsd \"%s\"",lsdroot);
 len=strlen(msg);
 for(i=0; i<len; i++)
@@ -1099,12 +1090,8 @@ Calls tclinit and tkinit, managing he errors
 WARNING !!!
 This function presumes the installation of a /gnu directory along
 the model's one. Tcl and Tk initialization files MUST be in
-/gnu/share/tcl8.0
-/gnu/share/tk8.0
-
-!!!!!!!!!!!!!!!!!! NEWER: UPDATE TO 8.3 !!!!!!!!!!!!!!!!!!!!!!
-/gnu/lib/tcl8.3
-/gnu/lib/tk8.3
+/gnu[64]/lib/tcl8.X
+/gnu[64]/lib/tk8.X
 
 *********************************/
 
@@ -1114,45 +1101,25 @@ the model's one. Tcl and Tk initialization files MUST be in
 Tcl_Interp *InterpInitWin(char *tcl_dir)
 {
 Tcl_Interp *app;
-char *s, *lsdroot;
+char *s;
 FILE *f;
 
 app=Tcl_CreateInterp();
 
 if(Tcl_Init(app)!=TCL_OK)
- {
-  lsdroot=getenv("LSDROOT");
-  if(lsdroot==NULL)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
-    fprintf(f,"Environmental variable 'LSDROOT' is not set, probably because you are using Win95/98/ME and no environmental space is available.\nTo fix the problem see in the LMM manual in the section concerning the compilation errors.");
+    fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
-    cmd(app, "set a [pwd]");
     exit(12);
    }
+
    
-  sprintf(msg, "set tcl_library {%s/gnu/lib/tcl8.3}", lsdroot);
-  cmd(app, msg);
-  sprintf(msg, "set tk_library {%s/gnu/lib/tk8.3}", lsdroot);
-  cmd(app, msg);
-  if(Tcl_Init(app)!=TCL_OK)
+if(Tk_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
     exit(13);
    }
-
-
-
- }
-
-
-if(Tk_Init(app)!=TCL_OK)
-   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
-    fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
-    fclose(f);
-    exit(14);
-   }
-
 
 return app;
 }

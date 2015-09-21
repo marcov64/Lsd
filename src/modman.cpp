@@ -94,33 +94,12 @@ char tbarsize[]="80";		// size in pixels of bottom taskbar (exclusion area)
 
 int main(int argn, char **argv)
 {
-/*
-Current attempt to get rid of the necessity to set the PATH variable under Windows
-I will keep on working on this.
-
-char *e, *loc, newpath[500], here[200];
-int i;
-e=getenv("PATH\0");
-if(e!=(char *)NULL)
- {
-  loc=strstr(e, "gnu/bin");
-  if(loc==(char *)NULL)
-   {strcpy(here, argv[0]);
-    loc=strstr(here, "lmm");
-    for(i=0; strcmp(here+i,loc); i++);
-    here[i-1]='\0';
-    strcat(here, "/gnu/bin");  // remember to check for _WIN64
-    sprintf(newpath, "PATH=%s;%s",e,here);
-    getenv(newpath);
-
-   }
- }
-*/
 
 #ifndef TK_LOCAL_APPINIT
 #define TK_LOCAL_APPINIT Tcl_AppInit    
 #endif
-    extern int TK_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
+
+extern int TK_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
     
     /*
      * The following #if block allows you to change how Tcl finds the startup
@@ -129,11 +108,10 @@ if(e!=(char *)NULL)
      */
     
 #ifdef TK_LOCAL_MAIN_HOOK
-    extern int TK_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
-    TK_LOCAL_MAIN_HOOK(&argc, &argv);
+extern int TK_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
+TK_LOCAL_MAIN_HOOK(&argc, &argv);
 #endif
 
-//    Tk_Main(argc, argv, TK_LOCAL_APPINIT);
 Tcl_FindExecutable(argv[0]);
 ModManMain(argn, argv);
 Tcl_Exit(0);
@@ -156,33 +134,18 @@ char *s;
 int res;
 app=Tcl_CreateInterp();
 
-//cmd(app, "puts $tcl_library");
-//cmd(app, "source init.tcl");
-//cmd(app, "source C:/Lsd5.5/gnu/lib/tk8.4/tk.tcl");  // remember to check for _WIN64
-
-//Tcl_SetVar(app, "tcl_library", "C:/Lsd5.5/gnu/lib/tcl8.4", TCL_APPEND_VALUE);
-/*
-cmd(app, "puts $tcl_library");
-return app;
-
-
-    cmd(app, "set tk_library {gnu/lib/tk8.4}");
-*/    
-//cmd(app, "lappend tcl_libPath {gnu/lib/tcl8.4}");
-
 if((res=Tcl_Init(app))!=TCL_OK)
  {
   char estring[255];
-  sprintf(estring,"Tcl Error = %d : %s\n",res,app->result);
+  sprintf(estring,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\nTcl Error = %d : %s\n",res,app->result);
   errormsg(estring,NULL);
   exit(1);
  
  }
 
-//cmd(app, "set env(DISPLAY) :0.0");
 if((res=Tk_Init(app))!=TCL_OK)
  {
-  errormsg( (char *)"Tk Initialization failed. Check directory structure:\nLSDHOME\\gnu[64]\\lib\\tk8.5\n", NULL);
+  errormsg( (char *)"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n", NULL);
   char estring[255];
   sprintf(estring,"Tk Error = %d : %s\n",res,app->result);
   errormsg(estring,NULL);
@@ -293,13 +256,10 @@ Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 
 sprintf(msg, "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file dirname \"%s\"]; set choice 1} {cd [pwd]; set choice 0}",str, str);
 cmd(inter, msg);
-cmd(inter, "set RootLsd [pwd]");
-s=(char *)Tcl_GetVar(inter, "RootLsd",0);
-strcpy(msg, s);
 
-cmd(inter, "lappend ml LSDROOT");
-cmd(inter, "lappend ml $RootLsd");
-cmd(inter, "array set env $ml");
+// check if LSDROOT already exists and use it if so
+cmd( inter, "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
+cmd( inter, "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSDROOT) $RootLsd }" );
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
@@ -354,7 +314,6 @@ if ( choice != 1 )
  }
  
 
-//cmd(inter, "tk_messageBox -type ok -message \"$env(LSDROOT)\\n[pwd]\"");
 strcpy(msg, s);
 
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}");
@@ -366,24 +325,13 @@ if(choice==1)
  
  }
 
-cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
-if(choice==1)
- {
-  for(i=0; msg[i]!=(char)NULL; i++)
-   {
-   if(msg[i]=='/')
-    msg[i]='\\';
-   }
- }
-//i=setenv("LSDROOT",msg,1);
-
-
 cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
 if(choice==1)
- {cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set sysfile \"sysopt_windows.txt\"} { if { $tcl_platform(os) == \"Darwin\"} {set sysfile \"sysopt_mac.txt\"} {set sysfile \"sysopt_linux.txt\"}}");
+ { //the src/system_options.txt file doesn't exists, so I invent it
+	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
-    //cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
+    cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
     cmd(inter, "puts -nonewline $f [read $f1]");
     cmd(inter, "close $f");
     cmd(inter, "close $f1");    
@@ -4718,7 +4666,7 @@ if(choice==0)
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
     cmd(inter, "puts -nonewline $f [read $f1]");
-   cmd(inter, "close $f");
+    cmd(inter, "close $f");
     cmd(inter, "close $f1");    
  }
 choice=0; 
