@@ -58,8 +58,10 @@ The widget of importance are:
 #include <sys/stat.h>
 
 // LSD version strings, for About... boxes and code testing
+#define _LSD_MAJOR_ 7
+#define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "7.0"
-#define _LSD_DATE_ "August 2015"
+#define _LSD_DATE_ __DATE__
 
 #define SHOW_TK_ERR true		// define to show Tk errors as dialogs
 

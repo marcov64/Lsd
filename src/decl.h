@@ -18,8 +18,10 @@ Comments and bug reports to marco.valente@univaq.it
 #include <limits.h>
 
 // LSD version strings, for About... boxes and code testing
+#define _LSD_MAJOR_ 7
+#define _LSD_MINOR_ 0
 #define _LSD_VERSION_ "7.0"
-#define _LSD_DATE_ "August 2015"
+#define _LSD_DATE_ __DATE__
 
 // comment the next line to compile without libz. It will not be possible to generate zipped result files.
 #define LIBZ 

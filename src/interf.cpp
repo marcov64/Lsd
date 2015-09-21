@@ -3383,7 +3383,6 @@ else
  }
 
 lab1=(char *)Tcl_GetVar(inter, "app",0);
-cmd(inter, "set app $tcl_platform(os)");
 cmd(inter, "set app $tcl_platform(osVersion)");
 
 lab1=(char *)Tcl_GetVar(inter, "app",0);
