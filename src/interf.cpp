@@ -404,7 +404,7 @@ else
 	  if(ap_v->next == NULL && justAddedVar)	// last variable & just added a new variable?
 	  {
 		  justAddedVar=false;
-		  cmd( inter, ".l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set end; set cur [ .l.v.c.var_name curselection ]; if { ! [ string equal $cur \"\" ] } { set res [ .l.v.c.var_name get $cur ]; set listfocus 1; set itemfocus $cur}");
+		  cmd( inter, ".l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set end; set lst [ .l.v.c.var_name curselection ]; if { ! [ string equal $lst \"\" ] } { set res [ .l.v.c.var_name get $lst ]; set listfocus 1; set itemfocus $lst}");
 	  }
 	 }
 	
@@ -1993,10 +1993,6 @@ if(nature==3 || nature==4)
 		{
 		cur->chg_var_lab(lab_old, lab);
 		cv=cur->search_var(NULL, lab);
-		cv->save=save;
-		cv->savei=savei;
-		cv->debug=num==1?'d':'n';
-		cv->plot=plot;
 		}
 		else
 		{
@@ -2936,8 +2932,10 @@ for(n=r; n->up!=NULL; n=n->up);
 n=n->search(res_g);
 
 if ( n != r )
+{
 	redrawRoot = true;	// force browser redraw
-cmd( inter, "set cur 0" ); // point for first var in listbox
+	cmd( inter, "set cur 0; set listfocus 1; set itemfocus 0" ); // point for first var in listbox
+}
 
 return n;
 
@@ -5046,8 +5044,8 @@ bool discard_change( bool checkSense, bool senseOnly )
 int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
 	if ( discard_change( ) == 1 )
-		inter->result = ( char * ) "ok";
+		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
 	else
-		inter->result = ( char * ) "cancel";
+		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
 	return TCL_OK;
 }

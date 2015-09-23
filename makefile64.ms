@@ -1,16 +1,16 @@
 # Makefile to compile LMM adapt as required. Under MS Windows system with installed Lsd follow these steps:
 # 1. Open a dos shell and move in the root of Lsd system, where this makefile is located.
-# 2. Run the batch file "run.bat". This will start LMM. Type Esc and quit the program. This will add to the shell
+# 2. Run the batch file "run64.bat". This will start LMM. Type Esc and quit the program. This will add to the shell
 #    the required path
-# 3. type make -f makefile.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
+# 3. type make -f makefile64.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
 
 TARGET=lmm64
 SWITCH_CC=
 
-TCL_VERSION=85
-TK_VERSION=85
+TCL_VERSION=86
+TK_VERSION=86
 
-# For MS Windows 64-bit systems ONLY, using the GNU 64-bit GCC (cygwin64) in the Lsd installation.
+# For MS Windows 64-bit systems ONLY, using the GNU 64-bit GCC (cygwin64/mingw-w64) in the Lsd installation.
 LSDROOT=.
 DUMMY=-mwindows
 PATH_TCL_LIB=$(LSDROOT)/gnu64/lib

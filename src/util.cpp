@@ -148,7 +148,7 @@ if( code != TCL_OK )
 	  firstCall = false;
 	  fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
   }
-  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
+  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
   fclose( f );
   plog( "\nTcl-Tk Error. See file '" );
   plog( fname );
@@ -1542,6 +1542,7 @@ for(cb=o->b; cb!=NULL; cb=cb->next)
 }
 
 #endif
+
 void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init)
 {
 description *cur, *cur1;

@@ -139,7 +139,7 @@ app=Tcl_CreateInterp();
 if((res=Tcl_Init(app))!=TCL_OK)
  {
   char estring[255];
-  sprintf(estring,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\nTcl Error = %d : %s\n",res,app->result);
+  sprintf(estring,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\nTcl Error = %d : %s\n",res,  Tcl_GetStringResult( app ) );
   errormsg(estring,NULL);
   exit(1);
  
@@ -149,7 +149,7 @@ if((res=Tk_Init(app))!=TCL_OK)
  {
   errormsg( (char *)"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n", NULL);
   char estring[255];
-  sprintf(estring,"Tk Error = %d : %s\n",res,app->result);
+  sprintf(estring,"Tk Error = %d : %s\n",res, Tcl_GetStringResult( app ) );
   errormsg(estring,NULL);
   exit(2);
  }
@@ -187,10 +187,10 @@ if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilati
 	  firstCall = false;
 	  fprintf( f, "\n\n====================> NEW TCL SESSION\n" );
   }
-  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, inter->result );
+  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
   fclose(f);
 #ifdef SHOW_TK_ERR
-  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message {Tk 8.5 error.\n\nPlease send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s}", cm, inter->result );
+  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message {Tcl/Tk error.\n\nPlease send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s}", cm, Tcl_GetStringResult( inter ) );
   cmd(inter, msg);
 #endif
  }
@@ -265,7 +265,8 @@ cmd( inter, "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSD
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
-cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
+cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
+cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
 
 cmd(inter, "set Terminal $DefaultTerminal");
 cmd(inter, "set HtmlBrowser $DefaultHtmlBrowser");
@@ -5645,7 +5646,7 @@ cmd(inter, "button .mm.b.perr -width -9 -text \"Previous Error\" -command {set e
 cmd(inter, "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left");
 cmd(inter, "pack .mm.b -expand yes -fill x");
 cmd(inter, "button .mm.close -width -9 -text Done -command {destroytop .mm}");
-cmd(inter, "pack .mm.close -padx 10 -pady 5 -side right");
+cmd(inter, "pack .mm.close -padx 10 -pady 10 -side right");
 cmd(inter, "bind .mm <Escape> {destroytop .mm}");
 cmd( inter, "showtop .mm topleftS no no no" );
 cmd(inter, "focus -force .mm.t");
