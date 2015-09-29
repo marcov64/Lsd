@@ -380,6 +380,25 @@ for(;O!=NULL;O=go_brother(O))
 #define CYCLE_LINK(O) if(p->node==NULL)error_cycle("invalid node");else O=p->node->first;for(;O!=NULL;O=O->next)
 #define CYCLES_LINK(C,O) if(C==NULL)error_cycle("invalid node");else if(C->node==NULL)error_cycle("invalid node");else O=C->node->first;for(;O!=NULL;O=O->next)
 
+// EXTENDED DATA/ATTRIBUTES MANAGEMENT MACROS
+// macros for handling extended attributes (usually lists) attached to objects' hook pointer
 
-
-
+// add/delete extension c++ data structures of type CLASS to the LSD object pointer by current/PTR
+#define ADD_EXT( CLASS ) p->hook = reinterpret_cast< object * >( new CLASS );
+#define ADDS_EXT( PTR, CLASS ) PTR->hook = reinterpret_cast< object * >( new CLASS );
+#define DELETE_EXT( CLASS ) delete reinterpret_cast< CLASS * >( p->hook );
+#define DELETES_EXT( PTR, CLASS ) delete reinterpret_cast< CLASS * >( PTR->hook );
+// convert current (or a pointer PTR from) LSD object type in the user defined CLASS type
+#define P_EXT( CLASS ) ( reinterpret_cast< CLASS * >( p->hook ) )
+#define PS_EXT( PTR, CLASS ) ( reinterpret_cast< CLASS * >( PTR->hook ) )
+// read/write from object OBJ pointed by pointer current/PTR of type CLASS
+#define V_EXT( CLASS, OBJ ) ( P_EXT( CLASS ) -> OBJ )
+#define VS_EXT( PTR, CLASS, OBJ ) ( PS_EXT( PTR, CLASS ) -> OBJ )
+#define WRITE_EXT( CLASS, OBJ, VAL ) ( P_EXT( CLASS ) -> OBJ = VAL )
+#define WRITES_EXT( PTR, CLASS, OBJ, VAL ) ( PS_EXT( PTR, CLASS ) -> OBJ = VAL )
+// execute METHOD contained in OBJ pointed by pointer current/PTR of type CLASS with the parameters ...
+#define EXEC_EXT( CLASS, OBJ, METHOD, ... ) ( P_EXT( CLASS ) -> OBJ.METHOD( __VA_ARGS__ ) )
+#define EXECS_EXT( PTR, CLASS, OBJ, METHOD, ... ) ( PS_EXT( PTR, CLASS ) -> OBJ.METHOD( __VA_ARGS__ ) )
+// cycle over elements of OBJ pointed by pointer current/PTR of type CLASS using iterator ITER
+#define CYCLE_EXT( ITER, CLASS, OBJ ) for ( ITER = EXEC_EXT( CLASS, OBJ, begin ); ITER != EXEC_EXT( CLASS, OBJ, end ); ++ITER )
+#define CYCLES_EXT( PTR, ITER, CLASS, OBJ ) for ( ITER = EXECS_EXT( PTR, CLASS, OBJ, begin ); ITER != EXECS_EXT( PTR, CLASS, OBJ, end ); ++ITER )
