@@ -76,7 +76,7 @@ position of the file is just after str.
 #include <tk.h>
 void cmd(Tcl_Interp *inter, char  const *cc);
 Tcl_Interp *InterpInitWin(char *tcl_dir);
-
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 Tcl_Interp *inter;
 #endif
 
@@ -161,7 +161,6 @@ void delete_mn(mnode *mn);
 void scan_mn(object *c);
 char *clean_file(char *);
 char *clean_path(char *);
-int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 
 char *upload_eqfile(void);
 lsdstack *stacklog;
