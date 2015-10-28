@@ -33,6 +33,10 @@ extern double i_values[100];
 
 #endif
 
+#ifndef NAMESPACE			// handle bug in some standard c libraries
+#define NAMESPACE			// macro has to be defined BEFORE including this
+#endif
+
 extern object *root;
 extern int seed;
 extern long idum;
@@ -139,7 +143,7 @@ cmd(inter, msg); \
 quit=2; \
 return -1; \
 end : \
-if( ((!use_nan && isnan(res)) || isinf(res)==1) && quit!=1) \
+if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)==1) && quit!=1) \
  { \
   sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
   error(msg); \
@@ -162,7 +166,7 @@ sprintf(msg, "Error trying to compute variable '%s': Equation not found.\n\nPoss
 printf("s",msg); \
 exit(0); \
 end : \
-if( ((!use_nan && isnan(res)) || isinf(res)==1) && quit!=1) \
+if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)==1) && quit!=1) \
  { \
   sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
   printf(msg); \
