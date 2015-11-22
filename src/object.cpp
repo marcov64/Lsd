@@ -420,6 +420,8 @@ variable *curr;
 
 double res;
 
+if(quit==2)
+ return -1;
 if(this==NULL)
 {if(lag==0)
    sprintf(msg, "\nError: Value of %s requested to a NULL pointer  (var. '%s').",l, stacklog->vs->label);
@@ -2340,9 +2342,9 @@ if(choice==4)
   reset_end(root);
   close_sim();
   running=0;
-  while(stacklog->prev!=NULL)
-   stacklog=stacklog->prev;
-  stack=0; 
+ // while(stacklog->prev!=NULL)
+   //stacklog=stacklog->prev;
+  //stack=0; 
   throw pippo; 
  }
 

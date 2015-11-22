@@ -293,7 +293,7 @@ if(stackinfo_flag>=stack)
 /****************/
 
 //Compute the Variable's equation
-if(!fast)				// not running in fast mode?
+if(!fast && 2==1)				// not running in fast mode?
 {
 	try 				// do it while catching exceptions to avoid obscure aborts
 	{

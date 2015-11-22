@@ -517,7 +517,11 @@ run(root);
 /**/
 catch(int p)
  {
- cmd(inter, "puts here");
+ //cmd(inter, "puts here");
+ while(stacklog->prev!=NULL)
+   stacklog=stacklog->prev;
+ stack=0; 
+ 
  }
 /**/ 
 cmd(inter, "wm deiconify .");
