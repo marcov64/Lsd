@@ -944,7 +944,7 @@ cmd(inter, "pack .tit -side top -anchor w");	// align this frame to the left
 
 cmd(inter, "frame .cc -relief groove -bd 2");
 cmd(inter, "scrollbar .cc.scroll -command \".cc.l yview\"");                                    //before 100
-cmd(inter, "text .cc.l -yscrollcommand \".cc.scroll set\" -wrap word -width 100 -height 200 -cursor arrow");
+cmd(inter, "text .cc.l -yscrollcommand \".cc.scroll set\" -wrap word -width 120 -height 200 -cursor arrow");
 
 
 
