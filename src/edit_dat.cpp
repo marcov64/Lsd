@@ -123,7 +123,7 @@ variable *cv;
 int i, counter, lag;
 
 
-sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 10; set cbd 1 } {set cwidth 8; set cbd 0}");
+sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 9; set cbd 0}");
 cmd(inter, msg);
 
 cmd(inter, "bind . <KeyPress-Return> {}");
@@ -313,7 +313,12 @@ else
 
 //sprintf(ch, "label $w.c%d_tit -width 9 -bd 1 -text \"%s\"", *incr ,ch2); 
 	
-sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
+//sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
+
+sprintf(ch, "set %d_titheader \"%s\"", *incr ,ch2);
+cmd(inter, ch);
+
+sprintf(ch, "entry $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -textvariable \"%d_titheader\" -state readonly", *incr ,*incr);
 cmd(inter, ch);
 sprintf(ch, "$w window create end -window $w.c%d_tit", *incr);
 cmd(inter, ch);
