@@ -123,7 +123,7 @@ variable *cv;
 int i, counter, lag;
 
 
-sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 9; set cbd 0}");
+sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 9; set cbd 2}");
 cmd(inter, msg);
 
 cmd(inter, "bind . <KeyPress-Return> {}");
@@ -428,7 +428,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
   if(cv->param==1)
     { sprintf(ch,"p%s_%d", cv->label,i);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%sp -textvariable p%s_%d -width 9",i, cv->label, cv->label, i);
+      sprintf(ch, "entry $w.c%d_v%sp -textvariable p%s_%d -width $cwidth -bd $cbd",i, cv->label, cv->label, i);
       cmd(inter, ch);
       if(set_focus==0)
        {
