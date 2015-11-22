@@ -972,7 +972,9 @@ cmd(inter, "pack .deb.tit -side top -anchor w -after .deb.t");	// align this fra
 
 cmd(inter, "frame .deb.cc -relief groove -bd 2");
 cmd(inter, "scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"");                                    //before 100
-cmd(inter, "text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap word -width 100 -height 200 -cursor arrow");
+
+cmd(inter, "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}");
+cmd(inter, "text .cc.l -yscrollcommand \".cc.scroll set\" -wrap word -width $wwidth -height 200 -cursor arrow");
 
 
 
