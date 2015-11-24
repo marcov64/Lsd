@@ -181,12 +181,12 @@ sprintf(msg, "bind .eq_%s <Control-f> {.eq_%s.search invoke}", lab, lab);
 cmd(inter, msg);
 sprintf(msg, ".eq_%s.f.text conf -font {Courier 10}", lab);
 cmd(inter, msg);
-sprintf(msg, ".eq_%s.f.text tag conf vars -foreground red", lab);
+sprintf(msg, ".eq_%s.f.text tag conf vars -foreground blue4", lab);
 cmd(inter, msg);
 
-sprintf(msg, ".eq_%s.f.text tag conf comment_line -foreground green", lab);
+sprintf(msg, ".eq_%s.f.text tag conf comment_line -foreground green4", lab);
 cmd(inter, msg);
-sprintf(msg, ".eq_%s.f.text tag conf temp_var -foreground blue", lab);
+sprintf(msg, ".eq_%s.f.text tag conf temp_var -foreground red4", lab);
 cmd(inter, msg);
 
 cmd(inter, "set mytag \"\"");
