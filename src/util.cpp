@@ -1886,7 +1886,10 @@ Create a new run time lattice having:
 - lcol= label of variable or parameter indicating the column value
 - lvar= label of variable or parameter from which to read the color of the cell
 - p= pointer of the object containing the initial color of the cell (if flag==-1)
-- init_color= indicate the type of initialization. If init_color==-1, the function uses the lvar values reading the coordinates in each lrow and lcol to initialize the lattice. Otherwise, the lattice is homogeneously initialized to the color specified by init_color
+- init_color= indicate the type of initialization. 
+  If init_color==-1, the function uses the lvar values reading the coordinates in each lrow and lcol to initialize the lattice. (not implemented yet)
+  If init_color < -1, the (positive) RGB equivalent to init_color is used.
+  Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 */
 double dimW, dimH;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
@@ -1909,7 +1912,20 @@ cmd(inter, "bind .lat <1> {if {$lat_update == 1 } {set lat_update 0; } {set lat_
 cmd(inter, "bind .lat <3> {set a [tk_getSaveFile ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 cmd(inter, "bind .lat <2> {set a [tk_getSaveFile ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 
-//sprintf(msg, "canvas .lat.c -height %d -width %d -bg $c%d", (int)(dim*nrow), (int)(dim*ncol),init_color);
+char init_color_string[32];		// the final string to be used to define tk color to use
+
+if ( init_color < -1 )				// RGB mode selected?
+	sprintf( init_color_string, "#%x", - init_color );		// yes: just use the positive RGB value
+else
+	if ( init_color != -1 )
+	{
+		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
+		// create (white) pallete entry if invalid palette in init_color
+		sprintf( msg, "if { ! [info exist c%d] } { set c%d white }", init_color, init_color );
+		cmd( inter, msg );
+	}
+		
+//sprintf(msg, "canvas .lat.c -height %d -width %d -bg %s", (int)(dim*nrow), (int)(dim*ncol),init_color_string);
 if(init_color==1001)
 {
 sprintf(msg, "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW);
@@ -1920,10 +1936,10 @@ cmd(inter, msg);
 }
 else
 {
-sprintf(msg, "canvas .lat.c -height %d -width %d -bg $c%d", (int)pixH, (int)pixW,init_color);
+sprintf(msg, "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string);
 cmd(inter, msg);
 
-sprintf(msg, ".lat.c create rect 0 0 %d %d -fill $c%d", (int)pixW, (int)pixH,init_color);
+sprintf(msg, ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string);
 cmd(inter, msg);
 }
 cmd(inter, "pack .lat.c");
@@ -1939,7 +1955,7 @@ for(i=1; i<=nrow; i++)
  {
   for(j=1; j<=nrow; j++)
    {
-    sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill $c%d",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color);
+    sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string);
    cmd(inter, msg);
 
    }
@@ -1951,23 +1967,36 @@ return(0);
 
 /*
 update_lattice.
-update the cell line.col to the color val
+update the cell line.col to the color val (1 to 21 as set in analysis.cpp palette)
+negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice(double line, double col, double val)
 {
+	char val_string[32];		// the final string to be used to define tk color to use
+	
+	if ( val < 0 )				// RGB mode selected?
+		sprintf( val_string, "#%x", - ( unsigned long ) val );		// yes: just use the positive RGB value
+	else
+	{
+		sprintf( val_string, "$c%.0lf", val );		// no: use the positive RGB value
+		// create (white) pallete entry if invalid palette in val
+		sprintf( msg, "if { ! [info exist c%.0lf] } { set c%.0lf white }", val, val );
+		cmd( inter, msg );
+	}
+		
 /* *
- sprintf(msg, ".lat.c itemconfigure c%d_%d -fill $c%d",(int)line, (int)col, (int)val);
+ sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string );
 /**/ 
  if(lattice_type==1)
  {
- sprintf(msg, ".lat.c itemconfigure c%d_%d -fill $c%d",(int)line, (int)col, (int)val);
+ sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string);
  cmd(inter, msg);
  return 0;
 }
 
-//sprintf(msg, ".lat.c dtag [.lat.c create rect %d %d %d %d -outline $c%.0lf -fill $c%.0lf]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)(col*dimW), (int)(line*dimH), val,val);
-//sprintf(msg, ".lat.c dtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill $c%.0lf]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val);
-sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill $c%.0lf", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val);
+//sprintf(msg, ".lat.c dtag [.lat.c create rect %d %d %d %d -outline %s -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)(col*dimW), (int)(line*dimH), val_string, val_string );
+//sprintf(msg, ".lat.c dtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
+sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 cmd(inter, msg);
 cmd(inter, "if {$lat_update == 1} {update} {}");
 return 0;  
