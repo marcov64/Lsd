@@ -5019,16 +5019,16 @@ bool discard_change( bool checkSense, bool senseOnly )
 		return true;					// yes: simply discard configuration
 	else								// no: ask for confirmation
 		if ( ! senseOnly && unsavedData )
-			cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard data?\" -message \"All data generated and not saved will be lost!\n\nDo you want to continue?\"]" );
+			cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard data?\" -message \"All data generated and not saved will be lost!\n\nDo you want to continue?\"]" );
 		else
 			if ( ! senseOnly && unsavedChange )
 			{
 				Tcl_SetVar( inter, "filename", simul_name , 0 );
-				cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' are not saved!\n\nDo you want to discard and continue?\"]" );
+				cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' are not saved!\n\nDo you want to discard and continue?\"]" );
 			}
 			else						// there is unsaved sense data
 				if ( checkSense )
-					cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data are not saved!\n\nDo you want to discard and continue?\"]" );
+					cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data are not saved!\n\nDo you want to discard and continue?\"]" );
 				else
 					return true;		// checking sensitivity data is disabled
 
