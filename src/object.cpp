@@ -2364,7 +2364,8 @@ if(choice==4)
  // while(stacklog->prev!=NULL)
    //stacklog=stacklog->prev;
   //stack=0; 
-  throw pippo; 
+  //throw pippo;
+     return;
  }
 
 if(choice==2)
