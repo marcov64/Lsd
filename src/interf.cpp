@@ -5176,7 +5176,7 @@ bool discard_change( bool checkSense )
 	{
 		Tcl_SetVar( inter, "filename", simul_name , 0 );
 		// ask the user what to do
-		cmd( inter, "set answer [tk_messageBox -type okcancel -default cancel -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' have not been saved!\n\nDo you want to discard them and continue?\"]" );
+		cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' have not been saved!\n\nDo you want to discard them and continue?\"]" );
 		cmd( inter, "if { $answer == \"ok\" } { set ans 1 } { set ans 0 }" );  
 		const char *ans = Tcl_GetVar( inter, "ans", 0 );
 		discard = atoi( ans );
