@@ -1324,6 +1324,78 @@ if(cv->data_loaded=='+')
 
 
 /****************************************************
+ WRITELL
+ Write the value value in the Varible or Parameter lab, making it appearing as if
+ it was computed at time time-lag and the variable updated at time time.
+ ***************************************************/
+void object::write(char const *lab, double value, int time, int lag)
+{
+    variable *cv;
+    
+    if(this==NULL)
+    {sprintf(msg, "\nError: write of '%s' requested to a NULL pointer in the equation for '%s%'\n\n", lab, stacklog->vs->label);
+        plog(msg);
+        error_hard();
+        quit=2;
+        return;
+    }
+    if((!use_nan && isnan(value)) || isinf(value)==1)
+    {sprintf(msg, "\nMath error: write of '%s' requested with a wrong value\n\n", lab);
+        plog(msg);
+        debug_flag=1;
+        stacklog->vs->debug='d';
+        return;
+    }
+    
+    for(cv=v; cv!=NULL; cv=cv->next)
+    {if(!strcmp(cv->label, lab))
+    {if(cv->under_computation==1)
+    {
+        sprintf(msg, "\nERROR: trying to write '%s' while it is under computation\nRevise the equation where %s is involved\n\n", lab, lab);
+        plog(msg);
+        error_hard();
+        plog(msg);
+        quit=2;
+    }
+        if(cv->param!=1 && time <= 0 && t>1)
+        {
+            sprintf(msg, "\nWARNING: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d\n", lab, stacklog->vs->label, lab, t);
+            plog(msg);
+            cv->val[0]=value;
+            cv->last_update=t;
+        }
+        else
+            // allow for change of initial lagged values when starting simulation (t=1)
+            if ( cv->param != 1 && time < 0 && t == 1 )
+            {
+                if ( - time > cv->num_lag )		// check for invalid lag
+                {
+                    sprintf( msg, "\nWhile writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored\n", lab, stacklog->vs->label, time );
+                    plog( msg );
+                }
+                else
+                {
+                    cv->val[ - time - 1 ] = value;
+                    cv->last_update = 0;	// force new updating
+                }
+            }
+            else
+            {
+                cv->val[lag]=value;
+                cv->last_update=time;
+            }
+        return;
+    }
+    }
+    sprintf(msg, "\nAttempt to write var %s not found in object %s", lab, label);
+    plog(msg);
+    error_hard();
+    quit=2;
+}
+
+
+
+/****************************************************
 WRITE
 Write the value value in the Varible or Parameter lab, making it appearing as if 
 it was computed at time time
