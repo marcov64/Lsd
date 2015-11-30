@@ -436,7 +436,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       {
       sprintf(ch,"v%s_%d_%d", cv->label,i, j);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%s_%d -textvariable v%s_%d_%d -width 9",i, cv->label,j, cv->label, i, j);
+      sprintf(ch, "entry $w.c%d_v%s_%d -textvariable v%s_%d_%d -width $cwidth -bd $cbd",i, cv->label,j, cv->label, i, j);
       cmd(inter, ch);
       if(set_focus==0)
        {
