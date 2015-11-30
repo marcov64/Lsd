@@ -1914,8 +1914,8 @@ cmd(inter, "bind .lat <2> {set a [tk_getSaveFile ]; if {$a != \"\" } {.lat.c pos
 
 char init_color_string[32];		// the final string to be used to define tk color to use
 
-if ( init_color < -1 )				// RGB mode selected?
-	sprintf( init_color_string, "#%x", - init_color );		// yes: just use the positive RGB value
+if ( init_color < -1 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
+	sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
 else
 	if ( init_color != -1 )
 	{
@@ -1974,8 +1974,8 @@ double update_lattice(double line, double col, double val)
 {
 	char val_string[32];		// the final string to be used to define tk color to use
 	
-	if ( val < 0 )				// RGB mode selected?
-		sprintf( val_string, "#%x", - ( unsigned long ) val );		// yes: just use the positive RGB value
+	if ( val < 0 && ( - val ) <= 0xffffff )			// RGB mode selected?
+		sprintf( val_string, "#%06x", - ( unsigned long ) val );	// yes: just use the positive RGB value
 	else
 	{
 		sprintf( val_string, "$c%.0lf", val );		// no: use the positive RGB value
