@@ -125,7 +125,7 @@ variable *cv;
 int i, counter, lag;
 
 
-sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 9; set cbd 2}");
+cmd( inter, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
 *choice=0;
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
 Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
@@ -300,7 +300,7 @@ else
 sprintf(ch, "set %d_titheader \"%s\"", *incr ,ch2);
 cmd(inter, ch);
 
-sprintf(ch, "entry $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -textvariable \"%d_titheader\" -state readonly", *incr ,*incr);
+sprintf(ch, "entry $w.c%d_tit -width $cwidth -bd $cbd -relief raised -justify center -textvariable \"%d_titheader\" -state readonly", *incr ,*incr);
 cmd(inter, ch);
 sprintf(ch, "$w window create end -window $w.c%d_tit", *incr);
 cmd(inter, ch);
