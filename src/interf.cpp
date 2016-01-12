@@ -747,8 +747,15 @@ cmd(inter, "if { $listfocus == 2} {focus -force .l.s.son_name; .l.s.son_name sel
 *choice=0;
 
 while(*choice==0 && choice_g==0)
+ {
+ try{
  Tcl_DoOneEvent(0);
- 
+   }
+ catch(...) {
+ goto main_cycle;
+  }
+ } 
+
 if(choice_g!=0)
  {*choice=choice_g;
   res_g=(char *)Tcl_GetVar(inter, "res_g",0);

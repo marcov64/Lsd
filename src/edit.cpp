@@ -173,7 +173,12 @@ while(*choice==0)
 
 noredraw:
   while(*choice==0)
-   Tcl_DoOneEvent(0);
+   {
+    try{Tcl_DoOneEvent(0);}
+    catch(...) {
+    goto noredraw;
+    }
+   } 
 
 if ( *choice == 3 && in_edit_data )		// avoid recursion
 {

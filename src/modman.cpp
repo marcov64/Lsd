@@ -818,7 +818,15 @@ else
 loop_help:
 
 while(choice==0)
+ {
+  try{
  Tcl_DoOneEvent(0);
+   }
+  catch(...)
+   {
+    goto loop;
+   }
+ }   
 
 if(choice==-1)
  {

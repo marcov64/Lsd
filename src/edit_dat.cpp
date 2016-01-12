@@ -192,7 +192,12 @@ if(set_focus==1)
 
 noredraw:
 while(*choice==0)
-	Tcl_DoOneEvent(0);
+    {
+   try{ Tcl_DoOneEvent(0);}
+   catch(...) {
+   goto noredraw;
+   }
+  } 
 
 if ( *choice == 4 && in_set_obj )		// avoid recursion
 {

@@ -2,7 +2,7 @@
 # Require ActiveTcl 8.5 and X11/XQuartz installed
 
 TARGET=lmmOSX
-SWITCH_CC=-w
+SWITCH_CC=-O2
 
 LSDROOT=.
 PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers

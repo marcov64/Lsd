@@ -288,8 +288,16 @@ if(lab!=NULL)
 if(asl!=NULL && asl->vs->up!=r)
   asl=NULL;
 
+debug_maincycle:
 while(choice==0)
+ {
+ try{ 
  Tcl_DoOneEvent(0);
+ }
+ catch(...) {
+ goto debug_maincycle;
+ }
+ }
 cmd(inter, "bind .deb <KeyPress-g> {}");
 if(lab!=NULL)
 {
