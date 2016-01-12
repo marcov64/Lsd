@@ -272,9 +272,16 @@ set_window_size();
 //bah=Tcl_GetStringResult(inter);
 
     
-    
+debug_maincycle:
 while(choice==0)
+ {
+ try{ 
  Tcl_DoOneEvent(0);
+ }
+ catch(...) {
+ goto debug_maincycle;
+ }
+ }
 cmd(inter, "bind . <KeyPress-g> {}");
 if(lab!=NULL)
 {

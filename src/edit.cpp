@@ -164,8 +164,14 @@ while(*choice==0)
   cmd(inter, "update");
 //  cmd(inter, "wm resizable . 0 0");
 set_window_size();
+edit_maincycle : 
   while(*choice==0)
-   Tcl_DoOneEvent(0);
+   {
+    try{Tcl_DoOneEvent(0);}
+    catch(...) {
+    goto edit_maincycle;
+    }
+   } 
 
 //  cmd(inter, "wm resizable . 1 1);
 

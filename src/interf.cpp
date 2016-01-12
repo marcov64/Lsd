@@ -718,7 +718,15 @@ cmd( inter, "restore_top_size" );		// restore top window size, if changed
 #endif
 
 while(*choice==0 && choice_g==0)
- Tcl_DoOneEvent(0);
+ {
+ try{
+  Tcl_DoOneEvent(0);
+  }
+ catch(...) {
+ goto main_cycle;
+  }
+   
+ } 
  
 #ifndef DUAL_MONITOR
 cmd(inter, "scan [wm geom .] %dx%d+%d+%d widthB heightB posX posY");

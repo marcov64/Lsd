@@ -199,8 +199,14 @@ set_window_size();
 if(set_focus==1)
   cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
 
+datainit_maincycle :
  while(*choice==0)
-	Tcl_DoOneEvent(0);
+	{
+   try{ Tcl_DoOneEvent(0);}
+   catch(...) {
+   goto datainit_maincycle;
+   }
+  } 
 
 cmd(inter, "set lastSizeDE [wm geometry .]"); 	// save window geometry
 
