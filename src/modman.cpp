@@ -939,7 +939,16 @@ loop:
 
 loop_help:
 while(choice==0)
- Tcl_DoOneEvent(0);
+ {
+  try{
+   Tcl_DoOneEvent(0);
+   }
+  catch(...)
+   {//cmd(inter, "tk_messageBox -message \"Gotcha!\"");
+    goto loop;
+   }
+ }   
+
 cmd(inter, "set b [.f.t.t tag ranges sel]");
 cmd(inter, "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}");
 

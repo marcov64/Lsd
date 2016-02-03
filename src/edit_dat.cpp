@@ -123,7 +123,7 @@ variable *cv;
 int i, counter, lag;
 
 
-sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 10; set cbd 1 } {set cwidth 8; set cbd 0}");
+sprintf(msg, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 9; set cbd 2}");
 cmd(inter, msg);
 
 cmd(inter, "bind . <KeyPress-Return> {}");
@@ -199,8 +199,14 @@ set_window_size();
 if(set_focus==1)
   cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
 
+datainit_maincycle :
  while(*choice==0)
-	Tcl_DoOneEvent(0);
+	{
+   try{ Tcl_DoOneEvent(0);}
+   catch(...) {
+   goto datainit_maincycle;
+   }
+  } 
 
 cmd(inter, "set lastSizeDE [wm geometry .]"); 	// save window geometry
 
@@ -313,7 +319,12 @@ else
 
 //sprintf(ch, "label $w.c%d_tit -width 9 -bd 1 -text \"%s\"", *incr ,ch2); 
 	
-sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
+//sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
+
+sprintf(ch, "set %d_titheader \"%s\"", *incr ,ch2);
+cmd(inter, ch);
+
+sprintf(ch, "entry $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -textvariable \"%d_titheader\" -state readonly", *incr ,*incr);
 cmd(inter, ch);
 sprintf(ch, "$w window create end -window $w.c%d_tit", *incr);
 cmd(inter, ch);
@@ -423,7 +434,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
   if(cv->param==1)
     { sprintf(ch,"p%s_%d", cv->label,i);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%sp -textvariable p%s_%d -width 9",i, cv->label, cv->label, i);
+      sprintf(ch, "entry $w.c%d_v%sp -textvariable p%s_%d -width $cwidth -bd $cbd",i, cv->label, cv->label, i);
       cmd(inter, ch);
       if(set_focus==0)
        {
@@ -449,7 +460,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       {
       sprintf(ch,"v%s_%d_%d", cv->label,i, j);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%s_%d -textvariable v%s_%d_%d -width 9",i, cv->label,j, cv->label, i, j);
+      sprintf(ch, "entry $w.c%d_v%s_%d -textvariable v%s_%d_%d -width $cwidth -bd $cbd",i, cv->label,j, cv->label, i, j);
       cmd(inter, ch);
       if(set_focus==0)
        {

@@ -234,8 +234,10 @@ for(;O!=NULL;O=go_brother(O))
 
 #define WRITE(X,Y) p->write((char*)X,Y,t)
 #define WRITEL(X,Y,Z) p->write((char*)X,Y,Z)
+#define WRITELL(X,Y,Z,L) p->write((char*)X,Y,Z,L)
 #define WRITES(O,X,Y) O->write((char*)X,Y,t)
 #define WRITELS(O,X,Y,Z) O->write((char*)X,Y,Z)
+#define WRITELLS(O,X,Y,Z,L) O->write((char*)X,Y,Z,L)
 
 #define SEARCH_CND(X,Y) p->search_var_cond((char*)X,Y,0)
 #define SEARCH_CNDL(X,Y,Z) p->search_var_cond((char*)X,Y,Z)

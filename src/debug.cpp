@@ -272,9 +272,16 @@ set_window_size();
 //bah=Tcl_GetStringResult(inter);
 
     
-    
+debug_maincycle:
 while(choice==0)
+ {
+ try{ 
  Tcl_DoOneEvent(0);
+ }
+ catch(...) {
+ goto debug_maincycle;
+ }
+ }
 cmd(inter, "bind . <KeyPress-g> {}");
 if(lab!=NULL)
 {
@@ -944,7 +951,9 @@ cmd(inter, "pack .tit -side top -anchor w");	// align this frame to the left
 
 cmd(inter, "frame .cc -relief groove -bd 2");
 cmd(inter, "scrollbar .cc.scroll -command \".cc.l yview\"");                                    //before 100
-cmd(inter, "text .cc.l -yscrollcommand \".cc.scroll set\" -wrap word -width 100 -height 200 -cursor arrow");
+
+cmd(inter, "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}");
+cmd(inter, "text .cc.l -yscrollcommand \".cc.scroll set\" -wrap word -width $wwidth -height 200 -cursor arrow");
 
 
 

@@ -181,7 +181,8 @@ void stat(char const *lab, double *v);
 object *add_n_objects2(char const *lab, int n, object *ex);
 object *add_n_objects2(char const *lab, int n);
 
-void write(char const *lab, double value, int time);
+void write(char const *lab, double value, int time);//write value as if computed at time
+void write(char const *lab, double value, int time, int lag);//write value in the lag field
 object *draw_rnd(char const *lo, char const *lv, int lag);
 object *draw_rnd(char const *lo);
 object *draw_rnd(char const *lo, char const *lv, int lag, double tot);

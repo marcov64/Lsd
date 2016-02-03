@@ -562,9 +562,13 @@ if(num_var==0)
 there :
 set_window_size();
 while(*choice==0)
- Tcl_DoOneEvent(0);
+ {
+  try{ Tcl_DoOneEvent(0);}
+  catch(...) {
+   goto there;
+   }
 
-
+ }
 if(*choice==1 && time_cross==2 && xy==0) //Plot cross section
  *choice=9;
 
