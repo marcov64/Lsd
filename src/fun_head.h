@@ -23,9 +23,7 @@ This file contains all the declarations and macros available in a model's equati
 
 
 #include "choose.h"
-
 #include "decl.h"
-#include <time.h>
 
 extern double i_values[100];
 #ifndef NO_WINDOW
@@ -99,13 +97,14 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 double update_lattice(double line, double col, double val);
 
 #endif
-#define DEBUG f=fopen("log.log","a"); \
- fprintf(f,"t=%d %s\n",t,label); \
- fclose(f);
 
+#define DEBUG f=fopen("log.log","a"); \
+ fprintf(f,"t=%d %s (cur=%g)\n",t,label, val[0]); \
+ fclose(f);
+ 
 #define DEBUG_AT(X) if(t>=X) \
  { f=fopen("log.log","a"); \
-   fprintf(f,"t=%d %s\n",t,label); \
+   fprintf(f,"t=%d %s (cur=%g)\n",t,label, val[0]); \
    fclose(f); \
  }  
 

@@ -1574,7 +1574,7 @@ int NOLH_5[][29] = {
 int **NOLH_0 = NULL;				// pointer to the design loaded from file
 
 // characteristics of NOLH tables
-struct { int kMin, kMax, n, loLevel, hiLevel, *table; } NOLH[] =
+static struct { int kMin, kMax, n, loLevel, hiLevel, *table; } NOLH[] =
 	   { { 0, 0, 0, 0, 0, NULL }, 
 	     { 1, 7, 17, 1, 17, NOLH_1[0] }, 
 		 { 8, 11, 33, 1, 33, NOLH_2[0] }, 

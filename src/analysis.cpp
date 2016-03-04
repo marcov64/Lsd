@@ -3723,6 +3723,9 @@ for(j=0; j<=new_c; j++)
  }
 }
 fclose(f);
+
+plog( " Done\n" );
+
 *num_v+=new_v;
 new_c--;
 if(new_c > *num_c)

@@ -109,8 +109,6 @@ ymax=ymin=0;
 strcpy(lab, "");
 
 count(r, &i);
-sprintf(msg, "\nSimulation %d running ...\n", id_sim);
-plog(msg);
 cmd(inter, "update");
 
 if(i==0)

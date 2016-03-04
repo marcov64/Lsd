@@ -15,6 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 #include <limits.h>
 
 // LSD version strings, for About... boxes and code testing

@@ -592,10 +592,9 @@ prepare_plot(root, i);
 
 if(done_in==2 && cur_plt>0)
  cmd(inter, "if {[winfo exists $activeplot]==1} {wm iconify $activeplot} {}");
-#else
-sprintf(msg, "\nSimulation %d running ...\n", i);
-plog(msg);
 #endif
+sprintf(msg, "\n\nSimulation %d running...", i);
+plog(msg);
 
 // deb(root->son, NULL, "stop 1", &app);
 if(i>1 || batch_sequential_loop)
@@ -614,7 +613,7 @@ if(i>1 || batch_sequential_loop)
  f=fopen(struct_file, "r");
  if(f==NULL)
   {
-   sprintf(msg, "\nFile %s not found.\n",struct_file);
+   sprintf(msg, "\nFile %s not found",struct_file);
    plog(msg);
    exit(9);
   }
@@ -642,7 +641,7 @@ if(no_more_memory==1)
   sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"Not enough memory: too many series saved for the memory available.\\n\\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\"", series_saved, max_step);
  cmd(inter, msg);
 #else
- printf("Not enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.", series_saved, max_step);
+ printf("\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.", series_saved, max_step);
  exit(10);
  #endif
  return;
@@ -820,7 +819,7 @@ cmd(inter, "update");
 //if(t<max_step+1) //cannot work, if users used the debug resetting the end.
 reset_end(root);
 scan_mn(root);
-plog("Done.\n");
+plog("Done");
 
 if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
 {
@@ -828,9 +827,9 @@ if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
 if(no_res==0)
 {
 if(batch_sequential==0)
- sprintf(msg, "\nSaving results in file %s_%d.res%s",simul_name, seed-1, dozip?".gz":"");
+ sprintf(msg, "\nSaving results in file %s_%d.res%s... ",simul_name, seed-1, dozip?".gz":"");
 else
- sprintf(msg, "\nSaving results in file %s_%d_%d.res%s",simul_name, findex, seed-1, dozip?".gz":"");
+ sprintf(msg, "\nSaving results in file %s_%d_%d.res%s... ",simul_name, findex, seed-1, dozip?".gz":"");
 
 plog(msg);
 #ifndef NO_WINDOW 
@@ -853,12 +852,7 @@ rf->title( root, 1 );					// write header
 rf->data( root, 0, actual_steps );		// write all data
 delete rf;								// close file and delete object
 
-if(batch_sequential==0)
- sprintf(msg, "\nResults saved in file %s_%d.res%s",simul_name, seed-1, dozip?".gz":"");
-else
- sprintf(msg, "\nResults saved in file %s_%d_%d.res%s",simul_name, findex, seed-1, dozip?".gz":"");
-
-plog(msg);
+plog("Done\n");
 }
 #ifndef NO_WINDOW 
 cmd(inter, "update");

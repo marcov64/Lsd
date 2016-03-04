@@ -494,7 +494,7 @@ cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
 cmd(inter, "scrollbar .f.t.vs -command \".f.t.t yview\"");
 cmd(inter, "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"");
-cmd(inter, "text .f.t.t -height 2 -undo 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"");
+cmd(inter, "text .f.t.t -height 2 -undo 1 -autoseparators 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"");
 cmd(inter, "set a [.f.t.t conf -font]");
 cmd(inter, "set b [lindex $a 3]");
 cmd(inter, "if {$dim_character == 0} {set dim_character [lindex $b 1]}");

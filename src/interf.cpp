@@ -3279,7 +3279,7 @@ sprintf(msg, "%s.lsd", simul_name);
 sprintf(ch, "%s.lsd", lab);
 sprintf(msg, "file copy -force %s.lsd %s.lsd", simul_name, lab);
 cmd(inter, msg);
-sprintf(msg, "\nLsd result file: %s.res%s\nLsd data file: %s.lsd\nSaving data ...",lab, dozip?".gz":"", lab);
+sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...",lab);
 plog(msg);
 cmd(inter, "focus .log");
 //cmd(inter, "raise .log");
@@ -3294,7 +3294,7 @@ for( n = r; n->up != NULL; n = n->up );	// get root object
 rf->title( n, 1 );						// write header
 rf->data( n, 0, actual_steps );			// write all data
 delete rf;								// close file and delete object
-plog(" done\n");
+plog(" Done\n");
 
 unsavedData = false;					// no unsaved simulation results
 
@@ -4266,7 +4266,7 @@ case 68:
 	cmd(inter, "entry .s.i.e -justify center -textvariable cores");
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"(using a number higher than the number\nof processors/cores is not recommended)\"");
-	cmd(inter, "set dozip 0");
+	cmd(inter, "set dozip 1");
 	cmd(inter, "checkbutton .s.i.dozip -text \"Generate zipped files\" -variable dozip");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w .s.i.dozip -pady 10");
 	cmd(inter, "pack .s.i");
@@ -4393,18 +4393,21 @@ case 69:
 	sprintf(ch, "label $b.war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
 	cmd(inter, ch);
 	cmd(inter, "label $b.tosave -text \"\\nYou are going to overwrite the existing configuration file\\nand any results files in the destination folder\\n\"");
+	cmd(inter, "set dozip 1");	// flag for producing compressed files
+	cmd(inter, "checkbutton $b.dozip -text \"Generate zipped files\" -variable dozip");
+
 	
 	if(sim_num>1)	// multiple runs case
 	{
-		sprintf(ch, "label $b.war6 -text \"from %s_%d.res%s to %s_%d.res%s\"", simul_name, seed, dozip ? ".gz" : "", simul_name, seed+sim_num-1);
+		sprintf(ch, "label $b.war6 -text \"from %s_%d.res to %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
 		cmd(inter, ch);
-		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war3 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave\"");
+		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war3 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave $b.dozip\"");
 	}
 	else			// single run case
 	{
-		sprintf(ch, "label $b.war6 -text \"%s_%d.res%s\"", simul_name, seed, dozip ? ".gz" : "");
+		sprintf(ch, "label $b.war6 -text \"%s_%d.res\"", simul_name, seed);
 		cmd(inter, ch);
-		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave\"");
+		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave $b.dozip\"");
 	}
 	cmd(inter, "foreach i $wind {pack $i}");
 
@@ -4421,6 +4424,8 @@ case 69:
 	if(*choice==2)
 		break;
 
+	cmd(inter, "set choice $dozip");
+	dozip=*choice;
 	// save the current configuration
 	for(n=r; n->up!=NULL; n=n->up);
 	blueprint->empty();			    // update blueprint to consider last changes
@@ -4458,6 +4463,7 @@ case 69:
 		fprintf(f, "\nEND_DOCUINITIAL\n\n");
 		save_eqfile(f);
 		fclose(f);
+		unsavedChange = false;		// no changes to save
 	}
 
 	// check for existing NW executable
@@ -4493,9 +4499,9 @@ case 69:
 	cmd(inter, "cd $path");
 
 	if(*choice == 1)							// Windows?
-		sprintf(msg, "exec %s -f %s >& %s.log  &", lab, struct_file, simul_name);
+		sprintf(msg, "exec %s -f %s %s >& %s.log  &", lab, struct_file, dozip ? "-z" : "", simul_name);
 	else										// Unix
-		sprintf(msg, "exec %s -f %s >& %s.log  &", lab, struct_file, simul_name);
+		sprintf(msg, "exec %s -f %s %s >& %s.log  &", lab, struct_file, dozip ? "-z" : "", simul_name);
     cmd(inter, msg);
 
 	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start 'No Window' Batch\" -message \"The current configuration was started as a 'No Window' background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
