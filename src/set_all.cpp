@@ -77,7 +77,7 @@ random generator, but it can be (and should...) linked with a serious random
 generator.
 ****************************************************/
 
-
+#include <ctype.h>
 #include <tk.h>
 #include "decl.h"
 
@@ -1058,8 +1058,9 @@ int num_sensitivity_variables( sense *rsens )
 void dataentry_sensitivity(int *choice, sense *s, int nval = 0)
 {
 
-int i;
-char *lab, *sss = NULL, *tok = NULL;
+int i, nPar, samples;
+double start, end;
+char *lab, *sss = NULL, *tok = NULL, type;
 FILE *f;
 
 *choice=0;
@@ -1067,9 +1068,9 @@ cmd(inter, "set sens .sens");
 cmd(inter, "newtop .sens \"Sensitivity Analysis\" { set choice 2 }");
 
 if ( nval > 0)								// number of values defined (0=no)?
-	sprintf(msg, "label .sens.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\"",s->nvalues,s->label);
+	sprintf(msg, "label .sens.lab -text \"Enter n=%d values for \'%s\' (most separators accepted)\n\nUse \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range\nSpaces are not allowed within clauses - TYPE values: \'L\' for linear and \'R\' for random samples\"",s->nvalues,s->label);
 else
-	sprintf(msg, "label .sens.lab -text \"Enter the desired values (at least 2) for \'%s\' (most separators accepted)\"",s->label);
+	sprintf(msg, "label .sens.lab -text \"Enter the desired values (at least 2) for \'%s\' (most separators accepted)\n\nUse \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range\nSpaces are not allowed within clauses - TYPE values: \'L\' for linear and \'R\' for random samples\"",s->label);
 cmd(inter, msg);
 cmd(inter, "pack .sens.lab -pady 5");
 cmd(inter, "text .sens.t; pack .sens.t"); 
@@ -1118,7 +1119,7 @@ if(*choice==2)
   return; 
  }
 
- cmd(inter, "set sss [.sens.t get 0.0 end]");
+cmd(inter, "set sss [.sens.t get 0.0 end]");
 sss=(char*)Tcl_GetVar(inter,"sss",0);
 
 if ( nval == 0 )					// undefined number of values?
@@ -1134,8 +1135,14 @@ if ( nval == 0 )					// undefined number of values?
 		tok = strtok( ss, SEP );	// accepts several separators
 		if ( tok == NULL )			// finished?
 			break;
-		ss = NULL;					
-		i += sscanf( tok, "%lf", &temp );	// count valid doubles only
+		ss = NULL;
+		
+		// is it a clause to be expanded?
+		nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
+		if ( nPar == 4 )			// all values are required
+			i += samples;			// samples to create
+		else						// no, read as regular double float
+			i += sscanf( tok, "%lf", &temp );	// count valid doubles only
 	 }
 	 while ( tok != NULL );
 	 
@@ -1163,7 +1170,22 @@ for(i=0; i<s->nvalues;)
 	  break;
   }
   sss=NULL;
-  i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
+  // is it a clause to be expanded?
+  nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
+  if ( nPar == 4 )								// all values are required
+  {
+	if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
+	{
+		s->v[ i++ ] = fmin( start, end );
+		for ( int j = 1; j < samples; ++j, ++i )
+			s->v[ i ] = s->v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
+	}
+	if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
+		for ( int j = 0; j < samples; ++j, ++i )
+			s->v[ i ] = fmin( start, end ) + RND * ( fmax( start, end ) - fmin( start, end ) );
+  }
+  else											// no, read as regular double float
+	i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
  }
 }
 while( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
