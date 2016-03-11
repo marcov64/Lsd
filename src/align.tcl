@@ -58,6 +58,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	wm protocol $w WM_DELETE_WINDOW $destroy
 	global tcl_platform
 	if { $tcl_platform(platform) != "windows"} {
+		global RootLsd LsdSrc
 		wm iconbitmap $w @$RootLsd/$LsdSrc/lsd.xbm
 	}
 #	plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst)" 

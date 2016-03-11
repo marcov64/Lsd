@@ -21,7 +21,7 @@ PATH_LIB=$(LSDROOT)/gnu64/lib
 INCLUDE_LIB=-I$(LSDROOT)/gnu64/include
 
 # from here you should not need to modify anything
-CC=gcc
+CC=g++
 RM=rm -f
 SRC=src
 
