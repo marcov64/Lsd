@@ -1745,9 +1745,12 @@ design::~design( void )
 
 // constructor function to the design object
 // type = 1: NOLH
-design::design( sense *rsens, int typ, char const *fname )
+// type = 2: random sampling
+design::design( sense *rsens, int typ, char const *fname, long findex, unsigned int samples )
 {
 	int i , j;
+	char *doefname, doeName[64];
+	FILE *f;
 	sense *cs;
 	
 	if ( rsens == NULL )					// valid pointer?
@@ -1755,7 +1758,7 @@ design::design( sense *rsens, int typ, char const *fname )
 	
 	switch ( typ )
 	{
-		case 1:
+		case 1:								// Near Orthogonal Latin Hypercube sampling
 			k = num_sensitivity_variables( rsens );	// number of factors
 			if ( strcmp( fname, "" ) )		// if filename was specified
 				NOLH_load( fname, true );	// load file and force using it always
@@ -1818,6 +1821,53 @@ design::design( sense *rsens, int typ, char const *fname )
 			
 			break;	
 			
+		case 2:								// random sampling
+			k = num_sensitivity_variables( rsens );	// number of factors
+			n = samples;					// number of samples required
+			if ( n < 1 )					// at least one sample required
+				goto invalid;
+			
+			// allocate memory for data
+			par = new int[ k ];				// vector of variable type (parameter / lagged value)
+			lag = new int[ k ];				// vector of lags
+			hi = new double[ k ];			// vector of high factor value
+			lo = new double[ k ];			// vector of low factor value
+			lab = new char *[ k ];			// vector of variable labels
+			ptr = new double *[ n ];		// allocate space for weighted design table
+			
+			// define low and high values from sensitivity data
+			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
+			{
+				if ( cs->nvalues < 2 )		// consider only multivalue variables
+					continue;
+				
+				hi[ i ] = lo[ i ] = cs->v[ 0 ];
+				for ( j = 1; j < cs->nvalues; j++ )
+				{
+					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
+					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
+				}
+				
+				par[ i ] = cs->param;		// set variable type
+				lag[ i ] = cs->lag;			// set number of lags
+				
+				// copy label (name)
+				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
+				strcpy( lab[i], cs->label );
+				
+				i++;
+			}
+			
+			// calculate the design of the experiment
+			for ( i = 0; i < n; i++ )		// for all experiments
+			{
+				ptr[ i ] = new double[ k ];	// allocate 2nd level data
+				for ( j = 0; j < k; j++ )	// for all factors
+					ptr[ i ][ j ] = lo[ j ] + RND * ( hi[ j ] - lo[ j ] );
+			}
+			
+			break;	
+			
 		default:							// invalid design!
 		invalid:
 			typ = tab = n = k = 0;
@@ -1825,7 +1875,36 @@ design::design( sense *rsens, int typ, char const *fname )
 			hi = lo = NULL;
 			ptr = NULL;
 			lab = NULL;
+			return;
 	}
+	
+	// generate a configuration file for the experiment
+			
+	// file name for saving table
+	sprintf( doeName, "%u_%u", findex, findex + n - 1 );
+	
+	if( strlen( path ) > 0 )				// non-default folder?
+	{
+		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
+		sprintf( doefname, "%s/%s_%s.csv", path, simul_name, doeName );
+	}
+	else
+	{
+		doefname = new char[ strlen( simul_name ) + strlen( doeName ) + 10 ];
+		sprintf( doefname, "%s_%s.csv", simul_name, doeName );
+	}
+	f = fopen( doefname, "w" );
+	delete [ ] doefname;
+	
+	// write the doe table to disk
+	for ( j = 0; j < k; j++ )		// write variable labels
+		fprintf( f, "%s%c", lab[ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
+		
+	for ( i = 0; i < n; i++ )		// for all experiments
+		for ( j = 0; j < k; j++ )	// write variable experimental values
+			fprintf( f, "%lf%c", ptr[ i ][ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
+			
+	fclose( f );
 }
 
 

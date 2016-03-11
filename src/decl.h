@@ -263,7 +263,8 @@ struct design
 	double *hi, *lo, **ptr; 
 	char **lab;
 
-	design( sense *rsens, int typ = 1, char const *fname = "" );// constructor
+	design( sense *rsens, int typ = 1, char const *fname = "", long findex = 1, 
+			unsigned int samples = 0 );	// constructor
 	~design( void );					// destructor
 };
 

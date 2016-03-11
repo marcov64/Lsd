@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 79
+USED CASE 80
 */
 
 /****************************************************
@@ -617,7 +617,8 @@ cmd(inter, "set w .m.data.setsens");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, "$w add command -label \"Full (online)\" -command {set choice 62} -underline 0");
 cmd(inter, "$w add command -label \"Full (batch)\" -command {set choice 63} -underline 6");
-cmd(inter, "$w add command -label \"MC Sampling (batch)\" -command {set choice 71} -underline 0");
+cmd(inter, "$w add command -label \"MC Point Sampling (batch)\" -command {set choice 71} -underline 0");
+cmd(inter, "$w add command -label \"MC Range Sampling (batch)\" -command {set choice 80} -underline 3");
 cmd(inter, "$w add command -label \"NOLH Sampling (batch)\" -command {set choice 72} -underline 0");
 
 cmd(inter, "set w .m.run");
@@ -3786,7 +3787,7 @@ else
 break;
 
 
-//Create Monte Carlo (MC) random sensitivity analysis sampling configuration
+//Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over user selected point values)
 case 71:
 
 if (rsense!=NULL) 
@@ -3804,9 +3805,7 @@ if (rsense!=NULL)
 	// get the number of Monte Carlo samples to produce
 	double sizMC;
 	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
-	cmd(inter, "toplevel .s");
-	cmd(inter, "wm transient .s .");
-	cmd(inter, "wm title .s \"Num. of MC Samples\"");
+	cmd(inter, "newtop .s \"Num. of MC Samples\" { set choice 2 }");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas % of sensitivity space size.\n(from 0 to 100)\"");
 	cmd(inter, "set sizMC \"10.0\"");
@@ -3814,19 +3813,16 @@ if (rsense!=NULL)
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"Requesting a too big\nsample is not recommended.\nThe sample size represents the\napproximated target average.\"");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
-	cmd(inter, "button .s.ok -width -9 -text Ok -command {set choice 1}");
-	cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}");
-	cmd(inter, "pack .s.i .s.ok .s.esc -fill x");
-	cmd(inter, "bind .s <KeyPress-Return> {set choice 1}");
-	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
-	cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-	*choice = -1;
+	cmd(inter, "pack .s.i");
+	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "focus .s.i.e");
-	while(*choice == -1)
+	cmd(inter, "showtop .s centerW");
+	*choice = 0;
+	while(*choice == 0)
 		Tcl_DoOneEvent(0);
-	cmd(inter, "destroy .s");
+	cmd(inter, "destroytop .s");
 	Tcl_UnlinkVar(inter, "sizMC");
-	if(*choice == 0)
+	if(*choice == 2)
 		break;
 	
 	// Check if number is valid
@@ -3877,32 +3873,28 @@ if (rsense!=NULL)
 	sprintf(msg, "\nSensitivity analysis space size: %ld", ptsSa);
 	plog(msg);
 
-	cmd(inter, "toplevel .s");
-	cmd(inter, "wm transient .s .");
-	cmd(inter, "wm title .s \"NOLH DoE\"");
+	cmd(inter, "newtop .s \"NOLH DoE\" { set choice 2 }");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
-	cmd(inter, "label .s.i.l -text \"Type the name of the design\nfile to be used. Or press\n'Built-in' to proceed with\ninternal tables (up to 29 factors).\"");
+	cmd(inter, "set extdoe 0");	// flag for using external DoE file
+	cmd(inter, "checkbutton .s.i.c -text \"Use external design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.i.e configure -state disabled } }");
+	cmd(inter, "label .s.i.l -text \"If required, type the name\nof the design file to be used\"");
 	cmd(inter, "set NOLHfile \"NOLH.csv\"");
-	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable NOLHfile");
-	cmd(inter, ".s.i.e selection range 0 end");
+	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable NOLHfile -state disabled");
 	cmd(inter, "label .s.i.w -text \"The file must be located\nin the same folder of the\nselected configuration file.\nThe file must be in CSV\nformat with NO empty lines.\"");
-	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
-	cmd(inter, "button .s.ok -width -9 -text \"From File\" -command {set choice 1}");
-	cmd(inter, "button .s.int -width -9 -text Built-in -command {set choice 2}");
-	cmd(inter, "button .s.esc -width -9 -text Cancel -command {set choice 0}");
-	cmd(inter, "pack .s.i .s.ok .s.int .s.esc -fill x");
-	cmd(inter, "bind .s <KeyPress-Escape> {set choice 0}");
-	cmd(inter, "set w .s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-	*choice = -1;
-	cmd(inter, "focus .s.i.e");
-	while(*choice == -1)
+	cmd(inter, "pack .s.i.c .s.i.l .s.i.e .s.i.w");
+	cmd(inter, "pack .s.i");
+	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
+	cmd(inter, "showtop .s centerW");
+	*choice = 0;
+	while(*choice == 0)
 		Tcl_DoOneEvent(0);
-	cmd(inter, "destroy .s");
-	if(*choice == 0)
+	cmd(inter, "destroytop .s");
+	if(*choice == 2)
 		break;
 	
 	char NOLHfile[300];
-	if ( *choice == 2 )
+	char const *extdoe = Tcl_GetVar(inter, "extdoe", 0);
+	if ( *extdoe == '0' )
 		strcpy( NOLHfile, "" );
 	else
 	{
@@ -3937,6 +3929,97 @@ if (rsense!=NULL)
 
 end72:
 	delete NOLHdoe;
+}
+else
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+
+break;
+
+
+//Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over selected range values)
+case 80:
+
+if (rsense!=NULL) 
+{
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
+	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
+	plog(msg);
+	long maxMC = num_sensitivity_points(rsense);	// total number of points in sensitivity space
+	sprintf(msg, "\nSensitivity analysis space size: %ld", maxMC);
+	plog(msg);
+
+	// get the number of Monte Carlo samples to produce
+	double sizMC;
+	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
+	cmd(inter, "newtop .s \"Num. of MC Samples\" { set choice 2 }");
+	cmd(inter, "frame .s.i -relief groove -bd 2");
+	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas number of samples.\"");
+	cmd(inter, "set sizMC \"10\"");
+	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable sizMC");
+	cmd(inter, ".s.i.e selection range 0 end");
+	if ( findexSens > 1 )			// there are previously saved sensitivity files?
+	{
+		cmd(inter, "set applst 1");	// flag for appending to existing configuration files
+		cmd(inter, "checkbutton .s.i.c -text \"Append to existing\nconfiguration files\" -variable applst");
+		cmd(inter, "pack .s.i.l .s.i.e .s.i.c");
+	}
+	else
+		cmd(inter, "pack .s.i.l .s.i.e");
+	cmd(inter, "pack .s.i");
+	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
+	cmd(inter, "focus .s.i.e");
+	cmd(inter, "showtop .s centerW");
+	*choice = 0;
+	while(*choice == 0)
+		Tcl_DoOneEvent(0);
+	cmd(inter, "destroy .s");
+	Tcl_UnlinkVar(inter, "sizMC");
+	if(*choice == 2)
+		break;
+	
+	// Check if number is valid
+	if( sizMC < 1 )
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Monte Carlo sample size to perform the sensitivity analysis.\\n\\nSelect at least one sample.\"");
+		*choice=0;
+		break;
+	}
+
+	// Prevent running into too big sensitivity space samples (high computation times)
+	if( sizMC  > MAX_SENS_POINTS )
+	{
+		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", (long)sizMC);
+		plog(msg);
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		if(*choice == 0)
+			break;
+	}
+	
+	sprintf( msg, "\nSensitivity analysis sample size: %ld", (long)sizMC );
+	plog(msg);
+	
+	// check if design file numberig should pick-up from previously generated files
+	if ( findexSens > 1 )
+	{
+		const char *applst = Tcl_GetVar( inter, "applst", 0 );
+		if ( *applst == '0' )
+			findexSens = 1;
+	}
+	else
+		findexSens = 1;
+	
+	// adjust an NOLH design of experiment (DoE) for the sensitivity data
+	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
+
+    sensitivity_doe( &findexSens, rand_doe );
+	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	plog( msg );
+ 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+
+	delete rand_doe;
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
