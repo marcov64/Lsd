@@ -4375,7 +4375,7 @@ case 68:
 	dozip=*choice;
 	*choice=param;
 	
-	if(param < 1 || param > 12) param=4;
+	if(param < 1 || param > 64) param=4;
 	
 	// create batch file
 	char wpath[300];
