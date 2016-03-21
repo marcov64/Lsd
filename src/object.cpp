@@ -393,12 +393,12 @@ extern char *struct_file;
 extern int running;
 extern lsdstack *stacklog;
 extern int stack;
+extern bool use_nan;	// flag to allow using Not a Number value
 
 char *qsort_lab;
 char *qsort_lab_secondary;
 
 int no_error=0;
-bool use_nan=false;		// flag to allow using Not a Number value
 
 int stairs=0;
 int sig_stairs=0;

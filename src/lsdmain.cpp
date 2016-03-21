@@ -124,6 +124,7 @@ int total_obj=0;
 int choice;
 int choice_g;
 
+extern bool fast;		// fast mode (log window)
 extern double ymin;
 extern double ymax;
 extern long nodesSerial;
@@ -196,7 +197,6 @@ int no_more_memory=0;
 int series_saved;
 int findex, fend;
 int batch_sequential=0;
-int fast=0;		// make fast persistent across runs
 bool dozip = false;			// compressed results file flag
 // Main window constraints
 char hsize[]="400";			// horizontal size in pixels
@@ -676,7 +676,7 @@ switch(done_in)
 {
 case 0:
 
- if(fast==0)
+ if( ! fast )
   {
   if(cur_plt==0)
    {sprintf(msg,"\nSim. %d step %d done",i,t);
@@ -710,7 +710,7 @@ case 0:
 break;
 
 case 2:
- fast=1;
+ fast = true;
  debug_flag=0;
  cmd(inter, "set a [split [winfo children .] ]");
  cmd(inter, " foreach i $a {if [string match .plt* $i] {wm iconify $i}}");
@@ -723,7 +723,7 @@ case 2:
  break;
 
 case 4:
- fast=0;
+ fast = false;
  cmd(inter, "set a [split [winfo children .] ]");
  cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i}}");
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}",i, i);

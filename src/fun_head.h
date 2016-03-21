@@ -39,6 +39,8 @@ extern char *simul_name;	// configuration name being run (for saving networks)
 extern char *path;			// folder where the configuration is
 extern bool invalidHooks;	// flag to invalid hooks pointers (set by simulation)
 
+bool use_nan = false;		// flag to allow using Not a Number value
+bool fast = false;			// make fast persistent across runs
 void error(char *);
 double log(double v);
 double exp(double c);
@@ -81,8 +83,6 @@ extern int max_step;
 extern int quit;
 extern char msg[];
 extern int debug_flag;
-extern bool use_nan;	// flag to allow using Not a Number value
-extern int fast;		// expose the global logging control variable
 
 
 void plog(char const *msg);

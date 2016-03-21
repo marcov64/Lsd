@@ -174,7 +174,7 @@ extern int stack;
 extern char msg[];
 extern lsdstack *stacklog;
 extern int total_var;
-extern int fast;
+extern bool fast;
 
 
 void set_lab_tit(variable *var);
