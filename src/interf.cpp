@@ -3876,13 +3876,20 @@ if (rsense!=NULL)
 	cmd(inter, "newtop .s \"NOLH DoE\" { set choice 2 }");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "set extdoe 0");	// flag for using external DoE file
-	cmd(inter, "checkbutton .s.i.c -text \"Use external design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.i.e configure -state disabled } }");
+	cmd(inter, "checkbutton .s.i.c -text \"Use external design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.o.c configure -state disabled; .s.o.e configure -state disabled; .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.o.c configure -state normal; .s.o.e configure -state normal; .s.i.e configure -state disabled } }");
 	cmd(inter, "label .s.i.l -text \"If required, type the name\nof the design file to be used\"");
 	cmd(inter, "set NOLHfile \"NOLH.csv\"");
 	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable NOLHfile -state disabled");
-	cmd(inter, "label .s.i.w -text \"The file must be located\nin the same folder of the\nselected configuration file.\nThe file must be in CSV\nformat with NO empty lines.\"");
+	cmd(inter, "label .s.i.w -text \"The file must be in the same\nfolder of the selected configuration file.\nThe file must be in CSV format\nwith NO empty lines.\"");
 	cmd(inter, "pack .s.i.c .s.i.l .s.i.e .s.i.w");
-	cmd(inter, "pack .s.i");
+	cmd(inter, "frame .s.o -relief groove -bd 2");
+	cmd(inter, "label .s.o.l -text \"Select NOLH table (number of variables)\"");
+	cmd(inter, "set doesize Auto");	// flag for selecting the DoE size (0=default)
+	cmd(inter, "ttk::combobox .s.o.c -text \"DoE number of variables\" -textvariable doesize -values [list Auto 7 11 16 22 29]");
+	cmd(inter, "set doeext 0");	// flag for using extended number of samples
+	cmd(inter, "checkbutton .s.o.e -text \"Use extended number of samples\" -variable doeext");
+	cmd(inter, "pack .s.o.l .s.o.c .s.o.e");
+	cmd(inter, "pack .s.i .s.o");
 	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "showtop .s centerW");
 	*choice = 0;
@@ -3894,6 +3901,9 @@ if (rsense!=NULL)
 	
 	char NOLHfile[300];
 	char const *extdoe = Tcl_GetVar(inter, "extdoe", 0);
+	char const *doesize = Tcl_GetVar(inter, "doesize", 0);
+	char const *doeext = Tcl_GetVar(inter, "doeext", 0);
+	
 	if ( *extdoe == '0' )
 		strcpy( NOLHfile, "" );
 	else
@@ -3901,9 +3911,12 @@ if (rsense!=NULL)
 		char const *fname = Tcl_GetVar(inter, "NOLHfile", 0);
 		strcpy(NOLHfile, fname);
 	}
+	
+	int doesz = strcmp( doesize, "Auto" ) ? atoi( doesize ) : 0;
+	int samples = ( *doeext == '0') ? 0 : -1;
 
 	// adjust an NOLH design of experiment (DoE) for the sensitivity data
-	design *NOLHdoe = new design( rsense, 1, NOLHfile );
+	design *NOLHdoe = new design( rsense, 1, NOLHfile, 1, samples, doesz );
 	
 	if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
 	{
