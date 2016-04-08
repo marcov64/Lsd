@@ -1096,7 +1096,8 @@ if ( s->entryOk )	// is there valid data from a previous data entry?
 	}
 	Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
 	cmd(inter, ".sens.t insert 0.0 $sss");		// insert string in entry window
-	delete [] tok, sss;
+	delete [] tok; 
+	delete [] sss;
 }
 
 cmd( inter, "showtop .sens" );
@@ -1721,7 +1722,8 @@ void NOLH_clear( void )
 {
 	if ( NOLH_0 == NULL )			// table is not allocated?
 		return;
-	delete [] NOLH_0[0], NOLH_0;
+	delete [] NOLH_0[0];
+	delete [] NOLH_0;
 	NOLH_0 = NULL;
 	NOLH[ 0 ].kMin = NOLH[ 0 ].kMax = NOLH[ 0 ].n1 = NOLH[ 0 ].n2 = NOLH[ 0 ].loLevel = NOLH[ 0 ].hiLevel = 0;
 	NOLH[ 0 ].table = NULL;
@@ -1798,7 +1800,8 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 
 			if ( num == NULL || NOLH_0[i][j] == 0 )
 			{
-				delete [] NOLH_0[0], NOLH_0;
+				delete [] NOLH_0[0];
+				delete [] NOLH_0;
 				NOLH_0 = NULL;
 				sprintf( msg, "\nError: invalid format in NOHL file: %s, line: %d", fileName, i + 1 );
 				plog( msg );
@@ -1833,24 +1836,469 @@ end:
 	return ok;
 }
 
+/*
+	Support functions for morris_oat() and enhancements
+*/
 
+#include <list>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// Integer random in [min,max]
+#define RND_RANGE( min, max ) ( min + ( rand( ) % ( int )( max - min + 1 ) ) )
+// Random choice between two numbers
+#define RND_CHOICE( o1, o2 ) ( RND < 0.5 ? o1 : o2 )
+
+// Matrix operations
+// allocate dynamic space for matrix
+double **mat_new( int m, int n )
+{
+	double **c = new double *[ m ];
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		c[ i ] = new double[ n ];
+	return c;
+}
+// deallocate dynamic space for matrix
+void mat_del( double **a, int m, int n )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		delete [] a[ i ];
+	delete [] a;
+}
+// multiply two matrices (c<-a*b)
+double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, double **c )
+{
+	if ( n != o )
+		return NULL;
+	for ( int i = 0; i < m ; ++i )	 	//row of first matrix
+		for ( int j = 0; j < p; ++j )	//column of second matrix
+		{
+			c[ i ][ j ] = 0;
+			for ( int k = 0; k < n; ++k )
+				c[ i ][ j ] += a[ i ][ k ] * b[ k ][ j ];
+		}
+	return c;
+}
+// add two same size matrices (c<-a+b)
+double **mat_add_mat( double **a, int m, int n, double **b, double **c )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			c[ i ][ j ] = a[ i ][ j ] + b[ i ][ j ];
+	return c;
+}
+// multiply all positions in matrix by a scalar 
+double **mat_mult_scal( double **a, int m, int n, double b, double **c )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			c[ i ][ j ] = a[ i ][ j ] * b;
+	return c;
+}
+// add a scalar to all positions in matrix
+double **mat_add_scal( double **a, int m, int n, double b, double **c )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			c[ i ][ j ] = a[ i ][ j ] + b;
+	return c;
+}
+// copy a scalar to all positions in matrix
+double **mat_copy_scal( double **a, int m, int n, double b )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			a[ i ][ j ] = b;
+	return a;
+}
+// copy same size matrices
+double **mat_copy_mat( double **a, int m, int n, double **b )
+{
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			a[ i ][ j ] = b[ i ][ j ];
+	return a;
+}
+// insert lines (replacing) in matrix (a<-b)
+double **mat_ins_mat( double **a, int m, int n, double **b, int o, int p, int lpos )
+{
+	if ( lpos + o > m || p > n )
+		return NULL;
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+			if ( i >= lpos && i < lpos + o && j < p )
+				a[ i ][ j ] = b[ i - lpos ][ j ];
+	return a;
+}
+// extract lines (replacing) in matrix (a<-b)
+double **mat_ext_mat( double **a, int m, int n, double **b, int o, int p, int lpos )
+{
+	if ( lpos + m > o || n < p )
+		return NULL;
+	for ( int i = 0; i < m ; ++i )	 	//rows
+		for ( int j = 0; j < n; ++j )	//columns
+				a[ i ][ j ] = b[ i + lpos ][ j ];
+	return a;
+}
+/* 	Sum the Euclidean distances of points in two matrices of same size
+	Calculates the distance between all points pairs and adds them
+	The matrices a and b must have the same size
+*/
+double mat_sum_dists( double **a, int m, int n, double **b )
+{
+	double sum = 0;
+	for ( int i = 0; i < m ; ++i )	 		//rows in a
+		for( int k = 0; k < m; ++k )		//rows in b 
+		{
+			double dist2 = 0;
+			for ( int j = 0; j < n ; ++j )	//columns
+				dist2 += pow( a[ i ][ j ] - b[ k ][ j ], 2 );
+			sum += sqrt( dist2 );
+		}
+	return sum;
+}
+
+/*
+	Calculate a DoE for Elementary Effects (Morris 1991) analysis,
+	according to Saltelli et al 2008. Code adapted from SAlib by
+	Jon Herman.
+	
+	Delta is fixed at p/[2(p-1)]
+	
+	k: number of factors
+	r: number of trajectories
+	p: number of grid levels
+	jump: delta measured in grid levels
+	X: preallocated memory area to save the trajectories
+*/
+double **morris_oat( int k, int r, int p, int jump, double **X )
+{
+	int i, j, l;
+    double delta = ( double ) jump / ( p - 1 );	// grid step delta
+	
+	// allocate all temporary matrices
+	double **B = mat_new( k + 1, k ),
+		**DM = mat_new( k, k ),
+		**P = mat_new( k, k ),
+		**X_base = mat_new( k + 1, k ),
+		**delta_diag = mat_new( k, k ),
+		**temp_1 = mat_new( k + 1, k ),
+		**temp_2 = mat_new( k + 1, k );
+	
+    // orientation matrix B: lower triangular (1) + upper triangular (-1)
+	for ( i = 0; i < k + 1; ++i )
+		for ( j = 0; j < k; ++j )
+			B[ i ][ j ] = ( i > j ) ? 1 : -1;
+    
+    // Create r trajectories. Each trajectory contains k+1 parameter sets.
+    // (Starts at a base point, and then changes one parameter at a time)
+	
+	for ( l = 0; l < r; ++l )
+	{
+        // directions matrix DM - diagonal matrix of either +1 or -1
+		for ( i = 0; i < k; ++i )
+			for ( j = 0; j < k; ++j )
+				DM[ i ][ j ] = ( i == j )? RND_CHOICE( -1, 1 ) : 0;
+			
+        // permutation matrix P
+		int *perm = new int[ k ];
+		for ( i = 0; i < k; ++i )
+			perm [ i ] = i;
+		random_shuffle( & perm[ 0 ], & perm[ k ] );
+
+		P = mat_copy_scal( P, k, k, 0 );
+		for ( i = 0; i < k; ++i )
+			P[ i ][ perm[ i ] ] = 1;
+
+		delete [] perm;
+
+        // starting point for this trajectory
+		for ( j = 0; j < k; ++j )
+		{
+			double start = ( double ) RND_RANGE( 0, p - delta * ( p - 1 ) - 1 ) / ( p - 1 );
+			for ( i = 0; i < k + 1; ++i )
+				X_base[ i ][ j ] = start;
+		}
+
+        // Indices to be assigned to X, corresponding to this trajectory
+		int index_list = l * ( k + 1 );
+		for ( i = 0; i < k; ++i )
+			for ( j = 0; j < k; ++j )
+				delta_diag[ i ][ j ] = ( i == j ) ? delta : 0;
+
+		temp_1 = mat_mult_mat( B, k + 1, k, P, k, k, temp_1 );
+		temp_2 = mat_mult_mat( temp_1, k + 1, k, DM, k, k, temp_2 );
+		temp_1 = mat_add_scal( temp_2, k + 1, k, 1, temp_1 );
+		temp_2 = mat_mult_mat( temp_1, k + 1, k, delta_diag, k, k, temp_2 );
+		temp_1 = mat_mult_scal( temp_2, k + 1, k, 0.5, temp_1 );
+		temp_2 = mat_add_mat( temp_1, k + 1, k, X_base, temp_2 );
+		X = mat_ins_mat( X, r * ( k + 1 ), k, temp_2, k + 1, k, index_list );
+	}
+	
+	// deallocate all temporary matrices
+	mat_del( B, k + 1, k );
+	mat_del( DM, k, k );
+	mat_del( P, k, k );
+	mat_del( X_base, k + 1, k );
+	mat_del( delta_diag, k, k );
+	mat_del( temp_1, k + 1, k );
+	mat_del( temp_2, k + 1, k );
+
+    return X;
+}
+
+/*
+	Optimize a DoE for Elementary Effects (Morris 1991) analysis,
+	according to Campolongo et al 2007 and Ruano 2012. Code adapted
+	from SAlib by Jon Herman.
+	
+	k: number of factors
+	pool: pool of trajectories produced by morris_oat()
+	M: number of trajectories in pool
+	r: number of final trajectories (<= M)
+	ptr: preallocated memory area to save the trajectories
+*/
+double **compute_distance_matrix( double **sample, int M, int k, double **DM )
+{
+	double **input_1 = mat_new( k + 1, k ), 
+		   **input_2 = mat_new( k + 1, k );
+	
+	DM = mat_copy_scal( DM, M, M, 0 );
+	for ( int i = 0 ; i < M; ++i )
+	{
+		input_1 = mat_ext_mat( input_1, k + 1, k, 
+							   sample, M * ( k + 1 ), k, 
+							   i * ( k + 1 ) );
+		for ( int j = i + 1; j < M; ++j )
+		{
+			input_2 = mat_ext_mat( input_2, k + 1, k, 
+								   sample, M * ( k + 1 ), k, 
+								   j * ( k + 1 ) );
+			DM[ i ][ j ] = DM[ j ][ i ] = 
+				mat_sum_dists( input_1, k + 1, k, input_2 );
+		}
+	}
+		
+	mat_del( input_1, k + 1, k );
+	mat_del( input_2, k + 1, k );
+	
+    return DM;
+}
+
+// Calculate the combinations of indices, r-to-r
+vector < vector < int > > combinations( list < int > indices, int r )
+{
+	vector < int > comb;
+	vector < vector < int > > combs;
+	// copy list to vector
+	vector < int > ind( indices.begin( ), indices.end( ) );
+	int n = ind.size( );
+	if ( r > n )
+		return combs;
+	// create selection array with r selectors
+	vector < bool > v( n );
+	fill( v.begin( ), v.end( ) - n + r, true );
+	// create all permutations of the selectors
+	do 
+	{
+		// set member if it is selected in the current permutation of v
+		for ( int i = 0; i < n; ++i )
+			if ( v[ i ] ) 
+				comb.push_back( ind[ i ] );
+		combs.push_back( comb );
+		comb.clear( );
+	}
+	while ( prev_permutation( v.begin( ), v.end( ) ) );
+	
+	return combs;
+}
+
+/*
+  Calculate combinatorial distance between a select group of trajectories, 
+  indicated by indices
+    
+    indices: list of candidate pairs of points = list < int >
+    DM: distance matrix = array (M,M)
+*/    
+double sum_distances( list < int > indices, double **DM )
+{
+	// get all combination pairs of indices
+	vector < vector < int > > combs = combinations( indices, 2 );
+
+    // add distance of all points pairs
+	double D = 0;
+	for ( int j = 0; j < combs.size( ); ++j )
+		D += DM[ combs[ j ][ 0 ] ][ combs[ j ][ 1 ] ];
+	
+	return D;
+}
+
+// get the top-i size items index from a unidimensional array
+list < int > top_idx( double *a, int n, int i )
+{
+	list < int > top;
+	vector < bool > used( n, false );
+	for ( int k = 0; k < i; ++k )
+	{
+		int max_idx = -1;
+		double max = -INFINITY;
+		for ( int j = 0; j < n; ++j )
+			if ( ! used[ j ] && a[ j ] > max )
+			{
+				max_idx = j;
+				max = a[ j ];
+			}
+		used[ max_idx ] = true;
+		top.push_back( max_idx );
+	}
+	return top;
+}
+
+/*
+	Get the indice that belong to the maximum distance in an array of distances
+    
+    indices_list = list of points
+    distance = array (M)
+*/
+list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < double > row_maxima_i )
+{
+	int max_idx = -1;
+	double max = -INFINITY;
+	for ( int j = 0; j < indices_list.size( ); ++j )
+		if ( row_maxima_i[ j ] > max )
+		{
+			max_idx = j;
+			max = row_maxima_i[ j ];
+		}
+	return indices_list[ max_idx ];
+}
+
+/*
+	Adds extra indices for the combinatorial problem. 
+	For indices = (1,2) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
+*/
+vector < list < int > > add_indices( list < int > m_max_ind, int M )
+{
+	vector < list < int > > list_new_indices;
+	list < int > copy = m_max_ind;
+	for ( int i = 0; i < M; ++i )
+		if ( find( m_max_ind.begin( ), m_max_ind.end( ), i ) == m_max_ind.end( ) )
+		{
+			copy.push_back( i );
+			list_new_indices.push_back( copy );
+			copy.pop_back( );
+		}
+	return list_new_indices;
+}
+
+/*
+	An alternative by Ruano et al. (2012) for the brute force approach as 
+	originally proposed by Campolongo et al. (2007). The method should improve 
+	the speed with which an optimal set of trajectories is found tremendously 
+	for larger sample sizes.
+*/
+double **opt_trajectories( int k, double **pool, int M, int r, double **X )
+{
+	if ( r >= M )					// nothing to do?
+	{
+		X = mat_copy_mat( X, r * ( k + 1 ), k, pool );
+		return X;
+	}
+
+ 	list < int > indices, i_max_ind, m_max_ind, tot_max; 
+	vector < list < int > > tot_indices_list, indices_list, m_ind;
+	
+	double **DM = mat_new( M, M );
+	DM = compute_distance_matrix( pool, M, k, DM );
+    
+	vector < double > tot_max_array( r - 1, 0 );
+	
+	//#############Loop 'i'#############
+	// i starts at 1
+	for ( int i = 1; i < r; ++i )
+	{
+		indices_list.clear( );
+		vector < double > row_maxima_i( M, 0 );
+		
+		for ( int row = 0; row < M; ++row )
+		{
+			indices = top_idx( DM[ row ], M, i );
+			indices.push_back( row );
+			row_maxima_i[ row ] = sum_distances( indices, DM );
+			indices_list.push_back( indices );
+		}
+		
+		// Find the indices belonging to the maximum distance
+		i_max_ind = get_max_sum_ind( indices_list, row_maxima_i );
+
+		//#########Loop 'm' (called loop 'k' in Ruano)############
+		m_max_ind = i_max_ind;
+		// m starts at 1
+        for ( int m = 1; m <= r - i - 1; ++m )
+		{
+			m_ind = add_indices( m_max_ind, M );
+            vector < double > m_maxima( m_ind.size( ), 0 );
+			
+            for ( int n = 0; n < m_ind.size( ); ++n )
+                m_maxima[ n ] = sum_distances( m_ind[ n ], DM );
+            
+            m_max_ind = get_max_sum_ind( m_ind, m_maxima );
+		}
+		tot_indices_list.push_back( m_max_ind );
+		tot_max_array[ i - 1 ] = sum_distances( m_max_ind, DM );
+	}
+
+	tot_max = get_max_sum_ind( tot_indices_list, tot_max_array );
+	tot_max.sort( );
+	vector < int > max( tot_max.begin( ), tot_max.end( ) );
+	
+	// index the submatrix for each trajectory
+	vector < int > index_list( M, 0 );
+	for ( int i = 0; i < M; ++i )
+		index_list[ i ] = i * ( k + 1 );
+	
+	// move the best trajectories to caller 2D array
+	double **temp = mat_new( k + 1, k );
+	for ( int i = 0; i < r; ++i )
+	{
+		temp = mat_ext_mat( temp, k + 1, k, pool, M * ( k + 1 ), k, index_list[ max[ i ] ] );
+		X = mat_ins_mat( X, r * ( k + 1 ), k, temp, k + 1, k, index_list[ i ] );
+	}
+	
+	mat_del( temp, k + 1, k );
+	mat_del( DM, M, M );
+	
+    return X;
+}
+	
 // destructor function to the design object
 design::~design( void )
 {
 	for( int i = 0; i < n; i++ )		// run through all experiments
-		delete [] ptr[ i ], lab[ i ];	// free memory
-	delete [] ptr, lab, hi, lo, par, lag;
+		delete [] ptr[ i ];				// free memory
+	for( int i = 0; i < k; i++ )		// and all variables
+		delete [] lab[ i ];
+	delete [] ptr;
+	delete [] lab; 
+	delete [] hi; 
+	delete [] lo; 
+	delete [] par; 
+	delete [] lag;
 }
 
-
-// constructor function to the design object
+// Constructor function to the design object
 // type = 1: NOLH
 // type = 2: random sampling
+// type = 3: Elementary Effects sampling (Morris, 1991)
 // samples = -1: use extended predefined sample size (n2)
 // factors = 0: use automatic DoE size
-design::design( sense *rsens, int typ, char const *fname, long findex, int samples, int factors )
+
+design::design( sense *rsens, int typ, char const *fname, long findex, 
+				int samples, int factors, int jump, int trajs )
 {
-	int i , j, kTab, doeRange;
+	int i , j, kTab, doeRange, poolSz;
+	double **pool;
 	char *doefname, doeName[64];
 	FILE *f;
 	sense *cs;
@@ -1990,6 +2438,66 @@ design::design( sense *rsens, int typ, char const *fname, long findex, int sampl
 			
 			break;	
 			
+		case 3:								// Elementary Effects sampling
+			k = num_sensitivity_variables( rsens );	// number of factors
+			poolSz = samples * ( k + 1 );	// larger pool to extract samples
+			n = trajs * ( k + 1 );			// number of effective samples
+			if ( n < 1 || n > poolSz )		// at least one sample required
+				goto invalid;
+			
+			// allocate memory for data
+			par = new int[ k ];				// vector of variable type (parameter / lagged value)
+			lag = new int[ k ];				// vector of lags
+			hi = new double[ k ];			// vector of high factor value
+			lo = new double[ k ];			// vector of low factor value
+			lab = new char *[ k ];			// vector of variable labels
+			ptr = new double *[ n ];		// allocate space for weighted design table
+			for ( i = 0; i < n; i++ )		// for all final trajectories
+				ptr[ i ] = new double[ k ];	// allocate 2nd level data
+			pool = new double *[ poolSz ];	// allocate space for weighted design table
+			for ( i = 0; i < poolSz; i++ )	// for all pool trajectories
+				pool[ i ] = new double[ k ];
+			
+			// define low and high values from sensitivity data
+			for ( i = 0, cs = rsens; cs != NULL; cs = cs->next )
+			{
+				if ( cs->nvalues < 2 )		// consider only multivalue variables
+					continue;
+				
+				hi[ i ] = lo[ i ] = cs->v[ 0 ];
+				for ( j = 1; j < cs->nvalues; j++ )
+				{
+					hi[ i ] = fmax( cs->v[ j ], hi[ i ] );
+					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
+				}
+				
+				par[ i ] = cs->param;		// set variable type
+				lag[ i ] = cs->lag;			// set number of lags
+				
+				// copy label (name)
+				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
+				strcpy( lab[i], cs->label );
+				
+				i++;
+			}
+			
+			// calculate the Morris OAT pool of trajectories
+			pool = morris_oat( k, samples, factors, jump, pool );
+			
+			// select the best trajectories from pool
+			ptr = opt_trajectories( k, pool, samples, trajs, ptr );
+			
+			for ( i = 0; i < poolSz; i++ )	// free pool memory
+				delete [] pool[ i ];
+			delete [] pool;
+			
+			// scale the DoE to the sensitivity test ranges
+			for ( i = 0; i < n; i++ )		// for all experiments
+				for ( j = 0; j < k; j++ )	// for all factors
+					ptr[ i ][ j ] = lo[ j ] + ptr[ i ][ j ] * ( hi[ j ] - lo[ j ] );
+			
+			break;	
+			
 		default:							// invalid design!
 		invalid:
 			typ = tab = n = k = 0;
@@ -2016,7 +2524,6 @@ design::design( sense *rsens, int typ, char const *fname, long findex, int sampl
 		sprintf( doefname, "%s_%s.csv", simul_name, doeName );
 	}
 	f = fopen( doefname, "w" );
-	delete [ ] doefname;
 	
 	// write the doe table to disk
 	for ( j = 0; j < k; j++ )		// write variable labels
@@ -2030,6 +2537,9 @@ design::design( sense *rsens, int typ, char const *fname, long findex, int sampl
 	
 	char out[ 256 ];
 	sprintf( out, "\nDoE configuration saved: %s", doefname );
+	plog( out );
+	
+	delete [ ] doefname;
 }
 
 

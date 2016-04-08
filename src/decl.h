@@ -264,7 +264,7 @@ struct design
 	char **lab;
 
 	design( sense *rsens, int typ = 1, char const *fname = "", long findex = 1, 
-			int samples = 0, int factors = 0 );	// constructor
+			int samples = 0, int factors = 0, int jump = 2, int trajs = 4 );	// constructor
 	~design( void );					// destructor
 };
 

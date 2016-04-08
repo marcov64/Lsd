@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 80
+USED CASE 81
 */
 
 /****************************************************
@@ -599,9 +599,6 @@ cmd(inter, "$w add command -label \"Initial Values...\" -command {set choice 21}
 cmd(inter, "$w add cascade -label \"Set Number of Objects\" -underline 4 -menu $w.setobj");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add cascade -label \"Sensitivity Analysis\" -underline 0 -menu $w.setsens");
-cmd(inter, "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 17");
-cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 1");
-cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 11");
 
 cmd(inter, "$w add separator");
 
@@ -619,6 +616,7 @@ cmd(inter, "$w add command -label \"Full (online)\" -command {set choice 62} -un
 cmd(inter, "$w add command -label \"Full (batch)\" -command {set choice 63} -underline 6");
 cmd(inter, "$w add command -label \"MC Point Sampling (batch)\" -command {set choice 71} -underline 0");
 cmd(inter, "$w add command -label \"MC Range Sampling (batch)\" -command {set choice 80} -underline 3");
+cmd(inter, "$w add command -label \"EE Sampling (batch)\" -command {set choice 81} -underline 0");
 cmd(inter, "$w add command -label \"NOLH Sampling (batch)\" -command {set choice 72} -underline 0");
 
 cmd(inter, "set w .m.run");
@@ -626,18 +624,21 @@ cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R");
 cmd(inter, "$w add command -label \"Start 'No Window' Batch\" -command {set choice 69} -underline 0");
+cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 11");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Simulation Settings...\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F");
-cmd(inter, "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Ctrl+G");
 cmd(inter, "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7");
+cmd(inter, "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 1 -accelerator Ctrl+G");
+cmd(inter, "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 20");
 cmd(inter, "$w add separator");
-cmd(inter, "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1");
-cmd(inter, "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17");
 cmd(inter, "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17");
+cmd(inter, "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17");
+cmd(inter, "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1");
+cmd(inter, "$w add command -label \"Show Elements of Sens. Anal.\" -command {set choice 66} -underline 17");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 0");
 
@@ -3809,7 +3810,7 @@ if (rsense!=NULL)
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas % of sensitivity space size.\n(from 0 to 100)\"");
 	cmd(inter, "set sizMC \"10.0\"");
-	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable sizMC");
+	cmd(inter, "entry .s.i.e -justify center -textvariable sizMC");
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"Requesting a too big\nsample is not recommended.\nThe sample size represents the\napproximated target average.\"");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
@@ -3869,9 +3870,6 @@ if (rsense!=NULL)
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
-	long ptsSa = num_sensitivity_points(rsense);	// total number of points in sensitivity space
-	sprintf(msg, "\nSensitivity analysis space size: %ld", ptsSa);
-	plog(msg);
 
 	cmd(inter, "newtop .s \"NOLH DoE\" { set choice 2 }");
 	cmd(inter, "frame .s.i -relief groove -bd 2");
@@ -3879,7 +3877,7 @@ if (rsense!=NULL)
 	cmd(inter, "checkbutton .s.i.c -text \"Use external design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.o.c configure -state disabled; .s.o.e configure -state disabled; .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.o.c configure -state normal; .s.o.e configure -state normal; .s.i.e configure -state disabled } }");
 	cmd(inter, "label .s.i.l -text \"If required, type the name\nof the design file to be used\"");
 	cmd(inter, "set NOLHfile \"NOLH.csv\"");
-	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable NOLHfile -state disabled");
+	cmd(inter, "entry .s.i.e -justify center -textvariable NOLHfile -state disabled");
 	cmd(inter, "label .s.i.w -text \"The file must be in the same\nfolder of the selected configuration file.\nThe file must be in CSV format\nwith NO empty lines.\"");
 	cmd(inter, "pack .s.i.c .s.i.l .s.i.e .s.i.w");
 	cmd(inter, "frame .s.o -relief groove -bd 2");
@@ -3960,9 +3958,6 @@ if (rsense!=NULL)
 	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
 	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
 	plog(msg);
-	long maxMC = num_sensitivity_points(rsense);	// total number of points in sensitivity space
-	sprintf(msg, "\nSensitivity analysis space size: %ld", maxMC);
-	plog(msg);
 
 	// get the number of Monte Carlo samples to produce
 	double sizMC;
@@ -3971,7 +3966,7 @@ if (rsense!=NULL)
 	cmd(inter, "frame .s.i -relief groove -bd 2");
 	cmd(inter, "label .s.i.l -text \"Type the Monte Carlo sample size\nas number of samples.\"");
 	cmd(inter, "set sizMC \"10\"");
-	cmd(inter, "entry .s.i.e -justify center -font {-weight bold} -textvariable sizMC");
+	cmd(inter, "entry .s.i.e -justify center -textvariable sizMC");
 	cmd(inter, ".s.i.e selection range 0 end");
 	if ( findexSens > 1 )			// there are previously saved sensitivity files?
 	{
@@ -4011,9 +4006,6 @@ if (rsense!=NULL)
 			break;
 	}
 	
-	sprintf( msg, "\nSensitivity analysis sample size: %ld", (long)sizMC );
-	plog(msg);
-	
 	// check if design file numberig should pick-up from previously generated files
 	if ( findexSens > 1 )
 	{
@@ -4024,13 +4016,97 @@ if (rsense!=NULL)
 	else
 		findexSens = 1;
 	
-	// adjust an NOLH design of experiment (DoE) for the sensitivity data
+	// adjust a design of experiment (DoE) for the sensitivity data
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 
     sensitivity_doe( &findexSens, rand_doe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+
+	delete rand_doe;
+}
+else
+ 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+
+break;
+
+
+//Create Elementary Effects (EE) sensitivity analysis sampling configuration (over selected range values)
+case 81:
+
+if (rsense!=NULL) 
+{
+	if ( ! discard_change( false ) )	// unsaved configuration?
+		break;
+
+	int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+	sprintf(msg, "\nNumber of variables for sensitivity analysis: %d", varSA);
+	plog(msg);
+
+	// get the number of Monte Carlo samples to produce
+	int nLevels = 4, jumpSz = 2, nTraj = 10, nSampl = 100;
+	Tcl_LinkVar(inter, "varSA", (char *)&varSA, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "nLevels", (char *)&nLevels, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "jumpSz", (char *)&jumpSz, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "nTraj", (char *)&nTraj, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "nSampl", (char *)&nSampl, TCL_LINK_INT);
+	cmd(inter, "newtop .s \"Elementary Effects Samples\" { set choice 2 }");
+	cmd(inter, "frame .s.i -relief groove -bd 2");
+	cmd(inter, "label .s.i.l1 -text \"Number of trajectories (r)\n([expr $varSA + 1]\u00D7r samples to create)\"");
+	cmd(inter, "entry .s.i.e1 -justify center -textvariable nTraj");
+	cmd(inter, "label .s.i.l2 -text \"Trajectories pool size (M)\n(M > r enables optimization)\"");
+	cmd(inter, "entry .s.i.e2 -justify center -textvariable nSampl");
+	cmd(inter, "label .s.i.l3 -text \"Number of levels (p)\n(must be even)\"");
+	cmd(inter, "entry .s.i.e3 -justify center -textvariable nLevels");
+	cmd(inter, "label .s.i.l4 -text \"Jump size\n( \u0394\u00D7(p - 1) )\"");
+	cmd(inter, "entry .s.i.e4 -justify center -textvariable jumpSz");
+	cmd(inter, "label .s.i.t -text \"\nFor details on setting Elementary\nEffects sampling parameters\nsee Morris (1991),  Campolongo\net al. (2007) and Ruano et al. (2012).\"");
+	cmd(inter, ".s.i.e1 selection range 0 end");
+	cmd(inter, "pack .s.i.l1 .s.i.e1 .s.i.l2 .s.i.e2 .s.i.l3 .s.i.e3 .s.i.l4 .s.i.e4 .s.i.t");
+	cmd(inter, "pack .s.i");
+	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
+	cmd(inter, "focus .s.i.e1");
+	cmd(inter, "showtop .s centerW");
+	*choice = 0;
+	while(*choice == 0)
+		Tcl_DoOneEvent(0);
+	cmd(inter, "destroy .s");
+	Tcl_UnlinkVar(inter, "varSA");
+	Tcl_UnlinkVar(inter, "nLevels");
+	Tcl_UnlinkVar(inter, "jumpSz");
+	Tcl_UnlinkVar(inter, "nTraj");
+	Tcl_UnlinkVar(inter, "nSampl");
+	if(*choice == 2)
+		break;
+	
+	// Check if numbers are valid
+	if( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj )
+	{
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Elementary Effects configuration to perform the sensitivity analysis.\\n\\nCheck Morris (1991) and Campolongo et al. (2007) for details.\"");
+		*choice=0;
+		break;
+	}
+	
+	// Prevent running into too big sensitivity space samples (high computation times)
+	if( nTraj * ( varSA + 1 )  > MAX_SENS_POINTS )
+	{
+		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", (long)( nTraj * ( varSA + 1 ) ) );
+		plog(msg);
+		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		if(*choice == 0)
+			break;
+	}
+	
+	findexSens = 1;
+	
+	// adjust a design of experiment (DoE) for the sensitivity data
+	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, nTraj );
+
+    sensitivity_doe( &findexSens, rand_doe );
+	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	plog( msg );
+ 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
 }
