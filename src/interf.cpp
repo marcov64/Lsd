@@ -4081,7 +4081,7 @@ if (rsense!=NULL)
 		break;
 	
 	// Check if numbers are valid
-	if( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj )
+	if( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
 	{
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Elementary Effects configuration to perform the sensitivity analysis.\\n\\nCheck Morris (1991) and Campolongo et al. (2007) for details.\"");
 		*choice=0;
@@ -4101,10 +4101,12 @@ if (rsense!=NULL)
 	findexSens = 1;
 	
 	// adjust a design of experiment (DoE) for the sensitivity data
-	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, nTraj );
+	plog( "\nCreating and optimizing design of experiments, please wait... " );
+	cmd( inter, "update idletasks" );					// force flushing text
+	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 
     sensitivity_doe( &findexSens, rand_doe );
-	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	sprintf( msg, "Done\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
