@@ -110,18 +110,20 @@ double update_lattice(double line, double col, double val);
 
 #define MODELBEGIN double variable::fun(object *caller) \
 { \
-double res; \
-object *p, *c, app; \
+if( quit == 2 ) \
+	return -1; \
+double res = 0; \
+object *p, *c, app = NULL; \
 int i,j,h,k; \
 double v[1000]; \
 object register *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
-cur=cur1=cur2=cur3=cur4=cur5=cyccur=NULL; \
 netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
-if(quit==2) \
- return -1; \
-p=up; \
-c=caller; \
-FILE *f;
+FILE *f = NULL; \
+i = j = h = k = 0; \
+cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = NULL; \
+curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = curl10 = cyccur = NULL; \
+p = up; \
+c = caller;
 
 #define EQUATION(X) if(!strcmp(label,X)) {
 #define FUNCTION(X) if(!strcmp(label,X)) { last_update--; if(c==NULL) {  res=val[0];  goto end; } }; \
@@ -145,7 +147,7 @@ cmd(inter, msg); \
 quit=2; \
 return -1; \
 end : \
-if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)==1) && quit!=1) \
+if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)) && quit!=1) \
  { \
   sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
   error(msg); \
@@ -165,13 +167,13 @@ return(res); \
 #define MODELEND sprintf(msg, "\nFunction for %s not found", label); \
 plog(msg); \
 sprintf(msg, "Error trying to compute variable '%s': Equation not found.\n\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly.\n\nCheck the Lsd help.\"", label, label); \
-printf("s",msg); \
+plog(msg); \
 exit(0); \
 end : \
-if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)==1) && quit!=1) \
+if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)) && quit!=1) \
  { \
   sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
-  printf(msg); \
+  plog(msg); \
   exit(0); \
  } \
 return(res); \

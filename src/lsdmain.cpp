@@ -799,9 +799,9 @@ if(quit==1) //For multiple simulation runs you need to reset quit
 /**************** WORKS ONLY FOR WINDOWS VERSION */
 end=clock();
 if(strlen(path)>0 || no_window==1)
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC), simul_name, seed-1);
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
 else
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC, simul_name, seed-1);
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC);
  plog(msg);
 /****************************************************/
 //sprintf(msg, "\nSimulation %d finished\n",i);

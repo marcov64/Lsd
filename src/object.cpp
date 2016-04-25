@@ -1333,7 +1333,7 @@ void object::write(char const *lab, double value, int time, int lag)
     variable *cv;
     
     if(this==NULL)
-    {sprintf(msg, "\nError: write of '%s' requested to a NULL pointer in the equation for '%s%'\n\n", lab, stacklog->vs->label);
+    {sprintf(msg, "\nError: write of '%s' requested to a NULL pointer in the equation for '%s'\n\n", lab, stacklog->vs->label);
         plog(msg);
         error_hard();
         quit=2;

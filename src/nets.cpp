@@ -446,7 +446,7 @@ object *object::draw_node_net( char const *lab )
 	{
 		sprintf( msg, "\nError (network node draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
 		plog( msg );
-		sprintf( msg, "\nFirst object returned.\n", lab );
+		sprintf( msg, "\nFirst object (%s) returned.\n", lab );
 		plog( msg );
 		return cur1;
 	}

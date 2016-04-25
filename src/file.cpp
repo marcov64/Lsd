@@ -1284,7 +1284,7 @@ bool save_configuration( object *r, long findex )
 	fprintf( f, "\nDATA\n" );
 	cur->save_param( f );
 	
-	long delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
+	int delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
 	
 	fprintf( f, "\nDESCRIPTION\n\n" );
