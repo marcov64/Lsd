@@ -174,11 +174,27 @@ FILE *search_data_str(char const *name, char const *init, char const *str);
 FILE *search_data_ent(char *name, variable *v);
 void find_lags(object *r);
 void plog(char const *msg);
+void save_eqfile(FILE *f);
 void set_blueprint(object *container, object *r);
 void add_description(char const *lab, char const *type, char const *text);
+void empty_cemetery(void);
+void empty_descr(void);
 
 extern char msg[];
+extern char name_rep[];
+extern char lsd_eq_file[];
+extern char *path;
+extern char *simul_name;
+extern char *equation_name;
+extern char *eq_file;
 extern char *struct_file;
+extern int struct_loaded;
+extern int t;
+extern int seed;
+extern int sim_num;
+extern int max_step;
+extern int ignore_eq_file;
+extern bool unsavedChange;
 extern object *blueprint;
        
 extern description *descr;
@@ -1081,3 +1097,217 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  }
 }
 
+/*
+	Load current defined configuration
+	Returns: 0: load ok, 1,2,3,4: load failure
+*/
+int load_configuration( object *r )
+{
+	int i, load = 0;
+	object *cur;
+	description *cur_descr;
+	
+	for ( cur = r; cur->up != NULL; cur = cur->up );
+	r = cur;
+	
+	r->empty( );
+	empty_cemetery( );
+	lsd_eq_file[ 0 ] = ( char ) NULL;
+	
+	r->label = new char[ strlen( "Root" ) + 1 ];
+	strcpy( r->label, "Root" );
+	
+	empty_descr( );
+	add_description( "Root", "Object", "(no description available)" );
+
+	delete [] struct_file;
+	
+	if ( strlen( path ) > 0 )
+	{
+		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s/%s.lsd", path, simul_name );
+	}
+	else
+	{
+		struct_file = new char[ strlen( simul_name ) + 6 ];
+		sprintf( struct_file, "%s.lsd", simul_name );
+	}
+
+	FILE * f = fopen( struct_file, "r" );
+	if( f == NULL )
+		return 1;
+
+    r->load_struct( f );
+	struct_loaded = 1;
+    fscanf( f, "%s", msg );					//should be DATA
+	r->load_param( struct_file, 1, f );
+	fscanf( f, "%s", msg );					//should be SIM_NUM 
+	fscanf( f, "%d", &sim_num );
+	fscanf( f, "%s", msg );					//should be SEED
+	fscanf( f, "%d", &seed );
+	fscanf( f, "%s", msg );					//should be MAX_STEP
+	fscanf( f, "%d", &max_step );
+	fscanf( f, "%s", msg );					//should be EQUATION
+	fgets( msg, 200, f );
+
+	delete [] equation_name;
+	equation_name = new char[ strlen( msg ) + 1 ];
+	strcpy( equation_name, msg + 1 );
+    if ( equation_name[ strlen( equation_name ) - 1 ] == '\n' )
+		equation_name[ strlen( equation_name ) - 1 ] = ( char ) NULL;
+    if ( equation_name[ strlen( equation_name ) - 1 ] == '\r' )
+		equation_name[ strlen( equation_name ) - 1 ] = ( char ) NULL;
+  
+	if ( fscanf( f, "%s", msg ) != 1 )		//should be MODELREPORT
+	{
+		load = 2;
+		goto endLoad;
+	}
+	fscanf( f, "%s", name_rep );
+
+	if ( fscanf( f, "%s", msg ) != 1 )		//should be DESCRIPTION
+	{
+		load = 3;
+		goto endLoad;
+	}  
+	fscanf( f, "%s", msg );					//should be the first description   
+
+	i = 1;
+	while ( strcmp( msg, "DOCUOBSERVE" ) != 0 && i == 1 )
+	{ 
+		load_description( f );
+		if( fscanf( f, "%s", msg ) != 1 ) 
+			i = 0;
+	}
+	if( i == 0 )
+	{
+		load = 4;
+		goto endLoad;
+	} 
+	
+	fscanf( f, "%s", msg );  
+	while ( strcmp( msg, "END_DOCUOBSERVE" ) != 0 )
+	{
+		cur_descr = search_description( msg );
+		if( cur_descr == NULL )
+		{
+			sprintf( msg, "\nWarning: description for '%s' not found. Check elements to observe.", msg );
+			plog( msg );
+			fscanf( f, "%s", msg );
+		}
+		else 
+		{
+			cur_descr->observe = 'y';
+			fscanf( f, "%s", msg );
+		} 
+	}
+	
+	fscanf( f, "%s", msg );  
+	fscanf( f, "%s", msg );  
+	while ( strcmp( msg, "END_DOCUINITIAL" ) != 0 )
+	{
+		cur_descr = search_description( msg );
+		if ( cur_descr == NULL )
+		{
+			sprintf( msg, "\nWarning: description for '%s' not found. Check elements to initialize.", msg );
+			plog( msg );
+			fscanf( f, "%s", msg );
+		}
+		else
+		{
+			cur_descr->initial = 'y';
+			fscanf( f, "%s", msg );
+		}
+	}
+	
+	if ( fscanf( f, "%s", msg ) == 1 )		//here is the equation file
+	{
+		fscanf( f, "%s", msg );
+		strcpy( lsd_eq_file, msg );
+		
+		while ( fgets( msg, 1000, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) )
+			strcat( lsd_eq_file, msg );
+		
+		i = strlen( lsd_eq_file );
+		lsd_eq_file[ i - 1 ] = lsd_eq_file[ i ];
+		
+		if( ignore_eq_file == 0 && strcmp( lsd_eq_file, eq_file ) != 0 )
+		{
+			sprintf( msg, "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the Lsd model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
+			plog( msg );
+		}
+	}  
+	
+endLoad:
+	fclose( f );
+	
+	t = 0;
+	unsavedChange = false;
+
+	return load;
+}
+
+/*
+	Save current defined configuration (renaming if appropriate)
+	Returns: true: save ok, false: save failure
+*/
+bool save_configuration( object *r, long findex )
+{
+	int indexDig = ( findex > 0 ) ? floor( log( findex ) / log( 10 ) + 2 ) : 0;
+	object *cur;
+	description *cur_descr;
+	
+	delete [] struct_file;
+	
+	if ( strlen( path ) > 0 )
+	{
+		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 + indexDig ];
+		sprintf( struct_file, "%s/%s", path, simul_name );
+	}
+	else
+	{
+		struct_file = new char[ strlen( simul_name ) + 6 + indexDig ];
+		sprintf( struct_file, "%s", simul_name );
+	}
+	if ( findex > 0 )
+		sprintf( struct_file, "%s_%ld.lsd", struct_file, findex );
+	else
+		sprintf( struct_file, "%s.lsd", struct_file );
+	
+	FILE * f = fopen( struct_file, "w" );
+	if ( f == NULL )
+		return false;
+
+	for ( cur = r; cur->up != NULL; cur = cur->up );
+	
+	cur->save_struct( f, "" );
+	fprintf( f, "\nDATA\n" );
+	cur->save_param( f );
+	
+	long delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
+	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
+	
+	fprintf( f, "\nDESCRIPTION\n\n" );
+	save_description( cur, f );
+	
+	fprintf( f, "\nDOCUOBSERVE\n" );
+	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
+		if ( cur_descr->observe == 'y' )   
+			fprintf( f, "%s\n", cur_descr->label );
+	fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
+	
+	fprintf( f, "\nDOCUINITIAL\n" );
+	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
+		if( cur_descr->initial == 'y' )     
+			fprintf( f, "%s\n", cur_descr->label );
+	fprintf( f, "\nEND_DOCUINITIAL\n\n" );
+	
+	save_eqfile( f );
+	
+	fclose( f );
+	
+	if ( findex <= 0 )
+		unsavedChange = false;		// no changes to save
+	
+	return true;
+}

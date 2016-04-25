@@ -1635,6 +1635,20 @@ cur->init=(char)NULL;
 
 }
 
+void empty_descr(void)
+{
+description *cur, *cur1;
+for(cur1=descr; cur1!=NULL; cur1=cur)
+  {cur=cur1->next;
+  delete[] cur1->label;
+  delete[] cur1->type;
+  delete[] cur1->text;
+  delete cur1;
+  }
+descr=NULL;
+}
+
+
 #ifndef NO_WINDOW
 
 void change_descr_text(char *lab)
@@ -1735,18 +1749,6 @@ cmd(inter, msg);
 cmd(inter, "set raise_description 1");
 cmd(inter, "showtop .desc_$vname");
 
-}
-void empty_descr(void)
-{
-description *cur, *cur1;
-for(cur1=descr; cur1!=NULL; cur1=cur)
-  {cur=cur1->next;
-  delete[] cur1->label;
-  delete[] cur1->type;
-  delete[] cur1->text;
-  delete cur1;
-  }
-descr=NULL;
 }
 
 

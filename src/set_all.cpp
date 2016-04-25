@@ -88,6 +88,8 @@ sense *rsense=NULL;
 extern long idum;
 extern Tcl_Interp *inter;
 extern char msg[];
+extern char *simul_name;
+extern char *path;
 extern int t;
 extern object *root;
 extern description *descr;
@@ -105,7 +107,7 @@ void change_descr_lab(char const *lab_old, char const *lab, char const *type, ch
 int compute_copyfrom(object *c, int *choice);
 void add_description(char const *lab, char const *type, char const *text);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
-void save_description(object *r, FILE *f);
+bool save_configuration( object *, long findex = 0 );
 int init_random(int seed);
 void NOLH_clear( void );	// external DoE	cleanup
 
@@ -920,16 +922,6 @@ return cur;
 }
 
 
-extern char *simul_name;
-extern char *path;
-extern int seed;
-extern int sim_num;
-extern int max_step;
-extern char *equation_name;
-extern char name_rep[400];
-void save_eqfile(FILE *f);
-
-
 void sensitivity_sequential(long *findex, sense *s, double probSampl = 1.0)
 {
 /*
@@ -986,42 +978,12 @@ for(i=0; i<s->nvalues; i++)
 
  if(probSampl == 1.0 || RND <= probSampl)		// if required draw if point will be sampled
  {
-	if(strlen(path)>0)
+	if ( ! save_configuration( root, *findex ) )
 	{
-		fname=new char[strlen(path)+strlen(simul_name)+20];
-		sprintf(fname,"%s/%s_%ld.lsd",path,simul_name,*findex);
+		cmd( inter , "tk_messageBox -type ok -icon error -title Error -message \"Configuration files cannot be saved.\n\nCheck if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+		return;
 	}
-	else
-    {
-		fname=new char[strlen(simul_name)+20];
-		sprintf(fname,"%s_%ld.lsd",simul_name,*findex);
-	}
-    f=fopen(fname,"w");
-	delete [ ] fname;
-	root->save_struct(f,"");
-   fprintf(f, "\n\nDATA");
-	root->save_param(f);
-	fprintf(f, "\nSIM_NUM %d\nSEED %ld\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed+sim_num*(*findex-1), max_step, equation_name, name_rep);
-  fprintf(f, "\nDESCRIPTION\n\n");
-  save_description(root, f);  
-  fprintf(f, "\nDOCUOBSERVE\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->observe=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUOBSERVE\n\n");
-  fprintf(f, "\nDOCUINITIAL\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->initial=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUINITIAL\n\n");
-  save_eqfile(f);
-  
-  fclose(f);
-  *findex=*findex+1;
+	*findex=*findex+1;
  }
 }
  
@@ -2570,38 +2532,12 @@ void sensitivity_doe( long *findex, design *doe )
 		}
 		
 		// generate a configuration file for the experiment
-		if( strlen( path ) > 0 )				// non-default folder?
+		if ( ! save_configuration( root, *findex ) )
 		{
-			fname = new char[ strlen( path ) + strlen( simul_name ) + 20 ];
-			sprintf( fname, "%s/%s_%ld.lsd", path, simul_name, *findex );
+			cmd( inter , "tk_messageBox -type ok -icon error -title Error -message \"Configuration files cannot be saved.\n\nCheck if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+			return;
 		}
-		else
-		{
-			fname = new char[ strlen( simul_name ) + 20 ];
-			sprintf( fname, "%s_%ld.lsd", simul_name, *findex );
-		}
-		f = fopen( fname, "w" );
-		delete [ ] fname;
-		// create the configuration file
-		root->save_struct( f, "" );
-		fprintf( f, "\n\nDATA" );
-		root->save_param( f );
-		fprintf( f, "\nSIM_NUM %d\nSEED %ld\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + sim_num * ( *findex - 1), max_step, equation_name, name_rep );
-		fprintf( f, "\nDESCRIPTION\n\n" );
-		save_description( root, f );  
-		fprintf( f, "\nDOCUOBSERVE\n" );
-		for ( cdescr = descr; cdescr != NULL; cdescr = cdescr->next )
-			if( cdescr->observe == 'y' )     
-				fprintf( f, "%s\n", cdescr->label );
-		fprintf( f, "\nEND_DOCUOBSERVE\n\n" );
-		fprintf( f, "\nDOCUINITIAL\n" );
-		for ( cdescr = descr; cdescr != NULL; cdescr = cdescr->next )
-			if( cdescr->initial == 'y' )     
-				fprintf( f, "%s\n", cdescr->label );
-		fprintf( f, "\nEND_DOCUINITIAL\n\n" );
-		save_eqfile( f );
-
-		fclose( f );
+		
 		*findex = *findex + 1;
 	}
 }

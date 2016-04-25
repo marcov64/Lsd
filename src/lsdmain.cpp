@@ -165,21 +165,19 @@ char *clean_file(char *);
 char *clean_path(char *);
 
 char *upload_eqfile(void);
-lsdstack *stacklog;
+lsdstack *stacklog = NULL;
+object *root = NULL;
+object *blueprint = NULL;
 
-object *root;
-object *blueprint;
-
-description *descr=NULL;
-
-char *simul_name;
-char *struct_file;
-char *equation_name;
-char *exec_file;		// name of executable file
-char *exec_path;		// path of executable file
+description *descr = NULL;
+char *path = NULL;
+char *simul_name = NULL;
+char *struct_file = NULL;
+char *equation_name = NULL;
+char *exec_file = NULL;		// name of executable file
+char *exec_path = NULL;		// path of executable file
 char name_rep[400];
 
-char *path;
 
 char **tp;
 variable **list;
@@ -198,6 +196,15 @@ int series_saved;
 int findex, fend;
 int batch_sequential=0;
 bool dozip = false;			// compressed results file flag
+int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
+char *sens_file=NULL;		// current sensitivity analysis file
+long findexSens=0;			// index to sequential sensitivity configuration filenames
+int strWindowOn=1;			// control the presentation of the model structure window
+bool justAddedVar=false;	// control the selection of last added variable
+bool unsavedChange = false;	// control for unsaved changes in configuration
+bool unsavedSense = false;	// control for unsaved changes in sensitivity data
+bool redrawRoot = true;		// control for redrawing root window (.)
+
 // Main window constraints
 char hsize[]="400";			// horizontal size in pixels
 char vsize[]="620";			// vertical minimum size in pixels
@@ -1070,11 +1077,11 @@ sprintf(app, ".log.text.text.internal insert end \"%s\"", cm);
 
 cmd(inter, app);
 cmd(inter, ".log.text.text.internal see end");
-//cmd(inter, "raise .log");
-//cmd(inter, "update");
+cmd(inter, "update idletasks");
 
 #else
- printf("\n%s", cm);
+printf("\n%s", cm);
+fflush(stdout);
 #endif 
 message_logged=1;
 

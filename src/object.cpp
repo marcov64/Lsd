@@ -2273,7 +2273,7 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value==1))
+if((!use_nan && isnan(value)) || isinf(value))
 {sprintf(msg, "\nMath error: increment of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;
@@ -2317,7 +2317,7 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value==1))
+if((!use_nan && isnan(value)) || isinf(value))
 {sprintf(msg, "\nMath error: multiply of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;

@@ -170,11 +170,8 @@ int compute_copyfrom(object *c, int *choice);
 int reset_bridges(object *r);
 char *choose_object( char *msg );
 void insert_lb_object(object *r);
-void save_eqfile(FILE *f);
-void load_description( FILE *f);
 void autofill_descr(object *o);
 void read_eq_filename(char *s);
-void save_description(object *r, FILE *f);
 void tex_report(object *r, FILE *f);
 void tex_report_init(object *r, FILE *f);
 void tex_report_observe(object *r, FILE *f);
@@ -189,6 +186,10 @@ void empty_sensitivity(sense *cs);
 void set_all(int *choice, object *original, char *lab, int lag);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
 bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
+void save_pos( object * );
+object *restore_pos( object * );
+int load_configuration( object * );
+bool save_configuration( object *, long findex = 0 );
 
 // comparison function for bsearch and qsort
 int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
@@ -203,7 +204,7 @@ extern bool dozip;			// compressed results file flag
 extern int struct_loaded;
 extern char *path;
 extern char *equation_name;
-extern char name_rep[400];
+extern char name_rep[];
 extern int debug_flag;
 extern int stackinfo_flag;
 extern int t;
@@ -228,7 +229,7 @@ extern description *descr;
 extern int no_error;
 extern char *eq_file;
 extern char lsd_eq_file[];
-int ignore_eq_file=1;
+extern int ignore_eq_file;
 extern int lattice_type;
 extern int no_res;
 extern object *blueprint;
@@ -238,13 +239,13 @@ extern bool unsavedData;	// control for unsaved simulation results
 
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 
-char *sens_file=NULL;		// current sensitivity analysis file
-long findexSens=0;			// index to sequential sensitivity configuration filenames
-int strWindowOn=1;			// control the presentation of the model structure window
-bool justAddedVar=false;	// control the selection of last added variable
-bool unsavedChange = false;	// control for unsaved changes in configuration
-bool unsavedSense = false;	// control for unsaved changes in sensitivity data
-bool redrawRoot = true;		// control for redrawing root window (.)
+extern char *sens_file;		// current sensitivity analysis file
+extern long findexSens;		// index to sequential sensitivity configuration filenames
+extern int strWindowOn;		// control the presentation of the model structure window
+extern bool justAddedVar;	// control the selection of last added variable
+extern bool unsavedChange;	// control for unsaved changes in configuration
+extern bool unsavedSense;	// control for unsaved changes in sensitivity data
+extern bool redrawRoot;		// control for redrawing root window (.)
 
 // list of choices that are bad with existing run data
 int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
@@ -614,17 +615,17 @@ cmd(inter, "set w .m.data.setsens");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, "$w add command -label \"Full (online)\" -command {set choice 62} -underline 0");
 cmd(inter, "$w add command -label \"Full (batch)\" -command {set choice 63} -underline 6");
-cmd(inter, "$w add command -label \"MC Point Sampling (batch)\" -command {set choice 71} -underline 0");
-cmd(inter, "$w add command -label \"MC Range Sampling (batch)\" -command {set choice 80} -underline 3");
-cmd(inter, "$w add command -label \"EE Sampling (batch)\" -command {set choice 81} -underline 0");
-cmd(inter, "$w add command -label \"NOLH Sampling (batch)\" -command {set choice 72} -underline 0");
+cmd(inter, "$w add command -label \"MC Point Sampling (batch)...\" -command {set choice 71} -underline 0");
+cmd(inter, "$w add command -label \"MC Range Sampling (batch)...\" -command {set choice 80} -underline 3");
+cmd(inter, "$w add command -label \"EE Sampling (batch)...\" -command {set choice 81} -underline 0");
+cmd(inter, "$w add command -label \"NOLH Sampling (batch)...\" -command {set choice 72} -underline 0");
 
 cmd(inter, "set w .m.run");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Run -menu $w -underline 0");
 cmd(inter, "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R");
-cmd(inter, "$w add command -label \"Start 'No Window' Batch\" -command {set choice 69} -underline 0");
-cmd(inter, "$w add command -label \"Create/Run Parallel Batch\" -command {set choice 68} -underline 11");
+cmd(inter, "$w add command -label \"Start 'No Window' Batch...\" -command {set choice 69} -underline 0");
+cmd(inter, "$w add command -label \"Create/Run Parallel Batch...\" -command {set choice 68} -underline 11");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Simulation Settings...\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
 cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
@@ -825,7 +826,7 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[4];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, overwConf, temp[4];
 bool saveAs, delVar, reload;
 char observe, initial, cc;
 bridge *cb;
@@ -2311,8 +2312,15 @@ cmd(inter, "label $T.war4 -text \"Results will be saved in memory only\\n\"");
 cmd(inter, "pack $T.war3 $T.war4");
 }
 
-cmd(inter, "label $T.tosave -text \"You are going to overwrite the existing\\n configuration file with the current values\"");
-cmd(inter, "pack $T.tosave");
+// Only ask to overwrite configuration if there are changes
+if ( unsavedChange )
+{
+	cmd( inter, "set overwConf 1" );
+	cmd( inter, "checkbutton $T.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
+	cmd( inter, "pack $T.tosave" );
+}
+else
+	cmd( inter, "set overwConf 0" );
 
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } { set choice 2 }" );
 cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");
@@ -2333,55 +2341,27 @@ cmd(inter, "set choice $overw");
 add_to_tot=*choice;
 cmd(inter, "set choice $dozip");
 dozip=*choice;
+cmd(inter, "set choice $overwConf");
+overwConf = *choice;
 *choice=1;
+
 for(n=r; n->up!=NULL; n=n->up);
 
 blueprint->empty();			    // update blueprint to consider last changes
 set_blueprint(blueprint, n);
 
-if(strlen(path)>0)
-  sprintf(struct_file, "%s/%s.lsd", path, simul_name);
-else
-  sprintf(struct_file, "%s.lsd", simul_name);
-f=fopen(struct_file, "w");
-if(f==NULL)
- {
-  sprintf( msg , "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved.\n\nCheck if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
-  cmd( inter, msg );
-  if(*choice==2)
-  {
-   *choice=0;
-   break;
-  }
- }
-else
- {
-  strcpy(lab, "");
-  for(cur=r; cur->up!=NULL; cur=cur->up);
-  cur->save_struct(f,lab);
-  fprintf(f, "\nDATA\n");
-  cur->save_param(f);
-	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed, max_step, equation_name, name_rep);
-  fprintf(f, "\nDESCRIPTION\n\n");
-  save_description(cur, f);
-  fprintf(f, "\nDOCUOBSERVE\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->observe=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUOBSERVE\n\n");
-  fprintf(f, "\nDOCUINITIAL\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->initial=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUINITIAL\n\n");
-  save_eqfile(f);
-  fclose(f);
-  unsavedChange = false;		// no changes to save
- }
+if ( overwConf == 1 )			// save if needed
+	if ( ! save_configuration( r ) )
+	{
+		sprintf( msg , "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved.\n\nCheck if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
+		cmd( inter, msg );
+		if( *choice == 2 )
+		{
+			*choice=0;
+			break;
+		}
+	}
+
 *choice=1; 
 
 return(n);
@@ -2402,13 +2382,7 @@ case 38: //quick reload
 reload = ( *choice == 38 ) ? true : false;
 
 if ( reload )
- {
-	// save the current object & cursor position for quick reload
-	strcpy( lastObj, r->label );
-	cmd( inter, "if { ! [ string equal [ .l.s.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.son_name curselection ] }" );
-	cmd( inter, "if { $lastItem == \"\" } { set lastItem 0 }" );
- }
+	save_pos( r );
 
 if(struct_loaded==1)
 { 
@@ -2418,18 +2392,11 @@ if(struct_loaded==1)
    cmd(inter, "set a [split [winfo children .] ]");  // remove old runtime plots
    cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
    for(n=r; n->up!=NULL; n=n->up);
-	  n->empty();
-  empty_cemetery();
-  lsd_eq_file[0]=(char)NULL;
-	  n->label = new char[strlen("Root")+1];
-	  strcpy(n->label, "Root");
-	  r=n;
-	  cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-  empty_descr();
-  add_description("Root", "Object", "(no description available)");
+   r=n;
+   cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+  
   empty_sensitivity(rsense); 	// discard sensitivity analysis data
   rsense=NULL;
-  unsavedChange = false;		// no changes to save
   unsavedSense = false;			// nothing to save
   findexSens=0;
   nodesSerial=0;				// network node serial number global counter
@@ -2479,157 +2446,43 @@ if(*choice==17)
    }
   else
    strcpy(path,"");
-  delete[] struct_file;
-  if(strlen(path)>0)
-   {struct_file=new char[strlen(path)+strlen(simul_name)+6];
-    sprintf(struct_file,"%s/%s.lsd",path,simul_name);
-   }
-  else
-   {struct_file=new char[strlen(simul_name)+6];
-    sprintf(struct_file,"%s.lsd",simul_name);
-   }
  } 
 
-	f=fopen(struct_file, "r");
-	if(f==NULL)
-	 {
-     if(strlen(path)>0)
-       sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in directory '%s'.\"", simul_name, path);
-     else
-       sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in current directory\"", simul_name);
- 	  cmd(inter, msg);
-     break;
-    }
-	else
-	 {
-    cmd(inter, "catch {unset ModElem}");
-    r->load_struct(f);
-	  struct_loaded=1;
-    fscanf(f, "%s", msg); //should be DATA
-	  r->load_param(struct_file, 1,f);
-	  show_graph(r);
-   fscanf(f, "%s",msg); //should be SIM_NUM 
-	  fscanf(f, "%d", &sim_num);
-   fscanf(f, "%s",msg); //should be SEED
-	  fscanf(f, "%d", &seed);
-   fscanf(f, "%s",msg); //should be MAX_STEP
-   fscanf(f, "%d", &max_step);
-   fscanf(f, "%s",msg); //should be EQUATION
-   fgets(msg, 200, f);
+switch ( load_configuration( r ) )
+{
+	case 1:							// file/path not found
+		if( strlen( path ) > 0 )
+			sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in directory '%s'.\"", simul_name, path );
+		else
+			sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in current directory\"", simul_name );
+		cmd( inter, msg );
+		*choice = 0;
+		break;
+		
+	case 2:							// problem from MODELREPORT section
+	case 3:							// problem from DESCRIPTION section
+		autofill_descr( r );
+	case 4:							// problem from DOCUOBSERVE section
+		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Invalid or damaged file.\\n\\nPlease check if a proper file was selected and if the loaded configuration is correct.\"" );
+		*choice = 0;
+	default:						// load ok
+		cmd( inter, "catch {unset ModElem}" );
+		show_graph( r );
+		unsavedChange = false;		// no changes to save
+		redrawRoot = true;			// force browser redraw
+		if ( ! reload )
+			cmd( inter, "set cur 0" ); // point for first var in listbox
+}
 
-	 delete[] equation_name;
-	 equation_name=new char[strlen(msg)+1];
-	 strcpy(equation_name, msg+1);
-    if(equation_name[strlen(equation_name)-1]=='\n')
-      equation_name[strlen(equation_name)-1]=(char)NULL;
-    if(equation_name[strlen(equation_name)-1]=='\r')
-      equation_name[strlen(equation_name)-1]=(char)NULL;
-  
-   if(fscanf(f, "%s",msg)!=1) //should be MODELREPORT
-    {
-    fclose(f);
-    autofill_descr(r);
-    *choice=0;
-    t=0;
-    goto end1738;
-    }  
-   fscanf(f, "%s", name_rep);
-   if(fscanf(f, "%s", msg)!=1) //should be DESCRIPTION
-    {
-    fclose(f);
-    autofill_descr(r);
-    *choice=0;
-    t=0;
-    goto end1738;
-    }  
-   
-   fscanf(f, "%s", msg); //should be the first description   
-   i=1;
-   while(strcmp(msg, "DOCUOBSERVE")!=0 && i==1)
-    { 
-     load_description(f);
-     if(fscanf(f, "%s", msg)!=1) 
-      i=0;
-    }
-   if(i==0)
-    {
-    fclose(f);
-    *choice=0;
-    t=0;
-    goto end1738;
-    } 
-   fscanf(f, "%s", msg);  
-   while(strcmp(msg, "END_DOCUOBSERVE")!=0)
-    {
-    cur_descr=search_description(msg);
-    if(cur_descr==NULL)
-    {
-     sprintf(msg, "Warning! description for '%s' not found. Check elements to observe.\\n", msg);
-     plog(msg);
-     fscanf(f, "%s", msg);
-    }
-    else 
-     {
-      cur_descr->observe='y';
-      fscanf(f, "%s", msg);
-     } 
-    }
-   fscanf(f, "%s", msg);  
-   fscanf(f, "%s", msg);  
-   while(strcmp(msg, "END_DOCUINITIAL")!=0)
-    {
-    cur_descr=search_description(msg);
-    if(cur_descr==NULL)
-    {
-     sprintf(msg, "Warning! description for '%s' not found. Check elements to initialize.\\n", msg);
-     plog(msg);
-     fscanf(f, "%s", msg);
-    }
-    else
-     {
-     cur_descr->initial='y';
-     fscanf(f, "%s", msg);
-     }
-    }
-   if(fscanf(f, "%s", msg)==1)
-    {//here is the eq_file
-    fscanf(f, "%s", msg);
-    strcpy(lsd_eq_file, msg);
-    while( fgets(msg, 1000, f)!=NULL && strncmp(msg, "END_EQ_FILE", 11) )
-      strcat(lsd_eq_file, msg);
-    i=strlen(lsd_eq_file);
-    lsd_eq_file[i-1]=lsd_eq_file[i];  
-    if(ignore_eq_file==0 && strcmp(lsd_eq_file, eq_file)!=0)
-     {
-      cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The configuration file loaded has been previously run with equations different from those used to create the Lsd model program.\\n\\nThe changes may affect the simulation results. You can offload the original equations in a new equation file and compare differences using TkDiff in LMM (menu File).\"");
+// restore pointed object and variable
+n = restore_pos( r );
+if ( n != r )
+{
+	*choice = 0;
+	return n;
+}
 
-     }  
-    }  
-	unsavedChange = false;		// no changes to save
-	redrawRoot = true;			// force browser redraw
-	if ( ! reload )
-		cmd( inter, "set cur 0" ); // point for first var in listbox
-
-    fclose(f);
-	 }
-   
-   t=0;
-end1738:
-	// restore pointed object and variable
-	if ( strlen( lastObj ) > 0 )
-	{
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lastObj );
-		if ( n != NULL )
-		{
-			cmd(inter, "if [ info exists lastList ] { set listfocus $lastList }");
-			cmd(inter, "if [ info exists lastItem ] { set itemfocus $lastItem }");
-			*choice = 0;
-			return n;
-		}
-	}
-
-	break;
+break;
 
 	
 //Save a model
@@ -2703,57 +2556,16 @@ if(strlen(msg)>0)
  }
 else
  strcpy(path,"");
-delete[] struct_file;
-if(strlen(path)>0)
- {struct_file=new char[strlen(path)+strlen(simul_name)+6];
-  sprintf(struct_file,"%s/%s.lsd",path,simul_name);
- }
-else
- {struct_file=new char[strlen(simul_name)+6];
-  sprintf(struct_file,"%s.lsd",simul_name);
- }
-}	// end if ( saveAs )
+}
 
-f=fopen(struct_file, "w");
-if(f==NULL)
- {
-  sprintf( msg , "tk_messageBox -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved.\n\nThe model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name );
-  cmd( inter, msg );
- }
-else
- {
-	strcpy(lab, "");
-  cur=r;
-	for(; cur->up!=NULL; cur=cur->up);
-	cur->save_struct(f,lab);
-   fprintf(f, "\n\nDATA");
-	for(cur=r; cur->up!=NULL; cur=cur->up);
-	cur->save_param(f);
-	fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed, max_step, equation_name, name_rep);
-  fprintf(f, "\nDESCRIPTION\n\n");
-  save_description(cur, f);  
-  fprintf(f, "\nDOCUOBSERVE\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->observe=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUOBSERVE\n\n");
-  fprintf(f, "\nDOCUINITIAL\n");
-  for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-    {
-    if(cur_descr->initial=='y')     
-      fprintf(f, "%s\n",cur_descr->label);
-    } 
-  fprintf(f, "\nEND_DOCUINITIAL\n\n");
-  save_eqfile(f);
-  
-	fclose(f);
-
-   unsavedChange = false;		// signal no unsaved change
- }  
-   Tcl_UnlinkVar(inter, "done");
-	break;
+if ( ! save_configuration( r ) )
+{
+	sprintf( msg , "tk_messageBox -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved.\n\nThe model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name );
+	cmd( inter, msg );
+}
+	
+Tcl_UnlinkVar(inter, "done");
+break;
 
 
 //Edit Objects' numbers
@@ -3776,11 +3588,27 @@ if (rsense!=NULL)
 			break;
 	}
 	
+	// save the current object & cursor position for quick reload
+	save_pos( r );
+
     findexSens=1;
     sensitivity_sequential(&findexSens,rsense);
 	sprintf( msg, "\nSensitivity analysis configurations produced: %ld", findexSens - 1 );
 	plog( msg );
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+	
+	// now reload the previously existing configuration
+	for ( n = r; n->up != NULL; n = n->up );
+	r = n;
+	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+	load_configuration( r );
+	// restore pointed object and variable
+	n = restore_pos( r );
+	if ( n != r )
+	{
+		*choice = 0;
+		return n;
+	}
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -3845,6 +3673,9 @@ if (rsense!=NULL)
 			break;
 	}
 	
+	// save the current object & cursor position for quick reload
+	save_pos( r );
+
 	sprintf(msg, "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", (long)(sizMC * maxMC), 100 * sizMC);
 	plog(msg);
     findexSens=1;
@@ -3852,6 +3683,19 @@ if (rsense!=NULL)
 	sprintf(msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1);
 	plog(msg);
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+	
+	// now reload the previously existing configuration
+	for ( n = r; n->up != NULL; n = n->up );
+	r = n;
+	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+	load_configuration( r );
+	// restore pointed object and variable
+	n = restore_pos( r );
+	if ( n != r )
+	{
+		*choice = 0;
+		return n;
+	}
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -3914,12 +3758,14 @@ if (rsense!=NULL)
 	int samples = ( *doeext == '0') ? 0 : -1;
 
 	// adjust an NOLH design of experiment (DoE) for the sensitivity data
+	plog( "\nCreating design of experiments, it may take a while, please wait... " );
 	design *NOLHdoe = new design( rsense, 1, NOLHfile, 1, samples, doesz );
 	
 	if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
 	{
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration.\\n\\nIf the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
-		goto end72;
+		delete NOLHdoe;
+		break;
 	}
 
 	// Prevent running into too big sensitivity space samples (high computation times)
@@ -3929,17 +3775,35 @@ if (rsense!=NULL)
 		plog( msg );
 		cmd( inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
 		if( *choice == 0 )
-			goto end72;
+		{
+			delete NOLHdoe;
+			break;
+		}
 	}
 	
+	// save the current object & cursor position for quick reload
+	save_pos( r );
+
     findexSens = 1;
     sensitivity_doe( &findexSens, NOLHdoe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
-
-end72:
+	
 	delete NOLHdoe;
+
+	// now reload the previously existing configuration
+	for ( n = r; n->up != NULL; n = n->up );
+	r = n;
+	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+	load_configuration( r );
+	// restore pointed object and variable
+	n = restore_pos( r );
+	if ( n != r )
+	{
+		*choice = 0;
+		return n;
+	}
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -4006,6 +3870,9 @@ if (rsense!=NULL)
 			break;
 	}
 	
+	// save the current object & cursor position for quick reload
+	save_pos( r );
+
 	// check if design file numberig should pick-up from previously generated files
 	if ( findexSens > 1 )
 	{
@@ -4017,6 +3884,7 @@ if (rsense!=NULL)
 		findexSens = 1;
 	
 	// adjust a design of experiment (DoE) for the sensitivity data
+	plog( "\nCreating design of experiments, it may take a while, please wait... " );
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 
     sensitivity_doe( &findexSens, rand_doe );
@@ -4025,6 +3893,19 @@ if (rsense!=NULL)
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
+	
+	// now reload the previously existing configuration
+	for ( n = r; n->up != NULL; n = n->up );
+	r = n;
+	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+	load_configuration( r );
+	// restore pointed object and variable
+	n = restore_pos( r );
+	if ( n != r )
+	{
+		*choice = 0;
+		return n;
+	}
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -4098,11 +3979,13 @@ if (rsense!=NULL)
 			break;
 	}
 	
+	// save the current object & cursor position for quick reload
+	save_pos( r );
+
 	findexSens = 1;
 	
 	// adjust a design of experiment (DoE) for the sensitivity data
-	plog( "\nCreating and optimizing design of experiments, please wait... " );
-	cmd( inter, "update idletasks" );					// force flushing text
+	plog( "\nCreating design of experiments, it may take a while, please wait... " );
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 
     sensitivity_doe( &findexSens, rand_doe );
@@ -4111,6 +3994,19 @@ if (rsense!=NULL)
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
+	
+	// now reload the previously existing configuration
+	for ( n = r; n->up != NULL; n = n->up );
+	r = n;
+	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
+	load_configuration( r );
+	// restore pointed object and variable
+	n = restore_pos( r );
+	if ( n != r )
+	{
+		*choice = 0;
+		return n;
+	}
 }
 else
  	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
@@ -4611,40 +4507,11 @@ case 69:
 	for(n=r; n->up!=NULL; n=n->up);
 	blueprint->empty();			    // update blueprint to consider last changes
 	set_blueprint(blueprint, n);
-
-	if(strlen(path)>0)
-		sprintf(struct_file, "%s/%s.lsd", path, simul_name);
-	else
-		sprintf(struct_file, "%s.lsd", simul_name);
-	f=fopen(struct_file, "w");
-	if(f==NULL)
+	
+	if ( ! save_configuration( r ) )
 	{
 		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"Configuration file cannot be opened.\n\nCheck if the file is set READ-ONLY.");
 		break;
-	}
-	else							// run save procedure
-	{
-		strcpy(lab, "");
-		for(cur=r; cur->up!=NULL; cur=cur->up);
-		cur->save_struct(f,lab);
-		fprintf(f, "\nDATA\n");
-		cur->save_param(f);
-		fprintf(f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed, max_step, equation_name, name_rep);
-		fprintf(f, "\nDESCRIPTION\n\n");
-		save_description(cur, f);
-		fprintf(f, "\nDOCUOBSERVE\n");
-		for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-			if(cur_descr->observe=='y')     
-				fprintf(f, "%s\n",cur_descr->label);
-		fprintf(f, "\nEND_DOCUOBSERVE\n\n");
-		fprintf(f, "\nDOCUINITIAL\n");
-		for(cur_descr=descr; cur_descr!=NULL; cur_descr=cur_descr->next)
-			if(cur_descr->initial=='y')     
-				fprintf(f, "%s\n",cur_descr->label);
-		fprintf(f, "\nEND_DOCUINITIAL\n\n");
-		save_eqfile(f);
-		fclose(f);
-		unsavedChange = false;		// no changes to save
 	}
 
 	// check for existing NW executable
@@ -5187,6 +5054,39 @@ if(direction==1)
    
  } 
 plog("\nError in shift_desc: should never reach this line\n"); 
+}
+
+/*
+	Save user position in browser
+*/
+void save_pos( object *r )
+{
+	// save the current object & cursor position for quick reload
+	strcpy( lastObj, r->label );
+	cmd( inter, "if { ! [ string equal [ .l.s.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
+	cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.son_name curselection ] }" );
+	cmd( inter, "if { $lastItem == \"\" } { set lastItem 0 }" );
+}
+
+/*
+	Restore user position in browser
+*/
+object *restore_pos( object *r )
+{
+	object *n;
+	
+	if ( strlen( lastObj ) > 0 )
+	{
+		for ( n = r; n->up != NULL; n = n->up );
+		n = n->search( lastObj );
+		if ( n != NULL )
+		{
+			cmd(inter, "if [ info exists lastList ] { set listfocus $lastList }");
+			cmd(inter, "if [ info exists lastItem ] { set itemfocus $lastItem }");
+			return n;
+		}
+	}
+	return r;
 }
 
 /*
