@@ -280,7 +280,7 @@ for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
      }
     if(level >= max_depth && c->b != NULL)
      {
-     sprintf(ch, "label $t.more$i -text \"   (click here to see the descendants)\" -bg white", *i);
+     sprintf(ch, "label $t.more$i -text \"   (click here to see the descendants)\" -bg white");
      cmd(inter, ch);
      cmd(inter, "pack $t.more$i");
      cmd(inter, "$t window create end -window $t.more$i");

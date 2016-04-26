@@ -280,7 +280,7 @@ cmd(inter, "wm iconify .");
 fprintf(frep, "<BR><I><A NAME=\"_DESCRIPTION_\">Automatically generated LSD report.</A></I><BR>");
 
 sprintf(msg, "<BR><CENTER><B><FONT SIZE=+2>Model: <U>%s</U></FONT></B></CENTER><BR>\n<BR>\n", app);
-fprintf(frep, "s", msg);
+fprintf(frep, "%s", msg);
 
 count=0;
 if(es1==1)

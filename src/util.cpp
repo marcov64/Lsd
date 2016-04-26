@@ -1960,7 +1960,7 @@ double update_lattice(double line, double col, double val)
 	char val_string[32];		// the final string to be used to define tk color to use
 	
 	if ( val < 0 && ( - val ) <= 0xffffff )			// RGB mode selected?
-		sprintf( val_string, "#%06x", - ( unsigned long ) val );	// yes: just use the positive RGB value
+		sprintf( val_string, "#%06lx", - ( unsigned long ) val );	// yes: just use the positive RGB value
 	else
 	{
 		sprintf( val_string, "$c%.0lf", val );		// no: use the positive RGB value

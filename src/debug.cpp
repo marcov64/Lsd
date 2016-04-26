@@ -420,10 +420,10 @@ case 22:
 	cmd( inter, "newtop $n \"Network\" { destroytop $n }");
 	
 	cmd(inter, "label $n.l1 -text \"Node id: \"");
-	sprintf(msg, "label $n.l2 -foreground red -text \"%d\"", r->node->id);
+	sprintf(msg, "label $n.l2 -foreground red -text \"%ld\"", r->node->id);
 	cmd(inter, msg); 
 	cmd(inter, "label $n.l3 -text \"Num. links out: \"");
-	sprintf(msg, "label $n.l4 -foreground red -text \"%d\"", r->node->nLinks);
+	sprintf(msg, "label $n.l4 -foreground red -text \"%ld\"", r->node->nLinks);
 	cmd(inter, msg); 
 	cmd(inter, "label $n.l5 -text \"Outgoing links: \"");
 	cmd(inter, "label $n.l6 -text \"dest. id          (weight)\" -foreground red");
@@ -446,7 +446,7 @@ case 22:
 	
 	for(netLink *curLnk=r->node->first; curLnk != NULL; curLnk=curLnk->next)
 	{
-		sprintf(msg, "$n.t insert end \"%d\"", curLnk->ptrTo->node->id);
+		sprintf(msg, "$n.t insert end \"%ld\"", curLnk->ptrTo->node->id);
 		cmd(inter, msg);
 		if(curLnk->weight != 0)
 			sprintf(msg, "$n.t insert end \"\t(%g)\n\"", curLnk->weight);
@@ -1142,7 +1142,7 @@ int i, j;
 
 if(r->up==NULL)
  {
- sprintf(msg, "");
+ strcpy(msg, "");
  return;
  }
 

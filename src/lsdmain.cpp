@@ -87,48 +87,30 @@ Tcl_Interp *inter;
 #include <time.h>
 #include <signal.h>
 
-int t;
-int quit=0;
-int done_in;
-int debug_flag;
-int when_debug;
-int stackinfo_flag=0;
-int optimized=0;
-int check_optimized=0;
-int add_to_tot=0;
-int plot_flag=1;
+// flags for some program defaults
+int seed = 1;				// random number generator initial seed
+int max_step = 100;			// default number of simulation runs
+int no_res = 0;				// produce intermediary .res files flag
+int dozip = 0;				// compressed results file flag
+int overwConf = 1;			// overwrite configuration on run flag
+int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
+int add_to_tot = 1;			// flag to append results to existing totals file
+int strWindowOn=1;			// control the presentation of the model structure window
+int lattice_type=2;			// default lattice type
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool firstRes = true;		// flag to mark first results file (init grand total file)
 bool unsavedData = false;	// flag unsaved simulation results
-double refresh=1.01;
-char *eq_file=NULL;
-char lsd_eq_file[200000];
-int lattice_type=2;
-int watch;
-char msg[1000];
+char nonavail[] = "NA";		// string for unavailable values (use R default)
+// Main window constraints
+char hsize[] = "400";		// horizontal size in pixels
+char vsize[] = "620";		// vertical minimum size in pixels
+char hmargin[] = "20";		// horizontal right margin from the screen borders
+char vmargin[] = "20";		// vertical margins from the screen borders
 
-int stack;
-int identity=0;
-int sim_num=1;
-
-int seed=1;
-long idum;
-
-int max_step=100;
-int cur_plt;
-char ind[30];
-variable *cemetery=NULL;
-
-int total_var=0;
-int total_obj=0;
-int choice;
-int choice_g;
-
-extern bool fast;		// fast mode (log window)
+extern bool fast;			// fast mode (log window)
 extern double ymin;
 extern double ymax;
 extern long nodesSerial;
-char nonavail[]="NA";	// string for unavailable values (use R default)
 
 int errormsg(char const *lpszText,  char const *lpszTitle);
 object *create( object *r);
@@ -137,10 +119,7 @@ void print_title(object *root);
 object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);
 object *go_brother(object *c);
-
 void plog(char const *m);
-
-
 void file_name( char *name);
 void print_title_obj( object *root, int index);
 void prepare_plot(object *r, int id_sim);
@@ -163,22 +142,44 @@ void delete_mn(mnode *mn);
 void scan_mn(object *c);
 char *clean_file(char *);
 char *clean_path(char *);
-
 char *upload_eqfile(void);
+
+int t;
+int quit=0;
+int done_in;
+int debug_flag;
+int when_debug;
+int stackinfo_flag=0;
+int optimized=0;
+int check_optimized=0;
+int plot_flag=1;
+double refresh=1.01;
+char lsd_eq_file[200000];
+int watch;
+char msg[1000];
+int stack;
+int identity=0;
+int sim_num=1;
+long idum;
+int cur_plt;
+char ind[30];
+int total_var=0;
+int total_obj=0;
+int choice;
+int choice_g;
 lsdstack *stacklog = NULL;
 object *root = NULL;
 object *blueprint = NULL;
-
+variable *cemetery=NULL;
 description *descr = NULL;
 char *path = NULL;
 char *simul_name = NULL;
 char *struct_file = NULL;
+char *eq_file=NULL;
 char *equation_name = NULL;
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
 char name_rep[400];
-
-
 char **tp;
 variable **list;
 object **mylist=NULL;
@@ -189,27 +190,17 @@ int running;
 int actual_steps=0;
 int counter;
 int no_window=0;
-int no_res=0;
 int message_logged=0;
 int no_more_memory=0;
 int series_saved;
 int findex, fend;
 int batch_sequential=0;
-bool dozip = false;			// compressed results file flag
-int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
 char *sens_file=NULL;		// current sensitivity analysis file
 long findexSens=0;			// index to sequential sensitivity configuration filenames
-int strWindowOn=1;			// control the presentation of the model structure window
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedChange = false;	// control for unsaved changes in configuration
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 bool redrawRoot = true;		// control for redrawing root window (.)
-
-// Main window constraints
-char hsize[]="400";			// horizontal size in pixels
-char vsize[]="620";			// vertical minimum size in pixels
-char hmargin[]="20";		// horizontal right margin from the screen borders
-char vmargin[]="20";		// vertical margins from the screen borders
 
 /*********************************
 LSD MAIN
@@ -239,48 +230,53 @@ fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n");
+  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n");
   exit(1);
  }
 else
  {
  for(i=1; i<argn; i+=2)
  {
- done=0;
  if(argv[i][0]=='-' && argv[i][1]=='f' )
   {
-   done=1;
    delete[] simul_name;
    simul_name=new char[strlen(argv[1+i])+1];
    strcpy(simul_name,argv[1+i]);
+   continue;
   }
  if(argv[i][0]=='-' && argv[i][1]=='s' )
-  {done=1;
+  {
  	 findex=atoi(argv[i+1]);
   batch_sequential=1;   
+   continue;
   }
  if(argv[i][0]=='-' && argv[i][1]=='e' )	// read -e parameter : last sequential file to process
-  {done=1;
+  {
  	 fend=atoi(argv[i+1]);
+   continue;
   }
+ if( argv[i][0] == '-' && argv[i][1] == 'r' )	// read -r parameter : do not produce intermediate .res files
+ {
+	i--; 	// no parameter for this option
+	no_res = 1;
+    continue;
+ }
  if( argv[i][0] == '-' && argv[i][1] == 'g' )	// read -g parameter : create grand total file (batch only)
  {
-	done = 1;
 	i--; 	// no parameter for this option
 	grandTotal = true;
-	printf( "\nGrand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
+	printf( "Grand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
+	continue;
  }
  if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : create compressed result files
  {
-	done = 1;
 	i--; 	// no parameter for this option
-	dozip = true;
+	dozip = 1;
+	continue;
  }
   
-  if(done==0)
-   {  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result files\n", argv[i][0], argv[i][1]);
-    exit(2);
-   }
+  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
+  exit(2);
   }
  } 
 if(batch_sequential==0)
@@ -337,6 +333,7 @@ if(batch_sequential==0)
 else
  {
   sprintf(msg, "%s_%d.lsd", simul_name,findex);
+  delete [ ] struct_file;
   struct_file=new char[strlen(msg)+1];
   strcpy(struct_file,msg);
   f=fopen(struct_file, "r");
@@ -542,6 +539,13 @@ cmd(inter, "destroy .l");
  blueprint->empty();
 #endif 
 
+delete stacklog;
+delete blueprint;
+delete root;
+delete [ ] struct_file;
+delete [ ] equation_name;
+delete [ ] path;
+delete [ ] simul_name;
 }
 
 
@@ -600,7 +604,7 @@ prepare_plot(root, i);
 if(done_in==2 && cur_plt>0)
  cmd(inter, "if {[winfo exists $activeplot]==1} {wm iconify $activeplot} {}");
 #endif
-sprintf(msg, "\n\nSimulation %d running...", i);
+sprintf(msg, "\nSimulation %d running...", i);
 plog(msg);
 
 // deb(root->son, NULL, "stop 1", &app);
@@ -648,7 +652,8 @@ if(no_more_memory==1)
   sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"Not enough memory: too many series saved for the memory available.\\n\\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\"", series_saved, max_step);
  cmd(inter, msg);
 #else
- printf("\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.", series_saved, max_step);
+ sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
+ plog(msg);
  exit(10);
  #endif
  return;
@@ -796,16 +801,12 @@ unsavedData = true;				// flag unsaved simulation results
 running=0;
 if(quit==1) //For multiple simulation runs you need to reset quit
  quit=0;
-/**************** WORKS ONLY FOR WINDOWS VERSION */
 end=clock();
 if(strlen(path)>0 || no_window==1)
   sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
 else
   sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC);
  plog(msg);
-/****************************************************/
-//sprintf(msg, "\nSimulation %d finished\n",i);
-//plog(msg);
 
 #ifndef NO_WINDOW 
 cmd(inter, "update");
@@ -817,16 +818,8 @@ cmd( inter, "wm state . normal" );
 #endif
 
 close_sim();
-plog("\nSetting variables with the end value... ");
-
-
-#ifndef NO_WINDOW 
-cmd(inter, "update");
-#endif
-//if(t<max_step+1) //cannot work, if users used the debug resetting the end.
 reset_end(root);
 scan_mn(root);
-plog("Done");
 
 if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
 {
@@ -839,9 +832,6 @@ else
  sprintf(msg, "\nSaving results in file %s_%d_%d.res%s... ",simul_name, findex, seed-1, dozip?".gz":"");
 
 plog(msg);
-#ifndef NO_WINDOW 
-cmd(inter, "update");
-#endif
 
 if(batch_sequential==0)
  if(strlen(path)==0)
@@ -861,12 +851,8 @@ delete rf;								// close file and delete object
 
 plog("Done\n");
 }
-#ifndef NO_WINDOW 
-cmd(inter, "update");
-#else
-printf("\n");
-fflush( stdout );	// force buffer flush to update file in case of redirection
-#endif
+else
+	plog( "\n" );
 
 if(batch_sequential==0)
  if(strlen(path)==0)
@@ -923,7 +909,7 @@ delete rf;										// close file and delete object
      plog(msg);
      break;
    }
-   sprintf(msg, "\n\nProcessing configuration file %s ...\n",struct_file);
+   sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
    plog(msg);
    fclose(f);  // process next file
    i=0;   // force restarting run count
@@ -1080,7 +1066,7 @@ cmd(inter, ".log.text.text.internal see end");
 cmd(inter, "update idletasks");
 
 #else
-printf("\n%s", cm);
+printf("%s", cm);
 fflush(stdout);
 #endif 
 message_logged=1;
@@ -1218,16 +1204,9 @@ print_title(root);
 
 for(t=1; quit==0 && t<=max_step;t++ )
   {
-  //printf("\n%d",t);
   root->update();
   }
-/*
-inter=InterpInitWin(NULL);
-Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
-cmd(inter, "set c");
-analysis(choice);
-*/
-printf("\nFinished simulation. Saving results...\n");
+
 sprintf(msg, "%s_%d.res%s", simul_name, seed-1, dozip?".gz":"");
 rf = new result( msg, "wt", dozip );	// create results file object
 rf->title( root, 1 );					// write header
@@ -1406,6 +1385,8 @@ char *clean_path(char *filepath)
 // handle critical system signals
 void signal_handler(int signum)
 {
+	char msg2[1000];
+	
 	switch(signum)
 	{
 		case SIGFPE:
@@ -1423,13 +1404,15 @@ void signal_handler(int signum)
 		default:
 			sprintf(msg, "Unknown signal");			
 	}
+	
 #ifdef NO_WINDOW
-	printf("FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
+	sprintf(msg2, "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
+	plog(msg2);
 #else
-	char msg2[1000];
 	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debug' menu option.\n\nLsd is aborting...\"", msg);
 	cmd(inter, msg2);
 #endif
 
 	exit(-signum);			// abort program
 }
+

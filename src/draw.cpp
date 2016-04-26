@@ -211,7 +211,7 @@ for(cv=t->v; cv!=NULL; cv=cv->next)
 if(t->up!=NULL)
   { // computes numerosity of groups of this typy
    sprintf(ch, "%s",t->label);
-	sprintf(ch1,"");
+	strcpy(ch1,"");
 	for(cur=t, num_groups=0; cur!=NULL ; num_groups++, cur=cur->hyper_next(cur->label) )
 	 {
      if(num_groups >5)

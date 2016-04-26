@@ -2503,7 +2503,7 @@ for(i=0, j=4, k=0, color=0; i<nv && k<4; i++)
 
   cmd(inter, "if {[expr $xlabel + $app]>600} {set xlabel 4; set ylabel [expr $ylabel + 1]} {}");
   cmd(inter, "set app1 [expr 330+14*$ylabel]");
-  sprintf(msg, "$p create text $xlabel $app1 -font {Times 10 normal} -anchor nw -text %s_%s -tag {txt%d text} ", str[i], tag[i], i,i);
+  sprintf(msg, "$p create text $xlabel $app1 -font {Times 10 normal} -anchor nw -text %s_%s -tag {txt%d text} ", str[i], tag[i], i);
   cmd(inter, msg);
   sprintf(msg, "$p addtag p%d withtag txt%d",i,i);
   cmd(inter, msg); 
@@ -3684,7 +3684,7 @@ f=fopen(filename, "r");
 if(*num_v>-1)
  sprintf(app_str, " (file=%d)",file_counter);
 else
- sprintf(app_str, "");
+ strcpy(app_str, "");
 for(i=*num_v; i<*num_v+new_v; i++)
  {
   fscanf(f, "%s %s (%d %d)\t", vs[i].label, vs[i].tag, &(vs[i].start), &(vs[i].end));
@@ -4854,14 +4854,14 @@ else
  if(line_point==1 && ndim>2)
   sprintf(str1, "with lines");
  else
-  sprintf(str1, ""); 
+  strcpy(str1, ""); 
 
 if(ndim==2)
 {
 if(allblack==1 )
  sprintf(str3, " lt -1");
 else
- sprintf(str3, "");
+ strcpy(str3, "");
 }
 else
  {
@@ -5283,7 +5283,7 @@ if(line_point==2)
  { fprintf(f, "set pointsize %lf\n", point_size);
    fprintf(f2, "set pointsize %lf\n", point_size);
    if(ndim==2)
-    sprintf(str2, "");
+    strcpy(str2, "");
    else
     sprintf(str2, "with points ");       
  }
@@ -5332,7 +5332,7 @@ if(ndim==3)
 
  if(allblack==1)
   {
-   sprintf(str3, "");
+   strcpy(str3, "");
   fprintf(f, "set palette gray\n");
   fprintf(f2, "set palette gray\n");
    
@@ -5604,7 +5604,7 @@ if(*choice==1)
 if(line_point==1)
  sprintf(str1, "smooth csplines");
 else
- sprintf(str1, "");
+ strcpy(str1, "");
 
 if(allblack==1)
  sprintf(str3, " lt -1");

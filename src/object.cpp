@@ -2795,7 +2795,7 @@ for(cb=b; cb!=NULL; cb=cb->next)
 if(cb==NULL)
  {
    #ifndef NO_WINDOW
-   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label, label); 
+   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label); 
      cmd(inter, msg); 
      plog(msg);
    

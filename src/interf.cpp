@@ -200,7 +200,7 @@ extern char *struct_file;
 extern char *exec_file;		// name of executable file
 extern char *exec_path;		// path of executable file
 extern int add_to_tot;
-extern bool dozip;			// compressed results file flag
+extern int dozip;			// compressed results file flag
 extern int struct_loaded;
 extern char *path;
 extern char *equation_name;
@@ -232,6 +232,7 @@ extern char lsd_eq_file[];
 extern int ignore_eq_file;
 extern int lattice_type;
 extern int no_res;
+extern int overwConf;
 extern object *blueprint;
 extern sense *rsense;
 extern long nodesSerial;	// network node serial number global counter
@@ -826,7 +827,7 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, overwConf, temp[4];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[4];
 bool saveAs, delVar, reload;
 char observe, initial, cc;
 bridge *cb;
@@ -2261,9 +2262,6 @@ cmd(inter, ch);
 cmd(inter, "pack $T.f1.war1 $T.f1.war2");
 cmd(inter, "pack $T.f1 -expand yes -fill x");
 
-cmd(inter, "set overw 0"); //flag for overwriting existing total file
-cmd(inter, "set dozip 0");	// flag for producing compressed files
-
 if(sim_num>1)
 {
 sprintf(ch, "label $T.war3 -text \"\\nNum. of simulations: %d\"", sim_num);
@@ -2280,6 +2278,9 @@ cmd(inter, "checkbutton $T.f2.nores -text \"Skip generating results files\" -var
 cmd(inter, "pack $T.f2.war5 $T.f2.war6 $T.f2.nores");
 
 Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
+Tcl_LinkVar(inter, "add_to_tot", (char *)&add_to_tot, TCL_LINK_INT);
+Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
 
 cmd(inter, "checkbutton $T.dozip -text \"Generate zipped files\" -variable dozip");
 
@@ -2294,8 +2295,8 @@ if(*choice==1)
  {
  cmd(inter, "frame $T.f3.c");
  cmd(inter, "label $T.f3.c.l -text \"Warning: totals file already exists\" -fg red");
- cmd(inter, "radiobutton $T.f3.c.b1 -text \"Overwrite existing totals file\" -variable overw -value 0 -anchor w");
- cmd(inter, "radiobutton $T.f3.c.b2 -text \"Append to existing totals file\" -variable overw -value 1 -anchor w");
+ cmd(inter, "radiobutton $T.f3.c.b1 -text \"Overwrite existing totals file\" -variable add_to_tot -value 0 -anchor w");
+ cmd(inter, "radiobutton $T.f3.c.b2 -text \"Append to existing totals file\" -variable add_to_tot -value 1 -anchor w");
  cmd(inter, "pack $T.f3.c.l $T.f3.c.b1 $T.f3.c.b2 -expand yes -fill x");
  cmd(inter, "pack $T.f3.war7 $T.f3.war8 $T.f3.c");
  cmd(inter, "pack $T.f2 $T.f3 $T.dozip -pady 10 -expand yes -fill x");
@@ -2305,7 +2306,6 @@ else
 }
 else
 {
-cmd(inter, "set overw 1");
 sprintf(ch, "label $T.war3 -text \"\\nSteps for simulation (max.): %d\"", max_step);
 cmd(inter, ch);
 cmd(inter, "label $T.war4 -text \"Results will be saved in memory only\\n\"");
@@ -2333,16 +2333,13 @@ while(*choice==0)
 
 cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "no_res");
+Tcl_UnlinkVar(inter, "add_to_tot");
+Tcl_UnlinkVar(inter, "dozip");
+Tcl_UnlinkVar(inter, "overwConf");
 
 if(*choice==2)
   break;
 
-cmd(inter, "set choice $overw");
-add_to_tot=*choice;
-cmd(inter, "set choice $dozip");
-dozip=*choice;
-cmd(inter, "set choice $overwConf");
-overwConf = *choice;
 *choice=1;
 
 for(n=r; n->up!=NULL; n=n->up);
@@ -3076,7 +3073,7 @@ if(actual_steps==0)
   cmd( inter, msg );
   cmd(inter, "entry .n.e -width 35 -relief sunken -textvariable lab");
   cmd(inter, "label .n.l2 -text \"(all data saved will be stored in a '.res' file\\nand the configuration that produced it \\nwill be copied in a new '.lsd' file)\"");
-  cmd(inter, "set dozip 0");
+  Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
   cmd(inter, "checkbutton .n.dozip -text \"Generate zipped results file\" -variable dozip");
   cmd(inter, "pack .n.l1 .n.e .n.l2 .n.dozip -pady 10");
   cmd( inter, "okcancel .n b { set choice 1 } { set choice 2 }" );
@@ -3089,18 +3086,18 @@ if(actual_steps==0)
 
   cmd(inter, "if {[string length lab] == 0} {set choice 2}");
   cmd(inter, "destroytop .n");
+  Tcl_UnlinkVar(inter, "dozip");
+  
   if(*choice==2)
 	break;
 
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
 strcpy(lab, lab1);
-cmd(inter, "set choice $dozip");
-dozip=*choice;
 sprintf(msg, "%s.lsd", simul_name);
 sprintf(ch, "%s.lsd", lab);
 sprintf(msg, "file copy -force %s.lsd %s.lsd", simul_name, lab);
 cmd(inter, msg);
-sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...",lab);
+sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...",lab,lab);
 plog(msg);
 cmd(inter, "focus .log");
 //cmd(inter, "raise .log");
@@ -4343,7 +4340,7 @@ case 68:
 	cmd(inter, "entry .s.i.e -justify center -textvariable cores");
 	cmd(inter, ".s.i.e selection range 0 end");
 	cmd(inter, "label .s.i.w -text \"(using a number higher than the number\nof processors/cores is not recommended)\"");
-	cmd(inter, "set dozip 1");
+	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
 	cmd(inter, "checkbutton .s.i.dozip -text \"Generate zipped files\" -variable dozip");
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w .s.i.dozip -pady 10");
 	cmd(inter, "pack .s.i");
@@ -4355,12 +4352,11 @@ case 68:
 	while(*choice==-1)
 		Tcl_DoOneEvent(0);
 	cmd(inter, "destroytop .s");
+	Tcl_UnlinkVar(inter, "dozip");
+
 	if(*choice==0)
 		break;
 	param=*choice;
-	cmd(inter, "set choice $dozip");
-	dozip=*choice;
-	*choice=param;
 	
 	if(param < 1 || param > 64) param=4;
 	
@@ -4470,7 +4466,7 @@ case 69:
 	sprintf(ch, "label $b.war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
 	cmd(inter, ch);
 	cmd(inter, "label $b.tosave -text \"\\nYou are going to overwrite the existing configuration file\\nand any results files in the destination folder\\n\"");
-	cmd(inter, "set dozip 1");	// flag for producing compressed files
+	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
 	cmd(inter, "checkbutton $b.dozip -text \"Generate zipped files\" -variable dozip");
 
 	
@@ -4497,12 +4493,11 @@ case 69:
 		Tcl_DoOneEvent(0);
 	
 	cmd(inter, "destroytop $b");
-	
+	Tcl_UnlinkVar(inter, "dozip");
+
 	if(*choice==2)
 		break;
 
-	cmd(inter, "set choice $dozip");
-	dozip=*choice;
 	// save the current configuration
 	for(n=r; n->up!=NULL; n=n->up);
 	blueprint->empty();			    // update blueprint to consider last changes

@@ -200,9 +200,14 @@ if(label==NULL)
  plog("\nError. No more memory");
 strcpy(label, _label);
 num_lag=_num_lag;
-val=new double[num_lag+1];
-for(i=0; i<num_lag+1; i++)
-  val[i]=v[i];
+if ( num_lag >= 0 )
+{
+	val = new double[ num_lag + 1 ];
+	for( i = 0; i < num_lag + 1; i++ )
+		val[ i ] = v[ i ];
+}
+else
+	val = NULL;
 next=NULL;
 last_update=0;
 save=_save;
@@ -403,7 +408,8 @@ if(data!=NULL)
   delete[] data;
 if(lab_tit!=NULL)
   delete[] lab_tit;
-delete[] val;
+if( val != NULL )
+	delete[] val;
 /*
 if(su!=NULL)
  {delete_su(su);

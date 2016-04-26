@@ -1712,7 +1712,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	else
 	{
 		fileName = new char[ strlen( baseName ) + 1 ];
-		sprintf( fileName, baseName );
+		sprintf( fileName, "%s", baseName );
 	}
 	NOLHfile = fopen( fileName, "r");
 	if ( NOLHfile == NULL )
@@ -2473,7 +2473,7 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 	// generate a configuration file for the experiment
 			
 	// file name for saving table
-	sprintf( doeName, "%u_%u", findex, findex + n - 1 );
+	sprintf( doeName, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
 	
 	if( strlen( path ) > 0 )				// non-default folder?
 	{
