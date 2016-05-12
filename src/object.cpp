@@ -1277,8 +1277,8 @@ if(v==NULL)
  }
 else
  {
-  for(cv=v; cv->next!=NULL; cv=cv->next);
-   {
+  for(cv=v; cv->next!=NULL; cv=cv->next)
+	  ;
    
    cv->next=new variable;
    if(cv->next==NULL)
@@ -1289,8 +1289,6 @@ else
 
 	}
 
-
-   }
   cv=cv->next;
  }
 
@@ -1974,11 +1972,12 @@ Comparison function used in lsdqsort
 int sort_function_up(  const void *a, const void *b)
 {
 if(qsort_lab!=NULL)		// variable defined?
+{
 if( (*(object **)a)->cal(qsort_lab, 0)< (*(object **)b)->cal(qsort_lab, 0) )
  return -1;
 else
  return 1;
-
+}
 // handles the case of node id comparison
 if( (*(object **)a)->node->id < (*(object **)b)->node->id )
  return -1;
@@ -1992,11 +1991,12 @@ Comparison function used in lsdqsort
 int sort_function_down( const void *a, const void *b)
 {
 if(qsort_lab!=NULL)		// variable defined?
+{
 if( (*(object **)a)->cal(qsort_lab, 0)> (*(object **)b)->cal(qsort_lab, 0) )
  return -1;
 else
  return 1;
-
+}
 // handles the case of node id comparison
 if( (*(object **)a)->node->id > (*(object **)b)->node->id )
  return -1;

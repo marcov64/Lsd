@@ -2288,6 +2288,7 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 				
 			tab = NOLH_table( kTab );		// design table to use
 			if ( tab == -1 )				// number of factors too large, try to load external table (file)
+			{
 				if ( NOLH_load( ) )			// tentative table load from disk ok?
 				{
 					tab = NOLH_table( k );	// design table to use
@@ -2302,6 +2303,7 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 					plog( "\nError: too many variables to test" );
 					goto invalid;			// abort
 				}
+			}
 				
 			// get the number of samples required by the NOLH design, according to user choice (basic/extended)
 			n = ( samples != -1 ) ? NOLH[ tab ].n1 : NOLH[ tab ].n2;

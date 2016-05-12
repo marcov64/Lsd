@@ -485,7 +485,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	 else
 	 {for(i=0; i<cv->num_lag; i++)
 		{
-		  if(  num= fscanf(f, "\t%lf", &app )!=1)
+		  if ( ( num = fscanf(f, "\t%lf", &app ) ) != 1 )
 			{sprintf(msg, "\nError: value not found for variable: %s\n", cv1->label);
 			  plog(msg);
 			  return 1;

@@ -174,7 +174,8 @@ char ftime[80];
 
 code=Tcl_Eval(inter, cm);
 
-if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat")) // don't log model compilation errors
+if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat") && 
+   !strstr(cm,(char*)"exec make -fmakefile 2> makemessage.txt")) // don't log model compilation errors
  {
   f=fopen("tk_err.err","a");
 
@@ -216,7 +217,7 @@ system(m);
 
 /*************************************
 ModManMain
-/*************************************/
+ *************************************/
 int ModManMain(int argn, char **argv)
 {
 int i, num, tosave, sourcefile, macro;
@@ -316,9 +317,6 @@ if ( choice != 1 )
   cmd(inter, "close $f");
  }
  
-
-strcpy(msg, s);
-
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}");
 if(choice==1)
  {
@@ -1008,7 +1006,7 @@ if(s==NULL || !strcmp(s, ""))
 
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
   if(choice==0)
-    cmd(inter, "set result \"[catch [exec make -fmakefile 2> makemessage.txt]]\""); 
+    cmd(inter, "catch [set result [catch [exec make -fmakefile 2> makemessage.txt]] ]"); 
   else
    {  
 
@@ -2014,22 +2012,6 @@ else
 	  if(curPos[i] + 1 > nextLin) nextLin = (long)floor(curPos[i]) + 1;
   }
   
-/*  
-  cmd(inter, "set inicolor [.f.t.t search -backwards * / [.f.t.t index insert] 1.0]");
-  cmd(inter, "if {$inicolor==\"\"} {set inicolor 1.0} {set inicolor [.f.t.t index \"$inicolor + 2 char\"]}");
-  cmd(inter, "set endcolor [.f.t.t search /* [.f.t.t index insert] end]");
-  cmd(inter, "if {$endcolor==\"\"} {set endcolor end} {}");
-   
-  cmd(inter, ".f.t.t tag remove str $inicolor $endcolor");
-  cmd(inter, ".f.t.t tag remove comment1 $inicolor $endcolor");
-  cmd(inter, ".f.t.t tag remove comment2 $inicolor $endcolor");
-
-//cmd(inter, "set inicolor 1.0");
-//cmd(inter, "set endcolor end");
-*/
-
-//choice=0;
-//color(&num);
 color(shigh, prevLin, nextLin);
 }
 goto loop;

@@ -524,8 +524,8 @@ cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
 cmd( inter, "pack .l.up_name" );
 
 cmd(inter, "frame .l.tit -relief raised -bd 2");
-strcpy( ch1, "button .l.tit.lab -padx 2 -text \"Object: \" -relief flat" );
-strcpy( ch, "button .l.tit.but -padx 2 -foreground red -relief flat -text " );
+strcpy( ch1, "button .l.tit.lab -text \"Object: \" -relief flat" );
+strcpy( ch, "button .l.tit.but -foreground red -relief flat -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
 {
@@ -827,7 +827,7 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[4];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[5];
 bool saveAs, delVar, reload;
 char observe, initial, cc;
 bridge *cb;

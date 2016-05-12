@@ -116,7 +116,7 @@ double res = 0; \
 object *p, *c, app; \
 int i,j,h,k; \
 double v[1000]; \
-object register *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
+object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
 netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9, *curl10; \
 FILE *f = NULL; \
 i = j = h = k = 0; \
@@ -131,7 +131,7 @@ c = caller;
 #define END_EQUATION(X) {res=X; goto end; }
 
 // workaround for STL bug on definitions of isnan/isinf in C++11
-#if ( defined ( __cplusplus ) && __cplusplus >= 201103L )
+#ifdef STLBUG
 #include <algorithm>
 #define NAMESPACE std::
 #else

@@ -192,6 +192,7 @@ for(cb=tr->up->b; cb!=NULL; cb=cb->next)
      return(cb->next->head); 
    }  
  }
+ return( NULL );
 }
 
 /****************************************************
@@ -1631,7 +1632,7 @@ else
   strcpy(cur->text, "(no description available)");
  }
    
-cur->init=(char)NULL;
+cur->init=NULL;
 
 }
 
@@ -1765,7 +1766,7 @@ for(cd=descr; cd!=NULL; cd=cd->next)
   { 
   app[0]=(char)NULL;
   //for each description
-  if(!strcmp(cd->type, "Variable")==1 || !strcmp(cd->type, "Function")==1 )
+  if( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
    { //if it is a Variable
    
     sprintf(msg, "EQUATION(\"%s\")", cd->label); //search its equation
@@ -1969,9 +1970,8 @@ double update_lattice(double line, double col, double val)
 		cmd( inter, msg );
 	}
 		
-/* *
- sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string );
-/**/ 
+//sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string );
+ 
  if(lattice_type==1)
  {
  sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string);

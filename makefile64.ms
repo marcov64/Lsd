@@ -5,7 +5,7 @@
 # 3. type make -f makefile64.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
 
 TARGET=lmm64
-SWITCH_CC=
+SWITCH_CC=-O3
 
 TCL_VERSION=86
 TK_VERSION=86
