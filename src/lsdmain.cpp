@@ -129,7 +129,7 @@ void set_lab_tit(variable *var);
 void reset_end(object *r);
 void close_sim(void);
 double ran1(long *idum);
-int deb(object *r, object *c, char *lab, double *res);
+int deb(object *r, object *c, char const *lab, double *res);
 void run_no_window(void);
 void analysis(int *choice);
 void init_random(int seed);
@@ -1386,6 +1386,7 @@ char *clean_path(char *filepath)
 void signal_handler(int signum)
 {
 	char msg2[1000];
+	double useless = -1;
 	
 	switch(signum)
 	{
@@ -1398,7 +1399,7 @@ void signal_handler(int signum)
 		break;
 		
 		case SIGSEGV:
-			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer?");		
+			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer?\nAlso ensure no group of objects has zero elements.");		
 		break;
 		
 		default:
@@ -1409,8 +1410,10 @@ void signal_handler(int signum)
 	sprintf(msg2, "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
 	plog(msg2);
 #else
-	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debug' menu option.\n\nLsd is aborting...\"", msg);
+	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debug' menu option.\n\nAttempting to open the LSD Debugger (LSD will close immediately after exiting the Debugger)...\"", msg);
 	cmd(inter, msg2);
+	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
+	deb( stacklog->vs->up, NULL, msg2, &useless );
 #endif
 
 	exit(-signum);			// abort program
