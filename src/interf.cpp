@@ -826,8 +826,8 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r)
 {
-char *lab1,*lab2,lab[300],lab_old[300], ch[300];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, temp[5];
+char *lab1,*lab2,*lab3,lab[300],lab_old[300], ch[300];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, temp[5];
 bool saveAs, delVar, reload;
 char observe, initial, cc;
 bridge *cb;
@@ -4246,18 +4246,15 @@ case 67:
 	break;
 
 
-//Create batch for serial sensitivity analysis job and optionally run it
+//Create batch for multi-runs jobs and optionally run it
 case 68:
 
 	// check a model is already loaded
-	if(struct_loaded==0)
-	{ 
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease select one before trying to create a script/batch.\"");
-		break;
-	}
-
-	if ( ! discard_change( false ) )	// unsaved configuration?
-		break;
+	if( struct_loaded == 0 )
+		findexSens = 0;									// no sensitivity created
+	else
+		if ( ! discard_change( false ) )				// unsaved configuration?
+			break;
 
 	// check for existing NW executable
 	sprintf(ch, "%s/%s", exec_path, exec_file);			// form full executable name
@@ -4278,7 +4275,7 @@ case 68:
 
 	if ((f=fopen(ch, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu first.\"");
+		cmd(inter, "tk_messageBox -type ok -icon error -title \"Create Batch\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu first.\"");
 		break;
 	}
 	fclose(f);
@@ -4286,7 +4283,7 @@ case 68:
 	// check if serial sensitivity configuration was just created
 	*choice=0;
 	if(findexSens > 0)
-		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default yes -title \"Sensitivity Analysis\" -message \"A sequential sensitivity set of configuration files was just created and will be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
+		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
 	if(*choice == 2)
 		break;
 	
@@ -4298,56 +4295,88 @@ case 68:
 		fnext=findexSens;
 		lab1=simul_name;
 		lab2=path;
+		Tcl_SetVar(inter, "res", simul_name, 0);
 		Tcl_SetVar(inter, "path", path, 0);
 	}
 	else								// ask for first configuration file
 	{
-		sprintf(msg, "set res %s_1.lsd", simul_name);	// default name
+		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default no -title \"Create Batch\" -message \"Do you want to select a sequence of numbered configuration files?\n\nPress 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
+		if(*choice == 2)
+			break;
+		else
+			fSeq = *choice;
+		
+		if(strlen(simul_name) > 0)				// default name
+			sprintf(msg, "set res \"%s_1.lsd\"", simul_name);
+		else
+			strcpy(msg, "set res \"\"");
 		cmd(inter, msg);
-		if(strlen(path) > 0)							// default path
+		if(strlen(path) > 0)					// default path
 			sprintf(msg, "set path \"%s\"", path);
 		else
 			sprintf(msg, "set path [pwd]");
 		cmd(inter, msg);
 		// open dialog box to get file name & folder
-		sprintf(msg, " set bah [tk_getOpenFile -title \"Load First SA Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
-		cmd(inter, msg);
-		cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; set choice [string range $res $numpos end]; set res [string range $res 0 [expr $numpos - 2]]} {set choice 0}");
-		if(*choice == 0)
-			break;
-		ffirst=*choice;
-		lab1=(char *)Tcl_GetVar(inter, "res",0);
-		lab2=(char *)Tcl_GetVar(inter, "path",0);
-		f=NULL;
-		do									// search for all sequential files
+		if( fSeq )								// file sequence?
 		{
-			if(strlen(lab2) == 0)			// default path
-				sprintf(lab, "%s_%d.lsd", lab1, (*choice)++);
-			else
-				sprintf(lab, "%s/%s_%d.lsd", lab2, lab1, (*choice)++);
-			if(f != NULL) fclose(f);
-			f=fopen(lab, "r");
+			cmd(inter, "set bah [tk_getOpenFile -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
+			cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}");
+			if(*choice == 0)
+				break;
+			ffirst=*choice;
+			lab1=(char *)Tcl_GetVar(inter, "res",0);
+			lab2=(char *)Tcl_GetVar(inter, "path",0);
+			f=NULL;
+			do									// search for all sequential files
+			{
+				if(strlen(lab2) == 0)			// default path
+					sprintf(lab, "%s_%d.lsd", lab1, (*choice)++);
+				else
+					sprintf(lab, "%s/%s_%d.lsd", lab2, lab1, (*choice)++);
+				if(f != NULL) fclose(f);
+				f=fopen(lab, "r");
+			}
+			while(f != NULL);
+			fnext=*choice - 1;
 		}
-		while(f != NULL);
-		fnext=*choice - 1;
+		else									// bunch of files?
+		{
+			cmd( inter, "set bah [tk_getOpenFile -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple yes]" );
+			cmd( inter,"set choice [llength $bah]; if {$choice > 0} {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
+			if( *choice == 0 )
+				break;
+			ffirst = 1;
+			fnext = *choice + 1;
+			lab2=(char *)Tcl_GetVar(inter, "path",0);
+		}
 	}
 
 	// confirm number of cores to use
-	cmd( inter, "newtop .s \"Num. of CPU Cores\" { set choice 0 }" );
+	cmd( inter, "newtop .s \"Number of Processes\" { set choice 0 }" );
 	cmd(inter, "frame .s.i -relief groove -bd 2");
-	cmd(inter, "label .s.i.l -text \"Type the number of parallel processes to use\"");
-	cmd(inter, "set cores \"4\"");
-	cmd(inter, "entry .s.i.e -justify center -textvariable cores");
-	cmd(inter, ".s.i.e selection range 0 end");
-	cmd(inter, "label .s.i.w -text \"(using a number higher than the number\nof processors/cores is not recommended)\"");
+	cmd(inter, "frame .s.i.c");
+	cmd(inter, "label .s.i.c.l -text \"Number of parallel processes\"");
+	cmd(inter, "set cores 4");
+	cmd(inter, "entry .s.i.c.e -justify center -textvariable cores");
+	cmd(inter, ".s.i.c.e selection range 0 end");
+	cmd(inter, "label .s.i.c.w -text \"(using a number higher than the number\nof processors/cores is not recommended)\"");
+	cmd(inter, "frame .s.i.b");
+	cmd(inter, "label .s.i.b.l -text \"Batch file base name\"");
+	cmd(inter, "entry .s.i.b.e -justify center -textvariable res");
+	cmd(inter, "frame .s.i.o");
+	cmd(inter, "set natBat 1");
+	cmd(inter, "checkbutton .s.i.o.n -text \"Use native batch format\" -variable natBat");
 	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
-	cmd(inter, "checkbutton .s.i.dozip -text \"Generate zipped files\" -variable dozip");
-	cmd(inter, "pack .s.i.l .s.i.e .s.i.w .s.i.dozip -pady 10");
+	cmd(inter, "checkbutton .s.i.o.dozip -text \"Generate zipped files\" -variable dozip");
+	cmd(inter, "pack .s.i.c.l .s.i.c.e .s.i.c.w");
+	cmd(inter, "pack .s.i.b.l .s.i.b.e");
+	cmd(inter, "pack .s.i.o.n .s.i.o.dozip");
+	cmd(inter, "pack .s.i.c .s.i.b .s.i.o -pady 10");
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set choice $cores } { set choice 0 }" );
 	cmd(inter, "bind .s <KeyPress-Return> {set choice $cores}");
 	cmd( inter, "showtop .s centerW" );
-	cmd(inter, "focus .s.i.e");
+	cmd(inter, "focus .s.i.c.e");
 	*choice=-1;
 	while(*choice==-1)
 		Tcl_DoOneEvent(0);
@@ -4358,19 +4387,29 @@ case 68:
 		break;
 	param=*choice;
 	
-	if(param < 1 || param > 64) param=4;
+	if(param < 1 || param > 64) 
+		param=4;
 	
-	// create batch file
+	lab3 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	
+	// select batch format & create batch file
 	char wpath[300];
-	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
-	if(*choice == 1)
-		sprintf(lab, "%s/%s_%d_%d.bat", lab2, lab1, ffirst, fnext - 1);
+	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {if {$natBat == 1} {set choice 1} {set choice 0}} {if {$natBat == 1} {set choice 0} {set choice 1}}");
+	if ( fSeq )
+		if(*choice == 1)
+			sprintf(lab, "%s/%s_%d_%d.bat", lab2, lab3, ffirst, fnext - 1);
+		else
+			sprintf(lab, "%s/%s_%d_%d.sh", lab2, lab3, ffirst, fnext - 1);
 	else
-		sprintf(lab, "%s/%s_%d_%d.sh", lab2, lab1, ffirst, fnext - 1);
+		if( *choice == 1 )
+			sprintf( lab, "%s/%s.bat", lab2, lab3 );
+		else
+			sprintf( lab, "%s/%s.sh", lab2, lab3 );
+		
 	f=fopen(lab, "wt");
 	if(*choice == 1)						// Windows header
 	{
-		fprintf(f, "@echo off\nrem Sequential sensitivity batch generated by Lsd\n");
+		fprintf(f, "@echo off\nrem Batch generated by Lsd\n");
 		fprintf(f, "echo Processing %d configuration files in up to %d parallel processes...\n", fnext - ffirst, param);
 
 		// convert to Windows folder separators (\)
@@ -4382,11 +4421,11 @@ case 68:
 	}
 	else									// Unix header
 	{
-		fprintf(f, "#!/bin/bash\n# Sequential sensitivity script generated by Lsd\n");
+		fprintf(f, "#!/bin/bash\n# Script generated by Lsd\n");
 		fprintf(f, "echo \"Processing %d configuration files in up to %d parallel processes...\"\n", fnext - ffirst, param);
 	}
 	
-	if((fnext - ffirst) > param)			// if possible, work in blocks
+	if( fSeq && ( fnext - ffirst ) > param )// if possible, work in blocks
 	{
 		num=(fnext - ffirst)/param;			// base number of cases per core
 		sl=(fnext - ffirst)%param;			// remaining cases per core
@@ -4396,31 +4435,64 @@ case 68:
 				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", wpath, lab1, j);
 			else							// Unix
 				fprintf(f, "%s -f %s/%s -s %d -e %d %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", lab2, lab1, j);
-			 j <= sl ? i+=num+1 : i+=num;
+			j <= sl ? i+=num+1 : i+=num;
 		}
 	}
 	else									// if not, do one by one
 		for(i=ffirst, j=1; i < fnext; i++, j++)
-			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, dozip ? "-z" : "", wpath, lab1, i);
-			else							// Unix
-				fprintf(f, "%s -f %s/%s_%d.lsd %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, dozip ? "-z" : "", lab2, lab1, i);
+			if( fSeq )
+				if(*choice == 1)			// Windows
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, dozip ? "-z" : "", wpath, lab1, i);
+				else						// Unix
+					fprintf(f, "%s -f %s/%s_%d.lsd %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, dozip ? "-z" : "", lab2, lab1, i);
+			else
+			{	// get the selected file names, one by one
+				sprintf( msg, "set res [lindex $bah %d]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]", j - 1 );
+				cmd( inter, msg );
+				lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+				
+				if(*choice == 1)			// Windows
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s.lsd %s 1>%s\\%s.log 2>&1\n", j, ch, wpath, lab1, dozip ? "-z" : "", wpath, lab1);
+				else						// Unix
+					fprintf(f, "%s -f %s/%s.lsd %s >%s/%s.log 2>&1 &\n", ch, lab2, lab1, dozip ? "-z" : "", lab2, lab1);
+			}
 	
-	if(*choice == 1)						// Windows closing
-	{
-		fprintf(f, "echo %d log files being generated: %s_1.log to %s_%d.log .\n", j - 1, lab1, lab1, j - 1);
-		fclose(f);
-	}
-	else									// Unix closing
-	{
-		fprintf(f, "echo \"%d log files being generated: %s_1.log to %s_%d.log .\"\n", j - 1, lab1, lab1, j - 1);
-		fprintf(f, "echo \"This terminal shell must not be closed during processing.\"\n");
-		fclose(f);
-		chmod(lab, ACCESSPERMS);			// set executable perms
-	}
+	if ( fSeq )
+		if(*choice == 1)					// Windows closing
+		{
+			fprintf(f, "echo %d log files being generated: %s_1.log to %s_%d.log .\n", j - 1, lab1, lab1, j - 1);
+			fclose(f);
+		}
+		else								// Unix closing
+		{
+			fprintf(f, "echo \"%d log files being generated: %s_1.log to %s_%d.log .\"\n", j - 1, lab1, lab1, j - 1);
+			fprintf(f, "echo \"This terminal shell must not be closed during processing.\"\n");
+			fclose(f);
+			chmod(lab, ACCESSPERMS);		// set executable perms
+		}
+	else
+		if(*choice == 1)					// Windows closing
+		{
+			fprintf(f, "echo %d log files being generated.\n", j - 1);
+			fclose(f);
+		}
+		else								// Unix closing
+		{
+			fprintf(f, "echo \"%d log files being generated.\"\n", j - 1);
+			fprintf(f, "echo \"This terminal shell must not be closed during processing.\"\n");
+			fclose(f);
+			chmod(lab, ACCESSPERMS);		// set executable perms
+		}
+		
+	sprintf( msg, "\nParallel batch file created: %s", lab );
+	plog( msg );
+	
+	cmd( inter, "set choice $natBat" );		// if non native batch, quit now
+	if( ! *choice )
+		break;
 
 	// ask if script/batch should be executed right away
-	cmd(inter, "set answer [tk_messageBox -type yesno -icon question -default no -title \"Sensitivity Analysis\" -message \"The script/batch for running the sensitivity configuration files was saved.\n\nPress 'Yes' if you want to start the script/batch as separated processes right now or 'No' to return.\"]; switch -- $answer {yes {set choice 1} no {set choice 2}}"); 
+	cmd(inter, "set answer [tk_messageBox -type yesno -icon question -default no -title \"Run Batch\" -message \"The script/batch for running the configuration files was saved.\n\nPress 'Yes' if you want to start the script/batch as separated processes right now or 'No' to return.\"]; switch -- $answer {yes {set choice 1} no {set choice 2}}"); 
 	if(*choice == 2)
 		break;
 
@@ -4436,7 +4508,10 @@ case 68:
 		sprintf(msg, "exec %s &", lab);
     cmd(inter, msg);
 
-	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"The sensitivity analysis script/batch was started in separated processes.\\n\\nThe results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
+	sprintf( msg, "\nParallel batch file started: %s", lab );
+	plog( msg );
+	
+	cmd(inter, "tk_messageBox -type ok -icon info -title \"Run Batch\" -message \"The script/batch was started in separated process(es).\\n\\nThe results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
 break;
 
 

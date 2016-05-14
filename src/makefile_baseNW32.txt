@@ -3,7 +3,7 @@ SRC_DIR=$(SRC)/
 LSDROOT=.
 DUMMY=
 INCLUDE_LIB=
-SSWITCH_CC=-march=-march=pentium-mmx -mtune=prescott -O3
+SSWITCH_CC=-march=pentium-mmx -mtune=prescott -O3
 TARGETNW=$(TARGET)NW
 
 $(TARGETNW): $(SRC_DIR)choose.h  model_options.txt $(SRC_DIR)system_options.txt $(SRC_DIR)fun_head.h $(SRC_DIR)main_gnuwin.obj \

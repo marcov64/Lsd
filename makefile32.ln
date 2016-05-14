@@ -1,11 +1,11 @@
 # Makefile for lmm in 32-bit Linux (cross-compilation in 64-bit platform ONLY)
 
-TARGET=lmm
+TARGET=lmm32
 SWITCH_CC=-m32 -O3
 
 
-TCL_VERSION=8.5
-TK_VERSION=8.5
+TCL_VERSION=8.6
+TK_VERSION=8.6
 
 # For Unix 
 LSDROOT=.
@@ -15,7 +15,7 @@ PATH_TK_LIB=/usr/lib #path to the file libtkXXX.a
 PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
 PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
 PATH_LIB=/usr/lib #path to general libraries
-INCLUDE_LIB= #additional libraries
+INCLUDE_LIB=-lX11 #additional libraries
 
 # from here you should not need to modify anything
 CC=g++	

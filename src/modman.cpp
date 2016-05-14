@@ -174,8 +174,7 @@ char ftime[80];
 
 code=Tcl_Eval(inter, cm);
 
-if(code!=TCL_OK && !strstr(cm,(char*)"exec a.bat") && 
-   !strstr(cm,(char*)"exec make -fmakefile 2> makemessage.txt")) // don't log model compilation errors
+if(code!=TCL_OK && strstr(cm,(char*)"exec make")==NULL) // don't log model compilation errors
  {
   f=fopen("tk_err.err","a");
 
@@ -1006,22 +1005,20 @@ if(s==NULL || !strcmp(s, ""))
 
   cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
   if(choice==0)
-    cmd(inter, "catch [set result [catch [exec make -fmakefile 2> makemessage.txt]] ]"); 
+    cmd(inter, "catch[set result [catch [exec make -fmakefile 2> makemessage.txt]]]"); 
   else
    {  
 
   cmd(inter, "set result -2.2");
-  cmd(inter, "set file [open a.bat w]");
-  cmd(inter, "puts -nonewline $file \"make -fmakefile 2> makemessage.txt\\n\"");
+  cmd(inter, "set file [open make.bat w]");
+  cmd(inter, "puts -nonewline $file \"make.exe -fmakefile 2> makemessage.txt\\n\"");
   cmd(inter, "close  $file");
   cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
   sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
   cmd(inter, msg);
-  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy $RootLsd/$LsdGnu/bin/crtend.o .;file copy $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy $RootLsd/$LsdGnu/bin/crt2.o .} {}");
-
-  cmd(inter, "catch [set result [catch [exec a.bat]] ]");
-  //cmd(inter, "tkwait variable result");
-  cmd(inter, "file delete a.bat");
+  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .} {}");
+  cmd(inter, "catch[set result [catch [exec make.bat]]]");
+  cmd(inter, "file delete make.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 
    }
@@ -5150,19 +5147,19 @@ cmd( inter, "showtop .t" );
 cmd(inter, "cd $modeldir");
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1;set add_exe \".exe\"} {set choice 0;set add_exe \"\"}");
 if(choice==0)
-  cmd(inter, "set result \"[catch [exec make -fmakefileNW 2> makemessage.txt]]\""); 
+  cmd(inter, "catch[set result [catch [exec make -fmakefileNW 2> makemessage.txt]]]"); 
 else
 {  
   cmd(inter, "set result -2.2");
-  cmd(inter, "set file [open a.bat w]");
-  cmd(inter, "puts -nonewline $file \"make -fmakefileNW 2> makemessage.txt\\n\"");
+  cmd(inter, "set file [open make.bat w]");
+  cmd(inter, "puts -nonewline $file \"make.exe -fmakefileNW 2> makemessage.txt\\n\"");
   cmd(inter, "close  $file");
   cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
   sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
   cmd(inter, msg);
-  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy $RootLsd/$LsdGnu/bin/crtend.o .;file copy $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy $RootLsd/$LsdGnu/bin/crt2.o .} {}");
-  cmd(inter, "catch [set result [catch [exec a.bat]] ]");
-  cmd(inter, "file delete a.bat");
+  cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .} {}");
+  cmd(inter, "catch[set result [catch [exec make.bat]]]");
+  cmd(inter, "file delete make.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 }
 cmd(inter, "destroytop .t");
@@ -5619,7 +5616,7 @@ cmd(inter, "set cerr 0.0");
 cmd( inter, "newtop .mm \"Compilation Errors\" { destroytop .mm } \"\"" );
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
-cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\"");
+cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in LSD installation directory for information on particular problems.\"");
 cmd(inter, "pack .mm.lab");
 
 cmd(inter, "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word; scrollbar .mm.yscroll -command \".mm.t yview\"");
