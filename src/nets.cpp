@@ -1028,10 +1028,12 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 		}
 
 		if (idNode > 1)										// not first object?
+		{
 			if ( idNode > exNodes )							// node does not exist?
 				cur = add_n_objects2( lab, 1 );				// create new node object
 			else
 				cur = cur->next;							// use existing node object
+		}
 		
 		cur->add_node_net( idNode, nameNode );				// add (or reset) net data
 	}

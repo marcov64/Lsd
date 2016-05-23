@@ -779,7 +779,7 @@ result::result( char const *fname, char const *fmode, bool dozip )
 			strcpy( fnamez, fname );
 			strcat( fnamez, ".gz");
 			fz = gzopen( fnamez, fmode );
-			delete fnamez;
+			delete [] fnamez;
 		#endif
 	}
 	else

@@ -4293,8 +4293,8 @@ for(h=0; h<num_freq[i]; h++)
 
 
 for(i=0; i<nv; i++)
- {freq[i].freq;
-  freq[i].v;
+ {//freq[i].freq;
+  //freq[i].v;
   delete[] str[i];
   delete[] tag[i];
  }
@@ -7906,7 +7906,7 @@ for(j=min_c; j<=max_c; j++)
   ddstart+=1; 
   gzprintf(fsavez,"\n");
  }
-/**********************/
+**********************/
 }
 else
 {

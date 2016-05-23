@@ -464,7 +464,7 @@ if(p==1)
 {
 f=fopen(struct_file, "r");
 if(f!=NULL)
-{struct_loaded;
+{//struct_loaded;
  root->load_struct(f);
  fclose(f);
  f=NULL;
@@ -1157,7 +1157,7 @@ root=new object;
 root->init(NULL, "Root");
 f=fopen(struct_file, "r");
 if(f!=NULL)
-{struct_loaded;
+{//struct_loaded;
  root->load_struct(f);
  fclose(f);
  f=NULL;
