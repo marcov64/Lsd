@@ -1961,6 +1961,12 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice(double line, double col, double val)
 {
+	// avoid operation if canvas was closed
+	cmd( inter, "if [ info exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
+	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
+	if ( latcanv[ 0 ] == '0' )
+		return 0;
+	
 	char val_string[32];		// the final string to be used to define tk color to use
 	
 	if ( val < 0 && ( - val ) <= 0xffffff )			// RGB mode selected?
@@ -1973,8 +1979,6 @@ double update_lattice(double line, double col, double val)
 		cmd( inter, msg );
 	}
 		
-//sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string );
- 
  if(lattice_type==1)
  {
  sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string);
@@ -1982,14 +1986,10 @@ double update_lattice(double line, double col, double val)
  return 0;
 }
 
-//sprintf(msg, ".lat.c dtag [.lat.c create rect %d %d %d %d -outline %s -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)(col*dimW), (int)(line*dimH), val_string, val_string );
-//sprintf(msg, ".lat.c dtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 cmd(inter, msg);
 cmd(inter, "if {$lat_update == 1} {update} {}");
 return 0;  
-
-
 }
 #endif
 

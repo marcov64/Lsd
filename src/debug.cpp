@@ -232,9 +232,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 
 	cmd(inter, "pack .deb.b.move .deb.b.act -side top");
 	cmd(inter, "pack .deb.b -side right");
-
-	cmd( inter, "if [ string equal $lab \"\" ] { showtop .deb topleftW } { showtop .deb topleftW 0 0 0 }" );
 }
+
+cmd( inter, "if [ string equal $lab \"\" ] { showtop .deb topleftW } { showtop .deb topleftW 0 0 0 }" );
 
 app_res=*res;
 Tcl_LinkVar(inter, "value", (char *) &app_res, TCL_LINK_DOUBLE);
