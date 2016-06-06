@@ -277,9 +277,9 @@ deb_show(r, inter);
 cmd(inter, "focus -force .deb");
 if(interact_flag==1)
  {
- cmd(inter, ".deb.v.val selection range 0 end");
- cmd(inter, "focus -force .deb.v.val");
- cmd(inter, "bind .deb.v.val <Return> {.deb.b.act.run invoke}");
+ cmd(inter, ".deb.v.val2 selection range 0 end");
+ cmd(inter, "focus -force .deb.v.val2");
+ cmd(inter, "bind .deb.v.val2 <Return> {.deb.b.act.run invoke}");
  }
 ch[0]=(char)NULL;
 attach_instance_number(ch, r);

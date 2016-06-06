@@ -629,7 +629,7 @@ cmd(inter, "$w add command -label \"Start 'No Window' Batch...\" -command {set c
 cmd(inter, "$w add command -label \"Create/Run Parallel Batch...\" -command {set choice 68} -underline 11");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Simulation Settings...\" -command {set choice 22} -underline 2 -accelerator Ctrl+M");
-cmd(inter, "$w add checkbutton -label \"Lattice updating\" -variable lattype -command {set choice 56} -underline 2");
+cmd(inter, "$w add checkbutton -label \"Frequent Lattice Updating\" -variable lattype -command {set choice 56} -underline 2");
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F");
@@ -3327,36 +3327,6 @@ else
 break;
 
 
-case 5600: //choose lattice type of updating (UNUSED)
-
-*choice=0;
-
-Tcl_LinkVar(inter, "lattype", (char *) &done, TCL_LINK_INT);
-done=lattice_type;
-cmd(inter, "set a $lattype");
-cmd( inter, "newtop .a \"Set Lattice Updating\" { set choice 1 }" );
-
-cmd(inter, "label .a.l -text \"Type of lattice updating\"");
-cmd(inter, "frame .a.v -relief groove -bd 2");
-cmd(inter, "radiobutton .a.v.r1 -text \"Lattice updating type 1 (more efficient when the a cell changes many times)\" -variable lattype -value 1\"");
-cmd(inter, "radiobutton .a.v.r2 -text \"Lattice updating type 2 (more efficient when cells change rarely)\" -variable lattype -value 2\"");
-cmd(inter, "pack .a.v.r1 .a.v.r2 -anchor w -fill x");
-cmd(inter, "pack .a.l .a.v -pady 10");
-
-cmd(inter, "ok .a b { set choice 1 }");
-cmd(inter, "showtop .a centerW");
-
-while(*choice==0)
- Tcl_DoOneEvent(0);
-
-lattice_type=done;
-*choice=0;
-Tcl_UnlinkVar(inter, "lattype");
-cmd(inter, "destroytop .a");
-
-break;
-
-
 //upload in memory current equation file
 case 51:
 /*
@@ -3440,6 +3410,8 @@ case 56:
 
 cmd(inter, "set choice $lattype");
 lattice_type=*choice;
+sprintf( msg, "\nLattice updating mode: %s\n", lattice_type == 0 ? "infrequent cells changes" : "frequent cells changes" );
+plog( msg );
 
 break; 
 

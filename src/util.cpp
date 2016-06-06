@@ -1890,11 +1890,11 @@ dimH=pixH/nrow;
 dimW=pixW/ncol;
 cmd(inter, "if {[winfo exists .lat]==1} {destroy .lat} {}");
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-sprintf( msg, "newtop .lat \"Lsd Lattice (%.0lf x %.0lf)\" { destroy .lat }", nrow, ncol );
+sprintf( msg, "newtop .lat \"Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", nrow, ncol );
 cmd(inter, msg);
 
 cmd(inter, "set lat_update 1");
-cmd(inter, "bind .lat <1> {if {$lat_update == 1 } {set lat_update 0; } {set lat_update 1} }");
+cmd(inter, "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }");
 cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 
@@ -1941,12 +1941,15 @@ for(i=1; i<=nrow; i++)
  {
   for(j=1; j<=nrow; j++)
    {
-    sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string);
+    sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string);
    cmd(inter, msg);
 
    }
  }
 } 
+
+cmd( inter, "showtop .lat centerS no no no" );
+
 return(0);
 
 }
