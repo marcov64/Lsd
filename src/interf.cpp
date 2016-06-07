@@ -2388,6 +2388,7 @@ if(struct_loaded==1)
 
    cmd(inter, "set a [split [winfo children .] ]");  // remove old runtime plots
    cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
+   cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
    for(n=r; n->up!=NULL; n=n->up);
    r=n;
    cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
@@ -2625,6 +2626,7 @@ if ( ! discard_change( ) )	// check for unsaved configuration changes
 	break;
 
 cmd( inter, "if { [ winfo exists .model_str ] == 1 } { wm withdraw .model_str }");
+cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
 
 for(n=r; n->up!=NULL; n=n->up);
 n->empty();

@@ -1962,7 +1962,7 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 double update_lattice(double line, double col, double val)
 {
 	// avoid operation if canvas was closed
-	cmd( inter, "if [ info exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
+	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
 	if ( latcanv[ 0 ] == '0' )
 		return 0;

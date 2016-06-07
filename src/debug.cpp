@@ -316,7 +316,6 @@ cmd(inter, "set a [winfo exists .intval]");
 cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
-
 break;
 
 case 2:
@@ -324,10 +323,10 @@ cmd(inter, "set a [winfo exists .intval]");
 cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
+cmd( inter, "destroytop .deb" );
 debug_flag=0;
 if(t==when_debug)
  when_debug=0;
-cmd(inter, "wm iconify .deb");
 break;
 
 case 3: if( r->up!=NULL)
@@ -657,13 +656,11 @@ if(choice==1)
  choice=deb(r,c, lab, res);
  break;
  }
-Tcl_UnlinkVar(inter, "value");
-*res=app_res;
+
 cmd(inter, "set a [winfo exists .intval]");
 cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
-
 cmd( inter, "destroytop .deb" );
    choice=1;
      quit=1;
@@ -880,7 +877,7 @@ cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
 debug_flag=0;
-cmd(inter, "wm iconify .deb");
+cmd( inter, "destroytop .deb" );
 
 break;
 
@@ -915,6 +912,10 @@ choice=0;
 break;
 }
 }
+
+Tcl_UnlinkVar(inter, "value");
+*res=app_res;
+
 return(choice);
 }
 
