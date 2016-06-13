@@ -180,6 +180,7 @@ return(res); \
 }
 #endif
 
+#define ABORT quit=1;
 #define RESULT(X) res=X; goto end; }
 #define CURRENT val[0]
 
@@ -307,15 +308,24 @@ for(;O!=NULL;O=go_brother(O))
 #define NETWORK_INI(X,Y,Z,W,V) (p->init_stub_net((char*)X,(char*)Y,(long)Z,(long)W,V))
 #define NETWORKS_INI(O,X,Y,Z,W,V) (O==NULL?0.:O->init_stub_net((char*)X,(char*)Y,(long)Z,(long)W,V))
 
+// delete a network using as nodes object label X, located inside object O
+#define NETWORK_DEL(X) (p->delete_net((char*)X)
+#define NETWORKS_DEL(O,X) if(O!=NULL) O->delete_net((char*)X);
+
 // read a network in Pajek format from file named Y/Z_xx.net (xx is the current seed) 
 // using as nodes object with label X located inside object O
-#define NETWORK_LOAD(X,Y,Z) (p->read_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
-#define NETWORKS_LOAD(O,X,Y,Z) (O==NULL?0.:O->read_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+#define NETWORK_LOAD(X,Y,Z) (p->read_file_net((char*)X,(char*)Y,(char*)Z,seed-1,"net"))
+#define NETWORKS_LOAD(O,X,Y,Z) (O==NULL?0.:O->read_file_net((char*)X,(char*)Y,(char*)Z,seed-1,"net"))
 
 // save a network in Pajek format to file from the network formed by nodes
 // with label X located inside object O with filename Y/Z (file name is Y/Z_xx.net)
-#define NETWORK_SAVE(X,Y,Z) (p->write_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
-#define NETWORKS_SAVE(O,X,Y,Z) (O==NULL?0.:O->write_file_net((char*)X,(char*)Y,(char*)Z,"net",seed-1))
+#define NETWORK_SAVE(X,Y,Z) (p->write_file_net((char*)X,(char*)Y,(char*)Z,seed-1,false))
+#define NETWORKS_SAVE(O,X,Y,Z) (O==NULL?0.:O->write_file_net((char*)X,(char*)Y,(char*)Z,seed-1,false))
+
+// add a network snapshot in Pajek format to file from the network formed by nodes
+// with label X located inside object O with filename Y/Z (file name is Y/Z_xx.paj)
+#define NETWORK_SNAP(X,Y,Z) (p->write_file_net((char*)X,(char*)Y,(char*)Z,seed-1,true))
+#define NETWORKS_SNAP(O,X,Y,Z) (O==NULL?0.:O->write_file_net((char*)X,(char*)Y,(char*)Z,seed-1,true))
 
 // shuffle the nodes of a network composed by objects with label X, contained in O
 #define SHUFFLE(X) p->shuffle_nodes_net((char*)X);

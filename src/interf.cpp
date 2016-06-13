@@ -1622,90 +1622,90 @@ cmd(inter, ch);
    cur_descr=search_description(lab_old);
   } 
 
- cmd(inter, "set w $T.desc");
- cmd(inter, "frame $w");
- cmd(inter, "frame $w.f -bd 2 -relief groove");
- cmd(inter, "label $w.f.int -text \"Description\"");
+ cmd(inter, "set Td $T.desc");
+ cmd(inter, "frame $Td");
+ cmd(inter, "frame $Td.f -bd 2 -relief groove");
+ cmd(inter, "label $Td.f.int -text \"Description\"");
 
-  cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
- cmd(inter, "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
- cmd(inter, "pack $w.f.yscroll -side right -fill y");
- cmd(inter, "pack $w.f.int $w.f.text -anchor w -expand yes -fill both");
- cmd(inter, "pack $w.f");
+  cmd(inter, "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"");
+ cmd(inter, "text $Td.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\"");
+ cmd(inter, "pack $Td.f.yscroll -side right -fill y");
+ cmd(inter, "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both");
+ cmd(inter, "pack $Td.f");
   for(i=0; cur_descr->text[i]!=(char)NULL; i++)
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      sprintf(msg, "$w.f.text insert end \"%c\"", cur_descr->text[i]);
+      sprintf(msg, "$Td.f.text insert end \"%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
     else
      {
-      sprintf(msg, "$w.f.text insert end \"\\%c\"", cur_descr->text[i]);
+      sprintf(msg, "$Td.f.text insert end \"\\%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
 
    }
- cmd(inter, "frame $w.opt");
+ cmd(inter, "frame $Td.opt");
  sprintf(msg, "set observe %d", cur_descr->observe=='y'?1:0);
  cmd(inter, msg);
  sprintf(msg, "set initial %d", cur_descr->initial=='y'?1:0);
  cmd(inter, msg);
  
- cmd(inter, "label $w.opt.l -text \"In model documentation set the element to be: \"");
- cmd(inter, "pack $w.opt.l -side left");
- cmd(inter, "checkbutton $w.opt.obs -text \"Observed\" -variable observe -anchor w");
- cmd(inter, "checkbutton $w.opt.ini -text \"Initialized\" -variable initial -anchor w"); 
+ cmd(inter, "label $Td.opt.l -text \"In model documentation set the element to be: \"");
+ cmd(inter, "pack $Td.opt.l -side left");
+ cmd(inter, "checkbutton $Td.opt.obs -text \"Observed\" -variable observe -anchor w");
+ cmd(inter, "checkbutton $Td.opt.ini -text \"Initialized\" -variable initial -anchor w"); 
  if(cv->param==1 || cv->num_lag>0)
-  cmd(inter, "pack $w.opt.obs $w.opt.ini -side left -anchor w");
+  cmd(inter, "pack $Td.opt.obs $Td.opt.ini -side left -anchor w");
  else
-  cmd(inter, "pack $w.opt.obs -anchor w");
- cmd(inter, "$w.f.text delete \"end - 1 char\"");
- cmd(inter, "pack $w.opt -expand yes -fill x");
- cmd(inter, "frame $w.b");
- cmd(inter, "button $w.b.eq -width -9 -text \"View Code\" -command {set done 3}");
- cmd(inter, "button $w.b.auto_doc -width -9 -text \"Auto Doc.\" -command {set done 9}");
- cmd(inter, "button $w.b.us -width -9 -text \"Using Element\" -command {set done 4}");
- cmd(inter, "button $w.b.using -width -9 -text \"Elements Used\" -command {set done 7}");
+  cmd(inter, "pack $Td.opt.obs -anchor w");
+ cmd(inter, "$Td.f.text delete \"end - 1 char\"");
+ cmd(inter, "pack $Td.opt -expand yes -fill x");
+ cmd(inter, "frame $Td.b");
+ cmd(inter, "button $Td.b.eq -width -9 -text \"View Code\" -command {set done 3}");
+ cmd(inter, "button $Td.b.auto_doc -width -9 -text \"Auto Doc.\" -command {set done 9}");
+ cmd(inter, "button $Td.b.us -width -9 -text \"Using Element\" -command {set done 4}");
+ cmd(inter, "button $Td.b.using -width -9 -text \"Elements Used\" -command {set done 7}");
  if(!strcmp(cur_descr->type, "Parameter"))
-   cmd(inter, "pack $w.b.auto_doc $w.b.us -padx 10 -pady 5 -side left");
+   cmd(inter, "pack $Td.b.auto_doc $Td.b.us -padx 10 -pady 5 -side left");
  else
-   cmd(inter, "pack $w.b.eq $w.b.auto_doc $w.b.us $w.b.using -padx 10 -pady 5  -side left -fill both");
- cmd(inter, "pack $w.f $w.b");
+   cmd(inter, "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx 10 -pady 5  -side left -fill both");
+ cmd(inter, "pack $Td.f $Td.b");
  if(cv->param==1 || cv->num_lag>0)
   {
-   cmd(inter, "frame $w.i -bd 2 -relief groove");
-   cmd(inter, "label $w.i.int -text \"Comments on the initial values\"");
-   cmd(inter, "scrollbar $w.i.yscroll -command \"$w.i.text yview\"");
-   cmd(inter, "text $w.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.i.yscroll set\"");
-   cmd(inter, "pack $w.i.yscroll -side right -fill y");
+   cmd(inter, "frame $Td.i -bd 2 -relief groove");
+   cmd(inter, "label $Td.i.int -text \"Comments on the initial values\"");
+   cmd(inter, "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"");
+   cmd(inter, "text $Td.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$Td.i.yscroll set\"");
+   cmd(inter, "pack $Td.i.yscroll -side right -fill y");
    if(cur_descr->init!=NULL)
     {
      for(i=0; cur_descr->init[i]!=(char)NULL; i++)
       {
       if(cur_descr->init[i]!='[' && cur_descr->init[i]!=']' && cur_descr->init[i]!='{' && cur_descr->init[i]!='}' && cur_descr->init[i]!='\"' )
         {
-         sprintf(msg, "$w.i.text insert end \"%c\"", cur_descr->init[i]);
+         sprintf(msg, "$Td.i.text insert end \"%c\"", cur_descr->init[i]);
          cmd(inter, msg);
         }
        else
         {
-         sprintf(msg, "$w.i.text insert end \"\\%c\"", cur_descr->init[i]);
+         sprintf(msg, "$Td.i.text insert end \"\\%c\"", cur_descr->init[i]);
          cmd(inter, msg);
         }
    
       }
-     cmd(inter, "$w.i.text delete \"end - 1 char\"");
+     cmd(inter, "$Td.i.text delete \"end - 1 char\"");
     }
-   cmd(inter, "pack $w.i.int $w.i.text -anchor w -expand yes -fill both");
-   cmd(inter, "pack $w.i -pady 5 -anchor w -expand yes -fill both");
-   cmd(inter, "frame $w.b2");
-   cmd(inter, "button $w.b2.setall -width -9 -text \"Initial Values\" -command {set done 11}" );
-   cmd(inter, "button $w.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
-   cmd(inter, "pack $w.b2.setall $w.b2.sens -padx 10 -pady 5 -side left");
-   cmd(inter, "pack $w.b2");
-   cmd(inter, "bind $w.f.text <Control-i> {focus -force $w.i.text}");
-   cmd(inter, "bind $w.i.text <Control-z> {set done 1}");   
+   cmd(inter, "pack $Td.i.int $Td.i.text -anchor w -expand yes -fill both");
+   cmd(inter, "pack $Td.i -pady 5 -anchor w -expand yes -fill both");
+   cmd(inter, "frame $Td.b2");
+   cmd(inter, "button $Td.b2.setall -width -9 -text \"Initial Values\" -command {set done 11}" );
+   cmd(inter, "button $Td.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
+   cmd(inter, "pack $Td.b2.setall $Td.b2.sens -padx 10 -pady 5 -side left");
+   cmd(inter, "pack $Td.b2");
+   cmd(inter, "bind $Td.f.text <Control-i> {focus -force $Td.i.text}");
+   cmd(inter, "bind $Td.i.text <Control-z> {set done 1}");   
    }
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
@@ -1733,9 +1733,9 @@ cmd(inter, "button $T.h.b.del -width -9 -text \"Delete\" -command {set done 10}"
 cmd(inter, "bind $T.h <Double-1> {set done 5}");
 cmd(inter, "pack $T.h.b.prop $T.h.b.mov $T.h.b.del -padx 10 -pady 5 -side left");
 cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.obj $T.h.b");
-cmd(inter, "pack $T.h $T.b1 $w -pady 5 -fill x -expand yes");
+cmd(inter, "pack $T.h $T.b1 $Td -pady 5 -fill x -expand yes");
 cmd(inter, "bind $T.h <KeyPress-Delete> {set done 10}");
-cmd(inter, "bind $T.b1 <Control-d> {focus -force $w.f.text}");
+cmd(inter, "bind $T.b1 <Control-d> {focus -force $Td.f.text}");
 cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}");   
 
 cmd( inter, "donehelp $T b { set done 1 } { LsdHelp menumodel.html#variables }" );
@@ -1768,18 +1768,18 @@ if(done == 7)
 if(done == 9) 
  {
   auto_document( choice, lab_old, "ALL", true );
-  cmd(inter, "$w.f.text delete 1.0 end");
+  cmd(inter, "$Td.f.text delete 1.0 end");
 
   for(i=0; cur_descr->text[i]!=(char)NULL; i++)
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      sprintf(msg, "$w.f.text insert end \"%c\"", cur_descr->text[i]);
+      sprintf(msg, "$Td.f.text insert end \"%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
     else
      {
-      sprintf(msg, "$w.f.text insert end \"\\%c\"", cur_descr->text[i]);
+      sprintf(msg, "$Td.f.text insert end \"\\%c\"", cur_descr->text[i]);
       cmd(inter, msg);
      }
       
@@ -1794,10 +1794,10 @@ if(done == 7 || done == 4 || done == 3 || done == 9)
 
 if(done==1) 
   {
-   cmd(inter, "set text_description \"[$w.f.text get 1.0 end]\"");
+   cmd(inter, "set text_description \"[$Td.f.text get 1.0 end]\"");
    change_descr_text(lab_old);
    if(cv->param==1 || cv->num_lag>0)
-    {cmd(inter, "set text_description \"[$w.i.text get 1.0 end]\"");
+    {cmd(inter, "set text_description \"[$Td.i.text get 1.0 end]\"");
      change_init_text(lab_old);
     }
   
@@ -2626,6 +2626,8 @@ if ( ! discard_change( ) )	// check for unsaved configuration changes
 	break;
 
 cmd( inter, "if { [ winfo exists .model_str ] == 1 } { wm withdraw .model_str }");
+cmd(inter, "set a [split [winfo children .] ]");
+cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
 cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
 
 for(n=r; n->up!=NULL; n=n->up);
@@ -2647,6 +2649,10 @@ nodesSerial=0;				// network node serial number global counter
 add_description("Root", "Object", "(no description available)");      
 cmd(inter, "catch {unset ModElem}");
 
+strcpy(path, "");
+delete[] simul_name;
+simul_name=new char[strlen("Sim1")+1];
+strcpy(simul_name, "Sim1");
 unsavedChange = false;		// signal no unsaved change
 redrawRoot = true;			// force browser redraw
 cmd( inter, "set cur 0" ); 	// point for first var in listbox
@@ -3960,7 +3966,7 @@ if (rsense!=NULL)
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 
     sensitivity_doe( &findexSens, rand_doe );
-	sprintf( msg, "Done\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 

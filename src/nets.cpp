@@ -123,6 +123,8 @@ void error_hard(void);
 void plog(char const *msg);
 
 extern char msg[];
+extern int t;
+extern int max_step;
 extern int seed;
 extern long idum;
 extern lsdstack *stacklog;
@@ -136,6 +138,8 @@ long nodesSerial = 0;					// node's serial number global counter
 
 netLink::netLink( object *origNode, object *destNode, double linkWeight, double destProb )
 {
+	time = t;							// save creation time
+
 	if ( origNode->node == NULL )		// origin is not yet a node?
 	{
 		origNode->node = new netNode( );// create node data structure
@@ -270,6 +274,7 @@ netLink *object::search_link_net( long destId )
 netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 {
 	id = nodeId;
+	time = t;						// save creation time
 	serNum = ++nodesSerial;
 	nLinks = 0;
 	first = last = NULL;
@@ -303,7 +308,7 @@ netNode::~netNode( void )
 	if ( name != NULL )			// name assigned?
 		delete name;
 		
-	while ( first != NULL )		// remove all links
+	while ( last != NULL )		// remove all links
 		delete last;
 }
 
@@ -312,13 +317,16 @@ netNode::~netNode( void )
 	Add netNode data structure to Lsd object
 */
 
-netNode *object::add_node_net( long id = -1, char const nodeName[] = "", double prob = 1 )
+netNode *object::add_node_net( long id = -1, char const nodeName[] = "", 
+							   bool silent = false )
 {
 	if ( node != NULL )
 	{
-		plog( "\nWarning: existing network data discarded from object." );
+		if ( ! silent )
+			plog( "\nWarning: existing network data discarded from object." );
 		delete node;
 	}
+	
 	node = new netNode( id, nodeName );
 	if( node == NULL )
 	{
@@ -326,7 +334,7 @@ netNode *object::add_node_net( long id = -1, char const nodeName[] = "", double 
 		error_hard( );
 		return NULL;
 	}
-
+	
 	return node;
 }
 
@@ -338,6 +346,7 @@ netNode *object::add_node_net( long id = -1, char const nodeName[] = "", double 
 void object::delete_node_net( void )
 {
 	delete node;
+	node = NULL;
 }
 
 
@@ -976,7 +985,7 @@ void get_line( char *lBuffer, FILE *fPtr )
 }
 
 long object::read_file_net( char const *lab, char const dir[] = "", char const base_name[] = "net", 
-							char const ext[] = "net", int serial = 1 )
+							int serial = 1, char const ext[] = "net" )
 {
 	long idNode, numNodes, exNodes, numLinks, startNode, endNode;
 	int rd;
@@ -997,6 +1006,12 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
  
 	for ( exNodes = 0, cur = search( lab ); cur != NULL; exNodes++, cur = go_brother( cur ) );
 															// count existing nodes
+	if ( exNodes == 0 )
+	{
+		plog( "\nError: no object exists with name '" ); plog( fileName ); plog( "'" );
+		return 0;
+	}
+		
 	numNodes = 0;											// no node read yet
 	while ( !feof( pajekFile ) )							// try to read number of vertices
 	{
@@ -1027,15 +1042,10 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 				sscanf( textLine, " %ld \"%[^\"]", &idNode, nameNode );
 		}
 
-		if (idNode > 1)										// not first object?
-		{
-			if ( idNode > exNodes )							// node does not exist?
-				cur = add_n_objects2( lab, 1 );				// create new node object
-			else
-				cur = cur->next;							// use existing node object
-		}
+		if ( idNode > exNodes )								// node does not exist?
+			cur = add_n_objects2( lab, 1 );					// create new node object
 		
-		cur->add_node_net( idNode, nameNode );				// add (or reset) net data
+		cur->add_node_net( idNode, nameNode, true );		// add (or reset) net data
 	}
   
 	numNodes = idNode - 1;									// effective number of nodes
@@ -1107,21 +1117,40 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 	Write directed network in Pajek text file format.
 */
 
-long object::write_file_net( char const *lab, char const dir[] = "", char const base_name[] = "net", 
-							 char const ext[] = "net", int serial = 1 )
+long object::write_file_net( char const *lab, char const dir[] = "", 
+							 char const base_name[] = "net", 
+							 int serial = 1, bool append = false )
 {
+	int tCur = ( t > max_step ) ? max_step : t;					// effective current time
 	long numNodes, numLinks = 0;
-	char fileName[FILE_PATH_LEN];
+	double weight;
+	char *c, mode[2], fileName[FILE_PATH_LEN], actIntv[64];
 	object *firstNode, *cur;
 	netLink *cur1;
 	FILE *pajekFile;
 
-	sprintf( fileName, "%s%s%s_%i.%s", dir, foldersep( dir ), base_name, serial, ext );
-																// fully formed file name
-	if ( !( pajekFile = fopen( fileName, "w" ) ) )				// create new file
+	sprintf( fileName, "%s%s%s_%i.%s", dir, foldersep( dir ), base_name, serial, 
+			 append ? "paj" : "net" );							// fully formed file name
+			 
+	if ( append && tCur > 1 )									// select write mode
+		strcpy( mode, "a" );
+	else
+		strcpy( mode, "w" );
+		
+	if ( !( pajekFile = fopen( fileName, mode ) ) )				// create new file
 	{
 		plog( "\nError creating network file: " ); plog( fileName );
 		return  0;
+	}
+	
+	if ( append )
+	{
+		char name[FILE_PATH_LEN];
+		strcpy( name, base_name );
+		while ( ( c = strchr( name, ' ' ) ) != NULL )
+			c[0] = '_';											// replace space by underscore
+		
+		fprintf( pajekFile, "\n*Network %s_%d_%d\n", base_name, serial, tCur );	// name network
 	}
 
 	firstNode = search( lab );									// pointer to first node
@@ -1135,20 +1164,19 @@ long object::write_file_net( char const *lab, char const dir[] = "", char const 
 	{
 		if ( cur->node == NULL )								// not node of a network?
 		{
-			plog( "\nError: object " );
-			plog( lab );
+			plog( "\nError: object " ); plog( lab );
 			plog( " does not contain the correct network data structure." );
 			plog( "\nFile "); plog( fileName ); plog ( " not saved.");
 			fclose( pajekFile );
 			return 0;
 		}
-			
+		
 		if ( cur->node->name == NULL )							// no name assigned?
-			fprintf( pajekFile, "%ld \"%ld\"\n", cur->node->serNum, cur->node->id );
-																// output id as name
+			fprintf( pajekFile, "%ld \"%ld\" [%d-%d]\n", cur->node->serNum, 
+					 cur->node->id, cur->node->time, tCur );	// output id as name
 		else
-			fprintf( pajekFile, "%ld \"%s\"\n", cur->node->serNum, cur->node->name );
-																// output text name
+			fprintf( pajekFile, "%ld \"%s\" [%d-%d]\n", cur->node->serNum, 
+					 cur->node->name, cur->node->time, tCur );	// output text name
 	}
   
 	fprintf( pajekFile, "*Arcs\n" );							// start arcs section
@@ -1157,16 +1185,25 @@ long object::write_file_net( char const *lab, char const dir[] = "", char const 
 		if ( cur->node->nLinks > 0 )							// if node has at least one link
 			for ( cur1 = cur->node->first; cur1 != NULL; cur1 = cur1->next )
 			{													// scan all links from node
-				if ( cur1->weight == 0 )						// no weight assigned?
-					fprintf( pajekFile, "%ld %ld\n", 			// outputs arc
-							 cur->node->serNum, cur1->serTo );				
-				else
-					fprintf( pajekFile, "%ld %ld %g\n", 
-							 cur->node->serNum, cur1->serTo, cur1->weight );
-
+				weight = ( cur1->weight == 0 ) ? 1 : cur1->weight;
+				fprintf( pajekFile, "%ld %ld %g [%d-%d]\n", 
+						 cur->node->serNum, cur1->serTo, weight, cur1->time, tCur );
 				numLinks++;
 			}
 	fclose( pajekFile );				
 	
 	return numLinks;
+}
+
+
+/*
+	Delete a network, removing nodes and links.
+*/
+
+void object::delete_net( char const *lab )
+{
+	object *cur;
+	
+	for ( cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
+		cur->delete_node_net( );								// scan all nodes
 }
