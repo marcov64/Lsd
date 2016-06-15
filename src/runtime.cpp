@@ -81,7 +81,6 @@ char intval[16];	// string buffer
 extern char msg[];
 extern Tcl_Interp *inter;
 extern char **tp;
-extern variable **list;
 extern int max_step;
 extern int cur_plt;
 extern int t;
@@ -93,6 +92,7 @@ double ymin;
 double ymax;
 double *old_val;
 double plot_step;
+variable **list;
 
 double min(double a, double b);
 

@@ -121,7 +121,6 @@ object *skip_next_obj(object *t);
 object *go_brother(object *c);
 void plog(char const *m);
 void file_name( char *name);
-void print_title_obj( object *root, int index);
 void prepare_plot(object *r, int id_sim);
 void myexit(int v);
 FILE *search_str(char const *name, char const *str);
@@ -130,16 +129,12 @@ void reset_end(object *r);
 void close_sim(void);
 double ran1(long *idum);
 int deb(object *r, object *c, char const *lab, double *res);
-void run_no_window(void);
 void analysis(int *choice);
 void init_random(int seed);
 void add_description(char const *lab, char const *type, char const *text);
 void add_description(char const *lab, char const *type, char const *text);
 void empty_cemetery(void);
-void control_bridge(object *r);
 void save_single(variable *vcv);
-void delete_mn(mnode *mn);
-void scan_mn(object *c);
 char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
@@ -181,9 +176,6 @@ char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
 char name_rep[400];
 char **tp;
-variable **list;
-object **mylist=NULL;
-int llist;
 int struct_loaded=0;
 int posiziona;
 int running;
@@ -534,18 +526,20 @@ cmd(inter, "destroy .l");
 
 #else
  run(root);
- empty_cemetery();
- root->empty();
- blueprint->empty();
 #endif 
 
-delete stacklog;
+empty_cemetery();
+blueprint->empty();
+root->empty();
 delete blueprint;
 delete root;
+delete stacklog;
 delete [ ] struct_file;
 delete [ ] equation_name;
 delete [ ] path;
 delete [ ] simul_name;
+
+return 0;
 }
 
 
@@ -613,14 +607,8 @@ if(i>1 || batch_sequential_loop)
  root->empty();
  root->init(NULL, "Root");
  blueprint->empty();
+ blueprint->init(NULL, "Root");
  nodesSerial=0;			// restart network nodes serial counter
-// if(batch_sequential==1)
-//  {
-//   sprintf(msg, "%s_%d.lsd",simul_name,findex);
-//   delete[] struct_file;
-//   struct_file=new char[strlen(msg)+1];
-//   strcpy(struct_file,msg);
-//  } 
  f=fopen(struct_file, "r");
  if(f==NULL)
   {
@@ -672,7 +660,6 @@ start = clock();
 
 for(t=1; quit==0 && t<=max_step;t++ )
  {
-// control_bridge(root);
 #ifndef NO_WINDOW 
   if(when_debug==t)
   {
@@ -794,7 +781,6 @@ cmd(inter, "update");
 #endif
  }//end of for t
 
-
 actual_steps=t-1;
 unsavedData = true;				// flag unsaved simulation results
 
@@ -819,7 +805,7 @@ cmd( inter, "wm state . normal" );
 
 close_sim();
 reset_end(root);
-scan_mn(root);
+root->emptyturbo();
 
 if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
 {
@@ -925,7 +911,6 @@ Tcl_UnlinkVar(inter, "posiziona");
 quit=0;
 }
 
-
 /*********************************
 PRINT_TITLE
 *********************************/
@@ -991,8 +976,6 @@ for(var=root->v; var!=NULL; var=var->next)
 	  }
  }
 
-
-//for(c=root->son, counter=1; c!=NULL; c=skip_next_obj(c, &num), counter=1)
 for(cb=root->b, counter=1; cb!=NULL; cb=cb->next, counter=1)
  {for(cur=cb->head; cur!=NULL && quit!=2; cur=go_brother(cur))
    {
@@ -1003,50 +986,6 @@ for(cb=root->b, counter=1; cb!=NULL; cb=cb->next, counter=1)
 if(quit!=2)
  quit=toquit;
 }
-
-/*********************************
-PRINT_TITLE_OBJ
-Esperimental routine, not used in this version. Prints the results
-in different files, one for each instance of an object
-*********************************/
-
-void print_title_obj( object *root, int index)
-{
-variable *cv;
-FILE *f;
-char ch[80];
-int num;
-object *cur;
-bridge *cb;
-
-//for(cur=root->son; cur!=NULL; cur=skip_next_obj(cur, &num))
-for(cb=root->b; cb!=NULL; cb=cb->next)
-{strcpy(ch,"");
- cur=cb->head;
- for(cv=cur->v; cv!=NULL; cv=cv->next)
- {if(cv->save==1)
-   {sprintf(ch,"%s_%d.res", cur->label, index);
-	 break;
-	}
- }
- if(strlen(ch)!=0)
- {
-
- sprintf(ch, "%s_1.res",root->label);
- f=fopen(ch, "wt");  // use text mode for Windows better compatibility
-
- for(cv=cur->v; cv!=NULL; cv=cv->next)
-  {if(cv->save==1)
-   fprintf(f,"%s\t",cv->label);
-  }
- fprintf(f,"\n");
- fclose(f);
- }
- print_title_obj(cur, index);
-}
-}
-
-
 
 /*********************************
 PLOG
@@ -1073,8 +1012,6 @@ message_logged=1;
 
 }
 
-
-
 /*********************************
 INTERPINITWIN
 Calls tclinit and tkinit, managing he errors
@@ -1085,7 +1022,6 @@ the model's one. Tcl and Tk initialization files MUST be in
 /gnu[64]/lib/tk8.X
 
 *********************************/
-
 
 #ifndef NO_WINDOW 
 
@@ -1103,7 +1039,6 @@ if(Tcl_Init(app)!=TCL_OK)
     fclose(f);
     exit(12);
    }
-
    
 if(Tk_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
@@ -1142,82 +1077,6 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
    }  
  }
 }
-
-
-
-
-void run_no_window(void)
-{
-int j, choice;
-FILE *f;
-result *rf;					// pointer for results files (may be zipped or not)
-char ch[10];
-
-root=new object;
-root->init(NULL, "Root");
-f=fopen(struct_file, "r");
-if(f!=NULL)
-{//struct_loaded;
- root->load_struct(f);
- fclose(f);
- f=NULL;
- root->load_param(struct_file, 1,f);
- f=search_str(struct_file, "SIM_NUM");
- if(f!=NULL)
-  fscanf(f, "%d", &sim_num);
- fclose(f);
- f=search_str(struct_file, "SEED");
- if(f!=NULL)
-  fscanf(f, "%ld", &idum);
- fclose(f);
- f=search_str(struct_file, "MAX_STEP");
- if(f!=NULL)
-   fscanf(f, "%d", &max_step);
- fclose(f);
- f=search_str(struct_file, "EQUATION");
- if(f!=NULL)
-   fgets(msg, 200, f);
- delete[] equation_name;
- equation_name=new char[strlen(msg)+1];
- strcpy(equation_name, msg+1);
- if(equation_name[strlen(equation_name)-1]=='\n')
-   equation_name[strlen(equation_name)-1]=(char)NULL;
-
- fclose(f);
-
-stacklog = new lsdstack;
-stacklog->next=NULL;
-stacklog->prev=NULL;
-stacklog->ns=0;
-
-idum=-seed; //new random routine' initialization
-ran1(&idum);
-
-seed++;
-stack=0;
-posiziona=0;
-running=1;
-actual_steps=0;
-strcpy(ch, "");
-j=0;
-print_title(root);
-
-for(t=1; quit==0 && t<=max_step;t++ )
-  {
-  root->update();
-  }
-
-sprintf(msg, "%s_%d.res%s", simul_name, seed-1, dozip?".gz":"");
-rf = new result( msg, "wt", dozip );	// create results file object
-rf->title( root, 1 );					// write header
-rf->data( root, 1, actual_steps );		// write all data
-delete rf;								// close file and delete object
-
-exit(0);
-
-}
-}
-
 
 #ifndef NO_WINDOW
 void create_logwindow(void)
@@ -1277,41 +1136,6 @@ cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm }" );
 
 #endif
 
-void control_bridge(object *r)
-{
-bridge *cb;
-object *cur;
-int i=0;
-
-plog("\nAttempted control bridge (lsdmain.cpp). Stopped.\n");
-return;
-
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
- cur=r->search(cb->head->label);
- if(cur!=cb->head)
-  {
-  sprintf(msg, "\nWrong bridge:\\nObject %s\\nDesc. %s\\n",r->label, cb->head->label);
-  plog(msg);
-  }
- }
-for(cur=r->b->head; cur!=NULL; cur=skip_next_obj(cur, &i) )
- {i=0;
- for(cb=r->b; cb!=NULL; cb=cb->next)
-  if(cb->head==cur)
-   i=1;
- if(i==0)
- {
-  sprintf(msg, "\nError in bridges: object %s has no bridge\\n",cur->label);
-  plog(msg);
- } 
-   
- }
-for(cur=r->b->head; cur!=NULL; cur=cur->next )
- control_bridge(cur);
-}
-
-
 void save_single(variable *vcv)
 {
 FILE *f;
@@ -1331,23 +1155,7 @@ for(i=0; i<=t-1; i++)
     fprintf(f,"%s\t\n", nonavail);
   }
   
- 
 fclose(f); 
-}
-
-void scan_mn(object *r)
-{
-bridge *cb;
-object *cur;
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
-  if(cb->mn!=NULL)
-   {delete_mn(cb->mn);
-    cb->mn=NULL;
-   } 
-  for(cur=cb->head; cur!=NULL; cur=cur->next)
-    scan_mn(cur);
- }
 }
 
 // remove any path prefixes to filename, if present
@@ -1418,4 +1226,3 @@ void signal_handler(int signum)
 
 	exit(-signum);			// abort program
 }
-

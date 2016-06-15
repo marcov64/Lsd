@@ -1012,24 +1012,9 @@ int temp;
 if(r==NULL)
  return;
 
-/*
-if(!strcmp(r->label, "Root") )
- {
-  for(cb=container->b; cb!=NULL; cb=cb1)
-   {cb1=cb->next;
-    cb->head->delete_obj();
-    delete[] cb->blabel;
-    delete cb;
-    if(cb1!=NULL)
-      cb1->head->up->b=cb1;
-   
-   } 
-   container->b=NULL;  
- }
-*/
-
 for(cv=r->v; cv!=NULL; cv=cv->next)
    container->add_var_from_example(cv);
+delete[] container->label;
 container->label=new char[strlen(r->label)+1];
 strcpy(container->label, r->label);
 
@@ -1040,9 +1025,6 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   cur=cb1->head;
   set_blueprint(cur, cur1);
  }
-
-
-   
 }
 
 void save_description(object *r, FILE *f)

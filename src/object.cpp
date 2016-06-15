@@ -403,8 +403,6 @@ int no_error=0;
 int stairs=0;
 int sig_stairs=0;
 
-extern object **mylist;
-extern int llist;
 object *globalcur;
 
 
@@ -1502,9 +1500,14 @@ for(cb=b; cb!=NULL; cb=cb1)
    total_obj--;
   }
   delete[] cb->blabel;
-  delete cb;
-  
+  if ( cb->mn != NULL )		// turbo search node exists?
+  {
+	cb->mn->empty( );
+	delete cb->mn;
+  }
+  delete cb; 
  }
+ 
 delete[] label;
 label=NULL;
 b=NULL; 
@@ -1834,20 +1837,24 @@ if(this==NULL)
 collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
 //find the bridge
-for(cb=up->b; cb!=NULL && strcmp(cb->blabel, label); cb=cb->next);
+if ( up != NULL )
+	for(cb=up->b; cb!=NULL && strcmp(cb->blabel, label); cb=cb->next);
+else
+	cb = NULL;
 
-
-
-cb->counter_updated=false;
- if(cb->head==this)
-   {//found the bridge
-    cb->head=next;
-   }
- else
-  {
-   for(cur=cb->head; cur->next!=this; cur=cur->next);
-   cur->next=next;
-  }  
+if ( cb != NULL )
+{
+	cb->counter_updated=false;
+	if(cb->head==this)
+	{//found the bridge
+		cb->head=next;
+	}
+	else
+	{
+		for(cur=cb->head; cur->next!=this; cur=cur->next);
+		cur->next=next;
+	}
+}	
 empty();
 delete this;
 }
@@ -1862,7 +1869,8 @@ if var is NULL, try sorting using the network node id
 
 void object::lsdqsort(char const *obj, char const *var, char const *direction)
 {
-object *cur, *cur1, *nex, *first;
+object *cur, *cur1, *nex, *first, **mylist;
+;
 bridge *cb;
 variable *cur_v;
 int num, flag_f, i;
@@ -1927,16 +1935,7 @@ cb->counter_updated=false;
 cur=cb->head;
 
   nex=skip_next_obj(cur, &num);
-  if(mylist==NULL)
-    {mylist=new object*[num];
-     llist=num;
-    }
-  else
-   if(num>llist)
-    {delete [] mylist;
-     mylist=new object*[num];
-     llist=num;
-    }
+  mylist=new object*[num];
   for(i=0; i<num; i++)
    {mylist[i]=cur;
     cur=cur->next;
@@ -1952,7 +1951,7 @@ cur=cb->head;
      error_hard();
      quit=2;
      plog(msg);
-     //delete[] mylist;
+     delete[] mylist;
      return;
     }
     
@@ -1963,7 +1962,7 @@ for(i=1; i<num; i++)
 
 mylist[i-1]->next=NULL;
 
-
+delete[] mylist;
 }
 
 /************************
@@ -2010,7 +2009,7 @@ Two stage sorting. Objects with identical values of var1 are sorted according to
 ****************************************************/
 void object::lsdqsort(char const *obj, char const *var1, char const *var2, char const *direction)
 {
-object *cur, *cur1, *nex, *first;
+object *cur, *cur1, *nex, *first, **mylist;
 variable *cur_v1, *cur_v2;
 int num, flag_f, i;
 bridge *cb;
@@ -2058,16 +2057,7 @@ if(cur->up==NULL)
 cur=cb->head;
 
   nex=skip_next_obj(cur, &num);
-  if(mylist==NULL)
-    {mylist=new object*[num];
-     llist=num;
-    }
-  else
-   if(num>llist)
-    {delete [] mylist;
-     mylist=new object*[num];
-     llist=num;
-    }
+  mylist=new object*[num];
   for(i=0; i<num; i++)
    {mylist[i]=cur;
     cur=cur->next;
@@ -2085,7 +2075,7 @@ cur=cb->head;
   plog(msg);
      error_hard();
      quit=2;
-     //delete[] mylist;
+     delete[] mylist;
      return;
     }
 
@@ -2095,6 +2085,7 @@ for(i=1; i<num; i++)
  (mylist[i-1])->next=mylist[i];
 mylist[i-1]->next=NULL;
 
+delete[] mylist;
 }
 
 /************************
@@ -2562,9 +2553,14 @@ if(d->up->b->head==d)
     cur1=cur->next;
     cur->empty(); 
     delete cur;
-    
    } 
   
+  delete[] a->blabel;
+  if ( a->mn != NULL )		// turbo search node exists?
+  {
+	a->mn->empty( );
+	delete a->mn;
+  }
   delete a;
   return;
  } 
@@ -2578,116 +2574,37 @@ for(cb=d->up->b; cb!=NULL; a=cb,cb=cb->next)
         cur1=cur->next;
         cur->empty(); 
         delete cur;
-        
        } 
 
      a->next=cb->next;
+
+     delete[] cb->blabel;
+     if ( cb->mn != NULL )		// turbo search node exists?
+     {
+       cb->mn->empty( );
+	   delete cb->mn;
+     }
      delete cb;
    }
 }
 
-
-void XXXXset_t_counter(object *r)
-{
-//set the t_counter, an index for objects used in print_tag
-object *cur;
-bridge *cb;
-int i;
-
-/*
-for(cur=r->son; cur!=NULL; cur=cur->next)
- {
-  cur->t_counter=i;
-  if(go_brother(cur)==NULL)
-    i=1;
-   else
-    i++; 
-  set_t_counter(cur);
- }
-
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
-  i=1;
-  for(cur=cb->head; cur!=NULL; cur=cur->next, i++)
-   {
-    cur->t_counter=i;
-    set_t_counter(cur);
-   } 
- }
-*/
-}
-
-
-
-
-//check and repair model bridges
-/*
-int reset_bridges(object *r)
-{
-bridge *cb, *cb1;
-object *cur;
-
-int count, res=0; 
-
-if(r->son==NULL && r->b!=NULL && r->b->head==NULL)
- return 0; //nothing to do: no son and bridge to null intact
- 
-if(r->b==NULL)
- {
-  r->b=new bridge;  
-  r->b->head=r->son;
-  r->b->next=NULL;
- } 
-for(cur=r->son,cb1=cb=r->b;  cur!=NULL; )
- {
-  if(cb==NULL)
-    {//no bridge
-     cb=new bridge;
-     cb->head=cur;
-     cb->next=NULL;
-     cb1->next=cb;
-     res++;
-    } 
-  
-  if(cb->head!=cur)
-   {res++;
-    cb->head=cur;
-   } 
-    
-   cb1=cb;
-   count=0;
-   cur=skip_next_obj(cur, &count);
-   if(cur==NULL)
-    {
-     if(cb->next!=NULL)
-      {res++;
-       delete cb->next;
-       cb->next=NULL;
-      }
-    }
-   cb=cb->next;
-  }
- for(cur=r->son; cur!=NULL; cur=go_brother(cur) )
-  res+=reset_bridges(cur);
-
-return res;
-}
-*/
-
-void delete_mn(mnode *mn)
+void mnode::empty(void)
 {
 int i;
-if (mn->son!=NULL) 
+if (son!=NULL) 
  {
    for(i=0; i<10; i++)
-    delete_mn(&(mn->son[i]));
-   delete[] mn->son; 
+    son[i].empty();
+   delete[] son; 
  }
 }
+
 void mnode::create(double level)
 {
 
 int i;
+
+deflev=level;
 
 if(level>0)
  {
@@ -2710,6 +2627,9 @@ object *mnode::fetch(double *n, double level)
 
 object *cur;
 double a,b;
+
+if ( level <= 0 )
+	level = deflev;
 
 level--;
 if(level==0)
@@ -2774,10 +2694,11 @@ val=num-1;
 if(tot>0)					// if size is informed
 	lev=floor(log10(tot-1))+1;
 else
-	lev=cb->mn->deflev;		// if not, use default
+	lev=0;					// if not, use default
 return(cb->mn->fetch(&val, lev));
 
 }
+
 void object::initturbo(char const *label, double tot=0)
 {
 /*
@@ -2812,10 +2733,29 @@ if(tot<=0)					// if size not informed
 	for(tot=0,cur=this->search(label); cur!=NULL; tot++,cur=go_brother(cur));
 							// compute it
 globalcur=cb->head;
+if( cb->mn != NULL )		// remove existing mnode
+{
+	cb->mn->empty( );
+	delete cb->mn;
+}
 cb->mn= new mnode;
 lev=floor(log10(tot-1))+1;
-cb->mn->deflev=(long)lev;			// save as default lev
 cb->mn->create(lev);
-
 }
 
+// remove all turbo search nodes
+void object::emptyturbo(void)
+{
+bridge *cb;
+object *cur;
+for(cb=this->b; cb!=NULL; cb=cb->next)
+ {
+  if(cb->mn!=NULL)
+   {cb->mn->empty();
+	delete cb->mn;
+    cb->mn=NULL;
+   } 
+  for(cur=cb->head; cur!=NULL; cur=cur->next)
+    cur->emptyturbo();
+ }
+}

@@ -79,7 +79,8 @@ object *pntr;
 long deflev;		// saves the log of number of objects to allow defaulting
 
 void create(double level);
-object *fetch(double *n, double level);
+void empty(void);
+object *fetch(double *n, double level=0);
 };
 
 class bridge
@@ -199,7 +200,8 @@ object *lat_down(void);
 object *lat_left(void);
 object *lat_right(void);
 double interact(char const *text, double v, double *tv);
-void initturbo(char const *label, double num);//set the structure to use the turbosearch
+void initturbo(char const *label, double num);	// set the structure to use turbo search
+void emptyturbo(void);							// remove turbo search structure
 object *turbosearch(char const *label, double tot, double num);
 
 // set the network handling methods
