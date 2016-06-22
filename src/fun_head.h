@@ -95,7 +95,7 @@ extern Tcl_Interp *inter;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color);
 
 double update_lattice(double line, double col, double val);
-
+int save_lattice( const char *fname );
 #endif
 
 #define DEBUG f=fopen("log.log","a"); \

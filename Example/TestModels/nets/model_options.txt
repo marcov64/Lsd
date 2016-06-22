@@ -1,0 +1,4 @@
+TARGET=lsd_gnu
+FUN=fun_nets
+SWITCH_CC=-g -Og
+

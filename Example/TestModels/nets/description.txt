@@ -1,0 +1,29 @@
+Network generation test model
+
+Generates models using the new LSD internal network functions.
+
+Use the code here as a blueprint for using the most common network macros.
+
+Network structure in LSD is independent from the model structure (the 
+parent-children relationship you create for the model's structure). Networks can
+be created having any single object type (with the required number of copies) as
+nodes (networks connecting different object types are not allowed). One model 
+can have multiple networks simultaneously (even hierarchically, nets inside nets) 
+but each object type can participate in one network at a time.
+
+Links in the network connect the object copies that compose it. Links between 
+nodes are always directed and can have optional weights. Undirected networks are
+represented by pairs of links with opposite directions.
+
+The NETWORK_LOAD and NETWORK_INI macros create the required network structure
+(and even creates copies of the node objects as needed) by loading it from disk
+(Pajek format) or by creating a pseudorandom network using one of the available 
+algorithms.
+
+Look at the 'case 8' example (star network) on how to manually create a network 
+when an appropriate algorithm is not available. Check equation 'NewLink' to see
+how to create new (random) undirected links in the network. Equation 'TopLink' 
+is an example of more complex manipulation of existing links.
+
+The NETWORKS_SAVE and NETWORK_SNAP macros allow for the saving of the existing 
+networks to a file (Pajek formats), both as a single or as a series of snapshots.

@@ -1,0 +1,509 @@
+	
+Label Root
+{
+	Son: Network
+	Label Network
+	{
+		Son: Node
+		Label Node
+		{
+			Var: NodeLinks
+			Var: TopLink
+
+		}
+
+		Param: numNodes
+		Param: numLinks
+		Param: typeNet
+		Param: expLink
+		Param: rho
+		Param: avgOutDeg
+		Param: linkProb
+		Var: NewLink
+		Var: TotalLinks
+
+	}
+
+	Var: InitNet
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: InitNet 0 n + d n
+
+Object: Network C	1
+Param: numNodes 0 n + n n	1000
+Param: numLinks 0 n + n n	10000
+Param: typeNet 0 n + n n	1
+Param: expLink 0 n + n n	2
+Param: rho 0 n + n n	0.1
+Param: avgOutDeg 0 n + n n	10
+Param: linkProb 0 n + n n	0.01
+Var: NewLink 0 s + n n
+Var: TotalLinks 0 s + n n
+
+Object: Node C	1
+Var: NodeLinks 0 s + n n
+Var: TopLink 0 s + n n
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 100
+EQUATION fun_nets.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_InitNet
+Initialize the net
+
+'InitNet' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Network
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_numNodes
+Number of nodes (users) in network
+_INIT_
+ All 1 instances equal to 1000.
+END_DESCRIPTION
+
+Parameter_numLinks
+Average number of arcs (directed links) per user node (out degree)
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_typeNet
+Type of user network initialization:
+0 - Reads network from file in Pajek format, according to LSD seed value (1, 2 ...)
+1 - Uniform random network: numNodes: total nodes, avgOutDeg: out links per node
+2 - Renyi-Erdos random network: numNodes: total nodes, avgOutDeg: average out links per node
+3 - Circle network: numNodes: total nodes, avgOutDeg: out neighbours per node
+4 - Small-World network: numNodes: total nodes, avgOutDeg: out neighbours per node, rho: rewires out of total number of links
+5 - Power-law network: numNodes: total nodes, avgOutDeg: average out links per node, expLink: power degree
+_INIT_
+ All 1 instances equal to 0.
+END_DESCRIPTION
+
+Parameter_expLink
+Power degree of the scale-free network of users (power-law networks only)
+_INIT_
+ All 1 instances equal to 2.
+END_DESCRIPTION
+
+Parameter_rho
+Rewiring link probability parameter for the small-world network of users (small-world networks only)
+_INIT_
+ All 1 instances equal to 0.1.
+END_DESCRIPTION
+
+Parameter_avgOutDeg
+Average out-degree
+_INIT_
+ All 1 instances equal to 10.
+END_DESCRIPTION
+
+Parameter_linkProb
+Probability of two links connecting (Renyi-Erdos networks)
+_INIT_
+ All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Variable_NewLink
+Add one new bidirectional link randomly every time step,
+with weight equal to the time
+
+'NewLink' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TotalLinks
+Register the total number of links in network
+
+'TotalLinks' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Object_Node
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_NodeLinks
+Register the total number of links in the node
+
+'NodeLinks' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TopLink
+Register the id of the highest weight link destination for the node
+and reduce the weight by one
+
+'TopLink' appears in the equation for: (Never Used).
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+Root
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+
+
+
+
+EQUATION("InitNet")
+/*
+Choose how to initialize the net
+*/
+v[0]=V("TypeNet");
+
+if(v[0]==1)
+ V("InitNetUniform");
+
+if(v[0]==2)
+ V("InitNetBarabasi");
+
+if(v[0]==3)
+ V("InitNetCircle");
+
+if(v[0]==4)
+ V("InitNetRnd"); 
+
+if(v[0]==5)
+ {
+  V("InitNetCircle");
+  V("WattsStrogatz");
+ }  
+
+PARAMETER 
+RESULT(1 )
+
+
+
+
+
+EQUATION("InitNetRnd")
+/*
+Create a network with random links. The probability of any two nodes being linked is probLink
+*/
+v[0]=V("NumNode");
+
+v[5]=V("varPref");
+cur2=ADDNOBJ("Node",v[0]-1);
+
+
+
+v[1]=1;
+v[2]=V("NumFilm");
+CYCLE(cur, "Node")
+ {
+  WRITES(cur,"IdNode",v[1]++);
+ }
+
+p->initturbo("Node", v[0]);
+
+v[6]=V("NumLinks")/v[0];
+v[7]=0;
+/**************/
+for(v[10]=1; v[10]<v[0]; v[10]++)
+ {
+  for(v[11]=v[10]+1; v[11]<=v[0]; v[11]++)
+   {
+    if(RND<v[6])
+     {
+      cur=p->turbosearch("Node", v[0],v[10]);
+      cur1=p->turbosearch("Node", v[0],v[11]);      
+      if(VS(cur,"LinkTo")==0)
+       cur2=SEARCHS(cur,"Link");
+      else
+       cur2=ADDOBJS(cur,"Link");
+      WRITES(cur2,"LinkTo",v[11]);
+      cur2->hook=cur1;
+      INCRS(cur,"nLinks",1);
+      v[7]++;
+      
+      if(VS(cur1,"LinkTo")==0)
+       cur2=SEARCHS(cur1,"Link");
+      else
+       cur2=ADDOBJS(cur1,"Link");
+      WRITES(cur2,"LinkTo",v[10]);
+      cur2->hook=cur;
+      INCRS(cur1,"nLinks",1);
+      v[7]++;
+
+     }
+   }
+ }
+
+/******************/
+
+/******************
+CYCLE(cur, "Node")
+ {
+  CYCLE(cur1, "Node")
+   {
+    if(cur!=cur1 && RND<v[6])
+     {
+      if(VS(cur,"LinkTo")==0)
+       cur2=SEARCHS(cur,"Link");
+      else
+       cur2=ADDOBJS(cur,"Link");
+      WRITES(cur2,"LinkTo",VS(cur1, "IdNode"));
+      cur2->hook=cur1;
+      INCRS(cur,"nLinks",1);
+      v[7]++;
+     } 
+   }
+
+ }
+/***************/ 
+WRITE("NumLinks",v[7]/v[0]);
+PARAMETER
+RESULT(1)
+
+
+EQUATION("InitNetCircle")
+/*
+Create a network placing agents on a circle with NumLinks/2 agents on each side
+Efficient algorithm
+*/
+v[0]=V("NumNode");
+
+v[5]=V("varPref");
+cur2=ADDNOBJ("Node",v[0]-1);
+
+
+
+v[1]=1;
+v[2]=V("NumFilm");
+CYCLE(cur, "Node")
+ {
+  WRITES(cur,"IdNode",v[1]++);
+ }
+
+
+/*
+nodo= new mnode;
+
+v[6]=floor(log10(v[0]-1))+1;
+v[7]=1;
+merda=SEARCH("Node");
+nodo->create(v[6], &(v[7]));
+*/
+p->initturbo("Node", v[0]);
+
+/*
+v[4]=3;
+v[6]=floor(log10(v[0]-1))+1;
+cur=nodo->fetch(&(v[4]), v[6]);
+*/
+//cur=p->turbosearch("Node", v[0], 3);
+//INTERACTS(cur, "boj", v[0]);
+v[1]=V("NumLinks");
+
+CYCLE(cur, "Node")
+ {WRITES(cur,"nLinks",v[1]);
+  ADDNOBJS(cur,"Link",v[1]-1);
+  v[3]=VS(cur,"IdNode");  
+
+/*******
+  sprintf(msg, "\nAg. %d", (int)v[3]);
+  plog(msg);
+  cmd(inter, "update");
+/********/
+  v[4]=v[3]-v[1]/2;
+  cur3=NULL;
+  CYCLES(cur, cur1, "Link")
+   {
+   while(v[4]==v[3] || v[4]<1 || v[4]>v[0])
+   {
+    if(v[4]==v[3])
+     v[4]++;      
+    if(v[4]<1)
+     v[4]+=v[0];
+    if(v[4]>v[0])
+     v[4]-=v[0];
+    }
+    WRITES(cur1,"LinkTo",v[4]);
+    /*if(v[4]==v[5]+1)
+     cur3=cur3->next;
+    else*/
+      //cur3=SEARCH_CND("IdNode",v[4]);
+    v[8]=v[4]-1;
+//    cur3=nodo->fetch(&(v[8]), v[6]);  
+    cur3=p->turbosearch("Node", v[0],v[4]);
+    cur1->hook=cur3;
+    v[5]=v[4];
+    v[4]++;
+   }
+
+
+ }
+
+PARAMETER
+RESULT( 1)
+
+
+EQUATION("InitNetUniform")
+/*
+Create a network
+
+Efficient algorithm
+*/
+v[0]=V("NumNode");
+
+v[5]=V("varPref");
+ADDNOBJ("Node",v[0]-1);
+v[1]=1;
+v[2]=V("NumFilm");
+CYCLE(cur, "Node")
+ {
+  WRITES(cur,"IdNode",v[1]++);
+  WRITES(cur,"pref",norm(0.5,v[5]));
+ }
+
+v[1]=V("NumLinks");
+
+CYCLE(cur, "Node")
+ {WRITES(cur,"nLinks",v[1]);
+  ADDNOBJS(cur,"Link",v[1]-1);
+  v[3]=VS(cur,"IdNode");  
+
+/*******
+  sprintf(msg, "\nAg. %d", (int)v[3]);
+  plog(msg);
+  cmd(inter, "update");
+/********/
+  CYCLES(cur, cur1, "Link")
+   {
+    while( (v[2]=rnd_integer(1,v[0]))==v[3]);
+    WRITES(cur1,"LinkTo",v[2]);
+   }
+
+  v[10]=1;
+  while(v[10]==1)
+   {
+     SORTS(cur,"Link","LinkTo", "UP");
+     v[4]=-1;
+     v[10]=0;
+     CYCLES(cur, cur1, "Link")
+      {
+       v[4]=VS(cur1,"LinkTo");
+       if(cur1->next!=NULL)
+        if(v[4]==VS(cur1->next,"LinkTo") )
+         {
+          while( (v[2]=rnd_integer(1,v[0]))==v[3]);
+          WRITES(cur1,"LinkTo",v[2]);
+          v[10]=1;
+         }
+      }
+   }
+  cur3=p;
+  CYCLES(cur, cur1, "Link")
+   {
+    cur3=SEARCH_CNDS(cur3,"IdNode",VS(cur1, "LinkTo"));
+    cur1->hook=cur3;
+   }
+
+ }
+
+PARAMETER
+RESULT( 1)
+
+EQUATION("WattsStrogatz")
+/*
+Implement the rewiring according to the Nature '98 paper
+*/
+	 
+v[0]=V("NumNode");
+v[1]=V("NumLinks")/2;
+v[2]=V("rho");
+
+CYCLE(cur, "Node")
+  {
+  for(v[4]=1; v[4]<=v[1]; v[4]++)
+   {
+      
+   if(RND<v[2])
+    {
+     v[5]=VS(cur,"IdNode");
+
+     v[6]=v[5]+v[4];
+     if(v[6]>v[0])
+      v[6]=v[6]-v[0];
+     //INTERACTS(cur, "Rewire", v[6]);
+     cur1=SEARCH_CNDS(cur,"LinkTo",v[6]);
+     cur2=cur1->hook;
+     INCRS(cur2,"nLinks",-1);
+     cur3=SEARCH_CNDS(cur2,"LinkTo",v[5]);
+     DELETE(cur3);
+     v[7]=v[5];
+     while(v[7]==v[5])
+      v[7]=rnd_integer(1,v[0]); //draw a random int different from this agent
+     //cur2=SEARCH_CND("IdNode",v[7]);
+     cur2=p->turbosearch("Node", v[0],v[7]);
+     WRITES(cur1,"LinkTo",v[7]);
+     cur1->hook=cur2;
+     cur3=ADDOBJS(cur2,"Link");
+     WRITES(cur3,"LinkTo",v[5]);
+     cur3->hook=cur;
+     INCRS(cur2,"nLinks",1);
+    } 
+   }
+
+ }
+PARAMETER
+RESULT(1 )
+
+
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE

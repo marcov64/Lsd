@@ -1993,6 +1993,24 @@ return 0;
 }
 #endif
 
+
+/*
+Save the existing lattice (if any) to the specified file name.
+*/
+int save_lattice( const char *fname )
+{
+	// avoid operation if no canvas or no file name
+	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
+	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
+	if ( latcanv[ 0 ] == '0' || strlen( fname ) == 0 )
+		return -1;
+	
+	Tcl_SetVar( inter, "latname", fname, 0 );
+	cmd(inter, "append latname \".eps\"; .lat.c postscript -colormode color -file $latname");
+
+	return 0;
+}
+
 void execmd(char *str)
 {
 #ifndef NO_WINDOW
