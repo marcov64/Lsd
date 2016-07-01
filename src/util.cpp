@@ -1859,9 +1859,7 @@ strcpy(s, r);
 
 return(""); //just to avoind a warning of no return
 }
-
-
-
+#endif
 
 
 /*
@@ -1882,6 +1880,7 @@ Create a new run time lattice having:
 double dimW, dimH;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
 {
+#ifndef NO_WINDOW
 object *cur;
 double i, j,color;
 
@@ -1950,8 +1949,8 @@ for(i=1; i<=nrow; i++)
 
 cmd( inter, "showtop .lat centerS no no no" );
 
+#endif
 return(0);
-
 }
 
 /*
@@ -1961,6 +1960,7 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice(double line, double col, double val)
 {
+#ifndef NO_WINDOW
 	// avoid operation if canvas was closed
 	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
@@ -1989,9 +1989,9 @@ double update_lattice(double line, double col, double val)
 sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 cmd(inter, msg);
 cmd(inter, "if {$lat_update == 1} {update} {}");
+#endif
 return 0;  
 }
-#endif
 
 
 /*
@@ -1999,6 +1999,7 @@ Save the existing lattice (if any) to the specified file name.
 */
 int save_lattice( const char *fname )
 {
+#ifndef NO_WINDOW
 	// avoid operation if no canvas or no file name
 	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
@@ -2007,7 +2008,7 @@ int save_lattice( const char *fname )
 	
 	Tcl_SetVar( inter, "latname", fname, 0 );
 	cmd(inter, "append latname \".eps\"; .lat.c postscript -colormode color -file $latname");
-
+#endif
 	return 0;
 }
 
