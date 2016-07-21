@@ -34,7 +34,7 @@ TCL_LIBRARY=$(LSDROOT)/gnu/lib/tcl8.5
 
 
 # from here you should not need to modify anything
-CC=gcc
+CC=g++
 SRC=src
 
 SRC_DIR=$(LSDROOT)/$(SRC)/
