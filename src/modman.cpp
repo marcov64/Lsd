@@ -935,6 +935,12 @@ if(s==NULL || !strcmp(s, ""))
   
   delete_compresult_window( );		// close any open compilation results window
 
+  if ( ! run )						// delete existing object file if it's just compiling
+  {									// to force recompilation
+	cmd( inter, "set oldObj \"[ file rootname [ lindex [ glob *.cpp ] 0 ] ].o\"" );
+	cmd( inter, "if { [ file exists $oldObj ] } { file delete $oldObj }");
+  }
+  
   make_makefile();
 
   cmd(inter, "set fapp [file nativename $modeldir/makefile]");
@@ -995,7 +1001,7 @@ if(s==NULL || !strcmp(s, ""))
   if ( run )
 	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
   else
-	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn failure a text window will show the compiling error messages.\"");
+	cmd(inter, "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2");
   cmd(inter, "focus -force .t");
   cmd( inter, "showtop .t centerS" );

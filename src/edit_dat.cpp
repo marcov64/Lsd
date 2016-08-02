@@ -370,9 +370,9 @@ strcpy(previous, "");
 for(cv1=cur1->v, j=0; cv1!=NULL;  )
  {
  if(cv1->param==1)
-    { strncpy(ch1, cv1->label, 18);
-      ch1[18]=0;
-      sprintf(ch, "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-18s\" -borderwidth 4", cv1->label, ch1);
+    { strncpy(ch1, cv1->label, 25);
+      ch1[25]=0;
+      sprintf(ch, "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1);
       cmd(inter, ch);
       sprintf(ch, "$w window create end -window $w.tit_t%s", cv1->label);
       cmd(inter, ch);
@@ -390,9 +390,9 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
     { 
      if(j<cv1->num_lag)
      {
-       strncpy(ch1, cv1->label, 16);
-       ch1[16]=0;
-       sprintf(ch, "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-16s -%d \" -borderwidth 4", cv1->label,j, ch1, j+1);
+       strncpy(ch1, cv1->label, 20);
+       ch1[20]=0;
+       sprintf(ch, "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label,j, ch1, j+1);
 		 cmd(inter, ch);
 		 sprintf(ch, "$w window create end -window $w.tit_t%s_%d", cv1->label, j);
 		 cmd(inter, ch);
