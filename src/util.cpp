@@ -1088,8 +1088,13 @@ void init_random( int seed )
 
 // Call the preset pseudo-random number generator
 
-double ran1( long *idum )
+double ran1( long *idum_loc )
 {
+	// Manage default (internal) number sequence
+	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
+	if( idum_loc == NULL )
+		idum_loc = & idum;
+
 	switch( ran_gen )
 	{
 		case 2:
@@ -1106,18 +1111,24 @@ double ran1( long *idum )
 			break;
 		case 1:
 		default:
-			return PMRand_open( idum );
+			return PMRand_open( idum_loc );
 	}
 }
 
 
 extern int quit;
 
-double gamdev(int ia, long *idum)
+double gamdev(int ia, long *idum_loc)
 {
 
 int j;
 double am, e, s, v1, v2, x, y;
+
+// Manage default (internal) number sequence
+// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
+if( idum_loc == NULL )
+	idum_loc = & idum;
+
 if(ia<1) 
  {
   plog("Error in routine gamdev");
@@ -1127,7 +1138,7 @@ if(ia<1)
 if(ia<6)
  {
  x=1.0;
- for(j=1; j<=ia; j++) x*=ran1(idum);
+ for(j=1; j<=ia; j++) x*=ran1(idum_loc);
  x=-log(x);
  }
 else
@@ -1138,8 +1149,8 @@ else
    {
     do
     { 
-    v1=ran1(idum);
-    v2=2*ran1(idum)-1.0;
+    v1=ran1(idum_loc);
+    v2=2*ran1(idum_loc)-1.0;
     }
     while(v1*v1+v2*v2>1.0);
    y=v2/v1;
@@ -1150,18 +1161,24 @@ else
    while(x<=0);
   e=(1+y*y)*exp(am*log(x/am)-s*y);
  }
- while(ran1(idum)>e);
+ while(ran1(idum_loc)>e);
 } 
 return x;
 }
 
 
-double poidev(double xm, long *idum)
+double poidev(double xm, long *idum_loc)
 {
 
 double gammaln(double xx);
 static double sq,alxm,g,oldm=(-1.0);
 double em,t,y;
+
+// Manage default (internal) number sequence
+// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
+if( idum_loc == NULL )
+	idum_loc = & idum;
+
 if (xm < 12.0) {
   if (xm != oldm) {
     oldm=xm;
@@ -1171,7 +1188,7 @@ em = -1;
 t=1.0;
 do {
   ++em;
-  t *= ran1(idum);
+  t *= ran1(idum_loc);
  } while (t > g);
 } else {
   if (xm != oldm) {
@@ -1182,13 +1199,13 @@ do {
   }
  do {
    do {
-      y=tan(PI*ran1(idum));
+      y=tan(PI*ran1(idum_loc));
       em=sq*y+xm;
       
    } while (em < 0.0);   
    em=floor(em);
    t=0.9*(1.0+y*y)*exp(em*alxm-gammaln(em+1.0)-g);
-   } while (ran1(idum) > t);
+   } while (ran1(idum_loc) > t);
  }
  return em;
 }

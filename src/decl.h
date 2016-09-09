@@ -38,9 +38,8 @@ Comments and bug reports to marco.valente@univaq.it
 #define NaN NAN
 
 // define the base pseudo random number generator
-extern long idum;
-double ran1(long *idum);
-#define RND (double)ran1(&idum)
+double ran1( long *idum_loc = NULL );
+#define RND ( (double) ran1( ) )
 
 
 //class speedup;

@@ -33,6 +33,7 @@ extern double i_values[100];
 
 extern object *root;
 extern int seed;
+extern long idum;
 extern int ran_gen;			// pseudo-random number generator to use (1-5))
 extern int sim_num;
 extern char *simul_name;	// configuration name being run (for saving networks)
@@ -45,10 +46,10 @@ void error(char *);
 double log(double v);
 double exp(double c);
 double fact( double x );								// Factorial function
-double poidev(double xm, long *idum);
+double poidev( double xm, long *idum_loc = NULL );
 double poisson(double m) {return poidev(m, &idum); };
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
-double gamdev(int ia, long *idum);
+double gamdev( int ia, long *idum_loc = NULL );
 double gamma(double m) {return gamdev((int)m, &idum);};
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacf( double a, double b, double x );			// beta distribution function
