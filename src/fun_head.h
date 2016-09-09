@@ -33,7 +33,7 @@ extern double i_values[100];
 
 extern object *root;
 extern int seed;
-extern long idum;
+extern int ran_gen;			// pseudo-random number generator to use (1-5))
 extern int sim_num;
 extern char *simul_name;	// configuration name being run (for saving networks)
 extern char *path;			// folder where the configuration is
@@ -45,8 +45,6 @@ void error(char *);
 double log(double v);
 double exp(double c);
 double fact( double x );								// Factorial function
-double ran1(long *idum);
-#define RND (double)ran1(&idum)
 double poidev(double xm, long *idum);
 double poisson(double m) {return poidev(m, &idum); };
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function

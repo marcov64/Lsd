@@ -127,7 +127,6 @@ FILE *search_str(char const *name, char const *str);
 void set_lab_tit(variable *var);
 void reset_end(object *r);
 void close_sim(void);
-double ran1(long *idum);
 int deb(object *r, object *c, char const *lab, double *res);
 void analysis(int *choice);
 void init_random(int seed);
@@ -155,7 +154,6 @@ char msg[1000];
 int stack;
 int identity=0;
 int sim_num=1;
-long idum;
 int cur_plt;
 char ind[30];
 int total_var=0;
@@ -467,7 +465,7 @@ if(f!=NULL)
  fclose(f);
  f=search_str(struct_file, "SEED");
  if(f!=NULL)
-  fscanf(f, "%ld", &idum);
+  fscanf(f, "%ld", &seed);
  fclose(f);
  f=search_str(struct_file, "MAX_STEP");
  if(f!=NULL)

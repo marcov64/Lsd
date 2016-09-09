@@ -114,10 +114,7 @@ char *strupr( char *s )
 { char *p = s; for ( ; *p; ++p ) *p = toupper( *p ); return s; }
 #endif
 
-#define RND (double)ran1(&idum)
-
 object *go_brother(object *c);
-double ran1(long *idum);
 double rnd_integer(double m, double x);
 void error_hard(void);
 void plog(char const *msg);
@@ -126,7 +123,6 @@ extern char msg[];
 extern int t;
 extern int max_step;
 extern int seed;
-extern long idum;
 extern lsdstack *stacklog;
 
 long nodesSerial = 0;					// node's serial number global counter

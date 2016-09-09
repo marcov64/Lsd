@@ -342,10 +342,6 @@ double object::interact(char const *text, double v, double *tv)
 
 long int search_step;
 
-extern long idum;
-double ran1(long *idum);
-#define RND (double)ran1(&idum)
-
 extern int t;
 extern object *root;
 extern object *blueprint;

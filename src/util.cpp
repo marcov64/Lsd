@@ -85,7 +85,6 @@ extern char msg[];
 extern variable *cemetery;
 extern char *equation_name;
 extern lsdstack *stacklog;
-extern long idum;
 extern description *descr;
 extern char *eq_file;
 extern char lsd_eq_file[];
@@ -95,9 +94,6 @@ extern int running;
 extern char nonavail[];	// string for unavailable values
 extern char *path;	// configuration folder path
 
-
-double ran1(long *idum);
-#define RND (double)ran1(&idum)
 
 double log(double v);
 double exp(double c);
@@ -270,18 +266,11 @@ else
 
 
 
-int dum;
-
-//initialize the pseudo random functions
-void init_random(int seed)
-{
-idum=-seed;
-ran1(&idum);
-dum=0;
-}
 /****************************************************
 NORM
 ***************************************************/
+int dum=0;
+
 double norm(double mean, double dev)
 {
 
@@ -831,6 +820,12 @@ return -tmp+log(2.5066282746310005*ser/x);
 }
 
 
+
+/*
+	Park-Miller pseudo-random number generator with Bays-Durham shuffling
+	and Press et al. (1992) protections with period 2^31 - 1 in (0,1)
+*/
+
 #define IA 16807
 #define IM 2147483647
 #define AM (1.0/IM)
@@ -842,7 +837,7 @@ return -tmp+log(2.5066282746310005*ser/x);
 #define RNMX (1.0-EPS)
 #define PI 3.141592654
 
-double ran1(long *idum)
+double PMRand_open(long *idum)
 {
 
 int j;
@@ -874,6 +869,247 @@ if ((temp=AM*iy) > RNMX) return RNMX;
 else return temp;
 }
    
+
+/*
+	Mersenne Twister pseudo-random number generator
+	with period 2^19937 - 1 with improved initialization scheme,
+	modified on 2002/1/26 by Takuji Nishimura and Makoto Matsumoto.
+	The generators returning floating point numbers are based on
+	a version by Isaku Wada, 2002/01/09
+	This version is a port from the original C-code to C++ by
+	Jasper Bedaux (http://www.bedaux.net/mtrand/).
+	
+	Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+	All rights reserved.
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions
+	are met:
+	1. Redistributions of source code must retain the above copyright
+	notice, this list of conditions and the following disclaimer.
+	2. Redistributions in binary form must reproduce the above copyright
+	notice, this list of conditions and the following disclaimer in the
+	documentation and/or other materials provided with the distribution.
+	3. The names of its contributors may not be used to endorse or promote
+	products derived from this software without specific prior written
+	permission.
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+	CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+	EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+	PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+	PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+class MTRand_int32 { // Mersenne Twister random number generator
+public:
+// default constructor: uses default seed only if this is the first instance
+  MTRand_int32() { if (!init) seed(5489UL); init = true; }
+// constructor with 32 bit int as seed
+  MTRand_int32(unsigned long s) { seed(s); init = true; }
+// constructor with array of size 32 bit ints as seed
+  MTRand_int32(const unsigned long* array, int size) { seed(array, size); init = true; }
+// the two seed functions
+  void seed(unsigned long); // seed with 32 bit integer
+  void seed(const unsigned long*, int size); // seed with array
+// overload operator() to make this a generator (functor)
+  unsigned long operator()() { return rand_int32(); }
+// 2007-02-11: made the destructor virtual; thanks "double more" for pointing this out
+  virtual ~MTRand_int32() {} // destructor
+protected: // used by derived classes, otherwise not accessible; use the ()-operator
+  unsigned long rand_int32(); // generate 32 bit random integer
+private:
+  static const int n = 624, m = 397; // compile time constants
+// the variables below are static (no duplicates can exist)
+  static unsigned long state[n]; // state vector array
+  static int p; // position in state array
+  static bool init; // true if init function is called
+// private functions used to generate the pseudo random numbers
+  unsigned long twiddle(unsigned long, unsigned long); // used by gen_state()
+  void gen_state(); // generate new state
+// make copy constructor and assignment operator unavailable, they don't make sense
+  MTRand_int32(const MTRand_int32&); // copy constructor not defined
+  void operator=(const MTRand_int32&); // assignment operator not defined
+};
+
+// inline for speed, must therefore reside in header file
+inline unsigned long MTRand_int32::twiddle(unsigned long u, unsigned long v) {
+  return (((u & 0x80000000UL) | (v & 0x7FFFFFFFUL)) >> 1)
+    ^ ((v & 1UL) * 0x9908B0DFUL);
+// 2013-07-22: line above modified for performance according to http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/Ierymenko.html
+// thanks Vitaliy FEOKTISTOV for pointing this out
+}
+
+inline unsigned long MTRand_int32::rand_int32() { // generate 32 bit random int
+  if (p == n) gen_state(); // new state vector needed
+// gen_state() is split off to be non-inline, because it is only called once
+// in every 624 calls and otherwise irand() would become too big to get inlined
+  unsigned long x = state[p++];
+  x ^= (x >> 11);
+  x ^= (x << 7) & 0x9D2C5680UL;
+  x ^= (x << 15) & 0xEFC60000UL;
+  return x ^ (x >> 18);
+}
+
+// generates double floating point numbers in the half-open interval [0, 1)
+class MTRand : public MTRand_int32 {
+public:
+  MTRand() : MTRand_int32() {}
+  MTRand(unsigned long seed) : MTRand_int32(seed) {}
+  MTRand(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
+  ~MTRand() {}
+  double operator()() {
+    return static_cast<double>(rand_int32()) * (1. / 4294967296.); } // divided by 2^32
+private:
+  MTRand(const MTRand&); // copy constructor not defined
+  void operator=(const MTRand&); // assignment operator not defined
+};
+
+// generates double floating point numbers in the closed interval [0, 1]
+class MTRand_closed : public MTRand_int32 {
+public:
+  MTRand_closed() : MTRand_int32() {}
+  MTRand_closed(unsigned long seed) : MTRand_int32(seed) {}
+  MTRand_closed(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
+  ~MTRand_closed() {}
+  double operator()() {
+    return static_cast<double>(rand_int32()) * (1. / 4294967295.); } // divided by 2^32 - 1
+private:
+  MTRand_closed(const MTRand_closed&); // copy constructor not defined
+  void operator=(const MTRand_closed&); // assignment operator not defined
+};
+
+// generates double floating point numbers in the open interval (0, 1)
+class MTRand_open : public MTRand_int32 {
+public:
+  MTRand_open() : MTRand_int32() {}
+  MTRand_open(unsigned long seed) : MTRand_int32(seed) {}
+  MTRand_open(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
+  ~MTRand_open() {}
+  double operator()() {
+    return (static_cast<double>(rand_int32()) + .5) * (1. / 4294967296.); } // divided by 2^32
+private:
+  MTRand_open(const MTRand_open&); // copy constructor not defined
+  void operator=(const MTRand_open&); // assignment operator not defined
+};
+
+// generates 53 bit resolution doubles in the half-open interval [0, 1)
+class MTRand53 : public MTRand_int32 {
+public:
+  MTRand53() : MTRand_int32() {}
+  MTRand53(unsigned long seed) : MTRand_int32(seed) {}
+  MTRand53(const unsigned long* seed, int size) : MTRand_int32(seed, size) {}
+  ~MTRand53() {}
+  double operator()() {
+    return (static_cast<double>(rand_int32() >> 5) * 67108864. + 
+      static_cast<double>(rand_int32() >> 6)) * (1. / 9007199254740992.); }
+private:
+  MTRand53(const MTRand53&); // copy constructor not defined
+  void operator=(const MTRand53&); // assignment operator not defined
+};
+
+// initialization of static private members
+unsigned long MTRand_int32::state[n] = {0x0UL};
+int MTRand_int32::p = 0;
+bool MTRand_int32::init = false;
+
+void MTRand_int32::gen_state() { // generate new state vector
+  for (int i = 0; i < (n - m); ++i)
+    state[i] = state[i + m] ^ twiddle(state[i], state[i + 1]);
+  for (int i = n - m; i < (n - 1); ++i)
+    state[i] = state[i + m - n] ^ twiddle(state[i], state[i + 1]);
+  state[n - 1] = state[m - 1] ^ twiddle(state[n - 1], state[0]);
+  p = 0; // reset position
+}
+
+void MTRand_int32::seed(unsigned long s) {  // init by 32 bit seed
+  state[0] = s & 0xFFFFFFFFUL; // for > 32 bit machines
+  for (int i = 1; i < n; ++i) {
+    state[i] = 1812433253UL * (state[i - 1] ^ (state[i - 1] >> 30)) + i;
+// see Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier
+// in the previous versions, MSBs of the seed affect only MSBs of the array state
+// 2002/01/09 modified by Makoto Matsumoto
+    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
+  }
+  p = n; // force gen_state() to be called for next random number
+}
+
+void MTRand_int32::seed(const unsigned long* array, int size) { // init by array
+  seed(19650218UL);
+  int i = 1, j = 0;
+  for (int k = ((n > size) ? n : size); k; --k) {
+    state[i] = (state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1664525UL))
+      + array[j] + j; // non linear
+    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
+    ++j; j %= size;
+    if ((++i) == n) { state[0] = state[n - 1]; i = 1; }
+  }
+  for (int k = n - 1; k; --k) {
+    state[i] = (state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1566083941UL)) - i;
+    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
+    if ((++i) == n) { state[0] = state[n - 1]; i = 1; }
+  }
+  state[0] = 0x80000000UL; // MSB is 1; assuring non-zero initial array
+  p = n; // force gen_state() to be called for next random number
+}
+
+
+/*
+	Pseudo-random number generator to extract draws
+	ran_gen =	1 : Park-Miller in (0,1)
+	ran_gen =	2 : Mersenne-Twister in (0,1)
+	ran_gen =	3 : Mersenne-Twister in [0,1]
+	ran_gen =	4 : Mersenne-Twister in [0,1)
+	ran_gen =	5 : Mersenne-Twister with 53 bits resolution in [0,1)
+*/
+int ran_gen = 2;	// default pseudo-random number generator (Mersenne-Twister)
+long idum = 0;		// Park-Miller sequential control (default seed)
+MTRand_open mt2;	// Mersenne-Twister object in (0,1)
+MTRand_closed mt3;	// Mersenne-Twister object in [0,1]
+MTRand mt4; 		// Mersenne-Twister object in [0,1)
+MTRand53 mt5;		// Mersenne-Twister object with 53 bits resolution in [0,1)
+
+// Set seed to all random generators
+void init_random( int seed )
+{
+	dum = 0;
+	idum = -seed;
+	PMRand_open( &idum );	// PM in (0,1)
+	mt2.seed( seed );		// MT in (0,1)
+	mt3.seed( seed );		// MT in [0,1]
+	mt4.seed( seed );		// MT in [0,1)
+	mt5.seed( seed );		// MT with 53 bits resolution in [0,1)
+}
+
+
+// Call the preset pseudo-random number generator
+
+double ran1( long *idum )
+{
+	switch( ran_gen )
+	{
+		case 2:
+			return mt2( );			// in (0,1)
+			break;
+		case 3:
+			return mt3( );			// in [0,1]
+			break;
+		case 4:
+			return mt4( );			// in [0,1)
+			break;
+		case 5:
+			return mt5( );			// 53 bits resolution in [0,1]
+			break;
+		case 1:
+		default:
+			return PMRand_open( idum );
+	}
+}
+
 
 extern int quit;
 
@@ -924,7 +1160,6 @@ double poidev(double xm, long *idum)
 {
 
 double gammaln(double xx);
-double ran1(long *idum);
 static double sq,alxm,g,oldm=(-1.0);
 double em,t,y;
 if (xm < 12.0) {

@@ -84,8 +84,6 @@ generator.
 
 sense *rsense=NULL;
 
-
-extern long idum;
 extern Tcl_Interp *inter;
 extern char msg[];
 extern char *simul_name;
@@ -97,8 +95,6 @@ extern bool unsavedChange;	// control for unsaved changes in configuration
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 
 void cmd(Tcl_Interp *inter, char const *cc);
-double ran1(long *idum);
-#define RND ran1(&idum)
 double rnd_integer(double min, double max);
 double norm(double mean, double dev);
 void plog(char const *msg);
