@@ -220,6 +220,7 @@ object *shuffle_nodes_net( char const *lab );
 netLink *add_link_net( object *destPtr, double weight, double probTo );
 void delete_link_net( netLink *ptr );
 netLink *search_link_net( long id ); 
+netLink *draw_link_net( void ); 
 long read_file_net( char const *lab, char const *dir, char const *base_name, int serial, char const *ext );
 long write_file_net( char const *lab, char const *dir, char const *base_name, int serial, bool append );
 long init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 );

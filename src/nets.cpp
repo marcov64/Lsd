@@ -101,6 +101,8 @@ NETS.CPP
 
 	object->search_link_net( destId )
 	
+	object->draw_link_net( )
+	
 ****************************************************************************************/
 
 #include "decl.h"
@@ -260,6 +262,46 @@ netLink *object::search_link_net( long destId )
 		return NULL;
 	else
 		return cur;
+}
+
+
+/*
+	Draw one of the outgoing links of a node randomly, 
+	with probability equal to probTo.
+	Returns NULL if no link exists.
+*/
+
+netLink *object::draw_link_net( void )
+{
+	double sum, drawPoint, accProb;
+	netLink *cur, *cur1;
+	
+	if ( node == NULL || node->first == NULL )	// no network structure?
+		return NULL;
+		
+	for ( sum = 0, cur = node->first; cur != NULL && cur->ptrTo->node != NULL; 
+		  cur = cur->next )				// add-up probabilities
+		sum += cur->probTo;
+		
+	if ( isinf( sum ) || sum <= 0 )		// check valid probabilities
+	{
+		sprintf( msg, "\nError (link draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
+		plog( msg );
+		sprintf( msg, "\nFirst link (%ld) returned.\n", node->first->serTo );
+		plog( msg );
+		return node->first;
+	}
+
+	do
+		drawPoint = RND * sum;
+	while ( drawPoint == sum );			// avoid RND == 1
+	
+	for ( accProb = 0, cur = cur1 = node->first;	// accumulate probabilities
+		  accProb <= drawPoint && cur != NULL && cur->ptrTo->node != NULL;
+		  accProb += cur->probTo, cur = cur->next ) // until reaching the right object
+		cur1 = cur;									// save previous object
+
+	return cur1;
 }
 
 
@@ -447,7 +489,7 @@ object *object::draw_node_net( char const *lab )
 													// add-up probabilities
 		sum += cur->node->prob;
 		
-	if ( isinf( sum ) || sum == 0 )					// check valid probabilities
+	if ( isinf( sum ) || sum <= 0 )					// check valid probabilities
 	{
 		sprintf( msg, "\nError (network node draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
 		plog( msg );
@@ -462,7 +504,7 @@ object *object::draw_node_net( char const *lab )
 	
 	for ( accProb = 0, cur = cur2 = cur1;			// accumulate probabilities
 		  accProb <= drawPoint && cur != NULL; 		// until reaching the right object
-		  accProb += cur->node->prob, cur = cur->next)
+		  accProb += cur->node->prob, cur = cur->next )
 		cur2 = cur;									// save previous object
 
 	return cur2;

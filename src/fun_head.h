@@ -377,6 +377,10 @@ for(;O!=NULL;O=go_brother(O))
 #define SEARCH_LINK(X) (p->search_link_net((long)X))
 #define SEARCHS_LINK(O,X) (O==NULL?NULL:O->search_link_net((long)X))
 
+// random draw one link from a node
+#define RNDDRAW_LINK (p->draw_link_net())
+#define RNDDRAWS_LINK(O) (O==NULL?NULL:O->draw_node_net())
+
 // get the destination object of link pointed by O
 #define LINKTO(O) (O==NULL?NULL:O->ptrTo)
 
