@@ -43,6 +43,7 @@ extern bool invalidHooks;	// flag to invalid hooks pointers (set by simulation)
 bool use_nan = false;		// flag to allow using Not a Number value
 bool fast = false;			// make fast persistent across runs
 void error(char *);
+void init_random( int seed );							// reset the random number generator seed
 double log(double v);
 double exp(double c);
 double fact( double x );								// Factorial function

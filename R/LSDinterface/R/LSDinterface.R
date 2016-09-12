@@ -324,8 +324,8 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
   if( ! is.null( posit ) && ! is.character( posit ) ){
     positChr <- paste0( posit[ 1 ] )
     for( i in 2 : length( posit ) )
-      positStr <- paste0( positChr, "_", posit[ i ] )
-    posit <- positStr
+      positChr <- paste0( positChr, "_", posit[ i ] )
+    posit <- positChr
   }
 
   # matrix to store the columns, keep rownames

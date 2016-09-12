@@ -21,7 +21,7 @@ data frame produced by \code{\link{info.details.lsd}} for the same results file 
 a vector of optional names for the variables to select from. The default is to select from all variables.
 }
   \item{posit}{
-string or integer vector describing the LSD object position of the variable(s) to select.
+a string, a vector of strings or an integer vector describing the LSD object position of the variable(s) to select. If a string or an integer vector, it should define the position of a SINGLE LSD object. If a vector of strings, each element of the vector should define a different LSD object, so the returning matrix will contain variables from more than one object.
 }
   \item{init.value}{
 initial value attributed to the variable(s) to select.
