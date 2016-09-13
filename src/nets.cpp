@@ -255,8 +255,7 @@ netLink *object::search_link_net( long destId )
 	if ( node == NULL )					// no network structure?
 		return NULL;
 	for ( cur = node->first; 			// scan all links from node
-		  cur != NULL && cur->ptrTo->node != NULL && 
-		  cur->ptrTo->node->id != destId; 
+		  cur != NULL && cur->ptrTo->node->id != destId; 
 		  cur = cur->next);
 	if ( cur != NULL && cur->ptrTo->node == NULL )
 		return NULL;
@@ -279,11 +278,11 @@ netLink *object::draw_link_net( void )
 	if ( node == NULL || node->first == NULL )	// no network structure?
 		return NULL;
 		
-	for ( sum = 0, cur = node->first; cur != NULL && cur->ptrTo->node != NULL; 
-		  cur = cur->next )				// add-up probabilities
-		sum += cur->probTo;
+	for ( sum = 0, cur = node->first; cur != NULL; cur = cur->next )
+		if ( cur->ptrTo->node != NULL )			// node still exists?
+			sum += cur->probTo;					// add-up probabilities
 		
-	if ( isinf( sum ) || sum <= 0 )		// check valid probabilities
+	if ( isinf( sum ) || sum <= 0 )				// check valid probabilities
 	{
 		sprintf( msg, "\nError (link draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
 		plog( msg );
@@ -294,12 +293,15 @@ netLink *object::draw_link_net( void )
 
 	do
 		drawPoint = RND * sum;
-	while ( drawPoint == sum );			// avoid RND == 1
+	while ( drawPoint == sum );					// avoid RND == 1
 	
-	for ( accProb = 0, cur = cur1 = node->first;	// accumulate probabilities
-		  accProb <= drawPoint && cur != NULL && cur->ptrTo->node != NULL;
-		  accProb += cur->probTo, cur = cur->next ) // until reaching the right object
-		cur1 = cur;									// save previous object
+	for ( accProb = 0, cur = cur1 = node->first;// accumulate probabilities
+		  accProb <= drawPoint && cur != NULL; cur = cur->next )
+	{											// until reaching the right object
+		if ( cur->ptrTo->node != NULL )			// node still exists?
+			accProb += cur->probTo;
+		cur1 = cur;								// save previous object
+	}
 
 	return cur1;
 }
@@ -841,9 +843,13 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 			}
 		
 			cur1 = turbosearch( lab, 0, (double) lowNeigh );		// get target node object
-			cur->add_link_net( cur1 );								// set link to current target node ID
 
-			numLinks++;												// one more link
+			if ( cur->search_link_net( cur1->node->id ) == NULL )	// link doesn't exist yet
+			{
+				cur->add_link_net( cur1 );							// set link to current target node ID
+				numLinks++;											// one more link
+			}
+			
 			lowNeigh++;												// next target ID
 		}
 	}

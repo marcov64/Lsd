@@ -343,6 +343,14 @@ for(;O!=NULL;O=go_brother(O))
 #define SEARCH_NET(X,Y) (p->search_node_net((char*)X,(long)Y))
 #define SEARCHS_NET(O,X,Y) (O==NULL?NULL:O->search_node_net((char*)X,(long)Y))
 
+// add a network node to object O, defininig id=X and name=Y
+#define ADDNODE(X,Y) (p->add_node_net(X,Y,false))
+#define ADDNODES(O,X,Y) (O==NULL?NULL:O->add_node_net(X,Y,false))
+
+// delete the node pointed by O
+#define DELETENODE p->delete_node_net( );
+#define DELETENODES(O) if(O!=NULL)O->delete_node_net( );
+
 // get the id of the node object O
 #define V_NODEID (p->node==NULL?0.:(double)p->node->id)
 #define VS_NODEID(O) (O==NULL?0.:O->node==NULL?0.:(double)O->node->id)
@@ -379,7 +387,7 @@ for(;O!=NULL;O=go_brother(O))
 
 // random draw one link from a node
 #define RNDDRAW_LINK (p->draw_link_net())
-#define RNDDRAWS_LINK(O) (O==NULL?NULL:O->draw_node_net())
+#define RNDDRAWS_LINK(O) (O==NULL?NULL:O->draw_link_net())
 
 // get the destination object of link pointed by O
 #define LINKTO(O) (O==NULL?NULL:O->ptrTo)
@@ -396,6 +404,7 @@ for(;O!=NULL;O=go_brother(O))
 // cycle through set of links of object C, using link pointer O
 #define CYCLE_LINK(O) if(p->node==NULL)error_cycle("invalid node");else O=p->node->first;for(;O!=NULL;O=O->next)
 #define CYCLES_LINK(C,O) if(C==NULL)error_cycle("invalid node");else if(C->node==NULL)error_cycle("invalid node");else O=C->node->first;for(;O!=NULL;O=O->next)
+
 
 // EXTENDED DATA/ATTRIBUTES MANAGEMENT MACROS
 // macros for handling extended attributes (usually lists) attached to objects' hook pointer
