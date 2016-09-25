@@ -179,7 +179,7 @@ extern bool fast;
 
 void set_lab_tit(variable *var);
 void plog(char const *msg);
-void error_hard(void);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 clock_t start_profile[100], end_profile[100];
 
 /****************************************************
@@ -197,7 +197,12 @@ label=NULL;
 i=strlen(_label)+1;
 label=new char[i];
 if(label==NULL)
- plog("\nError. No more memory");
+{
+	sprintf(msg, "out of memory in init");
+	error_hard( msg, "Out of memory" );
+	return -1;
+}
+
 strcpy(label, _label);
 num_lag=_num_lag;
 if ( num_lag >= 0 )
@@ -239,10 +244,8 @@ if(param==1 ) //it is a parameter
   return val[0];
  }
 if(num_lag<lag ) //check lag error
- {sprintf(msg, "\nLag error (during execution of equation for '%s'):\nvariable or function '%s' requested with lag=%d but declared with lag=%d\n. There two possible fixes:\n- change the model configuration, declaring '%s' with at least %d lags, or\n- change the code of '%s' requesting the value of '%s' with maximum %d lags.\n\n", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "in object '%s' variable or function '%s' requested with lag=%d but declared with lag=%d,\nTwo possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d, or\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
+  error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
   return -1;
  }
 
@@ -267,10 +270,8 @@ else
 stack++;
 
 if(under_computation==1)
- {sprintf(msg, "\nDead lock! An equation requested its own value while computing its current value.\n\nEquation for:\n%s\nrequested by object:\n%s\n\n",label, caller==NULL?"(No label)":((object *)caller)->label);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "the equation for '%s' (in object '%s') requested its own value while computing its current value",label, caller==NULL?"(No label)":((object *)caller)->label);
+  error_hard( msg, "Dead lock", "Check your code to prevent this situation." );
   return -1;
  }
 
@@ -306,18 +307,14 @@ if(!fast)				// not running in fast mode?
 	}
 	catch(std::exception& exc)
 	{
-		sprintf(msg, "\nException! An exception of type:\n '%s'\n was detected while computing the equation for:\n %s\nrequested by object:\n %sn\n", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
-		plog(msg);
-		error_hard();
-		quit=2;
+		sprintf(msg, "an exception of type '%s' was detected while computing the equation for\n'%s' requested by object '%s'", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
+		error_hard( msg, "Exception: unknown problem", "Please close Lsd before continuing!!!" );
 		return -1;
 	}
 	catch(...)
 	{
-		sprintf(msg, "\nException! An unknown problem was detected while computing the equation for:\n %s\nrequested by object:\n %s\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
-		plog(msg);
-		error_hard();
-		quit=2;
+		sprintf(msg, "an unknown problem was detected while computing the equation for\n'%s' requested by object '%s'", label, caller==NULL?"(No label)":((object *)caller)->label);
+		error_hard( msg, "Exception: unknown problem", "Please close Lsd before continuing!!!" );
 		return -1;
 	}
 }
@@ -355,9 +352,10 @@ else
   case 3: if(val[0]>deb_cnd_val)
 			  deb( (object *)up,caller, label, &val[0] );
 			 break;
-  default:printf("\nError 12: conditional debug %d in variable %s\n", deb_cond, label);
-			 exit(1);
-			 break;
+  default:
+			sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
+			error_hard( msg, "Internal error", "If error persists, please contact developers." );
+			return -1;
  }
 #endif
 
@@ -397,8 +395,8 @@ void variable::empty(void)
 
 
 if((data!=NULL && save!=true && savei !=true) || this==NULL || label==NULL)
- {sprintf(msg, "Error in emptying Variable %s\n", label);
-  plog(msg);
+ {sprintf(msg, "failure in emptying Variable %s", label);
+  error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
   return;
  }
 

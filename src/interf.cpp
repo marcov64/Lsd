@@ -1349,7 +1349,7 @@ cur_descr=search_description(lab_old);
 if(cur_descr==NULL)
   {
    add_description(lab_old, "Object", "(no description available)");
-   sprintf(msg, "\nWarning! description for '%s' not found. New one created.", lab_old);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab_old);
    plog(msg);
    cur_descr=search_description(lab_old);
   } 
@@ -1617,7 +1617,7 @@ cmd(inter, ch);
      add_description(lab_old, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(lab_old, "Function", "(no description available)");  
-   sprintf(msg, "\nWarning! description for '%s' not found. New one created.", lab_old);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab_old);
    plog(msg);
    cur_descr=search_description(lab_old);
   } 
@@ -4636,7 +4636,7 @@ case 70:
 break;
 
 default:
-sprintf(ch,"\nChoice %d not recognized\n",*choice);
+sprintf(ch,"\nWarning: choice %d not recognized",*choice);
 plog(ch);
 break;
 }
@@ -5062,7 +5062,7 @@ if(direction==1)
    }
    
  } 
-plog("\nError in move_var: should never reach this line\n"); 
+plog("\nWarning: should never reach this point in move_var"); 
 }
 
 void shift_desc(int direction, char *dlab, object *r)
@@ -5127,7 +5127,7 @@ if(direction==1)
    }
    
  } 
-plog("\nError in shift_desc: should never reach this line\n"); 
+plog("\nWarning: should never reach this point in shift_desc"); 
 }
 
 /*

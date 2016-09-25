@@ -99,13 +99,14 @@ double log(double v);
 double exp(double c);
 double sqrt(double v);
 
+void myexit(int v);
 void plog(char const *msg);
 void print_stack(void);
 void clean_spaces(char *s);
 void scan_used_lab(char *lab, int *choice);
 char const *return_where_used(char *lab, char s[]);
 void init_canvas(void);
-void error_hard(void);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void add_description(char const *lab, char const *type, char const *text);
 void save_single(variable *vcv);
 
@@ -1131,7 +1132,8 @@ if( idum_loc == NULL )
 
 if(ia<1) 
  {
-  plog("Error in routine gamdev");
+  sprintf( msg, "inconsistant state in gamdev");
+  error_hard( msg, "Internal error", "If error persists, please contact developers." );
   quit=1;
   return 0;
  } 
@@ -1488,19 +1490,18 @@ double betacdf( double alpha, double beta, double x )
 void error(char *m)
 {
 char app[1100];
-sprintf(app, "tk_messageBox -type ok -title Error -icon error -message \"%s\"",m );
+sprintf( app, "\nERROR: %s\n", m );
+plog( app );
 #ifndef NO_WINDOW
-cmd(inter, app);
-#else
- printf("%s\n",m);
+sprintf( app, "tk_messageBox -type ok -title Error -icon error -message \"Simulation error.\n\n%s\"", m );
+cmd( inter, app );
 #endif 
 }
 
 void error_cycle(char const *l)
 {
-sprintf(msg, "\nError in CYCLE (var. %s): object %s not found",stacklog->vs->label, l);
-plog(msg);
-error_hard();
+sprintf(msg, "failure in CYCLE (var. '%s'): object '%s' not found",stacklog->vs->label, l);
+error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 }
 
 struct s
@@ -1536,12 +1537,19 @@ FILE *f, *f1;
 int i, j, h=0;
 f=fopen("plot.file", "r");
 if(f==NULL)
- exit(1);
+{
+	sprintf( msg, "could not open plot file" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(14);
+}
 
 f1=fopen("plot_clean.file", "w");
 if(f==NULL)
- exit(1);
-
+{
+	sprintf( msg, "could not open clean plot file" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(15);
+}
 
 while(fgets(str, 200, f)!=NULL)
  {if(h++==1)
@@ -1631,9 +1639,10 @@ if(app==NULL)
   app->son=NULL;
   return 1;
  }
-printf("\nWhat the hell am I doing here?\n");
-exit(2);
 
+sprintf( msg, "invalid data structure" );
+error_hard( msg, "Internal error", "If error persists, please contact developers." );
+myexit(16);
 }
 
 int store(struct s *c, int x2, int x3, int x4)
@@ -1667,9 +1676,10 @@ if(app==NULL)
 
   return 1;
  }
-printf("\nWhat the hell am I doing here?\n");
-exit(2);
 
+sprintf( msg, "invalid data structure" );
+error_hard( msg, "Internal error", "If error persists, please contact developers." );
+myexit(17);
 }
 
 int store(struct s *c, int x3, int x4)
@@ -1699,9 +1709,10 @@ if(app==NULL)
 
   return 1;
  }
-printf("\nWhat the hell am I doing here?\n");
-exit(2);
 
+sprintf( msg, "invalid data structure" );
+error_hard( msg, "Internal error", "If error persists, please contact developers." );
+myexit(18);
 }
 
 int store(struct s *c, int x4)
@@ -1726,9 +1737,10 @@ if(app==NULL)
 
   return 1;
  }
-printf("\nWhat the hell am I doing here?\n");
-exit(2);
 
+sprintf( msg, "invalid data structure" );
+error_hard( msg, "Internal error", "If error persists, please contact developers." );
+myexit(19);
 }
 
 void free_storage(struct s *c)

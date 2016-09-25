@@ -42,7 +42,7 @@ extern bool invalidHooks;	// flag to invalid hooks pointers (set by simulation)
 
 bool use_nan = false;		// flag to allow using Not a Number value
 bool fast = false;			// make fast persistent across runs
-void error(char *);
+void error(char *m);
 void init_random( int seed );							// reset the random number generator seed
 double log(double v);
 double exp(double c);
@@ -140,16 +140,14 @@ c = caller;
 
 #ifndef NO_WINDOW
 
-#define MODELEND sprintf(msg, "\nFunction for %s not found", label); \
-plog(msg); \
-sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error trying to compute variable '%s': equation not found.\n\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly.\n\nCheck the Lsd help.\"", label, label); \
-cmd(inter, msg); \
+#define MODELEND sprintf( msg, "Equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly\"", label, label ); \
+error( msg ); \
 quit=2; \
 return -1; \
 end : \
-if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)) && quit!=1) \
+if( ( ( ! use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res) ) && quit == 0 ) \
  { \
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
+  sprintf(msg, "At time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD Debugger will open next.",t, label, res ); \
   error(msg); \
   debug_flag=1; \
   debug='d'; \
@@ -164,17 +162,15 @@ return(res); \
 
 #else
 
-#define MODELEND sprintf(msg, "\nFunction for %s not found", label); \
-plog(msg); \
-sprintf(msg, "Error trying to compute variable '%s': Equation not found.\n\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly.\n\nCheck the Lsd help.\"", label, label); \
-plog(msg); \
-exit(0); \
+#define MODELEND sprintf( msg, "Equation not found for variable '%s'", label ); \
+error( msg ); \
+myexit(101); \
 end : \
-if( ((!use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res)) && quit!=1) \
+if( ( ( ! use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res) ) && quit == 0 ) \
  { \
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res ); \
-  plog(msg); \
-  exit(0); \
+  sprintf(msg, "At time %d the equation for '%s' produces the invalid value '%lf'\nAborting simulation...\n",t, label, res ); \
+  error(msg); \
+  myexit(102); \
  } \
 return(res); \
 }
@@ -412,8 +408,8 @@ for(;O!=NULL;O=go_brother(O))
 // add/delete extension c++ data structures of type CLASS to the LSD object pointer by current/PTR
 #define ADD_EXT( CLASS ) p->hook = reinterpret_cast< object * >( new CLASS );
 #define ADDS_EXT( PTR, CLASS ) PTR->hook = reinterpret_cast< object * >( new CLASS );
-#define DELETE_EXT( CLASS ) delete reinterpret_cast< CLASS * >( p->hook );
-#define DELETES_EXT( PTR, CLASS ) delete reinterpret_cast< CLASS * >( PTR->hook );
+#define DELETE_EXT( CLASS ) { delete reinterpret_cast< CLASS * >( p->hook ); p->hook = NULL; }
+#define DELETES_EXT( PTR, CLASS ) { delete reinterpret_cast< CLASS * >( PTR->hook ); PTR->hook = NULL; }
 // convert current (or a pointer PTR from) LSD object type in the user defined CLASS type
 #define P_EXT( CLASS ) ( reinterpret_cast< CLASS * >( p->hook ) )
 #define PS_EXT( PTR, CLASS ) ( reinterpret_cast< CLASS * >( PTR->hook ) )

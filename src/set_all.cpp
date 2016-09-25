@@ -98,6 +98,8 @@ void cmd(Tcl_Interp *inter, char const *cc);
 double rnd_integer(double min, double max);
 double norm(double mean, double dev);
 void plog(char const *msg);
+void myexit(int v);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 description *search_description(char *lab);
 void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
 int compute_copyfrom(object *c, int *choice);
@@ -375,7 +377,7 @@ case 1:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -439,7 +441,7 @@ case 9:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -494,7 +496,7 @@ case 2: //increasing
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -546,7 +548,7 @@ case 4:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -599,7 +601,7 @@ case 3:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -653,7 +655,7 @@ case 5:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -710,7 +712,7 @@ case 6:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -761,7 +763,7 @@ case 7:
 		  }
      }
      if(cur!=NULL || kappa!=EOF)
-      plog("Problem loading data. The file may contain a different number of values compared to the objects to initialize.\n");
+      plog("\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize");
       if( update_description==1)
       {
       cd=search_description(lab);
@@ -774,7 +776,7 @@ case 7:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -830,7 +832,7 @@ case 8:
          add_description(lab, "Parameter", "(no description available)");  
        if(cv->param==2)
          add_description(lab, "Function", "(no description available)");  
-       sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", lab);
+       sprintf(msg, "\nWarning: description for '%s' not found. New one created.", lab);
        plog(msg);
        cd=search_description(lab);
       } 
@@ -855,8 +857,10 @@ case 8:
 		  break;
 
 
-default:printf("\nError in set_all\n");
-        exit(1);
+default:
+		sprintf( msg, "invalid option in set_all" );
+		error_hard( msg, "Internal error", "If error persists, please contact developers." );
+		myexit(22);
 }
 }
 Tcl_UnlinkVar(inter, "value1");
@@ -1713,8 +1717,8 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	NOLHfile = fopen( fileName, "r");
 	if ( NOLHfile == NULL )
 	{
-		sprintf( msg, "\nError: NOHL design file not available: %s", fileName );
-		plog( msg );
+		sprintf( msg, "error opening NOHL design file '%s'", fileName );
+		error_hard( msg, "Design of experiment file error", "Check the requested file exists." );
 		return false;
 	}
 
@@ -1761,8 +1765,8 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 				delete [] NOLH_0[0];
 				delete [] NOLH_0;
 				NOLH_0 = NULL;
-				sprintf( msg, "\nError: invalid format in NOHL file: %s, line: %d", fileName, i + 1 );
-				plog( msg );
+				sprintf( msg, "invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
+				error_hard( msg, "Invalid design of experiment file", "Check the file contents." );
 				goto end;
 			}
 
@@ -2275,7 +2279,8 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
 				{
-					plog( "\nError: number of variables selected is too small" );
+					sprintf( msg, "number of NOLH variables selected is too small" );
+					error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
 					goto invalid;
 				}
 				// if user selected # of factors, use it to select internal table
@@ -2290,13 +2295,15 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 					tab = NOLH_table( k );	// design table to use
 					if ( tab == -1 )		// still too large?
 					{
-					plog( "\nError: too many variables to test for NOLH.csv size" );
+						sprintf( msg, "too many variables to test for NOLH.csv size" );
+						error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
 						goto invalid;		// abort
 					}
 				}
 				else
 				{
-					plog( "\nError: too many variables to test" );
+					sprintf( msg, "too many variables to test" );
+					error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
 					goto invalid;			// abort
 				}
 			}

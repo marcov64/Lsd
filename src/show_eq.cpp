@@ -59,6 +59,7 @@ void plog(char const *msg);
 int contains (FILE *f, char *lab, int len);
 void clean_spaces(char *s);
 void find_using(object *r, variable *v, FILE *frep);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 
 extern char msg[];
 extern Tcl_Interp *inter;
@@ -134,9 +135,8 @@ for(done=0; done==0 && fgets(c1_lab, 399, f)!=NULL;  )
  }
 if(done==0)
  {fclose(f);
-  sprintf(msg,"\nError: equation for '%s' not found (check the spelling or equation file name)", lab);
-  plog(msg);
-  fclose(f);
+  sprintf(msg,"equation for '%s' not found (check the spelling or equation file name)", lab);
+  error_hard( msg, "Equation code missing", "Check your configuration or code to prevent this situation." );
   return;
   }
 //fgets(c1_lab, 399, f);

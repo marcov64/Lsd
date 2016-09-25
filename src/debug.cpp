@@ -118,6 +118,7 @@ void attach_instance_number(char *ch, object *r);
 void this_instance_number(object *r);
 void entry_new_objnum(object *c, int *choice, char const *tag);
 void set_all(int *choice, object *original, char *lab, int lag);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 
 lsdstack *asl=NULL;
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
@@ -907,7 +908,7 @@ break;
 
 
 default:
-plog("\nChoice not recognized\n");
+plog("\nChoice not recognized");
 choice=0;
 break;
 }
@@ -1072,8 +1073,10 @@ switch(cv->deb_cond)
           break;
   case 3: cmd(inter, "label $c.cnd_type -text \"Condition: > \"");
           break;
-  default: printf("\nError S01: debug condition for var %s set to %d",cv->label, cv->deb_cond);
-			 exit(1);
+  default: 
+		  sprintf( msg, "debug condition for var '%s' set to '%d'",cv->label, cv->deb_cond);
+		  error_hard( msg, "Internal error", "If error persists, please contact developers." );
+		  myexit(23);
           break;
  }
 old=cv->deb_cond;

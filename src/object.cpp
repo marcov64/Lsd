@@ -361,8 +361,6 @@ object *skip_next_obj(object *t);
 FILE *search_str(char *file_name, char *str);
 void plog(char const *msg);
 void plot_rt(variable *var);
-//void qsort_down(object *list, char *lab,int lag, int num, double d, object *beg, object *end);
-//void qsort_up(object *list, char *lab,int lag, int num, double d, object *beg, object *end);
 int sort_function_down( const void *a, const void *b);
 int sort_function_up( const void *a, const void *b);
 int sort_function_down_two( const void *a, const void *b);
@@ -373,7 +371,7 @@ void set_lab_tit(variable *var);
 void collect_cemetery( object *o );		// collect variables from object before deletion
 void add_cemetery(variable *v);
 void myexit(int v);
-void error_hard(void);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 
 void print_stack(void);
 void analysis(int *choice);
@@ -418,12 +416,10 @@ if(quit==2)
  return -1;
 if(this==NULL)
 {if(lag==0)
-   sprintf(msg, "\nError: Value of %s requested to a NULL pointer  (var. '%s').",l, stacklog->vs->label);
+   sprintf(msg, "value of '%s' requested to a NULL pointer  (var. '%s')",l, stacklog->vs->label);
  else
-   sprintf(msg, "\nError: Value of %s requested (lag %d) to a NULL pointer (var. '%s')",l, lag, stacklog->vs->label);  
- plog(msg);  
- error_hard();
- quit=2;
+   sprintf(msg, "value of variable '%s' requested (lag %d) to a NULL pointer (var. '%s')",l, lag, stacklog->vs->label);  
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
@@ -434,16 +430,13 @@ curr=search_var(this, l);
 /*
 if(search_step>100)
   {
-   sprintf(msg, "Un-optimized in cal(): Eq. %s searching for %s\n", stacklog->label, l);
+   sprintf(msg, "Warning: un-optimized in cal() for equation %s searching for %s", stacklog->label, l);
    plog(msg);
-
   }
 */
 if(curr==NULL)
- {sprintf(msg, "\nSearch for variable or parameter %s failed in (object %s)",l, label);
- plog(msg);
- error_hard();
- quit=2;
+ {sprintf(msg, "search for variable or parameter '%s' failed in object '%s'",l, label);
+ error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
  return 0;
  }
 res=curr->cal(caller, lag);
@@ -459,10 +452,8 @@ double object::cal( char const *l, int lag)
 {
 /*
 if(this==NULL)
-{sprintf(msg, "\nError: cal of %s requested to a NULL pointer\n\n", l);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "cal of '%s' requested to a NULL pointer", l);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 */
@@ -578,17 +569,8 @@ if( caller!=up)
 	 {
    if(no_error==0)
    {
-   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s': the model does not contain any element '%s'.\n\nYou need either to add the element '%s' to the model, or remove its reference in the equation for '%s'.\nIf you think that the element is included in the model, then you likely spelled its label differently in the equation's code and in the model configuration.\n\nClick to abort the program, or to inspect the model at the time of the error.\"",stacklog->label, l, l, l, stacklog->label); 
-   #ifndef NO_WINDOW
-     cmd(inter, msg); 
-   #else
-     plog(msg);
-   #endif    
-   
-    sprintf(msg, "\nSearch for '%s' failed during the equation of variable %s.",l, stacklog->label);
-	 plog(msg);
-    error_hard();
-	 quit=2;
+    sprintf(msg, "search for '%s' failed in the equation of variable '%s'",l, stacklog->label);
+	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
     return NULL;
     }
    else
@@ -604,7 +586,7 @@ if(bah>100 && curr!=NULL  && optimized==1)
 #ifdef TEST_OPTIMIZATION
 if(stairs>0 && sig_stairs==0)
  {
-  sprintf(msg, "Max searching steps for '%s' (equation for '%s', obj.='%s') = %d\n", l, stacklog->label, label, stairs);
+  sprintf(msg, "\nMax searching steps for '%s' (equation for '%s', obj.='%s') = %d", l, stacklog->label, label, stairs);
   plog(msg);
   sig_stairs=1;
  }
@@ -689,10 +671,8 @@ object *object::hyper_next(char const *lab)
 object *cur, *cur1=NULL;
 int count;
 if(this==NULL)
-{sprintf(msg, "\nError: hypernext of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "hypernext of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return NULL;
 }
 
@@ -874,10 +854,8 @@ bridge *cb;
 
 
 if(this==NULL)
-{sprintf(msg, "\nError: search of obj. %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "search of object '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return NULL;
 }
 
@@ -1019,19 +997,15 @@ variable *cur_v;
 int done, count=0;
 
 if(this==NULL)
-{sprintf(msg, "\nError: sum of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "sum of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
-{sprintf(msg, "\nError: variable %s not found trying to sum it up", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "variable '%s' not found trying to sum it up", lab);
+ error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
  return -1;
 }
 
@@ -1060,19 +1034,15 @@ variable *cur_v;
 int done, count=0;
 
 if(this==NULL)
-{sprintf(msg, "\nError: max of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "max of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
- {sprintf(msg, "\nError: variable %s not found in overall_max", lab);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "variable '%s' not found in overall_max", lab);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return -1;
  }
 cur=cur_v->up;
@@ -1099,28 +1069,22 @@ variable *cur_v;
 int done, count=0;
 
 if(this==NULL)
-{sprintf(msg, "\nError: whg_av of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "whg_av of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
 cur_v=search_var(this, lab);
 
 if(cur_v==NULL)
-{sprintf(msg, "\nError: variable %s not found in wgh_aver", lab);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "variable '%s' not found in wgh_aver", lab);
+ error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
  return -1;
 }
 cur_v=search_var(this, lab2);
 if(cur_v==NULL)
-{sprintf(msg, "\nError: variable %s not found in wgh_aver", lab2);
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "variable '%s' not found in wgh_aver", lab2);
+ error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
  return -1;
 
  }
@@ -1151,11 +1115,8 @@ variable *cv;
 double res;
 
 if(this==NULL)
-{sprintf(msg, "\nError: conditional search of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
- error_hard();
- quit=2;
-
+{sprintf(msg, "conditional search of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return NULL;
 }
 
@@ -1166,17 +1127,8 @@ cv=cur1->search_var(this, lab);
 no_error=0;
 if(cv==NULL)
  {
-  sprintf(msg, "tk_messageBox -title Error -type ok -icon error -message \"During the equation for '%s' the search of '%s' with value %g failed. Fix the initial value and/or the equation's code.\"",stacklog->label,lab,value);
-  #ifndef NO_WINDOW
-  cmd(inter, msg);
-  #else
-  plog(msg);
-  #endif
-  sprintf(msg, "\nVar %s with value %lf searched from %s not found", lab, value, label);
-  plog(msg);
-  error_hard();
-  plog(msg);
-  quit=2;
+  sprintf(msg, "variable '%s' with value '%lf' searched from '%s' not found", lab, value, label);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return NULL;
  }
 
@@ -1188,10 +1140,8 @@ for( ;cur!=NULL; cur=cur->hyper_next(cur->label))
     return(cur);
  }
 }
-sprintf(msg, "\nVar %s with value %lf searched from %s not found", lab, value, label);
-plog(msg);
-error_hard();
-quit=2;
+sprintf(msg, "variable '%s' with value '%lf' searched from '%s' not found", lab, value, label);
+error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 return NULL;
 }
 
@@ -1211,10 +1161,8 @@ char *ch;
 if(v==NULL)
  {app=new variable;
   if(app==NULL)
-	{sprintf(msg, "\nOut of memory");
-	 plog(msg);
-    error_hard();
-	 quit=2;
+	{sprintf(msg, "out of memory in add_empty_var");
+	 error_hard( msg, "Out of memory" );
 	 return NULL;
 	}
   v=app;
@@ -1259,11 +1207,8 @@ if(v==NULL)
 
   v=new variable;
   if(v==NULL)
-	{sprintf(msg, "\nOut of memory in add_var_from_example");
-	 plog(msg);
-    error_hard();
-	 quit=2;
-
+	{sprintf(msg, "out of memory in add_var_from_example");
+	 error_hard( msg, "Out of memory" );
 	}
 
   v->next=NULL;
@@ -1276,11 +1221,8 @@ else
    
    cv->next=new variable;
    if(cv->next==NULL)
-	{sprintf(msg, "\nOut of memory in add_var_from_example");
-	 plog(msg);
-    error_hard();
-	 quit=2;
-
+	{sprintf(msg, "out of memory in add_var_from_example");
+	 error_hard( msg, "Out of memory" );
 	}
 
   cv=cv->next;
@@ -1325,14 +1267,12 @@ void object::write(char const *lab, double value, int time, int lag)
     variable *cv;
     
     if(this==NULL)
-    {sprintf(msg, "\nError: write of '%s' requested to a NULL pointer in the equation for '%s'\n\n", lab, stacklog->vs->label);
-        plog(msg);
-        error_hard();
-        quit=2;
+    {sprintf(msg, "write of '%s' requested to a NULL pointer in the equation for '%s'", lab, stacklog->vs->label);
+		error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
         return;
     }
     if((!use_nan && isnan(value)) || isinf(value)==1)
-    {sprintf(msg, "\nMath error: write of '%s' requested with a wrong value\n\n", lab);
+    {sprintf(msg, "\nWarning: write of '%s' requested with an invalid value", lab);
         plog(msg);
         debug_flag=1;
         stacklog->vs->debug='d';
@@ -1343,15 +1283,12 @@ void object::write(char const *lab, double value, int time, int lag)
     {if(!strcmp(cv->label, lab))
     {if(cv->under_computation==1)
     {
-        sprintf(msg, "\nERROR: trying to write '%s' while it is under computation\nRevise the equation where %s is involved\n\n", lab, lab);
-        plog(msg);
-        error_hard();
-        plog(msg);
-        quit=2;
+        sprintf(msg, "trying to write '%s' while it is under computation", lab);
+		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
     }
         if(cv->param!=1 && time <= 0 && t>1)
         {
-            sprintf(msg, "\nWARNING: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d\n", lab, stacklog->vs->label, lab, t);
+            sprintf(msg, "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", lab, stacklog->vs->label, lab, t);
             plog(msg);
             cv->val[0]=value;
             cv->last_update=t;
@@ -1362,7 +1299,7 @@ void object::write(char const *lab, double value, int time, int lag)
             {
                 if ( - time > cv->num_lag )		// check for invalid lag
                 {
-                    sprintf( msg, "\nWhile writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored\n", lab, stacklog->vs->label, time );
+                    sprintf( msg, "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, ignored", lab, stacklog->vs->label, time );
                     plog( msg );
                 }
                 else
@@ -1379,10 +1316,8 @@ void object::write(char const *lab, double value, int time, int lag)
         return;
     }
     }
-    sprintf(msg, "\nAttempt to write var %s not found in object %s", lab, label);
-    plog(msg);
-    error_hard();
-    quit=2;
+    sprintf(msg, "attempt to write variable '%s' not found in object '%s'", lab, label);
+	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 }
 
 
@@ -1397,14 +1332,12 @@ void object::write(char const *lab, double value, int time)
 variable *cv;
 
 if(this==NULL)
-{sprintf(msg, "\nError: write of %s requested to a NULL pointer\n\n", lab);
- plog(msg);
-  error_hard();
- quit=2;
+{sprintf(msg, "write of '%s' requested to a NULL pointer", lab);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return;
 }
 if((!use_nan && isnan(value)) || isinf(value)==1)
-{sprintf(msg, "\nMath error: write of %s requested with a wrong value\n\n", lab);
+{sprintf(msg, "\nWarning: write of %s requested with an invalid value", lab);
  plog(msg);
  debug_flag=1;
  stacklog->vs->debug='d';
@@ -1415,15 +1348,12 @@ for(cv=v; cv!=NULL; cv=cv->next)
  {if(!strcmp(cv->label, lab))
 	{if(cv->under_computation==1)
      {
-      sprintf(msg, "\nERROR: trying to write %s while it is under computation\nRevise the equation where %s is involved\n\n", lab, lab);
-      plog(msg);
-      error_hard();
-      plog(msg);
-      quit=2;
+      sprintf(msg, "trying to write '%s' while it is under computation", lab);
+	  error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
      }
    if(cv->param!=1 && time <= 0 && t>1)
    {
-      sprintf(msg, "\nWARNING: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d\n", lab, stacklog->vs->label, lab, t);
+      sprintf(msg, "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", lab, stacklog->vs->label, lab, t);
       plog(msg);
 	  cv->val[0]=value;
       cv->last_update=t;
@@ -1434,7 +1364,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	{
 		if ( - time > cv->num_lag )		// check for invalid lag
 		{
-			sprintf( msg, "\nWhile writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored\n", lab, stacklog->vs->label, time );
+			sprintf( msg, "\nWarning: while writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored", lab, stacklog->vs->label, time );
 			plog( msg );
 		}
 		else
@@ -1451,10 +1381,8 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	 return;
 	 }
  }
-sprintf(msg, "\nAttempt to write var %s not found in object %s", lab, label);
-plog(msg);
-error_hard();
-quit=2;
+sprintf(msg, "attempt to write variable '%s' not found in object '%s'", lab, label);
+error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 }
 
 
@@ -1533,10 +1461,8 @@ bridge *cb;
 
 begin=new object;
 if(begin==NULL)
-{sprintf(msg, "\nOut of memory");
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "out of memory in add_an_object");
+ error_hard( msg, "Out of memory" );
  return NULL;
  }
 begin->init(this, lab);
@@ -1581,9 +1507,8 @@ for(cv=begin->v; cv!=NULL; cv=cv->next)
   }
  catch(...)
    {
-    sprintf(msg, "\nNot enough memory.\nData for %s will not be saved.\n",cv->lab_tit);
-    plog(msg);
-    error_hard();
+    sprintf(msg, "out of memory: data for '%s' will not be saved",cv->lab_tit);
+	error_hard( msg, "Out of memory" );
     cv->save=0;
    }
   cv->start=t;
@@ -1634,10 +1559,8 @@ for(cb2=b; cb2!=NULL && strcmp(cb2->blabel,lab); cb2=cb2->next);
 cb2->counter_updated=false;
 if(cb2==NULL)
 {
-sprintf(msg, "\nError adding new object(s): object '%s' does not contain objects of type '%s'.\n", label, lab);
- plog(msg);
- error_hard();
- quit=2;
+ sprintf(msg, "object '%s' does not contain objects of type '%s' when adding new object(s)", label, lab);
+ error_hard( msg, "Object not found", "Check your code to prevent this situation." );
  return NULL;
 }
 
@@ -1654,10 +1577,8 @@ for(i=0; i<n; i++)
 cur=new object;
 
 if(cur==NULL)
-{sprintf(msg, "\nOut of memory");
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "out of memory in add_n_objects");
+ error_hard( msg, "Out of memory" );
  return NULL;
  }
 cur->init(this, lab);
@@ -1667,10 +1588,8 @@ if(net)							// if objects are nodes in a network
 	cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
 	if(cur->node==NULL)
 	{
-		sprintf(msg, "\nOut of memory");
-		plog(msg);
-		error_hard();
-		quit=2;
+		sprintf(msg, "out of memory in add_n_objects");
+		error_hard( msg, "Out of memory" );
 		return NULL;
 	}
 }
@@ -1823,10 +1742,8 @@ variable *cv;
 bridge *cb, *a;
 
 if(this==NULL)
-{sprintf(msg, "\nError: delete_obj requested to a NULL pointer\n\n");
- plog(msg);
- error_hard();
- quit=2;
+{sprintf(msg, "delete_obj requested to a NULL pointer");
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return;
 }
 
@@ -1876,26 +1793,20 @@ if ( ! useNodeId )
 {
 cur_v=search_var(this, var);
 if(cur_v==NULL)
- {sprintf(msg, "Error: variable %s not found in sort", var);
-  quit=2;
-  plog(msg);
-  error_hard();
+ {sprintf(msg, "variable '%s' not found in sort", var);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return;
  }
 cur=cur_v->up;
 if(strcmp(obj, cur->label))
- {sprintf(msg, "Error: variable %s not contained in object %s to be sorted", var, obj);
-  plog(msg);
- error_hard();
-  quit=2;
+ {sprintf(msg, "variable '%s' not contained in object '%s' to be sorted", var, obj);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return;
  }
 
 if(cur->up==NULL)
- {sprintf(msg, "Error: sort for object %s aborted", obj);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "sort for object '%s' aborted", obj);
+  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
   return;
  }
 
@@ -1909,10 +1820,8 @@ else									// pick network object to sort
 			cb=cur->up->b;
 		else
 		{
-			sprintf(msg, "\nError: object %s has no network data structure", obj);
-			plog(msg);
-			error_hard();
-			quit=2;
+			sprintf(msg, "object '%s' has no network data structure", obj);
+			error_hard( msg, "Network data structure missing", "Check your code to prevent this situation." );
 			return;
 		}
 	else
@@ -1921,10 +1830,8 @@ else									// pick network object to sort
 
 for(; cb!=NULL && strcmp(cb->blabel, obj); cb=cb->next);
 if(cb==NULL)
- {sprintf(msg, "Error in sorting: objext '%s' not contained in object '%s'. ", obj, label);
-  plog(msg);
- error_hard();
-  quit=2;
+ {sprintf(msg, "object '%s' not contained in object '%s' when sorting", obj, label);
+  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
   return;
  }
 cb->counter_updated=false;
@@ -1943,10 +1850,8 @@ cur=cb->head;
    if(!strcmp(direction, "DOWN") )
      qsort((void *)mylist, num, sizeof(mylist[0]), sort_function_down);
    else
-    {sprintf(msg, "Error: sorting direction %s invalid ", direction);
-     error_hard();
-     quit=2;
-     plog(msg);
+    {sprintf(msg, "sorting direction '%s' invalid", direction);
+	 error_hard( msg, "Invalid sort option", "Check your code to prevent this situation." );
      delete[] mylist;
      return;
     }
@@ -2019,34 +1924,26 @@ for(cb=b; cb!=NULL; cb=cb->next)
    }
    
 if(cb==NULL)
- {sprintf(msg, "Error: bridge for %s in object %s not found in sort2", obj, label);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "bridge for '%s' in object '%s' not found in sort", obj, label);
+  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
   return;
  }
 cb->counter_updated=false;
 if(cur_v1==NULL)
- {sprintf(msg, "Error: variable %s not found in sort", var1);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "variable '%s' not found in sort", var1);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return;
  }
 cur=cur_v1->up;
 if(strcmp(obj, cur->label))
- {sprintf(msg, "Error: variable %s not contained in object %s to be sorted", var1, obj);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "variable '%s' not contained in object '%s' to be sorted", var1, obj);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return;
  }
 
 if(cur->up==NULL)
- {sprintf(msg, "Error: sort for object %s aborted", obj);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "sort for object '%s' aborted", obj);
+  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
   return;
  }
 
@@ -2067,10 +1964,8 @@ cur=cb->head;
    if(!strcmp(direction, "DOWN") )
      qsort((void *)mylist, num, sizeof(mylist[0]), sort_function_down_two);
    else
-    {sprintf(msg, "Error: sorting direction %s invalid ", direction);
-  plog(msg);
-     error_hard();
-     quit=2;
+    {sprintf(msg, "sorting direction '%s' invalid", direction);
+	 error_hard( msg, "Invalid sort option", "Check your code to prevent this situation." );
      delete[] mylist;
      return;
     }
@@ -2142,9 +2037,9 @@ cur1=cur=(search_var(this, lv))->up;
 for(a=0 ; cur!=NULL; cur=cur->next )
   a+=cur->cal(lv,lag);
 if(isinf(a)==1)
-   {sprintf(msg, "Warning (eq. for '%s'): sum of values for '%s' is too high.\n", stacklog->vs->label, lv);
+   {sprintf(msg, "\nWarning: sum of values for '%s' is too high (eq. for '%s')", stacklog->vs->label, lv);
     plog(msg);
-    sprintf(msg, "The first object '%s' of the list is used\n",lo);
+    sprintf(msg, "\nThe first object '%s' of the list is used",lo);
     plog(msg);
     return(cur1);
    }
@@ -2153,9 +2048,9 @@ b=RND*a;
 while(b==a) //avoid RND ==1
  {b=RND*a;
   if(a==0)
-   {sprintf(msg, "Warning (eq. for '%s'): draw random on '%s' with Prob.=0 for each element\n", stacklog->vs->label, lv);
+   {sprintf(msg, "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", stacklog->vs->label, lv);
     plog(msg);
-    sprintf(msg, "The first object '%s' of the list is used\n",lo);
+    sprintf(msg, "\nThe first object '%s' of the list is used",lo);
     plog(msg);
     return(cur1);
    }
@@ -2190,9 +2085,8 @@ b=RND*a;
 while(b==a) //avoid RND ==1
  {b=RND*a;
   if(a==0)
-   {sprintf(msg, "Error: draw random of an object '%s' impossible. No such objects.\n",lo);
-    plog(msg);
-   error_hard();   
+   {sprintf(msg, "draw random of an object '%s' impossible, no such object",lo);
+    error_hard( msg, "Object not found", "Check your code to prevent this situation." );
    }
  }
 cur=cur1;
@@ -2218,9 +2112,8 @@ double a, b;
 
 if(tot<=0)
  {
-  sprintf(msg, "\nError: Draw Random Tot of an object '%s' requested with a negative total of values for '%s' (%g)\nduring the equation for '%s'.\nFix the code.\n",lo,lv,tot, stacklog->vs->label);  
- plog(msg);  
- error_hard();
+  sprintf(msg, "draw random of an object '%s' requested with a negative total\nof values for '%s' (%g) during the equation for '%s'",lo,lv,tot, stacklog->vs->label);  
+  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
  }  
 
 cur1=cur=(search_var(this, lv))->up;
@@ -2234,9 +2127,8 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next )
   }
 if(a>tot)
  {
-  sprintf(msg, "\nError: Draw Random Tot of an object '%s' requested with a wrong total of values for '%s'\nduring the equation for '%s'.\nFix the code, or use simple Draw Random.\n",lo,lv, stacklog->vs->label);  
- plog(msg);  
- error_hard();
+  sprintf(msg, "draw random of an object '%s' requested with a wrong total\nof values for '%s' during the equation for '%s'",lo,lv, stacklog->vs->label);  
+  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
  }  
 return cur;
 
@@ -2253,15 +2145,13 @@ double object::increment(char const *lv, double value)
 variable *cv;
 if(this==NULL)
 {
- sprintf(msg, "\nError: Increment of %s requested to a NULL pointer  (var. '%s').",lv, stacklog->vs->label);
- plog(msg);  
- error_hard();
- quit=2;
+ sprintf(msg, "increment of '%s' requested to a NULL pointer  (var. '%s')",lv, stacklog->vs->label);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
 if((!use_nan && isnan(value)) || isinf(value))
-{sprintf(msg, "\nMath error: increment of %s requested with a wrong value\n\n", lv);
+{sprintf(msg, "\nWarning: increment of %s requested with an invalid value", lv);
  plog(msg);
  debug_flag=1;
  stacklog->vs->debug='d';
@@ -2273,10 +2163,8 @@ for(cv=v; cv!=NULL; cv=cv->next)
   break;
 
 if(cv==NULL)
- {sprintf(msg, "\nError in increment:\n variable %s not contained in object %s", lv, label);
-  plog(msg);
-  error_hard();
-  quit=2;
+ {sprintf(msg, "increment variable '%s' not contained in object '%s'", lv, label);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return -1;
  }
  
@@ -2297,15 +2185,13 @@ variable *cv;
 
 if(this==NULL)
 {
- sprintf(msg, "\nError: Multiplication of %s requested to a NULL pointer  (var. '%s').",lv, stacklog->vs->label);
- plog(msg);  
- error_hard();
- quit=2;
+ sprintf(msg, "multiplication of '%s' requested to a NULL pointer  (var. '%s')",lv, stacklog->vs->label);
+ error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return -1;
 }
 
 if((!use_nan && isnan(value)) || isinf(value))
-{sprintf(msg, "\nMath error: multiply of %s requested with a wrong value\n\n", lv);
+{sprintf(msg, "\nWarning: multiply of %s requested with a wrong value", lv);
  plog(msg);
  debug_flag=1;
  stacklog->vs->debug='d';
@@ -2317,11 +2203,8 @@ for(cv=v; cv!=NULL; cv=cv->next)
   break;
 
 if(cv==NULL)
- {sprintf(msg, "Error in multiply:\n variable %s not contained in object %s", lv, label);
-  plog(msg);
-  error_hard();
-  quit=2;
-
+ {sprintf(msg, "multiply variable '%s' not contained in object '%s'", lv, label);
+  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
   return -1;
  }
 cv->val[0]*=value;
@@ -2332,62 +2215,71 @@ return cv->val[0];
 /***********
 Procedure called when an unrecoverable error occurs. Information about the state of the simulation when the error occured is provided. Users can abort the program or analyse the results collected up the latest time step available.
 *************/
-void error_hard(void)
+void error_hard( const char *logText, const char *boxTitle, const char *boxText )
 {
 int pippo=1;
 double app=0;
 object *cur;
-if(running==0)
- return;
 
-sprintf(msg, "\n\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
+if ( quit == 2 )		// simulation already being stopped
+	return;
+	
+char *buffer = new char[ strlen( logText ) + 20 ];
+sprintf( buffer, "\nERROR: %s\n", logText );
+plog( buffer );
+delete [] buffer;
+
+#ifndef NO_WINDOW
+cmd(inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log");
+sprintf( msg, "tk_messageBox -title Error -type ok -icon error -message \"%s.\n\nMore details are available in th Log window.\n%s\nLSD cannot continue.\"", boxTitle, boxText );
+cmd( inter, msg );
+#endif
+
+if( running == 0 )
+	return;
+
+quit = 2;				// do not continue simulation
+
+sprintf(msg, "\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
 plog(msg);
-sprintf(msg, "\nOffending code contained in the equation for variable: %s\n", stacklog->vs->label);
+sprintf(msg, "\nOffending code contained in the equation for variable '%s'\n", stacklog->vs->label);
 plog(msg);
 
 print_stack();
 
 #ifndef NO_WINDOW
-cmd(inter, "wm deiconify .");
-
-loop:
+cmd(inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log");
 
 choice=0;
 cmd( inter, "newtop .cazzo Error { set err 1 }" );
 
 cmd(inter, "frame .cazzo.t");
-cmd(inter, "label .cazzo.t.l -text \"An error occurred during the simulation run.\n\nInformation about the error and on the state of the model are reported\nin the log window.\"");
+cmd(inter, "label .cazzo.t.l -fg red -text \"An error occurred during the simulation run\"");
 cmd(inter, "pack .cazzo.t.l -pady 10");
-cmd(inter, "label .cazzo.t.l1 -text \"Choose one of the following options to continue\"");
+cmd(inter, "label .cazzo.t.l1 -text \"Information about the error and on the state of the model are reported\nin the log window. Current results are available in the Lsd browser.\n\nChoose one of the following options to continue\"");
 cmd(inter, "pack .cazzo.t.l1 -expand yes -fill both");
 cmd(inter, "pack .cazzo.t");
-cmd(inter, "set err 4");
+cmd(inter, "set err 2");
 cmd(inter, "frame .cazzo.e -relief groove -bd 2");
-cmd(inter, "radiobutton .cazzo.e.r -variable err -value 4 -text \"Return to Lsd browser: choose this option to edit the model configuration.\"");
-cmd(inter, "radiobutton .cazzo.e.a -variable err -value 2 -text \"Analysis of results: observe data series produced so far and return here.\"");
-cmd(inter, "radiobutton .cazzo.e.d -variable err -value 3 -text \"Data browse: observe model values and return here.\"");
-cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code.\"");
+cmd(inter, "radiobutton .cazzo.e.r -variable err -value 2 -text \"Return to Lsd browser: choose this option to edit the model configuration\"");
+cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code\"");
 
-cmd(inter, "pack .cazzo.e.r .cazzo.e.a .cazzo.e.d .cazzo.e.e -anchor w");
+cmd(inter, "pack .cazzo.e.r .cazzo.e.e -anchor w");
 cmd(inter, "pack .cazzo.e  -fill both -expand yes");
 
 cmd( inter, "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-cmd(inter, "bind .cazzo.e.r <Down> {focus -force .cazzo.e.a; .cazzo.e.a invoke}");
-cmd(inter, "bind .cazzo.e.a <Down> {focus -force .cazzo.e.d; .cazzo.e.d invoke}");
-cmd(inter, "bind .cazzo.e.d <Down> {focus -force .cazzo.e.e; .cazzo.e.e invoke}");
+cmd(inter, "bind .cazzo.e.r <Down> {focus -force .cazzo.e.e; .cazzo.e.e invoke}");
+cmd(inter, "bind .cazzo.e.e <Up> {focus -force .cazzo.e.r; .cazzo.e.r invoke}");
 
-cmd(inter, "bind .cazzo.e.e <Up> {focus -force .cazzo.e.d; .cazzo.e.d invoke}");
-cmd(inter, "bind .cazzo.e.d <Up> {focus -force .cazzo.e.a; .cazzo.e.a invoke}");
-cmd(inter, "bind .cazzo.e.a <Up> {focus -force .cazzo.e.r; .cazzo.e.r invoke}");
+cmd(inter, "bind .cazzo.e.r <Return> {set choice 1}");
+cmd(inter, "bind .cazzo.e.e <Return> {set choice 1}");
+cmd(inter, "bind .cazzo.e <Return> {set choice 1}");
+cmd(inter, "bind .cazzo <Return> {set choice 1}");
 
-cmd(inter, "bind .cazzo.e.r <Return> {.cazzo.b.ok invoke}");
-cmd(inter, "bind .cazzo.e.a <Return> {.cazzo.b.ok invoke}");
-cmd(inter, "bind .cazzo.e.d <Return> {.cazzo.b.ok invoke}");
-cmd(inter, "bind .cazzo.e.e <Return> {.cazzo.b.ok invoke}");
-cmd(inter, "bind .cazzo.e <Return> {.cazzo.b.ok.invoke}");
+cmd(inter, "focus -force .cazzo.b.ok");
 
-cmd(inter, "showtop .cazzo 0 0 0");
+cmd(inter, "showtop .cazzo");
 
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -2395,49 +2287,18 @@ while(choice==0)
 cmd(inter, "set choice $err");
 cmd(inter, "destroytop .cazzo");
 
-if(choice==4)
- {
-  actual_steps=t;
-  reset_end(root);
-  close_sim();
-  running=0;
- // while(stacklog->prev!=NULL)
-   //stacklog=stacklog->prev;
-  //stack=0; 
-  //throw pippo;
-     return;
- }
-
 if(choice==2)
  {
   actual_steps=t;
-  reset_end(root);
-  cmd(inter, "wm withdraw .");
-  analysis(&choice);
-  cmd(inter, "wm deiconify .");
-  goto loop;
-
- }
-if(choice==3)
- {
-  app=stacklog->vs->val[0];
-  if(stacklog->prev->vs==NULL)
-    deb(stacklog->vs->up, NULL, stacklog->vs->label, &app);
-  else
-  {
-	cmd(inter, "wm withdraw .");
-    deb(stacklog->vs->up, stacklog->prev->vs->up, stacklog->vs->label, &app);  
-	cmd(inter, "wm deiconify .");
-  }
-  goto loop;
-
+  running=0;
+  return;
  }
 
 #else
- printf("\nHard error. Abort\n");
+printf("\nHard error. Aborting simulation...\n");
 #endif
-myexit(99);
 
+myexit(100);
 }
 
 /****************************
@@ -2656,33 +2517,15 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   #ifndef NO_WINDOW
-   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\"",stacklog->label, label); 
-     cmd(inter, msg); 
-     plog(msg);
-   
-   #else
-    sprintf(msg, "Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'",stacklog->label, label); 
-	 plog(msg);
-   #endif    
-    error_hard();
-	 quit=2;
-    return NULL;
+   sprintf(msg, "failure in equation for '%s' when searching object '%s' in TSEARCH_CNDS",stacklog->label, label); 
+   error_hard( msg, "Object not found", "Check your code to prevent this situation." );
+   return NULL;
   } 
 
 if(cb->mn==NULL)
  {
-   #ifndef NO_WINDOW
-    sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching object '%s' with 'TSEARCH_CNDS'.\\n\\nTurbosearch can be used only after initializing the object with 'INI_TSEARCHS'.\"",stacklog->label, label); 
-     cmd(inter, msg); 
-     plog(msg);
-   
-   #else
-    sprintf(msg, "Error in equation for '%s' when searching for '%s' with 'TSEARCH_CNDS'. Turbosearch can be used only after initializing the object with 'INI_TSEARCHS'.",stacklog->label, label); 
-	 plog(msg);
-   #endif    
-    error_hard();
-	 quit=2;
+    sprintf(msg, "failure in equation for '%s' when searching for '%s' with TSEARCH_CNDS,\nTurbosearch can be used only after initializing the object with INI_TSEARCHS",stacklog->label, label); 
+    error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return NULL;
   } 
  
@@ -2711,17 +2554,8 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   #ifndef NO_WINDOW
-   sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"Error in equation for '%s' when searching '%s' to initialize Turbosearch.\"",stacklog->label, label); 
-     cmd(inter, msg); 
-     plog(msg);
-   
-   #else
-    sprintf(msg, "Error in equation for '%s' when searching '%s' to initialize Turbosearch: the model does not contain any element '%s' in the expected position.",stacklog->label, label, label); 
-	 plog(msg);
-   #endif    
-    error_hard();
-	 quit=2;
+    sprintf(msg, "failure in equation for '%s' when searching '%s' to initialize Turbosearch:\nthe model does not contain any element '%s' in the expected position",stacklog->label, label, label); 
+	error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return;
   } 
 

@@ -119,6 +119,7 @@ void create_maverag(int *choice);
 void set_cs_data(int *choice);
 void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void myexit(int v);
 
 void save_data1(int *choice);
@@ -135,11 +136,9 @@ void insert_data_nosave(object *r, char * lab, int *num_v);
 void insert_data_file(int *num_v, int *num_c);
 void plog_series(int *choice);
 void set_lab_tit(variable *var);
-
 double *search_lab_tit_file(char *s,  char *t,int st, int en);
 double *find_data(int id_series);
 int shrink_gnufile(void);
-
 int sort_labels_down(const void *a, const void *b);
 void show_eq(char *lab, int *choice);
 int cd(char *path);
@@ -778,7 +777,8 @@ case 9:
 
 //Brutally shut down the system
 case 35:
-myexit(0);
+error_hard( msg, "Abort requested", "If error persists, please contact developers." );
+myexit(20);
 
 case 16:
 //show the equation for the selected variable
@@ -3399,8 +3399,10 @@ for(i=0; i<num_var ; i++)
 
  }
 
-cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Data not found.\n\nLsd crashed...\"");
-exit(0);
+sprintf( msg, "data not found in search_lab_tit_file" );
+error_hard( msg, "Internal error", "If error persists, please contact developers." );
+myexit(21);
+
 f=fopen(filename, "r");
 for(i=0, done=0; i<num_var; i++)
  {fscanf(f, "%s %s (%d %d)\t", str, tag, &app_st, &app_en);

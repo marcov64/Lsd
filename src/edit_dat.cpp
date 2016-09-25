@@ -103,7 +103,6 @@ void set_title(object *c, char *lab, char *tag, int *incr);
 void link_data(object *root, char *lab);
 void set_all(int *choice, object *r, char *lab, int lag);
 void set_obj_number(object *r, int *choice);
-void myexit(int code);
 int set_focus;
 // flags to avoid recursive usage (confusing and tk windows are not ready)
 bool in_edit_data = false;

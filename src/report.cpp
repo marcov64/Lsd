@@ -102,7 +102,7 @@ cmd(inter, msg);
 cmd(inter, "set choice [file exists $mrep]");
 if(*choice == 1)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\\n\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\" -type okcancel -title Warning -icon warning -default cancel]");
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
   if ( *choice == 1 )
 	  return;
@@ -277,7 +277,7 @@ plog("\nWriting report. Wait...\n");
 cmd(inter, "wm iconify .");
 
 
-fprintf(frep, "<BR><I><A NAME=\"_DESCRIPTION_\">Automatically generated LSD report.</A></I><BR>");
+fprintf(frep, "<BR><I><A NAME=\"_DESCRIPTION_\">Automatically generated Lsd report.</A></I><BR>");
 
 sprintf(msg, "<BR><CENTER><B><FONT SIZE=+2>Model: <U>%s</U></FONT></B></CENTER><BR>\n<BR>\n", app);
 fprintf(frep, "%s", msg);
@@ -992,7 +992,7 @@ cur_descr=search_description(r->label);
 if(cur_descr==NULL)
   {
    add_description(r->label, "Object", "(no description available)");
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", r->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", r->label);
    plog(msg);
    cur_descr=search_description(r->label);
   } 
@@ -1050,7 +1050,7 @@ if(r->v!=NULL)
      add_description(curv->label, "Parameter", "(no description available)");  
    if(curv->param==2)
      add_description(curv->label, "Function", "(no description available)");  
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", cur->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cur->label);
    plog(msg);
    cur_descr=search_description(curv->label);
   } 
@@ -1303,7 +1303,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
      add_description(cv->label, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", cv->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
    plog(msg);
    cd=search_description(cv->label);
   } 
@@ -1393,7 +1393,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
      add_description(cv->label, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", cv->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
    plog(msg);
    cd=search_description(cv->label);
   } 

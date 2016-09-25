@@ -112,7 +112,6 @@ extern double ymin;
 extern double ymax;
 extern long nodesSerial;
 
-int errormsg(char const *lpszText,  char const *lpszTitle);
 object *create( object *r);
 void run(object *r);
 void print_title(object *root);
@@ -221,7 +220,7 @@ fend=0;		// no file number limit
 if(argn<3)
  {
   printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n");
-  exit(1);
+  myexit(1);
  }
 else
  {
@@ -266,7 +265,7 @@ else
  }
   
   printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
-  exit(2);
+  myexit(2);
   }
  } 
 if(batch_sequential==0)
@@ -278,8 +277,8 @@ if(batch_sequential==0)
 #else 
 for(i=1; argv[i]!=NULL; i++)
 {if(argv[i][0]!='-' || (argv[i][1]!='f' && argv[i][1]!='i') )
-  {sprintf(msg,"Illegal option: %s\n\nAvailable options :\n-itcl_directory\n-fmodel_name\n\nContinue anyway?", argv[i]);
-	errormsg(msg, "Lsd Warning");
+  {printf(msg,"\nInvalid option: %s\nAvailable options:\n-i tcl_directory\n-f model_name\n", argv[i]);
+	myexit(1);
   }
  if(argv[i][1]=='f')
 	{delete[] simul_name;
@@ -331,7 +330,7 @@ else
 if(f==NULL)
  {
   printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
-  exit(3);
+  myexit(3);
  }
 fclose(f);
 #else 
@@ -356,7 +355,7 @@ cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set
 if(debug_flag==1)
  {
  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The directory containing the model is:\n[pwd]\nIt appears to include spaces.\\n\\nThis will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory. \"");
- exit(5);
+ myexit(5);
  
  }
 
@@ -368,7 +367,7 @@ lsdroot = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 if ( lsdroot == NULL || strlen( lsdroot ) == 0 )
  {
  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set, program aborted.\n\nPlease make sure the environment variable LSDROOT points to the directory where Lsd is installed.\"");
- exit(6);
+ myexit(6);
  }
 strcpy( str, lsdroot );
 lsdroot = ( char * ) calloc( strlen( str ) + 1, sizeof ( char ) );
@@ -497,7 +496,7 @@ strcpy(stacklog->label, "Lsd Simulation Manager");
 #ifndef NO_WINDOW
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"File 'src/align.tcl' is missing or corrupted.\\n\\nPlease check your instalation and reinstall Lsd if required.\\n\\nLsd is aborting now.\" }" );
 if ( choice != 0 )
-	exit( 7 + choice );
+	myexit( 7 + choice );
 
 while(1)
 {
@@ -612,7 +611,7 @@ if(i>1 || batch_sequential_loop)
   {
    sprintf(msg, "\nFile %s not found",struct_file);
    plog(msg);
-   exit(9);
+   myexit(9);
   }
  root->load_struct(f);
  fscanf(f, "%s", msg); //should be DATA
@@ -640,7 +639,7 @@ if(no_more_memory==1)
 #else
  sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
  plog(msg);
- exit(10);
+ myexit(10);
  #endif
  return;
  }
@@ -1035,14 +1034,14 @@ if(Tcl_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
-    exit(12);
+    myexit(12);
    }
    
 if(Tk_Init(app)!=TCL_OK)
    {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
     fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
     fclose(f);
-    exit(13);
+    myexit(13);
    }
 
 return app;
@@ -1216,11 +1215,11 @@ void signal_handler(int signum)
 	sprintf(msg2, "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
 	plog(msg2);
 #else
-	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debug' menu option.\n\nAttempting to open the LSD Debugger (LSD will close immediately after exiting the Debugger)...\"", msg);
+	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
 	cmd(inter, msg2);
 	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
 	deb( stacklog->vs->up, NULL, msg2, &useless );
 #endif
 
-	exit(-signum);			// abort program
+	myexit(-signum);			// abort program
 }

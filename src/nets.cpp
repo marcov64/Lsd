@@ -118,7 +118,8 @@ char *strupr( char *s )
 
 object *go_brother(object *c);
 double rnd_integer(double m, double x);
-void error_hard(void);
+void myexit(int v);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void plog(char const *msg);
 
 extern char msg[];
@@ -143,8 +144,9 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		origNode->node = new netNode( );// create node data structure
 		if( origNode->node == NULL )
 		{
-			plog( "\nError: out of memory." );
-			error_hard( );
+			sprintf( msg, "out of memory when creating net node" );
+			error_hard( msg, "Out of memory" );
+			myexit(103);
 		}
 	}
 	if ( destNode->node == NULL )		// destination is not yet a node?
@@ -152,8 +154,9 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		destNode->node = new netNode( );// create node data structure
 		if( destNode->node == NULL )
 		{
-			plog( "\nError: out of memory." );
-			error_hard( );
+			sprintf( msg, "out of memory when creating net node" );
+			error_hard( msg, "Out of memory" );
+			myexit(103);
 		}
 	}
 	
@@ -218,8 +221,9 @@ netLink *object::add_link_net( object *destPtr, double weight = 0, double probTo
 	cur = new netLink( this, destPtr, weight, probTo );
 	if( cur == NULL )
 	{
-		plog( "\nError: out of memory." );
-		error_hard( );
+		sprintf( msg, "out of memory when creating net link" );
+		error_hard( msg, "Out of memory" );
+		myexit(103);
 		return NULL;
 	}
 
@@ -284,10 +288,8 @@ netLink *object::draw_link_net( void )
 		
 	if ( isinf( sum ) || sum <= 0 )				// check valid probabilities
 	{
-		sprintf( msg, "\nError (link draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
-		plog( msg );
-		sprintf( msg, "\nFirst link (%ld) returned.\n", node->first->serTo );
-		plog( msg );
+		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs->label );
+		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
 		return node->first;
 	}
 
@@ -327,8 +329,9 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 		name = new char[ strlen( nodeName ) + 1 ];
 		if( name == NULL )
 		{
-			plog( "\nError: out of memory." );
-			error_hard( );
+			sprintf( msg, "out of memory when creating net node name" );
+			error_hard( msg, "Out of memory" );
+			myexit(103);
 		}
 		strcpy( name, nodeName );
 	}
@@ -370,8 +373,9 @@ netNode *object::add_node_net( long id = -1, char const nodeName[] = "",
 	node = new netNode( id, nodeName );
 	if( node == NULL )
 	{
-		plog( "\nError: out of memory." );
-		error_hard( );
+		sprintf( msg, "out of memory when creating net node" );
+		error_hard( msg, "Out of memory" );
+		myexit(103);
 		return NULL;
 	}
 	
@@ -407,8 +411,9 @@ void object::name_node_net( char const *nodeName )
 		node->name = new char[ strlen( nodeName ) + 1 ];
 		if( node->name == NULL )
 		{
-			plog( "\nError: out of memory." );
-			error_hard( );
+			sprintf( msg, "out of memory when creating net node name" );
+			error_hard( msg, "Out of memory" );
+			myexit(103);
 		}
 		strcpy( node->name, nodeName );
 	}
@@ -493,10 +498,8 @@ object *object::draw_node_net( char const *lab )
 		
 	if ( isinf( sum ) || sum <= 0 )					// check valid probabilities
 	{
-		sprintf( msg, "\nError (network node draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
-		plog( msg );
-		sprintf( msg, "\nFirst object (%s) returned.\n", lab );
-		plog( msg );
+		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs->label );
+		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
 		return cur1;
 	}
 
@@ -536,9 +539,8 @@ object *object::shuffle_nodes_net( char const *lab )
 		
 		if ( cur->node == NULL || cur1->node == NULL )
 		{
-			plog( "\nError: object " );
-			plog( lab );
-			plog( " does not contain the correct network data structure." );
+			sprintf( msg, "object '%s' has no network data structure", lab );
+			error_hard( msg, "Network data structure missing", "Check your code to prevent this situation." );
 			return NULL;
 		}
 		
@@ -656,7 +658,8 @@ long object::init_random_dir_net( char const *lab, long numNodes, long numLinks 
 	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) )				// test if net is achievable
 	{
-		plog( "\nError: numLinks > ( numNodes * ( numNodes - 1 ) )" );
+		sprintf( msg, "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) )", lab );
+		error_hard( msg, "Invalid network parameters", "Check your code to prevent this situation." );
 		return 0;
 	}
 	
@@ -695,7 +698,8 @@ long object::init_random_undir_net( char const *lab, long numNodes, long numLink
 	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) / 2 )			// test if net is achievable
 	{
-		plog( "\nError: numLinks > ( numNodes * ( numNodes - 1 ) ) / 2" );
+		sprintf( msg, "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2", lab );
+		error_hard( msg, "Invalid network parameters", "Check your code to prevent this situation." );
 		return 0;
 	}
 	
@@ -1044,7 +1048,8 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 															// fully formed file name
 	if ( !( pajekFile = fopen( fileName, "r" ) ) )			// open file for reading
 	{
-		plog( "\nError opening network file: " ); plog( fileName );
+		sprintf( msg, "error opening network file '%s'", fileName );
+		error_hard( msg, "Network file error", "Check the requested file exists." );
 		return 0;
 	}
  
@@ -1052,7 +1057,8 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 															// count existing nodes
 	if ( exNodes == 0 )
 	{
-		plog( "\nError: no object exists with name '" ); plog( fileName ); plog( "'" );
+		sprintf( msg, "no object exists with name '%s'", lab );
+		error_hard( msg, "Invalid network data structure", "Check your configuration to prevent this situation." );
 		return 0;
 	}
 		
@@ -1067,8 +1073,8 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 
 	if ( numNodes == 0 )									// no nodes to create (or EOF)
 	{
-		plog( "\nError: empty or invalid network file: " );
-		plog( fileName );
+		sprintf( msg, "empty or invalid network file '%s'", fileName );
+		error_hard( msg, "Network file error", "Check the requested file content." );
 		fclose( pajekFile );
 		return 0;
 	}
@@ -1183,7 +1189,8 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 		
 	if ( !( pajekFile = fopen( fileName, mode ) ) )				// create new file
 	{
-		plog( "\nError creating network file: " ); plog( fileName );
+		sprintf( msg, "error creating network file '%s'", fileName );
+		error_hard( msg, "Network file error", "Check disk space and permissions." );
 		return  0;
 	}
 	
@@ -1208,9 +1215,8 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 	{
 		if ( cur->node == NULL )								// not node of a network?
 		{
-			plog( "\nError: object " ); plog( lab );
-			plog( " does not contain the correct network data structure." );
-			plog( "\nFile "); plog( fileName ); plog ( " not saved.");
+			sprintf( msg, "object '%s' does not contain the correct network data structure.\nFile '%s' not saved.", lab, fileName );
+			error_hard( msg, "Invalid network data structure", "Check your code to prevent this situation." );
 			fclose( pajekFile );
 			return 0;
 		}

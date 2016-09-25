@@ -390,14 +390,14 @@ else
  } 
 
 if(f==NULL)
- { sprintf(msg,"\nError: search of data for %s in file %s failed\n", label, file_name);
+ { sprintf(msg,"\nWarning: search of data for '%s' in file '%s' failed", label, file_name);
 	plog(msg);
 	return 1;
  }
 else
 {
 if(fscanf(f, " %c", &ch)!=1)
-	{sprintf(msg, "\nError: data for object %s not found", label);
+	{sprintf(msg, "\nWarning: data for object '%s' not found", label);
 	 plog(msg);
 	 return 1;
    }
@@ -407,7 +407,7 @@ else
  to_compute=0;
 for(cur=this;cur!=NULL; )
  {if(fscanf(f, "\t%d", &num)!=1)
-	{sprintf(msg, "\nError: data for object %s not found", label);
+	{sprintf(msg, "\nWarning: data for object '%s' not found", label);
 	 plog(msg);
 	 return 1;
    }
@@ -425,13 +425,13 @@ for(cv=v; cv!=NULL; cv=cv->next)
   fscanf(f, "%s ", str); //skip the 'Element: '
   fscanf(f, "%s ", str); //skip the 'label'
   if(f==NULL)
-  { sprintf(msg, "\nError: search of data for %s in file %s failed\n", cv->label, file_name);
+  { sprintf(msg, "\nWarning: search of data for '%s' in file '%s' failed", cv->label, file_name);
 	 plog(msg);
 	 return 1;
   }
 
   if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2   )!=5)
-	 {sprintf(msg, "\nError: values not found for %s\n", cv->label);
+	 {sprintf(msg, "\nWarning: values not found for '%s'", cv->label);
 	  plog(msg);
 	 }
 
@@ -475,7 +475,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	 cv1->data_loaded=ch;
 	 if(cv1->param==1)
 	  {if(fscanf(f, "%lf", &app )!=1)
-			 {sprintf(msg,"\nError: value not found for parameter: %s\n", cv1->label);
+			 {sprintf(msg,"\nWarning: value not found for parameter: '%s'", cv1->label);
 			  plog(msg);
 			  return 1;
 			 }
@@ -486,7 +486,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	 {for(i=0; i<cv->num_lag; i++)
 		{
 		  if ( ( num = fscanf(f, "\t%lf", &app ) ) != 1 )
-			{sprintf(msg, "\nError: value not found for variable: %s\n", cv1->label);
+			{sprintf(msg, "\nWarning: value not found for variable: '%s'", cv1->label);
 			  plog(msg);
 			  return 1;
 			}
@@ -735,13 +735,13 @@ for(cv=v; cv!=NULL; cv=cv->next)
  {
   f=search_data_ent(file_name,  cv);
   if(f==NULL)
-  { sprintf(msg,"\nError: search of data for %s in file %s failed\n", cv->label, file_name);
+  { sprintf(msg,"\nWarning: search of data for '%s' in file '%s' failed", cv->label, file_name);
 	 plog(msg);
 	 return 1;
   }
 
   if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2 )!=5)
-	 {sprintf(msg,"\nError: values not found for %s\n", cv->label);
+	 {sprintf(msg,"\nWarning: values not found for '%s'", cv->label);
 	 plog(msg);
 	 return 1;
 	 }
@@ -989,7 +989,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
            break;
    case 2: load_description(cv->label, "Function", f);
            break;
-   default: plog("Error: wrong element loading description\n");
+   default: plog("\nWarning: wrong element loading description. File may be damaged.");
            break;
    }
  }
@@ -1038,7 +1038,7 @@ cd=search_description(r->label);
 if(cd==NULL)
   {
    add_description(r->label, "Object", "(no description available)");
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", r->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", r->label);
    plog(msg);
    cd=search_description(r->label);
   } 
@@ -1059,7 +1059,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
    add_description(cv->label, "Object", "(no description available)");
-   sprintf(msg, "Warning! description for '%s' not found. New one created.\\n", cv->label);
+   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
    plog(msg);
    cd=search_description(cv->label);
   } 

@@ -91,7 +91,6 @@ void link_data(object *root, char *lab);
 
 void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
 void plog(char const  *msg);
-void myexit(int v);
 
 char lab_view[40];
 char tag_view[40];
