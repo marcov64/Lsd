@@ -136,10 +136,11 @@ void clean_save(object *n);
 void show_save(object *n);
 void show_initial(object *n);
 void show_observe(object *n);
+void set_shortcuts( const char *window );
 
 void clean_plot(object *n);
 FILE *search_str(char const *name, char const *str);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void analysis(int *choice);
 void show_eq(char *lab, int *choice);
 void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
@@ -249,7 +250,7 @@ extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 extern bool redrawRoot;		// control for redrawing root window (.)
 
 // list of choices that are bad with existing run data
-int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
+int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
 #define NUM_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
  
@@ -655,78 +656,11 @@ cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -und
 cmd( inter, "$w add separator" );
 sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
-
-cmd(inter, "bind . <Control-l> {set choice 17}");
-cmd(inter, "bind . <Control-s> {set choice 18}");
-cmd(inter, "bind . <Control-e> {set choice 20}");
-cmd(inter, "bind . <Control-q> {set choice 11}");
-cmd(inter, "bind . <Control-v> {set param 0; set choice 2}");
-cmd(inter, "bind . <Control-p> {set param 1; set choice 2}");
-cmd(inter, "bind . <Control-n> {set param 2; set choice 2}");
-
-cmd(inter, "bind . <Control-d> {set choice 3}");
-cmd(inter, "bind . <Control-o> {set choice 19}");
-cmd(inter, "bind . <Control-i> {set choice 21}");
-cmd(inter, "bind . <Control-a> {set choice 26}");
-cmd(inter, "bind . <Control-r> {set choice 1}");
-cmd(inter, "bind . <Control-m> {set choice 22}");
-cmd(inter, "bind . <Control-f> {set choice 50}");
-cmd(inter, "bind . <Control-u> {set choice 28}");
-cmd(inter, "bind . <Control-g> {set choice 30}");
-cmd(inter, "bind . <Control-b> {set choice 34}");
-cmd(inter, "bind . <Control-c> {set choice 36}");
-cmd(inter, "bind . <Control-z> {set choice 37}");
-cmd(inter, "bind . <Control-w> {set choice 38}");
-cmd(inter, "bind . <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
-
-
-cmd(inter, "bind .log <Control-l> {set choice 17}");
-cmd(inter, "bind .log <Control-s> {set choice 18}");
-cmd(inter, "bind .log <Control-e> {set choice 20}");
-cmd(inter, "bind .log <Control-q> {set choice 11}");
-cmd(inter, "bind .log <Control-v> {set param 0; set choice 2}");
-cmd(inter, "bind .log <Control-p> {set param 1; set choice 2}");
-cmd(inter, "bind .log <Control-n> {set param 2; set choice 2}");
-cmd(inter, "bind .log <Control-d> {set choice 3}");
-cmd(inter, "bind .log <Control-o> {set choice 19}");
-cmd(inter, "bind .log <Control-i> {set choice 21}");
-cmd(inter, "bind .log <Control-a> {set choice 26}");
-cmd(inter, "bind .log <Control-r> {set choice 1}");
-cmd(inter, "bind .log <Control-m> {set choice 22}");
-cmd(inter, "bind .log <Control-f> {set choice 50}");
-cmd(inter, "bind .log <Control-u> {set choice 28}");
-cmd(inter, "bind .log <Control-g> {set choice 30}");
-cmd(inter, "bind .log <Control-b> {set choice 34}");
-cmd(inter, "bind .log <Control-z> {set choice 37}");
-cmd(inter, "bind .log <Control-w> {set choice 38}");
-cmd(inter, "bind .log <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
-
-if(strWindowOn)
-{
-cmd(inter, "bind $c <Control-l> {set choice 17}");
-cmd(inter, "bind $c <Control-s> {set choice 18}");
-cmd(inter, "bind $c <Control-e> {set choice 20}");
-cmd(inter, "bind $c <Control-q> {set choice 11}");
-cmd(inter, "bind $c <Control-v> {set param 0; set choice 2}");
-cmd(inter, "bind $c <Control-p> {set param 1; set choice 2}");
-cmd(inter, "bind $c <Control-n> {set param 2; set choice 2}");
-cmd(inter, "bind $c <Control-d> {set choice 3}");
-cmd(inter, "bind $c <Control-o> {set choice 19}");
-cmd(inter, "bind $c <Control-i> {set choice 21}");
-cmd(inter, "bind $c <Control-a> {set choice 26}");
-cmd(inter, "bind $c <Control-r> {set choice 1}");
-cmd(inter, "bind $c <Control-m> {set choice 22}");
-cmd(inter, "bind $c <Control-f> {set choice 50}");
-cmd(inter, "bind $c <Control-u> {set choice 28}");
-cmd(inter, "bind $c <Control-g> {set choice 30}");
-cmd(inter, "bind $c <Control-b> {set choice 34}");
-cmd(inter, "bind $c <Control-c> {set choice 36}");
-cmd(inter, "bind $c <Control-z> {set choice 37}");
-cmd(inter, "bind $c <Control-w> {set choice 38}");
-cmd(inter, "bind $c <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}");
-}
-
 cmd(inter, ". configure -menu .m");
+
+// set shortcuts on open windows
+set_shortcuts( "." );
+set_shortcuts( ".log" );
 }
 
 cmd(inter, "pack .l.v.c.var_name -fill both -expand yes");
@@ -2080,8 +2014,8 @@ if ( lab1 == NULL || ! strcmp( lab1, r->label ) )		// same object?
 	break;
 	
 cv = r->search_var( NULL, lab_old );
-if ( cv->param == 1 || cv->num_lag > 0 ) 
-	cv->data_loaded = '-';
+//if ( cv->param == 1 || cv->num_lag > 0 ) 		// force initial value request
+//	cv->data_loaded = '-';
 for ( cur = root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
 	cur->add_var_from_example( cv );
 
@@ -4908,6 +4842,59 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 return 0;
 }
 
+/****************************************************
+SET_SHORTCUTS
+Define keyboard shortcuts to menu items
+****************************************************/
+void set_shortcuts( const char *window )
+{
+	char command[300];
+	
+	sprintf( command, "bind %s <Control-l> {set choice 17}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-s> {set choice 18}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-e> {set choice 20}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-q> {set choice 11}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-v> {set param 0; set choice 2}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-p> {set param 1; set choice 2}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-n> {set param 2; set choice 2}", window );
+	cmd( inter, command );
+
+	sprintf( command, "bind %s <Control-d> {set choice 3}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-o> {set choice 19}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-i> {set choice 21}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-a> {set choice 26}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-r> {set choice 1}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-m> {set choice 22}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-f> {set choice 50}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-u> {set choice 28}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-g> {set choice 30}", window );
+	cmd( inter, command );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-b> {set choice 34}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-c> {set choice 36}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-z> {set choice 37}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-w> {set choice 38}", window );
+	cmd( inter, command );
+	sprintf( command, "bind %s <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}", window );
+	cmd( inter, command );
+}
 
 
 void control_tocompute(object *r, char *l)

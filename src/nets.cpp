@@ -106,7 +106,6 @@ NETS.CPP
 ****************************************************************************************/
 
 #include "decl.h"
-#include <math.h>
 
 #define GCCLIBS true			// enable linux code
 
@@ -120,7 +119,7 @@ object *go_brother(object *c);
 double rnd_integer(double m, double x);
 void myexit(int v);
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 
 extern char msg[];
 extern int t;

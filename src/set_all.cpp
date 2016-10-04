@@ -97,7 +97,7 @@ extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 void cmd(Tcl_Interp *inter, char const *cc);
 double rnd_integer(double min, double max);
 double norm(double mean, double dev);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void myexit(int v);
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 description *search_description(char *lab);

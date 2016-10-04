@@ -65,7 +65,7 @@ Contained in ANALYSIS.CPP. Simply sets the colors for any integer number
 #include <tk.h>
 #include "decl.h"
 
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void assign(object *r, int *i, char *lab);
 void count(object *r, int *i);
 object *skip_next_obj(object *t, int *count);
@@ -73,6 +73,7 @@ object *go_brother(object *c);
 void init_canvas(void);
 void init_plot(int i, int id_sim);
 void cmd(Tcl_Interp *inter, char const *cc);
+void set_shortcuts( const char *window );
 
 // better adjusts position for X11
 int shift=20;		// new window shift
@@ -264,7 +265,8 @@ for(i=0, j=0, k=0; i<num; i++)
 	 j=0;
 	}
  }
-
+sprintf( msg,".plt%d", id_sim );
+set_shortcuts( msg );
 }
 
 /**************************************

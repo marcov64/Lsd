@@ -319,11 +319,7 @@ see nets.cpp
 
 ****************************************************/
 
-#include "choose.h"
-
 #include "decl.h"
-#include <math.h>
-#include <stdio.h>
 #include <time.h>
 
 #ifndef NO_WINDOW
@@ -359,7 +355,7 @@ object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);
 
 FILE *search_str(char *file_name, char *str);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void plot_rt(variable *var);
 int sort_function_down( const void *a, const void *b);
 int sort_function_up( const void *a, const void *b);
@@ -1203,8 +1199,6 @@ int i;
 
 if(v==NULL)
  {
-  //v=new variable;
-
   v=new variable;
   if(v==NULL)
 	{sprintf(msg, "out of memory in add_var_from_example");
@@ -2225,13 +2219,13 @@ if ( quit == 2 )		// simulation already being stopped
 	return;
 	
 char *buffer = new char[ strlen( logText ) + 20 ];
-sprintf( buffer, "\nERROR: %s\n", logText );
+sprintf( buffer, "\n\nERROR: %s\n", logText );
 plog( buffer );
 delete [] buffer;
 
 #ifndef NO_WINDOW
 cmd(inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log");
-sprintf( msg, "tk_messageBox -title Error -type ok -icon error -message \"%s.\n\nMore details are available in th Log window.\n%s\nLSD cannot continue.\"", boxTitle, boxText );
+sprintf( msg, "tk_messageBox -title Error -type ok -icon error -message \"%s.\n\nMore details are available in the Log window.\n%s\nLsd cannot continue.\"", boxTitle, boxText );
 cmd( inter, msg );
 #endif
 
@@ -2295,7 +2289,7 @@ if(choice==2)
  }
 
 #else
-printf("\nHard error. Aborting simulation...\n");
+printf("\nAborting simulation...\n");
 #endif
 
 myexit(100);

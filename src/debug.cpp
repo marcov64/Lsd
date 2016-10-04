@@ -103,7 +103,7 @@ extern bool unsavedChange;	// control for unsaved changes in configuration
 
 void cmd(Tcl_Interp *inter, char const *cc);
 object *go_brother(object *cur);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void deb_show(object *r, Tcl_Interp *inter);
 object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);

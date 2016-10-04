@@ -21,29 +21,43 @@ This file contains all the declarations and macros available in a model's equati
 ****************************************************
 ****************************************************/
 
-
-#include "choose.h"
 #include "decl.h"
 
-extern double i_values[100];
 #ifndef NO_WINDOW
 #include <tk.h>
-
 #endif
 
-extern object *root;
-extern int seed;
-extern long idum;
-extern int ran_gen;			// pseudo-random number generator to use (1-5))
-extern int sim_num;
-extern char *simul_name;	// configuration name being run (for saving networks)
-extern char *path;			// folder where the configuration is
-extern bool invalidHooks;	// flag to invalid hooks pointers (set by simulation)
+// workaround for STL bug on definitions of isnan/isinf in C++11
+#ifdef STLBUG
+#include <algorithm>
+#define NAMESPACE std::
+#else
+#define NAMESPACE
+#endif
 
-bool use_nan = false;		// flag to allow using Not a Number value
-bool fast = false;			// make fast persistent across runs
-void error(char *m);
+extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
+extern object *root;
+extern lsdstack *stacklog;
+extern char *simul_name;								// configuration name being run (for saving networks)
+extern char *path;										// folder where the configuration is
+extern char msg[];
+extern int t;
+extern int max_step;
+extern int quit;
+extern int seed;
+extern int ran_gen;										// pseudo-random number generator to use (1-5))
+extern int sim_num;
+extern int debug_flag;
+extern long idum;
+extern double i_values[100];
+
+bool use_nan = false;									// flag to allow using Not a Number value
+bool fast = false;										// make fast persistent across runs
+void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
 void init_random( int seed );							// reset the random number generator seed
+void plog( char const *msg, char const *tag = "" );
+object *go_brother(object *c);
+int deb(object *r, object *c, char const *lab, double *res);
 double log(double v);
 double exp(double c);
 double fact( double x );								// Factorial function
@@ -60,9 +74,6 @@ double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmet
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
-void error_cycle(char const *l);
-
-int deb(object *r, object *c, char const *lab, double *res);
 
 double norm(double mean, double dev);
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
@@ -70,32 +81,22 @@ double max(double a, double b);
 double min(double a, double b);
 double round(double r);
 double rnd_integer(double m, double x);
+
+// redefine as macro to avoid conflicts with C++ version in <cmath.h>
 double _abs(double a)
 {if(a>0)
 	return a;
   else
 	return(-1*a);
 };
-#define abs( a ) _abs( a )	// redefine as macro to avoid conflicts with C++ version in <cmath>
-
-extern int t;
-extern int max_step;
-extern int quit;
-extern char msg[];
-extern int debug_flag;
-
-
-void plog(char const *msg);
-object *go_brother(object *c);
+#define abs( a ) _abs( a )
 
 #ifndef NO_WINDOW
 void cmd(Tcl_Interp *inter, char const *cc);
-//void cmd(Tcl_Interp *inter, const char cc[]);
-extern Tcl_Interp *inter;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color);
-
 double update_lattice(double line, double col, double val);
 int save_lattice( const char *fname );
+extern Tcl_Interp *inter;
 #endif
 
 #define DEBUG f=fopen("log.log","a"); \
@@ -113,68 +114,38 @@ int save_lattice( const char *fname );
 if( quit == 2 ) \
 	return -1; \
 double res = 0; \
-object *p, *c, app; \
-int i,j,h,k; \
+object *p = up, *c = caller, app; \
+int i, j, h, k; \
 double v[1000]; \
 object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
-netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9, *curl10; \
-FILE *f = NULL; \
-i = j = h = k = 0; \
-cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = NULL; \
-curl = curl1 = curl2 = curl3 = curl4 = curl5 = curl6 = curl7 = curl8 = curl9 = curl10 = NULL; \
-p = up; \
-c = caller;
+cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = NULL; \
+netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
+curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
+FILE *f = NULL;
+
+#define MODELEND sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
+error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." ); \
+return -1; \
+end : \
+if ( quit == 0 && ( ( ! use_nan && NAMESPACE isnan( res ) ) || NAMESPACE isinf( res ) ) ) \
+ { \
+  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD Debugger will open next.", t, label, res ); \
+  error_hard( msg, "Invalid result", "Check your code to prevent this situation." ); \
+  debug_flag = 1; \
+  debug = 'd'; \
+ } \
+if ( debug_flag == 1 ) \
+ { \
+ for ( i = 0; i < 100; i++ ) \
+  i_values[i] = v[i]; \
+ } \
+return res; \
+}
 
 #define EQUATION(X) if(!strcmp(label,X)) {
 #define FUNCTION(X) if(!strcmp(label,X)) { last_update--; if(c==NULL) {  res=val[0];  goto end; } }; \
  if(!strcmp(label,X)) {
 #define END_EQUATION(X) {res=X; goto end; }
-
-// workaround for STL bug on definitions of isnan/isinf in C++11
-#ifdef STLBUG
-#include <algorithm>
-#define NAMESPACE std::
-#else
-#define NAMESPACE
-#endif
-
-#ifndef NO_WINDOW
-
-#define MODELEND sprintf( msg, "Equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly\"", label, label ); \
-error( msg ); \
-quit=2; \
-return -1; \
-end : \
-if( ( ( ! use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res) ) && quit == 0 ) \
- { \
-  sprintf(msg, "At time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD Debugger will open next.",t, label, res ); \
-  error(msg); \
-  debug_flag=1; \
-  debug='d'; \
- } \
-if(debug_flag==1) \
- { \
- for(i=0; i<100; i++) \
-  i_values[i]=v[i]; \
- } \
-return(res); \
-}
-
-#else
-
-#define MODELEND sprintf( msg, "Equation not found for variable '%s'", label ); \
-error( msg ); \
-myexit(101); \
-end : \
-if( ( ( ! use_nan && NAMESPACE isnan(res)) || NAMESPACE isinf(res) ) && quit == 0 ) \
- { \
-  sprintf(msg, "At time %d the equation for '%s' produces the invalid value '%lf'\nAborting simulation...\n",t, label, res ); \
-  error(msg); \
-  myexit(102); \
- } \
-return(res); \
-}
-#endif
 
 #define ABORT quit=1;
 #define RESULT(X) res=X; goto end; }
@@ -203,30 +174,49 @@ return(res); \
 #define WHTAVES(X,W,Y) X->whg_av((char*)W,(char*)Y,0)
 #define WHTAVELS(X,W,Y,Z) X->whg_av((char*)W,(char*)Y,Z)
 
-
 #define INCRS(Q,X,Y) Q->increment((char*)X,Y)
 #define INCR(X,Y) p->increment((char*)X,Y)
 
 #define MULT(X,Y) p->multiply((char*)X,Y)
 #define MULTS(Q,X,Y) Q->multiply((char*)X,Y)
 
+#define CYCLE_SAFE(O,L) O = p->search( ( char * ) L ); \
+if ( O == NULL ) \
+{ \
+	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
+	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+} \
+else \
+	for ( cyccur = go_brother( O ); O != NULL; O = cyccur, \
+		  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
 
+#define CYCLE_SAFES(C,O,L) O = C->search( ( char * ) L ); \
+if ( O == NULL ) \
+{ \
+	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
+	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+} \
+else \
+	for ( cyccur = go_brother( O ); O != NULL; O = cyccur, \
+		  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
+		  
+#define CYCLE(O,L) O = p->search( ( char * ) L ); \
+if ( O == NULL ) \
+{ \
+	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
+	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+} \
+else \
+	for ( ; O != NULL; O = go_brother( O ) )
 
-
-#define CYCLE_SAFES(C,O,L) for(O=C->search((char*)L), cyccur=go_brother(O); \
-O!=NULL;O=cyccur, cyccur!=NULL?cyccur=go_brother(cyccur):cyccur=cyccur)
-#define CYCLE_SAFE(O,L) for(O=p->search((char*)L), cyccur=go_brother(O); \
-O!=NULL;O=cyccur, cyccur!=NULL?cyccur=go_brother(cyccur):cyccur=cyccur)
-
-
-#define CYCLE(O,L) O=p->search((char*)L); \
-if(O==NULL) error_cycle((char*)L); \
-for(;O!=NULL;O=go_brother(O))
-
-#define CYCLES(C,O,L) O=C->search((char*)L); \
-if(O==NULL) error_cycle((char*)L); \
-for(;O!=NULL;O=go_brother(O))
-
+#define CYCLES(C,O,L) O = C->search( ( char * ) L ); \
+if ( O == NULL ) \
+{ \
+	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
+	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+} \
+else \
+	for ( ; O != NULL; O = go_brother( O ) )
 
 #define MAX(X) p->overall_max((char*)X,0)
 #define MAXL(X,Y) p->overall_max((char*)X,Y)
@@ -284,8 +274,6 @@ for(;O!=NULL;O=go_brother(O))
 #define RNDDRAWFAIR(X) p->draw_rnd((char*)X)
 #define RNDDRAWFAIRS(Z,X) Z->draw_rnd((char*)X)
 
-
-
 #define RNDDRAWTOT(X,Y, T) p->draw_rnd((char*)X, (char*)Y, 0, T)
 #define RNDDRAWTOTL(X,Y,Z, T) p->draw_rnd((char*)X, (char*)Y, Z, T)
 #define RNDDRAWTOTS(Z,X,Y, T) Z->draw_rnd((char*)X, (char*)Y,0, T)
@@ -295,6 +283,7 @@ for(;O!=NULL;O=go_brother(O))
 
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
+
 
 // NETWORK MACROS
 
@@ -398,8 +387,15 @@ for(;O!=NULL;O=go_brother(O))
 #define WRITES_WEIGHT(O,X) if(O!=NULL)O->weight=X;
 
 // cycle through set of links of object C, using link pointer O
-#define CYCLE_LINK(O) if(p->node==NULL)error_cycle("invalid node");else O=p->node->first;for(;O!=NULL;O=O->next)
-#define CYCLES_LINK(C,O) if(C==NULL)error_cycle("invalid node");else if(C->node==NULL)error_cycle("invalid node");else O=C->node->first;for(;O!=NULL;O=O->next)
+#define CYCLE_LINK(O) if ( p->node == NULL || p->node->first == NULL ) \
+	error_hard( "object has incorrect network data structure", "Network data structure missing", "Check your code to prevent this situation." ); \
+else \
+	for ( O = p->node->first; O != NULL; O = O->next )
+
+#define CYCLES_LINK(C,O) if ( C == NULL || C->node == NULL || C->node->first == NULL ) \
+	error_hard( "object has incorrect network data structure", "Network data structure missing", "Check your code to prevent this situation." ); \
+else \
+	for ( O = C->node->first; O != NULL; O = O->next )
 
 
 // EXTENDED DATA/ATTRIBUTES MANAGEMENT MACROS
@@ -410,17 +406,21 @@ for(;O!=NULL;O=go_brother(O))
 #define ADDS_EXT( PTR, CLASS ) PTR->hook = reinterpret_cast< object * >( new CLASS );
 #define DELETE_EXT( CLASS ) { delete reinterpret_cast< CLASS * >( p->hook ); p->hook = NULL; }
 #define DELETES_EXT( PTR, CLASS ) { delete reinterpret_cast< CLASS * >( PTR->hook ); PTR->hook = NULL; }
+
 // convert current (or a pointer PTR from) LSD object type in the user defined CLASS type
 #define P_EXT( CLASS ) ( reinterpret_cast< CLASS * >( p->hook ) )
 #define PS_EXT( PTR, CLASS ) ( reinterpret_cast< CLASS * >( PTR->hook ) )
+
 // read/write from object OBJ pointed by pointer current/PTR of type CLASS
 #define V_EXT( CLASS, OBJ ) ( P_EXT( CLASS ) -> OBJ )
 #define VS_EXT( PTR, CLASS, OBJ ) ( PS_EXT( PTR, CLASS ) -> OBJ )
 #define WRITE_EXT( CLASS, OBJ, VAL ) ( P_EXT( CLASS ) -> OBJ = VAL )
 #define WRITES_EXT( PTR, CLASS, OBJ, VAL ) ( PS_EXT( PTR, CLASS ) -> OBJ = VAL )
+
 // execute METHOD contained in OBJ pointed by pointer current/PTR of type CLASS with the parameters ...
 #define EXEC_EXT( CLASS, OBJ, METHOD, ... ) ( P_EXT( CLASS ) -> OBJ.METHOD( __VA_ARGS__ ) )
 #define EXECS_EXT( PTR, CLASS, OBJ, METHOD, ... ) ( PS_EXT( PTR, CLASS ) -> OBJ.METHOD( __VA_ARGS__ ) )
+
 // cycle over elements of OBJ pointed by pointer current/PTR of type CLASS using iterator ITER
 #define CYCLE_EXT( ITER, CLASS, OBJ ) for ( ITER = EXEC_EXT( CLASS, OBJ, begin ); ITER != EXEC_EXT( CLASS, OBJ, end ); ++ITER )
 #define CYCLES_EXT( PTR, ITER, CLASS, OBJ ) for ( ITER = EXECS_EXT( PTR, CLASS, OBJ, begin ); ITER != EXECS_EXT( PTR, CLASS, OBJ, end ); ++ITER )

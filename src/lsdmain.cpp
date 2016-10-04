@@ -70,7 +70,11 @@ position of the file is just after str.
 
 ****************************************************/
 
-#include "choose.h"
+#include "decl.h"
+#include <ctype.h>
+#include <unistd.h>
+#include <time.h>
+#include <signal.h>
 
 #ifndef NO_WINDOW
 #include <tk.h>
@@ -79,13 +83,6 @@ Tcl_Interp *InterpInitWin(char *tcl_dir);
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 Tcl_Interp *inter;
 #endif
-
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include "decl.h"
-#include <time.h>
-#include <signal.h>
 
 // flags for some program defaults
 int seed = 1;				// random number generator initial seed
@@ -106,6 +103,8 @@ char hsize[] = "400";		// horizontal size in pixels
 char vsize[] = "620";		// vertical minimum size in pixels
 char hmargin[] = "20";		// horizontal right margin from the screen borders
 char vmargin[] = "20";		// vertical margins from the screen borders
+// Log window tabs
+char tabs[] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";
 
 extern bool fast;			// fast mode (log window)
 extern double ymin;
@@ -118,7 +117,7 @@ void print_title(object *root);
 object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);
 object *go_brother(object *c);
-void plog(char const *m);
+void plog( char const *msg, char const *tag = "" );
 void file_name( char *name);
 void prepare_plot(object *r, int id_sim);
 void myexit(int v);
@@ -786,9 +785,9 @@ if(quit==1) //For multiple simulation runs you need to reset quit
  quit=0;
 end=clock();
 if(strlen(path)>0 || no_window==1)
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
 else
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)",i,(float)( end - start) /CLOCKS_PER_SEC);
+  sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)( end - start) /CLOCKS_PER_SEC);
  plog(msg);
 
 #ifndef NO_WINDOW 
@@ -988,15 +987,15 @@ if(quit!=2)
 PLOG
 has some problems, because the log window tends to interpret the message
 as tcl/tk commands
+The optional tag parameter has to correspond to the log window existing tags
 *********************************/
 
-void plog(char const *cm)
+void plog( char const *cm, char const *tag )
 {
 char app[1000];
 
 #ifndef NO_WINDOW 
-sprintf(app, ".log.text.text.internal insert end \"%s\"", cm);
-
+sprintf( app, ".log.text.text.internal insert end \"%s\" %s", cm, tag );
 cmd(inter, app);
 cmd(inter, ".log.text.text.internal see end");
 cmd(inter, "update idletasks");
@@ -1088,9 +1087,13 @@ cmd(inter, "wm title .log \"Lsd Log\"");
 cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
 cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
 cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");
-cmd(inter, "$w.text configure -tabs {5c 7.5c 10c 12.5c 15c 17.5c 20c}");
+sprintf( msg, "$w.text configure -tabs {%s}", tabs );
+cmd( inter, msg );
+
+// Log window tags
 cmd(inter, "$w.text tag configure highlight -foreground red");
 cmd(inter, "$w.text tag configure tabel");
+cmd(inter, "$w.text tag configure series -tabs {2c 5c 8c}");
 
 cmd(inter, "pack $w.scroll -side right -fill y");
 cmd(inter, "pack $w.text -expand yes -fill both");

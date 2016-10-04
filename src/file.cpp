@@ -155,10 +155,7 @@ UTIL.CPP given the file name name, the routine searches for the data line for th
 
 ****************************************************/
 
-#include "choose.h"
-
 #include "decl.h"
-
 
 object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);
@@ -173,7 +170,7 @@ void execmd(char *);
 FILE *search_data_str(char const *name, char const *init, char const *str);
 FILE *search_data_ent(char *name, variable *v);
 void find_lags(object *r);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void save_eqfile(FILE *f);
 void set_blueprint(object *container, object *r);
 void add_description(char const *lab, char const *type, char const *text);

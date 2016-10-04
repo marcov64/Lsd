@@ -27,44 +27,43 @@ Place here your equations
 
 #include "fun_head.h"
 
-double variable::fun(object *caller)
+double variable::fun( object *caller )
 {
+//Don't proceed if simulation is stopping
+if ( quit == 2 )
+	return -1;
+
 //These are the local variables used by default
-double v[40], res;
-object *p, *c, *cur1, *cur2, *cur3, *cur4, *cur5;
+double v[ 1000 ], res = 0;
+object *p = up, *c = caller;
+object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10;
+cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = NULL;
+netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5;
+curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL;
+FILE *f = NULL;
 
 //Declare here any other local variable to be used in your equations
 //You may need an integer to be used as a counter
-int i, j;
-//and an object (a pointer to)
-register object *cur;
-
-
-if(quit==2)
- return -1;
-
-p=up;
-c=caller;
-FILE *f;
-
+int i, j, h, k;
 
 //Uncommenting the following lines the file "log.log" will
 //contain the name of the variable just computed.
 //To be used in case of unexpected crashes. It slows down sensibly the simulation
 /**
-f=fopen("log.log","a");
- fprintf(f,"t=%d %s\n",t,label);
- fclose(f);
+f = fopen( "log.log", "a" );
+fprintf( f, "t=%d %s\n", t, label );
+fclose( f );
 **/
 
 //Place here your equations. They must be blocks of the following type
 
-if(!strcmp(label, "VarX"))
+
+if ( ! strcmp( label, "VarX" ) )
 {
 /*
 comment the equation
 */
-res=v[0]; //final result for Variable VarX at the generic time step t
+res = v[0]; //final result for Variable VarX at the generic time step t
 goto end;
 }
 
@@ -75,38 +74,32 @@ Do not place equations beyond this point.
 
 *********************/
 
-sprintf(msg, "\nEquation for %s not found", label);
-plog(msg);
-quit=2;
+sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
+error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." );
 return -1;
-
 
 end :
 
-
-if( ((!use_nan && isnan(res)) || isinf(res)==1) && quit!=1)
- { 
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
-  error(msg);
-
-  debug_flag=1;
-  debug='d';
- } 
-
-if(debug_flag==1)
+if ( ( quit == 0 && ( ( ! use_nan && NAMESPACE isnan( res ) ) || NAMESPACE isinf( res ) ) ) )
  {
- for(i=0; i<40; i++)
-  i_values[i]=v[i];
+  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLsd debugger will open next.", t, label, res );
+  error_hard( msg, "Invalid result", "Check your code to prevent this situation." );
+  debug_flag = 1;
+  debug = 'd';
  }
-
-return(res);
+if ( debug_flag == 1 )
+ {
+ for ( i = 0; i < 100; i++ )
+  i_values[i] = v[i];
+ }
+return res;
 }
 
 /*
 This function is executed once at the end of a simulation run. It may be used
 to perform some cleanup, in case the model allocated memory during the simulation.
 */
-void close_sim(void)
+void close_sim( void )
 {
 
 }

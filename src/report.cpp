@@ -43,7 +43,7 @@ any function using lab as parameter.
 #define MAX_INIT 1000
 
 void cmd(Tcl_Interp *inter, char const *cc);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 int contains (FILE *f, char *lab, int len);
 void write_var(variable *v, FILE *frep);
 void write_obj(object *r, FILE *frep);

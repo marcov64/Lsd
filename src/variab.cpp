@@ -150,7 +150,6 @@ DEBUG.CPP
 activate the debugger.
 
 ****************************************************/
-#include "choose.h"
 
 #include "decl.h"
 #include <time.h>
@@ -178,7 +177,7 @@ extern bool fast;
 
 
 void set_lab_tit(variable *var);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 clock_t start_profile[100], end_profile[100];
 

@@ -55,7 +55,7 @@ did not issue an error message.
 #include "decl.h"
 
 void cmd(Tcl_Interp *inter, char const *cc);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 int contains (FILE *f, char *lab, int len);
 void clean_spaces(char *s);
 void find_using(object *r, variable *v, FILE *frep);

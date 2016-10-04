@@ -11,10 +11,11 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
 
+#include "decl.h"
+
 #ifndef NO_WINDOW
  #include <tk.h>
 #endif 
-#include "decl.h"
 
 int lsdmain(int argn, char **argv);
 void myexit(int v);

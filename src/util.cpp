@@ -65,16 +65,15 @@ given the file name name, the routine searches for the data line for the variabl
 - other various mathematical routines
 
  ****************************************************/
-#include "choose.h"
+
+#include "decl.h"
+#include <ctype.h>
+#include <time.h>
 
 #ifndef NO_WINDOW
  #include <tk.h>
  extern Tcl_Interp *inter;
 #endif
-
-#include "decl.h"
-#include <ctype.h>
-#include <time.h>
 
 extern char *simul_file;
 extern char *struct_file;
@@ -100,7 +99,7 @@ double exp(double c);
 double sqrt(double v);
 
 void myexit(int v);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void print_stack(void);
 void clean_spaces(char *s);
 void scan_used_lab(char *lab, int *choice);
@@ -1486,23 +1485,6 @@ double betacdf( double alpha, double beta, double x )
 		return 1.0 - bt * betacf( beta, alpha, 1.0 - x ) / beta;
 }
 
-
-void error(char *m)
-{
-char app[1100];
-sprintf( app, "\nERROR: %s\n", m );
-plog( app );
-#ifndef NO_WINDOW
-sprintf( app, "tk_messageBox -type ok -title Error -icon error -message \"Simulation error.\n\n%s\"", m );
-cmd( inter, app );
-#endif 
-}
-
-void error_cycle(char const *l)
-{
-sprintf(msg, "failure in CYCLE (var. '%s'): object '%s' not found",stacklog->vs->label, l);
-error_hard( msg, "Object not found", "Check your code to prevent this situation." );
-}
 
 struct s
 {

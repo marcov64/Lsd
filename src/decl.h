@@ -18,6 +18,9 @@ Comments and bug reports to marco.valente@univaq.it
 #include <float.h>
 #include <limits.h>
 
+// LSD compilation options file
+#include "choose.h"
+
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 0

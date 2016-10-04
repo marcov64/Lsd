@@ -68,6 +68,7 @@ void draw_obj(Tcl_Interp *ti, object *blk, object *t, int level, int center, int
 void put_node(Tcl_Interp *interp, int x1, int y1, int x2, int y2, char *str);
 void put_line(Tcl_Interp *interp, int x1, int y1, int x2, int y2);
 void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
+void set_shortcuts( const char *window );
 
 extern int strWindowOn;		// control the presentation of the model structure window
 extern char *simul_name;	// simulation name to use in title bar
@@ -155,6 +156,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd(inter, "set posYstr [winfo y .]");
 	sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
 	cmd( inter, msg );
+	set_shortcuts( ".model_str" );
 }
 else	// or just update canvas
 {

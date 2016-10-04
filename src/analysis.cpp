@@ -92,17 +92,15 @@ Exit function, which is customized on the operative system.
 
 ****************************************************/
 
-#define PI 3.141592654
+#include "decl.h"
 #include <tk.h>
 #include <unistd.h>
-#include <float.h>
 
-
-#include "decl.h"
+#define PI 3.141592654
 
 object *go_brother(object *c);
 void cmd(Tcl_Interp *inter, char const *cc);
-void plog(char const *msg);
+void plog( char const *msg, char const *tag = "" );
 void read_data(int *choice);
 void init_canvas(void);
 void plot(int *choice);
@@ -549,7 +547,7 @@ case 1:
 //exit
 case 2:
 ///plog("here 1\n");
-cmd( inter, "if { [ .da.f.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"Do you really want to exit Analysis of Results?\\n\\nAll the graphs created will be lost.\"] } { set answer ok }");
+cmd( inter, "if { [ .da.f.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -type okcancel -title Warning -icon warning -default ok -message \"Do you really want to exit Analysis of Results?\\n\\nAll the graphs created will be lost.\"] } { set answer ok }");
 app=(char *)Tcl_GetVar(inter, "answer",0);
 
 cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { } {set choice 0}");
@@ -4098,7 +4096,7 @@ else
 cmd(inter, msg);
 
 sprintf(str1, "%d Cases", max_c-min_c+1);
-sprintf(longmsg, "%-20s\tAverage\tVar.\tMin\tMax\tSigma\n", str1);
+sprintf(longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin\tMax\n", str1);
 sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
@@ -4139,7 +4137,7 @@ for(i=0; i<nv; i++)
  cmd(inter, msg);
 
 
- sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
+ sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
 sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
@@ -4404,7 +4402,7 @@ else
 cmd(inter, msg);
 
 sprintf(str1, "%d Variables",nv);
-sprintf(longmsg, "%-20s\tAverage\tVar.\tMin\tMax\tSigma\n", str1);
+sprintf(longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin\tMax\n", str1);
 sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg);
 cmd(inter, msg);
 
@@ -4443,7 +4441,7 @@ for(j=0; j<nt; j++)
  sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", str1 );
  cmd(inter, msg);
 
- sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, var, pdigits, ymin, pdigits, ymax, pdigits, sig);
+ sprintf(longmsg, "%.*g\t%.*g\t%.*g\t%.*g\t%.*g\n", pdigits, av, pdigits, sig, pdigits, var, pdigits, ymin, pdigits, ymax);
  sprintf(msg, ".log.text.text.internal insert end \"%s\" tabel", longmsg );
  cmd(inter, msg);
  }
@@ -8061,31 +8059,30 @@ for(i=0; i<nv; i++)
  }
 }
 
-sprintf(msg, "\n\n%s_%s", str[0], tag[0]);
-plog(msg); 
+sprintf(msg, "\n\nt\t%s_%s", str[0], tag[0]);
+plog( msg, "series" ); 
 
 for(i=1; i<nv; i++)
  {
   sprintf(msg, "\t%s_%s", str[i], tag[i]);
-  plog(msg); 
+  plog( msg, "series" ); 
  }
 plog("\n");
 
-
 for(i=min_c; i<=max_c; i++)
  {
- if(!isnan(data[0][i]))		// write NaN as n/a
-	sprintf(msg, "%lf", data[0][i]);
+ if ( ! isnan( data[0][i] ) && start[0] <= i )
+	sprintf(msg, "%d\t%.*g", i, pdigits, data[0][i]);
  else
-	sprintf(msg, "%s", nonavail);
- plog(msg);
+	sprintf(msg, "%d\t%s", i, nonavail);		// write NaN as n/a
+ plog( msg, "series" );
  for(j=1; j<nv; j++)
    {
-   if(!isnan(data[j][i]))		// write NaN as n/a
-	sprintf(msg, "\t%lf", data[j][i]);
+   if ( ! isnan( data[j][i] ) && start[j] <= i )
+	sprintf(msg, "\t%.*g", pdigits, data[j][i]);
    else
-	sprintf(msg, "%s", nonavail);
-   plog(msg);
+	sprintf(msg, "\t%s", nonavail);		// write NaN as n/a
+   plog( msg, "series" );
    
    }
  plog("\n");
