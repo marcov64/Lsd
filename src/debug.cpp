@@ -187,16 +187,16 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd(inter, "button .deb.b.move.search -width -9 -text \"Search\" -command {set choice 10} -underline 0");
 	cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left");
 
-	cmd(inter, "bind .deb <KeyPress-u> {.deb.b.move.up invoke}");
+	cmd(inter, "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}");
 	cmd(inter, "bind .deb <Up> {.deb.b.move.up invoke}");
-	cmd(inter, "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}");
+	cmd(inter, "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}; bind .deb <KeyPress-N> {.deb.b.move.broth invoke}");
 	cmd(inter, "bind .deb <Right> {.deb.b.move.broth invoke}");
-	cmd(inter, "bind .deb <KeyPress-t> {.deb.b.move.hypern invoke}");
-	cmd(inter, "bind .deb <KeyPress-l> {.deb.b.move.last invoke}");
-	cmd(inter, "bind .deb <KeyPress-d> {.deb.b.move.down invoke}");
+	cmd(inter, "bind .deb <KeyPress-t> {.deb.b.move.hypern invoke}; bind .deb <KeyPress-T> {.deb.b.move.hypern invoke}");
+	cmd(inter, "bind .deb <KeyPress-l> {.deb.b.move.last invoke}; bind .deb <KeyPress-L> {.deb.b.move.last invoke}");
+	cmd(inter, "bind .deb <KeyPress-d> {.deb.b.move.down invoke}; bind .deb <KeyPress-D> {.deb.b.move.down invoke}");
 	cmd(inter, "bind .deb <Down> {.deb.b.move.down invoke}");
-	cmd(inter, "bind .deb <KeyPress-f> {.deb.b.move.search invoke}");
-	cmd(inter, "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}");
+	cmd(inter, "bind .deb <KeyPress-f> {.deb.b.move.search invoke}; bind .deb <KeyPress-F> {.deb.b.move.search invoke}");
+	cmd(inter, "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}; bind .deb <KeyPress-P> {.deb.b.move.prev invoke}");
 	cmd(inter, "bind .deb <Left> {.deb.b.move.prev invoke}");
 	cmd(inter, "bind .deb <KeyPress-Escape> {set choice 7}");
 	
@@ -221,14 +221,14 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		//cmd(inter, "checkbutton .deb.b.act.stack -text \"Stack info\" -variable stack_flag");
 		cmd(inter, "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left");
 
-		cmd(inter, "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}");
-		cmd(inter, "bind .deb <KeyPress-r> {.deb.b.act.run invoke}");
-		cmd(inter, "bind .deb <KeyPress-q> {.deb.b.act.exit invoke}");
-		cmd(inter, "bind .deb <KeyPress-a> {.deb.b.act.an invoke}");
-		cmd(inter, "bind .deb <KeyPress-i> {.deb.b.act.until invoke}");
-		cmd(inter, "bind .deb <KeyPress-c> {.deb.b.act.call invoke}");
-		cmd(inter, "bind .deb <KeyPress-h> {set choice 21}");
-		cmd(inter, "bind .deb <KeyPress-w> {set choice 22}");
+		cmd(inter, "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}");
+		cmd(inter, "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}");
+		cmd(inter, "bind .deb <KeyPress-q> {.deb.b.act.exit invoke}; bind .deb <KeyPress-Q> {.deb.b.act.exit invoke}");
+		cmd(inter, "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}");
+		cmd(inter, "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}");
+		cmd(inter, "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}");
+		cmd(inter, "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}");
+		cmd(inter, "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}");
 	}
 
 	cmd(inter, "pack .deb.b.move .deb.b.act -side top");
@@ -285,7 +285,7 @@ if(interact_flag==1)
 ch[0]=(char)NULL;
 attach_instance_number(ch, r);
 if(lab!=NULL)
- cmd(inter, "bind .deb <KeyPress-g> {set choice 77}");
+ cmd(inter, "bind .deb <KeyPress-g> {set choice 77}; bind .deb <KeyPress-G> {set choice 77}");
 if(asl!=NULL && asl->vs->up!=r)
   asl=NULL;
 
@@ -299,7 +299,7 @@ while(choice==0)
  goto debug_maincycle;
  }
  }
-cmd(inter, "bind .deb <KeyPress-g> {}");
+cmd(inter, "bind .deb <KeyPress-g> {}; bind .deb <KeyPress-G> {}");
 if(lab!=NULL)
 {
  i=choice;

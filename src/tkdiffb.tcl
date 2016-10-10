@@ -2940,6 +2940,7 @@ proc common-navigation {args} {
     global w
 
     bind . <Control-f> do-find
+    bind . <Control-F> do-find
 
     foreach widget $args {
 	# this effectively disables the widget, without having to
@@ -2976,6 +2977,7 @@ proc common-navigation {args} {
 	# these bindings allow control-f, tab and shift-tab to work
 	# in spite of the fact we bound Any-KeyPress to a null action
 	bind $widget <Control-f> continue
+	bind $widget <Control-F> continue
 
 	bind $widget <Tab> continue
 

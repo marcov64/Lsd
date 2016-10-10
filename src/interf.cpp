@@ -519,7 +519,7 @@ else
 cmd( inter, ch1 );
 cmd( inter, ch );
 
-cmd(inter, "bind . <KeyPress-u> {catch {.l.up_name.n invoke}   }");
+cmd(inter, "bind . <KeyPress-u> {catch {.l.up_name.n invoke}}; bind . <KeyPress-U> {catch {.l.up_name.n invoke}}");
 
 cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
 cmd( inter, "pack .l.up_name" );
@@ -1327,12 +1327,12 @@ cmd(inter, "button $T.h.b.del -width -9 -text Delete -command {set choice 3}");
 cmd(inter, "pack $T.h.b.prop $T.h.b.del -padx 10 -pady 5 -side left");
 
 cmd(inter, "bind $T.h <Double-1> {set choice 5}");
-cmd(inter, "bind $T.h <KeyPress-c> \"$T.b1.com invoke\"");
+cmd(inter, "bind $T.h <KeyPress-c> \"$T.b1.com invoke\"; bind $T.h <KeyPress-C> \"$T.b1.com invoke\"");
 cmd(inter, "bind $T.h <KeyPress-Delete> {set choice 3}");
-cmd(inter, "bind $T <Control-d> {}");
-cmd(inter, "bind $T <Control-z> {}");
-cmd(inter, "bind $T.h.ent_var <Control-d> \"focus -force $T.desc.f.text\"");
-cmd(inter, "bind $T.desc.f.text <Control-z> {set choice 1}");
+cmd(inter, "bind $T <Control-d> {}; bind $T <Control-D> {}");
+cmd(inter, "bind $T <Control-z> {}; bind $T <Control-Z> {}");
+cmd(inter, "bind $T.h.ent_var <Control-d> \"focus -force $T.desc.f.text\"; bind $T.h.ent_var <Control-D> \"focus -force $T.desc.f.text\"");
+cmd(inter, "bind $T.desc.f.text <Control-z> {set choice 1}; bind $T.desc.f.text <Control-Z> {set choice 1}");
 cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.b");
 
 cmd(inter, "pack $T.h $T.b1 $w -pady 5 -fill x -expand yes");
@@ -1348,6 +1348,10 @@ if(*choice==1|| *choice==5 || *choice==3)
 {
 
 unsavedChange = true;		// signal unsaved change
+
+// save description changes
+cmd(inter, "set text_description \"[$T.desc.f.text get 1.0 end]\"");
+cmd(inter, "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}");
 change_descr_text(lab_old);
 
 if(*choice==5 || *choice==3)
@@ -1533,12 +1537,12 @@ if(cv->param==1)
 if(cv->param==0||cv->param==2)
  cmd(inter, "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb -anchor w");
 
-cmd(inter, "bind $T.b1 <KeyPress-d> \"$T.b1.deb invoke\"");
-cmd(inter, "bind $T.b1 <KeyPress-s> \"$T.b1.sav invoke\"");
-cmd(inter, "bind $T.b1 <KeyPress-f> \"$T.b1.savi invoke\"");
-cmd(inter, "bind $T.b1 <KeyPress-p> \"$T.b1.plt invoke\"");
-cmd(inter, "bind $T.b1 <KeyPress-i> \"$T.desc.opt.ini invoke\"");
-cmd(inter, "bind $T.b1 <KeyPress-o> \"$T.desc.opt.obs invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-d> \"$T.b1.deb invoke\"; bind $T.b1 <KeyPress-D> \"$T.b1.deb invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-s> \"$T.b1.sav invoke\"; bind $T.b1 <KeyPress-S> \"$T.b1.sav invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-f> \"$T.b1.savi invoke\"; bind $T.b1 <KeyPress-F> \"$T.b1.savi invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-p> \"$T.b1.plt invoke\"; bind $T.b1 <KeyPress-P> \"$T.b1.plt invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-i> \"$T.desc.opt.ini invoke\"; bind $T.b1 <KeyPress-I> \"$T.desc.opt.ini invoke\"");
+cmd(inter, "bind $T.b1 <KeyPress-o> \"$T.desc.opt.obs invoke\"; bind $T.b1 <KeyPress-O> \"$T.desc.opt.obs invoke\"");
 
 sprintf(ch, "set vname %s", lab_old);
 cmd(inter, ch);
@@ -1638,8 +1642,8 @@ cmd(inter, ch);
    cmd(inter, "button $Td.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
    cmd(inter, "pack $Td.b2.setall $Td.b2.sens -padx 10 -pady 5 -side left");
    cmd(inter, "pack $Td.b2");
-   cmd(inter, "bind $Td.f.text <Control-i> {focus -force $Td.i.text}");
-   cmd(inter, "bind $Td.i.text <Control-z> {set done 1}");   
+   cmd(inter, "bind $Td.f.text <Control-i> {focus -force $Td.i.text}; bind $Td.f.text <Control-I> {focus -force $Td.i.text}");
+   cmd(inter, "bind $Td.i.text <Control-z> {set done 1}; bind $Td.i.text <Control-Z> {set done 1}");   
    }
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
@@ -1669,8 +1673,8 @@ cmd(inter, "pack $T.h.b.prop $T.h.b.mov $T.h.b.del -padx 10 -pady 5 -side left")
 cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.obj $T.h.b");
 cmd(inter, "pack $T.h $T.b1 $Td -pady 5 -fill x -expand yes");
 cmd(inter, "bind $T.h <KeyPress-Delete> {set done 10}");
-cmd(inter, "bind $T.b1 <Control-d> {focus -force $Td.f.text}");
-cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}");   
+cmd(inter, "bind $T.b1 <Control-d> {focus -force $Td.f.text}; bind $T.b1 <Control-D> {focus -force $Td.f.text}");
+cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}; bind $T.desc.f.text <Control-Z> {set done 1}");   
 
 cmd( inter, "donehelp $T b { set done 1 } { LsdHelp menumodel.html#variables }" );
 
@@ -4850,47 +4854,45 @@ void set_shortcuts( const char *window )
 {
 	char command[300];
 	
-	sprintf( command, "bind %s <Control-l> {set choice 17}", window );
+	sprintf( command, "bind %s <Control-l> {set choice 17}; bind %s <Control-L> {set choice 17}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-s> {set choice 18}", window );
+	sprintf( command, "bind %s <Control-s> {set choice 18}; bind %s <Control-S> {set choice 18}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-e> {set choice 20}", window );
+	sprintf( command, "bind %s <Control-e> {set choice 20}; bind %s <Control-E> {set choice 20}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-q> {set choice 11}", window );
+	sprintf( command, "bind %s <Control-q> {set choice 11}; bind %s <Control-Q> {set choice 11}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-v> {set param 0; set choice 2}", window );
+	sprintf( command, "bind %s <Control-v> {set param 0; set choice 2}; bind %s <Control-V> {set param 0; set choice 2}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-p> {set param 1; set choice 2}", window );
+	sprintf( command, "bind %s <Control-p> {set param 1; set choice 2}; bind %s <Control-P> {set param 1; set choice 2}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-n> {set param 2; set choice 2}", window );
+	sprintf( command, "bind %s <Control-n> {set param 2; set choice 2}; bind %s <Control-N> {set param 2; set choice 2}", window, window );
 	cmd( inter, command );
-
-	sprintf( command, "bind %s <Control-d> {set choice 3}", window );
+	sprintf( command, "bind %s <Control-d> {set choice 3}; bind %s <Control-D> {set choice 3}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-o> {set choice 19}", window );
+	sprintf( command, "bind %s <Control-o> {set choice 19}; bind %s <Control-O> {set choice 19}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-i> {set choice 21}", window );
+	sprintf( command, "bind %s <Control-i> {set choice 21}; bind %s <Control-I> {set choice 21}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-a> {set choice 26}", window );
+	sprintf( command, "bind %s <Control-a> {set choice 26}; bind %s <Control-A> {set choice 26}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-r> {set choice 1}", window );
+	sprintf( command, "bind %s <Control-r> {set choice 1}; bind %s <Control-R> {set choice 1}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-m> {set choice 22}", window );
+	sprintf( command, "bind %s <Control-m> {set choice 22}; bind %s <Control-M> {set choice 22}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-f> {set choice 50}", window );
+	sprintf( command, "bind %s <Control-f> {set choice 50}; bind %s <Control-F> {set choice 50}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-u> {set choice 28}", window );
+	sprintf( command, "bind %s <Control-u> {set choice 28}; bind %s <Control-U> {set choice 28}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-g> {set choice 30}", window );
+	sprintf( command, "bind %s <Control-g> {set choice 30}; bind %s <Control-G> {set choice 30}", window, window );
 	cmd( inter, command );
+	sprintf( command, "bind %s <Control-b> {set choice 34}; bind %s <Control-B> {set choice 34}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-b> {set choice 34}", window );
+	sprintf( command, "bind %s <Control-c> {set choice 36}; bind %s <Control-C> {set choice 36}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-c> {set choice 36}", window );
+	sprintf( command, "bind %s <Control-z> {set choice 37}; bind %s <Control-Z> {set choice 37}", window, window );
 	cmd( inter, command );
-	sprintf( command, "bind %s <Control-z> {set choice 37}", window );
-	cmd( inter, command );
-	sprintf( command, "bind %s <Control-w> {set choice 38}", window );
+	sprintf( command, "bind %s <Control-w> {set choice 38}; bind %s <Control-W> {set choice 38}", window, window );
 	cmd( inter, command );
 	sprintf( command, "bind %s <Control-Tab> {set strWindowOn [expr ! $strWindowOn]; set choice 70}", window );
 	cmd( inter, command );

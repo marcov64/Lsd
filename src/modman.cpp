@@ -561,7 +561,7 @@ cmd(inter, "set dir [glob *]");
 cmd(inter, "set num [llength $dir]");
 
 
-cmd(inter, "bind . <Control-n> {tk_menuSetFocus .m.file}");
+cmd(inter, "bind . <Control-n> {tk_menuSetFocus .m.file}; bind . <Control-N> {tk_menuSetFocus .m.file}");
 
 // procedures to save cursor environment before and after changes in text window for syntax coloring
 cmd(inter, "proc savCurIni {} {global curSelIni curPosIni; set curSelIni [.f.t.t tag nextrange sel 1.0]; set curPosIni [.f.t.t index insert]; .f.t.t edit modified false}");
@@ -591,23 +591,23 @@ cmd(inter, "bind .f.t.t <KeyRelease-quotedbl> {.f.hea.line.line conf -text [.f.t
 cmd(inter, "bind .f.t.t <KeyRelease-backslash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");*/
 
 
-cmd(inter, "bind .f.t.t <Control-l> {set choice 10}");
+cmd(inter, "bind .f.t.t <Control-l> {set choice 10}; bind .f.t.t <Control-L> {set choice 10}");
 cmd(inter, "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwrap .f.t.t $wrap}");
 
-cmd(inter, "bind .f.t.t <Control-f> {set choice 11}");
+cmd(inter, "bind .f.t.t <Control-f> {set choice 11}; bind .f.t.t <Control-F> {set choice 11}");
 cmd(inter, "bind .f.t.t <F3> {set choice 12}");
 cmd(inter, "bind .f.t.t <Control-s> { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}}"); 
 cmd(inter, "bind .f.t.t <Control-a> { set choice 4}");
-cmd(inter, "bind .f.t.t <Control-r> {set choice 2}");
+cmd(inter, "bind .f.t.t <Control-r> {set choice 2}; bind .f.t.t <Control-R> {set choice 2}");
 cmd(inter, "bind .f.t.t <Control-e> {set choice 8}");
 cmd(inter, "bind .f.t.t <Control-KeyRelease-o> {if {$tk_strictMotif == 0} {set a [.f.t.t index insert]; .f.t.t delete \"$a lineend\"} {}; set choice 15; break}");
-cmd(inter, "bind .f.t.t <Control-q> {set choice 1}");
-cmd(inter, "bind .f.t.t <Control-p> {set choice 6; break}");
+cmd(inter, "bind .f.t.t <Control-q> {set choice 1}; bind .f.t.t <Control-Q> {set choice 1}");
+cmd(inter, "bind .f.t.t <Control-p> {set choice 6; break}; bind .f.t.t <Control-P> {set choice 6; break}");
 cmd(inter, "bind .f.t.t <Control-u> {set choice 32}");
 cmd(inter, "bind .f.t.t <Control-m> {set choice 17}");
-cmd(inter, "bind .f.t.t <Control-g> {set choice 13}");
+cmd(inter, "bind .f.t.t <Control-g> {set choice 13}; bind .f.t.t <Control-G> {set choice 13}");
 cmd(inter, "bind .f.t.t <Control-d> {set choice 5; break}");
-cmd(inter, "bind .f.t.t <Control-b> {set choice 33; break}");
+cmd(inter, "bind .f.t.t <Control-b> {set choice 33; break}; bind .f.t.t <Control-B> {set choice 33; break}");
 
 
 
@@ -625,7 +625,7 @@ cmd(inter, "bind .f.t.t <Control-less> {set choice 43}");
 cmd(inter, "bind .f.t.t <Control-semicolon> {set choice 64}");
 cmd(inter, "bind .f.t.t <Control-comma> {set choice 65}");
 cmd(inter, "bind .f.t.t <Control-period> {set choice 66}");
-cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}");
+cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m postcascade 0}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}} {}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}} {}");
 cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
@@ -640,8 +640,8 @@ cmd(inter, "bind .f.t.t <KeyPress-Return> {+set choice 16}");
 //cmd(inter, "bind .f.t.t <Control-y> {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} }");
 
 cmd(inter, "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}");
-cmd(inter, "bind .f.t.t <Control-z> {catch {.f.t.t edit undo}}");
-cmd(inter, "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}");
+cmd(inter, "bind .f.t.t <Control-z> {catch {.f.t.t edit undo}}; bind .f.t.t <Control-Z> {catch {.f.t.t edit undo}}");
+cmd(inter, "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}; bind .f.t.t <Control-Y> {catch {.f.t.t edit redo}}");
 cmd(inter, "bind . <KeyPress-Insert> {# nothing}");
 
 
@@ -1592,7 +1592,7 @@ cmd(inter, "bind .a.edir <Return> {focus -force .a.tdes}");
 
 cmd(inter, "label .a.ldes -text \"Insert a short description of the group\"");
 cmd(inter, "text .a.tdes -width 30 -heig 3");
-cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}; bind .a.tdes <Control-E> {focus -force .a.b.ok}");
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -2578,20 +2578,20 @@ cmd(inter, "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of 
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
-cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-v> {.a.r.cal invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-a> {.a.r.sear invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-c> {.a.r.for invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-o> {.a.r.addo invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-v> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-V> {.a.r.cal invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}; bind .a <KeyPress-U> {.a.r.sum invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}; bind .a <KeyPress-S> {.a.r.scnd invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-a> {.a.r.sear invoke; set choice 1}; bind .a <KeyPress-A> {.a.r.sear invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}; bind .a <KeyPress-W> {.a.r.wri invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-c> {.a.r.for invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.for invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}; bind .a <KeyPress-T> {.a.r.lqs invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-o> {.a.r.addo invoke; set choice 1}; bind .a <KeyPress-O> {.a.r.addo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}; bind .a <KeyPress-D> {.a.r.delo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}; bind .a <KeyPress-I> {.a.r.incr invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}; bind .a <KeyPress-M> {.a.r.mult invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; ind .a <KeyPress-H> {.a.r.math invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}; bind .a <KeyPress-N> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -2656,20 +2656,20 @@ cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of ob
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
 
-cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-c> {.a.r.cal invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-r> {.a.r.sear invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-f> {.a.r.for invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-a> {.a.r.addo invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-c> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.cal invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}; bind .a <KeyPress-U> {.a.r.sum invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-s> {.a.r.scnd invoke; set choice 1}; bind .a <KeyPress-S> {.a.r.scnd invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-r> {.a.r.sear invoke; set choice 1}; bind .a <KeyPress-R> {.a.r.sear invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-w> {.a.r.wri invoke; set choice 1}; bind .a <KeyPress-W> {.a.r.wri invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-f> {.a.r.for invoke; set choice 1}; bind .a <KeyPress-F> {.a.r.for invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-t> {.a.r.lqs invoke; set choice 1}; bind .a <KeyPress-T> {.a.r.lqs invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-a> {.a.r.addo invoke; set choice 1}; bind .a <KeyPress-A> {.a.r.addo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}; bind .a <KeyPress-D> {.a.r.delo invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}; bind .a <KeyPress-I> {.a.r.incr invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}; bind .a <KeyPress-M> {.a.r.mult invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; bind .a <KeyPress-H> {.a.r.math invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}; bind .a <KeyPress-N> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");

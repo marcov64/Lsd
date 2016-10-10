@@ -97,6 +97,7 @@ Exit function, which is customized on the operative system.
 #include <unistd.h>
 
 #define PI 3.141592654
+#define ERR_LIM 10			// maximum number of repeated error messages
 
 object *go_brother(object *c);
 void cmd(Tcl_Interp *inter, char const *cc);
@@ -261,7 +262,7 @@ cmd(inter, "bind $f.v <Return> {.da.f.vars.b.in invoke}");
 cmd(inter, "bind $f.v <Button-3> {.da.f.vars.lb.v selection clear 0 end;.da.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 30}");
 cmd(inter, "bind $f.v <Button-2> {.da.f.vars.lb.v selection clear 0 end;.da.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 30}");
 
-cmd(inter, "bind $f.v <KeyPress-b> {set res [.da.f.vars.lb.v get active]; set choice 30}");
+cmd(inter, "bind $f.v <KeyPress-b> {set res [.da.f.vars.lb.v get active]; set choice 30}; bind $f.v <KeyPress-B> {set res [.da.f.vars.lb.v get active]; set choice 30}");
 
 
 cmd(inter, "bind $f.v <Shift-Button-3> {.da.f.vars.lb.v selection clear 0 end;.da.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 16}");
@@ -273,7 +274,7 @@ cmd(inter, "label .da.f.vars.ch.l -text \"Series Selected\"");
 cmd(inter, "pack .da.f.vars.ch.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
 cmd(inter, "listbox $f.v -selectmode extended -width 40 -yscroll \"$f.v_scroll set\" -height 16");
-cmd(inter, "bind $f.v <KeyPress-o> {.da.f.vars.b.out invoke}");
+cmd(inter, "bind $f.v <KeyPress-o> {.da.f.vars.b.out invoke}; bind $f.v <KeyPress-O> {.da.f.vars.b.out invoke}");
 cmd(inter, "bind $f.v <Return> {.da.b.ts invoke}");
 
 cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
@@ -471,13 +472,13 @@ cmd( inter, msg );
 
 cmd(inter, ".da configure -menu .da.m");
 
-cmd(inter, "bind .da <Control-x> {set choice 23}");
-cmd(inter, "bind .da <Control-z> {set choice 24}");
-cmd(inter, "bind .da <Control-h> {set choice 32}");
+cmd(inter, "bind .da <Control-x> {set choice 23}; bind .da <Control-X> {set choice 23}");
+cmd(inter, "bind .da <Control-z> {set choice 24}; bind .da <Control-Z> {set choice 24}");
+cmd(inter, "bind .da <Control-h> {set choice 32}; bind .da <Control-H> {set choice 32}");
 cmd(inter, "bind .da <KeyPress-Escape> {set choice 2}");
-cmd(inter, "bind .da <Control-c> {.da.f.vars.b.empty invoke}"); 
-cmd(inter, "bind .da <Control-a> {set choice 24}");
-cmd(inter, "bind .da <Control-i> {set choice 34}");
+cmd(inter, "bind .da <Control-c> {.da.f.vars.b.empty invoke}; bind .da <Control-C> {.da.f.vars.b.empty invoke}"); 
+cmd(inter, "bind .da <Control-a> {set choice 24}; bind .da <Control-A> {set choice 24}");
+cmd(inter, "bind .da <Control-i> {set choice 34}; bind .da <Control-I> {set choice 34}");
 
 cmd( inter, "showtop .da topleftW 0 0 0");
 
@@ -553,8 +554,8 @@ app=(char *)Tcl_GetVar(inter, "answer",0);
 cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { } {set choice 0}");
 if(*choice==0)
   goto there;
-cmd(inter, "bind .da <Control-x> {}");
-cmd(inter, "bind .da <Control-z> {}");
+cmd(inter, "bind .da <Control-x> {}; bind .da <Control-X> {}");
+cmd(inter, "bind .da <Control-z> {}; bind .da <Control-Z> {}");
 cmd(inter, "bind .da <KeyPress-Escape> {}");
 cmd(inter, "bind .da <KeyPress-Delete> {}");
 
@@ -2129,6 +2130,8 @@ char *app;
 char **str, **tag;
 int idseries;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
 
 int i, nv, j, k, *start, *end, done, doney2, color,  numy2;
 double x1,x01, *y1, x2, x02, *y2,  cminy, cmaxy, miny2, maxy2, truemaxy2;
@@ -2186,8 +2189,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -2747,6 +2759,9 @@ int i, nv, j, *pos, k, nt, *list_times, h,  first;
 double x1, y01, x2,  y02;
 double val1,  step, **val, **data, **logdata, truemaxy;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.da.f.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
@@ -2821,8 +2836,17 @@ for(i=0, new_nv=0; i<nv; i++)
 	  else
 	  {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	  }
 	  
 	  data[i]=logdata[new_nv];				// replace the data series
@@ -3243,11 +3267,11 @@ cmd(inter, "set sfrom $bidi");
 cmd(inter, "set sto $bidi");
 cmd(inter, "set sskip 1");
 
-cmd(inter, "bind .da.s <KeyPress-c> {set choice 1}");
-cmd(inter, "bind .da.s <Control-f> {set sfrom $bidi}");
-cmd(inter, "bind .da.s <Control-t> {set sto $bidi}");
-cmd(inter, "bind .da.s <Control-x> {set sskip $bidi}");
-cmd(inter, "bind .da.s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}");
+cmd(inter, "bind .da.s <KeyPress-c> {set choice 1}; bind .da.s <KeyPress-C> {set choice 1}");
+cmd(inter, "bind .da.s <Control-f> {set sfrom $bidi}; bind .da.s <Control-F> {set sfrom $bidi}");
+cmd(inter, "bind .da.s <Control-t> {set sto $bidi}; bind .da.s <Control-T> {set sto $bidi}");
+cmd(inter, "bind .da.s <Control-x> {set sskip $bidi}; bind .da.s <Control-X> {set sskip $bidi}");
+cmd(inter, "bind .da.s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}; bind .da.s <Control-Z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}");
 
 while(*choice==0)
   Tcl_DoOneEvent(0);
@@ -4037,11 +4061,13 @@ char **str, **tag;
 char str1[50], longmsg[180];
 int i, nv, j, *start, *end;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.da.f.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 double **data,**logdata, av, var, num, ymin, ymax, sig;
-
 
 data=new double *[nv];
 logdata=new double *[nv];
@@ -4080,8 +4106,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -4324,6 +4359,9 @@ int i, nv, j, *start, *end, nt, *list_times, h, k;
 double **data,**logdata, av, var, num, ymin, ymax, sig;
 bool first;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.da.f.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
@@ -4388,8 +4426,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -4524,6 +4571,9 @@ char str1[50], str2[100], str3[10], dirname[300];
 FILE *f, *f2;
 double **data,**logdata;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 int i, nv,nanv=0, j, k, *start, *end, done, box;
 int idseries, ndim, gridd;
 
@@ -4631,8 +4681,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -5004,6 +5063,9 @@ double **data,**logdata;
 int i, nv, j, k, *start, *end, done, color;
 int time_sel, block_length, ndim;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 double previous_row;
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
 nv=*choice;
@@ -5049,8 +5111,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -5412,6 +5483,8 @@ double **data,**logdata;
 
 int i, nv, j, k, *start, *end, done, nlags;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
 
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
 if(*choice!=1)
@@ -5455,8 +5528,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }
@@ -6476,6 +6558,9 @@ int x1, x2, y1,y2;
 double ap, mx,mn,  step, a, b, s, lminy, miny2, truemaxy, truemaxy2, average, sigma, tot, totnorm;
 bin *cl;
 
+int logErrCnt = 0;				// log errors counter to prevent excess messages
+bool stopErr = false;
+
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
 nv=*choice;
 if(nv<2)
@@ -6524,8 +6609,17 @@ for(i=0; i<nv; i++)
 	   else
 	   {
 		 logdata[i][j]=NAN;
-		 sprintf(msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n",i+1,j);
-		 plog(msg);
+		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		 {
+			sprintf( msg,"\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", i + 1, j );
+			plog( msg );
+		 }
+		 else
+			if ( ! stopErr )
+			{
+				plog( "\nWarning: too many zero or negative values, stop reporting...\n" );
+				stopErr = true;
+			}
 	   }
 	 data[i]=logdata[i];				// replace the data series
    }

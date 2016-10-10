@@ -133,9 +133,9 @@ cmd(inter, "pack .w.l.opt.l .w.l.opt.popup .w.l.opt.text -anchor w -side left");
 cmd(inter, "pack .w.l.opt");
 
 cmd(inter, "checkbutton .w.code -text \"Include equations code\" -underline 8 -variable code");
-cmd(inter, "bind .w <Control-e> {.w.code invoke}");
+cmd(inter, "bind .w <Control-e> {.w.code invoke}; bind .w <Control-E> {.w.code invoke}");
 cmd(inter, "checkbutton .w.init -text \"Include initial values\" -underline 8 -variable init");
-cmd(inter, "bind .w <Control-i> {.w.init invoke}");
+cmd(inter, "bind .w <Control-i> {.w.init invoke}; bind .w <Control-I> {.w.init invoke}");
 
 cmd(inter, "frame .w.s -bd 2 -relief groove");
 cmd(inter, "label .w.s.lab -text \"Extra sections\"");
@@ -194,9 +194,9 @@ cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
 
 cmd( inter, "xokhelpcancel .w b Search { set res [tk_getSaveFile -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
 
-cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}");
-cmd(inter, "bind .w <Control-n> {.w.b.x invoke}");
-cmd(inter, "bind .w <Control-c> {.w.b.can invoke}");
+cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}");
+cmd(inter, "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}");
+cmd(inter, "bind .w <Control-c> {.w.b.can invoke}; bind .w <Control-C> {.w.b.can invoke}");
 cmd(inter, "bind .w <Return> {.w.b.ok invoke}");
 
 sprintf(msg, "set code %d", code);
