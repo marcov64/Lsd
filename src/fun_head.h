@@ -284,9 +284,14 @@ else \
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
 
+#define LOG( ... ) if ( ! fast ) \
+{ \
+	sprintf( msg, __VA_ARGS__ ); \
+	plog( msg ); \
+}
+
 
 // NETWORK MACROS
-
 // create a network using as nodes object label X, located inside object O,
 // applying generator Y, number of nodes Z, out-degree W and 
 // parameter V
