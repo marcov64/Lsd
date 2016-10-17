@@ -673,14 +673,15 @@ cmd(inter, "pack .l.up_name .l.tit");
 cmd(inter, "pack .l.v .l.s -side left -fill both -expand yes");
 
 cmd(inter, "pack .l -fill both -expand yes");
+}
 
 cmd(inter, "update");
 cmd(inter, "if { [info exists ModElem]==1 } {set ModElem [lsort -dictionary $ModElem]} {}");
+
 main_cycle:
 
 cmd(inter, "if { $listfocus == 1} {focus -force .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
 cmd(inter, "if { $listfocus == 2} {focus -force .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
-}
 
 *choice=0;
 

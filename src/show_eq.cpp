@@ -350,15 +350,17 @@ cmd(inter, "label $list.l3 -text \"(double-click to\\nobserve the element)\"");
 cmd(inter, "pack $list.lf.l1 $list.lf.l2");
 cmd(inter, "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both");
 
-sprintf( msg, "done $list b { destroy .list_%s }", lab );		// done button
+sprintf( msg, "done $list b { destroytop .list_%s }", lab );		// done button
 cmd(inter, msg);
 
-if( (f=fopen(equation_name,"r"))==NULL)
- return;
+exist = 0;
+
+if ( ( f = fopen( equation_name, "r" ) ) != NULL )
+{
 strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 
-for(exist=0,done=0; fgets(c1_lab, 399, f)!=NULL;  )
+for(done=0; fgets(c1_lab, 399, f)!=NULL;  )
  {
   clean_spaces(c1_lab); //eliminate the spaces
   for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL ; i++)
@@ -382,14 +384,16 @@ for(exist=0,done=0; fgets(c1_lab, 399, f)!=NULL;  )
 
 	}
  }
+
+fclose(f);
+}
+
 if(exist==1)
  {sprintf(msg, "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}");
   cmd(inter, msg);
  } 
 else
  cmd(inter, "$list.l insert end \"(never used)\"");
-
-fclose(f);
 
 cmd( inter, "showtop $list centerW 0 1" );
 }
