@@ -2219,7 +2219,6 @@ cmd(inter, "pack $T.f2.war5 $T.f2.war6 $T.f2.nores");
 Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "add_to_tot", (char *)&add_to_tot, TCL_LINK_INT);
 Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
-Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
 
 cmd(inter, "checkbutton $T.dozip -text \"Generate zipped files\" -variable dozip");
 
@@ -2252,14 +2251,15 @@ cmd(inter, "pack $T.war3 $T.war4");
 }
 
 // Only ask to overwrite configuration if there are changes
+Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
 if ( unsavedChange )
 {
-	cmd( inter, "set overwConf 1" );
+	overwConf = 1;
 	cmd( inter, "checkbutton $T.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
 	cmd( inter, "pack $T.tosave" );
 }
 else
-	cmd( inter, "set overwConf 0" );
+	overwConf = 0;
 
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } { set choice 2 }" );
 cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");

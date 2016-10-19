@@ -57,6 +57,7 @@ void error_hard( const char *logText, const char *boxTitle = "", const char *box
 void init_random( int seed );							// reset the random number generator seed
 void plog( char const *msg, char const *tag = "" );
 object *go_brother(object *c);
+object *get_cycle_obj( object *c, char const *label, char const *command );
 int deb(object *r, object *c, char const *lab, double *res);
 double log(double v);
 double exp(double c);
@@ -180,43 +181,15 @@ return res; \
 #define MULT(X,Y) p->multiply((char*)X,Y)
 #define MULTS(Q,X,Y) Q->multiply((char*)X,Y)
 
-#define CYCLE_SAFE(O,L) O = p->search( ( char * ) L ); \
-if ( O == NULL ) \
-{ \
-	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
-	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
-} \
-else \
-	for ( cyccur = go_brother( O ); O != NULL; O = cyccur, \
-		  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
+#define CYCLE(O,L) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE" ); O != NULL; O = go_brother( O ) )
+#define CYCLES(C,O,L) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLES" ); O != NULL; O = go_brother( O ) )
 
-#define CYCLE_SAFES(C,O,L) O = C->search( ( char * ) L ); \
-if ( O == NULL ) \
-{ \
-	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
-	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
-} \
-else \
-	for ( cyccur = go_brother( O ); O != NULL; O = cyccur, \
-		  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
-		  
-#define CYCLE(O,L) O = p->search( ( char * ) L ); \
-if ( O == NULL ) \
-{ \
-	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
-	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
-} \
-else \
-	for ( ; O != NULL; O = go_brother( O ) )
-
-#define CYCLES(C,O,L) O = C->search( ( char * ) L ); \
-if ( O == NULL ) \
-{ \
-	sprintf( msg, "object '%s' not found in CYCLE (variable '%s')", L, stacklog->vs->label ); \
-	error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
-} \
-else \
-	for ( ; O != NULL; O = go_brother( O ) )
+#define CYCLE_SAFE(O,L) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE_SAFE" ), \
+							  cyccur = go_brother( O ); O != NULL; O = cyccur, \
+							  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
+#define CYCLE_SAFES(C,O,L) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLE_SAFES" ), \
+								 cyccur = go_brother( O ); O != NULL; O = cyccur, \
+								 cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
 
 #define MAX(X) p->overall_max((char*)X,0)
 #define MAXL(X,Y) p->overall_max((char*)X,Y)

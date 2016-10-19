@@ -1486,6 +1486,24 @@ double betacdf( double alpha, double beta, double x )
 }
 
 
+/*
+Support function used in CYCLEx macros
+*/
+
+object *get_cycle_obj( object *parent, char const *label, char const *command )
+{
+	object *res = parent->search( label );
+	if ( res == NULL )
+	{
+		sprintf( msg, "object '%s' not found in %s (variable '%s')", 
+				 label, command, stacklog->vs->label ); \
+		error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+	}
+	
+	return res;
+}
+
+
 struct s
 {
 int x;

@@ -279,8 +279,8 @@ cmd(inter, "bind $f.v <Return> {.da.b.ts invoke}");
 
 cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 cmd(inter, "bind $f.v <Double-Button-1> {.da.f.vars.b.out invoke}");
-cmd(inter, "bind $f.v <Button-3> {.da.f.vars.ch.v selection clear 0 end;.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
-cmd(inter, "bind $f.v <Button-2> {.da.f.vars.ch.v selection clear 0 end;.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
+cmd(inter, "bind $f.v <Button-3> {.da.f.vars.ch.v selection clear 0 end;.da.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
+cmd(inter, "bind $f.v <Button-2> {.da.f.vars.ch.v selection clear 0 end;.da.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
 
 cmd(inter, "set f .da.f.vars.pl");
 cmd(inter, "frame $f");
