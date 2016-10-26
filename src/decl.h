@@ -192,7 +192,9 @@ void empty(void);
 void delete_obj(void);
 void stat(char const *lab, double *v);
 
+object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
 object *add_n_objects2(char const *lab, int n, object *ex);
+object *add_n_objects2( char const *lab, int n, int t_update );
 object *add_n_objects2(char const *lab, int n);
 
 void write(char const *lab, double value, int time);//write value as if computed at time

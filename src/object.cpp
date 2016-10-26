@@ -1527,10 +1527,9 @@ object *object::add_n_objects2(char const *lab, int n)
 object *cur;
 
 cur=blueprint->search(lab);
-cur=add_n_objects2(lab, n, cur);
+cur=add_n_objects2(lab, n, cur, -1);
 return(cur);
 }
-/*************************************/
 
 /****************************************************
 ADD_N_OBJECTS2 
@@ -1540,6 +1539,24 @@ as in the example object
 
 ****************************************************/
 object *object::add_n_objects2(char const *lab, int n, object *ex)
+{
+	return add_n_objects2( lab, n, ex, -1 );
+}
+
+/****************************************************
+ADD_N_OBJECTS2 
+Add N objects to the model making a copies of the example object ex
+In respect of the original version, it allows for the specification
+of the time of last update if t_update is positive or zero. If
+t_update is negative (<0) it takes the time of last update from
+the example object (if >0) or current t (if =0)
+****************************************************/
+object *object::add_n_objects2( char const *lab, int n, int t_update )
+{
+	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
+}
+
+object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
 char ch[90];
 FILE *f;
@@ -1596,8 +1613,12 @@ for(cv=ex->v; cv!=NULL; cv=cv->next)
 for(cv=cur->v; cv!=NULL; cv=cv->next)
  {
   if(running==1 && cv->param==0)
-   {if(cv->last_update==0)
-     cv->last_update=t;
+   {
+		if ( t_update < 0 && cv->last_update == 0 )
+			cv->last_update = t;
+		else
+			if ( t_update >= 0 )
+				cv->last_update = t_update;
    }
   if(cv->save || cv->savei)
   {

@@ -23,18 +23,6 @@ This file contains all the declarations and macros available in a model's equati
 
 #include "decl.h"
 
-#ifndef NO_WINDOW
-#include <tk.h>
-#endif
-
-// workaround for STL bug on definitions of isnan/isinf in C++11
-#ifdef STLBUG
-#include <algorithm>
-#define NAMESPACE std::
-#else
-#define NAMESPACE
-#endif
-
 extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
 extern object *root;
 extern lsdstack *stacklog;
@@ -49,10 +37,10 @@ extern int ran_gen;										// pseudo-random number generator to use (1-5))
 extern int sim_num;
 extern int debug_flag;
 extern long idum;
-extern double i_values[100];
 
 bool use_nan = false;									// flag to allow using Not a Number value
 bool fast = false;										// make fast persistent across runs
+double def_res = 0;										// default equation result
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
 void init_random( int seed );							// reset the random number generator seed
 void plog( char const *msg, char const *tag = "" );
@@ -85,19 +73,38 @@ double rnd_integer(double m, double x);
 
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 double _abs(double a)
-{if(a>0)
-	return a;
-  else
-	return(-1*a);
+{
+	if( a > 0 )
+		return a;
+	else
+		return( -1 * a );
 };
 #define abs( a ) _abs( a )
 
+// workaround for STL bug on definitions of isnan/isinf in C++11
+#ifdef STLBUG
+#include <algorithm>
+#define NAMESPACE std::
+#else
+#define NAMESPACE
+#endif
+
 #ifndef NO_WINDOW
+#include <tk.h>
 void cmd(Tcl_Interp *inter, char const *cc);
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color);
 double update_lattice(double line, double col, double val);
 int save_lattice( const char *fname );
 extern Tcl_Interp *inter;
+
+extern double i_values[100];
+#define DEBUG_CODE if ( debug_flag == 1 ) \
+{ \
+	for ( i = 0; i < 100; i++ ) \
+		i_values[i] = v[i]; \
+}
+#else
+#define DEBUG_CODE
 #endif
 
 #define DEBUG f=fopen("log.log","a"); \
@@ -114,7 +121,7 @@ extern Tcl_Interp *inter;
 { \
 if( quit == 2 ) \
 	return -1; \
-double res = 0; \
+double res = def_res; \
 object *p = up, *c = caller, app; \
 int i, j, h, k; \
 double v[1000]; \
@@ -135,13 +142,10 @@ if ( quit == 0 && ( ( ! use_nan && NAMESPACE isnan( res ) ) || NAMESPACE isinf( 
   debug_flag = 1; \
   debug = 'd'; \
  } \
-if ( debug_flag == 1 ) \
- { \
- for ( i = 0; i < 100; i++ ) \
-  i_values[i] = v[i]; \
- } \
+DEBUG_CODE \
 return res; \
 }
+
 
 #define EQUATION(X) if(!strcmp(label,X)) {
 #define FUNCTION(X) if(!strcmp(label,X)) { last_update--; if(c==NULL) {  res=val[0];  goto end; } }; \
@@ -226,16 +230,24 @@ return res; \
 #define UNIFORM( X, Y ) ((X) + RND*((Y)-(X)))
 
 #define ADDOBJ(X) p->add_n_objects2((char*)X,1)
-#define ADDOBJS(X,Y) X->add_n_objects2((char*)Y,1)
+#define ADDOBJL(X,Y) p->add_n_objects2((char*)X,1,(int)Y)
+#define ADDOBJS(O,X) O->add_n_objects2((char*)X,1)
+#define ADDOBJLS(O,X,Y) O->add_n_objects2((char*)X,1,(int)Y)
 
 #define ADDOBJ_EX(X,Y) p->add_n_objects2((char*)X,1,Y)
+#define ADDOBJL_EX(X,Y,Z) p->add_n_objects2((char*)X,1,Y,(int)Z)
 #define ADDOBJS_EX(O,X,Y) O->add_n_objects2((char*)X,1,Y)
+#define ADDOBJLS_EX(O,X,Y,Z) O->add_n_objects2((char*)X,1,Y,(int)Z)
 
-#define ADDNOBJ(X,Y) p->add_n_objects2((char*)X, (int)Y)
-#define ADDNOBJS(O,X,Y) O->add_n_objects2((char*)X, (int)Y)
+#define ADDNOBJ(X,Y) p->add_n_objects2((char*)X,(int)Y)
+#define ADDNOBJL(X,Y,Z) p->add_n_objects2((char*)X,(int)Y,(int)Z)
+#define ADDNOBJS(O,X,Y) O->add_n_objects2((char*)X,(int)Y)
+#define ADDNOBJLS(O,X,Y,Z) O->add_n_objects2((char*)X,(int)Y,(int)Z)
 
-#define ADDNOBJ_EX(X,Y,Z) p->add_n_objects2((char*)X, (int)Y, Z)
-#define ADDNOBJS_EX(O,X,Y,Z) O->add_n_objects2((char*)X, (int)Y, Z)
+#define ADDNOBJ_EX(X,Y,Z) p->add_n_objects2((char*)X,(int)Y,Z)
+#define ADDNOBJL_EX(X,Y,Z,W) p->add_n_objects2((char*)X,(int)Y,Z,(int)W)
+#define ADDNOBJS_EX(O,X,Y,Z) O->add_n_objects2((char*)X,(int)Y,Z)
+#define ADDNOBJLS_EX(O,X,Y,Z,W) O->add_n_objects2((char*)X,(int)Y,Z,(int)W)
 
 #define DELETE(X) X->delete_obj()
 

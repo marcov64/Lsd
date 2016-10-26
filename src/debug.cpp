@@ -89,17 +89,13 @@ extern int quit;
 extern int done_in;
 extern int actual_steps;
 extern int running;
-double i_values[100];
 extern char name_rep[400];
 extern char msg[];
 extern int stackinfo_flag;
 extern lsdstack *stacklog;
-extern double i_values[100];
-int interact_flag=0;
 extern int choice;
 extern char *simul_name;	// simulation name to use in title bar
 extern bool unsavedChange;	// control for unsaved changes in configuration
-
 
 void cmd(Tcl_Interp *inter, char const *cc);
 object *go_brother(object *cur);
@@ -120,6 +116,8 @@ void entry_new_objnum(object *c, int *choice, char const *tag);
 void set_all(int *choice, object *original, char *lab, int lag);
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 
+int interact_flag=0;
+double i_values[100];
 lsdstack *asl=NULL;
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
 
