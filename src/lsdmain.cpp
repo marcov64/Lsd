@@ -152,6 +152,7 @@ char msg[1000];
 int stack;
 int identity=0;
 int sim_num=1;
+int cur_sim;
 int cur_plt;
 char ind[30];
 int total_var=0;
@@ -583,7 +584,7 @@ Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
 
 for(i=1; i<=sim_num && quit!=2; i++)
 {
-
+cur_sim = i;	 //Update the global variable holding information on the current run in the set of runs
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
 #ifndef NO_WINDOW
 // disable main window widgets

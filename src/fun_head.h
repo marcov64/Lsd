@@ -35,6 +35,7 @@ extern int quit;
 extern int seed;
 extern int ran_gen;										// pseudo-random number generator to use (1-5))
 extern int sim_num;
+extern int cur_sim;
 extern int debug_flag;
 extern long idum;
 
