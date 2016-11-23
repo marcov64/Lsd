@@ -270,7 +270,14 @@ return res; \
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
 
+// regular logging (disabled in fast mode)
 #define LOG( ... ) if ( ! fast ) \
+{ \
+	sprintf( msg, __VA_ARGS__ ); \
+	plog( msg ); \
+}
+// priority logging (show even in in fast mode)
+#define PLOG( ... ) \
 { \
 	sprintf( msg, __VA_ARGS__ ); \
 	plog( msg ); \

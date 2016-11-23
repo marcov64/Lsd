@@ -59,7 +59,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	global tcl_platform
 	if { $tcl_platform(platform) != "windows"} {
 		global RootLsd LsdSrc
-		wm iconbitmap $w @$RootLsd/$LsdSrc/lsd.xbm
+		wm iconbitmap $w @$RootLsd/$LsdSrc/icons/lsd.xbm
 	}
 #	plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst)" 
 }

@@ -2341,7 +2341,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> { raise .da; focus -force .da.b.ts}");
 sprintf(msg, "wm protocol $p WM_DELETE_WINDOW { wm withdraw .da.f.new%d}", cur_plot);
 cmd(inter, msg);
@@ -2617,7 +2617,7 @@ for(x02=0; i<=max_c; i++)
        if(y2[k]<cminy)
          y2[k]=cminy;
 		 y2[k]=(300-((y2[k]-cminy)/(cmaxy-cminy))*300);
-       if(allblack==0)
+       if( allblack == 0 && color < 1100 )
        {
        if(line_point==1)
         {//plog("\nPoint size $point_size\n");
@@ -2911,7 +2911,7 @@ sprintf(msg, "set p .da.f.new%d", cur_plot);
 cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 
 cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
@@ -5770,7 +5770,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .da}");
 cmd(inter, "frame $p.f");
 cmd(inter, "canvas $p.f.plots -height 430 -width 640 -bg white");
@@ -5943,7 +5943,7 @@ sprintf(msg, "set p .da.f.new%d", cur_plot);
 cmd(inter, msg);
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .da}");
 sprintf(msg,"frame $p.f -width %d -height %d", ncol*le, nlin*hi);
 cmd(inter, msg);
@@ -6286,7 +6286,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");
@@ -6866,7 +6866,7 @@ cmd(inter, msg);
 
 cmd(inter, "toplevel $p");
 cmd(inter, "wm title $p $tit");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd(inter, "bind $p <Double-Button-1> {raise .da; focus -force .da.b.ts}");
 cmd(inter, "frame $p.f -width 640 -height 430");
 cmd(inter, "pack $p.f");

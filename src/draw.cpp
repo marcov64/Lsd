@@ -113,7 +113,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 {
 	cmd( inter, "if [ winfo exists $c ] { destroy $c}" );
 	cmd( inter, "toplevel $c" );
-	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap $c @$RootLsd/$LsdSrc/lsd.xbm }" );
+	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap $c @$RootLsd/$LsdSrc/icons/lsd.xbm }" );
 	cmd( inter, "wm protocol $c WM_DELETE_WINDOW { set strWindowOn 0; set choice 70 }" );
 
 	cmd(inter, "frame $c.f");

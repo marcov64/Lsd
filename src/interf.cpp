@@ -7,6 +7,9 @@ Universita' dell'Aquila
 Copyright Marco Valente
 Lsd is distributed according to the GNU Public License
 
+Silk icon set 1.3 by Mark James
+http://www.famfamfam.com/lab/icons/silk 
+
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
@@ -398,11 +401,11 @@ else
 	  if(ap_v->param==1)
 		 sprintf(ch, ".l.v.c.var_name itemconf $app -fg black");
 	  if( ap_v->param == 2 && ap_v->num_lag == 0 )
-		 sprintf(ch, ".l.v.c.var_name itemconf $app -fg red");
+		 sprintf(ch, ".l.v.c.var_name itemconf $app -fg firebrick");
 	  if( ap_v->param == 2 && ap_v->num_lag > 0 )
 		 sprintf(ch, ".l.v.c.var_name itemconf $app -fg tomato");
 	  cmd(inter, ch);
-    cmd(inter, "incr app");
+      cmd(inter, "incr app");
 
 	  if(ap_v->next == NULL && justAddedVar)	// last variable & just added a new variable?
 	  {
@@ -451,16 +454,20 @@ if(r->b==NULL)
   cmd( inter, ".l.s.son_name insert end \"(none)\"; set nDesc 0" );
 else
 {
+ cmd(inter, "set app 0");
  for(cb=r->b; cb!=NULL; cb=cb->next )
   {
 	 strcpy(ch, ".l.s.son_name insert end ");
 	 strcat(ch, cb->blabel);
-   cmd(inter, ch);
-	}
+     cmd(inter, ch);
+	 strcpy(ch, ".l.s.son_name itemconf $app -fg red");
+     cmd(inter, ch);
+     cmd(inter, "incr app");
+  }
   cmd( inter, "set nDesc [ .l.s.son_name size ]" );
 }	
 
-cmd( inter, "label .l.s.lab -text \"Descendants ($nDesc)\"" );
+cmd( inter, "label .l.s.lab -text \"Descending Objects ($nDesc)\"" );
 
 // objects context menu (right mouse button)
 cmd( inter, "menu .l.s.son_name.v -tearoff 0" );
@@ -503,16 +510,12 @@ cmd(inter, "bind .l.s.son_name <Left> {focus -force .l.v.c.var_name; set listfoc
 //cmd(inter, "bind .l.s.son_name <Down> {.l.s.son_name selection clear 0 end; .l.s.son_name selection set active}");
 
 cmd(inter, "frame .l.up_name");
-strcpy( ch1, "button .l.up_name.d -text \"Parent object: \" -relief flat" );
-strcpy( ch, "button .l.up_name.n -relief flat -text \"" );
+strcpy( ch1, "label .l.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
+strcpy( ch, "button .l.up_name.n -relief flat -anchor e -text \"" );
 if( r->up==NULL )
-{
-  strcat( ch1, " -command { }" );
   strcat( ch, "(none)\" -command { }" );
-}
 else
- { 
-  strcat( ch1, " -command { set itemfocus 0; set choice 5 }" );
+ {
   strcat( ch, ( r->up )->label );
   strcat( ch, "\" -command { set itemfocus 0; set choice 5 } -foreground red" );
  }
@@ -522,27 +525,20 @@ cmd( inter, ch );
 cmd(inter, "bind . <KeyPress-u> {catch {.l.up_name.n invoke}}; bind . <KeyPress-U> {catch {.l.up_name.n invoke}}");
 
 cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
-cmd( inter, "pack .l.up_name" );
+cmd( inter, "pack .l.up_name -padx 9 -anchor w" );
 
-cmd(inter, "frame .l.tit -relief raised -bd 2");
-strcpy( ch1, "button .l.tit.lab -text \"Object: \" -relief flat" );
-strcpy( ch, "button .l.tit.but -foreground red -relief flat -text " );
+cmd(inter, "frame .l.tit -bd 2");
+strcpy( ch1, "label .l.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
+strcpy( ch, "button .l.tit.but -foreground red -relief flat -anchor e -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
-{
- strcat( ch1, " -command { set choice 6 }" );
  strcat( ch, " -command { set choice 6 }" );
-}
 else
-{
- strcat( ch1, " -command { }" );
  strcat( ch, " -command { }" );
-}
 cmd( inter, ch1 );
 cmd(inter, ch);
- 
 cmd(inter, "pack .l.tit.lab .l.tit.but -side left");
-cmd( inter, "pack .l.tit -pady 2" );
+cmd( inter, "pack .l.tit -padx 8 -anchor w" );
 
 // avoid redrawing the menu if it already exists and is configured
 cmd(inter, "set existMenu [ winfo exists .m ]");
@@ -661,6 +657,49 @@ cmd(inter, ". configure -menu .m");
 // set shortcuts on open windows
 set_shortcuts( "." );
 set_shortcuts( ".log" );
+
+// Button bar
+cmd(inter, "destroy .bbar");
+cmd( inter, "frame .bbar -bd 2" );
+
+cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.gif\"" );
+cmd( inter, "image create photo reloadImg -file \"$RootLsd/$LsdSrc/icons/reload.gif\"" );
+cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.gif\"" );
+cmd( inter, "image create photo initImg -file \"$RootLsd/$LsdSrc/icons/init.gif\"" );
+cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.gif\"" );
+cmd( inter, "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.gif\"" );
+cmd( inter, "image create photo dataImg -file \"$RootLsd/$LsdSrc/icons/data.gif\"" );
+cmd( inter, "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.gif\"" );
+
+cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 17}" );
+cmd( inter, "button .bbar.reload -image reloadImg -relief flat -command {set choice 38}" );
+cmd( inter, "button .bbar.save -image saveImg -relief flat -command {set choice 18}" );
+cmd( inter, "button .bbar.init -image initImg -relief flat -command {set choice 21}" );
+cmd( inter, "button .bbar.set -image setImg -relief flat -command {set choice 22}" );
+cmd( inter, "button .bbar.run -image runImg -relief flat -command {set choice 1}" );
+cmd( inter, "button .bbar.data -image dataImg -relief flat -command {set choice 34}" );
+cmd( inter, "button .bbar.result -image resultImg -relief flat -command {set choice 26}" );
+cmd( inter, "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 17 -anchor w" );
+
+cmd( inter, "bind .bbar.open <Enter> {set ttip \"Open...\"}" );
+cmd( inter, "bind .bbar.open <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.reload <Enter> {set ttip \"Reload\"}" );
+cmd( inter, "bind .bbar.reload <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.save <Enter> {set ttip \"Save\"}" );
+cmd( inter, "bind .bbar.save <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.init <Enter> {set ttip \"Initial Values...\"}" );
+cmd( inter, "bind .bbar.init <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.set <Enter> {set ttip \"Simulation Settings...\"}" );
+cmd( inter, "bind .bbar.set <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.run <Enter> {set ttip \"Run\"}" );
+cmd( inter, "bind .bbar.run <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.data <Enter> {set ttip \"Data Browse...\"}" );
+cmd( inter, "bind .bbar.data <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.result <Enter> {set ttip \"Analysis of Results...\"}" );
+cmd( inter, "bind .bbar.result <Leave> {set ttip \"\"}" );
+
+cmd( inter, "pack .bbar.open .bbar.reload .bbar.save .bbar.init .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -padx 3 -side left" );
+cmd( inter, "pack .bbar -anchor w -fill x" );
 }
 
 cmd(inter, "pack .l.v.c.var_name -fill both -expand yes");
@@ -670,7 +709,7 @@ cmd(inter, "pack .l.s.lab -fill x");
 cmd(inter, "pack .l.s.son_name -fill both -expand yes");
 
 cmd(inter, "pack .l.up_name .l.tit");
-cmd(inter, "pack .l.v .l.s -side left -fill both -expand yes");
+cmd(inter, "pack .l.s .l.v -side left -fill both -expand yes");
 
 cmd(inter, "pack .l -fill both -expand yes");
 }
@@ -2355,7 +2394,7 @@ if(*choice==17)
   cmd(inter, msg);
   cmd(inter, "cd $path");
   cmd(inter, "set a \"\"");
-  sprintf(msg, " set bah [tk_getOpenFile -title \"Load Lsd File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
+  sprintf(msg, " set bah [tk_getOpenFile -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
 
   cmd(inter, msg);
   
@@ -2462,7 +2501,7 @@ cmd(inter, msg);
 
 if ( saveAs )			// only asks file name if instructed to or necessary
 {
-sprintf(msg, "set bah [tk_getSaveFile -title \"Save Lsd Model\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
+sprintf(msg, "set bah [tk_getSaveFile -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
 cmd(inter, msg);
 
 cmd(inter, "set res $bah");

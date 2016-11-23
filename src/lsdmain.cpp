@@ -415,7 +415,7 @@ cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [ope
 cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
 
 // set window icon
-cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/lsd.xbm}");
+cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lsd.xbm}");
 // set position parameters now
 Tcl_SetVar(inter, "widthB", hsize, 0);		// horizontal size in pixels
 Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
@@ -1080,7 +1080,7 @@ void create_logwindow(void)
 {
 cmd(inter, "toplevel .log");
 // change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/lsd.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd( inter, "wm protocol .log WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");

@@ -1,8 +1,7 @@
-# Makefile for lmm in OSX (tested up to 10.9)
-# Require ActiveTcl 8.5 and X11/XQuartz installed
+# Makefile for lmm in OSX (tested up to 10.11)
 
 TARGET=lmmOSX
-SWITCH_CC=-O3
+SWITCH_CC=-Wno-unused-result -O3
 
 LSDROOT=.
 PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers

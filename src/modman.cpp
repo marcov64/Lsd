@@ -7,6 +7,9 @@ Universita' dell'Aquila
 Copyright Marco Valente
 Lsd is distributed according to the GNU Public License
 
+Silk icon set 1.3 by Mark James
+http://www.famfamfam.com/lab/icons/silk 
+
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
@@ -290,18 +293,22 @@ if(choice==1)
 	cmd( inter, "gets $f wrap" );
 	cmd( inter, "gets $f shigh" );
 	cmd( inter, "gets $f autoHide" );
+	cmd( inter, "gets $f showFileCmds" );
+	cmd( inter, "gets $f LsdNew" );
   cmd(inter, "close $f" );
 	// handle old options file
-	cmd( inter, "if {$dim_character == \"\"} {set choice 0}" );
+	cmd( inter, "if {$dim_character == \"\" || $showFileCmds == \"\"} {set choice 0}" );
  }
 // handle non-existent or old options file for new options
 if ( choice != 1 )
  {
 	cmd( inter, "set dim_character 0" );	// default font size (0=force auto-size)
-	cmd( inter, "set tabsize 2" );		// default tab size
-	cmd( inter, "set wrap 1" );			// default text wrapping mode (1=yes)
+	cmd( inter, "set tabsize 2" );			// default tab size
+	cmd( inter, "set wrap 1" );				// default text wrapping mode (1=yes)
 	cmd( inter, "set shigh 2" );			// default is full syntax highlighting
-	cmd( inter, "set autoHide 1" );		// default is to auto hide LMM on run
+	cmd( inter, "set autoHide 1" );			// default is to auto hide LMM on run
+	cmd( inter, "set showFileCmds 1" );		// default is no text file commands in File menu
+	cmd( inter, "set LsdNew Work" );		// default new model subdirectory is "Work"
   cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
   cmd(inter, "puts $f $Terminal");
   cmd(inter, "puts $f $HtmlBrowser");
@@ -313,6 +320,8 @@ if ( choice != 1 )
 	cmd( inter, "puts $f $wrap" );
 	cmd( inter, "puts $f $shigh" );
 	cmd( inter, "puts $f $autoHide" );
+	cmd( inter, "puts $f $showFileCmds" );
+	cmd( inter, "puts $f $LsdNew" );
   cmd(inter, "close $f");
  }
  
@@ -379,14 +388,21 @@ cmd(inter, "menu .m -tearoff 0");
 cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
-cmd(inter, "$w add command -label \"New Text File\" -command { set choice 39} -underline 0");
-cmd(inter, "$w add command -label \"Open...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o");
-cmd(inter, "$w add command -label \"Save\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 0 -accelerator Ctrl+s");
-cmd(inter, "$w add command -label \"Save As...\" -command {set choice 4} -underline 5 -accelerator Ctrl+a");
+cmd(inter, "$w add command -label \"New Model...\" -underline 0 -command { set choice 14}");
+cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b");
+cmd(inter, "$w add command -label \"Save Model\" -underline 0 -state disabled -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} } -underline 0 -accelerator Ctrl+s");
+cmd(inter, "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41} -underline 11 -accelerator Ctrl+a");
 cmd(inter, "$w add separator");
+cmd(inter, "$w add command -label \"Compare Models...\" -underline 3 -command {set choice 61} -underline 0");
 cmd(inter, "$w add command -label \"TkDiff...\" -command {set choice 57} -underline 0");
-
 cmd(inter, "$w add separator");
+
+cmd(inter, "if { $showFileCmds == 1 } { $w add command -label \"New Text File\" -command { set choice 39} -underline 4 }");
+cmd(inter, "if { $showFileCmds == 1 } { $w add command -label \"Open Text File...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o }");
+cmd(inter, "if { $showFileCmds == 1 } { $w add command -label \"Save Text File\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 2 }");
+cmd(inter, "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command {set choice 4} -underline 3 }");
+cmd(inter, "if { $showFileCmds == 1 } { $w add separator }");
+
 cmd(inter, "$w add command -label \"Options...\" -command { set choice 60} -underline 1");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Ctrl+q");
@@ -441,13 +457,8 @@ cmd(inter, "$w.color add radio -label \" None\" -variable shigh -value 0 -comman
 cmd(inter, "set w .m.model");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label Model -menu $w -underline 0");
-//cmd(inter, "$w add command -label \"New Model\" -underline 0 -command { set choice 14}");
-//cmd(inter, "$w add command -label \"Copy Model\" -state disabled -underline 0 -command { set choice 41}");
-cmd(inter, "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b");
-cmd(inter, "$w add command -label \"Compare Models...\" -underline 3 -command {set choice 61}");
-cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Compile and Run Model...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r");
-cmd(inter, "$w add command -label \"Compile Model\" -state disabled -underline 2 -command {set choice 6} -accelerator Ctrl+p");
+cmd(inter, "$w add command -label \"Recompile Model\" -state disabled -underline 0 -command {set choice 6} -accelerator Ctrl+p");
 cmd(inter, "$w add command -label \"GDB Debugger\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g");
 cmd(inter, "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command {set choice 62}");
 cmd(inter, "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}");
@@ -486,6 +497,88 @@ cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Do
 
 sprintf( msg, "$w add command -label \"About LMM...\" -command { tk_messageBox -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
+
+// Button bar
+cmd( inter, "frame .bbar -bd 2" );
+
+cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.gif\"" );
+cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.gif\"" );
+cmd( inter, "image create photo undoImg -file \"$RootLsd/$LsdSrc/icons/undo.gif\"" );
+cmd( inter, "image create photo redoImg -file \"$RootLsd/$LsdSrc/icons/redo.gif\"" );
+cmd( inter, "image create photo cutImg -file \"$RootLsd/$LsdSrc/icons/cut.gif\"" );
+cmd( inter, "image create photo copyImg -file \"$RootLsd/$LsdSrc/icons/copy.gif\"" );
+cmd( inter, "image create photo pasteImg -file \"$RootLsd/$LsdSrc/icons/paste.gif\"" );
+cmd( inter, "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.gif\"" );
+cmd( inter, "image create photo replaceImg -file \"$RootLsd/$LsdSrc/icons/replace.gif\"" );
+cmd( inter, "image create photo indentImg -file \"$RootLsd/$LsdSrc/icons/indent.gif\"" );
+cmd( inter, "image create photo deindentImg -file \"$RootLsd/$LsdSrc/icons/deindent.gif\"" );
+cmd( inter, "image create photo comprunImg -file \"$RootLsd/$LsdSrc/icons/comprun.gif\"" );
+cmd( inter, "image create photo compileImg -file \"$RootLsd/$LsdSrc/icons/compile.gif\"" );
+cmd( inter, "image create photo infoImg -file \"$RootLsd/$LsdSrc/icons/info.gif\"" );
+cmd( inter, "image create photo descrImg -file \"$RootLsd/$LsdSrc/icons/descr.gif\"" );
+cmd( inter, "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equation.gif\"" );
+cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.gif\"" );
+cmd( inter, "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.gif\"" );
+
+cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 33}" );
+cmd( inter, "button .bbar.save -image saveImg -relief flat -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
+cmd( inter, "button .bbar.undo -image undoImg -relief flat -command {catch {.f.t.t edit undo}}" );
+cmd( inter, "button .bbar.redo -image redoImg -relief flat -command {catch {.f.t.t edit redo}}" );
+cmd( inter, "button .bbar.cut -image cutImg -relief flat -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( inter, "button .bbar.copy -image copyImg -relief flat -command {tk_textCopy .f.t.t}" );
+cmd( inter, "button .bbar.paste -image pasteImg -relief flat -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( inter, "button .bbar.find -image findImg -relief flat -command {set choice 11}" );
+cmd( inter, "button .bbar.replace -image replaceImg -relief flat -command {set choice 21}" );
+cmd( inter, "button .bbar.indent -image indentImg -relief flat -command {set choice 42}" );
+cmd( inter, "button .bbar.deindent -image deindentImg -relief flat -command {set choice 43}" );
+cmd( inter, "button .bbar.comprun -image comprunImg -relief flat -command {set choice 2}" );
+cmd( inter, "button .bbar.compile -image compileImg -relief flat -command {set choice 6}" );
+cmd( inter, "button .bbar.info -image infoImg -relief flat -command {set choice 44}" );
+cmd( inter, "button .bbar.descr -image descrImg -relief flat -command {set choice 5}" );
+cmd( inter, "button .bbar.equation -image equationImg -relief flat -command {set choice 8}" );
+cmd( inter, "button .bbar.set -image setImg -relief flat -command {set choice 48}" );
+cmd( inter, "button .bbar.help -image helpImg -relief flat -command {LsdHelp lsdfuncMacro.html}" );
+cmd( inter, "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
+
+cmd( inter, "bind .bbar.open <Enter> {set ttip \"Browse Models...\"}" );
+cmd( inter, "bind .bbar.open <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.save <Enter> {set ttip \"Save Model\"}" );
+cmd( inter, "bind .bbar.save <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.undo <Enter> {set ttip \"Undo\"}" );
+cmd( inter, "bind .bbar.undo <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.redo <Enter> {set ttip \"Redo\"}" );
+cmd( inter, "bind .bbar.redo <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.cut <Enter> {set ttip \"Cut\"}" );
+cmd( inter, "bind .bbar.cut <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.copy <Enter> {set ttip \"Copy\"}" );
+cmd( inter, "bind .bbar.copy <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.paste <Enter> {set ttip \"Paste\"}" );
+cmd( inter, "bind .bbar.paste <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.find <Enter> {set ttip \"Find...\"}" );
+cmd( inter, "bind .bbar.find <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.replace <Enter> {set ttip \"Replace...\"}" );
+cmd( inter, "bind .bbar.replace <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.indent <Enter> {set ttip \"Indent Selection\"}" );
+cmd( inter, "bind .bbar.indent <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.deindent <Enter> {set ttip \"De-indent Selection\"}" );
+cmd( inter, "bind .bbar.deindent <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.comprun <Enter> {set ttip \"Compile and Run Model...\"}" );
+cmd( inter, "bind .bbar.comprun <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.compile <Enter> {set ttip \"Recompile Model\"}" );
+cmd( inter, "bind .bbar.compile <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.info <Enter> {set ttip \"Model Info...\"}" );
+cmd( inter, "bind .bbar.info <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.descr <Enter> {set ttip \"Show Description\"}" );
+cmd( inter, "bind .bbar.descr <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.equation <Enter> {set ttip \"Show Equations\"}" );
+cmd( inter, "bind .bbar.equation <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.set <Enter> {set ttip \"Model Compilation Options...\"}" );
+cmd( inter, "bind .bbar.set <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.help <Enter> {set ttip \"Help on Macros for Lsd Equations\"}" );
+cmd( inter, "bind .bbar.help <Leave> {set ttip \"\"}" );
+
+cmd( inter, "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.comprun .bbar.compile .bbar.info .bbar.descr .bbar.equation .bbar.set .bbar.help .bbar.tip -padx 3 -side left" );
+cmd( inter, "pack .bbar -anchor w -fill x" );
 
 cmd(inter, "frame .f");
 cmd(inter, "frame .f.t -relief groove -bd 2");
@@ -751,7 +844,7 @@ cmd(inter, "set a [wm maxsize .]");
 cmd(inter, "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"");
 cmd(inter, "wm geometry . $c");
 // change window icon
-cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/lmm.xbm}");
+cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lmm.xbm}");
 
 if(argn>1)
  {sprintf(msg, "if {[file exists \"$filetoload\"] == 1} {set choice 0} {set choice -2}");
@@ -875,43 +968,7 @@ cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsize + 2*$bordsize + $hmargin)
 cmd(inter, "set y [expr ([winfo screenheight .]-$tbarsize)/2 - $bordsize - $h/2]");
 cmd(inter, "wm geom . [expr $w]x$h+$x+$y"); // main window geometry setting
 
-cmd( inter, "newtop .a \"Welcome\" { set temp 0; .a.b.ok invoke }" );
-
-cmd(inter, "frame .a.f");
-cmd(inter, "set temp 33");
-cmd(inter, "label .a.f.l -text \"Choose Action\"  -fg red");
-
-cmd(inter, "frame .a.f.b -relief groove -bd 2");
-cmd(inter, "radiobutton .a.f.b.r1 -variable temp -value 33 -text \"Browse models\" -justify left -anchor w");
-
-cmd(inter, "radiobutton .a.f.b.r2 -variable temp -value 15 -text \"Open text file\" -justify left -anchor w");
-
-cmd(inter, "radiobutton .a.f.b.r3 -variable temp -value 0 -text \"Create new text file\" -justify left -anchor w");
-
-
-cmd(inter, "pack .a.f.b.r1 .a.f.b.r2 .a.f.b.r3 -anchor w -fill x ");
-cmd(inter, "pack .a.f.l .a.f.b -fill x");
-
-cmd(inter, "frame .a.b");
-cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .a.b.help -width -9 -text Help -command {LsdHelp LMM_help.html#introduction}");
-cmd(inter, "pack .a.b.ok .a.b.help -padx 1 -pady 5 -side left");
-cmd(inter, "pack  .a.f .a.b -fill x");
-cmd(inter, "bind .a <Return> {.a.b.ok invoke}");
-cmd(inter, "bind .a <Escape> {set temp 0; .a.b.ok invoke}");
-cmd(inter, "set i 1; bind .a <Down> { if { $i < 3 } {incr i; .a.f.b.r$i invoke} {} }"); 
-cmd(inter, "bind .a <Up> { if { $i > 1 } {incr i -1; .a.f.b.r$i invoke} {} }");
-cmd(inter, "focus -force .a.f.b.r1");
-
-cmd( inter, "showtop .a" );
-while(choice==0)
- Tcl_DoOneEvent(0);
-cmd(inter, "destroytop .a");
-
-cmd(inter, "set choice $temp");
-
-
-
+cmd(inter, "set choice 33");		// Open Browse Models Window on start-up
 
 goto loop;
 }
@@ -925,7 +982,7 @@ bool run = ( choice == 2 ) ? true : false;
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
- {//this control is obsolete, since  model must be selected in order to arrive here
+ {
   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
@@ -996,7 +1053,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, "set init_time [clock seconds]"); 
   cmd( inter, "newtop .t \"Please Wait\" \"\" \"\"" );
   // change window icon
-  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
+  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
   if ( run )
 	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
@@ -1082,8 +1139,8 @@ cmd(inter, ".f.t.t delete 0.0 end");
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
- {//this control is obsolete, since  model must be selected in order to arrive here
-     cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
+ {
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1141,7 +1198,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1167,7 +1224,7 @@ if(s==NULL || !strcmp(s, ""))
 		choice = 8;		// load equations file
 		goto loop;
 	}
-	cmd( inter, ".f.t.t insert end \"Model $modelname (ver. $version)\"" );
+	cmd( inter, ".f.t.t insert end \"Model $modelname (ver. $version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
   }
 
   cmd(inter, ".f.t.t edit reset");
@@ -1199,7 +1256,7 @@ if(choice==7)
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1244,7 +1301,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-       cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1415,7 +1472,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-       cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\"");
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1539,6 +1596,13 @@ if(choice==14)
 
 choice=0;
 
+// prevent creating new groups in Lsd directory
+cmd( inter, "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
+				{	set groupdir \"$groupdir/$LsdNew\"; \
+					set f [open $groupdir/groupinfo.txt r]; \
+					set app \"[gets $f]\"; \
+					close $f; \
+					set modelgroup \"$modelgroup/$app\" }");
 
 cmd( inter, "newtop .a \"New Model or Group\" { .a.b.esc invoke }" );
 
@@ -1809,16 +1873,19 @@ cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
 
 cmd(inter, "cd $RootLsd");
+
+cmd(inter, ".m.file entryconf 2 -state normal");
+cmd(inter, ".m.file entryconf 3 -state normal");
+cmd(inter, ".m.model entryconf 0 -state normal");
+cmd(inter, ".m.model entryconf 1 -state normal");
+cmd(inter, ".m.model entryconf 2 -state normal");
 cmd(inter, ".m.model entryconf 3 -state normal");
 cmd(inter, ".m.model entryconf 4 -state normal");
-cmd(inter, ".m.model entryconf 5 -state normal");
 cmd(inter, ".m.model entryconf 6 -state normal");
 cmd(inter, ".m.model entryconf 7 -state normal");
+cmd(inter, ".m.model entryconf 8 -state normal");
 cmd(inter, ".m.model entryconf 9 -state normal");
-cmd(inter, ".m.model entryconf 10 -state normal");
 cmd(inter, ".m.model entryconf 11 -state normal");
-cmd(inter, ".m.model entryconf 12 -state normal");
-cmd(inter, ".m.model entryconf 14 -state normal");
 
 
 cmd(inter, "tk_messageBox -type ok -title \"Model Created\" -icon info -message \"New model '$mname' (ver. $mver) successfully created.\\n\\nDirectory:\n$dirname\"");
@@ -4253,6 +4320,7 @@ choice=0;
 Tcl_LinkVar(inter, "choiceSM", (char *) &num, TCL_LINK_INT);
 num=0;
 cmd(inter, "showmodel $groupdir");
+cmd(inter, "focus -force .l");
 
 while(choice==0 && num==0)
  Tcl_DoOneEvent(0);
@@ -4279,16 +4347,19 @@ cmd(inter, "set dirname $modeldir");
 cmd(inter, ".f.hea.grp.dat conf -text \"$modelgroup\"");
 cmd(inter, ".f.hea.mod.dat conf -text \"$modelname\"");
 cmd(inter, ".f.hea.ver.dat conf -text \"$version\"");
+
+cmd(inter, ".m.file entryconf 2 -state normal");
+cmd(inter, ".m.file entryconf 3 -state normal");
+cmd(inter, ".m.model entryconf 0 -state normal");
+cmd(inter, ".m.model entryconf 1 -state normal");
+cmd(inter, ".m.model entryconf 2 -state normal");
 cmd(inter, ".m.model entryconf 3 -state normal");
 cmd(inter, ".m.model entryconf 4 -state normal");
-cmd(inter, ".m.model entryconf 5 -state normal");
 cmd(inter, ".m.model entryconf 6 -state normal");
 cmd(inter, ".m.model entryconf 7 -state normal");
+cmd(inter, ".m.model entryconf 8 -state normal");
 cmd(inter, ".m.model entryconf 9 -state normal");
-cmd(inter, ".m.model entryconf 10 -state normal");
 cmd(inter, ".m.model entryconf 11 -state normal");
-cmd(inter, ".m.model entryconf 12 -state normal");
-cmd(inter, ".m.model entryconf 14 -state normal");
 
 choice=50;		// load description file
 goto loop;
@@ -4304,7 +4375,7 @@ if(choice==41)
 choice=0;
 
 
-cmd( inter, "newtop .a \"Copy Model\" { .a.b.esc invoke }" );
+cmd( inter, "newtop .a \"Save Model As...\" { .a.b.esc invoke }" );
 
 cmd(inter, "label .a.tit -text \"Create a new version of model '$modelname' (ver. $version)\"");
 
@@ -4318,7 +4389,7 @@ cmd(inter, "set mver $version");
 cmd(inter, "entry .a.ever -width 30 -textvariable mver");
 cmd(inter, "bind .a.ever <Return> {.a.edir selection range 0 end; focus -force .a.edir}"); 
 
-cmd(inter, "label .a.mdir -text \"Insert directory name\"");
+cmd(inter, "label .a.mdir -text \"Insert new directory name\"");
 cmd(inter, "set mdir $dirname");
 cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
 cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}"); 
@@ -4419,7 +4490,7 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-cmd(inter, "tk_messageBox -type ok -title \"Model Copy\" -icon info -message \"New model '$mname' (ver. $mver) successfully created (directory: $dirname).\"");
+cmd(inter, "tk_messageBox -type ok -title \"Save Model As...\" -icon info -message \"New model '$mname' (ver. $mver) successfully created.\\n\\nDirectory:\n$dirname\"");
 
 choice=49;
 goto loop;
@@ -4489,7 +4560,13 @@ if(choice==44)
 /*
 Show end edit model info
 */
-choice=0;
+
+if(s==NULL || !strcmp(s, ""))
+ {
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  choice=0;
+  goto loop;
+ }
 
 cmd(inter, "set ex [file exists $modeldir/modelinfo.txt]");
 cmd(inter, "set choice $ex");
@@ -4772,6 +4849,13 @@ if(choice==48)
 Model Compilation Options
 */
 
+if(s==NULL || !strcmp(s, ""))
+ {
+  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  choice=0;
+  goto loop;
+ }
+
 cmd(inter, "cd $modeldir");
 choice=0;
 cmd(inter, "set choice [file exists model_options.txt]");
@@ -4937,6 +5021,8 @@ cmd(inter, "set temp_var7 $tabsize");
 cmd(inter, "set temp_var8 $wrap");
 cmd(inter, "set temp_var9 $shigh");
 cmd(inter, "set temp_var10 $autoHide");
+cmd(inter, "set temp_var11 $showFileCmds");
+cmd(inter, "set temp_var12 $LsdNew");
 
 cmd( inter, "newtop .a \"LMM Options\" { .a.f2.esc invoke }" );
 
@@ -4950,7 +5036,7 @@ cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.v_num4; .a.v_num4 selection
 
 cmd(inter, "label .a.l4 -text \"Wish program\"");
 cmd(inter, "entry .a.v_num4 -width 30 -textvariable temp_var4");
-cmd(inter, "bind .a.v_num4 <Return> {focus -force .a.v_num5; .a.v_num4 selection range 0 end}");
+cmd(inter, "bind .a.v_num4 <Return> {focus -force .a.v_num5; .a.v_num5 selection range 0 end}");
 
 cmd(inter, "label .a.l5 -text \"Source code subdirectory\"");
 cmd(inter, "entry .a.v_num5 -width 30 -textvariable temp_var5");
@@ -4978,10 +5064,18 @@ cmd(inter, "bind .a.v_num9 <Return> {focus -force .a.v_num10; .a.v_num10 selecti
 
 cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
 cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
-cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.v_num11; .a.v_num11 selection range 0 end}");
+
+cmd(inter, "label .a.l11 -text \"Show text file commands (0:no/1:yes)\"");
+cmd(inter, "entry .a.v_num11 -width 30 -textvariable temp_var11");
+cmd(inter, "bind .a.v_num11 <Return> {focus -force .a.v_num12; .a.v_num12 selection range 0 end}");
+
+cmd(inter, "label .a.l12 -text \"New models subdirectory\"");
+cmd(inter, "entry .a.v_num12 -width 30 -textvariable temp_var12");
+cmd(inter, "bind .a.v_num12 <Return> {focus -force .a.f2.ok}");
 
 cmd(inter, "frame .a.f1");
-cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1}");
+cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1; set temp_var11 0; set temp_var12 Work}");
 cmd(inter, "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
 cmd(inter, "pack .a.f1.def .a.f1.help -padx 10 -pady 5 -side left");
 
@@ -4989,7 +5083,7 @@ cmd(inter, "frame .a.f2");
 cmd(inter, "button .a.f2.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f2.esc -width -9 -text Cancel -command {set choice 2}");
 cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 5 -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10");
+cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.l11 .a.v_num11 .a.l12 .a.v_num12");
 cmd(inter, "pack .a.f1");
 cmd(inter, "pack .a.f2");
 cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
@@ -5006,6 +5100,8 @@ cmd(inter, "destroytop .a");
 
 if(choice==1)
  {
+ cmd(inter, "if { $showFileCmds != $temp_var11 } { tk_messageBox -icon warning -title \"Restart required\" -type ok -message \"Restart required after configuration changes.\n\nOnly after LMM is closed and restarted the changes in the menu configuration will be shown.\" }");
+
  cmd(inter, "set Terminal $temp_var1");
  cmd(inter, "set HtmlBrowser $temp_var2");
  cmd(inter, "set fonttype $temp_var3");
@@ -5016,6 +5112,8 @@ if(choice==1)
  cmd(inter, "set wrap $temp_var8");
  cmd(inter, "set shigh $temp_var9");
  cmd(inter, "set autoHide $temp_var10");
+ cmd(inter, "set showFileCmds $temp_var11");
+ cmd(inter, "set LsdNew $temp_var12");
  
  cmd(inter, "set a [list $fonttype $dim_character]");
  cmd(inter, ".f.t.t conf -font \"$a\"");
@@ -5033,6 +5131,8 @@ cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
  cmd(inter, "puts $f $wrap");
  cmd(inter, "puts $f $shigh");
  cmd(inter, "puts $f $autoHide");
+ cmd(inter, "puts $f $showFileCmds");
+ cmd(inter, "puts $f $LsdNew");
  cmd(inter, "close $f");
  }
 
@@ -5143,7 +5243,7 @@ cmd(inter, "set init_time [clock seconds]");
 cmd( inter, "newtop .t \"Please Wait\"" );
 
 // change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/lmm.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
 
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
@@ -5621,7 +5721,7 @@ cmd(inter, "set cerr 0.0");
 
 cmd( inter, "newtop .mm \"Compilation Errors\" { destroytop .mm } \"\"" );
 // change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/lmm.xbm} {}");
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in Lsd installation directory for information on particular problems.\"");
 cmd(inter, "pack .mm.lab");
 
