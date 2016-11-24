@@ -421,30 +421,176 @@ cmd( inter, "label .l.v.lab -text \"Variables & Parameters ($nVar)\"" );
 
 // variables context menu (right mouse button)
 cmd( inter, "menu .l.v.c.var_name.v -tearoff 0" );
-cmd( inter, ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );
-cmd( inter, ".l.v.c.var_name.v add separator" );
-cmd( inter, ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );
-cmd( inter, ".l.v.c.var_name.v add separator" );
-cmd( inter, ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );
-cmd( inter, ".l.v.c.var_name.v add separator" );
-cmd( inter, ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );
-cmd( inter, ".l.v.c.var_name.v add separator" );
-cmd( inter, ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );
-cmd( inter, ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );
+cmd( inter, ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
+cmd( inter, ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
+cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 2
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save_var -command { set_var_conf $vname save $save_var }");	// entryconfig 3
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot_var -command { set_var_conf $vname plot $plot_var }");	// entryconfig 4
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable debug_var -command { set_var_conf $vname debug $debug_var }");	// entryconfig 5
+cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 6
+cmd( inter, ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 7
+cmd( inter, ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 8
+cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 9
+cmd( inter, ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 10
+cmd( inter, ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 11
+cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 12
+cmd( inter, ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 13
+cmd( inter, ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 14
+cmd( inter, ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 15
+cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 16
+cmd( inter, ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 17
+cmd( inter, ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 18
 
 if(r->v!=NULL)
   {
-	cmd(inter, "bind .l.v.c.var_name <Double-Button-1> { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 7 } }");
-	cmd( inter, "bind .l.v.c.var_name <Return> { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 7 } }" );
-	cmd( inter, "bind .l.v.c.var_name <Button-2> { .l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { .l.v.c.var_name.v entryconfig 3 -state normal; .l.v.c.var_name.v entryconfig 4 -state normal; .l.v.c.var_name.v entryconfig 9 -state normal; .l.v.c.var_name.v entryconfig 10 -state normal; .l.v.c.var_name.v entryconfig 11 -state normal; .l.v.c.var_name.v entryconfig 13 -state normal; .l.v.c.var_name.v entryconfig 14 -state normal; switch $color { purple { } blue { .l.v.c.var_name.v entryconfig 13 -state disabled; .l.v.c.var_name.v entryconfig 14 -state disabled } black { .l.v.c.var_name.v entryconfig 9 -state disabled; .l.v.c.var_name.v entryconfig 10 -state disabled } tomato { } red { .l.v.c.var_name.v entryconfig 13 -state disabled; .l.v.c.var_name.v entryconfig 14 -state disabled } }; if { $itemfocus == 0 } { .l.v.c.var_name.v entryconfig 3 -state disabled }; if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { .l.v.c.var_name.v entryconfig 4 -state disabled }; tk_popup .l.v.c.var_name.v %X %Y } }");
-	cmd( inter, "bind .l.v.c.var_name <Button-3> { .l.v.c.var_name selection clear 0 end;.l.v.c.var_name selection set @%x,%y; set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { .l.v.c.var_name.v entryconfig 3 -state normal; .l.v.c.var_name.v entryconfig 4 -state normal; .l.v.c.var_name.v entryconfig 9 -state normal; .l.v.c.var_name.v entryconfig 10 -state normal; .l.v.c.var_name.v entryconfig 11 -state normal; .l.v.c.var_name.v entryconfig 13 -state normal; .l.v.c.var_name.v entryconfig 14 -state normal; switch $color { purple { } blue { .l.v.c.var_name.v entryconfig 13 -state disabled; .l.v.c.var_name.v entryconfig 14 -state disabled } black { .l.v.c.var_name.v entryconfig 9 -state disabled; .l.v.c.var_name.v entryconfig 10 -state disabled } tomato { } red { .l.v.c.var_name.v entryconfig 13 -state disabled; .l.v.c.var_name.v entryconfig 14 -state disabled } }; if { $itemfocus == 0 } { .l.v.c.var_name.v entryconfig 3 -state disabled }; if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { .l.v.c.var_name.v entryconfig 4 -state disabled }; tk_popup .l.v.c.var_name.v %X %Y } }");
-	cmd( inter, "bind .l.v.c.var_name <Control-Up> { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 58 } }" );
-	cmd( inter, "bind .l.v.c.var_name <Control-Down> { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 59 } }" );
+	cmd(inter, "bind .l.v.c.var_name <Double-Button-1> \
+	{ \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			set choice 7 \
+		} \
+	}");
+	cmd( inter, "bind .l.v.c.var_name <Return> \
+	{ \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			set choice 7 \
+		} \
+	}" );
+	cmd( inter, "bind .l.v.c.var_name <Button-2> \
+	{ \
+		.l.v.c.var_name selection clear 0 end; \
+		.l.v.c.var_name selection set @%x,%y; \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			.l.v.c.var_name.v entryconfig 5 -state normal; \
+			.l.v.c.var_name.v entryconfig 7 -state normal; \
+			.l.v.c.var_name.v entryconfig 8 -state normal; \
+			.l.v.c.var_name.v entryconfig 13 -state normal; \
+			.l.v.c.var_name.v entryconfig 14 -state normal; \
+			.l.v.c.var_name.v entryconfig 15 -state normal; \
+			.l.v.c.var_name.v entryconfig 17 -state normal; \
+			.l.v.c.var_name.v entryconfig 18 -state normal; \
+			set save_var [ get_var_conf $vname save ]; \
+			set plot_var [ get_var_conf $vname plot ]; \
+			set debug_var [ get_var_conf $vname debug ]; \
+			switch $color \
+			{ \
+				purple { } \
+				blue \
+				{ \
+					.l.v.c.var_name.v entryconfig 17 -state disabled; \
+					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+				} \
+				black \
+				{ \
+					.l.v.c.var_name.v entryconfig 5 -state disabled; \
+					.l.v.c.var_name.v entryconfig 13 -state disabled; \
+					.l.v.c.var_name.v entryconfig 14 -state disabled \
+				} \
+				tomato { } \
+				firebrick \
+				{ \
+					.l.v.c.var_name.v entryconfig 17 -state disabled; \
+					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+				} \
+			}; \
+			if { $itemfocus == 0 } \
+			{ \
+				.l.v.c.var_name.v entryconfig 7 -state disabled \
+			}; \
+			if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } \
+			{ \
+				.l.v.c.var_name.v entryconfig 8 -state disabled \
+			}; \
+			tk_popup .l.v.c.var_name.v %X %Y \
+		} \
+	}");
+	cmd( inter, "bind .l.v.c.var_name <Button-3> \
+	{ \
+		.l.v.c.var_name selection clear 0 end; \
+		.l.v.c.var_name selection set @%x,%y; \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			.l.v.c.var_name.v entryconfig 5 -state normal; \
+			.l.v.c.var_name.v entryconfig 7 -state normal; \
+			.l.v.c.var_name.v entryconfig 8 -state normal; \
+			.l.v.c.var_name.v entryconfig 13 -state normal; \
+			.l.v.c.var_name.v entryconfig 14 -state normal; \
+			.l.v.c.var_name.v entryconfig 15 -state normal; \
+			.l.v.c.var_name.v entryconfig 17 -state normal; \
+			.l.v.c.var_name.v entryconfig 18 -state normal; \
+			set save_var [ get_var_conf $vname save ]; \
+			set plot_var [ get_var_conf $vname plot ]; \
+			set debug_var [ get_var_conf $vname debug ]; \
+			switch $color \
+			{ \
+				purple { } \
+				blue \
+				{ \
+					.l.v.c.var_name.v entryconfig 17 -state disabled; \
+					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+				} \
+				black \
+				{ \
+					.l.v.c.var_name.v entryconfig 5 -state disabled; \
+					.l.v.c.var_name.v entryconfig 13 -state disabled; \
+					.l.v.c.var_name.v entryconfig 14 -state disabled \
+				} \
+				tomato { } \
+				firebrick \
+				{ \
+					.l.v.c.var_name.v entryconfig 17 -state disabled; \
+					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+				} \
+			}; \
+			if { $itemfocus == 0 } \
+			{ \
+				.l.v.c.var_name.v entryconfig 7 -state disabled \
+			}; \
+			if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } \
+			{ \
+				.l.v.c.var_name.v entryconfig 8 -state disabled \
+			}; \
+			tk_popup .l.v.c.var_name.v %X %Y \
+		} \
+	}");
+	cmd( inter, "bind .l.v.c.var_name <Control-Up> \
+	{ \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		if { $itemfocus > 0 } \
+		{ \
+			incr itemfocus -1 \
+		}; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			set choice 58 \
+		} \
+	}" );
+	cmd( inter, "bind .l.v.c.var_name <Control-Down> \
+	{ \
+		set listfocus 1; \
+		set itemfocus [ .l.v.c.var_name curselection ]; \
+		if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } \
+		{ \
+			incr itemfocus \
+		}; \
+		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
+		{ \
+			set choice 59 \
+		} \
+	}" );
   }
 cmd(inter, ".l.v.c.var_name yview $cur");
 
@@ -1624,6 +1770,8 @@ cmd(inter, ch);
      }
 
    }
+ cmd(inter, "$Td.f.text delete \"end - 1 char\"");
+
  cmd(inter, "frame $Td.opt");
  sprintf(msg, "set observe %d", cur_descr->observe=='y'?1:0);
  cmd(inter, msg);
@@ -1724,16 +1872,6 @@ cycle_var:
 while(done==0)
  Tcl_DoOneEvent(0);
 
-if(done==1)
- {
-  cmd(inter, "set choice $observe");
-  *choice==1?observe='y':observe='n';
-  cmd(inter, "set choice $initial");
-  *choice==1?initial='y':initial='n';
-  cur_descr->initial=initial;
-  cur_descr->observe=observe;
- }
-
 *choice = 1;	// point .top window as parent for the following windows
 if(done == 3)
  show_eq(lab_old, choice);
@@ -1744,7 +1882,7 @@ if(done == 7)
 *choice = 0;
 
 if(done == 9) 
- {
+{
   auto_document( choice, lab_old, "ALL", true );
   cmd(inter, "$Td.f.text delete 1.0 end");
 
@@ -1762,45 +1900,23 @@ if(done == 9)
      }
       
    } 
+  cmd(inter, "$Td.f.text delete \"end - 1 char\"");
   unsavedChange = true;		// signal unsaved change
- }
+}
 if(done == 7 || done == 4 || done == 3 || done == 9)
- {
+{
   done=0;
   goto cycle_var;
- }
-
-if(done==1) 
-  {
-   cmd(inter, "set text_description \"[$Td.f.text get 1.0 end]\"");
-   change_descr_text(lab_old);
-   if(cv->param==1 || cv->num_lag>0)
-    {cmd(inter, "set text_description \"[$Td.i.text get 1.0 end]\"");
-     change_init_text(lab_old);
-    }
-  
-  unsavedChange = true;			// signal unsaved change
-  }
-
-cmd( inter, "destroytop $T" );
+}
 
 if ( done == 2 || done == 8 )	// esc/cancel
 {
 	redrawRoot = false;			// no browser redraw
 	goto here_endelem;
 }
-
-if(done==1)
- {if(save==1 || savei==1)
-   {
-   for(cur=r; cur!=NULL; cur=cur->up)
-    if(cur->to_compute==0)
-     {
-       sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", lab_old, cur->label);
-   cmd(inter, msg);
-     }
-   }
-  for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
+else
+{
+   for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
    {
   	cv=cur->search_var(NULL, lab_old);
   	cv->save=save;
@@ -1809,7 +1925,34 @@ if(done==1)
   	cv->plot=plot;
    }
     
- }
+   cmd(inter, "set choice $observe");
+   *choice==1?observe='y':observe='n';
+   cmd(inter, "set choice $initial");
+   *choice==1?initial='y':initial='n';
+   cur_descr->initial=initial;
+   cur_descr->observe=observe;
+  
+   cmd(inter, "set text_description \"[$Td.f.text get 1.0 end]\"");
+   change_descr_text(lab_old);
+   if(cv->param==1 || cv->num_lag>0)
+   {
+	 cmd(inter, "set text_description \"[$Td.i.text get 1.0 end]\"");
+     change_init_text(lab_old);
+   }
+  
+   unsavedChange = true;			// signal unsaved change
+
+   if ( save == 1 || savei == 1 )
+   {
+      for(cur=r; cur!=NULL; cur=cur->up)
+		if(cur->to_compute==0)
+		 {
+		   sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", lab_old, cur->label);
+		   cmd(inter, msg);
+		 }
+   }
+}
+
 if(done!=8)
   *choice=0;
 else
@@ -1817,6 +1960,7 @@ else
 
 here_endelem:
 
+cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "save");
 Tcl_UnlinkVar(inter, "savei");
@@ -1845,6 +1989,7 @@ switch ( done )
 		*choice = 0;
 		break;
 }
+
 if ( *choice != 0 )
 {
 	redrawRoot = false;			// no browser redraw yet
@@ -5238,4 +5383,75 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
 	else
 		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
 	return TCL_OK;
+}
+
+// Function to get variable configuration from Tcl
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+{
+	char vname[ 300 ], res[ 2 ];
+	variable *cv;
+	
+	if ( argc != 3 )					// require 2 parameters: variable name and property
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
+	cv = root->search_var( root, vname );
+
+	if ( cv == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// get the appropriate value for variable
+	res[ 1 ] = '\0';					// default is 1 char string array
+	if ( ! strcmp( argv[ 2 ], "save" ) )
+		res[ 0 ] = cv->save ? '1' : '0';
+	else 
+		if ( ! strcmp( argv[ 2 ], "plot" ) )
+			res[ 0 ] = cv->plot ? '1' : '0';
+		else
+			if ( ! strcmp( argv[ 2 ], "debug" ) )
+				res[ 0 ] = cv->debug == 'd' ? '1' : '0';
+			else
+				return TCL_ERROR;
+	
+	Tcl_SetResult( inter, res, TCL_VOLATILE );
+	return TCL_OK;		
+}
+
+// Function to set variable configuration from Tcl
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+{
+	char vname[ 300 ];
+	variable *cv;
+	
+	if ( argc != 4 )					// require 3 parameters: variable name, property and value
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || 
+		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
+		return TCL_ERROR;
+	
+	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
+	cv = root->search_var( root, vname );
+	
+	if ( cv == NULL )					// variable not found
+		return TCL_ERROR;
+
+	// set the appropriate value for variable
+	if ( ! strcmp( argv[ 2 ], "save" ) )
+		cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+	else 
+		if ( ! strcmp( argv[ 2 ], "plot" ) )
+			cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+		else
+			if ( ! strcmp( argv[ 2 ], "debug" ) )
+				cv->debug  = ( ! strcmp( argv[ 3 ], "1" ) ) ? 'd' : 'n';
+			else
+				return TCL_ERROR;
+	
+	unsavedChange = true;				// signal unsaved change
+
+	return TCL_OK;		
 }

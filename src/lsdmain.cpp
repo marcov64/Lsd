@@ -81,6 +81,8 @@ position of the file is just after str.
 void cmd(Tcl_Interp *inter, char  const *cc);
 Tcl_Interp *InterpInitWin(char *tcl_dir);
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
 Tcl_Interp *inter;
 #endif
 
@@ -425,6 +427,10 @@ cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+
+// create Tcl commands that get and set LSD variable properties
+Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
+Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
