@@ -290,6 +290,7 @@ cmd(inter, "set choice -1");
 cmd(inter, "set c \"\"");
 Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
+Tcl_LinkVar(inter, "actual_steps", (char *)&actual_steps, TCL_LINK_INT);
 choice_g=choice=0;
 cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1; raise .log; focus -force .log} {set choice -1}");
 cmd(inter, "wm resizable . 1 1");
@@ -424,9 +425,9 @@ cmd( inter, "menu .l.v.c.var_name.v -tearoff 0" );
 cmd( inter, ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 cmd( inter, ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 2
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save_var -command { set_var_conf $vname save $save_var }");	// entryconfig 3
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot_var -command { set_var_conf $vname plot $plot_var }");	// entryconfig 4
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable debug_var -command { set_var_conf $vname debug $debug_var }");	// entryconfig 5
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save_var -command { if { $actual_steps == 0 } { set_var_conf $vname save $save_var } { set choice 7 } }");	// entryconfig 3
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot_var -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot_var } { set choice 7 } }");	// entryconfig 4
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable debug_var -command { if { $actual_steps == 0 } { set_var_conf $vname debug $debug_var } { set choice 7 } }");	// entryconfig 5
 cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 6
 cmd( inter, ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 7
 cmd( inter, ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 8
