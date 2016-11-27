@@ -140,7 +140,6 @@ void show_save(object *n);
 void show_initial(object *n);
 void show_observe(object *n);
 void set_shortcuts( const char *window );
-
 void clean_plot(object *n);
 FILE *search_str(char const *name, char const *str);
 void plog( char const *msg, char const *tag = "" );
@@ -152,7 +151,6 @@ void wipe_out(object *d);
 int check_label(char *l, object *r);
 int cd(char *path);
 void set_blueprint(object *container, object *r);
-
 void myexit(int i);
 void scan_used_lab(char *lab, int *choice);
 void scan_using_lab(char *lab, int *choice);
@@ -194,6 +192,8 @@ void save_pos( object * );
 object *restore_pos( object * );
 int load_configuration( object * );
 bool save_configuration( object *, long findex = 0 );
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
 // comparison function for bsearch and qsort
 int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
@@ -216,7 +216,6 @@ extern int optimized;
 extern int check_optimized;
 extern int when_debug;
 extern int running;
-
 extern Tcl_Interp *inter;
 extern int seed;
 extern int sim_num;
@@ -241,16 +240,14 @@ extern object *blueprint;
 extern sense *rsense;
 extern long nodesSerial;	// network node serial number global counter
 extern bool unsavedData;	// control for unsaved simulation results
-
-char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
-
 extern char *sens_file;		// current sensitivity analysis file
 extern long findexSens;		// index to sequential sensitivity configuration filenames
 extern int strWindowOn;		// control the presentation of the model structure window
 extern bool justAddedVar;	// control the selection of last added variable
-extern bool unsavedChange;	// control for unsaved changes in configuration
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 extern bool redrawRoot;		// control for redrawing root window (.)
+
+char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
 
 // list of choices that are bad with existing run data
 int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
@@ -312,9 +309,9 @@ if(choice==-1)
  choice=0;
  }
 
-sprintf( msg, "wm title . \"%s%s - Lsd Browser\"", unsavedChange ? "*" : "", simul_name ) ;
+sprintf( msg, "wm title . \"%s%s - Lsd Browser\"", unsaved_change() ? "*" : " ", simul_name ) ;
 cmd(inter, msg);
-sprintf( msg, "wm title .log \"%s%s - Lsd Log\"", unsavedChange ? "*" : "", simul_name ) ;
+sprintf( msg, "wm title .log \"%s%s - Lsd Log\"", unsaved_change() ? "*" : " ", simul_name ) ;
 cmd(inter, msg);
 
 for(cur=cr; cur->up!=NULL; cur=cur->up);
@@ -1126,7 +1123,7 @@ if ( done == 2 )
  
 	justAddedVar=true;		// flag variable just added (for acquiring focus)
   }
-  unsavedChange = true;		// signal unsaved change
+  unsaved_change( true );	// signal unsaved change
  }
  }
 
@@ -1238,7 +1235,7 @@ if(done==1)
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
 
- unsavedChange = true;		// signal unsaved change
+ unsaved_change( true );	// signal unsaved change
  redrawRoot = true;			// force browser redraw
  }
 
@@ -1375,7 +1372,7 @@ if(done==1)
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
 
- unsavedChange = true;		// signal unsaved change
+ unsaved_change( true );	// signal unsaved change
  redrawRoot = true;			// force browser redraw
 
 here_endparent:
@@ -1534,7 +1531,7 @@ while(*choice==0)
 if(*choice==1|| *choice==5 || *choice==3)
 {
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 // save description changes
 cmd(inter, "set text_description \"[$T.desc.f.text get 1.0 end]\"");
@@ -1680,7 +1677,7 @@ for ( cv = cur->v; cv != NULL; cv = cv->next )
 	change_descr_lab( cv->label, "" , "", "", "" );
 wipe_out( cur );
 
-unsavedChange = true;				// signal unsaved change
+unsaved_change( true );				// signal unsaved change
 redrawRoot = true;					// force browser redraw
 
 break;
@@ -1902,7 +1899,7 @@ if(done == 9)
       
    } 
   cmd(inter, "$Td.f.text delete \"end - 1 char\"");
-  unsavedChange = true;		// signal unsaved change
+  unsaved_change( true );		// signal unsaved change
 }
 if(done == 7 || done == 4 || done == 3 || done == 9)
 {
@@ -1941,7 +1938,7 @@ else
      change_init_text(lab_old);
    }
   
-   unsavedChange = true;			// signal unsaved change
+   unsaved_change( true );		// signal unsaved change
 
    if ( save == 1 || savei == 1 )
    {
@@ -2181,7 +2178,7 @@ if(nature==1 || nature==0 || nature==2)
 	}
 }
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 here_endprop:
@@ -2236,7 +2233,7 @@ for( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 	}
 }
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 break;
@@ -2437,7 +2434,7 @@ cmd(inter, "pack $T.war3 $T.war4");
 
 // Only ask to overwrite configuration if there are changes
 Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
-if ( unsavedChange )
+if ( unsaved_change() )
 {
 	overwConf = 1;
 	cmd( inter, "checkbutton $T.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
@@ -2590,7 +2587,7 @@ switch ( load_configuration( r ) )
 	default:						// load ok
 		cmd( inter, "catch {unset ModElem}" );
 		show_graph( r );
-		unsavedChange = false;		// no changes to save
+		unsaved_change( false );		// no changes to save
 		redrawRoot = true;			// force browser redraw
 		if ( ! reload )
 			cmd( inter, "set cur 0" ); // point for first var in listbox
@@ -2701,7 +2698,7 @@ set_obj_number(n, choice);
 cmd( inter, "destroytop .ini" );
 r=n->search(lab);
 
-unsavedChange = true;			// signal unsaved change
+unsaved_change( true );			// signal unsaved change
 
 break;
 
@@ -2733,7 +2730,7 @@ for(n=r; n->up!=NULL; n=n->up);
 
 edit_data(n, choice, r->label);
 
-unsavedChange = true;			// signal unsaved change
+unsaved_change( true );			// signal unsaved change
 cmd( inter, "destroytop .ini" );
 
 if ( cur2 != NULL )				// restore original current object
@@ -2777,7 +2774,7 @@ strcpy(path, "");
 delete[] simul_name;
 simul_name=new char[strlen("Sim1")+1];
 strcpy(simul_name, "Sim1");
-unsavedChange = false;		// signal no unsaved change
+unsaved_change( false );	// signal no unsaved change
 redrawRoot = true;			// force browser redraw
 cmd( inter, "set cur 0" ); 	// point for first var in listbox
 
@@ -2861,7 +2858,7 @@ else
 	cmd(inter, "set choice $stack_info");
 	stackinfo_flag=*choice;
 
-	unsavedChange = true;		// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
 }
 
 Tcl_UnlinkVar(inter, "seed");
@@ -2902,7 +2899,7 @@ r=n->search(res_g);
 edit_data(n, choice, r->label);
 cmd( inter, "destroytop .ini" );
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 choice_g=0;
 
 break;
@@ -2929,7 +2926,7 @@ if(*choice==1)
 {
 	for(n=r; n->up!=NULL; n=n->up);
 	clean_debug(n);
-	unsavedChange = true;		// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
 }
 
 break;
@@ -2947,7 +2944,7 @@ sscanf( lab1, "%s", lab_old );
 delete[] equation_name;
 equation_name=new char[strlen(lab)+1];
 strcpy(equation_name, lab);
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 break;
 
@@ -2974,7 +2971,7 @@ if(*choice==1)
 {
 	for(n=r; n->up!=NULL; n=n->up);
 	clean_save(n);
-	unsavedChange = true;		// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
 }
 
 break;
@@ -3028,7 +3025,7 @@ if(*choice==1)
 {
 	for(n=r; n->up!=NULL; n=n->up);
 	clean_plot(n);
-	unsavedChange = true;		// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
 }
 
 break;
@@ -3122,7 +3119,7 @@ k=*choice;
 for(i=0, cur=r->up;cur!=NULL; i++, cur=cur->up); 
 chg_obj_num(&r, num, i, NULL, choice,k);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 here_endinst:
 if ( cur2 != NULL )			// restore original current object
@@ -3301,7 +3298,7 @@ if(*choice==1)
 else
    auto_document( choice, NULL, "ALL"); 
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 break;
 
@@ -3349,7 +3346,7 @@ strcpy(lab, lab1);
 
 change_descr_text(lab);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 break;
 
@@ -3472,7 +3469,7 @@ cmd(inter, "if {[string compare -nocase $answer ok] == 0} {set choice 1} {set ch
  if(*choice == 0)
   break;
 strcpy(lsd_eq_file, eq_file);
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 
 break;
 
@@ -3575,7 +3572,7 @@ sscanf( lab1, "%s", lab_old );
 
 shift_var(-1, lab_old, r);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 break;
@@ -3591,7 +3588,7 @@ sscanf( lab1, "%s", lab_old );
 
 shift_var(1, lab_old, r);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 break;
@@ -3607,7 +3604,7 @@ sscanf( lab1, "%s", lab_old );
 
 shift_desc(-1, lab_old, r);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 break;
@@ -3623,7 +3620,7 @@ sscanf( lab1, "%s", lab_old );
 
 shift_desc(1, lab_old, r);
 
-unsavedChange = true;		// signal unsaved change
+unsaved_change( true );		// signal unsaved change
 redrawRoot = true;			// request browser redraw
 
 break;
@@ -3657,7 +3654,7 @@ if (rsense!=NULL)
     cur=root->b->head;
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
-	unsavedChange = true;		// signal unsaved change
+	unsaved_change( true );		// signal unsaved change
  	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
@@ -5339,6 +5336,53 @@ object *restore_pos( object *r )
 }
 
 /*
+	Read or set the UnsavedChange flag and update windows titles accordingly
+*/
+
+bool unsavedChange = false;		// control for unsaved changes in configuration
+#define WND_NUM 6
+const char * wndName[ ] = { ".", ".log", ".model_str", ".ini", ".da", ".deb" };
+
+bool unsaved_change( bool val )
+{
+	int i; 
+	
+	if ( unsavedChange != val )
+	{
+		unsavedChange = val;
+		char chgMark[ ] = "\0\0";
+		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
+		
+		// change all the possibly open (single) windows
+		for ( i = 0; i < WND_NUM; ++i )
+		{
+			sprintf( msg, "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ] ) ;
+			cmd( inter, msg );
+		}
+		// handle (possibly multiple) run time plot windows
+		cmd(inter, "set a [ split [ winfo children . ] ]");
+		sprintf( msg, "foreach i $a \
+		{ \
+			if [ string match .plt* $i ] \
+			{ \
+				if [ winfo exist .plt$i ] \
+				{ \
+					wm title .plt$i \"%s[ string range [ wm title .plt$i ] 1 end ]\" \
+				} \
+			} \
+		}", wndName[ i ], wndName[ i ], chgMark, wndName[ i ] ) ;
+		cmd( inter, msg );
+	}
+	
+	return unsavedChange;
+}
+
+bool unsaved_change( void )
+{
+	return unsavedChange;
+}
+
+/*
 	Ask user to discard changes in configuration, if applicable
 	Returns: 0: abort, 1: continue without saving
 */
@@ -5426,6 +5470,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 {
 	char vname[ 300 ];
 	variable *cv;
+	object *cur;
 	
 	if ( argc != 4 )					// require 3 parameters: variable name, property and value
 		return TCL_ERROR;
@@ -5440,19 +5485,25 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
 
-	// set the appropriate value for variable
-	if ( ! strcmp( argv[ 2 ], "save" ) )
-		cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
-	else 
-		if ( ! strcmp( argv[ 2 ], "plot" ) )
-			cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
-		else
-			if ( ! strcmp( argv[ 2 ], "debug" ) )
-				cv->debug  = ( ! strcmp( argv[ 3 ], "1" ) ) ? 'd' : 'n';
+	// set the appropriate value for variable (all instances)
+	for ( cur = root; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	{
+		cv = cur->search_var( root, vname );
+		if ( ! strcmp( argv[ 2 ], "save" ) )
+			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+		else 
+			if ( ! strcmp( argv[ 2 ], "savei" ) )
+				cv->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 			else
-				return TCL_ERROR;
-	
-	unsavedChange = true;				// signal unsaved change
+				if ( ! strcmp( argv[ 2 ], "plot" ) )
+					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+				else
+					if ( ! strcmp( argv[ 2 ], "debug" ) )
+						cv->debug  = ( ! strcmp( argv[ 3 ], "1" ) ) ? 'd' : 'n';
+					else
+						return TCL_ERROR;
+	}
+	unsaved_change( true );				// signal unsaved change
 
 	return TCL_OK;		
 }

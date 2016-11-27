@@ -63,21 +63,21 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 void cmd(Tcl_Interp *inter, char const *cc);
 object *go_brother(object *cur);
 object *skip_next_obj(object *t, int *i);
-extern Tcl_Interp *inter;
 void draw_obj(Tcl_Interp *ti, object *blk, object *t, int level, int center, int from);
 void put_node(Tcl_Interp *interp, int x1, int y1, int x2, int y2, char *str);
 void put_line(Tcl_Interp *interp, int x1, int y1, int x2, int y2);
 void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
 void set_shortcuts( const char *window );
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
+extern Tcl_Interp *inter;
 extern int strWindowOn;		// control the presentation of the model structure window
 extern char *simul_name;	// simulation name to use in title bar
-extern bool unsavedChange;	// control for unsaved changes in configuration
 
 int range_type=90;
 int step_level=15;
 int step=10;
-
 int h0 = 255;					// initial horizontal position
 int v0 = 10;					// initial vertical position
 float hpan0 = 0.35;				// initial horizontal scroll %
@@ -164,7 +164,7 @@ else	// or just update canvas
 	draw_obj(inter, t, top, v0, h0, 0);
 }
 
-sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsavedChange ? "*" : "", simul_name );
+sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, msg );
 cmd(inter, "wm deiconify $c; lower $c .");
 }

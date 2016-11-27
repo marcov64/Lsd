@@ -74,10 +74,9 @@ void init_canvas(void);
 void init_plot(int i, int id_sim);
 void cmd(Tcl_Interp *inter, char const *cc);
 void set_shortcuts( const char *window );
-
-// better adjusts position for X11
-int shift=20;		// new window shift
-char intval[16];	// string buffer
+double min(double a, double b);
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
 extern char msg[];
 extern Tcl_Interp *inter;
@@ -87,15 +86,15 @@ extern int cur_plt;
 extern int t;
 extern int plot_flag;
 extern char *simul_name;	// simulation name to use in title bar
-extern bool unsavedChange;	// control for unsaved changes in configuration
 
+// better adjusts position for X11
+int shift=20;		// new window shift
+char intval[16];	// string buffer
 double ymin;
 double ymax;
 double *old_val;
 double plot_step;
 variable **list;
-
-double min(double a, double b);
 
 /**************************************
 PREPARE_PLOT
@@ -206,7 +205,7 @@ Tcl_SetVar(inter, "shift", intval, 0);
 cmd(inter, "set posXrt [expr $posXstr + $shift]");
 cmd(inter, "set posYrt [expr $posYstr + $shift]");
 cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
-sprintf(msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsavedChange ? "*" : "", simul_name, id_sim);
+sprintf(msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim);
 cmd(inter,msg);
 cmd(inter, "frame $activeplot.c");
 cmd(inter, "frame $activeplot.c.c  ");

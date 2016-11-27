@@ -81,22 +81,6 @@ did not issue an error message.
 #include <tk.h>
 #include "decl.h"
 
-extern int debug_flag;
-extern int when_debug;
-extern Tcl_Interp *inter;
-extern int t;
-extern int quit;
-extern int done_in;
-extern int actual_steps;
-extern int running;
-extern char name_rep[400];
-extern char msg[];
-extern int stackinfo_flag;
-extern lsdstack *stacklog;
-extern int choice;
-extern char *simul_name;	// simulation name to use in title bar
-extern bool unsavedChange;	// control for unsaved changes in configuration
-
 void cmd(Tcl_Interp *inter, char const *cc);
 object *go_brother(object *cur);
 void plog( char const *msg, char const *tag = "" );
@@ -115,6 +99,23 @@ void this_instance_number(object *r);
 void entry_new_objnum(object *c, int *choice, char const *tag);
 void set_all(int *choice, object *original, char *lab, int lag);
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
+
+extern int debug_flag;
+extern int when_debug;
+extern Tcl_Interp *inter;
+extern int t;
+extern int quit;
+extern int done_in;
+extern int actual_steps;
+extern int running;
+extern char name_rep[400];
+extern char msg[];
+extern int stackinfo_flag;
+extern lsdstack *stacklog;
+extern int choice;
+extern char *simul_name;	// simulation name to use in title bar
 
 int interact_flag=0;
 double i_values[100];
@@ -139,7 +140,7 @@ bridge *cb, *cb1;
 
 Tcl_SetVar( inter, "lab", lab, 0 );
 cmd( inter, "set deb .deb" );
-sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { newtop .deb \"%s%s - Lsd Data Browser\" { set choice 7 } } { newtop .deb \"%s%s - Lsd Debugger\" { set choice 7 } \"\" } }", unsavedChange ? "*" : "", simul_name, unsavedChange ? "*" : "", simul_name );
+sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\" }", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, msg );
 
 // avoid redrawing the menu if it already exists and is configured

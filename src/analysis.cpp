@@ -114,13 +114,11 @@ void histograms(int *choice);
 void histograms_cs(int *choice);
 void create_series(int *choice);
 void create_maverag(int *choice);
-
 void set_cs_data(int *choice);
 void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void myexit(int v);
-
 void save_data1(int *choice);
 void save_datazip(int *choice);
 void statistics(int *choice);
@@ -143,15 +141,20 @@ void show_eq(char *lab, int *choice);
 int cd(char *path);
 void show_plot_gnu(int n, int *choice, int type);
 object *skip_next_obj(object *t);
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
 extern Tcl_Interp *inter;
 extern object *root;
-
 extern char *simul_name;
 extern char name_rep[400];
 extern int seed;
 extern int done_in;
-extern bool unsavedChange;	// control for unsaved changes in configuration
+extern char nonavail[];	// string for unavailable values
+extern char msg[];
+extern variable *cemetery;
+extern int actual_steps;
+extern int watch;
 
 int num_var;
 int num_c;
@@ -162,7 +165,6 @@ double maxy;
 double truemaxy;
 int autom;
 int autom_x;
-extern int watch;
 int res, dir;
 int pdigits;   // precision parameter for labels in y scale
 int logs;		// log scale flag for the y-axis
@@ -170,12 +172,6 @@ int cur_plot=0;
 int file_counter=0;
 char filename[1000];
 char **name_var;
-extern char nonavail[];	// string for unavailable values
-extern char msg[];
-
-extern variable *cemetery;
-
-extern int actual_steps;
 FILE *debug;
 int time_cross;
 int line_point;
@@ -183,11 +179,9 @@ int grid;
 int allblack;
 double point_size;
 int xy;
-
 int type_graph[1000];
 int graph_l[1000];
 int graph_nl[1000];
-
 
 struct store
 {
@@ -241,7 +235,7 @@ file_counter=0;
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
 cmd( inter, "set da .da");
-sprintf(msg, "newtop .da \"%s%s - Lsd Results Analysis\" { set choice 2 } \"\"", unsavedChange ? "*" : "", simul_name);
+sprintf(msg, "newtop .da \"%s%s - Lsd Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name);
 cmd(inter, msg);
 
 cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");

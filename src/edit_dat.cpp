@@ -86,16 +86,10 @@ EDIT.CPP allows to edit the number of instances in the model
 #include <tk.h>
 #include "decl.h"
 
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;	// simulation name to use in title bar
-extern bool unsavedChange;	// control for unsaved changes in configuration
-
 void go_next(object **t);
 object *go_brother(object *cur);
 object *skip_next_obj(object *t, int *count);
 void cmd(Tcl_Interp *inter, char const *cc);
-
 void search_title(object *root, char *tag, int *i, char *lab, int *incr);
 void clean_cell(object *root, char *tag, char *lab);
 void edit_data(object *root, int *choice);
@@ -103,10 +97,17 @@ void set_title(object *c, char *lab, char *tag, int *incr);
 void link_data(object *root, char *lab);
 void set_all(int *choice, object *r, char *lab, int lag);
 void set_obj_number(object *r, int *choice);
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
+
+extern Tcl_Interp *inter;
+extern char msg[];
+extern char *simul_name;	// simulation name to use in title bar
+extern bool in_set_obj;
+
 int set_focus;
 // flags to avoid recursive usage (confusing and tk windows are not ready)
 bool in_edit_data = false;
-extern bool in_set_obj;
 // Main window constraints
 char widthDE[]="800";			// horizontal size in pixels
 char heightDE[]="600";			// vertical size in pixels
@@ -139,7 +140,7 @@ in_edit_data = true;
 while(*choice==0)
 {
 // reset title and destroy command because may be coming from set_obj_number
-sprintf( ch, "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsavedChange ? "*" : "", simul_name );
+sprintf( ch, "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, ch );
 
 //find first object->label==obj_name;

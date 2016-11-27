@@ -162,10 +162,8 @@ object *skip_next_obj(object *t);
 object *go_brother(object *t);
 void copy_descendant(object *from, object *to);
 void load_description(char *label, char *type);
-
 void kill_trailing_newline(char *s);
 FILE *search_str(char *name, char *str);
-
 void execmd(char *);
 FILE *search_data_str(char const *name, char const *init, char const *str);
 FILE *search_data_ent(char *name, variable *v);
@@ -176,6 +174,10 @@ void set_blueprint(object *container, object *r);
 void add_description(char const *lab, char const *type, char const *text);
 void empty_cemetery(void);
 void empty_descr(void);
+void recur_description(object *r, FILE *f);
+description *search_description(char *lab);
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
 extern char msg[];
 extern char name_rep[];
@@ -191,15 +193,10 @@ extern int seed;
 extern int sim_num;
 extern int max_step;
 extern int ignore_eq_file;
-extern bool unsavedChange;
 extern object *blueprint;
-       
 extern description *descr;
-void recur_description(object *r, FILE *f);
-description *search_description(char *lab);
 
 int inbp;// global variable signaling whether it is exploring the blueprint (=1) or the model (=0)
-
 fpos_t *fpos=NULL;
 
 /****************************************************
@@ -1221,7 +1218,7 @@ endLoad:
 	fclose( f );
 	
 	t = 0;
-	unsavedChange = false;
+	unsaved_change( false );
 
 	return load;
 }
@@ -1286,7 +1283,7 @@ bool save_configuration( object *r, long findex )
 	fclose( f );
 	
 	if ( findex <= 0 )
-		unsavedChange = false;		// no changes to save
+		unsaved_change( false );		// no changes to save
 	
 	return true;
 }

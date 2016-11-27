@@ -81,19 +81,6 @@ generator.
 #include <tk.h>
 #include "decl.h"
 
-
-sense *rsense=NULL;
-
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;
-extern char *path;
-extern int t;
-extern object *root;
-extern description *descr;
-extern bool unsavedChange;	// control for unsaved changes in configuration
-extern bool unsavedSense;	// control for unsaved changes in sensitivity data
-
 void cmd(Tcl_Interp *inter, char const *cc);
 double rnd_integer(double min, double max);
 double norm(double mean, double dev);
@@ -108,7 +95,19 @@ void dataentry_sensitivity(int *choice, sense *s, int nval);
 bool save_configuration( object *, long findex = 0 );
 int init_random(int seed);
 void NOLH_clear( void );	// external DoE	cleanup
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
 
+extern Tcl_Interp *inter;
+extern char msg[];
+extern char *simul_name;
+extern char *path;
+extern int t;
+extern object *root;
+extern description *descr;
+extern bool unsavedSense;	// control for unsaved changes in sensitivity data
+
+sense *rsense=NULL;
 
 /****************************************************
 SET_ALL
@@ -395,7 +394,7 @@ case 1:
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 		  break;
 
 //Range
@@ -459,7 +458,7 @@ case 9:
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 		  break;
 
 case 2: //increasing
@@ -514,7 +513,7 @@ case 2: //increasing
          change_descr_lab(lab, "", "", "", msg);
         }  
         }
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
         break;
 		
 case 4: 
@@ -567,7 +566,7 @@ case 4:
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 
         break;
 
@@ -621,7 +620,7 @@ case 3:
         }  
        }
 
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 
 		  break;
 		  
@@ -674,7 +673,7 @@ case 5:
            change_descr_lab(lab, "", "", "", msg);        
         }  
        }
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 
 		  break;
 
@@ -730,7 +729,7 @@ case 6:
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 
         break;
 
@@ -798,7 +797,7 @@ case 7:
 
     
     }
-  unsavedChange = true;		// signal unsaved change
+  unsaved_change( true );		// signal unsaved change
    }
 break;
 
@@ -852,7 +851,7 @@ case 8:
         }  
        }
 
-  		unsavedChange = true;		// signal unsaved change
+  		unsaved_change( true );		// signal unsaved change
 
 		  break;
 

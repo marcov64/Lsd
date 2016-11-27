@@ -189,7 +189,6 @@ int batch_sequential=0;
 char *sens_file=NULL;		// current sensitivity analysis file
 long findexSens=0;			// index to sequential sensitivity configuration filenames
 bool justAddedVar=false;	// control the selection of last added variable
-bool unsavedChange = false;	// control for unsaved changes in configuration
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 bool redrawRoot = true;		// control for redrawing root window (.)
 

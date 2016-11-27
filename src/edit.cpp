@@ -69,17 +69,10 @@ void link_data(object *root, char *lab);
 #include <tk.h>
 #include "decl.h"
 
-
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;	// simulation name to use in title bar
-extern bool unsavedChange;	// control for unsaved changes in configuration
-
 void go_next(object **t);
 object *go_brother(object *cur);
 object *skip_next_obj(object *t, int *count);
 void cmd(Tcl_Interp *inter, char const *cc);
-
 void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
 void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done);
 void eliminate_obj(object **r, int actual, int desired , int *choice);
@@ -88,21 +81,25 @@ void clean_cell(object *root, char *tag, char *lab);
 void edit_data(object *root, int *choice, char *obj_name);
 void set_title(object *c, char *lab, char *tag, int *incr);
 void link_data(object *root, char *lab);
-
 void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
 void plog( char const *msg, char const *tag = "" );
+bool unsaved_change(  );		// control for unsaved changes in configuration
+bool unsaved_change( bool );
+
+extern Tcl_Interp *inter;
+extern char msg[];
+extern char *simul_name;	// simulation name to use in title bar
+extern bool in_edit_data;
+extern char widthDE[];			// horizontal size in pixels
+extern char heightDE[];			// vertical size in pixels
 
 char lab_view[40];
 char tag_view[40];
-
 int level;
 int max_depth;
 // flags to avoid recursive usage (confusing and tk windows are not ready)
-extern bool in_edit_data;
 bool in_set_obj = false;
 // Main window constraints (defined in edit_data.cpp)
-extern char widthDE[];			// horizontal size in pixels
-extern char heightDE[];			// vertical size in pixels
 
 /***************************************************
 SET_OBJ_NUMBER
@@ -133,7 +130,7 @@ max_depth=1;
 while(*choice==0)
 {
   // reset title and destroy command because may be coming from edit_data
-  sprintf( ch, "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsavedChange ? "*" : "", simul_name );
+  sprintf( ch, "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
   cmd( inter, ch );
   
   cmd(inter, "frame .ini.obj");
