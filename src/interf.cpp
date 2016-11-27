@@ -803,17 +803,18 @@ set_shortcuts( "." );
 set_shortcuts( ".log" );
 
 // Button bar
-cmd(inter, "destroy .bbar");
+cmd( inter, "destroy .bbar" );
 cmd( inter, "frame .bbar -bd 2" );
 
-cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.gif\"" );
-cmd( inter, "image create photo reloadImg -file \"$RootLsd/$LsdSrc/icons/reload.gif\"" );
-cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.gif\"" );
-cmd( inter, "image create photo initImg -file \"$RootLsd/$LsdSrc/icons/init.gif\"" );
-cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.gif\"" );
-cmd( inter, "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.gif\"" );
-cmd( inter, "image create photo dataImg -file \"$RootLsd/$LsdSrc/icons/data.gif\"" );
-cmd( inter, "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.gif\"" );
+cmd( inter, "if [ string equal [ info tclversion ] \"8.6\" ] { set iconExt \"png\" } { set iconExt \"gif\" }" );
+cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.$iconExt\"" );
+cmd( inter, "image create photo reloadImg -file \"$RootLsd/$LsdSrc/icons/reload.$iconExt\"" );
+cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.$iconExt\"" );
+cmd( inter, "image create photo initImg -file \"$RootLsd/$LsdSrc/icons/init.$iconExt\"" );
+cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
+cmd( inter, "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.$iconExt\"" );
+cmd( inter, "image create photo dataImg -file \"$RootLsd/$LsdSrc/icons/data.$iconExt\"" );
+cmd( inter, "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.$iconExt\"" );
 
 cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 17}" );
 cmd( inter, "button .bbar.reload -image reloadImg -relief flat -command {set choice 38}" );

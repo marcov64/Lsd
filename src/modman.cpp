@@ -501,24 +501,25 @@ cmd( inter, msg );
 // Button bar
 cmd( inter, "frame .bbar -bd 2" );
 
-cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.gif\"" );
-cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.gif\"" );
-cmd( inter, "image create photo undoImg -file \"$RootLsd/$LsdSrc/icons/undo.gif\"" );
-cmd( inter, "image create photo redoImg -file \"$RootLsd/$LsdSrc/icons/redo.gif\"" );
-cmd( inter, "image create photo cutImg -file \"$RootLsd/$LsdSrc/icons/cut.gif\"" );
-cmd( inter, "image create photo copyImg -file \"$RootLsd/$LsdSrc/icons/copy.gif\"" );
-cmd( inter, "image create photo pasteImg -file \"$RootLsd/$LsdSrc/icons/paste.gif\"" );
-cmd( inter, "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.gif\"" );
-cmd( inter, "image create photo replaceImg -file \"$RootLsd/$LsdSrc/icons/replace.gif\"" );
-cmd( inter, "image create photo indentImg -file \"$RootLsd/$LsdSrc/icons/indent.gif\"" );
-cmd( inter, "image create photo deindentImg -file \"$RootLsd/$LsdSrc/icons/deindent.gif\"" );
-cmd( inter, "image create photo comprunImg -file \"$RootLsd/$LsdSrc/icons/comprun.gif\"" );
-cmd( inter, "image create photo compileImg -file \"$RootLsd/$LsdSrc/icons/compile.gif\"" );
-cmd( inter, "image create photo infoImg -file \"$RootLsd/$LsdSrc/icons/info.gif\"" );
-cmd( inter, "image create photo descrImg -file \"$RootLsd/$LsdSrc/icons/descr.gif\"" );
-cmd( inter, "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equation.gif\"" );
-cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.gif\"" );
-cmd( inter, "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.gif\"" );
+cmd( inter, "if [ string equal [ info tclversion ] \"8.6\" ] { set iconExt \"png\" } { set iconExt \"gif\" }" );
+cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.$iconExt\"" );
+cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.$iconExt\"" );
+cmd( inter, "image create photo undoImg -file \"$RootLsd/$LsdSrc/icons/undo.$iconExt\"" );
+cmd( inter, "image create photo redoImg -file \"$RootLsd/$LsdSrc/icons/redo.$iconExt\"" );
+cmd( inter, "image create photo cutImg -file \"$RootLsd/$LsdSrc/icons/cut.$iconExt\"" );
+cmd( inter, "image create photo copyImg -file \"$RootLsd/$LsdSrc/icons/copy.$iconExt\"" );
+cmd( inter, "image create photo pasteImg -file \"$RootLsd/$LsdSrc/icons/paste.$iconExt\"" );
+cmd( inter, "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.$iconExt\"" );
+cmd( inter, "image create photo replaceImg -file \"$RootLsd/$LsdSrc/icons/replace.$iconExt\"" );
+cmd( inter, "image create photo indentImg -file \"$RootLsd/$LsdSrc/icons/indent.$iconExt\"" );
+cmd( inter, "image create photo deindentImg -file \"$RootLsd/$LsdSrc/icons/deindent.$iconExt\"" );
+cmd( inter, "image create photo comprunImg -file \"$RootLsd/$LsdSrc/icons/comprun.$iconExt\"" );
+cmd( inter, "image create photo compileImg -file \"$RootLsd/$LsdSrc/icons/compile.$iconExt\"" );
+cmd( inter, "image create photo infoImg -file \"$RootLsd/$LsdSrc/icons/info.$iconExt\"" );
+cmd( inter, "image create photo descrImg -file \"$RootLsd/$LsdSrc/icons/descr.$iconExt\"" );
+cmd( inter, "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equation.$iconExt\"" );
+cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
+cmd( inter, "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.$iconExt\"" );
 
 cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 33}" );
 cmd( inter, "button .bbar.save -image saveImg -relief flat -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
@@ -903,7 +904,7 @@ loop:
 if ( tosave )
 	cmd( inter, "wm title . \"*$filename - LMM\"" );
 else
-	cmd( inter, "wm title . \"$filename - LMM\"" );
+	cmd( inter, "wm title . \" $filename - LMM\"" );
 
 loop_help:
 
