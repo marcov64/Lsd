@@ -610,7 +610,6 @@ to_compute=1;
 lab_len=strlen(_label);
 label=new char[lab_len+1];
 strcpy(label, _label);
-to_compute=1;
 b=NULL;
 hook=NULL;
 node=NULL;	// not part of a network yet
@@ -1567,13 +1566,13 @@ bridge *cb, *cb1, *cb2;
 
 //check the labels and prepare the bridge to attach to
 for(cb2=b; cb2!=NULL && strcmp(cb2->blabel,lab); cb2=cb2->next);
-cb2->counter_updated=false;
 if(cb2==NULL)
 {
  sprintf(msg, "object '%s' does not contain objects of type '%s' when adding new object(s)", label, lab);
  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
  return NULL;
 }
+cb2->counter_updated=false;
 
 //check if the objects are nodes in a network (avoid using EX from blueprint)
 bool net=false;
@@ -1581,7 +1580,7 @@ cur=search(lab);
 if(cur!=NULL && cur->node!=NULL)
 	net=true;
 
-last=NULL;//pointer of the object to link to, signalling also the special first case
+last=NULL;//pointer of the object to link to, signaling also the special first case
 for(i=0; i<n; i++)
 {
 //create a new copy of the object
@@ -1591,7 +1590,7 @@ if(cur==NULL)
 {sprintf(msg, "out of memory in add_n_objects");
  error_hard( msg, "Out of memory" );
  return NULL;
- }
+}
 cur->init(this, lab);
 
 if(net)							// if objects are nodes in a network
@@ -1626,18 +1625,19 @@ for(cv=cur->v; cv!=NULL; cv=cv->next)
 //  cv->lab_tit=new char[strlen(msg)+1];
 //  strcpy(cv->lab_tit, msg);
   if(running==1)
-   {   try {
-   amem=max_step+1;
-   appMem=new double[amem];
-   cv->data=appMem;
-   
-   }
-   catch(...)
-    {
-    plog("\nNot enough memory to save series for new objects.");
-    cv->save=false;
-    cv->savei=false;
-    }
+   {   try 
+	   {
+	   amem=max_step+1;
+	   appMem=new double[amem];
+	   cv->data=appMem;
+	   
+	   }
+	   catch(...)
+		{
+		plog("\nNot enough memory to save series for new objects.");
+		cv->save=false;
+		cv->savei=false;
+		}
    }
   cv->start=t;
   cv->end=max_step;
@@ -1661,8 +1661,7 @@ for(cb=ex->b; cb!=NULL; cb=cb->next)
   cb1->head=NULL;    
   cb1->counter_updated=false;
   for(cur1=cb->head; cur1!=NULL; cur1=cur1->next)
-    cur->add_n_objects2(cur1->label, 1, cur1);
-   
+    cur->add_n_objects2( cur1->label, 1, cur1, t_update );
  }
 
 //attach the new objects to the linked chain of the bridge
@@ -1683,7 +1682,6 @@ else
 
 last=cur;
 }
-
 
 return first;
 }
