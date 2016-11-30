@@ -939,19 +939,8 @@ cmd(inter, "label .deb.t.obj -text \"Level & object instance: \" ");
 if(r->up!=NULL)
 {
  cmd(inter, "bind .deb.t.obj <Button-1> {if {[winfo exist .deb.w]==1} {destroy .deb.w} {}; set choice 17}");
-// cmd(inter, "bind .deb.t.obj <Enter> {set mx %X; set my %Y; toplevel .deb.w; wm geometry .deb.w +$mx+$my; wm title .deb.w \"\"; label .deb.w.l -text \"Click here to change\\nObj. number\"; pack .deb.w.l}");
-// cmd(inter, "bind .deb.t.obj <Leave> {destroy .deb.w}");
 } 
 
-/*
-strcpy(ch, "label .deb.t.obj -text \"Object Name (ascendants and instance numbers): \" ");
-
-strcat(ch, r->label);
-this_instance_number(r);
-strcat(ch, msg);
-strcat(ch, "\"");
-cmd(inter, ch);
-**/
 strcpy(ch, "");
 
 attach_instance_number(ch, r);

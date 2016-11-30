@@ -75,6 +75,17 @@ given the file name name, the routine searches for the data line for the variabl
  extern Tcl_Interp *inter;
 #endif
 
+void myexit(int v);
+void plog( char const *msg, char const *tag = "" );
+void print_stack(void);
+void clean_spaces(char *s);
+void scan_used_lab(char *lab, int *choice);
+char const *return_where_used(char *lab, char s[]);
+void init_canvas(void);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
+void add_description(char const *lab, char const *type, char const *text);
+void save_single(variable *vcv);
+
 extern char *simul_file;
 extern char *struct_file;
 extern char *param_file;
@@ -93,21 +104,9 @@ extern int running;
 extern char nonavail[];	// string for unavailable values
 extern char *path;	// configuration folder path
 
-
 double log(double v);
 double exp(double c);
 double sqrt(double v);
-
-void myexit(int v);
-void plog( char const *msg, char const *tag = "" );
-void print_stack(void);
-void clean_spaces(char *s);
-void scan_used_lab(char *lab, int *choice);
-char const *return_where_used(char *lab, char s[]);
-void init_canvas(void);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void add_description(char const *lab, char const *type, char const *text);
-void save_single(variable *vcv);
 
 #ifndef NO_WINDOW
 /****************************************************
@@ -159,6 +158,7 @@ void cmd(char *cm)
 
 }
 #endif
+
 /****************************************************
 GO_BROTHER
 ****************************************************/
@@ -168,7 +168,6 @@ if(c->next==NULL)
   return(NULL);
 return(c->next);
 }
-
 
 object *skip_next_obj(object *tr)
 {
@@ -310,6 +309,13 @@ dice=RND;
 if(dice<p)
   return(1);
 return(0);
+}
+
+double round(double x)
+{
+if( (x-floor(x)) > (ceil(x)-x) )
+ return ceil(x);
+return floor(x);
 }
 
 double max(double a, double b)
@@ -461,13 +467,6 @@ if(fscanf(f, "%s", got)==EOF)
 return(f);
 }
 
-double round(double x)
-{
-if( (x-floor(x)) > (ceil(x) - x ) )
- return ceil(x);
-return floor(x);
-}
-
 void set_counter(object *o)
 {
 object *cur;
@@ -478,32 +477,30 @@ if(o->up==NULL)
   return;
 
 set_counter(o->up);  
+
 for(cb=o->up->b; strcmp(cb->blabel,o->label); cb=cb->next);
 
 if(cb->counter_updated==true)
   return;
 
 for(cur=cb->head,i=1; cur!=NULL; cur=cur->next,i++)
-	if ( cur->lstCntUpd == ( int ) t )		// don't update more than once per period
-		continue;							// to avoid deletions to change counters
-	else
-	{
+	if ( cur->lstCntUpd < t )		// don't update more than once per period
+	{								// to avoid deletions to change counters
 		cur->acounter = i;
-		cur->lstCntUpd = ( int ) t;
+		cur->lstCntUpd = t;
 	}
 
 cb->counter_updated=true;
-   
 }
-void set_lab_tit(variable *var)
-{
+
 /*
 Ensure that all objects on top of the variables have the counter updated,
 and then writes the lab_tit field.
 
 lab_tit indicates the position of the object containing the variables in the model.
 */
-
+void set_lab_tit(variable *var)
+{
 object *cur, *ceil, *cur1;
 bridge *cb;
 char app[2000], app1[2000];
@@ -539,14 +536,12 @@ var->lab_tit=new char[strlen(app)+1];
 strcpy(var->lab_tit,app);  
 }
 
-
-
-void add_cemetery(variable *v)
-{
 /*
 Store the variable in a list of variables in objects deleted
 but to be used for analysis.
 */
+void add_cemetery(variable *v)
+{
 variable *cv;
 if(v->savei==true)
   save_single(v);
@@ -626,7 +621,6 @@ int flag_save;
 
 for(cv=r->v; cv!=NULL; cv=cv->next)
  {
- 
  if(cv->save==1)
   {
    if(cv->start <= i && cv->end >= i && !isnan(cv->data[i]))		// save NaN as n/a
@@ -648,8 +642,8 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 		else
 			fprintf( f, "%s\t", nonavail );
   }
- 
  }
+ 
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {
   cur=cb->head;

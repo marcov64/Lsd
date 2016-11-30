@@ -108,7 +108,7 @@ if(!strWindowOn)	// model structure window is deactivated?
 cmd(inter, "set color white");
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd( inter, "set strExist [ winfo exists $c.f.c ]" );
+cmd( inter, "set strExist [ winfo exists .model_str ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 {
 	cmd( inter, "if [ winfo exists $c ] { destroy $c}" );
@@ -152,8 +152,8 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd( inter, "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
 	cmd( inter, "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	cmd(inter, "set posXstr [expr [winfo x .] + $posX + $widthB]");
-	cmd(inter, "set posYstr [winfo y .]");
+	cmd(inter, "set posXstr [expr [winfo x .] + $corrX + $posX + $widthB]");
+	cmd(inter, "set posYstr [expr [winfo y .] + $corrY]");
 	sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
 	cmd( inter, msg );
 	set_shortcuts( ".model_str" );
@@ -166,7 +166,6 @@ else	// or just update canvas
 
 sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, msg );
-cmd(inter, "wm deiconify $c; lower $c .");
 }
 
 

@@ -64,7 +64,6 @@ double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmet
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
 double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
-
 double norm(double mean, double dev);
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
 double max(double a, double b);

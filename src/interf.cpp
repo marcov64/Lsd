@@ -110,8 +110,6 @@ Exit function, which is customized on the operative system.
 
 ****************************************************/
 
-
-
 #include <sys/stat.h>
 #include <time.h>
 #include <tk.h>
@@ -129,7 +127,6 @@ object *skip_next_obj(object *t, int *i);
 object *skip_next_obj(object *t);
 int my_strcmp(char *a, char *b);
 void cmd(Tcl_Interp *inter, char const *cc);
-//void cmd(Tcl_Interp *inter, const char cc[]) {cmd(inter, (char *)cc);};
 object *go_brother(object *cur);
 void show_graph( object *t);
 void set_obj_number(object *r, int *choice);
@@ -165,7 +162,6 @@ void empty_descr(void);
 void show_description(char *lab);
 void add_description(char const *lab, char const *type, char const *text);
 void auto_document( int *choice, char const *lab, char const *which, bool append = false);
-void create_logwindow(void);
 void delete_bridge(object *d);
 void control_tocompute(object *r, char *ch);
 int compute_copyfrom(object *c, int *choice);
@@ -194,7 +190,6 @@ int load_configuration( object * );
 bool save_configuration( object *, long findex = 0 );
 bool unsaved_change(  );		// control for unsaved changes in configuration
 bool unsaved_change( bool );
-
 // comparison function for bsearch and qsort
 int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
 
@@ -221,11 +216,9 @@ extern int seed;
 extern int sim_num;
 extern int max_step;
 extern char msg[];
-char *res_g;
 extern int choice_g;
 extern int choice;
 extern variable *cemetery;
-int result_loaded;
 extern int message_logged;
 extern int actual_steps;
 extern description *descr;
@@ -247,8 +240,10 @@ extern bool justAddedVar;	// control the selection of last added variable
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 extern bool redrawRoot;		// control for redrawing root window (.)
 
+object *currObj;
+char *res_g;
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
-
+int result_loaded;
 // list of choices that are bad with existing run data
 int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
 #define NUM_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
@@ -257,18 +252,26 @@ int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 
 /****************************************************
 CREATE
 ****************************************************/
-object *create( object *cr)
+object *create( object *cr )
 {
 object *cur;
 char *s;
 
+// open log and structure windows
+cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; lower .log . }" );
+cmd( inter, "if { [ winfo exist .model_str ] && ! [ string equal [ wm state .model_str ] normal ] } { wm deiconify .model_str; if [ winfo exist .plt1 ] { lower .model_str .plt1 } { lower .model_str . } }" );
+
+Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
+Tcl_LinkVar(inter, "actual_steps", (char *)&actual_steps, TCL_LINK_INT);
+
 // sort the list of choices that are bad with existing run data to use later
 qsort( badChoices, NUM_CHOICES, sizeof ( int ), comp_ints );
 
-redrawRoot = true;			// browser redraw when drawing the first time
-
 cmd(inter, "set listfocus 1");
 cmd(inter, "set itemfocus 0");
+cmd(inter, "set cur 0"); 	//Set yview for vars listbox
+cmd(inter, "set c \"\"");
 
 // restore previous object and cursor position in browser, if any
 if ( strlen( lastObj ) > 0 )
@@ -283,73 +286,59 @@ if ( strlen( lastObj ) > 0 )
 	}
 }
 
-cmd(inter, "set choice -1");
-cmd(inter, "set c \"\"");
-Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
-Tcl_LinkVar(inter, "actual_steps", (char *)&actual_steps, TCL_LINK_INT);
-choice_g=choice=0;
-cmd(inter, "if { [winfo exist .log]==1} {wm resizable .log 1 1; raise .log; focus -force .log} {set choice -1}");
-cmd(inter, "wm resizable . 1 1");
-cmd(inter, "set cur 0"); //Set yview for vars listbox
-
 sprintf(msg, "set ignore_eq_file %d", ignore_eq_file);
 cmd(inter, msg);
-
 sprintf(msg, "set lattype %d", lattice_type);
 cmd(inter, msg);
 
-while(choice!=1) //Main Cycle ********************************
+redrawRoot = true;			// browser redraw when drawing the first time
+
+choice_g = choice = 0;
+
+//Main Cycle ********************************
+while(choice!=1)
 {
-if(choice==-1)
- {
- cmd(inter, "set choice [winfo exists .log]"); 
- if(choice==0)
-   create_logwindow();
- choice=0;
- }
+	sprintf( msg, "wm title . \"%s%s - Lsd Browser\"", unsaved_change() ? "*" : " ", simul_name ) ;
+	cmd( inter, msg );
+	sprintf( msg, "wm title .log \"%s%s - Lsd Log\"", unsaved_change() ? "*" : " ", simul_name ) ;
+	cmd( inter, msg );
 
-sprintf( msg, "wm title . \"%s%s - Lsd Browser\"", unsaved_change() ? "*" : " ", simul_name ) ;
-cmd(inter, msg);
-sprintf( msg, "wm title .log \"%s%s - Lsd Log\"", unsaved_change() ? "*" : " ", simul_name ) ;
-cmd(inter, msg);
+	for(cur=cr; cur->up!=NULL; cur=cur->up);
 
-for(cur=cr; cur->up!=NULL; cur=cur->up);
+	if(cur->v==NULL && cur->b==NULL)
+		struct_loaded=0;
+	else
+	{ 
+		struct_loaded=1;
+		show_graph(cr);
+		if(message_logged==1)
+		{
+			cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log }" );
+			cmd( inter, "raise .log; focus -force .log; update idletasks" );
+			message_logged=0;
+		}    
+	}    
 
-if(cur->v==NULL && cur->b==NULL)
-  struct_loaded=0;
-else
- { struct_loaded=1;
-     show_graph(cr);
- if(message_logged==1)
-  {
-  cmd(inter, "wm deiconify .log; raise .log; focus -force .log");
-  message_logged=0;
-  }    
- }    
+	cmd(inter, "bind . <KeyPress-Escape> {}");
+	cmd(inter, "bind . <KeyPress-Return> {}");
+	cmd(inter, "bind . <Destroy> {set choice 35}");
+	cmd(inter, "bind .log <Destroy> {set choice 35}");
 
-cmd(inter, "raise .; focus -force .");
-cmd(inter, "bind . <KeyPress-Escape> {}");
-cmd(inter, "bind . <KeyPress-Return> {}");
-cmd(inter, "bind . <Destroy> {set choice 35}");
-cmd(inter, "bind .log <Destroy> {set choice 35}");
+	// browse only if not running two-cycle operations
+	if ( choice != 55 && choice != 75 && choice != 76 && choice != 77 && choice != 78 && choice != 79 )
+		choice=browse(cr, &choice);
 
-// browse only if not running two-cycle operations
-if ( choice != 55 && choice != 75 && choice != 76 && choice != 77 && choice != 78 && choice != 79 )
-  choice=browse(cr, &choice);
-
-cr=operate( &choice, cr);
-
+	cr=operate(&choice, cr);
 }
 
-Tcl_UnlinkVar(inter,"save_option");
-Tcl_UnlinkVar(inter, "choice_g");
+Tcl_UnlinkVar( inter, "strWindowOn" );
+Tcl_UnlinkVar( inter, "choice_g" );
+Tcl_UnlinkVar( inter, "actual_steps" );
 
-cmd(inter, "if { [winfo exists .model_str] == 1} {wm withdraw .model_str} {}");
-cmd(inter, "wm deiconify .log; wm deiconify .; raise .; focus -force .; update");
-return(cr);
+cmd(inter, "if [ winfo exists .model_str ] { wm withdraw .model_str } {}");
+
+return cr;
 }
-
 
 
 /****************************************************
@@ -362,6 +351,8 @@ variable *ap_v;
 int count, heightB, widthB;
 object *ap_o;
 bridge *cb;
+
+currObj = r;			// global pointer to C Tcl routines
 
 if ( redrawRoot )		// avoids redrawing if not required
 {
@@ -422,9 +413,9 @@ cmd( inter, "menu .l.v.c.var_name.v -tearoff 0" );
 cmd( inter, ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 cmd( inter, ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 2
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save_var -command { if { $actual_steps == 0 } { set_var_conf $vname save $save_var } { set choice 7 } }");	// entryconfig 3
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot_var -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot_var } { set choice 7 } }");	// entryconfig 4
-cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable debug_var -command { if { $actual_steps == 0 } { set_var_conf $vname debug $debug_var } { set choice 7 } }");	// entryconfig 5
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }");	// entryconfig 3
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }");	// entryconfig 4
+cmd( inter, ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }");	// entryconfig 5
 cmd( inter, ".l.v.c.var_name.v add separator" );	// entryconfig 6
 cmd( inter, ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 7
 cmd( inter, ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 8
@@ -476,9 +467,9 @@ if(r->v!=NULL)
 			.l.v.c.var_name.v entryconfig 15 -state normal; \
 			.l.v.c.var_name.v entryconfig 17 -state normal; \
 			.l.v.c.var_name.v entryconfig 18 -state normal; \
-			set save_var [ get_var_conf $vname save ]; \
-			set plot_var [ get_var_conf $vname plot ]; \
-			set debug_var [ get_var_conf $vname debug ]; \
+			set save [ get_var_conf $vname save ]; \
+			set plot [ get_var_conf $vname plot ]; \
+			set num [ get_var_conf $vname debug ]; \
 			switch $color \
 			{ \
 				purple { } \
@@ -528,9 +519,9 @@ if(r->v!=NULL)
 			.l.v.c.var_name.v entryconfig 15 -state normal; \
 			.l.v.c.var_name.v entryconfig 17 -state normal; \
 			.l.v.c.var_name.v entryconfig 18 -state normal; \
-			set save_var [ get_var_conf $vname save ]; \
-			set plot_var [ get_var_conf $vname plot ]; \
-			set debug_var [ get_var_conf $vname debug ]; \
+			set save [ get_var_conf $vname save ]; \
+			set plot [ get_var_conf $vname plot ]; \
+			set num [ get_var_conf $vname debug ]; \
 			switch $color \
 			{ \
 				purple { } \
@@ -1917,11 +1908,11 @@ else
 {
    for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
    {
-  	cv=cur->search_var(NULL, lab_old);
-  	cv->save=save;
-    cv->savei=savei;
-  	cv->debug=num==1?'d':'n';
-  	cv->plot=plot;
+	   cv=cur->search_var(NULL, lab_old);
+	   cv->save=save;
+	   cv->savei=savei;
+	   cv->debug=num==1?'d':'n';
+	   cv->plot=plot;
    }
     
    cmd(inter, "set choice $observe");
@@ -2448,7 +2439,7 @@ cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } {
 cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");
 cmd(inter, "focus -force $T.b.ok");
 
-cmd( inter, "showtop $T topleftW" );
+cmd( inter, "showtop $T centerW" );
 *choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
@@ -2747,7 +2738,7 @@ case 20:
 if ( ! discard_change( ) )	// check for unsaved configuration changes
 	break;
 
-cmd( inter, "if { [ winfo exists .model_str ] == 1 } { wm withdraw .model_str }");
+cmd( inter, "if [ winfo exists .model_str ] { destroy .model_str }");
 cmd(inter, "set a [split [winfo children .] ]");
 cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
 cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
@@ -2909,11 +2900,7 @@ break;
 //Enter the analysis of results module
 case 26:
 
-cmd( inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }" );
-cmd( inter, "wm withdraw ." );
 analysis(choice);
-cmd( inter, "wm deiconify ." );
-cmd( inter, "if [ winfo exists .model_str ] { wm deiconify .model_str }" );
 
 break;
 
@@ -4322,7 +4309,6 @@ case 66:
 		}
 		plog("\n");
 	}
-    cmd(inter, "if { [winfo exists $c] == 1} {wm withdraw $c} {}");
 	break;
 
 
@@ -4687,7 +4673,7 @@ case 69:
 
 	cmd( inter, "okcancel $b b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "bind $b <KeyPress-Return> {set choice 1}");
-	cmd( inter, "showtop $b topleftW" );
+	cmd( inter, "showtop $b centerW" );
 	
 	*choice=0;
 	while(*choice==0)
@@ -4753,7 +4739,7 @@ case 69:
 break;
 
 
-// toggle the state of the model structure windows
+// no-operation: toggle the state of the model structure windows, refresh window
 case 70:
 break;
 
@@ -5444,7 +5430,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		return TCL_ERROR;
 	
 	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
-	cv = root->search_var( root, vname );
+	cv = currObj->search_var( NULL, vname );
 
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
@@ -5481,15 +5467,15 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		return TCL_ERROR;
 	
 	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
-	cv = root->search_var( root, vname );
+	cv = currObj->search_var( NULL, vname );
 	
 	if ( cv == NULL )					// variable not found
 		return TCL_ERROR;
 
 	// set the appropriate value for variable (all instances)
-	for ( cur = root; cur != NULL; cur = cur->hyper_next( cur->label ) )
+	for ( cur = currObj; cur != NULL; cur = cur->hyper_next( cur->label ) )
 	{
-		cv = cur->search_var( root, vname );
+		cv = cur->search_var( NULL, vname );
 		if ( ! strcmp( argv[ 2 ], "save" ) )
 			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
 		else 
@@ -5506,5 +5492,15 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	}
 	unsaved_change( true );				// signal unsaved change
 
+	if ( cv->save || cv->savei )
+	{
+		for ( cur = currObj; cur != NULL; cur = cur->up )
+			if( cur->to_compute == 0 )
+			{
+				sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", vname, cur->label);
+				cmd(inter, msg);
+			}
+	}
+	
 	return TCL_OK;		
 }

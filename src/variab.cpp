@@ -162,8 +162,6 @@ void cmd(Tcl_Interp *inter, char *cc);
 int deb(object *r, object *c, char const *lab, double *res);
 #endif
  
-
-
 extern int t;
 extern int debug_flag;
 extern int when_debug;
@@ -174,7 +172,6 @@ extern char msg[];
 extern lsdstack *stacklog;
 extern int total_var;
 extern bool fast;
-
 
 void set_lab_tit(variable *var);
 void plog( char const *msg, char const *tag = "" );
@@ -223,7 +220,6 @@ data_loaded='-';
 plot=0;
 data=NULL;
 lab_tit=NULL;
-//su=NULL;
 
 return 0;
 }
@@ -231,7 +227,6 @@ return 0;
 
 /***************************************************
 CAL
-
 ****************************************************/
 
 double variable::cal(object *caller, int lag)
@@ -242,16 +237,16 @@ if(param==1 ) //it is a parameter
  {
   return val[0];
  }
+
 if(num_lag<lag ) //check lag error
  {sprintf(msg, "in object '%s' variable or function '%s' requested with lag=%d but declared with lag=%d,\nTwo possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d, or\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
   error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
   return -1;
  }
 
-
 if(param==0)
  {//variable
-  if(lag > 0  || last_update==t )//lagged value or already computed
+  if( last_update >= t  || lag > 0 )//lagged value or already computed
    return(val[last_update+lag-t]);
  
  }
@@ -264,7 +259,6 @@ else
  } 
 
 
-
 //value to be computed
 stack++;
 
@@ -275,7 +269,7 @@ if(under_computation==1)
  }
 
 under_computation=1;
-/****************/
+
 //Add the Variable to the stack
 if(stacklog->next==NULL)
 {
@@ -295,7 +289,6 @@ if(stackinfo_flag>=stack)
  {
   start_profile[stack-1]=clock();
  }
-/****************/
 
 //Compute the Variable's equation
 if(!fast)				// not running in fast mode?
@@ -358,40 +351,28 @@ else
  }
 #endif
 
-/*****************/
-stack --;
 //Remove the element of the stack
+stack --;
 stacklog=stacklog->prev;
 if ( stacklog != NULL )
 {
 delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
 stacklog->next=NULL; //REIINSERTED
 }
-/****************/
+
 under_computation=0;
 
 return(val[0]);
 //by default the requested value is the last one, not yet computed
 }
 
-/*******
-archaic system to speedup simulations
-void delete_su(speedup *su)
-{
-if(su->next!=NULL)
- delete_su(su->next);
-delete su;
 
- 
-}
-*******/
 /****************************************************
 EMPTY
 ****************************************************/
 
 void variable::empty(void)
 {
-
 
 if((data!=NULL && save!=true && savei !=true) || this==NULL || label==NULL)
  {sprintf(msg, "failure in emptying Variable %s", label);
@@ -407,33 +388,4 @@ if(lab_tit!=NULL)
   delete[] lab_tit;
 if( val != NULL )
 	delete[] val;
-/*
-if(su!=NULL)
- {delete_su(su);
-  su=NULL;
- } 
-*/ 
 }
-
-
-/*********************
-REMOVED
-void add_stack_log(char *var, int nstack)
-{
-stacklog->next=new lsdstack;
-strcpy(stacklog->next->label, var);
-stacklog->next->ns=nstack;
-//stacklog->next->vs=this;
-
-stacklog->next->next=NULL;
-stacklog->next->prev=stacklog;
-stacklog=stacklog->next;
-}
-
-void rem_stack_log(void)
-{
-stacklog=stacklog->prev;
-delete stacklog->next;
-stacklog->next=NULL;
-}
-********************/

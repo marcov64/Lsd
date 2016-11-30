@@ -334,9 +334,28 @@ double object::interact(char const *text, double v, double *tv)
 }
 #endif
 
-
-
-long int search_step;
+object *go_brother(object *c);
+object *skip_next_obj(object *t, int *count);
+object *skip_next_obj(object *t);
+FILE *search_str(char *file_name, char *str);
+void plog( char const *msg, char const *tag = "" );
+void plot_rt(variable *var);
+int sort_function_down( const void *a, const void *b);
+int sort_function_up( const void *a, const void *b);
+int sort_function_down_two( const void *a, const void *b);
+int sort_function_up_two( const void *a, const void *b);
+int deb(object *r, object *c, char const *lab, double *res);
+void set_lab_tit(variable *var);
+void collect_cemetery( object *o );		// collect variables from object before deletion
+void add_cemetery(variable *v);
+void myexit(int v);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
+void print_stack(void);
+void analysis(int *choice);
+void reset_end(object *r);
+void delete_bridge(object *d);
+int reset_bridges(object *r);
+void close_sim(void);
 
 extern int t;
 extern object *root;
@@ -349,34 +368,6 @@ extern int optimized;
 extern int check_optimized;
 extern int total_obj;
 extern int choice;
-
-object *go_brother(object *c);
-object *skip_next_obj(object *t, int *count);
-object *skip_next_obj(object *t);
-
-FILE *search_str(char *file_name, char *str);
-void plog( char const *msg, char const *tag = "" );
-void plot_rt(variable *var);
-int sort_function_down( const void *a, const void *b);
-int sort_function_up( const void *a, const void *b);
-int sort_function_down_two( const void *a, const void *b);
-int sort_function_up_two( const void *a, const void *b);
-int deb(object *r, object *c, char const *lab, double *res);
-
-void set_lab_tit(variable *var);
-void collect_cemetery( object *o );		// collect variables from object before deletion
-void add_cemetery(variable *v);
-void myexit(int v);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-
-void print_stack(void);
-void analysis(int *choice);
-void reset_end(object *r);
-void delete_bridge(object *d);
-int reset_bridges(object *r);
-void close_sim(void);
-
-
 extern int watch;
 extern char msg[];
 extern char *struct_file;
@@ -387,12 +378,10 @@ extern bool use_nan;	// flag to allow using Not a Number value
 
 char *qsort_lab;
 char *qsort_lab_secondary;
-
+int search_step;
 int no_error=0;
-
 int stairs=0;
 int sig_stairs=0;
-
 object *globalcur;
 
 
@@ -419,8 +408,6 @@ if(this==NULL)
  return -1;
 }
 
-
-
 search_step=0;
 curr=search_var(this, l);
 /*
@@ -446,52 +433,8 @@ Interface for object->cal(...), using the "this" object by default
 ****************************************************/
 double object::cal( char const *l, int lag)
 {
-/*
-if(this==NULL)
-{sprintf(msg, "cal of '%s' requested to a NULL pointer", l);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
-*/
 return(cal(this, l, lag));
 }
-/******
-Archaic system to speedup simulations
-void add_su(variable *from, variable *to)
-{
-speedup *csu;
-if(from->su==NULL)
- {
-  from->su=new speedup;
-  csu=from->su;
- }
-else
- {
- csu=from->su;
- while(csu->next!=NULL)
-  csu=csu->next;
- csu->next =new speedup;
- csu=csu->next; 
- } 
-csu->vsu=to;
-csu->osu=to->up;
-csu->next=NULL;
-}
-
-object *search_su(speedup *from, char *l)
-{
-//return NULL;
-speedup *csu;
-csu=from;
- while(csu!=NULL && strcmp(csu->vsu->label,l) )
-  csu=csu->next;
-if(csu!=NULL)
- return(csu->osu);
-else
- return(NULL);  
-}
-
-******/
 
 
 /********************************************
@@ -574,11 +517,7 @@ if( caller!=up)
 	 }
 	curr=up->search_var(this,l);
  }
-/****
-if(bah>100 && curr!=NULL  && optimized==1)
- add_su(stacklog->vs, curr);
-****/ 
-/*******/
+
 #ifdef TEST_OPTIMIZATION
 if(stairs>0 && sig_stairs==0)
  {
@@ -948,25 +887,16 @@ FILE *app;
 int i=0;
 double cv ;
 for(var=v; var!=NULL && quit!=2; var=var->next)
- {  /*
-	if(var->last_update<t-1)
-     {
-      if (var->param==0)
-	   deb(this,NULL,"sds",&cv);
-     }
-    */ 
+ { 
 	if(var->last_update<t)
 	 var->cal(NULL,0);
 	if(var->save || var->savei)
 		var->data[t]=var->val[0];
-      //fprintf(f_data,"%lf\t", var->val[0]);
   #ifndef NO_WINDOW    
 	if(var->plot==1)
      plot_rt(var);
   #endif   
  }
-
-
 
 for(cb=b; cb!=NULL && quit!=2; cb=cb->next )
 {
@@ -976,8 +906,9 @@ for(cb=b; cb!=NULL && quit!=2; cb=cb->next )
   cur->update();
  }   
 } 
-
 } 
+
+
 /****************************************************
 SUM
 Compute the sum of Variables or Parameters lab with lag lag.
@@ -2243,7 +2174,8 @@ plog( buffer );
 delete [] buffer;
 
 #ifndef NO_WINDOW
-cmd(inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log");
+cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
+cmd( inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 sprintf( msg, "tk_messageBox -title Error -type ok -icon error -message \"%s.\n\nMore details are available in the Log window.\n%s\nLsd cannot continue.\"", boxTitle, boxText );
 cmd( inter, msg );
 #endif

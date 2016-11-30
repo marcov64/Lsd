@@ -157,6 +157,10 @@ UTIL.CPP given the file name name, the routine searches for the data line for th
 
 #include "decl.h"
 
+#ifndef NO_WINDOW
+bool unsaved_change( bool );		// control for unsaved changes in configuration
+#endif
+
 object *skip_next_obj(object *t, int *count);
 object *skip_next_obj(object *t);
 object *go_brother(object *t);
@@ -176,8 +180,6 @@ void empty_cemetery(void);
 void empty_descr(void);
 void recur_description(object *r, FILE *f);
 description *search_description(char *lab);
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
 
 extern char msg[];
 extern char name_rep[];
@@ -1218,7 +1220,9 @@ endLoad:
 	fclose( f );
 	
 	t = 0;
+	#ifndef NO_WINDOW
 	unsaved_change( false );
+	#endif
 
 	return load;
 }
@@ -1282,8 +1286,10 @@ bool save_configuration( object *r, long findex )
 	
 	fclose( f );
 	
+	#ifndef NO_WINDOW
 	if ( findex <= 0 )
 		unsaved_change( false );		// no changes to save
+	#endif
 	
 	return true;
 }

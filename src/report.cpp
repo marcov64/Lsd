@@ -274,7 +274,6 @@ fprintf(frep, "%s",msg);
 
 
 plog("\nWriting report. Wait...\n");
-cmd(inter, "wm iconify .");
 
 
 fprintf(frep, "<BR><I><A NAME=\"_DESCRIPTION_\">Automatically generated Lsd report.</A></I><BR>");
@@ -413,7 +412,6 @@ fclose(frep);
 
 sprintf(msg, "Finished. Report in file: \n%s\n", name_rep);
 plog(msg);
-cmd(inter, "wm deiconify .");
 sprintf(msg, "set namerep %s", name_rep);
 cmd(inter, msg);
 cmd(inter, "LsdHtml $namerep");

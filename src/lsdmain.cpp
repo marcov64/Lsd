@@ -86,33 +86,6 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 Tcl_Interp *inter;
 #endif
 
-// flags for some program defaults
-int seed = 1;				// random number generator initial seed
-int max_step = 100;			// default number of simulation runs
-int no_res = 0;				// produce intermediary .res files flag
-int dozip = 0;				// compressed results file flag
-int overwConf = 1;			// overwrite configuration on run flag
-int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
-int add_to_tot = 1;			// flag to append results to existing totals file
-int strWindowOn=1;			// control the presentation of the model structure window
-int lattice_type=0;			// default lattice type (infrequent cells changes)
-bool grandTotal = false;	// flag to produce or not grand total in batch processing
-bool firstRes = true;		// flag to mark first results file (init grand total file)
-bool unsavedData = false;	// flag unsaved simulation results
-char nonavail[] = "NA";		// string for unavailable values (use R default)
-// Main window constraints
-char hsize[] = "400";		// horizontal size in pixels
-char vsize[] = "620";		// vertical minimum size in pixels
-char hmargin[] = "20";		// horizontal right margin from the screen borders
-char vmargin[] = "20";		// vertical margins from the screen borders
-// Log window tabs
-char tabs[] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";
-
-extern bool fast;			// fast mode (log window)
-extern double ymin;
-extern double ymax;
-extern long nodesSerial;
-
 object *create( object *r);
 void run(object *r);
 void print_title(object *root);
@@ -122,6 +95,8 @@ object *go_brother(object *c);
 void plog( char const *msg, char const *tag = "" );
 void file_name( char *name);
 void prepare_plot(object *r, int id_sim);
+void create_logwindow(void);
+void cover_browser( const char *, const char *, const char * );
 void myexit(int v);
 FILE *search_str(char const *name, char const *str);
 void set_lab_tit(variable *var);
@@ -137,6 +112,11 @@ void save_single(variable *vcv);
 char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
+
+extern bool fast;			// fast mode (log window)
+extern double ymin;
+extern double ymax;
+extern long nodesSerial;
 
 int t;
 int quit=0;
@@ -191,6 +171,28 @@ long findexSens=0;			// index to sequential sensitivity configuration filenames
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 bool redrawRoot = true;		// control for redrawing root window (.)
+// flags for some program defaults
+int seed = 1;				// random number generator initial seed
+int max_step = 100;			// default number of simulation runs
+int no_res = 0;				// produce intermediary .res files flag
+int dozip = 0;				// compressed results file flag
+int overwConf = 1;			// overwrite configuration on run flag
+int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
+int add_to_tot = 1;			// flag to append results to existing totals file
+int strWindowOn=1;			// control the presentation of the model structure window
+int lattice_type=0;			// default lattice type (infrequent cells changes)
+bool grandTotal = false;	// flag to produce or not grand total in batch processing
+bool firstRes = true;		// flag to mark first results file (init grand total file)
+bool unsavedData = false;	// flag unsaved simulation results
+char nonavail[] = "NA";		// string for unavailable values (use R default)
+// Main window constraints
+char hsize[] = "400";		// horizontal size in pixels
+char vsize[] = "620";		// vertical minimum size in pixels
+char hmargin[] = "20";		// horizontal right margin from the screen borders
+char vmargin[] = "20";		// vertical margins from the screen borders
+// Log window tabs
+char tabs[] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";
+
 
 /*********************************
 LSD MAIN
@@ -349,7 +351,6 @@ cmd(inter, msg);
 
 Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug_flag", (char *) &debug_flag, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "stack_flag", (char *) &stackinfo_flag, TCL_LINK_INT);
 Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}");
@@ -407,13 +408,19 @@ Tcl_UnlinkVar(inter, "done");
 
 cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global RootLsd; set here [pwd];  set f [open $RootLsd/Manual/temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"[file nativename $RootLsd/Manual/temp.html]\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {exec cmd.exe /c start $b &}}");
 
-
 //cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.1\" || $tcl_platform(osVersion) == \"5.0\"  } {exec cmd.exe /c start $b &} {catch [exec open.bat &] }} {exec start $b &}}}");
 
 cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {exec cmd.exe /c start $b &}}");
 
 
 cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
+
+// create a Tcl command that calls the C discard_change function before killing Lsd
+Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+
+// create Tcl commands that get and set LSD variable properties
+Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
+Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
 // set window icon
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lsd.xbm}");
@@ -423,13 +430,6 @@ Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
 Tcl_SetVar(inter, "posX", hmargin, 0);		// horizontal right margin from the screen borders
 Tcl_SetVar(inter, "posY", vmargin, 0);		// vertical margins from the screen borders
 cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
-
-// create a Tcl command that calls the C discard_change function before killing Lsd
-Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
-
-// create Tcl commands that get and set LSD variable properties
-Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
-Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
@@ -449,8 +449,7 @@ if(f!=NULL)
  sprintf(equation_name, "%s.cpp",msg+4);
  }
 
-
-
+create_logwindow( );
 cmd(inter, "destroy .l");
 #endif
 
@@ -486,7 +485,6 @@ if(f!=NULL)
  if(equation_name[strlen(equation_name)-1]=='\n')
    equation_name[strlen(equation_name)-1]=(char)NULL;
   
-
  fclose(f);
 }
 }
@@ -519,11 +517,8 @@ catch(int p)
  while(stacklog->prev!=NULL)
    stacklog=stacklog->prev;
  stack=0; 
- 
  }
 /**/ 
-cmd(inter, "wm deiconify .");
-cmd(inter, "destroy .l");
 }
 
 #else
@@ -570,6 +565,7 @@ quit=0;
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
 Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
+cover_browser( "Running...", "The simulation is being executed.", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop': stops the simulation.\n'Fast': accelerates the simulation by hiding information.\n'Observe': presents more run time information.\n'Debug': interrupts the simulation at a flagged variable." );
 #else
     sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
     plog(msg);
@@ -592,18 +588,13 @@ for(i=1; i<=sim_num && quit!=2; i++)
 cur_sim = i;	 //Update the global variable holding information on the current run in the set of runs
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
 #ifndef NO_WINDOW
-// disable main window widgets
-cmd( inter, "wm state . withdrawn" );
-
 prepare_plot(root, i);
-
 if(done_in==2 && cur_plt>0)
  cmd(inter, "if {[winfo exists $activeplot]==1} {wm iconify $activeplot} {}");
 #endif
 sprintf(msg, "\nSimulation %d running...", i);
 plog(msg);
 
-// deb(root->son, NULL, "stop 1", &app);
 if(i>1 || batch_sequential_loop)
 {
  root->empty();
@@ -666,7 +657,7 @@ for(t=1; quit==0 && t<=max_step;t++ )
   if(when_debug==t)
   {
     debug_flag=1;
-	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb }" );
+	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
   }
 #endif
   cur_plt=0;
@@ -699,7 +690,6 @@ case 0:
        sprintf(msg, "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step);
        cmd(inter, msg);
        sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i);
-       //sprintf(msg,"$activeplot.c.c.cn xview moveto %lf", (double)t/(double)max_step);
        cmd(inter, msg);
        cmd(inter, "set posiziona $oldposiziona");
        break;
@@ -744,7 +734,7 @@ break;
 
 case 3:
 debug_flag=1;
-cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb }" );
+cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
 done_in=0;
 break;
 
@@ -800,9 +790,6 @@ else
 cmd(inter, "update");
 // allow for run time plot window destruction
 cmd(inter, "if {[info exists activeplot] == 1} {if {[winfo exists $activeplot] == 1} {wm protocol $activeplot WM_DELETE_WINDOW \"\"}}");
-
-// enable main window widgets
-cmd( inter, "wm state . normal" );
 #endif
 
 close_sim();
@@ -907,11 +894,13 @@ delete rf;										// close file and delete object
 }
 
 #ifndef NO_WINDOW 
+cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
 Tcl_UnlinkVar(inter, "done_in");
 Tcl_UnlinkVar(inter, "posiziona");
 #endif
 quit=0;
 }
+
 
 /*********************************
 PRINT_TITLE
@@ -934,8 +923,6 @@ for(var=root->v; var!=NULL; var=var->next)
 
 	if( (var->save || var->savei) && no_more_memory==0)
 	 {
-    /*fprintf(f,"%s%s\t", var->label,tag);
-     sprintf(msg,"%s%s", var->label,tag); */
      if(var->num_lag>0 || var->param==1)
        var->start=0;
      else
@@ -967,11 +954,11 @@ for(var=root->v; var!=NULL; var=var->next)
 	  {sprintf(msg,"\nData for %s in object %s not loaded\n", var->label, root->label);
 		plog(msg);
 		plog("Use the Initial Values editor to set its values\n");
+     #ifndef NO_WINDOW   
      if(var->param==1)
        sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
      else
        sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
-     #ifndef NO_WINDOW   
      cmd(inter, msg);  
      #endif
 		toquit=2;
@@ -988,6 +975,7 @@ for(cb=root->b, counter=1; cb!=NULL; cb=cb->next, counter=1)
 if(quit!=2)
  quit=toquit;
 }
+
 
 /*********************************
 PLOG
@@ -1080,6 +1068,11 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  }
 }
 
+
+/*********************************
+CREATE_LOG_WINDOW
+*********************************/
+
 #ifndef NO_WINDOW
 void create_logwindow(void)
 {
@@ -1129,8 +1122,7 @@ cmd(inter, "pack $w");
 cmd(inter, "update idletasks");
 cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
 cmd(inter, "set posYLog [expr [winfo screenheight .log] - 4 * $posY - [winfo reqheight .log]]");
-cmd(inter, "wm geometry .log +$posXLog+$posYLog; update idletasks");	
-cmd( inter, "focus -force .log" );
+cmd(inter, "wm geometry .log +$posXLog+$posYLog");	
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
 cmd( inter, "rename .log.text.text .log.text.text.internal" );
@@ -1139,8 +1131,32 @@ cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { 
 // a Tcl/Tk version of plog
 cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm }" );
 }
-
 #endif
+
+
+/*********************************
+COVER_BROWSER
+*********************************/
+
+#ifndef NO_WINDOW
+void cover_browser( const char *text1, const char *text2, const char *text3 )
+{
+cmd( inter, "newtop .t \"[ wm title . ] (DISABLED)\"" );
+cmd( inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}" );
+sprintf( msg, "label .t.l1 -font {-weight bold} -text \"%s\"", text1 );
+cmd( inter, msg );
+sprintf( msg, "label .t.l2 -text \"\n%s\"", text2 );
+cmd( inter, msg );
+cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled.\"" );
+sprintf( msg, "label .t.l4 -justify left -text \"\n%s\"", text3 );
+cmd( inter, msg );
+cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
+cmd( inter, "showtop .t coverW no no no" );
+cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; lower .log . }" );
+cmd( inter, "raise .log; focus -force .log; update idletasks" );
+}
+#endif
+
 
 void save_single(variable *vcv)
 {

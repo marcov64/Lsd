@@ -101,6 +101,7 @@ Exit function, which is customized on the operative system.
 
 object *go_brother(object *c);
 void cmd(Tcl_Interp *inter, char const *cc);
+void cover_browser( const char *, const char *, const char * );
 void plog( char const *msg, char const *tag = "" );
 void read_data(int *choice);
 void init_canvas(void);
@@ -194,6 +195,7 @@ int rank;
 } *vs;
 void sort_on_end(store *app);
 
+
 /***************************************************
 ANALYSIS
 ****************************************************/
@@ -233,6 +235,10 @@ file_counter=0;
 *choice=0;
 
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
+
+cmd( inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }" );
+cover_browser( "Analysis of Results...", "Analysis of Results window is open.", "Keep the Lsd Browser window minimized. \nUsing it while Analysis of Results is open\ncan lead to unexpected behavior." );
+cmd( inter, "wm iconify ." );
 
 cmd( inter, "set da .da");
 sprintf(msg, "newtop .da \"%s%s - Lsd Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name);
@@ -474,7 +480,7 @@ cmd(inter, "bind .da <Control-c> {.da.f.vars.b.empty invoke}; bind .da <Control-
 cmd(inter, "bind .da <Control-a> {set choice 24}; bind .da <Control-A> {set choice 24}");
 cmd(inter, "bind .da <Control-i> {set choice 34}; bind .da <Control-I> {set choice 34}");
 
-cmd( inter, "showtop .da topleftW 0 0 0");
+cmd( inter, "showtop .da overM 0 0 0");
 
 if(num_var==0)
   cmd(inter, "tk_messageBox -type ok -title \"No Series\" -icon warning -message \"Apparently there are no series available from a recent simulation run.\\n\\nClick on button \'Add Series\' to select series to analyse from previously saved files or current state of the model. \\nIf you expected data from a simulation that are not available you probably forgot to select series to save, or set the objects containing them to be not computed.\"");  
@@ -555,6 +561,9 @@ cmd(inter, "bind .da <KeyPress-Delete> {}");
 
 delete[] vs;
   cmd( inter, "destroytop .da" );
+  cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
+  cmd( inter, "if [ winfo exists .model_str ] { wm deiconify .model_str }" );
+  cmd( inter, "wm deiconify ." );
   Tcl_UnlinkVar(inter, "minc");
   Tcl_UnlinkVar(inter, "maxc");
   Tcl_UnlinkVar(inter, "maxy");
@@ -3550,15 +3559,14 @@ bridge *cb;
 for(cv=r->v; cv!=NULL; cv=cv->next)
    if(cv->save)
     {
-//     sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit+strlen(cv->label)+1, cv->start, cv->end, *num_v); //this uses the tags embdedded in lab_tit
      set_lab_tit(cv);
      sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v);
      if(cv->end>*num_c)
        *num_c=cv->end;
      cmd(inter, msg);
      *num_v+=1;
-    }
-//for(cur=r->son; cur!=NULL; )
+}
+
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
  if(cur->to_compute==1)

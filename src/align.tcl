@@ -16,10 +16,39 @@
 #	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
 #	centerW: center over the parent window (in any display)
 #	topleftS: put over the top left corner of screen of primary display, only available if the parent window center is also in the primary display (if not, falback to topleftW)
-#	topleftW: put over the top left corner of parent window (below menu bar)
+#	topleftW: put over the top left corner of parent window (around menu bar)
+#	coverW: cover the parent window (same size & position)
+#	overM: over the main window (same top-left position)
 #	current: keep current position
 #
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
+
+# OS specific screen location offset adjustments
+set corrXmac 0
+set corrYmac 0
+set corrXlinux 0
+set corrYlinux -57
+set corrXwindows 0
+set corrYwindows 0
+
+if [ string equal $tcl_platform(platform) unix ] {
+	if [ string equal $tcl_platform(os) Darwin ] {
+		set corrX $corrXmac
+	} {
+		set corrX $corrXlinux
+	}
+} {
+	set corrX $corrXwindows
+}
+if [ string equal $tcl_platform(platform) unix ] {
+	if [ string equal $tcl_platform(os) Darwin ] {
+		set corrY $corrYmac
+	} {
+		set corrY $corrYlinux
+	}
+} {
+	set corrY $corrYwindows
+}
 
 # register static special configurations
 unset -nocomplain defaultPos defaultFocus
@@ -83,8 +112,11 @@ proc settop { w { name no } { destroy no } { par no } } {
 
 # configure the window
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } } {
-	if { $sizeX != 0 && $sizeY != 0 } {
-		$w configure -width $sizeX -height $sizeY 
+	if { $sizeX != 0 } {
+		$w configure -width $sizeX 
+	}
+	if { $sizeY != 0 } {
+		$w configure -height $sizeY 
 	}
 	wm withdraw $w
 	update idletasks
@@ -99,11 +131,15 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	if { ! [ string equal $pos current ] } {
 		if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
-			set pos topleftW 
+			set pos $defaultPos 
 		}
 		set x [ getx $w $pos ]
 		set y [ gety $w $pos ]
 		if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
+			if { [ string equal $pos coverW ] } {
+				set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 5 ]
+				set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
+			}
 			if { $sizeX != 0 && $sizeY != 0 } {
 				wm geom $w ${sizeX}x${sizeY}+$x+$y 
 			} {
@@ -158,14 +194,14 @@ proc destroytop w {
 
 # alignment of window w1 to the to right side of w2
 proc align {w1 w2} {
-	global posX
-	set a [winfo width $w1]
-	set b [winfo height $w1]
-	set c [winfo x $w2]
-	set d [winfo y $w2]
-	set e [winfo width $w2]
+	global posX corrX corrY
+	set a [ winfo width $w1 ]
+	set b [ winfo height $w1 ]
+	set c [ expr [ winfo x $w2 ] + $corrX ]
+	set d [ expr [ winfo y $w2 ] + $corrY ]
+	set e [ winfo width $w2 ]
 
-	set f [expr $c + $e + $posX ]
+	set f [ expr $c + $e + $posX ]
 	wm geometry $w1 +$f+$d
 #	plog "align w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)"
 }
@@ -181,38 +217,52 @@ proc primdisp w {
 
 # compute x and y coordinates of new window according to the types
 proc getx { w pos } {
+	global corrX
 	switch $pos {
 		centerS { 
 			return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo rootx [ winfo parent $w ] ] + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
+			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
 		topleftS { 
 			global hmargin
 			return $hmargin
 		}
 		topleftW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + 5 ]
+			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
+		}
+		overM { 
+			return [ expr [ winfo x . ] + $corrX ]
+		}
+		coverW { 
+			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
 		}
 	}
 #	plog "\nw:$w (parent:[ winfo parent $w ], x:[ winfo x [ winfo parent $w ] ],"
 }
 
 proc gety { w pos } {
+	global corrY
 	switch $pos {
 		centerS { 
 			return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo rooty [ winfo parent $w ] ] + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
+			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
 		topleftS { 
 			global vmargin
 			return $vmargin
 		}
 		topleftW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + 50 ]
+			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
+		}
+		overM { 
+			return [ expr [ winfo y . ] + $corrY ]
+		}
+		coverW { 
+			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 	} 
 #	plog "y:[ winfo y [ winfo parent $w ] ])"
