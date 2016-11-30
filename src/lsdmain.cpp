@@ -415,6 +415,23 @@ cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [ope
 
 cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
 
+// commands to disable/enable main window widget in cases where grab is inappropriate (TK8.6 only)
+cmd( inter, "proc disable_main { } { \
+		if { ! [ string equal [ info tclversion ] \"8.6\" ] } { \
+			return \
+		}; \
+		tk busy hold .l; \
+		update \
+	}" );
+
+cmd( inter, "proc enable_main { } { \
+		if { ! [ string equal [ info tclversion ] \"8.6\" ] } { \
+			return \
+		}; \
+		tk busy forget .l; \
+		update \
+	}" );
+
 // create a Tcl command that calls the C discard_change function before killing Lsd
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
@@ -565,6 +582,7 @@ quit=0;
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
 Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
+cmd( inter, "disable_main" );		// disable main window (Tk 8.6 only)
 cover_browser( "Running...", "The simulation is being executed.", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop': stops the simulation.\n'Fast': accelerates the simulation by hiding information.\n'Observe': presents more run time information.\n'Debug': interrupts the simulation at a flagged variable." );
 #else
     sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
@@ -895,6 +913,7 @@ delete rf;										// close file and delete object
 
 #ifndef NO_WINDOW 
 cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
+cmd( inter, "enable_main" );			// enable main window (Tk 8.6 only)
 Tcl_UnlinkVar(inter, "done_in");
 Tcl_UnlinkVar(inter, "posiziona");
 #endif

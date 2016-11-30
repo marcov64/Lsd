@@ -6,7 +6,7 @@
 if {[catch {package present Tcl 8.5}]} {
     return
 }
-package ifneeded tdbc 1.0.3 \
+package ifneeded tdbc 1.0.4 \
     "package require TclOO 0.6-;\
-    [list source [file join $dir tdbc.tcl]]\;\
-    [list load [file join $dir tdbc103.dll] tdbc]"
+    [list load [file join $dir tdbc104.dll] tdbc]\;\
+    [list source [file join $dir tdbc.tcl]]"

@@ -2,7 +2,7 @@
 # ttrace.tcl --
 #
 # Copyright (C) 2003 Zoran Vasiljevic, Archiware GmbH. All Rights Reserved.
-# 
+#
 # See the file "license.terms" for information on usage and redistribution of
 # this file, and for a DISCLAIMER OF ALL WARRANTIES.
 # ----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace eval ttrace {
     }
 
     # Keep in sync with the Thread package
-    package provide Ttrace 2.7.2
+    package provide Ttrace 2.8.0
 
     # Package variables
     variable resolvers ""     ; # List of registered resolvers
@@ -187,7 +187,7 @@ namespace eval ttrace {
     }
 
     proc update {{from -1}} {
-        if {$from == -1} { 
+        if {$from == -1} {
             variable epoch [_set ttrace lastepoch]
         } else {
             if {[lsearch [_set ttrace epochlist] $from] == -1} {
@@ -196,7 +196,7 @@ namespace eval ttrace {
             variable epoch $from
         }
         uplevel [getscript]
-    } 
+    }
 
     proc getscript {} {
         variable preloads
@@ -238,7 +238,7 @@ namespace eval ttrace {
             return $cmd
         }
     }
-    
+
     proc atdisable {cmd arglist body} {
         variable disables
         if {[lsearch $disables $cmd] == -1} {
@@ -248,7 +248,7 @@ namespace eval ttrace {
             return $cmd
         }
     }
-     
+
     proc addtrace {cmd arglist body} {
         variable tracers
         if {[lsearch $tracers $cmd] == -1} {
@@ -396,7 +396,7 @@ namespace eval ttrace {
     }
 
     proc _dropepoch {epoch threads} {
-        set self [_getthread] 
+        set self [_getthread]
         foreach tid [_set ttrace $epoch] {
             if {$tid != $self && [lsearch $threads $tid] >= 0} {
                 lappend alive $tid
@@ -637,7 +637,7 @@ eval {
             if {[array exists $entry]} {
                 append res "\n::array set $var [list [array get $entry]]" \n
             } elseif {[info exists $entry]} {
-                append res " [list [set $entry]]" \n 
+                append res " [list [set $entry]]" \n
             } else {
                 append res \n
             }
@@ -870,7 +870,7 @@ eval {
     }
 
     ttrace::atdisable XOTclDisabler {args} {
-        if {   [info commands ::xotcl::Class] == "" 
+        if {   [info commands ::xotcl::Class] == ""
             || [info commands ::xotcl::_creator] == ""} {
             return
         }
@@ -914,7 +914,7 @@ eval {
     #
     # Register callback to be called on cleanup. This will trash lazily loaded
     # procs which have changed since.
-    # 
+    #
 
     ttrace::addcleanup {
         variable resolveproc

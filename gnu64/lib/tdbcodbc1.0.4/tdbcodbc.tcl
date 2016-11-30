@@ -226,7 +226,7 @@ package require tdbc
     # actual work.
 
     method preparecall {call} {
-	
+
 	regexp {^[[:space:]]*(?:([A-Za-z_][A-Za-z_0-9]*)[[:space:]]*=)?(.*)} \
 	    $call -> varName rest
 	if {$varName eq {}} {
@@ -337,7 +337,7 @@ package require tdbc
     }
 
     # Methods implemented in C:
-    # init statement ?dictionary?  
+    # init statement ?dictionary?
     #     Does the heavy lifting for the constructor
     # connection
     #	Returns the connection handle to which this statement belongs
@@ -503,7 +503,7 @@ oo::class create ::tdbc::odbc::typesStatement {
     #     -- Returns a list of the names of the columns in the result.
     # nextdict
     #     -- Stores the next row of the result set in the given variable in
-    #        the caller's scope as a dictionary whose keys are 
+    #        the caller's scope as a dictionary whose keys are
     #        column names and whose values are column values.
     # nextlist
     #     -- Stores the next row of the result set in the given variable in

@@ -11,7 +11,7 @@ if {![package vsatisfies [package provide Tcl] 8.4]} {
     }
 }
 
-# All Tcl 8.4+ interps can [load] Thread 2.7.2
+# All Tcl 8.4+ interps can [load] Thread 2.8.0
 #
 # For interps that are not thread-enabled, we still call [package ifneeded].
 # This is contrary to the usual convention, but is a good idea because we
@@ -23,13 +23,13 @@ if {![package vsatisfies [package provide Tcl] 8.4]} {
 # about a thread-disabled interp, instead of the message
 # "can't find package Thread".
 
-package ifneeded Thread 2.7.2 [list load [file join $dir thread272.dll]]
+package ifneeded Thread 2.8.0 [list load [file join $dir thread280.dll]]
 
 # package Ttrace uses some support machinery.
 
 # In Tcl 8.4 interps we use some older interfaces
 if {![package vsatisfies [package provide Tcl] 8.5]} {
-    package ifneeded Ttrace 2.7.2 "
+    package ifneeded Ttrace 2.8.0 "
     [list proc thread_source {dir} {
 	if {[info exists ::env(TCL_THREAD_LIBRARY)] &&
 		[file readable $::env(TCL_THREAD_LIBRARY)/ttrace.tcl]} {
@@ -50,7 +50,7 @@ if {![package vsatisfies [package provide Tcl] 8.5]} {
 
 # In Tcl 8.5+ interps; use [::apply]
 
-package ifneeded Ttrace 2.7.2 [list ::apply {{dir} {
+package ifneeded Ttrace 2.8.0 [list ::apply {{dir} {
     if {[info exists ::env(TCL_THREAD_LIBRARY)] &&
 	[file readable $::env(TCL_THREAD_LIBRARY)/ttrace.tcl]} {
 	source $::env(TCL_THREAD_LIBRARY)/ttrace.tcl

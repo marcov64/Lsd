@@ -142,14 +142,14 @@ typedef struct ItclObjectInfo {
     Tcl_HashTable objects;          /* list of all known objects key is
                                      * ioPtr */
     Tcl_HashTable objectCmds;       /* list of known objects using accessCmd */
-    Tcl_HashTable objectNames;      /* list of known objects using namePtr */
+    Tcl_HashTable unused5;          /* list of known objects using namePtr */
     Tcl_HashTable classes;          /* list of all known classes,
                                      * key is iclsPtr */
     Tcl_HashTable nameClasses;      /* maps from fullNamePtr to iclsPtr */
     Tcl_HashTable namespaceClasses; /* maps from nsPtr to iclsPtr */
     Tcl_HashTable procMethods;      /* maps from procPtr to mFunc */
     Tcl_HashTable instances;        /* maps from instanceNumber to ioPtr */
-    Tcl_HashTable objectInstances;  /* maps from ioPtr to instanceNumber */
+    Tcl_HashTable unused8;          /* maps from ioPtr to instanceNumber */
     Tcl_HashTable unused;           /* Obsolete field */
     Tcl_HashTable classTypes;       /* maps from class type i.e. "widget"
                                      * to define value i.e. ITCL_WIDGET */
@@ -159,17 +159,17 @@ typedef struct ItclObjectInfo {
     Itcl_Stack clsStack;            /* stack of class definitions currently
                                      * being parsed */
     Itcl_Stack contextStack;        /* stack of call contexts */
-    Itcl_Stack constructorStack;    /* stack of constructor calls */
+    Itcl_Stack unused6;		    /* obsolete field */
     struct ItclObject *currIoPtr;   /* object currently being constructed
                                      * set only during calling of constructors
 				     * otherwise NULL */
     Tcl_ObjectMetadataType *class_meta_type;
                                     /* type for getting the Itcl class info
                                      * from a TclOO Tcl_Object */
-    Tcl_ObjectMetadataType *object_meta_type;
+    const Tcl_ObjectMetadataType *object_meta_type;
                                     /* type for getting the Itcl object info
                                      * from a TclOO Tcl_Object */
-    Tcl_Object clazzObjectPtr;      /* the root object of Itcl */
+    Tcl_Object unused1;             /* the root object of Itcl */
     Tcl_Class clazzClassPtr;        /* the root class of Itcl */
     struct EnsembleInfo *ensembleInfo;
     struct ItclClass *currContextIclsPtr;
@@ -182,7 +182,7 @@ typedef struct ItclObjectInfo {
     Tcl_Obj **unparsedObjv;         /* options not parsed by
                                        ItclExtendedConfigure/-Cget function */
     int functionFlags;              /* used for creating of ItclMemberCode */
-    int numInstances;               /* used for having a unique key for objects
+    int unused7;               /* used for having a unique key for objects
                                      * for use in mytypemethod etc. */
     struct ItclDelegatedOption *currIdoPtr;
                                     /* the current delegated option info */
@@ -197,11 +197,10 @@ typedef struct ItclObjectInfo {
     int itclHullCmdsInitted;        /* set to 1 if itclHullCmds.tcl has already
                                      * been called
 				     */
-    Tcl_Obj *unknownNamePtr;
-    Tcl_Obj *unknownArgumentPtr;
-    Tcl_Obj *unknownBodyPtr;
+    Tcl_Obj *unused2;
+    Tcl_Obj *unused3;
+    Tcl_Obj *unused4;
     Tcl_Obj *infoVarsPtr;
-    Tcl_Obj *infoVars2Ptr;
     Tcl_Obj *infoVars3Ptr;
     Tcl_Obj *infoVars4Ptr;
     Tcl_Obj *typeDestructorArgumentPtr;
@@ -293,12 +292,11 @@ typedef struct ItclClass {
     Tcl_HashTable resolveCmds;    /* all possible names for functions in
                                    * this class (e.g., x, foo::x, etc.) */
     Tcl_HashTable contextCache;   /* cache for function contexts */
-    struct ItclMemberFunc *constructor;
+    struct ItclMemberFunc *unused2;
                                   /* the class constructor or NULL */
-    struct ItclMemberFunc *destructor;
+    struct ItclMemberFunc *unused3;
                                   /* the class destructor or NULL */
-    struct ItclMemberFunc *constructorInit;
-                                  /* the class constructor init code or NULL */
+    struct ItclMemberFunc *unused1;
     Tcl_Resolve *resolvePtr;
     Tcl_Obj *widgetClassPtr;      /* class name for widget if class is a
                                    * ::itcl::widget */
@@ -314,6 +312,7 @@ typedef struct ItclClass {
     int callRefCount;             /* prevent deleting of class if refcount>1 */
     Tcl_Obj *typeConstructorPtr;  /* initialization for types */
     int destructorHasBeenCalled;  /* prevent multiple invocations of destrcutor */
+    int refCount;
 } ItclClass;
 
 typedef struct ItclHierIter {
@@ -441,8 +440,6 @@ typedef struct ItclMemberCode {
 #define ITCL_DESTRUCTOR        0x040  /* non-zero => is a destructor */
 #define ITCL_ARG_SPEC          0x080  /* non-zero => has an argument spec */
 #define ITCL_BODY_SPEC         0x100  /* non-zero => has an body spec */
-#define ITCL_CONINIT           0x200  /* non-zero => is a constructor
-                                       * init code */
 #define ITCL_BUILTIN           0x400  /* non-zero => built-in method */
 #define ITCL_COMPONENT         0x800  /* non-zero => component */
 #define ITCL_TYPE_METHOD       0x1000 /* non-zero => typemethod */
@@ -517,6 +514,7 @@ typedef struct ItclMemberFunc {
     ClientData tmPtr;           /* TclOO methodPtr */
     ItclDelegatedFunction *idmPtr;
                                 /* if the function is delegated != NULL */
+    int refCount;
 } ItclMemberFunc;
 
 /*
@@ -588,16 +586,6 @@ typedef struct ItclMethodVariable {
     Tcl_Obj *defaultValuePtr;
     Tcl_Obj *callbackPtr;
 } ItclMethodVariable;
-
-typedef struct IctlVarTraceInfo {
-    int flags;
-    ItclVariable* ivPtr;
-    ItclClass *iclsPtr;
-    ItclObject *ioPtr;
-} IctlVarTraceInfo;
-
-#define ITCL_TRACE_CLASS		0x01
-#define ITCL_TRACE_OBJECT		0x02
 
 #define VAR_TYPE_VARIABLE 	1
 #define VAR_TYPE_COMMON 	2
@@ -692,6 +680,12 @@ MODULE_SCOPE Tcl_ObjCmdProc ItclObjectUnknownCommand;
 MODULE_SCOPE int ItclCheckCallProc(ClientData clientData, Tcl_Interp *interp,
         Tcl_ObjectContext contextPtr, Tcl_CallFrame *framePtr, int *isFinished);
 
+MODULE_SCOPE void ItclPreserveIMF(ItclMemberFunc *imPtr);
+MODULE_SCOPE void ItclReleaseIMF(ClientData imPtr);
+
+MODULE_SCOPE void ItclPreserveClass(ItclClass *iclsPtr);
+MODULE_SCOPE void ItclReleaseClass(ClientData iclsPtr);
+
 MODULE_SCOPE ItclFoundation *ItclGetFoundation(Tcl_Interp *interp);
 MODULE_SCOPE Tcl_ObjCmdProc ItclClassCommandDispatcher;
 MODULE_SCOPE Tcl_Command Itcl_CmdAliasProc(Tcl_Interp *interp,
@@ -723,8 +717,6 @@ MODULE_SCOPE void ItclDeleteObjectVariablesNamespace(Tcl_Interp *interp,
 MODULE_SCOPE void ItclDeleteClassVariablesNamespace(Tcl_Interp *interp,
         ItclClass *iclsPtr);
 MODULE_SCOPE int ItclInfoInit(Tcl_Interp *interp);
-MODULE_SCOPE char * ItclTraceUnsetVar(ClientData clientData, Tcl_Interp *interp,
-	const char *name1, const char *name2, int flags);
 
 struct Tcl_ResolvedVarInfo;
 MODULE_SCOPE int Itcl_ClassCmdResolver(Tcl_Interp *interp, const char* name,
@@ -820,8 +812,6 @@ MODULE_SCOPE int ItclAddClassFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclMemberFunc *imPtr);
 MODULE_SCOPE int ItclAddClassDelegatedFunctionDictInfo(Tcl_Interp *interp,
         ItclClass *iclsPtr, ItclDelegatedFunction *idmPtr);
-MODULE_SCOPE ItclClass * GetClassFromClassName(Tcl_Interp *interp,
-        const char *className, ItclClass *iclsPtr);
 MODULE_SCOPE int ItclClassCreateObject(ClientData clientData, Tcl_Interp *interp,
         int objc, Tcl_Obj *const objv[]);
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_BiMyProcCmd;
@@ -842,6 +832,13 @@ MODULE_SCOPE Tcl_ObjCmdProc Itcl_AddDelegatedFunctionCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_SetComponentCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassHullTypeCmd;
 MODULE_SCOPE Tcl_ObjCmdProc Itcl_ClassWidgetClassCmd;
+
+typedef int (ItclRootMethodProc)(ItclObject *ioPtr, Tcl_Interp *interp,
+	int objc, Tcl_Obj *const objv[]);
+
+MODULE_SCOPE const Tcl_MethodType itclRootMethodType;
+MODULE_SCOPE ItclRootMethodProc ItclUnknownGuts;
+MODULE_SCOPE ItclRootMethodProc ItclConstructGuts;
 
 #include "itcl2TclOO.h"
 #ifdef NEW_PROTO_RESOLVER

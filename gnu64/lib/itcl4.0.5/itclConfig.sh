@@ -12,56 +12,56 @@
 # The information in this file is specific to a single platform.
 
 # Itcl's version number.
-itcl_VERSION='4.0.3'
-ITCL_VERSION='4.0.3'
+itcl_VERSION='4.0.5'
+ITCL_VERSION='4.0.5'
 
 # The name of the Itcl library (may be either a .a file or a shared library):
-itcl_LIB_FILE=itcl403.dll
-ITCL_LIB_FILE=itcl403.dll
+itcl_LIB_FILE=itcl405.dll
+ITCL_LIB_FILE=itcl405.dll
 
 # String to pass to linker to pick up the Itcl library from its
 # build directory.
-itcl_BUILD_LIB_SPEC='-L/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3 -litcl403'
-ITCL_BUILD_LIB_SPEC='-L/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3 -litcl403'
+itcl_BUILD_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5 -litcl405'
+ITCL_BUILD_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5 -litcl405'
 
 # String to pass to linker to pick up the Itcl library from its
 # installed directory.
-itcl_LIB_SPEC='-L/home/Marcelo/gnu64/lib/itcl4.0.3 -litcl403'
-ITCL_LIB_SPEC='-L/home/Marcelo/gnu64/lib/itcl4.0.3 -litcl403'
+itcl_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5 -litcl405'
+ITCL_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5 -litcl405'
 
 # The name of the Itcl stub library (a .a file):
-itcl_STUB_LIB_FILE=libitclstub403.a
-ITCL_STUB_LIB_FILE=libitclstub403.a
+itcl_STUB_LIB_FILE=libitclstub405.a
+ITCL_STUB_LIB_FILE=libitclstub405.a
 
 # String to pass to linker to pick up the Itcl stub library from its
 # build directory.
-itcl_BUILD_STUB_LIB_SPEC='-L/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3 -litclstub403'
-ITCL_BUILD_STUB_LIB_SPEC='-L/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3 -litclstub403'
+itcl_BUILD_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5 -litclstub405'
+ITCL_BUILD_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5 -litclstub405'
 
 # String to pass to linker to pick up the Itcl stub library from its
 # installed directory.
-itcl_STUB_LIB_SPEC='-L/home/Marcelo/gnu64/lib/itcl4.0.3 -litclstub403'
-ITCL_STUB_LIB_SPEC='-L/home/Marcelo/gnu64/lib/itcl4.0.3 -litclstub403'
+itcl_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5 -litclstub405'
+ITCL_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5 -litclstub405'
 
 # String to pass to linker to pick up the Itcl stub library from its
 # build directory.
-itcl_BUILD_STUB_LIB_PATH='/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3/libitclstub403.a'
-ITCL_BUILD_STUB_LIB_PATH='/home/Marcelo/tcl8.6.4/win/pkgs/itcl4.0.3/libitclstub403.a'
+itcl_BUILD_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5/libitclstub405.a'
+ITCL_BUILD_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/pkgs/itcl4.0.5/libitclstub405.a'
 
 # String to pass to linker to pick up the Itcl stub library from its
 # installed directory.
-itcl_STUB_LIB_PATH='/home/Marcelo/gnu64/lib/itcl4.0.3/libitclstub403.a'
-ITCL_STUB_LIB_PATH='/home/Marcelo/gnu64/lib/itcl4.0.3/libitclstub403.a'
+itcl_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5/libitclstub405.a'
+ITCL_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/gnu64/lib/itcl4.0.5/libitclstub405.a'
 
 # Location of the top-level source directories from which [incr Tcl]
 # was built.  This is the directory that contains generic, unix, etc.
 # If [incr Tcl] was compiled in a different place than the directory
 # containing the source files, this points to the location of the sources,
 # not the location where [incr Tcl] was compiled.
-itcl_SRC_DIR='/home/Marcelo/tcl8.6.4/pkgs/itcl4.0.3'
-ITCL_SRC_DIR='/home/Marcelo/tcl8.6.4/pkgs/itcl4.0.3'
+itcl_SRC_DIR='/home/Marcelo/tcl8.6.6/pkgs/itcl4.0.5'
+ITCL_SRC_DIR='/home/Marcelo/tcl8.6.6/pkgs/itcl4.0.5'
 
 # String to pass to the compiler so that an extension can
 # find installed Itcl headers.
-itcl_INCLUDE_SPEC='/home/Marcelo/tcl8.6.4/pkgs/itcl4.0.3/generic'
-ITCL_INCLUDE_SPEC='/home/Marcelo/tcl8.6.4/pkgs/itcl4.0.3/generic'
+itcl_INCLUDE_SPEC='/home/Marcelo/tcl8.6.6/pkgs/itcl4.0.5/generic'
+ITCL_INCLUDE_SPEC='/home/Marcelo/tcl8.6.6/pkgs/itcl4.0.5/generic'

@@ -13,7 +13,7 @@
 package require tdbc
 package require sqlite3
 
-package provide tdbc::sqlite3 1.0.3
+package provide tdbc::sqlite3 1.0.4
 
 namespace eval tdbc::sqlite3 {
     namespace export connection
@@ -70,7 +70,7 @@ namespace eval tdbc::sqlite3 {
 	    } else {
 		lappend result serializable
 	    }
-	    lappend result -readonly 0 
+	    lappend result -readonly 0
 	    lappend result -timeout $timeout
 	    return $result
 
@@ -80,7 +80,7 @@ namespace eval tdbc::sqlite3 {
 
 	    set option [lindex $args 0]
 	    switch -exact -- $option {
-		-e - -en - -enc - -enco - -encod - -encodi - -encodin - 
+		-e - -en - -enc - -enco - -encod - -encodi - -encodin -
 		-encoding {
 		    return utf-8
 		}
@@ -105,7 +105,7 @@ namespace eval tdbc::sqlite3 {
 					BADOPTION $option] \
 			"bad option \"$option\": must be\
                          -encoding, -isolation, -readonly or -timeout"
-		    
+
 		}
 	    }
 
@@ -124,7 +124,7 @@ namespace eval tdbc::sqlite3 {
 
 	foreach {option value} $args {
 	    switch -exact -- $option {
-		-e - -en - -enc - -enco - -encod - -encodi - -encodin - 
+		-e - -en - -enc - -enco - -encod - -encodi - -encodin -
 		-encoding {
 		    if {$value ne {utf-8}} {
 			return -code error \
@@ -138,7 +138,7 @@ namespace eval tdbc::sqlite3 {
 		-isolatio - -isolation {
 		    switch -exact -- $value {
 			readu - readun - readunc - readunco - readuncom -
-			readuncomm - readuncommi - readuncommit - 
+			readuncomm - readuncommi - readuncommit -
 			readuncommitt - readuncommitte - readuncommitted {
 			    db eval {PRAGMA read_uncommitted = 1}
 			}
@@ -332,7 +332,7 @@ namespace eval tdbc::sqlite3 {
     #   argdict - Dictionary that may or may not contain a key,
     #             'primary', whose value is the name of a table that
     #             must hold the primary key corresponding to the foreign
-    #             key. If the 'primary' key is absent, all tables are 
+    #             key. If the 'primary' key is absent, all tables are
     #             candidates.
     # Results:
     #
@@ -347,7 +347,7 @@ namespace eval tdbc::sqlite3 {
 
 	set result {}
 	set n 0
-   
+
 	# Go through the foreign keys in the given table, looking for
 	# ones that refer to the primary table (if one is given), or
 	# for any primary keys if none is given.
@@ -378,7 +378,7 @@ namespace eval tdbc::sqlite3 {
 			dict set rrow $to [dict get $row $from]
 		    }
 		}
-		
+
 		# Add the newly-constucted dictionary to the result list
 
 		lappend result $rrow
@@ -420,7 +420,7 @@ namespace eval tdbc::sqlite3 {
     # The 'transaction' method executes a script as a single transaction.
     # We override the 'transaction' method of the base class, since SQLite3
     # has a faster implementation of the same thing. (The base class's generic
-    # method should also work.) 
+    # method should also work.)
     # (Don't overload the base class method, because 'break', 'continue'
     # and 'return' in the transaction body don't work!)
 
@@ -432,7 +432,7 @@ namespace eval tdbc::sqlite3 {
 	set result [next $sqlCode]
 	return $result
     }
-	
+
     method getDBhandle {} {
 	return [namespace which db]
     }
@@ -454,7 +454,7 @@ namespace eval tdbc::sqlite3 {
 
     # The constructor accepts the handle to the connection and the SQL
     # code for the statement to prepare.  All that it does is to parse the
-    # statement and store it.  The parse is used to support the 
+    # statement and store it.  The parse is used to support the
     # 'params' and 'paramtype' methods.
 
     constructor {connection sqlcode} {

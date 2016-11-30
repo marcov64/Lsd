@@ -136,7 +136,7 @@ enum _SQL_DATATYPE {
 /* Parameter transmission diretions */
 
 #define SQL_PARAM_INPUT 1
-    
+
 /* Status returns */
 
 #define    SQL_ERROR (-1)
@@ -254,7 +254,7 @@ enum _SQL_DIAG {
 #endif
 
 #include "odbcStubs.h"
-MODULE_SCOPE odbcStubDefs* odbcStubs;
+MODULE_SCOPE const odbcStubDefs* odbcStubs;
 
 /*
  * Additional entry points in ODBCINST - all of these are optional
