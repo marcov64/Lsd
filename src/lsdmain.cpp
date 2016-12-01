@@ -175,7 +175,7 @@ bool redrawRoot = true;		// control for redrawing root window (.)
 int seed = 1;				// random number generator initial seed
 int max_step = 100;			// default number of simulation runs
 int no_res = 0;				// produce intermediary .res files flag
-int dozip = 0;				// compressed results file flag
+int dozip = 1;				// compressed results file flag
 int overwConf = 1;			// overwrite configuration on run flag
 int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
 int add_to_tot = 1;			// flag to append results to existing totals file
@@ -301,6 +301,7 @@ for(i=1; argv[i]!=NULL; i++)
 
 }
 
+grandTotal = true;				// not in parallel mode: use .tot headers
 struct_file=new char[strlen(simul_name)+5];
 sprintf(struct_file, "%s.lsd", simul_name);
 #endif
@@ -415,20 +416,37 @@ cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [ope
 
 cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
 
-// commands to disable/enable main window widget in cases where grab is inappropriate (TK8.6 only)
-cmd( inter, "proc disable_main { } { \
-		if { ! [ string equal [ info tclversion ] \"8.6\" ] } { \
-			return \
+// commands to disable/enable windows in cases where grab is inappropriate (only menus if not TK8.6)
+// call parameters are: container window, menu name, widgets names
+cmd( inter, "proc disable_window { w m { args \"\" } } { \
+		if [ winfo exist $w.$m ] { \
+			for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } { \
+				$w.$m entryconfig $i -state disabled \
+			} \
 		}; \
-		tk busy hold .l; \
+		if [ string equal [ info tclversion ] \"8.6\" ] { \
+			foreach i $args { \
+				if [ winfo exists $w.$i ] { \
+					tk busy hold $w.$i \
+				} \
+			}; \
+		}; \
 		update \
 	}" );
-
-cmd( inter, "proc enable_main { } { \
-		if { ! [ string equal [ info tclversion ] \"8.6\" ] } { \
-			return \
+	
+cmd( inter, "proc enable_window { w m { args \"\" } } { \
+		if [ winfo exist $w.$m ] { \
+			for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } { \
+				$w.$m entryconfig $i -state normal \
+			} \
 		}; \
-		tk busy forget .l; \
+		if [ string equal [ info tclversion ] \"8.6\" ] { \
+			foreach i $args { \
+				if [ winfo exists $w.$i ] { \
+					tk busy forget $w.$i \
+				} \
+			}; \
+		}; \
 		update \
 	}" );
 
@@ -530,7 +548,6 @@ run(root);
 /**/
 catch(int p)
  {
- //cmd(inter, "puts here");
  while(stacklog->prev!=NULL)
    stacklog=stacklog->prev;
  stack=0; 
@@ -582,7 +599,7 @@ quit=0;
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
 Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
-cmd( inter, "disable_main" );		// disable main window (Tk 8.6 only)
+cmd( inter, "disable_window \"\" m bbar l" );		// disable main window (Tk 8.6 only)
 cover_browser( "Running...", "The simulation is being executed.", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop': stops the simulation.\n'Fast': accelerates the simulation by hiding information.\n'Observe': presents more run time information.\n'Debug': interrupts the simulation at a flagged variable." );
 #else
     sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
@@ -913,7 +930,7 @@ delete rf;										// close file and delete object
 
 #ifndef NO_WINDOW 
 cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
-cmd( inter, "enable_main" );			// enable main window (Tk 8.6 only)
+cmd( inter, "enable_window \"\" m bbar l" );	// enable main window (Tk 8.6 only)
 Tcl_UnlinkVar(inter, "done_in");
 Tcl_UnlinkVar(inter, "posiziona");
 #endif

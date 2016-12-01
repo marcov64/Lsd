@@ -801,6 +801,7 @@ cmd( inter, "if [ string equal [ info tclversion ] \"8.6\" ] { set iconExt \"png
 cmd( inter, "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.$iconExt\"" );
 cmd( inter, "image create photo reloadImg -file \"$RootLsd/$LsdSrc/icons/reload.$iconExt\"" );
 cmd( inter, "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.$iconExt\"" );
+cmd( inter, "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.$iconExt\"" );
 cmd( inter, "image create photo initImg -file \"$RootLsd/$LsdSrc/icons/init.$iconExt\"" );
 cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
 cmd( inter, "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.$iconExt\"" );
@@ -810,6 +811,7 @@ cmd( inter, "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.
 cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 17}" );
 cmd( inter, "button .bbar.reload -image reloadImg -relief flat -command {set choice 38}" );
 cmd( inter, "button .bbar.save -image saveImg -relief flat -command {set choice 18}" );
+cmd( inter, "button .bbar.find -image findImg -relief flat -command {set choice 50}" );
 cmd( inter, "button .bbar.init -image initImg -relief flat -command {set choice 21}" );
 cmd( inter, "button .bbar.set -image setImg -relief flat -command {set choice 22}" );
 cmd( inter, "button .bbar.run -image runImg -relief flat -command {set choice 1}" );
@@ -823,6 +825,8 @@ cmd( inter, "bind .bbar.reload <Enter> {set ttip \"Reload\"}" );
 cmd( inter, "bind .bbar.reload <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.save <Enter> {set ttip \"Save\"}" );
 cmd( inter, "bind .bbar.save <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.find <Enter> {set ttip \"Find Element...\"}" );
+cmd( inter, "bind .bbar.find <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.init <Enter> {set ttip \"Initial Values...\"}" );
 cmd( inter, "bind .bbar.init <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.set <Enter> {set ttip \"Simulation Settings...\"}" );
@@ -834,7 +838,7 @@ cmd( inter, "bind .bbar.data <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.result <Enter> {set ttip \"Analysis of Results...\"}" );
 cmd( inter, "bind .bbar.result <Leave> {set ttip \"\"}" );
 
-cmd( inter, "pack .bbar.open .bbar.reload .bbar.save .bbar.init .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -padx 3 -side left" );
+cmd( inter, "pack .bbar.open .bbar.reload .bbar.save .bbar.find .bbar.init .bbar.set .bbar.run .bbar.data .bbar.result .bbar.tip -padx 3 -side left" );
 cmd( inter, "pack .bbar -anchor w -fill x" );
 }
 

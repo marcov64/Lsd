@@ -131,11 +131,12 @@ void insert_data_mem(object *r, int *num_v, int *num_c);
 void insert_labels_nosave(object *r,char * lab,  int *num_v);
 void insert_store_nosave(object *r,char * lab,  int *num_v);
 void insert_data_nosave(object *r, char * lab, int *num_v);
-void insert_data_file(int *num_v, int *num_c);
+void insert_data_file( bool gz, int *num_v, int *num_c );
 void plog_series(int *choice);
 void set_lab_tit(variable *var);
 double *search_lab_tit_file(char *s,  char *t,int st, int en);
 double *find_data(int id_series);
+double max(double a, double b);
 int shrink_gnufile(void);
 int sort_labels_down(const void *a, const void *b);
 void show_eq(char *lab, int *choice);
@@ -237,6 +238,7 @@ file_counter=0;
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
 cmd( inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }" );
+cmd( inter, "disable_window \"\" m bbar l" );		// disable main window (Tk 8.6 only)
 cover_browser( "Analysis of Results...", "Analysis of Results window is open.", "Keep the Lsd Browser window minimized. \nUsing it while Analysis of Results is open\ncan lead to unexpected behavior." );
 cmd( inter, "wm iconify ." );
 
@@ -562,6 +564,7 @@ cmd(inter, "bind .da <KeyPress-Delete> {}");
 delete[] vs;
   cmd( inter, "destroytop .da" );
   cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
+  cmd( inter, "enable_window \"\" m bbar l" );	// enable main window (Tk 8.6 only)
   cmd( inter, "if [ winfo exists .model_str ] { wm deiconify .model_str }" );
   cmd( inter, "wm deiconify ." );
   Tcl_UnlinkVar(inter, "minc");
@@ -1504,12 +1507,22 @@ if(*choice==5)
  } 
 if(*choice==1 || *choice==3)
  {
+	bool gz = false;
+#ifdef LIBZ
+	gzFile fz;
+	const char extRes[] = ".res .res.gz";
+	const char extTot[] = ".tot .tot.gz";
+#else
+	const char extRes[] = ".res";
+	const char extTot[] = ".tot";
+#endif 
  
-  cmd(inter, "set lab [tk_getOpenFile -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {.res}} {{Lsd Total Files} {.tot}} {{All Files} {*}} }]");
+  sprintf( msg, "set lab [tk_getOpenFile -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {%s}} {{Lsd Total Files} {%s}} {{All Files} {*}} }]", extRes, extTot );
+  cmd( inter, msg );
+  
   cmd(inter, "set choice [llength $lab]");
   if(*choice==0 )
    {//no file selected
-    //cmd(inter, "tk_messageBox -type ok -title -title Error -icon error -message \"No files matching pattern '$nfiles' found.\"");
     goto there; 
    }
   h=*choice;
@@ -1520,12 +1533,39 @@ if(*choice==1 || *choice==3)
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "datafile",0);
   strcpy(filename,app);
-  f=fopen(filename, "r");
+  
+#ifdef LIBZ
+  if ( strlen( filename ) > 3 && ! strcmp( &filename[ strlen( filename ) - 3 ], ".gz" ) )
+	  gz = true;
+#endif
+  
+  if ( ! gz )
+	f = fopen( filename, "rt" );
+  else
+  {
+#ifdef LIBZ
+	fz = gzopen( filename, "rt" );
+#endif
+  }
 
-  if(f!=NULL)
-   {fclose(f);
+  if ( ! gz && f != NULL )
+   {
+	fclose(f);
     file_counter++;
-    insert_data_file(&num_var, &num_c);
+    insert_data_file(gz, &num_var, &num_c);
+    sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
+    cmd(inter,msg);
+    sprintf(msg, ".da.f.com.ncas conf -text \"Cases = %d\"", num_c);
+    cmd(inter,msg);
+   }
+   
+  if ( gz && fz != NULL )
+   {
+#ifdef LIBZ
+	gzclose( fz );
+#endif
+    file_counter++;
+    insert_data_file(gz, &num_var, &num_c);
     sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
     cmd(inter,msg);
     sprintf(msg, ".da.f.com.ncas conf -text \"Cases = %d\"", num_c);
@@ -3654,42 +3694,117 @@ if(r->up==NULL)
 /***************************************************
 INSERT_data_FILE
 ****************************************************/
-void insert_data_file(int *num_v, int *num_c)
+void insert_data_file( bool gz, int *num_v, int *num_c )
 {
 FILE *f;
-char ch, label[60], tag[60], app_str[20];
+#ifdef LIBZ
+gzFile fz;
+#endif
+char ch, label[60], tag[60], app_str[20], *tok, *linbuf;
 int i, j, new_v, new_c;
+bool header = false;
+long linsiz = 1;
 store *app;
 
-f=fopen(filename, "r");
-if(f==NULL)
- plog("\nFile not opened");
-ch=(char)fgetc(f);
+if ( ! gz )
+	f = fopen( filename, "rt" );
+else
+{
+#ifdef LIBZ
+	fz = gzopen( filename, "rt" );
+#endif
+}
+
 new_v=0;
 if(*num_v==0)
   sprintf(msg, "\nResult data from file %s:\n", filename);
 else
   sprintf(msg, "\nAdditional data file number %d.\nResult data from file %s:\n", file_counter, filename);  
 plog(msg);
-//cmd(inter, "raise .log");
-//cmd(inter, "update");
-while(ch!='\n')
- if( (ch=(char)fgetc(f))=='\t')
-   new_v+=1;
-fclose(f);
+
+if ( ! gz )
+	ch = ( char ) fgetc( f );
+else
+{
+#ifdef LIBZ
+	ch = ( char ) gzgetc( fz );
+#endif
+}
+
+while( ch != '\n' )
+{
+	if ( ! gz )
+		ch = ( char ) fgetc( f );
+	else
+	{
+#ifdef LIBZ
+		ch = ( char ) gzgetc( fz );
+#endif
+	}
+	if ( ch == '\t' )
+	   new_v += 1;
+   
+	if ( ch == '(' )		// check for header-less .tot files
+		header = true;
+	
+	linsiz++;				// count line size
+}
+
+if ( ! header )
+{
+	plog( "\nError: invalid header, aborting file load.\nCheck if '.tot' files where created with the -g option.\n" );
+	goto end;
+}
+
+if ( ! gz )
+	fclose( f );
+else
+{
+#ifdef LIBZ
+	gzclose( fz );
+#endif
+}
+
 sprintf(msg, "- %d Variables\n",  new_v);
 plog(msg);
 cmd(inter, "update");
-f=fopen(filename, "r");
+
+if ( ! gz )
+	f = fopen( filename, "rt" );
+else
+{
+#ifdef LIBZ
+	fz = gzopen( filename, "rt" );
+#endif
+}
 
 new_c=-1;
-while(ch!=EOF)
- if( (ch=(char)fgetc(f))=='\n')
-   new_c+=1;
-fclose(f);
+while( ch != EOF )
+{
+	if ( ! gz )
+		ch = ( char ) fgetc( f );
+	else
+	{
+#ifdef LIBZ
+		ch = ( char ) gzgetc( fz );
+#endif
+	}
+	if ( ch == '\n' )
+		new_c += 1;
+}
+
+if ( ! gz )
+	fclose( f );
+else
+{
+#ifdef LIBZ
+	gzclose( fz );
+#endif
+}
+
 sprintf(msg, "- %d Cases\nLoading...", new_c);
 plog(msg);
-cmd(inter, "update");
+
 if(*num_v==0)
  {
   vs=new store[new_v];
@@ -3705,15 +3820,49 @@ else
  delete[] vs;
  vs=app;
  }  
-f=fopen(filename, "r");
+
+if ( ! gz )
+	f = fopen( filename, "rt" );
+else
+{
+#ifdef LIBZ
+	fz = gzopen( filename, "rt" );
+#endif
+}
 
 if(*num_v>-1)
  sprintf(app_str, " (file=%d)",file_counter);
 else
  strcpy(app_str, "");
-for(i=*num_v; i<*num_v+new_v; i++)
- {
-  fscanf(f, "%s %s (%d %d)\t", vs[i].label, vs[i].tag, &(vs[i].start), &(vs[i].end));
+
+linsiz = max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
+linbuf = new char[ linsiz ];
+if ( linbuf == NULL )
+{
+	plog( "\nError: not enough memory or invalid format, aborting file load.\n" );
+	goto end;
+}
+
+// read header line
+if ( ! gz )
+	fgets( linbuf, linsiz, f );	// buffers one entire line
+else
+{
+#ifdef LIBZ
+	gzgets( fz, linbuf, linsiz );
+#endif
+}
+
+tok = strtok( linbuf , "\t" ); // prepares for parsing and get first one
+for ( i = *num_v; i < new_v + *num_v; ++i )
+{
+  if ( tok == NULL )
+  {
+	  plog( "\nError: invalid header, aborting file load.\n");
+	  goto end;
+  }
+  
+  sscanf( tok, "%s %s (%d %d)", vs[i].label, vs[i].tag, &( vs[i].start ), &( vs[i].end ) );	
   strcat(vs[i].label, "F");
   sprintf(msg, "%d_%s", file_counter, vs[i].tag);
   strcpy(vs[i].tag, msg);
@@ -3728,33 +3877,43 @@ for(i=*num_v; i<*num_v+new_v; i++)
    }
  cmd(inter, msg);
  vs[i].data=new double[new_c+2];
- }
+ 
+ tok=strtok( NULL, "\t" );		// get next token, if any
+}
 
-long linsiz=new_v*(DBL_DIG+4)+1;
-if(linsiz>INT_MAX)
- linsiz=INT_MAX;	// prevents too big buffers for 32-bit arch
-char *tok,*linbuf=new char[linsiz];
-const char *sep=" \t,;|";	// token separators are spaces, tabs, commas etc.
-
-for(j=0; j<=new_c; j++)
+// read data lines
+for(j=0; j<new_c; j++)
 {
- fgets(linbuf,linsiz,f);	// buffers one entire line
- tok=strtok(linbuf,sep); // prepares for parsing and get first one
- for(i=*num_v; i<new_v+*num_v; i++)
+	if(j==401)
+		plog("");
+	
+ if ( ! gz )
+	fgets( linbuf, linsiz, f );	// buffers one entire line
+ else
  {
-    //fscanf(f,"%lf",&(vs[i].data[j]));      // can't handle n/a's
-	if(tok==NULL)				// get to end of line too early
-	  break;
-	if(!strcmp(tok,nonavail))	// it's a non-available observation
-	  vs[i].data[j]=NAN;
+#ifdef LIBZ
+	gzgets( fz, linbuf, linsiz );
+#endif
+ }
+ 
+ tok = strtok( linbuf , "\t" ); // prepares for parsing and get first one
+ for ( i = *num_v; i < new_v + *num_v; ++i )
+ {
+	if ( tok == NULL )
+	{
+	  plog( "\nError: invalid data, aborting file load.\n" );
+	  *num_c += ( j > 0 ? j - 1 : 0 ) > *num_c ? ( j > 0 ? j - 1 : 0 ) : 0;
+	  goto end;
+	}
+  
+	if ( ! strcmp( tok, nonavail ) )	// it's a non-available observation
+		vs[ i ].data[ j ] = NAN;
 	else
-	  sscanf(tok,"%lf",&(vs[i].data[j]));
- 	tok=strtok(NULL,sep);		// get next token, if any
+		sscanf( tok,"%lf", &( vs[ i ].data[ j ] ) );
+	
+	tok=strtok( NULL, "\t" );		// get next token, if any
  }
 }
-fclose(f);
-
-plog( " Done\n" );
 
 *num_v+=new_v;
 new_c--;
@@ -3762,6 +3921,20 @@ if(new_c > *num_c)
  *num_c=new_c;
 if(new_c > max_c)
  max_c=new_c; 
+
+plog( " Done\n" );
+
+end:
+
+if ( ! gz )
+	fclose( f );
+else
+{
+#ifdef LIBZ
+	gzclose( fz );
+#endif
+}
+
 }
 
 /************************
