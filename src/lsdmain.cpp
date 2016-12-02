@@ -86,6 +86,12 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 Tcl_Interp *inter;
 #endif
 
+#ifdef LIBZ
+int dozip = 1;				// compressed results file flag
+#else
+int dozip = 0;
+#endif
+
 object *create( object *r);
 void run(object *r);
 void print_title(object *root);
@@ -156,7 +162,6 @@ char *exec_path = NULL;		// path of executable file
 char name_rep[400];
 char **tp;
 int struct_loaded=0;
-int posiziona;
 int running;
 int actual_steps=0;
 int counter;
@@ -168,14 +173,15 @@ int findex, fend;
 int batch_sequential=0;
 char *sens_file=NULL;		// current sensitivity analysis file
 long findexSens=0;			// index to sequential sensitivity configuration filenames
+bool scroll;				// scroll state in current runtime plot
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 bool redrawRoot = true;		// control for redrawing root window (.)
+
 // flags for some program defaults
 int seed = 1;				// random number generator initial seed
 int max_step = 100;			// default number of simulation runs
 int no_res = 0;				// produce intermediary .res files flag
-int dozip = 1;				// compressed results file flag
 int overwConf = 1;			// overwrite configuration on run flag
 int ignore_eq_file = 1;		// flag to ignore equation file in configuration file
 int add_to_tot = 1;			// flag to append results to existing totals file
@@ -588,34 +594,32 @@ double app=0;
 clock_t start, end;
 
 #ifndef NO_WINDOW
-Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 Tcl_LinkVar(inter, "done_in", (char *) &done_in, TCL_LINK_INT);
+Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 #endif
 
 done_in=done=0;
 quit=0;
-
  
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
-Tcl_LinkVar(inter, "posiziona", (char *) &posiziona, TCL_LINK_INT);
 cmd( inter, "disable_window \"\" m bbar l" );		// disable main window (Tk 8.6 only)
-cover_browser( "Running...", "The simulation is being executed.", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop': stops the simulation.\n'Fast': accelerates the simulation by hiding information.\n'Observe': presents more run time information.\n'Debug': interrupts the simulation at a flagged variable." );
+cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  interrupts the simulation at a flagged variable" );
 #else
-    sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
-    plog(msg);
-   	f=fopen(struct_file, "r");
-    root->load_struct(f);
-	  struct_loaded=1;
-    fscanf(f, "%s", msg); //should be DATA
-	  root->load_param(struct_file, 1,f);
-    fscanf(f, "%s",msg); //should be SIM_NUM 
-	  fscanf(f, "%d", &sim_num);
-    fscanf(f, "%s",msg); //should be SEED
-	  fscanf(f, "%d", &seed);
-    fscanf(f, "%s",msg); //should be MAX_STEP
-    fscanf(f, "%d", &max_step);
-    fclose(f);
+sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
+plog(msg);
+f=fopen(struct_file, "r");
+root->load_struct(f);
+struct_loaded=1;
+fscanf(f, "%s", msg); //should be DATA
+root->load_param(struct_file, 1,f);
+fscanf(f, "%s",msg); //should be SIM_NUM 
+fscanf(f, "%d", &sim_num);
+fscanf(f, "%s",msg); //should be SEED
+fscanf(f, "%d", &seed);
+fscanf(f, "%s",msg); //should be MAX_STEP
+fscanf(f, "%d", &max_step);
+fclose(f);
 #endif
 
 for(i=1; i<=sim_num && quit!=2; i++)
@@ -624,8 +628,6 @@ cur_sim = i;	 //Update the global variable holding information on the current ru
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
 #ifndef NO_WINDOW
 prepare_plot(root, i);
-if(done_in==2 && cur_plt>0)
- cmd(inter, "if {[winfo exists $activeplot]==1} {wm iconify $activeplot} {}");
 #endif
 sprintf(msg, "\nSimulation %d running...", i);
 plog(msg);
@@ -681,61 +683,47 @@ init_random(seed);
 seed++;
 stack=0;
 
-posiziona=0;
-running=1;
-actual_steps=0;
+scroll = false;
+done_in = 0;
+debug_flag = 0;
+running = 1;
+actual_steps = 0;
 start = clock();
 
 for(t=1; quit==0 && t<=max_step;t++ )
- {
+{
 #ifndef NO_WINDOW 
-  if(when_debug==t)
-  {
-    debug_flag=1;
-	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
-  }
+if(when_debug==t)
+{
+  debug_flag=1;
+  cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+}
 #endif
-  cur_plt=0;
-  root->update();
+
+cur_plt=0;
+root->update();
 
 #ifndef NO_WINDOW 
-switch(done_in)
+switch( done_in )
 {
 case 0:
-
  if( ! fast )
   {
-  if(cur_plt==0)
-   {sprintf(msg,"\nSim. %d step %d done",i,t);
-	 plog(msg);
-   }
-  else
-   {switch(posiziona)
-      {
-      
-      case 2: 
-        sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}",i);
-        cmd(inter, msg);
-       
-      break;
-       
-      case 1:  
-       
-       
-       sprintf(msg, "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step);
-       cmd(inter, msg);
-       sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i);
-       cmd(inter, msg);
-       cmd(inter, "set posiziona $oldposiziona");
-       break;
-      default:
-      break; 
-      }
-   }
-   }
+	if(cur_plt==0)
+	{
+		sprintf(msg,"\nSim. %d step %d done",i,t);
+		plog(msg);
+	}
+  }
 break;
 
-case 2:
+case 1:			// Stop button in Log window / s/S key in Runtime window
+  sprintf(msg, "\nSimulation stopped at t = %d", t);
+  plog(msg);
+  quit=2;
+break;
+
+case 2:			// Fast button in Log window / f/F key in Runtime window
  fast = true;
  debug_flag=0;
  cmd(inter, "set a [split [winfo children .] ]");
@@ -744,77 +732,80 @@ case 2:
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
  cmd(inter, msg);
- 
- done_in=0;
- break;
+break;
 
-case 4:
+case 3:			// Debug button in Log window / d/D key in Runtime window
+ debug_flag=1;
+ cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+break;
+
+case 4:			// Observe button in Log window / o/O key in Runtime window
  fast = false;
  cmd(inter, "set a [split [winfo children .] ]");
- cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i}}");
+ cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}");
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}",i, i);
  cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}",i, i);
  cmd(inter, msg);
-
- done_in=0;
- break;
+break;
  
-case 1:
-  sprintf(msg, "\nSimulation stopped at t = %d", t);
-  plog(msg);
-  quit=2;
-  done_in=0;
-break;
-
-case 3:
-debug_flag=1;
-cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
-done_in=0;
-break;
-
-case 35:
-myexit(11);
-break;
-
-case 6:
-
-Tcl_LinkVar(inter, "app_refresh", (char *) &app, TCL_LINK_DOUBLE);
-
-cmd(inter, "set app_refresh $refresh");
-Tcl_UnlinkVar(inter, "done");
-if(app<2 && app > 1)
- refresh=app;
-done_in=0;
-break; 
-
 // plot window DELETE_WINDOW button handler
 case 5:
- cmd(inter, " if { [winfo exists .plt%d] == 1} {wm deiconify .plt%d} {}");
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}",i, i);
- cmd(inter, msg);
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
- cmd(inter, msg);
  sprintf(msg, "if { [winfo exist .plt%d]} {destroy .plt%d} {}", i, i);
  cmd(inter, msg);
  sprintf(msg, "\nSimulation stopped at t = %d", t);
  plog(msg);
  quit=2;
- done_in=0;
+break;
+
+case 6:
+ Tcl_LinkVar(inter, "app_refresh", (char *) &app, TCL_LINK_DOUBLE);
+ cmd(inter, "set app_refresh $refresh");
+ Tcl_UnlinkVar(inter, "app_refresh");
+ if(app<2 && app > 1)
+  refresh=app;
+break; 
+
+// runtime plot events
+case 7:  		// Center button
+ sprintf(msg, "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step);
+ cmd(inter, msg);
+ sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i);
+ cmd(inter, msg);
+break;
+
+case 8: 		// Scroll checkbox
+ scroll = ! scroll;
+break;
+
+case 35:
+ myexit(11);
+break;
+
+default:
 break;
 }
 
+// perform scrolling if enabled
+if ( scroll )
+{
+	sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}",i);
+	cmd(inter, msg);
+}
+
+done_in = 0;
 cmd(inter, "update");
 #endif
- }//end of for t
+}//end of for t
 
 actual_steps=t-1;
 unsavedData = true;				// flag unsaved simulation results
-
 running=0;
+end=clock();
+
 if(quit==1) //For multiple simulation runs you need to reset quit
  quit=0;
-end=clock();
+
 if(strlen(path)>0 || no_window==1)
   sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
 else
@@ -822,9 +813,13 @@ else
  plog(msg);
 
 #ifndef NO_WINDOW 
-cmd(inter, "update");
+cmd( inter, "update" );
 // allow for run time plot window destruction
-cmd(inter, "if {[info exists activeplot] == 1} {if {[winfo exists $activeplot] == 1} {wm protocol $activeplot WM_DELETE_WINDOW \"\"}}");
+cmd( inter, "if [ winfo exists $activeplot ] { wm protocol $activeplot WM_DELETE_WINDOW \"\" } }" );
+sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.go conf -state disabled }", i, i );
+cmd( inter, msg);
+sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.shift conf -state disabled }", i, i );
+cmd( inter, msg);
 #endif
 
 close_sim();
@@ -932,7 +927,6 @@ delete rf;										// close file and delete object
 cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
 cmd( inter, "enable_window \"\" m bbar l" );	// enable main window (Tk 8.6 only)
 Tcl_UnlinkVar(inter, "done_in");
-Tcl_UnlinkVar(inter, "posiziona");
 #endif
 quit=0;
 }
@@ -1183,13 +1177,13 @@ sprintf( msg, "label .t.l1 -font {-weight bold} -text \"%s\"", text1 );
 cmd( inter, msg );
 sprintf( msg, "label .t.l2 -text \"\n%s\"", text2 );
 cmd( inter, msg );
-cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled.\"" );
+cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
 sprintf( msg, "label .t.l4 -justify left -text \"\n%s\"", text3 );
 cmd( inter, msg );
 cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 cmd( inter, "showtop .t coverW no no no" );
-cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; lower .log . }" );
-cmd( inter, "raise .log; focus -force .log; update idletasks" );
+cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; raise .log; focus .log }" );
+cmd( inter, "update idletasks" );
 }
 #endif
 

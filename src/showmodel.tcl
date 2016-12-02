@@ -11,7 +11,6 @@
 # to the number of the list chosen and the global lists containing the references
 # in the group selected
 
-
 lappend lmn
 lappend lver
 lappend lmd
@@ -24,8 +23,6 @@ set memory 0
 
 proc showmodel pippo {
 global lmn lmd ldn lrn group result choiceSM lver modelgroup RootLsd memory
-
-
 
 unset lmn
 lappend lmn
@@ -65,15 +62,12 @@ text .l.t.text -wrap word -font {Times 12 normal} -width 60 -relief sunken -yscr
 pack .l.t.yscroll -side right -fill y
 pack .l.t.text -expand yes -fill both
 
-
-
 pack .l.l.tit
 pack .l.l.vs -side right -fill y
 pack .l.l.l -expand yes -fill both
 pack .l.l .l.t -expand yes -fill both -side left
 
 bind .l.l.l <1> {.l.l.l selection set [.l.l.l nearest %y]; .l.t.text delete 0.0 end; .l.t.text insert end "[lindex $lmd [.l.l.l nearest %y] ]"}
-
 
 set curdir [pwd]
 if { [ file isdirectory $pippo ] != 1 } {
@@ -116,18 +110,14 @@ foreach i $dir {
       .l.l.l insert end "GROUP: $app"
       
      } {}
-    
-   
    }
    } {}
    
  }
 
-
 .l.t.text conf -state normal
 .l.t.text insert end "[lindex $lmd 0]"
 .l.t.text conf -state disable
-
 .l.l.l selection set 0
 
 cd $curdir
@@ -142,16 +132,13 @@ $m add command -label "Select Model" -underline 0 -accelerator Enter -command {s
 $m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { destroytop .l; set memory 0; set choiceSM 14} 
 $m add command -label Quit -underline 0 -accelerator Escape -command {set result -1; destroytop .l; set memory 0; set choiceSM 2 }
 
-
 set m .l.m.edit 
 menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Edit -menu $m -underline 0
-
 $m add command -label "Edit Name/Description..." -underline 0 -command {edit [.l.l.l curselection] }
 $m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {copy [.l.l.l curselection] }
 if { $memory == 0 } {$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {paste [.l.l.l curselection] } } {$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {paste [.l.l.l curselection] } }
 $m add command -label "Delete..." -underline 0 -accelerator Delete -command {delete [.l.l.l curselection] }
-
 
 set m .l.m.help 
 menu $m -tearoff 0 -relief groove -bd 2
@@ -184,9 +171,6 @@ bind .l <Up> {if { [.l.l.l curselection] > 0 } {set app [expr [.l.l.l curselecti
 bind .l <Down> {if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {set app [expr [.l.l.l curselection] + 1]; .l.l.l selection clear 0 end; .l.l.l selection set $app; .l.t.text conf -state normal;.l.t.text delete 0.0 end;  .l.t.text insert end "[lindex $lmd $app ]"; .l.t.text conf -state disable } {} }
 
 }
-
-
-
 
 
 #################################
@@ -248,6 +232,7 @@ if { $answer == "yes" } {
  }
 }
 
+
 #################################
 # Edit the model/group name and description
 ################################
@@ -292,7 +277,6 @@ showtop .l.e centerS
 }
 
 
-
 #################################
 # Paste a previously copied model/group
 ################################
@@ -300,12 +284,6 @@ proc paste i {
 global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM
 
 set pastedir [lindex $lrn $i]
-
-# with the line below works!
-#puts here
-
-
-
 
 newtop .l.p "Paste Model" { .l.b.esc invoke }
 
@@ -342,7 +320,6 @@ button .l.p.b.ok -width -9 -text Ok -command {set choiceSM 1}
 button .l.p.b.esc -width -9 -text Cancel -command {set choiceSM 2}
 pack .l.p.b.ok .l.p.b.esc -padx 10 -pady 10 -side left
 pack .l.p.b
-
 
 showtop .l.p centerS
 

@@ -151,7 +151,6 @@ extern object *root;
 extern char *simul_name;
 extern char name_rep[400];
 extern int seed;
-extern int done_in;
 extern char nonavail[];	// string for unavailable values
 extern char msg[];
 extern variable *cemetery;
@@ -239,7 +238,7 @@ Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
 cmd( inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }" );
 cmd( inter, "disable_window \"\" m bbar l" );		// disable main window (Tk 8.6 only)
-cover_browser( "Analysis of Results...", "Analysis of Results window is open.", "Keep the Lsd Browser window minimized. \nUsing it while Analysis of Results is open\ncan lead to unexpected behavior." );
+cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Keep the Lsd Browser window minimized. \nUsing it while Analysis of Results is open\ncan lead to unexpected behavior." );
 cmd( inter, "wm iconify ." );
 
 cmd( inter, "set da .da");
@@ -485,7 +484,7 @@ cmd(inter, "bind .da <Control-i> {set choice 34}; bind .da <Control-I> {set choi
 cmd( inter, "showtop .da overM 0 0 0");
 
 if(num_var==0)
-  cmd(inter, "tk_messageBox -type ok -title \"No Series\" -icon warning -message \"Apparently there are no series available from a recent simulation run.\\n\\nClick on button \'Add Series\' to select series to analyse from previously saved files or current state of the model. \\nIf you expected data from a simulation that are not available you probably forgot to select series to save, or set the objects containing them to be not computed.\"");  
+  cmd(inter, "tk_messageBox -type ok -title \"No Series Available\" -icon warning -message \"There are no series available.\\n\\nClick on button \'Add Series\' to load series from results files.\\n\\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"");  
 
 there :
 while(*choice==0)
@@ -566,7 +565,8 @@ delete[] vs;
   cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
   cmd( inter, "enable_window \"\" m bbar l" );	// enable main window (Tk 8.6 only)
   cmd( inter, "if [ winfo exists .model_str ] { wm deiconify .model_str }" );
-  cmd( inter, "wm deiconify ." );
+  cmd( inter, "wm deiconify .; raise .; focus -force ." );
+  cmd( inter, "update idletasks" );
   Tcl_UnlinkVar(inter, "minc");
   Tcl_UnlinkVar(inter, "maxc");
   Tcl_UnlinkVar(inter, "maxy");
@@ -645,7 +645,7 @@ case 34: //sort the selection in selected series list in inverse order
 case 36: //Print the data series in the log window
    
    plog_series(choice);
-   cmd(inter, "wm deiconify .log");
+   cmd(inter, "wm deiconify .log; raise .log; focus .log");
    cmd(inter, "raise .log .da");
    *choice=0;
    goto there;
@@ -1439,77 +1439,69 @@ case 24:
 /*
 Insert series not saved from the current model.
 */
-  i=0;
-
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
-cmd(inter, "toplevel .da.s");
-cmd(inter, "wm title .da.s \"Choose Data Source\"");
-cmd(inter, "wm transient .da.s .da");
-cmd(inter, "label .da.s.l -text \"Select the source of additional series\"");
-cmd(inter, "set bidi 0");
-cmd(inter, "frame .da.s.i -relief groove -bd 2");
-cmd(inter, "radiobutton .da.s.i.m -text \"Current model configuration\" -variable bidi -value 0");
-cmd(inter, "bind .da.s.i.m <Down> {set bidi 1; focus -force .da.s.i.f}");
+if ( *choice > 0 )
+{
+	cmd(inter, "toplevel .da.s");
+	cmd(inter, "wm title .da.s \"Choose Data Source\"");
+	cmd(inter, "wm transient .da.s .da");
+	cmd(inter, "label .da.s.l -text \"Source of additional series\"");
+	cmd(inter, "set bidi 4");
+	cmd(inter, "frame .da.s.i -relief groove -bd 2");
 
-cmd(inter, "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1");
-if(*choice>0)
-  cmd(inter, "bind .da.s.i.f <Down> {set bidi 5; focus -force .da.s.i.a}");
-cmd(inter, "bind .da.s.i.f <Up> {set bidi 0; focus -force .da.s.i.m}");
+	cmd(inter, "radiobutton .da.s.i.c -text \"Create one series from selected\" -variable bidi -value 4");
+	cmd(inter, "bind .da.s.i.c <Down> {set bidi 5; focus -force .da.s.i.a}");
+	cmd(inter, "radiobutton .da.s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
+	cmd(inter, "bind .da.s.i.a <Up> {set bidi 4; focus -force .da.s.i.c}");
+	cmd(inter, "bind .da.s.i.a <Down> {set bidi 1; focus -force .da.s.i.f}");
+	cmd(inter, "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1");
+	cmd(inter, "bind .da.s.i.f <Up> {set bidi 5; focus -force .da.s.i.a}");
 
+	cmd(inter, "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w");
+	cmd(inter, "pack .da.s.l .da.s.i");
 
-cmd(inter, "radiobutton .da.s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
-cmd(inter, "bind .da.s.i.a <Down> {set bidi 4; focus -force .da.s.i.c}");
-cmd(inter, "bind .da.s.i.a <Up> {set bidi 1; focus -force .da.s.i.f}");
+	cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
+	cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
+	cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
 
+	cmd(inter, "pack .da.s.i .da.s.ok .da.s.help .da.s.esc");
+	cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
+	cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
 
-cmd(inter, "radiobutton .da.s.i.c -text \"Create one serie from selected series\" -variable bidi -value 4");
-cmd(inter, "bind .da.s.i.c <Up> {set bidi 5; focus -force .da.s.i.a}");
+	cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
 
-if(*choice>0)
- cmd(inter, "pack .da.s.i.m .da.s.i.f .da.s.i.a .da.s.i.c -anchor w");
+	*choice=0;
+	while(*choice==0)
+	  Tcl_DoOneEvent(0);
+
+	cmd(inter, "destroy .da.s");
+
+	if(*choice==2)
+	 {*choice=0;
+	  goto there;
+	 }
+
+	cmd(inter, "set choice $bidi");
+	if(*choice==4)
+	 {
+	  *choice=0;
+	  create_series(choice);
+	 }
+	if(*choice==5)
+	 {
+	  *choice=0;
+	  create_maverag(choice);
+	 }
+	
+	*choice=0;
+}
 else
- cmd(inter, "pack .da.s.i.m .da.s.i.f  -anchor w");
+	*choice = 1;
 
-cmd(inter, "pack .da.s.l .da.s.i");
-cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
-cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
-
-cmd(inter, "pack .da.s.i .da.s.ok .da.s.help .da.s.esc");
-cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
-cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-
-*choice=0;
-cmd(inter, "focus -force .da.s.i.m");
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
-cmd(inter, "destroy .da.s");
-if(*choice==2)
- {*choice=0;
-  goto there;
- }
-
-cmd(inter, "set choice $bidi");
-if(*choice==4)
- {
-  *choice=0;
-  create_series(choice);
-  *choice=0;
-  goto there;
- }
-if(*choice==5)
- {
-  *choice=0;
-  create_maverag(choice);
-  *choice=0;
-  goto there;
- } 
-if(*choice==1 || *choice==3)
- {
+if(*choice==1)
+{
 	bool gz = false;
 #ifdef LIBZ
-	gzFile fz;
 	const char extRes[] = ".res .res.gz";
 	const char extTot[] = ".tot .tot.gz";
 #else
@@ -1539,16 +1531,9 @@ if(*choice==1 || *choice==3)
 	  gz = true;
 #endif
   
-  if ( ! gz )
-	f = fopen( filename, "rt" );
-  else
-  {
-#ifdef LIBZ
-	fz = gzopen( filename, "rt" );
-#endif
-  }
+  f = fopen( filename, "r" );
 
-  if ( ! gz && f != NULL )
+  if ( f != NULL )
    {
 	fclose(f);
     file_counter++;
@@ -1558,62 +1543,17 @@ if(*choice==1 || *choice==3)
     sprintf(msg, ".da.f.com.ncas conf -text \"Cases = %d\"", num_c);
     cmd(inter,msg);
    }
-   
-  if ( gz && fz != NULL )
+   else
    {
-#ifdef LIBZ
-	gzclose( fz );
-#endif
-    file_counter++;
-    insert_data_file(gz, &num_var, &num_c);
-    sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
-    cmd(inter,msg);
-    sprintf(msg, ".da.f.com.ncas conf -text \"Cases = %d\"", num_c);
-    cmd(inter,msg);
+		sprintf( msg, "\nError: could not open file: %s\n", filename );
+		plog( msg );
    }
   }
-  *choice=0;
-  goto there;
- 
- }
-cmd(inter, "toplevel .da.s");
-cmd(inter, "wm title .da.s \"Series Selection\"");
-cmd(inter, "wm transient .da.s .da");
-cmd(inter, "frame .da.s.i -relief groove -bd 2");
-cmd(inter, "label .da.s.i.l -text \"Type the label of the series to insert (self-completion)\"");
-cmd(inter, "set bidi \"\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
-cmd(inter, "pack .da.s.i.l .da.s.i.e");
-cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
+}
 
-cmd(inter, "pack .da.s.i .da.s.ok .da.s.esc");
-cmd(inter, "bind .da.s.i.e <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
-cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-
-*choice=0;
-cmd(inter, "focus .da.s.i.e");
-cmd(inter, "bind .da.s.i.e <KeyRelease> {if { %N < 256} { set b [.da.s.i.e index insert]; set c [.da.s.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .da.s.i.e delete 0 end; .da.s.i.e insert 0 $d; .da.s.i.e index $b; .da.s.i.e selection range $b end } { } } { } }");
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
-cmd(inter, "destroy .da.s");
-if(*choice==2)
- {*choice=0;
-  goto there;
- }
-cmd(inter, "toplevel .da.s");
-cmd(inter, "wm transient .da.s .da");
-cmd(inter, "label .da.s.l -text \"Inserting new series\"");
-cmd(inter, "pack .da.s.l");
-app=(char *)Tcl_GetVar(inter, "bidi",0);
-strcpy(lab,app);
-insert_data_nosave(root, lab, &i);
-cmd(inter, "destroy .da.s");
-cmd(inter, "set tit [.da.f.vars.ch.v get 0]");
-cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
 *choice=0;
 goto there;
+
 
 case 30:
 /*

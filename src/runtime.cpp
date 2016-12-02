@@ -119,7 +119,6 @@ old_val=new double[i];
 i=0;
 assign(r, &i, lab);
 init_plot(i, id_sim);
-
 }
 
 
@@ -207,11 +206,17 @@ cmd(inter, "set posYrt [expr $posYstr + $shift]");
 cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
 sprintf(msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim);
 cmd(inter,msg);
+sprintf( msg,".plt%d", id_sim );
+set_shortcuts( msg );
+cmd( inter, "bind $activeplot <s> { set done_in 1 }; bind $activeplot <S> { set done_in 1 }" );
+cmd( inter, "bind $activeplot <f> { set done_in 2 }; bind $activeplot <F> { set done_in 2 }" );
+cmd( inter, "bind $activeplot <d> { set done_in 3 }; bind $activeplot <D> { set done_in 3 }" );
+cmd( inter, "bind $activeplot <o> { set done_in 4 }; bind $activeplot <O> { set done_in 4 }" );
+
 cmd(inter, "frame $activeplot.c");
 cmd(inter, "frame $activeplot.c.c  ");
 cmd(inter, "set p $activeplot.c.c.cn");
 cmd(inter, "scrollbar $activeplot.c.c.hscroll -orient horiz -command \"$p xview\"");
-
 sprintf(msg, "canvas $p -width 500 -height 330 -relief sunken -background white -bd 2 -scrollregion {0 0 %d 400} -xscrollcommand \"$activeplot.c.c.hscroll set\"", max_step);
 cmd(inter, msg);
 cmd(inter, "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x");
@@ -221,9 +226,7 @@ sprintf(msg, "$p create line 0 151 %d 151 -fill grey60",(int)((double) max_step*
 cmd(inter, msg);
 cmd(inter, "pack $p -expand yes -fill both -anchor w");
 cmd(inter, "$p xview moveto 0");
-//cmd(inter, "canvas $activeplot.c.yscale -width 70 -height 330");
-cmd(inter, "canvas $activeplot.c.yscale -width 70 -height 370");
-//cmd(inter, "pack $activeplot.c.yscale $activeplot.c.c -anchor w -side left -fill both -expand yes");
+cmd(inter, "canvas $activeplot.c.yscale -width 80 -height 370");
 cmd(inter, "pack $activeplot.c.yscale -anchor w -side left -anchor n -expand no");
 cmd(inter, "pack $activeplot.c.c -anchor w -side left -fill both -expand yes");
 cmd(inter, "pack $activeplot.c -anchor w -expand yes -fill both");
@@ -235,27 +238,25 @@ for(i=0; i<(int)((double)max_step*plot_step); i+=100)
   cmd(inter, msg);
 
  }
-cmd(inter, "$activeplot.c.yscale create line 70 4 70 303");
-cmd(inter, "$activeplot.c.yscale create line 65 4 70 4");
-cmd(inter, "$activeplot.c.yscale create line 65 150 70 150");
-cmd(inter, "$activeplot.c.yscale create line 65 302 70 302");
+cmd(inter, "$activeplot.c.yscale create line 80 4 80 303");
+cmd(inter, "$activeplot.c.yscale create line 75 4 80 4");
+cmd(inter, "$activeplot.c.yscale create line 75 150 80 150");
+cmd(inter, "$activeplot.c.yscale create line 75 302 80 302");
 cmd(inter, "$activeplot.c.yscale create text 2 2 -font {{MS Times New Roman} 10} -anchor nw -text \"\" -tag ymax");
 cmd(inter, "$activeplot.c.yscale create text 2 150 -font {{MS Times New Roman} 10} -anchor w -text \"\" -tag medy");
-cmd(inter, "$activeplot.c.yscale create text 2 300 -font {{MS Times New Roman} 10} -anchor sw -text \"\" -tag ymin");
-cmd(inter, "set posiziona 0");
-cmd(inter, "button $activeplot.c.yscale.go -width -9 -text \"Center\" -command {set oldposiziona $posiziona; set posiziona 1}");
+cmd(inter, "$activeplot.c.yscale create text 2 305 -font {{MS Times New Roman} 10} -anchor sw -text \"\" -tag ymin");
+cmd(inter, "set scrollB 0");
+cmd(inter, "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set done_in 8 }");
+cmd(inter, "button $activeplot.c.yscale.go -width -7 -text Center -command {set done_in 7}");
 cmd(inter, "$activeplot.c.c.cn conf -xscrollincrement 1");
-cmd(inter, "bind $activeplot.c.yscale.go <3> {set posiziona 2}");
-cmd(inter, "pack $activeplot.c.yscale.go -anchor nw -expand yes -fill both");
-cmd(inter, "checkbutton $activeplot.c.yscale.shift -text Scroll -variable posiziona -onvalue 2");
-cmd(inter, "pack $activeplot.c.yscale.shift -anchor nw -expand yes -fill both");
 
-cmd(inter, "$activeplot.c.yscale create window 3 310 -window $activeplot.c.yscale.go -anchor nw");
-cmd(inter, "$activeplot.c.yscale create window 3 340 -window $activeplot.c.yscale.shift -anchor nw");
+cmd(inter, "$activeplot.c.yscale create window 42 313 -window $activeplot.c.yscale.shift -anchor n");
+cmd(inter, "$activeplot.c.yscale create window 42 343 -window $activeplot.c.yscale.go -anchor n");
 cmd(inter, "canvas $activeplot.fond -height 50");
 cmd(inter, "pack $activeplot.fond -expand yes -fill both");
-for(i=0, j=0, k=0; i<num; i++)
- {sprintf(msg, "$activeplot.fond create text %d %d -font {{MS Times New Roman} 10} -anchor nw -text %s -fill $c%d",4+j*100, k*12, tp[i], i);
+for ( i = 0, j = 0, k = 0; i < ( num < 18 ? num : 18 ); ++i )
+ {
+  sprintf( msg, "$activeplot.fond create text %d %d -font {{MS Times New Roman} 10} -anchor nw -text %s -fill $c%d", 5 + j * 100, k * 16, tp[i], i );
   cmd(inter, msg);
   if(j<5)
 	j++;
@@ -264,8 +265,6 @@ for(i=0, j=0, k=0; i<num; i++)
 	 j=0;
 	}
  }
-sprintf( msg,".plt%d", id_sim );
-set_shortcuts( msg );
 }
 
 /**************************************
@@ -294,11 +293,11 @@ if(ymax==ymin) //Very initial setting
 // they are supposed to grow
     }
 
-	sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.5g", ymax);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.4g", ymax);
 	cmd(inter, msg);
-	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.5g", ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.4g", ymin);
 	cmd(inter, msg);
-	sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin);
 	cmd(inter, msg);
 
  }
@@ -312,9 +311,9 @@ if(v->val[0]>=ymax)
   sprintf( msg, "$activeplot.c.c.cn scale punto 0 300 1 %lf", scale  < 0.01 ? 0.01 : scale );
   cmd(inter, msg);
   ymax=v->val[0]*step;
-  sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.5g", ymax);
+  sprintf(msg, "$activeplot.c.yscale itemconf ymax -text %.4g", ymax);
   cmd(inter, msg);
-  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
+  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin);
   cmd(inter, msg);
 
  }
@@ -330,9 +329,9 @@ if(v->val[0]<=ymin)
   sprintf( msg, "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale );
   cmd(inter, msg);
   ymin=value;
-	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.5g", ymin);
+	sprintf(msg, "$activeplot.c.yscale itemconf ymin -text %.4g", ymin);
   cmd(inter, msg);
-  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.5g", (ymax-ymin)/2+ymin);
+  sprintf(msg, "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin);
   cmd(inter, msg);
 
  }

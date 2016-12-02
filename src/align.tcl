@@ -107,6 +107,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 	update
 	wm deiconify $w
 	raise $w
+	focus $w
 	update 
 }
 
@@ -158,6 +159,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	wm deiconify $w
 	raise $w
+	focus $w
 	update
 #	plog "\nshowtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, pos:$pos)" 
 }
@@ -182,9 +184,9 @@ proc destroytop w {
 		}
 		# handle different window default focus on destroy
 		if [ info exists defaultFocus ] {
-			focus -force $defaultFocus
+			focus $defaultFocus
 		} {
-			focus -force [ winfo parent $w ]
+			focus [ winfo parent $w ]
 		}
 		destroy $w
 		update

@@ -127,7 +127,7 @@ DEB
 ********************************************/
 int deb(object *r, object *c,  char const *lab, double *res)
 {
-    const char *bah;
+const char *bah;
 variable *cv, *cv1;
 char ch[100], *ch1;
 object *cur, *cur1, *cur2;
@@ -140,7 +140,7 @@ bridge *cb, *cb1;
 
 Tcl_SetVar( inter, "lab", lab, 0 );
 cmd( inter, "set deb .deb" );
-sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\" }", unsaved_change() ? "*" : " ", simul_name );
+sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated 1 }", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, msg );
 
 // avoid redrawing the menu if it already exists and is configured
@@ -234,7 +234,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd(inter, "pack .deb.b -side right");
 }
 
-cmd( inter, "if [ string equal $lab \"\" ] { showtop .deb topleftW } { showtop .deb topleftW 0 0 0 }" );
+cmd( inter, "if $justCreated { if [ string equal $lab \"\" ] { showtop .deb topleftW } { showtop .deb topleftW 0 0 0 }; set justCreated 0 }" );
 
 app_res=*res;
 Tcl_LinkVar(inter, "value", (char *) &app_res, TCL_LINK_DOUBLE);

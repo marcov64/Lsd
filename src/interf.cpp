@@ -134,6 +134,7 @@ void edit_data(object *root, int *choice, char *obj_name);
 void clean_debug(object *n);
 void clean_save(object *n);
 void show_save(object *n);
+void count_save( object *n, int *count );
 void show_initial(object *n);
 void show_observe(object *n);
 void set_shortcuts( const char *window );
@@ -204,7 +205,6 @@ extern int struct_loaded;
 extern char *path;
 extern char *equation_name;
 extern char name_rep[];
-extern int debug_flag;
 extern int stackinfo_flag;
 extern int t;
 extern int optimized;
@@ -313,7 +313,7 @@ while(choice!=1)
 		show_graph(cr);
 		if(message_logged==1)
 		{
-			cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log }" );
+			cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; raise .log; focus .log }" );
 			cmd( inter, "raise .log; focus -force .log; update idletasks" );
 			message_logged=0;
 		}    
@@ -718,7 +718,7 @@ cmd( inter, "$w add command -label \"Change Element...\" -command { if { ! [ cat
 cmd(inter, "$w add command -label \"Change Object...\" -command {set choice 6} -underline 7");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Create Auto Descriptions\" -command {set choice 43} -underline 7");
-cmd(inter, "$w add command -label \"Create Model Report...\" -command {set choice 36} -underline 7 -accelerator Ctrl+C");
+cmd(inter, "$w add command -label \"Create Model Report...\" -command {set choice 36} -underline 7");
 cmd(inter, "$w add command -label \"Create LaTex report\" -command {set choice 57} -underline 9");
 
 cmd(inter, "$w add separator");
@@ -2360,8 +2360,25 @@ break;
 //Exit the browser and run the simulation
 case 1:
 
-if(struct_loaded==0)
- break;
+if ( struct_loaded == 0 )
+{
+	cmd( inter, "tk_messageBox -type ok -icon error -title Run -message \"There is no configuration loaded.\\n\\nPlease load or create one before trying run the simulation.\"");
+	break;
+}
+
+// warn about no variable being saved
+for ( n = r; n->up != NULL; n = n->up );
+i = 0;
+count_save( n, &i );
+if ( i == 0 )
+{
+	cmd( inter, "set answer [ tk_messageBox -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved.\n\nIf you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
+	if( *choice == 2 )
+	{
+		*choice=0;
+		break;
+	}
+}
 
 // save the current object & cursor position for quick reload
 strcpy( lastObj, r->label );
@@ -2972,9 +2989,17 @@ break;
 //Show variables to be saved
 case 39:
 
-for(n=r; n->up!=NULL; n=n->up);
-plog("\n\nVariables and parameters saved:\n");
-show_save(n);
+for ( n = r; n->up != NULL; n = n->up );
+i = 0;
+count_save( n, &i );
+if ( i == 0 )
+	plog( " \nNo variable or parameter saved." );
+else
+{
+	sprintf( msg, "\n\nVariables and parameters saved (%d):\n", i );
+	plog( msg );
+	show_save( n );
+}
 
 break;
 
@@ -4804,21 +4829,25 @@ variable *cv;
 object *co;
 bridge *cb;
 
-int app;
 for(cv=n->v; cv!=NULL; cv=cv->next)
- {if(cv->save==1)
+ {
+  if ( cv->save == 1 || cv->savei == 1 )
   {
    if(cv->param==1)
     sprintf(msg, "Object: %s \tParam:\t", n->label);
    else
     sprintf(msg, "Object: %s \tVar:\t", n->label);
+   if ( cv->savei == 1 )
+   {
+	if ( cv->save == 1 )
+	   strcat( msg, " (memory and disk)" );
+    else
+	   strcat( msg, " (disk only)" );
+   }
    plog(msg);
-
-   cmd(inter, "");
    sprintf(msg, ".log.text.text.internal insert end \"%s\" highlight", cv->label);
    cmd(inter, msg);
    plog("\n");
-
   }
  }
 
@@ -4832,6 +4861,29 @@ for(cb=n->b; cb!=NULL; cb=cb->next)
  }
 }
 
+
+/****************************************************
+COUNT_SAVE
+****************************************************/
+void count_save( object *n, int *count )
+{
+variable *cv;
+object *co;
+bridge *cb;
+
+for ( cv = n->v; cv!=NULL; cv=cv->next )
+	if ( cv->save == 1 || cv->savei == 1 )
+		( *count )++;
+
+for ( cb = n->b; cb != NULL; cb = cb->next )
+{
+	if ( cb->head == NULL )
+		co = blueprint->search( cb->blabel );
+	else
+		co = cb->head; 
+	count_save( co, count );
+ }
+}
 
 
 /****************************************************
@@ -5061,8 +5113,6 @@ void set_shortcuts( const char *window )
 	sprintf( command, "bind %s <Control-g> {set choice 30}; bind %s <Control-G> {set choice 30}", window, window );
 	cmd( inter, command );
 	sprintf( command, "bind %s <Control-b> {set choice 34}; bind %s <Control-B> {set choice 34}", window, window );
-	cmd( inter, command );
-	sprintf( command, "bind %s <Control-c> {set choice 36}; bind %s <Control-C> {set choice 36}", window, window );
 	cmd( inter, command );
 	sprintf( command, "bind %s <Control-z> {set choice 37}; bind %s <Control-Z> {set choice 37}", window, window );
 	cmd( inter, command );
