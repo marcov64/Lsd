@@ -2152,8 +2152,8 @@ cmd(inter, msg);
 
 cmd(inter, "set lat_update 1");
 cmd(inter, "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }");
-cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
-cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
+cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -parent .lat -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
+cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -parent .lat -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
 
 char init_color_string[32];		// the final string to be used to define tk color to use
 
@@ -2343,7 +2343,7 @@ char lab[200];
 f=fopen("makefile", "r");
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nCannot upload the equation file.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Cannot upload the equation file.\"");
   return;
  }
 fscanf(f, "%s", lab);
@@ -2351,7 +2351,7 @@ while(strncmp(lab, "FUN=", 4) && fscanf(f, "%s", lab)!=EOF);
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in LMM menu Model.\"");
+  cmd(inter, "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in LMM menu Model.\"");
   return;
  }
 

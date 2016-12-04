@@ -157,7 +157,6 @@ if((res=Tk_Init(app))!=TCL_OK)
   exit(2);
  }
 
-//cmd(app, "tk_messageBox -type ok -message \"[lindex [array get env PATH] 1]\"");
 return app;
 }
 
@@ -193,7 +192,7 @@ if(code!=TCL_OK && strstr(cm,(char*)"exec make")==NULL) // don't log model compi
   fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
   fclose(f);
 #ifdef SHOW_TK_ERR
-  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message {Tcl/Tk error.\n\nPlease send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s}", cm, Tcl_GetStringResult( inter ) );
+  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Please send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s\"", cm, Tcl_GetStringResult( inter ) );
   cmd(inter, msg);
 #endif
  }
@@ -328,8 +327,7 @@ if ( choice != 1 )
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}");
 if(choice==1)
  {
- cmd(inter, "wm iconify .");
- cmd(inter, "tk_messageBox -icon error -title \"Installation Error\" -type ok -message \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd model.\n\nThe Lsd directory must be located where there are no spaces in the full path name.\n\nMove all the Lsd directory in another directory.\n\nIf exists, delete the 'system_options.txt' file from the \\src directory. \"");
+ cmd(inter, "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd model.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\"");
  exit(4);
  
  }
@@ -371,7 +369,7 @@ cmd(inter, "set alignMode \"LMM\"");
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }");
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( inter, "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Some critical Tcl files ($choice) are missing or corrupted.\\n\\nPlease check your instalation and reinstall Lsd if required.\\n\\nLsd is aborting now.\" }" );
+cmd( inter, "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Files missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	exit( 10 + choice );
 
@@ -495,7 +493,7 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}");
 
 
-sprintf( msg, "$w add command -label \"About LMM...\" -command { tk_messageBox -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+sprintf( msg, "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
 
 // Button bar
@@ -881,7 +879,7 @@ if(argn>1)
 
     }
    else
-	cmd( inter, "tk_messageBox -parent .f.t.t -type ok -icon error -title Error -message \"File\\n$filetoload\\nnot found.\"");
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File\\n$filetoload\\nnot found.\"");
    
   }
  else
@@ -935,7 +933,7 @@ cmd( inter, "if [ string compare $before $after ] { set tosave 1 } { set tosave 
 if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {
 
-  cmd(inter, "set answer [tk_messageBox -type yesnocancel -default yes -icon warning -title \"Save File?\" -message \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n- Yes: save the file and continue.\n- No: do not save and continue.\n- Cancel: do not save and return to editing.\"]");
+  cmd(inter, "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save File?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]");
   cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal -nocase $answer \"cancel\"] {set choice 0} {}}");  
   if(choice==0)
   goto loop;
@@ -984,7 +982,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1011,7 +1009,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nUse the 'Model Compilation Options', in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1022,7 +1020,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1035,7 +1033,7 @@ if(s==NULL || !strcmp(s, ""))
    {
      f=fopen("makefile", "w");
      fclose(f);
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nUse the 'Model Compilation Options', in menu Model, to create it.\"");
+    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1046,7 +1044,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1141,7 +1139,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1163,7 +1161,7 @@ cmd(inter, "set filename makefile");
 cmd(inter, ".f.t.t mark set insert 1.0");
 cmd(inter, ".f.hea.file.dat conf -text \"makefile\"");
 cmd(inter, "wm title . \"Makefile - LMM\"");
-cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"Direct changes to the 'makefile' will not affect compilation issued through LMM.\\n\\nChoose 'System Compilation Options' and 'Model Compilation Options' in menu Model.\"");  
+cmd(inter, "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"File 'makefile' changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Choose 'System Compilation Options' and 'Model Compilation Options' in menu Model.\"");  
 choice=0;
 goto loop;
 }
@@ -1173,7 +1171,7 @@ if(choice==4)
  /*Save the file currently shown*/
 
 
-cmd(inter, "set curfilename [tk_getSaveFile -title \"Save File\" -initialfile $filename -initialdir $dirname]");
+cmd(inter, "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]");
 s=(char *)Tcl_GetVar(inter, "curfilename",0);
 
 if(s!=NULL && strcmp(s, ""))
@@ -1199,7 +1197,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \" Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1216,8 +1214,8 @@ if(s==NULL || !strcmp(s, ""))
   }
   else		// if no description, ask if the user wants to create it or not
   {
-	cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon question -message \"There is no valid description file ('description.txt') set for the model.\\n\\nPress 'Ok' to create a description file or 'Cancel' to show the equations file.\" ]" );
-	cmd( inter, " if [ string equal -nocase $answer \"ok\" ] { set choice 1 } { set choice 2 } " );
+	cmd( inter, "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('description.txt') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
+	cmd( inter, " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
 	if ( choice == 2 )
 	{
 		cmd( inter, " set filename \"\" " );
@@ -1257,7 +1255,7 @@ if(choice==7)
 s=(char *)Tcl_GetVar(inter, "modelname",0);
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1283,7 +1281,7 @@ cmd(inter, "lappend udi [.f.t.t index insert]");
   else
   {
 
-   cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No compilation results.\"");
+   cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No compilation results\"");
   choice=0;
   goto loop;
 
@@ -1302,7 +1300,7 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -1318,7 +1316,7 @@ if(s==NULL || !strcmp(s, ""))
   if(f==NULL)
    {
    
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nAdd a makefile to model $modelname.\"");
+    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
 
     choice=0;
     cmd(inter, "cd $RootLsd");
@@ -1329,7 +1327,7 @@ if(s==NULL || !strcmp(s, ""))
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1400,7 +1398,7 @@ cmd( inter, "newtop .search_line \"Goto Line\" { .search_line.b.esc invoke }" );
 cmd(inter, "label .search_line.l -text \"Type the line number\"");
 cmd(inter, "entry .search_line.e -justify center -width 10 -textvariable line");
 cmd(inter, "frame .search_line.b");
-cmd(inter, "button .search_line.b.ok -width -9 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {if [ string is integer $line ] { .f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroytop .search_line } { destroytop .search_line; tk_messageBox -type ok -title Error -icon error -message \"Invalid value.\n\nPlease check that a valid integer is used.\" } } }");
+cmd(inter, "button .search_line.b.ok -width -9 -text Ok -command {if {$line == \"\"} {.search_line.esc invoke} {if [ string is integer $line ] { .f.t.t see $line.0; .f.t.t tag remove sel 1.0 end; .f.t.t tag add sel $line.0 $line.500; .f.t.t mark set insert $line.0; .f.hea.line.line conf -text [.f.t.t index insert]; destroytop .search_line } { destroytop .search_line; tk_messageBox -parent .search_line -type ok -title Error -icon error -message \"Invalid value\" -detail \"Please check that a valid integer is used.\" } } }");
 cmd(inter, "button .search_line.b.esc -width -9 -text Cancel -command {destroytop .search_line}");
 cmd(inter, "bind .search_line <KeyPress-Return> {.search_line.b.ok invoke}");
 cmd(inter, "bind .search_line <KeyPress-Escape> {.search_line.b.esc invoke}");
@@ -1473,13 +1471,14 @@ s=(char *)Tcl_GetVar(inter, "modelname",0);
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
-
   
   cmd(inter, "cd $modeldir");
+
+
   if(choice==58)
    {
    //cmd(inter, "scan [.f.t.t index insert] %d.%d line col");
@@ -1498,7 +1497,7 @@ if(s==NULL || !strcmp(s, ""))
   
   if(f==NULL)
    {
-    cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' for model '$modelname' not found.\"");
+    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
     choice=0;
     cmd(inter, "cd $RootLsd");
     goto loop;
@@ -1507,7 +1506,7 @@ if(s==NULL || !strcmp(s, ""))
   while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
     choice=0;
     goto loop;
    }
@@ -1576,7 +1575,7 @@ if(s==NULL || !strcmp(s, ""))
    } 
   else
    {//executable not found
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"Executable not found.\\n\\nCompile the model before running it in the GDB debugger.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the GDB debugger.\"");
   choice=0;
   goto loop;
     choice=0;
@@ -1687,13 +1686,13 @@ if(choice==2)
  }
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
- {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Directory name must not contain spaces.\"");
+ {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces.\"");
   cmd(inter, "focus -force .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
 //control for existing directory
-cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory:\\n$groupdir/$mdir\\n\\nPossibly there is already such a directory.\\nCreation of new group aborted.\"; set choice 3} {}");
+cmd(inter, "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory.\nCreation of new group aborted.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, "destroytop .a");
   choice=0;
@@ -1764,14 +1763,14 @@ if(choice==2)
 
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
- {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Directory name must not contain spaces.\"");
+ {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces.\"");
   cmd(inter, "focus -force .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
 
 //control for existing directory
-cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory:\\n$mdir\"; set choice 3} {}");
+cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$mdir\\n\\nPossibly there is already such a directory.\"; set choice 3} {}");
 if(choice==3)
  {choice=0;
   goto loop_copy_new;
@@ -1808,16 +1807,14 @@ for(i=0; i<num; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
+ {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create model\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
   choice=0;
   goto loop_copy_new;
  } 
 if(choice==4)
  {
  choice=0;
- cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"A model '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Copy' command in the Model Browser. Or press 'Ok' to continue creating a new (empty) model '$mname'.\"]");
-
-
+ cmd(inter, "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'Ok' to continue creating a new (empty) model '$mname'.\"]");
   s=(char *)Tcl_GetVar(inter, "answer",0);
 
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
@@ -1889,7 +1886,7 @@ cmd(inter, ".m.model entryconf 9 -state normal");
 cmd(inter, ".m.model entryconf 11 -state normal");
 
 
-cmd(inter, "tk_messageBox -type ok -title \"Model Created\" -icon info -message \"New model '$mname' (ver. $mver) successfully created.\\n\\nDirectory:\n$dirname\"");
+cmd(inter, "tk_messageBox -parent . -type ok -title \"Model Created\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"");
 
 cmd(inter, "set before [.f.t.t get 0.0 end]"); //avoid to re-issue a warning for non saved files
 choice=50;
@@ -1902,7 +1899,7 @@ if(choice==15)
 {
 /* open a text file*/
 
-cmd(inter, "set brr [tk_getOpenFile -title \"Load Text File\" -initialdir $dirname]");
+cmd(inter, "set brr [tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $dirname]");
 cmd(inter, "if {[string length $brr] == 0} {set choice 0} {set choice 1}");
 if(choice==0)
  goto loop;
@@ -4424,7 +4421,7 @@ if(choice==2)
  }
 
 //control for existing directory
-cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -type ok -title Error -icon error -message \"Cannot create directory: $mdir.\\n\\nChoose a different name.\"; set choice 3} {}");
+cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$mdir.\\n\\nChoose a different name.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, ".a.edir selection range 0 end");
   cmd(inter, "focus -force .a.edir");
@@ -4464,7 +4461,7 @@ for(i=0; i<num && choice!=3; i++)
 
  }
 if(choice==3)
- {cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"");
+ {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create new model\" -detail \"The model '$mname' already exists (directory: $errdir).\"");
   cmd(inter, ".a.ename selection range 0 end");
   cmd(inter, "focus -force .a.ename");
   choice=0;
@@ -4491,7 +4488,7 @@ cmd(inter, "puts $f \"$version\"");
 cmd(inter, "set frmt \"%d %B, %Y\"");
 cmd(inter, "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"");
 cmd(inter, "close $f");
-cmd(inter, "tk_messageBox -type ok -title \"Save Model As...\" -icon info -message \"New model '$mname' (ver. $mver) successfully created.\\n\\nDirectory:\n$dirname\"");
+cmd(inter, "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"");
 
 choice=49;
 goto loop;
@@ -4564,7 +4561,7 @@ Show end edit model info
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -4572,10 +4569,7 @@ if(s==NULL || !strcmp(s, ""))
 cmd(inter, "set ex [file exists $modeldir/modelinfo.txt]");
 cmd(inter, "set choice $ex");
 if(choice==0)
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Cannot find file for model info.\\n\\nPlease, check the date of creation.\"");
-
-
-
+  cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot find file for model info\" -detail \"Please, check the date of creation.\"");
   
 cmd( inter, "newtop .a \"Model Info\" { .a.b.ok invoke }" );
 
@@ -4615,7 +4609,7 @@ f=fopen(s, "r");
 
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"File 'makefile' not found.\\n\\nAdd a makefile to model '$modelname' ([pwd]).\"");
+  cmd(inter, "tk_messageBox -parent .a -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
   choice=0;
   cmd(inter, "cd $RootLsd");
   cmd(inter, "if { [winfo exists .a] == 1} {destroytop .a} {}");
@@ -4626,7 +4620,7 @@ while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Makefile corrupted.\\n\\nCheck 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
   choice=0;
   goto loop;
  }
@@ -4852,7 +4846,7 @@ Model Compilation Options
 
 if(s==NULL || !strcmp(s, ""))
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"No model selected.\\n\\n Choose an existing model or create a new one.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"");
   choice=0;
   goto loop;
  }
@@ -4879,7 +4873,7 @@ if(choice==1)
  }
 else
   {
-   cmd(inter, "tk_messageBox -type ok -icon warning -message \"Model compilation options not found.\\n\\nThe system will use default values.\" -title Warning");
+   cmd(inter, "tk_messageBox -parent . -type ok -icon warning -message \"Model compilation options not found\" -detail \"The system will use default values.\" -title Warning");
    cmd(inter, "set a \"$gcc_conf $gcc_opt\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
@@ -5101,7 +5095,7 @@ cmd(inter, "destroytop .a");
 
 if(choice==1)
  {
- cmd(inter, "if { $showFileCmds != $temp_var11 } { tk_messageBox -icon warning -title \"Restart required\" -type ok -message \"Restart required after configuration changes.\n\nOnly after LMM is closed and restarted the changes in the menu configuration will be shown.\" }");
+ cmd(inter, "if { $showFileCmds != $temp_var11 } { tk_messageBox -parent . -icon warning -title Warning -type ok -message \"Restart required\" -detail \"Restart required after configuration changes. Only after LMM is closed and restarted the changes in the menu configuration will be used.\" }");
 
  cmd(inter, "set Terminal $temp_var1");
  cmd(inter, "set HtmlBrowser $temp_var2");
@@ -5282,9 +5276,9 @@ if(choice==1)
 }
 cmd(inter, "cd $RootLsd");
 if(choice==1)
-  cmd(inter, "tk_messageBox -type ok -icon error -title Error -message \"Problem generating 'No Window' version, probably there is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' option without errors. The error list is in the file 'makemessage.txt'.\"");
+  cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Problem generating 'No Window' version\" -detail \"Probably there is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' option without errors. The error list is in the file 'makemessage.txt'.\"");
 else
-  cmd(inter, "tk_messageBox -type ok -icon info -title \"Info\" -message \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in Lsd result files named after the seed generator used.\"");
+  cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in Lsd result files named after the seed generator used.\"");
 choice=0;
 goto loop;
 

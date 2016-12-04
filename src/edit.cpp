@@ -330,7 +330,7 @@ int i,j, k,h, res;
 
 if ( c->up == NULL )
 {
-	cmd( inter, "tk_messageBox -type ok -icon warning -title Warning -message \"Element contained in Root object.\\n\\n The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 	return 1;
 }
 

@@ -102,7 +102,7 @@ cmd(inter, msg);
 cmd(inter, "set choice [file exists $mrep]");
 if(*choice == 1)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report already exists.\\n\\nIf you do not change the file name you are going to overwrite it.\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "set answer [tk_messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok]");
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
   if ( *choice == 1 )
 	  return;
@@ -157,7 +157,7 @@ cmd(inter, "frame .w.s.e1.file");
 cmd(inter, "label .w.s.e1.file.tlab -text \"File name\"");
 cmd(inter, "set file1 description.txt");
 cmd(inter, "entry .w.s.e1.file.tit -width 50 -textvariable file1");
-cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
 cmd(inter, "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
@@ -180,7 +180,7 @@ cmd(inter, "frame .w.s.e2.file");
 cmd(inter, "label .w.s.e2.file.tlab -text \"File name\"");
 cmd(inter, "set file2 comments.txt");
 cmd(inter, "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2");
-cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
 cmd(inter, "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w ");
@@ -192,7 +192,7 @@ cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
 
 cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
 
-cmd( inter, "xokhelpcancel .w b Search { set res [tk_getSaveFile -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
+cmd( inter, "okhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
 
 cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}");
 cmd(inter, "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}");
@@ -236,7 +236,7 @@ cmd(inter, "destroytop .w");
 start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
  {
-  cmd( inter, "answer [ tk_messageBox -type okcancel -default ok -icon warning -title Warning -message \"Equation file '%s' not found.\n\nPress 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
+  cmd( inter, "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
 
 if(*choice==1)
  {

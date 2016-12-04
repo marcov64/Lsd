@@ -363,7 +363,7 @@ Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}");
 if(debug_flag==1)
  {
- cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"The directory containing the model is:\n[pwd]\nIt appears to include spaces.\\n\\nThis will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory. \"");
+ cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Spaces in file path\" -detail \"The directory containing the model is:\n[pwd]\nIt appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"");
  myexit(5);
  
  }
@@ -375,7 +375,7 @@ cmd( inter, "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ fi
 lsdroot = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 if ( lsdroot == NULL || strlen( lsdroot ) == 0 )
  {
- cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"LSDROOT not set, program aborted.\n\nPlease make sure the environment variable LSDROOT points to the directory where Lsd is installed.\"");
+ cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"");
  myexit(6);
  }
 strcpy( str, lsdroot );
@@ -407,7 +407,7 @@ if(done==1)
  }
 else
  { 
-  cmd(inter, "tk_messageBox -title Warning -icon warning -type ok -message \"The system could not locate the LMM system options.\\n\\nIt may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
+  cmd(inter, "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
  }
 
 Tcl_UnlinkVar(inter, "done");
@@ -538,7 +538,7 @@ stacklog->vs=NULL;
 strcpy(stacklog->label, "Lsd Simulation Manager");
 
 #ifndef NO_WINDOW
-cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"File 'src/align.tcl' is missing or corrupted.\\n\\nPlease check your instalation and reinstall Lsd if required.\\n\\nLsd is aborting now.\" }" );
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/align.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	myexit( 7 + choice );
 
@@ -667,7 +667,7 @@ if(no_more_memory==1)
  fclose(f);
  f=NULL;
  root->load_param(struct_file, 1, f);
-  sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"Not enough memory: too many series saved for the memory available.\\n\\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\"", series_saved, max_step);
+  sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory sufficient for %d series over %d time steps. Reduce series to save and/or time steps.\"", series_saved, max_step);
  cmd(inter, msg);
 #else
  sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
@@ -986,9 +986,9 @@ for(var=root->v; var!=NULL; var=var->next)
 		plog("Use the Initial Values editor to set its values\n");
      #ifndef NO_WINDOW   
      if(var->param==1)
-       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
      else
-       sprintf(msg, "tk_messageBox -type ok -icon error -title Error -message \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\n\nMove the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
+       sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
      cmd(inter, msg);  
      #endif
 		toquit=2;
@@ -1270,7 +1270,7 @@ void signal_handler(int signum)
 	sprintf(msg2, "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
 	plog(msg2);
 #else
-	sprintf(msg2, "tk_messageBox -title Error -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
+	sprintf(msg2, "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
 	cmd(inter, msg2);
 	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
 	deb( stacklog->vs->up, NULL, msg2, &useless );

@@ -2176,7 +2176,7 @@ delete [] buffer;
 #ifndef NO_WINDOW
 cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
 cmd( inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
-sprintf( msg, "tk_messageBox -title Error -type ok -icon error -message \"%s.\n\nMore details are available in the Log window.\n%s\nLsd cannot continue.\"", boxTitle, boxText );
+sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nLsd cannot continue.\"", boxTitle, boxText );
 cmd( inter, msg );
 #endif
 

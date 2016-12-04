@@ -86,9 +86,9 @@ if(strcmp(msg, "yes"))
 start:
 if( (f=fopen(equation_name,"r"))==NULL)
  {
-  sprintf( msg, "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"Equation file '%s.lsd' cannot be saved.\n\nCheck equation file name and press 'Ok' to search for the required file again.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name );
+  sprintf( msg, "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Equation file '%s.lsd' not saved\" -detail \"Check equation file name and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name );
   cmd( inter, msg );
-  cmd( inter, "if { $choice == 1 } { set res [ tk_getOpenFile -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] }" );
+  cmd( inter, "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] }" );
 
   if(*choice==1)
  {

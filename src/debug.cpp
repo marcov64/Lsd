@@ -162,7 +162,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	cmd(inter, "$w add separator");
 	cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 	cmd( inter, "$w add separator" );
-	sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+	sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 	cmd( inter, msg );
 	cmd(inter, ".deb configure -menu .deb.m");
 }
@@ -386,7 +386,7 @@ case 21: if(r->hook!=NULL)
 				
 				if ( lstUpd <= 0 || lstUpd > t )
 				{
-					cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Invalid hook pointer.\n\nCheck if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"");
+					cmd( inter, "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"");
 					choice = 0;
 					break;
 				}
@@ -395,7 +395,7 @@ case 21: if(r->hook!=NULL)
 			}
 			else
 			{
-				cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"This option is unavailable.\n\nYour code is using non-standard pointers('invalidHooks = true').\"");
+				cmd( inter, "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Unavailable option\" -detail \"Your code is using non-standard pointers ('invalidHooks = true').\"");
 				choice = 0;
 				break;
 			}
@@ -647,7 +647,7 @@ case 7:
 
 if(lab!=NULL)
  {
- cmd(inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"Quitting the simulation run.\\n\\nPress 'Ok' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
+ cmd(inter, "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'Ok' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
  } 
 else
  choice=0; 
@@ -900,7 +900,7 @@ cmd(inter, msg);
 cmd(inter, "set choice [file exists $name_rep]");
 
 cmd(inter, "if {$choice == 1} {LsdHtml $name_rep} {}");
-cmd(inter, "if {$choice == 0} {tk_messageBox -type ok -title Error -icon error -message \"Report file not available.\\n\\nYou can create the report in menu Model.\"} {}");
+cmd(inter, "if {$choice == 0} {tk_messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\"} {}");
 choice=0;
 break;
 

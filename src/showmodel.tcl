@@ -145,7 +145,7 @@ menu $m -tearoff 0 -relief groove -bd 2
 .l.m add cascade -label Help -menu $m -underline 0
 $m add command -label "Help" -underline 0 -accelerator F1 -command { LsdHelp LMM_help.html#select }
 $m add separator
-$m add command -label "About Lsd..." -underline 0 -command { tk_messageBox -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" }
+$m add command -label "About Lsd..." -underline 0 -command { tk_messageBox -parent .l -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" }
 
 .l configure -menu .l.m
 
@@ -178,7 +178,7 @@ bind .l <Down> {if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {set app
 ################################
 proc copy i {
 global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
-if { [lindex $group $i] == 1  } {tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups." } {
+if { [lindex $group $i] == 1  } {tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again" } {
 
 set memory 1
 
@@ -206,11 +206,11 @@ if { [lindex $lmn $i] == "<UP>" } {return } {}
 if { [lindex $group $i] == 1} {set item group} {set item model}
 
 if { [ string match -nocase $RootLsd/trashbin* [ lindex $ldn $i ] ] } {
- set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to permanently delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
+ set answer [tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
  file delete -force [ lindex $ldn $i ]
  showmodel [lindex $lrn $i]
 } {
-set answer [tk_messageBox -parent .l -type yesno -title Delete -icon question -default no -message "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
+set answer [tk_messageBox -parent .l -type yesno -title Confirmation -icon question -default yes -message "Confirm deletion?" -detail "Do you want to delete $item\n[lindex $lmn $i]\n(dir [lindex $ldn $i])?"]
 
 if { $answer == "yes" } {
  set modelDir [ string range [ lindex $ldn $i ] 0 [ expr [ string last / [ lindex $ldn $i ] ] - 1 ] ] 
@@ -339,10 +339,10 @@ if { $choiceSM == 2 } { } {
   set appl [.l.p.n get]
   set appdsc "[.l.p.t.text get 1.0 end]"
   
-  set confirm [tk_messageBox -parent .l.p -type okcancel -icon warning -title Confirm -default cancel -message "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
+  set confirm [tk_messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
   if { $confirm == "ok" } {
     set app [file exists $pastedir/$appd]
-    if { $app == 1} {tk_messageBox -parent .l.p -title Error -icon error -type ok -message "Directory $pastedir/$appd already exists.\n\nSpecify a different directory." } {
+    if { $app == 1} {tk_messageBox -parent .l.p -title Error -icon error -type ok -message "Copy error" -detail "Directory $pastedir/$appd already exists.\nSpecify a different directory." } {
        #viable directory name 
        file mkdir $pastedir/$appd
        set copylist [glob $copydir/*]

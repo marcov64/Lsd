@@ -714,7 +714,7 @@ cmd(inter, "$w add command -label \"Add Function...\" -command {set param 2; set
 cmd(inter, "$w add command -label \"Add Descending Object...\" -command {set choice 3} -underline 4 -accelerator Ctrl+D");
 cmd(inter, "$w add command -label \"Insert New Parent...\" -command {set choice 32} -underline 9");
 cmd(inter, "$w add separator");
-cmd( inter, "$w add command -label \"Change Element...\" -command { if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 7 } { tk_messageBox -type ok -icon error -title Error -message \"No element selected.\n\nPlease select an element (variable, parameter) before using this option.\" } } -underline 0" );
+cmd( inter, "$w add command -label \"Change Element...\" -command { if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 7 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\" } } -underline 0" );
 cmd(inter, "$w add command -label \"Change Object...\" -command {set choice 6} -underline 7");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Create Auto Descriptions\" -command {set choice 43} -underline 7");
@@ -785,7 +785,7 @@ cmd(inter, "$w add separator");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}");
 cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 cmd( inter, "$w add separator" );
-sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
 cmd(inter, ". configure -menu .m");
 
@@ -885,7 +885,7 @@ if(actual_steps>0)
  { // search the sorted list of choices that are bad with existing run data
    if ( bsearch( choice, badChoices, NUM_CHOICES, sizeof ( int ), comp_ints ) != NULL )
    { // prevent changing data if analysis is open
-	 cmd( inter, "if [ winfo exists .da ] { tk_messageBox -ok -icon warning -title Warning -message \"Analysis of results window is open.\n\nPlease close it before proceeding with any option that requires existing data to be removed.\"; set daOpen 1 } { set daOpen 0 }" );
+	 cmd( inter, "if [ winfo exists .da ] { tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Analysis of Results window is open\" -detail \"Please close it before proceeding with any option that requires existing data to be removed.\"; set daOpen 1 } { set daOpen 0 }" );
 	 if ( ! strcmp( Tcl_GetVar( inter, "daOpen", 0 ), "1" ) )
 	 {
 		 *choice = 0;				// discard option
@@ -1074,14 +1074,14 @@ if(sl!=0)
  done=check_label(lab, cur);
  if(done==1)
    {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+	cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newelem;
    }
 if ( done == 2 )
 {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+	cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newelem;
@@ -1212,14 +1212,14 @@ if(done==1)
  done=check_label(lab, cur); //check that the label does not exist already
  if(done==1)
    {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+	cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newobject;
    }
  if(done==2)
   {
-   cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newobject;
@@ -1270,16 +1270,16 @@ if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 else
 	cur2 = NULL;
 
-cmd( inter, "set T .inspar" );
-cmd( inter, "newtop $T \"Insert Parent\" { set done 2 }" );
-
 if(r->up==NULL)
  {
-  cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -title Warning -icon warning -message \"Cannot insert a parent of Root.\\n\\nPress 'Ok' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
+  cmd( inter, "set answer [ tk_messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'Ok' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
   if ( done == 2 )
 	goto here_endparent;
   done=0;
  }
+
+cmd( inter, "set T .inspar" );
+cmd( inter, "newtop $T \"Insert Parent\" { set done 2 }" );
 
 cmd(inter, "frame $T.f");
 if(r->up!=NULL)
@@ -1323,14 +1323,14 @@ if(done==1)
  done=check_label(lab1, cur); //check that the label does not exist already
  if(done==1)
    {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+	cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newparent;
    }
  if(done==2)
   {
-   cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd( inter, "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
    cmd(inter, "focus $T.f.ent_var; $T.f.ent_var selection range 0 end");
    done = 0;
    goto here_newparent;
@@ -1446,7 +1446,7 @@ else
 
 if ( ! strcmp( r->label, "Root" ) )	// cannot change Root
 {
-	cmd( inter, "tk_messageBox -type ok -title Warning -icon warning -message \"Cannot change Root.\\n\\nPlease select an existing object or insert a new one before using this option.\"" );
+	cmd( inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot change Root\" -detail \"Please select an existing object or insert a new one before using this option.\"" );
 	break;
 }
 
@@ -1538,8 +1538,8 @@ if(*choice==5 || *choice==3)
 {
 if(*choice==3)
 {
-	 cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default cancel -message \"Press 'Ok' to confirm deleting:\n$lab\n\nNote that all descendents will be also deleted!\"]");
-	 cmd(inter, "switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
+	 cmd(inter, "set answer [tk_messageBox -parent $T -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting:\n$lab\n\nNote that all descendants will be also deleted!\"]");
+	 cmd(inter, "switch -- $answer {yes {set choice 1} no {set choice 2}}");
 	 if(*choice == 1)				// simulate a name change
 		cmd(inter, "set lab \"\"");	// to empty string (delete)
 }
@@ -1573,13 +1573,13 @@ if ( *choice == 1 )
 		done = check_label( lab, cur );
 		if(done==1)
 		{
-			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+			cmd( inter, "tk_messageBox -parent $TT -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 			cmd(inter, "focus $TT.e; $TT.e selection range 0 end");
 			goto here_newname;
 		}
 		if(done==2)
 		{
-			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd( inter, "tk_messageBox -parent $TT -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 			cmd(inter, "focus $TT.e; $TT.e selection range 0 end");
 			goto here_newname;
 		}
@@ -1663,8 +1663,8 @@ if ( cur == NULL )
 	break;
 }
 
-cmd(inter, "set answer [tk_messageBox -title \"Delete Object\" -icon warning -type okcancel -default cancel -message \"Press 'Ok' to confirm deleting:\n$vname\n\nNote that all descendents will be also deleted!\"]");
-cmd(inter, "switch $answer {ok {set choice 1} cancel {set choice 2}}");
+cmd(inter, "set answer [tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting:\n$vname\n\nNote that all descendants will be also deleted!\"]");
+cmd(inter, "switch $answer {yes {set choice 1} no {set choice 2}}");
 if( *choice == 2 )
 	break;
 
@@ -1941,7 +1941,7 @@ else
       for(cur=r; cur!=NULL; cur=cur->up)
 		if(cur->to_compute==0)
 		 {
-		   sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", lab_old, cur->label);
+		   sprintf(msg, "tk_messageBox -parent $T -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label);
 		   cmd(inter, msg);
 		 }
    }
@@ -2006,7 +2006,7 @@ sscanf( lab1, "%s", lab_old );		// get var/par name in lab_old
 if ( *choice == 76 )
 {
 	delVar = true;
-	cmd( inter, "set answer [ tk_messageBox -title \"Delete Element\" -icon warning -type okcancel -default ok -message \"Press 'Ok' to confirm deleting:\n$vname\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+	cmd( inter, "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete element?\" -detail \"Press 'Yes' to confirm deleting:\n$vname\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 	if( *choice == 1 )
 		cmd( inter, "set vname \"\"; set nature 3; set numlag 0" );	// configure to delete
 	else
@@ -2102,12 +2102,12 @@ if(nature==3 || nature==4)
 
 		if(*choice==1)
 		{
-			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"The name already exists in the model.\\n\\nChoose a different name and try again.\"" );
+			cmd( inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
 			goto here_endprop;
 		}
 		if(*choice==2)
 		{
-			cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid characters in name.\\n\\nNames must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd( inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
 			goto here_endprop;
 		}
 	}
@@ -2283,7 +2283,7 @@ if ( ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
 	// abort if necessary
 	if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
 	{
-		cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Invalid lag selected.\n\nSelect a valid lag value for the variable or change the number of lagged values for this variable.\"" );
+		cmd( inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Invalid lag selected\" -detail \"Select a valid lag value for the variable or change the number of lagged values for this variable.\"" );
 		break;
 	}
 }
@@ -2362,7 +2362,7 @@ case 1:
 
 if ( struct_loaded == 0 )
 {
-	cmd( inter, "tk_messageBox -type ok -icon error -title Run -message \"There is no configuration loaded.\\n\\nPlease load or create one before trying run the simulation.\"");
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Run -message \"No configuration loaded\" -detail \"Please load or create one before trying run the simulation.\"");
 	break;
 }
 
@@ -2372,7 +2372,7 @@ i = 0;
 count_save( n, &i );
 if ( i == 0 )
 {
-	cmd( inter, "set answer [ tk_messageBox -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved.\n\nIf you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
+	cmd( inter, "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 	if( *choice == 2 )
 	{
 		*choice=0;
@@ -2484,7 +2484,7 @@ set_blueprint(blueprint, n);
 if ( overwConf == 1 )			// save if needed
 	if ( ! save_configuration( r ) )
 	{
-		sprintf( msg , "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved.\n\nCheck if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
+		sprintf( msg , "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
 		cmd( inter, msg );
 		if( *choice == 2 )
 		{
@@ -2550,7 +2550,7 @@ if(*choice==17)
   cmd(inter, msg);
   cmd(inter, "cd $path");
   cmd(inter, "set a \"\"");
-  sprintf(msg, " set bah [tk_getOpenFile -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
+  sprintf(msg, " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
 
   cmd(inter, msg);
   
@@ -2584,9 +2584,9 @@ switch ( load_configuration( r ) )
 {
 	case 1:							// file/path not found
 		if( strlen( path ) > 0 )
-			sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in directory '%s'.\"", simul_name, path );
+			sprintf( msg, "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
 		else
-			sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"File not found.\\n\\nFile for model '%s' not found in current directory\"", simul_name );
+			sprintf( msg, "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name );
 		cmd( inter, msg );
 		*choice = 0;
 		break;
@@ -2595,7 +2595,7 @@ switch ( load_configuration( r ) )
 	case 3:							// problem from DESCRIPTION section
 		autofill_descr( r );
 	case 4:							// problem from DOCUOBSERVE section
-		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Invalid or damaged file.\\n\\nPlease check if a proper file was selected and if the loaded configuration is correct.\"" );
+		cmd( inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
 		*choice = 0;
 	default:						// load ok
 		cmd( inter, "catch {unset ModElem}" );
@@ -2627,17 +2627,15 @@ Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
 if(struct_loaded==0)
 {
-	cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"No configuration to save.\\n\\nPress 'Ok' to save an empty configuration file.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration to save\" -detail \"Create a configuration before saving.\"" );
 
-   if(done==2)
-	{Tcl_UnlinkVar(inter, "done");
-	 break;
-	}
-	saveAs = true;	// require file name to save
- }
+	Tcl_UnlinkVar(inter, "done");
+	break;
+}
+
 if(actual_steps>0)
 { 
-	cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon warning -title Warning -message \"The loaded configuration is the final state of a simulation run.\\n\\nPress 'Ok' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
+	cmd( inter, "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'Ok' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
 
    if(done==2)
 	{Tcl_UnlinkVar(inter, "done");
@@ -2657,7 +2655,7 @@ cmd(inter, msg);
 
 if ( saveAs )			// only asks file name if instructed to or necessary
 {
-sprintf(msg, "set bah [tk_getSaveFile -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
+sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
 cmd(inter, msg);
 
 cmd(inter, "set res $bah");
@@ -2692,7 +2690,7 @@ else
 
 if ( ! save_configuration( r ) )
 {
-	sprintf( msg , "tk_messageBox -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved.\n\nThe model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name );
+	sprintf( msg , "tk_messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name );
 	cmd( inter, msg );
 }
 	
@@ -2929,7 +2927,7 @@ break;
 //Remove all the debugging flags
 case 27:
 
-cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon question -title \"Remove Debug Flags\" -message \"Confirm the removal of all debugging information?\\n\\nDebugger will not stop in any variable update.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+cmd( inter, "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all debugging information. Debugger will not stop in any variable update.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 if(*choice==1)
 {
@@ -2944,7 +2942,7 @@ break;
 //Change Equation File from which to take the code to show
 case 28:
 
-cmd(inter, "set res1 [file tail [tk_getOpenFile -title \"Select New Equation File\" -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]");
+cmd(inter, "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]");
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
 if ( lab1 == NULL || strlen ( lab1 ) == 0 )
@@ -2974,7 +2972,7 @@ break;
 //Remove all the save flags
 case 30:
 
-cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon question -title \"Remove Debug Flags\" -message \"Confirm the removal of all saving information?\\n\\nNo data will be saved.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+cmd( inter, "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove debug flags?\" -detail \"Confirm the removal of all saving information. No data will be saved.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 if(*choice==1)
 {
@@ -3036,7 +3034,7 @@ break;
 //Remove all the plot flags
 case 31:
 
-cmd( inter, "set answer [ tk_messageBox -type okcancel -default cancel -icon question -title \"Remove Plot Flags\" -message \"Confirm the removal of all run time plot information?\\n\\nNo data will be plotted during run time.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
+cmd( inter, "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 if(*choice==1)
 {
@@ -3073,7 +3071,7 @@ else
 *choice=0;
 if(r->up==NULL)
  {
-  cmd(inter, "tk_messageBox -title Error -icon error -type ok -message \"You cannot create copies of the 'Root' object.\n\nConsider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"");
   goto here_endinst;
  }
 
@@ -3199,7 +3197,7 @@ case 37:
 *choice=0;
 if(actual_steps==0)
  {
-	cmd( inter, "tk_messageBox -title Error -icon error -type ok -message \"Simulation not run, there is nothing to save.\\n\\nPlease select in the menu Run the option Run before using this option.\"" );
+	cmd( inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Simulation not run, nothing to save\" -detail \"Please select in the menu Run the option Run before using this option.\"" );
 	break;
  }
 
@@ -3278,8 +3276,8 @@ case 43:
 
 *choice=0;
 
-cmd(inter, "set answer [tk_messageBox -message \"The automatic documentation will replace any previous documentation.\\n\\nDo you want to proceed?\" -type okcancel -title Warning -icon warning -default cancel]");
-cmd(inter, "if {[string compare -nocase $answer ok] == 0} {set choice 0} {set choice 1}");
+cmd(inter, "set answer [tk_messageBox -parent . -message \"Replace existing documentation?\" -detail \"The automatic documentation will replace any previous documentation. Do you want to proceed?\" -type yesno -title Confirmation -icon question -default yes]");
+cmd(inter, "if {[string compare $answer yes] == 0} {set choice 0} {set choice 1}");
 
 if(*choice==1)
   break;
@@ -3328,11 +3326,11 @@ sprintf(msg, "set choice [file exists %s]", name_rep);
 cmd(inter, msg);
 if(*choice == 0)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Cancel' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default ok]");
-  cmd(inter, "if {[string compare -nocase $answer ok] == 0} {set choice 0} {set choice 1}");
- if(*choice == 0)
+  cmd(inter, "set answer [tk_messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "if {[string compare $answer ok] == 0} {set choice 0} {set choice 1}");
+ if(*choice == 1)
   break;
- cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set fname [file tail $fname]; set choice 1}");
  if(*choice == 0)
   break;
@@ -3468,7 +3466,7 @@ if(cv!=NULL)
  return cv->up;
  }
 else
-	 cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Element not found.\n\nCheck the spelling of the element name.\"" );
+	 cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element not found\" -detail \"Check the spelling of the element name.\"" );
 
 break;
 
@@ -3481,8 +3479,8 @@ replace lsd_eq_file with the eq_file. That is, make appear actually used equatio
 if(!strcmp(eq_file, lsd_eq_file))
   break;//no need to do anything
 
-cmd(inter, "set answer [tk_messageBox -title Warning -icon warning -message \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program.\\n\\nPress 'Ok' to confirm.\" -type okcancel -default cancel]");
-cmd(inter, "if {[string compare -nocase $answer ok] == 0} {set choice 1} {set choice 0}");
+cmd(inter, "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'Yes' to confirm.\" -type yesno -default yes]");
+cmd(inter, "if {[string compare $answer yes] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
 strcpy(lsd_eq_file, eq_file);
@@ -3497,14 +3495,14 @@ case 52:
 Used to re-generate the equations used for the current configuration file
 */
 if(strlen(lsd_eq_file)==0 || !strcmp(eq_file, lsd_eq_file) )
- {cmd(inter, "tk_messageBox -title Warning -icon warning -message \"There are no equations to be offloaded differing from the current equation file.\" -type ok");
+ {cmd(inter, "tk_messageBox -parent . -title Error -icon error -message \"No equation available\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok");
  *choice=0;
  break;
  }
 
 sprintf(msg, "set res1 fun_%s.cpp", simul_name);
 cmd(inter, msg);
-sprintf(msg, "set tk_strictMotif 0; set bah [tk_getSaveFile -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]; set tk_strictMotif 1");
+sprintf(msg, "set tk_strictMotif 0; set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]; set tk_strictMotif 1");
 cmd(inter, msg);
 
 cmd(inter,"if {[string length $bah] > 0} { set choice 1; set res1 [file tail $bah]} {set choice 0}");
@@ -3519,7 +3517,7 @@ if(strlen(lab)==0)
 f=fopen(lab, "wb");
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
-cmd(inter, "tk_messageBox -title \"File Created\" -icon info -message \"The new equation file '$res1' has been created.\\n\\nYou need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
+cmd(inter, "tk_messageBox -parent . -title \"File Created\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
 
 break;
 
@@ -3574,7 +3572,7 @@ tex_report(root,f);
 fclose(f);
 
 Tcl_SetVar( inter, "res1", ch, 0 );
-cmd(inter, "tk_messageBox -title \"File Created\" -icon info -message \"The Latex version of the model report has been created.\\n\\nThe file '$res1' is available in the model directory.\" -type ok");
+cmd(inter, "tk_messageBox -parent . -title \"File Created\" -icon info -message \"Latex report created\" -detail \"The file '$res1' is available in the model directory.\" -type ok");
 
 break;
 
@@ -3661,7 +3659,7 @@ if (rsense!=NULL)
 	if(ptsSa > MAX_SENS_POINTS)
 	{
 		plog("\nWarning: sensitivity analysis space size is too big!");
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
@@ -3672,10 +3670,10 @@ if (rsense!=NULL)
     root->add_n_objects2(cur->label, i-1, cur);
     sensitivity_parallel(cur,rsense);
 	unsaved_change( true );		// signal unsaved change
- 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration.\\n\\nIf you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"");
   }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -3698,7 +3696,7 @@ if (rsense!=NULL)
 	if(ptsSa > MAX_SENS_POINTS)
 	{
 		plog("\nWarning: sensitivity analysis space size is too big!");
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
@@ -3710,7 +3708,7 @@ if (rsense!=NULL)
     sensitivity_sequential(&findexSens,rsense);
 	sprintf( msg, "\nSensitivity analysis configurations produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the sequential sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the sequential sensitivity analysis. To run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 	
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
@@ -3726,7 +3724,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -3773,7 +3771,7 @@ if (rsense!=NULL)
 	sizMC /= 100.0;
 	if( (sizMC * maxMC) < 1 || sizMC > 1.0)
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Monte Carlo sample size to perform the sensitivity analysis.\\n\\nSelect a number between 0% and 100% that produces at least one sample (in average).\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0% and 100% that produces at least one sample (in average).\"");
 		*choice=0;
 		break;
 	}
@@ -3783,7 +3781,7 @@ if (rsense!=NULL)
 	{
 		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is still too big!", (long)(sizMC * maxMC));
 		plog(msg);
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
@@ -3797,7 +3795,7 @@ if (rsense!=NULL)
     sensitivity_sequential(&findexSens, rsense, sizMC);
 	sprintf(msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1);
 	plog(msg);
- 	cmd(inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 	
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
@@ -3813,7 +3811,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -3878,7 +3876,7 @@ if (rsense!=NULL)
 	
 	if ( NOLHdoe -> n == 0 )					// DoE configuration is not ok?
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration.\\n\\nIf the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration error\" -detail \"It was not possible to create a Non Orthogonal Latin Hypercube (NOLH) Design of Experiment (DoE) for the current sensitivity configuration. If the number of variables (factors) is large than 29, an external NOLH has to be provided in the file NOLH.csv (empty lines not allowed).\"" );
 		delete NOLHdoe;
 		break;
 	}
@@ -3888,7 +3886,7 @@ if (rsense!=NULL)
 	{
 		sprintf( msg, "\nWarning: sampled sensitivity analysis space size (%d) is still too big!", NOLHdoe -> n );
 		plog( msg );
-		cmd( inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+		cmd( inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
 		if( *choice == 0 )
 		{
 			delete NOLHdoe;
@@ -3903,7 +3901,7 @@ if (rsense!=NULL)
     sensitivity_doe( &findexSens, NOLHdoe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+ 	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
 	delete NOLHdoe;
 
@@ -3921,7 +3919,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -3970,7 +3968,7 @@ if (rsense!=NULL)
 	// Check if number is valid
 	if( sizMC < 1 )
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Monte Carlo sample size to perform the sensitivity analysis.\\n\\nSelect at least one sample.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select at least one sample.\"");
 		*choice=0;
 		break;
 	}
@@ -3980,7 +3978,7 @@ if (rsense!=NULL)
 	{
 		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", (long)sizMC);
 		plog(msg);
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
@@ -4005,7 +4003,7 @@ if (rsense!=NULL)
     sensitivity_doe( &findexSens, rand_doe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+ 	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
 	
@@ -4023,7 +4021,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -4079,7 +4077,7 @@ if (rsense!=NULL)
 	// Check if numbers are valid
 	if( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid Elementary Effects configuration to perform the sensitivity analysis.\\n\\nCheck Morris (1991) and Campolongo et al. (2007) for details.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid configuration\" -detail \"Invalid Elementary Effects configuration to perform the sensitivity analysis. Check Morris (1991) and Campolongo et al. (2007) for details.\"");
 		*choice=0;
 		break;
 	}
@@ -4089,7 +4087,7 @@ if (rsense!=NULL)
 	{
 		sprintf(msg, "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", (long)( nTraj * ( varSA + 1 ) ) );
 		plog(msg);
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"Too many cases to perform the sensitivity analysis!\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}");
 		if(*choice == 0)
 			break;
 	}
@@ -4106,7 +4104,7 @@ if (rsense!=NULL)
     sensitivity_doe( &findexSens, rand_doe );
 	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
 	plog( msg );
- 	cmd( inter, "tk_messageBox -type ok -icon info -title \"Sensitivity Analysis\" -message \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+ 	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
 	
@@ -4124,7 +4122,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+ 	cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 
 break;
 
@@ -4135,13 +4133,13 @@ case 64:
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"There is no model loaded.\\n\\nPlease load one before trying to load a sensitivity analysis configuration.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No model loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"");
 		break;
     } 
 	// check for existing sensitivity data loaded
 	if (rsense!=NULL) 
 	{
-		cmd(inter, "set answer [tk_messageBox -type okcancel -icon warning -default cancel -title \"Sensitivity Analysis\" -message \"There is sensitivity data already loaded.\\n\\nPress 'Ok' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
+		cmd(inter, "set answer [tk_messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'Ok' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}");
 		if(*choice == 2)
 			break;
 		
@@ -4161,7 +4159,7 @@ case 64:
 	cmd(inter, msg);
 	cmd(inter, "cd $path");
 	// open dialog box to get file name & folder
-	sprintf(msg, " set bah [tk_getOpenFile -title \"Load Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
+	sprintf(msg, " set bah [tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
 	cmd(inter, msg);
 	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
@@ -4183,7 +4181,7 @@ case 64:
 	f=fopen(sens_file, "rt");
 	if(f==NULL)
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Sensitivity analysis file not found.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not found\"");
 		break;
 	}
 
@@ -4243,7 +4241,7 @@ case 64:
 	error64:
 		empty_sensitivity(rsense); 			// discard read data
 		rsense=NULL;
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid sensitivity analysis file.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\"");
 		fclose(f);
 		break;
 
@@ -4254,7 +4252,7 @@ case 65:
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to save.\\n\\nBefore using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values.\\n\\nTo set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to save\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"");
 		break;
 	}
 	// default file name and path
@@ -4267,12 +4265,12 @@ case 65:
 	cmd(inter, msg);
 	cmd(inter, "cd $path");
 	// open dialog box to get file name & folder
-	sprintf(msg, "set bah [tk_getSaveFile -title \"Save Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
+	sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
 	cmd(inter, msg);
 	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Invalid sensitivity analysis file name or path.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file name or path\"");
 		break;
 	}
 	lab1=(char *)Tcl_GetVar(inter, "res",0);
@@ -4292,7 +4290,7 @@ case 65:
 	f=fopen(sens_file, "wt");  // use text mode for Windows better compatibility
 	if(f==NULL)
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Sensitivity Analysis\" -message \"Sensitivity analysis file not saved.\\n\\nPlease check the file name and path are valid.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not saved\" -detail \"Please check if the file name and path are valid.\"");
 		break;
 	}
 	for(cs=rsense; cs!=NULL; cs=cs->next)
@@ -4317,7 +4315,7 @@ case 66:
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to show.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"There is no sensitivity data to show\"");
 		break;
 	}
 	// print data to log window
@@ -4348,7 +4346,7 @@ case 67:
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon warning -title \"Sensitivity Analysis\" -message \"There is no sensitivity data to remove.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to remove\"");
 		break;
 	}
 	
@@ -4392,7 +4390,7 @@ case 68:
 
 	if ((f=fopen(ch, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Create Batch\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu first.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"");
 		break;
 	}
 	fclose(f);
@@ -4400,7 +4398,7 @@ case 68:
 	// check if serial sensitivity configuration was just created
 	*choice=0;
 	if(findexSens > 0)
-		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
+		cmd(inter, "set answer [tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
 	if(*choice == 2)
 		break;
 	
@@ -4418,7 +4416,7 @@ case 68:
 	}
 	else								// ask for first configuration file
 	{
-		cmd(inter, "set answer [tk_messageBox -type yesnocancel -icon question -default no -title \"Create Batch\" -message \"Do you want to select a sequence of numbered configuration files?\n\nPress 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
+		cmd(inter, "set answer [tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
 		if(*choice == 2)
 			break;
 		else
@@ -4437,7 +4435,7 @@ case 68:
 		// open dialog box to get file name & folder
 		if( fSeq )								// file sequence?
 		{
-			cmd(inter, "set bah [tk_getOpenFile -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
+			cmd(inter, "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
 			cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}");
 			if(*choice == 0)
 				break;
@@ -4459,7 +4457,7 @@ case 68:
 		}
 		else									// bunch of files?
 		{
-			cmd( inter, "set bah [tk_getOpenFile -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple yes]" );
+			cmd( inter, "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple yes]" );
 			cmd( inter,"set choice [llength $bah]; if {$choice > 0} {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
@@ -4633,7 +4631,7 @@ case 68:
 		break;
 
 	// ask if script/batch should be executed right away
-	cmd(inter, "set answer [tk_messageBox -type yesno -icon question -default no -title \"Run Batch\" -message \"The script/batch for running the configuration files was saved.\n\nPress 'Yes' if you want to start the script/batch as separated processes right now or 'No' to return.\"]; switch -- $answer {yes {set choice 1} no {set choice 2}}"); 
+	cmd(inter, "set answer [tk_messageBox -parent . -type yesno -icon question -default no -title \"Run Batch\" -message \"Run created script/batch?\" -detail \"The script/batch for running the configuration files was created. Press 'Yes' if you want to start the script/batch as separated processes now.\"]; switch -- $answer {yes {set choice 1} no {set choice 2}}"); 
 	if(*choice == 2)
 		break;
 
@@ -4652,7 +4650,7 @@ case 68:
 	sprintf( msg, "\nParallel batch file started: %s", lab );
 	plog( msg );
 	
-	cmd(inter, "tk_messageBox -type ok -icon info -title \"Run Batch\" -message \"The script/batch was started in separated process(es).\\n\\nThe results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
+	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
 break;
 
 
@@ -4662,7 +4660,7 @@ case 69:
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"There is no model loaded.\\n\\nPlease select one before trying to start a 'No Window' batch.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No model loaded\" -detail \"Please select one before trying to start a 'No Window' batch.\"");
 		break;
 	}
 
@@ -4721,7 +4719,7 @@ case 69:
 	
 	if ( ! save_configuration( r ) )
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"Configuration file cannot be opened.\n\nCheck if the file is set READ-ONLY.");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Cannot save configuration file\" -detail \"Check if the file is set READ-ONLY.");
 		break;
 	}
 
@@ -4744,7 +4742,7 @@ case 69:
 
 	if ((f=fopen(lab, "rb")) == NULL) 
 	{
-		cmd(inter, "tk_messageBox -type ok -icon error -title \"Start 'No Window' Batch\" -message \"The executable file 'lsd_gnuNW' was not found.\n\nPlease create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM first.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"");
 		break;
 	}
 	fclose(f);
@@ -4763,7 +4761,7 @@ case 69:
 		sprintf(msg, "exec %s -f %s %s >& %s.log  &", lab, struct_file, dozip ? "-z" : "", simul_name);
     cmd(inter, msg);
 
-	sprintf(msg, "tk_messageBox -type ok -icon info -title \"Start 'No Window' Batch\" -message \"The current configuration was started as a 'No Window' background job.\\n\\nThe results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
+	sprintf(msg, "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
 	cmd(inter, msg);
 break;
 
@@ -5133,7 +5131,7 @@ bridge *cb;
   {
   if(cv->save==1)
    {
-   sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item '%s' set to be saved, but will not be available, since object '%s' is set to be not computed.\"", cv->label, l);
+   sprintf(msg, "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item '%s' set to be saved but it will not be registered for the Analysis of Results, since object '%s' is not set to be computed.\"", cv->label, l);
    cmd(inter, msg);
    } 
    }
@@ -5432,7 +5430,7 @@ bool discard_change( bool checkSense, bool senseOnly )
 	// don't stop if simulation is runnig
 	if ( running )
 	{
-		cmd( inter, "set answer [tk_messageBox -type ok -icon error -title Error -message \"Cannot quit while simulation is running.\n\nPress 'Ok' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
+		cmd( inter, "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit Lsd\" -detail \"Cannot quit while simulation is running. Press 'Ok' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
 		return false;
 	}
 	// nothing to save?
@@ -5440,20 +5438,20 @@ bool discard_change( bool checkSense, bool senseOnly )
 		return true;					// yes: simply discard configuration
 	else								// no: ask for confirmation
 		if ( ! senseOnly && unsavedData )
-			cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard data?\" -message \"All data generated and not saved will be lost!\n\nDo you want to continue?\"]" );
+			cmd( inter, "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?\" -detail \"All data generated and not saved will be lost!\nDo you want to continue?\"]" );
 		else
 			if ( ! senseOnly && unsavedChange )
 			{
 				Tcl_SetVar( inter, "filename", simul_name , 0 );
-				cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard changes?\" -message \"Recent changes to configuration '$filename' are not saved!\n\nDo you want to discard and continue?\"]" );
+				cmd( inter, "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard changes?\" -detail \"Recent changes to configuration '$filename' are not saved!\nDo you want to discard and continue?\"]" );
 			}
 			else						// there is unsaved sense data
 				if ( checkSense )
-					cmd( inter, "set answer [tk_messageBox -type okcancel -default ok -icon warning -title \"Discard changes?\" -message \"Recent changes to sensitivity data are not saved!\n\nDo you want to discard and continue?\"]" );
+					cmd( inter, "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard changes?\" -detail \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"]" );
 				else
 					return true;		// checking sensitivity data is disabled
 
-	cmd( inter, "if [ string equal -nocase $answer ok ] { set ans 1 } { set ans 0 }" );  
+	cmd( inter, "if [ string equal $answer yes ] { set ans 1 } { set ans 0 }" );  
 	const char *ans = Tcl_GetVar( inter, "ans", 0 );
 	if ( atoi( ans ) == 1 )
 		return true;
@@ -5551,7 +5549,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		for ( cur = currObj; cur != NULL; cur = cur->up )
 			if( cur->to_compute == 0 )
 			{
-				sprintf(msg, "tk_messageBox -type ok -title Warning -icon warning -message \"Item\n'%s'\nset to be saved, but will not be available for the Analysis of Results, since object\n'%s'\nis set to be not computed.\"", vname, cur->label);
+				sprintf(msg, "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", vname, cur->label);
 				cmd(inter, msg);
 			}
 	}

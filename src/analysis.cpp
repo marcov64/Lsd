@@ -32,32 +32,32 @@ read_data
 Builds the managemen window, setting all the bindings, and enters in a cycle
 from which can make 8 choices:
 
-1) Plot the graph as indicated
+1) Plot the plot as indicated
 2) Exit from data analysis
-3) Brings in foreground the graph on which title it was double clicked
+3) Brings in foreground the plot on which title it was double clicked
 4) Load a new data file
 5) Sort the labels of the variables
 6) Copy the selection from the list of variables to the list of the variables
 to plot
 7) delete the variables selected in the list of the variables to plot
-9) plot the cross-section graph
+9) plot the cross-section plot
 
 - void init_canvas(void);
 Simply sets the colors for any integer number
 
 - void plot(int *choice);
-Plot the graph with the variable indicated in the list of the variables
+Plot the plot with the variable indicated in the list of the variables
 to plot. If the option says to use the automatic y scaling, it makes first
 a scan of the file to spot the maximum and minimum y, then it plots. Otherwise,
 it uses directly the values set by the users.
 
 - void plot_cross(void);
-Plot a graph of cross section data. The variables chosen are plotted along the times
+Plot a plot of cross section data. The variables chosen are plotted along the times
 steps chosen and, on request, they are sorted (descending or ascending) one one of
 time steps. To choose which time to sort on, double-click on the time step.
 
 - void set_cs_data(int *choice);
-Interface used to determine the time steps to plot in the cross-section graphs
+Interface used to determine the time steps to plot in the cross-section plots
 and the possible sorting.
 
 - void sort_cs_asc(char **s, double **v, int nv, int nt, int c);
@@ -151,6 +151,7 @@ extern object *root;
 extern char *simul_name;
 extern char name_rep[400];
 extern int seed;
+extern int dozip;			// compressed results file flag
 extern char nonavail[];	// string for unavailable values
 extern char msg[];
 extern variable *cemetery;
@@ -180,9 +181,9 @@ int grid;
 int allblack;
 double point_size;
 int xy;
-int type_graph[1000];
-int graph_l[1000];
-int graph_nl[1000];
+int type_plot[1000];
+int plot_l[1000];
+int plot_nl[1000];
 
 struct store
 {
@@ -285,7 +286,7 @@ cmd(inter, "bind $f.v <Button-2> {.da.f.vars.ch.v selection clear 0 end;.da.f.va
 
 cmd(inter, "set f .da.f.vars.pl");
 cmd(inter, "frame $f");
-cmd(inter, "label $f.l -text \"Graphs\"");
+cmd(inter, "label $f.l -text \"Plots\"");
 cmd(inter, "pack $f.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
 cmd(inter, "listbox $f.v -width 30 -yscroll \"$f.v_scroll set\" -height 16 -selectmode single");
@@ -328,8 +329,8 @@ sprintf( msg, "label .da.f.com.ncas -text \"Cases = %d\" -width 17", num_c );
 cmd( inter, msg );
 cmd( inter, "label .da.f.com.pad -width 12" );
 cmd( inter, "label .da.f.com.selec -text \"Series = [ .da.f.vars.ch.v size ]\" -width 36" );
-cmd( inter, "label .da.f.com.graph -text \"Graphs = [ .da.f.vars.pl.v size ]\" -width 28" );
-cmd( inter, "pack .da.f.com.nvar .da.f.com.ncas .da.f.com.pad .da.f.com.selec .da.f.com.graph -side left" );
+cmd( inter, "label .da.f.com.plot -text \"Plots = [ .da.f.vars.pl.v size ]\" -width 28" );
+cmd( inter, "pack .da.f.com.nvar .da.f.com.ncas .da.f.com.pad .da.f.com.selec .da.f.com.plot -side left" );
 cmd(inter, "frame .da.f.ft");
 cmd(inter, "label .da.f.ft.minc -text \"From case: \"");
 Tcl_LinkVar(inter, "minc", (char *) &min_c, TCL_LINK_INT);
@@ -414,11 +415,11 @@ cmd(inter, "pack .da.f.tit -pady 5");
 
 cmd(inter, "frame .da.b");
 cmd(inter, "button .da.b.ts -width -9 -text Plot -command {set choice 1}");
+cmd(inter, "button .da.b.dump -width -9 -text \"Save Plot\" -command {set choice 11}");
 cmd(inter, "button .da.b.sv -width -9 -text \"Save Data\" -command {set choice 10}");
 cmd(inter, "button .da.b.sp -width -9 -text \"Print Data\" -command {set choice 36}");
 cmd(inter, "button .da.b.st -width -9 -text Statistics -command {set choice 12}");
-cmd(inter, "button .da.b.fr -width -9 -text Histograms -command {set choice 32}");
-cmd(inter, "button .da.b.dump -width -9 -text Postscript -command {set choice 11}");
+cmd(inter, "button .da.b.fr -width -9 -text Histogram -command {set choice 32}");
 cmd(inter, "button .da.b.lat -width -9 -text Lattice -command {set choice 23}");
 
 cmd(inter, "frame .da.b.tc");
@@ -437,7 +438,7 @@ Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_INT);
 cmd(inter, "checkbutton .da.b.watch -text Watch -variable watch");
 
 
-cmd(inter, "pack .da.b.watch .da.b.ts .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.dump .da.b.lat .da.b.tc .da.b.xy -padx 1 -pady 5 -side left");
+cmd(inter, "pack .da.b.watch .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat .da.b.tc .da.b.xy -padx 1 -pady 5 -side left");
 cmd(inter, "pack .da.f .da.b");
 cmd(inter, "set watch 1");
 cmd(inter, "set auto 1");
@@ -452,7 +453,7 @@ cmd(inter, "$w add command -label \"Quit and return to Browser\" -command {set c
 cmd(inter, "set w .da.m.gp");
 cmd(inter, ".da.m add cascade -label Gnuplot -menu $w -underline 0");
 cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd( inter, "$w add command -label \"Gnuplot\" -command { if { $tcl_platform(platform) == \"unix\" } { set answer [ catch { exec xterm -e gnuplot & } ] } { if {$tcl_platform(os) == \"Windows NT\"} { set answer [ catch { exec wgnuplot & } ] } { set answer [ catch { exec start wgnuplot & } ] } }; if { $answer != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$answer' during setup.\n\nPlease check if Gnuplot is set up properly (Linux and Mac only).\" } } -underline 0");
+cmd( inter, "$w add command -label \"Gnuplot\" -command { if { $tcl_platform(platform) == \"unix\" } { set answer [ catch { exec xterm -e gnuplot & } ] } { if {$tcl_platform(os) == \"Windows NT\"} { set answer [ catch { exec wgnuplot & } ] } { set answer [ catch { exec start wgnuplot & } ] } }; if { $answer != 0 } { tk_messageBox -parent .da -type ok -icon error -title Error -message \"Gnuplot returned error '$answer' during setup\" -detail \"Please check if Gnuplot is set up properly.\" } } -underline 0");
 cmd(inter, "$w add command -label \"Gnuplot Options...\" -command {set choice 37} -underline 8");
 
 
@@ -468,7 +469,7 @@ cmd(inter, ".da.m add cascade -label Help -menu $w -underline 0");
 cmd(inter, "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0");
 cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
 cmd( inter, "$w add separator" );
-sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\n\nPlatform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
 
 cmd(inter, ".da configure -menu .da.m");
@@ -484,7 +485,7 @@ cmd(inter, "bind .da <Control-i> {set choice 34}; bind .da <Control-I> {set choi
 cmd( inter, "showtop .da overM 0 0 0");
 
 if(num_var==0)
-  cmd(inter, "tk_messageBox -type ok -title \"No Series Available\" -icon warning -message \"There are no series available.\\n\\nClick on button \'Add Series\' to load series from results files.\\n\\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"");  
+  cmd(inter, "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -default ok -message \"There are no series available\" -detail \"Click on button 'Add Series' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"");  
 
 there :
 while(*choice==0)
@@ -519,7 +520,7 @@ case 1:
   cmd(inter, "set choice [.da.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
    {
-   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nPlace some series in the Series Selected listbox.\"");
+   cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"");
    goto there;
    }
   cur_plot++;
@@ -534,22 +535,20 @@ case 1:
    *choice=0;
    goto there;
    }
- 
-
   *choice=0;
 
   cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  type_graph[cur_plot]=0; //Lsd standard graph
-  graph_l[cur_plot]=390; //height of graph with labels
-  graph_nl[cur_plot]=325; //height of graph with labels  
+  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  type_plot[cur_plot]=0; //Lsd standard plot
+  plot_l[cur_plot]=390; //height of plot with labels
+  plot_nl[cur_plot]=325; //height of plot without labels  
 
-  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 //exit
 case 2:
-///plog("here 1\n");
-cmd( inter, "if { [ .da.f.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -type okcancel -title Warning -icon warning -default ok -message \"Do you really want to exit Analysis of Results?\\n\\nAll the graphs created will be lost.\"] } { set answer ok }");
+cmd( inter, "if { [ .da.f.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -parent .da -type okcancel -title Warning -icon warning -default ok -message \"Do you really want to exit Analysis of Results?\" -detail \"All the plots created will be lost.\"] } { set answer ok }");
 app=(char *)Tcl_GetVar(inter, "answer",0);
 
 cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { } {set choice 0}");
@@ -584,7 +583,7 @@ Tcl_UnlinkVar(inter,"xy");
   cmd(inter, "catch [set a [glob -nocomplain plotxy_*]]"); //remove directories
   cmd(inter, "catch [foreach b $a {catch [file delete -force $b]}]");
   return;
-//Raise the clicked graph
+//Raise the clicked plot
 case 3:
 
   cmd(inter, "scan $it %d)%s a b");
@@ -750,7 +749,7 @@ case 8:
   cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
   goto there;
 
-//Plot the cross-section graph. That is, the vars selected form
+//Plot the cross-section plot. That is, the vars selected form
 //one series for each time step selected
 case 9:
   *choice=1;
@@ -773,11 +772,11 @@ case 9:
     *choice=0;
 
     cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-    type_graph[cur_plot]=0; //Lsd standard graph
-    graph_l[cur_plot]=390; //height of graph with labels
-    graph_nl[cur_plot]=325; //height of graph with labels  
+    type_plot[cur_plot]=0; //Lsd standard plot
+    plot_l[cur_plot]=390; //height of plot with labels
+    plot_nl[cur_plot]=325; //height of plot with labels  
 
-    cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+    cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
     goto there;
 
 //Brutally shut down the system
@@ -820,11 +819,11 @@ sprintf(msg, "set choice [file exists %s]", name_rep);
 cmd(inter, msg);
 if(*choice == 0)
  {
-  cmd(inter, "set answer [tk_messageBox -message \"Model report not found.\\n\\nYou may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
+  cmd(inter, "set answer [tk_messageBox -parent .da -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]");
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   goto there;
- cmd(inter, "set fname [tk_getOpenFile -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set choice 0}");
  if(*choice == 0)
   goto there;
@@ -1075,175 +1074,147 @@ case 13:
  goto there;
 
 case 11:
-//create the postscript for a graph
+//create the postscript for a plot
 
-exist_selection:
-*choice=0;
-  cmd(inter, "toplevel .da.a");
-  cmd(inter, "wm title .da.a \"Save Lsd Graph\"");
-  cmd(inter, "wm transient .da.a .da");
-  cmd(inter, "bind .da.a <Destroy> {set choice 2}");
-  cmd(inter, "label .da.a.l -text \"Select one graph\"");
-  cmd(inter, "button .da.a.ok -width -9 -text Ok -command {set choice 1}");
-  cmd(inter, "button .da.a.can -width -9 -text Cancel -command {set choice 2}");
-  cmd(inter, "pack .da.a.l .da.a.ok .da.a.can");
-  cmd(inter, "focus -force .da.a.ok");
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
+*choice = 0;
+cmd( inter, "set choice [ .da.f.vars.pl.v size ]" );
+if ( *choice == 0 )		 // no plots to save
+{
+	cmd( inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"");
+	goto there;
+}
 
-cmd(inter, "bind .da.a <Destroy> {}");
-cmd(inter, "destroy .da.a");
+do
+{
+	*choice=0;
+	cmd(inter, "set iti [.da.f.vars.pl.v curselection]");
+	cmd(inter, "if {[string length $iti] == 0} {set choice 1}");
+
+	if(*choice==1)
+	{
+		*choice=0;
+		cmd( inter, "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
+		cmd( inter, "label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'Ok'\"" );
+		cmd( inter, "pack .da.a.l -pady 10" );
+		cmd( inter, "okcancel .da.a b { set choice 1 } { set choice 2 }" );
+		cmd( inter, "showtop .da.a centerW 0 0 0" );
+		while(*choice==0)
+			Tcl_DoOneEvent(0);
+		cmd(inter, "destroytop .da.a");
+	}
+}
+while ( *choice == 1 );
+
 if(*choice==2)
    {*choice=0;
     goto there;
    }
+
 *choice=0;
-cmd(inter, "set iti \"\"");
 cmd(inter, "set iti [.da.f.vars.pl.v curselection]");
-cmd(inter, "if {[string length $iti] == 0} {set choice 1}");
-cmd(inter, "update");
-if(*choice==1)
-  goto exist_selection;
-
-
-Tcl_LinkVar(inter, "res", (char *) &rot, TCL_LINK_INT);
-
 cmd(inter, "set it [.da.f.vars.pl.v get $iti]");
 cmd(inter, "scan $it %d)%s a b");
-
 cmd(inter, "set choice [winfo exist .da.f.new$a]");
-if(*choice == 0)
- {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"The selected graph does not exist anymore.\n\nIf you closed the window of the graph, then re-create it.\nIf the graph is a high-quality scatter plot, use the gnuplot facilities to export it (use the right button of the mouse).\"");
-  Tcl_UnlinkVar(inter, "res");
-  goto there;  
- }
-cmd(inter, "set cazzo $a");
-cmd(inter, "toplevel .da.file");
-cmd(inter, "set r .da.file");
-cmd(inter, "wm title .da.file \"Save Lsd Graph\"");
-cmd(inter, "wm transient .da.file .da");
-cmd(inter, "bind .da.file <Destroy> {set choice 2}");
-cmd(inter, "label .da.file.l -text \"Save the graph\\n$it\"");
-cmd(inter, "frame .da.file.b");
-cmd(inter, "button .da.file.b.ok -width -9 -text Ok -bd 2 -command {if {[string length $fn] > 0 } {set choice 1} {set choice 3} }");
-cmd(inter, "button .da.file.b.can -width -9 -text Cancel -bd 2 -command {set choice 2}");
-cmd(inter, "bind .da.file <KeyPress-Return> {.da.file.b.ok invoke} ");
-cmd(inter, "bind .da.file <KeyPress-Escape> {.da.file.b.can invoke}");
-cmd(inter, "bind .da.file <Destroy> {set choice 2}");
-cmd(inter, "button .da.file.s -width -9 -text \"Choose File\" -command {set fn1 [tk_getSaveFile -title \"Save Graph File\" -defaultextension \"eps\" -initialfile $fn -filetypes {{{Encapsulated Ps} {.eps}} {{All Files} {*}}}]; raise .da.file ; if {[string length $fn1] == 0} {} {set fn $fn1}}");
-//cmd(inter, "set fn \"Lsdplot.eps\"");
-cmd(inter, "set fn \"$b.eps\"");
-cmd(inter, "entry  .da.file.e -width 40 -relief sunken -textvariable fn");
-cmd(inter, "set cm \"color\"");
-cmd(inter, "frame $r.r");
-cmd(inter, "frame $r.r.col -bd 2");
-cmd(inter, "radiobutton $r.r.col.r1 -text \"Color\" -variable cm -value color");
-cmd(inter, "radiobutton $r.r.col.r2 -text \"Gray\" -variable cm -value gray");
-cmd(inter, "pack $r.r.col.r1 $r.r.col.r2");
 
-cmd(inter, "frame $r.r.pos -bd 2");
-cmd(inter, "set res 1");
-cmd(inter, "radiobutton $r.r.pos.p1 -text \"Landscape\" -variable res -value 1");
-cmd(inter, "radiobutton $r.r.pos.p2 -text \"Portrait\" -variable res -value 2");
-cmd(inter, "bind $r.r.pos.p1 <Button-1> {set dim 270}");
-cmd(inter, "bind $r.r.pos.p2 <Button-1> {set dim 200}");
+if( *choice == 0 )
+{
+	cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"The selected plot does not exist anymore\" -detail \"If you closed the window of the plot, then re-create it.\nIf the plot is a high-quality scatter plot, use the gnuplot tools to export it (use the right button of the mouse).\"");
+	goto there;  
+}
 
-cmd(inter, "label $r.ldim -text \"Dimension (width in mm @96DPI)\"");
-cmd(inter, "set dim 270");
-cmd(inter, "entry $r.dim -width 4 -relief sunken -bd 2 -textvariable dim");
-cmd(inter, "pack $r.r.pos.p1 $r.r.pos.p2");
-cmd(inter, "pack $r.r.col $r.r.pos -side left");
+cmd( inter, "newtop .da.file \"Save Plot\" { set choice 2 } .da" );
 
-cmd(inter, "set heightpost 1");
-//cmd(inter, "checkbutton .da.file.lab -text \"Include graph labels\" -variable heightpost -onvalue 390 -offvalue 325");
-cmd(inter, "scan $it %d)%s a b");
+cmd( inter, "frame .da.file.l -bd 2" );
+cmd( inter, "label .da.file.l.l1 -text \"Settings for plot\"" );
+cmd( inter, "label .da.file.l.l2 -fg red -text \"($a) $b\"" );
+cmd( inter, "pack .da.file.l.l1 .da.file.l.l2" );
 
+cmd( inter, "set cm \"color\"" );
+cmd( inter, "frame .da.file.col -relief groove -bd 2" );
+cmd( inter, "radiobutton .da.file.col.r1 -text \"Color\" -variable cm -value color" );
+cmd( inter, "radiobutton .da.file.col.r2 -text \"Grayscale\" -variable cm -value gray" );
+cmd( inter, "radiobutton .da.file.col.r3 -text \"Mono\" -variable cm -value mono" );
+cmd( inter, "pack .da.file.col.r1 .da.file.col.r2 .da.file.col.r3 -side left" );
 
-cmd(inter, "checkbutton .da.file.lab -text \"Include graph labels\" -variable heightpost -onvalue 1 -offvalue 0");
-cmd(inter, "set choice $a");
-if(graph_l[*choice]==graph_nl[*choice])
- cmd(inter, ".da.file.lab conf -state disabled");
+cmd( inter, "set res 0" );
+cmd( inter, "frame .da.file.pos -relief groove -bd 2" );
+cmd( inter, "radiobutton .da.file.pos.p1 -text \"Landscape\" -variable res -value 0" );
+cmd( inter, "radiobutton .da.file.pos.p2 -text \"Portrait\" -variable res -value 1" );
+cmd( inter, "pack .da.file.pos.p1 .da.file.pos.p2 -side left -ipadx 11" );
 
-cmd(inter, "pack .da.file.b.ok .da.file.b.can -side left");
-cmd(inter, "pack .da.file.l .da.file.lab .da.file.r $r.ldim $r.dim .da.file.e .da.file.s .da.file.b");
-//cmd(inter, "raise .da.file");
+cmd( inter, "set dim 270" );
+cmd( inter, "frame .da.file.dim -bd 2" );
+cmd( inter, "label .da.file.dim.l1 -text \"Dimension\"" );
+cmd( inter, "entry .da.file.dim.n -width 4 -relief sunken -bd 2 -textvariable dim -justify center" );
+cmd( inter, "label .da.file.dim.l2 -text \"(mm@96DPI)\"" );
+cmd( inter, "pack .da.file.dim.l1  .da.file.dim.n .da.file.dim.l2 -side left" );
+
+cmd( inter, "set heightpost 1" );
+cmd( inter, "checkbutton .da.file.lab -text \"Include plot labels\" -variable heightpost -onvalue 1 -offvalue 0" );
+cmd( inter, "set choice $a" );
+if ( plot_l[ *choice ] == plot_nl[ *choice ] )
+	cmd( inter, ".da.file.lab conf -state disabled" );
+
+cmd( inter, "pack .da.file.l .da.file.col .da.file.pos .da.file.dim .da.file.lab -pady 5 -padx 5" );
+cmd( inter, "okcancel .da.file b { set choice 1 } { set choice 2 }" );
+cmd( inter, "showtop .da.file centerW" );
+
 *choice=0;
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-Tcl_UnlinkVar(inter, "res");
+cmd( inter, "destroytop .da.file" );
 
-if(*choice==3)
- {cmd(inter, "bind .da.file <Destroy> {}");
-  cmd(inter, "destroy .da.file");
-  *choice=11;
-  goto there;
- }
 if(*choice==2)
  {*choice=0;
-  cmd(inter, "bind .da.file <Destroy> {}");
-  cmd(inter, "destroy .da.file");
   goto there;
  }
 
-cmd(inter, "scan $it %d)%s a b");
-cmd(inter, "set dd \"\"");
-cmd(inter, "append dd $dim m");
-cmd(inter, "set fn [file nativename $fn]"); //return the name in the platform specifi format
+cmd( inter, "set fn \"$b.eps\"" );
+cmd( inter, "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -filetypes { { {Encapsulated Postscript} {.eps} } { {All Files} {*} } } ]; if { [string length $fn] == 0 } { set choice 2 }");
 
-if(graph_l[*choice]==-1 )
- *choice=2;
-
-if(*choice==1 )
-{
-cmd(inter, "set choice $a");
-if(graph_l[*choice]==graph_nl[*choice])
- {
-  if(graph_l[*choice]>0)
-   {
-    sprintf(msg, "set heightpost %d",graph_l[*choice]);
-    cmd(inter, msg);
-   } 
-  else
-   {
-    cmd(inter, "set str [.da.f.new$a.f.plots conf -height]");
-    cmd(inter," scan $str \"%s %s %s %s %d\" trash1 trash2 trash3 trash4 heighpost");
-
-   } 
-   
+if(*choice==2)
+ {*choice=0;
+  goto there;
  }
-else
- {
- sprintf(msg, "if {$heightpost == 1} {set heightpost %d} {set heightpost %d}", graph_l[*choice],graph_nl[*choice]);
- cmd(inter, msg);
- }  
-if(rot==2)
-  cmd(inter, ".da.f.new$a.f.plots postscript -height $heightpost -pagewidth $dd -colormode $cm -file \"$fn\"");
-else
-  cmd(inter, ".da.f.new$a.f.plots postscript -height $heightpost -pagewidth $dd -rotate true -colormode $cm -file \"$fn\"");
+
+cmd( inter, "set dd \"\"" );
+cmd( inter, "append dd $dim m" );
+cmd( inter, "set fn [file nativename $fn]" ); //return the name in the platform specific format
+
+cmd( inter, "set choice $a" );
+if ( plot_l[ *choice ] == plot_nl[ *choice ] )	// no labels?
+{
+	if ( plot_l[ *choice ] > 0 )
+	{
+		sprintf( msg, "set heightpost %d", plot_l[ *choice ] );
+		cmd( inter, msg );
+	} 
+	else
+	{
+		cmd( inter, "set str [.da.f.new$a.f.plots conf -height]" );
+		cmd( inter," scan $str \"%s %s %s %s %d\" trash1 trash2 trash3 trash4 heighpost" );
+	} 
 }
 else
 {
-if(rot==2)
-  cmd(inter, ".da.f.new$a.f.plots postscript -pagewidth $dd -colormode $cm -file \"$fn\"");
-else
-  cmd(inter, ".da.f.new$a.f.plots postscript -pagewidth $dd -rotate true -colormode $cm -file \"$fn\"");
-}
-  app=(char *)Tcl_GetVar(inter, "fn",0);
+	sprintf( msg, "if { $heightpost == 1 } { set heightpost %d } { set heightpost %d }", plot_l[ *choice ], plot_nl[ *choice ] );
+	cmd( inter, msg );
+}  
 
-  cmd(inter, "bind .da.file <Destroy> {}");
-  cmd(inter, "destroy .da.file");
+cmd( inter, ".da.f.new$a.f.plots postscript -height $heightpost -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"");
+cmd( inter, "plog \"\nPlot saved: $fn\n\"" );
 
- *choice=0;
- goto there;
+*choice = 0;
+goto there;
+
 
 //Plot_gnu AND phase diagram, depending on how many series are selected
 case 17:
   *choice=1;
   cmd(inter, "set choice [.da.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
-   { cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No Series Selected.\\n\\nPlace some of series available for the analysis\\nin the central listbox.\"");
+   { cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"");
     goto there;
    }
   cur_plot++;
@@ -1267,11 +1238,11 @@ case 17:
    }
 
   cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  type_graph[cur_plot]=1; //Gnuplot graph
-  graph_l[cur_plot]=430; //height of graph with labels
-  graph_nl[cur_plot]=430; //height of graph without labels  
+  type_plot[cur_plot]=1; //Gnuplot plot
+  plot_l[cur_plot]=430; //height of plot with labels
+  plot_nl[cur_plot]=430; //height of plot without labels  
   
-  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
   *choice=0;
   goto there;
 
@@ -1295,11 +1266,11 @@ case 18:
   *choice=0;
 
   cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  type_graph[cur_plot]=1; //gnuplot standard graph
-  graph_l[cur_plot]=430; //height of graph with labels
-  graph_nl[cur_plot]=430; //height of graph with labels  
+  type_plot[cur_plot]=1; //gnuplot standard plot
+  plot_l[cur_plot]=430; //height of plot with labels
+  plot_nl[cur_plot]=430; //height of plot with labels  
   
-  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 //phase diagram //REMOVED, since P.D is activated elsewhere
@@ -1317,24 +1288,24 @@ case 19:
 
   *choice=0;
   cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  type_graph[cur_plot]=1; //Gnuplot graph
-  graph_l[cur_plot]=430; //height of graph with labels
-  graph_nl[cur_plot]=430; //height of graph with labels  
+  type_plot[cur_plot]=1; //Gnuplot plot
+  plot_l[cur_plot]=430; //height of plot with labels
+  plot_nl[cur_plot]=430; //height of plot with labels  
 
-  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 case 20:
-//remove a graph
-cmd(inter, "set answer [tk_messageBox -type okcancel -title \"Delete Graph?\" -message \"Press 'Ok' to delete graph:\\n$tit\" -icon warning -default cancel]");
-cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} { set choice 1} {set choice 0}");
+//remove a plot
+cmd(inter, "set answer [tk_messageBox -parent .da -type yesno -title Confirmation -message \"Delete plot?\" -detail \"Press 'Yes' to delete plot:\\n$tit\" -icon question -default yes]");
+cmd(inter, "if {[string compare $answer yes] == 0} { set choice 1} {set choice 0}");
 if(*choice==0)
  goto there;
 cmd(inter, "scan $it %d)%s a b");
 cmd(inter, "set ex [winfo exists .da.f.new$a]");
 cmd(inter, "if { $ex == 1 } {destroy .da.f.new$a; .da.f.vars.pl.v delete $n_it} {.da.f.vars.pl.v delete $n_it}");
 
-cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
 *choice=0;
 goto there;
 
@@ -1412,7 +1383,7 @@ sequence
   cmd(inter, "set choice [.da.f.vars.ch.v size]");
   if(*choice==0) //No variables to plot defined
    {
-   cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nPlace some series in the Series Selected listbox.\"");
+   cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"");
    goto there;
    }
   cur_plot++;
@@ -1424,15 +1395,15 @@ sequence
     {
 
     cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-    type_graph[cur_plot]=3; //Lattice canvas standard graph
-    graph_l[cur_plot]=-1; //height of graph with labels
-    graph_nl[cur_plot]=-1; //height of graph with labels  
+    type_plot[cur_plot]=3; //Lattice canvas standard plot
+    plot_l[cur_plot]=-1; //height of plot with labels
+    plot_nl[cur_plot]=-1; //height of plot with labels  
 
     }
   else
     *choice=0;
 
-  cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
   goto there;
 
 case 24:
@@ -1509,7 +1480,7 @@ if(*choice==1)
 	const char extTot[] = ".tot";
 #endif 
  
-  sprintf( msg, "set lab [tk_getOpenFile -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {%s}} {{Lsd Total Files} {%s}} {{All Files} {*}} }]", extRes, extTot );
+  sprintf( msg, "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {%s}} {{Lsd Total Files} {%s}} {{All Files} {*}} }]", extRes, extTot );
   cmd( inter, msg );
   
   cmd(inter, "set choice [llength $lab]");
@@ -2088,11 +2059,11 @@ else
 
 *choice=0;
 
-type_graph[cur_plot]=0; //Lsd standard graph
-graph_l[cur_plot]=325; //height of graph with labels
-graph_nl[cur_plot]=325; //height of graph with labels  
+type_plot[cur_plot]=0; //Lsd standard plot
+plot_l[cur_plot]=325; //height of plot with labels
+plot_nl[cur_plot]=325; //height of plot with labels  
 
-cmd( inter, ".da.f.com.graph conf -text \"Graphs = [ .da.f.vars.pl.v size ]\"");
+cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
 goto there;
 
 
@@ -2126,7 +2097,7 @@ double **data,**logdata;
 
 if(nv>1000)
  {
-  cmd(inter, "set answer [tk_messageBox -type okcancel -title Warning -icon warning -default cancel -message \"You selected $nv series to be plotted.\n\n So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nPress 'Ok' to continue anyway?\"]" );
+  cmd(inter, "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become slow, please be patient.\nPress 'Ok' to continue anyway.\"]" );
   *choice=0;
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1 } {set choice 22}");
   if(*choice==22)
@@ -3262,7 +3233,7 @@ while(*choice==0)
 if(*choice==2)
  goto end;
 
-cmd(inter, "if { [.da.s.i.lb size] == 0 } {tk_messageBox -type ok -title Error -icon error -message \"No time step has been selected.\\n\\nNo graph will be created.\";set choice 2} { }");
+cmd(inter, "if { [.da.s.i.lb size] == 0 } {tk_messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step has been selected\" -detail \"No plot will be created.\";set choice 2} { }");
 cmd(inter, "set num_t [.da.s.i.lb size]");
 cmd(inter, "set list_times [.da.s.i.lb get 0 end]");
 
@@ -3382,7 +3353,7 @@ double *d, app;
 
 return vs[id].data;
 
-sprintf(msg, "tk_messageBox -type ok -title Error -icon error -message \"System error: series %d not found.\\n\\nTo continue the very first series is returned.\"", id);
+sprintf(msg, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Series %d not found\" -detail \"To continue the very first series is returned.\"", id);
 cmd(inter, msg);
 return vs[0].data;
 }
@@ -3876,292 +3847,6 @@ else
 }
 
 }
-
-/************************
-SAVE_DATA1
-************************/
-void save_data1(int *choice)
-{
-
-int idseries;
-char *app;
-char **str, **tag;
-char str1[100], delimiter[10], misval[10];
-int i, nv, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
-double **data;
-FILE *fsave;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
-Tcl_UnlinkVar(inter, "nv");
-
-*choice=0;
-
-if(nv==0)
- return;
-
-if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
-
-data=new double *[nv];
-start=new int[nv];
-end=new int[nv];
-
-
-str=new char *[nv];
-tag=new char *[nv];
-
-max_c=min_c=0;
-
-for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
-
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
-  cmd(inter, msg);
-  app=(char *)Tcl_GetVar(inter, "res",0);
-  strcpy(msg,app);
-  sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-
-  data[i]=find_data(idseries);
-  if(max_c<end[i])
-   max_c=end[i];
- }
-
-
-//Variables' Name in first column
-fr=1;
-strcpy(misval,nonavail);
-Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
-typelab=4;
-cmd(inter, "toplevel .da.lab");
-cmd(inter, "wm title .da.lab \"Saving Data\"");
-cmd(inter, "wm transient .da.lab .da ");
-cmd(inter, "frame .da.lab.f");
-cmd(inter, "radiobutton .da.lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
-cmd(inter, "radiobutton .da.lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
-cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
-
-cmd(inter, "pack .da.lab.f.lsd .da.lab.f.nolsd -anchor w");
-cmd(inter, "pack .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
-cmd(inter, "bind .da.lab <Return> {.da.lab.ok invoke}");
-cmd(inter, "bind .da.lab <Escape> {.da.lab.esc invoke}");
-cmd(inter, "focus .da.lab");
-cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-
-while(*choice==0)
- Tcl_DoOneEvent(0);
-if(*choice==2)
- goto end;
-type_res=typelab;
-
-*choice=0;
-cmd(inter, "destroy .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
-
- 
-
-
-if(typelab==4)
-{
-Tcl_LinkVar(inter, "deli", (char *) &del, TCL_LINK_INT);
-Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
-Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
-
-typelab=1;
-cmd(inter, "frame .da.lab.f -relief groove -bd 2");
-cmd(inter, "label .da.lab.f.tit -text \"Labels to use\" -foreground red");
-
-cmd(inter, "radiobutton .da.lab.f.orig -text Original -variable typelab -value 1");
-cmd(inter, "radiobutton .da.lab.f.new -text \"New names\" -variable typelab -value 2");
-cmd(inter, "set newlab \"\"");
-cmd(inter, "entry .da.lab.f.en -textvariable newlab");
-cmd(inter, "set gp 0");
-cmd(inter, "checkbutton .da.lab.f.gp -text \"Add #\" -variable gp");
-cmd(inter, "bind .da.lab.f.en <FocusIn> {.da.lab.f.new invoke}");
-cmd(inter, "pack .da.lab.f.tit .da.lab.f.orig .da.lab.f.new .da.lab.f.en .da.lab.f.gp -anchor w");
-cmd(inter, "frame .da.lab.d -relief groove -bd 2");
-cmd(inter, "label .da.lab.d.tit -text \"Columns delimiter\" -foreground red");
-
-cmd(inter, "frame .da.lab.d.r");
-del=1;
-cmd(inter, "radiobutton .da.lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
-cmd(inter, "radiobutton .da.lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
-cmd(inter, "set delimiter \"\"");
-cmd(inter, "entry .da.lab.d.r.del -textvariable delimiter");
-cmd(inter, "bind .da.lab.d.r.del <FocusIn> {.da.lab.d.r.oth invoke}");
-
-cmd(inter, "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
-numcol=16;
-cmd(inter, "entry .da.lab.d.r.ecol -textvariable numcol");
-cmd(inter, "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}");
-
-
-cmd(inter, "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w");
-cmd(inter, "pack .da.lab.d.tit .da.lab.d.r -anchor w");
-
-cmd(inter, "frame .da.lab.gen -relief groove -bd 2");
-cmd(inter, "label .da.lab.gen.tit -text \"General Options\" -foreground red");
-cmd(inter, "checkbutton .da.lab.gen.fr -text \"Names in first row\" -variable fr");
-cmd(inter, "label .da.lab.gen.miss -text \"Missing values\"");
-cmd(inter, "set misval \"n/a\"");
-cmd(inter, "entry .da.lab.gen.mis_val -textvariable misval");
-cmd(inter, "pack .da.lab.gen.tit .da.lab.gen.fr .da.lab.gen.miss .da.lab.gen.mis_val -anchor w");
-cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
-cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
-cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
-
-cmd(inter, "pack .da.lab.f .da.lab.d .da.lab.gen .da.lab.ok .da.lab.help .da.lab.esc -fill x");
-*choice=0;
-cmd(inter, "focus .da.lab");
-cmd(inter, "bind .da.lab <KeyPress-Return> {.da.lab.ok invoke}");
-cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
-
-while(*choice==0)
- Tcl_DoOneEvent(0);
-
-if(*choice==2)
- goto end;
-
-cmd(inter, "set choice $gp");
-gp=*choice;
-
-*choice=0;
-
-app=(char *)Tcl_GetVar(inter, "misval", 0);
-strcpy(misval,app);
-
-}
-
-if(type_res==4)
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
-else
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
-cmd(inter, msg);
-app=(char *)Tcl_GetVar(inter, "bah",0);
-strcpy(msg, app);
-
-if(strlen(msg)==0)
- goto end;
-fsave=fopen(msg, "wt");  // use text mode for Windows better compatibility
-
-
-if(del!=3) //Delimited files
-{if(del==2)
- {app=(char *)Tcl_GetVar(inter, "delimiter",0);
-  if(strlen(app)==0)
-    strcpy(delimiter,"\t");
-  else
-    strcpy(delimiter,app);
- }
- else
-  strcpy(delimiter, "\t");
-}
-if(fr==1)
-{
-if(del!=3)
-{
-switch(typelab)
-{
-case 1:   //Original labels
-if(gp==1)
- fprintf(fsave, "#");
-for(i=0; i<nv; i++)
-  fprintf(fsave, "%s_%s%s", str[i], tag[i], delimiter);
-break;
-
-case 2: //New names for labels
-  app=(char *)Tcl_GetVar(inter, "newlab",0);
-  if(strlen(app)==0)
-    strcpy(msg,"Var");
-  else
-    strcpy(msg,app);
-if(gp==1)
- fprintf(fsave, "#");
- for(i=0; i<nv; i++)
-   fprintf(fsave, "%s%d%s", msg, i, delimiter);
- break;
-
-case 3:
-for(i=0; i<nv; i++) //Lsd result files
-  fprintf(fsave, "%s %s (%d %d)\t", str[i], tag[i], start[i], end[i]);
-break;
- } //end switch delimiter
-} //and of delimiter header writing
-else //header for Column text files
-  {
-if(gp==1)
- fprintf(fsave, "#");
-
-  strcpy(str1, "                                                                                ");
-   for(i=0; i<nv; i++)
-    {sprintf(msg, "%s_%s", str[i], tag[i]);
-     if(strlen(msg)<=numcol)
-      strcat(msg, str1);
-     msg[numcol]=(char)NULL;
-    fprintf(fsave,"%s", msg);
-    }
-  }
-
-fprintf(fsave,"\n");
-}//end of header writing
-
-if(del!=3) //data delimited writing
-{
-for(j=min_c; j<=max_c; j++)
- {for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// save NaN as n/a
-      fprintf(fsave, "%g%s", data[i][j], delimiter);
-    else
-      fprintf(fsave, "%s%s", misval, delimiter);
-   }
-  fprintf(fsave,"\n");
- }
-
-}
-else //column data writing
-{ strcpy(str1, "00000000000000000000000000000000000000000000000000000000000000000000000000000000");
-for(j=min_c; j<=max_c; j++)
- {for(i=0; i<nv; i++)
-   {
-   if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))
-   {
-      sprintf(msg, "%.10lf", data[i][j]);
-	  strcat(msg, str1);
-	  msg[numcol]=(char)NULL;
-   }
-   else
-      sprintf(msg, "%s", misval);		// save NaN as n/a
-   fprintf(fsave, "%s", msg);
-   }
-  fprintf(fsave,"\n");
- }
-
-}
-fclose(fsave);
-
-end:
-cmd(inter, "destroy .da.lab");
-Tcl_UnlinkVar(inter, "typelab");
-Tcl_UnlinkVar(inter, "numcol");
-Tcl_UnlinkVar(inter, "deli");
-Tcl_UnlinkVar(inter, "fr");
-Tcl_UnlinkVar(inter, "misval");
-
-
-for(i=0; i<nv; i++)
- {delete[] str[i];
-  delete[] tag[i];
- }
-delete[] str;
-delete[] tag;
-delete[] data;
-delete[] start;
-delete[] end;
-*choice=0;
-
-} //end of save_data1
 
 
 /************************
@@ -4675,7 +4360,7 @@ else
 
 /***************************************************
 PLOT_GNU
-Draws the XY graphs, with the first series as X and the others as Y's
+Draws the XY plots, with the first series as X and the others as Y's
 ****************************************************/
 void plot_gnu(int *choice)
 {
@@ -4697,22 +4382,22 @@ nv=*choice;
 *choice=0;
 if(nv==0)
  {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nBring some series in the Selected Series listbox.\"");
+ cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"");
  return;
  }
 
 if(nv>2)
  {
  cmd(inter, "toplevel .da.s");
- cmd(inter, "wm title .da.s \"Graph Type\"");
+ cmd(inter, "wm title .da.s \"Plot Type\"");
  cmd(inter, "wm transient .da.s .da");
 
- cmd(inter, "label .da.s.l -text \"Choose the type of graph\"");
+ cmd(inter, "label .da.s.l -text \"Choose the type of plot\"");
 
  cmd(inter, "frame .da.s.d -relief groove -bd 2");
  cmd(inter, "set ndim 2");
- cmd(inter, "radiobutton .da.s.d.2d -text \"2D graph\" -variable ndim -value 2");
- cmd(inter, "radiobutton .da.s.d.3d -text \"3D graph \" -variable ndim -value 3");
+ cmd(inter, "radiobutton .da.s.d.2d -text \"2D plot\" -variable ndim -value 2");
+ cmd(inter, "radiobutton .da.s.d.3d -text \"3D plot \" -variable ndim -value 3");
 
  cmd(inter, "pack .da.s.d.2d .da.s.d.3d -expand yes -fill x -anchor w");
 
@@ -5131,7 +4816,7 @@ for( ; i<nv; i++)
 fprintf(f, "\n");
 fprintf(f2, "\n");
 
-fprintf(f2, "pause -1 \"Close graph %d)\"\n", cur_plot);
+fprintf(f2, "pause -1 \"Close plot %d)\"\n", cur_plot);
 
 fclose(f);
 fclose(f2);
@@ -5187,7 +4872,7 @@ nv=*choice;
 *choice=0;
 if(nv==0)
  {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"No series selected.\\n\\nBring some series in the Selected Series listbox.\"");
+ cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"");
  return;
  }
 
@@ -5296,9 +4981,9 @@ cmd(inter, "pack .da.s.i.l .da.s.i.e -expand yes -fill x");
 
 cmd(inter, "frame .da.s.d -relief groove -bd 2");
 
-cmd(inter, "label .da.s.d.l -text \"Select the type of graph\"");
-cmd(inter, "radiobutton .da.s.d.2d -text \"2D graph\" -variable ndim -value 2");
-cmd(inter, "radiobutton .da.s.d.3d -text \"3D graph\" -variable ndim -value 3");
+cmd(inter, "label .da.s.d.l -text \"Select the type of plot\"");
+cmd(inter, "radiobutton .da.s.d.2d -text \"2D plot\" -variable ndim -value 2");
+cmd(inter, "radiobutton .da.s.d.3d -text \"3D plot\" -variable ndim -value 3");
 
 cmd(inter, "pack .da.s.d.l .da.s.d.2d .da.s.d.3d -expand yes -fill x -anchor w");
 
@@ -5396,7 +5081,7 @@ cmd(inter, "destroy .da.s");
 
 if(nv%block_length!=0)
  {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Block length is incorrect.\\n\\nIt should be an exact divisor of the number of Variables.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid block length\" -detail \"It should be an exact divisor of the number of variables.\"");
   goto end;
  }
 
@@ -5558,7 +5243,7 @@ strcat(msg,"\n");
 fprintf(f, "%s",msg);
 fprintf(f2, "%s",msg);
 
-fprintf(f2, "pause -1 \"(Close graph %d)\"\n", cur_plot);
+fprintf(f2, "pause -1 \"(Close plot %d)\"\n", cur_plot);
 fclose(f);
 fclose(f2);
 cmd(inter, "set choice $wind");
@@ -5604,7 +5289,7 @@ bool stopErr = false;
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
 if(*choice!=1)
  {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nOne and only one series must be selected.\"");
+ cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"");
  return;
  }
 
@@ -5825,7 +5510,7 @@ for(i=2; i<=nlags; i++)
 fprintf(f, "%s",msg);
 fprintf(f2, "%s",msg);
 
-fprintf(f2, "pause -1 \"Close graph %d)\"\n", cur_plot);
+fprintf(f2, "pause -1 \"Close plot %d)\"\n", cur_plot);
 
 fclose(f);
 fclose(f2);
@@ -5875,7 +5560,7 @@ cmd(inter, msg);
 
 if ( *choice != 0 )			// Gnuplot failed
 {
-	cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during setup.\n\nPlease check if you have selected an adequate configuration for the graph and if Gnuplot is set up properly (Linux and Mac only).\"" );
+	cmd( inter, "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during setup\" -detail \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\"" );
 	*choice=0;
 	return;
 }
@@ -5893,15 +5578,12 @@ cmd(inter, "canvas $p.f.plots -height 430 -width 640 -bg white");
 cmd(inter, "pack $p.f.plots");
 cmd(inter, "pack $p.f");
 cmd(inter, "update");
-//cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 2\\n\"");
 shrink_gnufile();
 cmd(inter, "file delete plot.file; file rename plot_clean.file plot.file");
 
-//cmd(inter, "file stat plot.file stat_data");
-//cmd(inter, "if { $stat_data(size) > 500000} {set choice 1} {set choice 0}");
 if(type==0)
 {
-  cmd(inter, "set answer [tk_messageBox -type yesno -title Option -icon question -default yes -message \"The requested graph may be generated with higher quality by using Gnuplot external from Lsd.\\n\\nPress 'Yes' to generate a low-quality graph within Lsd or 'No' to generate a high-quality graph with Gnuplot.\"]");
+  cmd(inter, "set answer [tk_messageBox -parent .da -type yesno -title Option -icon question -default yes -message \"Plot may be generated with higher quality by using Gnuplot\" -detail \"Press 'Yes' to generate a low-quality plot within Lsd or 'No' to generate a high-quality plot with Gnuplot.\"]");
   cmd(inter, "if {[string compare -nocase $answer \"yes\"] == 0} { set choice 1} {set choice 0}");
   if(*choice ==0)
    type=2;
@@ -5914,7 +5596,7 @@ if(type==2)
    cmd(inter, "destroy $p");
    cmd(inter, "if {$tcl_platform(platform) == \"unix\"} { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } {if {$tcl_platform(os) == \"Windows NT\"} { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }");
    if ( *choice != 0 )			// Gnuplot failed
-		cmd( inter, "tk_messageBox -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during plotting.\n\nPlease check if you have selected an adequate configuration for the graph.\"" );
+		cmd( inter, "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Gnuplot returned error '$choice' during plotting\" -detail \"Please check if you have selected an adequate configuration for the plot.\"" );
  *choice=0;
  return;
  }
@@ -5924,11 +5606,8 @@ cmd(inter, "source plot.file");
 cmd(inter, "update idletasks");
 cmd(inter, "set choice 0");
 
-// cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 3\\n\"");
   cmd(inter, "catch [gnuplot $p.f.plots]");
 cmd(inter, "catch [rename gnuplot \"\"]");
-// cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Step 4\\n\"");
-
 }
 
 void plot_lattice(int *choice)
@@ -5944,13 +5623,6 @@ int i, nv, j, hi, le, done, nlags, ncol, nlin, end;
 
 
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
-/*
-if(*choice!=1)
- {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nOne and only one series must be selected.\"");
- return;
- }
-*/
 nv=*choice;
 data=new double *[nv];
 if(autom_x==1)
@@ -6043,7 +5715,7 @@ ncol=*choice;
 nlin=nv/ncol;
 if(nlin*ncol!=nv)
  {
- cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of columns.\"");
+ cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of columns\"");
  cur_plot--;
  *choice=1;
  goto end;
@@ -6176,7 +5848,7 @@ bin *cl;
 cmd(inter, "set choice [.da.f.vars.ch.v size]");
 if(*choice!=1)
  {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nFor Time Series histograms select only one series.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For time series histograms select only one series.\"");
   cur_plot--;
   sprintf(msg, ".da.f.vars.pl.v delete %d",cur_plot);
   cmd(inter, msg);
@@ -6680,7 +6352,7 @@ cmd(inter, "set choice [.da.f.vars.ch.v size]");
 nv=*choice;
 if(nv<2)
 {
-  cmd(inter, "tk_messageBox -type ok -title Error -icon error -message \"Wrong number of series.\\n\\nFor Cross Section histograms select more than 2 series.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"For Cross Section histograms select more than two series.\"");
   cur_plot--;
   sprintf(msg, ".da.f.vars.pl.v delete %d",cur_plot);
   cmd(inter, msg);
@@ -7262,7 +6934,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
@@ -7613,7 +7285,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 cmd(inter, "toplevel .da.s");
 cmd(inter, "wm title .da.s \"Mov. Average Range\"");
@@ -7757,20 +7429,25 @@ SAVE_DATAzip
 ************************/
 void save_datazip(int *choice)
 {
-
-int idseries, dozip=0, memstep;
+int idseries, memstep;
 char *app;
 char **str, **tag;
 char str1[100], delimiter[10], misval[10];
 int i, nv, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
 double **data, *dd, *ddstart;
-
-#ifdef LIBZ
- gzFile fsavez;
-#else
- FILE *fsavez; 
-#endif 
+const char *descr, *ext;
+const char descrRes[] = "Lsd Result File";
+const char descrTxt[] = "Text File";
+const char extResZip[] = ".res.gz";
+const char extTxtZip[] = ".txt.gz";
+const char extRes[] = ".res";
+const char extTxt[] = ".txt";
 FILE *fsave;
+#ifdef LIBZ
+gzFile fsavez;
+#else
+FILE *fsavez; 
+#endif 
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 cmd(inter, "set nv [.da.f.vars.ch.v size]");
@@ -7782,13 +7459,11 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
 end=new int[nv];
-
-
 str=new char *[nv];
 tag=new char *[nv];
 
@@ -7814,14 +7489,15 @@ for(i=0; i<nv; i++)
 fr=1;
 strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
-typelab=4;
+Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+typelab=3;
 cmd(inter, "toplevel .da.lab");
 cmd(inter, "wm title .da.lab \"Saving Data\"");
 cmd(inter, "wm transient .da.lab .da ");
+cmd(inter, "label .da.lab.l -text \"File format\"");
 cmd(inter, "frame .da.lab.f -relief groove -bd 2");
 cmd(inter, "radiobutton .da.lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3");
 cmd(inter, "radiobutton .da.lab.f.nolsd -text \"Text file\" -variable typelab -value 4");
-cmd(inter, "set dozip 0");
 cmd(inter, "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip");
 
 cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
@@ -7830,9 +7506,9 @@ cmd(inter ,"button .da.lab.esc -width -9 -text Cancel -command {set choice 2}");
 
 cmd(inter, "pack .da.lab.f.lsd .da.lab.f.nolsd -anchor w");
 #ifdef LIBZ
-cmd(inter, "pack .da.lab.f  .da.lab.dozip .da.lab.ok .da.lab.help .da.lab.esc");
+cmd(inter, "pack .da.lab.l .da.lab.f .da.lab.dozip .da.lab.ok .da.lab.help .da.lab.esc");
 #else
-cmd(inter, "pack .da.lab.f  .da.lab.ok .da.lab.help .da.lab.esc");
+cmd(inter, "pack .da.lab.l .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
 #endif
 cmd(inter, "bind .da.lab <Return> {.da.lab.ok invoke}");
 cmd(inter, "bind .da.lab <Escape> {.da.lab.esc invoke}");
@@ -7846,14 +7522,8 @@ if(*choice==2)
  goto end;
 type_res=typelab;
 
-cmd(inter, "set choice $dozip");
-dozip=*choice;
-
 *choice=0;
-cmd(inter, "destroy .da.lab.f .da.lab.ok .da.lab.help .da.lab.esc");
-
- 
-
+cmd(inter, "destroy .da.lab");
 
 if(typelab==4)
 {
@@ -7862,6 +7532,9 @@ Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
 Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
 
 typelab=1;
+cmd(inter, "toplevel .da.lab");
+cmd(inter, "wm title .da.lab \"Saving Data\"");
+cmd(inter, "wm transient .da.lab .da ");
 cmd(inter, "frame .da.lab.f -relief groove -bd 2");
 cmd(inter, "label .da.lab.f.tit -text \"Labels to use\" -foreground red");
 
@@ -7888,7 +7561,6 @@ cmd(inter, "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable
 numcol=16;
 cmd(inter, "entry .da.lab.d.r.ecol -textvariable numcol");
 cmd(inter, "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}");
-
 
 cmd(inter, "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w");
 cmd(inter, "pack .da.lab.d.tit .da.lab.d.r -anchor w");
@@ -7923,13 +7595,26 @@ gp=*choice;
 
 app=(char *)Tcl_GetVar(inter, "misval", 0);
 strcpy(misval,app);
-
 }
 
-if(type_res==4)
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\" -initialdir [pwd] -defaultextension \"txt\" -filetypes {{{Text Files} {.txt}} {{Lsd Result Files} {.res}} {{All Files} {*}} }]");
+if ( type_res == 4 )
+{
+	descr = descrTxt;
+	if ( ! dozip )
+		ext = extTxt;
+	else
+		ext = extTxtZip;
+}
 else
-  sprintf(msg, "set bah [tk_getSaveFile -title \"Save Data File\"  -initialdir [pwd] -defaultextension \"res\" -filetypes {{{Lsd Result Files} {.res}} {{Text Files} {.txt}} {{All Files} {*}} }]");
+{
+	descr = descrRes;
+	if ( ! dozip )
+		ext = extRes;
+	else
+		ext = extResZip;
+}
+
+sprintf(msg, "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir [pwd] -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All Files} {*}} }]", ext, descr, ext);
 cmd(inter, msg);
 app=(char *)Tcl_GetVar(inter, "bah",0);
 strcpy(msg, app);
@@ -7938,16 +7623,12 @@ if(strlen(msg)==0)
  goto end;
 if(dozip==1) 
  {
- strcat(msg, ".gz");
  #ifdef LIBZ
-  fsavez=gzopen(msg, "wb");
+  fsavez=gzopen(msg, "wt");
  #endif 
-
-   
  } 
 else
  fsave=fopen(msg, "wt");  // use text mode for Windows better compatibility
-
 
 if(del!=3) //Delimited files
 {if(del==2)
@@ -8078,9 +7759,6 @@ if(del!=3) //data delimited writing
 
 if(dozip==1)
 {
-/**********/
-//WORKS
-
 #ifdef LIBZ
 for(j=min_c; j<=max_c; j++)
  {
@@ -8094,28 +7772,6 @@ for(j=min_c; j<=max_c; j++)
   gzprintf(fsavez,"\n");
  }
 #endif 
-/**********************
-
-if(nv>1)
- memstep=&data[1][0]-&data[0][0];
-else
- memstep=0; 
-ddstart=&data[0][min_c]; 
-for(j=min_c; j<=max_c; j++)
- {
- dd=ddstart;
-  for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i])
-      gzprintf(fsavez, "%g%s", *dd, delimiter);
-    else
-      gzprintf(fsavez, "%s%s", misval, delimiter);
-      
-    dd+=memstep;  
-   }
-  ddstart+=1; 
-  gzprintf(fsavez,"\n");
- }
-**********************/
 }
 else
 {
@@ -8175,11 +7831,11 @@ else
 end:
 cmd(inter, "destroy .da.lab");
 Tcl_UnlinkVar(inter, "typelab");
+Tcl_UnlinkVar(inter, "dozip");
 Tcl_UnlinkVar(inter, "numcol");
 Tcl_UnlinkVar(inter, "deli");
 Tcl_UnlinkVar(inter, "fr");
 Tcl_UnlinkVar(inter, "misval");
-
 
 for(i=0; i<nv; i++)
  {delete[] str[i];
@@ -8196,8 +7852,6 @@ delete[] end;
 
 void plog_series(int *choice)
 {
-
-
 int i, nv, j, k, *start, *end, idseries, flt;
 double nmax, nmin, nmean, nvar, nn, thflt;
 double step;
@@ -8214,7 +7868,7 @@ if(nv==0)
  return;
 
 if(logs)
-  cmd(inter, "tk_messageBox -type ok -icon warning -title Warning -message \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
+  cmd(inter, "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"");
 
 data=new double *[nv];
 start=new int[nv];
@@ -8250,10 +7904,7 @@ for(i=0; i<nv; i++)
    
    data[i]=find_data(idseries);
    }
-
  }
-
-
 
 if(autom_x==1||min_c>=max_c)
 {
@@ -8307,5 +7958,4 @@ for(i=0; i<nv; i++)
  }
 delete[] str;
 delete[] tag; 
-
 }    

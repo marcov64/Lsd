@@ -736,7 +736,7 @@ case 6:
 
 case 7:
   cmd(inter, "set oldpath [pwd]");
-  cmd( inter, "set filename [ tk_getOpenFile -title \"Select Text File\" -filetypes { { { \"Text Files\" } {.txt} } } ]" );
+  cmd( inter, "set filename [ tk_getOpenFile -parent . -title \"Select Text File\" -filetypes { { { \"Text Files\" } {.txt} } } ]" );
   l=(char *)Tcl_GetVar(inter, "filename",0);
   if(l!=(char *)NULL && strcmp(l, ""))
  { cmd(inter, "cd [file dirname $filename]");
@@ -979,7 +979,7 @@ for(i=0; i<s->nvalues; i++)
  {
 	if ( ! save_configuration( root, *findex ) )
 	{
-		cmd( inter , "tk_messageBox -type ok -icon error -title Error -message \"Configuration files cannot be saved.\n\nCheck if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+		cmd( inter , "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 		return;
 	}
 	*findex=*findex+1;
@@ -1126,7 +1126,7 @@ for(i=0; i<s->nvalues;)
   tok=strtok(sss, SEP);		// accepts several separators
   if(tok==NULL)		// finished too early?
   {
-	  cmd(inter, "tk_messageBox -title \"Sensitivity Analysis\" -icon error -type ok -message \"There are less values than required.\n\nPlease insert the correct number of values.\"");
+	  cmd(inter, "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"");
 	  *choice=0;
 	  cmd(inter, "focus -force .sens.t");
 	  break;
@@ -2538,7 +2538,7 @@ void sensitivity_doe( long *findex, design *doe )
 		// generate a configuration file for the experiment
 		if ( ! save_configuration( root, *findex ) )
 		{
-			cmd( inter , "tk_messageBox -type ok -icon error -title Error -message \"Configuration files cannot be saved.\n\nCheck if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+			cmd( inter , "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 			return;
 		}
 		
