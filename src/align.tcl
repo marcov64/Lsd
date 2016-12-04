@@ -112,7 +112,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 }
 
 # configure the window
-proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } } {
+proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } } {
 	if { $sizeX != 0 } {
 		$w configure -width $sizeX 
 	}
@@ -159,7 +159,11 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	wm deiconify $w
 	raise $w
-	focus $w
+	if [ winfo exists $w.$buttonF.ok ] {
+		focus $w.$buttonF.ok
+	} {
+		focus $w
+	}
 	update
 #	plog "\nshowtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, pos:$pos)" 
 }

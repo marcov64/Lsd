@@ -1408,68 +1408,58 @@ sequence
 
 case 24:
 /*
-Insert series not saved from the current model.
+Insert new series (from disk or combining existing series).
 */
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd( inter, "set choice [.da.f.vars.ch.v size]" );
 if ( *choice > 0 )
 {
-	cmd(inter, "toplevel .da.s");
-	cmd(inter, "wm title .da.s \"Choose Data Source\"");
-	cmd(inter, "wm transient .da.s .da");
-	cmd(inter, "label .da.s.l -text \"Source of additional series\"");
-	cmd(inter, "set bidi 4");
-	cmd(inter, "frame .da.s.i -relief groove -bd 2");
+	cmd( inter, "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
+	cmd( inter, "label .da.s.l -text \"Source of additional series\"" );
 
-	cmd(inter, "radiobutton .da.s.i.c -text \"Create one series from selected\" -variable bidi -value 4");
-	cmd(inter, "bind .da.s.i.c <Down> {set bidi 5; focus -force .da.s.i.a}");
-	cmd(inter, "radiobutton .da.s.i.a -text \"Create mov. average series from selected\" -variable bidi -value 5");
-	cmd(inter, "bind .da.s.i.a <Up> {set bidi 4; focus -force .da.s.i.c}");
-	cmd(inter, "bind .da.s.i.a <Down> {set bidi 1; focus -force .da.s.i.f}");
-	cmd(inter, "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1");
-	cmd(inter, "bind .da.s.i.f <Up> {set bidi 5; focus -force .da.s.i.a}");
+	cmd( inter, "set bidi 4" );
+	cmd( inter, "frame .da.s.i -relief groove -bd 2" );
+	cmd( inter, "radiobutton .da.s.i.c -text \"Create new series from selected\" -variable bidi -value 4" );
+	cmd( inter, "radiobutton .da.s.i.a -text \"Moving average series from selected\" -variable bidi -value 5" );
+	cmd( inter, "radiobutton .da.s.i.f -text \"File(s) of saved results\" -variable bidi -value 1" );
+	cmd( inter, "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w" );
 
-	cmd(inter, "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w");
-	cmd(inter, "pack .da.s.l .da.s.i");
+	cmd( inter, "pack .da.s.l .da.s.i -pady 5 -padx 5" );
+	cmd( inter, "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#add_series } { set choice 2 }" );
+	cmd( inter, "showtop .da.s centerW" );
 
-	cmd(inter, "button .da.s.ok -width -9 -text Ok -command {set choice 1}");
-	cmd(inter, "button .da.s.help -width -9 -text Help -command {LsdHelp mdatares.html#add_series}");
-	cmd(inter, "button .da.s.esc -width -9 -text Cancel -command {set choice 2}");
+	*choice = 0;
+	while ( *choice == 0 )
+	  Tcl_DoOneEvent( 0 );
 
-	cmd(inter, "pack .da.s.i .da.s.ok .da.s.help .da.s.esc");
-	cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
-	cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
+	cmd( inter, "destroytop .da.s" );
 
-	cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
+	if ( *choice == 2 )
+	{
+		*choice = 0;
+		goto there;
+	}
 
-	*choice=0;
-	while(*choice==0)
-	  Tcl_DoOneEvent(0);
-
-	cmd(inter, "destroy .da.s");
-
-	if(*choice==2)
-	 {*choice=0;
-	  goto there;
-	 }
-
-	cmd(inter, "set choice $bidi");
-	if(*choice==4)
-	 {
-	  *choice=0;
-	  create_series(choice);
-	 }
-	if(*choice==5)
-	 {
-	  *choice=0;
-	  create_maverag(choice);
-	 }
-	
-	*choice=0;
+	cmd( inter, "set choice $bidi" );
+	switch ( *choice )
+	{
+		case 4:
+			*choice = 0;
+			create_series( choice );
+			*choice = 0;
+			goto there;
+		case 5:
+			*choice = 0;
+			create_maverag( choice );
+			*choice = 0;
+			goto there;
+		case 1:
+			*choice = 1;
+	}
 }
 else
 	*choice = 1;
 
-if(*choice==1)
+if ( *choice == 1 )
 {
 	bool gz = false;
 #ifdef LIBZ
