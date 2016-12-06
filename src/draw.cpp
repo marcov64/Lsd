@@ -80,7 +80,9 @@ int step_level=15;
 int step=10;
 int h0 = 255;					// initial horizontal position
 int v0 = 10;					// initial vertical position
-float hpan0 = 0.35;				// initial horizontal scroll %
+float hpan0win = 0.35;			// initial horizontal scroll % - Windows
+float hpan0lin = 0.35;			// Linux
+float hpan0mac = 0.23;			// Mac
 int hsz = 600;					// horizontal window size in pixels
 int vsz = 400;					// vertical window size in pixels
 int hcvsz = 1920;				// horizontal canvas size
@@ -125,8 +127,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd(inter, "pack $c.f.hs -side bottom -fill x");
 	cmd(inter, "pack $c.f.c -expand yes -fill both");
 	cmd(inter, "pack $c.f -expand yes -fill both");
-	sprintf( msg, "$c.f.c xview moveto %f", hpan0 );
+	sprintf( msg, "set hpan0win %f; set hpan0lin %f; set hpan0mac %f", hpan0win, hpan0lin, hpan0mac );
 	cmd( inter, msg );
+cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { $c.f.c xview moveto $hpan0win } { if [ string equal $tcl_platform(os) Darwin ] { $c.f.c xview moveto $hpan0mac } { $c.f.c xview moveto $hpan0lin } }" );
 
 	draw_obj(inter, t, top, v0, h0, 0);
 

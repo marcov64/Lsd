@@ -128,9 +128,6 @@ set k [lindex $lgroup $j]
 incr j
 .l.l.l insert end "$i" 
 }
-#single monitor version
-#set w .l; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 - [winfo vrootx [winfo parent $w]]]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 - [winfo vrooty [winfo parent $w]]]; wm geom $w +$x+$y; update; wm deiconify $w
-#dual monitor version
 showtop .l centerS
 }
 

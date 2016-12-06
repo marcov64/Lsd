@@ -357,18 +357,18 @@ for(j=1, cur=c; cur->up!=NULL; cur=cur->up, j++)
   cmd(inter, msg); 
   }
   
-sprintf(msg, "focus -force $c.f.f%d.e; $c.f.f%d.e selection range 0 end", j-1, j-1);
+sprintf(msg, "focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end", j-1, j-1);
 cmd(inter, msg);
 
 for(j--, cur=c; cur->up!=NULL; cur=cur->up, j--)
   {//pack in inverse order
   sprintf(msg, "pack $c.f.f%d -fill both -expand yes", j);
   cmd(inter, msg);
-  sprintf(msg, "bind $c.f.f%d.e <Return> {focus -force $c.f.f%d.e; $c.f.f%d.e selection range 0 end}", j,j-1, j-1);
+  sprintf(msg, "bind $c.f.f%d.e <Return> {focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end}", j,j-1, j-1);
   cmd(inter, msg);
   }
 
-  sprintf(msg, "bind $c.f.f1.e <Return> \"focus -force $c.com\"");
+  sprintf(msg, "bind $c.f.f1.e <Return> \"focus $c.com\"");
   cmd(inter, msg);
 
 sprintf(msg, "label $c.res -fg red -text \"Instance chosen is number: %d\"",i);
@@ -513,13 +513,14 @@ cmd(inter, "pack $n.cp.l $n.cp.e $n.cp.compute -side left");
  cmd(inter, "bind $n <KeyPress-Return> {set conf 1; set choice 1}");
  cmd(inter, "pack $n.cp $n.ef -pady 5 -fill both -expand yes");
  cmd( inter, "okhelpcancel $n b { set conf 1; set choice 1 } { LsdHelp mdataobjn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
- cmd(inter, "focus $n.e");
 
  cmd( inter, "showtop $n centerS" );
+ cmd(inter, "focus $n.e");
 
 here_objec_num:
-		 while(*choice==0)
-		  Tcl_DoOneEvent(0);
+ while(*choice==0)
+  Tcl_DoOneEvent(0);
+	  
 k=*choice;
 
 cmd(inter, "set choice $conf");
@@ -631,7 +632,6 @@ cmd( inter, "set d .delobj" );
 cmd( inter, "newtop $d \"Delete Objects\" { set choice 3 }" );
 cmd(inter, "set conf 0");
 
-
 sprintf(ch, "label $d.txt1 -text \"Do you want to delete the last\"");
 cmd(inter, ch);
 
@@ -646,6 +646,7 @@ cmd(inter, "button $d.b.choose -width -9 -text Choose -command {set choice 2}");
 cmd(inter, "pack $d.b.last $d.b.choose -padx 10 -side left");
 cmd(inter, "pack $d.b -pady 5");
 cmd( inter, "helpcancel $d b2 { LsdHelp mdataobjn.html#pick_remove } { set choice 3 }" );
+
 cmd( inter, "showtop $d centerS" );
 
 while(*choice==0)
@@ -679,9 +680,10 @@ else
     cmd(inter, "bind $d.e <KeyPress-Return> {set choice 1}");
 	 cmd(inter, "pack $d.tit $d.tit1 $d.e");
 	cmd( inter, "okhelpcancel $d b { set choice 1 } { LsdHelp mdataobjn.html#pick_remove } { set choice 2 }" );
+	
 	cmd( inter, "showtop $d centerS" );
-    cmd(inter, "focus $d.e");
     cmd(inter, "$d.e selection range 0 end");
+    cmd(inter, "focus $d.e");
   
   last=0;
   val=1;

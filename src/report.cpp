@@ -192,7 +192,7 @@ cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
 
 cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
 
-cmd( inter, "okhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
+cmd( inter, "okXhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
 
 cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}");
 cmd(inter, "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}");
@@ -208,11 +208,10 @@ Tcl_LinkVar(inter, "code", (char *) &code, TCL_LINK_INT);
 Tcl_LinkVar(inter, "init", (char *) &init, TCL_LINK_INT);
 
 cmd(inter, "showtop .w centerS");
-cmd(inter, "focus -force .w.b.ok");
 
 here_create_report:
-  while(*choice==0)
-   Tcl_DoOneEvent(0);
+while(*choice==0)
+ Tcl_DoOneEvent(0);
 
 Tcl_UnlinkVar(inter, "code");
 Tcl_UnlinkVar(inter, "init");

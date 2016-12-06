@@ -1059,8 +1059,10 @@ if(s==NULL || !strcmp(s, ""))
   else
 	cmd(inter, "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2");
-  cmd(inter, "focus -force .t");
+  
   cmd( inter, "showtop .t centerS" );
+  cmd(inter, "focus .t");
+  
     s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
   if ( run && ! strcmp( s, "1" ) )	// auto hide LMM if appropriate
 	cmd(inter, "wm iconify .");
@@ -1388,7 +1390,7 @@ if(choice==10)
 {
 
 /* Find a line in the text*/
-cmd(inter, "if {[winfo exists .search_line]==1} {set choice 0; focus -force .search_line.e} {}");
+cmd(inter, "if {[winfo exists .search_line]==1} {set choice 0; focus .search_line.e} {}");
 if(choice==0)
  goto loop;
 
@@ -1407,9 +1409,9 @@ cmd(inter, "pack .search_line.b.ok .search_line.b.esc -padx 1 -pady 5 -side left
 cmd(inter, "pack .search_line.l .search_line.e");
 cmd(inter, "pack .search_line.b -side right");
 
-cmd(inter, "focus -force .search_line.e");
-
 cmd( inter, "showtop .search_line" );
+cmd(inter, "focus .search_line.e");
+
 choice=0;
 goto loop;
 }
@@ -1417,7 +1419,7 @@ goto loop;
 if(choice==11)
 {
 /* Find a text pattern in the text*/
-cmd(inter, "if {[winfo exists .find]==1} {set choice 0; focus -force .find.e} {}");
+cmd(inter, "if {[winfo exists .find]==1} {set choice 0; focus .find.e} {}");
 if(choice==0)
  goto loop;
 
@@ -1440,7 +1442,6 @@ cmd(inter, "bind .find.e <Down> {if { $curcounter <= $lfindcounter} {incr curcou
 
 cmd(inter, "button .find.b.esc -width -9 -text Cancel -command {destroytop .find}");
 
-
 cmd(inter, "bind .find <KeyPress-Return> {.find.b.ok invoke}");
 cmd(inter, "bind .find <KeyPress-Escape> {.find.b.esc invoke}");
 
@@ -1448,10 +1449,10 @@ cmd(inter, "pack .find.b.ok .find.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .find.l .find.e .find.r1 .find.r2 .find.c -fill x");
 cmd(inter, "pack .find.b -side right");
 
-cmd(inter, "focus -force .find.e");
+cmd( inter, "showtop .find" );
+cmd(inter, "focus .find.e");
 
 choice=0;
-cmd( inter, "showtop .find" );
 goto loop;
 }
 
@@ -1625,8 +1626,10 @@ cmd(inter, "bind .a <Up> {.a.f.r1 invoke}");
 cmd(inter, "bind .a <Down> {.a.f.r2 invoke}");
 
 cmd( inter, "showtop .a" );
+
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 
@@ -1647,16 +1650,16 @@ cmd(inter, "label .a.tit -text \"Create a new group in group:\\n $modelgroup\"")
 cmd(inter, "label .a.mname -text \"Insert new group name\"");
 cmd(inter, "set mname \"New group\"");
 cmd(inter, "entry .a.ename -width 30 -textvariable mname");
-cmd(inter, "bind .a.ename <Return> {focus -force .a.edir; .a.edir selection range 0 end}");
+cmd(inter, "bind .a.ename <Return> {focus .a.edir; .a.edir selection range 0 end}");
 
 cmd(inter, "label .a.mdir -text \"Insert a (non-existing) directory name\"");
 cmd(inter, "set mdir \"newgroup\"");
 cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
-cmd(inter, "bind .a.edir <Return> {focus -force .a.tdes}");
+cmd(inter, "bind .a.edir <Return> {focus .a.tdes}");
 
 cmd(inter, "label .a.ldes -text \"Insert a short description of the group\"");
 cmd(inter, "text .a.tdes -width 30 -heig 3");
-cmd(inter, "bind .a.tdes <Control-e> {focus -force .a.b.ok}; bind .a.tdes <Control-E> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.tdes <Control-e> {focus .a.b.ok}; bind .a.tdes <Control-E> {focus .a.b.ok}");
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -1667,10 +1670,10 @@ cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mdir .a.edir .a.ldes .a.tdes");
 cmd(inter, "pack .a.b -side right");
 
-cmd(inter, "focus -force .a.ename");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.ename");
 cmd(inter, ".a.ename selection range 0 end");
 
-cmd( inter, "showtop .a" );
 here_newgroup:
 choice=0;
 while(choice==0)
@@ -1687,7 +1690,7 @@ if(choice==2)
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
  {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces.\"");
-  cmd(inter, "focus -force .a.edir");
+  cmd(inter, "focus .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
@@ -1723,17 +1726,17 @@ cmd(inter, "label .a.tit -text \"Create a new model in group:\\n $modelgroup\"")
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
 cmd(inter, "set mname \"New model\"");
 cmd(inter, "entry .a.ename -width 30 -textvariable mname");
-cmd(inter, "bind .a.ename <Return> {focus -force .a.ever; .a.ever selection range 0 end}");
+cmd(inter, "bind .a.ename <Return> {focus .a.ever; .a.ever selection range 0 end}");
 
 cmd(inter, "label .a.mver -text \"Insert a version number\"");
 cmd(inter, "set mver \"0.1\"");
 cmd(inter, "entry .a.ever -width 30 -textvariable mver");
-cmd(inter, "bind .a.ever <Return> {focus -force .a.edir; .a.edir selection range 0 end}");
+cmd(inter, "bind .a.ever <Return> {focus .a.edir; .a.edir selection range 0 end}");
 
 cmd(inter, "label .a.mdir -text \"Insert a (non-existing) directory name\"");
 cmd(inter, "set mdir \"New\"");
 cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
-cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.edir <Return> {focus .a.b.ok}");
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -1744,10 +1747,9 @@ cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left -fill x");
 cmd(inter, "pack .a.tit .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
 cmd(inter, "pack .a.b -side right");
 
-cmd(inter, "focus -force .a.ename");
-cmd(inter, ".a.ename selection range 0 end");
-
 cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.ename");
+cmd(inter, ".a.ename selection range 0 end");
 
 loop_copy_new:
 while(choice==0)
@@ -1764,7 +1766,7 @@ if(choice==2)
 cmd(inter, "if {[llength [split $mdir]]>1} {set choice -1} {}");
 if(choice==-1)
  {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces.\"");
-  cmd(inter, "focus -force .a.edir");
+  cmd(inter, "focus .a.edir");
   cmd(inter, ".a.edir selection range 0 end");
   goto here_newgroup;
  } 
@@ -2089,7 +2091,7 @@ goto loop;
 if(choice==21)
 {
 /* Find and replace a text pattern in the text*/
-cmd(inter, "if {[winfo exists .l]==1} {set choice 0; focus -force .l.e} {}");
+cmd(inter, "if {[winfo exists .l]==1} {set choice 0; focus .l.e} {}");
 if(choice==0)
  goto loop;
 
@@ -2121,12 +2123,11 @@ cmd(inter, "pack .l.l .l.e .l.r .l.s .l.r1 .l.r2 .l.c");
 cmd(inter, "pack .l.b1");
 cmd(inter, "pack .l.b2 -side right");
 
-cmd(inter, "focus -force .l.e");
+cmd( inter, "showtop .l" );
+cmd(inter, "focus .l.e");
 cmd(inter, ".f.t.t tag conf found -background red -foreground white");
 
 choice=0;
-
-cmd( inter, "showtop .l" );
 here:
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -2142,7 +2143,7 @@ while(choice==4)
 if(choice!=0)  
   cmd(inter, "set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]"); 
   cmd(inter, "raise .l");
-  cmd(inter, "focus -force .l");
+  cmd(inter, "focus .l");
   Tcl_DoOneEvent(0);  
   goto here;
  }
@@ -2169,7 +2170,7 @@ cmd( inter, "newtop .a \"Insert an Equation\" { .a.b.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.label <Return> {focus .a.b.ok}");
 
 cmd(inter, "frame .a.f -relief groove -bd 2");
 
@@ -2189,12 +2190,13 @@ cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
 cmd(inter, "pack .a.b -side right");
 
-cmd(inter, "focus -force .a.label");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2239,7 +2241,7 @@ cmd( inter, "newtop .a \"Insert an Equation\" { .a.b.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the label of the variable\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.label <Return> {focus .a.b.ok}");
 
 cmd(inter, "frame .a.f -relief groove -bd 2");
 
@@ -2259,12 +2261,13 @@ cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.f");
 cmd(inter, "pack .a.b -side right");
 
-cmd(inter, "focus -force .a.label");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2314,22 +2317,22 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to compute\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -2342,12 +2345,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2391,22 +2395,22 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to compute\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -2419,12 +2423,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2462,18 +2467,18 @@ cmd( inter, "newtop .a \"Insert a 'CYCLE' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 
 cmd(inter, "label .a.l2 -text \"Type below the cycling pointer\"");
 cmd(inter, "set v_obj cur");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.par; .a.par selection range 0 end}");
+cmd(inter, "bind .a.obj <Return> {focus .a.par; .a.par selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the parent pointer\"");
 cmd(inter, "set v_par p");
 cmd(inter, "entry .a.par -width 6 -textvariable v_par");
-cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.par <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -2486,12 +2491,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.label");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2560,18 +2566,18 @@ cmd( inter, "newtop .a \"Insert a 'for' Cycle\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to cycle through\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 
 cmd(inter, "label .a.l2 -text \"Type below the cycling pointer\"");
 cmd(inter, "set v_obj cur");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.par; .a.par selection range 0 end}");
+cmd(inter, "bind .a.obj <Return> {focus .a.par; .a.par selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the parent pointer\"");
 cmd(inter, "set v_par p");
 cmd(inter, "entry .a.par -width 6 -textvariable v_par");
-cmd(inter, "bind .a.par <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.par <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -2584,12 +2590,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.label .a.l2 .a.obj .a.l3 .a.par");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.label");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.label");
 cmd(inter, ".a.label selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2670,13 +2677,12 @@ cmd(inter, "pack .a.f -side right");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-cmd(inter, "focus -force .a.r.cal");
-
-//cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
-
 cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.r.cal");
+
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2720,7 +2726,6 @@ cmd(inter, "radiobutton .a.r.mult -text \"multiply - multiply the value of a par
 cmd(inter, "radiobutton .a.r.for -text \"for - insert a cycle over a group of objects\" -underline 0 -variable res -value 27");
 cmd(inter, "radiobutton .a.r.math -text \"Insert a mathematical/statistical function\" -underline 12 -variable res -value 51");
 
-
 cmd(inter, "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-c> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.cal invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-u> {.a.r.sum invoke; set choice 1}; bind .a <KeyPress-U> {.a.r.sum invoke; set choice 1}");
@@ -2748,15 +2753,11 @@ cmd(inter, "pack .a.f -side right");
 cmd(inter, "bind .a <Return> {.a.f.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f.esc invoke}");
 
-cmd(inter, "focus -force .a.r.cal");
-
-//cmd(inter, "bind . <Button-1> {raise .a; focus -force .a}");
-
-cmd(inter, "focus -force .a.f.ok");
-
 cmd( inter, "showtop .a" );
+
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2788,22 +2789,22 @@ sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to increase\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.val; .a.val selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the value to add\"");
 cmd(inter, "set v_val 1");
 cmd(inter, "entry .a.val -width 15 -textvariable v_val");
-cmd(inter, "bind .a.val <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to increment\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -2815,12 +2816,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2860,22 +2862,22 @@ sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to increase\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.val; .a.val selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the value to add\"");
 cmd(inter, "set v_val 0");
 cmd(inter, "entry .a.val -width 15 -textvariable v_val");
-cmd(inter, "bind .a.val <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to increment\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -2887,12 +2889,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -2931,22 +2934,22 @@ sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to multiply\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.val; .a.val selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the value to multiply\"");
 cmd(inter, "set v_val 0");
 cmd(inter, "entry .a.val -width 15 -textvariable v_val");
-cmd(inter, "bind .a.val <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to multiply\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
@@ -2960,12 +2963,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3006,22 +3010,22 @@ sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to multiply\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.val; .a.val selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the value to multiply\"");
 cmd(inter, "set v_val 0");
 cmd(inter, "entry .a.val -width 15 -textvariable v_val");
-cmd(inter, "bind .a.val <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to multiply\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 	
 cmd(inter, "frame .a.f");	
@@ -3034,12 +3038,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.val .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3077,22 +3082,22 @@ cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 cmd(inter, "set v_num 0");
 
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Label of the var. or par. to overwrite\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Time step appearing as latest computation for the new value\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3105,12 +3110,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3146,22 +3152,22 @@ cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 cmd(inter, "set v_num 0");
 
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to write\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the time step appearing as latest computation for the new value\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3174,12 +3180,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3208,27 +3215,27 @@ cmd( inter, "newtop .a \"Insert a 'search_var_cond' Command\" { .a.f.esc invoke 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the value to search for\"");
 cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3241,12 +3248,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3275,27 +3283,27 @@ cmd( inter, "newtop .a \"Insert a 'SEARCH_CND' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the value to search for\"");
 cmd(inter, "set v_num 0");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3308,12 +3316,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3346,24 +3355,24 @@ cmd( inter, "newtop .a \"Insert a 'SORT' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
-cmd(inter, "bind .a.obj1 <Return> {focus -force .a.obj0; .a.obj0 selection range 0 end}");
+cmd(inter, "bind .a.obj1 <Return> {focus .a.obj0; .a.obj0 selection range 0 end}");
 
 cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
 cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.r_up}");
+cmd(inter, "bind .a.label <Return> {focus .a.r_up}");
 
 cmd(inter, "label .a.l3 -text \"Set the sorting direction\"");
 cmd(inter, "set v_direction 1");
 cmd(inter, "radiobutton .a.r_up -text Increasing -variable v_direction -value 1");
 cmd(inter, "radiobutton .a.r_down -text Decreasing -variable v_direction -value 2");
 
-cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.l3 <Return> {focus .a.f.ok}");
 
 
 
@@ -3377,12 +3386,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj1");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3419,24 +3429,24 @@ cmd( inter, "newtop .a \"Insert a 'lsdqsort' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
-cmd(inter, "bind .a.obj1 <Return> {focus -force .a.obj0; .a.obj0 selection range 0 end}");
+cmd(inter, "bind .a.obj1 <Return> {focus .a.obj0; .a.obj0 selection range 0 end}");
 
 cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
 cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.r_up}");
+cmd(inter, "bind .a.label <Return> {focus .a.r_up}");
 
 cmd(inter, "label .a.l3 -text \"Set the sorting direction\"");
 cmd(inter, "set v_direction 1");
 cmd(inter, "radiobutton .a.r_up -text Increasing -variable v_direction -value 1");
 cmd(inter, "radiobutton .a.r_down -text Decreasing -variable v_direction -value 2");
 
-cmd(inter, "bind .a.l3 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.l3 <Return> {focus .a.f.ok}");
 
 
 
@@ -3450,12 +3460,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.obj1 .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.r_up .a.r_down");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj1");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj1");
 cmd(inter, ".a.obj1 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3517,11 +3528,12 @@ cmd(inter, "pack .a.r1 .a.r2 .a.r3 .a.r4 .a.r5 .a.r6 .a.r7 .a.r8 .a.r9 .a.r10 .a
 cmd(inter, "pack .a.f -side right");
 choice=0;
 
-cmd(inter, "focus -force .a.e1; .a.e1 selection range 0 end");
-
 cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.e1; .a.e1 selection range 0 end");
+
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3583,28 +3595,28 @@ cmd( inter, "newtop .a \"Insert an 'ADDOBJ' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
 
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.numobj; .a.numobj selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.numobj; .a.numobj selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
 cmd(inter, "set numobj \"1\"");
 cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
-cmd(inter, "bind .a.numobj <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.numobj <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object to copy its initialization, if any.\"");
 cmd(inter, "set v_num \"cur\"");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the parent object containing the new object(s)\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3617,13 +3629,14 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l2 .a.label .a.l3 .a.numobj .a.l1 .a.v_num .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
  
 choice=0;
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
  
  
@@ -3674,28 +3687,28 @@ cmd( inter, "newtop .a \"Insert an 'add_n_objects2' Command\" { .a.f.esc invoke 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object, if available\"");
 cmd(inter, "set v_num \"\"");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 
 cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
 cmd(inter, "set numobj \"1\"");
 cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
-cmd(inter, "bind .a.numobj <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.numobj <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the parent object where to add the new object\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3708,12 +3721,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.numobj .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3743,7 +3757,7 @@ cmd( inter, "newtop .a \"Insert a 'DELETE' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3755,12 +3769,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l0 .a.obj0");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3791,7 +3806,7 @@ cmd( inter, "newtop .a \"Insert a 'delete_obj' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3803,12 +3818,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l0 .a.obj0");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3840,32 +3856,32 @@ cmd( inter, "newtop .a \"Insert a 'RNDDRAW' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
 cmd(inter, "set v_num object");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.tot; .a.tot selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.tot; .a.tot selection range 0 end}");
 
 cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
 cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
-cmd(inter, "bind .a.tot <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.tot <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -3878,12 +3894,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -3933,33 +3950,32 @@ cmd( inter, "newtop .a \"Insert a 'draw_rnd' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.v_num; .a.v_num selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
 cmd(inter, "set v_num Object");
 cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.tot; .a.tot selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.tot; .a.tot selection range 0 end}");
 
 cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
 cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
-cmd(inter, "bind .a.tot <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.tot <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
-
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3971,12 +3987,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l31 .a.tot .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -4012,17 +4029,17 @@ cmd( inter, "newtop .a \"Insert a 'SEARCH' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.lab; .a.lab selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.lab; .a.lab selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
 cmd(inter, "set v_lab Object");
 cmd(inter, "entry .a.lab -width 20 -textvariable v_lab");
-cmd(inter, "bind .a.lab <Return> {focus -force .a.obj1; .a.obj1 selection range 0 end}");
+cmd(inter, "bind .a.lab <Return> {focus .a.obj1; .a.obj1 selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
-cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj1 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -4034,12 +4051,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -4070,17 +4088,17 @@ cmd( inter, "newtop .a \"Insert a 'search' Command\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
 cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
-cmd(inter, "bind .a.obj0 <Return> {focus -force .a.lab; .a.lab selection range 0 end}");
+cmd(inter, "bind .a.obj0 <Return> {focus .a.lab; .a.lab selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
 cmd(inter, "set v_lab Object");
 cmd(inter, "entry .a.lab -width 20 -textvariable v_lab");
-cmd(inter, "bind .a.lab <Return> {focus -force .a.obj1; .a.obj1 selection range 0 end}");
+cmd(inter, "bind .a.lab <Return> {focus .a.obj1; .a.obj1 selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
 cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
-cmd(inter, "bind .a.obj1 <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj1 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -4092,12 +4110,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l0 .a.obj0 .a.l1 .a.lab .a.l2 .a.obj1");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.obj0");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.obj0");
 cmd(inter, ".a.obj0 selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -4130,22 +4149,22 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to sum\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -4158,12 +4177,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -4206,22 +4226,22 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.label; .a.label selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to sum\"");
 cmd(inter, "set v_label Label");
 cmd(inter, "entry .a.label -width 30 -textvariable v_label");
-cmd(inter, "bind .a.label <Return> {focus -force .a.lag; .a.lag selection range 0 end}");
+cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
 cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
-cmd(inter, "bind .a.lag <Return> {focus -force .a.obj; .a.obj selection range 0 end}");
+cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
-cmd(inter, "bind .a.obj <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -4234,12 +4254,13 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.label .a.l3 .a.lag .a.l4 .a.obj");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -4318,7 +4339,7 @@ choice=0;
 Tcl_LinkVar(inter, "choiceSM", (char *) &num, TCL_LINK_INT);
 num=0;
 cmd(inter, "showmodel $groupdir");
-cmd(inter, "focus -force .l");
+cmd(inter, "focus .l");
 
 while(choice==0 && num==0)
  Tcl_DoOneEvent(0);
@@ -4380,17 +4401,17 @@ cmd(inter, "label .a.tit -text \"Create a new version of model '$modelname' (ver
 cmd(inter, "label .a.mname -text \"Insert new model name\"");
 cmd(inter, "set mname $modelname");
 cmd(inter, "entry .a.ename -width 30 -textvariable mname");
-cmd(inter, "bind .a.ename <Return> {.a.ever selection range 0 end; focus -force .a.ever}"); 
+cmd(inter, "bind .a.ename <Return> {.a.ever selection range 0 end; focus .a.ever}"); 
 
 cmd(inter, "label .a.mver -text \"Insert new version number\"");
 cmd(inter, "set mver $version");
 cmd(inter, "entry .a.ever -width 30 -textvariable mver");
-cmd(inter, "bind .a.ever <Return> {.a.edir selection range 0 end; focus -force .a.edir}"); 
+cmd(inter, "bind .a.ever <Return> {.a.edir selection range 0 end; focus .a.edir}"); 
 
 cmd(inter, "label .a.mdir -text \"Insert new directory name\"");
 cmd(inter, "set mdir $dirname");
 cmd(inter, "entry .a.edir -width 30 -textvariable mdir");
-cmd(inter, "bind .a.edir <Return> {focus -force .a.b.ok}"); 
+cmd(inter, "bind .a.edir <Return> {focus .a.b.ok}"); 
 
 cmd(inter, "frame .a.b");
 cmd(inter, "button .a.b.ok -width -9 -text Ok -command {set choice 1}");
@@ -4401,16 +4422,14 @@ cmd(inter, "pack .a.b.ok .a.b.help .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.mname .a.ename .a.mver .a.ever .a.mdir .a.edir");
 cmd(inter, "pack .a.b -side right");
 
-cmd(inter, ".a.ename selection range 0 end");
-cmd(inter, "focus -force .a.ename");
-
 cmd( inter, "showtop .a" );
-loop_copy:
+cmd(inter, "focus .a.ename");
+cmd(inter, ".a.ename selection range 0 end");
 
+loop_copy:
 
 while(choice==0)
  Tcl_DoOneEvent(0);
-
 
 //operation cancelled
 if(choice==2)
@@ -4424,7 +4443,7 @@ if(choice==2)
 cmd(inter, "if {[file exists $mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$mdir.\\n\\nChoose a different name.\"; set choice 3} {}");
 if(choice==3)
  {cmd(inter, ".a.edir selection range 0 end");
-  cmd(inter, "focus -force .a.edir");
+  cmd(inter, "focus .a.edir");
   choice=0;
   goto loop_copy;
  } 
@@ -4463,7 +4482,7 @@ for(i=0; i<num && choice!=3; i++)
 if(choice==3)
  {cmd(inter, "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create new model\" -detail \"The model '$mname' already exists (directory: $errdir).\"");
   cmd(inter, ".a.ename selection range 0 end");
-  cmd(inter, "focus -force .a.ename");
+  cmd(inter, "focus .a.ename");
   choice=0;
   goto loop_copy;
  } 
@@ -4647,16 +4666,17 @@ cmd(inter, "pack .a.b.ok .a.b.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.c");
 cmd(inter, "pack .a.b -side right");
 cmd(inter, "bind .a <Escape> {set choice 2}");
-cmd(inter, "bind .a.c.en <Return> {focus -force .a.c.ev}");
-cmd(inter, "bind .a.c.ev <Return> {focus -force .a.b.ok}");
+cmd(inter, "bind .a.c.en <Return> {focus .a.c.ev}");
+cmd(inter, "bind .a.c.ev <Return> {focus .a.b.ok}");
 cmd(inter, "bind .a.b.ok <Return> {.a.b.ok invoke}");
 choice=0;
 
-cmd(inter, "focus -force .a.c.en");
-
 cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.c.en");
+
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==1)
@@ -4816,9 +4836,9 @@ cmd(inter, ".l.t.text insert end $a");
 //cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
 
-cmd(inter, "focus -force .l.t.text");
-
 cmd( inter, "showtop .l" );
+cmd(inter, "focus .l.t.text");
+
 while(choice==0)
  Tcl_DoOneEvent(0);
 
@@ -4911,10 +4931,11 @@ cmd(inter, "bind .l <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .l <KeyPress-Escape> {set choice 2}");
 cmd(inter, ".l.t.text insert end $a");
 
-cmd(inter, "focus -force .l.t.text");
+cmd( inter, "showtop .l" );
+cmd(inter, "focus .l.t.text");
 
 cmd(inter, "set cazzo 0");
-cmd( inter, "showtop .l" );
+
 while(choice==0)
  Tcl_DoOneEvent(0);
 
@@ -4966,7 +4987,7 @@ cmd( inter, "newtop .a \"Change Font\" { .a.f.esc invoke }" );
 cmd(inter, "label .a.l1 -text \"Enter the font name you wish to use\"");
 
 cmd(inter, "entry .a.v_num -width 30 -textvariable fonttype");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.f.ok}");
 
 
 cmd(inter, "frame .a.f");	
@@ -4979,12 +5000,14 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
-cmd(inter, ".a.v_num selection range 0 end");
-choice=0;
 cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
+cmd(inter, ".a.v_num selection range 0 end");
+
+choice=0;
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -5023,51 +5046,51 @@ cmd( inter, "newtop .a \"LMM Options\" { .a.f2.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Terminal to use for the GDB debugger\"");
 cmd(inter, "entry .a.v_num -width 30 -textvariable temp_var1");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.v_num2; .a.v_num2 selection range 0 end}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.v_num2; .a.v_num2 selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages\"");
 cmd(inter, "entry .a.v_num2 -width 30 -textvariable temp_var2");
-cmd(inter, "bind .a.v_num2 <Return> {focus -force .a.v_num4; .a.v_num4 selection range 0 end}");
+cmd(inter, "bind .a.v_num2 <Return> {focus .a.v_num4; .a.v_num4 selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Wish program\"");
 cmd(inter, "entry .a.v_num4 -width 30 -textvariable temp_var4");
-cmd(inter, "bind .a.v_num4 <Return> {focus -force .a.v_num5; .a.v_num5 selection range 0 end}");
+cmd(inter, "bind .a.v_num4 <Return> {focus .a.v_num5; .a.v_num5 selection range 0 end}");
 
 cmd(inter, "label .a.l5 -text \"Source code subdirectory\"");
 cmd(inter, "entry .a.v_num5 -width 30 -textvariable temp_var5");
-cmd(inter, "bind .a.v_num5 <Return> {focus -force .a.v_num3; .a.v_num3 selection range 0 end}");
+cmd(inter, "bind .a.v_num5 <Return> {focus .a.v_num3; .a.v_num3 selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Font family\"");
 cmd(inter, "entry .a.v_num3 -width 30 -textvariable temp_var3");
-cmd(inter, "bind .a.v_num3 <Return> {focus -force .a.v_num6; .a.v_num6 selection range 0 end}");
+cmd(inter, "bind .a.v_num3 <Return> {focus .a.v_num6; .a.v_num6 selection range 0 end}");
 
 cmd(inter, "label .a.l6 -text \"Font size (points)\"");
 cmd(inter, "entry .a.v_num6 -width 30 -textvariable temp_var6");
-cmd(inter, "bind .a.v_num6 <Return> {focus -force .a.v_num7; .a.v_num7 selection range 0 end}");
+cmd(inter, "bind .a.v_num6 <Return> {focus .a.v_num7; .a.v_num7 selection range 0 end}");
 
 cmd(inter, "label .a.l7 -text \"Tab size (characters))\"");
 cmd(inter, "entry .a.v_num7 -width 30 -textvariable temp_var7");
-cmd(inter, "bind .a.v_num7 <Return> {focus -force .a.v_num8; .a.v_num8 selection range 0 end}");
+cmd(inter, "bind .a.v_num7 <Return> {focus .a.v_num8; .a.v_num8 selection range 0 end}");
 
 cmd(inter, "label .a.l8 -text \"Wrap text (0:no/1:yes)\"");
 cmd(inter, "entry .a.v_num8 -width 30 -textvariable temp_var8");
-cmd(inter, "bind .a.v_num8 <Return> {focus -force .a.v_num9; .a.v_num9 selection range 0 end}");
+cmd(inter, "bind .a.v_num8 <Return> {focus .a.v_num9; .a.v_num9 selection range 0 end}");
 
 cmd(inter, "label .a.l9 -text \"Syntax highlights (0:no/1:part./2:full)\"");
 cmd(inter, "entry .a.v_num9 -width 30 -textvariable temp_var9");
-cmd(inter, "bind .a.v_num9 <Return> {focus -force .a.v_num10; .a.v_num10 selection range 0 end}");
+cmd(inter, "bind .a.v_num9 <Return> {focus .a.v_num10; .a.v_num10 selection range 0 end}");
 
 cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
 cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
-cmd(inter, "bind .a.v_num10 <Return> {focus -force .a.v_num11; .a.v_num11 selection range 0 end}");
+cmd(inter, "bind .a.v_num10 <Return> {focus .a.v_num11; .a.v_num11 selection range 0 end}");
 
 cmd(inter, "label .a.l11 -text \"Show text file commands (0:no/1:yes)\"");
 cmd(inter, "entry .a.v_num11 -width 30 -textvariable temp_var11");
-cmd(inter, "bind .a.v_num11 <Return> {focus -force .a.v_num12; .a.v_num12 selection range 0 end}");
+cmd(inter, "bind .a.v_num11 <Return> {focus .a.v_num12; .a.v_num12 selection range 0 end}");
 
 cmd(inter, "label .a.l12 -text \"New models subdirectory\"");
 cmd(inter, "entry .a.v_num12 -width 30 -textvariable temp_var12");
-cmd(inter, "bind .a.v_num12 <Return> {focus -force .a.f2.ok}");
+cmd(inter, "bind .a.v_num12 <Return> {focus .a.f2.ok}");
 
 cmd(inter, "frame .a.f1");
 cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1; set temp_var11 0; set temp_var12 Work}");
@@ -5084,13 +5107,14 @@ cmd(inter, "pack .a.f2");
 cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f2.esc invoke}");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
+cmd(inter, "focus .a.v_num");
 cmd(inter, ".a.v_num selection range 0 end");
 
 choice=0;
-cmd( inter, "showtop .a" );
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==1)
@@ -5243,6 +5267,7 @@ cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$Root
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
 cmd(inter, "pack .t.l1 .t.l2");
+
 cmd( inter, "showtop .t" );
 
 cmd(inter, "cd $modeldir");
@@ -5332,7 +5357,7 @@ cmd( inter, "newtop .a \"Change Tab Size\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Enter the tab size (characters)\"");
 cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
-cmd(inter, "bind .a.v_num <Return> {focus -force .a.f.ok}");
+cmd(inter, "bind .a.v_num <Return> {focus .a.f.ok}");
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
@@ -5343,13 +5368,14 @@ cmd(inter, "pack .a.f.ok .a.f.help .a.f.esc -padx 1 -pady 5 -side left");
 cmd(inter, "pack .a.l1 .a.v_num");
 cmd(inter, "pack .a.f -side right");
 
-cmd(inter, "focus -force .a.v_num");
+cmd( inter, "showtop .a" );
 cmd(inter, ".a.v_num selection range 0 end");
+cmd(inter, "focus .a.v_num");
 
 choice=0;
-cmd( inter, "showtop .a" );
 while(choice==0)
 	Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .a");
 
 if(choice==2)
@@ -5736,8 +5762,9 @@ cmd(inter, "pack .mm.b -expand yes -fill x");
 cmd(inter, "button .mm.close -width -9 -text Done -command {destroytop .mm}");
 cmd(inter, "pack .mm.close -padx 10 -pady 10 -side right");
 cmd(inter, "bind .mm <Escape> {destroytop .mm}");
+
 cmd( inter, "showtop .mm topleftS no no no" );
-cmd(inter, "focus -force .mm.t");
+cmd(inter, "focus .mm.t");
 
 cmd(inter, "set file [open $modeldir/makemessage.txt]");
 cmd(inter, ".mm.t insert end [read $file]");

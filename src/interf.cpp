@@ -314,7 +314,7 @@ while(choice!=1)
 		if(message_logged==1)
 		{
 			cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; raise .log; focus .log }" );
-			cmd( inter, "raise .log; focus -force .log; update idletasks" );
+			cmd( inter, "raise .log; focus .log; update idletasks" );
 			message_logged=0;
 		}    
 	}    
@@ -366,7 +366,7 @@ cmd(inter, "frame .l.v.c");
 cmd(inter, "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"");
 cmd(inter, "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"");
 
-cmd(inter, "bind .l.v.c.var_name <Right> {focus -force .l.s.son_name; .l.s.son_name selection set 0}");
+cmd(inter, "bind .l.v.c.var_name <Right> {focus .l.s.son_name; .l.s.son_name selection set 0}");
 
 if(r->v==NULL)
   cmd( inter, ".l.v.c.var_name insert end \"(none)\"; set nVar 0" );
@@ -640,7 +640,7 @@ if(r->b!=NULL)
   cmd( inter, "bind .l.s.son_name <Control-Down> { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );
 }
 cmd( inter, "bind .l.s.son_name <BackSpace> { set choice 5 }" );
-cmd(inter, "bind .l.s.son_name <Left> {focus -force .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0}");
+cmd(inter, "bind .l.s.son_name <Left> {focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0}");
 
 //cmd(inter, "bind .l.s.son_name <Down> {.l.s.son_name selection clear 0 end; .l.s.son_name selection set active}");
 
@@ -859,8 +859,8 @@ cmd(inter, "if { [info exists ModElem]==1 } {set ModElem [lsort -dictionary $Mod
 
 main_cycle:
 
-cmd(inter, "if { $listfocus == 1} {focus -force .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
-cmd(inter, "if { $listfocus == 2} {focus -force .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
+cmd(inter, "if { $listfocus == 1} {focus .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
+cmd(inter, "if { $listfocus == 2} {focus .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
 
 *choice=0;
 
@@ -877,7 +877,7 @@ while(*choice==0 && choice_g==0)
 if(choice_g!=0)
  {*choice=choice_g;
   res_g=(char *)Tcl_GetVar(inter, "res_g",0);
-  cmd(inter, "focus -force .l.v.c.var_name");
+  cmd(inter, "focus .l.v.c.var_name");
   choice_g=0;
  }
 
@@ -905,15 +905,14 @@ if(actual_steps>0)
    cmd(inter, "pack $T.f.reload $T.f.load $T.f.ar -anchor w -fill x ");
    cmd(inter, "pack $T.f -fill x");
    cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp QuickHelp.html#problem } { set choice 2 }");
-  
-   *choice=0;
-   
-   cmd(inter, "focus -force $T.b.ok");
    cmd(inter, "bind $T <Return> {set choice 1}");
    
    cmd(inter, "showtop $T");
+   
+   *choice=0;
    while(*choice==0 && choice_g==0)
      Tcl_DoOneEvent(0);
+ 
    cmd(inter, "destroytop $T");
 
    if(*choice==1)
@@ -1003,7 +1002,7 @@ cmd(inter, "label $T.f.sp -text \"     \"");
 cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "entry $T.f.ent_num -width 2 -relief sunken -textvariable num");
 
-cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}");
 cmd(inter, "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left");
 }
 
@@ -1021,7 +1020,7 @@ cmd(inter, "label $T.f.sp -text \"     \"");
 cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "entry $T.f.ent_num -width 2 -relief sunken -textvariable num");
 
-cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}");
 cmd(inter, "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left");
 }
 
@@ -1036,7 +1035,7 @@ cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 
 cmd(inter, "pack $T.f.lab_ent $T.f.ent_var -side left");
 }
-cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}");
 
 cmd(inter, "set w $T.d");
 cmd(inter, "frame $w");
@@ -1056,9 +1055,10 @@ else
 		cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAPar } { set done 2 }" );
 	else
 		cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html } { set done 2 }" );
-cmd(inter, "focus -force $T.f.ent_var");
 
 cmd( inter, "showtop $T centerS" );
+cmd(inter, "focus $T.f.ent_var");
+
 here_newelem:
 while(done==0)
  Tcl_DoOneEvent(0);
@@ -1180,7 +1180,7 @@ cmd(inter, "frame $T.f");
 cmd(inter, "label $T.f.lab_ent -text \"New object name: \"");
 cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "pack $T.f.lab_ent $T.f.ent_var -side left");
-cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}");
 
 cmd(inter, "set w $T.d");
 cmd(inter, "frame $w");
@@ -1195,9 +1195,10 @@ cmd(inter, "pack $w.f");
 
 cmd(inter, "pack $T.tit $T.f $w -pady 5");
 cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddADesc } { set done 2 }" );
-cmd(inter, "focus $T.f.ent_var");
 
 cmd( inter, "showtop $T centerS" );
+cmd(inter, "focus $T.f.ent_var");
+
 here_newobject:
 while(done==0)
  Tcl_DoOneEvent(0);
@@ -1291,7 +1292,7 @@ cmd(inter, msg);
 cmd(inter, "set lab \"\"");
 cmd(inter, "entry $T.f.ent_var -width 20 -relief sunken -textvariable lab");
 cmd(inter, "pack $T.f.lab_ent $T.f.ent_var");
-cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}");
 
 cmd(inter, "set w $T.d");
 cmd(inter, "frame $w");
@@ -1306,9 +1307,10 @@ cmd(inter, "pack $w.f");
 
 cmd(inter, "pack $T.f $w -pady 5");
 cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#InsertAParent } { set done 2 }" );
-cmd(inter, "focus $T.f.ent_var");
 
 cmd( inter, "showtop $T centerS" );
+cmd(inter, "focus $T.f.ent_var");
+
 here_newparent:
 while(done==0)
  Tcl_DoOneEvent(0);
@@ -1497,7 +1499,7 @@ cmd(inter, "pack $w.f -fill x -expand yes");
 
 cmd(inter, "frame $T.h");
 cmd(inter, "label $T.h.ent_var -width 30 -relief sunken -fg red -text $lab");
-cmd(inter, "bind $T.h.ent_var <KeyPress-Return> {focus -force $T.b.ok}");
+cmd(inter, "bind $T.h.ent_var <KeyPress-Return> {focus $T.b.ok}");
 
 cmd(inter, "label $T.h.lab_ent -text \"Object\"");
 
@@ -1511,16 +1513,17 @@ cmd(inter, "bind $T.h <KeyPress-c> \"$T.b1.com invoke\"; bind $T.h <KeyPress-C> 
 cmd(inter, "bind $T.h <KeyPress-Delete> {set choice 3}");
 cmd(inter, "bind $T <Control-d> {}; bind $T <Control-D> {}");
 cmd(inter, "bind $T <Control-z> {}; bind $T <Control-Z> {}");
-cmd(inter, "bind $T.h.ent_var <Control-d> \"focus -force $T.desc.f.text\"; bind $T.h.ent_var <Control-D> \"focus -force $T.desc.f.text\"");
+cmd(inter, "bind $T.h.ent_var <Control-d> \"focus $T.desc.f.text\"; bind $T.h.ent_var <Control-D> \"focus $T.desc.f.text\"");
 cmd(inter, "bind $T.desc.f.text <Control-z> {set choice 1}; bind $T.desc.f.text <Control-Z> {set choice 1}");
 cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.b");
 
 cmd(inter, "pack $T.h $T.b1 $w -pady 5 -fill x -expand yes");
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
-cmd(inter, "focus -force $T.h.ent_var");
+
+cmd( inter, "showtop $T centerS" );
+cmd(inter, "focus $T.h.ent_var");
 
 *choice=0;
-cmd( inter, "showtop $T centerS" );
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -1553,9 +1556,10 @@ cmd(inter, "entry $TT.e -width 30 -textvariable lab");
 cmd(inter, "pack $TT.l $TT.e -anchor w");
 
 cmd( inter, "okcancel $TT b { set choice 1 } { set choice 2 }" );
-cmd(inter, "focus -force $TT.e");
 
 cmd( inter, "showtop $TT centerS" );
+cmd(inter, "focus $TT.e");
+
 here_newname:
 *choice=0;
 while(*choice==0)
@@ -1824,7 +1828,7 @@ cmd(inter, ch);
    cmd(inter, "button $Td.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12}" );
    cmd(inter, "pack $Td.b2.setall $Td.b2.sens -padx 10 -pady 5 -side left");
    cmd(inter, "pack $Td.b2");
-   cmd(inter, "bind $Td.f.text <Control-i> {focus -force $Td.i.text}; bind $Td.f.text <Control-I> {focus -force $Td.i.text}");
+   cmd(inter, "bind $Td.f.text <Control-i> {focus $Td.i.text}; bind $Td.f.text <Control-I> {focus $Td.i.text}");
    cmd(inter, "bind $Td.i.text <Control-z> {set done 1}; bind $Td.i.text <Control-Z> {set done 1}");   
    }
 
@@ -1855,13 +1859,14 @@ cmd(inter, "pack $T.h.b.prop $T.h.b.mov $T.h.b.del -padx 10 -pady 5 -side left")
 cmd(inter, "pack $T.h.lab_ent $T.h.ent_var $T.h.obj $T.h.b");
 cmd(inter, "pack $T.h $T.b1 $Td -pady 5 -fill x -expand yes");
 cmd(inter, "bind $T.h <KeyPress-Delete> {set done 10}");
-cmd(inter, "bind $T.b1 <Control-d> {focus -force $Td.f.text}; bind $T.b1 <Control-D> {focus -force $Td.f.text}");
+cmd(inter, "bind $T.b1 <Control-d> {focus $Td.f.text}; bind $T.b1 <Control-D> {focus $Td.f.text}");
 cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}; bind $T.desc.f.text <Control-Z> {set done 1}");   
 
 cmd( inter, "donehelp $T b { set done 1 } { LsdHelp menumodel.html#variables }" );
 
 cmd(inter, "showtop $T topleftW");
 cmd(inter, "focus $T.b1");
+
 cycle_var:
 while(done==0)
  Tcl_DoOneEvent(0);
@@ -2049,8 +2054,10 @@ else
 	cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#change_nature } { set choice 2 }" );
 	cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");
 	cmd(inter, "bind $T.l.e <KeyPress-Return> {set choice 1}");
-	*choice=0;
+	
 	cmd(inter, "showtop $T");
+	
+	*choice=0;
 }
 
 while(*choice==0)
@@ -2269,11 +2276,14 @@ if ( ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
 	cmd( inter, "pack $T.i" );
 	cmd( inter, "okcancel $T b { set choice $lag } { set choice 0 }");
 	cmd( inter, "bind $T <KeyPress-Return> { set choice $lag }");
-	*choice=-1;
-	cmd( inter, "focus $T.i.e" );
+	
 	cmd( inter, "showtop $T" );
+	cmd( inter, "focus $T.i.e" );
+	
+	*choice=-1;
 	while ( *choice == -1 )		// wait for user action
 		Tcl_DoOneEvent( 0 );
+		
 	cmd( inter, "destroytop $T" );
 	
 	lag = abs( *choice ) - 1;	// try to extract chosed lag
@@ -2458,9 +2468,9 @@ else
 
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } { set choice 2 }" );
 cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");
-cmd(inter, "focus -force $T.b.ok");
 
 cmd( inter, "showtop $T centerW" );
+
 *choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
@@ -2844,7 +2854,6 @@ cmd(inter, "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w");
 cmd(inter, "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e -anchor w");
 cmd(inter, "pack $T.tit $T.f -expand yes -fill both");
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
-cmd(inter, "focus $T.f.a.e");
 cmd(inter, "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}");
 cmd(inter, "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.c.e2; $T.f.c.e2 selection range 0 end}");
 cmd(inter, "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}");
@@ -2852,6 +2861,8 @@ cmd(inter, "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selecti
 cmd(inter, "bind $T.f.e.e2 <KeyPress-Return>  {focus $T.b.ok}");
 
 cmd( inter, "showtop $T centerS" );
+cmd(inter, "focus $T.f.a.e");
+
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -3100,10 +3111,11 @@ cmd(inter, "pack $T.cp.l $T.cp.e $T.cp.compute -side left");
 cmd(inter, "pack $T.cp -pady 5 -expand yes -fill x");
 
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp mdataobjn.html#this } { set choice 2 }" );
-cmd( inter, "showtop $T" );
 cmd(inter, "bind $T.ent <KeyPress-Return> {set choice 1}");
+
+cmd( inter, "showtop $T" );
+cmd(inter, "focus $T.ent");
 cmd(inter, "$T.ent selection range 0 end");
-cmd(inter, "focus -force $T.ent");
 
 here_objec_num1:
 while(*choice==0)
@@ -3221,10 +3233,12 @@ if(actual_steps==0)
   cmd(inter, "checkbutton .n.dozip -text \"Generate zipped results file\" -variable dozip");
   cmd(inter, "pack .n.l1 .n.e .n.l2 .n.dozip -pady 10");
   cmd( inter, "okcancel .n b { set choice 1 } { set choice 2 }" );
-  cmd( inter, "showtop .n centerW" );
   cmd(inter, "bind .n <KeyPress-Return> {set choice 1}");
+  
+  cmd( inter, "showtop .n centerW" );
+  cmd(inter, "focus .n.e");
   cmd(inter, ".n.e selection range 0 end");  
-  cmd(inter, "focus -force .n.e");
+  
   while(*choice==0)
    Tcl_DoOneEvent(0);
 
@@ -3294,8 +3308,6 @@ cmd(inter, "pack .warn.l .warn.o -fill both -expand yes");
 cmd( inter, "okhelpcancel .warn f { set choice 1 } { LsdHelp menumodel.html#auto_docu } { set choice 2 }" );
 
 cmd( inter, "showtop .warn centerS");
-cmd(inter, "focus -force .warn.f.ok");
-cmd(inter, "bind .warn <KeyPress-Return> {.warn.f.ok invoke}");
 
 cmd(inter, "set x 1");
 
@@ -3405,11 +3417,11 @@ cmd(inter, "entry .a.v_num2 -width 30 -textvariable temp_var");
 cmd(inter, "bind .a.v_num2 <Return> {set choice 1}");
 cmd(inter, "pack .a.l2 .a.v_num2 -pady 10");
 
-cmd( inter, "xokhelpcancel .a f Default { set temp_var mozilla } { set choice 1 } { LsdHelp lsdfuncMacro.html#V } { set choice 2 }" );
-cmd( inter, "showtop .a centerW");
+cmd( inter, "okXhelpcancel .a f Default { set temp_var mozilla } { set choice 1 } { LsdHelp lsdfuncMacro.html#V } { set choice 2 }" );
 
+cmd( inter, "showtop .a centerW");
+cmd(inter, "focus .a.v_num2");
 cmd(inter, ".a.v_num2 selection range 0 end");
-cmd(inter, "focus -force .a.v_num2");
 
 *choice=0;
 while(*choice==0)
@@ -3436,15 +3448,18 @@ cmd(inter, "label .srch.i.l2 -text \"Press Enter when the desired label appears\
 cmd(inter, "pack .srch.i.l1 .srch.i.e .srch.i.l2 -pady 10");
 cmd(inter, "pack .srch.i");
 cmd( inter, "okcancel .srch b { set choice 1 } { set choice 2 }" );
-cmd( inter, "showtop .srch centerW" );
 cmd(inter, "bind .srch.i.e <KeyPress-Return> {set choice 1}");
-cmd(inter, "focus .srch.i.e");
 cmd(inter, "bind .srch.i.e <KeyRelease> {if { %N < 256 && [ info exists ModElem] } { set b [.srch.i.e index insert]; set c [.srch.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } { } } { } }");
+
+cmd( inter, "showtop .srch centerW" );
+cmd(inter, "focus .srch.i.e");
 
 *choice=0;
 while(*choice==0)
 	Tcl_DoOneEvent(0);
+
 cmd(inter, "destroytop .srch");
+
 if(*choice==2)
   break;
 
@@ -3757,13 +3772,17 @@ if (rsense!=NULL)
 	cmd(inter, "pack .s.i.l .s.i.e .s.i.w");
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
-	cmd(inter, "focus .s.i.e");
+
 	cmd(inter, "showtop .s centerW");
+	cmd(inter, "focus .s.i.e");
+
 	*choice = 0;
 	while(*choice == 0)
 		Tcl_DoOneEvent(0);
+
 	cmd(inter, "destroytop .s");
 	Tcl_UnlinkVar(inter, "sizMC");
+
 	if(*choice == 2)
 		break;
 	
@@ -3846,11 +3865,15 @@ if (rsense!=NULL)
 	cmd(inter, "pack .s.o.l .s.o.c .s.o.e");
 	cmd(inter, "pack .s.i .s.o");
 	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
+	
 	cmd(inter, "showtop .s centerW");
+	
 	*choice = 0;
 	while(*choice == 0)
 		Tcl_DoOneEvent(0);
+	
 	cmd(inter, "destroytop .s");
+	
 	if(*choice == 2)
 		break;
 	
@@ -3955,13 +3978,17 @@ if (rsense!=NULL)
 		cmd(inter, "pack .s.i.l .s.i.e");
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
-	cmd(inter, "focus .s.i.e");
+	
 	cmd(inter, "showtop .s centerW");
+	cmd(inter, "focus .s.i.e");
+	
 	*choice = 0;
 	while(*choice == 0)
 		Tcl_DoOneEvent(0);
+	
 	cmd(inter, "destroy .s");
 	Tcl_UnlinkVar(inter, "sizMC");
+	
 	if(*choice == 2)
 		break;
 	
@@ -4060,17 +4087,21 @@ if (rsense!=NULL)
 	cmd(inter, "pack .s.i.l1 .s.i.e1 .s.i.l2 .s.i.e2 .s.i.l3 .s.i.e3 .s.i.l4 .s.i.e4 .s.i.t");
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set choice 1 } { set choice 2 }" );
-	cmd(inter, "focus .s.i.e1");
+	
 	cmd(inter, "showtop .s centerW");
+	cmd(inter, "focus .s.i.e1");
+	
 	*choice = 0;
 	while(*choice == 0)
 		Tcl_DoOneEvent(0);
+	
 	cmd(inter, "destroy .s");
 	Tcl_UnlinkVar(inter, "varSA");
 	Tcl_UnlinkVar(inter, "nLevels");
 	Tcl_UnlinkVar(inter, "jumpSz");
 	Tcl_UnlinkVar(inter, "nTraj");
 	Tcl_UnlinkVar(inter, "nSampl");
+	
 	if(*choice == 2)
 		break;
 	
@@ -4492,11 +4523,14 @@ case 68:
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set choice $cores } { set choice 0 }" );
 	cmd(inter, "bind .s <KeyPress-Return> {set choice $cores}");
+	
 	cmd( inter, "showtop .s centerW" );
 	cmd(inter, "focus .s.i.c.e");
+	
 	*choice=-1;
 	while(*choice==-1)
 		Tcl_DoOneEvent(0);
+	
 	cmd(inter, "destroytop .s");
 	Tcl_UnlinkVar(inter, "natBat");
 	Tcl_UnlinkVar(inter, "dozip");
@@ -4700,6 +4734,7 @@ case 69:
 
 	cmd( inter, "okcancel $b b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "bind $b <KeyPress-Return> {set choice 1}");
+	
 	cmd( inter, "showtop $b centerW" );
 	
 	*choice=0;
@@ -5175,7 +5210,8 @@ cmd( inter, "okcancel $TT b { set done1 1 } { set done1 2 }" );	// insert ok but
 cmd(inter, "bind $TT.v.lb <Double-1> { set done1 1 }");
 
 cmd( inter, "showtop $TT centerW" );
-cmd(inter, "focus -force $TT.v.lb");
+cmd(inter, "focus $TT.v.lb");
+
 done1=0;
 while(done1==0)
  Tcl_DoOneEvent(0);

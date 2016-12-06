@@ -2214,15 +2214,13 @@ cmd(inter, "pack .cazzo.e  -fill both -expand yes");
 
 cmd( inter, "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-cmd(inter, "bind .cazzo.e.r <Down> {focus -force .cazzo.e.e; .cazzo.e.e invoke}");
-cmd(inter, "bind .cazzo.e.e <Up> {focus -force .cazzo.e.r; .cazzo.e.r invoke}");
+cmd(inter, "bind .cazzo.e.r <Down> {focus .cazzo.e.e; .cazzo.e.e invoke}");
+cmd(inter, "bind .cazzo.e.e <Up> {focus .cazzo.e.r; .cazzo.e.r invoke}");
 
 cmd(inter, "bind .cazzo.e.r <Return> {set choice 1}");
 cmd(inter, "bind .cazzo.e.e <Return> {set choice 1}");
 cmd(inter, "bind .cazzo.e <Return> {set choice 1}");
 cmd(inter, "bind .cazzo <Return> {set choice 1}");
-
-cmd(inter, "focus -force .cazzo.b.ok");
 
 cmd(inter, "showtop .cazzo");
 

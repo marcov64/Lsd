@@ -267,9 +267,9 @@ pack .l.e.b
 
 .l.e.t.text insert end "[lindex $lmd $i]"
 set result $i
-focus -force .l.e.n
+focus .l.e.n
 .l.e.n selection range 0 end
-bind .l.e.n <Return> {focus -force .l.e.t.text; .l.e.t.text mark set insert 1.0}
+bind .l.e.n <Return> {focus .l.e.t.text; .l.e.t.text mark set insert 1.0}
 bind .l.e <Escape> {.l.e.b.esc invoke}
 bind .l.e.t.text <Control-e> {.l.e.b.ok invoke}
 
@@ -323,10 +323,10 @@ pack .l.p.b
 
 showtop .l.p centerS
 
-focus -force .l.p.n
-bind .l.p.n <Return> {focus -force .l.p.v}
-bind .l.p.v <Return> {focus -force .l.p.d}
-bind .l.p.d <Return> {focus -force .l.p.b.ok}
+focus .l.p.n
+bind .l.p.n <Return> {focus .l.p.v}
+bind .l.p.v <Return> {focus .l.p.d}
+bind .l.p.d <Return> {focus .l.p.b.ok}
 bind .l.p.b.ok <Return> {.l.p.b.ok invoke}
 bind .l.p <Escape> {.l.p.b.esc invoke}
 

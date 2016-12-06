@@ -2006,8 +2006,8 @@ if(i==1)
 sprintf(msg, "set vname %s",lab);
 cmd(inter, msg);
 cmd(inter, "set raise_description 1");
-cmd(inter, "showtop .desc_$vname");
 
+cmd(inter, "showtop .desc_$vname");
 }
 
 
@@ -2206,7 +2206,6 @@ for(i=1; i<=nrow; i++)
 } 
 
 cmd( inter, "showtop .lat centerS no no no" );
-
 #endif
 return(0);
 }

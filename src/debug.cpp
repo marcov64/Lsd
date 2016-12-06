@@ -274,11 +274,11 @@ cmd(inter, "pack .deb.v -pady 2 -before .deb.b");
 
 deb_show(r, inter);
 
-cmd(inter, "focus -force .deb");
+cmd(inter, "focus .deb");
 if(interact_flag==1)
  {
  cmd(inter, ".deb.v.val2 selection range 0 end");
- cmd(inter, "focus -force .deb.v.val2");
+ cmd(inter, "focus .deb.v.val2");
  cmd(inter, "bind .deb.v.val2 <Return> {.deb.b.act.run invoke}");
  }
 ch[0]=(char)NULL;
@@ -453,6 +453,7 @@ case 22:
 			sprintf(msg, "$n.t insert end \"\n\"");
 		cmd(inter, msg);
 	}
+	
 	cmd( inter, "showtop $n topleftW 0 1 0");
 	cmd( inter, "align $n .deb");
 	
@@ -535,10 +536,10 @@ cmd(inter, "pack $s.cond.eq $s.cond.geq $s.cond.leq $s.cond.gr $s.cond.le $s.con
 cmd(inter, "pack $s.l1 $s.e1 $s.l2 $s.e2 $s.cond");
 
 cmd( inter, "okcancel $s b { set choice 1 } { set choice 2 }" );
-cmd( inter, "showtop $s" );
-
 cmd(inter, "bind $s.e1 <KeyPress-Return> {focus $s.e2}");
 cmd(inter, "bind $s.e2 <KeyPress-Return> {focus $s.ok}");
+
+cmd( inter, "showtop $s" );
 cmd(inter, "$s.e2 selection range 0 end");
 cmd(inter, "focus $s.e1");
 
@@ -736,15 +737,17 @@ else
  cmd(inter, "pack $e.past $e.deb $e.eq $e.cond"); 
 
 cmd( inter, "donehelp $e b { set choice 1 } { LsdHelp debug.html#content }" );
-cmd( inter, "showtop $e" );
-
-cmd(inter, "$e.past.l0.e0 selection range 0 end");
-cmd(inter, "focus -force $e.past.l0.e0");
 cmd(inter, "bind $e.past.l0.e0 <Return> {set choice 1}");
+
+cmd( inter, "showtop $e" );
+cmd(inter, "$e.past.l0.e0 selection range 0 end");
+cmd(inter, "focus $e.past.l0.e0");
 
 while(choice==0)
  Tcl_DoOneEvent(0);
+
 cv->data_loaded='+';
+
 for(i=0; i<cv->num_lag+1; i++)
  {cv->val[i]=app_values[i];
   sprintf(ch, "val%d",i);
@@ -859,9 +862,9 @@ cmd(inter, "$t.val selection range 0 end");
 cmd(inter, "pack $t.l $t.val");
 
 cmd( inter, "okhelp $t b {set choice 1} {LsdHelp debug.html#until}" );
-cmd( inter, "showtop $t" );
-
 cmd(inter, "bind $t <KeyPress-Return> {set choice 1}");
+
+cmd( inter, "showtop $t" );
 cmd(inter, "$t.val selection range 0 end");
 cmd(inter, "focus $t.val");
 
@@ -1083,6 +1086,7 @@ cmd(inter, "pack $c.c.min $c.c.eq $c.c.max -side left");
 cmd(inter, "pack $c.name $c.cnd_type $c.c $c.cond $c.no -side top");
 
 cmd( inter, "done $c b { set choice 1 }" );
+
 cmd( inter, "showtop $c" );
 
 while(choice==0 && cv->deb_cond==old)

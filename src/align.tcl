@@ -70,16 +70,22 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	toplevel $w
 	if { $par != "" } {
 		if { $par != "." } {
-			wm transient $w $par 
+			if { [ winfo viewable [ winfo toplevel $par ] ] } {
+				wm transient $w $par 
+			}
 		} {
 			global parWndLst
 			while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
 					set parWndLst [ lreplace $parWndLst 0 0 ]
 				}
 			if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
-				wm transient $w [ lindex $parWndLst 0 ] 
+				if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
+					wm transient $w [ lindex $parWndLst 0 ] 
+				}
 			} {
-				wm transient $w .
+				if { [ winfo viewable [ winfo toplevel . ] ] } {
+					wm transient $w .
+				}
 			}
 		} 
 	}
@@ -95,7 +101,9 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 
 proc settop { w { name no } { destroy no } { par no } } {
 	if { $par != no } {
-		wm transient $w $par 
+		if { [ winfo viewable [ winfo toplevel $par ] ] } {
+			wm transient $w $par 
+		}
 	}
 	if { $name != no } {
 		wm title $w $name 
@@ -103,11 +111,16 @@ proc settop { w { name no } { destroy no } { par no } } {
 	if { $destroy != no } {
 		wm protocol $w WM_DELETE_WINDOW $destroy 
 	}
-	wm withdraw $w
 	update
-	wm deiconify $w
+	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
+		wm deiconify $w
+	}
 	raise $w
-	focus $w
+	if [ winfo exists $w.$buttonF.ok ] {
+		focus $w.$buttonF.ok
+	} {
+		focus $w
+	}
 	update 
 }
 
@@ -119,7 +132,6 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	if { $sizeY != 0 } {
 		$w configure -height $sizeY 
 	}
-	wm withdraw $w
 	update idletasks
 	# handle different window default position
 	global defaultPos parWndLst
@@ -157,7 +169,9 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		grab set $w
 	}
-	wm deiconify $w
+	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
+		wm deiconify $w
+	}
 	raise $w
 	if [ winfo exists $w.$buttonF.ok ] {
 		focus $w.$buttonF.ok
@@ -209,6 +223,7 @@ proc align {w1 w2} {
 
 	set f [ expr $c + $e + $posX ]
 	wm geometry $w1 +$f+$d
+	update
 #	plog "align w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)"
 }
 
@@ -330,18 +345,18 @@ proc ok { w fr comOk } {
 	pack $w.$fr -side right 
 }
 
-proc xokhelpcancel { w fr nameX comX comOk comHelp comCancel } {
+proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	frame $w.$fr
-	button $w.$fr.x -width -9 -text $nameX -command $comX
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
+	button $w.$fr.x -width -9 -text $nameX -command $comX
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	button $w.$fr.can -width -9 -text Cancel -command $comCancel
-	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	pack $w.$fr.x $w.$fr.ok $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
+	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 
