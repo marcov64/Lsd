@@ -192,7 +192,8 @@ if(code!=TCL_OK && strstr(cm,(char*)"exec make")==NULL) // don't log model compi
   fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
   fclose(f);
 #ifdef SHOW_TK_ERR
-  sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Please send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s\"", cm, Tcl_GetStringResult( inter ) );
+  //sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Please send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s\"", cm, Tcl_GetStringResult( inter ) );
+     sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Error in managing the interfaces. See file 'tkerr.err' for details\"");
   cmd(inter, msg);
 #endif
  }
