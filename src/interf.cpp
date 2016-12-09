@@ -357,16 +357,15 @@ currObj = r;			// global pointer to C Tcl routines
 if ( redrawRoot )		// avoids redrawing if not required
 {
 cmd(inter, "destroy .l");
+cmd(inter, "frame .l");
 
-cmd(inter, "frame .l -relief groove -bd 2");
-cmd(inter, "frame .l.v -relief groove -bd 2");
-cmd(inter, "frame .l.s -relief groove -bd 2");
+cmd(inter, "frame .l.v");
 
 cmd(inter, "frame .l.v.c");
 cmd(inter, "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"");
 cmd(inter, "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"");
 
-cmd(inter, "bind .l.v.c.var_name <Right> {focus .l.s.son_name; .l.s.son_name selection set 0}");
+cmd( inter, "bind .l.v.c.var_name <Left> { focus .l.s.c.son_name; set listfocus 2; set itemfocus 0; ; .l.s.c.son_name selection set 0; .l.s.c.son_name activate 0; .l.s.c.son_name see 0 }" );
 
 if(r->v==NULL)
   cmd( inter, ".l.v.c.var_name insert end \"(none)\"; set nVar 0" );
@@ -432,7 +431,7 @@ cmd( inter, ".l.v.c.var_name.v add command -label Sensitivity -state disabled -c
 
 if(r->v!=NULL)
   {
-	cmd(inter, "bind .l.v.c.var_name <Double-Button-1> \
+	cmd(inter, "bind .l.v.c.var_name <Return> \
 	{ \
 		set listfocus 1; \
 		set itemfocus [ .l.v.c.var_name curselection ]; \
@@ -441,15 +440,7 @@ if(r->v!=NULL)
 			set choice 7 \
 		} \
 	}");
-	cmd( inter, "bind .l.v.c.var_name <Return> \
-	{ \
-		set listfocus 1; \
-		set itemfocus [ .l.v.c.var_name curselection ]; \
-		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-		{ \
-			set choice 7 \
-		} \
-	}" );
+	cmd( inter, "bind .l.v.c.var_name <Double-Button-1> { event generate .l.v.c.var_name <Return> }" );
 	cmd( inter, "bind .l.v.c.var_name <Button-2> \
 	{ \
 		.l.v.c.var_name selection clear 0 end; \
@@ -502,58 +493,7 @@ if(r->v!=NULL)
 			tk_popup .l.v.c.var_name.v %X %Y \
 		} \
 	}");
-	cmd( inter, "bind .l.v.c.var_name <Button-3> \
-	{ \
-		.l.v.c.var_name selection clear 0 end; \
-		.l.v.c.var_name selection set @%x,%y; \
-		set listfocus 1; \
-		set itemfocus [ .l.v.c.var_name curselection ]; \
-		set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-		{ \
-			.l.v.c.var_name.v entryconfig 5 -state normal; \
-			.l.v.c.var_name.v entryconfig 7 -state normal; \
-			.l.v.c.var_name.v entryconfig 8 -state normal; \
-			.l.v.c.var_name.v entryconfig 13 -state normal; \
-			.l.v.c.var_name.v entryconfig 14 -state normal; \
-			.l.v.c.var_name.v entryconfig 15 -state normal; \
-			.l.v.c.var_name.v entryconfig 17 -state normal; \
-			.l.v.c.var_name.v entryconfig 18 -state normal; \
-			set save [ get_var_conf $vname save ]; \
-			set plot [ get_var_conf $vname plot ]; \
-			set num [ get_var_conf $vname debug ]; \
-			switch $color \
-			{ \
-				purple { } \
-				blue \
-				{ \
-					.l.v.c.var_name.v entryconfig 17 -state disabled; \
-					.l.v.c.var_name.v entryconfig 18 -state disabled; \
-				} \
-				black \
-				{ \
-					.l.v.c.var_name.v entryconfig 5 -state disabled; \
-					.l.v.c.var_name.v entryconfig 13 -state disabled; \
-					.l.v.c.var_name.v entryconfig 14 -state disabled \
-				} \
-				tomato { } \
-				firebrick \
-				{ \
-					.l.v.c.var_name.v entryconfig 17 -state disabled; \
-					.l.v.c.var_name.v entryconfig 18 -state disabled; \
-				} \
-			}; \
-			if { $itemfocus == 0 } \
-			{ \
-				.l.v.c.var_name.v entryconfig 7 -state disabled \
-			}; \
-			if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } \
-			{ \
-				.l.v.c.var_name.v entryconfig 8 -state disabled \
-			}; \
-			tk_popup .l.v.c.var_name.v %X %Y \
-		} \
-	}");
+	cmd( inter, "bind .l.v.c.var_name <Button-3> { event generate .l.v.c.var_name <Button-2> -x %x -y %y }" );
 	cmd( inter, "bind .l.v.c.var_name <Control-Up> \
 	{ \
 		set listfocus 1; \
@@ -583,70 +523,75 @@ if(r->v!=NULL)
   }
 cmd(inter, ".l.v.c.var_name yview $cur");
 
-cmd(inter, "pack .l.v.c.v_scroll -side right -fill y");
-cmd(inter, "listbox .l.s.son_name");
+cmd(inter, "frame .l.s");
+
+cmd(inter, "frame .l.s.c");
+cmd(inter, "scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"");
+cmd(inter, "listbox .l.s.c.son_name");
+
+cmd( inter, "bind .l.s.c.son_name <Right> { focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0; .l.v.c.var_name see 0 }" );
+cmd( inter, "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
+
 if(r->b==NULL)
-  cmd( inter, ".l.s.son_name insert end \"(none)\"; set nDesc 0" );
+  cmd( inter, ".l.s.c.son_name insert end \"(none)\"; set nDesc 0" );
 else
 {
  cmd(inter, "set app 0");
  for(cb=r->b; cb!=NULL; cb=cb->next )
   {
-	 strcpy(ch, ".l.s.son_name insert end ");
+	 strcpy(ch, ".l.s.c.son_name insert end ");
 	 strcat(ch, cb->blabel);
      cmd(inter, ch);
-	 strcpy(ch, ".l.s.son_name itemconf $app -fg red");
+	 strcpy(ch, ".l.s.c.son_name itemconf $app -fg red");
      cmd(inter, ch);
      cmd(inter, "incr app");
   }
-  cmd( inter, "set nDesc [ .l.s.son_name size ]" );
+  cmd( inter, "set nDesc [ .l.s.c.son_name size ]" );
 }	
 
 cmd( inter, "label .l.s.lab -text \"Descending Objects ($nDesc)\"" );
 
 // objects context menu (right mouse button)
-cmd( inter, "menu .l.s.son_name.v -tearoff 0" );
-cmd( inter, ".l.s.son_name.v add command -label \"Select\" -command { set choice 4 }" );
-cmd( inter, ".l.s.son_name.v add command -label \"Parent\" -command { set choice 5 }" );
-cmd( inter, ".l.s.son_name.v add command -label \"Insert Parent\" -command { set choice 32 }" );
-cmd( inter, ".l.s.son_name.v add separator" );
-cmd( inter, ".l.s.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );
-cmd( inter, ".l.s.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );
-cmd( inter, ".l.s.son_name.v add separator" );
-cmd( inter, ".l.s.son_name.v add command -label Change -command { set choice 6 }" );
-cmd( inter, ".l.s.son_name.v add command -label Number -command { set choice 33 }" );
-cmd( inter, ".l.s.son_name.v add command -label Delete -command { set choice 74 }" );
-cmd( inter, ".l.s.son_name.v add separator" );
-cmd( inter, ".l.s.son_name.v add cascade -label Add -menu .l.s.son_name.v.a");
-cmd( inter, ".l.s.son_name.v add separator" );
-cmd( inter, ".l.s.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );
-cmd( inter, ".l.s.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );
-cmd( inter, "menu .l.s.son_name.v.a -tearoff 0" );
-cmd( inter, ".l.s.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-cmd( inter, ".l.s.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-cmd( inter, ".l.s.son_name.v.a add command -label Function -command { set choice 2; set param 2 }" );
-cmd( inter, ".l.s.son_name.v.a add command -label Object -command { set choice 3 }" );
+cmd( inter, "menu .l.s.c.son_name.v -tearoff 0" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Select\" -command { set choice 4 }" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Parent\" -command { set choice 5 }" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Insert Parent\" -command { set choice 32 }" );
+cmd( inter, ".l.s.c.son_name.v add separator" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );
+cmd( inter, ".l.s.c.son_name.v add separator" );
+cmd( inter, ".l.s.c.son_name.v add command -label Change -command { set choice 6 }" );
+cmd( inter, ".l.s.c.son_name.v add command -label Number -command { set choice 33 }" );
+cmd( inter, ".l.s.c.son_name.v add command -label Delete -command { set choice 74 }" );
+cmd( inter, ".l.s.c.son_name.v add separator" );
+cmd( inter, ".l.s.c.son_name.v add cascade -label Add -menu .l.s.c.son_name.v.a");
+cmd( inter, ".l.s.c.son_name.v add separator" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Initial Values\" -command { set choice 21 }" );
+cmd( inter, ".l.s.c.son_name.v add command -label \"Browse Data\" -command { set choice 34 }" );
+cmd( inter, "menu .l.s.c.son_name.v.a -tearoff 0" );
+cmd( inter, ".l.s.c.son_name.v.a add command -label Variable -command { set choice 2; set param 0 }" );
+cmd( inter, ".l.s.c.son_name.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
+cmd( inter, ".l.s.c.son_name.v.a add command -label Function -command { set choice 2; set param 2 }" );
+cmd( inter, ".l.s.c.son_name.v.a add command -label Object -command { set choice 3 }" );
 
 // flag to select among the current or the clicked object
 cmd( inter, "set useCurrObj yes" );
 
 if(r->b!=NULL)
 {
-  cmd( inter, "bind .l.s.son_name <Double-Button-1> { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 4 } }" );
-  cmd( inter, "bind .l.s.son_name <Return> { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 4 } }" );
-  cmd( inter, "bind .l.s.son_name <Button-2> { .l.s.son_name selection clear 0 end; .l.s.son_name selection set @%x,%y; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set useCurrObj no; if { $itemfocus == 0 } { .l.s.son_name.v entryconfig 4 -state disabled } { .l.s.son_name.v entryconfig 4 -state normal }; if { $itemfocus == [ expr [ .l.s.son_name size ] - 1 ] } { .l.s.son_name.v entryconfig 5 -state disabled } { .l.s.son_name.v entryconfig 5 -state normal }; tk_popup .l.s.son_name.v %X %Y } }" );
-  cmd( inter, "bind .l.s.son_name <Button-3> { .l.s.son_name selection clear 0 end; .l.s.son_name selection set @%x,%y; set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set useCurrObj no; if { $itemfocus == 0 } { .l.s.son_name.v entryconfig 4 -state disabled } { .l.s.son_name.v entryconfig 4 -state normal }; if { $itemfocus == [ expr [ .l.s.son_name size ] - 1 ] } { .l.s.son_name.v entryconfig 5 -state disabled } { .l.s.son_name.v entryconfig 5 -state normal }; tk_popup .l.s.son_name.v %X %Y } }" );
-  cmd( inter, "bind .l.s.son_name <Control-Up> { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );
-  cmd( inter, "bind .l.s.son_name <Control-Down> { set listfocus 2; set itemfocus [ .l.s.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );
+  cmd( inter, "bind .l.s.c.son_name <Return> { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 4 } }" );
+  cmd( inter, "bind .l.s.c.son_name <Double-Button-1> { event generate .l.s.c.son_name <Return> }" );
+  cmd( inter, "bind .l.s.c.son_name <Button-2> { .l.s.c.son_name selection clear 0 end; .l.s.c.son_name selection set @%x,%y; set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set useCurrObj no; if { $itemfocus == 0 } { .l.s.c.son_name.v entryconfig 4 -state disabled } { .l.s.c.son_name.v entryconfig 4 -state normal }; if { $itemfocus == [ expr [ .l.s.c.son_name size ] - 1 ] } { .l.s.c.son_name.v entryconfig 5 -state disabled } { .l.s.c.son_name.v entryconfig 5 -state normal }; tk_popup .l.s.c.son_name.v %X %Y } }" );
+  cmd( inter, "bind .l.s.c.son_name <Button-3> { event generate .l.s.c.son_name <Button-2> -x %x -y %y }" );
+  cmd( inter, "bind .l.s.c.son_name <Control-Up> { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 60 } }" );
+  cmd( inter, "bind .l.s.c.son_name <Control-Down> { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ]; if { $itemfocus < [ expr [ .l.s.c.son_name size ] - 1 ] } { incr itemfocus }; if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { set choice 61 } }" );
 }
-cmd( inter, "bind .l.s.son_name <BackSpace> { set choice 5 }" );
-cmd(inter, "bind .l.s.son_name <Left> {focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0}");
 
-//cmd(inter, "bind .l.s.son_name <Down> {.l.s.son_name selection clear 0 end; .l.s.son_name selection set active}");
+cmd(inter, "frame .l.p -relief groove -bd 2");
 
-cmd(inter, "frame .l.up_name");
-strcpy( ch1, "label .l.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.up_name.n -relief flat -anchor e -text \"" );
+cmd(inter, "frame .l.p.up_name");
+strcpy( ch1, "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
+strcpy( ch, "button .l.p.up_name.n -relief flat -overrelief groove -anchor e -text \"" );
 if( r->up==NULL )
   strcat( ch, "(none)\" -command { }" );
 else
@@ -657,14 +602,16 @@ else
 cmd( inter, ch1 );
 cmd( inter, ch );
 
-cmd(inter, "bind . <KeyPress-u> {catch {.l.up_name.n invoke}}; bind . <KeyPress-U> {catch {.l.up_name.n invoke}}");
+cmd( inter, "bind .l.p.up_name.n <Enter> {set ttip \"Select parent object\"}" );
+cmd( inter, "bind .l.p.up_name.n <Leave> {set ttip \"\"}" );
+cmd(inter, "bind . <KeyPress-u> {catch {.l.p.up_name.n invoke}}; bind . <KeyPress-U> {catch {.l.p.up_name.n invoke}}");
 
-cmd(inter, "pack .l.up_name.d .l.up_name.n -side left");
-cmd( inter, "pack .l.up_name -padx 9 -anchor w" );
+cmd(inter, "pack .l.p.up_name.d .l.p.up_name.n -side left");
+cmd( inter, "pack .l.p.up_name -padx 9 -anchor w" );
 
-cmd(inter, "frame .l.tit -bd 2");
-strcpy( ch1, "label .l.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.tit.but -foreground red -relief flat -anchor e -text " );
+cmd(inter, "frame .l.p.tit");
+strcpy( ch1, "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
+strcpy( ch, "button .l.p.tit.but -foreground red -relief flat -overrelief groove -anchor e -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
  strcat( ch, " -command { set choice 6 }" );
@@ -672,8 +619,12 @@ else
  strcat( ch, " -command { }" );
 cmd( inter, ch1 );
 cmd(inter, ch);
-cmd(inter, "pack .l.tit.lab .l.tit.but -side left");
-cmd( inter, "pack .l.tit -padx 8 -anchor w" );
+
+cmd( inter, "bind .l.p.tit.but <Enter> {set ttip \"Change...\"}" );
+cmd( inter, "bind .l.p.tit.but <Leave> {set ttip \"\"}" );
+
+cmd(inter, "pack .l.p.tit.lab .l.p.tit.but -side left");
+cmd( inter, "pack .l.p.tit -padx 8 -anchor w" );
 
 // avoid redrawing the menu if it already exists and is configured
 cmd(inter, "set existMenu [ winfo exists .m ]");
@@ -808,15 +759,15 @@ cmd( inter, "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.$iconE
 cmd( inter, "image create photo dataImg -file \"$RootLsd/$LsdSrc/icons/data.$iconExt\"" );
 cmd( inter, "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.$iconExt\"" );
 
-cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 17}" );
-cmd( inter, "button .bbar.reload -image reloadImg -relief flat -command {set choice 38}" );
-cmd( inter, "button .bbar.save -image saveImg -relief flat -command {set choice 18}" );
-cmd( inter, "button .bbar.find -image findImg -relief flat -command {set choice 50}" );
-cmd( inter, "button .bbar.init -image initImg -relief flat -command {set choice 21}" );
-cmd( inter, "button .bbar.set -image setImg -relief flat -command {set choice 22}" );
-cmd( inter, "button .bbar.run -image runImg -relief flat -command {set choice 1}" );
-cmd( inter, "button .bbar.data -image dataImg -relief flat -command {set choice 34}" );
-cmd( inter, "button .bbar.result -image resultImg -relief flat -command {set choice 26}" );
+cmd( inter, "button .bbar.open -image openImg -relief flat -overrelief groove -command {set choice 17}" );
+cmd( inter, "button .bbar.reload -image reloadImg -relief flat -overrelief groove -command {set choice 38}" );
+cmd( inter, "button .bbar.save -image saveImg -relief flat -overrelief groove -command {set choice 18}" );
+cmd( inter, "button .bbar.find -image findImg -relief flat -overrelief groove -command {set choice 50}" );
+cmd( inter, "button .bbar.init -image initImg -relief flat -overrelief groove -command {set choice 21}" );
+cmd( inter, "button .bbar.set -image setImg -relief flat -overrelief groove -command {set choice 22}" );
+cmd( inter, "button .bbar.run -image runImg -relief flat -overrelief groove -command {set choice 1}" );
+cmd( inter, "button .bbar.data -image dataImg -relief flat -overrelief groove -command {set choice 34}" );
+cmd( inter, "button .bbar.result -image resultImg -relief flat -overrelief groove -command {set choice 26}" );
 cmd( inter, "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 17 -anchor w" );
 
 cmd( inter, "bind .bbar.open <Enter> {set ttip \"Open...\"}" );
@@ -842,25 +793,32 @@ cmd( inter, "pack .bbar.open .bbar.reload .bbar.save .bbar.find .bbar.init .bbar
 cmd( inter, "pack .bbar -anchor w -fill x" );
 }
 
+cmd(inter, "pack .l.v.c.v_scroll -side right -fill y");
 cmd(inter, "pack .l.v.c.var_name -fill both -expand yes");
 cmd(inter, "pack .l.v.lab -fill x");
 cmd(inter, "pack .l.v.c -fill both -expand yes");
-cmd(inter, "pack .l.s.lab -fill x");
-cmd(inter, "pack .l.s.son_name -fill both -expand yes");
 
-cmd(inter, "pack .l.up_name .l.tit");
+cmd(inter, "pack .l.s.c.v_scroll -side right -fill y");
+cmd(inter, "pack .l.s.c.son_name -fill both -expand yes");
+cmd(inter, "pack .l.s.lab -fill x");
+cmd(inter, "pack .l.s.c -fill both -expand yes");
+
+cmd(inter, "pack .l.p.up_name .l.p.tit");
+cmd(inter, "pack .l.p -fill x");
+
 cmd(inter, "pack .l.s .l.v -side left -fill both -expand yes");
 
 cmd(inter, "pack .l -fill both -expand yes");
 }
 
 cmd(inter, "update");
-cmd(inter, "if { [info exists ModElem]==1 } {set ModElem [lsort -dictionary $ModElem]} {}");
 
 main_cycle:
 
+cmd( inter, "if [ info exists ModElem ] { set ModElem [ lsort -dictionary $ModElem ] }" );
+
 cmd(inter, "if { $listfocus == 1} {focus .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}");
-cmd(inter, "if { $listfocus == 2} {focus .l.s.son_name; .l.s.son_name selection set $itemfocus; .l.s.son_name activate $itemfocus} {}");
+cmd(inter, "if { $listfocus == 2} {focus .l.s.c.son_name; .l.s.c.son_name selection set $itemfocus; .l.s.c.son_name activate $itemfocus} {}");
 
 *choice=0;
 
@@ -1600,23 +1558,34 @@ if(*choice==2)
 
 if(strlen(lab1)!=0)
 {
-
  if(strcmp(lab, r->label))
   {
+   sprintf( msg, "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", r->label );
+   cmd( inter, msg );
+   
    change_descr_lab(r->label, lab, "", "", "");
    r->chg_lab(lab);
+   
+   sprintf( msg, "lappend ModElem %s", lab );
+   cmd( inter, msg );
+   
    goto here_endobjprop;
   }
 }
 else //Delete the Object !
- {for(cur=r->up; cur->up!=NULL; cur=cur->up);
+ {
+  for(cur=r->up; cur->up!=NULL; cur=cur->up);
   cur=cur->search(r->label);
   r=r->up;
   for(cv=cur->v; cv!=NULL; cv=cv->next)
+  {
+	sprintf( msg, "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", cv->label );
+	cmd( inter, msg );
+	
     change_descr_lab(cv->label,"" , "", "", "");
+  }
   wipe_out(cur);
   goto here_endobjprop;
-
  }
 }//end of *choice==5
 cmd(inter, "set choice $to_compute");
@@ -1674,9 +1643,13 @@ if( *choice == 2 )
 
 r = cur->up;
 for ( cv = cur->v; cv != NULL; cv = cv->next )
+{
+	sprintf( msg, "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", cv->label );
+	cmd( inter, msg );
+	
 	change_descr_lab( cv->label, "" , "", "", "" );
+}
 wipe_out( cur );
-
 unsaved_change( true );				// signal unsaved change
 redrawRoot = true;					// force browser redraw
 
@@ -2095,14 +2068,14 @@ if(nature==3 || nature==4)
 {
 	lab1=(char *)Tcl_GetVar(inter, "vname",0);
 	if ( strlen( lab1 ) > 0 )
-		sscanf( lab1, "%s", lab );
+		sscanf( lab1, "%s", lab );				// new name in lab (empty if delete)
 	else
 		if ( delVar )
 			strcpy( lab, "" );
 		else
 			goto here_endprop;
 	
-	if ( strcmp( lab, lab_old ) && ! delVar )
+	if ( strcmp( lab, lab_old ) && ! delVar )	// check new name if different
 	{
 		for(cur=r; cur->up!=NULL; cur=cur->up);
 		*choice=check_label(lab, cur);
@@ -2119,8 +2092,18 @@ if(nature==3 || nature==4)
 		}
 	}
 	
+	// remove from find list
+	sprintf( msg, "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", lab_old );
+	cmd( inter, msg );
+
 	if(nature==3)
+	{
+		
 		change_descr_lab(lab_old, lab, "", "", "");
+		
+		sprintf( msg, "lappend ModElem %s", lab );		// add to find list
+		cmd( inter, msg );
+	}
 	
 	for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
 	{
@@ -2392,8 +2375,8 @@ if ( i == 0 )
 
 // save the current object & cursor position for quick reload
 strcpy( lastObj, r->label );
-cmd( inter, "if { ! [ string equal [ .l.s.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.son_name curselection ] }" );
+cmd( inter, "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
+cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
 cmd( inter, "if { $lastItem == \"\" } { set lastItem 0 }" );
 
 cmd( inter, "set T .run" );
@@ -2542,12 +2525,13 @@ if(struct_loaded==1)
   unsavedSense = false;			// nothing to save
   findexSens=0;
   nodesSerial=0;				// network node serial number global counter
+  cmd( inter, "catch {unset ModElem}" );
 }
 
 actual_steps=0;					//Flag that no simulation has been run
 unsavedData = false;			// no unsaved simulation results
 
-if(*choice==17)
+if ( ! reload )
 {
   *choice=0;
   strcpy(lastObj,"");	// disable last object for quick reload
@@ -2608,7 +2592,6 @@ switch ( load_configuration( r ) )
 		cmd( inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
 		*choice = 0;
 	default:						// load ok
-		cmd( inter, "catch {unset ModElem}" );
 		show_graph( r );
 		unsaved_change( false );		// no changes to save
 		redrawRoot = true;			// force browser redraw
@@ -3449,7 +3432,7 @@ cmd(inter, "pack .srch.i.l1 .srch.i.e .srch.i.l2 -pady 10");
 cmd(inter, "pack .srch.i");
 cmd( inter, "okcancel .srch b { set choice 1 } { set choice 2 }" );
 cmd(inter, "bind .srch.i.e <KeyPress-Return> {set choice 1}");
-cmd(inter, "bind .srch.i.e <KeyRelease> {if { %N < 256 && [ info exists ModElem] } { set b [.srch.i.e index insert]; set c [.srch.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } { } } { } }");
+cmd(inter, "bind .srch.i.e <KeyRelease> {if { %N < 256 && [info exists ModElem] } { set b [.srch.i.e index insert]; set c [.srch.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }");
 
 cmd( inter, "showtop .srch centerW" );
 cmd(inter, "focus .srch.i.e");
@@ -5384,8 +5367,8 @@ void save_pos( object *r )
 {
 	// save the current object & cursor position for quick reload
 	strcpy( lastObj, r->label );
-	cmd( inter, "if { ! [ string equal [ .l.s.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.son_name curselection ] }" );
+	cmd( inter, "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
+	cmd( inter, "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
 	cmd( inter, "if { $lastItem == \"\" } { set lastItem 0 }" );
 }
 
@@ -5416,7 +5399,7 @@ object *restore_pos( object *r )
 
 bool unsavedChange = false;		// control for unsaved changes in configuration
 #define WND_NUM 6
-const char * wndName[ ] = { ".", ".log", ".model_str", ".ini", ".da", ".deb" };
+const char *wndName[ ] = { ".", ".log", ".model_str", ".ini", ".da", ".deb" };
 
 bool unsaved_change( bool val )
 {

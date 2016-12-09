@@ -356,6 +356,7 @@ void reset_end(object *r);
 void delete_bridge(object *d);
 int reset_bridges(object *r);
 void close_sim(void);
+void uncover_browser( void );
 
 extern int t;
 extern object *root;
@@ -2174,13 +2175,21 @@ plog( buffer );
 delete [] buffer;
 
 #ifndef NO_WINDOW
-cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
-cmd( inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
-sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nLsd cannot continue.\"", boxTitle, boxText );
-cmd( inter, msg );
+if ( running )		// handle running events differently
+{
+	uncover_browser( );
+	cmd( inter, "wm deiconify .log; raise .log; focus -force .log" );
+	sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText );
+	cmd( inter, msg );
+}
+else
+{
+	sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText );
+	cmd( inter, msg );
+}
 #endif
 
-if( running == 0 )
+if( ! running )
 	return;
 
 quit = 2;				// do not continue simulation

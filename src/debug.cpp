@@ -183,7 +183,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd(inter, "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0");
 	cmd(inter, "button .deb.b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5");
 	cmd(inter, "button .deb.b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0");
-	cmd(inter, "button .deb.b.move.search -width -9 -text \"Search\" -command {set choice 10} -underline 0");
+	cmd(inter, "button .deb.b.move.search -width -9 -text \"Find\" -command {set choice 10} -underline 0");
 	cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left");
 
 	cmd(inter, "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}");
@@ -230,7 +230,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd(inter, "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}");
 	}
 
-	cmd(inter, "pack .deb.b.move .deb.b.act -side top");
+	cmd(inter, "pack .deb.b.move .deb.b.act");
 	cmd(inter, "pack .deb.b -side right");
 }
 
@@ -261,7 +261,6 @@ else
 }
 
 cmd(inter, ch);
-//cmd(inter, "bind .deb.v.name2 <Double-Button-1> {set choice 10");
 Tcl_LinkVar(inter, "time", (char *) &t, TCL_LINK_INT);
 cmd(inter, "label .deb.v.time -text \"      Time step: $time      \"");
 Tcl_UnlinkVar(inter, "time");
@@ -517,10 +516,9 @@ cond=1;
 choice=0;
 i=1;
 cmd( inter, "set s .sobj" );
-cmd( inter, "newtop $s \"Search Object\" { set choice 2 }" );
+cmd( inter, "newtop $s \"Find Object\" { set choice 2 }" );
 
-cmd(inter, "label $s.l1 -text \"Search for obj. containing var.\"");
-//cmd(inter, "set en \"\"");
+cmd(inter, "label $s.l1 -text \"Find object containing variable\"");
 cmd(inter, "entry $s.e1 -width 10 -relief sunken -textvariable en");
 cmd(inter, "label $s.l2 -text \"with value\"");
 cmd(inter, "entry $s.e2 -width 10 -relief sunken -textvariable value_search");
@@ -642,8 +640,7 @@ running=pre_running;
 break;
 
 
-
-
+// quit
 case 7:
 
 if(lab!=NULL)
@@ -663,16 +660,25 @@ cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
 cmd( inter, "destroytop .deb" );
-   choice=1;
-     quit=1;
-		 debug_flag=0;
-		 break;
+choice=1;
+
+// prevent changing run parameters when only data browse was called
+if ( lab != NULL )
+{
+	quit=1;
+	debug_flag=0;
+}
+
+break;
+
+		 
 case 29:
 		ch1=(char *)Tcl_GetVar(inter, "res",0);
 		strcpy(ch, ch1);
      set_all(&choice, r, ch, 0);
 		choice=0;
 		break;
+		
 case 8:
 ch1=(char *)Tcl_GetVar(inter, "res",0);
 Tcl_LinkVar(inter, "debug", (char *) &count, TCL_LINK_INT);
@@ -977,8 +983,6 @@ cmd(inter, "scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"");            
 cmd(inter, "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}");
 cmd(inter, "text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap word -width $wwidth -height 200 -cursor arrow");
 
-
-
 if(r->v==NULL)
   {cmd(inter, "label .deb.cc.l.no_var -text \"(no variables defined)\"");
 	cmd(inter,".deb.cc.l window create end -window .deb.cc.l.no_var");
@@ -991,8 +995,6 @@ else
      sprintf(msg, "set last %d", ap_v->last_update);
      cmd(inter, msg);
 
-//    Tcl_LinkVar(inter, "last", (char *) &ap_v->last_update, TCL_LINK_INT);
-//	 Tcl_LinkVar(inter, "val", (char *) &ap_v->val[0], TCL_LINK_DOUBLE);
      sprintf(msg, "set val %g", ap_v->val[0]);
      cmd(inter, msg);
 	  cmd(inter, "frame .deb.cc.l.e$i");
@@ -1008,22 +1010,24 @@ else
 	  cmd(inter, "label .deb.cc.l.e$i.val -width $w3 -pady 0 -bd 0 -anchor w -text $val");
 
 	  cmd(inter, "pack .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left");
-//	  if(ap_v->param==0)
-		{strcpy(ch, "bind .deb.cc.l.e$i.name <Double-Button-1> {set res ");
-		 strcat(ch, ap_v->label);
-		 strcat(ch, "; set choice 8}");
-		 cmd(inter, ch);
-
-		 strcpy(ch, "bind .deb.cc.l.e$i.name <Button-3> {set res ");
-		 strcat(ch, ap_v->label);
-		 strcat(ch, "; set choice 29}");
-		 cmd(inter, ch);
-		}
+      strcpy(ch, "bind .deb.cc.l.e$i.name <Double-Button-1> {set res ");
+      strcat(ch, ap_v->label);
+      strcat(ch, "; set choice 8}");
+      cmd(inter, ch);
+      
+      strcpy(ch, "bind .deb.cc.l.e$i.name <Button-3> {set res ");
+      strcat(ch, ap_v->label);
+      strcat(ch, "; set choice 29}");
+      cmd(inter, ch);
+      
+      strcpy(ch, "bind .deb.cc.l.e$i.name <Button-2> {set res ");
+      strcat(ch, ap_v->label);
+      strcat(ch, "; set choice 29}");
+      cmd(inter, ch);
+      
 	  cmd(inter,".deb.cc.l window create end -window .deb.cc.l.e$i");
      if( (i%2)==0)
        cmd(inter, ".deb.cc.l insert end \\n");
-	  Tcl_UnlinkVar(inter, "last");
-//	  Tcl_UnlinkVar(inter, "val");
 	 }
 	Tcl_UnlinkVar(inter, "i");
 
@@ -1033,10 +1037,7 @@ cmd(inter, "pack .deb.cc.scroll -side right -fill y");
 cmd(inter, ".deb.cc.l conf -height 20");
 cmd(inter, "pack .deb.cc.l -expand 1 -fill y -fill x");
 cmd(inter, "pack .deb.cc -expand 1  -fill x -fill y -after .deb.tit");
-
-
 }
-
 
 
 /*******************************************

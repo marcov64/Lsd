@@ -628,7 +628,6 @@ variable *cv;
 if(up==NULL)
  fpos=NULL;
 
-//fscanf(f, "%*[{\t\n]Label %s", ch);
 fscanf(f,"%s",ch);
 while(strcmp(ch,"Label"))
  fscanf(f,"%s",ch);
@@ -645,8 +644,6 @@ while(strcmp(ch, "}"))
  if(!strcmp(ch, "Son:"))
    { fscanf(f, "%*[ ]%s", ch);
      add_obj(ch, 1, 0);
-   //load_description(ch, "Object");
-   //for(cur=son; strcmp(ch, cur->label); cur=cur->next);
    for(cb=b; strcmp(cb->blabel, ch); cb=cb->next);
    cur=cb->head;
    cur->load_struct(f);
@@ -654,7 +651,6 @@ while(strcmp(ch, "}"))
  if(!strcmp(ch, "Var:"))
    { fscanf(f, "%*[ ]%s", ch);
      add_empty_var(ch);
-   //  load_description(ch, "Variable");
      sprintf(msg, "lappend ModElem %s",ch);
      execmd(msg);
    }
@@ -662,7 +658,6 @@ while(strcmp(ch, "}"))
 	{ fscanf(f, "%*[ ]%s", ch);
      cv=add_empty_var(ch);
      cv->param=1;
-     //load_description(ch, "Parameter");
      sprintf(msg, "lappend ModElem %s",ch);
      execmd( msg);
      
@@ -671,7 +666,6 @@ while(strcmp(ch, "}"))
 	{ fscanf(f, "%*[ ]%s", ch);
      cv=add_empty_var(ch);
      cv->param=2;
-     //load_description(ch, "Function");
      sprintf(msg, "lappend ModElem %s",ch);
      execmd(msg);
 
@@ -679,8 +673,6 @@ while(strcmp(ch, "}"))
 
  fscanf(f, "%*[{\r\t\n]%s", ch);
 }
-
-
 }
 
 
@@ -769,14 +761,6 @@ for(cb=b; cb!=NULL; cb=cb->next)
  }
 return 0;
 }
-
-
-
-
-
-
-
-
 
 
 FILE *quick_file_search(FILE *f, char str1[])
@@ -879,7 +863,6 @@ description *app;
 char str[10000], str1[10000];
 int done, i;
 
-//return;// BEWARE
 if(descr==NULL)
   app=descr=new description;
 else  
@@ -896,7 +879,6 @@ strcpy(app->type, type);
 
 sprintf(str, "%s_%s",type, label);
 
-//fsetpos(f, fpos);
 f=quick_file_search(f,str);
 if(f==NULL)
  {
@@ -930,12 +912,8 @@ if(!strcmp(str, "_INIT_\n") )
 else
  app->init=NULL;
 
-//fclose(f);
-
-
 app->initial='n';
 app->observe='n';
-//f=search_str(struct_file, "DOCUOBSERVE");
 for( ; fgets(str, 1000, f)!=NULL && strncmp(str, "DOCUOBSERVE", 11) ; );
 if(f!=NULL)
  {
@@ -943,11 +921,8 @@ if(f!=NULL)
    {if(!strncmp(label, str, strlen(label)) )
      app->observe='y';
    }  
- 
- //fclose(f);
  }
 
-//f=search_str(struct_file, "DOCUINITIAL");
 for( ; fgets(str, 1000, f)!=NULL && strncmp(str, "DOCUINITIAL", 11) ; );
 if(f!=NULL)
  {
@@ -955,8 +930,6 @@ if(f!=NULL)
    {if(!strncmp(label, str, strlen(label)) )
      app->initial='y';
    } 
- 
-
  }
 
 }
@@ -969,7 +942,6 @@ variable *cv;
 bridge *cb;
 load_description(r->label, "Object", f);
 
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur) )
 for(cb=r->b; cb!=NULL; cb=cb->next)
 {
  cur=cb->head;
@@ -989,10 +961,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
            break;
    }
  }
-
 }
-
-
 
 
 /*
@@ -1022,6 +991,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   set_blueprint(cur, cur1);
  }
 }
+
 
 void save_description(object *r, FILE *f)
 {
@@ -1067,7 +1037,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    
  }
 
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur) )
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {
   cur=cb->head;

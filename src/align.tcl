@@ -116,7 +116,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 		wm deiconify $w
 	}
 	raise $w
-	if [ winfo exists $w.$buttonF.ok ] {
+	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		focus $w.$buttonF.ok
 	} {
 		focus $w
@@ -144,7 +144,11 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	if { ! [ string equal $pos current ] } {
 		if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
-			set pos $defaultPos 
+			if [ info exists defaultPos ] {
+				set pos $defaultPos
+			} {
+				set pos centerS
+			}
 		}
 		set x [ getx $w $pos ]
 		set y [ gety $w $pos ]
@@ -173,7 +177,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		wm deiconify $w
 	}
 	raise $w
-	if [ winfo exists $w.$buttonF.ok ] {
+	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		focus $w.$buttonF.ok
 	} {
 		focus $w
@@ -393,9 +397,9 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 	pack $w.$fr -side right 
 }
 
-proc searchdone { w fr comSearch comDone } {
+proc finddone { w fr comFind comDone } {
 	frame $w.$fr
-	button $w.$fr.search -width -9 -text Search -command $comSearch
+	button $w.$fr.search -width -9 -text Find -command $comFind
 	button $w.$fr.ok -width -9 -text Done -command $comDone
 	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"

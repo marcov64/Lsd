@@ -139,7 +139,6 @@ if(done==0)
   error_hard( msg, "Equation code missing", "Check your configuration or code to prevent this situation." );
   return;
   }
-//fgets(c1_lab, 399, f);
 
 sprintf(msg, "set w .eq_%s", lab);
 cmd(inter, msg);
@@ -155,7 +154,7 @@ cmd(inter, "pack $w.f.yscroll -side right -fill y");
 cmd(inter, "pack $w.f.xscroll -side bottom -fill x");
 cmd(inter, "pack $w.f.text -expand yes -fill both");
 cmd(inter, "pack $w.f -expand yes -fill both");
-sprintf( msg, "searchdone $w b { set W .eq_%s; set cur1 [ $W.f.text index insert ]; newtop $W.s \"\" { destroytop $W.s } $W; label $W.s.l -text \"Search for\"; entry $W.s.e -textvariable s; focus $W.s.e; button $W.s.b -width -9 -text Ok -command { destroytop $W.s; set cur1 [ $W.f.text search -count length $s $cur1 ]; if { [ string length $cur1 ] > 0 } { $W.f.text tag remove sel 1.0 end; $W.f.text tag add sel $cur1 \"$cur1 + $length char\"; update; $W.f.text see $cur1 } }; pack $W.s.l $W.s.e; pack $W.s.b -padx 10 -pady 10; bind $W.s <KeyPress-Return> { $W.s.b invoke }; showtop $W.s } { destroytop .eq_%s }", lab, lab );
+sprintf( msg, "finddone $w b { set W .eq_%s; set cur1 [ $W.f.text index insert ]; newtop $W.s \"\" { destroytop $W.s } $W; label $W.s.l -text \"Find\"; entry $W.s.e -textvariable s; focus $W.s.e; button $W.s.b -width -9 -text Ok -command { destroytop $W.s; set cur1 [ $W.f.text search -count length $s $cur1 ]; if { [ string length $cur1 ] > 0 } { $W.f.text tag remove sel 1.0 end; $W.f.text tag add sel $cur1 \"$cur1 + $length char\"; update; $W.f.text see $cur1 } }; pack $W.s.l $W.s.e; pack $W.s.b -padx 10 -pady 10; bind $W.s <KeyPress-Return> { $W.s.b invoke }; showtop $W.s } { destroytop .eq_%s }", lab, lab );
 cmd(inter, msg);
 sprintf(msg, "bind .eq_%s <Control-f> {.eq_%s.search invoke}; bind .eq_%s <Control-F> {.eq_%s.search invoke}", lab, lab, lab, lab);
 cmd(inter, msg);

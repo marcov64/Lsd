@@ -56,7 +56,6 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 ****************************************************/
 
-
 #include <tk.h>
 #include "decl.h"
 
@@ -93,7 +92,6 @@ int vcvsz = 1080;				// vertical canvas size
 SHOW_GRAPH
 
 ****************************************************/
-
 void show_graph( object *t)
 {
 char msg[300];
@@ -176,7 +174,6 @@ cmd( inter, msg );
 DRAW_OBJ
 
 ****************************************************/
-
 void draw_obj(Tcl_Interp *inter, object *blk, object *t, int level, int center, int from)
 {
 int i, num, step_type, begin, x, count, num_groups;
@@ -253,54 +250,31 @@ for(i=begin-range_type/2, cb=t->b; cb!=NULL; cb=cb->next,  i+=step_type)
 range_type+=15;
 }
 
+
 /****************************************************
 PUT_NODE
 
 ****************************************************/
-
 void put_node(Tcl_Interp *inter, int x1, int y1, int x2, int y2, char *str)
 {
-char ch[1000];
+	char ch[1000];
 
-//Tcl_LinkVar(inter, "x1", (char *) &x1, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "x2", (char *) &x2, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "y1", (char *) &y1, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "y2", (char *) &y2, TCL_LINK_INT);
-
-//sprintf(ch, "$c.f.c create oval $x1.m $y1.m $x2.m $y2.m -tags node -tags %s -fill $color", str);
-sprintf(ch, "$c.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str);
-cmd(inter, ch);
-
-//Tcl_UnlinkVar(inter, "x1");
-//Tcl_UnlinkVar(inter, "x2");
-//Tcl_UnlinkVar(inter, "y1");
-//Tcl_UnlinkVar(inter, "y2");
-
+	sprintf(ch, "$c.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str);
+	cmd(inter, ch);
 }
+
 
 /****************************************************
 PUT_LINE
 
 ****************************************************/
-
 void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
 {
 
     char ch[1000];
-//Tcl_LinkVar(inter, "x1", (char *) &x1, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "x2", (char *) &x2, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "y1", (char *) &y1, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "y2", (char *) &y2, TCL_LINK_INT);
 
-// cmd(inter, "$c.f.c create line $x1.m $y1.m $x2.m $y2.m -tags node");
     sprintf(ch, "$c.f.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2);
-cmd(inter, ch);
-
-//Tcl_UnlinkVar(inter, "x1");
-//Tcl_UnlinkVar(inter, "x2");
-//Tcl_UnlinkVar(inter, "y1");
-//Tcl_UnlinkVar(inter, "y2");
-
+	cmd(inter, ch);
 }
 
 
@@ -308,14 +282,10 @@ cmd(inter, ch);
 PUT_TEXT
 
 ****************************************************/
-
 void put_text(Tcl_Interp *inter, char *str, char *n, int x, int y, char *str2)
 {
 char ch[1000];
 const char *bah;
-
-//Tcl_LinkVar(inter, "x", (char *) &x, TCL_LINK_INT);
-//Tcl_LinkVar(inter, "y", (char *) &y, TCL_LINK_INT);
 
 sprintf(ch, "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s",x,y,str,str2 );
 cmd(inter, ch);
@@ -325,40 +295,8 @@ y+=8;
 sprintf(ch, "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s",x,y,n,str2 );
 cmd(inter, ch);
 
-/*
-sprintf(ch, "$c.f.c bind %s <Enter> {$c.f.c create text 2 1 -font {{MS Times New Roman} 10} -text $%s -anchor nw -tags list}", str2, str2);
-cmd(inter, ch);
-sprintf(ch, "$c.f.c bind %s <Leave> {$c.f.c delete list}", str2);
-cmd(inter, ch);
-*/
 sprintf(ch, "$c.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $c; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $c }", str2, str2, str2);
 cmd(inter, ch);
 sprintf(ch, "$c.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2);
 cmd(inter, ch);
-
-//sprintf(ch, "$c.f.c bind %s <Double-1> {set res_g %s; set choice_g 24}", str2, str2);
-//cmd(inter, ch);
-//bah=Tcl_GetStringResult(inter);
-//sprintf(ch, "$c.f.c bind %s <Button-3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
-//cmd(inter, ch);
-//sprintf(ch, "$c.f.c bind %s <3> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
-//cmd(inter, ch);
-//sprintf(ch, "$c.f.c bind %s <2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
-//cmd(inter, ch);
-
-//sprintf(ch, "$c.f.c bind %s <Button-2> {.log.text.text.internal insert end cazzo; wm withdraw $c; set res_g %s; set choice_g 25; }", str2, str2);
-//cmd(inter, ch);
-
-//sprintf(ch, "$c.f.c bind %s <Shift-Button-1> {set res_g %s; set choice_g 25;}", str2, str2);
-//cmd(inter, ch);
-
-//sprintf(ch, ".log.text.text.internal insert end [$c.f.c bind %s <2>]; .log.text.text.internal inser end \\n", str2);
-//cmd(inter, ch);
-
-//bah=Tcl_GetStringResult(inter);
-
-//Tcl_UnlinkVar(inter, "x");
-//Tcl_UnlinkVar(inter, "y");
 }
-
-

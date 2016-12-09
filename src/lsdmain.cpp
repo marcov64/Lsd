@@ -103,6 +103,7 @@ void file_name( char *name);
 void prepare_plot(object *r, int id_sim);
 void create_logwindow(void);
 void cover_browser( const char *, const char *, const char * );
+void uncover_browser( void );
 void myexit(int v);
 FILE *search_str(char const *name, char const *str);
 void set_lab_tit(variable *var);
@@ -115,6 +116,7 @@ void add_description(char const *lab, char const *type, char const *text);
 void add_description(char const *lab, char const *type, char const *text);
 void empty_cemetery(void);
 void save_single(variable *vcv);
+int load_configuration( object * );
 char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
@@ -162,7 +164,7 @@ char *exec_path = NULL;		// path of executable file
 char name_rep[400];
 char **tp;
 int struct_loaded=0;
-int running;
+int running=0;
 int actual_steps=0;
 int counter;
 int no_window=0;
@@ -173,6 +175,7 @@ int findex, fend;
 int batch_sequential=0;
 char *sens_file=NULL;		// current sensitivity analysis file
 long findexSens=0;			// index to sequential sensitivity configuration filenames
+bool pause_run;				// pause running simulation
 bool scroll;				// scroll state in current runtime plot
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
@@ -494,40 +497,10 @@ create_logwindow( );
 cmd(inter, "destroy .l");
 #endif
 
-if(p==1)
+if ( p == 1 && ! load_configuration( root ) )
 {
-f=fopen(struct_file, "r");
-if(f!=NULL)
-{//struct_loaded;
- root->load_struct(f);
- fclose(f);
- f=NULL;
- root->load_param(struct_file, 1, f);
- f=search_str(struct_file, "SIM_NUM");
- if(f!=NULL)
-  fscanf(f, "%d", &sim_num);
- fclose(f);
- f=search_str(struct_file, "SEED");
- if(f!=NULL)
-  fscanf(f, "%ld", &seed);
- fclose(f);
- f=search_str(struct_file, "MAX_STEP");
- if(f!=NULL)
-   fscanf(f, "%d", &max_step);
- fclose(f);
- f=search_str(struct_file, "EQUATION");
- if(f!=NULL)
-   fgets(msg, 200, f);
- delete[] equation_name;
- equation_name=new char[strlen(msg)+1];
- strcpy(equation_name, msg+1);
- if(equation_name[strlen(equation_name)-1]=='\n')
-   equation_name[strlen(equation_name)-1]=(char)NULL;
- if(equation_name[strlen(equation_name)-1]=='\n')
-   equation_name[strlen(equation_name)-1]=(char)NULL;
-  
- fclose(f);
-}
+	printf("\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n",struct_file);
+	myexit(3);
 }
 
 stacklog = new lsdstack;
@@ -603,8 +576,7 @@ quit=0;
  
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
-cmd( inter, "disable_window \"\" m bbar l" );		// disable main window (Tk 8.6 only)
-cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  interrupts the simulation at a flagged variable" );
+cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
 #else
 sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
 plog(msg);
@@ -684,14 +656,20 @@ seed++;
 stack=0;
 
 scroll = false;
+pause_run = false;
 done_in = 0;
 debug_flag = 0;
 running = 1;
 actual_steps = 0;
 start = clock();
 
-for(t=1; quit==0 && t<=max_step;t++ )
+for(t=1; quit==0 && t<=max_step;t++)
 {
+	
+// adjust "clock" backwards if simulation is paused
+if ( pause_run )
+	t--;
+
 #ifndef NO_WINDOW 
 if(when_debug==t)
 {
@@ -701,13 +679,16 @@ if(when_debug==t)
 #endif
 
 cur_plt=0;
-root->update();
+
+// only update if simulation not paused
+if ( ! pause_run )
+	root->update();
 
 #ifndef NO_WINDOW 
 switch( done_in )
 {
 case 0:
- if( ! fast )
+ if ( ! pause_run && ! fast )
   {
 	if(cur_plt==0)
 	{
@@ -718,6 +699,8 @@ case 0:
 break;
 
 case 1:			// Stop button in Log window / s/S key in Runtime window
+  if ( pause_run )
+	cmd( inter, "wm title .log \"$origLogTit\"" );
   sprintf(msg, "\nSimulation stopped at t = %d", t);
   plog(msg);
   quit=2;
@@ -735,8 +718,17 @@ case 2:			// Fast button in Log window / f/F key in Runtime window
 break;
 
 case 3:			// Debug button in Log window / d/D key in Runtime window
- debug_flag=1;
- cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+if ( ! pause_run )
+{
+	debug_flag=1;
+	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+}
+else			// if paused, just call the data browser
+{
+	double useless = -1;
+	deb( root, NULL, NULL, &useless );
+}
+	
 break;
 
 case 4:			// Observe button in Log window / o/O key in Runtime window
@@ -751,6 +743,8 @@ break;
  
 // plot window DELETE_WINDOW button handler
 case 5:
+ if ( pause_run )
+	cmd( inter, "wm title .log \"$origLogTit\"" );
  sprintf(msg, "if { [winfo exist .plt%d]} {destroy .plt%d} {}", i, i);
  cmd(inter, msg);
  sprintf(msg, "\nSimulation stopped at t = %d", t);
@@ -778,6 +772,21 @@ case 8: 		// Scroll checkbox
  scroll = ! scroll;
 break;
 
+case 9: 		// Pause simulation
+ pause_run = ! pause_run;
+ if ( pause_run )
+ {
+	cmd( inter, "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
+	sprintf( msg, "\nSimulation paused at t = %d", t );
+	plog( msg );
+ }
+ else
+ {
+	cmd( inter, "wm title .log \"$origLogTit\"" );
+	plog( "\nSimulation resumed" );
+ }
+break;
+
 case 35:
  myexit(11);
 break;
@@ -787,7 +796,7 @@ break;
 }
 
 // perform scrolling if enabled
-if ( scroll )
+if ( ! pause_run && scroll )
 {
 	sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}",i);
 	cmd(inter, msg);
@@ -815,7 +824,7 @@ else
 #ifndef NO_WINDOW 
 cmd( inter, "update" );
 // allow for run time plot window destruction
-cmd( inter, "if [ winfo exists $activeplot ] { wm protocol $activeplot WM_DELETE_WINDOW \"\" } }" );
+cmd( inter, "if [ winfo exists $activeplot ] { wm protocol $activeplot WM_DELETE_WINDOW \"\" }" );
 sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.go conf -state disabled }", i, i );
 cmd( inter, msg);
 sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.shift conf -state disabled }", i, i );
@@ -924,8 +933,7 @@ delete rf;										// close file and delete object
 }
 
 #ifndef NO_WINDOW 
-cmd( inter, "if [ winfo exist .t ] { destroytop .t }" );
-cmd( inter, "enable_window \"\" m bbar l" );	// enable main window (Tk 8.6 only)
+uncover_browser( );
 Tcl_UnlinkVar(inter, "done_in");
 #endif
 quit=0;
@@ -1129,6 +1137,7 @@ cmd(inter, "pack $w.text -expand yes -fill both");
 cmd(inter, "pack $w.scrollx -side bottom -fill x");
 cmd(inter, "pack $w -expand yes -fill both");
 cmd(inter, "bind .log <KeyPress-s> {.log.but.stop invoke}; bind .log <KeyPress-S> {.log.but.stop invoke}");
+cmd(inter, "bind .log <KeyPress-p> {.log.but.pause invoke}; bind .log <KeyPress-P> {.log.but.pause invoke}");
 cmd(inter, "bind .log <KeyPress-f> {.log.but.speed invoke}; bind .log <KeyPress-F> {.log.but.speed invoke}");
 cmd(inter, "bind .log <KeyPress-o> {.log.but.obs invoke}; bind .log <KeyPress-O> {.log.but.obs invoke}");
 cmd(inter, "bind .log <KeyPress-d> {.log.but.deb invoke}; bind .log <KeyPress-D> {.log.but.deb invoke}");
@@ -1140,14 +1149,15 @@ cmd(inter, "bind .log <KeyPress-Escape> {focus -force .}");
 cmd(inter, "set w .log.but");
 cmd(inter, "frame $w");
 cmd(inter, "button $w.stop -width -9 -text Stop -command {set done_in 1} -underline 0");
+cmd(inter, "button $w.pause -width -9 -text Pause -command {set done_in 9} -underline 0");
 cmd(inter, "button $w.speed -width -9 -text Fast -command {set done_in 2} -underline 0");
 cmd(inter, "button $w.obs -width -9 -text Observe -command {set done_in 4} -underline 0");
 cmd(inter, "button $w.deb -width -9 -text Debug -command {set done_in 3} -underline 0");
 cmd(inter, "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0");
 cmd(inter, "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0");
 
-cmd(inter, "pack $w.stop $w.speed $w.obs $w.deb $w.help $w.copy -padx 10 -pady 10 -side left");
-cmd(inter, "pack $w");
+cmd(inter, "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left");
+cmd(inter, "pack $w -side right");
 
 cmd(inter, "update idletasks");
 cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
@@ -1161,34 +1171,47 @@ cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { 
 // a Tcl/Tk version of plog
 cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm }" );
 }
-#endif
 
 
 /*********************************
 COVER_BROWSER
 *********************************/
 
-#ifndef NO_WINDOW
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
-cmd( inter, "newtop .t \"[ wm title . ] (DISABLED)\"" );
-cmd( inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}" );
-sprintf( msg, "label .t.l1 -font {-weight bold} -text \"%s\"", text1 );
-cmd( inter, msg );
-sprintf( msg, "label .t.l2 -text \"\n%s\"", text2 );
-cmd( inter, msg );
-cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
-sprintf( msg, "label .t.l4 -justify left -text \"\n%s\"", text3 );
-cmd( inter, msg );
-cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
-cmd( inter, "showtop .t coverW no no no" );
-cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; raise .log; focus .log }" );
-cmd( inter, "update idletasks" );
+	cmd( inter, "disable_window \"\" m bbar l" );		// disable main window
+	cmd( inter, "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
+	cmd( inter, "newtop .t [ wm title . ]" );
+	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm } {}" );
+	sprintf( msg, "label .t.l1 -font {-weight bold} -text \"%s\"", text1 );
+	cmd( inter, msg );
+	sprintf( msg, "label .t.l2 -text \"\n%s\"", text2 );
+	cmd( inter, msg );
+	cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
+	sprintf( msg, "label .t.l4 -justify left -text \"\n%s\"", text3 );
+	cmd( inter, msg );
+	cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
+	cmd( inter, "showtop .t coverW no no no" );
+	cmd( inter, "wm deiconify .log; raise .log; focus -force .log" );
+	cmd( inter, "update" );
+}
+
+
+/*********************************
+UNCOVER_BROWSER
+*********************************/
+
+void uncover_browser( void )
+{
+	cmd( inter, "if [ winfo exist .t ] { destroytop .t }"  );
+	cmd( inter, "wm title . $origMainTit" );
+	cmd( inter, "enable_window \"\" m bbar l" );	// enable main window
+	cmd( inter, "update" );
 }
 #endif
 
 
-void save_single(variable *vcv)
+ void save_single(variable *vcv)
 {
 FILE *f;
 int i;

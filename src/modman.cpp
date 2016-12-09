@@ -416,19 +416,12 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Ctrl+x");
 cmd(inter, "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Ctrl+c");
 cmd(inter, "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Ctrl+v");
-
-//cmd(inter, "$w add command -label \"Cut\" -command {tk_textCut .f.t.t} -underline 1");
-//cmd(inter, "$w add command -label \"Paste\" -command {tk_textPaste .f.t.t} -underline 0 -accelerator Ctrl+v");
-//cmd(inter, "$w add command -label \"Undo\" -command {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}} -underline 0 -accelerator Ctrl+z");
-//cmd(inter, "$w add command -label \"Redo\" -command {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} } -underline 2 -accelerator Ctrl+y");
-
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f");
 cmd(inter, "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3");
 cmd(inter, "$w add command -label \"Replace...\" -command {set choice 21} -underline 0");
 cmd(inter, "$w add command -label \"Goto Line...\" -command {set choice 10} -underline 5 -accelerator Ctrl+l");
 cmd(inter, "$w add separator");
-
 cmd(inter, "$w add command -label \"Match \\\{ \\}\" -command {set choice 17} -accelerator Ctrl+m");
 cmd(inter, "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -accelerator Ctrl+u");
 cmd(inter, "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Ctrl+\\\(");
@@ -519,24 +512,24 @@ cmd( inter, "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equat
 cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
 cmd( inter, "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.$iconExt\"" );
 
-cmd( inter, "button .bbar.open -image openImg -relief flat -command {set choice 33}" );
-cmd( inter, "button .bbar.save -image saveImg -relief flat -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
-cmd( inter, "button .bbar.undo -image undoImg -relief flat -command {catch {.f.t.t edit undo}}" );
-cmd( inter, "button .bbar.redo -image redoImg -relief flat -command {catch {.f.t.t edit redo}}" );
-cmd( inter, "button .bbar.cut -image cutImg -relief flat -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( inter, "button .bbar.copy -image copyImg -relief flat -command {tk_textCopy .f.t.t}" );
-cmd( inter, "button .bbar.paste -image pasteImg -relief flat -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( inter, "button .bbar.find -image findImg -relief flat -command {set choice 11}" );
-cmd( inter, "button .bbar.replace -image replaceImg -relief flat -command {set choice 21}" );
-cmd( inter, "button .bbar.indent -image indentImg -relief flat -command {set choice 42}" );
-cmd( inter, "button .bbar.deindent -image deindentImg -relief flat -command {set choice 43}" );
-cmd( inter, "button .bbar.comprun -image comprunImg -relief flat -command {set choice 2}" );
-cmd( inter, "button .bbar.compile -image compileImg -relief flat -command {set choice 6}" );
-cmd( inter, "button .bbar.info -image infoImg -relief flat -command {set choice 44}" );
-cmd( inter, "button .bbar.descr -image descrImg -relief flat -command {set choice 5}" );
-cmd( inter, "button .bbar.equation -image equationImg -relief flat -command {set choice 8}" );
-cmd( inter, "button .bbar.set -image setImg -relief flat -command {set choice 48}" );
-cmd( inter, "button .bbar.help -image helpImg -relief flat -command {LsdHelp lsdfuncMacro.html}" );
+cmd( inter, "button .bbar.open -image openImg -relief flat -overrelief groove -command {set choice 33}" );
+cmd( inter, "button .bbar.save -image saveImg -relief flat -overrelief groove -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
+cmd( inter, "button .bbar.undo -image undoImg -relief flat -overrelief groove -command {catch {.f.t.t edit undo}}" );
+cmd( inter, "button .bbar.redo -image redoImg -relief flat -overrelief groove -command {catch {.f.t.t edit redo}}" );
+cmd( inter, "button .bbar.cut -image cutImg -relief flat -overrelief groove -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( inter, "button .bbar.copy -image copyImg -relief flat -overrelief groove -command {tk_textCopy .f.t.t}" );
+cmd( inter, "button .bbar.paste -image pasteImg -relief flat -overrelief groove -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( inter, "button .bbar.find -image findImg -relief flat -overrelief groove -command {set choice 11}" );
+cmd( inter, "button .bbar.replace -image replaceImg -relief flat -overrelief groove -command {set choice 21}" );
+cmd( inter, "button .bbar.indent -image indentImg -relief flat -overrelief groove -command {set choice 42}" );
+cmd( inter, "button .bbar.deindent -image deindentImg -relief flat -overrelief groove -command {set choice 43}" );
+cmd( inter, "button .bbar.comprun -image comprunImg -relief flat -overrelief groove -command {set choice 2}" );
+cmd( inter, "button .bbar.compile -image compileImg -relief flat -overrelief groove -command {set choice 6}" );
+cmd( inter, "button .bbar.info -image infoImg -relief flat -overrelief groove -command {set choice 44}" );
+cmd( inter, "button .bbar.descr -image descrImg -relief flat -overrelief groove -command {set choice 5}" );
+cmd( inter, "button .bbar.equation -image equationImg -relief flat -overrelief groove -command {set choice 8}" );
+cmd( inter, "button .bbar.set -image setImg -relief flat -overrelief groove -command {set choice 48}" );
+cmd( inter, "button .bbar.help -image helpImg -relief flat -overrelief groove -command {LsdHelp lsdfuncMacro.html}" );
 cmd( inter, "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
 
 cmd( inter, "bind .bbar.open <Enter> {set ttip \"Browse Models...\"}" );
@@ -587,15 +580,13 @@ cmd(inter, "text .f.t.t -height 2 -undo 1 -autoseparators 1 -bg #fefefe -yscroll
 cmd(inter, "set a [.f.t.t conf -font]");
 cmd(inter, "set b [lindex $a 3]");
 cmd(inter, "if {$dim_character == 0} {set dim_character [lindex $b 1]}");
-//cmd(inter, "set fonttype [lindex $b 0]");
 cmd(inter, "if { $dim_character == \"\"} {set dim_character 12} {}");
-
 cmd(inter, "set a [list $fonttype $dim_character]");
+
 // set preferred tab size and wrap option
 cmd( inter, "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 cmd( inter, "setwrap .f.t.t $wrap" );		// adjust text wrap
-//cmd(inter, "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"");
-//
+
 // set syntax colors
 cmd(inter, ".f.t.t tag configure comment1 -foreground green4");
 cmd(inter, ".f.t.t tag configure comment2 -foreground green4");
@@ -607,9 +598,6 @@ cmd(inter, ".f.t.t tag configure ctype -foreground DarkViolet");
 cmd(inter, ".f.t.t tag configure ckword -foreground purple4");
 cmd(inter, ".f.t.t configure -selectbackground gray");
 cmd(inter, ".f.t.t configure -selectforeground black");
-
-//
-
 
 cmd(inter, "frame .f.hea -relief groove -bd 2");
 
@@ -666,23 +654,6 @@ cmd(inter, "bind .f.t.t <KeyRelease> {if {[.f.t.t edit modified]} {savCurFin; se
 cmd(inter, "bind .f.t.t <ButtonPress> {savCurIni}");
 cmd(inter, "bind .f.t.t <ButtonRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}");
 
-/*
-cmd(inter, "bind .f.t.t <KeyRelease> {.f.hea.line.line conf -text [.f.t.t index insert]}");
-cmd(inter, "bind .f.t.t <ButtonRelease> {.f.hea.line.line conf -text [.f.t.t index insert]}");
-
-
-
-cmd(inter, "bind .f.t.t <KeyPress> {if { [string compare $currentdoc [.f.t.t get 1.0 end] ]!=0 } {set recolor [lindex [.f.t.t tag nextrange sel 1.0] 0]; set undopos $currentpos; set currentpos [.f.t.t index insert]; set wholedoc \"$currentdoc\"; set currentdoc [.f.t.t get 1.0 end]; } {} }");
-cmd(inter, "bind .f.t.t <KeyRelease> {.f.hea.line.line conf -text [.f.t.t index insert]; if { $recolor!=\"\"} {set choice 23; set recolor \"\"} {}}");
-cmd(inter, "bind .f.t.t <KeyPress-Return> {.f.t.t tag remove comment2 [.f.t.t index insert] \"[.f.t.t index insert]+1 char\"}");
-cmd(inter, "bind .f.t.t <KeyRelease-Delete> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-BackSpace> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-slash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-asterisk> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-quotedbl> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");
-cmd(inter, "bind .f.t.t <KeyRelease-backslash> {.f.hea.line.line conf -text [.f.t.t index insert]; set choice 23}");*/
-
-
 cmd(inter, "bind .f.t.t <Control-l> {set choice 10}; bind .f.t.t <Control-L> {set choice 10}");
 cmd(inter, "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwrap .f.t.t $wrap}");
 
@@ -700,16 +671,8 @@ cmd(inter, "bind .f.t.t <Control-m> {set choice 17}");
 cmd(inter, "bind .f.t.t <Control-g> {set choice 13}; bind .f.t.t <Control-G> {set choice 13}");
 cmd(inter, "bind .f.t.t <Control-d> {set choice 5; break}");
 cmd(inter, "bind .f.t.t <Control-b> {set choice 33; break}; bind .f.t.t <Control-B> {set choice 33; break}");
-
-
-
-//cmd(inter, "bind .f.t.t <Control-c> {tk_textCopy .f.t.t}");
-//cmd(inter, "bind .f.t.t <Control-v> {tk_textPaste .f.t.t}");
-
 cmd(inter, "bind .f.t.t <Control-minus> {incr dim_character -2; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"}");
-
 cmd(inter, "bind .f.t.t <Control-plus> {incr dim_character 2; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"}");
-
 cmd(inter, "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\\{}");
 cmd(inter, "bind .f.t.t <Control-parenright> {.f.t.t insert insert \\}}");
 cmd(inter, "bind .f.t.t <Control-greater> {set choice 42}");
@@ -721,16 +684,8 @@ cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m post
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}} {}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}} {}");
 cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
-//cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-v> { .f.t.t yview scroll -1 pages; tk_textPaste .f.t.t } }" );
 
 cmd(inter, "bind .f.t.t <KeyPress-Return> {+set choice 16}");
-//cmd(inter, "bind .f.t.t <KeyPress-Return> {+lappend ud [.f.t.t get 0.0 \"end - 1 chars\"]; lappend udi [.f.t.t index insert]}");
-//cmd(inter, "bind .f.t.t <KeyPress-space> {+lappend ud [.f.t.t get 0.0 \"end - 1 chars\"]; lappend udi [.f.t.t index insert]}");
-//cmd(inter, "bind .f.t.t <Control-z> {if {[llength $ud] ==0 } {} {lappend rd [.f.t.t get 0.0 \"end - 1 chars\"]; lappend rdi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $ud end]; .f.t.t delete end; .f.t.t see [lindex $udi end]; .f.t.t mark set insert [lindex $udi end]; set ud [lreplace $ud end end]; set udi [lreplace $udi end end]; set choice 23}}");
-
-
-//cmd(inter, "bind .f.t.t <Control-y> {if {[llength $rd] ==0} {} {lappend ud [.f.t.t get 0.0 \"end -1 chars\"]; lappend udi [.f.t.t index insert]; .f.t.t delete 0.0 end; .f.t.t insert 0.0 [lindex $rd end]; .f.t.t delete end; .f.t.t see [lindex $rdi end]; .f.t.t mark set insert [lindex $rdi end]; set rd [lreplace $rd end end]; set rdi [lreplace $rdi end end]; set choice 23} }");
-
 cmd(inter, "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}");
 cmd(inter, "bind .f.t.t <Control-z> {catch {.f.t.t edit undo}}; bind .f.t.t <Control-Z> {catch {.f.t.t edit undo}}");
 cmd(inter, "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}; bind .f.t.t <Control-Y> {catch {.f.t.t edit redo}}");
@@ -868,9 +823,6 @@ if(argn>1)
        {strcpy(str, s);
         if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++")|| !strcmp(str, ".h")|| !strcmp(str, ".H"))
           {sourcefile=1;
-//           cmd(inter, "set inicolor \"1.0\"");
-//           cmd(inter, "set endcolor [.f.t.t index end]");
-//           color(&num);
 			color(shigh, 0, 0);			// set color types (all text)
           }
         else
@@ -887,12 +839,6 @@ if(argn>1)
   
 cmd(inter, "set tcl_nonwordchars \\\"");
 cmd(inter, "focus -force .f.t.t");
-//cmd(inter, "bind .f.t.t <Control-o> {; set choice 15}");
-//cmd(inter, "wm focusmodel . active");
-/*
-cmd(inter, "set trash [bind .f.t.t]");
-cmd(inter, ".f.t.t insert end \"$trash\"");
-*/
 
 cmd(inter, "set lfindcounter -1");
 
@@ -1097,7 +1043,6 @@ if(s==NULL || !strcmp(s, ""))
     sprintf(msg, "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}",str+7,str+7);
     cmd(inter, msg);
   
-    //cmd(inter, "if {$funtime > $exectime } {set choice 1} {set choice 0}");
     cmd(inter, "if {$init_time < $exectime } {set choice 0} { }");
     //turn into 0 if the executable is newer than the compilation command, implying just warnings
   }
@@ -1359,20 +1304,15 @@ if(s==NULL || !strcmp(s, ""))
   cmd(inter, ".f.t.t edit reset");
   sourcefile=1;
   cmd(inter, "set before [.f.t.t get 1.0 end]");
-//  cmd(inter, "set a [.f.t.t search \"if(!strcmp\" 1.0]");
-//  cmd(inter, "if {$a !=\"\" } {.f.t.t yview $a;.f.t.t mark set insert \"$a + 12 lines\"} {}");
 
   cmd(inter, ".f.hea.file.dat conf -text \"$filename\"");
   cmd(inter, "wm title . \"$filename - LMM\"");
   cmd(inter, "update");
   sourcefile=1;
   choice=0;
-//  cmd(inter, "set inicolor \"1.0\"");
-//  cmd(inter, "set endcolor [.f.t.t index end]");
   cmd(inter, ".f.t.t tag add bc \"1.0\"");
   cmd(inter, ".f.t.t tag add fc \"1.0\"");
   cmd(inter, ".f.t.t mark set insert 1.0");
-//  color(&num);
 color(shigh, 0, 0);			// set color types (all text)
   
 cmd(inter, "catch [unset -nocomplain ud]");
@@ -1931,9 +1871,6 @@ if(s[0]!='\0')
  {strcpy(str, s);
   if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H"))
    {sourcefile=1;
-//    cmd(inter, "set inicolor \"1.0\"");
-//    cmd(inter, "set endcolor [.f.t.t index end]");
-//    color(&num);
 	color(shigh, 0, 0);			// set color types (all text)
    }
   else
@@ -1981,7 +1918,6 @@ while(num!=0 && choice!=0)
  cmd(inter, "set a [.f.t.t search $direction \"\\{\" $cur $terminal]");
  cmd(inter, "if {$a==\"\"} {set a [.f.t.t index $terminal]} {}");
  cmd(inter, "set b [.f.t.t search $direction \"\\}\" $cur $terminal]");
-// cmd(inter, ".f.t.t insert end \"$a $b $cur\\n\"");
  cmd(inter, "if {$b==\"\"} {set b [.f.t.t index $terminal]} {}");
  cmd(inter, "if {$a==$b} {set choice 0} {}");
  if(choice==0)
@@ -2003,45 +1939,6 @@ goto loop;
 }
 
 
-/*
-// It seems it's not used anymore
-if(choice==19)
-{
-choice=0;
-if(sourcefile==1)
-  color(&num);
-
-goto loop;
-}
-
-
-
-// It seems it's not used anymore
-if(choice==22)
-{
-//reset the coloring around the insertion point after a deletion
-if(sourcefile==0)
- {choice=0;
-  goto loop;
- }
-cmd(inter, "set a [lindex [.f.t.t nextrange sel 1.0] 0]");
-cmd(inter, "if {$a==\"\"} {set choice 1} {set choice 0}");
-if(choice==0)
- goto loop;
-
-cmd(inter, ".f.t.t tag remove str 1.0 end");
-cmd(inter, ".f.t.t tag remove comment1 1.0 end");
-cmd(inter, ".f.t.t tag remove comment2 1.0 end");
-
-cmd(inter, "set inicolor 1.0");
-cmd(inter, "set endcolor end");
-color(&num);
-choice=0;
-choice=0;
-goto loop;
-}
-
-*/
 if(choice==23)
 { //reset colors after a sign for coloring
 
@@ -4243,7 +4140,6 @@ cmd(inter, "set v_obj p");
 cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
-
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "bind .a.f.ok <Return> {.a.f.ok invoke}");
@@ -4385,7 +4281,6 @@ goto loop;
 }
 
 
-
 if(choice==41)
 {
 /************
@@ -4447,7 +4342,6 @@ if(choice==3)
   choice=0;
   goto loop_copy;
  } 
-
 
 //control for an existing model with the same name AND same version
 cmd(inter, "set dir [glob *]");
@@ -4566,7 +4460,6 @@ for( ;i<=num; i++)
   }  
  }
  
-
 choice=0;
 goto loop;
 
@@ -4643,8 +4536,6 @@ if(strncmp(str, "FUN=", 4)!=0)
   choice=0;
   goto loop;
  }
-
-
 
 sprintf(msg, "set eqname %s.cpp", str+4);
 cmd(inter, msg);
@@ -5615,9 +5506,6 @@ free(hits);
 
 void make_makefile(void)
 {
-
- 
-
 cmd(inter, "set choice [file exists model_options.txt]");
 if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
@@ -5632,8 +5520,6 @@ choice=0;
 cmd(inter, "set f [open model_options.txt r]");
 cmd(inter, "set a [read -nonewline $f]");
 cmd(inter, "close $f");
-
-
 
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
@@ -5665,13 +5551,9 @@ cmd(inter, "update");
 }
 
 
-
-
-
 void make_makefileNW(void)
 {
 
- 
 cmd(inter, "set choice [file exists model_options.txt]");
 if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
@@ -5686,8 +5568,6 @@ choice=0;
 cmd(inter, "set f [open model_options.txt r]");
 cmd(inter, "set a [read -nonewline $f]");
 cmd(inter, "close $f");
-
-
 
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
@@ -5711,14 +5591,12 @@ cmd(inter, "set f [open $fnameNW r]");
 cmd(inter, "set b [read -nonewline $f]");
 cmd(inter, "close $f");
 
-
 cmd(inter, "set c \"# Model compilation options\\n$a\\n\\n# System compilation option\\n$d\\n\\n# body of the makefile (in src/makefile_base.txt)\\n$b\"");
 cmd(inter, "set f [open makefileNW w]");
 cmd(inter, "puts -nonewline $f $c");
 cmd(inter, "close $f");
 cmd(inter, "update");
 }
-
 
 
 void signal(char *s)
@@ -5728,9 +5606,6 @@ f=fopen("signal.txt", "w");
 fprintf(f, "%s",s);
 fclose(f);
 }
-
-
-
 
 
 void create_compresult_window(void)
