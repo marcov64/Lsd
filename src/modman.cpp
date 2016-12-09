@@ -2560,7 +2560,7 @@ cmd(inter, "bind .a <KeyPress-o> {.a.r.addo invoke; set choice 1}; bind .a <KeyP
 cmd(inter, "bind .a <KeyPress-d> {.a.r.delo invoke; set choice 1}; bind .a <KeyPress-D> {.a.r.delo invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-i> {.a.r.incr invoke; set choice 1}; bind .a <KeyPress-I> {.a.r.incr invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-m> {.a.r.mult invoke; set choice 1}; bind .a <KeyPress-M> {.a.r.mult invoke; set choice 1}");
-cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; ind .a <KeyPress-H> {.a.r.math invoke; set choice 1}");
+cmd(inter, "bind .a <KeyPress-h> {.a.r.math invoke; set choice 1}; bind .a <KeyPress-H> {.a.r.math invoke; set choice 1}");
 cmd(inter, "bind .a <KeyPress-n> {.a.r.rndo invoke; set choice 1}; bind .a <KeyPress-N> {.a.r.rndo invoke; set choice 1}");
 
 cmd(inter, "frame .a.f");
