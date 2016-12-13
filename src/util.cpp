@@ -82,6 +82,7 @@ void clean_spaces(char *s);
 void scan_used_lab(char *lab, int *choice);
 char const *return_where_used(char *lab, char s[]);
 void init_canvas(void);
+void log_tcl_error( const char *cm, const char *message );
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void add_description(char const *lab, char const *type, char const *text);
 void save_single(variable *vcv);
@@ -114,45 +115,57 @@ CMD
 ****************************************************/
 bool firstCall = true;
 
-void cmd(Tcl_Interp *inter, char const *cm)
+void cmd(Tcl_Interp *inter, const char *cm)
 {
+	if ( strlen( cm ) >= TCL_BUFF_STR )
+	{
+		char message[ 100 ];
+		sprintf( message, "Tcl buffer overrun (memory corrupted!)\nPlease increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.\nLsd will close now.", strlen( cm ) );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
+		myexit( 24 );
+	}
 
-int code = Tcl_Eval( inter, cm );
+	int code = Tcl_Eval( inter, cm );
 
-if( code != TCL_OK )
- {
-  FILE *f;
-  char fname[ 300 ];
-  time_t rawtime;
-  struct tm *timeinfo;
-  char ftime[ 80 ];
-  
-  if( strlen( path ) > 0 )
-	sprintf( fname, "%s/tk_err.err", path );
-  else
-	sprintf( fname, "tk_err.err" );
+	if( code != TCL_OK )
+		log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+}
 
-  f = fopen( fname,"a" );
 
-  time( &rawtime );
-  timeinfo = localtime( &rawtime );
-  strftime ( ftime, 80, "%F %T", timeinfo );
+void log_tcl_error( const char *cm, const char *message )
+{
+	FILE *f;
+	char fname[ 300 ];
+	time_t rawtime;
+	struct tm *timeinfo;
+	char ftime[ 80 ];
 
-  if ( firstCall )
-  {
-	  firstCall = false;
-	  fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
-  }
-  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
-  fclose( f );
-  plog( "\nTcl-Tk Error. See file '" );
-  plog( fname );
-  plog( "'\n" );
- }
+	if( strlen( path ) > 0 )
+		sprintf( fname, "%s/tk_err.err", path );
+	else
+		sprintf( fname, "tk_err.err" );
 
+	f = fopen( fname,"a" );
+
+	time( &rawtime );
+	timeinfo = localtime( &rawtime );
+	strftime ( ftime, 80, "%F %T", timeinfo );
+
+	if ( firstCall )
+	{
+		firstCall = false;
+		fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
+	}
+	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
+	fclose( f );
+	plog( "\nTcl-Tk Error. See file '" );
+	plog( fname );
+	plog( "'\n" );
 }
 
 #else
+	
 void cmd(char *cm)
 {
 
@@ -2416,7 +2429,8 @@ sprintf(msg, "set eqfiledim [file size %s]",s);
 cmd(inter, msg);
 
 eq=new char[i+1];
-Tcl_UnlinkVar(inter, "i");
+
+Tcl_UnlinkVar(inter, "eqfiledim");
 eq[0]=(char)NULL;
 f=fopen(s, "r");
 while( fgets(msg, 1000, f)!=NULL)

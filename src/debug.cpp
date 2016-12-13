@@ -129,7 +129,7 @@ int deb(object *r, object *c,  char const *lab, double *res)
 {
 const char *bah;
 variable *cv, *cv1;
-char ch[100], *ch1;
+char ch[TCL_BUFF_STR], *ch1;
 object *cur, *cur1, *cur2;
 int count, old, i, cond;
 int pre_running;
@@ -215,9 +215,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd(inter, "button .deb.b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}");
 		cmd(inter, "frame .deb.b.act.stack");
 		cmd(inter, "label .deb.b.act.stack.l -text \"Print stack level: \"");
-		cmd(inter, "entry .deb.b.act.stack.e -width 3 -relief sunken -textvariable stack_flag");
+		cmd( inter, "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %P ] { set stack_flag %P; return 1 } { %W delete 0 end; %W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( inter, ".deb.b.act.stack.e insert 0 $stack_flag" ); 
 		cmd(inter, "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left");
-		//cmd(inter, "checkbutton .deb.b.act.stack -text \"Stack info\" -variable stack_flag");
 		cmd(inter, "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left");
 
 		cmd(inter, "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}");
@@ -265,7 +265,7 @@ Tcl_LinkVar(inter, "time", (char *) &t, TCL_LINK_INT);
 cmd(inter, "label .deb.v.time -text \"      Time step: $time      \"");
 Tcl_UnlinkVar(inter, "time");
 cmd(inter, "label .deb.v.val1 -text \"Value: \"");
-cmd(inter, "entry .deb.v.val2 -width 10 -relief sunken -textvariable value");
+cmd(inter, "entry .deb.v.val2 -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set value %P; return 1 } { %W delete 0 end; %W insert 0 $value; return 0 } } -invcmd { bell } -justify center");
 
 cmd(inter, "pack .deb.v.name1 .deb.v.name2 .deb.v.time .deb.v.val1 .deb.v.val2 -side left");
 cmd(inter, "pack .deb.v -pady 2 -before .deb.b");
@@ -288,6 +288,13 @@ if(asl!=NULL && asl->vs->up!=r)
   asl=NULL;
 
 debug_maincycle:
+
+if ( lab != NULL )
+{
+	cmd( inter, "write_any .deb.v.val2 $value" ); 
+	cmd( inter, "write_any .deb.b.act.stack.e $stack_flag" ); 
+}
+
 while(choice==0)
  {
  try{ 
@@ -297,10 +304,13 @@ while(choice==0)
  goto debug_maincycle;
  }
  }
+ 
 cmd(inter, "bind .deb <KeyPress-g> {}; bind .deb <KeyPress-G> {}");
 if(lab!=NULL)
 {
  i=choice;
+ cmd( inter, "set value [ .deb.v.val2 get ]" ); 
+ cmd( inter, "set stack_flag [ .deb.b.act.stack.e get ]" ); 
  cmd(inter, "set choice $stack_flag");
  stackinfo_flag=choice;
  choice=i;
@@ -519,9 +529,10 @@ cmd( inter, "set s .sobj" );
 cmd( inter, "newtop $s \"Find Object\" { set choice 2 }" );
 
 cmd(inter, "label $s.l1 -text \"Find object containing variable\"");
-cmd(inter, "entry $s.e1 -width 10 -relief sunken -textvariable en");
+cmd(inter, "entry $s.e1 -width 10 -textvariable en");
 cmd(inter, "label $s.l2 -text \"with value\"");
-cmd(inter, "entry $s.e2 -width 10 -relief sunken -textvariable value_search");
+cmd( inter, "entry $s.e2 -width 10 -validate focusout -vcmd { if [ string is double %P ] { set value_search %P; return 1 } { %W delete 0 end; %W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, "$s.e2 insert 0 $value_search" ); 
 
 cmd(inter, "frame $s.cond");
 cmd(inter, "radiobutton $s.cond.eq -text \" = \" -variable condition -value 1");
@@ -552,11 +563,12 @@ Tcl_UnlinkVar(inter, "value_search");
 Tcl_UnlinkVar(inter, "condition");
 choice=0;
 break;
-
  }
+ 
 pre_running=running;
 running=0;
 
+cmd( inter, "set value_search [ $s.e2 get ]" ); 
 ch1=(char *)Tcl_GetVar(inter, "en",0);
 strcpy(ch, ch1);
 switch(cond)
@@ -726,8 +738,12 @@ for(i=0; i<cv->num_lag+1; i++)
     cmd(inter, "label $e.past.l$i.n$i -text \"Lag $i: \"");
   else
     cmd(inter, "label $e.past.l$i.n$i -text \"Value: \"");
-  cmd(inter, "entry $e.past.l$i.e$i -width 10 -textvariable val$i");
-  
+
+  sprintf( msg, "entry $e.past.l%d.e%d -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i, i );
+  cmd( inter, msg );
+  sprintf( msg, "$e.past.l%d.e%d insert 0 $val%d", i, i, i ); 
+  cmd( inter, msg );
+
   sprintf(msg, "button $e.past.l$i.sa -width -9 -text \"Set All\" -command {set sa %i; set choice 10}", i);
   cmd(inter, msg);
   cmd(inter, "pack $e.past.l$i.n$i $e.past.l$i.e$i $e.past.l$i.sa -side left");
@@ -755,7 +771,11 @@ while(choice==0)
 cv->data_loaded='+';
 
 for(i=0; i<cv->num_lag+1; i++)
- {cv->val[i]=app_values[i];
+ {
+  sprintf( msg, "set val%d [ $e.past.l%d.e%d get ]", i, i, i ); 
+  cmd( inter, msg );
+
+  cv->val[i]=app_values[i];
   sprintf(ch, "val%d",i);
 
   Tcl_UnlinkVar(inter, ch);
@@ -804,7 +824,6 @@ if(choice==10)
  set_all(&choice, r, ch, i);
  
  } 
-//Tcl_UnlinkVar(inter, "choice");
 
 choice=0;
 break;
@@ -819,9 +838,7 @@ cmd( inter, "if { $a==1 } { destroytop .net }" );
 actual_steps=t;
 for(cur=r; cur->up!=NULL; cur=cur->up);
 reset_end(cur);
-Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 analysis(&choice);
-//Tcl_UnlinkVar(inter, "choice");
 choice=0;
 break;
 
@@ -863,7 +880,8 @@ cmd( inter, "newtop $t \"Time Debugger\" { set choice 1 }" );
 cmd(inter, "label $t.l -text \"Time for activation of debug mode\"");
 sprintf(msg, "set when_debug %d",t+1);
 cmd(inter, msg);
-cmd(inter, "entry $t.val -width 10 -relief sunken -textvariable when_debug");
+cmd( inter, "entry $t.val -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set when_debug %P; return 1 } { %W delete 0 end; %W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, "$t.val insert 0 $when_debug" ); 
 cmd(inter, "$t.val selection range 0 end");
 cmd(inter, "pack $t.l $t.val");
 
@@ -877,6 +895,7 @@ cmd(inter, "focus $t.val");
 while(choice==0)
  Tcl_DoOneEvent(0);
 
+cmd( inter, "set when_debug [ $t.val get ]" ); 
 cmd(inter, "destroytop $t");
 
 //restart execution
@@ -934,7 +953,7 @@ DEB_SHOW
 ********************************************/
 void deb_show(object *r, Tcl_Interp *inter)
 {
-char ch[1000];
+char ch[TCL_BUFF_STR];
 variable *ap_v;
 int count, i;
 object *ap_o;
@@ -1076,7 +1095,8 @@ strcpy(ch, "label $c.name -text \"Conditional stop for variable:");
 strcat(ch, cv->label);
 strcat(ch, "\"");
 cmd(inter, ch);       
-cmd(inter, "entry $c.cond -relief sunken -textvariable cond_val");
+cmd( inter, "entry $c.cond -validate focusout -vcmd { if [ string is double %P ] { set cond_val %P; return 1 } { %W delete 0 end; %W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, "$c.cond insert 0 $cond_val" ); 
 cmd(inter, "frame $c.c");
 cmd(inter, "button $c.c.eq -width -9 -text \" = \" -command {set cond 1}");
 cmd(inter, "button $c.c.min -width -9 -text \" < \" -command {set cond 2}");
@@ -1093,6 +1113,7 @@ cmd( inter, "showtop $c" );
 while(choice==0 && cv->deb_cond==old)
  Tcl_DoOneEvent(0);
 
+cmd( inter, "set cond_val [ $c.cond get ]" ); 
 cmd(inter, "destroy $c.cnd_type $c.name $c.cond $c.c $c.no $c.b");
 }
 

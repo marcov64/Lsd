@@ -82,9 +82,11 @@ EDIT.CPP allows to edit the number of instances in the model
 
 ****************************************************/
 
-
 #include <tk.h>
 #include "decl.h"
+
+// WARNING: Cell number limited to 100 (change below to alter behavior)
+#define MAX_COLS 100
 
 void go_next(object **t);
 object *go_brother(object *cur);
@@ -108,6 +110,8 @@ extern bool in_set_obj;
 int set_focus;
 // flags to avoid recursive usage (confusing and tk windows are not ready)
 bool in_edit_data = false;
+bool iniShowOnce = false;		// prevent repeating warning on # of columns
+bool colOvflw;					// indicate columns overflow (>MAX_COLS)
 // Main window constraints
 char widthDE[]="800";			// horizontal size in pixels
 char heightDE[]="600";			// vertical size in pixels
@@ -119,32 +123,32 @@ EDIT_DATA
 
 void edit_data(object *root, int *choice, char *obj_name)
 {
-char ch[120], *l , ch1[120];
+char ch[TCL_BUFF_STR], *l , ch1[TCL_BUFF_STR];
 object *first;
 variable *cv;
 int i, counter, lag;
 
-
 cmd( inter, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
-*choice=0;
+
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
 Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
 Tcl_SetVar(inter, "heightDE", heightDE, 0);		// vertical minimum size in pixels
 
-cmd( inter, "set ini .ini" );
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini centerS 1 1 1 $widthDE $heightDE }" );
+cmd( inter, "if { ! [ info exists autoWidth ] } { set autoWidth 1 }");
+cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $widthDE $heightDE } { if { ! $autoWidth } { resizetop $widthDE $heightDE } }" );
 
 cmd(inter, "set position 1.0");
 in_edit_data = true;
 
+*choice=0;
 while(*choice==0)
 {
 // reset title and destroy command because may be coming from set_obj_number
 sprintf( ch, "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, ch );
 
-//find first object->label==obj_name;
 first=root->search(obj_name);
+
 cmd(inter, "frame .ini.b");
 cmd(inter, "set w .ini.b.tx");
 cmd(inter, "scrollbar .ini.b.ys -command \".ini.b.tx yview\"");
@@ -164,33 +168,57 @@ cmd(inter, "$w window create end -window $w.tit_empty");
 strcpy(ch, "");
 i=0;
 counter=1;
+colOvflw = false;
 search_title(root, ch, &i, obj_name, &counter);
 cmd(inter, "$w insert end \\n");
-
 
 //explore the tree searching for each instance of such object and create:
 //- titles
 //- entry cells linked to the values
 set_focus=0;
 link_data(root, obj_name);
-cmd(inter, "$w see $position");
 cmd(inter, "pack .ini.b.ys -side right -fill y");
 cmd(inter, "pack .ini.b.xs -side bottom -fill x");
 cmd(inter, "pack .ini.b.tx -expand yes -fill both");
 cmd(inter, "pack .ini.b  -expand yes -fill both");
 
-cmd(inter, "label .ini.msg -textvariable msg -anchor w");
-cmd(inter, "pack .ini.msg");
+cmd( inter, "label .ini.msg -textvariable msg" );
+cmd( inter, "pack .ini.msg -pady 5" );
+
+cmd( inter, "frame .ini.st" );
+cmd(inter, "label .ini.st.err -text \"\"" );
+cmd(inter, "label .ini.st.pad -text \"         \"" );
+cmd( inter, "checkbutton .ini.st.aw -text \"Automatic width\" -variable autoWidth -command { set choice 5 }" );
+cmd( inter, "pack .ini.st.err .ini.st.pad .ini.st.aw -side left" );
+cmd( inter, "pack .ini.st -anchor e -padx 10" );
 
 cmd( inter, "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
 
 cmd(inter, "$w configure -state disabled");
-cmd(inter, "bind .ini <KeyPress-Escape> {set choice 1}");
 
 if(set_focus==1)
   cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
 
+cmd(inter, "bind .ini <KeyPress-Escape> {set choice 1}");
+
+// show overflow warning just once per configuration but always indicate
+if ( colOvflw )
+{
+	sprintf( ch, ".ini.st.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -fg red", MAX_COLS );
+	cmd( inter, ch );
+	if ( ! iniShowOnce )
+	{
+		sprintf( ch, "update; tk_messageBox -parent .ini -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"Lsd Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS );
+		cmd( inter, ch );
+		iniShowOnce = true;
+	}
+}
+
 noredraw:
+
+sprintf( ch, "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter );
+cmd( inter, ch );
+
 while(*choice==0)
     {
    try{ Tcl_DoOneEvent(0);}
@@ -199,7 +227,8 @@ while(*choice==0)
    }
   } 
 
-if ( *choice == 4 && in_set_obj )		// avoid recursion
+// handle both resizing event and block object # setting while editing initial values
+if ( *choice == 5 || ( *choice == 4 && in_set_obj ) )		// avoid recursion
 {
 	*choice = 0;
 	goto noredraw;
@@ -210,7 +239,7 @@ if ( *choice == 4 && in_set_obj )		// avoid recursion
 strcpy(ch, "");
 i=0;
 clean_cell(root, ch, obj_name);
-cmd(inter, "destroy .ini.b .ini.boh .ini.msg");
+cmd(inter, "destroy .ini.b .ini.boh .ini.msg .ini.st");
 
 
 if(*choice==2)
@@ -252,7 +281,6 @@ bridge *cb;
 
 set_title(root, lab, tag, incr);
 
-//for(c=root->son, counter=1; c!=NULL;c=skip_next_obj(c, &num), counter=1)
 for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
  {  
  c=cb->head;
@@ -270,8 +298,8 @@ for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
         sprintf(ch, "%d",counter);
    else
 		sprintf(ch, "%s",tag);
-   // WARNING: Limits to 100 number of cells
-	if(*incr<101)
+ 
+	if ( *incr <= MAX_COLS )
 	 search_title(cur, ch, i, lab, incr);
 
    }
@@ -288,7 +316,7 @@ void set_title(object *c, char *lab, char *tag, int *incr)
 {
 int j;
 variable *cv;
-char ch[120], ch1[11], ch2[10];
+char ch[TCL_BUFF_STR], ch1[11], ch2[10];
 
 if(!strcmp(c->label, lab))
 {
@@ -299,8 +327,6 @@ if(!strcmp(c->label, lab))
   }
 else
  strcpy(ch2, "  ");
-
-//sprintf(ch, "label $w.c%d_tit -width $cwidth	-bd $cbd -relief raised -text \"%s\"", *incr ,ch2);
 
 sprintf(ch, "set %d_titheader \"%s\"", *incr ,ch2);
 cmd(inter, ch);
@@ -327,25 +353,29 @@ CLEAN_CELL
 
 void clean_cell(object *root, char *tag, char *lab)
 {
-char ch[120];
+char ch[TCL_BUFF_STR], ch1[300];
 int j, i;
 object *cur;
 variable *cv;
 cur=root->search(lab);
-// WARNING: Cell number limited to 100 !!!!!!!
-for(i=1 ; i<101 && cur!=NULL; cur=cur->hyper_next(lab), i++)
+
+for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 {
 
 for(cv=cur->v; cv!=NULL; cv=cv->next)
  {if(cv->param==1)
-    { sprintf(ch,"p%s_%d", cv->label,i);
-      Tcl_UnlinkVar(inter, ch);
+    { sprintf(ch1,"p%s_%d", cv->label,i);
+	  sprintf( ch, "set %s [ $w.c%d_v%sp get ]", ch1, i, cv->label );
+	  cmd( inter, ch );
+      Tcl_UnlinkVar(inter, ch1);
     }
   else
     { for(j=0; j<cv->num_lag; j++)
       {
-      sprintf(ch,"v%s_%d_%d", cv->label,i, j);
-      Tcl_UnlinkVar(inter, ch);
+      sprintf(ch1,"v%s_%d_%d", cv->label,i, j);
+	  sprintf( ch, "set %s [ $w.c%d_v%s_%d get ]", ch1, i, cv->label, j );
+	  cmd( inter, ch );
+      Tcl_UnlinkVar(inter, ch1);
        }
     }
   }
@@ -362,7 +392,7 @@ void link_data(object *root, char *lab)
 {
 object *cur, *cur1;
 int i, j;
-char ch[350], previous[60], ch1[25];
+char ch[TCL_BUFF_STR], previous[60], ch1[25];
 variable *cv, *cv1;
 
 cur1=root->search(lab);
@@ -407,15 +437,17 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 
      }
     }
-// WARNING: Cell number limited to 100 !!!!!!!!!
- for(cur=cur1, i=1; i<101 && cur!=NULL; cur=cur->hyper_next(lab) , i++)
+
+ for ( cur = cur1, i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ) , ++i )
  {
   cv=cur->search_var(cur, cv1->label);
   cv->data_loaded='+';
   if(cv->param==1)
     { sprintf(ch,"p%s_%d", cv->label,i);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%sp -textvariable p%s_%d -width $cwidth -bd $cbd",i, cv->label, cv->label, i);
+      sprintf( ch, "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i );
+      cmd( inter, ch );
+      sprintf(ch, "$w.c%d_v%sp insert 0 $p%s_%d",i, cv->label, cv->label, i);
       cmd(inter, ch);
       if(set_focus==0)
        {
@@ -426,7 +458,11 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       sprintf(ch, "$w window create end -window $w.c%d_v%sp", i, cv->label);
       cmd(inter, ch);
       if(strlen(previous)!=0)
-       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%sp;$w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
+       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
+        cmd(inter, ch);
+        sprintf(ch, "bind %s <KeyPress-Down> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
+        cmd(inter, ch);
+        sprintf(ch, "bind $w.c%d_v%sp <KeyPress-Up> {focus %s; %s selection range 0 end; $w see %s}", i, cv->label, previous, previous, previous);
         cmd(inter, ch);
        }
       sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: parameter %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
@@ -441,7 +477,9 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       {
       sprintf(ch,"v%s_%d_%d", cv->label,i, j);
       Tcl_LinkVar(inter, ch, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
-      sprintf(ch, "entry $w.c%d_v%s_%d -textvariable v%s_%d_%d -width $cwidth -bd $cbd",i, cv->label,j, cv->label, i, j);
+      sprintf( ch, "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j );
+      cmd( inter, ch );
+      sprintf(ch, "$w.c%d_v%s_%d insert 0 $v%s_%d_%d", i, cv->label, j, cv->label, i, j);
       cmd(inter, ch);
       if(set_focus==0)
        {
@@ -453,7 +491,11 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       sprintf(ch, "$w window create end -window $w.c%d_v%s_%d", i, cv->label, j);
       cmd(inter, ch);
       if(strlen(previous)!=0)
-       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d;$w.c%d_v%s_%d selection range 0 end;$w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
+       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
+        cmd(inter, ch);
+        sprintf(ch, "bind %s <KeyPress-Down> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
+        cmd(inter, ch);
+        sprintf(ch, "bind  $w.c%d_v%s_%d <KeyPress-Up> {focus %s; %s selection range 0 end; $w see  %s}", i, cv->label, j, previous, previous, previous);
         cmd(inter, ch);
        }
       sprintf(ch, "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: variable %s (lag %d) in %s $tag_%d\"}",i,cv->label,j,cv->label,j+1,cur1->label,i);
@@ -465,8 +507,12 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       }
   }
   }
+  
+  // indicate columns overflow (>MAX_COLS)
+  if ( ! colOvflw && cur != NULL )
+	  colOvflw = true;
 
-//set flag of data loaded also to not shown pars.
+  //set flag of data loaded also to not shown pars.
   for( ;cur!=NULL; cur=cur->hyper_next(lab) )
      {
         cv=cur->search_var(cur, cv1->label);

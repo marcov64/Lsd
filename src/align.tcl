@@ -89,6 +89,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 			}
 		} 
 	}
+	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
 	global tcl_platform
@@ -154,7 +155,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		set y [ gety $w $pos ]
 		if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
 			if { [ string equal $pos coverW ] } {
-				set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 5 ]
+				set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
 				set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 			}
 			if { $sizeX != 0 && $sizeY != 0 } {
@@ -184,6 +185,26 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	update
 #	plog "\nshowtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, pos:$pos)" 
+}
+
+# resize the window
+proc resizetop { w sizeX { sizeY 0 } } {
+	if { $sizeX <= 0 } {
+		set sizeX [ winfo width $w ]
+	}
+	if { $sizeY <= 0 } {
+		set sizeY [ winfo height $w ]
+	}
+	if { $sizeX > [ expr [ winfo screenwidth $w ] - [ winfo rootx $w ] ] } {
+		set sizeX [ expr [ winfo screenwidth $w ] - [ winfo rootx $w ] ]
+	}
+	if { $sizeY > [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ] } {
+		set sizeY [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ]
+	}
+	if { $sizeX != [ winfo width $w ] || $sizeY != [ winfo height $w ] } {
+		wm geom $w ${sizeX}x${sizeY} 
+	}
+	update
 }
 
 proc destroytop w {
@@ -295,7 +316,7 @@ proc gety { w pos } {
 
 # procedures to create standard button sets
 proc okhelpcancel { w fr comOk comHelp comCancel } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	button $w.$fr.can -width -9 -text Cancel -command $comCancel
@@ -308,7 +329,7 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 }
 
 proc okhelp { w fr comOk comHelp } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -319,7 +340,7 @@ proc okhelp { w fr comOk comHelp } {
 }
 
 proc okcancel { w fr comOk comCancel } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	button $w.$fr.can -width -9 -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -330,7 +351,7 @@ proc okcancel { w fr comOk comCancel } {
 }
 
 proc helpcancel { w fr comHelp comCancel } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	button $w.$fr.can -width -9 -text Cancel -command $comCancel
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
@@ -341,7 +362,7 @@ proc helpcancel { w fr comHelp comCancel } {
 }
 
 proc ok { w fr comOk } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
@@ -350,7 +371,7 @@ proc ok { w fr comOk } {
 }
 
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
 	button $w.$fr.x -width -9 -text $nameX -command $comX
 	button $w.$fr.help -width -9 -text Help -command $comHelp
@@ -365,7 +386,7 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 }
 
 proc donehelp { w fr comDone comHelp } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Done -command $comDone
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -376,7 +397,7 @@ proc donehelp { w fr comDone comHelp } {
 }
 
 proc done { w fr comDone } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Done -command $comDone
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
@@ -385,7 +406,7 @@ proc done { w fr comDone } {
 }
 
 proc comphelpdone { w fr comComp comHelp comDone } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.com -width -9 -text Compute -command $comComp
 	button $w.$fr.help -width -9 -text Help -command $comHelp
 	button $w.$fr.ok -width -9 -text Done -command $comDone
@@ -398,7 +419,7 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 }
 
 proc finddone { w fr comFind comDone } {
-	frame $w.$fr
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.search -width -9 -text Find -command $comFind
 	button $w.$fr.ok -width -9 -text Done -command $comDone
 	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"

@@ -238,9 +238,7 @@ file_counter=0;
 
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
-cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Keep the Lsd Browser window minimized. \nUsing it while Analysis of Results is open\ncan lead to unexpected behavior." );
-cmd( inter, "if [ winfo exists .model_str ] { wm iconify .model_str }" );
-cmd( inter, "wm iconify ." );
+cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the Lsd Browser." );
 
 cmd( inter, "set da .da");
 sprintf(msg, "newtop .da \"%s%s - Lsd Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name);
@@ -352,6 +350,7 @@ time_cross=1;
 pdigits=4;
 watch=1;
 gnu = 1;
+cmd(inter, "set numy2 2");
 
 cmd(inter, "frame .da.f.com");
 sprintf( msg, "label .da.f.com.nvar -text \"Series = %d\" -width 17", num_var );
@@ -368,34 +367,32 @@ cmd(inter, "frame .da.f.h.v");
 
 cmd(inter, "frame .da.f.h.v.ft");
 
-cmd(inter, "set auto_x 1");
 cmd(inter, "checkbutton .da.f.h.v.ft.auto -text \"Use all cases \" -variable auto_x -command {if {$auto_x==1} {.da.f.h.v.ft.to.mxc conf -state disabled; .da.f.h.v.ft.from.mnc conf -state disabled} {.da.f.h.v.ft.to.mxc conf -state normal; .da.f.h.v.ft.from.mnc conf -state normal}}");
 
 cmd(inter, "frame .da.f.h.v.ft.from");
 cmd(inter, "label .da.f.h.v.ft.from.minc -text \"From case\"");
-cmd(inter, "entry .da.f.h.v.ft.from.mnc -width 5 -textvariable minc -state disabled");
+cmd( inter, "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if [ string is integer %P ] { set minc %P; return 1 } { %W delete 0 end; %W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd(inter, "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -side left");
 
 cmd(inter, "frame .da.f.h.v.ft.to");
 cmd(inter, "label .da.f.h.v.ft.to.maxc -text \"to case\"");
-cmd(inter, "entry .da.f.h.v.ft.to.mxc -width 5 -textvariable maxc -state disabled");
+cmd( inter, "entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -vcmd { if [ string is integer %P ] { set maxc %P; return 1 } { %W delete 0 end; %W insert 0 $maxc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd(inter, "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -side left");
 
 cmd(inter, "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -ipadx 15");
 
 cmd(inter, "frame .da.f.h.v.sc");
-cmd(inter, "set auto 1");
 
 cmd(inter, "checkbutton .da.f.h.v.sc.auto -text \"Y self-scaling\" -variable auto -command {if {$auto==1} {.da.f.h.v.sc.max.max conf -state disabled; .da.f.h.v.sc.min.min conf -state disabled} {.da.f.h.v.sc.max.max conf -state normal; .da.f.h.v.sc.min.min conf -state normal}}");
 
 cmd(inter, "frame .da.f.h.v.sc.min");
 cmd(inter, "label .da.f.h.v.sc.min.lmin -text \"Min. Y\"");
-cmd(inter, "entry .da.f.h.v.sc.min.min -width 10 -textvariable miny -state disabled");
+cmd( inter, "entry .da.f.h.v.sc.min.min -width 10 -validate focusout -vcmd { if [ string is double %P ] { set miny %P; return 1 } { %W delete 0 end; %W insert 0 $miny; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd(inter, "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -side left");
 
 cmd(inter, "frame .da.f.h.v.sc.max");
 cmd(inter, "label .da.f.h.v.sc.max.lmax -text \"Max. Y\"");
-cmd(inter, "entry .da.f.h.v.sc.max.max -width 10 -textvariable maxy -state disabled");
+cmd( inter, "entry .da.f.h.v.sc.max.max -width 10 -validate focusout -vcmd { if [ string is double %P ] { set maxy %P; return 1 } { %W delete 0 end; %W insert 0 $maxy; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd(inter, "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -side left");
 
 cmd(inter, "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -ipadx 5");
@@ -407,8 +404,7 @@ cmd(inter, "checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command 
 
 cmd(inter, "frame .da.f.h.v.y2.f");
 cmd(inter, "label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"");
-cmd(inter, "set numy2 2");
-cmd(inter, "entry .da.f.h.v.y2.f.e -textvariable numy2 -width 4 -state disabled");
+cmd( inter, "entry .da.f.h.v.y2.f.e -width 4 -validate focusout -vcmd { if [ string is integer %P ] { set numy2 %P; return 1 } { %W delete 0 end; %W insert 0 $numy2; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd(inter, "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -side left");
 
 cmd(inter, "pack .da.f.h.v.y2.logs .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ipadx 7");
@@ -437,7 +433,6 @@ cmd(inter, "checkbutton .da.f.tit.chk.allblack -text \"No colors\" -variable all
 cmd(inter, "checkbutton .da.f.tit.chk.grid -text \"Grids\" -variable grid");
 cmd(inter, "pack .da.f.tit.chk.allblack .da.f.tit.chk.grid -anchor w");
 
-
 cmd(inter, "frame .da.f.tit.lp");
 cmd(inter, "radiobutton .da.f.tit.lp.line -text \"Lines\" -variable line_point -value 1");
 cmd(inter, "radiobutton .da.f.tit.lp.point -text \"Points\" -variable line_point -value 2");
@@ -445,7 +440,7 @@ cmd(inter, "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w");
 
 cmd(inter, "frame .da.f.tit.ps");
 cmd(inter, "label .da.f.tit.ps.l -text \"Point size\"");
-cmd(inter, "entry .da.f.tit.ps.e -width 4 -textvariable point_size -justify center");
+cmd( inter, "entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double %P ] { set point_size %P; return 1 } { %W delete 0 end; %W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center" );
 cmd(inter, "pack .da.f.tit.ps.l .da.f.tit.ps.e");
 
 cmd(inter, "frame .da.f.tit.run");			// field for adjusting 
@@ -455,7 +450,7 @@ cmd(inter, "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w");
 
 cmd(inter, "frame .da.f.tit.pr");			// field for adjusting y-axis precision
 cmd(inter, "label .da.f.tit.pr.l -text \"Precision\"");
-cmd(inter, "entry .da.f.tit.pr.e -textvariable pdigits -width 2 -justify center");
+cmd( inter, "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is double %P ] { set pdigits %P; return 1 } { %W delete 0 end; %W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
 cmd(inter, "pack .da.f.tit.pr.l .da.f.tit.pr.e");
 
 cmd(inter, "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5");
@@ -567,6 +562,15 @@ cmd( inter, "if [ info exists DaModElem ] { set DaModElem [ lsort -unique -dicti
 // enable/disable the remove series button in the series toolbar
 cmd(inter, "if { [ .da.f.vars.ch.v size ] > 0 } { .da.f.vars.b.out conf -state normal } { .da.f.vars.b.out conf -state disabled }");
 
+// update entry boxes with linked variables
+cmd( inter, "write_disabled .da.f.h.v.ft.from.mnc $minc" );
+cmd( inter, "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
+cmd( inter, "write_disabled .da.f.h.v.sc.min.min [ format \"%.[ expr $pdigits ]g\" $miny ]" );
+cmd( inter, "write_disabled .da.f.h.v.sc.max.max [ format \"%.[ expr $pdigits ]g\" $maxy ]" );
+cmd( inter, "write_disabled .da.f.h.v.y2.f.e $numy2" );
+cmd( inter, "write_any .da.f.tit.ps.e $point_size" ); 
+cmd( inter, "write_any .da.f.tit.pr.e $pdigits" ); 
+
 while(*choice==0)
  {
   try{ Tcl_DoOneEvent(0); }
@@ -576,7 +580,16 @@ while(*choice==0)
   }
  }
 
- if(*choice==1 && time_cross==2 && xy==0) //Plot cross section
+// update linked variables with values in entry boxes
+cmd( inter, "set minc [ .da.f.h.v.ft.from.mnc get ]" );
+cmd( inter, "set maxc [ .da.f.h.v.ft.to.mxc get ]" );
+cmd( inter, "set miny [ .da.f.h.v.sc.min.min get ]" );
+cmd( inter, "set maxy [ .da.f.h.v.sc.max.max get ]" );
+cmd( inter, "set numy2 [ .da.f.h.v.y2.f.e get ]" );
+cmd( inter, "set point_size [ .da.f.tit.ps.e get ]" ); 
+cmd( inter, "set pdigits [ .da.f.tit.pr.e get ]" ); 
+
+if(*choice==1 && time_cross==2 && xy==0) //Plot cross section
  *choice=9;
 
 if(*choice==1 && time_cross==1 && xy==1) //Plot XY
@@ -606,8 +619,6 @@ if(*choice==0)
 delete[] vs;
 cmd( inter, "destroytop .da" );
 uncover_browser( );
-cmd( inter, "if { [ winfo exist .model_str ] && ! [ string equal [ wm state .model_str ] normal ] } { wm deiconify .model_str; if [ winfo exist .plt1 ] { lower .model_str .plt1 } { lower .model_str . } }" );
-cmd( inter, "wm deiconify .; raise .; focus -force ." );
 Tcl_UnlinkVar(inter, "auto");
 Tcl_UnlinkVar(inter, "auto_x");
 Tcl_UnlinkVar(inter, "minc");
@@ -978,7 +989,8 @@ cmd( inter, "pack .da.file.pos.p1 .da.file.pos.p2 -side left -ipadx 11" );
 cmd( inter, "set dim 270" );
 cmd( inter, "frame .da.file.dim -bd 2" );
 cmd( inter, "label .da.file.dim.l1 -text \"Dimension\"" );
-cmd( inter, "entry .da.file.dim.n -width 4 -textvariable dim -justify center" );
+cmd( inter, "entry .da.file.dim.n -width 4 -validate focusout -vcmd { if [ string is integer %P ] { set dim %P; return 1 } { %W delete 0 end; %W insert 0 $dim; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.file.dim.n insert 0 $dim" );
 cmd( inter, "label .da.file.dim.l2 -text \"(mm@96DPI)\"" );
 cmd( inter, "pack .da.file.dim.l1 .da.file.dim.n .da.file.dim.l2 -side left" );
 
@@ -996,6 +1008,7 @@ cmd( inter, "showtop .da.file centerW" );
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
+cmd( inter, "set dim [ .da.file.dim.n get ]" ); 
 cmd( inter, "destroytop .da.file" );
 
 if(*choice==2)
@@ -1046,7 +1059,6 @@ goto there;
 
 //Use right button of the mouse to select all series with a given label
 case 30:
-cmd(inter, "unset -nocomplain compvalue");
 Tcl_LinkVar(inter, "compvalue", (char *) &compvalue, TCL_LINK_DOUBLE);
 cmd(inter, "set a [split $res]");
 cmd(inter, "set b [lindex $a 0]");
@@ -1077,7 +1089,7 @@ cmd(inter, "bind .da.a.q.f.c <Return> {focus .da.a.q.f.l.e0; .da.a.q.f.l.e0 sele
 cmd(inter, "bind .da.a.q.f.c <Down> {focus .da.a.q.f3.s; .da.a.q.f3.s invoke}");
 cmd(inter, "pack .da.a.q.f.c -anchor w");
 cmd(inter, "frame .da.a.q.f.l");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {$x > 0} {label .da.a.q.f.l.s$x -text \u2014}; entry .da.a.q.f.l.e$x -width 4 -relief sunken -textvariable v$x -justify center -state disabled}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {$x > 0} {label .da.a.q.f.l.s$x -text \u2014}; entry .da.a.q.f.l.e$x -width 4 -textvariable v$x -justify center -state disabled}");
 cmd(inter, "for { set x 0 } { $x < $i } { incr x } { if { $x > 0 } { pack .da.a.q.f.l.s$x -side left }; pack .da.a.q.f.l.e$x -side left; bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr $x + 1 ]; .da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; incr x -1; bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.ok }");
 cmd(inter, "pack .da.a.q.f.l -anchor w -padx 25");
 cmd(inter, "pack .da.a.q.f -anchor w");
@@ -1095,7 +1107,7 @@ cmd(inter, "bind .da.a.q.f2.s <Return> {focus .da.a.q.f2.f.e; .da.a.q.f2.f.e sel
 cmd(inter, "pack .da.a.q.f2.s -anchor w");
 cmd(inter, "frame .da.a.q.f2.f");
 cmd(inter, "label .da.a.q.f2.f.l -text \"Label\"");
-cmd(inter, "entry .da.a.q.f2.f.e -width 17 -relief sunken -textvariable svar -justify center -state disabled");
+cmd(inter, "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled");
 cmd(inter, "bind .da.a.q.f2.f.e <KeyRelease> {if { %N < 256 && [info exists DaModElem] } { set bb1 [.da.a.q.f2.f.e index insert]; set bc1 [.da.a.q.f2.f.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $DaModElem $bf1]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }");
 cmd(inter, "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}");
 cmd(inter, "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left");
@@ -1113,12 +1125,14 @@ cmd(inter, "pack .da.a.c.o.eq .da.a.c.o.dif .da.a.c.o.geq .da.a.c.o.g .da.a.c.o.
 cmd(inter, "frame .da.a.c.v");
 cmd(inter, "frame .da.a.c.v.c");
 cmd(inter, "label .da.a.c.v.c.l -text \"Comparison value\"");
-cmd(inter, "entry .da.a.c.v.c.e -width 17 -relief sunken -textvariable compvalue -justify center -state disabled");
+cmd( inter, "entry .da.a.c.v.c.e -width 17 -validate focusout -vcmd { if [ string is double %P ] { set compvalue %P; return 1 } { %W delete 0 end; %W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( inter, "write_any .da.a.c.v.c.e $compvalue" ); 
 cmd(inter, "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }");
 cmd(inter, "pack .da.a.c.v.c.l .da.a.c.v.c.e");
 cmd(inter, "frame .da.a.c.v.t");
 cmd(inter, "label .da.a.c.v.t.t -text \"Case\"");
-cmd(inter, "entry .da.a.c.v.t.e2 -width 6 -relief sunken -textvariable tvar -justify center -state disabled");
+cmd( inter, "entry .da.a.c.v.t.e2 -width 6 -validate focusout -vcmd { if [ string is integer %P ] { set tvar %P; return 1 } { %W delete 0 end; %W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( inter, "write_any .da.a.c.v.t.e2 $tvar" ); 
 cmd(inter, "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}");
 cmd(inter, "pack .da.a.c.v.t.t .da.a.c.v.t.e2");
 cmd(inter, "pack .da.a.c.v.c .da.a.c.v.t -ipady 10");
@@ -1133,6 +1147,8 @@ cmd(inter, "focus .da.a.q.f1.c");
 while(*choice==0)
 	Tcl_DoOneEvent(0);
 
+cmd( inter, "set tvar [ .da.a.c.v.t.e2 get ]" ); 
+cmd( inter, "set compvalue [ .da.a.c.v.c.e get ]" ); 
 Tcl_UnlinkVar(inter, "compvalue");
 
 if(*choice==2)
@@ -1306,7 +1322,7 @@ cmd(inter, "bind .da.a.q.f.c <Return> {focus .da.a.q.f.l.e0; .da.a.q.f.l.e0 sele
 cmd(inter, "bind .da.a.q.f.c <Down> {focus .da.a.q.f3.s; .da.a.q.f3.s invoke}");
 cmd(inter, "pack .da.a.q.f.c -anchor w");
 cmd(inter, "frame .da.a.q.f.l");
-cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {$x > 0} {label .da.a.q.f.l.s$x -text \u2014}; entry .da.a.q.f.l.e$x -width 4 -relief sunken -textvariable v$x -justify center -state disabled}");
+cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {$x > 0} {label .da.a.q.f.l.s$x -text \u2014}; entry .da.a.q.f.l.e$x -width 4 -textvariable v$x -justify center -state disabled}");
 cmd(inter, "for { set x 0 } { $x < $i } { incr x } { if { $x > 0 } { pack .da.a.q.f.l.s$x -side left }; pack .da.a.q.f.l.e$x -side left; bind .da.a.q.f.l.e$x <Return> [ subst -nocommand { focus .da.a.q.f.l.e[ expr $x + 1 ]; .da.a.q.f.l.e[ expr $x + 1 ] selection range 0 end } ]; bind .da.a.q.f.l.e$x <KeyRelease> { .da.a.q.f.c invoke } }; incr x -1; bind .da.a.q.f.l.e$x <Return> { focus .da.a.b.ok }");
 cmd(inter, "pack .da.a.q.f.l -anchor w -padx 25");
 cmd(inter, "pack .da.a.q.f -anchor w");
@@ -1324,7 +1340,7 @@ cmd(inter, "bind .da.a.q.f2.s <Return> {focus .da.a.q.f2.f.e; .da.a.q.f2.f.e sel
 cmd(inter, "pack .da.a.q.f2.s -anchor w");
 cmd(inter, "frame .da.a.q.f2.f");
 cmd(inter, "label .da.a.q.f2.f.l -text \"Label\"");
-cmd(inter, "entry .da.a.q.f2.f.e -width 17 -relief sunken -textvariable svar -justify center -state disabled");
+cmd(inter, "entry .da.a.q.f2.f.e -width 17 -textvariable svar -justify center -state disabled");
 cmd(inter, "bind .da.a.q.f2.f.e <KeyRelease> {if { %N < 256 && [info exists DaModElem] } { set bb1 [.da.a.q.f2.f.e index insert]; set bc1 [.da.a.q.f2.f.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $DaModElem $bf1]; .da.a.q.f2.f.e delete 0 end; .da.a.q.f2.f.e insert 0 $bd1; .da.a.q.f2.f.e index $bb1; .da.a.q.f2.f.e selection range $bb1 end } } }");
 cmd(inter, "bind .da.a.q.f2.f.e <Return> {focus .da.a.c.v.c.e; .da.a.c.v.c.e selection range 0 end}");
 cmd(inter, "pack .da.a.q.f2.f.l .da.a.q.f2.f.e -anchor w -side left");
@@ -1342,12 +1358,14 @@ cmd(inter, "pack .da.a.c.o.eq .da.a.c.o.dif .da.a.c.o.geq .da.a.c.o.g .da.a.c.o.
 cmd(inter, "frame .da.a.c.v");
 cmd(inter, "frame .da.a.c.v.c");
 cmd(inter, "label .da.a.c.v.c.l -text \"Comparison value\"");
-cmd(inter, "entry .da.a.c.v.c.e -width 17 -relief sunken -textvariable compvalue -justify center -state disabled");
+cmd( inter, "entry .da.a.c.v.c.e -width 17 -validate focusout -vcmd { if [ string is double %P ] { set compvalue %P; return 1 } { %W delete 0 end; %W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( inter, "write_any .da.a.c.v.c.e $compvalue" ); 
 cmd(inter, "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }");
 cmd(inter, "pack .da.a.c.v.c.l .da.a.c.v.c.e");
 cmd(inter, "frame .da.a.c.v.t");
 cmd(inter, "label .da.a.c.v.t.t -text \"Case\"");
-cmd(inter, "entry .da.a.c.v.t.e2 -width 6 -relief sunken -textvariable tvar -justify center -state disabled");
+cmd( inter, "entry .da.a.c.v.t.e2 -width 6 -validate focusout -vcmd { if [ string is integer %P ] { set tvar %P; return 1 } { %W delete 0 end; %W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( inter, "write_any .da.a.c.v.t.e2 $tvar" ); 
 cmd(inter, "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}");
 cmd(inter, "pack .da.a.c.v.t.t .da.a.c.v.t.e2");
 cmd(inter, "pack .da.a.c.v.c .da.a.c.v.t -ipady 10");
@@ -1365,6 +1383,8 @@ cmd(inter, "focus .da.a.q.f1.c");
 while(*choice==0)
 	Tcl_DoOneEvent(0);
 
+cmd( inter, "set tvar [ .da.a.c.v.t.e2 get ]" ); 
+cmd( inter, "set compvalue [ .da.a.c.v.c.e get ]" ); 
 Tcl_UnlinkVar(inter, "compvalue");
 
 if(*choice==2)
@@ -2048,8 +2068,8 @@ case 26:
  cmd(inter, "set istyle [lindex [$ccanvas itemcget selected -font] 2]");
  cmd(inter, "frame .da.a.format.e");
  cmd(inter, "entry .da.a.format.e.font -textvariable ifont -width 30");
- cmd(inter, "entry .da.a.format.e.dim -textvariable idim -width 4");
-  cmd(inter, "entry .da.a.format.e.sty -textvariable istyle -width 10");
+ cmd(inter, "entry .da.a.format.e.dim -textvariable idim -width 4 -justify center");
+  cmd(inter, "entry .da.a.format.e.sty -textvariable istyle -width 10 -justify center");
  cmd(inter, "set icolor [$ccanvas itemcget selected -fill]");  
  cmd(inter, "button .da.a.format.e.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .da.a.format.e.color configure -foreground $icolor; focus .da.a.format.e.color}");
 
@@ -2383,19 +2403,14 @@ if(miny2==maxy2) //To avoid divisions by zero for constant values
     {miny2*=1.1;
      maxy2*=0.9;
     }
-
    }
  }
 
-sprintf(msg, "set miny %lf", miny);
-cmd(inter, msg);
+cmd( inter, "write_disabled .da.f.h.v.sc.min.min $miny" );
+cmd( inter, "write_disabled .da.f.h.v.sc.max.max $maxy" );
+cmd( inter, "write_disabled .da.f.h.v.ft.from.mnc $minc" );
+cmd( inter, "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
 
-sprintf(msg, "set maxy %lf", maxy);
-cmd(inter, msg);
-sprintf(msg, "set minc %d", min_c);
-cmd(inter, msg);
-sprintf(msg, "set maxc %d", max_c);
-cmd(inter, msg);
 truemaxy=maxy;
 maxy+=(maxy-miny)/100; //The f... Windows does not plot the very firt pixels...
 
@@ -2488,7 +2503,6 @@ cmd(inter, "$p create line 38 0 640 0 -fill grey60 -tag p");
 }
 else
 {
-//cmd(inter, "$p create line 35 300 45 300  -tag p");
 cmd(inter, "$p create line 35 225 45 225  -tag p");
 cmd(inter, "$p create line 35 150 45 150  -tag p");
 cmd(inter, "$p create line 35 75 45 75  -tag p");
@@ -2853,18 +2867,6 @@ end=new int[nv];
 erase = new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-/*
-for(i=0; i<nv;i++)
- {str[i]=new char[30];
-  tag[i]=new char[30];
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
-  cmd(inter, msg);
-  app=(char *)Tcl_GetVar(inter, "res",0);
-  strcpy(msg,app);
-  sscanf(msg, "%s %s (%d - %d)", str[i], tag[i], &start[i], &end[i]);
-
- }
-*/
 data=new double *[nv];
 logdata=new double *[nv];
 for(i=0, new_nv=0; i<nv; i++)
@@ -2875,7 +2877,6 @@ for(i=0, new_nv=0; i<nv; i++)
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
-//  sscanf(msg, "%s %s (%d - %d)", str[i], tag[i], &start[i], &end[i]);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   for(k=0, erase[i]=0; k<nt; k++)
     if(list_times[k]<start[i] || list_times[k]>end[i])
@@ -3250,6 +3251,13 @@ if ( *choice < 2 )
 	return;
 }
 	
+cmd(inter, "set bidi $maxc");
+cmd(inter, "set res 0");
+cmd(inter, "set dir 0");
+cmd(inter, "set count 0");
+cmd(inter, "set sfrom -1");
+cmd(inter, "set sto -1");
+
 cmd(inter, "toplevel .da.s");
 cmd(inter, "wm protocol .da.s WM_DELETE_WINDOW {set choice 2}");
 cmd(inter, "wm transient .da.s .da");
@@ -3261,22 +3269,17 @@ Tcl_LinkVar(inter, "dir", (char *) &dir, TCL_LINK_INT);
 
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert time steps to use\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "label .da.s.i.l1 -text \"Time steps selected\"");
 cmd(inter, "listbox .da.s.i.lb");
-cmd(inter, "set bidi $maxc");
-cmd(inter, "set res 0");
-cmd(inter, "set dir 0");
-cmd(inter, "set count 0");
-cmd(inter, "set sfrom -1");
-cmd(inter, "set sto -1");
 cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.l1 .da.s.i.lb");
 
 cmd(inter, "frame .da.s.fb -relief groove -bd 2");
 cmd(inter, "set p .da.s.fb");
 
 cmd(inter, "bind .da.s.i.e <KeyPress-Return> {$p.add invoke}");
-cmd(inter, "button $p.add -width -9 -text Add -command {.da.s.i.lb insert end $bidi; incr count 1; focus .da.s.i.e; .da.s.i.e selection range 0 end; .da.s.i.lb selection set end }");
+cmd(inter, "button $p.add -width -9 -text Add -command {set bidi [ .da.s.i.e get ]; .da.s.i.lb insert end $bidi; incr count 1; focus .da.s.i.e; .da.s.i.e selection range 0 end; .da.s.i.lb selection set end }");
 cmd(inter, "button $p.del -width -9 -text Delete -command {.da.s.i.lb delete [.da.s.i.lb curselection]; incr count -1; focus .da.s.i.e; .da.s.i.e selection range 0 end }");
 cmd(inter, "button $p.end -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#crosssection}");
@@ -3292,14 +3295,14 @@ cmd(inter, "pack .da.s.s.l .da.s.s.up .da.s.s.down .da.s.s.nosort -anchor n");
 
 cmd(inter, "pack .da.s.i .da.s.fb .da.s.s -side left -anchor n");
 cmd(inter, "focus .da.s.i.e; .da.s.i.e selection range 0 end");
-cmd(inter, "set sfrom $bidi");
-cmd(inter, "set sto $bidi");
+cmd(inter, "set sfrom [format \"%d\" $bidi]");
+cmd(inter, "set sto [format \"%d\" $bidi]");
 cmd(inter, "set sskip 1");
 
 cmd(inter, "bind .da.s <KeyPress-c> {set choice 1}; bind .da.s <KeyPress-C> {set choice 1}");
-cmd(inter, "bind .da.s <Control-f> {set sfrom $bidi}; bind .da.s <Control-F> {set sfrom $bidi}");
-cmd(inter, "bind .da.s <Control-t> {set sto $bidi}; bind .da.s <Control-T> {set sto $bidi}");
-cmd(inter, "bind .da.s <Control-x> {set sskip $bidi}; bind .da.s <Control-X> {set sskip $bidi}");
+cmd(inter, "bind .da.s <Control-f> {set bidi [ .da.s.i.e get ]; set sfrom $bidi}; bind .da.s <Control-F> {set bidi [ .da.s.i.e get ]; set sfrom $bidi}");
+cmd(inter, "bind .da.s <Control-t> {set bidi [ .da.s.i.e get ]; set sto $bidi}; bind .da.s <Control-T> {set bidi [ .da.s.i.e get ]; set sto $bidi}");
+cmd(inter, "bind .da.s <Control-x> {set bidi [ .da.s.i.e get ]; set sskip $bidi}; bind .da.s <Control-X> {set bidi [ .da.s.i.e get ]; set sskip $bidi}");
 cmd(inter, "bind .da.s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}; bind .da.s <Control-Z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}");
 
 *choice=0;
@@ -4071,14 +4074,6 @@ delete[] tag;
 
 delete[] logdata;
 delete[] data;
-/*
-else
- {for(i=0; i<nv; i++)
-   if(start[i]<=i && end[i]>=i)
-    delete data[i];
-  delete data;
- }
-*/
 delete[] start;
 delete[] end;
 
@@ -4154,12 +4149,6 @@ for(i=0; i<nv; i++)
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   data[i]=find_data(idseries); 
-/*
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
-   {
-   data[i]=find_data(idseries); 
-   }
- */  
    
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
@@ -4251,8 +4240,6 @@ delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
-
-
 } //end Statistics_cross
 
 
@@ -4930,7 +4917,8 @@ cmd(inter, "wm title .da.s \"Options\"");
 cmd(inter, "wm transient .da.s .da");
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert time step to use\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "pack .da.s.i.l .da.s.i.e -expand yes -fill x");
 
 cmd(inter, "frame .da.s.d -relief groove -bd 2");
@@ -4962,7 +4950,8 @@ cmd(inter, msg);
 cmd(inter, "set numv 1");
 cmd(inter, "frame .da.s.v -relief groove -bd 2");
 cmd(inter, "label .da.s.v.l -text \"Number of dependent variables: \"");
-cmd(inter, "entry .da.s.v.e -textvariable numv");
+cmd( inter, "entry .da.s.v.e -validate focusout -vcmd { if [ string is integer %P ] { set numv %P; return 1 } { %W delete 0 end; %W insert 0 $numv; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.v.e insert 0 $numv" ); 
 cmd(inter, "label .da.s.v.n -text \"Num. of points: $blength\"");
 cmd(inter, "pack .da.s.v.l .da.s.v.e .da.s.v.n -expand yes -fill x");
 cmd(inter, "bind .da.s.v.e <KeyRelease> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
@@ -4975,7 +4964,6 @@ cmd(inter, "bind .da.s.d.2d <ButtonRelease-1> {set ndim 2; set blength [expr $nn
 cmd(inter, "bind .da.s.d.3d <ButtonRelease-1> {set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
 cmd(inter, "bind .da.s.d.2d <Down> {.da.s.d.3d invoke; focus .da.s.d.3d; set ndim 3; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
 cmd(inter, "bind .da.s.d.3d <Up> {.da.s.d.2d invoke; focus .da.s.d.2d; set ndim 2; set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Num. of points: $blength\"}");
-
 
 cmd(inter, "frame .da.s.l -relief groove -bd 2");
 cmd(inter, "label .da.s.l.l -text \"Select the block length\"");
@@ -5013,6 +5001,8 @@ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo sc
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
+cmd( inter, "set bidi [ .da.s.i.e get ]" ); 
+cmd( inter, "set numv [ .da.s.v.e get ]" ); 
 cmd(inter, "destroy .da.s");
 
 if(*choice==2)
@@ -5328,7 +5318,8 @@ cmd(inter, "wm transient .da.s .da");
 cmd(inter, "wm title .da.s \"Lags Selection\"");
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert number of lags\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "set dia 0");
 cmd(inter, "checkbutton .da.s.i.arrow -text \"Diagonal\" -variable dia");
 cmd(inter, "pack .da.s.i.l .da.s.i.e .da.s.i.arrow");
@@ -5358,6 +5349,7 @@ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo sc
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
+cmd( inter, "set bidi [ .da.s.i.e get ]" ); 
 cmd(inter, "destroy .da.s");
 
 if(*choice==2)
@@ -5603,25 +5595,29 @@ cmd(inter, "wm title .da.s \"Lattice Definition\"");
 cmd(inter, "wm transient .da.s .da");
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert number of columns\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "pack .da.s.i.l .da.s.i.e");
 sprintf(msg, "set time %d", end);
 cmd(inter, msg);
 cmd(inter, "frame .da.s.t -relief groove -bd 2");
 cmd(inter, "label .da.s.t.l -text \"Insert time step to use\"");
-cmd(inter, "entry .da.s.t.e -textvariable time");
+cmd( inter, "entry .da.s.t.e -validate focusout -vcmd { if [ string is integer %P ] { set time %P; return 1 } { %W delete 0 end; %W insert 0 $time; return 0 } } -invcmd { bell } -justify center");
+cmd( inter, ".da.s.t.e insert 0 $time" ); 
 cmd(inter, "pack .da.s.t.l .da.s.t.e");
 
 cmd(inter, "set lx 400");
 cmd(inter, "frame .da.s.x -relief groove -bd 2");
 cmd(inter, "label .da.s.x.l -text \"Lattice width\"");
-cmd(inter, "entry .da.s.x.e -textvariable lx");
+cmd( inter, "entry .da.s.x.e -validate focusout -vcmd { if [ string is integer %P ] { set lx %P; return 1 } { %W delete 0 end; %W insert 0 $lx; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.x.e insert 0 $lx" ); 
 cmd(inter, "pack .da.s.x.l .da.s.x.e");
 
 cmd(inter, "set ly 400");
 cmd(inter, "frame .da.s.y -relief groove -bd 2");
 cmd(inter, "label .da.s.y.l -text \"Lattice heigth\"");
-cmd(inter, "entry .da.s.y.e -textvariable ly");
+cmd( inter, "entry .da.s.y.e -validate focusout -vcmd { if [ string is integer %P ] { set ly %P; return 1 } { %W delete 0 end; %W insert 0 $ly; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.y.e insert 0 $ly" ); 
 cmd(inter, "pack .da.s.y.l .da.s.y.e");
 
 cmd(inter, "frame .da.s.b");
@@ -5646,6 +5642,10 @@ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo sc
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
+cmd( inter, "set bidi [ .da.s.i.e get ]" ); 
+cmd( inter, "set time [ .da.s.t.e get ]" ); 
+cmd( inter, "set lx [ .da.s.x.e get ]" ); 
+cmd( inter, "set ly [ .da.s.y.e get ]" ); 
 cmd(inter, "destroy .da.s");
 
 if(*choice==2)
@@ -5834,7 +5834,8 @@ cmd(inter, "wm title .da.s \"Number of Classes\"");
 cmd(inter, "wm transient .da.s .da");
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert the number of classes to use\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "set norm 0");
 cmd(inter, "checkbutton .da.s.i.norm -text \"Interpolate a Normal\" -variable norm");
 cmd(inter, "set stat 0");
@@ -5861,6 +5862,7 @@ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo sc
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
+cmd( inter, "set bidi [ .da.s.i.e get ]" ); 
 cmd(inter, "destroy .da.s");
 
 if(*choice==2)
@@ -6332,13 +6334,15 @@ cmd(inter, "wm title .da.s \"Number of Classes\"");
 cmd(inter, "wm transient .da.s .da");
 cmd(inter, "frame .da.s.t -relief groove -bd 2");
 cmd(inter, "label .da.s.t.l -text \"Insert the time step to use\"");
-cmd(inter, "entry .da.s.t.e -textvariable time");
+cmd( inter, "entry .da.s.t.e -validate focusout -vcmd { if [ string is integer %P ] { set time %P; return 1 } { %W delete 0 end; %W insert 0 $time; return 0 } } -invcmd { bell } -justify center");
+cmd( inter, ".da.s.t.e insert 0 $time" ); 
 cmd(inter, "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}");
 cmd(inter, "pack .da.s.t.l .da.s.t.e -anchor w");
 
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 cmd(inter, "label .da.s.i.l -text \"Insert the number of classes to use\"");
-cmd(inter, "entry .da.s.i.e -textvariable bidi");
+cmd( inter, "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %P ] { set bidi %P; return 1 } { %W delete 0 end; %W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.e insert 0 $bidi" ); 
 cmd(inter, "set norm 0");
 cmd(inter, "checkbutton .da.s.i.norm -text \"Interpolate a Normal\" -variable norm");
 cmd(inter, "set stat 0");
@@ -6365,6 +6369,8 @@ cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo sc
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
+cmd( inter, "set bidi [ .da.s.i.e get ]" ); 
+cmd( inter, "set time [ .da.s.t.e get ]" ); 
 cmd(inter, "destroy .da.s");
 
 if(*choice==2)
@@ -6798,8 +6804,6 @@ int i, nv, j, k, *start, *end, idseries, flt;
 double nmax, nmin, nmean, nvar, nn, thflt, confi;
 double step;
 bool first;
-
-thflt=0;
 char *lapp, **str, **tag;
 store *app;
 
@@ -6821,6 +6825,11 @@ if(logs)
 Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
 
+thflt=0;
+confi=1.96;
+cmd(inter, "set flt 0");
+cmd(inter, "set bido 1");
+cmd(inter, "set bidi 1");
 
 cmd(inter, "toplevel .da.s");
 cmd(inter, "wm title .da.s \"Elaboration Selection\"");
@@ -6829,7 +6838,6 @@ cmd(inter, "wm transient .da.s .da");
 cmd(inter, "frame .da.s.o -relief groove -bd 2");
 cmd(inter, "label .da.s.o.l -text \"Type of scanning\" -fg red");
 cmd(inter, "pack .da.s.o.l");
-cmd(inter, "set bido 1");
 cmd(inter, "radiobutton .da.s.o.m -text \"Compute over series (same # of cases)\" -variable bido -value 1");
 cmd(inter, "radiobutton .da.s.o.f -text \"Compute over cases (# cases = # of series)\" -variable bido -value 2");
 cmd(inter, "pack .da.s.o.m .da.s.o.f -anchor w");
@@ -6839,16 +6847,15 @@ cmd(inter, "pack .da.s.o");
 cmd(inter, "frame .da.s.f -relief groove -bd 2");
 cmd(inter, "label .da.s.f.l -text \"Filtering\" -fg red");
 cmd(inter, "pack .da.s.f.l");
-cmd(inter, "set flt 0");
 cmd(inter, "radiobutton .da.s.f.n -text \"Use all the data\" -variable flt -value 0");
 cmd(inter, "radiobutton .da.s.f.s -text \"Ignore small values\" -variable flt -value 1");
 cmd(inter, "radiobutton .da.s.f.b -text \"Ignore large values\" -variable flt -value 2");
-cmd(inter, "entry .da.s.f.th -width 21 -textvariable thflt");
+cmd( inter, "entry .da.s.f.th -width 21 -validate focusout -vcmd { if [ string is double %P ] { set thflt %P; return 1 } { %W delete 0 end; %W insert 0 $thflt; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.f.th insert 0 $thflt" ); 
 cmd(inter, "pack .da.s.f.n .da.s.f.s .da.s.f.b .da.s.f.th  -anchor w");
 
 cmd(inter, "pack .da.s.f");
 
-cmd(inter, "set bidi 0");
 cmd(inter, "frame .da.s.i -relief groove -bd 2");
 /**/
 cmd(inter, "label .da.s.i.l -text \"Type of series to create\" -fg red");
@@ -6861,8 +6868,8 @@ cmd(inter, "radiobutton .da.s.i.c -text \"Variance\" -variable bidi -command {se
 cmd(inter, "frame .da.s.i.ci");
 cmd(inter, "radiobutton .da.s.i.ci.c -text \"StdDev\" -variable bidi -command {set headname \"CI\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 6");
 cmd(inter, "label .da.s.i.ci.x -text \"x\"");
-confi=1.96;
-cmd(inter, "entry .da.s.i.ci.p -width 4 -textvariable confi");
+cmd( inter, "entry .da.s.i.ci.p -width 4 -validate focusout -vcmd { if [ string is double %P ] { set confi %P; return 1 } { %W delete 0 end; %W insert 0 $confi; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.i.ci.p insert 0 $confi" ); 
 cmd(inter, "pack .da.s.i.ci.c .da.s.i.ci.x .da.s.i.ci.p -side left");
 
 cmd(inter, "radiobutton .da.s.i.n -text \"Count\" -variable bidi -command {set headname \"Num\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 7");
@@ -6893,21 +6900,23 @@ cmd(inter, "bind .da.s <KeyPress-Return> {set choice 1}");
 cmd(inter, "bind .da.s <KeyPress-Escape> {set choice 2}");
 cmd(inter, "set w .da.s; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w");
 
-*choice=0;
-cmd(inter, "set bidi 1");
 cmd(inter, "focus .da.s.nv");
- cmd(inter, ".da.s.nv selection range 0 end");
-  while(*choice==0)
+cmd(inter, ".da.s.nv selection range 0 end");
+ 
+*choice=0;
+while(*choice==0)
 	Tcl_DoOneEvent(0);
 
+cmd( inter, "set thflt [ .da.s.f.th get ]" ); 
+cmd( inter, "set confi [ .da.s.i.ci.p get ]" ); 
 Tcl_UnlinkVar(inter,"thflt");
 Tcl_UnlinkVar(inter,"confi");
 cmd(inter, "destroy .da.s");
+
 if(*choice==2)
  {*choice=0;
   return;
  }
-
 
 data=new double *[nv];
 start=new int[nv];
@@ -6943,10 +6952,7 @@ for(i=0; i<nv; i++)
 
    data[i]=find_data(idseries);
    }
-
  }
-
-
 
 if(autom_x==1||min_c>=max_c)
 {
@@ -6963,8 +6969,6 @@ for(i=0; i<nv; i++)
 
 cmd(inter, "set choice $flt");
 flt=*choice;
-
-
 
 cmd(inter, "set choice $bido");
 
@@ -7135,8 +7139,6 @@ for(i=0; i<nv; i++)
  }
 delete[] str;
 delete[] tag; 
-
-
 }
 
 
@@ -7172,7 +7174,8 @@ cmd(inter, "frame .da.s.o -relief groove -bd 2");
 cmd(inter, "label .da.s.o.l -text \"Set # of (odd) periods\" -fg red");
 cmd(inter, "pack .da.s.o.l");
 cmd(inter, "set bido 10");
-cmd(inter, "entry .da.s.o.th -width 6 -textvariable bido");
+cmd( inter, "entry .da.s.o.th -width 6 -validate focusout -vcmd { if [ string is integer %P ] { set bido %P; return 1 } { %W delete 0 end; %W insert 0 $bido; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.s.o.th insert 0 $bido" ); 
 cmd(inter, "pack .da.s.o.th");
 
 cmd(inter, "pack .da.s.o");
@@ -7191,12 +7194,13 @@ cmd(inter, ".da.s.o.th selection range 0 end");
   while(*choice==0)
 	Tcl_DoOneEvent(0);
 
+cmd( inter, "set bido [ .da.s.o.th get ]" ); 
 cmd(inter, "destroy .da.s");
+
 if(*choice==2)
  {*choice=0;
   return;
  }
-
 
 data=new double *[nv];
 start=new int[nv];
@@ -7299,7 +7303,6 @@ for(i=0; i<nv; i++)
  }
 delete[] str;
 delete[] tag; 
-
 }
 
 /************************
@@ -7365,12 +7368,15 @@ for(i=0; i<nv; i++)
    max_c=end[i];
  }
 
-
-//Variables' Name in first column
-fr=1;
-strcpy(misval,nonavail);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+Tcl_LinkVar(inter, "deli", (char *) &del, TCL_LINK_INT);
+Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
+Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
+
+//Variables' Name in first column
+strcpy(misval,nonavail);
+fr=1;
 typelab=3;
 cmd(inter, "toplevel .da.lab");
 cmd(inter, "wm title .da.lab \"Saving Data\"");
@@ -7408,10 +7414,6 @@ cmd(inter, "destroy .da.lab");
 
 if(typelab==4)
 {
-Tcl_LinkVar(inter, "deli", (char *) &del, TCL_LINK_INT);
-Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
-Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
-
 typelab=1;
 cmd(inter, "toplevel .da.lab");
 cmd(inter, "wm title .da.lab \"Saving Data\"");
@@ -7435,12 +7437,13 @@ del=1;
 cmd(inter, "radiobutton .da.lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1");
 cmd(inter, "radiobutton .da.lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2");
 cmd(inter, "set delimiter \"\"");
-cmd(inter, "entry .da.lab.d.r.del -textvariable delimiter");
+cmd(inter, "entry .da.lab.d.r.del -textvariable delimiter -justify center");
 cmd(inter, "bind .da.lab.d.r.del <FocusIn> {.da.lab.d.r.oth invoke}");
 
 cmd(inter, "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3");
 numcol=16;
-cmd(inter, "entry .da.lab.d.r.ecol -textvariable numcol");
+cmd( inter, "entry .da.lab.d.r.ecol -validate focusout -vcmd { if [ string is double %P ] { set numcol %P; return 1 } { %W delete 0 end; %W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, ".da.lab.d.r.ecol insert 0 $numcol" ); 
 cmd(inter, "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}");
 
 cmd(inter, "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w");
@@ -7451,7 +7454,7 @@ cmd(inter, "label .da.lab.gen.tit -text \"General Options\" -foreground red");
 cmd(inter, "checkbutton .da.lab.gen.fr -text \"Names in first row\" -variable fr");
 cmd(inter, "label .da.lab.gen.miss -text \"Missing values\"");
 cmd(inter, "set misval \"n/a\"");
-cmd(inter, "entry .da.lab.gen.mis_val -textvariable misval");
+cmd(inter, "entry .da.lab.gen.mis_val -textvariable misval -justify center");
 cmd(inter, "pack .da.lab.gen.tit .da.lab.gen.fr .da.lab.gen.miss .da.lab.gen.mis_val -anchor w");
 cmd(inter ,"button .da.lab.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .da.lab.help -width -9 -text Help -command {LsdHelp mdatares.html#save}");
@@ -7465,6 +7468,8 @@ cmd(inter, "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo 
 
 while(*choice==0)
  Tcl_DoOneEvent(0);
+
+cmd( inter, "set numcol [ .da.lab.d.r.ecol get ]" ); 
 
 if(*choice==2)
  goto end;
@@ -7716,7 +7721,6 @@ Tcl_UnlinkVar(inter, "dozip");
 Tcl_UnlinkVar(inter, "numcol");
 Tcl_UnlinkVar(inter, "deli");
 Tcl_UnlinkVar(inter, "fr");
-Tcl_UnlinkVar(inter, "misval");
 
 for(i=0; i<nv; i++)
  {delete[] str[i];
@@ -7730,6 +7734,7 @@ delete[] end;
 *choice=0;
 
 } //end of save_datazip
+
 
 void plog_series(int *choice)
 {

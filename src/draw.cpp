@@ -94,7 +94,7 @@ SHOW_GRAPH
 ****************************************************/
 void show_graph( object *t)
 {
-char msg[300];
+char msg[TCL_BUFF_STR];
 object *top;
 
 cmd(inter, "set c .model_str");
@@ -115,19 +115,34 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd( inter, "toplevel $c" );
 	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap $c @$RootLsd/$LsdSrc/icons/lsd.xbm }" );
 	cmd( inter, "wm protocol $c WM_DELETE_WINDOW { set strWindowOn 0; set choice 70 }" );
+	cmd( inter, "wm transient $c .; wm group $c ." );
 
 	cmd(inter, "frame $c.f");
 	cmd(inter, "scrollbar $c.f.vs -command \"$c.f.c yview\"");
 	cmd(inter, "scrollbar $c.f.hs -orient horiz -command \"$c.f.c xview\"");
 	sprintf( msg, "canvas $c.f.c -width %d -height %d -yscrollcommand \"$c.f.vs set\" -xscrollcommand \"$c.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
 	cmd( inter, msg );
+
 	cmd(inter, "pack $c.f.vs -side right -fill y");
 	cmd(inter, "pack $c.f.hs -side bottom -fill x");
 	cmd(inter, "pack $c.f.c -expand yes -fill both");
 	cmd(inter, "pack $c.f -expand yes -fill both");
 	sprintf( msg, "set hpan0win %f; set hpan0lin %f; set hpan0mac %f", hpan0win, hpan0lin, hpan0mac );
 	cmd( inter, msg );
-cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { $c.f.c xview moveto $hpan0win } { if [ string equal $tcl_platform(os) Darwin ] { $c.f.c xview moveto $hpan0mac } { $c.f.c xview moveto $hpan0lin } }" );
+    cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { \
+					bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D / 120 } ] units }; \
+					$c.f.c xview moveto $hpan0win \
+				} { \
+					if [ string equal $tcl_platform(os) Darwin ] { \
+						bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D } ] units }; \
+						$c.f.c xview moveto $hpan0mac \
+					} { \
+						bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D /120 } ] units }; \
+						bind $c.f.c <4> { %W yview scroll [ expr { -%D / 120 } ] units }; \
+						bind $c.f.c <5> { %W yview scroll [ expr { %D / 120 } ] units }; \
+						$c.f.c xview moveto $hpan0lin \
+					} \
+				}" );
 
 	draw_obj(inter, t, top, v0, h0, 0);
 
@@ -178,7 +193,7 @@ void draw_obj(Tcl_Interp *inter, object *blk, object *t, int level, int center, 
 {
 int i, num, step_type, begin, x, count, num_groups;
 object *cur, *cur1;
-char str[80], ch[600], ch1[50];
+char str[80], ch[TCL_BUFF_STR], ch1[50];
 variable *cv;
 bridge *cb;
 
@@ -257,7 +272,7 @@ PUT_NODE
 ****************************************************/
 void put_node(Tcl_Interp *inter, int x1, int y1, int x2, int y2, char *str)
 {
-	char ch[1000];
+	char ch[TCL_BUFF_STR];
 
 	sprintf(ch, "$c.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str);
 	cmd(inter, ch);
@@ -271,7 +286,7 @@ PUT_LINE
 void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
 {
 
-    char ch[1000];
+    char ch[TCL_BUFF_STR];
 
     sprintf(ch, "$c.f.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2);
 	cmd(inter, ch);
@@ -284,7 +299,7 @@ PUT_TEXT
 ****************************************************/
 void put_text(Tcl_Interp *inter, char *str, char *n, int x, int y, char *str2)
 {
-char ch[1000];
+char ch[TCL_BUFF_STR];
 const char *bah;
 
 sprintf(ch, "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s",x,y,str,str2 );

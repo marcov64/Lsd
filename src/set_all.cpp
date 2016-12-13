@@ -116,7 +116,7 @@ SET_ALL
 
 void set_all(int *choice, object *original, char *lab, int lag)
 {
-char *l, ch[300];
+char *l, ch[TCL_BUFF_STR];
 int res, i, kappa, cases_from=1, cases_to=0, to_all, update_description, fill=0;
 bool exist;
 object *cur, *r;
@@ -129,175 +129,218 @@ sense *cs;
 if(original->up!=NULL)
  for(r=original->up; r->up!=NULL; r=r->up);//go for the root
 else
- r=original; 
+r=original; 
 r=r->search(original->label);//select the first instance
+cv=r->search_var(NULL, lab);
+if ( cv == NULL )
+	return;
 
 Tcl_LinkVar(inter, "res", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "value1", (char *) &value1, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "value2", (char *) &value2, TCL_LINK_DOUBLE);
 
+value1 = cv->val[0];		// preload the existing value of the first object
+
+// default values
 res=1;
 value2=0;
+cmd(inter, "set value 1"); 	// method
+cmd(inter, "set to_all 1");
+cmd(inter, "set step_in 1");
+cmd(inter, "set cases_from 1; set cases_to 10000");
+cmd(inter, "set rnd_seed 1");
+cmd(inter, "set use_seed 0");
+cmd(inter, "set update_d 1");
 
-cmd( inter, "set sa .sa" );
-cmd( inter, "newtop .sa \"Set All Initialization\" { set choice 2 }" );
+cmd( inter, "newtop .sa \"Set All Objects Initialization\" { set choice 2 }" );
 
-cv=r->search_var(NULL, lab);
-
-cmd(inter, "frame .sa.f1");
+// heading
 cmd(inter, "frame .sa.head");
 cmd(inter, "label .sa.head.lg -text \"Set initial values for every copy of\"");
-if(cv->param==1)
+
+cmd(inter, "frame .sa.head.l");
+if ( cv->param == 1 )
 {
-  sprintf(ch, "label .sa.head.l -text \"Parameter: %s\" -fg red", lab);
-  value1 = cv->val[0];		// preload the existing value of the first object
+  cmd( inter, "label .sa.head.l.c -text \"Parameter: \"" );
+  sprintf( ch, "label .sa.head.l.n -text \"%s\" -fg red", lab );
+  cmd( inter, ch );
 }
 else
 {
-  if(cv->param==2)
-    sprintf(ch, "label .sa.head.l -text \"Function: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
+  if ( cv->param == 2 )
+	cmd( inter, "label .sa.head.l.c -text \"Function: \"" );
   else
-    sprintf(ch, "label .sa.head.l -text \"Variable: %s (lag  -%d)\" -fg red", lab, t-cv->last_update+lag+1);
-  value1 = cv->val[0];		// preload the existing value of the first object
+    cmd( inter, "label .sa.head.l.c -text \"Variable: \"" );
+  sprintf( ch, "label .sa.head.l.n -text \"%s [lag -%d]\" -fg red", lab, t-cv->last_update + lag + 1 );
+  cmd( inter, ch );
 }
   
-cmd(inter, ch);
+cmd( inter, "pack .sa.head.l.c .sa.head.l.n -side left" );
 
-sprintf(ch, "label .sa.head.lo -text \"Contained in object: %s\"", cv->up->label);
-cmd(inter, ch);
+cmd( inter, "frame .sa.head.lo" );
+cmd( inter, "label .sa.head.lo.l -text \"Contained in object: \"" );
+sprintf( ch, "label .sa.head.lo.o -text \"%s\" -fg red", cv->up->label );
+cmd( inter, ch );
+cmd( inter, "pack .sa.head.lo.l .sa.head.lo.o -side left" );
 
 cmd(inter, "pack .sa.head.lg .sa.head.l .sa.head.lo");
 
-cmd(inter, "set value 1");
-cmd(inter, "frame .sa.f1.rd -relief groove -bd 2");
+// main content
+cmd(inter, "frame .sa.m");
 
-cmd(inter, "label .sa.f1.rd.l -text \"Initialization functions\" -fg red");
-cmd(inter, "pack .sa.f1.rd.l");
+// left column
+cmd(inter, "frame .sa.m.f1");
 
-cmd(inter, "radiobutton .sa.f1.rd.r1 -text \"Equal to \" -variable res -value 1 -command { .sa.f1.val.l1 conf -text \"Value\"; .sa.f1.val.l2 conf -text \"(no use)\"}");
-cmd(inter, "bind .sa.f1.rd.r1 <Down> {focus .sa.f1.rd.r9; .sa.f1.rd.r9 invoke}");
-cmd(inter, "bind .sa.f1.rd.r1 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "frame .sa.m.f1.val -relief groove -bd 2");
 
-cmd(inter, "radiobutton .sa.f1.rd.r9 -text \"Range \" -variable res -value 9 -command { .sa.f1.val.l1 conf -text \"Minimum\"; .sa.f1.val.l2 conf -text \"Maximum\"}");
-cmd(inter, "bind .sa.f1.rd.r9 <Down> {focus .sa.f1.rd.f2.r2; .sa.f1.rd.f2.r2 invoke}");
-cmd(inter, "bind .sa.f1.rd.r9 <Up> {focus .sa.f1.rd.r1; .sa.f1.rd.r1 invoke}");
-cmd(inter, "bind .sa.f1.rd.r9 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "label .sa.m.f1.val.l -text \"Initialization data\"");
+cmd(inter, "pack .sa.m.f1.val.l");
 
-cmd(inter, "frame .sa.f1.rd.f2");
-cmd(inter, "radiobutton .sa.f1.rd.f2.r2 -text \"Increasing \" -variable res -value 2 -command { .sa.f1.val.l1 conf -text \"Start\"; .sa.f1.val.l2 conf -text \"Step\"}");
-cmd(inter, "bind .sa.f1.rd.f2.r2 <Down> {focus .sa.f1.rd.r4; .sa.f1.rd.r4 invoke}");
-cmd(inter, "bind .sa.f1.rd.f2.r2 <Up> {focus .sa.f1.rd.r9; .sa.f1.rd.r9 invoke}");
+cmd(inter, "frame .sa.m.f1.val.l1");
+cmd(inter, "label .sa.m.f1.val.l1.l1 -text \"Value 1\"");
+cmd( inter, "entry .sa.m.f1.val.l1.e1 -validate focusout -vcmd { if [ string is double %P ] { set value1 %P; return 1 } { %W delete 0 end; %W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
+cmd(inter, "pack .sa.m.f1.val.l1.l1 .sa.m.f1.val.l1.e1");
 
-cmd(inter, "bind .sa.f1.rd.f2.r2 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "frame .sa.m.f1.val.l2");
+cmd(inter, "label .sa.m.f1.val.l2.l2 -text \"Value 2\"");
+cmd( inter, "entry .sa.m.f1.val.l2.e2 -validate focusout -vcmd { if [ string is double %P ] { set value2 %P; return 1 } { %W delete 0 end; %W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd(inter, "pack .sa.m.f1.val.l2.l2 .sa.m.f1.val.l2.e2");
 
-cmd(inter, "set step_in 1");
-cmd(inter, "pack .sa.f1.rd.f2.r2 -side left");
-cmd(inter, "radiobutton .sa.f1.rd.r4 -text \"Increasing (groups) \" -variable res -value 4 -command {.sa.f1.val.l1 conf -text \"Start\"; .sa.f1.val.l2 conf -text \"Step\"}");
-cmd(inter, "bind .sa.f1.rd.r4 <Up> {focus .sa.f1.rd.f2.r2; .sa.f1.rd.f2.r2 invoke}");
-cmd(inter, "bind .sa.f1.rd.r4 <Down> {focus .sa.f1.rd.r3; .sa.f1.rd.r3 invoke}");
-cmd(inter, "bind .sa.f1.rd.r4 <Return> {.sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "pack .sa.m.f1.val.l1 .sa.m.f1.val.l2 -expand yes -fill x  -ipadx 5 -ipady 2");
 
-cmd(inter, "radiobutton .sa.f1.rd.r3 -text \"Random (uniform) \" -variable res -value 3 -command { .sa.f1.val.l1 conf -text \"Min\"; .sa.f1.val.l2 conf -text \"Max\"}");
-cmd(inter, "bind .sa.f1.rd.r3 <Up> {focus .sa.f1.rd.r4; .sa.f1.rd.r4 invoke}");
-cmd(inter, "bind .sa.f1.rd.r3 <Down> {focus .sa.f1.rd.r8; .sa.f1.rd.r8 invoke}");
-cmd(inter, "bind .sa.f1.rd.r3 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "frame .sa.m.f1.rd -relief groove -bd 2");
 
-cmd(inter, "radiobutton .sa.f1.rd.r8 -text \"Random integer (uniform) \" -variable res -value 8 -command { .sa.f1.val.l1 conf -text \"Min\"; .sa.f1.val.l2 conf -text \"Max\"}");
-cmd(inter, "bind .sa.f1.rd.r8 <Up> {focus .sa.f1.rd.r3; .sa.f1.rd.r3 invoke}");
-cmd(inter, "bind .sa.f1.rd.r8 <Down> {focus .sa.f1.rd.r5; .sa.f1.rd.r5 invoke}");
-cmd(inter, "bind .sa.f1.rd.r8 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "label .sa.m.f1.rd.l -text \"Initialization method\"");
+cmd(inter, "pack .sa.m.f1.rd.l -pady 2");
 
-cmd(inter, "radiobutton .sa.f1.rd.r5 -text \"Random (normal) \" -variable res -value 5 -command {.sa.f1.val.l1 conf -text \"Mean\"; .sa.f1.val.l2 conf -text \"Std Dev\"}");
-cmd(inter, "bind .sa.f1.rd.r5 <Up> {focus .sa.f1.rd.r8; .sa.f1.rd.r8 invoke}");
-cmd(inter, "bind .sa.f1.rd.r5 <Down> {focus .sa.f1.rd.r7; .sa.f1.rd.r7 invoke}");
-cmd(inter, "bind .sa.f1.rd.r5 <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "radiobutton .sa.m.f1.rd.r1 -text \"Equal to\" -variable res -value 1 -command { .sa.m.f1.val.l1.l1 conf -text \"Value\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.l2.e2 conf -state disabled }");
+cmd(inter, "bind .sa.m.f1.rd.r1 <Down> {focus .sa.m.f1.rd.r9; .sa.m.f1.rd.r9 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r1 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "radiobutton .sa.f1.rd.r7 -text \"File\" -variable res -value 7 -command { .sa.f1.val.l1 conf -text \"(no use)\"; .sa.f1.val.l2 conf -text \"(no use)\"}");
-cmd(inter, "bind .sa.f1.rd.r7 <Up> {focus .sa.f1.rd.r5; .sa.f1.rd.r5 invoke}");
-cmd(inter, "bind .sa.f1.rd.r7 <Return> {.sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "radiobutton .sa.m.f1.rd.r9 -text \"Range\" -variable res -value 9 -command { .sa.m.f1.val.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r9 <Down> {focus .sa.m.f1.rd.r2; .sa.m.f1.rd.r2 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r9 <Up> {focus .sa.m.f1.rd.r1; .sa.m.f1.rd.r1 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r9 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "pack .sa.f1.rd.r1 .sa.f1.rd.r9 .sa.f1.rd.f2 .sa.f1.rd.r4 .sa.f1.rd.r3 .sa.f1.rd.r8 .sa.f1.rd.r5 .sa.f1.rd.r7 -anchor w");
+cmd(inter, "radiobutton .sa.m.f1.rd.r2 -text \"Increasing\" -variable res -value 2 -command { .sa.m.f1.val.l1.l1 conf -text \"Start\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Step\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r2 <Down> {focus .sa.m.f1.rd.r4; .sa.m.f1.rd.r4 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r2 <Up> {focus .sa.m.f1.rd.r9; .sa.m.f1.rd.r9 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r2 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "bind .sa.f1.rd <Return> { .sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1}");
+cmd(inter, "radiobutton .sa.m.f1.rd.r4 -text \"Increasing (groups)\" -variable res -value 4 -command {.sa.m.f1.val.l1.l1 conf -text \"Start\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Step\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r4 <Up> {focus .sa.m.f1.rd.r2; .sa.m.f1.rd.r2 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r4 <Down> {focus .sa.m.f1.rd.r3; .sa.m.f1.rd.r3 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r4 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "frame .sa.f1.val -relief groove -bd 2");
-cmd(inter, "label .sa.f1.val.l -text \"Numerical data for initialization\" -fg red");
-cmd(inter, "label .sa.f1.val.l1 -text \"Value 1\"");
-cmd(inter, "entry .sa.f1.val.e1 -textvariable value1");
-cmd(inter, "label .sa.f1.val.l2 -text \"Value 2\"");
-cmd(inter, "entry .sa.f1.val.e2 -textvariable value2");
-cmd(inter, "pack .sa.f1.val.l .sa.f1.val.l1 .sa.f1.val.e1 .sa.f1.val.l2 .sa.f1.val.e2 -expand yes -fill x");
+cmd(inter, "radiobutton .sa.m.f1.rd.r3 -text \"Random (uniform)\" -variable res -value 3 -command { .sa.m.f1.val.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r3 <Up> {focus .sa.m.f1.rd.r4; .sa.m.f1.rd.r4 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r3 <Down> {focus .sa.m.f1.rd.r8; .sa.m.f1.rd.r8 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r3 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "set rnd_seed 1");
-cmd(inter, "set use_seed 0");
-cmd(inter, "frame .sa.f2");
-cmd(inter, "frame .sa.f2.rnd -relief groove -bd 2");
-cmd(inter, "label .sa.f2.rnd.l -text \"Random number generator settings\" -fg red");
-cmd(inter, "checkbutton .sa.f2.rnd.f -text \"Reset the generator\" -variable use_seed");
-cmd(inter, "frame .sa.f2.rnd.le");
-cmd(inter, "label .sa.f2.rnd.le.l1 -text \"Seed used \"");
-cmd(inter, "entry .sa.f2.rnd.le.e1 -width 6 -textvariable rnd_seed");
-cmd(inter, "pack .sa.f2.rnd.le.l1 .sa.f2.rnd.le.e1 -side left");
-cmd(inter, "pack .sa.f2.rnd.l .sa.f2.rnd.f");
-cmd(inter, "pack .sa.f2.rnd.l .sa.f2.rnd.f");
-cmd(inter, "pack .sa.f2.rnd.le");
-cmd(inter, "pack .sa.f2.rnd -pady 2 -expand yes -fill x");
+cmd(inter, "radiobutton .sa.m.f1.rd.r8 -text \"Random integer (uniform)\" -variable res -value 8 -command { .sa.m.f1.val.l1.l1 conf -text \"Minimum\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Maximum\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r8 <Up> {focus .sa.m.f1.rd.r3; .sa.m.f1.rd.r3 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r8 <Down> {focus .sa.m.f1.rd.r5; .sa.m.f1.rd.r5 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r8 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "frame .sa.f2.fr -relief groove -bd 2");
-cmd(inter, "label .sa.f2.fr.tit -text \"Frequency\" -fg red");
+cmd(inter, "radiobutton .sa.m.f1.rd.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.l1.e1 conf -state normal; .sa.m.f1.val.l2.l2 conf -text \"Std. Deviation\"; .sa.m.f1.val.l2.e2 conf -state normal }");
+cmd(inter, "bind .sa.m.f1.rd.r5 <Up> {focus .sa.m.f1.rd.r8; .sa.m.f1.rd.r8 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r5 <Down> {focus .sa.m.f1.rd.r7; .sa.m.f1.rd.r7 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r5 <Return> { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "label .sa.f2.fr.l -text \"Apply every\"");
-cmd(inter, "entry .sa.f2.fr.e -width 6 -textvariable step_in");
-cmd(inter, "label .sa.f2.fr.l1 -text \"objects \"");
-cmd(inter, "checkbutton .sa.f2.fr.f -text \"Fill in\" -variable fill");
-cmd(inter, "pack .sa.f2.fr.tit");
-cmd(inter, "pack  .sa.f2.fr.l .sa.f2.fr.e .sa.f2.fr.l1 .sa.f2.fr.f -padx 5 -side left");
-cmd(inter, "pack  .sa.f2.fr -pady 2 -fill x");
+cmd(inter, "radiobutton .sa.m.f1.rd.r7 -text \"Import from data file\" -variable res -value 7 -command { .sa.m.f1.val.l1.l1 conf -text \"(none)\"; .sa.m.f1.val.l1.e1 conf -state disabled; .sa.m.f1.val.l2.l2 conf -text \"(none)\"; .sa.m.f1.val.l2.e2 conf -state disabled }");
+cmd(inter, "bind .sa.m.f1.rd.r7 <Up> {focus .sa.m.f1.rd.r5; .sa.m.f1.rd.r5 invoke}");
+cmd(inter, "bind .sa.m.f1.rd.r7 <Return> {.sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1}");
 
-cmd(inter, "frame .sa.f2.s -relief groove -bd 2");
-cmd(inter, "set to_all 1");
-cmd(inter, "label .sa.f2.s.tit -text \"Extension of initialization\" -fg red");
-cmd(inter, "pack .sa.f2.s.tit");
-cmd(inter, "frame .sa.f2.s.sel");
-cmd(inter, "radiobutton .sa.f2.s.sel.all -text \"Apply to every object\" -variable to_all -value 1 -command { .sa.f2.s.sel2.to conf -state disabled; .sa.f2.s.sel2.from conf -state disabled; bind .sa.f2.s.sel2.from <Button-3> { }; bind .sa.f2.s.sel2.to <Button-3> { }; bind .sa.f2.s.sel2.from <Button-2> { }; bind .sa.f2.s.sel2.to <Button-2> { } }");
-cmd(inter, "radiobutton .sa.f2.s.sel.sel -text \"Apply to a group of objects\" -variable to_all -value 2 -command { .sa.f2.s.sel2.to conf -state normal; .sa.f2.s.sel2.from conf -state normal; bind .sa.f2.s.sel2.from <Button-3> {set choice 9}; bind .sa.f2.s.sel2.to <Button-3> { set choice 10 }; bind .sa.f2.s.sel2.from <Button-2> {set choice 9}; bind .sa.f2.s.sel2.to <Button-2> { set choice 10 } }");
-cmd(inter, "pack .sa.f2.s.sel.all .sa.f2.s.sel.sel -anchor w");
-cmd(inter, "pack .sa.f2.s.sel -anchor w");
-cmd(inter, "frame .sa.f2.s.sel2");
-cmd(inter, "set cases_from 1; set cases_to 10000");
-cmd(inter, "label .sa.f2.s.sel2.lfrom -text \" From: \"");
-cmd(inter, "entry .sa.f2.s.sel2.from -width 5 -textvariable cases_from -state disabled");
-cmd(inter, "label .sa.f2.s.sel2.lto -text \" to: \"");
-cmd(inter, "entry .sa.f2.s.sel2.to -width 5 -textvariable cases_to -state disabled");
-cmd(inter, "label .sa.f2.s.sel2.obs -text \"(use right button on cells)\"");
-cmd(inter, "pack .sa.f2.s.sel2.lfrom .sa.f2.s.sel2.from .sa.f2.s.sel2.lto .sa.f2.s.sel2.to .sa.f2.s.sel2.obs -side left");
-cmd(inter, "pack .sa.f2.s.sel2");
-cmd(inter, "pack .sa.f2.s -pady 2 -expand yes -fill x");
+cmd(inter, "pack .sa.m.f1.rd.r1 .sa.m.f1.rd.r9 .sa.m.f1.rd.r2 .sa.m.f1.rd.r4 .sa.m.f1.rd.r3 .sa.m.f1.rd.r8 .sa.m.f1.rd.r5 .sa.m.f1.rd.r7 -anchor w -padx 2");
 
-cmd(inter, "bind .sa.f2.s.sel.all <Return> {focus .sa.f2.b.ok}");
-cmd(inter, "bind .sa.f2.s.sel.sel <Return> {focus .sa.f2.b.ok}");
-cmd(inter, "bind .sa.f2.s.sel2.from <Return> {focus .sa.f2.s.sel2.to}");
-cmd(inter, "bind .sa.f2.s.sel2.to <Return> {focus .sa.f2.b.ok}");
+cmd(inter, "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x  -padx 2 -pady 2");
 
-cmd(inter, "set update_d 1");
-cmd(inter, "checkbutton .sa.f2.ud -text \"Update description\" -variable update_d");
+// right column
+cmd(inter, "frame .sa.m.f2");
 
-cmd(inter, "bind .sa <KeyPress-Escape> {set choice 2}");
-cmd(inter, "pack .sa.f1.rd .sa.f1.val");
-cmd(inter, "pack .sa.f2.rnd .sa.f2.fr .sa.f2.s .sa.f2.ud -anchor w -expand yes -fill both");
+cmd(inter, "frame .sa.m.f2.s -relief groove -bd 2");
+cmd(inter, "label .sa.m.f2.s.tit -text \"Object selection\"");
+cmd(inter, "pack .sa.m.f2.s.tit -pady 2");
 
-cmd(inter, "pack .sa.head");
-cmd(inter, "pack .sa.f1 .sa.f2 -side left -expand yes -fill y");
+cmd(inter, "frame .sa.m.f2.s.l");
 
-cmd( inter, "okhelpcancel .sa.f2 b { set choice 1 } { LsdHelp mdatainit.html#setall } { set choice 2 }" );
-cmd(inter, "bind .sa.f1.val.e1 <KeyPress-Return> { set choice 1 }");
-cmd(inter, "bind .sa.f1.val.e2 <KeyPress-Return> { set choice 1 }");
+cmd(inter, "frame .sa.m.f2.s.l.a");
+cmd(inter, "label .sa.m.f2.s.l.a.l -text \"Apply every\"");
+cmd( inter, "entry .sa.m.f2.s.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer %P ] { set step_in %P; return 1 } { %W delete 0 end; %W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
+cmd(inter, "label .sa.m.f2.s.l.a.l1 -text \"object(s)\"");
+cmd(inter, "pack .sa.m.f2.s.l.a.l .sa.m.f2.s.l.a.e .sa.m.f2.s.l.a.l1 -side left -padx 1");
 
-cmd(inter, "showtop .sa");
-cmd(inter, ".sa.f1.val.e1 selection range 0 end; focus .sa.f1.val.e1; .sa.f1.rd.r1 invoke");	// speed-up data entry focusing first data field
+cmd(inter, "checkbutton .sa.m.f2.s.l.f -text \"Fill-in\" -variable fill");
+cmd(inter, "pack  .sa.m.f2.s.l.a .sa.m.f2.s.l.f -padx 5 -side left");
+cmd(inter, "pack  .sa.m.f2.s.l -pady 2");
+
+cmd(inter, "frame .sa.m.f2.s.sel");
+cmd(inter, "radiobutton .sa.m.f2.s.sel.all -text \"Apply to all objects\" -variable to_all -value 1 -command { .sa.m.f2.s.sel2.c.to conf -state disabled; .sa.m.f2.s.sel2.c.from conf -state disabled; bind .sa.m.f2.s.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.sel2.c.to <Button-2> { } }");
+cmd(inter, "radiobutton .sa.m.f2.s.sel.sel -text \"Apply to a group of objects\" -variable to_all -value 2 -command { .sa.m.f2.s.sel2.c.to conf -state normal; .sa.m.f2.s.sel2.c.from conf -state normal; bind .sa.m.f2.s.sel2.c.from <Button-3> {set choice 9}; bind .sa.m.f2.s.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.sel2.c.from <Button-2> {set choice 9}; bind .sa.m.f2.s.sel2.c.to <Button-2> { set choice 10 } }");
+cmd(inter, "pack .sa.m.f2.s.sel.all .sa.m.f2.s.sel.sel -anchor w");
+cmd(inter, "pack .sa.m.f2.s.sel -pady 2");
+
+cmd(inter, "frame .sa.m.f2.s.sel2");
+
+cmd(inter, "frame .sa.m.f2.s.sel2.c");
+cmd(inter, "label .sa.m.f2.s.sel2.c.lfrom -text \"From\"");
+cmd( inter, "entry .sa.m.f2.s.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer %P ] { set cases_from %P; return 1 } { %W delete 0 end; %W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center" );
+cmd(inter, "label .sa.m.f2.s.sel2.c.lto -text \"to\"");
+cmd( inter, "entry .sa.m.f2.s.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer %P ] { set cases_to %P; return 1 } { %W delete 0 end; %W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center" );
+cmd(inter, "pack .sa.m.f2.s.sel2.c.lfrom .sa.m.f2.s.sel2.c.from .sa.m.f2.s.sel2.c.lto .sa.m.f2.s.sel2.c.to -side left -pady 1");
+
+cmd(inter, "label .sa.m.f2.s.sel2.obs -text \"(use right button on cells for options)\"");
+cmd(inter, "pack .sa.m.f2.s.sel2.c .sa.m.f2.s.sel2.obs");
+cmd(inter, "pack .sa.m.f2.s.sel2 -pady 2");
+
+cmd(inter, "pack .sa.m.f2.s -pady 2 -expand yes -fill x");
+
+cmd(inter, "frame .sa.m.f2.rnd -relief groove -bd 2");
+cmd(inter, "label .sa.m.f2.rnd.l -text \"Random number generator\"");
+
+cmd(inter, "frame .sa.m.f2.rnd.le");
+cmd(inter, "checkbutton .sa.m.f2.rnd.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.le.e1 conf -state normal } { .sa.m.f2.rnd.le.e1 conf -state disabled } }");
+cmd(inter, "frame .sa.m.f2.rnd.le.s");
+cmd(inter, "label .sa.m.f2.rnd.le.s.l1 -text \"Seed\"");
+cmd( inter, "entry .sa.m.f2.rnd.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer %P ] { set rnd_seed %P; return 1 } { %W delete 0 end; %W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center" );
+cmd(inter, "pack .sa.m.f2.rnd.le.s.l1 .sa.m.f2.rnd.le.s.e1 -side left -padx 1");
+
+cmd(inter, "pack .sa.m.f2.rnd.le.f .sa.m.f2.rnd.le.s -side left -padx 5");
+cmd(inter, "pack .sa.m.f2.rnd.l .sa.m.f2.rnd.le -pady 2");
+
+cmd(inter, "checkbutton .sa.m.f2.ud -text \"Update description\" -variable update_d");
+
+cmd(inter, "pack .sa.m.f2.s .sa.m.f2.rnd .sa.m.f2.ud -anchor w -expand yes -fill x");
+
+cmd(inter, "pack .sa.m.f1 .sa.m.f2 -side left -expand yes -fill both -padx 5 -pady 5");
+cmd(inter, "pack .sa.head .sa.m -pady 5");
+
+cmd( inter, "okhelpcancel .sa b { set choice 1 } { LsdHelp mdatainit.html#setall } { set choice 2 }" );
+
+cmd( inter, "bind .sa.m.f1.rd <Return> {  if [ string equal [ .sa.m.f1.val.l2.e2 cget -state ] normal ] { .sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1 } }" );
+cmd( inter, "bind .sa.m.f1.val.l1.e1 <Return> { if [ string equal [ .sa.m.f1.val.l2.e2 cget -state ] normal ] { focus .sa.m.f1.val.l2.e2; .sa.m.f1.val.l2.e2 selection range 0 end } { set choice 1 } }" );
+cmd(inter, "bind .sa.m.f1.val.l2.e2 <Return> { set choice 1 }");
+cmd(inter, "bind .sa.m.f2.s.l.a.e <Return> {focus .sa.m.f2.s.sel.all; .sa.m.f2.s.sel.all invoke}");
+cmd(inter, "bind .sa.m.f2.s.sel.all <Return> {focus .sa.b.ok}");
+cmd(inter, "bind .sa.m.f2.s.sel.sel <Return> {focus .sa.m.f2.s.sel2.c.from; .sa.m.f2.s.sel2.c.from selection range 0 end }");
+cmd(inter, "bind .sa.m.f2.s.sel2.c.from <Return> {focus .sa.m.f2.s.sel2.c.to; .sa.m.f2.s.sel2.c.from selection range 0 end }");
+cmd(inter, "bind .sa.m.f2.s.sel2.c.to <Return> {focus .sa.b.ok}");
+cmd(inter, "bind .sa.m.f2.rnd.le.s.e1 <Return> {focus .sa.b.ok}");
+
+cmd(inter, "showtop .sa topleftW");
+cmd(inter, ".sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1; .sa.m.f1.rd.r1 invoke");	// speed-up data entry focusing first data field
+
+here_setall:
+
+// update current linked variables values
+cmd( inter, "write_any .sa.m.f1.val.l1.e1 $value1" ); 
+cmd( inter, "write_any .sa.m.f1.val.l2.e2 $value2" );
+cmd( inter, "write_any .sa.m.f2.s.l.a.e $step_in" ); 
+cmd( inter, "write_any .sa.m.f2.s.sel2.c.from $cases_from" ); 
+cmd( inter, "write_any .sa.m.f2.s.sel2.c.to $cases_to" ); 
+cmd( inter, "write_any .sa.m.f2.rnd.le.s.e1 $rnd_seed" ); 
 
 *choice = 0;
-here_setall:
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
@@ -306,7 +349,6 @@ if(*choice==9)
  i=compute_copyfrom(original, choice);
  sprintf(msg, "set cases_from %d",i);
  cmd(inter, msg);
- *choice=0;
  goto here_setall;
 }
 
@@ -316,15 +358,21 @@ if(*choice==10)
  i=compute_copyfrom(original, choice);
  sprintf(msg, "set cases_to %d",i);
  cmd(inter, msg);
- *choice=0;
  goto here_setall;
 }
 
-cmd(inter, "destroytop .sa");
+// save current linked variables values before closing
+cmd( inter, "set value1 [ .sa.m.f1.val.l1.e1 get ]" ); 
+cmd( inter, "set value2 [ .sa.m.f1.val.l2.e2 get ]" ); 
+cmd( inter, "set cases_from [ .sa.m.f2.s.sel2.c.from get ]" ); 
+cmd( inter, "set cases_to [ .sa.m.f2.s.sel2.c.to get ]" ); 
+cmd( inter, "set step_in [ .sa.m.f2.s.l.a.e get ]" ); 
+cmd( inter, "set rnd_seed [ .sa.m.f2.rnd.le.s.e1 get ]" ); 
+
+cmd( inter, "destroytop .sa" );
 
 if( (*choice==1 && res!=0) || *choice==9 || *choice==10)
 {
-
 cmd(inter, "set choice $use_seed");
 if(*choice==1)
  {
@@ -732,7 +780,7 @@ case 6:
 
 case 7:
   cmd(inter, "set oldpath [pwd]");
-  cmd( inter, "set filename [ tk_getOpenFile -parent . -title \"Select Text File\" -filetypes { { { \"Text Files\" } {.txt} } } ]" );
+  cmd( inter, "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { { Text Files } { .txt } } { { All Files } { * } }} ]" );
   l=(char *)Tcl_GetVar(inter, "filename",0);
   if(l!=(char *)NULL && strcmp(l, ""))
  { cmd(inter, "cd [file dirname $filename]");
@@ -858,10 +906,10 @@ default:
 		myexit(22);
 }
 }
+
 Tcl_UnlinkVar(inter, "value1");
 Tcl_UnlinkVar(inter, "value2");
 Tcl_UnlinkVar(inter, "res");
-
 }
 
 
@@ -1057,7 +1105,7 @@ if ( s->entryOk )	// is there valid data from a previous data entry?
 	delete [] sss;
 }
 
-cmd( inter, "showtop .sens" );
+cmd( inter, "showtop .sens topleftW" );
 
 do			// finish only after reading all values
 {

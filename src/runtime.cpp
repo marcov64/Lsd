@@ -198,6 +198,8 @@ cmd(inter, "wm resizable $activeplot 1 0");
 // allow for run time plot window destruction
 cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW {set done_in 5}");
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $activeplot @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
+cmd( inter, "wm transient $activeplot .; wm group $activeplot .; lower $activeplot .log" );
+
 i=(id_sim)*shift;				// calculate window shift position
 sprintf(intval,"%i",i);
 Tcl_SetVar(inter, "shift", intval, 0);

@@ -12,8 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-
-
 /****************************************************
 LSD_MAIN.CPP contains:
 - early initialization (namely, of the Log windows)
@@ -92,6 +90,9 @@ int dozip = 1;				// compressed results file flag
 int dozip = 0;
 #endif
 
+// launch TkCon as an auxiliary window for debugging (comment to disable)
+//#define TKCON
+
 object *create( object *r);
 void run(object *r);
 void print_title(object *root);
@@ -136,9 +137,9 @@ int optimized=0;
 int check_optimized=0;
 int plot_flag=1;
 double refresh=1.01;
-char lsd_eq_file[200000];
+char lsd_eq_file[500000];
 int watch;
-char msg[1000];
+char msg[TCL_BUFF_STR];
 int stack;
 int identity=0;
 int sim_num=1;
@@ -161,7 +162,7 @@ char *eq_file=NULL;
 char *equation_name = NULL;
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
-char name_rep[400];
+char name_rep[1000];
 char **tp;
 int struct_loaded=0;
 int running=0;
@@ -208,14 +209,14 @@ LSD MAIN
 *********************************/
 int lsdmain(int argn, char **argv)
 {
-char tcl_dir[100], str[500], *lsdroot;
+char tcl_dir[1000], str[1000], *lsdroot;
 
 int i, p=0, len, done;
 FILE *f;
 
 blueprint=NULL;
-simul_name=new char[30];
-path=new char[300];
+simul_name=new char[300];
+path=new char[1000];
 equation_name=new char[300];
 exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
 exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
@@ -458,6 +459,25 @@ cmd( inter, "proc enable_window { w m { args \"\" } } { \
 		}; \
 		update \
 	}" );
+	
+// Tk procedures to read any entry widget (normal or disabled)
+cmd( inter, "proc write_any { w val } { \
+		if [ string equal [ $w cget -state ] disabled ] { \
+			write_disabled $w $val \
+		} { \
+			$w delete 0 end; \
+			$w insert 0 $val \
+		} \
+	}" );
+
+// Tk procedure to update a disabled entry widget (do nothing if normal state)
+cmd( inter, "proc write_disabled { w val } { \
+		if [ string equal [ $w cget -state ] disabled ] { \
+			$w conf -state normal; \
+			write_any $w $val; \
+			$w conf -state disabled \
+		} \
+	}" );
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -515,6 +535,11 @@ cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { sour
 if ( choice != 0 )
 	myexit( 7 + choice );
 
+#ifdef TKCON
+// launch TkCon as an auxiliary window for debugging
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is continuing with no debug console.\" } }" );
+#endif
+
 while(1)
 {
 root=create( root);
@@ -560,7 +585,7 @@ void run(object *root)
 {
 int i, j, done=0;
 bool batch_sequential_loop=false; // indicates second or higher iteration of a batch
-char ch[120], nf[300];
+char ch[300], nf[300];
 FILE *f;
 result *rf;					// pointer for results files (may be zipped or not)
 double app=0;
@@ -577,6 +602,8 @@ quit=0;
 #ifndef NO_WINDOW 
 Tcl_UnlinkVar(inter, "done");
 cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
+cmd( inter, "wm deiconify .log; raise .log; focus .log" );
+
 #else
 sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
 plog(msg);
@@ -934,6 +961,7 @@ delete rf;										// close file and delete object
 
 #ifndef NO_WINDOW 
 uncover_browser( );
+cmd( inter, "wm deiconify .log; raise .log; focus .log" );
 Tcl_UnlinkVar(inter, "done_in");
 #endif
 quit=0;
@@ -946,7 +974,6 @@ PRINT_TITLE
 
 void print_title(object *root)
 {
-char ch[20];
 object *c, *cur;
 variable *var;
 int num=0, multi, toquit;
@@ -1024,7 +1051,7 @@ The optional tag parameter has to correspond to the log window existing tags
 
 void plog( char const *cm, char const *tag )
 {
-char app[1000];
+char app[TCL_BUFF_STR];
 
 #ifndef NO_WINDOW 
 sprintf( app, ".log.text.text.internal insert end \"%s\" %s", cm, tag );
@@ -1118,6 +1145,8 @@ cmd(inter, "toplevel .log");
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 cmd( inter, "wm protocol .log WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
+cmd( inter, "wm group .log ." );
+
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");
 cmd(inter, "wm title .log \"Lsd Log\"");
@@ -1179,6 +1208,7 @@ COVER_BROWSER
 
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
+	cmd(inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }");
 	cmd( inter, "disable_window \"\" m bbar l" );		// disable main window
 	cmd( inter, "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
 	cmd( inter, "newtop .t [ wm title . ]" );
@@ -1192,7 +1222,6 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	cmd( inter, msg );
 	cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 	cmd( inter, "showtop .t coverW no no no" );
-	cmd( inter, "wm deiconify .log; raise .log; focus -force .log" );
 	cmd( inter, "update" );
 }
 
@@ -1206,6 +1235,7 @@ void uncover_browser( void )
 	cmd( inter, "if [ winfo exist .t ] { destroytop .t }"  );
 	cmd( inter, "wm title . $origMainTit" );
 	cmd( inter, "enable_window \"\" m bbar l" );	// enable main window
+	cmd( inter, "if { [ string equal [ wm state . ] normal ] && [ winfo exist .model_str ] && ! [ string equal [ wm state .model_str ] normal ] } { wm deiconify .model_str; lower .model_str }" );
 	cmd( inter, "update" );
 }
 #endif
@@ -1268,7 +1298,7 @@ char *clean_path(char *filepath)
 // handle critical system signals
 void signal_handler(int signum)
 {
-	char msg2[1000];
+	char msg2[TCL_BUFF_STR];
 	double useless = -1;
 	
 	switch(signum)

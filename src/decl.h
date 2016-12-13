@@ -40,6 +40,9 @@ Comments and bug reports to marco.valente@univaq.it
 #endif
 #define NaN NAN
 
+// global constants
+#define TCL_BUFF_STR 2000				// standard Tcl buffer size
+
 // define the base pseudo random number generator
 double ran1( long *idum_loc = NULL );
 #define RND ( (double) ran1( ) )

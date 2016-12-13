@@ -35,11 +35,9 @@ after having copied cygwin1.dll in the Lsd root directory
 #include <ctype.h>
 int main(void)
 {
-   char *path, *ptr, cmd[400], cp[1000], cd[1000], str[1000];
+   char *path, *ptr, cmd[TCL_BUFF_STR], cp[1000], cd[1000], str[1000];
    int i = 0;
    FILE *f;
-
-
 
    f=fopen("src\\cd.txt","r");
 	   if(f==NULL)
@@ -67,13 +65,11 @@ int main(void)
 
    if(strstr(cp+5, str)!=NULL)
     {
-//    printf("\nYes\n");
     return 0;
     }
    else
     {
     sprintf(str, "PATH %s\\gnu\\bin;%s\n", cd, cp+5);
-//    printf("\nNo\nNew path = %s\n", str);
     f=fopen("src\\kicklmm.bat","w");
     fprintf(f,str);
     fprintf(f, "set LSDROOT=%s\n",cd);
@@ -82,26 +78,6 @@ int main(void)
 
 
     };
-/*
-   for( i=0; cd[i]!=NULL; i++)
-
-    
-   printf("\n%s\n", cd);
-  
-   path = getenv("UGO");
-   printf("\n%s\n", path);
-   ptr=strstr(path, "/gnu/bin");
-   
-   if(ptr==NULL)
-      {printf("No");
-      
-       return 0;
-      } 
-   else
-     {printf("Yes");
-      return 1;
-     } 
-*/
 }
  
 

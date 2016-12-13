@@ -90,9 +90,9 @@ extern Tcl_Interp *inter;
 extern char msg[];
 extern char *simul_name;	// simulation name to use in title bar
 extern bool in_edit_data;
-extern char widthDE[];			// horizontal size in pixels
-extern char heightDE[];			// vertical size in pixels
 
+char widthNE[]="350";			// horizontal size in pixels
+char heightNE[]="550";			// vertical size in pixels
 char lab_view[40];
 char tag_view[40];
 int level;
@@ -108,7 +108,7 @@ SET_OBJ_NUMBER
 void set_obj_number(object *r, int *choice)
 {
 
-char ch[80], *l;
+char ch[TCL_BUFF_STR], *l;
 int i, num, res, count, done;
 object *cur, *first;
 Tcl_LinkVar(inter, "val", (char *) &count, TCL_LINK_INT);
@@ -116,11 +116,11 @@ Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "result", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "max_depth", (char *) &max_depth, TCL_LINK_INT);
-Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
-Tcl_SetVar(inter, "heightDE", heightDE, 0);		// vertical minimum size in pixels
+Tcl_SetVar(inter, "widthNE", widthNE, 0);		// horizontal size in pixels
+Tcl_SetVar(inter, "heightNE", heightNE, 0);		// vertical minimum size in pixels
 
 cmd( inter, "set ini .ini" );
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini centerS 1 1 1 $widthDE $heightDE }" );
+cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $widthNE $heightNE } { resizetop .ini $widthNE $heightNE }" );
 
 in_set_obj = true;
 strcpy(lab_view,"");
@@ -154,7 +154,8 @@ while(*choice==0)
   cmd(inter, "frame .ini.f");
 
   cmd(inter, "label .ini.f.tmd -text \"Show hierarchical level: \"");
-  cmd(inter, "entry .ini.f.emd -textvariable max_depth -width 5");
+  cmd( inter, "entry .ini.f.emd -width 5 -validate focusout -vcmd { if [ string is integer %P ] { set max_depth %P; return 1 } { %W delete 0 end; %W insert 0 $max_depth; return 0 } } -invcmd { bell } -justify center" );
+  cmd( inter, ".ini.f.emd insert 0 $max_depth" ); 
   cmd(inter, "button .ini.f.ud -width -9 -text Update -command {set choice 4}");
   cmd(inter, "pack .ini.f.tmd .ini.f.emd .ini.f.ud -side left");
 
@@ -168,6 +169,9 @@ while(*choice==0)
     cmd(inter, "$t see $toview");
 
 noredraw:
+
+  cmd( inter, "write_any .ini.f.emd $max_depth" ); 
+
   while(*choice==0)
    {
     try{Tcl_DoOneEvent(0);}
@@ -175,6 +179,8 @@ noredraw:
     goto noredraw;
     }
    } 
+
+cmd( inter, "set max_depth [ .ini.f.emd get ]" ); 
 
 if ( *choice == 3 && in_edit_data )		// avoid recursion
 {
@@ -232,7 +238,7 @@ INSERT_OBJ_NUM
 ****************************************************/
 void insert_obj_num(object *root, char const *tag, char const *ind, int counter, int *i, int *value)
 {
-char ch[620], ch1[120], indent[30];
+char ch[TCL_BUFF_STR], ch1[120], indent[30];
 object *c, *cur;
 variable *var;
 int num=0, multi=0;
@@ -347,7 +353,7 @@ for(j=1, cur=c; cur->up!=NULL; cur=cur->up, j++)
   cmd(inter, msg);
   sprintf(msg, "label $c.f.f%d.l -text \"Instance of '%s' number: \"", j, cur->label);
   cmd(inter, msg);
-  sprintf(msg, "entry $c.f.f%d.e -width 8 -textvariable num%d", j,j);
+  sprintf(msg, "entry $c.f.f%d.e -width 8 -textvariable num%d -justify center", j,j);
   cmd(inter, msg);
   sprintf(msg, "pack $c.f.f%d.l $c.f.f%d.e -side left", j, j);
   cmd(inter, msg);
@@ -388,8 +394,11 @@ for(i=0, k=0; k==0 && cur!=NULL ; cur3=cur, cur=cur->hyper_next(c->label), i++)
   k=1;
   for(j=1, cur1=cur; cur1->up!=NULL; cur1=cur1->up, j++)
    {
-   sprintf(msg, "set choice $num%d", j);
-   cmd(inter, msg);
+   sprintf( msg, "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
+   cmd( inter, msg );
+   if ( *choice < 0 )
+	   break;
+   
    for(h=1, cur2=cur1->up->search(cur1->label); cur2!=cur1; cur2=cur2->next, h++);   
    if(cur2->next==NULL && *choice>h)
      *choice=h;
@@ -456,14 +465,13 @@ strcpy(lab_view, c->label);
 strcpy(tag_view, tag);
 sprintf(msg, "label $n.l -text \"Number of objects '%s' in %s %s \"", c->label, c->up->label, tag);
 cmd(inter, msg);
-cmd(inter, "entry $n.e -textvariable num -width 10");
+cmd( inter, "entry $n.e -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set num %P; return 1 } { %W delete 0 end; %W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, "$n.e insert 0 $num" ); 
 cmd( inter, "pack $n.l $n.e" );
 
 cmd(inter, "frame $n.ef -relief groove -bd 2");
 cmd(inter, "label $n.ef.l -text \"Groups to be modified\"");
 
-//      sprintf(msg, "radiobutton $n.ef.r0 -text \"Only this group of %s\" -variable affect -value 0 ", c->label);
-//      cmd(inter, msg);
 for(j=1, cur=c->up; cur->up!=NULL; cur=cur->up, j++)
  {
   if(j==1)
@@ -493,8 +501,6 @@ for(j=1, cur=c->up; cur->up!=NULL; cur=cur->up, j++)
   if(j==1) //we are dealing with root's descendants
    cmd(inter, "set affect1 1");
 cmd(inter, "pack $n.ef.l");        
-//      cmd(inter, "pack $n.ef.r0 -anchor w");
-//for(j=1, cur=c->up; cur!=NULL; cur=cur->up, j++)
 for( ; j>0;  j--)
  {
  sprintf(msg, "if {[winfo exist $n.ef.r%d] == 1} {pack $n.ef.r%d  -anchor w} {}",j,j);
@@ -505,7 +511,8 @@ cmd(inter, "set affect 1");
 cmd(inter, "frame $n.cp -relief groove -bd 2");
 cmd(inter, "label $n.cp.l -text \"Copy from instance: \"");
 cmd(inter, "set cfrom 1");
-cmd(inter, "entry $n.cp.e -textvariable cfrom -width 10");
+cmd( inter, "entry $n.cp.e -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set cfrom %P; return 1 } { %W delete 0 end; %W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+cmd( inter, "$n.cp.e insert 0 $cfrom" ); 
 cmd(inter, "button $n.cp.compute -width -9 -text Compute -command {set conf 1; set choice 3}");
 cmd(inter, "pack $n.cp.l $n.cp.e $n.cp.compute -side left");
  cmd(inter, "$n.e selection range 0 end");
@@ -521,6 +528,9 @@ here_objec_num:
  while(*choice==0)
   Tcl_DoOneEvent(0);
 	  
+cmd( inter, "set num [ $n.e get ]" ); 
+cmd( inter, "set cfrom [ $n.cp.e get ]" ); 
+
 k=*choice;
 
 cmd(inter, "set choice $conf");
@@ -675,7 +685,7 @@ else
 
   sprintf(ch, "label $d.tit -text \"Select instances of %s to delete\"", (*r)->label);
   cmd(inter, ch);
-    cmd(inter, "entry $d.e -width 6 -textvariable val");
+    cmd( inter, "entry $d.e -width 6 -validate focusout -vcmd { if [ string is integer %P ] { set val %P; return 1 } { %W delete 0 end; %W insert 0 $val; return 0 } } -invcmd { bell } -justify center" );
 	 cmd(inter, "label $d.tit1 -text \"(0 instance(s) done)\"");
     cmd(inter, "bind $d.e <KeyPress-Return> {set choice 1}");
 	 cmd(inter, "pack $d.tit $d.tit1 $d.e");
@@ -691,12 +701,15 @@ else
    {
    do
     {
-    *choice=0;
     cmd(inter, "$d.tit1 conf -text \"([ expr $i - 1 ] instance(s) done)\"");
-    cmd(inter, "$d.e conf -textvariable val");
+	cmd( inter, "write_any $d.e $val" ); 
     cmd(inter, "$d.e selection range 0 end");
+	
+    *choice=0;
     while(*choice==0)
      Tcl_DoOneEvent(0);
+
+	cmd( inter, "set val [ $d.e get ]" ); 
 
     if(*choice==2)
       {

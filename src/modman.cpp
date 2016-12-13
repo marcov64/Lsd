@@ -69,7 +69,7 @@ The widget of importance are:
 #define SHOW_TK_ERR true		// define to show Tk errors as dialogs
 
 Tcl_Interp *inter;
-char msg[1024];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
+char msg[3000];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
 int choice;
 int v_counter=0; //counter of the v[i] variables inserted in the equations
 int shigh;			// syntax highlighting state (0, 1 or 2)
@@ -511,6 +511,7 @@ cmd( inter, "image create photo infoImg -file \"$RootLsd/$LsdSrc/icons/info.$ico
 cmd( inter, "image create photo descrImg -file \"$RootLsd/$LsdSrc/icons/descr.$iconExt\"" );
 cmd( inter, "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equation.$iconExt\"" );
 cmd( inter, "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
+cmd( inter, "image create photo hideImg -file \"$RootLsd/$LsdSrc/icons/hide.$iconExt\"" );
 cmd( inter, "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.$iconExt\"" );
 
 cmd( inter, "button .bbar.open -image openImg -relief flat -overrelief groove -command {set choice 33}" );
@@ -530,12 +531,13 @@ cmd( inter, "button .bbar.info -image infoImg -relief flat -overrelief groove -c
 cmd( inter, "button .bbar.descr -image descrImg -relief flat -overrelief groove -command {set choice 5}" );
 cmd( inter, "button .bbar.equation -image equationImg -relief flat -overrelief groove -command {set choice 8}" );
 cmd( inter, "button .bbar.set -image setImg -relief flat -overrelief groove -command {set choice 48}" );
+cmd( inter, "button .bbar.hide -image hideImg -relief flat -overrelief groove -command {set autoHide [ expr ! $autoHide ]}" );
 cmd( inter, "button .bbar.help -image helpImg -relief flat -overrelief groove -command {LsdHelp lsdfuncMacro.html}" );
 cmd( inter, "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
 
-cmd( inter, "bind .bbar.open <Enter> {set ttip \"Browse Models...\"}" );
+cmd( inter, "bind .bbar.open <Enter> {set ttip \"Browse models...\"}" );
 cmd( inter, "bind .bbar.open <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.save <Enter> {set ttip \"Save Model\"}" );
+cmd( inter, "bind .bbar.save <Enter> {set ttip \"Save model\"}" );
 cmd( inter, "bind .bbar.save <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.undo <Enter> {set ttip \"Undo\"}" );
 cmd( inter, "bind .bbar.undo <Leave> {set ttip \"\"}" );
@@ -551,26 +553,28 @@ cmd( inter, "bind .bbar.find <Enter> {set ttip \"Find...\"}" );
 cmd( inter, "bind .bbar.find <Leave> {set ttip \"\"}" );
 cmd( inter, "bind .bbar.replace <Enter> {set ttip \"Replace...\"}" );
 cmd( inter, "bind .bbar.replace <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.indent <Enter> {set ttip \"Indent Selection\"}" );
+cmd( inter, "bind .bbar.indent <Enter> {set ttip \"Indent selection\"}" );
 cmd( inter, "bind .bbar.indent <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.deindent <Enter> {set ttip \"De-indent Selection\"}" );
+cmd( inter, "bind .bbar.deindent <Enter> {set ttip \"De-indent selection\"}" );
 cmd( inter, "bind .bbar.deindent <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.comprun <Enter> {set ttip \"Compile and Run Model...\"}" );
+cmd( inter, "bind .bbar.comprun <Enter> {set ttip \"Compile and run model...\"}" );
 cmd( inter, "bind .bbar.comprun <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.compile <Enter> {set ttip \"Recompile Model\"}" );
+cmd( inter, "bind .bbar.compile <Enter> {set ttip \"Recompile model\"}" );
 cmd( inter, "bind .bbar.compile <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.info <Enter> {set ttip \"Model Info...\"}" );
+cmd( inter, "bind .bbar.info <Enter> {set ttip \"Model information...\"}" );
 cmd( inter, "bind .bbar.info <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.descr <Enter> {set ttip \"Show Description\"}" );
+cmd( inter, "bind .bbar.descr <Enter> {set ttip \"Show description\"}" );
 cmd( inter, "bind .bbar.descr <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.equation <Enter> {set ttip \"Show Equations\"}" );
+cmd( inter, "bind .bbar.equation <Enter> {set ttip \"Show equations\"}" );
 cmd( inter, "bind .bbar.equation <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.set <Enter> {set ttip \"Model Compilation Options...\"}" );
+cmd( inter, "bind .bbar.set <Enter> {set ttip \"Model compilation options...\"}" );
 cmd( inter, "bind .bbar.set <Leave> {set ttip \"\"}" );
-cmd( inter, "bind .bbar.help <Enter> {set ttip \"Help on Macros for Lsd Equations\"}" );
+cmd( inter, "bind .bbar.hide <Enter> {if $autoHide {set ttip \"Not hide LMM on run\"} {set ttip \"Hide LMM on run\"}}" );
+cmd( inter, "bind .bbar.hide <Leave> {set ttip \"\"}" );
+cmd( inter, "bind .bbar.help <Enter> {set ttip \"Help on macros for Lsd equations\"}" );
 cmd( inter, "bind .bbar.help <Leave> {set ttip \"\"}" );
 
-cmd( inter, "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.comprun .bbar.compile .bbar.info .bbar.descr .bbar.equation .bbar.set .bbar.help .bbar.tip -padx 3 -side left" );
+cmd( inter, "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.comprun .bbar.compile .bbar.info .bbar.descr .bbar.equation .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( inter, "pack .bbar -anchor w -fill x" );
 
 cmd(inter, "frame .f");
@@ -1997,7 +2001,6 @@ if(choice==0)
 cmd(inter, "set cur \"\"");
 cmd( inter, "newtop .l \"Replace Text\" { .l.b2.esc invoke }" );
 
-//cmd(inter, "set textsearch \"\"");
 cmd(inter, "label .l.l -text \"Type the text to search\"");
 cmd(inter, "entry .l.e -width 30 -textvariable textsearch");
 cmd(inter, "label .l.r -text \"Type the text to replace\"");
@@ -2214,7 +2217,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to compute\"");
@@ -2224,12 +2227,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -2260,15 +2263,13 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
  cmd(inter, "set a [.f.t.t index insert]");
 
-//cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
-cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
 
 cmd(inter, "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"V(\\\"$v_label\\\")\"} {}");
 cmd(inter, "if {$v_lag!=0 && $v_obj==\"p\"} { .f.t.t insert insert \"VL(\\\"$v_label\\\",$v_lag)\"} {}");
 cmd(inter, "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"VS($v_obj,\\\"$v_label\\\")\"} {}");
-cmd(inter, "if {$v_lag!=0 && $v_obj!=\"p\"} { .f.t.t insert insert \"VLS($v_obj,\\\"$v_label\\\",$v_lag)\"} {}");
+cmd(inter, "if {$v_lag!=0 && $v_obj!=\"p\" && [string is integer $v_lag]} { .f.t.t insert insert \"VLS($v_obj,\\\"$v_label\\\",$v_lag)\"} {}");
 
-//cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"} {}"); //no new line character
 cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \";\"} {}");
 
 cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
@@ -2292,7 +2293,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to compute\"");
@@ -2302,12 +2303,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -2338,10 +2339,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
-//cmd(inter, ".f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"");
-//cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
-
+cmd(inter, "if {$v_num==\"\" && [string is integer $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
 
 cmd(inter, "if {$v_num==\"\"} { set num -1} {set num $v_num}");
 if(num!=-1)
@@ -2370,12 +2368,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}"
 
 cmd(inter, "label .a.l2 -text \"Type below the cycling pointer\"");
 cmd(inter, "set v_obj cur");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.par; .a.par selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the parent pointer\"");
 cmd(inter, "set v_par p");
-cmd(inter, "entry .a.par -width 6 -textvariable v_par");
+cmd(inter, "entry .a.par -width 6 -textvariable v_par -justify center");
 cmd(inter, "bind .a.par <Return> {focus .a.f.ok}");
 
 
@@ -2469,12 +2467,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}"
 
 cmd(inter, "label .a.l2 -text \"Type below the cycling pointer\"");
 cmd(inter, "set v_obj cur");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.par; .a.par selection range 0 end}");
 
 cmd(inter, "label .a.l3 -text \"Type below the parent pointer\"");
 cmd(inter, "set v_par p");
-cmd(inter, "entry .a.par -width 6 -textvariable v_par");
+cmd(inter, "entry .a.par -width 6 -textvariable v_par -justify center");
 cmd(inter, "bind .a.par <Return> {focus .a.f.ok}");
 
 
@@ -2686,7 +2684,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to increase\"");
@@ -2696,12 +2694,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the value to add\"");
 cmd(inter, "set v_val 1");
-cmd(inter, "entry .a.val -width 15 -textvariable v_val");
+cmd(inter, "entry .a.val -width 15 -textvariable v_val -justify center");
 cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to increment\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -2730,9 +2728,8 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
-cmd(inter, "if {$v_num!=\"\" } {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
-cmd(inter, "if {$v_obj!=\"p\" } {.f.t.t insert insert \"INCRS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\",$v_val)\"}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
+cmd(inter, "if {$v_obj!=\"p\" && [string is integer $v_val]} {.f.t.t insert insert \"INCRS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\",$v_val)\"}");
 cmd(inter, ".f.t.t insert insert \";\\n\"");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
@@ -2759,7 +2756,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to increase\"");
@@ -2769,12 +2766,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the value to add\"");
 cmd(inter, "set v_val 0");
-cmd(inter, "entry .a.val -width 15 -textvariable v_val");
+cmd(inter, "entry .a.val -width 15 -textvariable v_val -justify center");
 cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to increment\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -2803,9 +2800,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
-
-
+cmd(inter, "if {$v_num==\"\" && [string is integer $v_num] && [string is double $v_val]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
 if(num!=-1)
@@ -2831,7 +2826,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to multiply\"");
@@ -2841,12 +2836,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the value to multiply\"");
 cmd(inter, "set v_val 0");
-cmd(inter, "entry .a.val -width 15 -textvariable v_val");
+cmd(inter, "entry .a.val -width 15 -textvariable v_val -justify center");
 cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to multiply\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 	
@@ -2877,12 +2872,10 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
-cmd(inter, "if {$v_num!=\"\" } {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
-cmd(inter, "if {$v_obj!=\"p\" } {.f.t.t insert insert \"MULTS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\",$v_val)\"}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
+cmd(inter, "if {$v_obj!=\"p\" && [string is double $v_val]} {.f.t.t insert insert \"MULTS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\",$v_val)\"}");
 cmd(inter, ".f.t.t insert insert \";\\n\"");
-
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
 if(num!=-1)
@@ -2907,7 +2900,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
 
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to multiply\"");
@@ -2917,12 +2910,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.val; .a.val selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the value to multiply\"");
 cmd(inter, "set v_val 0");
-cmd(inter, "entry .a.val -width 15 -textvariable v_val");
+cmd(inter, "entry .a.val -width 15 -textvariable v_val -justify center");
 cmd(inter, "bind .a.val <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the variable to multiply\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 	
@@ -2952,9 +2945,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {$v_num==\"\" } {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
-
-
+cmd(inter, "if {$v_num==\"\" && [string is integer $v_num] && [string is integer $v_val]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
 if(num!=-1)
@@ -2979,7 +2970,7 @@ cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
 cmd(inter, "set v_num 0");
 
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 15 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Label of the var. or par. to overwrite\"");
@@ -2989,12 +2980,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Time step appearing as latest computation for the new value\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3024,13 +3015,10 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num, $v_lag);\"");
-//cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 } { .f.t.t insert insert \"WRITE(\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 } { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 } { .f.t.t insert insert \"WRITES($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"WRITELS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-
+cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITES($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITELS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3049,7 +3037,7 @@ cmd(inter, "label .a.l1 -text \"Type below the value to write\"");
 
 cmd(inter, "set v_num 0");
 
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 15 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to write\"");
@@ -3059,12 +3047,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the time step appearing as latest computation for the new value\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object containing the var. or par. to write\"");
 cmd(inter, "if { [catch {puts $v_obj}] == 1 } {set v_obj p} {}");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3094,9 +3082,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, ".f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num,$v_lag);\"");
-//cmd(inter, ".f.t.t mark set insert \"$a + 1 line\"");
-
+cmd(inter, "if {[string is double $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num,$v_lag);\"}");
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
 goto loop;
@@ -3112,12 +3098,12 @@ cmd( inter, "newtop .a \"Insert a 'search_var_cond' Command\" { .a.f.esc invoke 
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the value to search for\"");
 cmd(inter, "set v_num 0");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 15 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
@@ -3127,12 +3113,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3162,7 +3148,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num,$v_lag);\"");
+cmd(inter, "if {[string is double $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num,$v_lag);\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3180,12 +3166,12 @@ cmd( inter, "newtop .a \"Insert a 'SEARCH_CND' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object found\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the value to search for\"");
 cmd(inter, "set v_num 0");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 15 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to search for\"");
@@ -3195,12 +3181,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3232,10 +3218,10 @@ cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 //cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CND(\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDS($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=SEARCH_CNDLS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CND(\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDS($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDLS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3252,12 +3238,12 @@ cmd( inter, "newtop .a \"Insert a 'SORT' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
-cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
+cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1 -justify center");
 cmd(inter, "bind .a.obj1 <Return> {focus .a.obj0; .a.obj0 selection range 0 end}");
 
 cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
-cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 30 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
@@ -3271,8 +3257,6 @@ cmd(inter, "radiobutton .a.r_up -text Increasing -variable v_direction -value 1"
 cmd(inter, "radiobutton .a.r_down -text Decreasing -variable v_direction -value 2");
 
 cmd(inter, "bind .a.l3 <Return> {focus .a.f.ok}");
-
-
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3326,12 +3310,12 @@ cmd( inter, "newtop .a \"Insert a 'lsdqsort' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Type below the object containing the objects to be sorted\"");
 cmd(inter, "set v_obj1 p");
-cmd(inter, "entry .a.obj1 -width 10 -textvariable v_obj1");
+cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1 -justify center");
 cmd(inter, "bind .a.obj1 <Return> {focus .a.obj0; .a.obj0 selection range 0 end}");
 
 cmd(inter, "label .a.l0 -text \"Type below label of the objects to be sorted\"");
 cmd(inter, "set v_obj0 ObjectName");
-cmd(inter, "entry .a.obj0 -width 20 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 30 -textvariable v_obj0");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. whose values are to be sorted\"");
@@ -3345,8 +3329,6 @@ cmd(inter, "radiobutton .a.r_up -text Increasing -variable v_direction -value 1"
 cmd(inter, "radiobutton .a.r_down -text Decreasing -variable v_direction -value 2");
 
 cmd(inter, "bind .a.l3 <Return> {focus .a.f.ok}");
-
-
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3398,24 +3380,23 @@ cmd( inter, "newtop .a \"Insert a Math Operation\" { .a.f.esc invoke }" );
 cmd(inter, "set value1 \"0\"; set value2 \"1\"; set res 1; set str \"UNIFORM($value1,$value2)\"");
 cmd(inter, "label .a.l1 -text \"Minimum\"");
 cmd(inter, "entry .a.e1 -justify center -textvariable value1");
-//cmd(inter, "a.e1 selection range 0 end");
 cmd(inter, "label .a.l2 -text \"Maximum\"");
 cmd(inter, "entry .a.e2 -justify center -textvariable value2");
 cmd(inter, "pack .a.l1 .a.e1 .a.l2 .a.e2");
 
-cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"UNIFORM($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance; set str \"norm($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum; set str \"rnd_integer($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"poisson($value1)\"}");
-cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused); set str \"gamma($value1)\"}");
-cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"abs($value1)\"}");
-cmd(inter, "radiobutton .a.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"min($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\"; set str \"max($value1,$value2)\"}");
-cmd(inter, "radiobutton .a.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"round($value1)\"}");
-cmd(inter, "radiobutton .a.r10 -text \"Exponential\" -variable res -value 10 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"exp($value1)\"}");
-cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"log($value1)\"}");
-cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused); set str \"sqrt($value1)\"}");
-cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\"; set str \"pow($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"UNIFORM($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"norm($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"rnd_integer($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"poisson($value1)\"}}");
+cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"gamma($value1)\"}}");
+cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"abs($value1)\"}}");
+cmd(inter, "radiobutton .a.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"min($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"max($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"round($value1)\"}}");
+cmd(inter, "radiobutton .a.r10 -text \"Exponential\" -variable res -value 10 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"exp($value1)\"}}");
+cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"log($value1)\"}}");
+cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"sqrt($value1)\"}}");
+cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"pow($value1,$value2)\"}}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3492,9 +3473,8 @@ cmd( inter, "newtop .a \"Insert an 'ADDOBJ' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.label; .a.label selection range 0 end}");
-
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
 cmd(inter, "set v_label Label");
@@ -3503,17 +3483,17 @@ cmd(inter, "bind .a.label <Return> {focus .a.numobj; .a.numobj selection range 0
 
 cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
 cmd(inter, "set numobj \"1\"");
-cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
+cmd(inter, "entry .a.numobj -width 6 -textvariable numobj -justify center");
 cmd(inter, "bind .a.numobj <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object to copy its initialization, if any.\"");
 cmd(inter, "set v_num \"cur\"");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 6 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the parent object containing the new object(s)\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3553,18 +3533,18 @@ if(choice ==1)
 {
 //cmd(inter, ".f.t.t insert insert \"$v_obj0 \"");
 cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\"} {}");
-cmd(inter, "if {$v_obj ==\"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_num!=\"\" && [string is integer $v_num]} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\",$v_num);\"} {}");
 cmd(inter, "if {$v_obj !=\"p\" && $v_num == \"\" } { .f.t.t insert insert \"ADDOBJS($v_obj,\\\"$v_label\\\");\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_num != \"\" } { .f.t.t insert insert \"ADDOBJS_EX($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_num != \"\" && [string is integer $v_num]} { .f.t.t insert insert \"ADDOBJS_EX($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
 
 }
 else
 {
 
-cmd(inter, "if {$v_obj ==\"p\" && $v_num!=\"\" } { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\",$numobj, $v_num);\"; set choice -3} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_num!= \"\" } { .f.t.t insert insert \"ADDNOBJS_EX($v_obj,\\\"$v_label\\\",$numobj,$v_num);\"; set choice -3} {}");
-cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_num== \"\" } { .f.t.t insert insert \"ADDNOBJS($v_obj,\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_num!=\"\" && [string is integer $v_num] && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\",$numobj, $v_num);\"; set choice -3} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_num!= \"\" && [string is integer $v_num] && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJS_EX($v_obj,\\\"$v_label\\\",$numobj,$v_num);\"; set choice -3} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_num==\"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_num== \"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj,\\\"$v_label\\\",$numobj);\"; set choice -3} {}");
 
 }
 
@@ -3584,12 +3564,12 @@ cmd( inter, "newtop .a \"Insert an 'add_n_objects2' Command\" { .a.f.esc invoke 
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the new object created\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the pointer to an example object, if available\"");
 cmd(inter, "set v_num \"\"");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 6 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the object to create\"");
@@ -3600,12 +3580,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.obj; .a.obj selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the number of objects to create\"");
 cmd(inter, "set numobj \"1\"");
-cmd(inter, "entry .a.numobj -width 6 -textvariable numobj");
+cmd(inter, "entry .a.numobj -width 6 -textvariable numobj -justify center");
 cmd(inter, "bind .a.numobj <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the parent object where to add the new object\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3636,7 +3616,8 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-cmd(inter, "if {$v_num==\"\" } { .f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj);\\n\"} {.f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj,$v_num);\\n\"}");
+cmd(inter, "if {$v_num==\"\" && [string is integer $numobj]} { .f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj);\\n\"}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num] && [string is integer $numobj]} {.f.t.t insert insert \"$v_obj0=$v_obj->add_n_objects2(\\\"$v_label\\\",$numobj,$v_num);\\n\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3654,7 +3635,7 @@ cmd( inter, "newtop .a \"Insert a 'DELETE' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -3703,7 +3684,7 @@ cmd( inter, "newtop .a \"Insert a 'delete_obj' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the pointer of the object to delete\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -3753,12 +3734,12 @@ cmd( inter, "newtop .a \"Insert a 'RNDDRAW' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
 cmd(inter, "set v_num object");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 6 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
@@ -3768,17 +3749,17 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.tot; .a.tot selection range 0 end}");
 
 cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
-cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
+cmd(inter, "entry .a.tot -width 15 -textvariable v_tot -justify center");
 cmd(inter, "bind .a.tot <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -3815,22 +3796,19 @@ if(choice==1)
  {
   cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0=RNDDRAW(\\\"$v_num\\\",\\\"$v_label\\\");\\n\"} {}");
   cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0=RNDDRAWFAIR(\\\"$v_num\\\");\\n\"} {}");  
-  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag);\\n\"} {}");
+  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0=RNDDRAWL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag);\\n\"} {}");
   cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0=RNDDRAWS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\");\\n\"} {}");
   cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0=RNDDRAWFAIRS($v_obj,\\\"$v_num\\\");\\n\"} {}");  
-  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag);\\n\"} {}");
+  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0=RNDDRAWLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag);\\n\"} {}");
   
  }
 else
  {
-  cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWTOT(\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 } { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
-  
-
+  cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOT(\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 && [string is integer $v_lag] && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 && [string is integer $v_lag] && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
  }
-
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3847,12 +3825,12 @@ cmd( inter, "newtop .a \"Insert a 'draw_rnd' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer in which to return the object drawn\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.v_num; .a.v_num selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the objects to draw\"");
 cmd(inter, "set v_num Object");
-cmd(inter, "entry .a.v_num -width 10 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 6 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the var. or par. to be used as proxies for probabilities\"");
@@ -3862,17 +3840,17 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.tot; .a.tot selection range 0 end}");
 
 cmd(inter, "label .a.l31 -text \"Type below the sum over all values of the var. or par., if available\"");
 cmd(inter, "set v_tot \"\"");
-cmd(inter, "entry .a.tot -width 9 -textvariable v_tot");
+cmd(inter, "entry .a.tot -width 15 -textvariable v_tot -justify center");
 cmd(inter, "bind .a.tot <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object from which to search\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -3905,15 +3883,14 @@ cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
 
 if(choice==1)
-  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag);\\n\"");
+  cmd(inter, "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag);\\n\"}");
 else
-  cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag,$v_tot);\\n\"");
+  cmd(inter, "if {[string is integer $v_lag] && [string is double $v_tot]} {.f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag,$v_tot);\\n\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
 goto loop;
 }
-
 
 
 if(choice==55&& macro==1)
@@ -3926,7 +3903,7 @@ cmd( inter, "newtop .a \"Insert a 'SEARCH' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.lab; .a.lab selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
@@ -3936,7 +3913,7 @@ cmd(inter, "bind .a.lab <Return> {focus .a.obj1; .a.obj1 selection range 0 end}"
 
 cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
-cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
+cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1 -justify center");
 cmd(inter, "bind .a.obj1 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -3985,7 +3962,7 @@ cmd( inter, "newtop .a \"Insert a 'search' Command\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l0 -text \"Type below the target pointer where to return the found object\"");
 cmd(inter, "set v_obj0 cur");
-cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0");
+cmd(inter, "entry .a.obj0 -width 6 -textvariable v_obj0 -justify center");
 cmd(inter, "bind .a.obj0 <Return> {focus .a.lab; .a.lab selection range 0 end}");
 
 cmd(inter, "label .a.l1 -text \"Type below the label of the object to search\"");
@@ -3995,7 +3972,7 @@ cmd(inter, "bind .a.lab <Return> {focus .a.obj1; .a.obj1 selection range 0 end}"
 
 cmd(inter, "label .a.l2 -text \"Type below the pointer of the parent object where to start the search\"");
 cmd(inter, "set v_obj1 p");
-cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1");
+cmd(inter, "entry .a.obj1 -width 6 -textvariable v_obj1 -justify center");
 cmd(inter, "bind .a.obj1 <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -4027,7 +4004,6 @@ cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj1->search(\\\"$v_lab\\\");\\n\"");
 
-
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
 goto loop;
@@ -4046,7 +4022,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to sum\"");
@@ -4056,12 +4032,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 
@@ -4093,12 +4069,12 @@ cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 //cmd(inter, "if {$v_num==\"\"} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->cal(\\\"$v_label\\\",$v_lag);\"; incr v_num}");
-cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
 
 cmd(inter, "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\"} {}");
-cmd(inter, "if {$v_lag!=0 && $v_obj==\"p\"} { .f.t.t insert insert \"SUML(\\\"$v_label\\\",$v_lag)\"} {}");
+cmd(inter, "if {$v_lag!=0 && [string is integer $v_lag] && $v_obj==\"p\"} { .f.t.t insert insert \"SUML(\\\"$v_label\\\",$v_lag)\"} {}");
 cmd(inter, "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMS($v_obj,\\\"$v_label\\\")\"} {}");
-cmd(inter, "if {$v_lag!=0 && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMLS($v_obj,\\\"$v_label\\\",$v_lag)\"} {}");
+cmd(inter, "if {$v_lag!=0 && [string is integer $v_lag] && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMLS($v_obj,\\\"$v_label\\\",$v_lag)\"} {}");
 
 cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"} {}");
 
@@ -4123,7 +4099,7 @@ cmd(inter, "label .a.l1 -text \"Type below the number v\\\[x\\] to which assign 
 
 sprintf(msg, "set v_num %d", v_counter);
 cmd(inter, msg);
-cmd(inter, "entry .a.v_num -width 2 -textvariable v_num");
+cmd(inter, "entry .a.v_num -width 2 -textvariable v_num -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.label; .a.label selection range 0 end}");
 
 cmd(inter, "label .a.l2 -text \"Type below the label of the variable to sum\"");
@@ -4133,12 +4109,12 @@ cmd(inter, "bind .a.label <Return> {focus .a.lag; .a.lag selection range 0 end}"
 
 cmd(inter, "label .a.l3 -text \"Type below the lag to be used\"");
 cmd(inter, "set v_lag 0");
-cmd(inter, "entry .a.lag -width 2 -textvariable v_lag");
+cmd(inter, "entry .a.lag -width 2 -textvariable v_lag -justify center");
 cmd(inter, "bind .a.lag <Return> {focus .a.obj; .a.obj selection range 0 end}");
 
 cmd(inter, "label .a.l4 -text \"Type below the object to which request the computation\"");
 cmd(inter, "set v_obj p");
-cmd(inter, "entry .a.obj -width 6 -textvariable v_obj");
+cmd(inter, "entry .a.obj -width 6 -textvariable v_obj -justify center");
 cmd(inter, "bind .a.obj <Return> {focus .a.f.ok}");
 
 cmd(inter, "frame .a.f");	
@@ -4168,7 +4144,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
-cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->sum(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\",$v_lag);\\n\"}");
+cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->sum(\\\"$v_label\\\",$v_lag);\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\",$v_lag);\\n\"}");
 
 cmd(inter, "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"} {}");
 
@@ -4957,27 +4933,27 @@ cmd(inter, "entry .a.v_num3 -width 30 -textvariable temp_var3");
 cmd(inter, "bind .a.v_num3 <Return> {focus .a.v_num6; .a.v_num6 selection range 0 end}");
 
 cmd(inter, "label .a.l6 -text \"Font size (points)\"");
-cmd(inter, "entry .a.v_num6 -width 30 -textvariable temp_var6");
+cmd(inter, "entry .a.v_num6 -width 3 -textvariable temp_var6 -justify center");
 cmd(inter, "bind .a.v_num6 <Return> {focus .a.v_num7; .a.v_num7 selection range 0 end}");
 
 cmd(inter, "label .a.l7 -text \"Tab size (characters))\"");
-cmd(inter, "entry .a.v_num7 -width 30 -textvariable temp_var7");
+cmd(inter, "entry .a.v_num7 -width 2 -textvariable temp_var7 -justify center");
 cmd(inter, "bind .a.v_num7 <Return> {focus .a.v_num8; .a.v_num8 selection range 0 end}");
 
 cmd(inter, "label .a.l8 -text \"Wrap text (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num8 -width 30 -textvariable temp_var8");
+cmd(inter, "entry .a.v_num8 -width 2 -textvariable temp_var8 -justify center");
 cmd(inter, "bind .a.v_num8 <Return> {focus .a.v_num9; .a.v_num9 selection range 0 end}");
 
 cmd(inter, "label .a.l9 -text \"Syntax highlights (0:no/1:part./2:full)\"");
-cmd(inter, "entry .a.v_num9 -width 30 -textvariable temp_var9");
+cmd(inter, "entry .a.v_num9 -width 2 -textvariable temp_var9 -justify center");
 cmd(inter, "bind .a.v_num9 <Return> {focus .a.v_num10; .a.v_num10 selection range 0 end}");
 
 cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num10 -width 30 -textvariable temp_var10");
+cmd(inter, "entry .a.v_num10 -width 2 -textvariable temp_var10 -justify center");
 cmd(inter, "bind .a.v_num10 <Return> {focus .a.v_num11; .a.v_num11 selection range 0 end}");
 
 cmd(inter, "label .a.l11 -text \"Show text file commands (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num11 -width 30 -textvariable temp_var11");
+cmd(inter, "entry .a.v_num11 -width 2 -textvariable temp_var11 -justify center");
 cmd(inter, "bind .a.v_num11 <Return> {focus .a.v_num12; .a.v_num12 selection range 0 end}");
 
 cmd(inter, "label .a.l12 -text \"New models subdirectory\"");
@@ -5018,12 +4994,12 @@ if(choice==1)
  cmd(inter, "set fonttype $temp_var3");
  cmd(inter, "set wish $temp_var4");
  cmd(inter, "set LsdSrc $temp_var5");
- cmd(inter, "set dim_character $temp_var6");
- cmd(inter, "set tabsize $temp_var7");
- cmd(inter, "set wrap $temp_var8");
- cmd(inter, "set shigh $temp_var9");
- cmd(inter, "set autoHide $temp_var10");
- cmd(inter, "set showFileCmds $temp_var11");
+ cmd(inter, "if [string is integer $temp_var6] {set dim_character $temp_var6}");
+ cmd(inter, "if [string is integer $temp_var7] {set tabsize $temp_var7}");
+ cmd(inter, "if [string is boolean $temp_var8] {set wrap $temp_var8}");
+ cmd(inter, "if [string is integer $temp_var9] {set shigh $temp_var9}");
+ cmd(inter, "if [string is boolean $temp_var10] {set autoHide $temp_var10}");
+ cmd(inter, "if [string is boolean $temp_var11] {set showFileCmds $temp_var11}");
  cmd(inter, "set LsdNew $temp_var12");
  
  cmd(inter, "set a [list $fonttype $dim_character]");
@@ -5248,7 +5224,7 @@ if(choice==67)
 cmd( inter, "newtop .a \"Change Tab Size\" { .a.f.esc invoke }" );
 
 cmd(inter, "label .a.l1 -text \"Enter the tab size (characters)\"");
-cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize");
+cmd(inter, "entry .a.v_num -justify center -width 10 -textvariable tabsize -justify center");
 cmd(inter, "bind .a.v_num <Return> {focus .a.f.ok}");
 cmd(inter, "frame .a.f");
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -5275,7 +5251,7 @@ if(choice==2)
 	choice=0;
 	goto loop;
 }
-cmd(inter, "settab .f.t.t $tabsize \"[.f.t.t cget -font]\"");
+cmd(inter, "if [string is integer $tabsize] {settab .f.t.t $tabsize \"[.f.t.t cget -font]\"}");
 choice=0;
 goto loop;
 }
@@ -5332,6 +5308,7 @@ if(choice!=1)
 Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "tosave");
+Tcl_UnlinkVar(inter, "macro");
 Tcl_UnlinkVar(inter, "shigh");
 
 Tcl_Exit(0);
