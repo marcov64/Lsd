@@ -137,9 +137,8 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 						bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D } ] units }; \
 						$c.f.c xview moveto $hpan0mac \
 					} { \
-						bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D /120 } ] units }; \
-						bind $c.f.c <4> { %W yview scroll [ expr { -%D / 120 } ] units }; \
-						bind $c.f.c <5> { %W yview scroll [ expr { %D / 120 } ] units }; \
+						bind $c.f.c <4> { %W yview scroll -1 units }; \
+						bind $c.f.c <5> { %W yview scroll 1 units }; \
 						$c.f.c xview moveto $hpan0lin \
 					} \
 				}" );

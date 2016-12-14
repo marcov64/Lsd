@@ -1086,8 +1086,6 @@ if ( done == 2 )
 cmd( inter, "destroytop $T" );
 redrawRoot = ( done == 2 ) ? false : true;
 
-cmd(inter, "unset lab done");
-
 if(done!=2)
  {
   sprintf(msg, "lappend ModElem %s", lab);
@@ -1100,7 +1098,7 @@ if ( cur2 != NULL )			// restore original current object
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "copy_param");
-cmd(inter, "unset lab done");
+cmd(inter, "unset done");
 
 break;
 
@@ -1202,7 +1200,7 @@ if ( cur2 != NULL )			// restore original current object
 
 cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "done");
-cmd(inter, "unset lab done");
+cmd(inter, "unset done");
 
 break;
 
@@ -1339,7 +1337,7 @@ if ( cur2 != NULL )			// restore original current object
 
 cmd( inter, "destroytop $T" );
 Tcl_UnlinkVar(inter, "done");
-cmd(inter, "unset lab done");
+cmd(inter, "unset done");
 
 break;
 
@@ -1936,7 +1934,7 @@ Tcl_UnlinkVar(inter, "save");
 Tcl_UnlinkVar(inter, "savei");
 Tcl_UnlinkVar(inter, "debug");
 Tcl_UnlinkVar(inter, "plot");
-cmd(inter, "unset lab done");
+cmd(inter, "unset done");
 
 // options to be handled in a second run of the operate function
 switch ( done )
@@ -2635,7 +2633,7 @@ if(actual_steps>0)
    if(done==2)
 	{
 	 Tcl_UnlinkVar(inter, "done");
-	 cmd(inter, "unset lab done");
+	 cmd(inter, "unset done");
 	 break;
 	}
 	saveAs = true;	// require file name to save
@@ -2661,7 +2659,7 @@ cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $
 if(done==2)
  {
   Tcl_UnlinkVar(inter, "done");
-  cmd(inter, "unset lab done");
+  cmd(inter, "unset done");
   break;
  }
 lab1=(char *)Tcl_GetVar(inter, "res",0);
@@ -2694,7 +2692,7 @@ if ( ! save_configuration( r ) )
 }
 	
 Tcl_UnlinkVar(inter, "done");
-cmd(inter, "unset lab done");
+cmd(inter, "unset done");
 break;
 
 

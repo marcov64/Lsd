@@ -27,7 +27,7 @@
 set corrXmac 0
 set corrYmac 0
 set corrXlinux 0
-set corrYlinux -57
+set corrYlinux -47
 set corrXwindows 0
 set corrYwindows 0
 

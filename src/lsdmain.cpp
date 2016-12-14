@@ -752,8 +752,8 @@ if ( ! pause_run )
 }
 else			// if paused, just call the data browser
 {
-	double useless = -1;
-	deb( root, NULL, NULL, &useless );
+	double useless = 0;
+	deb( root, NULL, "Paused", &useless );
 }
 	
 break;
@@ -851,10 +851,7 @@ else
 #ifndef NO_WINDOW 
 cmd( inter, "update" );
 // allow for run time plot window destruction
-cmd( inter, "if [ winfo exists $activeplot ] { wm protocol $activeplot WM_DELETE_WINDOW \"\" }" );
-sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.go conf -state disabled }", i, i );
-cmd( inter, msg);
-sprintf( msg, "if [ winfo exists .plt%d ] { .plt%d.c.yscale.shift conf -state disabled }", i, i );
+sprintf( msg, "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i );
 cmd( inter, msg);
 #endif
 
@@ -1104,7 +1101,6 @@ if(Tk_Init(app)!=TCL_OK)
 
 return app;
 }
-
 #endif
 
 void reset_end(object *r)
@@ -1205,9 +1201,13 @@ cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm }" );
 /*********************************
 COVER_BROWSER
 *********************************/
+bool brCovered = false;
 
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
+	if ( brCovered )		// ignore if already covered
+		return;
+		
 	cmd(inter, "if [ winfo exists .model_str ] { wm withdraw .model_str }");
 	cmd( inter, "disable_window \"\" m bbar l" );		// disable main window
 	cmd( inter, "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
@@ -1223,6 +1223,8 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 	cmd( inter, "showtop .t coverW no no no" );
 	cmd( inter, "update" );
+	
+	brCovered = true;
 }
 
 
@@ -1232,11 +1234,16 @@ UNCOVER_BROWSER
 
 void uncover_browser( void )
 {
+	if ( ! brCovered )		// ignore if not covered
+		return;
+
 	cmd( inter, "if [ winfo exist .t ] { destroytop .t }"  );
 	cmd( inter, "wm title . $origMainTit" );
 	cmd( inter, "enable_window \"\" m bbar l" );	// enable main window
 	cmd( inter, "if { [ string equal [ wm state . ] normal ] && [ winfo exist .model_str ] && ! [ string equal [ wm state .model_str ] normal ] } { wm deiconify .model_str; lower .model_str }" );
 	cmd( inter, "update" );
+	
+	brCovered = false;
 }
 #endif
 

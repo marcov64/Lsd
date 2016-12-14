@@ -830,10 +830,8 @@ break;
 
 //Analysis
 case 11:
-cmd(inter, "set a [winfo exists .intval]");
-cmd(inter, "if { $a==1} {destroytop .intval} {}");
-cmd( inter, "set a [winfo exists .net]" );
-cmd( inter, "if { $a==1 } { destroytop .net }" );
+cmd( inter, "if [ winfo exists .intval ] { destroytop .intval }");
+cmd( inter, "if [ winfo exists .net ] { destroytop .net }" );
 
 actual_steps=t;
 for(cur=r; cur->up!=NULL; cur=cur->up);
@@ -845,7 +843,7 @@ break;
 //Print stack
 case 13:
 print_stack();
-cmd(inter, "raise .log");
+cmd(inter, "raise .log; focus .log");
 choice=0;
 break;
 

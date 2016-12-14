@@ -246,8 +246,6 @@ cmd(inter, msg);
 
 cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");
 
-*choice=0;
-
 cmd(inter, "frame .da.f");
 cmd(inter, "frame .da.f.vars");
 cmd(inter, "set f .da.f.vars.lb");
@@ -617,8 +615,11 @@ if(*choice==0)
   goto there;
 
 delete[] vs;
+
 cmd( inter, "destroytop .da" );
-uncover_browser( );
+if ( actual_steps == 0 )		// don't uncover if called during simulation
+	uncover_browser( );
+	
 Tcl_UnlinkVar(inter, "auto");
 Tcl_UnlinkVar(inter, "auto_x");
 Tcl_UnlinkVar(inter, "minc");
