@@ -1014,12 +1014,14 @@ cmd(inter, "focus $T.f.ent_var");
 
 here_newelem:
 
-cmd( inter, "write_any $T.f.ent $num" ); 
+if ( param != 1 )
+	cmd( inter, "write_any $T.f.ent $num" ); 
 
 while(done==0)
  Tcl_DoOneEvent(0);
 
-cmd( inter, "set num [ $T.f.ent get ]" ); 
+if ( param != 1 )
+	cmd( inter, "set num [ $T.f.ent get ]" ); 
 
 if(done==1)
  {
@@ -2356,7 +2358,7 @@ case 1:
 
 if ( struct_loaded == 0 )
 {
-	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Run -message \"No configuration loaded\" -detail \"Please load or create one before trying run the simulation.\"");
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to run the simulation.\"");
 	break;
 }
 
@@ -4179,7 +4181,7 @@ case 64:
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
-		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No model loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"");
 		break;
     } 
 	// check for existing sensitivity data loaded
@@ -4712,7 +4714,7 @@ case 69:
 	// check a model is already loaded
 	if(struct_loaded==0)
 	{ 
-		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No model loaded\" -detail \"Please select one before trying to start a 'No Window' batch.\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a 'No Window' batch.\"");
 		break;
 	}
 

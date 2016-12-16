@@ -249,8 +249,6 @@ if(argn>1)
   cmd(inter, "if {[file pathtype \"$filetoload\"]==\"absolute\"} {} {set filetoload \"[pwd]/$filetoload\"}");
  }
 
-//cmd(inter, "set tk_strictMotif 1");
-
 sprintf(msg, "%s",*argv);
 if(!strncmp(msg, "//", 2))
  sprintf(str, "%s",msg+3);
@@ -345,10 +343,6 @@ if(choice==1)
     cmd(inter, "close $f1");    
  }
 
-cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global RootLsd; set here [pwd]; cd $RootLsd; cd Manual; set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {catch [exec $HtmlBrowser $b &]} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.2\" } {exec cmd.exe /c start $b &} { if {$tcl_platform(osVersion) == \"5.2\"} {cmd.exe /c $b &} {catch [exec openhelp.bat &]} }} {exec start $b &}}; cd $here }");
- 
-cmd(inter, "proc lmmraise {win ent} {wm focusmodel . active; if { $ent!=\"\"} {focus -force $ent} {focus -force $win}; wm focusmodel . passive}");
-
 // procedures to adjust tab size according to font type and size and text wrapping
 cmd( inter, "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
 cmd( inter, "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
@@ -367,9 +361,11 @@ cmd(inter, "set v_num 0");
 cmd(inter, "set macro 1");
 cmd(inter, "set shigh_temp $shigh");
 cmd(inter, "set alignMode \"LMM\"");
+
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }");
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Files missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	exit( 10 + choice );
@@ -577,8 +573,8 @@ cmd( inter, "bind .bbar.help <Leave> {set ttip \"\"}" );
 cmd( inter, "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.comprun .bbar.compile .bbar.info .bbar.descr .bbar.equation .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( inter, "pack .bbar -anchor w -fill x" );
 
-cmd(inter, "frame .f");
-cmd(inter, "frame .f.t -relief groove -bd 2");
+cmd(inter, "frame .f -bd 2");
+cmd(inter, "frame .f.t");
 cmd(inter, "scrollbar .f.t.vs -command \".f.t.t yview\"");
 cmd(inter, "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"");
 cmd(inter, "text .f.t.t -height 2 -undo 1 -autoseparators 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"");
@@ -696,8 +692,6 @@ cmd(inter, "bind .f.t.t <Control-z> {catch {.f.t.t edit undo}}; bind .f.t.t <Con
 cmd(inter, "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}; bind .f.t.t <Control-Y> {catch {.f.t.t edit redo}}");
 cmd(inter, "bind . <KeyPress-Insert> {# nothing}");
 
-
-
 /*
 POPUP manu
 */
@@ -774,23 +768,18 @@ cmd(inter, "bind .f.t.t <Control-D> {set choice 53}");
 cmd(inter, "bind .f.t.t <Control-N> {set choice 54}");
 cmd(inter, "bind .f.t.t <Control-H> {set choice 51}");
 
-
 cmd(inter, "bind .f.t.t <F1> {set choice 34}");
-
-
 
 cmd(inter, "set textsearch \"\"");
 cmd(inter, "set datasel \"\"");
 
 cmd(inter, ". configure -menu .m");
 
-
 cmd(inter, "pack .f -expand yes -fill both");
 cmd(inter, "pack .f.t -expand yes -fill both");
 cmd(inter, "pack .f.t.vs -side right -fill y");
 cmd(inter, "pack .f.t.t -expand yes -fill both");
 cmd(inter, "pack .f.t.hs -fill x");
-
 
 cmd(inter, "set filename \"noname.txt\"");
 cmd(inter, "set dirname [pwd]");
@@ -802,6 +791,7 @@ cmd(inter, "set before [.f.t.t get 1.0 end]");
 cmd(inter, "set a [wm maxsize .]");
 cmd(inter, "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"");
 cmd(inter, "wm geometry . $c");
+cmd( inter, "wm minsize . 600 300" );
 // change window icon
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lmm.xbm}");
 
@@ -1009,7 +999,7 @@ if(s==NULL || !strcmp(s, ""))
 	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
   else
 	cmd(inter, "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"");
-  cmd(inter, "pack .t.l1 .t.l2");
+  cmd(inter, "pack .t.l1 .t.l2 -padx 5 -pady 5");
   
   cmd( inter, "showtop .t centerS" );
   cmd(inter, "focus .t");
@@ -2729,7 +2719,7 @@ if(choice==2)
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
-cmd(inter, "if {$v_obj!=\"p\" && [string is integer $v_val]} {.f.t.t insert insert \"INCRS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\",$v_val)\"}");
+cmd(inter, "if {$v_obj!=\"p\"} {.f.t.t insert insert \"INCRS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\",$v_val)\"}");
 cmd(inter, ".f.t.t insert insert \";\\n\"");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
@@ -2800,7 +2790,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {$v_num==\"\" && [string is integer $v_num] && [string is double $v_val]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
+cmd(inter, "if {$v_num==\"\" && [string is integer $v_num]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->increment(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
 if(num!=-1)
@@ -2874,7 +2864,7 @@ cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
 
 cmd(inter, "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\]=\"} {}");
-cmd(inter, "if {$v_obj!=\"p\" && [string is double $v_val]} {.f.t.t insert insert \"MULTS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\",$v_val)\"}");
+cmd(inter, "if {$v_obj!=\"p\"} {.f.t.t insert insert \"MULTS($v_obj,\\\"$v_label\\\",$v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\",$v_val)\"}");
 cmd(inter, ".f.t.t insert insert \";\\n\"");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
@@ -2945,7 +2935,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {$v_num==\"\" && [string is integer $v_num] && [string is integer $v_val]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
+cmd(inter, "if {$v_num==\"\" && [string is integer $v_num]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\",$v_val);\"} {.f.t.t insert insert \"v\\\[$v_num\\]=$v_obj->multiply(\\\"$v_label\\\",$v_val);\";incr v_num}");
 
 cmd(inter, "if {$v_num==\"\" } {set num -1} {set num $v_num}");
 if(num!=-1)
@@ -3015,10 +3005,10 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITES($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"WRITELS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITES($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3082,7 +3072,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {[string is double $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num,$v_lag);\"}");
+cmd(inter, "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\",$v_num,$v_lag);\"}");
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
 goto loop;
@@ -3148,7 +3138,7 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-cmd(inter, "if {[string is double $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num,$v_lag);\"}");
+cmd(inter, "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num,$v_lag);\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3216,12 +3206,10 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
-
-cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CND(\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDS($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
-cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0 && [string is double $v_num]} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDLS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0=SEARCH_CND(\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj ==\"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDL(\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDS($v_obj,\\\"$v_label\\\",$v_num);\"} {}");
+cmd(inter, "if {$v_obj !=\"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0=SEARCH_CNDLS($v_obj,\\\"$v_label\\\",$v_num, $v_lag);\"} {}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -3384,19 +3372,19 @@ cmd(inter, "label .a.l2 -text \"Maximum\"");
 cmd(inter, "entry .a.e2 -justify center -textvariable value2");
 cmd(inter, "pack .a.l1 .a.e1 .a.l2 .a.e2");
 
-cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"UNIFORM($value1,$value2)\"}}");
-cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"norm($value1,$value2)\"}}");
-cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"rnd_integer($value1,$value2)\"}}");
-cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"poisson($value1)\"}}");
-cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"gamma($value1)\"}}");
-cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"abs($value1)\"}}");
-cmd(inter, "radiobutton .a.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"min($value1,$value2)\"}}");
-cmd(inter, "radiobutton .a.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"max($value1,$value2)\"}}");
-cmd(inter, "radiobutton .a.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"round($value1)\"}}");
-cmd(inter, "radiobutton .a.r10 -text \"Exponential\" -variable res -value 10 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"exp($value1)\"}}");
-cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"log($value1)\"}}");
-cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; if {[string is double $value1]} {set str \"sqrt($value1)\"}}");
-cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\" -state normal; if {[string is double $value1] && [string is double $value2]} {set str \"pow($value1,$value2)\"}}");
+cmd(inter, "radiobutton .a.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; set str \"UNIFORM($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.l1 conf -text Mean; .a.l2 conf -text Variance -state normal; set str \"norm($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.l1 conf -text Minimum; .a.l2 conf -text Maximum -state normal; set str \"rnd_integer($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; set str \"poisson($value1)\"}");
+cmd(inter, "radiobutton .a.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.l1 conf -text Mean; .a.l2 conf -text (unused) -state disabled; set str \"gamma($value1)\"}");
+cmd(inter, "radiobutton .a.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; set str \"abs($value1)\"}");
+cmd(inter, "radiobutton .a.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; set str \"min($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.l1 conf -text \"Value 1\"; .a.l2 conf -text \"Value 2\" -state normal; set str \"max($value1,$value2)\"}");
+cmd(inter, "radiobutton .a.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; set str \"round($value1)\"}");
+cmd(inter, "radiobutton .a.r10 -text \"Exponential\" -variable res -value 10 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; set str \"exp($value1)\"}");
+cmd(inter, "radiobutton .a.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; set str \"log($value1)\"}");
+cmd(inter, "radiobutton .a.r12 -text \"Square root\" -variable res -value 12 -command {.a.l1 conf -text Value; .a.l2 conf -text (unused) -state disabled; set str \"sqrt($value1)\"}");
+cmd(inter, "radiobutton .a.r13 -text \"Power\" -variable res -value 13 -command {.a.l1 conf -text \"Base\"; .a.l2 conf -text \"Exponent\" -state normal; set str \"pow($value1,$value2)\"}");
 
 cmd(inter, "frame .a.f");	
 cmd(inter, "button .a.f.ok -width -9 -text Ok -command {set choice 1}");
@@ -3789,7 +3777,6 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
 
 if(choice==1)
@@ -3804,10 +3791,10 @@ if(choice==1)
  }
 else
  {
-  cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0 && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOT(\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 && [string is integer $v_lag] && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0 && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
-  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 && [string is integer $v_lag] && [string is double $v_tot]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj ==\"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOT(\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj ==\"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTL(\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj !=\"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_tot);\\n\"} {}");
+  cmd(inter, "if {$v_obj !=\"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0=RNDDRAWTOTLS($v_obj,\\\"$v_num\\\",\\\"$v_label\\\", $v_lag, $v_tot);\\n\"} {}");
  }
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
@@ -3879,13 +3866,12 @@ if(choice==2)
  }
 cmd(inter, "savCurIni");	// save data for recolor
 cmd(inter, "set a [.f.t.t index insert]");
-//cmd(inter, ".f.t.t insert insert \"$v_obj0=$v_obj->search_var_cond(\\\"$v_label\\\",$v_num, $v_lag);\"");
 cmd(inter, "if {$v_tot == \"\"} {set choice 1} {set choice 2}");
 
 if(choice==1)
   cmd(inter, "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag);\\n\"}");
 else
-  cmd(inter, "if {[string is integer $v_lag] && [string is double $v_tot]} {.f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag,$v_tot);\\n\"}");
+  cmd(inter, "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0=$v_obj->draw_rnd(\\\"$v_num\\\",\\\"$v_label\\\",$v_lag,$v_tot);\\n\"}");
 
 cmd(inter, "savCurFin; updCurWnd");	// save data for recolor
 choice=23;	// do syntax coloring
@@ -5134,7 +5120,7 @@ cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$Root
 
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
-cmd(inter, "pack .t.l1 .t.l2");
+cmd(inter, "pack .t.l1 .t.l2 -padx 5 -pady 5");
 
 cmd( inter, "showtop .t" );
 

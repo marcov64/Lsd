@@ -392,7 +392,7 @@ void link_data(object *root, char *lab)
 {
 object *cur, *cur1;
 int i, j;
-char ch[TCL_BUFF_STR], previous[60], ch1[25];
+char ch[TCL_BUFF_STR], previous[60], ch1[30];
 variable *cv, *cv1;
 
 cur1=root->search(lab);

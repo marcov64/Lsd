@@ -1,12 +1,98 @@
+# ****************************************************
+# ****************************************************
+# LSD 7.0 - August 2015
+# written by Marco Valente
+# Universita' dell'Aquila
+# 
+# Copyright Marco Valente
+# Lsd is distributed according to the GNU Public License
+# 
+# Comments and bug reports to marco.valente@univaq.it
+# ****************************************************
+# ****************************************************
+
+# Collection of procedures to manage HTML and other external files
+
+proc LsdHelp a {
+	global HtmlBrowser tcl_platform RootLsd
+	set here [ pwd ]
+	set f [ open $RootLsd/Manual/temp.html w ]
+	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
+	close $f
+	set b "[file nativename $RootLsd/Manual/temp.html]"
+	if { $tcl_platform(platform) == "unix" } {
+		exec $HtmlBrowser $b &
+	} {
+		exec cmd.exe /c start $b &
+	}
+}
+
+
+# proc LsdHelp a {
+	# global tcl_platform RootLsd
+	# set here [ pwd ]
+	# cd $RootLsd
+	# cd Manual
+	# set f [ open temp.html w ]
+	# puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
+	# close $f
+	# set b "temp.html"
+	# if { $tcl_platform(platform) == "unix" } {
+		# exec konqueror $b &
+	# } {
+		# if { $tcl_platform(os) == "Windows NT" } {
+			# if { $tcl_platform(osVersion) == "4.0" || $tcl_platform(osVersion) == "5.1" || $tcl_platform(osVersion) == "5.0" } {
+				# exec cmd.exe /c start $b &
+			# } {
+				# catch [ exec open.bat & ]
+			# }
+		# } {
+			# exec command.com /c start $b &
+		# }
+	# } 
+	# cd $here 
+# }
+
+
+proc LsdHtml a {
+	global HtmlBrowser tcl_platform
+	set f [ open temp.html w ]
+	puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
+	close $f
+	set b "temp.html"
+	if { $tcl_platform(platform) == "unix" } {
+		exec $HtmlBrowser $b &
+	} {
+		exec cmd.exe /c start $b &
+	}
+}
+
+
+proc LsdTkDiff { a b } {
+	global tcl_platform RootLsd wish LsdSrc
+	if { $tcl_platform(platform) == "unix" } {
+		exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+	} {
+		if { $tcl_platform(os) == "Windows NT" } {
+			if { $tcl_platform(osVersion) == "4.0" } {
+				exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+			} {
+				exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+			} 
+		} {
+			exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+		}
+	}
+}
+
+
 # Procedure used to allocate a file 'index.html' in each directory
 # containing links to each file
-
 # the "from" parameter is the directory root where to start inserting the index.html files
 # the "chop" parameter is the number of characters to chop from the beginning of the directory.
 # For example, if the directory is C:/Lsd5.1, setting chop=3 will make appear the directory names as Lsd5.1
 
 proc ls2html {from chop} {
-
 
 catch [set list [glob *]]
 if { [info exists list] == 0 } {return } {}
@@ -17,7 +103,6 @@ foreach i $list {
  if { [file isdirectory $i] == 1 } {lappend ldir $i} {lappend lfile $i } 
 }
 
-
 if { [info exists ldir] == 1 } {
 
 set sortedlist [lsort -dictionary $ldir]
@@ -26,7 +111,6 @@ foreach i $sortedlist {
  cd $i; ls2html $from $chop; cd ..;
  
 } } {}
-
 
 set f [open index.html w]
 puts $f "<B><font size=+3><U>Directory: [string range [pwd] $chop end ]</U></font></B>"
@@ -41,8 +125,6 @@ foreach i $sortedlist {
  puts $f "\n<br><B>Dir: </B><a href=\"$i/index.html\">$i</a>" 
  } 
 } {} 
-
-
 
 if { [info exists lfile] == 1 } {
 set sortedlist [lsort -dictionary $lfile]

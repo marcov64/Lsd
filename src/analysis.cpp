@@ -236,66 +236,100 @@ cur_plot=0;
 file_counter=0;
 *choice=0;
 
+cmd( inter, "set daCwidth 36");				     	// lists width (even number)
+
+cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");
+
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
 cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the Lsd Browser." );
 
-cmd( inter, "set da .da");
 sprintf(msg, "newtop .da \"%s%s - Lsd Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name);
 cmd(inter, msg);
 
-cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");
+cmd(inter, "menu .da.m -tearoff 0 -relief groove -bd 2");
 
-cmd(inter, "frame .da.f");
-cmd(inter, "frame .da.f.vars");
-cmd(inter, "set f .da.f.vars.lb");
+cmd(inter, "set w .da.m.exit");
+cmd(inter, ".da.m add cascade -label Exit -menu $w -underline 0");
+cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
+cmd(inter, "$w add command -label \"Quit and return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc");
+
+cmd(inter, "set w .da.m.gp");
+cmd(inter, ".da.m add cascade -label Gnuplot -menu $w -underline 0");
+cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
+cmd( inter, "$w add command -label \"Gnuplot...\" -command {set choice 4} -underline 0 -accelerator Ctrl+G");
+cmd(inter, "$w add command -label \"Gnuplot Options...\" -command {set choice 37} -underline 8");
+
+cmd(inter, "set w .da.m.color");
+cmd(inter, ".da.m add cascade -label Color -menu $w -underline 0");
+cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
+cmd(inter, "$w add command -label \"Set Colors...\" -command {set choice 21} -underline 0");
+cmd(inter, "$w add command -label \"Set Default Colors\" -command {set choice 22} -underline 0");
+
+cmd(inter, "set w .da.m.help");
+cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
+cmd(inter, ".da.m add cascade -label Help -menu $w -underline 0");
+cmd(inter, "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0");
+cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
+cmd( inter, "$w add separator" );
+sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+cmd( inter, msg );
+
+cmd(inter, ".da configure -menu .da.m");
+
+cmd(inter, "set f .da.head");
 cmd(inter, "frame $f");
-cmd(inter, "label .da.f.vars.lb.l -text \"Series Available\"");
-cmd(inter, "pack .da.f.vars.lb.l");
+cmd(inter, "label $f.lb -width [ expr $daCwidth - 3 ] -text \"Series Available\"");
+cmd(inter, "label $f.pad -width 6");
+cmd(inter, "label $f.ch -width [ expr $daCwidth - 3 ] -text \"Series Selected\"");
+cmd(inter, "label $f.pl -width [ expr $daCwidth - 3 ] -text \"Plots\"");
+cmd(inter, "pack $f.lb $f.pad $f.ch $f.pl -side left");
+cmd(inter, "pack $f");
+
+cmd(inter, "frame .da.vars");
+
+cmd(inter, "set f .da.vars.lb");
+cmd(inter, "frame $f");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -selectmode extended -width 39 -yscroll \"$f.v_scroll set\" -height 17");
-
-cmd(inter, "bind $f.v <Return> {.da.f.vars.b.in invoke}");
-cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.f.vars.lb.v <Return> }" );
-cmd(inter, "bind $f.v <Button-2> {.da.f.vars.lb.v selection clear 0 end;.da.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 30}");
-cmd( inter, "bind $f.v <Button-3> { event generate .da.f.vars.lb.v <Button-2> -x %x -y %y }" );
-cmd(inter, "bind $f.v <KeyPress-space> {set res [.da.f.vars.lb.v get active]; set choice 30}; bind $f.v <KeyPress-space> {set res [.da.f.vars.lb.v get active]; set choice 30}");
-
-cmd(inter, "bind $f.v <Shift-Button-2> {.da.f.vars.lb.v selection clear 0 end;.da.f.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 16}");
-cmd(inter, "bind $f.v <Shift-Button-3> { event generate .da.f.vars.lb.v <Shift-Button-2> -x %x -y %y }");
+cmd(inter, "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"");
 cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
 
-cmd(inter, "set f .da.f.vars.ch");
+cmd(inter, "bind $f.v <Return> {.da.vars.b.in invoke}");
+cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.vars.lb.v <Return> }" );
+cmd(inter, "bind $f.v <Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 30}");
+cmd( inter, "bind $f.v <Button-3> { event generate .da.vars.lb.v <Button-2> -x %x -y %y }" );
+cmd(inter, "bind $f.v <KeyPress-space> {set res [.da.vars.lb.v get active]; set choice 30}; bind $f.v <KeyPress-space> {set res [.da.vars.lb.v get active]; set choice 30}");
+
+cmd(inter, "bind $f.v <Shift-Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%x,%y; set res [selection get]; set choice 16}");
+cmd(inter, "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.v <Shift-Button-2> -x %x -y %y }");
+
+cmd(inter, "set f .da.vars.ch");
 cmd(inter, "frame $f");
-cmd(inter, "label .da.f.vars.ch.l -text \"Series Selected\"");
-cmd(inter, "pack .da.f.vars.ch.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -selectmode extended -width 39 -yscroll \"$f.v_scroll set\" -height 17");
-cmd(inter, "bind $f.v <KeyPress-o> {.da.f.vars.b.out invoke}; bind $f.v <KeyPress-O> {.da.f.vars.b.out invoke}");
+cmd(inter, "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"");
+cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
+
+cmd(inter, "bind $f.v <KeyPress-o> {.da.vars.b.out invoke}; bind $f.v <KeyPress-O> {.da.vars.b.out invoke}");
 cmd(inter, "bind $f.v <Return> {.da.b.ts invoke}");
-cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.f.vars.ch.v <Return> }" );
+cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <Return> }" );
+cmd(inter, "bind $f.v <Button-2> {.da.vars.ch.v selection clear 0 end;.da.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
+cmd( inter, "bind $f.v <Button-3> { event generate .da.vars.ch.v <Button-2> -x %x -y %y }" );
+cmd(inter, "bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}; bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}");
 
-cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
-cmd(inter, "bind $f.v <Button-2> {.da.f.vars.ch.v selection clear 0 end;.da.f.vars.ch.v selection set @%x,%y; set res [selection get]; set choice 33}");
-cmd( inter, "bind $f.v <Button-3> { event generate .da.f.vars.ch.v <Button-2> -x %x -y %y }" );
-cmd(inter, "bind $f.v <KeyPress-space> {set res [.da.f.vars.ch.v get active]; set choice 33}; bind $f.v <KeyPress-space> {set res [.da.f.vars.ch.v get active]; set choice 33}");
-
-cmd(inter, "set f .da.f.vars.pl");
+cmd(inter, "set f .da.vars.pl");
 cmd(inter, "frame $f");
-cmd(inter, "label $f.l -text \"Plots\"");
-cmd(inter, "pack $f.l");
 cmd(inter, "scrollbar $f.v_scroll -command \"$f.v yview\"");
-cmd(inter, "listbox $f.v -width 39 -yscroll \"$f.v_scroll set\" -height 17 -selectmode single");
-
+cmd(inter, "listbox $f.v -width $daCwidth -yscroll \"$f.v_scroll set\" -selectmode single");
 cmd(inter, "pack $f.v $f.v_scroll -side left -fill y");
-cmd(inter, "bind $f.v <Return> {set it [selection get];set choice 3}");
-cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.f.vars.pl.v <Return> }" );
-cmd(inter, "bind $f.v <Button-2> {.da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set @%x,%y; set it [selection get]; set n_it [.da.f.vars.pl.v curselection]; set choice 20}");
-cmd( inter, "bind $f.v <Button-3> { event generate .da.f.vars.pl.v <Button-2> -x %x -y %y }" );
-cmd(inter, "bind .da <KeyPress-Delete> {set n_it [.da.f.vars.pl.v curselection]; if {$n_it != \"\" } {set it [selection get]; set choice 20} {}}");
 
-cmd(inter, "frame .da.f.vars.b");
-cmd(inter, "set f .da.f.vars.b");
+cmd(inter, "bind $f.v <Return> {set it [selection get];set choice 3}");
+cmd( inter, "bind $f.v <Double-Button-1> { event generate .da.vars.pl.v <Return> }" );
+cmd(inter, "bind $f.v <Button-2> {.da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set @%x,%y; set it [selection get]; set n_it [.da.vars.pl.v curselection]; set choice 20}");
+cmd( inter, "bind $f.v <Button-3> { event generate .da.vars.pl.v <Button-2> -x %x -y %y }" );
+cmd(inter, "bind .da <KeyPress-Delete> {set n_it [.da.vars.pl.v curselection]; if {$n_it != \"\" } {set it [selection get]; set choice 20} {}}");
+
+cmd(inter, "frame .da.vars.b");
+cmd(inter, "set f .da.vars.b");
 cmd(inter, "button $f.in -width -6 -relief flat -overrelief groove -text \u25b6 -command {set choice 6}");
 cmd(inter, "button $f.out -width -6 -relief flat -overrelief groove -state disabled -text \u25c0 -command {set choice 7}");
 cmd(inter, "button $f.sort -width -6 -relief flat -overrelief groove -text \"Sort \u25b2\" -command {set choice 5} -underline 0");
@@ -305,11 +339,20 @@ cmd(inter, "button $f.unsort -width -6 -relief flat -overrelief groove -text \"U
 cmd( inter, "button $f.search -width -6 -relief flat -overrelief groove -text Find... -command { set choice 39 } -underline 0" );
 cmd(inter, "button $f.add -width -6 -relief flat -overrelief groove -text \"Add...\" -command {set choice 24} -underline 0");
 cmd(inter, "button $f.empty -width -6 -relief flat -overrelief groove -text Clear -command {set choice 8} -underline 0");
+cmd(inter, "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty -padx 2 -pady 1 -fill y");
 
-cmd(inter, "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty -padx 2 -pady 1");
+cmd(inter, "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left  -expand true -fill y");
+cmd(inter, "pack .da.vars -expand true -fill y");
 
-cmd(inter, "pack .da.f.vars.lb .da.f.vars.b .da.f.vars.ch .da.f.vars.pl -side left");
-cmd(inter, "pack .da.f.vars");
+cmd(inter, "frame .da.com");
+sprintf( msg, "label .da.com.nvar -text \"Series = %d\" -width [ expr [ expr $daCwidth - 4 ] / 2 ]", num_var );
+cmd( inter, msg );
+sprintf( msg, "label .da.com.ncas -text \"Cases = %d\" -width [ expr [ expr $daCwidth - 4 ] / 2 ]", num_c );
+cmd( inter, msg );
+cmd( inter, "label .da.com.pad -width 6" );
+cmd( inter, "label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ expr $daCwidth - 3 ]" );
+cmd( inter, "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwidth - 3 ]" );
+cmd( inter, "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -side left" );
 
 num_c=1;
 num_var=0;
@@ -350,16 +393,7 @@ watch=1;
 gnu = 1;
 cmd(inter, "set numy2 2");
 
-cmd(inter, "frame .da.f.com");
-sprintf( msg, "label .da.f.com.nvar -text \"Series = %d\" -width 17", num_var );
-cmd( inter, msg );
-sprintf( msg, "label .da.f.com.ncas -text \"Cases = %d\" -width 17", num_c );
-cmd( inter, msg );
-cmd( inter, "label .da.f.com.pad -width 10" );
-cmd( inter, "label .da.f.com.selec -text \"Series = [ .da.f.vars.ch.v size ]\" -width 35" );
-cmd( inter, "label .da.f.com.plot -text \"Plots = [ .da.f.vars.pl.v size ]\" -width 35" );
-cmd( inter, "pack .da.f.com.nvar .da.f.com.ncas .da.f.com.pad .da.f.com.selec .da.f.com.plot -side left" );
-
+cmd(inter, "frame .da.f");
 cmd(inter, "frame .da.f.h");
 cmd(inter, "frame .da.f.h.v");
 
@@ -453,7 +487,8 @@ cmd(inter, "pack .da.f.tit.pr.l .da.f.tit.pr.e");
 
 cmd(inter, "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5");
 
-cmd(inter, "pack .da.f.com .da.f.vars .da.f.h .da.f.tit");
+cmd(inter, "pack .da.f.h .da.f.tit");
+cmd(inter, "pack .da.f");
 
 cmd(inter, "frame .da.b");
 cmd(inter, "button .da.b.ts -width -9 -text Plot -command {set choice 1} -underline 0");
@@ -464,39 +499,8 @@ cmd(inter, "button .da.b.st -width -9 -text Statistics -command {set choice 12} 
 cmd(inter, "button .da.b.fr -width -9 -text Histogram -command {set choice 32} -underline 0");
 cmd(inter, "button .da.b.lat -width -9 -text Lattice -command {set choice 23} -underline 0");
 
-cmd(inter, "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx 10 -pady 10 -side left");
-cmd(inter, "pack .da.f");
-cmd(inter, "pack .da.b -side right");
-
-cmd(inter, "menu .da.m -tearoff 0 -relief groove -bd 2");
-
-cmd(inter, "set w .da.m.exit");
-cmd(inter, ".da.m add cascade -label Exit -menu $w -underline 0");
-cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Quit and return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc");
-
-cmd(inter, "set w .da.m.gp");
-cmd(inter, ".da.m add cascade -label Gnuplot -menu $w -underline 0");
-cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd( inter, "$w add command -label \"Gnuplot...\" -command {set choice 4} -underline 0 -accelerator Ctrl+G");
-cmd(inter, "$w add command -label \"Gnuplot Options...\" -command {set choice 37} -underline 8");
-
-cmd(inter, "set w .da.m.color");
-cmd(inter, ".da.m add cascade -label Color -menu $w -underline 0");
-cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, "$w add command -label \"Set Colors...\" -command {set choice 21} -underline 0");
-cmd(inter, "$w add command -label \"Set Default Colors\" -command {set choice 22} -underline 0");
-
-cmd(inter, "set w .da.m.help");
-cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-cmd(inter, ".da.m add cascade -label Help -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0");
-cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
-cmd( inter, "$w add separator" );
-sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
-cmd( inter, msg );
-
-cmd(inter, ".da configure -menu .da.m");
+cmd(inter, "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx 10 -pady 10 -side left -expand no -fill none");
+cmd(inter, "pack .da.b -side right -expand no -fill none");
 
 // top window shortcuts binding
 cmd(inter, "bind .da <KeyPress-Escape> {set choice 2}");	// quit
@@ -520,7 +524,6 @@ cmd( inter, "bind .da <Control-e> { set choice 10 }; bind .da <Control-E> { set 
 cmd( inter, "bind .da <Control-d> { set choice 36 }; bind .da <Control-D> { set choice 36 }" );	// show data
 cmd( inter, "bind .da <Control-t> { set choice 12 }; bind .da <Control-D> { set choice 12 }" );	// statistics
 
-
 // create special sort procedure to keep names starting with underline at the end
 cmd( inter, "proc comp_und { n1 n2 } { \
 	if [ string equal $n1 $n2 ] { \
@@ -542,7 +545,7 @@ cmd( inter, "proc comp_und { n1 n2 } { \
 	}; \
 }" );
 	
-cmd( inter, "showtop .da overM 0 0 0");
+cmd( inter, "showtop .da overM 0 1 0");
 
 if(num_var==0)
   cmd(inter, "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"");  
@@ -558,7 +561,7 @@ there:
 cmd( inter, "if [ info exists DaModElem ] { set DaModElem [ lsort -unique -dictionary $DaModElem ] }" );
 
 // enable/disable the remove series button in the series toolbar
-cmd(inter, "if { [ .da.f.vars.ch.v size ] > 0 } { .da.f.vars.b.out conf -state normal } { .da.f.vars.b.out conf -state disabled }");
+cmd(inter, "if { [ .da.vars.ch.v size ] > 0 } { .da.vars.b.out conf -state normal } { .da.vars.b.out conf -state disabled }");
 
 // update entry boxes with linked variables
 cmd( inter, "write_disabled .da.f.h.v.ft.from.mnc $minc" );
@@ -607,7 +610,7 @@ switch(*choice)
 
 //exit
 case 2:
-cmd( inter, "if { [ .da.f.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }");
+cmd( inter, "if { [ .da.vars.pl.v size ] != 0 } { set answer [ tk_messageBox -parent .da -type okcancel -title Confirmation -icon question -default ok -message \"Exit Analysis of Results?\" -detail \"All the plots and series created and not saved will be lost.\"] } { set answer ok }");
 app=(char *)Tcl_GetVar(inter, "answer",0);
 
 cmd(inter, "if {[string compare $answer ok] == 0} { } {set choice 0}");
@@ -671,14 +674,14 @@ case 1:
    }
 
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
-  cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  cmd(inter, ".da.vars.pl.v insert end $exttit");
+  cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
   
   type_plot[cur_plot]=0; //Lsd standard plot
   plot_l[cur_plot]=390; //height of plot with labels
   plot_nl[cur_plot]=325; //height of plot without labels  
 
-  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
 
   *choice=0;
   goto there;
@@ -713,14 +716,14 @@ case 9:
     }
 
     cmd(inter, "set exttit \"$cur_plot) $tit\"");
-    cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-	cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+    cmd(inter, ".da.vars.pl.v insert end $exttit");
+	cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
 	
     type_plot[cur_plot]=0; //Lsd standard plot
     plot_l[cur_plot]=390; //height of plot with labels
     plot_nl[cur_plot]=325; //height of plot with labels  
 
-    cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+    cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
 	
     *choice=0;
     goto there;
@@ -733,7 +736,7 @@ case 17:
 
   cur_plot++;
   
-  cmd(inter, "set choice [.da.f.vars.ch.v size]");
+  cmd(inter, "set choice [.da.vars.ch.v size]");
   if(*choice>1)
     plot_gnu(choice);
   else
@@ -750,14 +753,14 @@ case 17:
    }
 
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
-  cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  cmd(inter, ".da.vars.pl.v insert end $exttit");
+  cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
   
   type_plot[cur_plot]=1; //Gnuplot plot
   plot_l[cur_plot]=430; //height of plot with labels
   plot_nl[cur_plot]=430; //height of plot without labels  
   
-  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
   
   *choice=0;
   goto there;
@@ -783,14 +786,14 @@ case 18:
    }
 
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
-  cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  cmd(inter, ".da.vars.pl.v insert end $exttit");
+  cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
   
   type_plot[cur_plot]=1; //gnuplot standard plot
   plot_l[cur_plot]=430; //height of plot with labels
   plot_nl[cur_plot]=430; //height of plot with labels  
   
-  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
 
   *choice=0;
   goto there;
@@ -820,14 +823,14 @@ case 23:
    }
    
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
-  cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  cmd(inter, ".da.vars.pl.v insert end $exttit");
+  cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
   
   type_plot[cur_plot]=3; //Lattice canvas standard plot
   plot_l[cur_plot]=-1; //height of plot with labels
   plot_nl[cur_plot]=-1; //height of plot with labels  
 
-  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
 
   *choice=0;
   goto there;
@@ -857,14 +860,14 @@ case 32:
    }
    
   cmd(inter, "set exttit \"$cur_plot) $tit\"");
-  cmd(inter, ".da.f.vars.pl.v insert end $exttit");
-  cmd( inter, ".da.f.vars.pl.v selection clear 0 end; .da.f.vars.pl.v selection set end; .da.f.vars.pl.v activate end; .da.f.vars.pl.v see end" );
+  cmd(inter, ".da.vars.pl.v insert end $exttit");
+  cmd( inter, ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
     
   type_plot[cur_plot]=0; //Lsd standard plot
   plot_l[cur_plot]=325; //height of plot with labels
   plot_nl[cur_plot]=325; //height of plot with labels  
   
-  cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+  cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
   
   *choice=0;
   goto there;
@@ -922,7 +925,7 @@ case 13:
 
 //create the postscript for a plot
 case 11:
-cmd( inter, "set choice [ .da.f.vars.pl.v size ]" );
+cmd( inter, "set choice [ .da.vars.pl.v size ]" );
 if ( *choice == 0 )		 // no plots to save
 {
 	cmd( inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"");
@@ -932,7 +935,7 @@ if ( *choice == 0 )		 // no plots to save
 do
 {
 	*choice=0;
-	cmd(inter, "set iti [.da.f.vars.pl.v curselection]");
+	cmd(inter, "set iti [.da.vars.pl.v curselection]");
 	cmd(inter, "if {[string length $iti] == 0} {set choice 1}");
 
 	if(*choice==1)
@@ -956,8 +959,8 @@ if(*choice==2)
    }
 
 *choice=0;
-cmd(inter, "set iti [.da.f.vars.pl.v curselection]");
-cmd(inter, "set it [.da.f.vars.pl.v get $iti]");
+cmd(inter, "set iti [.da.vars.pl.v curselection]");
+cmd(inter, "set it [.da.vars.pl.v get $iti]");
 cmd(inter, "scan $it %d)%s a b");
 cmd(inter, "set choice [winfo exist .da.f.new$a]");
 
@@ -1159,13 +1162,13 @@ cmd(inter, "destroytop .da.a");
 goto there;
 }
 
-cmd(inter, "if {[.da.f.vars.ch.v get 0] == \"\"} {set tit \"\"} {}");
+cmd(inter, "if {[.da.vars.ch.v get 0] == \"\"} {set tit \"\"} {}");
 cmd(inter, "set choice $ssys");
 if(*choice==2)
  {
- cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
- cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.f.vars.ch.v insert end \"$i\"  } {}}");
- cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
+ cmd(inter, "set tot [.da.vars.lb.v get 0 end]");
+ cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.vars.ch.v insert end \"$i\"  } {}}");
+ cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.vars.ch.v get 0]} {}");
  }
  
 if(*choice== 1)
@@ -1177,12 +1180,12 @@ i=*choice;
 cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {[.da.a.q.f.l.e$x get]!=\"\"} {set choice $x}}");
 if(*choice==-1)
 {
-cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
-cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} { .da.f.vars.ch.v insert end \"$i\"  } }");
+cmd(inter, "set tot [.da.vars.lb.v get 0 end]");
+cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} { .da.vars.ch.v insert end \"$i\"  } }");
 }
 else
  {
-cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
+cmd(inter, "set tot [.da.vars.lb.v get 0 end]");
 cmd(inter, "if { [info exist vcell]==1} {unset vcell} {}");
 cmd(inter, "set choice $ntag");
 for(j=0; j<*choice; j++)
@@ -1194,22 +1197,22 @@ for(j=0; j<*choice; j++)
 switch(i) 
 {
 case 0:
-  cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] == [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0 } }; if $c { .da.f.vars.ch.v insert end \"$i\" } } }");
+  cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] == [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0 } }; if $c { .da.vars.ch.v insert end \"$i\" } } }");
  break;
 case 1:
-  cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] != [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.f.vars.ch.v insert end \"$i\"  } {}} {}}");
+  cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] != [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}");
  break;
 case 2:
-   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] > [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.f.vars.ch.v insert end \"$i\"  } {}} {}}");
+   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] > [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}");
  break;
 case 3:
-   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] >= [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.f.vars.ch.v insert end \"$i\"  } {}} {}}");
+   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] >= [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}");
  break;
 case 4:
-   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] < [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.f.vars.ch.v insert end \"$i\"  } {}} {}}");
+   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] < [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}");
  break;
 case 5:
-   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] <= [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.f.vars.ch.v insert end \"$i\"  } {}} {}}");
+   cmd(inter, "foreach i $tot { if { [lindex [split $i] 0] == \"$b\" } { set c 1; for {set x 0} {$x<$ntag} {incr x} { if { [lindex $vcell $x] != \"\" && [lindex $vcell $x] <= [lindex [split [lindex [split $i] 1] {_}] $x] } { set c 0} {} }; if { $c==1 } {  .da.vars.ch.v insert end \"$i\"  } {}} {}}");
  break;
 } 
 }
@@ -1221,7 +1224,7 @@ if ( *choice == 3 || *choice == 4 )
 l = *choice;
 cmd(inter, "set choice $cond");
 p=*choice;
-cmd(inter, "set tot [.da.f.vars.lb.v get 0 end]");
+cmd(inter, "set tot [.da.vars.lb.v get 0 end]");
 cmd(inter, "set choice [llength $tot]");
 j=*choice;
 
@@ -1271,7 +1274,7 @@ for(i=0; i<j; i++)
 
       while(*choice>=0)
        {
-       cmd(inter, ".da.f.vars.ch.v insert end [lindex $templ $choice]");
+       cmd(inter, ".da.vars.ch.v insert end [lindex $templ $choice]");
        cmd(inter, "set templ [lreplace $templ $choice $choice]");
        cmd(inter, msg);
        }
@@ -1282,8 +1285,8 @@ for(i=0; i<j; i++)
 
 cmd(inter, "destroytop .da.a");
 
-cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.f.vars.ch.v get 0]} {}");
-cmd(inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
+cmd(inter, "if {\"$tit\" == \"\"} {set tit [.da.vars.ch.v get 0]} {}");
+cmd(inter, ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"");
 
 *choice=0;
 goto there;
@@ -1396,12 +1399,12 @@ goto there;
 }
 
 cmd(inter, "set choice $ssys");
-cmd( inter, ".da.f.vars.ch.v selection clear 0 end" );
+cmd( inter, ".da.vars.ch.v selection clear 0 end" );
 
 if(*choice==2)
  {
- cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
- cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.f.vars.ch.v selection set $myc  } {}; incr myc}");
+ cmd(inter, "set tot [.da.vars.ch.v get 0 end]");
+ cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} {  .da.vars.ch.v selection set $myc  } {}; incr myc}");
  }
  
 if(*choice== 1)
@@ -1413,12 +1416,12 @@ i=*choice;
 cmd(inter, "for {set x 0} {$x<$i} {incr x} {if {[.da.a.q.f.l.e$x get]!=\"\"} {set choice $x}}");
 if(*choice==-1)
 {
-cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
-cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} { .da.f.vars.ch.v selection set $myc }; incr myc }");
+cmd(inter, "set tot [.da.vars.ch.v get 0 end]");
+cmd(inter, "set myc 0; foreach i $tot { if { [lindex [split $i] 0] == \"$b\"} { .da.vars.ch.v selection set $myc }; incr myc }");
 }
 else
  {
-cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
+cmd(inter, "set tot [.da.vars.ch.v get 0 end]");
 cmd(inter, "if { [info exist vcell]==1} {unset vcell} {}");
 cmd(inter, "set choice $ntag");
 for(j=0; j<*choice; j++)
@@ -1430,22 +1433,22 @@ for(j=0; j<*choice; j++)
 switch(i) 
 {
 case 0:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] == [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] == [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 case 1:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] != [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] != [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 case 2:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] > [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] > [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 case 3:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] >= [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] >= [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 case 4:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] < [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] < [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 case 5:
- cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] <= [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.f.vars.ch.v selection set $myc } }; incr myc }");  
+ cmd(inter, "set myc 0; foreach i $tot { if { [ lindex [ split $i ] 0 ] == \"$b\" } { set c 1; for { set x 0 } { $x < $ntag } { incr x } { if { [ lindex $vcell $x ] != \"\" && [ lindex $vcell $x ] <= [ lindex [ split [ lindex [ split $i ] 1 ] {_}] $x ] } { set c 0 } }; if $c { .da.vars.ch.v selection set $myc } }; incr myc }");  
  break;
 } 
 }
@@ -1457,7 +1460,7 @@ if ( *choice == 3 || *choice == 4 )
 l = *choice;
 cmd(inter, "set choice $cond");
 p=*choice;
-cmd(inter, "set tot [.da.f.vars.ch.v get 0 end]");
+cmd(inter, "set tot [.da.vars.ch.v get 0 end]");
 cmd(inter, "set choice [llength $tot]");
 j=*choice;
 
@@ -1507,7 +1510,7 @@ for(i=0; i<j; i++)
 
       while(*choice>=0)
        {
-       cmd(inter, ".da.f.vars.ch.v selection set $choice");
+       cmd(inter, ".da.vars.ch.v selection set $choice");
        cmd(inter, "set templ [lreplace $templ $choice $choice]");
        cmd(inter, msg);
        }
@@ -1518,9 +1521,9 @@ for(i=0; i<j; i++)
 
 cmd(inter, "destroytop .da.a");
 
-cmd( inter, "if { ! $selOnly } { set steps 0; foreach i [ .da.f.vars.ch.v curselection ] { .da.f.vars.ch.v delete [ expr $i - $steps ]; incr steps} } { if { [ llength [ .da.f.vars.ch.v curselection ] ] > 0 } { .da.f.vars.ch.v see [ lindex [ .da.f.vars.ch.v curselection ] 0 ] } }" );
+cmd( inter, "if { ! $selOnly } { set steps 0; foreach i [ .da.vars.ch.v curselection ] { .da.vars.ch.v delete [ expr $i - $steps ]; incr steps} } { if { [ llength [ .da.vars.ch.v curselection ] ] > 0 } { .da.vars.ch.v see [ lindex [ .da.vars.ch.v curselection ] 0 ] } }" );
 
-cmd(inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
+cmd(inter, ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"");
 
 *choice=0;
 goto there;
@@ -1536,9 +1539,9 @@ if(*choice==0)
  goto there;
 cmd(inter, "scan $it %d)%s a b");
 cmd(inter, "set ex [winfo exists .da.f.new$a]");
-cmd(inter, "if { $ex == 1 } {destroy .da.f.new$a; .da.f.vars.pl.v delete $n_it} {.da.f.vars.pl.v delete $n_it}");
+cmd(inter, "if { $ex == 1 } {destroy .da.f.new$a; .da.vars.pl.v delete $n_it} {.da.vars.pl.v delete $n_it}");
 
-cmd( inter, ".da.f.com.plot conf -text \"Plots = [ .da.f.vars.pl.v size ]\"");
+cmd( inter, ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"");
 
 *choice=0;
 goto there;
@@ -1571,57 +1574,57 @@ case 3:
 
 // Sort
 case 5:
-  cmd(inter, "set a [.da.f.vars.lb.v get 0 end]");
+  cmd(inter, "set a [.da.vars.lb.v get 0 end]");
   cmd(inter, "set choice [llength $a]");
   if(*choice==0)
     goto there;
   cmd(inter, "set b {}");
   cmd(inter, "set b [lsort -command comp_und $a]");		// use special sort procedure to keep underscores at the end
-  cmd(inter, ".da.f.vars.lb.v delete 0 end");
-  cmd(inter, "foreach i $b {.da.f.vars.lb.v insert end $i}");
+  cmd(inter, ".da.vars.lb.v delete 0 end");
+  cmd(inter, "foreach i $b {.da.vars.lb.v insert end $i}");
   *choice=0;
   goto there;
   
   
 // Sort (descending order)
 case 38:
-  cmd(inter, "set a [.da.f.vars.lb.v get 0 end]");
+  cmd(inter, "set a [.da.vars.lb.v get 0 end]");
   cmd(inter, "set choice [llength $a]");
   if(*choice==0)
     goto there;
   cmd(inter, "set b {}");
   cmd(inter, "set b [lsort -decreasing -dictionary $a]");
-  cmd(inter, ".da.f.vars.lb.v delete 0 end");
-  cmd(inter, "foreach i $b {.da.f.vars.lb.v insert end $i}");
+  cmd(inter, ".da.vars.lb.v delete 0 end");
+  cmd(inter, "foreach i $b {.da.vars.lb.v insert end $i}");
   *choice=0;
   goto there;
  
 
 //sort the selection in selected series list in inverse order
 case 34:
-   cmd(inter, "set a [.da.f.vars.ch.v curselection]");
+   cmd(inter, "set a [.da.vars.ch.v curselection]");
    cmd(inter, "set choice [llength $a]");
    if(*choice==0)
     goto there;
    cmd(inter, "set b {}");
-   cmd(inter, "foreach i $a {lappend b [.da.f.vars.ch.v get $i]}");
+   cmd(inter, "foreach i $a {lappend b [.da.vars.ch.v get $i]}");
    cmd(inter, "set c [lsort -decreasing -dictionary $b]");
    cmd(inter, "set d -1");
-   cmd(inter, "foreach i $a {.da.f.vars.ch.v delete $i; .da.f.vars.ch.v insert $i [lindex $c [incr d]] }");
+   cmd(inter, "foreach i $a {.da.vars.ch.v delete $i; .da.vars.ch.v insert $i [lindex $c [incr d]] }");
    *choice=0;
    goto there;
 
    
 // Unsort
 case 14:
-   cmd(inter, "set a [.da.f.vars.lb.v get 0 end]");
+   cmd(inter, "set a [.da.vars.lb.v get 0 end]");
    cmd(inter, "set choice [llength $a]");
    if(*choice==0)
     goto there;
-   cmd(inter, ".da.f.vars.lb.v delete 0 end");
+   cmd(inter, ".da.vars.lb.v delete 0 end");
    for(i=0; i<num_var; i++)
     {
-     sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", vs[i].label, vs[i].tag, vs[i].start, vs[i].end, vs[i].rank);
+     sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", vs[i].label, vs[i].tag, vs[i].start, vs[i].end, vs[i].rank);
      cmd(inter, msg);
     }
    *choice=0;
@@ -1630,7 +1633,7 @@ case 14:
    
 // Sort on End
 case 15:
-   cmd(inter, "set a [.da.f.vars.lb.v get 0 end]");
+   cmd(inter, "set a [.da.vars.lb.v get 0 end]");
    cmd(inter, "set choice [llength $a]");
    if(*choice==0)
     goto there;
@@ -1638,10 +1641,10 @@ case 15:
    for(i=0; i<num_var; i++)
      app_store[i]=vs[i];
    sort_on_end(app_store);
-   cmd(inter, ".da.f.vars.lb.v delete 0 end");
+   cmd(inter, ".da.vars.lb.v delete 0 end");
    for(i=0; i<num_var; i++)
     {
-     sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", app_store[i].label, app_store[i].tag, app_store[i].start, app_store[i].end, app_store[i].rank);
+     sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", app_store[i].label, app_store[i].tag, app_store[i].start, app_store[i].end, app_store[i].rank);
      cmd(inter, msg);
     }
     delete[] app_store;
@@ -1651,7 +1654,7 @@ case 15:
    
 // Find first instance of series in the available series listbox
 case 39:
-cmd(inter, "set a [.da.f.vars.lb.v get 0 end]");
+cmd(inter, "set a [.da.vars.lb.v get 0 end]");
 cmd(inter, "set choice [llength $a]");
 if(*choice==0)
  goto there;
@@ -1682,10 +1685,10 @@ if ( *choice == 1 )
 		goto there;
 	
 	cmd( inter, "set srchTxt [ string tolower $srchTxt ]" );
-	cmd( inter, "set a [ .da.f.vars.lb.v get 0 end ]; set i 0");
+	cmd( inter, "set a [ .da.vars.lb.v get 0 end ]; set i 0");
 	cmd( inter, "foreach b $a { set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; if { $choice != -1 } { break } { set i [ expr $i + 1 ] } }");
 	if ( *choice != -1 )
-	cmd( inter, ".da.f.vars.lb.v selection clear 0 end; .da.f.vars.lb.v selection set $i; .da.f.vars.lb.v see $i" );
+	cmd( inter, ".da.vars.lb.v selection clear 0 end; .da.vars.lb.v selection set $i; .da.vars.lb.v see $i" );
 	else
 		cmd( inter, "tk_messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"Check if the name was spelled correctly or use just part of the name. This command is case insensitive.\"" );
 }
@@ -1700,10 +1703,10 @@ cmd( inter, "set choice [ string length $srchTxt ]" );
 if ( *choice == 0 )
 	goto there;
 
-cmd( inter, "set a [ .da.f.vars.lb.v get 0 end ]; set i 0; set inst 0");
+cmd( inter, "set a [ .da.vars.lb.v get 0 end ]; set i 0; set inst 0");
 cmd( inter, "foreach b $a { set choice [ string first $srchTxt [ string tolower [ lindex [ split $b ] 0 ] ] ]; if { $choice != -1 } { set inst [ expr $inst + 1 ]; if { $inst > $srchInst } { set srchInst $inst; break } }; set i [ expr $i + 1 ] }");
 if ( *choice != -1 )
-	cmd( inter, ".da.f.vars.lb.v selection clear 0 end; .da.f.vars.lb.v selection set $i; .da.f.vars.lb.v see $i" );
+	cmd( inter, ".da.vars.lb.v selection clear 0 end; .da.vars.lb.v selection set $i; .da.vars.lb.v see $i" );
 else
 	cmd( inter, "tk_messageBox -parent .da -type ok -title \"Error\" -icon error -default ok -message \"Series not found\" -detail \"No additional instance of series found.\"" );
 
@@ -1713,12 +1716,12 @@ goto there;
   
 // Insert the variables selected in the list of the variables to plot
 case 6:
-  cmd(inter, "set a [.da.f.vars.lb.v curselection]");
-  cmd(inter, "foreach i $a {.da.f.vars.ch.v insert end [.da.f.vars.lb.v get $i]}");
+  cmd(inter, "set a [.da.vars.lb.v curselection]");
+  cmd(inter, "foreach i $a {.da.vars.ch.v insert end [.da.vars.lb.v get $i]}");
   *choice=0;
-  cmd(inter, "set tit [.da.f.vars.ch.v get 0]");
+  cmd(inter, "set tit [.da.vars.ch.v get 0]");
 
-  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
+  cmd( inter, ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"");
   goto there;
 
   
@@ -1726,20 +1729,20 @@ case 6:
 case 7:
 
   cmd(inter, "set steps 0");
-  cmd(inter, "foreach i [.da.f.vars.ch.v curselection] {.da.f.vars.ch.v delete [expr $i - $steps]; incr steps}");
-  cmd(inter, "if [.da.f.vars.ch.v size]==0 {$f.out conf -state disabled}");
+  cmd(inter, "foreach i [.da.vars.ch.v curselection] {.da.vars.ch.v delete [expr $i - $steps]; incr steps}");
+  cmd(inter, "if [.da.vars.ch.v size]==0 {$f.out conf -state disabled}");
   *choice=0;
 
-  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
+  cmd( inter, ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"");
   goto there;
 
   
 //Remove all the variables from the list of vars to plot
 case 8:
-  cmd(inter, ".da.f.vars.ch.v delete 0 end");
+  cmd(inter, ".da.vars.ch.v delete 0 end");
   *choice=0;
 
-  cmd( inter, ".da.f.com.selec conf -text \"Series = [ .da.f.vars.ch.v size ]\"");
+  cmd( inter, ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"");
   goto there;
 
 
@@ -1747,7 +1750,7 @@ case 24:
 /*
 Insert new series (from disk or combining existing series).
 */
-cmd( inter, "set choice [.da.f.vars.ch.v size]" );
+cmd( inter, "set choice [.da.vars.ch.v size]" );
 if ( *choice > 0 )
 {
 	cmd( inter, "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
@@ -1836,9 +1839,9 @@ if ( *choice == 1 )
 	fclose(f);
     file_counter++;
     insert_data_file(gz, &num_var, &num_c);
-    sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
+    sprintf(msg, ".da.com.nvar conf -text \"Series = %d\"",num_var);
     cmd(inter,msg);
-    sprintf(msg, ".da.f.com.ncas conf -text \"Cases = %d\"", num_c);
+    sprintf(msg, ".da.com.ncas conf -text \"Cases = %d\"", num_c);
     cmd(inter,msg);
    }
    else
@@ -2232,7 +2235,7 @@ int i, nv, j, k, *start, *end, done, doney2, color,  numy2;
 double x1,x01, *y1, x2, x02, *y2,  cminy, cmaxy, miny2, maxy2, truemaxy2;
 double step;
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 double **data,**logdata;
 
@@ -2266,7 +2269,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[100];
   tag[i]=new char[100];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -2830,7 +2833,7 @@ int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 if ( nv == 0 )
 {
@@ -2874,7 +2877,7 @@ for(i=0, new_nv=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -3244,7 +3247,7 @@ SET_CS_DATA
 void set_cs_data(int *choice)
 {
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 if ( *choice < 2 )
 {
 	cmd( inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place two or more series in the Series Selected listbox and select 'Plot' to produce a cross-section plot.\"");
@@ -3501,9 +3504,9 @@ for(cur=r; cur!=NULL; cur=cur->next)
    if(cv->save==0 && !strcmp(cv->label,lab))
     {
      set_lab_tit(cv);
-     sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, 0, 0, num_var + (*num_v));
+     sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, 0, 0, num_var + (*num_v));
      cmd(inter, msg);
-     sprintf(msg, ".da.f.vars.ch.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, 0, 0, num_var + (*num_v));
+     sprintf(msg, ".da.vars.ch.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, 0, 0, num_var + (*num_v));
      cmd(inter, msg);
 
      *num_v+=1;
@@ -3539,7 +3542,7 @@ insert_store_nosave(r,lab, num_v);
 num_var=*num_v;
 
 
-sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
+sprintf(msg, ".da.com.nvar conf -text \"Series = %d\"",num_var);
 cmd(inter,msg);
 }
 
@@ -3588,7 +3591,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    if(cv->save)
     {
      set_lab_tit(cv);
-     sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v);
+     sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v);
      if(cv->end>*num_c)
        *num_c=cv->end;
      cmd(inter, msg);
@@ -3608,7 +3611,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  }
 if(r->up==NULL)
  for(cv=cemetery; cv!=NULL; cv=cv->next)
-  {  sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v);
+  {  sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v);
      if(cv->end>*num_c)
        *num_c=cv->end;
      cmd(inter, msg);
@@ -3857,9 +3860,9 @@ for ( i = *num_v; i < new_v + *num_v; ++i )
   vs[i].rank=i;
 
  if(vs[i].start!=-1)
-   sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d %s\"", vs[i].label, vs[i].tag, vs[i].start, vs[i].end, i, app_str);
+   sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d %s\"", vs[i].label, vs[i].tag, vs[i].start, vs[i].end, i, app_str);
  else
-   {sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (0 - %d) # %d %s\"", vs[i].label, vs[i].tag, new_c-1, i, app_str);
+   {sprintf(msg, ".da.vars.lb.v insert end \"%s %s (0 - %d) # %d %s\"", vs[i].label, vs[i].tag, new_c-1, i, app_str);
     vs[i].start=0;
     vs[i].end=new_c-1;
    }
@@ -3946,7 +3949,7 @@ int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
@@ -3972,7 +3975,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -4099,7 +4102,7 @@ int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
@@ -4144,7 +4147,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -4331,7 +4334,7 @@ bool stopErr = false;
 int i, nv,nanv=0, j, k, *start, *end, done, box;
 int idseries, ndim, gridd;
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 nv=*choice;
 *choice=0;
 if ( nv == 0 )
@@ -4417,7 +4420,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -4817,7 +4820,7 @@ int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
 double previous_row;
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 nv=*choice;
 *choice=0;
 if(nv==0)
@@ -4842,7 +4845,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -5220,7 +5223,7 @@ int i, nv, j, k, *start, *end, done, nlags;
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 if(*choice!=1)
  {
  cmd(inter, "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"");
@@ -5245,7 +5248,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -5559,7 +5562,7 @@ double **data;
 int i, nv, j, hi, le, done, nlags, ncol, nlin, end;
 
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 nv=*choice;
 if ( nv == 0 )		 // no plots to save
 {
@@ -5574,14 +5577,14 @@ if(autom_x==1)
   max_c=num_c;
  }
 
-cmd(inter, "set res [.da.f.vars.ch.v get 0]");
+cmd(inter, "set res [.da.vars.ch.v get 0]");
 cmd(inter, "scan $res \"%s %s (%d - %d) # %d\" a b c d choice");
 end=vs[nv].end;
 
 for(i=0; i<nv; i++)
  {
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   cmd(inter, "scan $res \"%s %s (%d - %d) # %d\" a b c d choice");
   data[i]=vs[nv].data;
@@ -5785,7 +5788,7 @@ int x1, x2, y1,y2;
 double ap, mx,mn, *data, step, a, b, s, lminy, miny2, truemaxy, truemaxy2, average, sigma, tot, totnorm;
 bin *cl;
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 if(*choice!=1)
  {
 	if ( *choice == 0 )			// no variables selected
@@ -5796,7 +5799,7 @@ if(*choice!=1)
 	return;
  } 
  
-cmd(inter, "set res [.da.f.vars.ch.v get 0]");
+cmd(inter, "set res [.da.vars.ch.v get 0]");
 app=(char *)Tcl_GetVar(inter, "res",0);
 strcpy(msg,app);
 sscanf(msg, "%s %s (%d - %d) # %d", str, tag, &start, &end, &idseries);
@@ -6256,7 +6259,7 @@ bin *cl;
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-cmd(inter, "set choice [.da.f.vars.ch.v size]");
+cmd(inter, "set choice [.da.vars.ch.v size]");
 nv=*choice;
 if(nv<2)
 {
@@ -6284,7 +6287,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -6809,7 +6812,7 @@ char *lapp, **str, **tag;
 store *app;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )
@@ -6879,7 +6882,7 @@ cmd(inter, "pack .da.s.i.l .da.s.i.m .da.s.i.z .da.s.i.f .da.s.i.t .da.s.i.c .da
 /**/
 cmd(inter, "pack .da.s.i");
 
-cmd(inter, "set a [.da.f.vars.ch.v get 0]");
+cmd(inter, "set a [.da.vars.ch.v get 0]");
 cmd(inter, "set basename [lindex [split $a] 0]");
 cmd(inter, "set headname \"Av\"");
 cmd(inter, "set vname $headname$basename");
@@ -6943,7 +6946,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
@@ -7043,7 +7046,7 @@ if(*choice==6)
 
 
  }
-sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, min_c, max_c, num_var); 
+sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, min_c, max_c, num_var); 
 cmd(inter, msg);
 
 sprintf( msg, "lappend DaModElem %s", vs[num_var].label );
@@ -7119,15 +7122,15 @@ if(*choice==6)
 
  }
 
-sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, 0, nv-1, num_var); 
+sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, 0, nv-1, num_var); 
 cmd(inter, msg);
 
 sprintf( msg, "lappend DaModElem %s", vs[num_var].label );
 cmd( inter, msg );
 }
-cmd(inter, ".da.f.vars.lb.v see end");
+cmd(inter, ".da.vars.lb.v see end");
 num_var++; 
-sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
+sprintf(msg, ".da.com.nvar conf -text \"Series = %d\"",num_var);
 cmd(inter,msg);
 
 delete[] start;
@@ -7153,7 +7156,7 @@ char *lapp, **str, **tag;
 store *app;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )
@@ -7238,7 +7241,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
@@ -7281,7 +7284,7 @@ for(i=0; i<nv; i++)
    for(   ; j<end[i]; j++)
      vs[num_var+i].data[j]=xapp;     
    }
-  sprintf(msg, ".da.f.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var+i].label, vs[num_var+i].tag,       
+  sprintf(msg, ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var+i].label, vs[num_var+i].tag,       
   vs[num_var+i].start, vs[num_var+i].end, num_var+i); 
   cmd(inter, msg); 
   
@@ -7289,9 +7292,9 @@ for(i=0; i<nv; i++)
   cmd( inter, msg );
  }
 
-cmd(inter, ".da.f.vars.lb.v see end");
+cmd(inter, ".da.vars.lb.v see end");
 num_var+=nv; 
-sprintf(msg, ".da.f.com.nvar conf -text \"Series = %d\"",num_var);
+sprintf(msg, ".da.com.nvar conf -text \"Series = %d\"",num_var);
 cmd(inter,msg);
 
 delete[] start;
@@ -7332,7 +7335,7 @@ FILE *fsavez;
 #endif 
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 *choice=0;
@@ -7358,7 +7361,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
@@ -7747,7 +7750,7 @@ char *lapp, **str, **tag;
 store *app;
 
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd(inter, "set nv [.da.f.vars.ch.v size]");
+cmd(inter, "set nv [.da.vars.ch.v size]");
 Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
@@ -7785,7 +7788,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[50];
   tag[i]=new char[50];
 
-  sprintf(msg, "set res [.da.f.vars.ch.v get %d]",i);
+  sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);

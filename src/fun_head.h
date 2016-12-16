@@ -45,6 +45,7 @@ double def_res = 0;										// default equation result
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
 void init_random( int seed );							// reset the random number generator seed
 void plog( char const *msg, char const *tag = "" );
+void results_alt_path( const char * );  				// change where results are saved.
 object *go_brother(object *c);
 object *get_cycle_obj( object *c, char const *label, char const *command );
 int deb(object *r, object *c, char const *lab, double *res);

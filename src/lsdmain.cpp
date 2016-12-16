@@ -156,6 +156,7 @@ object *blueprint = NULL;
 variable *cemetery=NULL;
 description *descr = NULL;
 char *path = NULL;
+char *alt_path = NULL;
 char *simul_name = NULL;
 char *struct_file = NULL;
 char *eq_file=NULL;
@@ -181,6 +182,7 @@ bool scroll;				// scroll state in current runtime plot
 bool justAddedVar=false;	// control the selection of last added variable
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 bool redrawRoot = true;		// control for redrawing root window (.)
+bool save_alt_path = false;	// alternate save path flag
 
 // flags for some program defaults
 int seed = 1;				// random number generator initial seed
@@ -195,9 +197,9 @@ bool grandTotal = false;	// flag to produce or not grand total in batch processi
 bool firstRes = true;		// flag to mark first results file (init grand total file)
 bool unsavedData = false;	// flag unsaved simulation results
 char nonavail[] = "NA";		// string for unavailable values (use R default)
-// Main window constraints
-char hsize[] = "400";		// horizontal size in pixels
-char vsize[] = "620";		// vertical minimum size in pixels
+// Main window constraints (even numbers only)
+char hsize[] = "400";		// horizontal size in pixels (minimum)
+char vsize[] = "620";		// vertical minimum size in pixels (2 x minimum)
 char hmargin[] = "20";		// horizontal right margin from the screen borders
 char vmargin[] = "20";		// vertical margins from the screen borders
 // Log window tabs
@@ -232,7 +234,7 @@ fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n");
+  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n");
   myexit(1);
  }
 else
@@ -270,17 +272,18 @@ else
 	printf( "Grand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
 	continue;
  }
- if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : create compressed result files
+ if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : don't create compressed result files
  {
 	i--; 	// no parameter for this option
-	dozip = 1;
+	dozip = 0;
 	continue;
  }
   
-  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
+  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
   myexit(2);
   }
  } 
+ 
 if(batch_sequential==0)
  {
  struct_file=new char[strlen(simul_name)+1];
@@ -392,11 +395,6 @@ for(i=0; i<len; i++)
   msg[i]='/';
 cmd(inter, msg);
 
-/** WORKS
-cmd(inter, "proc LsdHelp a {global tcl_platform; global RootLsd; set here [pwd]; cd $RootLsd; cd Manual; set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec konqueror $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.1\" || $tcl_platform(osVersion) == \"5.0\" } {exec cmd.exe /c start $b &} {catch [exec open.bat &] }} {exec command.com /c start $b &}}; cd $here }");
-
-********/
-
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 cmd(inter, "set done [file exist $RootLsd/lmm_options.txt]");
 if(done==1)
@@ -415,69 +413,6 @@ else
  }
 
 Tcl_UnlinkVar(inter, "done");
-//cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global RootLsd; set here [pwd];  set f [open $RootLsd/Manual/temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"[file nativename $RootLsd/Manual/temp.html]\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.1\" || $tcl_platform(osVersion) == \"5.0\" } {exec cmd.exe /c start $b &} {catch [exec open.bat &] }} {exec start $b &}} }");
-
-cmd(inter, "proc LsdHelp a {global HtmlBrowser; global tcl_platform; global RootLsd; set here [pwd];  set f [open $RootLsd/Manual/temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"[file nativename $RootLsd/Manual/temp.html]\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {exec cmd.exe /c start $b &}}");
-
-//cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" || $tcl_platform(osVersion) == \"5.1\" || $tcl_platform(osVersion) == \"5.0\"  } {exec cmd.exe /c start $b &} {catch [exec open.bat &] }} {exec start $b &}}}");
-
-cmd(inter, "proc LsdHtml a {global HtmlBrowser; global tcl_platform;  set f [open temp.html w]; puts $f \"<meta http-equiv=\\\"Refresh\\\" content=\\\"0;url=$a\\\">\"; close $f; set b \"temp.html\"; if {$tcl_platform(platform) == \"unix\"} {exec $HtmlBrowser $b &} {exec cmd.exe /c start $b &}}");
-
-
-cmd(inter, "proc LsdTkDiff {a b} {global tcl_platform; global RootLsd; global wish; global LsdSrc; if {$tcl_platform(platform) == \"unix\"} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\" } {exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} {exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &} } {exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &}}}");
-
-// commands to disable/enable windows in cases where grab is inappropriate (only menus if not TK8.6)
-// call parameters are: container window, menu name, widgets names
-cmd( inter, "proc disable_window { w m { args \"\" } } { \
-		if [ winfo exist $w.$m ] { \
-			for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } { \
-				$w.$m entryconfig $i -state disabled \
-			} \
-		}; \
-		if [ string equal [ info tclversion ] \"8.6\" ] { \
-			foreach i $args { \
-				if [ winfo exists $w.$i ] { \
-					tk busy hold $w.$i \
-				} \
-			}; \
-		}; \
-		update \
-	}" );
-	
-cmd( inter, "proc enable_window { w m { args \"\" } } { \
-		if [ winfo exist $w.$m ] { \
-			for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } { \
-				$w.$m entryconfig $i -state normal \
-			} \
-		}; \
-		if [ string equal [ info tclversion ] \"8.6\" ] { \
-			foreach i $args { \
-				if [ winfo exists $w.$i ] { \
-					tk busy forget $w.$i \
-				} \
-			}; \
-		}; \
-		update \
-	}" );
-	
-// Tk procedures to read any entry widget (normal or disabled)
-cmd( inter, "proc write_any { w val } { \
-		if [ string equal [ $w cget -state ] disabled ] { \
-			write_disabled $w $val \
-		} { \
-			$w delete 0 end; \
-			$w insert 0 $val \
-		} \
-	}" );
-
-// Tk procedure to update a disabled entry widget (do nothing if normal state)
-cmd( inter, "proc write_disabled { w val } { \
-		if [ string equal [ $w cget -state ] disabled ] { \
-			$w conf -state normal; \
-			write_any $w $val; \
-			$w conf -state disabled \
-		} \
-	}" );
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
@@ -494,6 +429,7 @@ Tcl_SetVar(inter, "heightB", vsize, 0);		// vertical minimum size in pixels
 Tcl_SetVar(inter, "posX", hmargin, 0);		// horizontal right margin from the screen borders
 Tcl_SetVar(inter, "posY", vmargin, 0);		// vertical margins from the screen borders
 cmd(inter, "wm geometry . \"[expr $widthB]x$heightB+$posX+$posY\"");
+cmd( inter, "wm minsize . [ expr $widthB ] [ expr $heightB / 2 ]" );
 
 cmd(inter, "label .l -text \"Starting Lsd\"");
 cmd(inter, "pack .l");
@@ -532,6 +468,10 @@ strcpy(stacklog->label, "Lsd Simulation Manager");
 
 #ifndef NO_WINDOW
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/align.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
+if ( choice != 0 )
+	myexit( 7 + choice );
+
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/ls2html.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	myexit( 7 + choice );
 
@@ -753,7 +693,7 @@ if ( ! pause_run )
 else			// if paused, just call the data browser
 {
 	double useless = 0;
-	deb( root, NULL, "Paused", &useless );
+	deb( root, NULL, "Paused by User", &useless );
 }
 	
 break;
@@ -806,11 +746,17 @@ case 9: 		// Pause simulation
 	cmd( inter, "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
 	sprintf( msg, "\nSimulation paused at t = %d", t );
 	plog( msg );
+	cmd(inter, "bind .log <KeyPress-p> { }; bind .log <KeyPress-P> { }");
+	cmd( inter, ".log.but.pause conf -text Resume" );
+	cmd(inter, "bind .log <KeyPress-r> { .log.but.pause invoke }; bind .log <KeyPress-R> { .log.but.pause invoke }");
  }
  else
  {
 	cmd( inter, "wm title .log \"$origLogTit\"" );
 	plog( "\nSimulation resumed" );
+	cmd(inter, "bind .log <KeyPress-r> { }; bind .log <KeyPress-R> { }");
+	cmd( inter, ".log.but.pause conf -text Pause" );
+	cmd(inter, "bind .log <KeyPress-p> { .log.but.pause invoke }; bind .log <KeyPress-P> { .log.but.pause invoke }");
  }
 break;
 
@@ -859,28 +805,28 @@ close_sim();
 reset_end(root);
 root->emptyturbo();
 
-if(sim_num>1 || no_window==1) //Save results for multiple simulation runs
+if ( sim_num > 1 || no_window ) //Save results for multiple simulation runs
 {
 
-if(no_res==0)
+if ( ! no_res )
 {
-if(batch_sequential==0)
- sprintf(msg, "\nSaving results in file %s_%d.res%s... ",simul_name, seed-1, dozip?".gz":"");
+if ( ! batch_sequential )
+ sprintf( msg, "\nSaving results in file %s/%s_%d.res%s... ", save_alt_path ? alt_path : path, simul_name, seed - 1, dozip ? ".gz" : "" );
 else
- sprintf(msg, "\nSaving results in file %s_%d_%d.res%s... ",simul_name, findex, seed-1, dozip?".gz":"");
+ sprintf( msg, "\nSaving results in file %s/%s_%d_%d.res%s... ", save_alt_path ? alt_path : path, simul_name, findex, seed - 1, dozip ?".gz" : "");
 
-plog(msg);
+plog ( msg );
 
-if(batch_sequential==0)
- if(strlen(path)==0)
-  sprintf(msg, "%s_%d.res", simul_name, seed-1);
+if ( ! batch_sequential )
+ if ( strlen( save_alt_path ? alt_path : path ) == 0 )
+  sprintf( msg, "%s_%d.res", simul_name, seed - 1 );
  else
-  sprintf(msg, "%s/%s_%d.res", path, simul_name, seed-1);
+  sprintf( msg, "%s/%s_%d.res", save_alt_path ? alt_path : path, simul_name, seed - 1 );
 else
- if(strlen(path)==0)
-  sprintf(msg, "%s_%d_%d.res", simul_name, findex, seed-1);
+ if ( strlen( save_alt_path ? alt_path : path ) == 0 )
+  sprintf( msg, "%s_%d_%d.res", simul_name, findex, seed - 1 );
  else
-  sprintf(msg, "%s/%s_%d_%d.res", path, simul_name, findex, seed-1);
+  sprintf( msg, "%s/%s_%d_%d.res", save_alt_path ? alt_path : path, simul_name, findex, seed - 1 );
 
 rf = new result( msg, "wt", dozip );	// create results file object
 rf->title( root, 1 );					// write header
@@ -1138,14 +1084,14 @@ CREATE_LOG_WINDOW
 void create_logwindow(void)
 {
 cmd(inter, "toplevel .log");
-// change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
+cmd(inter, "wm title .log \"Lsd Log\"");
 cmd( inter, "wm protocol .log WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd( inter, "wm group .log ." );
+// change window icon
+cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .log @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
 
 cmd(inter, "set w .log.text");
 cmd(inter, "frame $w");
-cmd(inter, "wm title .log \"Lsd Log\"");
 cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
 cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
 cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");
@@ -1188,6 +1134,7 @@ cmd(inter, "update idletasks");
 cmd(inter, "set posXLog [expr [winfo screenwidth .log] - $posX - [winfo reqwidth .log]]");
 cmd(inter, "set posYLog [expr [winfo screenheight .log] - 4 * $posY - [winfo reqheight .log]]");
 cmd(inter, "wm geometry .log +$posXLog+$posYLog");	
+cmd(inter, "wm minsize .log [ winfo width .log ] [ winfo height .log ]");	
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
 cmd( inter, "rename .log.text.text .log.text.text.internal" );
@@ -1248,7 +1195,34 @@ void uncover_browser( void )
 #endif
 
 
- void save_single(variable *vcv)
+/*********************************
+RESULTS_ALT_PATH
+*********************************/
+//Simple tool to allow changing where results are saved.
+void results_alt_path(const char * altPath_)
+{
+	if ( save_alt_path )
+		delete [ ] alt_path;
+
+	if ( strlen( altPath_ ) == 0 )
+	{
+		save_alt_path = false;
+		return;
+	}
+	  
+	alt_path = new char[ strlen( altPath_ ) + 1 ];
+	if ( sprintf( alt_path, "%s", altPath_ ) > 0 )
+		save_alt_path = true;
+	else
+		delete [ ] alt_path;
+}
+
+
+/*********************************
+SAVE_SINGLE
+*********************************/
+
+void save_single(variable *vcv)
 {
 FILE *f;
 int i;
@@ -1270,6 +1244,10 @@ for(i=0; i<=t-1; i++)
 fclose(f); 
 }
 
+
+/*********************************
+CLEAN_FILE
+*********************************/
 // remove any path prefixes to filename, if present
 char *clean_file(char *filename)
 {
@@ -1280,6 +1258,10 @@ char *clean_file(char *filename)
 	return filename;
 }
 
+
+/*********************************
+CLEAN_PATH
+*********************************/
 // remove cygwin path prefix, if present, and replace \ with /
 char *clean_path(char *filepath)
 {
@@ -1302,6 +1284,10 @@ char *clean_path(char *filepath)
 	return filepath;
 }
 
+
+/*********************************
+SIGNAL_HANDLER
+*********************************/
 // handle critical system signals
 void signal_handler(int signum)
 {

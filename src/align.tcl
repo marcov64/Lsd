@@ -126,7 +126,7 @@ proc settop { w { name no } { destroy no } { par no } } {
 }
 
 # configure the window
-proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } } {
+proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
 	if { $sizeX != 0 } {
 		$w configure -width $sizeX 
 	}
@@ -166,6 +166,9 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 	}
 	wm resizable $w $resizeX $resizeY
+	if { ! $noMinSize && ( $resizeX || $resizeY ) } {
+		wm minsize $w [ winfo width $w ] [ winfo height $w ]
+	}
 	set parWndLst [ linsert $parWndLst 0 $w ]
 	if $grab {
 		global lstGrab
@@ -200,6 +203,11 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	}
 	if { $sizeY > [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ] } {
 		set sizeY [ expr [ winfo screenheight $w ] - [ winfo rooty $w ] ]
+	}
+	set newMinX [ expr min( [ lindex [ wm minsize $w ] 0 ], $sizeX ) ]
+	set newMinY [ expr min( [ lindex [ wm minsize $w ] 1 ], $sizeY ) ]
+	if { $newMinX != [ lindex [ wm minsize $w ] 0 ] || $newMinY != [ lindex [ wm minsize $w ] 1 ] } {
+		wm minsize $w $newMinX $newMinY
 	}
 	if { $sizeX != [ winfo width $w ] || $sizeY != [ winfo height $w ] } {
 		wm geom $w ${sizeX}x${sizeY} 
@@ -427,4 +435,76 @@ proc finddone { w fr comFind comDone } {
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.search $w.$fr.ok -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
+}
+
+
+# commands to disable/enable windows in cases where grab is inappropriate (only menus if not TK8.6)
+# call parameters are: container window, menu name, widgets names
+proc disable_window { w m { args "" } } {
+	if [ winfo exist $w.$m ] {
+		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
+			$w.$m entryconfig $i -state disabled
+		}
+	}
+	if [ string equal [ info tclversion ] "8.6" ] {
+		foreach i $args {
+			if [ winfo exists $w.$i ] {
+				tk busy hold $w.$i
+			}
+		}
+	}
+	update 
+}
+	
+proc enable_window { w m { args "" } } {
+	if [ winfo exist $w.$m ] {
+		for { set i 0 } { $i <= [ $w.$m index last ] } { incr i } {
+			$w.$m entryconfig $i -state normal
+		}
+	}
+	if [ string equal [ info tclversion ] "8.6" ] {
+		foreach i $args {
+			if [ winfo exists $w.$i ] {
+				tk busy forget $w.$i
+			}
+		}
+	}
+	update
+}
+	
+	
+# read any entry widget (normal or disabled)
+proc write_any { w val } {
+	if [ string equal [ $w cget -state ] disabled ] {
+		write_disabled $w $val
+	} {
+		$w delete 0 end
+		$w insert 0 $val
+	}
+}
+
+
+# update a disabled entry widget (do nothing if normal state)
+proc write_disabled { w val } {
+	if [ string equal [ $w cget -state ] disabled ] {
+		$w conf -state normal
+		write_any $w $val
+		$w conf -state disabled
+	}
+}
+
+
+# bind the mouse wheel to the y scrollbar
+proc mouse_wheel { w } {
+	global tcl_platform
+	if [ string equal $tcl_platform(platform) windows ] {
+		bind $w <MouseWheel> { %W yview scroll [ expr { -%D / 120 } ] units }
+	} {
+		if [ string equal $tcl_platform(os) Darwin ] {
+			bind $w <MouseWheel> { %W yview scroll [ expr { -%D } ] units }
+		} {
+			bind $w <4> { %W yview scroll -1 units }
+			bind $w <5> { %W yview scroll 1 units }
+		}
+	}
 }

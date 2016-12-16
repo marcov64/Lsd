@@ -171,7 +171,7 @@ else
 	cmd( inter, "label .sa.head.l.c -text \"Function: \"" );
   else
     cmd( inter, "label .sa.head.l.c -text \"Variable: \"" );
-  sprintf( ch, "label .sa.head.l.n -text \"%s [lag -%d]\" -fg red", lab, t-cv->last_update + lag + 1 );
+  sprintf( ch, "label .sa.head.l.n -text \"%s \\[lag -%d\\]\" -fg red", lab, t-cv->last_update + lag + 1 );
   cmd( inter, ch );
 }
   

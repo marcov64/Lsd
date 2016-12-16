@@ -82,8 +82,8 @@ int v0 = 10;					// initial vertical position
 float hpan0win = 0.35;			// initial horizontal scroll % - Windows
 float hpan0lin = 0.35;			// Linux
 float hpan0mac = 0.23;			// Mac
-int hsz = 600;					// horizontal window size in pixels
-int vsz = 400;					// vertical window size in pixels
+int hsz = 600;					// horizontal window size in pixels (2 x minimum)
+int vsz = 400;					// vertical window size in pixels (2 x minimum)
 int hcvsz = 1920;				// horizontal canvas size
 int vcvsz = 1080;				// vertical canvas size
 
@@ -129,16 +129,13 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd(inter, "pack $c.f -expand yes -fill both");
 	sprintf( msg, "set hpan0win %f; set hpan0lin %f; set hpan0mac %f", hpan0win, hpan0lin, hpan0mac );
 	cmd( inter, msg );
+	cmd( inter, "mouse_wheel $c.f.c" );
     cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { \
-					bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D / 120 } ] units }; \
 					$c.f.c xview moveto $hpan0win \
 				} { \
 					if [ string equal $tcl_platform(os) Darwin ] { \
-						bind $c.f.c <MouseWheel> { %W yview scroll [ expr { -%D } ] units }; \
 						$c.f.c xview moveto $hpan0mac \
 					} { \
-						bind $c.f.c <4> { %W yview scroll -1 units }; \
-						bind $c.f.c <5> { %W yview scroll 1 units }; \
 						$c.f.c xview moveto $hpan0lin \
 					} \
 				}" );
@@ -170,6 +167,8 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd(inter, "set posXstr [expr [winfo x .] + $corrX + $posX + $widthB]");
 	cmd(inter, "set posYstr [expr [winfo y .] + $corrY]");
 	sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
+	cmd( inter, msg );
+	sprintf( msg, "wm minsize $c [ expr %d / 2 ] [ expr %d / 2 ]", hsz, vsz );	
 	cmd( inter, msg );
 	set_shortcuts( ".model_str" );
 }
