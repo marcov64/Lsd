@@ -352,20 +352,23 @@ SEARCH_STR
 FILE *search_str(char const *name, char const *str)
 {
 FILE *f;
-char got[80];
+char got[100];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%s", got);
-while(strcmp(got, str))
+fscanf(f, "%99s", got);
+for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 }
-return(f);
+if ( ! strcmp( got, str ) )
+	return f;
+else
+	return NULL;
 }
 
 /****************************************************
@@ -374,22 +377,25 @@ SEARCH_STR_nospaces
 FILE *search_str_nospaces(char *name, char *str)
 {
 FILE *f;
-char got[400];
+char got[1000];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fgets(got, 400, f);
+fgets(got, 999, f);
 clean_spaces(got);
-while(strncmp(got, str, strlen(str)))
+for ( int i = 0; strncmp( got, str, strlen( str ) ) && i < MAX_FILE_TRY; ++i )
 {
-if(fgets(got, 400, f)==NULL)
+if(fgets(got, 999, f)==NULL)
  return(NULL);
 clean_spaces(got); 
 }
-return(f);
+if ( ! strncmp( got, str, strlen( str ) ) )
+	return f;
+else
+	return NULL;
 }
 
 
@@ -399,27 +405,33 @@ SEARCH_DATA_STR
 FILE *search_data_str(char const *name, char const *init, char const *str)
 {
 FILE *f;
-char got[80];
+char got[100];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%s", got);
-while(strcmp(got, init))
+fscanf(f, "%99s", got);
+for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 }
 
+if ( strcmp( got, init ) )
+	return NULL;
 
-while(strcmp(got, str))
+for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 }
-return(f);
+
+if ( ! strcmp( got, str ) )
+	return f;
+else
+	return NULL;
 }
 
 /****************************************************
@@ -428,9 +440,9 @@ SEARCH_DATA_ENT
 FILE *search_data_ent(char *name, variable *v)
 {
 FILE *f;
-char got[80];
-char temp[80];
-char temp1[80];
+char got[100];
+char temp[100];
+char temp1[100];
 char typ[20];
 
 f=fopen(name, "r");
@@ -438,23 +450,29 @@ if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%s", got);
-while(strcmp(got, "DATA"))
+fscanf(f, "%99s", got);
+for ( int i = 0; strcmp( got, "DATA" ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 }
+
+if ( strcmp( got, "DATA" ) )
+	return NULL;
 
 strcpy(temp, (v->up)->label); //Search for the section of the Object
-fscanf(f, "%s", temp1);
-fscanf(f, "%s", got);
+fscanf(f, "%99s", temp1);
+fscanf(f, "%99s", got);
 
-while(strcmp(got, temp) || strcmp(temp1,"Object:") )
+for ( int i = 0; ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 }
+
+if ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) )
+	return NULL;
 
 //hopefully, we are at the beginning of the vars in the correct object
 if(v->param==1)
@@ -465,20 +483,23 @@ else
  else
   strcpy(typ,"Var:");
 
-fscanf(f, "%s", temp1); //Search for the line of the var
-fscanf(f, "%s", got);
+fscanf(f, "%99s", temp1); //Search for the line of the var
+fscanf(f, "%99s", got);
 
-while(strcmp(got, v->label) || strcmp(temp1,typ) )
+for ( int i = 0; ( strcmp( got, v->label ) || strcmp( temp1, typ ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%s", got)==EOF)
+if(fscanf(f, "%99s", got)==EOF)
  return(NULL);
 
 }
 
-
-return(f);
+if ( strcmp( got, v->label ) || strcmp( temp1, typ ) )
+	return NULL;
+else
+	return f;
 }
+
 
 void set_counter(object *o)
 {
@@ -1763,7 +1784,6 @@ delete c;
 
 }
 
-
 description *search_description(char *lab)
 {
 description *cur;
@@ -1779,7 +1799,6 @@ return NULL;
 #ifndef NO_WINDOW
 /********************
 autofill_descr
-
 generate recur. the descriptions of the model as it is
 *********************/
 void autofill_descr(object *o)
@@ -1808,7 +1827,6 @@ for(cv=o->v; cv!=NULL; cv=cv->next)
     add_description(cv->label, "Function", "(no description available)");
    } 
  } 
-//for(co=o->son; co!=NULL; co=skip_next_obj(co)) 
 for(cb=o->b; cb!=NULL; cb=cb->next)
   autofill_descr(cb->head);
 }
@@ -2358,8 +2376,8 @@ if(f==NULL)
   cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Cannot upload the equation file.\"");
   return;
  }
-fscanf(f, "%s", lab);
-while(strncmp(lab, "FUN=", 4) && fscanf(f, "%s", lab)!=EOF);    
+fscanf(f, "%199s", lab);
+for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
@@ -2383,7 +2401,7 @@ int i;
 
 read_eq_filename(lab);
 f=fopen(lab, "r");
-s=new char[1000000];
+s=new char[ MAX_FILE_SIZE + 1 ];
 while( fgets(msg, 1000, f)!=NULL)
    strcat(s, msg);
 fclose(f);  

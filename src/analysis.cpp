@@ -3445,7 +3445,7 @@ SEARCH_LAB_TIT_FILE
 double *search_lab_tit_file(char *s, char *t, int st, int en)
 {
 int i, done, app_st, app_en, j;
-char str[50], tag[30];
+char str[100], tag[100];
 double *d, app;
 FILE *f;
 
@@ -3461,7 +3461,7 @@ myexit(21);
 
 f=fopen(filename, "r");
 for(i=0, done=0; i<num_var; i++)
- {fscanf(f, "%s %s (%d %d)\t", str, tag, &app_st, &app_en);
+ {fscanf(f, "%99s %99s (%d %d)\t", str, tag, &app_st, &app_en);
   if(!strcmp(s, str) && !strcmp(tag, t ) && (app_st==st || app_st==-1))
     done=i;
 

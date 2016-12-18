@@ -41,7 +41,11 @@ Comments and bug reports to marco.valente@univaq.it
 #define NaN NAN
 
 // global constants
-#define TCL_BUFF_STR 2000				// standard Tcl buffer size
+#define TCL_BUFF_STR 2000				// standard Tcl buffer size (>1000)
+#define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
+#define MAX_FILE_TRY 100000				// max number of lines to read from files
+#define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
+
 
 // define the base pseudo random number generator
 double ran1( long *idum_loc = NULL );
@@ -180,8 +184,8 @@ variable *add_empty_var(char const *str);
 void add_var_from_example(variable *example);
 
 void replicate(int num, int propagate);
-int load_param(char *file_name, int repl, FILE *f);
-void load_struct(FILE *f);
+bool load_param(char *file_name, int repl, FILE *f);
+bool load_struct(FILE *f);
 void save_param(FILE *f);
 void save_struct(FILE *f, char const *tab);
 int read_param(char *file_name);

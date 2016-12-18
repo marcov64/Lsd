@@ -185,7 +185,7 @@ void dataentry_sensitivity(int *choice, sense *s, int nval);
 bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
 void save_pos( object * );
 object *restore_pos( object * );
-int load_configuration( object * );
+int load_configuration( object *, bool reload = false );
 bool save_configuration( object *, long findex = 0 );
 bool unsaved_change(  );		// control for unsaved changes in configuration
 bool unsaved_change( bool );
@@ -242,6 +242,7 @@ extern bool iniShowOnce;	// prevent repeating warning on # of columns
 object *currObj;
 char *res_g;
 char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
+int natBat = true;			// native (Windows/Linux) batch format flag
 int result_loaded;
 // list of choices that are bad with existing run data
 int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
@@ -321,7 +322,7 @@ while(choice!=1)
 	cmd(inter, "bind .log <Destroy> {set choice 35}");
 
 	// browse only if not running two-cycle operations
-	if ( choice != 55 && choice != 75 && choice != 76 && choice != 77 && choice != 78 && choice != 79 )
+	if ( choice != 20 && choice != 55 && choice != 75 && choice != 76 && choice != 77 && choice != 78 && choice != 79 )
 		choice=browse(cr, &choice);
 
 	cr=operate(&choice, cr);
@@ -896,7 +897,7 @@ OPERATE
 object *operate( int *choice, object *r)
 {
 char *lab1,*lab2,*lab3,lab[TCL_BUFF_STR],lab_old[TCL_BUFF_STR], ch[TCL_BUFF_STR];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, natBat, temp[10];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, temp[10];
 bool saveAs, delVar, reload;
 char observe, initial, cc;
 bridge *cb;
@@ -1834,7 +1835,7 @@ cmd(inter, "bind $T.h <KeyPress-Delete> {set done 10}");
 cmd(inter, "bind $T.b1 <Control-d> {focus $Td.f.text}; bind $T.b1 <Control-D> {focus $Td.f.text}");
 cmd(inter, "bind $T.desc.f.text <Control-z> {set done 1}; bind $T.desc.f.text <Control-Z> {set done 1}");   
 
-cmd( inter, "donehelp $T b { set done 1 } { LsdHelp menumodel.html#variables }" );
+cmd( inter, "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#variables } { set done 2 }" );
 
 cmd(inter, "showtop $T topleftW");
 cmd(inter, "focus $T.b1");
@@ -2390,38 +2391,37 @@ cmd( inter, "if { $lastItem == \"\" } { set lastItem 0 }" );
 cmd( inter, "set T .run" );
 cmd( inter, "newtop $T \"Run Simulation\" { set choice 2 }" );
 
-cmd(inter, "frame $T.f1 -bd 2 -relief groove");
+cmd(inter, "frame $T.f1");
 cmd(inter, "label $T.f1.war1 -text \"Running the model configuration:\"");
 sprintf(ch, "label $T.f1.war2 -text \"%s\" -fg red", simul_name);
 cmd(inter, ch);
-cmd(inter, "pack $T.f1.war1 $T.f1.war2");
-cmd(inter, "pack $T.f1 -expand yes -fill x");
 
 if(sim_num>1)
 {
-sprintf(ch, "label $T.war3 -text \"\\nNum. of simulations: %d\"", sim_num);
+sprintf(ch, "label $T.f1.war3 -text \"\nNumber of simulations: %d\"", sim_num);
 cmd(inter, ch);
-sprintf(ch, "label $T.war4 -text \"Steps for each simulation (max.): %d\"", max_step);
+sprintf(ch, "label $T.f1.war4 -text \"Time steps: %d\"", max_step);
 cmd(inter, ch);
-cmd(inter, "pack $T.war3 $T.war4");
+cmd(inter, "pack $T.f1.war1 $T.f1.war2 $T.f1.war3 $T.f1.war4");
 
 cmd(inter, "frame $T.f2 -bd 2 -relief groove");
-cmd(inter, "label $T.f2.war5 -text \"Results files (single simulations): \"");
-sprintf(ch, "label $T.f2.war6 -text \"from: %s_%d.res\\nto: %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
+cmd(inter, "label $T.f2.war5 -text \"Results files (single simulation): \"");
+sprintf(ch, "label $T.f2.war6 -text \"from: %s_%d.res\\[.gz\\]\nto: %s_%d.res\\[.gz\\]\"", simul_name, seed, simul_name, seed+sim_num-1);
 cmd(inter, ch);
 cmd(inter, "checkbutton $T.f2.nores -text \"Skip generating results files\" -variable no_res");
 cmd(inter, "pack $T.f2.war5 $T.f2.war6 $T.f2.nores");
 
-cmd(inter, "checkbutton $T.dozip -text \"Generate zipped files\" -variable dozip");
-
 cmd(inter, "frame $T.f3 -bd 2 -relief groove");
-cmd(inter, "label $T.f3.war7 -text \"Totals file (simulations last step only): \"");
-sprintf(ch, "label $T.f3.war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
+cmd(inter, "label $T.f3.war7 -text \"Totals file (last steps only): \"");
+sprintf(ch, "label $T.f3.war8 -text \"%s.tot\\[.gz\\]\"", simul_name);
 cmd(inter, ch);
-sprintf(msg, "set choice [file exist %s_%d_%d.tot] ", simul_name, seed, seed+sim_num-1);
+
+sprintf( msg, "set choice [ file exists %s%s%s.tot%s ]", path, strlen( path ) > 0 ? "/" : "", simul_name, dozip ? ".gz" : "" );
 cmd(inter, msg);
 
-if(*choice==1)
+cmd(inter, "checkbutton $T.dozip -text \"Generate zipped files\" -variable dozip");
+
+if(*choice)
  {
  cmd(inter, "frame $T.f3.c");
  cmd(inter, "label $T.f3.c.l -text \"Warning: totals file already exists\" -fg red");
@@ -2429,17 +2429,19 @@ if(*choice==1)
  cmd(inter, "radiobutton $T.f3.c.b2 -text \"Append to existing totals file\" -variable add_to_tot -value 1 -anchor w");
  cmd(inter, "pack $T.f3.c.l $T.f3.c.b1 $T.f3.c.b2 -expand yes -fill x");
  cmd(inter, "pack $T.f3.war7 $T.f3.war8 $T.f3.c");
- cmd(inter, "pack $T.f2 $T.f3 $T.dozip -pady 10 -expand yes -fill x");
  }
 else
- cmd(inter, "pack $T.f2 $T.dozip -pady 10 -expand yes -fill x");
+ cmd(inter, "pack $T.f3.war7 $T.f3.war8");
+ 
+cmd(inter, "pack $T.f1 $T.f2 $T.f3 $T.dozip -pady 5 -padx 5 -expand yes -fill x");
 }
 else
 {
-sprintf(ch, "label $T.war3 -text \"\\nSteps for simulation (max.): %d\"", max_step);
+sprintf(ch, "label $T.f1.war3 -text \"\nTime steps: %d\"", max_step);
 cmd(inter, ch);
-cmd(inter, "label $T.war4 -text \"Results will be saved in memory only\\n\"");
-cmd(inter, "pack $T.war3 $T.war4");
+cmd(inter, "label $T.f1.war4 -text \"Results will be saved in memory only\\n\"");
+cmd(inter, "pack $T.f1.war1 $T.f1.war2 $T.f1.war3 $T.f1.war4");
+cmd(inter, "pack $T.f1 -pady 5 -padx 5 -expand yes -fill x");
 }
 
 // Only ask to overwrite configuration if there are changes
@@ -2447,7 +2449,7 @@ if ( unsaved_change() )
 {
 	overwConf = 1;
 	cmd( inter, "checkbutton $T.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
-	cmd( inter, "pack $T.tosave" );
+	cmd( inter, "pack $T.tosave -padx 10" );
 }
 else
 	overwConf = 0;
@@ -2467,13 +2469,13 @@ Tcl_UnlinkVar(inter, "add_to_tot");
 Tcl_UnlinkVar(inter, "dozip");
 Tcl_UnlinkVar(inter, "overwConf");
 
-if(*choice==2)
-  break;
-
-*choice=1;
+if ( *choice == 2 )
+{
+	*choice = 0;
+	break;
+}
 
 for(n=r; n->up!=NULL; n=n->up);
-
 blueprint->empty();			    // update blueprint to consider last changes
 set_blueprint(blueprint, n);
 
@@ -2511,7 +2513,7 @@ reload = ( *choice == 38 ) ? true : false;
 if ( reload )
 	save_pos( r );
 
-if(struct_loaded==1)
+if ( struct_loaded )
 { 
 	if ( ! discard_change( ) )		// unsaved configuration?
 	 break;
@@ -2531,13 +2533,14 @@ if(struct_loaded==1)
   cmd( inter, "catch {unset ModElem}" );
 }
 
+struct_loaded = false;
 actual_steps=0;					//Flag that no simulation has been run
 unsavedData = false;			// no unsaved simulation results
 
 if ( ! reload )
 {
   *choice=0;
-  strcpy(lastObj,"");	// disable last object for quick reload
+  strcpy(lastObj,"");			// disable last object for quick reload
   sprintf(lab, "set res %s", simul_name);
   cmd(inter, lab);
   if(strlen(path)>0)
@@ -2577,7 +2580,7 @@ if ( ! reload )
    strcpy(path,"");
  } 
 
-switch ( load_configuration( r ) )
+switch ( load_configuration( r, false ) )
 {
 	case 1:							// file/path not found
 		if( strlen( path ) > 0 )
@@ -2585,15 +2588,29 @@ switch ( load_configuration( r ) )
 		else
 			sprintf( msg, "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name );
 		cmd( inter, msg );
-		*choice = 0;
+		*choice = 20;
 		break;
 		
-	case 2:							// problem from MODELREPORT section
-	case 3:							// problem from DESCRIPTION section
+	case 2:
+	case 3:
+		cmd( inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
+		*choice = 20;
+		break;
+		
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:							// problem from MODELREPORT section
+	case 9:							// problem from DESCRIPTION section
 		autofill_descr( r );
-	case 4:							// problem from DOCUOBSERVE section
+		
+	case 10:						// problem from DOCUOBSERVE section
+	case 11:
+	case 12:						// problem from DOCUINITIAL section
+	case 13:
 		cmd( inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
-		*choice = 0;
+
 	default:						// load ok
 		show_graph( r );
 		unsaved_change( false );	// no changes to save
@@ -2601,15 +2618,14 @@ switch ( load_configuration( r ) )
 		redrawRoot = true;			// force browser redraw
 		if ( ! reload )
 			cmd( inter, "set cur 0" ); // point for first var in listbox
+		*choice = 0;
 }
 
 // restore pointed object and variable
 n = restore_pos( r );
+
 if ( n != r )
-{
-	*choice = 0;
 	return n;
-}
 
 break;
 
@@ -3736,7 +3752,13 @@ if (rsense!=NULL)
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
 	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-	load_configuration( r );
+	if ( load_configuration( r ) != 0 )
+	{
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		*choice = 20;
+		break;
+	}
+		
 	// restore pointed object and variable
 	n = restore_pos( r );
 	if ( n != r )
@@ -3828,7 +3850,13 @@ if (rsense!=NULL)
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
 	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-	load_configuration( r );
+	if ( load_configuration( r ) != 0 )
+	{
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		*choice = 20;
+		break;
+	}
+
 	// restore pointed object and variable
 	n = restore_pos( r );
 	if ( n != r )
@@ -3940,7 +3968,13 @@ if (rsense!=NULL)
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
 	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-	load_configuration( r );
+	if ( load_configuration( r ) != 0 )
+	{
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		*choice = 20;
+		break;
+	}
+
 	// restore pointed object and variable
 	n = restore_pos( r );
 	if ( n != r )
@@ -4047,7 +4081,13 @@ if (rsense!=NULL)
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
 	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-	load_configuration( r );
+	if ( load_configuration( r ) != 0 )
+	{
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		*choice = 20;
+		break;
+	}
+
 	// restore pointed object and variable
 	n = restore_pos( r );
 	if ( n != r )
@@ -4160,7 +4200,13 @@ if (rsense!=NULL)
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
 	cmd(inter, "if {[winfo exists $c.c]==1} {destroy $c.c} {}");
-	load_configuration( r );
+	if ( load_configuration( r ) != 0 )
+	{
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		*choice = 20;
+		break;
+	}
+
 	// restore pointed object and variable
 	n = restore_pos( r );
 	if ( n != r )
@@ -4236,13 +4282,13 @@ case 64:
 	// read data from file (1 line per element, '#' indicate comment)
 	while(!feof(f))
 	{	// read element by element, skipping comments
-		fscanf(f, "%s", lab);				// read string
+		fscanf(f, "%99s", lab);				// read string
 		while(lab[0]=='#')					// start of a comment
 		{
 			do								// jump to next line
 				cc=fgetc(f);
 			while(!feof(f) && cc!='\n');
-			fscanf(f, "%s", lab);			// try again
+			fscanf(f, "%99s", lab);			// try again
 		}
 
 		if(feof(f))							// ended too early?
@@ -4515,9 +4561,9 @@ case 68:
 		}
 	}
 
+	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
 	Tcl_LinkVar(inter, "natBat", (char *)&natBat, TCL_LINK_INT);
 	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
-	natBat = 1;
 	
 	// confirm number of cores to use
 	cmd( inter, "newtop .s \"Number of Processes\" { set choice 0 }" );
@@ -4531,13 +4577,15 @@ case 68:
 	cmd(inter, "label .s.i.c.w -text \"(using a number higher than the number\nof processors/cores is not recommended)\"");
 	cmd(inter, "frame .s.i.b");
 	cmd(inter, "label .s.i.b.l -text \"Batch file base name\"");
-	cmd(inter, "entry .s.i.b.e -textvariable res -justify center");
+	cmd(inter, "set res2 $res");
+	cmd(inter, "entry .s.i.b.e -textvariable res2 -justify center");
 	cmd(inter, "frame .s.i.o");
+	cmd(inter, "checkbutton .s.i.o.nores -text \"Skip generating results files\" -variable no_res");
 	cmd(inter, "checkbutton .s.i.o.n -text \"Use native batch format\" -variable natBat");
 	cmd(inter, "checkbutton .s.i.o.dozip -text \"Generate zipped files\" -variable dozip");
 	cmd(inter, "pack .s.i.c.l .s.i.c.e .s.i.c.w");
 	cmd(inter, "pack .s.i.b.l .s.i.b.e");
-	cmd(inter, "pack .s.i.o.n .s.i.o.dozip");
+	cmd(inter, "pack .s.i.o.nores .s.i.o.n .s.i.o.dozip");
 	cmd(inter, "pack .s.i.c .s.i.b .s.i.o -pady 10");
 	cmd(inter, "pack .s.i");
 	cmd( inter, "okcancel .s b { set cores [ .s.i.c.e get ]; set choice $cores } { set choice 0 }" );
@@ -4553,6 +4601,7 @@ case 68:
 	
 	cmd(inter, "destroytop .s");
 	Tcl_UnlinkVar(inter, "natBat");
+	Tcl_UnlinkVar(inter, "no_res");
 	Tcl_UnlinkVar(inter, "dozip");
 
 	if(*choice==0)
@@ -4562,7 +4611,7 @@ case 68:
 	if(param < 1 || param > 64) 
 		param=4;
 	
-	lab3 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	lab3 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
 	
 	// select batch format & create batch file
 	char wpath[300];
@@ -4626,9 +4675,9 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", wpath, lab1, j);
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, j);
 			else							// Unix
-				fprintf(f, "%s -f %s/%s -s %d -e %d %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, dozip ? "-z" : "", lab2, lab1, j);
+				fprintf(f, "%s -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, j);
 			j <= sl ? i+=num+1 : i+=num;
 		}
 	}
@@ -4636,19 +4685,19 @@ case 68:
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if( fSeq )
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, dozip ? "-z" : "", wpath, lab1, i);
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, i);
 				else						// Unix
-					fprintf(f, "%s -f %s/%s_%d.lsd %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, dozip ? "-z" : "", lab2, lab1, i);
+					fprintf(f, "%s -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, i);
 			else
 			{	// get the selected file names, one by one
-				sprintf( msg, "set res [lindex $bah %d]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]", j - 1 );
+				sprintf( msg, "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1 );
 				cmd( inter, msg );
-				lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+				lab1 = ( char * ) Tcl_GetVar( inter, "res3", 0 );
 				
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s.lsd %s 1>%s\\%s.log 2>&1\n", j, ch, wpath, lab1, dozip ? "-z" : "", wpath, lab1);
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, wpath, lab1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1);
 				else						// Unix
-					fprintf(f, "%s -f %s/%s.lsd %s >%s/%s.log 2>&1 &\n", ch, lab2, lab1, dozip ? "-z" : "", lab2, lab1);
+					fprintf(f, "%s -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, lab2, lab1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1);
 			}
 	
 	if ( fSeq )
@@ -4718,40 +4767,60 @@ case 69:
 		break;
 	}
 
+	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
 	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
 	
 	// confirm overwriting current configuration
 	cmd( inter, "set b .batch" );
 	cmd( inter, "newtop $b \"Start Batch\" { set choice 2 }" );
 
-	cmd(inter, "label $b.war1 -text \"Starting 'No Window' batch for the model configuration: \"");
-	sprintf(ch, "label $b.war2 -text \"%s\" -fg red", simul_name);
+	cmd(inter, "frame $b.f1");
+	cmd(inter, "label $b.f1.war1 -text \"Starting 'No Window' batch\nfor the model configuration: \"");
+	sprintf(ch, "label $b.f1.war2 -text \"%s\" -fg red", simul_name);
 	cmd(inter, ch);
-	sprintf(ch, "label $b.war3 -text \"Number of simulations: %d\"", sim_num);
+	sprintf(ch, "label $b.f1.war3 -text \"\nNumber of simulations: %d\"", sim_num);
 	cmd(inter, ch);
-	sprintf(ch, "label $b.war4 -text \"Time steps (max): %d\"", max_step);
+	sprintf(ch, "label $b.f1.war4 -text \"Time steps: %d\"", max_step);
 	cmd(inter, ch);
-	cmd(inter, "label $b.war5 -text \"Results file(s) (single simulation): \"");
-	cmd(inter, "label $b.war7 -text \"Total file (last steps): \"");
-	sprintf(ch, "label $b.war8 -text \"%s_%d_%d.tot\"", simul_name, seed, seed+sim_num-1);
-	cmd(inter, ch);
-	cmd(inter, "label $b.tosave -text \"\\nYou are going to overwrite the existing configuration file\\nand any results files in the destination folder\\n\"");
-	cmd(inter, "checkbutton $b.dozip -text \"Generate zipped files\" -variable dozip");
-
+	cmd(inter, "pack $b.f1.war1 $b.f1.war2 $b.f1.war3 $b.f1.war4");
+	
+	cmd(inter, "frame $b.f2 -bd 2 -relief groove");
+	cmd(inter, "label $b.f2.war5 -text \"Results file(s) (single simulation): \"");
 	
 	if(sim_num>1)	// multiple runs case
-	{
-		sprintf(ch, "label $b.war6 -text \"from %s_%d.res to %s_%d.res\"", simul_name, seed, simul_name, seed+sim_num-1);
-		cmd(inter, ch);
-		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war3 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave $b.dozip\"");
-	}
+		sprintf(ch, "label $b.f2.war6 -text \"from: %s_%d.res\\[.gz\\]\nto: %s_%d.re\\[.gz\\]s\"", simul_name, seed, simul_name, seed+sim_num-1);
 	else			// single run case
+		sprintf(ch, "label $b.f2.war6 -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed);
+	cmd(inter, ch);
+
+	cmd(inter, "label $b.f2.war7 -text \"Totals file (last steps only): \"");
+	sprintf(ch, "label $b.f2.war8 -text \"%s_%d_%d.tot\\[.gz\\]\"", simul_name, seed, seed+sim_num-1);
+	cmd(inter, ch);
+	cmd( inter, "label $b.f2.war9 -text \"Warning: you are going to overwrite\nany results files in the destination folder\" -fg red" );
+	cmd(inter, "checkbutton $b.f2.nores -text \"Skip generating results files\" -variable no_res");
+	
+	sprintf( msg, "set choice [ expr [file exists  %s%s%s_%d.res%s] || [file exists %s%s%s_%d_%d.tot%s] ]", path, strlen( path ) > 0 ? "/" : "", simul_name, seed, dozip ? ".gz" : "", path, strlen( path ) > 0 ? "/" : "", simul_name, seed, seed + sim_num - 1, dozip ? ".gz" : "" );
+	cmd( inter, msg );
+	
+	cmd(inter, "checkbutton $b.dozip -text \"Generate zipped files\" -variable dozip");
+	
+	if ( *choice )
+		cmd(inter, "pack $b.f2.war5 $b.f2.war6 $b.f2.war7 $b.f2.war8 $b.f2.war9 $b.f2.nores -padx 10");
+	else
+		cmd(inter, "pack $b.f2.war5 $b.f2.war6 $b.f2.war7 $b.f2.war8 $b.f2.nores -padx 10");
+		
+	cmd(inter, "pack $b.f1 $b.f2 $b.dozip -pady 10 -padx 5 -expand yes -fill x");
+	
+	// Only ask to overwrite configuration if there are changes
+	if ( unsaved_change() )
 	{
-		sprintf(ch, "label $b.war6 -text \"%s_%d.res\"", simul_name, seed);
-		cmd(inter, ch);
-		cmd(inter, "set wind \"$b.war1 $b.war2 $b.war4 $b.war5 $b.war6 $b.war7 $b.war8 $b.tosave $b.dozip\"");
+		overwConf = 1;
+		cmd( inter, "checkbutton $b.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
+		cmd( inter, "pack $b.tosave -padx 10" );
 	}
-	cmd(inter, "foreach i $wind {pack $i}");
+	else
+		overwConf = 0;
 
 	cmd( inter, "okcancel $b b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "bind $b <KeyPress-Return> {set choice 1}");
@@ -4763,21 +4832,31 @@ case 69:
 		Tcl_DoOneEvent(0);
 	
 	cmd(inter, "destroytop $b");
+	Tcl_UnlinkVar(inter, "no_res");
 	Tcl_UnlinkVar(inter, "dozip");
+	Tcl_UnlinkVar(inter, "overwConf");
 
-	if(*choice==2)
+	if ( *choice == 2 )
+	{
+		*choice = 0;
 		break;
+	}
 
-	// save the current configuration
 	for(n=r; n->up!=NULL; n=n->up);
 	blueprint->empty();			    // update blueprint to consider last changes
 	set_blueprint(blueprint, n);
 	
-	if ( ! save_configuration( r ) )
-	{
-		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Cannot save configuration file\" -detail \"Check if the file is set READ-ONLY.");
-		break;
-	}
+	if ( overwConf == 1 )			// save if needed
+		if ( ! save_configuration( r ) )
+		{
+			sprintf( msg , "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
+			cmd( inter, msg );
+			if( *choice == 2 )
+			{
+				*choice=0;
+				break;
+			}
+		}
 
 	// check for existing NW executable
 	sprintf(lab, "%s/%s", exec_path, exec_file);		// form full executable name
@@ -4812,9 +4891,9 @@ case 69:
 	cmd(inter, "cd $path");
 
 	if(*choice == 1)							// Windows?
-		sprintf(msg, "exec %s -f %s %s >& %s.log  &", lab, struct_file, dozip ? "-z" : "", simul_name);
+		sprintf(msg, "exec %s -f %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", dozip ? "" : "-z", simul_name);
 	else										// Unix
-		sprintf(msg, "exec %s -f %s %s >& %s.log  &", lab, struct_file, dozip ? "-z" : "", simul_name);
+		sprintf(msg, "exec %s -f %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", dozip ? "" : "-z", simul_name);
     cmd(inter, msg);
 
 	sprintf(msg, "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);

@@ -114,10 +114,9 @@ int deb(object *r, object *c, char const *lab, double *res);
 void analysis(int *choice);
 void init_random(int seed);
 void add_description(char const *lab, char const *type, char const *text);
-void add_description(char const *lab, char const *type, char const *text);
 void empty_cemetery(void);
 void save_single(variable *vcv);
-int load_configuration( object * );
+int load_configuration( object *, bool reload = false );
 char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
@@ -137,7 +136,7 @@ int optimized=0;
 int check_optimized=0;
 int plot_flag=1;
 double refresh=1.01;
-char lsd_eq_file[500000];
+char lsd_eq_file[ MAX_FILE_SIZE + 1 ];
 int watch;
 char msg[TCL_BUFF_STR];
 int stack;
@@ -212,8 +211,7 @@ LSD MAIN
 int lsdmain(int argn, char **argv)
 {
 char tcl_dir[1000], str[1000], *lsdroot;
-
-int i, p=0, len, done;
+int i, len, done;
 FILE *f;
 
 blueprint=NULL;
@@ -234,7 +232,7 @@ fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n");
+  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n");
   myexit(1);
  }
 else
@@ -275,21 +273,23 @@ else
  if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : don't create compressed result files
  {
 	i--; 	// no parameter for this option
-	dozip = 0;
+	dozip = false;
+	continue;
+ }
+ if( argv[i][0] == '-' && argv[i][1] == 'o' )	// change the path for the output of result files
+ {
+	delete [ ] alt_path;
+	alt_path = new char [ strlen( argv[ 1 + i ] ) + 1 ];
+	strcpy( alt_path, argv[ 1 + i ] );
+	save_alt_path = true;
 	continue;
  }
   
-  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
+  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
   myexit(2);
   }
  } 
- 
-if(batch_sequential==0)
- {
- struct_file=new char[strlen(simul_name)+1];
- sprintf(struct_file, "%s", simul_name);
- simul_name[strlen(simul_name)-4]='\0';
-  } 
+
 #else 
 for(i=1; argv[i]!=NULL; i++)
 {if(argv[i][0]!='-' || (argv[i][1]!='f' && argv[i][1]!='i') )
@@ -304,14 +304,12 @@ for(i=1; argv[i]!=NULL; i++)
     if(len>4 && !strcmp(".lsd",simul_name+len-4) )
      *(simul_name+len-4)=(char)NULL;
     i++;
-    p=1;
 	}
  if(argv[i][1]=='i')
 	{
    strcpy(tcl_dir,argv[i+1]+2);
    i++;
   } 
-
 }
 
 grandTotal = true;				// not in parallel mode: use .tot headers
@@ -327,29 +325,41 @@ signal(SIGSEGV, signal_handler);
 
 root=new object;
 root->init(NULL, "Root");
+add_description("Root", "Object", "(no description available)");
 blueprint=new object;
 blueprint->init(NULL, "Root");
-
 
 #ifdef NO_WINDOW
 no_window=1;
 
-if(batch_sequential==0)
-  f=fopen(struct_file, "r");
+if ( batch_sequential )
+ {
+ struct_file=new char[strlen(simul_name)+1];
+ sprintf(struct_file, "%s", simul_name);
+ simul_name[strlen(simul_name)-4]='\0';
+ } 
 else
  {
   sprintf(msg, "%s_%d.lsd", simul_name,findex);
-  delete [ ] struct_file;
   struct_file=new char[strlen(msg)+1];
   strcpy(struct_file,msg);
-  f=fopen(struct_file, "r");
  }
+ 
+f=fopen(struct_file, "r");
 if(f==NULL)
  {
-  printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n",struct_file);
+  printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", struct_file);
   myexit(3);
  }
 fclose(f);
+struct_loaded = true;
+
+if ( load_configuration( root, false ) != 0 )
+{
+	printf( "\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n", struct_file );
+	myexit(3);
+}
+
 #else 
 Tcl_FindExecutable(argv[0]); 
 inter=InterpInitWin(tcl_dir);
@@ -436,15 +446,14 @@ cmd(inter, "pack .l");
 cmd( inter, "wm protocol . WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 cmd(inter, "update");
 
-add_description("Root", "Object", "(no description available)");
 sprintf(name_rep, "modelreport.html");
 
 f=fopen("makefile", "r");
 if(f!=NULL)
  {
- fscanf(f, "%s", msg);
+ fscanf(f, "%99s", msg);
  while(strncmp(msg, "FUN=", 4) && f!=(FILE *)EOF)
-    fscanf(f, "%s", msg);
+    fscanf(f, "%99s", msg);
  fclose(f);
  sprintf(equation_name, "%s.cpp",msg+4);
  }
@@ -452,12 +461,6 @@ if(f!=NULL)
 create_logwindow( );
 cmd(inter, "destroy .l");
 #endif
-
-if ( p == 1 && ! load_configuration( root ) )
-{
-	printf("\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n",struct_file);
-	myexit(3);
-}
 
 stacklog = new lsdstack;
 stacklog->next=NULL;
@@ -531,89 +534,76 @@ result *rf;					// pointer for results files (may be zipped or not)
 double app=0;
 clock_t start, end;
 
-#ifndef NO_WINDOW
-Tcl_LinkVar(inter, "done_in", (char *) &done_in, TCL_LINK_INT);
-Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-#endif
-
 done_in=done=0;
 quit=0;
  
-#ifndef NO_WINDOW 
-Tcl_UnlinkVar(inter, "done");
+#ifndef NO_WINDOW
+Tcl_LinkVar(inter, "done_in", (char *) &done_in, TCL_LINK_INT);
+Tcl_SetVar(inter, "done", "0", 0);
+
 cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
 cmd( inter, "wm deiconify .log; raise .log; focus .log" );
 
 #else
 sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
 plog(msg);
-f=fopen(struct_file, "r");
-root->load_struct(f);
-struct_loaded=1;
-fscanf(f, "%s", msg); //should be DATA
-root->load_param(struct_file, 1,f);
-fscanf(f, "%s",msg); //should be SIM_NUM 
-fscanf(f, "%d", &sim_num);
-fscanf(f, "%s",msg); //should be SEED
-fscanf(f, "%d", &seed);
-fscanf(f, "%s",msg); //should be MAX_STEP
-fscanf(f, "%d", &max_step);
-fclose(f);
 #endif
 
 for(i=1; i<=sim_num && quit!=2; i++)
 {
 cur_sim = i;	 //Update the global variable holding information on the current run in the set of runs
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
+
 #ifndef NO_WINDOW
 prepare_plot(root, i);
 #endif
+
 sprintf(msg, "\nSimulation %d running...", i);
 plog(msg);
 
-if(i>1 || batch_sequential_loop)
+// if new batch configuration file, reload all
+if ( batch_sequential_loop )
 {
- root->empty();
- root->init(NULL, "Root");
- blueprint->empty();
- blueprint->init(NULL, "Root");
- nodesSerial=0;			// restart network nodes serial counter
- f=fopen(struct_file, "r");
- if(f==NULL)
-  {
-   sprintf(msg, "\nFile %s not found",struct_file);
-   plog(msg);
-   myexit(9);
-  }
- root->load_struct(f);
- fscanf(f, "%s", msg); //should be DATA
- root->load_param(struct_file, 1, f);
- fclose(f);
+	if ( load_configuration( root, false ) != 0 )
+	{
+#ifndef NO_WINDOW 
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+#else
+		sprintf(msg, "\nFile %s not found or corrupted", struct_file);
+		plog(msg);
+#endif
+		myexit(9);
+	}
+	batch_sequential_loop = false;
 }
 
-strcpy(ch, "");
+// if just another run seed, reload just structure & parameters
+if ( i > 1 )
+	if ( load_configuration( root, true ) != 0 )
+	{
+#ifndef NO_WINDOW 
+		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+#else
+		sprintf(msg, "\nFile %s not found or corrupted", struct_file);
+		plog(msg);
+#endif
+		myexit(9);
+	}
 
+strcpy(ch, "");
 series_saved=0;
+
 print_title(root);
 if(no_more_memory==1)
  {
 #ifndef NO_WINDOW 
- root->empty();
- root->init(NULL, "Root");
- blueprint->empty();
- f=fopen(struct_file, "r");
- root->load_struct(f);
- fclose(f);
- f=NULL;
- root->load_param(struct_file, 1, f);
-  sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory sufficient for %d series over %d time steps. Reduce series to save and/or time steps.\"", series_saved, max_step);
+ sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLsd will close now.\"", series_saved, max_step);
  cmd(inter, msg);
 #else
- sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory sufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
+ sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
  plog(msg);
+#endif
  myexit(10);
- #endif
- return;
  }
  
 //new random routine' initialization
@@ -781,18 +771,15 @@ cmd(inter, "update");
 }//end of for t
 
 actual_steps=t-1;
-unsavedData = true;				// flag unsaved simulation results
+unsavedData = true;						// flag unsaved simulation results
 running=0;
 end=clock();
 
-if(quit==1) //For multiple simulation runs you need to reset quit
+if(quit==1) 			//For multiple simulation runs you need to reset quit
  quit=0;
 
-if(strlen(path)>0 || no_window==1)
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)(( end - start) /(float)CLOCKS_PER_SEC));
-else
-  sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)( end - start) /CLOCKS_PER_SEC);
- plog(msg);
+sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)(end - start) /CLOCKS_PER_SEC);
+plog(msg);
 
 #ifndef NO_WINDOW 
 cmd( inter, "update" );
@@ -811,82 +798,63 @@ if ( sim_num > 1 || no_window ) //Save results for multiple simulation runs
 if ( ! no_res )
 {
 if ( ! batch_sequential )
- sprintf( msg, "\nSaving results in file %s/%s_%d.res%s... ", save_alt_path ? alt_path : path, simul_name, seed - 1, dozip ? ".gz" : "" );
+  sprintf( msg, "%s%s%s_%d.res", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", simul_name, seed - 1 );
 else
- sprintf( msg, "\nSaving results in file %s/%s_%d_%d.res%s... ", save_alt_path ? alt_path : path, simul_name, findex, seed - 1, dozip ?".gz" : "");
+  sprintf( msg, "%s%s%s_%d_%d.res", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", simul_name, findex, seed - 1 );
 
-plog ( msg );
+sprintf( ch, "Saving results in file %s%s... ", msg, dozip ? ".gz" : "" );
+plog ( ch );
 
-if ( ! batch_sequential )
- if ( strlen( save_alt_path ? alt_path : path ) == 0 )
-  sprintf( msg, "%s_%d.res", simul_name, seed - 1 );
- else
-  sprintf( msg, "%s/%s_%d.res", save_alt_path ? alt_path : path, simul_name, seed - 1 );
-else
- if ( strlen( save_alt_path ? alt_path : path ) == 0 )
-  sprintf( msg, "%s_%d_%d.res", simul_name, findex, seed - 1 );
- else
-  sprintf( msg, "%s/%s_%d_%d.res", save_alt_path ? alt_path : path, simul_name, findex, seed - 1 );
-
-rf = new result( msg, "wt", dozip );	// create results file object
-rf->title( root, 1 );					// write header
-rf->data( root, 0, actual_steps );		// write all data
-delete rf;								// close file and delete object
+rf = new result( msg, "wt", dozip );				// create results file object
+rf->title( root, 1 );							// write header
+rf->data( root, 0, actual_steps );				// write all data
+delete rf;										// close file and delete object
 
 plog("Done\n");
 }
-else
-	plog( "\n" );
 
-if(batch_sequential==0)
- if(strlen(path)==0)
-  sprintf(msg, "%s_%d_%d.tot", simul_name, seed-i, seed-1+sim_num-i);
- else
-  sprintf(msg, "%s/%s_%d_%d.tot", path, simul_name, seed-i, seed-1+sim_num-i);
-else
- if(strlen(path)==0)
-  sprintf(msg, "%s_%d_%d_%d.tot", simul_name, findex, seed-i, seed-1+sim_num-i);
- else
-  sprintf(msg, "%s/%s_%d_%d_%d.tot", path, simul_name, findex, seed-i, seed-1+sim_num-i);
-
-if( batch_sequential == 0 || ! grandTotal )		// generate partial total files?
-	if(i==1 && add_to_tot==0)
-	{
-		rf = new result( msg, "wt", dozip );	// create results file object
-		rf->title( root, 0 );					// write header
-	}
+if ( ! grandTotal || batch_sequential )			// generate partial total files?
+{
+	if ( ! batch_sequential )
+	  sprintf( msg, "%s%s%s_%d_%d.tot", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", simul_name, seed - i, seed - 1 + sim_num - i );
 	else
-		rf = new result( msg, "a", dozip );		// add results object to existing file
-	
+	  sprintf( msg, "%s%s%s_%d_%d_%d.tot", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", simul_name, findex, seed - i, seed - 1 + sim_num - i );
+}
 else											// generate single grand total file
 {
-	if(strlen(path)==0)
-		sprintf(msg, "%s.tot", simul_name);
-	else
-		sprintf(msg, "%s/%s.tot", path, simul_name);
-
-	if( firstRes )
-	{
-		rf = new result( msg, "wt", dozip );	// create results file object
-		rf->title( root, 0 );					// write header
-		firstRes = false;
-	}
-	else
-		rf = new result( msg, "a", dozip );		// add results object to existing file
+	sprintf( msg, "%s%s%s.tot", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", simul_name );
 }
+
+if ( i == sim_num )								// print only for last
+{
+	sprintf( ch, "\nSaving totals in file %s%s... ", msg, dozip ? ".gz" : "" );
+	plog( ch );
+}
+
+if ( ( i == 1 && ! add_to_tot ) || ( grandTotal && firstRes ) )
+{
+	rf = new result( msg, "wt", dozip );		// create results file object
+	rf->title( root, 0 );						// write header
+	firstRes = false;
+}
+else
+	rf = new result( msg, "a", dozip );			// add results object to existing file
 
 rf->data( root, actual_steps );					// write current data data
 delete rf;										// close file and delete object
 
- if(batch_sequential==1 && i==sim_num)  // last run of current batch file?
+if ( i == sim_num )								// print only for last
+	plog( "Done\n" );
+
+if ( batch_sequential && i == sim_num)  		// last run of current batch file?
  {
-   findex++;							// try next file
+   findex++;									// try next file
    sprintf(msg, "%s_%d.lsd",simul_name,findex);
    delete[] struct_file;
    struct_file=new char[strlen(msg)+1];
    strcpy(struct_file,msg);
    f=fopen(struct_file, "r");			
-   if(f==NULL || (fend!=0 && findex>fend))  // no more file to process
+   if(f==NULL || (fend!=0 && findex>fend))  	// no more file to process
    {
 	 if(f!=NULL) fclose(f);
      sprintf(msg, "\nFinished processing %s.\n",simul_name);
@@ -895,10 +863,11 @@ delete rf;										// close file and delete object
    }
    sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
    plog(msg);
-   fclose(f);  // process next file
-   i=0;   // force restarting run count
+   fclose(f);  									// process next file
+   struct_loaded = true;
+   i=0;   										// force restarting run count
    batch_sequential_loop=true;
-  } 
+ } 
 }
 }
 

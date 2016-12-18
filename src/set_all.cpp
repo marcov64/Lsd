@@ -790,7 +790,7 @@ case 7:
    cmd(inter, "cd $oldpath");
    if(f!=NULL)
     {
-    fscanf(f, "%s", ch); //the label
+    fscanf(f, "%99s", ch); //the label
     kappa=fscanf(f, "%lf", &value);
     for(i=1,cur=r; cur!=NULL && kappa!=EOF; cur=cur->hyper_next(r->label),i++)
 		  {
@@ -1696,9 +1696,6 @@ int NOLH_5[][29] = {
 {217, 33, 229, 151, 145, 234, 164, 227, 33, 105, 30, 3, 31, 107, 239, 152, 157, 202, 208, 177, 165, 200, 245, 217, 256, 187, 152, 137, 255},
 {225, 217, 244, 175, 220, 240, 235, 155, 241, 162, 144, 202, 184, 235, 161, 182, 193, 216, 130, 210, 256, 179, 190, 174, 115, 132, 140, 243, 256} };
 
-#define NOLH_DEF_FILE "NOLH.csv"
-#define LINE_BUFFER 100000
-
 int **NOLH_0 = NULL;				// pointer to the design loaded from file
 
 // characteristics of NOLH tables
@@ -1765,10 +1762,10 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 		return false;
 	}
 
-	lBuffer = str = new char[ LINE_BUFFER ];
+	lBuffer = str = new char[ MAX_FILE_SIZE ];
 
 	// get first text line
-	fgets( str, LINE_BUFFER - 1, NOLHfile );
+	fgets( str, MAX_FILE_SIZE - 1, NOLHfile );
 	do								// count factors
 	{
 		num = strtok( str, ",;" );	// get next value
@@ -1780,7 +1777,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 
 	do								// count file lines
 	{
-		fgets( lBuffer, LINE_BUFFER - 1, NOLHfile );
+		fgets( lBuffer, MAX_FILE_SIZE - 1, NOLHfile );
 		n++;
 	}
 	while ( ! feof( NOLHfile ) );
@@ -1795,7 +1792,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	for ( i = 0; i < n ; i++ )		// read file content
 	{
 		// get next text line
-		fgets( lBuffer, LINE_BUFFER - 1, NOLHfile );
+		fgets( lBuffer, MAX_FILE_SIZE - 1, NOLHfile );
 		str = lBuffer;
 		for ( j = 0; j < kFile ; j++ )	// get factor values
 		{
