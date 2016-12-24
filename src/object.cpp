@@ -320,69 +320,12 @@ see nets.cpp
 ****************************************************/
 
 #include "decl.h"
-#include <time.h>
 
-#ifndef NO_WINDOW
-#include <tk.h>
-void cmd(Tcl_Interp *inter, char const *cc);
-extern Tcl_Interp *inter;
-#else
- void cmd(char *m);
-double object::interact(char const *text, double v, double *tv)
-{
- return v;
-}
-#endif
-
-object *go_brother(object *c);
-object *skip_next_obj(object *t, int *count);
-object *skip_next_obj(object *t);
-FILE *search_str(char *file_name, char *str);
-void plog( char const *msg, char const *tag = "" );
-void plot_rt(variable *var);
-int sort_function_down( const void *a, const void *b);
-int sort_function_up( const void *a, const void *b);
-int sort_function_down_two( const void *a, const void *b);
-int sort_function_up_two( const void *a, const void *b);
-int deb(object *r, object *c, char const *lab, double *res);
-void set_lab_tit(variable *var);
-void collect_cemetery( object *o );		// collect variables from object before deletion
-void add_cemetery(variable *v);
-void myexit(int v);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void print_stack(void);
-void analysis(int *choice);
-void reset_end(object *r);
-void delete_bridge(object *d);
-int reset_bridges(object *r);
-void close_sim(void);
-void uncover_browser( void );
-
-extern int t;
-extern object *root;
-extern object *blueprint;
-extern int actual_steps;
-extern int quit;
-extern int debug_flag;
-extern int max_step;
-extern int optimized;
-extern int check_optimized;
-extern int total_obj;
-extern int choice;
-extern int watch;
-extern char msg[];
-extern char *struct_file;
-extern int running;
-extern lsdstack *stacklog;
-extern int stack;
-extern bool use_nan;	// flag to allow using Not a Number value
-
+bool no_error=false;
 char *qsort_lab;
 char *qsort_lab_secondary;
-int search_step;
-int no_error=0;
-int stairs=0;
 int sig_stairs=0;
+int stairs=0;
 object *globalcur;
 
 
@@ -409,15 +352,7 @@ if(this==NULL)
  return -1;
 }
 
-search_step=0;
 curr=search_var(this, l);
-/*
-if(search_step>100)
-  {
-   sprintf(msg, "Warning: un-optimized in cal() for equation %s searching for %s", stacklog->label, l);
-   plog(msg);
-  }
-*/
 if(curr==NULL)
  {sprintf(msg, "search for variable or parameter '%s' failed in object '%s'",l, label);
  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
@@ -507,7 +442,7 @@ for(cb=b, curr=NULL; cb!=NULL; cb=cb->next)
 if( caller!=up)
  { if(up==NULL)
 	 {
-   if(no_error==0)
+   if(!no_error)
    {
     sprintf(msg, "search for '%s' failed in the equation of variable '%s'",l, stacklog->label);
 	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
@@ -1049,9 +984,9 @@ if(this==NULL)
 
 for(cur1=this; cur1!=NULL; cur1=cur1->up)
 {
-no_error=1;
+no_error=true;
 cv=cur1->search_var(this, lab);
-no_error=0;
+no_error=false;
 if(cv==NULL)
  {
   sprintf(msg, "variable '%s' with value '%lf' searched from '%s' not found", lab, value, label);
@@ -1196,10 +1131,10 @@ void object::write(char const *lab, double value, int time, int lag)
 		error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
         return;
     }
-    if((!use_nan && isnan(value)) || isinf(value)==1)
+    if((!use_nan && is_nan(value)) || is_inf(value))
     {sprintf(msg, "\nWarning: write of '%s' requested with an invalid value", lab);
         plog(msg);
-        debug_flag=1;
+        debug_flag=true;
         stacklog->vs->debug='d';
         return;
     }
@@ -1261,10 +1196,10 @@ if(this==NULL)
  error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
  return;
 }
-if((!use_nan && isnan(value)) || isinf(value)==1)
+if((!use_nan && is_nan(value)) || is_inf(value))
 {sprintf(msg, "\nWarning: write of %s requested with an invalid value", lab);
  plog(msg);
- debug_flag=1;
+ debug_flag=true;
  stacklog->vs->debug='d';
  return;
 }
@@ -1375,7 +1310,6 @@ Add an object to the model making a copy of the example object ex
 ****************************************************
 object *object::add_an_object(char *lab, object *ex)
 {
-char ch[90];
 FILE *f;
 object *cur, *begin;
 variable *cv;
@@ -1489,7 +1423,6 @@ object *object::add_n_objects2( char const *lab, int n, int t_update )
 
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
-char ch[90];
 FILE *f;
 object *cur, *last, *cur1, *cur2, *first;
 variable *cv;
@@ -1553,9 +1486,6 @@ for(cv=cur->v; cv!=NULL; cv=cv->next)
    }
   if(cv->save || cv->savei)
   {
-//  set_lab_tit(cv, msg);
-//  cv->lab_tit=new char[strlen(msg)+1];
-//  strcpy(cv->lab_tit, msg);
   if(running==1)
    {   try 
 	   {
@@ -1617,7 +1547,6 @@ last=cur;
 
 return first;
 }
-
 
 
 /****************************************************
@@ -1981,7 +1910,7 @@ cur1=cur=(search_var(this, lv))->up;
 
 for(a=0 ; cur!=NULL; cur=cur->next )
   a+=cur->cal(lv,lag);
-if(isinf(a)==1)
+if(is_inf(a))
    {sprintf(msg, "\nWarning: sum of values for '%s' is too high (eq. for '%s')", stacklog->vs->label, lv);
     plog(msg);
     sprintf(msg, "\nThe first object '%s' of the list is used",lo);
@@ -2095,10 +2024,10 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value))
+if((!use_nan && is_nan(value)) || is_inf(value))
 {sprintf(msg, "\nWarning: increment of %s requested with an invalid value", lv);
  plog(msg);
- debug_flag=1;
+ debug_flag=true;
  stacklog->vs->debug='d';
  return value;
 }
@@ -2135,10 +2064,10 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value))
+if((!use_nan && is_nan(value)) || is_inf(value))
 {sprintf(msg, "\nWarning: multiply of %s requested with a wrong value", lv);
  plog(msg);
- debug_flag=1;
+ debug_flag=true;
  stacklog->vs->debug='d';
  return value;
 }
@@ -2413,7 +2342,7 @@ void mnode::create(double level)
 
 int i;
 
-deflev=level;
+deflev = ( long ) level;
 
 if(level>0)
  {

@@ -80,16 +80,16 @@ return -1;
 
 end :
 
-if ( ( quit == 0 && ( ( ! use_nan && NAMESPACE isnan( res ) ) || NAMESPACE isinf( res ) ) ) )
+if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
  {
   sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLsd debugger will open next.", t, label, res );
   error_hard( msg, "Invalid result", "Check your code to prevent this situation." );
-  debug_flag = 1;
+  debug_flag = true;
   debug = 'd';
  }
-if ( debug_flag == 1 )
+if ( debug_flag )
  {
- for ( i = 0; i < 100; i++ )
+ for ( i = 0; i < 1000; i++ )
   i_values[i] = v[i];
  }
 return res;

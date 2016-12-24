@@ -17,60 +17,68 @@ FUN_HEAD.CPP
 
 This file contains all the declarations and macros available in a model's equation file.
 
-
 ****************************************************
 ****************************************************/
 
+#define FUN
 #include "decl.h"
-
-extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
-extern object *root;
-extern lsdstack *stacklog;
-extern char *simul_name;								// configuration name being run (for saving networks)
-extern char *path;										// folder where the configuration is
-extern char msg[];
-extern int t;
-extern int max_step;
-extern int quit;
-extern int seed;
-extern int ran_gen;										// pseudo-random number generator to use (1-5))
-extern int sim_num;
-extern int cur_sim;
-extern int debug_flag;
-extern long idum;
 
 bool use_nan = false;									// flag to allow using Not a Number value
 bool fast = false;										// make fast persistent across runs
 double def_res = 0;										// default equation result
-void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
-void init_random( int seed );							// reset the random number generator seed
-void plog( char const *msg, char const *tag = "" );
-void results_alt_path( const char * );  				// change where results are saved.
-object *go_brother(object *c);
-object *get_cycle_obj( object *c, char const *label, char const *command );
-int deb(object *r, object *c, char const *lab, double *res);
-double log(double v);
+
+extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
+extern char *path;										// folder where the configuration is
+extern char *simul_name;								// configuration name being run (for saving networks)
+extern char msg[];
+extern int cur_sim;
+extern int debug_flag;
+extern int max_step;
+extern int quit;
+extern int ran_gen;										// pseudo-random number generator to use (1-5))
+extern int seed;
+extern int sim_num;
+extern int t;
+extern long idum;
+extern lsdstack *stacklog;
+extern object *root;
+
+bool is_finite( double x );
+bool is_inf( double x );
+bool is_nan( double x );
+double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
+double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cumulative distribution function
+double beta( double alpha, double beta );				// draw from a beta distribution
+double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
+double betacf( double a, double b, double x );			// beta distribution function
 double exp(double c);
 double fact( double x );								// Factorial function
+double gamdev( int ia, long *idum_loc = NULL );
+double gamma(double m) {return gamdev((int)m, &idum);};
+double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color);
+double lnorm( double mu, double sigma );				// draw from a lognormal distribution
+double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
+double log(double v);
+double max(double a, double b);
+double min(double a, double b);
+double norm(double mean, double dev);
+double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
 double poidev( double xm, long *idum_loc = NULL );
 double poisson(double m) {return poidev(m, &idum); };
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
-double gamdev( int ia, long *idum_loc = NULL );
-double gamma(double m) {return gamdev((int)m, &idum);};
-double beta( double alpha, double beta );				// draw from a beta distribution
-double betacf( double a, double b, double x );			// beta distribution function
-double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
-double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
-double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cumulative distribution function
-double lnorm( double mu, double sigma );				// draw from a lognormal distribution
-double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
-double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
-double norm(double mean, double dev);
-double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
-double max(double a, double b);
-double min(double a, double b);
-double round(double r);
 double rnd_integer(double m, double x);
+double round(double r);
+double save_lattice( const char *fname );
+double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
+double update_lattice(double line, double col, double val);
+int deb(object *r, object *c, char const *lab, double *res);
+object *get_cycle_obj( object *c, char const *label, char const *command );
+object *go_brother(object *c);
+void cmd( const char *cm, ... );
+void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
+void init_random( int seed );							// reset the random number generator seed
+void plog( char const *msg, char const *tag = "", ... );
+void results_alt_path( const char * );  				// change where results are saved.
 
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 double _abs(double a)
@@ -82,26 +90,16 @@ double _abs(double a)
 };
 #define abs( a ) _abs( a )
 
-// workaround for STL bug on definitions of isnan/isinf in C++11
-#ifdef STLBUG
-#include <algorithm>
-#define NAMESPACE std::
-#else
-#define NAMESPACE
-#endif
-
 #ifndef NO_WINDOW
 #include <tk.h>
-void cmd(Tcl_Interp *inter, char const *cc);
-double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color);
-double update_lattice(double line, double col, double val);
-int save_lattice( const char *fname );
-extern Tcl_Interp *inter;
+void cmd( Tcl_Interp *inter, const char *cm );
 
-extern double i_values[100];
-#define DEBUG_CODE if ( debug_flag == 1 ) \
+extern Tcl_Interp *inter;
+extern double i_values[];
+
+#define DEBUG_CODE if ( debug_flag ) \
 { \
-	for ( i = 0; i < 100; i++ ) \
+	for ( i = 0; i < 1000; i++ ) \
 		i_values[i] = v[i]; \
 }
 #else
@@ -136,11 +134,11 @@ FILE *f = NULL;
 error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." ); \
 return -1; \
 end : \
-if ( quit == 0 && ( ( ! use_nan && NAMESPACE isnan( res ) ) || NAMESPACE isinf( res ) ) ) \
+if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
  { \
   sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD Debugger will open next.", t, label, res ); \
   error_hard( msg, "Invalid result", "Check your code to prevent this situation." ); \
-  debug_flag = 1; \
+  debug_flag = true; \
   debug = 'd'; \
  } \
 DEBUG_CODE \

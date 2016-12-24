@@ -12,27 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-/*******************************************
-****************************************************
-DOES NOT WORK
-This is an attempt to speed up the loading process for large configuration files.
-
-Standard system re-opens and re-scans the file for every element, which is not that practical
-for large files. In this system the file is scanned only once reading sequentially the data for the elements
-
-The problem lies in the latest updates after the description, which can be absent.
-
-To make it work you need to replace load_param to accept also a file. Changes are required to:
-- decl.h
-- lsdmain.cpp
-- interf.cpp
-
-FIXED
-Loading files strictly sequentially, stopping and automatically completing the necessary info for compatibility.
-****************************************************/
-
-
-
 /****************************************************
 FILE.CPP
 Contains the methods and functions used to save and load a model. The
@@ -151,57 +130,10 @@ in the structure definition and in the data section.
 UTIL.CPP given the file name name, the routine searches for the data line for the variable
 (or parameter) v. It is not messed up by same labels for variables and objects.
 
-
-
 ****************************************************/
 
 #include "decl.h"
 
-#ifndef NO_WINDOW
-bool unsaved_change( bool );		// control for unsaved changes in configuration
-#endif
-
-object *skip_next_obj(object *t, int *count);
-object *skip_next_obj(object *t);
-object *go_brother(object *t);
-void copy_descendant(object *from, object *to);
-bool load_description(char *label, char *type);
-bool load_description( char *msg, FILE *f );
-void kill_trailing_newline(char *s);
-FILE *search_str(char *name, char *str);
-void execmd(char *);
-FILE *search_data_str(char const *name, char const *init, char const *str);
-FILE *search_data_ent(char *name, variable *v);
-void find_lags(object *r);
-void plog( char const *msg, char const *tag = "" );
-void save_eqfile(FILE *f);
-void set_blueprint(object *container, object *r);
-void add_description(char const *lab, char const *type, char const *text);
-void empty_cemetery(void);
-void empty_descr(void);
-void recur_description(object *r, FILE *f);
-description *search_description(char *lab);
-
-extern char msg[];
-extern char name_rep[];
-extern char lsd_eq_file[];
-extern char *path;
-extern char *simul_name;
-extern char *equation_name;
-extern char *eq_file;
-extern char *struct_file;
-extern int struct_loaded;
-extern int t;
-extern int seed;
-extern int sim_num;
-extern int max_step;
-extern int ignore_eq_file;
-extern long nodesSerial;	// network node serial number global counter
-extern object *blueprint;
-extern description *descr;
-
-int inbp;// global variable signaling whether it is exploring the blueprint (=1) or the model (=0)
-fpos_t *fpos=NULL;
 
 /****************************************************
 OBJECT::SAVE_STRUCT
@@ -370,7 +302,7 @@ OBJECT::LOAD_PARAM
 bool object::load_param(char *file_name, int repl, FILE *f)
 {
 
-char str[100], ch, ch1, ch2;
+char str[MAX_ELEM_LENGTH], ch, ch1, ch2;
 int num, i;
 object *cur;
 variable *cv, *cv1;
@@ -520,10 +452,7 @@ for(i=usl; i<num; i++)
 	app->add_var_from_example(cv);
 
   copy_descendant(this, app);
-
-
  }
-
 }
 
 
@@ -577,7 +506,6 @@ for(cb1=from->b->next; cb1!=NULL; cb1=cb1->next)
 	  cb->head->add_var_from_example(cv);
 	 copy_descendant(cb1->head, cb->head);
   }
-
 }
 
 
@@ -587,14 +515,11 @@ OBJECT::LOAD_STRUCT
 ****************************************************/
 bool object::load_struct(FILE *f)
 {
-char ch[100];
+char ch[MAX_ELEM_LENGTH];
 int len, i = 0;
 object *cur;
 bridge *cb;
 variable *cv;
-
-if(up==NULL)
- fpos=NULL;
 
 fscanf(f,"%99s",ch);
 while( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
@@ -626,23 +551,21 @@ while( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
    { fscanf(f, "%*[ ]%99s", ch);
      add_empty_var(ch);
      sprintf(msg, "lappend ModElem %s",ch);
-     execmd(msg);
+     cmd(msg);
    }
   if(!strcmp(ch, "Param:"))
 	{ fscanf(f, "%*[ ]%99s", ch);
      cv=add_empty_var(ch);
      cv->param=1;
      sprintf(msg, "lappend ModElem %s",ch);
-     execmd( msg);
-     
+     cmd( msg);
    }
   if(!strcmp(ch, "Func:"))
 	{ fscanf(f, "%*[ ]%99s", ch);
      cv=add_empty_var(ch);
      cv->param=2;
      sprintf(msg, "lappend ModElem %s",ch);
-     execmd(msg);
-
+     cmd(msg);
    }
 
  fscanf(f, "%*[{\r\t\n]%99s", ch);
@@ -661,7 +584,7 @@ void find_lags(object *r)
 {
 FILE *f;
 variable *cv;
-char ch[50];
+char ch[MAX_ELEM_LENGTH];
 int res, l=-1, found;
 
 for(cv=r->v; cv!=NULL; cv=cv->next)
@@ -691,7 +614,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 int object::read_param(char *file_name)
 {
 FILE *f=NULL;
-char str[40], ch, ch1, ch2;
+char ch, ch1, ch2;
 int num, i;
 object *cur;
 variable *cv, *cv1;
@@ -744,13 +667,13 @@ return 0;
 
 FILE *quick_file_search(FILE *f, char str1[])
 {
-char str[10000];
+char str[10*MAX_LINE_SIZE];
 
 
-fgets(str,9999,f);
+fgets(str,MAX_LINE_SIZE,f);
 while(strcmp(str, str1) )
  {
- if(fgets(str, 9999, f)==NULL)
+ if(fgets(str, MAX_LINE_SIZE, f)==NULL)
     break;
  kill_trailing_newline(str);   
  //plog(str);
@@ -765,30 +688,31 @@ return f;
 
 bool load_description( char *msg, FILE *f )
 {
-char type[20],label[100];
+char type[20],label[MAX_ELEM_LENGTH];
 description *app;
-char str[10000], str1[10000];
+char str[10*MAX_LINE_SIZE], str1[10*MAX_LINE_SIZE];
 int done, i, j;
 
+label[ MAX_ELEM_LENGTH - 1 ] = '\0';
 if(strncmp(msg, "Object", 6)==0)
  {
   strcpy(type, "Object");
-  strcpy(label, msg+7);
+  strncpy(label, msg+7, MAX_ELEM_LENGTH-1);
  } else
 if(strncmp(msg, "Variable", 8)==0)
  {
  strcpy(type, "Variable");
- strcpy(label, msg+9);
+ strncpy(label, msg+9, MAX_ELEM_LENGTH-1);
  } else
 if(strncmp(msg, "Parameter", 9)==0)
  {
  strcpy(type, "Parameter");
- strcpy(label, msg+10);
+ strncpy(label, msg+10, MAX_ELEM_LENGTH-1);
  } else
 if(strncmp(msg, "Function", 6)==0)
  {
   strcpy(type, "Function");
-  strcpy(label, msg+9);
+  strncpy(label, msg+9, MAX_ELEM_LENGTH-1);
  } else
 	 return false;
  
@@ -807,8 +731,8 @@ app->type=new char[strlen(type)+1];
 strcpy(app->type, type);
 
 strcpy(str1, "");
-fgets(str, 1000, f);//skip the first newline character
-for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) &&  strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9000 && j < MAX_FILE_TRY ; ++j )
+fgets(str, MAX_LINE_SIZE, f);//skip the first newline character
+for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) &&  strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
   strcat(str1, str);
 
 if ( strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) )
@@ -822,7 +746,7 @@ strcpy(app->text, str1);
 if ( ! strncmp( str, "_INIT_", 6 ) )
  {
   strcpy(str1, "");
-  for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9000 && j < MAX_FILE_TRY ; ++j )
+  for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
     strcat(str1, str);
 
   if ( strncmp( str, "END_DESCRIPTION", 15 ) )
@@ -847,7 +771,7 @@ bool load_description(char const *label, char const *type, FILE *f)
 {
 
 description *app;
-char str[10000], str1[10000];
+char str[10*MAX_LINE_SIZE], str1[10*MAX_LINE_SIZE];
 int done, i, j;
 bool res = true;
 
@@ -875,11 +799,11 @@ if(f==NULL)
   app->init=NULL;
   return false;
  }
-fgets(str,1000,f);
+fgets(str,MAX_LINE_SIZE,f);
 
 strcpy(str1, "");
 
-for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) &&  strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9000 && j < MAX_FILE_TRY ; ++j )
+for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) &&  strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
   strcat(str1, str);
 
 if ( strncmp( str, "END_DESCRIPTION", 15 ) && strncmp( str, "_INIT_", 6 ) )
@@ -893,7 +817,7 @@ strcpy(app->text, str1);
 if ( ! strncmp( str, "_INIT_", 6 ) )
 {
   strcpy(str1, "");
-  for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9000 && j < MAX_FILE_TRY ; ++j )
+  for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
     strcat(str1, str);
 
   if ( strncmp( str, "END_DESCRIPTION", 15 ) )
@@ -912,14 +836,14 @@ else
 app->initial='n';
 app->observe='n';
 
-for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "DOCUOBSERVE", 11 ) && j < MAX_FILE_TRY; ++j );
+for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "DOCUOBSERVE", 11 ) && j < MAX_FILE_TRY; ++j );
 
 if ( strncmp( str, "DOCUOBSERVE", 11 ) )
 	res =  false;
 
 if(f!=NULL)
  {
- for ( j = 0; fgets(str, 1000, f ) != NULL && strncmp( str, "END_DOCUOBSERVE", 15 ) && j < MAX_FILE_TRY; ++j )
+ for ( j = 0; fgets(str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DOCUOBSERVE", 15 ) && j < MAX_FILE_TRY; ++j )
    {if(!strncmp(label, str, strlen(label)) )
      app->observe='y';
    }  
@@ -927,14 +851,14 @@ if(f!=NULL)
 	res =  false;
  }
 
-for ( j = 0 ; fgets( str, 1000, f ) != NULL && strncmp( str, "DOCUINITIAL", 11 ) && j < MAX_FILE_TRY; ++j );
+for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "DOCUINITIAL", 11 ) && j < MAX_FILE_TRY; ++j );
 
 if ( strncmp( str, "DOCUINITIAL", 11 ) )
 	res =  false;
 
 if(f!=NULL)
  {
- for ( j = 0; fgets( str, 1000, f ) != NULL && strncmp( str, "END_DOCUINITIAL", 15 ) && j < MAX_FILE_TRY; ++j )
+ for ( j = 0; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DOCUINITIAL", 15 ) && j < MAX_FILE_TRY; ++j )
    {if(!strncmp(label, str, strlen(label)) )
      app->initial='y';
    } 
@@ -1063,7 +987,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 int load_configuration( object *r, bool reload )
 {
 	int i, j = 0, load = 0;
-	char msg[ 1000 ];
+	char msg[ MAX_LINE_SIZE ];
 	object *cur;
 	description *cur_descr;
 	
@@ -1077,7 +1001,7 @@ int load_configuration( object *r, bool reload )
 	blueprint->empty( );
 	blueprint->init( NULL, "Root" );
 	empty_cemetery( );
-	nodesSerial = 0;			// restart network nodes serial counter
+	nodesSerial = 0;							// restart network nodes serial counter
 
 	if ( ! struct_loaded )
 	{
@@ -1094,7 +1018,7 @@ int load_configuration( object *r, bool reload )
 		}
 	}
 	
-	FILE * f = fopen( struct_file, "r" );
+	FILE * f = fopen( struct_file, "rt" );
 	if( f == NULL )
 		return 1;
 
@@ -1106,7 +1030,7 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	strcpy( msg, "" );
-    fscanf( f, "%99s", msg );					//should be DATA
+    fscanf( f, "%999s", msg );					//should be DATA
 	if ( ! ( ! strcmp( msg, "DATA" ) && r->load_param( struct_file, 1, f ) ) )
 	{
 		load = 3;
@@ -1117,7 +1041,7 @@ int load_configuration( object *r, bool reload )
 		goto endLoad;
 		
 	sim_num = 1;
-	fscanf( f, "%99s", msg );					//should be SIM_NUM 
+	fscanf( f, "%999s", msg );					//should be SIM_NUM 
 	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", &sim_num ) ) )
 	{
 		load = 4;
@@ -1125,7 +1049,7 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	seed = 1;
-	fscanf( f, "%99s", msg );					//should be SEED
+	fscanf( f, "%999s", msg );					//should be SEED
 	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", &seed ) ) )
 	{
 		load = 5;
@@ -1133,21 +1057,21 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	max_step = 100;
-	fscanf( f, "%99s", msg );					//should be MAX_STEP
+	fscanf( f, "%999s", msg );					//should be MAX_STEP
 	if ( ! ( ! strcmp( msg, "MAX_STEP" ) && fscanf( f, "%d", &max_step ) ) )
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	fscanf( f, "%99s", msg );					//should be EQUATION
+	fscanf( f, "%999s", msg );					//should be EQUATION
 	if ( strcmp( msg, "EQUATION" ) )
 	{
 		load = 7;
 		goto endLoad;
 	}
 	strcpy( msg, "NONE" );
-	fgets( msg, 300, f );
+	fgets( msg, MAX_PATH_LENGTH - 1, f );
     if ( msg[ strlen( msg ) - 1 ] == '\n' )
 		msg[ strlen( msg ) - 1 ] = '\0';
     if ( msg[ strlen( msg ) - 1 ] == '\r' )
@@ -1157,25 +1081,25 @@ int load_configuration( object *r, bool reload )
 	equation_name = new char[ strlen( msg ) ];
 	strcpy( equation_name, msg + 1 );
 	
-	fscanf( f, "%99s", msg );					//should be MODELREPORT
-	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%99s", name_rep ) ) )
+	fscanf( f, "%999s", msg );					//should be MODELREPORT
+	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%499s", name_rep ) ) )
 	{
 		load = 8;
 		goto endLoad;
 	}
 
-	fscanf( f, "%99s", msg );					//should be DESCRIPTION
+	fscanf( f, "%999s", msg );					//should be DESCRIPTION
 	if ( strcmp( msg, "DESCRIPTION" ) )
 	{
 		load = 9;
 		goto endLoad;
 	}  
 	
-	i = fscanf( f, "%99s", msg );				//should be the first description   
+	i = fscanf( f, "%999s", msg );				//should be the first description   
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{ 
 		i = load_description( msg, f );
-		if( ! fscanf( f, "%99s", msg ) ) 
+		if( ! fscanf( f, "%999s", msg ) ) 
 			i = 0;
 	}
 	
@@ -1185,13 +1109,13 @@ int load_configuration( object *r, bool reload )
 		goto endLoad;
 	} 
 	
-	fscanf( f, "%99s", msg );  
+	fscanf( f, "%999s", msg );  
 	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cur_descr = search_description( msg );
 		if( cur_descr != NULL )
 			cur_descr->observe = 'y';
-		fscanf( f, "%99s", msg );
+		fscanf( f, "%999s", msg );
 	}
 	
 	if( j >= MAX_FILE_TRY )
@@ -1200,20 +1124,20 @@ int load_configuration( object *r, bool reload )
 		goto endLoad;
 	} 
 	
-	fscanf( f, "%99s", msg );  					//should be the DOCUINITIAL
+	fscanf( f, "%999s", msg );  				//should be the DOCUINITIAL
 	if ( strcmp( msg, "DOCUINITIAL" ) )
 	{
 		load = 12;
 		goto endLoad;
 	}  
 	
-	fscanf( f, "%99s", msg );  
+	fscanf( f, "%999s", msg );  
 	for ( j = 0; strcmp( msg, "END_DOCUINITIAL" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cur_descr = search_description( msg );
 		if ( cur_descr != NULL )
 			cur_descr->initial = 'y';
-		fscanf( f, "%99s", msg );
+		fscanf( f, "%999s", msg );
 	}
 	
 	if( j >= MAX_FILE_TRY )
@@ -1222,7 +1146,7 @@ int load_configuration( object *r, bool reload )
 		goto endLoad;
 	} 
 	
-	fscanf( f, "%99s", msg );					// here is the equation file
+	fscanf( f, "%999s\n", msg );				// here is the equation file
 	if ( strcmp( msg, "EQ_FILE" ) )
 	{
 		load = 0;								// optional
@@ -1230,8 +1154,14 @@ int load_configuration( object *r, bool reload )
 	}
 
 	strcpy( lsd_eq_file, "" );
-	for ( j = 0; fgets( msg, 999, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - 1000 && j < MAX_FILE_TRY; ++j )
+	for ( j = 0; fgets( msg, MAX_LINE_SIZE - 1, f ) != NULL && strncmp( msg, "END_EQ_FILE", 11 ) && strlen( lsd_eq_file ) < MAX_FILE_SIZE - MAX_LINE_SIZE && j < MAX_FILE_TRY; ++j )
 		strcat( lsd_eq_file, msg );
+	
+	// remove extra \n and \r (Windows) at the end
+    if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\n' )
+		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
+    if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\r' )
+		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
 	
 	if( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
 	{
@@ -1251,13 +1181,14 @@ endLoad:
 	return load;
 }
 
+
 /*
 	Save current defined configuration (renaming if appropriate)
 	Returns: true: save ok, false: save failure
 */
-bool save_configuration( object *r, long findex )
+bool save_configuration( object *r, int findex )
 {
-	int indexDig = ( findex > 0 ) ? floor( log( findex ) / log( 10 ) + 2 ) : 0;
+	int indexDig = ( findex > 0 ) ? ( int ) floor( log( findex ) / log( 10 ) + 2 ) : 0;
 	object *cur;
 	description *cur_descr;
 	
@@ -1274,7 +1205,7 @@ bool save_configuration( object *r, long findex )
 		sprintf( struct_file, "%s", simul_name );
 	}
 	if ( findex > 0 )
-		sprintf( struct_file, "%s_%ld.lsd", struct_file, findex );
+		sprintf( struct_file, "%s_%d.lsd", struct_file, findex );
 	else
 		sprintf( struct_file, "%s.lsd", struct_file );
 	
@@ -1289,7 +1220,7 @@ bool save_configuration( object *r, long findex )
 	cur->save_param( f );
 	
 	int delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
-	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\n MODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
+	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
 	
 	fprintf( f, "\nDESCRIPTION\n\n" );
 	save_description( cur, f );

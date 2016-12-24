@@ -68,19 +68,19 @@ proc LsdHtml a {
 }
 
 
-proc LsdTkDiff { a b } {
+proc LsdTkDiff { a b { c "" } { d "" } } {
 	global tcl_platform RootLsd wish LsdSrc
 	if { $tcl_platform(platform) == "unix" } {
-		exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+		exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 	} {
 		if { $tcl_platform(os) == "Windows NT" } {
 			if { $tcl_platform(osVersion) == "4.0" } {
-				exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+				exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 			} {
-				exec $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+				exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 			} 
 		} {
-			exec start $wish $RootLsd/$LsdSrc/tkdiffb.tcl $a $b &
+			exec start $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 		}
 	}
 }

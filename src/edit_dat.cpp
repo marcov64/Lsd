@@ -12,7 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-
 /****************************************************
 EDIT_DAT.CPP
 Called by INTERF.CPP shows all the lagged variables and parameters
@@ -82,39 +81,14 @@ EDIT.CPP allows to edit the number of instances in the model
 
 ****************************************************/
 
-#include <tk.h>
 #include "decl.h"
 
-// WARNING: Cell number limited to 100 (change below to alter behavior)
-#define MAX_COLS 100
-
-void go_next(object **t);
-object *go_brother(object *cur);
-object *skip_next_obj(object *t, int *count);
-void cmd(Tcl_Interp *inter, char const *cc);
-void search_title(object *root, char *tag, int *i, char *lab, int *incr);
-void clean_cell(object *root, char *tag, char *lab);
-void edit_data(object *root, int *choice);
-void set_title(object *c, char *lab, char *tag, int *incr);
-void link_data(object *root, char *lab);
-void set_all(int *choice, object *r, char *lab, int lag);
-void set_obj_number(object *r, int *choice);
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;	// simulation name to use in title bar
-extern bool in_set_obj;
-
-int set_focus;
 // flags to avoid recursive usage (confusing and tk windows are not ready)
-bool in_edit_data = false;
-bool iniShowOnce = false;		// prevent repeating warning on # of columns
 bool colOvflw;					// indicate columns overflow (>MAX_COLS)
-// Main window constraints
-char widthDE[]="800";			// horizontal size in pixels
-char heightDE[]="600";			// vertical size in pixels
+bool iniShowOnce = false;		// prevent repeating warning on # of columns
+bool in_edit_data = false;
+int set_focus;
+
 
 /****************************************************
 EDIT_DATA
@@ -131,11 +105,9 @@ int i, counter, lag;
 cmd( inter, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
 
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
-Tcl_SetVar(inter, "widthDE", widthDE, 0);		// horizontal size in pixels
-Tcl_SetVar(inter, "heightDE", heightDE, 0);		// vertical minimum size in pixels
 
 cmd( inter, "if { ! [ info exists autoWidth ] } { set autoWidth 1 }");
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $widthDE $heightDE } { if { ! $autoWidth } { resizetop $widthDE $heightDE } }" );
+cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeI $vsizeI } { if { ! $autoWidth } { resizetop $hsizeI $vsizeI } }" );
 
 cmd(inter, "set position 1.0");
 in_edit_data = true;
@@ -273,7 +245,7 @@ SEARCH_TITLE
 
 void search_title(object *root, char *tag, int *i, char *lab, int *incr)
 {
-char ch[120];
+char ch[MAX_ELEM_LENGTH+20];
 int num, multi, counter, j;
 object *c, *cur;
 variable *cv;
@@ -320,10 +292,11 @@ char ch[TCL_BUFF_STR], ch1[11], ch2[10];
 
 if(!strcmp(c->label, lab))
 {
+  ch1[10]='\0';
   strncpy(ch1, c->label, 10);
   if(strlen(tag)!=0)
   {  strncpy(ch2, tag, 9);
-     ch2[9]=0;
+     ch2[9]='\0';
   }
 else
  strcpy(ch2, "  ");
@@ -353,7 +326,7 @@ CLEAN_CELL
 
 void clean_cell(object *root, char *tag, char *lab)
 {
-char ch[TCL_BUFF_STR], ch1[300];
+char ch[TCL_BUFF_STR], ch1[2*MAX_ELEM_LENGTH];
 int j, i;
 object *cur;
 variable *cv;
@@ -392,7 +365,7 @@ void link_data(object *root, char *lab)
 {
 object *cur, *cur1;
 int i, j;
-char ch[TCL_BUFF_STR], previous[60], ch1[30];
+char ch[TCL_BUFF_STR], previous[MAX_ELEM_LENGTH+20], ch1[30];
 variable *cv, *cv1;
 
 cur1=root->search(lab);

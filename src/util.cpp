@@ -67,60 +67,21 @@ given the file name name, the routine searches for the data line for the variabl
  ****************************************************/
 
 #include "decl.h"
-#include <ctype.h>
-#include <time.h>
+
 
 #ifndef NO_WINDOW
- #include <tk.h>
- extern Tcl_Interp *inter;
-#endif
 
-void myexit(int v);
-void plog( char const *msg, char const *tag = "" );
-void print_stack(void);
-void clean_spaces(char *s);
-void scan_used_lab(char *lab, int *choice);
-char const *return_where_used(char *lab, char s[]);
-void init_canvas(void);
-void log_tcl_error( const char *cm, const char *message );
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void add_description(char const *lab, char const *type, char const *text);
-void save_single(variable *vcv);
-
-extern char *simul_file;
-extern char *struct_file;
-extern char *param_file;
-extern char *result_file;
-extern char *total_file;
-extern char msg[];
-extern variable *cemetery;
-extern char *equation_name;
-extern lsdstack *stacklog;
-extern description *descr;
-extern char *eq_file;
-extern char lsd_eq_file[];
-extern int lattice_type;
-extern int t;
-extern int running;
-extern char nonavail[];	// string for unavailable values
-extern char *path;	// configuration folder path
-
-double log(double v);
-double exp(double c);
-double sqrt(double v);
-
-#ifndef NO_WINDOW
 /****************************************************
 CMD
 ****************************************************/
 bool firstCall = true;
 
-void cmd(Tcl_Interp *inter, const char *cm)
+void cmd( Tcl_Interp *inter, const char *cm )
 {
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
-		char message[ 100 ];
-		sprintf( message, "Tcl buffer overrun (memory corrupted!)\nPlease increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.\nLsd will close now.", strlen( cm ) );
+		char message[ TCL_BUFF_STR ];
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) );
 		log_tcl_error( cm, message );
 		cmd( inter, "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
 		myexit( 24 );
@@ -133,10 +94,45 @@ void cmd(Tcl_Interp *inter, const char *cm)
 }
 
 
+void cmd( const char *cm, ... )
+{
+	char message[ TCL_BUFF_STR ];
+	
+	if ( strlen( cm ) >= TCL_BUFF_STR )
+	{
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) + 1 );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
+		myexit( 24 );
+	}
+
+	char buffer[ TCL_BUFF_STR ];
+	va_list argptr;
+	
+	va_start( argptr, cm );
+	int reqSz = vsnprintf( buffer, TCL_BUFF_STR, cm, argptr );
+	va_end( argptr );
+	
+	if ( reqSz >= TCL_BUFF_STR )
+	{
+		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", reqSz + 1 );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+	}
+	else
+	{
+		int code = Tcl_Eval( inter, buffer );
+
+		if( code != TCL_OK )
+			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+	}
+}
+
+
 void log_tcl_error( const char *cm, const char *message )
 {
 	FILE *f;
-	char fname[ 300 ];
+	char fname[ MAX_PATH_LENGTH ];
 	time_t rawtime;
 	struct tm *timeinfo;
 	char ftime[ 80 ];
@@ -159,18 +155,18 @@ void log_tcl_error( const char *cm, const char *message )
 	}
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
-	plog( "\nTcl-Tk Error. See file '" );
+	plog( "\nTcl/Tk Error. See file '" );
 	plog( fname );
 	plog( "'\n" );
 }
 
 #else
-	
-void cmd(char *cm)
-{
 
+void cmd( const char *cm, ... )
+{
 }
 #endif
+
 
 /****************************************************
 GO_BROTHER
@@ -336,14 +332,42 @@ double max(double a, double b)
 if(a>b)
  return a;
 return(b);
-};
+}
 
 double min(double a, double b)
 {
 if(a<b)
  return a;
 return(b);
-};
+}
+
+// function redefinitions to handle GCC standard library bugs
+bool is_finite( double x )
+{
+#if __GNUC__ > 3
+	return __builtin_isfinite( x );
+#else
+	return isfinite( x );
+#endif
+}
+
+bool is_inf( double x )
+{
+#if __GNUC__ > 3
+	return __builtin_isinf( x );
+#else
+	return isinf( x );
+#endif
+}
+
+bool is_nan( double x )
+{
+#if __GNUC__ > 3
+	return __builtin_isnan( x );
+#else
+	return isnan( x );
+#endif
+}
 
 
 /****************************************************
@@ -352,17 +376,17 @@ SEARCH_STR
 FILE *search_str(char const *name, char const *str)
 {
 FILE *f;
-char got[100];
+char got[MAX_LINE_SIZE];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%99s", got);
+fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 if ( ! strcmp( got, str ) )
@@ -377,18 +401,18 @@ SEARCH_STR_nospaces
 FILE *search_str_nospaces(char *name, char *str)
 {
 FILE *f;
-char got[1000];
+char got[MAX_LINE_SIZE];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fgets(got, 999, f);
+fgets(got, MAX_LINE_SIZE, f);
 clean_spaces(got);
 for ( int i = 0; strncmp( got, str, strlen( str ) ) && i < MAX_FILE_TRY; ++i )
 {
-if(fgets(got, 999, f)==NULL)
+if(fgets(got, MAX_LINE_SIZE, f)==NULL)
  return(NULL);
 clean_spaces(got); 
 }
@@ -405,17 +429,17 @@ SEARCH_DATA_STR
 FILE *search_data_str(char const *name, char const *init, char const *str)
 {
 FILE *f;
-char got[100];
+char got[MAX_LINE_SIZE];
 
 f=fopen(name, "r");
 if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%99s", got);
+fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -424,7 +448,7 @@ if ( strcmp( got, init ) )
 
 for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -440,9 +464,9 @@ SEARCH_DATA_ENT
 FILE *search_data_ent(char *name, variable *v)
 {
 FILE *f;
-char got[100];
-char temp[100];
-char temp1[100];
+char got[MAX_LINE_SIZE];
+char temp[MAX_LINE_SIZE];
+char temp1[MAX_LINE_SIZE];
 char typ[20];
 
 f=fopen(name, "r");
@@ -450,10 +474,10 @@ if(f==NULL)
  {return(NULL);
  }
 
-fscanf(f, "%99s", got);
+fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, "DATA" ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -461,13 +485,13 @@ if ( strcmp( got, "DATA" ) )
 	return NULL;
 
 strcpy(temp, (v->up)->label); //Search for the section of the Object
-fscanf(f, "%99s", temp1);
-fscanf(f, "%99s", got);
+fscanf(f, "%999s", temp1);
+fscanf(f, "%999s", got);
 
 for ( int i = 0; ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -483,13 +507,13 @@ else
  else
   strcpy(typ,"Var:");
 
-fscanf(f, "%99s", temp1); //Search for the line of the var
-fscanf(f, "%99s", got);
+fscanf(f, "%999s", temp1); //Search for the line of the var
+fscanf(f, "%999s", got);
 
 for ( int i = 0; ( strcmp( got, v->label ) || strcmp( temp1, typ ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%99s", got)==EOF)
+if(fscanf(f, "%999s", got)==EOF)
  return(NULL);
 
 }
@@ -537,7 +561,7 @@ void set_lab_tit(variable *var)
 {
 object *cur, *ceil, *cur1;
 bridge *cb;
-char app[2000], app1[2000];
+char app[20*MAX_ELEM_LENGTH], app1[20*MAX_ELEM_LENGTH];
 bool first=true;
 if(var->up->up==NULL)
   {
@@ -551,7 +575,6 @@ if(var->up->up==NULL)
 
 for(cur=var->up; cur->up!=NULL; cur=cur->up)
  {
-//  for(cb=cur->b; strcmp(cb->blabel,var->up->label); cb=cb->next);
   //found the bridge containing the variable
   set_counter(cur);
   if(first==false)
@@ -657,7 +680,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  {
  if(cv->save==1)
   {
-   if(cv->start <= i && cv->end >= i && !isnan(cv->data[i]))		// save NaN as n/a
+   if(cv->start <= i && cv->end >= i && !is_nan(cv->data[i]))		// save NaN as n/a
 		if ( dozip )
 		{
 			#ifdef LIBZ
@@ -690,7 +713,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 
 if(r->up==NULL)
  {for(cv=cemetery; cv!=NULL; cv=cv->next)
-    if(cv->start<=i && cv->end>=i && !isnan(cv->data[i]))		// save NaN as n/a
+    if(cv->start<=i && cv->end>=i && !is_nan(cv->data[i]))		// save NaN as n/a
 		if ( dozip )
 		{
 			#ifdef LIBZ
@@ -1557,7 +1580,7 @@ d.son=NULL;
 d.next=NULL;
 d.x=-1;
 
-char str[200], str1[200], str2[200], str3[200], str4[200], fin[300];
+char str[2*MAX_ELEM_LENGTH], str1[2*MAX_ELEM_LENGTH], str2[2*MAX_ELEM_LENGTH], str3[2*MAX_ELEM_LENGTH], str4[2*MAX_ELEM_LENGTH];
 
 int x1, x2, x3, x4, count=1;
 
@@ -1579,7 +1602,7 @@ if(f==NULL)
 	myexit(15);
 }
 
-while(fgets(str, 200, f)!=NULL)
+while(fgets(str, 2*MAX_ELEM_LENGTH, f)!=NULL)
  {if(h++==1)
    fprintf(f1, "set font \"{Times 10}\"\n");
  sscanf(str, "%s %s", str1, str2);
@@ -2042,11 +2065,11 @@ cmd(inter, "showtop .desc_$vname");
 }
 
 
-void auto_document( int *choice, char const *lab, char const *which, bool append = false )
+void auto_document( int *choice, char const *lab, char const *which, bool append )
 {
 FILE *f;
 description *cd;
-char str1[400], app[3000];
+char str1[MAX_LINE_SIZE], app[10*MAX_LINE_SIZE];
 int i, j=0, done;
 
 for(cd=descr; cd!=NULL; cd=cd->next)
@@ -2074,7 +2097,7 @@ for(cd=descr; cd!=NULL; cd=cd->next)
      j=0;
      while(done!=1)
       {
-      fgets(str1, 400, f);
+      fgets(str1, MAX_LINE_SIZE, f);
       for(i=0; str1[i]!=(char)NULL && done!=1; i++)
        {
        if(done==-1) //no comment found yet
@@ -2135,7 +2158,7 @@ for(cd=descr; cd!=NULL; cd=cd->next)
 
 }
 
-char const *return_where_used(char *lab, char s[]) 
+void return_where_used(char *lab, char s[]) 
 {
 int choice;
 char *r; 
@@ -2145,8 +2168,6 @@ cmd(inter, "set l [join [$list.l get 0 end] \", \"]");
 cmd(inter, "destroytop $list"); 
 r=(char *)Tcl_GetVar(inter, "l",0);
 strcpy(s, r);
-
-return(""); //just to avoind a warning of no return
 }
 #endif
 
@@ -2166,25 +2187,26 @@ Create a new run time lattice having:
   If init_color < -1, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 */
+#ifndef NO_WINDOW
+
 double dimW, dimH;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
 {
-#ifndef NO_WINDOW
 object *cur;
 double i, j,color;
 
 init_canvas();
 dimH=pixH/nrow;
 dimW=pixW/ncol;
-cmd(inter, "if {[winfo exists .lat]==1} {destroy .lat} {}");
+cmd( inter, "if { [winfo exists .lat] } { destroytop .lat }" );
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-sprintf( msg, "newtop .lat \"Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", nrow, ncol );
+sprintf( msg, "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 cmd(inter, msg);
 
 cmd(inter, "set lat_update 1");
 cmd(inter, "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }");
-cmd(inter, "bind .lat <3> {set a [tk_getSaveFile -parent .lat -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
-cmd(inter, "bind .lat <2> {set a [tk_getSaveFile -parent .lat -title \"Save Lattice File\" ]; if {$a != \"\" } {.lat.c postscript -colormode color -file \"$a\"} {} }");
+cmd( "bind .lat <2> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
+cmd( "bind .lat <3> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
 
 char init_color_string[32];		// the final string to be used to define tk color to use
 
@@ -2199,7 +2221,6 @@ else
 		cmd( inter, msg );
 	}
 		
-//sprintf(msg, "canvas .lat.c -height %d -width %d -bg %s", (int)(dim*nrow), (int)(dim*ncol),init_color_string);
 if(init_color==1001)
 {
 sprintf(msg, "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW);
@@ -2237,9 +2258,10 @@ for(i=1; i<=nrow; i++)
 } 
 
 cmd( inter, "showtop .lat centerS no no no" );
-#endif
+set_shortcuts_log( ".lat" );
 return(0);
 }
+
 
 /*
 update_lattice.
@@ -2248,7 +2270,6 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice(double line, double col, double val)
 {
-#ifndef NO_WINDOW
 	// avoid operation if canvas was closed
 	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
@@ -2277,7 +2298,6 @@ double update_lattice(double line, double col, double val)
 sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 cmd(inter, msg);
 cmd(inter, "if {$lat_update == 1} {update} {}");
-#endif
 return 0;  
 }
 
@@ -2285,9 +2305,8 @@ return 0;
 /*
 Save the existing lattice (if any) to the specified file name.
 */
-int save_lattice( const char *fname )
+double save_lattice( const char *fname )
 {
-#ifndef NO_WINDOW
 	// avoid operation if no canvas or no file name
 	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
@@ -2296,16 +2315,28 @@ int save_lattice( const char *fname )
 	
 	Tcl_SetVar( inter, "latname", fname, 0 );
 	cmd(inter, "append latname \".eps\"; .lat.c postscript -colormode color -file $latname");
-#endif
 	return 0;
 }
 
-void execmd(char *str)
+#else
+
+double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
 {
-#ifndef NO_WINDOW
-cmd(inter, str);
-#endif
+	return 0;
 }
+
+double update_lattice(double line, double col, double val)
+{
+	return 0;
+}
+
+double save_lattice( const char *fname )
+{
+	return 0;
+}
+
+#endif
+
 
 void kill_initial_newline(char *s)
 {
@@ -2346,9 +2377,10 @@ while(done==0)
 void clean_spaces(char *s)
 {
 int i, j;
-char app[2000];
+char app[MAX_LINE_SIZE];
 
-for(j=0, i=0; s[i]!=(char)NULL; i++)
+app[ MAX_LINE_SIZE - 1 ] = '\0';
+for ( j = 0, i = 0; s[i] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
  {
  switch(s[i])
   {
@@ -2364,24 +2396,35 @@ app[j]=(char)NULL;
 strcpy(s, app);
 }
 
+void save_eqfile(FILE *f)
+{
+if ( strlen( lsd_eq_file ) == 0 )
+	strcpy( lsd_eq_file, eq_file );
+ 
+fprintf(f, "\nEQ_FILE\n");
+fprintf(f, "%s", lsd_eq_file);
+fprintf(f, "\nEND_EQ_FILE\n");
+}
+
 #ifndef NO_WINDOW
+
 void read_eq_filename(char *s)
 {
 FILE *f;
-char lab[200];
+char lab[MAX_PATH_LENGTH];
 
-f=fopen("makefile", "r");
+f=fopen("model_options.txt", "r");
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Cannot upload the equation file.\"");
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"");
   return;
  }
-fscanf(f, "%199s", lab);
-for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
+fscanf(f, "%499s", lab);
+for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in LMM menu Model.\"");
+  cmd(inter, "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"");
   return;
  }
 
@@ -2392,52 +2435,37 @@ return;
     
 }
 
-
 int compare_eqfile(void)
 {
 FILE *f;
-char *s, lab[200];
-int i;
+char *s, lab[MAX_PATH_LENGTH+1];
+int i = MAX_FILE_SIZE;
 
 read_eq_filename(lab);
 f=fopen(lab, "r");
-s=new char[ MAX_FILE_SIZE + 1 ];
-while( fgets(msg, 1000, f)!=NULL)
-   strcat(s, msg);
+s = new char[ i + 1 ];
+while( fgets(msg, MAX_LINE_SIZE, f) != NULL )
+{
+	i -= strlen( msg );
+	if ( i < 0 )
+		break;
+	strcat(s, msg);
+}
 fclose(f);  
-if(strcmp(s,eq_file)==0)
+if(strcmp(s,lsd_eq_file)==0)
  i=0;
 else
  i=1;
 delete[] s;
 
 return i;
-
-}
-#endif
-
-void save_eqfile(FILE *f)
-{
-FILE *o;
-char *lab, s[200];
-int i;
-i=strlen(lsd_eq_file);
-if(i==0)
- strcpy(lsd_eq_file, eq_file);
- 
-fprintf(f, "\nEQ_FILE\n");
-fprintf(f, "%s", lsd_eq_file);
-fprintf(f, "\nEND_EQ_FILE\n");
-return;
-
 }
 
-#ifndef NO_WINDOW
 char *upload_eqfile(void)
 {
 //load into the string eq_file the equation file
-char s[200], *eq;
-int i;
+char s[MAX_PATH_LENGTH+1], *eq;
+int i, sz = 0;
 FILE *f;
 
 Tcl_LinkVar(inter, "eqfiledim", (char *) &i, TCL_LINK_INT);
@@ -2446,14 +2474,19 @@ read_eq_filename(s);
 sprintf(msg, "set eqfiledim [file size %s]",s);
 cmd(inter, msg);
 
-eq=new char[i+1];
-
 Tcl_UnlinkVar(inter, "eqfiledim");
+
+eq=new char[i+1];
 eq[0]=(char)NULL;
 f=fopen(s, "r");
-while( fgets(msg, 1000, f)!=NULL)
-  strcat(eq, msg);
-fclose(f);  
+while( fgets(msg, MAX_LINE_SIZE, f)!=NULL)
+{
+	i -= strlen( msg );
+	if ( i < 0 )
+		break;
+	strcat( eq, msg );
+}
+fclose(f);
 return eq;
 }
 

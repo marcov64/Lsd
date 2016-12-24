@@ -11,6 +11,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
 
+
 /****************************************************
 SHOW_EQ.CPP show one window containig the equation for the label clicked on.
 Less simple as it seems, given that it has to deal with all weird characters
@@ -46,33 +47,19 @@ UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
 
-
-
 ****************************************************/
 
-
-#include <tk.h>
 #include "decl.h"
 
-void cmd(Tcl_Interp *inter, char const *cc);
-void plog( char const *msg, char const *tag = "" );
-int contains (FILE *f, char *lab, int len);
-void clean_spaces(char *s);
-void find_using(object *r, variable *v, FILE *frep);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
+bool macro;
 
-extern char msg[];
-extern Tcl_Interp *inter;
-extern char *equation_name;
-extern object *root;
 
-int macro;
 /****************************************************
 SHOW_EQ
 ****************************************************/
 void show_eq(char *lab, int *choice)
 {
-char c1_lab[TCL_BUFF_STR], c2_lab[TCL_BUFF_STR], c3_lab[TCL_BUFF_STR], *app;
+char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE], c3_lab[MAX_LINE_SIZE], *app;
 FILE *f;
 int i,j, done, bra, start, lun, printing_var=0, comment_line=0, temp_var=0;
 
@@ -86,9 +73,9 @@ if(strcmp(msg, "yes"))
 start:
 if( (f=fopen(equation_name,"r"))==NULL)
  {
-  sprintf( msg, "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Equation file '%s.lsd' not saved\" -detail \"Check equation file name and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name );
+  sprintf( msg, "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name );
   cmd( inter, msg );
-  cmd( inter, "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] }" );
+  cmd( inter, "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] }" );
 
   if(*choice==1)
  {
@@ -111,7 +98,7 @@ goto start;
  strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 
-for(done=0; done==0 && fgets(c1_lab, 399, f)!=NULL;  )
+for(done=0; done==0 && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
  {
   clean_spaces(c1_lab); //eliminate the spaces
   for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL; i++)
@@ -121,9 +108,9 @@ for(done=0; done==0 && fgets(c1_lab, 399, f)!=NULL;  )
   if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
 	{
    if(!strcmp(c2_lab, "if(!strcmp(label,"))
-    macro=0;
+    macro=false;
    else
-    macro=1;
+    macro=true;
    for(j=i+1; c1_lab[j]!='"'; j++)
      c3_lab[j-i-1]=c1_lab[j];
    c3_lab[j-i-1]=(char)NULL;
@@ -170,7 +157,7 @@ cmd(inter, msg);
 
 cmd(inter, "set mytag \"\"");
 
-if(macro==0)
+if(!macro)
  {//standard type of equations
   start=1;
   bra=1;
@@ -180,7 +167,7 @@ else
  start=0;
  bra=2;
  }
- for(; (bra>1||start==1) && fgets(c1_lab, 399, f)!=NULL;  )
+ for(; (bra>1||start==1) && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
  {sscanf(c1_lab, "%s", c2_lab);
   strcpy(c2_lab, c1_lab);
   clean_spaces(c2_lab);
@@ -291,14 +278,11 @@ else
       {cmd(inter, "set mytag \"\"");
        comment_line=0;
       }
-	  }
-
+	}
   }
-
  }
 fclose(f);
-//sprintf(msg, ".eq_%s.f.text conf -state disabled", lab);
-//cmd(inter, msg);
+
 sprintf(msg, "bind .eq_%s.f.text <KeyPress-Prior> {.eq_%s.f.text yview scroll -1 pages}", lab, lab);
 cmd(inter, msg);
 sprintf(msg, "bind .eq_%s.f.text <KeyPress-Next> {.eq_%s.f.text yview scroll 1 pages}", lab, lab);
@@ -319,13 +303,12 @@ cmd( inter, "showtop $w centerS 1 1" );
 }
 
 
-
 /****************************************************
 SCAN_USED_LAB
 ****************************************************/
 void scan_used_lab(char *lab, int *choice)
 {
-char c1_lab[400], c2_lab[400], c3_lab[400], *app;
+char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE];
 FILE *f;
 int i,j, done, bra, start, exist;
 
@@ -359,7 +342,7 @@ if ( ( f = fopen( equation_name, "r" ) ) != NULL )
 strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 
-for(done=0; fgets(c1_lab, 399, f)!=NULL;  )
+for(done=0; fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
  {
   clean_spaces(c1_lab); //eliminate the spaces
   for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL ; i++)
@@ -368,9 +351,9 @@ for(done=0; fgets(c1_lab, 399, f)!=NULL;  )
   if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
 	{
    if(!strcmp(c2_lab, "if(!strcmp(label,") )
-    macro=0;
+    macro=false;
    else
-    macro=1;
+    macro=true;
    for(j=0;c1_lab[i+1+j]!='"'; j++)
 	  c2_lab[j]=c1_lab[i+1+j]; //prepare the c2_lab to store the var's label
 	 c2_lab[j]=(char)NULL;
@@ -402,7 +385,6 @@ SCAN_USING_LAB
 ****************************************************/
 void scan_using_lab(char *lab, int *choice)
 {
-char c1_lab[400], c2_lab[400], c3_lab[400], *app;
 FILE *f;
 int i,j, done, bra, start, exist;
 variable *cv;
@@ -454,8 +436,8 @@ SHOW_EQ
 int contains (FILE *f, char *lab, int len)
 {
 int bra, found, start, i, got, j, comm=0;
-char c1_lab[400], pot[600];
-if(macro==0)
+char c1_lab[MAX_LINE_SIZE], pot[MAX_LINE_SIZE];
+if(!macro)
  {
  start=1;
  bra=1;
@@ -467,7 +449,7 @@ else
  }
 
 //for each line of the equation ...
- for(found=0; (bra>1||start==1) && fgets(c1_lab, 399, f)!=NULL;  )
+ for(found=0; (bra>1||start==1) && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
  {
 
  if(comm==1)

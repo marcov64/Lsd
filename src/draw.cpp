@@ -12,7 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-
 /****************************************************
 DRAW.CPP
 Draw the graphical representation of the model. It is activated by
@@ -20,22 +19,22 @@ INTERF.CPP only in case a model is loaded.
 
 The functions contained in this file are:
 
-- void show_graph( object *t)
+- void show_graph(object *t)
 initialize the canvas and calls show_obj for the root
 
-- void draw_obj(Tcl_Interp *inter, object *blk, object *t, int level, int center, int from)
+- void draw_obj(object *blk, object *t, int level, int center, int from)
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node(Tcl_Interp *inter, int x1, int y1, int x2, int y2, char *str)
+- void put_node(int x1, int y1, int x2, int y2, char *str)
 Draw the circle.
 
-- void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
+- void put_line(int x1, int y1, int x2, int y2)
 draw the line
 
-- void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
+- void put_text(char *str, char *num, int x, int y, char *str2);
 Draw the different texts and sets the bindings
 
 Functions used here from other files are:
@@ -56,35 +55,17 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 ****************************************************/
 
-#include <tk.h>
 #include "decl.h"
 
-void cmd(Tcl_Interp *inter, char const *cc);
-object *go_brother(object *cur);
-object *skip_next_obj(object *t, int *i);
-void draw_obj(Tcl_Interp *ti, object *blk, object *t, int level, int center, int from);
-void put_node(Tcl_Interp *interp, int x1, int y1, int x2, int y2, char *str);
-void put_line(Tcl_Interp *interp, int x1, int y1, int x2, int y2);
-void put_text(Tcl_Interp *inter, char *str, char *num, int x, int y, char *str2);
-void set_shortcuts( const char *window );
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern Tcl_Interp *inter;
-extern int strWindowOn;		// control the presentation of the model structure window
-extern char *simul_name;	// simulation name to use in title bar
-
-int range_type=90;
-int step_level=15;
-int step=10;
-int h0 = 255;					// initial horizontal position
-int v0 = 10;					// initial vertical position
-float hpan0win = 0.35;			// initial horizontal scroll % - Windows
 float hpan0lin = 0.35;			// Linux
 float hpan0mac = 0.23;			// Mac
-int hsz = 600;					// horizontal window size in pixels (2 x minimum)
-int vsz = 400;					// vertical window size in pixels (2 x minimum)
+float hpan0win = 0.35;			// initial horizontal scroll % - Windows
+int h0 = 255;					// initial horizontal position
 int hcvsz = 1920;				// horizontal canvas size
+int range_type=90;
+int step=10;
+int step_level=15;
+int v0 = 10;					// initial vertical position
 int vcvsz = 1080;				// vertical canvas size
 
 
@@ -97,25 +78,25 @@ void show_graph( object *t)
 char msg[TCL_BUFF_STR];
 object *top;
 
-cmd(inter, "set c .model_str");
+cmd(inter, "set c .str");
 
 if(!strWindowOn)	// model structure window is deactivated?
 {
-	cmd( inter, "if [ winfo exists $c ] { destroy $c }" );
+	cmd( inter, "if [ winfo exists $c ] { destroytop $c }" );
 	return;
 }
 
 cmd(inter, "set color white");
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd( inter, "set strExist [ winfo exists .model_str ]" );
+cmd( inter, "set strExist [ winfo exists $c ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 {
-	cmd( inter, "if [ winfo exists $c ] { destroy $c}" );
-	cmd( inter, "toplevel $c" );
-	cmd( inter, "if { $tcl_platform(platform) != \"windows\" } { wm iconbitmap $c @$RootLsd/$LsdSrc/icons/lsd.xbm }" );
-	cmd( inter, "wm protocol $c WM_DELETE_WINDOW { set strWindowOn 0; set choice 70 }" );
-	cmd( inter, "wm transient $c .; wm group $c ." );
+	cmd( inter, "if [ winfo exists $c ] { destroytop $c}" );
+	cmd( inter, "newtop $c \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+	cmd( inter, "wm transient $c .");
+	sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+	cmd( inter, msg );
 
 	cmd(inter, "frame $c.f");
 	cmd(inter, "scrollbar $c.f.vs -command \"$c.f.c yview\"");
@@ -140,7 +121,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 					} \
 				}" );
 
-	draw_obj(inter, t, top, v0, h0, 0);
+	draw_obj(t, top, v0, h0, 0);
 
 	cmd( inter, "bind $c.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
 	cmd( inter, "bind $c.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %X %Y } }" );
@@ -164,22 +145,18 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd( inter, "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
 	cmd( inter, "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	cmd(inter, "set posXstr [expr [winfo x .] + $corrX + $posX + $widthB]");
-	cmd(inter, "set posYstr [expr [winfo y .] + $corrY]");
-	sprintf( msg, "wm geometry $c %dx%d+$posXstr+$posYstr", hsz, vsz ); 
-	cmd( inter, msg );
-	sprintf( msg, "wm minsize $c [ expr %d / 2 ] [ expr %d / 2 ]", hsz, vsz );	
-	cmd( inter, msg );
-	set_shortcuts( ".model_str" );
+	cmd( inter, "set posXstr [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] ]" );
+	cmd( inter, "set posYstr [ expr [ winfo y . ] + $corrY ]" );
+	cmd( inter, "wm geometry $c ${hsizeM}x${vsizeM}+${posXstr}+${posYstr}" );	
+	cmd( inter, "showtop $c current yes yes no 0 0 b yes" );
+	cmd( inter, "wm minsize $c [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]" );	
+	set_shortcuts( "$c" );
 }
 else	// or just update canvas
 {
 	cmd( inter, "$c.f.c delete all" );
-	draw_obj(inter, t, top, v0, h0, 0);
+	draw_obj(t, top, v0, h0, 0);
 }
-
-sprintf( msg, "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
-cmd( inter, msg );
 }
 
 
@@ -187,11 +164,11 @@ cmd( inter, msg );
 DRAW_OBJ
 
 ****************************************************/
-void draw_obj(Tcl_Interp *inter, object *blk, object *t, int level, int center, int from)
+void draw_obj(object *blk, object *t, int level, int center, int from)
 {
 int i, num, step_type, begin, x, count, num_groups;
 object *cur, *cur1;
-char str[80], ch[TCL_BUFF_STR], ch1[50];
+char str[MAX_LINE_SIZE], ch[TCL_BUFF_STR], ch1[MAX_ELEM_LENGTH];
 variable *cv;
 bridge *cb;
 
@@ -237,10 +214,10 @@ if(t->up!=NULL)
 	  strcat(ch1, str);
 	  for( ;cur->next!=NULL; cur=cur->next); // reaches the last object of this group
 	 }
-	put_text(inter, ch, ch1, x, level, t->label);
-	put_node(inter, x-2, level+2, x+2, level+6, t->label);
+	put_text(ch, ch1, x, level, t->label);
+	put_node(x-2, level+2, x+2, level+6, t->label);
 	if(t->up->up!=NULL)
-    put_line(inter, from, level-step_level +6, x, level+2);
+    put_line(from, level-step_level +6, x, level+2);
 
   }
 
@@ -258,7 +235,7 @@ if(t->up==NULL)
  level-=step_level;
 for(i=begin-range_type/2, cb=t->b; cb!=NULL; cb=cb->next,  i+=step_type)
  if(cb->head!=NULL)
-   draw_obj(inter, blk, cb->head, level+step_level, i, center);
+   draw_obj(blk, cb->head, level+step_level, i, center);
 
 range_type+=15;
 }
@@ -268,7 +245,7 @@ range_type+=15;
 PUT_NODE
 
 ****************************************************/
-void put_node(Tcl_Interp *inter, int x1, int y1, int x2, int y2, char *str)
+void put_node(int x1, int y1, int x2, int y2, char *str)
 {
 	char ch[TCL_BUFF_STR];
 
@@ -281,7 +258,7 @@ void put_node(Tcl_Interp *inter, int x1, int y1, int x2, int y2, char *str)
 PUT_LINE
 
 ****************************************************/
-void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
+void put_line(int x1, int y1, int x2, int y2)
 {
 
     char ch[TCL_BUFF_STR];
@@ -295,7 +272,7 @@ void put_line(Tcl_Interp *inter, int x1, int y1, int x2, int y2)
 PUT_TEXT
 
 ****************************************************/
-void put_text(Tcl_Interp *inter, char *str, char *n, int x, int y, char *str2)
+void put_text(char *str, char *n, int x, int y, char *str2)
 {
 char ch[TCL_BUFF_STR];
 const char *bah;

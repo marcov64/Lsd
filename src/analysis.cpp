@@ -12,9 +12,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /* 
-############################################################
 Reached case 40
-############################################################
 */
 
 /****************************************************
@@ -92,110 +90,36 @@ Exit function, which is customized on the operative system.
 ****************************************************/
 
 #include "decl.h"
-#include <tk.h>
-#include <ctype.h>
-#include <unistd.h>
 
 #define PI 3.141592654
-#define ERR_LIM 10			// maximum number of repeated error messages
 
-object *go_brother(object *c);
-void cmd(Tcl_Interp *inter, char const *cc);
-void cover_browser( const char *, const char *, const char * );
-void uncover_browser( void );
-void plog( char const *msg, char const *tag = "" );
-void read_data(int *choice);
-void init_canvas(void);
-void plot(int *choice);
-void plot_cross(int *choice);
-void plot_gnu(int *choice);
-void plot_cs_xy(int *choice);
-void plot_phase_diagram(int *choice);
-void plot_lattice(int *choice);
-void histograms(int *choice);
-void histograms_cs(int *choice);
-void create_series(int *choice);
-void create_maverag(int *choice);
-void set_cs_data(int *choice);
-void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
-void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void myexit(int v);
-void save_data1(int *choice);
-void save_datazip(int *choice);
-void statistics(int *choice);
-void statistics_cross(int *choice);
-void insert_labels_mem(object *r, int *num_v, int *num_c);
-void insert_store_mem(object *r, int *num_v);
-void insert_data_mem(object *r, int *num_v, int *num_c);
-void insert_labels_nosave(object *r,char * lab,  int *num_v);
-void insert_store_nosave(object *r,char * lab,  int *num_v);
-void insert_data_nosave(object *r, char * lab, int *num_v);
-void insert_data_file( bool gz, int *num_v, int *num_c );
-void plog_series(int *choice);
-void set_lab_tit(variable *var);
-double *search_lab_tit_file(char *s,  char *t,int st, int en);
-double *find_data(int id_series);
-double max(double a, double b);
-int shrink_gnufile(void);
-int sort_labels_down(const void *a, const void *b);
-void show_eq(char *lab, int *choice);
-int cd(char *path);
-void show_plot_gnu(int n, int *choice, int type);
-object *skip_next_obj(object *t);
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern Tcl_Interp *inter;
-extern object *root;
-extern char *simul_name;
-extern char name_rep[400];
-extern int seed;
-extern int dozip;			// compressed results file flag
-extern char nonavail[];	// string for unavailable values
-extern char msg[];
-extern variable *cemetery;
-extern int actual_steps;
-extern int watch;
-
-int num_var;
-int num_c;
-int min_c;
-int max_c;
-double miny;
+bool allblack = false;
+bool autom = true;
+bool autom_x = true;
+bool grid = false;
+bool logs = false;		// log scale flag for the y-axis
+bool time_cross = false;
+bool xy = false;
+bool watch = true;
+char filename[MAX_PATH_LENGTH];
 double maxy;
+double miny;
+double point_size = 1.0;
 double truemaxy;
-int autom;
-int autom_x;
-int res, dir;
-int pdigits;   // precision parameter for labels in y scale
-int logs;		// log scale flag for the y-axis
-int gnu;		// use gnuplot for plots
 int cur_plot;
 int file_counter=0;
-char filename[1000];
-char **name_var;
-FILE *debug;
-int time_cross;
-int line_point;
-int grid;
-int allblack;
-double point_size;
-int xy;
-int type_plot[1000];
-int plot_l[1000];
-int plot_nl[1000];
-
-struct store
-{
-char label[80];
-int start;
-int end;
-char tag[20];
-double *data;
-int rank;
-} *vs;
-void sort_on_end(store *app);
+int gnu = 1;			// don't use gnuplot for plots
+int line_point = 1;
+int max_c;
+int min_c;
+int num_c;
+int num_var;
+int pdigits = 4;   		// precision parameter for labels in y scale
+int plot_l[MAX_PLOTS];
+int plot_nl[MAX_PLOTS];
+int res, dir;
+int type_plot[MAX_PLOTS];
+store *vs;
 
 
 /***************************************************
@@ -229,7 +153,7 @@ void read_data(int *choice)
 FILE *f;
 int rot, i, h, j, k, l, m, n, p, q, r;
 store *app_store;
-char *app, *app1, *app2, lab[60], dirname[300], str[200], str1[200], str2[200], str3[200], str4[200];
+char *app, *app1, *app2, dirname[MAX_PATH_LENGTH], str1[MAX_ELEM_LENGTH], str2[MAX_ELEM_LENGTH], str3[MAX_ELEM_LENGTH];
 double *datum, compvalue=0;
 
 cur_plot=0;
@@ -238,7 +162,7 @@ file_counter=0;
 
 cmd( inter, "set daCwidth 36");				     	// lists width (even number)
 
-cmd(inter, "if {[info exist gpterm] == 1 } {} {set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\";if { $tcl_platform(platform) == \"windows\"} {set gpterm \"windows\"} {set gpterm \"x11\"}}");
+cmd( inter, "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
 
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 
@@ -359,38 +283,27 @@ num_var=0;
 if(actual_steps>0)
   insert_data_mem(root, &num_var, &num_c);
 
-Tcl_LinkVar(inter, "auto", (char *) &autom, TCL_LINK_INT);
-Tcl_LinkVar(inter, "auto_x", (char *) &autom_x, TCL_LINK_INT);
+Tcl_LinkVar(inter, "auto", (char *) &autom, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "auto_x", (char *) &autom_x, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "minc", (char *) &min_c, TCL_LINK_INT);
 Tcl_LinkVar(inter, "maxc", (char *) &max_c, TCL_LINK_INT);
 Tcl_LinkVar(inter, "miny", (char *) &miny, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "maxy", (char *) &maxy, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "logs", (char *) &logs, TCL_LINK_INT);
-Tcl_LinkVar(inter, "allblack", (char *) &allblack, TCL_LINK_INT);
-Tcl_LinkVar(inter, "grid", (char *) &grid, TCL_LINK_INT);
+Tcl_LinkVar(inter, "logs", (char *) &logs, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "allblack", (char *) &allblack, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "grid", (char *) &grid, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "point_size", (char *) &point_size, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "tc", (char *) &time_cross, TCL_LINK_INT);
+Tcl_LinkVar(inter, "tc", (char *) &time_cross, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "line_point", (char *) &line_point, TCL_LINK_INT);
-Tcl_LinkVar(inter, "xy", (char *) &xy, TCL_LINK_INT);
+Tcl_LinkVar(inter, "xy", (char *) &xy, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "pdigits", (char *) &pdigits, TCL_LINK_INT);
-Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_INT);
+Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "gnu", (char *) &gnu, TCL_LINK_INT);
 
 min_c=1;
 max_c=num_c;
-autom=1;
-autom_x=1;
 miny=maxy=0;
-logs=0;
-allblack=0;
-grid=0;
-point_size=1.0;
-xy=0;
-line_point=1;
-time_cross=1;
-pdigits=4;
-watch=1;
-gnu = 1;
+
 cmd(inter, "set numy2 2");
 
 cmd(inter, "frame .da.f");
@@ -444,8 +357,8 @@ cmd(inter, "pack .da.f.h.v.y2.logs .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ip
 cmd(inter, "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2");
 
 cmd(inter, "frame .da.f.h.tc -relief groove -bd 2");
-cmd(inter, "radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 1");
-cmd(inter, "radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 2");
+cmd(inter, "radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0");
+cmd(inter, "radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1");
 cmd(inter, "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w");
 
 cmd(inter, "frame .da.f.h.xy -relief groove -bd 2");
@@ -544,8 +457,10 @@ cmd( inter, "proc comp_und { n1 n2 } { \
 		return 1 \
 	}; \
 }" );
-	
-cmd( inter, "showtop .da overM 0 1 0");
+
+// grab focus when called from LSD Debugger
+Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
+cmd( inter, "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }");
 
 if(num_var==0)
   cmd(inter, "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"");  
@@ -590,16 +505,16 @@ cmd( inter, "set numy2 [ .da.f.h.v.y2.f.e get ]" );
 cmd( inter, "set point_size [ .da.f.tit.ps.e get ]" ); 
 cmd( inter, "set pdigits [ .da.f.tit.pr.e get ]" ); 
 
-if(*choice==1 && time_cross==2 && xy==0) //Plot cross section
+if(*choice==1 && time_cross==1 && xy==0) //Plot cross section
  *choice=9;
 
-if(*choice==1 && time_cross==1 && xy==1) //Plot XY
+if(*choice==1 && time_cross==0 && xy==1) //Plot XY
  *choice=17;
 
-if(*choice==1 && time_cross==2 && xy==1) //Plot XY Cross section
+if(*choice==1 && time_cross==1 && xy==1) //Plot XY Cross section
  *choice=18;
 
-if(*choice==12 && time_cross==2) //Statistics cross section
+if(*choice==12 && time_cross==1) //Statistics cross section
  *choice=13;
 
 if(pdigits<1 || pdigits>8)
@@ -620,8 +535,7 @@ if(*choice==0)
 delete[] vs;
 
 cmd( inter, "destroytop .da" );
-if ( actual_steps == 0 )		// don't uncover if called during simulation
-	uncover_browser( );
+uncover_browser( );
 	
 Tcl_UnlinkVar(inter, "auto");
 Tcl_UnlinkVar(inter, "auto_x");
@@ -844,7 +758,7 @@ case 32:
   cur_plot++;
   
   cmd(inter, "set choice $tc");
-  if(*choice==1)
+  if(*choice==0)
     histograms(choice);
   else
     histograms_cs(choice);
@@ -1021,7 +935,7 @@ if(*choice==2)
  }
 
 cmd( inter, "set fn \"$b.eps\"" );
-cmd( inter, "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -filetypes { { {Encapsulated Postscript} {.eps} } { {All Files} {*} } } ]; if { [string length $fn] == 0 } { set choice 2 }");
+cmd( inter, "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { [string length $fn] == 0 } { set choice 2 }");
 
 if(*choice==2)
  {*choice=0;
@@ -1249,7 +1163,7 @@ for(i=0; i<j; i++)
    {
    datum=find_data(k);
    r=0;
-   if(!isnan(datum[h]))		// ignore NaNs
+   if(is_finite(datum[h]))		// ignore NaNs
     switch(p)
     {
     case 0: if(datum[h]!=compvalue) r=1;
@@ -1485,7 +1399,7 @@ for(i=0; i<j; i++)
    {
    datum=find_data(k);
    r=0;
-   if(!isnan(datum[h]))		// ignore NaNs
+   if(is_finite(datum[h]))		// ignore NaNs
     switch(p)
     {
     case 0: if(datum[h]!=compvalue) r=1;
@@ -1555,7 +1469,7 @@ case 3:
   cmd(inter, "if { $ex == 1 } { wm deiconify .da.f.new$a; raise .da.f.new$a; focus .da.f.new$a } { set choice 1 }");
   if(*choice==1)
    {
-   getcwd(dirname, 300);
+   getcwd(dirname, MAX_PATH_LENGTH - 1);
    cmd(inter, "set choice $a");
    sprintf(msg, "plotxy_%d",*choice);
    chdir(msg);
@@ -1810,7 +1724,7 @@ if ( *choice == 1 )
 	const char extTot[] = ".tot";
 #endif 
  
-  sprintf( msg, "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd Result Files} {%s}} {{Lsd Total Files} {%s}} {{All Files} {*}} }]", extRes, extTot );
+  sprintf( msg, "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd result files} {%s}} {{Lsd total files} {%s}} {{All files} {*}} }]", extRes, extTot );
   cmd( inter, msg );
   
   cmd(inter, "set choice [llength $lab]");
@@ -2033,7 +1947,7 @@ if(*choice == 0)
   cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   goto there;
- cmd(inter, "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set choice 0}");
  if(*choice == 0)
   goto there;
@@ -2260,21 +2174,21 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[100];
-  tag[i]=new char[100];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
 
    data[i]=find_data(idseries);
@@ -2283,7 +2197,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -2308,7 +2222,7 @@ for(i=0; i<nv; i++)
 y1=new double[nv];
 y2=new double[nv];
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -2334,7 +2248,7 @@ else
  
 numy2--;
  
-if(autom==1||miny>=maxy)
+if(autom||miny>=maxy)
 {
 
 miny2=miny;
@@ -2345,13 +2259,13 @@ for(done=doney2=0, i=0; i<nv; i++)
   {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
+    if(done==0 && start[i]<=j && end[i]>=j && is_finite(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -2360,13 +2274,13 @@ for(done=doney2=0, i=0; i<nv; i++)
   {
   for(j=min_c; j<=max_c; j++)
    {
-    if(doney2==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
+    if(doney2==0 && start[i]<=j && end[i]>=j && is_finite(data[i][j]))		// ignore NaNs
      {miny2=maxy2=data[i][j];
       doney2=1;
      }
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny2 )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]<miny2 )		// ignore NaNs
      miny2=data[i][j];
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy2 )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy2 )		// ignore NaNs
      maxy2=data[i][j];
 
    }
@@ -2442,7 +2356,7 @@ cmd(inter, "pack $p");
 
 cmd(inter, "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 40 0 40 310 -fill grey60 -width 1p -tag p");
 cmd(inter, "$p create line 190 0 190 310 -fill grey60 -width 1p -tag p");
@@ -2497,7 +2411,7 @@ cmd(inter, msg);
 
 cmd(inter, "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 38 300 640 300 -fill grey60 -tag p");
 cmd(inter, "$p create line 38 225 640 225 -fill grey60 -tag p");
@@ -2618,7 +2532,7 @@ for(i=0, j=4, k=0, color=0; i<nv && k<4; i++)
   cmd(inter, "set xlabel [expr $xlabel+$app+4]");
   cmd(inter, "set choice $ylabel");
   k=*choice;
-  if(allblack==0)
+  if(!allblack)
   {
   sprintf(msg, "$p itemconf p%d -fill $c%d",i,color);
   cmd(inter, msg);
@@ -2648,7 +2562,7 @@ for(k=0; k<nv; k++)
 for(x01=0,x1=40,i=min_c ;x1==40 ;i++ ) //, and record the first to be used
  {
   for(k=0; k<nv; k++)
-   {if(start[k]<=i && end[k]>=i && !isnan(data[k][i]))		// ignore NaNs
+   {if(start[k]<=i && end[k]>=i && is_finite(data[k][i]))		// ignore NaNs
       y1[k]+=data[k][i];
    }
   x1=40+(int)((double)(1+i)*step);
@@ -2694,14 +2608,14 @@ for(x02=0; i<=max_c; i++)
      }
       
     color++;
-    if( (start[k]<i) && (end[k]>=i) && !isnan(data[k][i]))		// ignore NaNs
+    if( (start[k]<i) && (end[k]>=i) && is_finite(data[k][i]))		// ignore NaNs
 	  {y2[k]+=data[k][i];
 		if(x1!=x2 )
 		{y2[k]/=x02;
        if(y2[k]<cminy)
          y2[k]=cminy;
 		 y2[k]=(300-((y2[k]-cminy)/(cmaxy-cminy))*300);
-       if( allblack == 0 && color < 1100 )
+       if ( ! allblack && color < 1100 )
        {
        if(line_point==1)
         {//plog("\nPoint size $point_size\n");
@@ -2728,7 +2642,7 @@ for(x02=0; i<=max_c; i++)
 		 }
 	  }
      else
-      if(start[k]==i && !isnan(data[k][i]))		// ignore NaNs
+      if(start[k]==i && is_finite(data[k][i]))		// ignore NaNs
        { //series entrying after the min_c
 
         y1[k]=(300-((data[k][i]-cminy)/(cmaxy-cminy))*300);
@@ -2742,7 +2656,7 @@ for(x02=0; i<=max_c; i++)
     }
   
   }
- if(watch==1)
+ if(watch)
 	cmd(inter, "update");
  if(x1!=x2 )
  { x1=x2;
@@ -2874,8 +2788,8 @@ tag=new char *[nv];
 data=new double *[nv];
 logdata=new double *[nv];
 for(i=0, new_nv=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
@@ -2897,7 +2811,7 @@ for(i=0, new_nv=0; i<nv; i++)
     {
 	  logdata[new_nv]=new double[end[i]+1];	// create space for the logged values
       for(j=start[i];j<=end[i];j++)		// log everything possible
-	  if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	  if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	  else
 	  {
@@ -2927,7 +2841,7 @@ for(i=0, new_nv=0; i<nv; i++)
  for(j=0, first=1, i=0; j<nv; j++)
   {
 	for(k=0; k<nt; k++)
-	{if(erase[j]==0 && !isnan(data[j][list_times[k]]))		// ignore NaNs
+	{if(erase[j]==0 && is_finite(data[j][list_times[k]]))		// ignore NaNs
 	  {val[i][k]=data[j][list_times[k]];
      if(first==1)  //The first value is assigned to both min and max
       {miny=maxy=val[i][k];
@@ -2984,7 +2898,7 @@ cmd(inter, "canvas $p -width 640 -height 430 -relief flat -background white");
 cmd(inter, "pack $p");
 
 cmd(inter, "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p");
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 40 0 40 310 -fill grey60 -tag p");
 cmd(inter, "$p create line 190 0 190 310 -fill grey60 -tag p");
@@ -3017,7 +2931,7 @@ cmd(inter, msg);
 
 cmd(inter, "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 38 300 640 300 -fill grey60 -tag p");
 cmd(inter, "$p create line 38 225 640 225 -fill grey60 -tag p");
@@ -3083,7 +2997,7 @@ for(i=0 ; i<new_nv-1; i++)
     y01=300-((val[i][j]-miny)/(maxy-miny))*300;
     y02=300-((val[i+1][j]-miny)/(maxy-miny))*300;
 
-   if(allblack==0)
+   if(!allblack)
     {// draw colorful lines
     if(line_point==1)
       {
@@ -3154,7 +3068,7 @@ cmd(inter, msg);
 	 j=0;
 	}
 
-  if(allblack==0)
+  if(!allblack)
   {
   sprintf(msg, "$p itemconf p%d -fill $c%d",i,i);
   cmd(inter, msg);
@@ -3337,7 +3251,7 @@ void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c)
 {
 int i, j, h;
 double dapp;
-char sapp[50];
+char sapp[MAX_ELEM_LENGTH];
 
 
 for(i=nv-2; i>=0; i--)
@@ -3371,7 +3285,7 @@ void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c)
 {
 int i, j, h;
 double dapp;
-char sapp[50];
+char sapp[MAX_ELEM_LENGTH];
 
 
 for(i=nv-2; i>=0; i--)
@@ -3445,7 +3359,7 @@ SEARCH_LAB_TIT_FILE
 double *search_lab_tit_file(char *s, char *t, int st, int en)
 {
 int i, done, app_st, app_en, j;
-char str[100], tag[100];
+char str[MAX_ELEM_LENGTH], tag[MAX_ELEM_LENGTH];
 double *d, app;
 FILE *f;
 
@@ -3691,7 +3605,7 @@ FILE *f;
 #ifdef LIBZ
 gzFile fz;
 #endif
-char ch, label[60], tag[60], app_str[20], *tok, *linbuf;
+char ch, label[MAX_ELEM_LENGTH], tag[MAX_ELEM_LENGTH], app_str[20], *tok, *linbuf;
 int i, j, new_v, new_c;
 bool header = false;
 long linsiz = 1;
@@ -3942,7 +3856,7 @@ void statistics(int *choice)
 int idseries;
 char *app;
 char **str, **tag;
-char str1[50], longmsg[180];
+char str1[50], longmsg[300];
 int i, nv, j, *start, *end;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
@@ -3966,21 +3880,21 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries); 
    
@@ -3988,7 +3902,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -4029,10 +3943,8 @@ for(i=0; i<nv; i++)
 
  for(av=var=num=0, j=min_c; j<=max_c; j++)
   {
-  if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// ignore NaNs
+  if(j>=start[i] && j<=end[i] && is_finite(data[i][j]))		// ignore NaNs
   {
-//   if(j==start[i])
-//     ymin=ymax=data[i][j]; DOES NOT WORK IN CASE OF LIMITED RANGE
    if(data[i][j]<ymin)
     ymin=data[i][j];
    if(data[i][j]>ymax)
@@ -4093,7 +4005,7 @@ void statistics_cross(int *choice)
 int idseries;
 char *app;
 char **str, **tag;
-char str1[50], longmsg[180];
+char str1[50], longmsg[300];
 int i, nv, j, *start, *end, nt, *list_times, h, k;
 double **data,**logdata, av, var, num, ymin, ymax, sig;
 bool first;
@@ -4138,14 +4050,14 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
@@ -4158,7 +4070,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -4195,7 +4107,7 @@ for(j=0; j<nt; j++)
  first=true;
  for(av=var=num=0, i=0; i<nv; i++)
   {
-  if(h>=start[i] && h<=end[i] && !isnan(data[i][h]))		// ignore NaNs
+  if(h>=start[i] && h<=end[i] && is_finite(data[i][h]))		// ignore NaNs
   {
   if(first)
   {
@@ -4324,7 +4236,7 @@ void plot_gnu(int *choice)
 
 char *app;
 char **str, **tag;
-char str1[50], str2[100], str3[10], dirname[300];
+char str1[50], str2[100], str3[10], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata;
 
@@ -4411,21 +4323,21 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
 
   data[i]=find_data(idseries); 
@@ -4434,7 +4346,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -4459,7 +4371,7 @@ for(i=0; i<nv; i++)
 
  }
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -4472,20 +4384,20 @@ for(i=0; i<nv; i++)
  }
 }
 
-if(autom==1||miny>=maxy)
+if(autom||miny>=maxy)
 {
 
 for(done=0, i=1; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
+    if(done==0 && start[i]<=j && end[i]>=j && is_finite(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -4498,7 +4410,7 @@ cmd(inter, msg);
 
 cmd(inter, "file mkdir $dirxy");
 
-getcwd(dirname, 300);
+getcwd(dirname, MAX_PATH_LENGTH-1);
 sprintf(msg, "plotxy_%d", cur_plot);
 chdir(msg);
 f=fopen("data.gp","w");
@@ -4628,7 +4540,7 @@ fprintf(f,"set term tkcanvas\n");
 fprintf(f2,"set term %s\n", app);
 fprintf(f,"set output 'plot.file'\n");
 
-if(grid==1)
+if(grid)
  {fprintf(f, "set grid\n");
   fprintf(f2, "set grid\n");
  }
@@ -4671,7 +4583,7 @@ else
 
 if(ndim==2)
 {
-if(allblack==1 )
+if(allblack)
  sprintf(str3, " lt -1");
 else
  strcpy(str3, "");
@@ -4693,7 +4605,7 @@ else
    sprintf(str1, "with pm3d ");
   }
 
-  if(allblack==1)
+  if(allblack)
    {
    fprintf(f, "set palette gray\n");
    fprintf(f2, "set palette gray\n");
@@ -4709,7 +4621,7 @@ fprintf(f2,"%s\n", app);
 if(ndim==2) 
  {
   sprintf(msg,"plot 'data.gp' using 1:2 %s t \"%s(%s)\"", str1, str[1], tag[1]);
-  if(allblack==1 )
+  if(allblack)
    strcat(msg, str3);
   i=2;
  } 
@@ -4759,7 +4671,7 @@ for( ; i<nv; i++)
        strcpy(str2,"");  
     }  
 
-   if(strlen(str2)>0 && allblack==1 )
+   if(strlen(str2)>0 && allblack)
      strcat(str2, str3);
    fprintf(f, "%s",str2);
    fprintf(f2, "%s",str2);
@@ -4810,7 +4722,7 @@ void plot_cs_xy(int *choice)
 int idseries;
 char *app;
 char **str, **tag;
-char str1[500], str2[500], str3[10], dirname[300];
+char str1[5*MAX_ELEM_LENGTH], str2[5*MAX_ELEM_LENGTH], str3[10], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata;
 int i, nv, j, k, *start, *end, done, color;
@@ -4836,21 +4748,21 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
   data[i]=find_data(idseries); 
    
@@ -4858,7 +4770,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -4880,7 +4792,7 @@ for(i=0; i<nv; i++)
    }
  }
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -4893,20 +4805,20 @@ for(i=0; i<nv; i++)
  }
 }
 
-if(autom==1||miny>=maxy)
+if(autom||miny>=maxy)
 {
 
 for(done=0, i=1; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
+    if(done==0 && start[i]<=j && end[i]>=j && is_finite(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -5035,7 +4947,7 @@ sprintf(msg, "set dirxy plotxy_%d", cur_plot);
 cmd(inter, msg);
 
 cmd(inter, "file mkdir $dirxy");
-getcwd(dirname, 300);
+getcwd(dirname, MAX_PATH_LENGTH-1);
 sprintf(msg, "plotxy_%d",cur_plot);
 chdir(msg);
 
@@ -5088,7 +5000,7 @@ fprintf(f2,"set term %s\n", app);
 fprintf(f,"set term tkcanvas\n");
 fprintf(f,"set output 'plot.file'\n");
 
-if(grid==1)
+if(grid)
  {
   fprintf(f, "set grid\n");
   fprintf(f2, "set grid\n");
@@ -5120,7 +5032,7 @@ if(ndim==3)
  fprintf(f2, "%s",msg);
  } 
 
-if(allblack==1)
+if(allblack)
  sprintf(str3, " lt -1");
 else
   str3[0]=0;
@@ -5141,7 +5053,7 @@ if(ndim==3)
    fprintf(f2, "set pm3d\n");
   }
 
- if(allblack==1)
+ if(allblack)
   {
    strcpy(str3, "");
   fprintf(f, "set palette gray\n");
@@ -5152,7 +5064,7 @@ if(ndim==3)
 if(ndim==2)
  {
   sprintf(msg,"plot 'data.gp' using 1:2 %s t \"%s_%s(%d)\"",str2, str[block_length], tag[block_length], time_sel);
-  if(allblack==1 )
+  if(allblack)
    strcat(msg, str3);
   i=2; //init from the second variable
  } 
@@ -5168,7 +5080,7 @@ for(; i<nv/block_length; i++)
    if(ndim==2)
     {
      sprintf(str1,", 'data.gp' using 1:%d %s t \"%s_%s(%d)\"",i+1, str2, str[j], tag[j], time_sel);
-     if(allblack==1 )
+     if(allblack)
       strcat(str1, str3);
     }  
    else
@@ -5214,7 +5126,7 @@ void plot_phase_diagram(int *choice)
 int idseries;
 char *app;
 char **str, **tag;
-char str1[50], str2[100], str3[100], dirname[300];
+char str1[50], str2[100], str3[100], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata;
 
@@ -5239,21 +5151,21 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries);
    
@@ -5261,7 +5173,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -5283,7 +5195,7 @@ for(i=0; i<nv; i++)
    }
  }
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -5296,20 +5208,20 @@ for(i=0; i<nv; i++)
  }
 }
 
-if(autom==1||miny>=maxy)
+if(autom||miny>=maxy)
 {
 
 for(done=0, i=0; i<nv; i++)
  {
   for(j=min_c; j<=max_c; j++)
    {
-    if(done==0 && start[i]<=j && end[i]>=j && !isnan(data[i][j]))		// ignore NaNs
+    if(done==0 && start[i]<=j && end[i]>=j && is_finite(data[i][j]))		// ignore NaNs
      {miny=maxy=data[i][j];
       done=1;
      }
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]<miny )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]<miny )		// ignore NaNs
      miny=data[i][j];
-    if(start[i]<=j && end[i]>=j && !isnan(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
+    if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
 
    }
@@ -5362,7 +5274,7 @@ sprintf(msg, "set dirxy plotxy_%d", cur_plot);
 cmd(inter, msg);
 
 cmd(inter, "file mkdir $dirxy");
-getcwd(dirname, 300);
+getcwd(dirname, MAX_PATH_LENGTH-1);
 sprintf(msg, "plotxy_%d",cur_plot);
 chdir(msg);
 
@@ -5392,7 +5304,7 @@ fprintf(f2, "set datafile missing \"nan\" \n");
 fprintf(f,"set term tkcanvas\n");
 fprintf(f,"set output 'plot.file'\n");
 
-if(grid==1)
+if(grid)
  {fprintf(f, "set grid\n");
   fprintf(f2, "set grid\n");
  }
@@ -5419,20 +5331,19 @@ if(line_point==1)
 else
  strcpy(str1, "");
 
-if(allblack==1)
+if(allblack)
  sprintf(str3, " lt -1");
 else
  str3[0]=0;
- //sprintf(str3, "");
 
  sprintf(msg,"plot 'data.gp' using 1:2 %s t \"t+1\"", str1 );
- if(allblack==1 )
+ if(allblack)
   strcat(msg, str3);
 for(i=2; i<=nlags; i++)
  if(start[0]<=max_c && end[0]>=min_c)
   {sprintf(str2,", 'data.gp' using 1:%d %s t \"t+%d\"",i+1, str1, i);
    strcat(msg,str2);
-   if(allblack==1 )
+   if(allblack)
     strcat(msg, str3);
 
   }
@@ -5553,14 +5464,9 @@ PLOT_LATTICE
 void plot_lattice(int *choice)
 {
 
-char *app;
-
-char str1[50], str2[100], str3[100];
 FILE *f, *f2;
 double **data;
-
 int i, nv, j, hi, le, done, nlags, ncol, nlin, end;
-
 
 cmd(inter, "set choice [.da.vars.ch.v size]");
 nv=*choice;
@@ -5572,7 +5478,7 @@ if ( nv == 0 )		 // no plots to save
 }
 
 data=new double *[nv];
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
@@ -5590,8 +5496,6 @@ for(i=0; i<nv; i++)
   data[i]=vs[nv].data;
 
  }
-
-
 
 cmd(inter, "set bidi 1");
 cmd(inter, "toplevel .da.s");
@@ -5693,7 +5597,7 @@ sprintf(msg, "canvas $p -width %d -height %d -background white -relief flat", nc
 cmd(inter, msg);
 cmd(inter, "pack $p");
 
-if(grid==0)
+if(!grid)
 {
 for(j=0; j<nlin; j++)
  for(i=0; i<ncol; i++)
@@ -5779,8 +5683,8 @@ void histograms(int *choice)
 
 int idseries;
 char *app;
-char str[100];
-char tag[100];
+char str[MAX_ELEM_LENGTH];
+char tag[MAX_ELEM_LENGTH];
 
 int start, end;
 int i, num_bin, j, first, last, stat;
@@ -5805,7 +5709,7 @@ strcpy(msg,app);
 sscanf(msg, "%s %s (%d - %d) # %d", str, tag, &start, &end, &idseries);
 
 data=find_data(idseries);
-if(autom_x==1)
+if(autom_x)
  {first=start;
   last=end;
  }
@@ -5827,7 +5731,7 @@ else
  }  
 
 for(tot=0, i=first; i<=last; i++)	// count number of points excluding NaNs
- if(!isnan(data[i]))				// ignore NaNs
+ if(is_finite(data[i]))				// ignore NaNs
   tot++;
 
 sprintf(msg, "set bidi %d", 100<tot?100:(int)tot);
@@ -5880,7 +5784,7 @@ ap=(double)num_bin;
 tot=average=sigma=0;
 for(i=first; i<=last; i++)
  {
- if(isnan(data[i]))		// ignore NaNs
+ if(!is_finite(data[i]))		// ignore NaNs
   continue;
  if(i==first)
   mx=mn=data[i];
@@ -5912,7 +5816,7 @@ for(i=0; i<num_bin; i++)
 step=(mx-mn)/(ap); 
 for(i=first; i<=last; i++)
  {
-  if(isnan(data[i]))		// ignore NaNs
+  if(!is_finite(data[i]))		// ignore NaNs
    continue;
   a=floor( ap*(data[i]-mn)/(mx-mn));
   s=ap*(data[i]-mn)/(mx-mn);
@@ -5977,7 +5881,7 @@ for(i=0; i<num_bin; i++)
 
 if(stat==1)
  cmd(inter, "wm deiconify .log; raise .log .da"); 
-if(autom==0 && miny<maxy)
+if(!autom && miny<maxy)
  {
   lminy=miny;
   miny2=lminy/tot;
@@ -6016,7 +5920,7 @@ cmd(inter, "pack $p");
 
 cmd(inter, "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 40 0 40 310 -fill grey60 -width 1p -tag p");
 cmd(inter, "$p create line 190 0 190 310 -fill grey60 -width 1p -tag p");
@@ -6076,7 +5980,7 @@ cmd(inter, msg);
 
 cmd(inter, "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 38 300 640 300 -fill grey60 -tag p");
 cmd(inter, "$p create line 38 225 640 225 -fill grey60 -tag p");
@@ -6191,7 +6095,7 @@ cmd(inter, msg);
     {
      i=num_bin;
     }
- if(watch==1)
+ if(watch)
 	cmd(inter, "update");
  }
 
@@ -6278,14 +6182,14 @@ end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
 
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
@@ -6296,7 +6200,7 @@ for(i=0; i<nv; i++)
   
   /*****************
   IT IS CS, SO THE TIME MUST BE DECIDED YET
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries);
    }
@@ -6306,7 +6210,7 @@ for(i=0; i<nv; i++)
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
      for(j=start[i];j<=end[i];j++)		// log everything possible
-	   if(!isnan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
+	   if(!is_nan(data[i][j]) && data[i][j]>0.0)		// ignore NaNs
 		 logdata[i][j]=log(data[i][j]);
 	   else
 	   {
@@ -6408,11 +6312,11 @@ ap=(double)num_bin;
 tot=average=sigma=0;
 active_v=0;
 
-if(autom==1)
+if(autom)
 {//min and max fixed automatically
 for(i=0; i<nv; i++)
  {
- if(start[i]<=time && end[i]>=time && !isnan(data[i][time]))		// ignore NaNs
+ if(start[i]<=time && end[i]>=time && is_finite(data[i][time]))		// ignore NaNs
  {
  if(active_v==0)
   mx=mn=data[i][time];
@@ -6437,7 +6341,7 @@ mx=maxy;
 mn=miny;
 for(i=0; i<nv; i++)
  {
- if(start[i]<=time && end[i]>=time && !isnan(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
+ if(start[i]<=time && end[i]>=time && is_finite(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
  {
   average+=data[i][time];
   sigma+=data[i][time]*data[i][time];
@@ -6464,7 +6368,7 @@ for(i=0; i<num_bin; i++)
 step=(mx-mn)/(ap); 
 for(i=0; i<nv; i++)
  {
-  if(start[i]<=time && end[i]>=time && !isnan(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
+  if(start[i]<=time && end[i]>=time && is_finite(data[i][time]) && data[i][time]>=mn && data[i][time]<=mx)		// ignore NaNs
   {
   a=floor( ap*(data[i][time]-mn)/(mx-mn));
   s=ap*(data[i][time]-mn)/(mx-mn);
@@ -6532,7 +6436,7 @@ for(i=0; i<num_bin; i++)
 
 if(stat==1)
  cmd(inter, "wm deiconify .log; raise .log .da"); 
-if(2==1 && autom==0 && miny<maxy)
+if(!autom && miny<maxy)
  {
   lminy=miny;
   miny2=lminy/tot;
@@ -6570,7 +6474,7 @@ cmd(inter, "pack $p");
 
 cmd(inter, "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 40 0 40 310 -fill grey60 -width 1p -tag p");
 cmd(inter, "$p create line 190 0 190 310 -fill grey60 -width 1p -tag p");
@@ -6629,7 +6533,7 @@ cmd(inter, msg);
 
 cmd(inter, "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p");
 
-if(grid==1)
+if(grid)
 {
 cmd(inter, "$p create line 38 300 640 300 -fill grey60 -tag p");
 cmd(inter, "$p create line 38 225 640 225 -fill grey60 -tag p");
@@ -6737,7 +6641,7 @@ for(i=0; i<num_bin; i++)
     {
      i=num_bin;
     }
- if(watch==1)
+ if(watch)
 	cmd(inter, "update");
  }
 
@@ -6937,28 +6841,28 @@ tag=new char *[nv];
  delete[] vs;
  vs=app;
 
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
 
    data[i]=find_data(idseries);
    }
  }
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -6996,7 +6900,7 @@ for(i=min_c; i<=max_c; i++)
   first=true;
   for(j=0; j<nv; j++)
    {
-    if(i>=start[j] && i<=end[j] && !isnan(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))		// ignore NaNs
+    if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))		// ignore NaNs
     {
     nmean+=data[j][i];
     nvar+=data[j][i]*data[j][i];
@@ -7073,7 +6977,7 @@ for(j=0; j<nv; j++)
   first=true;
   for(i=min_c; i<=max_c; i++)
    {
-    if(i>=start[j] && i<=end[j] && !isnan(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
+    if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
     {
     nmean+=data[j][i];
     nvar+=data[j][i]*data[j][i];
@@ -7221,7 +7125,7 @@ tag=new char *[nv];
  delete[] vs;
  vs=app;
 
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
@@ -7238,8 +7142,8 @@ if(flt<2)
 
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
@@ -7254,13 +7158,13 @@ for(i=0; i<nv; i++)
   vs[num_var+i].end=end[i];
   vs[num_var+i].rank=num_var+i;
   vs[num_var+i].data = new double[max_c+2];
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[i]=find_data(idseries);
    xapp=0;
 
    for(h=0, j=start[i]; j<start[i]+flt;j++)
-	   if(!isnan(data[i][j]))		// not a NaN?
+	   if(is_finite(data[i][j]))		// not a NaN?
 	   {
 		   xapp+=data[i][j];
 		   h++;
@@ -7275,7 +7179,7 @@ for(i=0; i<nv; i++)
 
    for(   ; j<end[i]-(flt-1)/2; j++)
     {
-	 if(!isnan(data[i][j-(flt-1)/2]) && !isnan(data[i][j+(flt-1)/2]))
+	 if(is_finite(data[i][j-(flt-1)/2]) && is_finite(data[i][j+(flt-1)/2]))
 		xapp=xapp-data[i][j-(flt-1)/2]/(double)flt+data[i][j+(flt-1)/2]/(double)flt;
 	 else
 		xapp=NAN;
@@ -7358,8 +7262,8 @@ tag=new char *[nv];
 max_c=min_c=0;
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
@@ -7504,7 +7408,7 @@ else
 		ext = extResZip;
 }
 
-sprintf(msg, "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir [pwd] -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All Files} {*}} }]", ext, descr, ext);
+sprintf(msg, "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir [pwd] -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext);
 cmd(inter, msg);
 app=(char *)Tcl_GetVar(inter, "bah",0);
 strcpy(msg, app);
@@ -7653,7 +7557,7 @@ if(dozip==1)
 for(j=min_c; j<=max_c; j++)
  {
   for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
+   {if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
       gzprintf(fsavez, "%g%s", data[i][j], delimiter);
     else
       gzprintf(fsavez, "%s%s", misval, delimiter);
@@ -7667,7 +7571,7 @@ else
 {
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
-   {if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
+   {if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
       fprintf(fsave, "%g%s", data[i][j], delimiter);  
     else
       fprintf(fsave, "%s%s", misval, delimiter);  
@@ -7681,7 +7585,7 @@ else //column data writing
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
    {
-   if(j>=start[i] && j<=end[i] && !isnan(data[i][j]))		// write NaN as n/a
+   if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
    {
       sprintf(msg, "%.10lf", data[i][j]);
 	  strcat(msg, str1);
@@ -7779,28 +7683,28 @@ tag=new char *[nv];
  delete[] vs;
  vs=app;
 
-if(autom_x==1)
+if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
 for(i=0; i<nv; i++)
- {str[i]=new char[50];
-  tag[i]=new char[50];
+ {str[i]=new char[MAX_ELEM_LENGTH];
+  tag[i]=new char[MAX_ELEM_LENGTH];
 
   sprintf(msg, "set res [.da.vars.ch.v get %d]",i);
   cmd(inter, msg);
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
+  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    
    data[i]=find_data(idseries);
    }
  }
 
-if(autom_x==1||min_c>=max_c)
+if(autom_x||min_c>=max_c)
 {
 
 for(i=0; i<nv; i++)
@@ -7826,14 +7730,14 @@ plog("\n");
 
 for(i=min_c; i<=max_c; i++)
  {
- if ( ! isnan( data[0][i] ) && start[0] <= i )
+ if ( ! is_nan( data[0][i] ) && start[0] <= i )
 	sprintf(msg, "%d\t%.*g", i, pdigits, data[0][i]);
  else
 	sprintf(msg, "%d\t%s", i, nonavail);		// write NaN as n/a
  plog( msg, "series" );
  for(j=1; j<nv; j++)
    {
-   if ( ! isnan( data[j][i] ) && start[j] <= i )
+   if ( ! is_nan( data[j][i] ) && start[j] <= i )
 	sprintf(msg, "\t%.*g", pdigits, data[j][i]);
    else
 	sprintf(msg, "\t%s", nonavail);		// write NaN as n/a

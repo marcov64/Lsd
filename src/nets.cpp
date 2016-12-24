@@ -107,27 +107,12 @@ NETS.CPP
 
 #include "decl.h"
 
-#define GCCLIBS true			// enable linux code
-
-#ifdef GCCLIBS
-#include <ctype.h>
+// enable linux code
+#ifndef GCCLIBS
 char *strupr( char *s )
 { char *p = s; for ( ; *p; ++p ) *p = toupper( *p ); return s; }
+#define GCCLIBS			
 #endif
-
-object *go_brother(object *c);
-double rnd_integer(double m, double x);
-void myexit(int v);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-void plog( char const *msg, char const *tag = "" );
-
-extern char msg[];
-extern int t;
-extern int max_step;
-extern int seed;
-extern lsdstack *stacklog;
-
-long nodesSerial = 0;					// node's serial number global counter
 
 
 /*
@@ -285,7 +270,7 @@ netLink *object::draw_link_net( void )
 		if ( cur->ptrTo->node != NULL )			// node still exists?
 			sum += cur->probTo;					// add-up probabilities
 		
-	if ( isinf( sum ) || sum <= 0 )				// check valid probabilities
+	if ( ! is_finite( sum ) || sum <= 0 )		// check valid probabilities
 	{
 		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs->label );
 		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
@@ -495,7 +480,7 @@ object *object::draw_node_net( char const *lab )
 													// add-up probabilities
 		sum += cur->node->prob;
 		
-	if ( isinf( sum ) || sum <= 0 )					// check valid probabilities
+	if ( ! is_finite( sum ) || sum <= 0 )			// check valid probabilities
 	{
 		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs->label );
 		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
@@ -1010,9 +995,6 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 	Read directed or undirected network text file in Pajek format.
 */
 
-#define FILE_PATH_LEN 300
-#define LINE_BUFFER 300
-
 // Choose separator
 #define foldersep( dir ) ( dir[0] == '\0' ? "" : "/" )
 
@@ -1021,7 +1003,7 @@ void get_line( char *lBuffer, FILE *fPtr )
 	char firstChar;
 	do
 	{
-		fgets( lBuffer, LINE_BUFFER - 1, fPtr );			// gets next text line
+		fgets( lBuffer, MAX_LINE_SIZE, fPtr );				// gets next text line
 		firstChar = '\0';
 		sscanf( lBuffer, " %c", &firstChar );
 	}
@@ -1037,7 +1019,7 @@ long object::read_file_net( char const *lab, char const dir[] = "", char const b
 	long idNode, numNodes, exNodes, numLinks, startNode, endNode;
 	int rd;
 	double weight;
-	char *p, fileName[FILE_PATH_LEN], textLine[LINE_BUFFER], nameNode[LINE_BUFFER];
+	char *p, fileName[MAX_PATH_LENGTH], textLine[MAX_LINE_SIZE], nameNode[MAX_LINE_SIZE];
 	bool inSection;
 	object *cur, *cur1;
 	netLink *cur2, *cur3;
@@ -1173,7 +1155,7 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 	int tCur = ( t > max_step ) ? max_step : t;					// effective current time
 	long numNodes, numLinks = 0;
 	double weight;
-	char *c, mode[2], fileName[FILE_PATH_LEN], actIntv[64];
+	char *c, mode[2], fileName[MAX_PATH_LENGTH], actIntv[64];
 	object *firstNode, *cur;
 	netLink *cur1;
 	FILE *pajekFile;
@@ -1195,7 +1177,7 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 	
 	if ( append )
 	{
-		char name[FILE_PATH_LEN];
+		char name[MAX_PATH_LENGTH];
 		strcpy( name, base_name );
 		while ( ( c = strchr( name, ' ' ) ) != NULL )
 			c[0] = '_';											// replace space by underscore

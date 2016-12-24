@@ -14,9 +14,22 @@ Comments and bug reports to marco.valente@univaq.it
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <math.h>
 #include <float.h>
 #include <limits.h>
+#include <time.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <exception>
+
+// comment the next line to compile without libz
+#define LIBZ 							
+#ifdef LIBZ
+#include <zlib.h>
+#endif
 
 // LSD compilation options file
 #include "choose.h"
@@ -27,11 +40,18 @@ Comments and bug reports to marco.valente@univaq.it
 #define _LSD_VERSION_ "7.0"
 #define _LSD_DATE_ __DATE__
 
-// comment the next line to compile without libz. It will not be possible to generate zipped result files.
-#define LIBZ 
-#ifdef LIBZ
-#include <zlib.h>
-#endif
+// global constants
+#define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
+#define MAX_PATH_LENGTH 500				// maximum path length (>499)
+#define MAX_ELEM_LENGTH 100				// maximum element (object, variable) name length (>99)
+#define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
+#define MAX_FILE_TRY 100000				// max number of lines to read from files
+#define MAX_LINE_SIZE 1000				// max size of a text line to read from files (>999)
+#define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
+#define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
+#define MAX_COLS 100					// max numbers of columns in init. editor
+#define MAX_PLOTS 1000					// max numbers of plots in analysis
+#define ERR_LIM 10						// maximum number of repeated error messages
 
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
@@ -40,20 +60,21 @@ Comments and bug reports to marco.valente@univaq.it
 #endif
 #define NaN NAN
 
-// global constants
-#define TCL_BUFF_STR 2000				// standard Tcl buffer size (>1000)
-#define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
-#define MAX_FILE_TRY 100000				// max number of lines to read from files
-#define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
-
+// access permissions in Linux/Mac
+#ifndef ACCESSPERMS
+#define ACCESSPERMS 0777 
+#endif
 
 // define the base pseudo random number generator
+#ifndef RND
 double ran1( long *idum_loc = NULL );
 #define RND ( (double) ran1( ) )
+#endif
 
 
-//class speedup;
+// classes definitions
 class object;
+
 class variable
 {
 public:
@@ -77,7 +98,6 @@ double *data;
 char *lab_tit;
 int start;
 int end;
-//speedup *su;
 
 int init(object *_up, char const *_label, int _num_lag, double *val, int _save);
 double cal(object *caller, int lag);
@@ -88,7 +108,6 @@ void empty(void);
 class mnode
 {
 public:
-
 mnode *son;
 object *pntr;
 long deflev;		// saves the log of number of objects to allow defaulting
@@ -100,14 +119,22 @@ object *fetch(double *n, double level=0);
 
 class bridge
 {
-
 public:
-
 object *head;
 char *blabel;
 bridge *next;
 bool counter_updated;
 mnode *mn;
+};
+
+struct store
+{
+char label[MAX_ELEM_LENGTH];
+int start;
+int end;
+char tag[MAX_ELEM_LENGTH];
+double *data;
+int rank;
 };
 
 // network data structures
@@ -146,50 +173,41 @@ struct netNode		// network node data
 class object
 {
 public:
-
 char *label;
 object *up;
 object *next;
 object *hook;
 variable *v;
 bridge *b;
-
 int acounter;
 int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 int to_compute;
-
 netNode *node;		// pointer to network node data structure
 
 double cal(object *caller,  char const *l, int lag);
 double cal( char const *l, int lag);
-
 variable *search_var(object *caller,char const *label);
 object *search_var_cond(char const *lab, double value, int lag);
-
 double overall_max(char const *lab, int lag);
 double sum(char const *lab, int lag);
 double whg_av(char const *lab, char const *lab2, int lag);
-
 int init(object *_up, char const *_label);
 void update(void);
 object *hyper_next(char const *lab);
 void add_var(char const *label, int lag, double *val, int save);
 void add_obj(char const *label, int num, int propagate);
 void insert_parent_obj_one(char const *lab);
-
 object *search(char const *lab);
 void chg_lab(char const *lab);
 void chg_var_lab(char const *old, char const *n);
 variable *add_empty_var(char const *str);
 void add_var_from_example(variable *example);
-
 void replicate(int num, int propagate);
 bool load_param(char *file_name, int repl, FILE *f);
 bool load_struct(FILE *f);
 void save_param(FILE *f);
 void save_struct(FILE *f, char const *tab);
 int read_param(char *file_name);
-
 void sort_asc( object *from, char *l_var);
 void sort_desc( object *from, char *l_var);
 void sort(char const *obj, char const *var, char *direction);
@@ -198,12 +216,10 @@ void lsdqsort(char const *obj, char const *var1, char const *var2, char const *d
 void empty(void);
 void delete_obj(void);
 void stat(char const *lab, double *v);
-
 object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
 object *add_n_objects2(char const *lab, int n, object *ex);
 object *add_n_objects2( char const *lab, int n, int t_update );
 object *add_n_objects2(char const *lab, int n);
-
 void write(char const *lab, double value, int time);//write value as if computed at time
 void write(char const *lab, double value, int time, int lag);//write value in the lag field
 object *draw_rnd(char const *lo, char const *lv, int lag);
@@ -251,7 +267,7 @@ struct lsdstack
 {
 lsdstack *prev;
 lsdstack *next;
-char label[100];
+char label[MAX_ELEM_LENGTH];
 int ns;
 variable *vs;
 };
@@ -270,34 +286,34 @@ description *next;
 struct sense
 {
  char *label;
- int param;			// save element type/lag to allow
- int lag;			// handling lags > 1
+ int param;						// save element type/lag to allow
+ int lag;						// handling lags > 1
  int nvalues;
  int i;
  double *v;
  sense *next;
- bool entryOk;		// flag valid data entered
+ bool entryOk;					// flag valid data entered
 };
 
 // design of experiment object
 struct design 
 { 
-	int typ, tab, n, k, *par, *lag;		// experiment parameters
+	int typ, tab, n, k, *par, *lag;	// experiment parameters
 	double *hi, *lo, **ptr; 
 	char **lab;
 
-	design( sense *rsens, int typ = 1, char const *fname = "", long findex = 1, 
+	design( sense *rsens, int typ = 1, char const *fname = "", int findex = 1, 
 			int samples = 0, int factors = 0, int jump = 2, int trajs = 4 );	// constructor
-	~design( void );					// destructor
+	~design( void );			// destructor
 };
 
 // results file object
 class result
 {
 	FILE *f;					// uncompressed file pointer
-	#ifdef LIBZ
-		gzFile fz;				// compressed file pointer
-	#endif
+#ifdef LIBZ
+	gzFile fz;					// compressed file pointer
+#endif
 	bool dozip;					// compressed file flag
 
 	void title_recursive( object *r, int i );	// write file header (recursively)
@@ -309,3 +325,279 @@ public:
 	void title( object *root, int flag );		// write file header
 	void data( object *root, int initstep, int endtstep = 0 );	// write data
 };
+
+
+#ifndef FUN						// prevent exposing internals in users' fun_xxx.cpp
+
+// standalone C functions/procedures
+
+FILE *create_frames(char *t);
+FILE *search_data_ent(char *name, variable *v);
+FILE *search_data_str(char const *name, char const *init, char const *str);
+FILE *search_str(char const *name, char const *str);
+bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
+bool is_finite( double x );						// standard library redefinitions to workaround gcc bug
+bool is_inf( double x );
+bool is_nan( double x );
+bool load_description( char *msg, FILE *f );
+bool load_description(char *label, char *type);
+bool save_configuration( object *, int findex = 0 );
+bool unsaved_change(  );						// control for unsaved changes in configuration
+bool unsaved_change( bool );
+char *choose_object( char *msg );
+char *clean_file(char *);
+char *clean_path(char *);
+char *upload_eqfile(void);
+description *search_description(char *lab);
+double *find_data(int id_series);
+double *search_lab_tit_file(char *s,  char *t,int st, int en);
+double exp(double c);
+double log(double v);
+double max(double a, double b);
+double min(double a, double b);
+double norm(double mean, double dev);
+double rnd_integer(double min, double max);
+double sqrt(double v);
+int browse( object *r, int *choice);
+int check_label(char *l, object *r);
+int compute_copyfrom(object *c, int *choice);
+int contains (FILE *f, char *lab, int len);
+int deb(object *r, object *c, char const *lab, double *res);
+int is_equation_header(char *line, char *var);
+int load_configuration( object *, bool reload = false );
+int lsdmain(int argn, char **argv);
+int my_strcmp(char *a, char *b);
+int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
+int reset_bridges(object *r);
+int shrink_gnufile(void);
+int sort_function_down( const void *a, const void *b );
+int sort_function_down_two( const void *a, const void *b );
+int sort_function_up( const void *a, const void *b );
+int sort_function_up_two( const void *a, const void *b );
+int sort_labels_down(const void *a, const void *b);
+long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
+object *create( object *r);
+object *go_brother(object *cur);
+object *operate( int *choice, object *r);
+object *restore_pos( object * );
+object *sensitivity_parallel(object *o, sense *s );
+object *skip_next_obj(object *t);
+object *skip_next_obj(object *t, int *count);
+void NOLH_clear( void );						// external DoE	cleanup
+void add_cemetery(variable *v);
+void add_description(char const *lab, char const *type, char const *text);
+void analysis(int *choice);
+void ancestors(object *r, FILE *f);
+void assign(object *r, int *i, char *lab);
+void attach_instance_number(char *ch, object *r);
+void auto_document( int *choice, char const *lab, char const *which, bool append = false );
+void autofill_descr(object *o);
+void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
+void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
+void change_descr_text(char *lab);
+void change_init_text(char *lab);
+void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
+void clean_cell(object *root, char *tag, char *lab);
+void clean_debug(object *n);
+void clean_plot(object *n);
+void clean_save(object *n);
+void clean_spaces(char *s);
+void close_sim(void);
+void cmd( const char *cc, ... );
+void collect_cemetery( object *o );				// collect variables from object before deletion
+void control_tocompute(object *r, char *ch);
+void copy_descendant(object *from, object *to);
+void count(object *r, int *i);
+void count_save( object *n, int *count );
+void cover_browser( const char *, const char *, const char * );
+void create_form(int num, char const *title, char const *prefix);
+void create_initial_values(object *r);
+void create_logwindow(void);
+void create_maverag(int *choice);
+void create_series(int *choice);
+void create_table_init(object *r);
+void createmodelhelp(int *choice, object *r);
+void dataentry_sensitivity(int *choice, sense *s, int nval);
+void deb_show(object *r);
+void delete_bridge(object *d);
+void draw_obj(object *blk, object *t, int level, int center, int from);
+void edit_data(object *root, int *choice, char *obj_name);
+void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done);
+void eliminate_obj(object **r, int actual, int desired , int *choice);
+void empty_cemetery(void);
+void empty_descr(void);
+void empty_sensitivity(sense *cs);
+void entry_new_objnum(object *c, int *choice, char const *tag);
+void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
+void file_name( char *name);
+void fill_list_par(object *r, int flag_all);
+void fill_list_var(object *r, int flag_all, int flag_init);
+void find_lags(object *r);
+void find_using(object *r, variable *v, FILE *frep);
+void go_next(object **t);
+void histograms(int *choice);
+void histograms_cs(int *choice);
+void init_canvas(void);
+void init_plot(int i, int id_sim);
+void init_random(int seed);
+void insert_data_file( bool gz, int *num_v, int *num_c );
+void insert_data_mem(object *r, int *num_v, int *num_c);
+void insert_data_nosave(object *r, char * lab, int *num_v);
+void insert_docuoptions(FILE *frep, object *r);
+void insert_labels_mem(object *r, int *num_v, int *num_c);
+void insert_labels_nosave(object *r,char * lab,  int *num_v);
+void insert_lb_object(object *r);
+void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
+void insert_store_mem(object *r, int *num_v);
+void insert_store_nosave(object *r,char * lab,  int *num_v);
+void insert_summary(object *r, FILE *frep);
+void kill_trailing_newline(char *s);
+void link_data(object *root, char *lab);
+void log_tcl_error( const char *cm, const char *message );
+void myexit(int v);
+void plog( char const *msg, char const *tag = "", ... );
+void plog_series(int *choice);
+void plot(int *choice);
+void plot_cross(int *choice);
+void plot_cs_xy(int *choice);
+void plot_gnu(int *choice);
+void plot_lattice(int *choice);
+void plot_phase_diagram(int *choice);
+void plot_rt(variable *var);
+void prepare_plot(object *r, int id_sim);
+void print_stack(void);
+void print_title(object *root);
+void put_line(int x1, int y1, int x2, int y2);
+void put_node(int x1, int y1, int x2, int y2, char *str);
+void put_text(char *str, char *num, int x, int y, char *str2);
+void read_data(int *choice);
+void read_eq_filename(char *s);
+void recur_description(object *r, FILE *f);
+void report(int *choice, object *r);
+void reset_end(object *r);
+void results_alt_path( const char *altPath );
+void return_where_used(char *lab, char s[]);
+void run(object *r);
+void save_data1(int *choice);
+void save_datazip(int *choice);
+void save_eqfile(FILE *f);
+void save_pos( object * );
+void save_single(variable *vcv);
+void scan_used_lab(char *lab, int *choice);
+void scan_using_lab(char *lab, int *choice);
+void search_title(object *root, char *tag, int *i, char *lab, int *incr);
+void sensitivity_doe( int *findex, design *doe );
+void sensitivity_sequential(int *findexSens, sense *s, double probSampl = 1.0);
+void set_all(int *choice, object *original, char *lab, int lag);
+void set_blueprint(object *container, object *r);
+void set_cond(variable *cv);
+void set_cs_data(int *choice);
+void set_lab_tit(variable *var);
+void set_obj_number(object *r, int *choice);
+void set_shortcuts( const char *window );
+void set_shortcuts_log( const char *window );
+void set_title(object *c, char *lab, char *tag, int *incr);
+void shift_desc(int direction, char *dlab, object *r);
+void shift_var(int direction, char *vlab, object *r);
+void show_description(char *lab);
+void show_eq(char *lab, int *choice);
+void show_graph( object *t);
+void show_initial(object *n);
+void show_observe(object *n);
+void show_plot_gnu(int n, int *choice, int type);
+void show_save(object *n);
+void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
+void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
+void sort_on_end(store *app);
+void statistics(int *choice);
+void statistics_cross(int *choice);
+void tex_report(object *r, FILE *f);
+void tex_report_init(object *r, FILE *f);
+void tex_report_observe(object *r, FILE *f);
+void this_instance_number(object *r);
+void uncover_browser( void );
+void wipe_out(object *d);
+void write_list(FILE *frep, object *root, int flag_all, char const *prefix);
+void write_obj(object *r, FILE *frep);
+void write_str(object *r, FILE *frep, int dep, char const *prefix );
+void write_var(variable *v, FILE *frep);
+
+
+// global variables
+
+extern bool add_to_tot;		// type of totals file generated
+extern bool debug_flag;		// debug enable control
+extern bool dozip;			// compressed results file flag
+extern bool fast;			// fast mode (log window)
+extern bool ignore_eq_file;	// control of configuration files equation updating
+extern bool iniShowOnce;	// prevent repeating warning on # of columns
+extern bool in_edit_data;	// in initial settings mode
+extern bool in_set_obj;		// in setting number of objects mode
+extern bool macro;			// equations style (macros or C++)
+extern bool message_logged;	// new message posted in log window
+extern bool no_error;		// object search error control	
+extern bool no_res;			// do not produce .res results files
+extern bool overwConf;		// overwrite current configuration file on run
+extern bool redrawRoot;		// control for redrawing root window (.)
+extern bool running;		// simulation is running
+extern bool strWindowOn;	// control the presentation of the model structure window
+extern bool struct_loaded;	// a valid configuration file is loaded
+extern bool use_nan;		// flag to allow using Not a Number value
+extern bool unsavedData;	// control for unsaved simulation results
+extern bool unsavedSense;	// control for unsaved changes in sensitivity data
+extern bool watch;			// allow for graph generation interruption
+extern char *eq_file;		// equation file content
+extern char *equation_name;	// equation file name
+extern char *exec_file;		// name of executable file
+extern char *exec_path;		// path of executable file
+extern char *path;			// path of current configuration
+extern char *sens_file;		// current sensitivity analysis file
+extern char *simul_name;	// name of current simulation configuration
+extern char *struct_file;	// name of current configuration file
+extern char lsd_eq_file[];	// equations saved in configuration file
+extern char msg[];			// auxiliary Tcl buffer
+extern char name_rep[];		// documentation report file name
+extern char nonavail[];		// string for unavailable values
+extern description *descr;	// model description structure
+extern double ymax;			// runtime plot max limit
+extern double ymin;			// runtime plot min limit
+extern int actual_steps;	// number of executed time steps
+extern int choice;			// Tcl menu control variable (main window)
+extern int choice_g;		// Tcl menu control variable (structure window)
+extern int cur_plt;			// current graph plot number
+extern int done_in;			// Tcl menu control variable (log window)
+extern int findexSens;		// index to sequential sensitivity configuration filenames
+extern int lattice_type;	// lattice window mode
+extern int max_step;		// last simulation time step
+extern int quit;			// simulation interruption mode (0=none)
+extern int seed;			// pseudo random number generator seed in use
+extern int sim_num;			// simulation number running
+extern int stack;			// Lsd stack call level
+extern int stackinfo_flag; 	// Lsd stack control
+extern int t;               // current time step
+extern int total_obj;		// total objects in model
+extern int total_var;       // total variables/parameters in model
+extern int when_debug;      // next debug stop time step (0 for none)
+extern long nodesSerial;	// network node serial number global counter
+extern lsdstack *stacklog;	// Lsd stack
+extern object *blueprint;   // Lsd blueprint (effective model in use)
+extern object *root;        // Lsd root object
+extern sense *rsense;       // Lsd sensitivity analysis structure
+extern variable *cemetery;  // Lsd saved data series (from last simulation run)
+
+// Tcl/Tk specific definitions (for the windowed version only)
+#ifndef NO_WINDOW
+
+#include <tk.h>
+
+Tcl_Interp *InterpInitWin( char *tcl_dir );
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
+int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
+int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
+void cmd( Tcl_Interp *inter, const char *cc );
+
+extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
+
+#endif						// NO_WINDOW
+
+#endif						// FUN

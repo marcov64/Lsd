@@ -15,7 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /*
-USED CASE 81
+USED CASE 82
 */
 
 /****************************************************
@@ -99,154 +99,25 @@ position of the file is just after str.
 - int deb(object *r, object *c, char *lab, double *res);
 Use the debugger interface to browse through the model
 
-- int cd(char *patch)
-The change directory function uses different headers for Windows and Unix
-Therefore, it is defined in the mainwin/main_un.
-
 - void myexit(int v);
 Exit function, which is customized on the operative system.
 
 ****************************************************/
 
-#include <sys/stat.h>
-#include <time.h>
-#include <tk.h>
 #include "decl.h"
 
-#ifndef ACCESSPERMS
-#define ACCESSPERMS 0777 
-#endif
-
-#define MAX_SENS_POINTS 999		// default warning threshold for sensitivity analysis
-
-object *operate( int *choice, object *r);
-int browse( object *r, int *choice);
-object *skip_next_obj(object *t, int *i);
-object *skip_next_obj(object *t);
-int my_strcmp(char *a, char *b);
-void cmd(Tcl_Interp *inter, char const *cc);
-object *go_brother(object *cur);
-void show_graph( object *t);
-void set_obj_number(object *r, int *choice);
-void edit_data(object *root, int *choice, char *obj_name);
-void clean_debug(object *n);
-void clean_save(object *n);
-void show_save(object *n);
-void count_save( object *n, int *count );
-void show_initial(object *n);
-void show_observe(object *n);
-void set_shortcuts( const char *window );
-void clean_plot(object *n);
-FILE *search_str(char const *name, char const *str);
-void plog( char const *msg, char const *tag = "" );
-void analysis(int *choice);
-void show_eq(char *lab, int *choice);
-void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
-int deb(object *r, object *c, char const *lab, double *res);
-void wipe_out(object *d);
-int check_label(char *l, object *r);
-int cd(char *path);
-void set_blueprint(object *container, object *r);
-void myexit(int i);
-void scan_used_lab(char *lab, int *choice);
-void scan_using_lab(char *lab, int *choice);
-void report(int *choice, object *r);
-void empty_cemetery(void);
-void createmodelhelp(int *choice, object *r);
-description *search_description(char *lab);
-void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
-void change_descr_text(char *lab);
-void change_init_text(char *lab);
-void empty_descr(void);
-void show_description(char *lab);
-void add_description(char const *lab, char const *type, char const *text);
-void auto_document( int *choice, char const *lab, char const *which, bool append = false);
-void delete_bridge(object *d);
-void control_tocompute(object *r, char *ch);
-int compute_copyfrom(object *c, int *choice);
-int reset_bridges(object *r);
-char *choose_object( char *msg );
-void insert_lb_object(object *r);
-void autofill_descr(object *o);
-void read_eq_filename(char *s);
-void tex_report(object *r, FILE *f);
-void tex_report_init(object *r, FILE *f);
-void tex_report_observe(object *r, FILE *f);
-void shift_var(int direction, char *vlab, object *r);
-void shift_desc(int direction, char *dlab, object *r);
-object *sensitivity_parallel(object *o, sense *s );
-void sensitivity_sequential(long *findexSens, sense *s, double probSampl = 1.0);
-void sensitivity_doe( long *findex, design *doe );
-long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
-int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
-void empty_sensitivity(sense *cs);
-void set_all(int *choice, object *original, char *lab, int lag);
-void dataentry_sensitivity(int *choice, sense *s, int nval);
-bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
-void save_pos( object * );
-object *restore_pos( object * );
-int load_configuration( object *, bool reload = false );
-bool save_configuration( object *, long findex = 0 );
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-// comparison function for bsearch and qsort
-int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
-
-extern object *root;
-extern char *simul_name;
-extern char *struct_file;
-extern char *exec_file;		// name of executable file
-extern char *exec_path;		// path of executable file
-extern int add_to_tot;
-extern int dozip;			// compressed results file flag
-extern int struct_loaded;
-extern char *path;
-extern char *equation_name;
-extern char name_rep[];
-extern int stackinfo_flag;
-extern int t;
-extern int optimized;
-extern int check_optimized;
-extern int when_debug;
-extern int running;
-extern Tcl_Interp *inter;
-extern int seed;
-extern int sim_num;
-extern int max_step;
-extern char msg[];
-extern int choice_g;
-extern int choice;
-extern variable *cemetery;
-extern int message_logged;
-extern int actual_steps;
-extern description *descr;
-extern int no_error;
-extern char *eq_file;
-extern char lsd_eq_file[];
-extern int ignore_eq_file;
-extern int lattice_type;
-extern int no_res;
-extern int overwConf;
-extern object *blueprint;
-extern sense *rsense;
-extern long nodesSerial;	// network node serial number global counter
-extern bool unsavedData;	// control for unsaved simulation results
-extern char *sens_file;		// current sensitivity analysis file
-extern long findexSens;		// index to sequential sensitivity configuration filenames
-extern int strWindowOn;		// control the presentation of the model structure window
-extern bool justAddedVar;	// control the selection of last added variable
-extern bool unsavedSense;	// control for unsaved changes in sensitivity data
-extern bool redrawRoot;		// control for redrawing root window (.)
-extern bool iniShowOnce;	// prevent repeating warning on # of columns
-
-object *currObj;
+bool justAddedVar = false;			// control the selection of last added variable
+bool natBat = true;					// native (Windows/Linux) batch format flag
+char lastObj[MAX_ELEM_LENGTH]="";	// to save last shown object for quick reload (choice=38)
 char *res_g;
-char lastObj[256]="";		// to save last shown object for quick reload (choice=38)
-int natBat = true;			// native (Windows/Linux) batch format flag
 int result_loaded;
+object *currObj;
 // list of choices that are bad with existing run data
 int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79 };
 #define NUM_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
+
+// comparison function for bsearch and qsort
+int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int * ) b ); }
 
  
 /****************************************************
@@ -283,7 +154,7 @@ if ( strlen( lastObj ) > 0 )
 	}
 }
 
-sprintf(msg, "set ignore_eq_file %d", ignore_eq_file);
+sprintf( msg, "set ignore_eq_file %d", ignore_eq_file ? 1 : 0 );
 cmd(inter, msg);
 sprintf(msg, "set lattype %d", lattice_type);
 cmd(inter, msg);
@@ -303,16 +174,16 @@ while(choice!=1)
 	for(cur=cr; cur->up!=NULL; cur=cur->up);
 
 	if(cur->v==NULL && cur->b==NULL)
-		struct_loaded=0;
+		struct_loaded = false;
 	else
 	{ 
-		struct_loaded=1;
+		struct_loaded = true;
 		show_graph(cr);
-		if(message_logged==1)
+		if(message_logged)
 		{
 			cmd( inter, "if { ! [ string equal [ wm state .log ] normal ] } { wm deiconify .log; raise .log; focus .log }" );
 			cmd( inter, "raise .log; focus .log; update idletasks" );
-			message_logged=0;
+			message_logged = false;
 		}    
 	}    
 
@@ -343,7 +214,6 @@ int browse(object *r, int *choice)
 {
 char ch[TCL_BUFF_STR], ch1[TCL_BUFF_STR];
 variable *ap_v;
-int count, heightB, widthB;
 object *ap_o;
 bridge *cb;
 
@@ -630,11 +500,12 @@ cmd(inter, "menu .m -tearoff 0");
 cmd(inter, "set w .m.file");
 cmd(inter, "menu $w -tearoff 0");
 cmd(inter, ".m add cascade -label File -menu $w -underline 0");
-cmd(inter, "$w add command -label \"Open...\" -command {set choice 17} -underline 0 -accelerator Ctrl+L");
-cmd(inter, "$w add command -label \"Reload\" -command {set choice 38} -underline 0 -accelerator Ctrl+W");
+cmd(inter, "$w add command -label \"Load...\" -command {set choice 17} -underline 0 -accelerator Ctrl+L");
+cmd(inter, "$w add command -label Reload -command {set choice 38} -underline 0 -accelerator Ctrl+W");
 cmd(inter, "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Ctrl+S");
 cmd(inter, "$w add command -label \"Save As...\" -command {set choice 73} -underline 5");
-cmd(inter, "$w add command -label Empty -command {set choice 20} -underline 0 -accelerator Ctrl+E");
+cmd(inter, "$w add command -label Unload -command {set choice 20} -underline 0 -accelerator Ctrl+E");
+cmd(inter, "$w add command -label Compare... -command {set choice 82} -underline 0");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Save Results...\" -command {set choice 37}  -underline 2 -accelerator Ctrl+Z");
 cmd(inter, "$w add separator");
@@ -644,7 +515,7 @@ cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U");
 cmd(inter, "$w add command -label \"Upload Equation File\" -command {set choice 51} -underline 0");
 cmd(inter, "$w add command -label \"Offload Equation File...\" -command {set choice 52} -underline 1");
-cmd(inter, "$w add command -label \"Compare Equation Files...\" -command {set choice 53} -underline 0");
+cmd(inter, "$w add command -label \"Compare Equation Files...\" -command {set choice 53} -underline 2");
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Ctrl+Q");
 
@@ -2357,7 +2228,7 @@ break;
 //Exit the browser and run the simulation
 case 1:
 
-if ( struct_loaded == 0 )
+if ( ! struct_loaded )
 {
 	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to run the simulation.\"");
 	break;
@@ -2377,10 +2248,10 @@ if ( i == 0 )
 	}
 }
 
-Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
-Tcl_LinkVar(inter, "add_to_tot", (char *)&add_to_tot, TCL_LINK_INT);
-Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
-Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
+Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "add_to_tot", (char *)&add_to_tot, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_BOOLEAN);
 
 // save the current object & cursor position for quick reload
 strcpy( lastObj, r->label );
@@ -2447,12 +2318,12 @@ cmd(inter, "pack $T.f1 -pady 5 -padx 5 -expand yes -fill x");
 // Only ask to overwrite configuration if there are changes
 if ( unsaved_change() )
 {
-	overwConf = 1;
+	overwConf = true;
 	cmd( inter, "checkbutton $T.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
 	cmd( inter, "pack $T.tosave -padx 10" );
 }
 else
-	overwConf = 0;
+	overwConf = false;
 
 cmd( inter, "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } { set choice 2 }" );
 cmd(inter, "bind $T <KeyPress-Return> {set choice 1}");
@@ -2479,7 +2350,7 @@ for(n=r; n->up!=NULL; n=n->up);
 blueprint->empty();			    // update blueprint to consider last changes
 set_blueprint(blueprint, n);
 
-if ( overwConf == 1 )			// save if needed
+if ( overwConf )				// save if needed
 	if ( ! save_configuration( r ) )
 	{
 		sprintf( msg , "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
@@ -2536,49 +2407,42 @@ if ( struct_loaded )
 struct_loaded = false;
 actual_steps=0;					//Flag that no simulation has been run
 unsavedData = false;			// no unsaved simulation results
+// make sure there is a path set
+sprintf(msg, "set path \"%s\"", path);
+cmd(inter, msg);
+if(strlen(path)>0)
+	cmd(inter, "cd $path");
 
 if ( ! reload )
 {
-  *choice=0;
   strcpy(lastObj,"");			// disable last object for quick reload
   sprintf(lab, "set res %s", simul_name);
   cmd(inter, lab);
-  if(strlen(path)>0)
-   sprintf(msg, "set path \"%s\"", path);
-  else
-   sprintf(msg, "set path [pwd]");
-  cmd(inter, msg);
-  cmd(inter, "cd $path");
-  cmd(inter, "set a \"\"");
-  sprintf(msg, " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}  }]");
 
-  cmd(inter, msg);
+  cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir [pwd] -initialfile \"$res.lsd\" -filetypes {{{Lsd model files} {.lsd}}  }]" );
   
+  *choice=0;
   cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]} {set choice 2}");
   if(*choice==2)
-   {
     break;
-   }
+
   lab1=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(lab, lab1);
   
   if(strlen(lab)==0)
-   break;
+    break;
   delete[] simul_name;
   simul_name=new char[strlen(lab)+1];
   strcpy(simul_name, lab);
+
   lab1=(char *)Tcl_GetVar(inter, "path",0);
   strcpy(msg, lab1);
+  delete[] path;
+  path=new char[strlen(msg)+1];
+  strcpy(path, msg);
   if(strlen(msg)>0)
-   {delete[] path;
-    path =new char[strlen(msg)+1];
-    strcpy(path, msg);
-    sprintf(msg, "cd %s", path);
     cmd(inter, "cd $path");
-   }
-  else
-   strcpy(path,"");
- } 
+}
 
 switch ( load_configuration( r, false ) )
 {
@@ -2636,7 +2500,7 @@ case 18:
 
 saveAs = ( *choice == 73 ) ? true : false;
 
-if(struct_loaded==0)
+if ( ! struct_loaded )
 {
 	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration to save\" -detail \"Create a configuration before saving.\"" );
 	break;
@@ -2660,15 +2524,12 @@ if(actual_steps>0)
 done=0;
 sprintf(lab, "set res %s", simul_name);
 cmd(inter, lab);
-if(strlen(path)>0)
- sprintf(msg, "set path \"%s\"", path);
-else
- sprintf(msg, "set path [pwd]");
+sprintf(msg, "set path \"%s\"", path);
 cmd(inter, msg);
 
 if ( saveAs )			// only asks file name if instructed to or necessary
 {
-sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd Model Files} {.lsd}} {{All Files} {*}} }]");
+sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd model files} {.lsd}}}]");
 cmd(inter, msg);
 
 cmd(inter, "set res $bah");
@@ -2690,17 +2551,11 @@ simul_name=new char[strlen(lab)+1];
 strcpy(simul_name, lab);
 lab1=(char *)Tcl_GetVar(inter, "path",0);
 strcpy(msg, lab1);
+delete[] path;
+path =new char[strlen(msg)+1];
+strcpy(path, msg);
 if(strlen(msg)>0)
- {delete[] path;
-  path =new char[strlen(msg)+1];
-  strcpy(path, msg);
-  sprintf(msg, "%s", path);
-  cmd(inter, "pwd");
   cmd(inter, "cd $path");
-  cmd(inter, "pwd");
- }
-else
- strcpy(path,"");
 }
 
 if ( ! save_configuration( r ) )
@@ -2764,13 +2619,13 @@ if ( cur2 != NULL )				// restore original current object
 break;
 
 
-//Empty the model
+//Unload the model
 case 20:
 
 if ( ! discard_change( ) )	// check for unsaved configuration changes
 	break;
 
-cmd( inter, "if [ winfo exists .model_str ] { destroy .model_str }");
+cmd( inter, "if [ winfo exists .str ] { destroy .str }");
 cmd(inter, "set a [split [winfo children .] ]");
 cmd(inter, " foreach i $a {if [string match .plt* $i] {destroy $i}}");
 cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
@@ -2778,7 +2633,6 @@ cmd( inter, "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
 for(n=r; n->up!=NULL; n=n->up);
 n->empty();
 empty_cemetery();
-lsd_eq_file[0]=(char)NULL;
 n->label = new char[strlen("Root")+1];
 strcpy(n->label, "Root");
 r=n;
@@ -2793,11 +2647,16 @@ findexSens=0;
 nodesSerial=0;				// network node serial number global counter
 add_description("Root", "Object", "(no description available)");      
 cmd(inter, "catch {unset ModElem}");
-
-strcpy(path, "");
+delete [] path;
+path = new char[ strlen( exec_path ) + 1 ];
+strcpy( path, exec_path );
+cmd( "set path \"%s\"; cd \"$path\"", path );
 delete[] simul_name;
 simul_name=new char[strlen("Sim1")+1];
 strcpy(simul_name, "Sim1");
+strcpy( lsd_eq_file, "" );
+sprintf( name_rep, "report_%s.html", simul_name );
+
 unsaved_change( false );	// signal no unsaved change
 redrawRoot = true;			// force browser redraw
 cmd( inter, "set cur 0" ); 	// point for first var in listbox
@@ -2970,12 +2829,20 @@ break;
 //Change Equation File from which to take the code to show
 case 28:
 
-cmd(inter, "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]]");
+if ( ! struct_loaded )
+{
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to change the equation file.\"" );
+	break;
+}
+
+cmd( "set res %s", equation_name );
+
+cmd(inter, "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]]");
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
 if ( lab1 == NULL || strlen ( lab1 ) == 0 )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%499s", lab );
 delete[] equation_name;
 equation_name=new char[strlen(lab)+1];
 strcpy(equation_name, lab);
@@ -3235,7 +3102,7 @@ if(actual_steps==0)
 	break;
  }
 
-  Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+  Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
   time_t rawtime;
   time( &rawtime );
   struct tm *timeinfo;
@@ -3281,7 +3148,6 @@ cmd(inter, msg);
 sprintf(msg, "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...",lab,lab);
 plog(msg);
 cmd(inter, "focus .log");
-//cmd(inter, "raise .log");
 
 if( strlen( path ) == 0 )
 	sprintf( msg, "%s.res", lab );
@@ -3365,7 +3231,7 @@ if(*choice == 0)
   cmd(inter, "if {[string compare $answer ok] == 0} {set choice 0} {set choice 1}");
  if(*choice == 1)
   break;
- cmd(inter, "set fname [tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]");
+ cmd(inter, "set fname [tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]");
  cmd(inter, "if {$fname == \"\"} {set choice 0} {set fname [file tail $fname]; set choice 1}");
  if(*choice == 0)
   break;
@@ -3492,9 +3358,9 @@ case 55: //arrive here from the list of vars used.
 *choice = 0;
 lab1=(char *)Tcl_GetVar(inter, "bidi",0);
 strcpy(msg,lab1);
-no_error=1;
+no_error=true;
 cv=r->search_var(r, msg);
-no_error=0;
+no_error=false;
 if(cv!=NULL)
  {
  for(i=0, cur_v=cv->up->v; cur_v!=cv; cur_v=cur_v->next, i++);
@@ -3514,14 +3380,24 @@ case 51:
 /*
 replace lsd_eq_file with the eq_file. That is, make appear actually used equation file as the one used for the current configuration
 */
-if(!strcmp(eq_file, lsd_eq_file))
-  break;//no need to do anything
+if ( ! struct_loaded )
+{
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to upload an equation file.\"");
+	break;
+}
 
-cmd(inter, "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'Yes' to confirm.\" -type yesno -default yes]");
-cmd(inter, "if {[string compare $answer yes] == 0} {set choice 1} {set choice 0}");
+if( !strcmp(eq_file, lsd_eq_file) )
+ {cmd(inter, "tk_messageBox -parent . -title \"Upload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be uploaded differing from the current configuration file.\" -type ok");
+ break;
+ }
+
+cmd(inter, "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'Ok' to confirm.\" -type okcancel -default ok]");
+cmd(inter, "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}");
  if(*choice == 0)
   break;
-strcpy(lsd_eq_file, eq_file);
+
+lsd_eq_file[ MAX_FILE_SIZE ] = '\0';
+strncpy( lsd_eq_file, eq_file, MAX_FILE_SIZE );
 unsaved_change( true );		// signal unsaved change
 
 break;
@@ -3532,15 +3408,21 @@ case 52:
 /*
 Used to re-generate the equations used for the current configuration file
 */
-if(strlen(lsd_eq_file)==0 || !strcmp(eq_file, lsd_eq_file) )
- {cmd(inter, "tk_messageBox -parent . -title Error -icon error -message \"No equation available\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok");
- *choice=0;
+
+if ( ! struct_loaded )
+{
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to offload an equation file.\"");
+	break;
+}
+
+if( !strcmp(eq_file, lsd_eq_file) )
+ {cmd(inter, "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Nothing to do\" -detail \"There are no equations to be offloaded differing from the current equation file.\" -type ok");
  break;
  }
 
 sprintf(msg, "set res1 fun_%s.cpp", simul_name);
 cmd(inter, msg);
-sprintf(msg, "set tk_strictMotif 0; set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{Lsd Equation Files} {.cpp}} {{All Files} {*}} }]; set tk_strictMotif 1");
+sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]");
 cmd(inter, msg);
 
 cmd(inter,"if {[string length $bah] > 0} { set choice 1; set res1 [file tail $bah]} {set choice 0}");
@@ -3555,7 +3437,7 @@ if(strlen(lab)==0)
 f=fopen(lab, "wb");
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
-cmd(inter, "tk_messageBox -parent . -title \"File Created\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to generate a new Lsd model program to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
+cmd(inter, "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new Lsd model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok");
 
 break;
 
@@ -3563,8 +3445,17 @@ break;
 //Compare equation files
 case 53: 
 
+if ( ! struct_loaded )
+{
+	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare equation files.\"");
+	break;
+}
+
 if ( strlen( lsd_eq_file ) == 0 )
-  break;
+{
+	cmd( inter, "tk_messageBox -parent . -type ok -icon Warning -title Warning -message \"No equations loaded\" -detail \"Please upload an equation file before trying to compare equation files.\"");
+	break;
+}
 
 sprintf( ch, "orig-eq_%s.tmp", simul_name);
 f=fopen( ch, "wb" );
@@ -3572,7 +3463,40 @@ fprintf(f, "%s", lsd_eq_file);
 fclose(f);
 
 read_eq_filename(lab);
-sprintf( msg, "LsdTkDiff %s %s", lab, ch );
+sprintf( msg, "LsdTkDiff %s %s \"Equations on '%s'\" \"Equations on '%s.lsd'\"", lab, ch, equation_name, simul_name );
+cmd(inter, msg);
+
+break;
+
+
+//Compare configuration files
+case 82: 
+
+if ( ! struct_loaded )
+{
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to compare configuration files.\"" );
+	break;
+}
+
+cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Comapre to\" -initialdir [pwd] -filetypes { { {Lsd configuration files} {.lsd} } } ]" );
+cmd( "set res2 [ file tail $res1 ]" );
+
+lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
+lab2 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
+if ( lab1 == NULL || lab2 == NULL || strlen ( lab1 ) == 0 || strlen ( lab2 ) == 0 )
+	break;
+
+f = fopen( lab1, "r" );
+if ( f == NULL )
+{
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Cannot open file\" -detail \"Error opening file '%s'.\"", lab2 );
+	break;
+}
+fclose( f );
+
+cmd( "file copy -force -- $res1 ext-cfg.tmp" );
+cmd( "file copy -force -- %s int-cfg.tmp", struct_file );
+cmd( "LsdTkDiff ext-cfg.tmp int-cfg.tmp \"Configuration on '%s'\" \"Configuration on '%s.lsd' (LOADED)\"", lab2, simul_name );
 cmd(inter, msg);
 
 break;
@@ -3744,7 +3668,7 @@ if (rsense!=NULL)
 
     findexSens=1;
     sensitivity_sequential(&findexSens,rsense);
-	sprintf( msg, "\nSensitivity analysis configurations produced: %ld", findexSens - 1 );
+	sprintf( msg, "\nSensitivity analysis configurations produced: %d", findexSens - 1 );
 	plog( msg );
  	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the sequential sensitivity analysis. To run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 	
@@ -3842,7 +3766,7 @@ if (rsense!=NULL)
 	plog(msg);
     findexSens=1;
     sensitivity_sequential(&findexSens, rsense, sizMC);
-	sprintf(msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1);
+	sprintf(msg, "\nSensitivity analysis samples produced: %d", findexSens - 1);
 	plog(msg);
  	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"");
 	
@@ -3913,7 +3837,7 @@ if (rsense!=NULL)
 	if(*choice == 2)
 		break;
 	
-	char NOLHfile[300];
+	char NOLHfile[MAX_PATH_LENGTH];
 	char const *extdoe = Tcl_GetVar(inter, "extdoe", 0);
 	char const *doesize = Tcl_GetVar(inter, "doesize", 0);
 	char const *doeext = Tcl_GetVar(inter, "doeext", 0);
@@ -3923,7 +3847,8 @@ if (rsense!=NULL)
 	else
 	{
 		char const *fname = Tcl_GetVar(inter, "NOLHfile", 0);
-		strcpy(NOLHfile, fname);
+		NOLHfile[ MAX_PATH_LENGTH - 1 ] = '\0';
+		strncpy(NOLHfile, fname, MAX_PATH_LENGTH - 1);
 	}
 	
 	int doesz = strcmp( doesize, "Auto" ) ? atoi( doesize ) : 0;
@@ -3958,7 +3883,7 @@ if (rsense!=NULL)
 
     findexSens = 1;
     sensitivity_doe( &findexSens, NOLHdoe );
-	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	sprintf( msg, "\nSensitivity analysis samples produced: %d", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
@@ -4071,7 +3996,7 @@ if (rsense!=NULL)
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 
     sensitivity_doe( &findexSens, rand_doe );
-	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	sprintf( msg, "\nSensitivity analysis samples produced: %d", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
@@ -4190,7 +4115,7 @@ if (rsense!=NULL)
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 
     sensitivity_doe( &findexSens, rand_doe );
-	sprintf( msg, "\nSensitivity analysis samples produced: %ld", findexSens - 1 );
+	sprintf( msg, "\nSensitivity analysis samples produced: %d", findexSens - 1 );
 	plog( msg );
  	cmd( inter, "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
@@ -4225,7 +4150,7 @@ break;
 case 64:
 	
 	// check a model is already loaded
-	if(struct_loaded==0)
+	if ( ! struct_loaded )
 	{ 
 		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load one before trying to load a sensitivity analysis configuration.\"");
 		break;
@@ -4244,18 +4169,15 @@ case 64:
 		findexSens=0;
 	}
 	// set default name and path to conf. file folder
-	sprintf(lab, "set res %s_sens", simul_name);
+	sprintf(lab, "set res %s", simul_name);
 	cmd(inter, lab);
-	if(strlen(path)>0)
-		sprintf(msg, "set path \"%s\"", path);
-	else
-		sprintf(msg, "set path [pwd]");
+	sprintf(msg, "set path \"%s\"", path);
 	cmd(inter, msg);
-	cmd(inter, "cd $path");
+
 	// open dialog box to get file name & folder
-	sprintf(msg, " set bah [tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}}  }]");
+	sprintf(msg, " set bah [tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]");
 	cmd(inter, msg);
-	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
+	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
 		break;
 	lab1=(char *)Tcl_GetVar(inter, "res",0);
@@ -4265,17 +4187,14 @@ case 64:
 		delete sens_file;
 	sens_file=new char[strlen(lab1)+strlen(lab2)+7];
 	if(strlen(lab1)>0)
-	{
-		cmd(inter, "cd $path");
-		sprintf(sens_file,"%s/%s.txt",lab2,lab1);
-	}
+		sprintf(sens_file,"%s/%s.sa",lab2,lab1);
 	else
-		sprintf(sens_file,"%s.txt",lab1);
+		sprintf(sens_file,"%s.sa",lab1);
 	// read sensitivity file (text mode)
 	f=fopen(sens_file, "rt");
 	if(f==NULL)
 	{
-		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not found\"");
+		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity Analysis file not found\"");
 		break;
 	}
 
@@ -4350,23 +4269,18 @@ case 65:
 		break;
 	}
 	// default file name and path
-	sprintf(lab, "set res %s_sens", simul_name);
+	sprintf(lab, "set res %s", simul_name);
 	cmd(inter, lab);
-	if(strlen(path)>0)
-		sprintf(msg, "set path \"%s\"", path);
-	else
-		sprintf(msg, "set path [pwd]");
+	sprintf(msg, "set path \"%s\"", path);
 	cmd(inter, msg);
-	cmd(inter, "cd $path");
+
 	// open dialog box to get file name & folder
-	sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".txt\" -initialfile $res -initialdir $path  -filetypes {{{Sensitivity analysis text files} {.txt}} {{All Files} {*}} }]");
+	sprintf(msg, "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -confirmoverwrite yes -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]");
 	cmd(inter, msg);
-	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .txt $res] -1];set res [string range $res 0 $last]} {set choice 2}");
+	cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}");
 	if(*choice==2)
-	{
-		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file name or path\"");
 		break;
-	}
+
 	lab1=(char *)Tcl_GetVar(inter, "res",0);
 	lab2=(char *)Tcl_GetVar(inter, "path",0);
 	// form full name
@@ -4374,12 +4288,9 @@ case 65:
 		delete sens_file;
 	sens_file=new char[strlen(lab2)+strlen(lab1)+7];
 	if(strlen(lab2)>0)
-	{
-		cmd(inter, "cd $path");
-		sprintf(sens_file,"%s/%s.txt",lab2,lab1);
-	}
+		sprintf(sens_file,"%s/%s.sa",lab2,lab1);
 	else
-		sprintf(sens_file,"%s.txt",lab1);
+		sprintf(sens_file,"%s.sa",lab1);
 	// write sensitivity file (text mode)
 	f=fopen(sens_file, "wt");  // use text mode for Windows better compatibility
 	if(f==NULL)
@@ -4449,6 +4360,7 @@ case 67:
 
 	// empty sensitivity data
 	empty_sensitivity(rsense); 			// discard read data
+	plog( "\nSensitivity data removed.\n" );
 	rsense=NULL;
 	unsavedSense = false;				// nothing to save
 	findexSens=0;
@@ -4459,7 +4371,7 @@ case 67:
 case 68:
 
 	// check a model is already loaded
-	if( struct_loaded == 0 )
+	if ( ! struct_loaded )
 		findexSens = 0;									// no sensitivity created
 	else
 		if ( ! discard_change( false ) )				// unsaved configuration?
@@ -4498,8 +4410,15 @@ case 68:
 	
 	// get configuration files to use
 	int ffirst, fnext;
-	if(*choice == 1)					// use current configuration files
+	if(*choice == 1)							// use current configuration files
 	{
+		if ( strlen( path ) == 0 || strlen( simul_name ) == 0 )
+		{
+			cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid simulation folder or name\" -detail \"Please try again.\"");
+			findexSens = 0;						// no sensitivity created
+			break;
+		}
+		
 		ffirst=1;
 		fnext=findexSens;
 		findexSens = 0;
@@ -4508,7 +4427,7 @@ case 68:
 		Tcl_SetVar(inter, "res", simul_name, 0);
 		Tcl_SetVar(inter, "path", path, 0);
 	}
-	else								// ask for first configuration file
+	else										// ask for first configuration file
 	{
 		cmd(inter, "set answer [tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}"); 
 		if(*choice == 2)
@@ -4521,15 +4440,12 @@ case 68:
 		else
 			strcpy(msg, "set res \"\"");
 		cmd(inter, msg);
-		if(strlen(path) > 0)					// default path
-			sprintf(msg, "set path \"%s\"", path);
-		else
-			sprintf(msg, "set path [pwd]");
+		sprintf(msg, "set path \"%s\"", path);
 		cmd(inter, msg);
 		// open dialog box to get file name & folder
 		if( fSeq )								// file sequence?
 		{
-			cmd(inter, "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple no]");
+			cmd(inter, "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple no]");
 			cmd(inter,"if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}");
 			if(*choice == 0)
 				break;
@@ -4551,7 +4467,7 @@ case 68:
 		}
 		else									// bunch of files?
 		{
-			cmd( inter, "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir $path  -filetypes {{{Lsd Model Files} {.lsd}}} -multiple yes]" );
+			cmd( inter, "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple yes]" );
 			cmd( inter,"set choice [llength $bah]; if {$choice > 0} {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
@@ -4561,9 +4477,9 @@ case 68:
 		}
 	}
 
-	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "natBat", (char *)&natBat, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar(inter, "natBat", (char *)&natBat, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
 	
 	// confirm number of cores to use
 	cmd( inter, "newtop .s \"Number of Processes\" { set choice 0 }" );
@@ -4614,7 +4530,7 @@ case 68:
 	lab3 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
 	
 	// select batch format & create batch file
-	char wpath[300];
+	char wpath[MAX_PATH_LENGTH];
 	
 	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {if {$natBat == 1} {set choice 1} {set choice 0}} {if {$natBat == 1} {set choice 0} {set choice 1}}");
 	if ( fSeq )
@@ -4637,7 +4553,8 @@ case 68:
 		// convert to Windows folder separators (\)
 		for(i=0; i < strlen(ch); i++) 
 			if(ch[i] == '/') ch[i]='\\';
-		strcpy(wpath, lab2);
+		wpath[ MAX_PATH_LENGTH - 1 ] = '\0';
+		strncpy(wpath, lab2, MAX_PATH_LENGTH - 1);
 		for(i=0; i < strlen(wpath); i++) 
 			if(wpath[i] == '/') wpath[i]='\\';
 		
@@ -4739,9 +4656,11 @@ case 68:
 		break;
 
 	// start the job
+	cmd(inter, "set oldpath [pwd]");
 	sprintf(msg, "set path \"%s\"", lab2);
 	cmd(inter, msg);
-	cmd(inter, "cd $path");
+	if ( strlen( lab2 ) > 0 )
+		cmd(inter, "cd $path");
 
 	cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
 	if(*choice == 1)						// Windows?
@@ -4752,8 +4671,10 @@ case 68:
 
 	sprintf( msg, "\nParallel batch file started: %s", lab );
 	plog( msg );
-	
 	cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"Run Batch\" -message \"Script/batch started\" -detail \"The script/batch was started in separated process(es). The results and log files are being created in the folder:\\n\\n$path\\n\\nCheck the '.log' files to see the results or use the command 'tail  -F  <name>.log' in a shell/command prompt to follow simulation execution (there is one log file per assigned process/core).\"");
+	
+	cmd(inter, "set path $oldpath; cd $path");
+	
 break;
 
 
@@ -4761,15 +4682,15 @@ break;
 case 69:
 
 	// check a model is already loaded
-	if(struct_loaded==0)
+	if ( ! struct_loaded )
 	{ 
 		cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to start a 'No Window' batch.\"");
 		break;
 	}
 
-	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_INT);
+	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_BOOLEAN);
 	
 	// confirm overwriting current configuration
 	cmd( inter, "set b .batch" );
@@ -4815,12 +4736,12 @@ case 69:
 	// Only ask to overwrite configuration if there are changes
 	if ( unsaved_change() )
 	{
-		overwConf = 1;
+		overwConf = true;
 		cmd( inter, "checkbutton $b.tosave -text \"Overwrite the existing configuration\nfile with the current values\" -variable overwConf" );
 		cmd( inter, "pack $b.tosave -padx 10" );
 	}
 	else
-		overwConf = 0;
+		overwConf = false;
 
 	cmd( inter, "okcancel $b b { set choice 1 } { set choice 2 }" );
 	cmd(inter, "bind $b <KeyPress-Return> {set choice 1}");
@@ -4846,7 +4767,7 @@ case 69:
 	blueprint->empty();			    // update blueprint to consider last changes
 	set_blueprint(blueprint, n);
 	
-	if ( overwConf == 1 )			// save if needed
+	if ( overwConf )				// save if needed
 		if ( ! save_configuration( r ) )
 		{
 			sprintf( msg , "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
@@ -4883,12 +4804,11 @@ case 69:
 	fclose(f);
 	
 	// start the job
-	if(strlen(path)>0)
-		sprintf(msg, "set path \"%s\"", path);
-	else
-		sprintf(msg, "set path [pwd]");
+	cmd(inter, "set oldpath [pwd]");
+	sprintf(msg, "set path \"%s\"", path);
 	cmd(inter, msg);
-	cmd(inter, "cd $path");
+	if(strlen(path)>0)
+		cmd(inter, "cd $path");
 
 	if(*choice == 1)							// Windows?
 		sprintf(msg, "exec %s -f %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", dozip ? "" : "-z", simul_name);
@@ -4898,6 +4818,8 @@ case 69:
 
 	sprintf(msg, "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name);
 	cmd(inter, msg);
+	
+	cmd(inter, "set path $oldpath; cd $path");
 break;
 
 
@@ -5068,8 +4990,7 @@ void show_initial(object *n)
 variable *cv, *cv1;
 object *co;
 description *cd;
-int app, i;
-char s[1];
+int i;
 bridge *cb;
 
 for(cv=n->v; cv!=NULL; cv=cv->next)
@@ -5515,8 +5436,8 @@ object *restore_pos( object *r )
 */
 
 bool unsavedChange = false;		// control for unsaved changes in configuration
-#define WND_NUM 6
-const char *wndName[ ] = { ".", ".log", ".model_str", ".ini", ".da", ".deb" };
+#define WND_NUM 7
+const char *wndName[ ] = { ".", ".log", ".str", ".ini", ".da", ".deb", ".lat" };
 
 bool unsaved_change( bool val )
 {
@@ -5599,7 +5520,7 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
 // Function to get variable configuration from Tcl
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
-	char vname[ 300 ], res[ 2 ];
+	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
 	variable *cv;
 	
 	if ( argc != 3 )					// require 2 parameters: variable name and property
@@ -5608,7 +5529,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 	
-	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
 	cv = currObj->search_var( NULL, vname );
 
 	if ( cv == NULL )					// variable not found
@@ -5634,7 +5555,7 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 // Function to set variable configuration from Tcl
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
-	char vname[ 300 ];
+	char vname[ MAX_ELEM_LENGTH ];
 	variable *cv;
 	object *cur;
 	
@@ -5645,7 +5566,7 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 		 argv[ 3 ] == NULL || ! strcmp( argv[ 1 ], "(none)" ) )
 		return TCL_ERROR;
 	
-	sscanf( argv[ 1 ], "%s", vname );	// remove unwanted spaces
+	sscanf( argv[ 1 ], "%99s", vname );	// remove unwanted spaces
 	cv = currObj->search_var( NULL, vname );
 	
 	if ( cv == NULL )					// variable not found

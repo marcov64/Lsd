@@ -12,7 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-
 /****************************************************
 DEBUG.CPP
 Builds and manages the debug window. This window appears under two conditions:
@@ -49,7 +48,7 @@ command from user. The available actions are
 9) observe the object from which this equation was triggered, if any.
 10) Search for an Object containing a specific Variable with a specific value
 
-- void deb_show(object *r, Tcl_Interp *inter)
+- void deb_show(object *r)
 fill in all the content of the object.
 
 - void set_cond(variable *cv)
@@ -77,50 +76,13 @@ did not issue an error message.
 
 ****************************************************/
 
-
-#include <tk.h>
 #include "decl.h"
 
-void cmd(Tcl_Interp *inter, char const *cc);
-object *go_brother(object *cur);
-void plog( char const *msg, char const *tag = "" );
-void deb_show(object *r, Tcl_Interp *inter);
-object *skip_next_obj(object *t, int *count);
-object *skip_next_obj(object *t);
-void show_graph(Tcl_Interp *ti, object *t);
-void set_cond(variable *cv);
-void show_eq(char *lab, int *choice);
-void analysis(int *choice);
-void reset_end(object *r);
-void myexit(int i);
-void print_stack(void);
-void attach_instance_number(char *ch, object *r);
-void this_instance_number(object *r);
-void entry_new_objnum(object *c, int *choice, char const *tag);
-void set_all(int *choice, object *original, char *lab, int lag);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern int debug_flag;
-extern int when_debug;
-extern Tcl_Interp *inter;
-extern int t;
-extern int quit;
-extern int done_in;
-extern int actual_steps;
-extern int running;
-extern char name_rep[400];
-extern char msg[];
-extern int stackinfo_flag;
-extern lsdstack *stacklog;
-extern int choice;
-extern char *simul_name;	// simulation name to use in title bar
-
-int interact_flag=0;
-double i_values[100];
-lsdstack *asl=NULL;
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
+double i_values[1000];
+int interact_flag=0;
+lsdstack *asl=NULL;
+
 
 /*******************************************
 DEB
@@ -132,7 +94,7 @@ variable *cv, *cv1;
 char ch[TCL_BUFF_STR], *ch1;
 object *cur, *cur1, *cur2;
 int count, old, i, cond;
-int pre_running;
+bool pre_running;
 double value_search=1;
 double *app_values;
 double app_res;
@@ -143,7 +105,7 @@ int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : 1;
 Tcl_SetVar( inter, "lab", lab, 0 );
 
 cmd( inter, "set deb .deb" );
-sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated 1 }", unsaved_change() ? "*" : " ", simul_name );
+sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name );
 cmd( inter, msg );
 
 // avoid redrawing the menu if it already exists and is configured
@@ -292,11 +254,11 @@ if ( mode == 1 )
 	Tcl_UnlinkVar( inter, "time" );
 }
 
-deb_show(r, inter);
+deb_show(r);
 
 cmd(inter, "pack .deb.b -side right -expand no");
 
-cmd( inter, "if $justCreated { if [ string equal $lab \"\" ] { showtop .deb topleftW 0 1 } { showtop .deb topleftW 0 1 0 }; set justCreated 0 }" );
+cmd( inter, "if $justCreated { showtop .deb topleftW 0 1; set justCreated false }" );
 
 cmd(inter, "raise .deb; focus .deb");
 
@@ -356,7 +318,7 @@ cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
 cmd( inter, "destroytop .deb" );
-debug_flag=0;
+debug_flag=false;
 if(t==when_debug)
  when_debug=0;
 break;
@@ -588,8 +550,8 @@ choice=0;
 break;
  }
  
-pre_running=running;
-running=0;
+pre_running = running;
+running = false;
 
 cmd( inter, "set value_search [ $s.e2 get ]" ); 
 ch1=(char *)Tcl_GetVar(inter, "en",0);
@@ -671,7 +633,7 @@ if(cur!=NULL)
 else
  choice=0;
 
-running=pre_running;
+running = pre_running;
 break;
 
 
@@ -702,7 +664,7 @@ choice=1;
 if ( mode == 1 )
 {
 	quit=1;
-	debug_flag=0;
+	debug_flag=false;
 }
 
 if ( mode == 3 )
@@ -929,7 +891,7 @@ cmd(inter, "set a [winfo exists .intval]");
 cmd(inter, "if { $a==1} {destroytop .intval} {}");
 cmd( inter, "set a [winfo exists .net]" );
 cmd( inter, "if { $a==1 } { destroytop .net }" );
-debug_flag=0;
+debug_flag=false;
 cmd( inter, "destroytop .deb" );
 
 break;
@@ -976,7 +938,7 @@ return(choice);
 /*******************************************
 DEB_SHOW
 ********************************************/
-void deb_show(object *r, Tcl_Interp *inter)
+void deb_show(object *r)
 {
 char ch[TCL_BUFF_STR];
 variable *ap_v;
@@ -1099,7 +1061,7 @@ SET_COND
 void set_cond(variable *cv)
 {
 int old;
-char ch[120];
+char ch[TCL_BUFF_STR];
 Tcl_LinkVar(inter, "cond", (char *) &cv->deb_cond, TCL_LINK_INT);
 Tcl_LinkVar(inter, "cond_val", (char *) &cv->deb_cnd_val, TCL_LINK_DOUBLE);
 
@@ -1208,6 +1170,8 @@ sprintf(msg, " (%d/%d)", j, i-1);
 
 }
 
+#ifndef NO_WINDOW
+
 double object::interact(char const *text, double v, double *tv)
 {
 /*
@@ -1227,3 +1191,12 @@ deb(this, NULL, text, &app);
 interact_flag=0;
 return app;
 }
+
+#else
+
+double object::interact(char const *text, double v, double *tv)
+{
+ return v;
+}
+
+#endif

@@ -37,53 +37,20 @@ Checks if the equation beginning in the file position indicated by f contains
 any function using lab as parameter.
 
 ************************/
-#include <tk.h>
+
 #include "decl.h"
 
 #define MAX_INIT 1000
 
-void cmd(Tcl_Interp *inter, char const *cc);
-void plog( char const *msg, char const *tag = "" );
-int contains (FILE *f, char *lab, int len);
-void write_var(variable *v, FILE *frep);
-void write_obj(object *r, FILE *frep);
-void write_str(object *r, FILE *frep, int dep, char const *prefix );
-
-object *skip_next_obj(object *t, int *count);
-object *skip_next_obj(object *t);
-void find_using(object *r, variable *v, FILE *frep);
-void insert_summary(object *r, FILE *frep);
-void clean_spaces(char *s);
-void write_list(FILE *frep, object *root, int flag_all, char const *prefix);
-void fill_list_var(object *r, int flag_all, int flag_init);
-void fill_list_par(object *r, int flag_all);
-void createmodelhelp(int *choice, object *r);
-
-void create_table_init(object *r);
-int is_equation_header(char *line, char *var);
-description *search_description(char *lab);
-void create_initial_values(object *r);
-void ancestors(object *r, FILE *f);
-FILE *create_frames(char *t);
-void create_form(int num, char const *title, char const *prefix);
-void insert_docuoptions(FILE *frep, object *r);
-void add_description(char const *lab, char const *type, char const *text);
-
-extern char msg[];
-extern Tcl_Interp *inter;
-extern char *equation_name;
-extern char *simul_name;
-extern char *name_report;
-extern int macro;
-extern char name_rep[400];
-int fatto;
-int code=1;
-int init=0;
-int pos;
-int ltext;
-int lmenu;
-
 FILE *frep;
+int code=1;
+int fatto;
+int init=0;
+int lmenu;
+int ltext;
+int pos;
+
+
 /******************************
 REPORT
 *******************************/
@@ -157,7 +124,7 @@ cmd(inter, "frame .w.s.e1.file");
 cmd(inter, "label .w.s.e1.file.tlab -text \"File name\"");
 cmd(inter, "set file1 description.txt");
 cmd(inter, "entry .w.s.e1.file.tit -width 50 -textvariable file1");
-cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}");
 cmd(inter, "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
@@ -180,7 +147,7 @@ cmd(inter, "frame .w.s.e2.file");
 cmd(inter, "label .w.s.e2.file.tlab -text \"File name\"");
 cmd(inter, "set file2 comments.txt");
 cmd(inter, "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2");
-cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All Files} {*}} }]}");
+cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}");
 cmd(inter, "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left");
 
 cmd(inter, "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w ");
@@ -192,7 +159,7 @@ cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
 
 cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
 
-cmd( inter, "okXhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML Files} {.html}} {{All Files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
+cmd( inter, "okXhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
 
 cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}");
 cmd(inter, "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}");
@@ -235,7 +202,7 @@ cmd(inter, "destroytop .w");
 start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
  {
-  cmd( inter, "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
+  cmd( inter, "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
 
 if(*choice==1)
  {
@@ -454,7 +421,6 @@ for(cur=r; cur!=NULL; cur=skip_next_obj(cur, &count ) )
   ancestors(cur, frep);
  }
 fprintf(frep,"<BR><I>Containing:</I>&nbsp");
-//for(cur2=cur->son; cur2!=NULL ; cur2=skip_next_obj(cur2, &count) )
 for(cb=cur->b; cb!=NULL; cb=cb->next )
  {
  cur2=cb->head;
@@ -480,7 +446,7 @@ WRITE_VAR
 void write_var(variable *v, FILE *frep)
 {
 FILE *ffun ;
-char c1_lab[2000], c2_lab[2000], c3_lab[2000], *app;
+char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], c3_lab[2*MAX_LINE_SIZE], *app;
 int done, i, one, j,flag_begin, flag_string, flag_comm, flag_var;
 object *cur, *cur2;
 
@@ -502,7 +468,7 @@ if( (ffun=fopen(equation_name,"r"))==NULL)
 strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 
-for(one=0 ; fgets(c1_lab, 1999, ffun)!=NULL;  )
+for(one=0 ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
  {
 
   if(is_equation_header(c1_lab,c2_lab)==1)
@@ -551,12 +517,12 @@ if( (ffun=fopen(equation_name,"r"))==NULL)
 strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 flag_comm=0;
-for(one=0 ; fgets(c1_lab, 1999, ffun)!=NULL;  )
+for(one=0 ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
  {
 
   if(is_equation_header(c1_lab,c2_lab)==1)
 	{
-   if(macro==0)
+   if(!macro)
      done=0;
    else
      done=1; //will never stop with {} only
@@ -566,7 +532,7 @@ for(one=0 ; fgets(c1_lab, 1999, ffun)!=NULL;  )
      
      while(done>0 || fatto==0)
       {fatto=1;
-      fgets(c1_lab, 1999, ffun);
+      fgets(c1_lab, 2*MAX_LINE_SIZE, ffun);
       app=strstr(c1_lab, "{");
       if(app!=NULL)
        done++;
@@ -646,7 +612,7 @@ for(one=0 ; fgets(c1_lab, 1999, ffun)!=NULL;  )
       fprintf(frep, "</TT>\n");
       
       clean_spaces(c1_lab);
-      if(!strncmp(c1_lab, "RESULT(",7) && macro==1)
+      if(!strncmp(c1_lab, "RESULT(",7) && macro)
         done=0; //force it to stop
       }//end of the while()
       
@@ -672,7 +638,7 @@ void find_using(object *r, variable *v, FILE *frep)
 object *cur;
 variable *cv;
 int count;
-char c1_lab[2000], c2_lab[2000], c3_lab[2000], *app;
+char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE];
 FILE *ffun;
 int done, i, one;
 
@@ -687,7 +653,7 @@ for(cur=r; cur!=NULL; cur=skip_next_obj(cur, &count) )
     strcpy(c1_lab, "");
     strcpy(c2_lab, "");
 
-    for(one=0 ; fgets(c1_lab, 1999, ffun)!=NULL;  )
+    for(one=0 ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
      {
 
 
@@ -727,7 +693,6 @@ object *cur;
 int count;
 bridge *cb;
 
-//for(cur=r; cur!=NULL; cur=skip_next_obj(cur, &count) )
 for(cb=r->up->b; cb!=NULL; cb=cb->next )
  {
  cur=cb->head;
@@ -749,7 +714,6 @@ bridge *cb;
 trash=0;
 if(r->up!=NULL)
   {
-  //if(r->up->son!=r)
   if(r->up->b->head!=r)
    for(i=0; i<dep; i++)
     {if(msg[i]==' ')
@@ -773,7 +737,6 @@ for(i=0; i<len; i++)
   msg[dep+i+trash]=' ';
 dep=dep+len+trash;
 j=dep;
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &trash) )
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {
  cur=cb->head;
@@ -800,7 +763,7 @@ WRITE_LIST
 void write_list(FILE *frep, object *root, int flag_all, char const *prefix)
 {
 int num, i;
-char *app, s1[200], s2[50];
+char *app, s1[2*MAX_ELEM_LENGTH], s2[MAX_ELEM_LENGTH];
 
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 if(flag_all==1) //initial listing
@@ -903,7 +866,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  }
 if(flag_all==0)
  return;
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &count ))
 for(cb=r->b; cb!=NULL; cb=cb->next)
  fill_list_var(cb->head, flag_all, flag_init);
 }
@@ -927,7 +889,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  }
 if(flag_all==0)
  return;
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &count ))
 for(cb=r->b; cb!=NULL; cb=cb->next)
  fill_list_par(cb->head, flag_all);
 }
@@ -976,9 +937,6 @@ bridge *cb;
  if(r->b!=NULL)
   {fprintf(frep, "<BR><i>Containing objects: &nbsp;</i> ");
    fprintf(frep, " <a HREF=\"#%s\">%s</a>",r->b->blabel,r->b->blabel);
-   //cur=skip_next_obj(r->son, &i );
-   
-   //for(; cur!=NULL; cur=skip_next_obj(cur, &i ))
    for(cb=r->b->next ; cb!=NULL; cb=cb->next)
     fprintf(frep, ", <a HREF=\"#%s\">%s</a>",cb->blabel, cb->blabel);
   }
@@ -1090,8 +1048,6 @@ if(cur_descr->text !=NULL && strcmp(cur_descr->text,"(no description available)"
  fprintf(frep, "</table>");
 }//end if exist a var
 
-//cur= skip_next_obj(r->son, &count);
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &count))
 for(cb=r->b; cb!=NULL; cb=cb->next)
    create_table_init(cb->head);
 
@@ -1114,7 +1070,6 @@ bridge *cb;
 
 if(count==0)
  {//no need for initialization, typically root
-  //for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &count))
   for(cb=r->b; cb!=NULL; cb=cb->next)
    create_initial_values(cb->head);
   return;
@@ -1169,8 +1124,6 @@ for(count=0,cur=r; cur!=NULL;cur=cur->hyper_next(cur->label) )
  }
  fprintf(frep, "</table>");
 
-//cur= skip_next_obj(r->son, &count);
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur, &count))
 for(cb=r->b; cb!=NULL; cb=cb->next)
    create_initial_values(cb->head);
 
@@ -1188,9 +1141,9 @@ clean_spaces(line);
 if(!strncmp(line, "if(!strcmp(label,",17)|| !strncmp(line, "EQUATION(",9) || !strncmp(line, "FUNCTION(",9))
  {
   if(!strncmp(line, "if(!strcmp(label,",17))
-   macro=0;
+   macro=false;
   else
-   macro=1;
+   macro=true;
    for(i=0; line[i]!='"'; i++);
    for(j=++i; line[i]!='"'; i++)
     var[i-j]=line[i];
@@ -1248,7 +1201,7 @@ CREATE LIST FORMS FOR LABELS.
 void create_form(int num, char const *title, char const *prefix)
 {
 int i;
-char s1[200],s2[200], *app;
+char s1[2*MAX_ELEM_LENGTH],s2[2*MAX_ELEM_LENGTH], *app;
 
 if(num==0)
  return;
@@ -1349,20 +1302,9 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
      }
     }
     fprintf(f, "</td></tr>\n");    
-
-   
-   
-/*
-   if(cv->param==1)
-    fprintf(f, "<li><B>Param:</B> <A HREF=\"#%s\">%s</A> </li>\n", cv->label, cv->label);
-   else
-    fprintf(f, "<li><B>Var.</B>: <A HREF=\"#%s\">%s</A> </li>\n", cv->label, cv->label);
-*/
-
   }
  }
 
-//for(co=n->son; co!=NULL; co=skip_next_obj(co, &app))
 for(cb=n->b; cb!=NULL; cb=cb->next)
  showrep_observe(f, cb->head, begin);
 if(n->up==NULL)
@@ -1406,7 +1348,6 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
     fprintf(f, "<td><center><b>Object</b></center></td>");
     fprintf(f, "<td><center><b>Label</b></center></td>\n");
     fprintf(f, "<td><center><b>Description</b></center></td>\n");    
-//    fprintf(f, "<td><center><b>Data</b></center></td>\n");    
     fprintf(f, "</tr>");
    }
     fprintf(f, "<tr>");
@@ -1460,30 +1401,11 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
          break;
      }
     }
-    /*
-    fprintf(f, "</td><td>"); 
-    for(co=n; co!=NULL; co=co->hyper_next(co->label) )
-     {
-       cv1=co->search_var(co, cv->label);
-       fprintf(f, " %g", cv1->val[0]);
-     }
-    */
     fprintf(f, " <A HREF=\"#_i_%s\">See initial values</A>,</td>",  cv->label);
     fprintf(f, "</td></tr>\n");    
-
-   
-   
-/*
-   if(cv->param==1)
-    fprintf(f, "<li><B>Param:</B> <A HREF=\"#%s\">%s</A> </li>\n", cv->label, cv->label);
-   else
-    fprintf(f, "<li><B>Var.</B>: <A HREF=\"#%s\">%s</A> </li>\n", cv->label, cv->label);
-*/
-
   }
  }
 
-//for(co=n->son; co!=NULL; co=skip_next_obj(co, &app))
 for(cb=n->b; cb!=NULL; cb=cb->next)
  showrep_initial(f, cb->head, begin);
 if(n->up==NULL)
@@ -1550,7 +1472,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
  }
 fprintf(f, "\\end{longtable}\n\n");
 
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur))
 for(cb=r->b; cb!=NULL; cb=cb->next)
  tex_report(cb->head, f);
 
@@ -1593,8 +1514,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
   } 
  }
 
-
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur))
 for(cb=r->b; cb!=NULL; cb=cb->next)
  tex_report_observe(cb->head, f);
 if(r->up==NULL)
@@ -1642,9 +1561,6 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
   } 
  }
 
-
-
-//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur))
 for(cb=r->b; cb!=NULL; cb=cb->next)
  tex_report_init(cb->head, f);
 if(r->up==NULL)

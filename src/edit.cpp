@@ -12,7 +12,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 
-
 /****************************************************
 EDIT.CPP
 This functions manage the computation, display and modification of
@@ -64,42 +63,14 @@ void link_data(object *root, char *lab);
 
 ************************************/
 
-
-
-#include <tk.h>
 #include "decl.h"
 
-void go_next(object **t);
-object *go_brother(object *cur);
-object *skip_next_obj(object *t, int *count);
-void cmd(Tcl_Interp *inter, char const *cc);
-void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
-void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done);
-void eliminate_obj(object **r, int actual, int desired , int *choice);
-void search_title(object *root, char *tag, int *i, char *lab, int *incr);
-void clean_cell(object *root, char *tag, char *lab);
-void edit_data(object *root, int *choice, char *obj_name);
-void set_title(object *c, char *lab, char *tag, int *incr);
-void link_data(object *root, char *lab);
-void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
-void plog( char const *msg, char const *tag = "" );
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;	// simulation name to use in title bar
-extern bool in_edit_data;
-
-char widthNE[]="350";			// horizontal size in pixels
-char heightNE[]="550";			// vertical size in pixels
-char lab_view[40];
-char tag_view[40];
+bool in_set_obj = false;		// avoid recursive usage (confusing and tk windows are not ready)
+char lab_view[MAX_ELEM_LENGTH];
+char tag_view[MAX_ELEM_LENGTH];
 int level;
 int max_depth;
-// flags to avoid recursive usage (confusing and tk windows are not ready)
-bool in_set_obj = false;
-// Main window constraints (defined in edit_data.cpp)
+
 
 /***************************************************
 SET_OBJ_NUMBER
@@ -116,11 +87,9 @@ Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "result", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "max_depth", (char *) &max_depth, TCL_LINK_INT);
-Tcl_SetVar(inter, "widthNE", widthNE, 0);		// horizontal size in pixels
-Tcl_SetVar(inter, "heightNE", heightNE, 0);		// vertical minimum size in pixels
 
 cmd( inter, "set ini .ini" );
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $widthNE $heightNE } { resizetop .ini $widthNE $heightNE }" );
+cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeN $vsizeN } { resizetop .ini $hsizeN $vsizeN }" );
 
 in_set_obj = true;
 strcpy(lab_view,"");
@@ -238,7 +207,7 @@ INSERT_OBJ_NUM
 ****************************************************/
 void insert_obj_num(object *root, char const *tag, char const *ind, int counter, int *i, int *value)
 {
-char ch[TCL_BUFF_STR], ch1[120], indent[30];
+char ch[TCL_BUFF_STR], indent[30];
 object *c, *cur;
 variable *var;
 int num=0, multi=0;
@@ -449,7 +418,7 @@ return res;
 void entry_new_objnum(object *c, int *choice, char const *tag)
 {  
 object *cur,  *first;
-int cfrom, j, affect, k, pippo[100], num;
+int cfrom, j, affect, k, pippo[1000], num;
 
 for(num=0, cur=c->up->search(c->label);cur!=NULL; cur=go_brother(cur),num++ );
 
@@ -583,15 +552,14 @@ EDIT_STR
 
 void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done)
 {
-char ch[120];
+char ch[MAX_ELEM_LENGTH+20];
 object *c, *cur, *first;
 variable *var;
-int multi=0, cazzo, param, cfrom, j, affect, k, pippo[100];
+int multi=0, cazzo, param, cfrom, j, affect, k;
 bridge *cb;
 
 param=0;
 strcpy(ch, tag);
-//for(c=root->son, counter=1; c!=NULL && *done==0;c=skip_next_obj(c, &cazzo), counter=1)
 for(cb=root->b, counter=1; cb!=NULL && *done==0;cb=cb->next, counter=1)
  { c=cb->head; 
    *i=*i+1;
@@ -622,7 +590,6 @@ for(cb=root->b, counter=1; cb!=NULL && *done==0;cb=cb->next, counter=1)
 
 	}
   }
-
 }
 
 /***************************************************
@@ -631,7 +598,7 @@ ELIMINATE_OBJ
 
 void eliminate_obj(object **r, int actual, int desired , int *choice)
 {
-char ch[120];
+char ch[2*MAX_ELEM_LENGTH];
 int i, *del, val, last;
 object *cur, *app, *prev;
 bridge *cb, *first;

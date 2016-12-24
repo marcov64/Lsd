@@ -61,40 +61,18 @@ Contained in ANALYSIS.CPP. Simply sets the colors for any integer number
 
 ****************************************************/
 
-
-#include <tk.h>
 #include "decl.h"
 
-void plog( char const *msg, char const *tag = "" );
-void assign(object *r, int *i, char *lab);
-void count(object *r, int *i);
-object *skip_next_obj(object *t, int *count);
-object *go_brother(object *c);
-void init_canvas(void);
-void init_plot(int i, int id_sim);
-void cmd(Tcl_Interp *inter, char const *cc);
-void set_shortcuts( const char *window );
-double min(double a, double b);
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern char msg[];
-extern Tcl_Interp *inter;
-extern char **tp;
-extern int max_step;
-extern int cur_plt;
-extern int t;
-extern int plot_flag;
-extern char *simul_name;	// simulation name to use in title bar
-
 // better adjusts position for X11
-int shift=20;		// new window shift
-char intval[16];	// string buffer
+char intval[100];				// string buffer
+char **tp;						// labels of variables to plot in runtime
 double ymin;
 double ymax;
 double *old_val;
 double plot_step;
+int shift=20;					// new window shift
 variable **list;
+
 
 /**************************************
 PREPARE_PLOT
@@ -102,14 +80,13 @@ PREPARE_PLOT
 void prepare_plot(object *r, int id_sim)
 {
 int i=0;
-char lab[20];
+char lab[MAX_ELEM_LENGTH];
 
 ymax=ymin=0;
 
 strcpy(lab, "");
 
 count(r, &i);
-cmd(inter, "update");
 
 if(i==0)
   return;
@@ -150,7 +127,7 @@ void assign(object *r, int *i, char *lab)
 {
 variable *a;
 object *c, *c1;
-char cur_lab[30];
+char cur_lab[MAX_ELEM_LENGTH];
 int j;
 bridge *cb;
 
@@ -190,26 +167,17 @@ if(max_step>500)
  plot_step=1;
 else
  plot_step=(500/max_step);
+
 sprintf(msg,"set activeplot .plt%d", id_sim);
 cmd(inter, msg);
-cmd(inter, "if {[winfo exists $activeplot]==1} {destroy $activeplot} {}");
-cmd(inter, "toplevel $activeplot");
-cmd(inter, "wm resizable $activeplot 1 0");
-// allow for run time plot window destruction
-cmd(inter, "wm protocol $activeplot WM_DELETE_WINDOW {set done_in 5}");
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $activeplot @$RootLsd/$LsdSrc/icons/lsd.xbm} {}");
-cmd( inter, "wm transient $activeplot .; wm group $activeplot .; lower $activeplot .log" );
 
-i=(id_sim)*shift;				// calculate window shift position
-sprintf(intval,"%i",i);
-Tcl_SetVar(inter, "shift", intval, 0);
-cmd(inter, "set posXrt [expr $posXstr + $shift]");
-cmd(inter, "set posYrt [expr $posYstr + $shift]");
-cmd(inter, "wm geometry $activeplot +$posXrt+$posYrt");
-sprintf(msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim);
-cmd(inter,msg);
-sprintf( msg,".plt%d", id_sim );
-set_shortcuts( msg );
+cmd(inter, "if {[winfo exists $activeplot]==1} {destroytop $activeplot}");
+
+cmd( inter, "newtop $activeplot \"\" { set done_in 5 } \"\"");
+cmd( inter, "wm transient $activeplot .");
+sprintf( msg,"wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim );
+cmd( inter,msg );
+
 cmd( inter, "bind $activeplot <s> { set done_in 1 }; bind $activeplot <S> { set done_in 1 }" );
 cmd( inter, "bind $activeplot <f> { set done_in 2 }; bind $activeplot <F> { set done_in 2 }" );
 cmd( inter, "bind $activeplot <d> { set done_in 3 }; bind $activeplot <D> { set done_in 3 }" );
@@ -267,6 +235,18 @@ for ( i = 0, j = 0, k = 0; i < ( num < 18 ? num : 18 ); ++i )
 	 j=0;
 	}
  }
+ 
+i=(id_sim)*shift;				// calculate window shift position
+sprintf(intval,"%i",i);
+Tcl_SetVar(inter, "shift", intval, 0);
+cmd(inter, "set posXrt [expr $posXstr + $shift]");
+cmd(inter, "set posYrt [expr $posYstr + $shift]");
+
+cmd( inter, "showtop  $activeplot xy no no no $posXrt $posYrt" );
+cmd( inter, "raise .log" );
+cmd( inter, "focus .log" );
+
+set_shortcuts_log( "$activeplot" );
 }
 
 /**************************************
@@ -276,8 +256,7 @@ void plot_rt(variable *v)
 {
 int y1, y2;
 double dy, step, value;
-if(plot_flag==0)
- return;
+
 if(ymax==ymin) //Very initial setting
  { if(v->val[0]>0)
 	 {

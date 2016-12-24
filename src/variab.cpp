@@ -152,30 +152,7 @@ activate the debugger.
 ****************************************************/
 
 #include "decl.h"
-#include <time.h>
-#include <exception>
 
-#ifndef NO_WINDOW
- #include <tk.h>
-extern Tcl_Interp *inter;
-void cmd(Tcl_Interp *inter, char *cc);
-int deb(object *r, object *c, char const *lab, double *res);
-#endif
- 
-extern int t;
-extern int debug_flag;
-extern int when_debug;
-extern int stackinfo_flag;
-extern int quit;
-extern int stack;
-extern char msg[];
-extern lsdstack *stacklog;
-extern int total_var;
-extern bool fast;
-
-void set_lab_tit(variable *var);
-void plog( char const *msg, char const *tag = "" );
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 clock_t start_profile[100], end_profile[100];
 
 /****************************************************
@@ -329,7 +306,7 @@ if(stackinfo_flag>=stack)
 
 last_update++;
 #ifndef NO_WINDOW
-if(debug_flag==1 && debug=='d')
+if(debug_flag && debug=='d')
 	 deb( (object *)up, caller, label, &val[0] );
 else
  switch(deb_cond)

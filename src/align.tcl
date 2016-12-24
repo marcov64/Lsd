@@ -9,8 +9,9 @@
 # 
 # Comments and bug reports to marco.valente@univaq.it
 # ****************************************************
-# ****************************************************
 
+
+# ****************************************************
 # Procedures to adjust window positioning. 
 #	Types of window positioning:
 #	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
@@ -21,15 +22,39 @@
 #	overM: over the main window (same top-left position)
 #	current: keep current position
 #
-# Variable 'alignMode' configure special, per module (LMM, LSD), settings
+# ****************************************************
+
+package require Tk 8.5
+
+# Main windows size and margins (must be even numbers)
+set hmargin		20	; # horizontal right margin from the screen borders
+set vmargin		20	; # vertical margins from the screen borders
+set bordsize	2	; # width of windows borders
+set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
+set hsizeL		800	; # LMM horizontal size in pixels
+set vsizeL		600	; # LMM vertical size in pixels
+set hsizeB 		400	; # browser horizontal size in pixels
+set vsizeB		620	; # browser vertical size in pixels
+set hsizeM 		600	; # model structure horizontal size in pixels
+set vsizeM		400	; # model structure vertical size in pixels
+set hsizeI 		800	; # initial values editor horizontal size in pixels
+set vsizeI		600	; # initial values editor vertical size in pixels
+set hsizeN 		350	; # objects numbers editor horizontal size in pixels
+set vsizeN		550	; # objects numbers editor vertical size in pixels
 
 # OS specific screen location offset adjustments
-set corrXmac 0
-set corrYmac 0
-set corrXlinux 0
-set corrYlinux -47
+set corrXmac	0
+set corrYmac	0
+set corrXlinux	0
+set corrYlinux	-47
 set corrXwindows 0
 set corrYwindows 0
+
+# Enable window functions operation logging
+set logWndFn	false
+
+
+# register static special configurations
 
 if [ string equal $tcl_platform(platform) unix ] {
 	if [ string equal $tcl_platform(os) Darwin ] {
@@ -50,7 +75,7 @@ if [ string equal $tcl_platform(platform) unix ] {
 	set corrY $corrYwindows
 }
 
-# register static special configurations
+# Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus
 if [ info exists alignMode ] {
 	if [ string equal -nocase $alignMode "LMM" ] {
@@ -59,11 +84,15 @@ if [ info exists alignMode ] {
 	}
 }
 
-# list to hold the windows parents stack
+# lists to hold the windows parents stacks and exceptions to the parent mgmt.
 set parWndLst [ list ]
+set grabLst [ list ]
+set noParLst [ list .log .str .plt .lat ]
 
 # procedures for create, update and destroy top level new windows
 proc newtop { w { name "" } { destroy { } } { par "." } } {
+	global tcl_platform RootLsd LsdSrc parWndLst grabLst noParLst logWndFn
+
 	if [ winfo exists $w ] { 
 		destroytop $w
 	}
@@ -74,33 +103,34 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 				wm transient $w $par 
 			}
 		} {
-			global parWndLst
-			while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
-					set parWndLst [ lreplace $parWndLst 0 0 ]
-				}
-			if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
-				if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
-					wm transient $w [ lindex $parWndLst 0 ] 
-				}
-			} {
-				if { [ winfo viewable [ winfo toplevel . ] ] } {
+			if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+				while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
+						set parWndLst [ lreplace $parWndLst 0 0 ]
+					}
+				if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
+					if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
+						wm transient $w [ lindex $parWndLst 0 ] 
+					}
+				} {
 					wm transient $w .
 				}
+			} {
+				wm transient $w .
 			}
 		} 
 	}
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
-	global tcl_platform
 	if { $tcl_platform(platform) != "windows"} {
-		global RootLsd LsdSrc
 		wm iconbitmap $w @$RootLsd/$LsdSrc/icons/lsd.xbm
 	}
-#	plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst)" 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 proc settop { w { name no } { destroy no } { par no } } {
+	global parWndLst grabLst logWndFn
+
 	if { $par != no } {
 		if { [ winfo viewable [ winfo toplevel $par ] ] } {
 			wm transient $w $par 
@@ -123,19 +153,22 @@ proc settop { w { name no } { destroy no } { par no } } {
 		focus $w
 	}
 	update 
+	
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsettop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 # configure the window
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
-	if { $sizeX != 0 } {
+	global defaultPos parWndLst grabLst noParLst logWndFn
+	
+	if { ! [ string equal $pos xy ] && $sizeX != 0 } {
 		$w configure -width $sizeX 
 	}
-	if { $sizeY != 0 } {
+	if { ! [ string equal $pos xy ] && $sizeY != 0 } {
 		$w configure -height $sizeY 
 	}
 	update idletasks
 	# handle different window default position
-	global defaultPos parWndLst
 	if [ string equal $pos none ] {
 		if [ info exists defaultPos ] {
 			set pos $defaultPos
@@ -151,14 +184,19 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				set pos centerS
 			}
 		}
-		set x [ getx $w $pos ]
-		set y [ gety $w $pos ]
+		if { ! [ string equal $pos xy ]	} {
+			set x [ getx $w $pos ]
+			set y [ gety $w $pos ]
+		} {
+			set x $sizeX
+			set y $sizeY
+		}
 		if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
 			if { [ string equal $pos coverW ] } {
 				set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
 				set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 			}
-			if { $sizeX != 0 && $sizeY != 0 } {
+			if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
 				wm geom $w ${sizeX}x${sizeY}+$x+$y 
 			} {
 				wm geom $w +$x+$y
@@ -169,13 +207,14 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	if { ! $noMinSize && ( $resizeX || $resizeY ) } {
 		wm minsize $w [ winfo width $w ] [ winfo height $w ]
 	}
-	set parWndLst [ linsert $parWndLst 0 $w ]
-	if $grab {
-		global lstGrab
-		if { ! [ info exists lstGrab ] || [ lsearch -glob $lstGrab "$w *" ] < 0 } {
-			lappend lstGrab "$w [ grab current $w ]"
+	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+		set parWndLst [ linsert $parWndLst 0 $w ]
+		if $grab {
+			if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+				lappend grabLst "$w [ grab current $w ]"
+			}
+			grab set $w
 		}
-		grab set $w
 	}
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
 		wm deiconify $w
@@ -187,11 +226,47 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		focus $w
 	}
 	update
-#	plog "\nshowtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, pos:$pos)" 
+	
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+}
+
+proc destroytop w {
+	global defaultFocus parWndLst grabLst noParLst logWndFn
+
+	if { ! [ winfo exists $w ] } return
+	
+	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+		if [ info exists grabLst ] {
+			set igrab [ lsearch -glob $grabLst "$w *" ]
+			if { $igrab >= 0 } {
+				grab release $w
+				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
+				if { $grabPar != "" } {
+					grab set $grabPar 
+				}
+				set grabLst [ lreplace $grabLst $igrab $igrab ]
+			}
+		}
+		if { [ llength $parWndLst ] > 0 } {
+			set parWndLst [ lreplace $parWndLst 0 0 ] 
+		}
+	}
+	# handle different window default focus on destroy
+	if [ info exists defaultFocus ] {
+		focus $defaultFocus
+	} {
+		focus [ winfo parent $w ]
+	}
+	destroy $w
+	update
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
 # resize the window
 proc resizetop { w sizeX { sizeY 0 } } {
+	global parWndLst grabLst logWndFn
+
 	if { $sizeX <= 0 } {
 		set sizeX [ winfo width $w ]
 	}
@@ -213,51 +288,25 @@ proc resizetop { w sizeX { sizeY 0 } } {
 		wm geom $w ${sizeX}x${sizeY} 
 	}
 	update
-}
 
-proc destroytop w {
-	if [ winfo exists $w ] {
-		global lstGrab
-		if [ info exists lstGrab ] {
-			set igrab [ lsearch -glob $lstGrab "$w *" ]
-			if { $igrab >= 0 } {
-				grab release $w
-				set grabPar [ string range [ lindex $lstGrab $igrab ] [ expr [ string first " " [ lindex $lstGrab $igrab ] ] + 1 ] end ]
-				if { $grabPar != "" } {
-					grab set $grabPar 
-				}
-				set lstGrab [ lreplace $lstGrab $igrab $igrab ]
-			}
-		}
-		global parWndLst defaultFocus
-		if { [ llength $parWndLst ] > 0 } {
-			set parWndLst [ lreplace $parWndLst 0 0 ] 
-		}
-		# handle different window default focus on destroy
-		if [ info exists defaultFocus ] {
-			focus $defaultFocus
-		} {
-			focus [ winfo parent $w ]
-		}
-		destroy $w
-		update
-#		plog "\ndestroytop (w:$w, parWndLst:$parWndLst)"
-	}
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 # alignment of window w1 to the to right side of w2
 proc align {w1 w2} {
-	global posX corrX corrY
+	global hmargin corrX corrY logWndFn
+	
 	set a [ winfo width $w1 ]
 	set b [ winfo height $w1 ]
 	set c [ expr [ winfo x $w2 ] + $corrX ]
 	set d [ expr [ winfo y $w2 ] + $corrY ]
 	set e [ winfo width $w2 ]
 
-	set f [ expr $c + $e + $posX ]
+	set f [ expr $c + $e + $hmargin ]
 	wm geometry $w1 +$f+$d
 	update
-#	plog "align w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)"
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)" }
 }
 
 # check if window center is in primary display
@@ -271,7 +320,8 @@ proc primdisp w {
 
 # compute x and y coordinates of new window according to the types
 proc getx { w pos } {
-	global corrX
+	global corrX hmargin bordsize
+	
 	switch $pos {
 		centerS { 
 			return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
@@ -292,12 +342,18 @@ proc getx { w pos } {
 		coverW { 
 			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
 		}
+		bottomrightS {
+			return [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
+		}
+		righttoW {
+			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
+		}
 	}
-#	plog "\nw:$w (parent:[ winfo parent $w ], x:[ winfo x [ winfo parent $w ] ],"
 }
 
 proc gety { w pos } {
-	global corrY
+	global corrY vmargin tbarsize
+	
 	switch $pos {
 		centerS { 
 			return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
@@ -318,8 +374,13 @@ proc gety { w pos } {
 		coverW { 
 			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
+		bottomrightS {
+			return [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
+		}
+		righttoW {
+			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+		}
 	} 
-#	plog "y:[ winfo y [ winfo parent $w ] ])"
 }
 
 # procedures to create standard button sets
@@ -498,7 +559,7 @@ proc write_disabled { w val } {
 proc mouse_wheel { w } {
 	global tcl_platform
 	if [ string equal $tcl_platform(platform) windows ] {
-		bind $w <MouseWheel> { %W yview scroll [ expr { -%D / 120 } ] units }
+		bind $w <MouseWheel> { %W yview scroll [ expr { -%D / 40 } ] units }
 	} {
 		if [ string equal $tcl_platform(os) Darwin ] {
 			bind $w <MouseWheel> { %W yview scroll [ expr { -%D } ] units }

@@ -77,37 +77,8 @@ random generator, but it can be (and should...) linked with a serious random
 generator.
 ****************************************************/
 
-#include <ctype.h>
-#include <tk.h>
 #include "decl.h"
 
-void cmd(Tcl_Interp *inter, char const *cc);
-double rnd_integer(double min, double max);
-double norm(double mean, double dev);
-void plog( char const *msg, char const *tag = "" );
-void myexit(int v);
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
-description *search_description(char *lab);
-void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init);
-int compute_copyfrom(object *c, int *choice);
-void add_description(char const *lab, char const *type, char const *text);
-void dataentry_sensitivity(int *choice, sense *s, int nval);
-bool save_configuration( object *, long findex = 0 );
-int init_random(int seed);
-void NOLH_clear( void );	// external DoE	cleanup
-bool unsaved_change(  );		// control for unsaved changes in configuration
-bool unsaved_change( bool );
-
-extern Tcl_Interp *inter;
-extern char msg[];
-extern char *simul_name;
-extern char *path;
-extern int t;
-extern object *root;
-extern description *descr;
-extern bool unsavedSense;	// control for unsaved changes in sensitivity data
-
-sense *rsense=NULL;
 
 /****************************************************
 SET_ALL
@@ -965,7 +936,7 @@ return cur;
 }
 
 
-void sensitivity_sequential(long *findex, sense *s, double probSampl = 1.0)
+void sensitivity_sequential(int *findex, sense *s, double probSampl)
 {
 /*
 This function fills the initial values according to the sensitivity analysis system performed by sequential simulations: each run executes one configuration labelled with sequential labels.
@@ -1765,7 +1736,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	lBuffer = str = new char[ MAX_FILE_SIZE ];
 
 	// get first text line
-	fgets( str, MAX_FILE_SIZE - 1, NOLHfile );
+	fgets( str, MAX_FILE_SIZE, NOLHfile );
 	do								// count factors
 	{
 		num = strtok( str, ",;" );	// get next value
@@ -1777,7 +1748,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 
 	do								// count file lines
 	{
-		fgets( lBuffer, MAX_FILE_SIZE - 1, NOLHfile );
+		fgets( lBuffer, MAX_FILE_SIZE, NOLHfile );
 		n++;
 	}
 	while ( ! feof( NOLHfile ) );
@@ -1792,7 +1763,7 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	for ( i = 0; i < n ; i++ )		// read file content
 	{
 		// get next text line
-		fgets( lBuffer, MAX_FILE_SIZE - 1, NOLHfile );
+		fgets( lBuffer, MAX_FILE_SIZE, NOLHfile );
 		str = lBuffer;
 		for ( j = 0; j < kFile ; j++ )	// get factor values
 		{
@@ -2296,12 +2267,12 @@ design::~design( void )
 // samples = -1: use extended predefined sample size (n2)
 // factors = 0: use automatic DoE size
 
-design::design( sense *rsens, int typ, char const *fname, long findex, 
+design::design( sense *rsens, int typ, char const *fname, int findex, 
 				int samples, int factors, int jump, int trajs )
 {
 	int i , j, kTab, doeRange, poolSz;
 	double **pool;
-	char *doefname, doeName[64];
+	char *doefname, doeName[MAX_ELEM_LENGTH];
 	FILE *f;
 	sense *cs;
 	
@@ -2542,7 +2513,7 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 			
 	fclose( f );
 	
-	char out[ 256 ];
+	char out[ MAX_PATH_LENGTH ];
 	sprintf( out, "\nDoE configuration saved: %s", doefname );
 	plog( out );
 	
@@ -2551,7 +2522,7 @@ design::design( sense *rsens, int typ, char const *fname, long findex,
 
 
 // procedure to generate the configuration files for the Design of Experiment (DOE)
-void sensitivity_doe( long *findex, design *doe )
+void sensitivity_doe( int *findex, design *doe )
 {
 	int i, j;
 	object *cur;

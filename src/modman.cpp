@@ -14,7 +14,6 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
 
-
 /*****
 used up to 69 options included
 *******/
@@ -66,36 +65,30 @@ The widget of importance are:
 #define _LSD_VERSION_ "7.0"
 #define _LSD_DATE_ __DATE__
 
-#define SHOW_TK_ERR true		// define to show Tk errors as dialogs
+#define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
+#define MAX_PATH_LENGTH 500		// maximum path length
 
-Tcl_Interp *inter;
-char msg[3000];		// old value (300) was too small (Tcl/Tk "invading" next vars) 
-int choice;
-int v_counter=0; //counter of the v[i] variables inserted in the equations
-int shigh;			// syntax highlighting state (0, 1 or 2)
-
-void copy(char *f1, char *f2);
+// auxiliary C procedures
 Tcl_Interp *InterpInitWin(void);
-void cmd(Tcl_Interp *inter, char *cc);
-void cmd(Tcl_Interp *inter, const char cc[]) {cmd(inter, (char *)cc);};
-int errormsg( char *lpszText,  char *lpszTitle);
 int ModManMain(int argn, char **argv);
+int errormsg(char *lpszText,  char *lpszTitle);
+void cmd(Tcl_Interp *inter, const char *cm);
+void cmd( const char *cm, ... );
 void color(int hiLev, long iniLin, long finLin);
-void make_makefile(void);
-void make_makefileNW(void);
-char app_str[2][200];
-void signal(char *s);
 void create_compresult_window(void);
 void delete_compresult_window( void );
+void log_tcl_error( const char *cm, const char *message );
+void make_makefile(void);
+void make_makefileNW(void);
+void signal(char *s);
 
-// Main window constraints
-char hsize[]="800";			// horizontal size in pixels
-char vsize[]="600";			// vertical minimum size in pixels
-char hmargin[]="20";		// horizontal right margin from the screen borders
-char vmargin[]="20";		// vertical margins from the screen borders
-char bordsize[]="4";		// width of windows borders
-char tbarsize[]="80";		// size in pixels of bottom taskbar (exclusion area)
-							// Windows 7+ = 82
+// global variables
+Tcl_Interp *inter;
+char msg[ TCL_BUFF_STR ]; 
+int choice;
+int shigh;						// syntax highlighting state (0, 1 or 2)
+int v_counter=0; 				//counter of the v[i] variables inserted in the equations
+
 
 int main(int argn, char **argv)
 {
@@ -106,11 +99,11 @@ int main(int argn, char **argv)
 
 extern int TK_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
     
-    /*
-     * The following #if block allows you to change how Tcl finds the startup
-     * script, prime the library or encoding paths, fiddle with the argv,
-     * etc., without needing to rewrite Tk_Main()
-     */
+/*
+ * The following #if block allows you to change how Tcl finds the startup
+ * script, prime the library or encoding paths, fiddle with the argv,
+ * etc., without needing to rewrite Tk_Main()
+ */
     
 #ifdef TK_LOCAL_MAIN_HOOK
 extern int TK_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
@@ -141,7 +134,7 @@ app=Tcl_CreateInterp();
 
 if((res=Tcl_Init(app))!=TCL_OK)
  {
-  char estring[255];
+  char estring[TCL_BUFF_STR];
   sprintf(estring,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\nTcl Error = %d : %s\n",res,  Tcl_GetStringResult( app ) );
   errormsg(estring,NULL);
   exit(1);
@@ -151,52 +144,13 @@ if((res=Tcl_Init(app))!=TCL_OK)
 if((res=Tk_Init(app))!=TCL_OK)
  {
   errormsg( (char *)"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n", NULL);
-  char estring[255];
+  char estring[TCL_BUFF_STR];
   sprintf(estring,"Tk Error = %d : %s\n",res, Tcl_GetStringResult( app ) );
   errormsg(estring,NULL);
   exit(2);
  }
 
 return app;
-}
-
-/****************************************************
-CMD
-****************************************************/
-bool firstCall = true;
-
-void cmd(Tcl_Interp *inter, char *cm)
-{
-
-int code;
-FILE *f;
-time_t rawtime;
-struct tm *timeinfo;
-char ftime[80];
-
-code=Tcl_Eval(inter, cm);
-
-if(code!=TCL_OK && strstr(cm,(char*)"exec make")==NULL) // don't log model compilation errors
- {
-  f=fopen("tk_err.err","a");
-
-  time( &rawtime );
-  timeinfo = localtime( &rawtime );
-  strftime ( ftime, 80, "%F %T", timeinfo );
-
-  if ( firstCall )
-  {
-	  firstCall = false;
-	  fprintf( f, "\n\n====================> NEW TCL SESSION\n" );
-  }
-  fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, Tcl_GetStringResult( inter ) );
-  fclose(f);
-#ifdef SHOW_TK_ERR
-  //sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Please send the following information to the developers.\n\nCommand:\n%s\n\nMessage:\n%s\"", cm, Tcl_GetStringResult( inter ) );
-     sprintf( msg, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"Error in managing the interfaces. See file 'tkerr.err' for details\"");
-  cmd(inter, msg);
-#endif
- }
 }
 
 int errormsg( char *lpszText,  char *lpszTitle)
@@ -207,13 +161,85 @@ exit(3);
 }
 
 
-void copy(char *f1, char *f2)
+/****************************************************
+CMD
+****************************************************/
+bool firstCall = true;
+
+// traditional cmd version, with buffer underrun detection
+void cmd( Tcl_Interp *inter, const char *cm )
 {
-char m[600];
+	if ( strlen( cm ) >= TCL_BUFF_STR )
+	{
+		char message[ TCL_BUFF_STR ];
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", strlen( cm ) );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'Ok'.\"" );
+	}
 
-sprintf(m,"copy %s %s", f1, f2);
-system(m);
+	int code = Tcl_Eval( inter, cm );
 
+	if( code != TCL_OK )
+		log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+}
+
+// enhanced cmd with embedded sprintf capabilities and integrated buffer underrun protection
+void cmd( const char *cm, ... )
+{
+	char message[ TCL_BUFF_STR ];
+	
+	if ( strlen( cm ) >= TCL_BUFF_STR )
+	{
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", strlen( cm ) );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'Ok'.\"" );
+	}
+
+	char buffer[ TCL_BUFF_STR ];
+	va_list argptr;
+	
+	va_start( argptr, cm );
+	int reqSz = vsnprintf( buffer, TCL_BUFF_STR, cm, argptr );
+	va_end( argptr );
+	
+	if ( reqSz >= TCL_BUFF_STR )
+	{
+		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR to at least %d bytes.", reqSz + 1 );
+		log_tcl_error( cm, message );
+		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+	}
+	else
+	{
+		int code = Tcl_Eval( inter, buffer );
+
+		if( code != TCL_OK )
+			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+	}
+}
+
+
+void log_tcl_error( const char *cm, const char *message )
+{
+	FILE *f;
+	time_t rawtime;
+	struct tm *timeinfo;
+	char ftime[ 80 ];
+
+	f = fopen( "tk_err.err","a" );
+
+	time( &rawtime );
+	timeinfo = localtime( &rawtime );
+	strftime ( ftime, 80, "%F %T", timeinfo );
+
+	if ( firstCall )
+	{
+		firstCall = false;
+		fprintf( f,"\n\n====================> NEW TCL SESSION\n" );
+	}
+	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
+	fclose( f );
+	
+	cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"More information in file 'tk_err.err').\"" );
 }
 
 
@@ -223,7 +249,7 @@ ModManMain
 int ModManMain(int argn, char **argv)
 {
 int i, num, tosave, sourcefile, macro;
-char str[500], str1[500], str2[500];
+char str[TCL_BUFF_STR], str1[TCL_BUFF_STR], str2[TCL_BUFF_STR];
 char *s;
 FILE *f;
 
@@ -266,8 +292,8 @@ cmd( inter, "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSD
 cmd(inter, "set groupdir [pwd]");
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}");
 cmd(inter, "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier} {}");
-cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
-cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
+cmd( inter, "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
+cmd( inter, "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
 
 cmd(inter, "set Terminal $DefaultTerminal");
 cmd(inter, "set HtmlBrowser $DefaultHtmlBrowser");
@@ -275,7 +301,7 @@ cmd(inter, "set fonttype $DefaultFont");
 cmd(inter, "set wish $DefaultWish");
 cmd(inter, "set LsdSrc src");
 
-cmd(inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } {set LsdGnu gnu} {set LsdGnu gnu64}");
+cmd(inter, "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } {set LsdGnu gnu} {set LsdGnu gnu64}");
 	
 cmd(inter, "set choice [file exist $RootLsd/lmm_options.txt]");
 if(choice==1)
@@ -304,8 +330,8 @@ if ( choice != 1 )
 	cmd( inter, "set tabsize 2" );			// default tab size
 	cmd( inter, "set wrap 1" );				// default text wrapping mode (1=yes)
 	cmd( inter, "set shigh 2" );			// default is full syntax highlighting
-	cmd( inter, "set autoHide 1" );			// default is to auto hide LMM on run
-	cmd( inter, "set showFileCmds 1" );		// default is no text file commands in File menu
+	cmd( inter, "set autoHide 0" );			// default is to not auto hide LMM on run
+	cmd( inter, "set showFileCmds 0" );		// default is no text file commands in File menu
 	cmd( inter, "set LsdNew Work" );		// default new model subdirectory is "Work"
   cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
   cmd(inter, "puts $f $Terminal");
@@ -334,7 +360,7 @@ if(choice==1)
 cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
 if(choice==1)
  { //the src/system_options.txt file doesn't exists, so I invent it
-	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+	cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
@@ -366,6 +392,7 @@ cmd( inter, "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { 
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( inter, "if [ file exists $RootLsd/$LsdSrc/dblclick.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/dblclick.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( inter, "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Files missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	exit( 10 + choice );
@@ -481,8 +508,6 @@ cmd(inter, "$w add separator");
 //cmd(inter, "$w add command -label \"Tutorial 2 - Using Lsd Models\" -underline 0 -command {LsdHelp ModelUsing.html}");
 //cmd(inter, "$w add command -label \"Tutorial 3 - Writing Lsd Models\" -underline 6 -command {LsdHelp ModelWriting.html}");
 cmd(inter, "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}");
-
-
 sprintf( msg, "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 cmd( inter, msg );
 
@@ -637,10 +662,8 @@ cmd(inter, "pack .f.t.vs -side right -fill y");
 cmd(inter, "pack .f.t.t -expand yes -fill both");
 cmd(inter, "pack .f.t.hs -fill x");
 
-
 cmd(inter, "set dir [glob *]");
 cmd(inter, "set num [llength $dir]");
-
 
 cmd(inter, "bind . <Control-n> {tk_menuSetFocus .m.file}; bind . <Control-N> {tk_menuSetFocus .m.file}");
 
@@ -684,7 +707,7 @@ cmd(inter, "bind .f.t.t <Control-period> {set choice 66}");
 cmd(inter, "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m postcascade 0}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}} {}");
 cmd(inter, "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}} {}");
-cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) unix ] && ! [ string equal -nocase $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
+cmd( inter, "if { [ string equal $tcl_platform(platform) unix ] && ! [ string equal $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
 
 cmd(inter, "bind .f.t.t <KeyPress-Return> {+set choice 16}");
 cmd(inter, "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}");
@@ -693,7 +716,7 @@ cmd(inter, "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}; bind .f.t.t <Con
 cmd(inter, "bind . <KeyPress-Insert> {# nothing}");
 
 /*
-POPUP manu
+POPUP menu
 */
 cmd(inter, "menu .v -tearoff 0");
 
@@ -770,6 +793,12 @@ cmd(inter, "bind .f.t.t <Control-H> {set choice 51}");
 
 cmd(inter, "bind .f.t.t <F1> {set choice 34}");
 
+// set advanced double-click behavior (dblclick.tcl) and also
+// reset the word boundaries to fix weird double-click behavior on Windows
+cmd( "setDoubleclickBinding .f.t.t" );
+cmd( "set tcl_wordchars {\\w}" );
+cmd( "set tcl_nonwordchars {\\W}" );
+
 cmd(inter, "set textsearch \"\"");
 cmd(inter, "set datasel \"\"");
 
@@ -792,7 +821,6 @@ cmd(inter, "set a [wm maxsize .]");
 cmd(inter, "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"");
 cmd(inter, "wm geometry . $c");
 cmd( inter, "wm minsize . 600 300" );
-// change window icon
 cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lmm.xbm}");
 
 if(argn>1)
@@ -823,7 +851,6 @@ if(argn>1)
         else
           sourcefile=0;
        }
-
     }
    else
 	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File\\n$filetoload\\nnot found.\"");
@@ -832,10 +859,10 @@ if(argn>1)
  else
   choice= -2; 
   
-cmd(inter, "set tcl_nonwordchars \\\"");
 cmd(inter, "focus -force .f.t.t");
 
 cmd(inter, "set lfindcounter -1");
+
 
 loop:
 
@@ -844,8 +871,6 @@ if ( tosave )
 	cmd( inter, "wm title . \"*$filename - LMM\"" );
 else
 	cmd( inter, "wm title . \" $filename - LMM\"" );
-
-loop_help:
 
 while(choice==0)
  {
@@ -875,7 +900,7 @@ if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==
   {
 
   cmd(inter, "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save File?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]");
-  cmd(inter, " if { $answer == \"yes\"} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal -nocase $answer \"cancel\"] {set choice 0} {}}");  
+  cmd(inter, " if { $answer == yes} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal $answer cancel] {set choice 0} {}}");  
   if(choice==0)
   goto loop;
 
@@ -896,15 +921,9 @@ Initial stuff. Don't ask me why, it does not work if it is placed before the loo
 
 choice=0;
 
-Tcl_SetVar(inter, "hsize", hsize, 0);		// horizontal size in pixels
-Tcl_SetVar(inter, "vsize", vsize, 0);		// vertical minimum size in pixels
-Tcl_SetVar(inter, "hmargin", hmargin, 0);	// horizontal right margin from the screen borders
-Tcl_SetVar(inter, "vmargin", vmargin, 0);	// vertical margins from the screen borders
-Tcl_SetVar(inter, "bordsize", bordsize, 0);	// width of windows borders
-Tcl_SetVar(inter, "tbarsize", tbarsize, 0);	// size in pixels of bottom taskbar (exclusion area)
-cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsize + 2*$bordsize)} {set w [expr [winfo screenwidth .] - 2*$bordsize]} {set w $hsize}");
-cmd(inter, "set h [expr [winfo screenheight .] - $tbarsize - 2*$vmargin - 2*$bordsize]; if {$h < $vsize} {set h [expr [winfo screenheight .] - $tbarsize - 2*$bordsize]}");
-cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsize + 2*$bordsize + $hmargin)} {set x 0} {set x [expr [winfo screenwidth .] -$hmargin - $bordsize - $w]}");
+cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsizeL + 2*$bordsize)} {set w [expr [winfo screenwidth .] - 2*$bordsize]} {set w $hsizeL}");
+cmd(inter, "set h [expr [winfo screenheight .] - $tbarsize - 2*$vmargin - 2*$bordsize]; if {$h < $vsizeL} {set h [expr [winfo screenheight .] - $tbarsize - 2*$bordsize]}");
+cmd(inter, "if {[expr [winfo screenwidth .]] < ($hsizeL + 2*$bordsize + $hmargin)} {set x 0} {set x [expr [winfo screenwidth .] -$hmargin - $bordsize - $w]}");
 cmd(inter, "set y [expr ([winfo screenheight .]-$tbarsize)/2 - $bordsize - $h/2]");
 cmd(inter, "wm geom . [expr $w]x$h+$x+$y"); // main window geometry setting
 
@@ -912,6 +931,7 @@ cmd(inter, "set choice 33");		// Open Browse Models Window on start-up
 
 goto loop;
 }
+
 
 if ( choice == 2 || choice == 6 )
  {
@@ -942,110 +962,82 @@ if(s==NULL || !strcmp(s, ""))
 
   cmd(inter, "set fapp [file nativename $modeldir/makefile]");
   s=(char *)Tcl_GetVar(inter, "fapp",0);
-  
-  //register equation file's name
   f=fopen(s, "r");
-
   if(f==NULL)
    {
-     f=fopen("makefile", "w");
-     fclose(f);
-    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
-
-    choice=0;
-    cmd(inter, "cd $RootLsd");
-    goto loop;
+     cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+	 goto end_run;
    }
-  fscanf(f, "%s", str);
-  while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
+  fscanf(f, "%999s", str);
+  while(strncmp(str, "FUN=", 4) && fscanf(f, "%999s", str)!=EOF);
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
-    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
-    choice=0;
-    goto loop;
+     cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+	 goto end_run;
    }
-   sprintf(msg, "set fname %s.cpp", str+4);
-   cmd(inter, msg);
+  sprintf(msg, "set fname %s.cpp", str+4);
+  cmd(inter, msg);
   
   f=fopen(s, "r");
-
-  if(f==NULL)
-   {
-     f=fopen("makefile", "w");
-     fclose(f);
-    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
-
-    choice=0;
-    cmd(inter, "cd $RootLsd");
-    goto loop;
-   }
-  fscanf(f, "%s", str);
-  while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
+  fscanf(f, "%999s", str);
+  while(strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
   fclose(f);
   if(strncmp(str, "TARGET=", 7)!=0)
    {
-    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
-    choice=0;
-    goto loop;
+     cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+	 goto end_run;
    }
 
   cmd(inter, "set init_time [clock seconds]"); 
   cmd( inter, "newtop .t \"Please Wait\" \"\" \"\"" );
-  // change window icon
-  cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
   cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making model...\"");
   if ( run )
-	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched and LMM will stay minimized.\nOn failure a text window will show the compiling error messages.\"");
+	cmd(inter, "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched.\nOn failure a text window will show the compiling error messages.\"");
   else
 	cmd(inter, "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"");
   cmd(inter, "pack .t.l1 .t.l2 -padx 5 -pady 5");
-  
   cmd( inter, "showtop .t centerS" );
-  cmd(inter, "focus .t");
   
-    s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
+  s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
   if ( run && ! strcmp( s, "1" ) )	// auto hide LMM if appropriate
 	cmd(inter, "wm iconify .");
 
-  cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}");
+  cmd(inter, "if { [ string equal $tcl_platform(platform) windows ] && ! [ string equal $tcl_platform(machine) amd64 ] } {set choice 1} {set choice 0}");
   if(choice==0)
-    cmd(inter, "catch[set result [catch [exec make -fmakefile 2> makemessage.txt]]]"); 
+    cmd( inter, "catch { exec make -f makefile 2> makemessage.txt } result" ); 
   else
    {  
-
-  cmd(inter, "set result -2.2");
   cmd(inter, "set file [open make.bat w]");
-  cmd(inter, "puts -nonewline $file \"make.exe -fmakefile 2> makemessage.txt\\n\"");
+  cmd(inter, "puts -nonewline $file \"make.exe -f makefile 2> makemessage.txt\\n\"");
   cmd(inter, "close  $file");
   cmd(inter, "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}");
   sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
   cmd(inter, msg);
   cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .} {}");
-  cmd(inter, "catch[set result [catch [exec make.bat]]]");
+  cmd(inter, "catch { exec make.bat } result");
   cmd(inter, "file delete make.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
-
    }
+   
   cmd(inter, "destroytop .t");
   
-  cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}");
-  
-  cmd(inter, "if { [file size makemessage.txt]==0 } {set choice 0} {set choice 1}");
+  cmd( inter, "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set choice 0 } { set choice 1 }" );
   if(choice==1)
   {
+	cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}");  
     cmd(inter, "set funtime [file mtime $fname]");
     sprintf(msg, "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}",str+7,str+7);
     cmd(inter, msg);
   
-    cmd(inter, "if {$init_time < $exectime } {set choice 0} { }");
-    //turn into 0 if the executable is newer than the compilation command, implying just warnings
+    cmd(inter, "if {$init_time < $exectime } {set choice 0}");
+    //turn choice into 0 if the executable is newer than the compilation command, implying just warnings
   }
-  
 
   if(choice==1)
    { //problem
-   cmd(inter, "wm deiconify .");  // only reopen if error
+   if ( run && ! strcmp( s, "1" ) )	// auto unhide LMM if appropriate
+     cmd(inter, "wm deiconify .");  // only reopen if error
    create_compresult_window();
    }
   else
@@ -1054,22 +1046,22 @@ if(s==NULL || !strcmp(s, ""))
      strcpy(str1, str+7);
       cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}");
       if(choice==1) //unix
-       sprintf(msg,"exec ./%s &",str1);
-      if(choice==2) //win2k
-       sprintf(msg, "exec %s.exe &", str1); //Changed
+       sprintf(msg,"catch { exec ./%s & } result",str1);
+      if(choice==2) //win2k, XP, 7, 8, 10...
+       sprintf(msg, "catch { exec %s.exe & } result", str1); //Changed
       if(choice==3) //win 95/98
-       sprintf(msg, "exec start %s.exe &", str1);
+       sprintf(msg, "catch { exec start %s.exe & } result", str1);
       if(choice==4)  //win NT
-       sprintf(msg, "exec cmd /c start %s.exe &", str1);
+       sprintf(msg, "catch { exec cmd /c start %s.exe & } result", str1);
        
       cmd(inter, msg);
-      choice=0;
      } 
+	 
+ end_run:
  cmd(inter, "cd $RootLsd");
  choice=0;
  goto loop;
  }
-
 
 
 if(choice==3)
@@ -1264,8 +1256,8 @@ if(s==NULL || !strcmp(s, ""))
     cmd(inter, "cd $RootLsd");
     goto loop;
    }
-  fscanf(f, "%s", str);
-  while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);    
+  fscanf(f, "%999s", str);
+  while(strncmp(str, "FUN=", 4) && fscanf(f, "%999s", str)!=EOF);    
   fclose(f);
   if(strncmp(str, "FUN=", 4)!=0)
    {
@@ -1273,8 +1265,6 @@ if(s==NULL || !strcmp(s, ""))
     choice=0;
     goto loop;
    }
-  
-
 
 sprintf(msg, "set filename %s.cpp", str+4);
 cmd(inter, msg);
@@ -1400,6 +1390,7 @@ choice=0;
 goto loop;
 }
 
+
 if(choice==13 || choice==58)
 {
  /*Run the model in the gdb debugger */
@@ -1412,119 +1403,95 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
   
-  cmd(inter, "cd $modeldir");
+cmd(inter, "cd $modeldir");
 
+if(choice==58)
+ {
+ cmd(inter, "scan $vmenuInsert %d.%d line col");
+ cmd(inter, "catch { set f [open break.txt w]; puts $f \"break $filename:$line\nrun\n\"; close $f }");
+ cmd(inter, "set cmdbreak \"--command=break.txt\"");
+ 
+ }
+else
+ cmd(inter, "set cmdbreak \"--args\""); 
 
-  if(choice==58)
-   {
-   //cmd(inter, "scan [.f.t.t index insert] %d.%d line col");
-   cmd(inter, "scan $vmenuInsert %d.%d line col");
-   cmd(inter, "set f [open break.txt w]; puts $f \"break $filename:$line\nrun\n\"; close $f");
-   cmd(inter, "set cmdbreak \"--command=break.txt\"");
-   
-   }
-  else
-   cmd(inter, "set cmdbreak \"\""); 
-  make_makefile();  
-  cmd(inter, "set fapp [file nativename $modeldir/makefile]");
-  s=(char *)Tcl_GetVar(inter, "fapp",0);
-  
-  f=fopen(s, "r");
-  
-  if(f==NULL)
-   {
-    cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Compilation Options', in menu Model, to create it.\"");
-    choice=0;
-    cmd(inter, "cd $RootLsd");
-    goto loop;
-   }
-  fscanf(f, "%s", str);
-  while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
-  if(strncmp(str, "TARGET=", 7)!=0)
-   {
-    cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
-    choice=0;
-    goto loop;
-   }
-  
+make_makefile();  
+cmd(inter, "set fapp [file nativename $modeldir/makefile]");
+s=(char *)Tcl_GetVar(inter, "fapp",0);
+f=fopen(s, "r");
 
-  if(f!=NULL && f!=(FILE *)EOF)
-   {strcpy(str1, str+7);
-    
-     cmd( inter, "if [ string equal -nocase $tcl_platform(platform) unix ] { set choice 1 } { if [ string equal -nocase $tcl_platform(os) \"Windows NT\" ] { if [ string equal $tcl_platform(osVersion) \"4.0\" ] { set choice 4 } { set choice 5 } } { set choice 3 } }");
-   if(choice==3)
-    {
-     
-    cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
-    sprintf(msg, "exec start gdb_batw9x %s &", str1); //Win 9x    
-	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
-    }
+if(f==NULL)
+ {
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  goto end_gdb;
+ }
+fscanf(f, "%999s", str);
+while(strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
+if(strncmp(str, "TARGET=", 7)!=0)
+ {
+  cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  goto end_gdb;
+ }
 
-   if(choice==4)
-    {//WIndows NT case
-    cmd(inter, "set SETDIR \"../$LsdGnu/share/gdbtcl\"");
-    sprintf(msg, "exec cmd.exe /c start /min gdb_bat %s $SETDIR &", str1); //Win NT case
-	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
-    }
-   if(choice==5)
-    {//Windows 2000
-     
-    cmd(inter, "set nowin \"\"");
-    sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"SET GDBTK_LIBRARY=$RootLsd/$LsdGnu/share/gdbtcl\\nstart gdb $nowin %s $cmdbreak &\\n\"; close $f",str1);
-    cmd(inter, msg);
-    sprintf(msg, "exec run_gdb &");
-	sprintf( str, "%s%s", str1, ".exe" );				// full executable file name
-     
-    }
+strcpy(str1, str+7);
 
-   if(choice==1)
-     {
-      sprintf(msg, "if {$cmdbreak==\"\"} {exec $Terminal -e gdb %s &} {exec $Terminal -e gdb $cmdbreak %s &}", str1, str1); //Unix case
-	sprintf( str, "%s", str1 );				// full executable file name
-     }
-     
-	// check if executable file is older than model file
-	s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
-	sprintf( str1, "%s/%s", s, str );
-	strcpy( str, s );
-	s = ( char * ) Tcl_GetVar( inter, "filename", 0 );
-	sprintf( str2, "%s/%s", str, s );
+cmd( inter, "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { if [ string equal $tcl_platform(os) \"Windows NT\" ] { if [ string equal $tcl_platform(osVersion) \"4.0\" ] { set choice 4 } { set choice 2 } } { set choice 3 } }");
+if(choice==1)
+ {//Unix
+  sprintf( msg, "catch { exec $Terminal -e gdb $cmdbreak %s & } result", str1);
+ }
+if(choice==2)
+ {//Windows 2000, XP, 7, 8, 10...
+  strcat( str1, ".exe" );
+  sprintf( msg, "catch { exec $Terminal /c gdb $cmdbreak %s & } result", str1);
+ }
+if(choice==3)
+ {//Windows 95/98
+  strcat( str1, ".exe" );
+  sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"start gdb %s $cmdbreak &\\n\"; close $f", str1);
+  cmd(inter, msg);
+  sprintf(msg, "catch { exec start run_gdb & } result");    
+ }
+if(choice==4)
+ {//Windows NT case
+  strcat( str1, ".exe" );
+  sprintf(msg, "set f [open run_gdb.bat w]; puts $f \"start gdb %s $cmdbreak &\\n\"; close $f", str1);
+  cmd(inter, msg);
+  sprintf(msg, "catch { exec cmd.exe /c start /min run_gdb & } result"); 
+ }
 
-	// get OS info for files
-	struct stat stExe, stMod;
-	if ( stat( str, &stExe ) == 0 && stat( str1, &stMod ) == 0 )
+// check if executable file is older than model file
+s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+sprintf( str, "%s/%s", s, str1 );
+strcpy( str1, s );
+s = ( char * ) Tcl_GetVar( inter, "filename", 0 );
+sprintf( str2, "%s/%s", str1, s );
+
+// get OS info for files
+struct stat stExe, stMod;
+if ( stat( str, &stExe ) == 0 && stat( str2, &stMod ) == 0 )
+{
+	if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 	{
-		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
-		{
-			cmd( inter, "set answer [t k_messageBox -title Warning -icon warning -type okcancel -default cancel -message \"The executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if { string equal -nocase $answer ok } { set choice 1 } { set choice 2 }" );
-			if ( choice == 2 )
-			{
-				choice = 0;
-				goto loop;
-			}
-			choice = 0;
-		}
+		cmd( inter, "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+		if ( choice == 2 )
+			goto end_gdb;
 	}
+}
+else
+{
+	cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the GDB debugger.\"");
+	goto end_gdb;
+}
 
-	 cmd(inter, msg);
-    cmd(inter, "cd $RootLsd"); 
-   } 
-  else
-   {//executable not found
-  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the GDB debugger.\"");
-  choice=0;
-  goto loop;
-    choice=0;
-    cmd(inter, "cd $RootLsd");
-    goto loop;
-   }
+cmd(inter, msg);
 
-
-
+end_gdb:
+cmd(inter, "cd $RootLsd");
 choice =0;
 goto loop;
-
 }
+
 
 if(choice==14)
 {
@@ -1754,7 +1721,7 @@ if(choice==4)
  cmd(inter, "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'Ok' to continue creating a new (empty) model '$mname'.\"]");
   s=(char *)Tcl_GetVar(inter, "answer",0);
 
-  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}");
+  cmd(inter, "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}");
   if(choice==0)
    {cmd(inter, "destroytop .a");
     goto loop;
@@ -1792,7 +1759,7 @@ cmd(inter, "cd $dirname");
 //create the model_options.txt file
 cmd(inter, "set dir [glob *.cpp]");
 cmd(inter, "set b [lindex $dir 0]");
-cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
+cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"");
 cmd(inter, "set f [open model_options.txt w]");
 cmd(inter, "puts $f $a");
 cmd(inter, "close $f");
@@ -4490,8 +4457,8 @@ if(f==NULL)
   cmd(inter, "if { [winfo exists .a] == 1} {destroytop .a} {}");
   goto loop;
  }
-fscanf(f, "%s", str);
-while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
+fscanf(f, "%999s", str);
+while(strncmp(str, "FUN=", 4) && fscanf(f, "%999s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "FUN=", 4)!=0)
  {
@@ -4588,7 +4555,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -4603,7 +4570,7 @@ cmd(inter, "cd $RootLsd");
 cmd(inter, "set choice [file exists $LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+	cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
@@ -4669,7 +4636,7 @@ cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 
 cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.os");
 
-cmd( inter, "if [ string equal -nocase $tcl_platform(machine) intel ] { button .l.t.d.os.win -width -15 -text \"Default Windows x32\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win32.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } { button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win64.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } " ); 
+cmd( inter, "if [ string equal $tcl_platform(machine) intel ] { button .l.t.d.os.win -width -15 -text \"Default Windows x32\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win32.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } { button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command { .l.t.text delete 1.0 end; set file [ open $RootLsd/$LsdSrc/sysopt_win64.txt r ]; set a [ read -nonewline $file ]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\" } } " ); 
 cmd(inter, "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}");
 cmd(inter, "button .l.t.d.os.mac -width -15 -text \"Default Mac OSX\" -command {.l.t.text delete 1.0 end; set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; set a [read -nonewline $file]; close $file; .l.t.text insert end \"LSDROOT=[pwd]\\n\"; .l.t.text insert end \"$a\"}"); 
 cmd(inter, "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 1 -pady 5 -side left");
@@ -4725,17 +4692,34 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
-cmd(inter, "cd $modeldir");
-choice=0;
-cmd(inter, "set choice [file exists model_options.txt]");
+cmd( inter, "cd $modeldir" );
+s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+strcpy( str, s );
+strcat( str, "/model_options.txt" );
+choice = 0;
+f = fopen( str, "r" );
+if ( f != NULL )
+{
+	while ( fscanf( f, "%499s", str ) != EOF && strncmp( str, "FUN=", 4 ) );    
+	fclose( f );
+	if ( ! strncmp( str, "FUN=", 4 ) )
+	{
+		strcat( str, ".cpp");
+		Tcl_SetVar( inter, "b", str + 4, 0 );
+		choice = 1;
+	}
+}
 
-cmd(inter, "set dir [glob *.cpp]");
-cmd(inter, "set b [lindex $dir 0]");
+if ( choice == 0 )
+{
+	cmd(inter, "set dir [glob fun_*.cpp]");
+	cmd(inter, "set b [lindex $dir 0]");
+}
 
 cmd(inter, "set gcc_base \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC_LNK=\"");
-cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native\" }" );
+cmd( inter, "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native\" }" );
 cmd(inter, "set gcc_conf \"$gcc_base\\n$gcc_par\"");
-cmd(inter, "set gcc_deb \"-g\"");
+cmd(inter, "set gcc_deb \"-O0 -g\"");
 cmd(inter, "set gcc_opt \"-O3\"");
 
 if(choice==1)
@@ -4747,7 +4731,7 @@ if(choice==1)
  }
 else
   {
-   cmd(inter, "tk_messageBox -parent . -type ok -icon warning -message \"Model compilation options not found\" -detail \"The system will use default values.\" -title Warning");
+   cmd(inter, "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Model compilation options not found or corrupted\" -detail \"The system will use default values.\"");
    cmd(inter, "set a \"$gcc_conf $gcc_opt\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
@@ -4763,7 +4747,7 @@ cmd(inter, "text .l.t.text -wrap word -font {Times 10 normal} -width 60 -height 
 
 cmd(inter, "frame .l.t.d");
 cmd(inter, "frame .l.t.d.opt");
-cmd(inter, "if { ! [ info exists debug ] } { set debug 0 }; checkbutton .l.t.d.opt.debug -text Debug -variable debug");
+cmd(inter, "if { ! [ info exists debug ] } { set debug 0 }; checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { .l.t.d.opt.def invoke }");
 
 cmd( inter, "button .l.t.d.opt.def -width -15 -text \"Default Values\" -command { if { $debug == 0 } { set default \"$gcc_conf $gcc_opt\\n\" } { set default \"$gcc_conf $gcc_deb\\n\" }; .l.t.text delete 1.0 end; .l.t.text insert end \"$default\" }" );
 
@@ -4788,8 +4772,6 @@ cmd(inter, ".l.t.text insert end $a");
 cmd( inter, "showtop .l" );
 cmd(inter, "focus .l.t.text");
 
-cmd(inter, "set cazzo 0");
-
 while(choice==0)
  Tcl_DoOneEvent(0);
 
@@ -4802,7 +4784,7 @@ if(choice==1)
  }
 else
  choice=0; 
-//cmd(inter, "set choice $cazzo");
+
 cmd(inter, "cd $RootLsd");
 
 cmd(inter, "destroytop .l");
@@ -4818,13 +4800,13 @@ if(choice==57)
 
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {if {$tcl_platform(os) == \"Darwin\" } {set choice 1} {set choice 1} } {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}");
 if(choice==1) //unix
- sprintf(msg,"exec $wish $LsdSrc/tkdiffb.tcl &");
+ sprintf(msg,"exec $wish $LsdSrc/tkdiff.tcl &");
 if(choice==2) //win2k
- sprintf(msg, "exec $wish $LsdSrc/tkdiffb.tcl &"); //Changed
+ sprintf(msg, "exec $wish $LsdSrc/tkdiff.tcl &"); //Changed
 if(choice==3) //win 95/98
- sprintf(msg, "exec start $wish $LsdSrc/tkdiffb.tcl &");
+ sprintf(msg, "exec start $wish $LsdSrc/tkdiff.tcl &");
 if(choice==4)  //win NT
- sprintf(msg, "exec cmd /c start $wish $LsdSrc/tkdiffb.tcl &");
+ sprintf(msg, "exec cmd /c start $wish $LsdSrc/tkdiff.tcl &");
  
 cmd(inter, msg);
 choice=0;
@@ -4898,72 +4880,94 @@ cmd(inter, "set temp_var12 $LsdNew");
 
 cmd( inter, "newtop .a \"LMM Options\" { .a.f2.esc invoke }" );
 
-cmd(inter, "label .a.l1 -text \"Terminal to use for the GDB debugger\"");
-cmd(inter, "entry .a.v_num -width 30 -textvariable temp_var1");
-cmd(inter, "bind .a.v_num <Return> {focus .a.v_num2; .a.v_num2 selection range 0 end}");
+cmd( inter, "frame .a.num" );
+cmd( inter, "label .a.num.l -text \"Terminal for the GDB debugger\"" );
+cmd( inter, "entry .a.num.v -width 25 -textvariable temp_var1" );
+cmd( inter, "pack .a.num.l .a.num.v" );
+cmd( inter, "bind .a.num.v <Return> {focus .a.num2.v; .a.num2.v selection range 0 end}" );
 
-cmd(inter, "label .a.l2 -text \"HTML Browser to use for help pages\"");
-cmd(inter, "entry .a.v_num2 -width 30 -textvariable temp_var2");
-cmd(inter, "bind .a.v_num2 <Return> {focus .a.v_num4; .a.v_num4 selection range 0 end}");
+cmd( inter, "frame .a.num2" );
+cmd( inter, "label .a.num2.l -text \"HTML browser for help pages\"" );
+cmd( inter, "entry .a.num2.v -width 25 -textvariable temp_var2" );
+cmd( inter, "pack .a.num2.l .a.num2.v" );
+cmd( inter, "bind .a.num2.v <Return> {focus .a.num4.v; .a.num4.v selection range 0 end}" );
 
-cmd(inter, "label .a.l4 -text \"Wish program\"");
-cmd(inter, "entry .a.v_num4 -width 30 -textvariable temp_var4");
-cmd(inter, "bind .a.v_num4 <Return> {focus .a.v_num5; .a.v_num5 selection range 0 end}");
+cmd( inter, "frame .a.num4" );
+cmd( inter, "label .a.num4.l -text \"Wish program\"" );
+cmd( inter, "entry .a.num4.v -width 25 -textvariable temp_var4" );
+cmd( inter, "pack .a.num4.l .a.num4.v" );
+cmd( inter, "bind .a.num4.v <Return> {focus .a.num12.v; .a.num12.v selection range 0 end}" );
 
-cmd(inter, "label .a.l5 -text \"Source code subdirectory\"");
-cmd(inter, "entry .a.v_num5 -width 30 -textvariable temp_var5");
-cmd(inter, "bind .a.v_num5 <Return> {focus .a.v_num3; .a.v_num3 selection range 0 end}");
+cmd( inter, "frame .a.num12" );
+cmd( inter, "label .a.num12.l -text \"New models subdirectory\"" );
+cmd( inter, "entry .a.num12.v -width 25 -textvariable temp_var12" );
+cmd( inter, "pack .a.num12.l .a.num12.v" );
+cmd( inter, "bind .a.num12.v <Return> {focus .a.num5.v; .a.num5.v selection range 0 end}" );
 
-cmd(inter, "label .a.l3 -text \"Font family\"");
-cmd(inter, "entry .a.v_num3 -width 30 -textvariable temp_var3");
-cmd(inter, "bind .a.v_num3 <Return> {focus .a.v_num6; .a.v_num6 selection range 0 end}");
+cmd( inter, "frame .a.num5" );
+cmd( inter, "label .a.num5.l -text \"Source code subdirectory\"" );
+cmd( inter, "entry .a.num5.v -width 25 -textvariable temp_var5" );
+cmd( inter, "pack .a.num5.l .a.num5.v" );
+cmd( inter, "bind .a.num5.v <Return> {focus .a.num3.v; .a.num3.v selection range 0 end}" );
 
-cmd(inter, "label .a.l6 -text \"Font size (points)\"");
-cmd(inter, "entry .a.v_num6 -width 3 -textvariable temp_var6 -justify center");
-cmd(inter, "bind .a.v_num6 <Return> {focus .a.v_num7; .a.v_num7 selection range 0 end}");
+cmd( inter, "frame .a.num3" );
+cmd( inter, "label .a.num3.l -text \"Font family\"" );
+cmd( inter, "entry .a.num3.v -width 25 -textvariable temp_var3" );
+cmd( inter, "pack .a.num3.l .a.num3.v" );
+cmd( inter, "bind .a.num3.v <Return> {focus .a.num6.v; .a.num6.v selection range 0 end}" );
 
-cmd(inter, "label .a.l7 -text \"Tab size (characters))\"");
-cmd(inter, "entry .a.v_num7 -width 2 -textvariable temp_var7 -justify center");
-cmd(inter, "bind .a.v_num7 <Return> {focus .a.v_num8; .a.v_num8 selection range 0 end}");
+cmd( inter, "frame .a.num6" );
+cmd( inter, "label .a.num6.l -text \"Font size (points)\"" );
+cmd( inter, "entry .a.num6.v -width 3 -textvariable temp_var6 -justify center" );
+cmd( inter, "pack .a.num6.l .a.num6.v" );
+cmd( inter, "bind .a.num6.v <Return> {focus .a.num7.v; .a.num7.v selection range 0 end}" );
 
-cmd(inter, "label .a.l8 -text \"Wrap text (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num8 -width 2 -textvariable temp_var8 -justify center");
-cmd(inter, "bind .a.v_num8 <Return> {focus .a.v_num9; .a.v_num9 selection range 0 end}");
+cmd( inter, "frame .a.num7" );
+cmd( inter, "label .a.num7.l -text \"Tab size (characters)\"" );
+cmd( inter, "entry .a.num7.v -width 2 -textvariable temp_var7 -justify center" );
+cmd( inter, "pack .a.num7.l .a.num7.v" );
+cmd( inter, "bind .a.num7.v <Return> {focus .a.num9.v3}" );
 
-cmd(inter, "label .a.l9 -text \"Syntax highlights (0:no/1:part./2:full)\"");
-cmd(inter, "entry .a.v_num9 -width 2 -textvariable temp_var9 -justify center");
-cmd(inter, "bind .a.v_num9 <Return> {focus .a.v_num10; .a.v_num10 selection range 0 end}");
+cmd( inter, "frame .a.num9" );
+cmd( inter, "label .a.num9.l -text \"Syntax highlights\"" );
+cmd( inter, "pack .a.num9.l" );
+cmd( inter, "radiobutton .a.num9.v1 -variable temp_var9 -value 0 -text None" );
+cmd( inter, "radiobutton .a.num9.v2 -variable temp_var9 -value 1 -text Partial" );
+cmd( inter, "radiobutton .a.num9.v3 -variable temp_var9 -value 2 -text Full" );
+cmd( inter, "pack .a.num9.v1 .a.num9.v2 .a.num9.v3 -side left" );
+cmd( inter, "bind .a.num9.v1 <Return> { focus .a.v_num8 }" );
+cmd( inter, "bind .a.num9.v2 <Return> { focus .a.v_num8 }" );
+cmd( inter, "bind .a.num9.v3 <Return> { focus .a.v_num8 }" );
 
-cmd(inter, "label .a.l10 -text \"Auto hide on run (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num10 -width 2 -textvariable temp_var10 -justify center");
-cmd(inter, "bind .a.v_num10 <Return> {focus .a.v_num11; .a.v_num11 selection range 0 end}");
+cmd( inter, "checkbutton .a.v_num8 -variable temp_var8 -text \"Wrap text\"" );
+cmd( inter, "bind .a.v_num8 <Return> { focus .a.v_num10 }" );
 
-cmd(inter, "label .a.l11 -text \"Show text file commands (0:no/1:yes)\"");
-cmd(inter, "entry .a.v_num11 -width 2 -textvariable temp_var11 -justify center");
-cmd(inter, "bind .a.v_num11 <Return> {focus .a.v_num12; .a.v_num12 selection range 0 end}");
+cmd( inter, "checkbutton .a.v_num10 -variable temp_var10 -text \"Auto hide on run\"" );
+cmd( inter, "bind .a.v_num10 <Return> { focus .a.v_num11 }");
 
-cmd(inter, "label .a.l12 -text \"New models subdirectory\"");
-cmd(inter, "entry .a.v_num12 -width 30 -textvariable temp_var12");
-cmd(inter, "bind .a.v_num12 <Return> {focus .a.f2.ok}");
+cmd( inter, "checkbutton .a.v_num11 -variable temp_var11 -text \"Show text file commands\"" );
+cmd( inter, "bind .a.v_num11 <Return> { focus .a.f2.ok }" );
+
+cmd(inter, "pack .a.num .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num6 .a.num7 .a.num9 .a.v_num8 .a.v_num10 .a.v_num11 -padx 5 -pady 5");
 
 cmd(inter, "frame .a.f1");
-cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 1; set temp_var11 0; set temp_var12 Work}");
+cmd(inter, "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work}");
 cmd(inter, "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}");
-cmd(inter, "pack .a.f1.def .a.f1.help -padx 10 -pady 5 -side left");
+cmd(inter, "pack .a.f1.def .a.f1.help -padx 10 -side left");
 
 cmd(inter, "frame .a.f2");
 cmd(inter, "button .a.f2.ok -width -9 -text Ok -command {set choice 1}");
 cmd(inter, "button .a.f2.esc -width -9 -text Cancel -command {set choice 2}");
-cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 5 -side left");
-cmd(inter, "pack .a.l1 .a.v_num .a.l2 .a.v_num2 .a.l4 .a.v_num4 .a.l5 .a.v_num5 .a.l3 .a.v_num3 .a.l6 .a.v_num6 .a.l7 .a.v_num7 .a.l8 .a.v_num8 .a.l9 .a.v_num9 .a.l10 .a.v_num10 .a.l11 .a.v_num11 .a.l12 .a.v_num12");
+
+cmd(inter, "pack .a.f2.ok .a.f2.esc -padx 10 -pady 10 -side left");
 cmd(inter, "pack .a.f1");
 cmd(inter, "pack .a.f2");
 cmd(inter, "bind .a.f2.ok <Return> {.a.f2.ok invoke}");
 cmd(inter, "bind .a <Escape> {.a.f2.esc invoke}");
 
 cmd( inter, "showtop .a" );
-cmd(inter, "focus .a.v_num");
-cmd(inter, ".a.v_num selection range 0 end");
+cmd(inter, "focus .a.num.v");
+cmd(inter, ".a.num.v selection range 0 end");
 
 choice=0;
 while(choice==0)
@@ -4982,10 +4986,10 @@ if(choice==1)
  cmd(inter, "set LsdSrc $temp_var5");
  cmd(inter, "if [string is integer $temp_var6] {set dim_character $temp_var6}");
  cmd(inter, "if [string is integer $temp_var7] {set tabsize $temp_var7}");
- cmd(inter, "if [string is boolean $temp_var8] {set wrap $temp_var8}");
- cmd(inter, "if [string is integer $temp_var9] {set shigh $temp_var9}");
- cmd(inter, "if [string is boolean $temp_var10] {set autoHide $temp_var10}");
- cmd(inter, "if [string is boolean $temp_var11] {set showFileCmds $temp_var11}");
+ cmd(inter, "set wrap $temp_var8");
+ cmd(inter, "set shigh $temp_var9");
+ cmd(inter, "set autoHide $temp_var10");
+ cmd(inter, "set showFileCmds $temp_var11");
  cmd(inter, "set LsdNew $temp_var12");
  
  cmd(inter, "set a [list $fonttype $dim_character]");
@@ -5011,9 +5015,8 @@ cmd(inter, "set f [open $RootLsd/lmm_options.txt w]");
 
 choice=0;
 goto loop;
-
-
 }
+
 
 if(choice==61)
 {
@@ -5033,18 +5036,19 @@ if(choice==-1)
  
 cmd(inter, "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}");
 if(choice==1) //unix
- sprintf(msg,"exec $wish src/tkdiffb.tcl [file join $d1 $f1] [file join $d2 $f2] &");
+ sprintf(msg,"exec $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2] &");
 if(choice==2) //win2k
- sprintf(msg, "exec $wish src/tkdiffb.tcl [file join $d1 $f1] [file join $d2 $f2]  &"); //Changed
+ sprintf(msg, "exec $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2]  &"); //Changed
 if(choice==3) //win 95/98
- sprintf(msg, "exec start $wish src/tkdiffb.tcl [file join $d1 $f1] [file join $d2 $f2]  &");
+ sprintf(msg, "exec start $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2]  &");
 if(choice==4)  //win NT
- sprintf(msg, "exec cmd /c start $wish src/tkdiffb.tcl [file join $d1 $f1] [file join $d2 $f2]  &");
+ sprintf(msg, "exec cmd /c start $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2]  &");
  
 cmd(inter, msg);
 choice=0;
 goto loop;
 }
+
 
 if(choice==62)
 {
@@ -5055,15 +5059,8 @@ cmd(inter, "cd $modeldir");
 
 make_makefileNW();
 
-cmd(inter, "if { [file exist src] ==1 } {set choice 1} {file mkdir src; set choice 0}");
+cmd( inter, "if { ! [ file exists src ] } { file mkdir src }" );
 
-//cmd(inter, "set lfile [glob $RootLsd/$LsdSrc/*.cpp]");
-cmd(inter, "set lfile {$RootLsd/$LsdSrc/lsdmain.cpp $RootLsd/$LsdSrc/main_gnuwin.cpp $RootLsd/$LsdSrc/file.cpp $RootLsd/$LsdSrc/util.cpp $RootLsd/$LsdSrc/variab.cpp $RootLsd/$LsdSrc/object.cpp $RootLsd/$LsdSrc/nets.cpp $RootLsd/$LsdSrc/report.cpp $RootLsd/$LsdSrc/fun_head.h $RootLsd/$LsdSrc/decl.h } ");
-
-//cmd(inter, "foreach i $lfile {file copy -force \"$i\" src}");
-
-//cmd(inter, "set lfile [glob $RootLsd/$LsdSrc/*.h]");
-//cmd(inter, "foreach i $lfile {file copy -force $i src}");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/lsdmain.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/main_gnuwin.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/file.cpp src");
@@ -5072,65 +5069,59 @@ cmd(inter, "file copy -force $RootLsd/$LsdSrc/object.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/report.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/util.cpp src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/nets.cpp src");
-
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/fun_head.h src");
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/decl.h src");
-
 cmd(inter, "file copy -force $RootLsd/$LsdSrc/system_options.txt src");
 
 cmd(inter, "set f [open src/choose.h w]");
 cmd(inter, "puts -nonewline $f \"#define NO_WINDOW\\n\"");
 cmd(inter, "close $f");
 
-cmd(inter, "cd $RootLsd"); 
-
 // Compile a local machine version of lsd_gnuNW
 cmd(inter, "set fapp [file nativename $modeldir/makefileNW]");
 s=(char *)Tcl_GetVar(inter, "fapp",0);
 f=fopen(s, "r");
 if(f==NULL)
-  goto loop;
-fscanf(f, "%s", str);
-while(strncmp(str, "FUN=", 4) && fscanf(f, "%s", str)!=EOF);
+{
+  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  goto end_compNW;
+}
+fscanf(f, "%999s", str);
+while(strncmp(str, "FUN=", 4) && fscanf(f, "%999s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "FUN=", 4)!=0)
 {
-  choice=0;
-  goto loop;
+  cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  goto end_compNW;
 }
 sprintf(msg, "set fname %s.cpp", str+4);
+cmd(inter, msg);
 
 f=fopen(s, "r");
-fscanf(f, "%s", str);
-while(strncmp(str, "TARGET=", 7) && fscanf(f, "%s", str)!=EOF);
+fscanf(f, "%999s", str);
+while(strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
 fclose(f);
 if(strncmp(str, "TARGET=", 7)!=0)
 {
-  choice=0;
-  goto loop;
+  cmd(inter, "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Check 'Model Compilation Options' and 'System Compilation Options' in menu Model.\"");
+  goto end_compNW;
 }
+
 strcat(str,"NW");
 cmd(inter, msg);
+
 cmd(inter, "set init_time [clock seconds]"); 
-
 cmd( inter, "newtop .t \"Please Wait\"" );
-
-// change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .t @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
-
 cmd(inter, "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"");
 cmd(inter, "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"");
 cmd(inter, "pack .t.l1 .t.l2 -padx 5 -pady 5");
-
 cmd( inter, "showtop .t" );
 
-cmd(inter, "cd $modeldir");
-cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {set choice 1;set add_exe \".exe\"} {set choice 0;set add_exe \"\"}");
+cmd(inter, "if { [ string equal $tcl_platform(platform) windows ] && ! [ string equal $tcl_platform(machine) amd64 ] } {set choice 1} {set choice 0}");
 if(choice==0)
-  cmd(inter, "catch[set result [catch [exec make -fmakefileNW 2> makemessage.txt]]]"); 
+  cmd(inter, "catch { exec make -f makefileNW 2> makemessage.txt } result"); 
 else
 {  
-  cmd(inter, "set result -2.2");
   cmd(inter, "set file [open make.bat w]");
   cmd(inter, "puts -nonewline $file \"make.exe -fmakefileNW 2> makemessage.txt\\n\"");
   cmd(inter, "close  $file");
@@ -5138,29 +5129,33 @@ else
   sprintf(msg, "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7);
   cmd(inter, msg);
   cmd(inter, "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .} {}");
-  cmd(inter, "catch[set result [catch [exec make.bat]]]");
+  cmd(inter, "catch { exec make.bat } result");
   cmd(inter, "file delete make.bat");
   cmd(inter, "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o } {}");
 }
+
 cmd(inter, "destroytop .t");
 
-cmd(inter, "if { [file size makemessage.txt]==0 } {set choice 0} {set choice 1}");
+cmd( inter, "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set choice 0 } { set choice 1 }" );
 if(choice==1)
 {
+  cmd(inter, "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}");
   cmd(inter, "set funtime [file mtime $fname]");
   sprintf(msg, "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}",str+7,str+7);
   cmd(inter, msg);
   cmd(inter, "if {$init_time < $exectime } {set choice 0} { }");
-  //turn into 0 if the executable is newer than the compilation command, implying just warnings
+  //turn choice into 0 if the executable is newer than the compilation command, implying just warnings
 }
-cmd(inter, "cd $RootLsd");
+
 if(choice==1)
   cmd(inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Problem generating 'No Window' version\" -detail \"Probably there is a problem with your model.\\n\\nBefore using this option, make sure you are able to run the model with the 'Model'/'Compile and Run Model' option without errors. The error list is in the file 'makemessage.txt'.\"");
 else
   cmd(inter, "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in Lsd result files named after the seed generator used.\"");
+
+end_compNW:
+cmd(inter, "cd $RootLsd");
 choice=0;
 goto loop;
-
 }
 
 if(choice==64)
@@ -5475,7 +5470,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -5488,7 +5483,7 @@ cmd(inter, "close $f");
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+	cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
@@ -5523,7 +5518,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd(inter, "set dir [glob *.cpp]");
    cmd(inter, "set b [lindex $dir 0]");
-   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-g\\nSWITCH_CC_LNK=\\n\"");
+   cmd(inter, "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"");
    cmd(inter, "set f [open model_options.txt w]");
    cmd(inter, "puts -nonewline $f $a");
    cmd(inter, "close $f");
@@ -5536,7 +5531,7 @@ cmd(inter, "close $f");
 cmd(inter, "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]");
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
-	cmd( inter, "if [ string equal -nocase $tcl_platform(platform) windows ] { if [ string equal -nocase $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal -nocase $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
+	cmd( inter, "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
     cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt w]");
     cmd(inter, "set f1 [open $RootLsd/$LsdSrc/$sysfile r]");
     cmd(inter, "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"");
@@ -5550,7 +5545,7 @@ cmd(inter, "set f [open $RootLsd/$LsdSrc/system_options.txt r]");
 cmd(inter, "set d [read -nonewline $f]");
 cmd(inter, "close $f");
 
-cmd( inter, "if { [ string equal -nocase $tcl_platform(platform) windows ] && [ string equal -nocase $tcl_platform(machine) intel ] } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW32.txt } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW.txt }" );
+cmd( inter, "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW32.txt } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW.txt }" );
 cmd(inter, "set f [open $fnameNW r]");
 cmd(inter, "set b [read -nonewline $f]");
 cmd(inter, "close $f");
@@ -5580,8 +5575,7 @@ delete_compresult_window();
 cmd(inter, "set cerr 0.0");
 
 cmd( inter, "newtop .mm \"Compilation Errors\" { destroytop .mm } \"\"" );
-// change window icon
-cmd(inter, "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap .mm @$RootLsd/$LsdSrc/icons/lmm.xbm} {}");
+
 cmd(inter, "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in Lsd installation directory for information on particular problems.\"");
 cmd(inter, "pack .mm.lab");
 
