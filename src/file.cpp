@@ -58,12 +58,12 @@ one instance in any group.
 This is a function called by replicate above, so that the replicated object
 are initialized also the descendants.
 
--object *create(Tcl_Interp *inter, object *root)
+-object *create(object *root)
 The main cycle for the Browser, from which it exits only to run a simulation
 or to quit the program. The cycle is just once call to browsw followed by
 a call to operate.
 
-- int browse(Tcl_Interp *inter, object *r, int *choice);
+- int browse(object *r, int *choice);
 build the browser window and waits for an action (on the form of
 values for choice or choice_g different from 0)
 
@@ -98,7 +98,7 @@ after the last of the series.
 UTIL.CPP It is a normal strcmp, but it catches the possibility of both strings being
 NULL
 
-- void cmd(Tcl_Interp *inter, char *cc);
+- void cmd(char *cc);
 UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
@@ -550,22 +550,19 @@ while( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
  if(!strcmp(ch, "Var:"))
    { fscanf(f, "%*[ ]%99s", ch);
      add_empty_var(ch);
-     sprintf(msg, "lappend ModElem %s",ch);
-     cmd(msg);
+     cmd( "lappend ModElem %s",ch );
    }
   if(!strcmp(ch, "Param:"))
 	{ fscanf(f, "%*[ ]%99s", ch);
      cv=add_empty_var(ch);
      cv->param=1;
-     sprintf(msg, "lappend ModElem %s",ch);
-     cmd( msg);
-   }
+     cmd( "lappend ModElem %s",ch );
+    }
   if(!strcmp(ch, "Func:"))
 	{ fscanf(f, "%*[ ]%99s", ch);
      cv=add_empty_var(ch);
      cv->param=2;
-     sprintf(msg, "lappend ModElem %s",ch);
-     cmd(msg);
+     cmd( "lappend ModElem %s",ch );
    }
 
  fscanf(f, "%*[{\r\t\n]%99s", ch);
@@ -625,14 +622,12 @@ for(cv=v; cv!=NULL; cv=cv->next)
  {
   f=search_data_ent(file_name,  cv);
   if(f==NULL)
-  { sprintf(msg,"\nWarning: search of data for '%s' in file '%s' failed", cv->label, file_name);
-	 plog(msg);
+  { plog( "\nWarning: search of data for '%s' in file '%s' failed", "", cv->label, file_name);
 	 return 1;
   }
 
   if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2 )!=5)
-	 {sprintf(msg,"\nWarning: values not found for '%s'", cv->label);
-	 plog(msg);
+	 {plog( "\nWarning: values not found for '%s'", "", cv->label );
 	 return 1;
 	 }
   if(ch1=='s')
@@ -676,7 +671,6 @@ while(strcmp(str, str1) )
  if(fgets(str, MAX_LINE_SIZE, f)==NULL)
     break;
  kill_trailing_newline(str);   
- //plog(str);
  }
 
 
@@ -939,8 +933,7 @@ cd=search_description(r->label);
 if(cd==NULL)
   {
    add_description(r->label, "Object", "(no description available)");
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", r->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
    cd=search_description(r->label);
   } 
 
@@ -960,8 +953,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
    add_description(cv->label, "Object", "(no description available)");
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
    cd=search_description(cv->label);
   } 
 
@@ -1165,8 +1157,7 @@ int load_configuration( object *r, bool reload )
 	
 	if( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
 	{
-		sprintf( msg, "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the Lsd model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
-		plog( msg );
+		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the Lsd model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 	}  
 	
 endLoad:

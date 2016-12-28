@@ -60,7 +60,7 @@ UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series.
 
-- void cmd(Tcl_Interp *inter, char *cc);
+- void cmd(char *cc);
 UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
@@ -97,99 +97,94 @@ EDIT_DATA
 
 void edit_data(object *root, int *choice, char *obj_name)
 {
-char ch[TCL_BUFF_STR], *l , ch1[TCL_BUFF_STR];
+char ch[2*MAX_ELEM_LENGTH], *l , ch1[MAX_ELEM_LENGTH];
 object *first;
 variable *cv;
 int i, counter, lag;
 
-cmd( inter, "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
+cmd( "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
 
 Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
 
-cmd( inter, "if { ! [ info exists autoWidth ] } { set autoWidth 1 }");
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeI $vsizeI } { if { ! $autoWidth } { resizetop $hsizeI $vsizeI } }" );
+cmd( "if { ! [ info exists autoWidth ] } { set autoWidth 1 }" );
+cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeI $vsizeI } { if { ! $autoWidth } { resizetop $hsizeI $vsizeI } }" );
 
-cmd(inter, "set position 1.0");
+cmd( "set position 1.0" );
 in_edit_data = true;
 
 *choice=0;
 while(*choice==0)
 {
 // reset title and destroy command because may be coming from set_obj_number
-sprintf( ch, "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name );
-cmd( inter, ch );
+cmd( "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name  );
 
 first=root->search(obj_name);
 
-cmd(inter, "frame .ini.b");
-cmd(inter, "set w .ini.b.tx");
-cmd(inter, "scrollbar .ini.b.ys -command \".ini.b.tx yview\"");
-cmd(inter, "scrollbar .ini.b.xs -command \".ini.b.tx xview\" -orient horizontal");
-cmd(inter, "text $w -yscrollcommand \".ini.b.ys set\" -xscrollcommand \".ini.b.xs set\" -wrap none");
-cmd(inter, ".ini.b.tx conf -cursor arrow");
-strncpy(ch1, obj_name, 17 );
-ch1[17]=0;
-sprintf(ch, "label $w.tit_empty -width 32 -relief raised -text \"Object: %-17s \" -borderwidth 4", ch1);
-cmd(inter, ch);
-cmd(inter, "bind $w.tit_empty <Button-1> {set choice 4}");
+cmd( "frame .ini.b" );
+cmd( "set w .ini.b.tx" );
+cmd( "scrollbar .ini.b.ys -command \".ini.b.tx yview\"" );
+cmd( "scrollbar .ini.b.xs -command \".ini.b.tx xview\" -orient horizontal" );
+cmd( "text $w -yscrollcommand \".ini.b.ys set\" -xscrollcommand \".ini.b.xs set\" -wrap none" );
+cmd( ".ini.b.tx conf -cursor arrow" );
+strncpy(ch1, obj_name, MAX_ELEM_LENGTH - 1 );
+ch1[ MAX_ELEM_LENGTH - 1 ] = '\0';
+cmd( "label $w.tit_empty -width 32 -relief raised -text \"Object: %-17s \" -borderwidth 4", ch1 );
+cmd( "bind $w.tit_empty <Button-1> {set choice 4}" );
 if ( ! in_set_obj )				// show only if not already recursing
-	cmd( inter,"bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}" );
-cmd(inter, "bind $w.tit_empty <Leave> {set msg \"\"}");
-cmd(inter, "$w window create end -window $w.tit_empty");
+	cmd( "bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}" );
+cmd( "bind $w.tit_empty <Leave> {set msg \"\"}" );
+cmd( "$w window create end -window $w.tit_empty" );
 
 strcpy(ch, "");
 i=0;
 counter=1;
 colOvflw = false;
 search_title(root, ch, &i, obj_name, &counter);
-cmd(inter, "$w insert end \\n");
+cmd( "$w insert end \\n" );
 
 //explore the tree searching for each instance of such object and create:
 //- titles
 //- entry cells linked to the values
 set_focus=0;
 link_data(root, obj_name);
-cmd(inter, "pack .ini.b.ys -side right -fill y");
-cmd(inter, "pack .ini.b.xs -side bottom -fill x");
-cmd(inter, "pack .ini.b.tx -expand yes -fill both");
-cmd(inter, "pack .ini.b  -expand yes -fill both");
+cmd( "pack .ini.b.ys -side right -fill y" );
+cmd( "pack .ini.b.xs -side bottom -fill x" );
+cmd( "pack .ini.b.tx -expand yes -fill both" );
+cmd( "pack .ini.b  -expand yes -fill both" );
 
-cmd( inter, "label .ini.msg -textvariable msg" );
-cmd( inter, "pack .ini.msg -pady 5" );
+cmd( "label .ini.msg -textvariable msg" );
+cmd( "pack .ini.msg -pady 5" );
 
-cmd( inter, "frame .ini.st" );
-cmd(inter, "label .ini.st.err -text \"\"" );
-cmd(inter, "label .ini.st.pad -text \"         \"" );
-cmd( inter, "checkbutton .ini.st.aw -text \"Automatic width\" -variable autoWidth -command { set choice 5 }" );
-cmd( inter, "pack .ini.st.err .ini.st.pad .ini.st.aw -side left" );
-cmd( inter, "pack .ini.st -anchor e -padx 10" );
+cmd( "frame .ini.st" );
+cmd( "label .ini.st.err -text \"\"" );
+cmd( "label .ini.st.pad -text \"         \"" );
+cmd( "checkbutton .ini.st.aw -text \"Automatic width\" -variable autoWidth -command { set choice 5 }" );
+cmd( "pack .ini.st.err .ini.st.pad .ini.st.aw -side left" );
+cmd( "pack .ini.st -anchor e -padx 10" );
 
-cmd( inter, "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
+cmd( "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
 
-cmd(inter, "$w configure -state disabled");
+cmd( "$w configure -state disabled" );
 
 if(set_focus==1)
-  cmd(inter, "focus $initial_focus; $initial_focus selection range 0 end");
+  cmd( "focus $initial_focus; $initial_focus selection range 0 end" );
 
-cmd(inter, "bind .ini <KeyPress-Escape> {set choice 1}");
+cmd( "bind .ini <KeyPress-Escape> {set choice 1}" );
 
 // show overflow warning just once per configuration but always indicate
 if ( colOvflw )
 {
-	sprintf( ch, ".ini.st.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -fg red", MAX_COLS );
-	cmd( inter, ch );
+	cmd( ".ini.st.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -fg red", MAX_COLS );
 	if ( ! iniShowOnce )
 	{
-		sprintf( ch, "update; tk_messageBox -parent .ini -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"Lsd Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS );
-		cmd( inter, ch );
+		cmd( "update; tk_messageBox -parent .ini -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"Lsd Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS  );
 		iniShowOnce = true;
 	}
 }
 
 noredraw:
 
-sprintf( ch, "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter );
-cmd( inter, ch );
+cmd( "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter  );
 
 while(*choice==0)
     {
@@ -211,7 +206,7 @@ if ( *choice == 5 || ( *choice == 4 && in_set_obj ) )		// avoid recursion
 strcpy(ch, "");
 i=0;
 clean_cell(root, ch, obj_name);
-cmd(inter, "destroy .ini.b .ini.boh .ini.msg .ini.st");
+cmd( "destroy .ini.b .ini.boh .ini.msg .ini.st" );
 
 
 if(*choice==2)
@@ -220,7 +215,7 @@ if(*choice==2)
   strcpy(ch, l);
   *choice = 2;		// set data editor window parent
   set_all(choice,first, ch, lag);
-  cmd(inter, "bind .ini <KeyPress-Return> {}");
+  cmd( "bind .ini <KeyPress-Return> {}" );
   *choice=0;
 
 
@@ -245,7 +240,7 @@ SEARCH_TITLE
 
 void search_title(object *root, char *tag, int *i, char *lab, int *incr)
 {
-char ch[MAX_ELEM_LENGTH+20];
+char ch[2*MAX_ELEM_LENGTH];
 int num, multi, counter, j;
 object *c, *cur;
 variable *cv;
@@ -288,31 +283,27 @@ void set_title(object *c, char *lab, char *tag, int *incr)
 {
 int j;
 variable *cv;
-char ch[TCL_BUFF_STR], ch1[11], ch2[10];
+char ch1[MAX_ELEM_LENGTH], ch2[MAX_ELEM_LENGTH];
 
 if(!strcmp(c->label, lab))
 {
-  ch1[10]='\0';
-  strncpy(ch1, c->label, 10);
+  ch1[MAX_ELEM_LENGTH - 1]='\0';
+  strncpy(ch1, c->label, MAX_ELEM_LENGTH - 1);
   if(strlen(tag)!=0)
-  {  strncpy(ch2, tag, 9);
-     ch2[9]='\0';
+  {  strncpy(ch2, tag, MAX_ELEM_LENGTH - 1);
+     ch2[MAX_ELEM_LENGTH - 1]='\0';
   }
 else
  strcpy(ch2, "  ");
 
-sprintf(ch, "set %d_titheader \"%s\"", *incr ,ch2);
-cmd(inter, ch);
+cmd( "set %d_titheader \"%s\"", *incr ,ch2 );
 
-sprintf(ch, "entry $w.c%d_tit -width $cwidth -bd $cbd -relief raised -justify center -textvariable \"%d_titheader\" -state readonly", *incr ,*incr);
-cmd(inter, ch);
-sprintf(ch, "$w window create end -window $w.c%d_tit", *incr);
-cmd(inter, ch);
+cmd( "entry $w.c%d_tit -width $cwidth -bd $cbd -relief raised -justify center -textvariable \"%d_titheader\" -state readonly", *incr ,*incr );
+cmd( "$w window create end -window $w.c%d_tit", *incr );
 if(strlen(tag)==0)
-  sprintf(ch, "set tag_%d \" \"", *incr);
+  cmd( "set tag_%d \" \"", *incr );
 else
-  sprintf(ch, "set tag_%d %s", *incr, tag);
-cmd(inter,ch);
+  cmd( "set tag_%d %s", *incr, tag );
 *incr=*incr+1;
 }
 
@@ -326,7 +317,7 @@ CLEAN_CELL
 
 void clean_cell(object *root, char *tag, char *lab)
 {
-char ch[TCL_BUFF_STR], ch1[2*MAX_ELEM_LENGTH];
+char ch1[2*MAX_ELEM_LENGTH];
 int j, i;
 object *cur;
 variable *cv;
@@ -338,16 +329,14 @@ for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 for(cv=cur->v; cv!=NULL; cv=cv->next)
  {if(cv->param==1)
     { sprintf(ch1,"p%s_%d", cv->label,i);
-	  sprintf( ch, "set %s [ $w.c%d_v%sp get ]", ch1, i, cv->label );
-	  cmd( inter, ch );
+	  cmd( "set %s [ $w.c%d_v%sp get ]", ch1, i, cv->label  );
       Tcl_UnlinkVar(inter, ch1);
     }
   else
     { for(j=0; j<cv->num_lag; j++)
       {
       sprintf(ch1,"v%s_%d_%d", cv->label,i, j);
-	  sprintf( ch, "set %s [ $w.c%d_v%s_%d get ]", ch1, i, cv->label, j );
-	  cmd( inter, ch );
+	  cmd( "set %s [ $w.c%d_v%s_%d get ]", ch1, i, cv->label, j  );
       Tcl_UnlinkVar(inter, ch1);
        }
     }
@@ -365,7 +354,7 @@ void link_data(object *root, char *lab)
 {
 object *cur, *cur1;
 int i, j;
-char ch[TCL_BUFF_STR], previous[MAX_ELEM_LENGTH+20], ch1[30];
+char previous[MAX_ELEM_LENGTH+20], ch1[MAX_ELEM_LENGTH];
 variable *cv, *cv1;
 
 cur1=root->search(lab);
@@ -373,40 +362,28 @@ strcpy(previous, "");
 for(cv1=cur1->v, j=0; cv1!=NULL;  )
  {
  if(cv1->param==1)
-    { strncpy(ch1, cv1->label, 25);
-      ch1[25]=0;
-      sprintf(ch, "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1);
-      cmd(inter, ch);
-      sprintf(ch, "$w window create end -window $w.tit_t%s", cv1->label);
-      cmd(inter, ch);
-      sprintf(ch, "bind $w.tit_t%s <Enter> {set msg \"Parameter: %s\"}", cv1->label,cv1->label);
-		cmd(inter, ch);
-		sprintf(ch, "bind $w.tit_t%s <Leave> {set msg \" \"}", cv1->label);
-		cmd(inter, ch);
-	sprintf(ch, "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j,cv1->label );
-	cmd(inter, ch);
-	sprintf(ch, "$w window create end -window $w.b%s_%d", cv1->label, j);
-		 cmd(inter, ch);
+    { strncpy(ch1, cv1->label, MAX_ELEM_LENGTH - 1);
+      ch1[MAX_ELEM_LENGTH - 1]=0;
+      cmd( "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1 );
+      cmd( "$w window create end -window $w.tit_t%s", cv1->label );
+      cmd( "bind $w.tit_t%s <Enter> {set msg \"Parameter: %s\"}", cv1->label,cv1->label );
+		cmd( "bind $w.tit_t%s <Leave> {set msg \" \"}", cv1->label );
+	cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j,cv1->label  );
+	cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
 
     }
   else
     { 
      if(j<cv1->num_lag)
      {
-       strncpy(ch1, cv1->label, 20);
-       ch1[20]=0;
-       sprintf(ch, "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label,j, ch1, j+1);
-		 cmd(inter, ch);
-		 sprintf(ch, "$w window create end -window $w.tit_t%s_%d", cv1->label, j);
-		 cmd(inter, ch);
-		 sprintf(ch, "bind $w.tit_t%s_%d <Enter> {set msg \"Variable: %s with lag %d\" }", cv1->label, j, cv1->label, j+1);
-		 cmd(inter, ch);
-		 sprintf(ch, "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j);
-		 cmd(inter, ch);
-	sprintf(ch, "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j,cv1->label, j);
-	cmd(inter, ch);
-	sprintf(ch, "$w window create end -window $w.b%s_%d", cv1->label, j);
-       cmd(inter, ch);
+       strncpy(ch1, cv1->label, MAX_ELEM_LENGTH - 1);
+       ch1[MAX_ELEM_LENGTH - 1]=0;
+       cmd( "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label,j, ch1, j+1 );
+		 cmd( "$w window create end -window $w.tit_t%s_%d", cv1->label, j );
+		 cmd( "bind $w.tit_t%s_%d <Enter> {set msg \"Variable: %s with lag %d\" }", cv1->label, j, cv1->label, j+1 );
+		 cmd( "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j );
+	cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j,cv1->label, j );
+	cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
 
      }
     }
@@ -416,65 +393,47 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
   cv=cur->search_var(cur, cv1->label);
   cv->data_loaded='+';
   if(cv->param==1)
-    { sprintf(ch,"p%s_%d", cv->label,i);
-      Tcl_LinkVar(inter, ch, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
-      sprintf( ch, "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i );
-      cmd( inter, ch );
-      sprintf(ch, "$w.c%d_v%sp insert 0 $p%s_%d",i, cv->label, cv->label, i);
-      cmd(inter, ch);
+    { sprintf(ch1,"p%s_%d", cv->label,i);
+      Tcl_LinkVar(inter, ch1, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
+      cmd( "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i  );
+      cmd( "$w.c%d_v%sp insert 0 $p%s_%d", i, cv->label, cv->label, i );
       if(set_focus==0)
        {
-       sprintf(ch, "set initial_focus $w.c%d_v%sp",i, cv->label);
-       cmd(inter, ch);
+       cmd( "set initial_focus $w.c%d_v%sp", i, cv->label );
        set_focus=1;
        }
-      sprintf(ch, "$w window create end -window $w.c%d_v%sp", i, cv->label);
-      cmd(inter, ch);
+      cmd( "$w window create end -window $w.c%d_v%sp", i, cv->label );
       if(strlen(previous)!=0)
-       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
-        cmd(inter, ch);
-        sprintf(ch, "bind %s <KeyPress-Down> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label);
-        cmd(inter, ch);
-        sprintf(ch, "bind $w.c%d_v%sp <KeyPress-Up> {focus %s; %s selection range 0 end; $w see %s}", i, cv->label, previous, previous, previous);
-        cmd(inter, ch);
+       {cmd( "bind %s <KeyPress-Return> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label );
+        cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label );
+        cmd( "bind $w.c%d_v%sp <KeyPress-Up> {focus %s; %s selection range 0 end; $w see %s}", i, cv->label, previous, previous, previous );
        }
-      sprintf(ch, "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: parameter %s in %s $tag_%d\"}",i,cv->label,cv->label,cur1->label,i);
-      cmd(inter, ch);
-      sprintf(ch, "bind $w.c%d_v%sp <FocusOut> {set msg \" \"}", i, cv->label);
-      cmd(inter, ch);
+      cmd( "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: parameter %s in %s $tag_%d\"}", i,cv->label,cv->label,cur1->label,i );
+      cmd( "bind $w.c%d_v%sp <FocusOut> {set msg \" \"}", i, cv->label );
 
       sprintf(previous, "$w.c%d_v%sp", i, cv->label);
     }
   else
     { if(j<cv->num_lag)
       {
-      sprintf(ch,"v%s_%d_%d", cv->label,i, j);
-      Tcl_LinkVar(inter, ch, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
-      sprintf( ch, "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j );
-      cmd( inter, ch );
-      sprintf(ch, "$w.c%d_v%s_%d insert 0 $v%s_%d_%d", i, cv->label, j, cv->label, i, j);
-      cmd(inter, ch);
+      sprintf(ch1,"v%s_%d_%d", cv->label,i, j);
+      Tcl_LinkVar(inter, ch1, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
+      cmd( "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j  );
+      cmd( "$w.c%d_v%s_%d insert 0 $v%s_%d_%d", i, cv->label, j, cv->label, i, j );
       if(set_focus==0)
        {
-       sprintf(ch, "set initial_focus $w.c%d_v%s_%d",i, cv->label,j);
-       cmd(inter, ch);
+       cmd( "set initial_focus $w.c%d_v%s_%d", i, cv->label,j );
        set_focus=1;
        }
 
-      sprintf(ch, "$w window create end -window $w.c%d_v%s_%d", i, cv->label, j);
-      cmd(inter, ch);
+      cmd( "$w window create end -window $w.c%d_v%s_%d", i, cv->label, j );
       if(strlen(previous)!=0)
-       {sprintf(ch, "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
-        cmd(inter, ch);
-        sprintf(ch, "bind %s <KeyPress-Down> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j);
-        cmd(inter, ch);
-        sprintf(ch, "bind  $w.c%d_v%s_%d <KeyPress-Up> {focus %s; %s selection range 0 end; $w see  %s}", i, cv->label, j, previous, previous, previous);
-        cmd(inter, ch);
+       {cmd( "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j );
+        cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j );
+        cmd( "bind  $w.c%d_v%s_%d <KeyPress-Up> {focus %s; %s selection range 0 end; $w see  %s}", i, cv->label, j, previous, previous, previous );
        }
-      sprintf(ch, "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: variable %s (lag %d) in %s $tag_%d\"}",i,cv->label,j,cv->label,j+1,cur1->label,i);
-      cmd(inter, ch);
-      sprintf(ch, "bind $w.c%d_v%s_%d <FocusOut> {set msg \" \"}",i,cv->label,j);
-      cmd(inter, ch);
+      cmd( "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: variable %s (lag %d) in %s $tag_%d\"}", i,cv->label,j,cv->label,j+1,cur1->label,i );
+      cmd( "bind $w.c%d_v%s_%d <FocusOut> {set msg \" \"}", i,cv->label,j );
 
       sprintf(previous, "$w.c%d_v%s_%d", i, cv->label, j);
       }
@@ -493,7 +452,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 
      }
  if(cv1->param==1 || cv1->num_lag>0)
-   cmd(inter, "$w insert end \\n" );
+   cmd( "$w insert end \\n" );
  if(cv1->param==0 && j+1<cv1->num_lag)
    j++;
  else

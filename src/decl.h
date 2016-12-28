@@ -594,7 +594,6 @@ Tcl_Interp *InterpInitWin( char *tcl_dir );
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
-void cmd( Tcl_Interp *inter, const char *cc );
 
 extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
 

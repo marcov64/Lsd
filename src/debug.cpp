@@ -68,7 +68,7 @@ after the last of the series.
 Uses search_var, but returns the instance of the object that has the searched
 variable with the desired value equal to value.
 
-- void cmd(Tcl_Interp *inter, char *cc);
+- void cmd(char *cc);
 UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
@@ -91,7 +91,7 @@ int deb(object *r, object *c,  char const *lab, double *res)
 {
 const char *bah;
 variable *cv, *cv1;
-char ch[TCL_BUFF_STR], *ch1;
+char ch[4*MAX_ELEM_LENGTH], *ch1;
 object *cur, *cur1, *cur2;
 int count, old, i, cond;
 bool pre_running;
@@ -104,111 +104,107 @@ bridge *cb, *cb1;
 int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : 1; 
 Tcl_SetVar( inter, "lab", lab, 0 );
 
-cmd( inter, "set deb .deb" );
-sprintf( msg, "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name );
-cmd( inter, msg );
+cmd( "set deb .deb" );
+cmd( "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name  );
 
 // avoid redrawing the menu if it already exists and is configured
-cmd(inter, "set existMenu [ winfo exists .deb.m ]");
-cmd(inter, "set confMenu [ .deb cget -menu ]");
+cmd( "set existMenu [ winfo exists .deb.m ]" );
+cmd( "set confMenu [ .deb cget -menu ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	 strcmp( Tcl_GetVar( inter, "confMenu", 0 ), ".deb.m" ) )
 {
-	cmd( inter, "destroy .deb.m" );
-	cmd(inter, "menu .deb.m -tearoff 0 -relief groove -bd 2");
-	cmd(inter, "set w .deb.m.exit");
-	cmd(inter, ".deb.m add cascade -label Exit -menu $w -underline 0");
-	cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
+	cmd( "destroy .deb.m" );
+	cmd( "menu .deb.m -tearoff 0 -relief groove -bd 2" );
+	cmd( "set w .deb.m.exit" );
+	cmd( ".deb.m add cascade -label Exit -menu $w -underline 0" );
+	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 	if ( mode == 3 )
-		cmd(inter, "$w add command -label \"Quit and resume simulation\" -command { set choice 7 } -underline 0 -accelerator Esc");
+		cmd( "$w add command -label \"Quit and resume simulation\" -command { set choice 7 } -underline 0 -accelerator Esc" );
 	else
-		cmd(inter, "$w add command -label \"Quit and return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc");
-	cmd(inter, "set w .deb.m.help");
-	cmd(inter, "menu $w -tearoff 0 -relief groove -bd 2");
-	cmd(inter, ".deb.m add cascade -label Help -menu $w -underline 0");
-	cmd(inter, "$w add command -label \"Help on Lsd Debugger\" -command {LsdHelp debug.html} -underline 0");
-	cmd(inter, "$w add separator");
-	cmd(inter, "$w add command -label \"Model Report\" -command {set choice 44} -underline 0");
-	cmd( inter, "$w add separator" );
-	sprintf( msg, "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
-	cmd( inter, msg );
-	cmd(inter, ".deb configure -menu .deb.m");
+		cmd( "$w add command -label \"Quit and return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc" );
+	cmd( "set w .deb.m.help" );
+	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
+	cmd( ".deb.m add cascade -label Help -menu $w -underline 0" );
+	cmd( "$w add command -label \"Help on Lsd Debugger\" -command {LsdHelp debug.html} -underline 0" );
+	cmd( "$w add separator" );
+	cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
+	cmd( "$w add separator" );
+	cmd( "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+	cmd( ".deb configure -menu .deb.m" );
 }
 
 // avoid redrawing the buttons if they already exist
-cmd( inter, "set existButtons [ expr [ winfo exists .deb.b ] ]" );
+cmd( "set existButtons [ expr [ winfo exists .deb.b ] ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 { 
-	cmd( inter, "destroy .deb.b" );
+	cmd( "destroy .deb.b" );
 
-	cmd(inter, "frame .deb.b -border 6");
-	cmd(inter, "frame .deb.b.move");
-	cmd(inter, "frame .deb.b.act");
+	cmd( "frame .deb.b -border 6" );
+	cmd( "frame .deb.b.move" );
+	cmd( "frame .deb.b.act" );
 
-	cmd(inter, "button .deb.b.move.up -width -9 -text \"Up\" -command {set choice 3} -underline 0");
-	cmd(inter, "button .deb.b.move.down -width -9 -text \"Down\" -command {set choice 6} -underline 0");
-	cmd(inter, "button .deb.b.move.prev -width -9 -text \"Prev.\" -command {set choice 12} -underline 0");
-	cmd(inter, "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0");
-	cmd(inter, "button .deb.b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5");
-	cmd(inter, "button .deb.b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0");
-	cmd(inter, "button .deb.b.move.search -width -9 -text \"Find\" -command {set choice 10} -underline 0");
+	cmd( "button .deb.b.move.up -width -9 -text \"Up\" -command {set choice 3} -underline 0" );
+	cmd( "button .deb.b.move.down -width -9 -text \"Down\" -command {set choice 6} -underline 0" );
+	cmd( "button .deb.b.move.prev -width -9 -text \"Prev.\" -command {set choice 12} -underline 0" );
+	cmd( "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0" );
+	cmd( "button .deb.b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5" );
+	cmd( "button .deb.b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0" );
+	cmd( "button .deb.b.move.search -width -9 -text \"Find\" -command {set choice 10} -underline 0" );
 	
 	if ( mode == 3 )
 	{
-		cmd(inter, "button .deb.b.move.run -width -9 -text Resume -command {set choice 2} -underline 0");
-		cmd(inter, "button .deb.b.move.an -width -9 -text Analysis -command {set choice 11} -underline 0");
-		cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.an .deb.b.move.run -padx 8 -pady 10 -side left");
+		cmd( "button .deb.b.move.run -width -9 -text Resume -command {set choice 2} -underline 0" );
+		cmd( "button .deb.b.move.an -width -9 -text Analysis -command {set choice 11} -underline 0" );
+		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.an .deb.b.move.run -padx 8 -pady 10 -side left" );
 
-		cmd(inter, "bind .deb <KeyPress-r> {.deb.b.move.run invoke}; bind .deb <KeyPress-R> {.deb.b.move.run invoke}");
-		cmd(inter, "bind .deb <KeyPress-a> {.deb.b.move.an invoke}; bind .deb <KeyPress-A> {.deb.b.move.an invoke}");
+		cmd( "bind .deb <KeyPress-r> {.deb.b.move.run invoke}; bind .deb <KeyPress-R> {.deb.b.move.run invoke}" );
+		cmd( "bind .deb <KeyPress-a> {.deb.b.move.an invoke}; bind .deb <KeyPress-A> {.deb.b.move.an invoke}" );
 	}
 	else
-		cmd(inter, "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left");
+		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search -padx 10 -pady 10 -side left" );
 	
 	if ( mode == 1 )
 	{
-		sprintf(msg, "set stack_flag %d",stackinfo_flag);
-		cmd(inter, msg);
+		cmd( "set stack_flag %d",stackinfo_flag );
+		cmd( "button .deb.b.act.run -width -9 -text Run -command {set choice 2} -underline 0" );
+		cmd( "button .deb.b.act.until -width -9 -text Until -command {set choice 16} -underline 3" );
+		cmd( "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set done_in 3} -underline 0" );
+		cmd( "button .deb.b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0" );
+		cmd( "button .deb.b.act.net -width -9 -text Network -command {set choice 22} -underline 3" );
+		cmd( "button .deb.b.act.call -width -9 -text Caller -command {set choice 9} -underline 0" );
+		cmd( "button .deb.b.act.hook -width -9 -text Hook -command {set choice 21} -underline 0" );
+		cmd( "button .deb.b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}" );
+		cmd( "button .deb.b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}" );
+		cmd( "frame .deb.b.act.stack" );
+		cmd( "label .deb.b.act.stack.l -text \"Print stack level\"" );
+		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
+		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1" );
+		cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left" );
 
-		cmd(inter, "button .deb.b.act.run -width -9 -text Run -command {set choice 2} -underline 0");
-		cmd(inter, "button .deb.b.act.until -width -9 -text Until -command {set choice 16} -underline 3");
-		cmd(inter, "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set done_in 3} -underline 0");
-		cmd(inter, "button .deb.b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0");
-		cmd(inter, "button .deb.b.act.net -width -9 -text Network -command {set choice 22} -underline 3");
-		cmd(inter, "button .deb.b.act.call -width -9 -text Caller -command {set choice 9} -underline 0");
-		cmd(inter, "button .deb.b.act.hook -width -9 -text Hook -command {set choice 21} -underline 0");
-		cmd(inter, "button .deb.b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}");
-		cmd(inter, "button .deb.b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}");
-		cmd(inter, "frame .deb.b.act.stack");
-		cmd(inter, "label .deb.b.act.stack.l -text \"Print stack level\"");
-		cmd( inter, "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %P ] { set stack_flag %P; return 1 } { %W delete 0 end; %W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
-		cmd( inter, ".deb.b.act.stack.e insert 0 $stack_flag" ); 
-		cmd(inter, "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1");
-		cmd(inter, "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.net .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 1 -pady 10 -side left");
-
-		cmd(inter, "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}");
-		cmd(inter, "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}");
-		cmd(inter, "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}");
-		cmd(inter, "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}");
-		cmd(inter, "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}");
-		cmd(inter, "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}");
-		cmd(inter, "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}");
+		cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
+		cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
+		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
+		cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
+		cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
+		cmd( "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}" );
+		cmd( "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}" );
 	}
 	
-	cmd(inter, "pack .deb.b.move .deb.b.act");
+	cmd( "pack .deb.b.move .deb.b.act" );
 
-	cmd(inter, "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}");
-	cmd(inter, "bind .deb <Up> {.deb.b.move.up invoke}");
-	cmd(inter, "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}; bind .deb <KeyPress-N> {.deb.b.move.broth invoke}");
-	cmd(inter, "bind .deb <Right> {.deb.b.move.broth invoke}");
-	cmd(inter, "bind .deb <KeyPress-t> {.deb.b.move.hypern invoke}; bind .deb <KeyPress-T> {.deb.b.move.hypern invoke}");
-	cmd(inter, "bind .deb <KeyPress-l> {.deb.b.move.last invoke}; bind .deb <KeyPress-L> {.deb.b.move.last invoke}");
-	cmd(inter, "bind .deb <KeyPress-d> {.deb.b.move.down invoke}; bind .deb <KeyPress-D> {.deb.b.move.down invoke}");
-	cmd(inter, "bind .deb <Down> {.deb.b.move.down invoke}");
-	cmd(inter, "bind .deb <KeyPress-f> {.deb.b.move.search invoke}; bind .deb <KeyPress-F> {.deb.b.move.search invoke}");
-	cmd(inter, "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}; bind .deb <KeyPress-P> {.deb.b.move.prev invoke}");
-	cmd(inter, "bind .deb <Left> {.deb.b.move.prev invoke}");
-	cmd(inter, "bind .deb <KeyPress-Escape> {set choice 7}");
+	cmd( "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}" );
+	cmd( "bind .deb <Up> {.deb.b.move.up invoke}" );
+	cmd( "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}; bind .deb <KeyPress-N> {.deb.b.move.broth invoke}" );
+	cmd( "bind .deb <Right> {.deb.b.move.broth invoke}" );
+	cmd( "bind .deb <KeyPress-t> {.deb.b.move.hypern invoke}; bind .deb <KeyPress-T> {.deb.b.move.hypern invoke}" );
+	cmd( "bind .deb <KeyPress-l> {.deb.b.move.last invoke}; bind .deb <KeyPress-L> {.deb.b.move.last invoke}" );
+	cmd( "bind .deb <KeyPress-d> {.deb.b.move.down invoke}; bind .deb <KeyPress-D> {.deb.b.move.down invoke}" );
+	cmd( "bind .deb <Down> {.deb.b.move.down invoke}" );
+	cmd( "bind .deb <KeyPress-f> {.deb.b.move.search invoke}; bind .deb <KeyPress-F> {.deb.b.move.search invoke}" );
+	cmd( "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}; bind .deb <KeyPress-P> {.deb.b.move.prev invoke}" );
+	cmd( "bind .deb <Left> {.deb.b.move.prev invoke}" );
+	cmd( "bind .deb <KeyPress-Escape> {set choice 7}" );
 }
 
 app_res=*res;
@@ -221,46 +217,45 @@ while (choice==0)
 // if necessary, create the variable name and the time info bar
 if ( mode == 1 )
 {
-	cmd( inter, "if { ! [ winfo exists .deb.v ] } { \
-					frame .deb.v -relief groove -bd 2; \
-					frame .deb.v.v1; \
-					label .deb.v.v1.name1 -text \"Variable:\"; \
-					label .deb.v.v1.name2 -fg red -text \"\"; \
-					label .deb.v.v1.time1 -text \"      Time step:\"; \
-					label .deb.v.v1.time2 -fg red -text \"      \"; \
-					label .deb.v.v1.val1 -text \"Value \"; \
-					entry .deb.v.v1.val2 -width 10 -validate focusout -vcmd { \
-						if [ string is integer %P ] { \
-							set value %P; \
-							return 1 \
-						} { \
-							%W delete 0 end; \
-							if [ string is double $value ] { \
-								%W insert 0 [ format \"%.4g\" $value ]; \
-							} { \
-								%W insert 0 $value; \
-							} \
-							return 0 \
-						} \
-					} -invcmd { bell } -justify center; \
-					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
-					bind .deb <KeyPress-g> {set choice 77}; \
-					bind .deb <KeyPress-G> {set choice 77} \
-				}" );
-	sprintf( ch, ".deb.v.v1.name2 conf -text \"%s\"", lab );
-	cmd( inter, ch );
+	cmd( "if { ! [ winfo exists .deb.v ] } { \
+			frame .deb.v -relief groove -bd 2; \
+			frame .deb.v.v1; \
+			label .deb.v.v1.name1 -text \"Variable:\"; \
+			label .deb.v.v1.name2 -fg red -text \"\"; \
+			label .deb.v.v1.time1 -text \"      Time step:\"; \
+			label .deb.v.v1.time2 -fg red -text \"      \"; \
+			label .deb.v.v1.val1 -text \"Value \"; \
+			entry .deb.v.v1.val2 -width 10 -validate focusout -vcmd { \
+				if [ string is integer %%P ] { \
+					set value %%P; \
+					return 1 \
+				} { \
+					%%W delete 0 end; \
+					if [ string is double $value ] { \
+						%%W insert 0 [ format \"%%.4g\" $value ]; \
+					} { \
+						%%W insert 0 $value; \
+					} \
+					return 0 \
+				} \
+			} -invcmd { bell } -justify center; \
+			pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
+			bind .deb <KeyPress-g> {set choice 77}; \
+			bind .deb <KeyPress-G> {set choice 77} \
+		}" );
+	cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
 	Tcl_LinkVar( inter, "time", (char *) &t, TCL_LINK_INT );
-	cmd( inter, ".deb.v.v1.time2 conf -text \"$time      \"" );
+	cmd( ".deb.v.v1.time2 conf -text \"$time      \"" );
 	Tcl_UnlinkVar( inter, "time" );
 }
 
 deb_show(r);
 
-cmd(inter, "pack .deb.b -side right -expand no");
+cmd( "pack .deb.b -side right -expand no" );
 
-cmd( inter, "if $justCreated { showtop .deb topleftW 0 1; set justCreated false }" );
+cmd( "if $justCreated { showtop .deb topleftW 0 1; set justCreated false }" );
 
-cmd(inter, "raise .deb; focus .deb");
+cmd( "raise .deb; focus .deb" );
 
 ch[0]=(char)NULL;
 attach_instance_number(ch, r);
@@ -272,13 +267,13 @@ debug_maincycle:
 
 if ( mode == 1 )
 {
-	cmd( inter, "if [ string is double $value ] { write_any .deb.v.v1.val2 [ format \"%.4g\" $value ] } { write_any .deb.v.v1.val2 $value }" ); 
-	cmd( inter, "write_any .deb.b.act.stack.e $stack_flag" ); 
+	cmd( "if [ string is double $value ] { write_any .deb.v.v1.val2 [ format \"%%.4g\" $value ] } { write_any .deb.v.v1.val2 $value }" ); 
+	cmd( "write_any .deb.b.act.stack.e $stack_flag" ); 
 	if ( interact_flag == 1 )
 	{
-		cmd(inter, ".deb.v.val2 selection range 0 end");
-		cmd(inter, "focus .deb.v.val2");
-		cmd(inter, "bind .deb.v.val2 <Return> {.deb.b.act.run invoke}");
+		cmd( ".deb.v.val2 selection range 0 end" );
+		cmd( "focus .deb.v.val2" );
+		cmd( "bind .deb.v.val2 <Return> {.deb.b.act.run invoke}" );
 	}
 }
 
@@ -294,11 +289,11 @@ while(choice==0)
  
 if ( mode == 1 )
 {
- cmd( inter, "set value [ .deb.v.v1.val2 get ]" ); 
- cmd( inter, "set stack_flag [ .deb.b.act.stack.e get ]" ); 
- cmd(inter, "bind .deb <KeyPress-g> {}; bind .deb <KeyPress-G> {}");
+ cmd( "set value [ .deb.v.v1.val2 get ]" ); 
+ cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
+ cmd( "bind .deb <KeyPress-g> {}; bind .deb <KeyPress-G> {}" );
  i=choice;
- cmd(inter, "set choice $stack_flag");
+ cmd( "set choice $stack_flag" );
  stackinfo_flag=choice;
  choice=i;
 } 
@@ -306,18 +301,18 @@ if ( mode == 1 )
 switch(choice)
 {
 case 1:
-cmd(inter, "set a [winfo exists .intval]");
-cmd(inter, "if { $a==1} {destroytop .intval} {}");
-cmd( inter, "set a [winfo exists .net]" );
-cmd( inter, "if { $a==1 } { destroytop .net }" );
+cmd( "set a [winfo exists .intval]" );
+cmd( "if { $a==1} {destroytop .intval} {}" );
+cmd( "set a [winfo exists .net]" );
+cmd( "if { $a==1 } { destroytop .net }" );
 break;
 
 case 2:
-cmd(inter, "set a [winfo exists .intval]");
-cmd(inter, "if { $a==1} {destroytop .intval} {}");
-cmd( inter, "set a [winfo exists .net]" );
-cmd( inter, "if { $a==1 } { destroytop .net }" );
-cmd( inter, "destroytop .deb" );
+cmd( "set a [winfo exists .intval]" );
+cmd( "if { $a==1} {destroytop .intval} {}" );
+cmd( "set a [winfo exists .net]" );
+cmd( "if { $a==1 } { destroytop .net }" );
+cmd( "destroytop .deb" );
 debug_flag=false;
 if(t==when_debug)
  when_debug=0;
@@ -333,9 +328,8 @@ case 77:
         if(asl==NULL && stacklog->vs!=NULL)
             {
             asl=stacklog;
-            sprintf(msg, "\nVariable: %s", asl->label);
-            plog(msg);
-        			 choice=deb(asl->vs->up,c, lab, res);
+            plog( "\nVariable: %s", "", asl->label );
+   			choice=deb(asl->vs->up,c, lab, res);
             }
           else
            {
@@ -343,15 +337,13 @@ case 77:
              {
              while(asl->prev->prev!=NULL)
               asl=asl->prev;
-             sprintf(msg, "\nVariable: %s", asl->label);
-             plog(msg);
-         			 choice=deb(asl->vs->up,c, lab, res);
+             plog( "\nVariable: %s", "", asl->label );
+         	 choice=deb(asl->vs->up,c, lab, res);
              }
              else
               {
                asl=asl->next;
-               sprintf(msg, "\nVariable: %s", asl->label);
-               plog(msg);
+               plog( "\nVariable: %s", "", asl->label );
                choice=deb(asl->vs->up,c, lab, res);
               }
            }  
@@ -380,7 +372,7 @@ case 21: if(r->hook!=NULL)
 				
 				if ( lstUpd <= 0 || lstUpd > t )
 				{
-					cmd( inter, "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"");
+					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
 					choice = 0;
 					break;
 				}
@@ -389,7 +381,7 @@ case 21: if(r->hook!=NULL)
 			}
 			else
 			{
-				cmd( inter, "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Unavailable option\" -detail \"Your code is using non-standard pointers ('invalidHooks = true').\"");
+				cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Unavailable option\" -detail \"Your code is using non-standard pointers ('invalidHooks = true').\"" );
 				choice = 0;
 				break;
 			}
@@ -404,52 +396,47 @@ case 22:
 	if(r->node == NULL)
 		break;
 
-	cmd(inter, "set a [winfo exists .intval]");
-	cmd(inter, "if { $a==1} {destroytop .intval} {}");
-	cmd( inter, "set a [winfo exists .net]" );
-	cmd( inter, "if { $a==1 } { destroytop .net }" );
+	cmd( "set a [winfo exists .intval]" );
+	cmd( "if { $a==1} {destroytop .intval} {}" );
+	cmd( "set a [winfo exists .net]" );
+	cmd( "if { $a==1 } { destroytop .net }" );
 
-	cmd( inter, "set n .net");
-	cmd( inter, "newtop $n \"Network\" { destroytop $n }");
+	cmd( "set n .net" );
+	cmd( "newtop $n \"Network\" { destroytop $n }" );
 	
-	cmd(inter, "label $n.l1 -text \"Node id: \"");
-	sprintf(msg, "label $n.l2 -foreground red -text \"%ld\"", r->node->id);
-	cmd(inter, msg); 
-	cmd(inter, "label $n.l3 -text \"Num. links out: \"");
-	sprintf(msg, "label $n.l4 -foreground red -text \"%ld\"", r->node->nLinks);
-	cmd(inter, msg); 
-	cmd(inter, "label $n.l5 -text \"Outgoing links: \"");
-	cmd(inter, "label $n.l6 -text \"dest. id          (weight)\" -foreground red");
+	cmd( "label $n.l1 -text \"Node id: \"" );
+	cmd( "label $n.l2 -foreground red -text \"%ld\"", r->node->id );
+	cmd( "label $n.l3 -text \"Num. links out: \"" );
+	cmd( "label $n.l4 -foreground red -text \"%ld\"", r->node->nLinks );
+	cmd( "label $n.l5 -text \"Outgoing links: \"" );
+	cmd( "label $n.l6 -text \"dest. id          (weight)\" -foreground red" );
 	if(r->node->name != NULL)		// is node named?
 	{
-		cmd(inter, "label $n.l7 -text \"Node name: \"");
-		sprintf(msg, "label $n.l8 -foreground red -text \"%s\"", r->node->name);
-		cmd(inter, msg); 
-		cmd(inter, "pack $n.l7 $n.l8 $n.l1 $n.l2 $n.l3 $n.l4 $n.l5");
+		cmd( "label $n.l7 -text \"Node name: \"" );
+		cmd( "label $n.l8 -foreground red -text \"%s\"", r->node->name );
+		cmd( "pack $n.l7 $n.l8 $n.l1 $n.l2 $n.l3 $n.l4 $n.l5" );
 	}
 	else
-		cmd(inter, "pack $n.l1 $n.l2 $n.l3 $n.l4 $n.l5");
-	cmd(inter, "pack $n.l6 -anchor w");
-	cmd(inter, "text $n.t -width 15 -yscrollcommand \"$n.yscroll set\" -wrap word");
-	cmd(inter, "scrollbar $n.yscroll -command \"$n.t yview\"");
-	cmd(inter, "pack $n.yscroll -side right -fill y");
-	cmd(inter, "pack $n.t -expand yes -fill both");
-	cmd( inter, "done $n c { destroytop $n }" ); 
-	cmd(inter, "$n.t tag configure v -foreground red");
+		cmd( "pack $n.l1 $n.l2 $n.l3 $n.l4 $n.l5" );
+	cmd( "pack $n.l6 -anchor w" );
+	cmd( "text $n.t -width 15 -yscrollcommand \"$n.yscroll set\" -wrap word" );
+	cmd( "scrollbar $n.yscroll -command \"$n.t yview\"" );
+	cmd( "pack $n.yscroll -side right -fill y" );
+	cmd( "pack $n.t -expand yes -fill both" );
+	cmd( "done $n c { destroytop $n }" ); 
+	cmd( "$n.t tag configure v -foreground red" );
 	
 	for(netLink *curLnk=r->node->first; curLnk != NULL; curLnk=curLnk->next)
 	{
-		sprintf(msg, "$n.t insert end \"%ld\"", curLnk->ptrTo->node->id);
-		cmd(inter, msg);
+		cmd( "$n.t insert end \"%ld\"", curLnk->ptrTo->node->id );
 		if(curLnk->weight != 0)
-			sprintf(msg, "$n.t insert end \"\t(%g)\n\"", curLnk->weight);
+			cmd( "$n.t insert end \"\t(%g)\n\"", curLnk->weight );
 		else
-			sprintf(msg, "$n.t insert end \"\n\"");
-		cmd(inter, msg);
+			cmd( "$n.t insert end \"\n\"" );
 	}
 	
-	cmd( inter, "showtop $n topleftW 0 1 0");
-	cmd( inter, "align $n .deb");
+	cmd( "showtop $n topleftW 0 1 0" );
+	cmd( "align $n .deb" );
 	
 	choice=0;
 
@@ -510,32 +497,32 @@ Tcl_LinkVar(inter, "condition", (char *) &cond, TCL_LINK_INT);
 cond=1;
 choice=0;
 i=1;
-cmd( inter, "set s .sobj" );
-cmd( inter, "newtop $s \"Find Object\" { set choice 2 }" );
+cmd( "set s .sobj" );
+cmd( "newtop $s \"Find Object\" { set choice 2 }" );
 
-cmd(inter, "label $s.l1 -text \"Find object containing variable\"");
-cmd(inter, "entry $s.e1 -width 10 -textvariable en");
-cmd(inter, "label $s.l2 -text \"with value\"");
-cmd( inter, "entry $s.e2 -width 10 -validate focusout -vcmd { if [ string is double %P ] { set value_search %P; return 1 } { %W delete 0 end; %W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center" );
-cmd( inter, "$s.e2 insert 0 $value_search" ); 
+cmd( "label $s.l1 -text \"Find object containing variable\"" );
+cmd( "entry $s.e1 -width 10 -textvariable en" );
+cmd( "label $s.l2 -text \"with value\"" );
+cmd( "entry $s.e2 -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set value_search %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$s.e2 insert 0 $value_search" ); 
 
-cmd(inter, "frame $s.cond");
-cmd(inter, "radiobutton $s.cond.eq -text \" = \" -variable condition -value 1");
-cmd(inter, "radiobutton $s.cond.geq -text \" >= \" -variable condition -value 2");
-cmd(inter, "radiobutton $s.cond.leq -text \" <= \" -variable condition -value 3");
-cmd(inter, "radiobutton $s.cond.gr -text \" > \" -variable condition -value 4");
-cmd(inter, "radiobutton $s.cond.le -text \" < \" -variable condition -value 5");
-cmd(inter, "radiobutton $s.cond.not -text \" != \" -variable condition -value 6");
-cmd(inter, "pack $s.cond.eq $s.cond.geq $s.cond.leq $s.cond.gr $s.cond.le $s.cond.not -anchor w");
-cmd(inter, "pack $s.l1 $s.e1 $s.l2 $s.e2 $s.cond");
+cmd( "frame $s.cond" );
+cmd( "radiobutton $s.cond.eq -text \" = \" -variable condition -value 1" );
+cmd( "radiobutton $s.cond.geq -text \" >= \" -variable condition -value 2" );
+cmd( "radiobutton $s.cond.leq -text \" <= \" -variable condition -value 3" );
+cmd( "radiobutton $s.cond.gr -text \" > \" -variable condition -value 4" );
+cmd( "radiobutton $s.cond.le -text \" < \" -variable condition -value 5" );
+cmd( "radiobutton $s.cond.not -text \" != \" -variable condition -value 6" );
+cmd( "pack $s.cond.eq $s.cond.geq $s.cond.leq $s.cond.gr $s.cond.le $s.cond.not -anchor w" );
+cmd( "pack $s.l1 $s.e1 $s.l2 $s.e2 $s.cond" );
 
-cmd( inter, "okcancel $s b { set choice 1 } { set choice 2 }" );
-cmd(inter, "bind $s.e1 <KeyPress-Return> {focus $s.e2}");
-cmd(inter, "bind $s.e2 <KeyPress-Return> {focus $s.ok}");
+cmd( "okcancel $s b { set choice 1 } { set choice 2 }" );
+cmd( "bind $s.e1 <KeyPress-Return> {focus $s.e2}" );
+cmd( "bind $s.e2 <KeyPress-Return> {focus $s.ok}" );
 
-cmd( inter, "showtop $s" );
-cmd(inter, "$s.e2 selection range 0 end");
-cmd(inter, "focus $s.e1");
+cmd( "showtop $s" );
+cmd( "$s.e2 selection range 0 end" );
+cmd( "focus $s.e1" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -543,7 +530,7 @@ while(choice==0)
 if(choice==2)
  {
 quit=0;
-cmd(inter, "destroytop $s");
+cmd( "destroytop $s" );
 Tcl_UnlinkVar(inter, "value_search");
 Tcl_UnlinkVar(inter, "condition");
 choice=0;
@@ -553,13 +540,12 @@ break;
 pre_running = running;
 running = false;
 
-cmd( inter, "set value_search [ $s.e2 get ]" ); 
+cmd( "set value_search [ $s.e2 get ]" ); 
 ch1=(char *)Tcl_GetVar(inter, "en",0);
 strcpy(ch, ch1);
 switch(cond)
 {
 case 1:
-//cur=r->search_var_cond(ch, value_search, 0); //BUG: triggers the computation of variables, which in general is not a good idea.
 i=0;
 cur2=NULL;
 for(cur1=r; cur1!=NULL && i==0; cur1=cur1->up)
@@ -624,7 +610,7 @@ cur=NULL;
 }
 
 quit=0; //If var is mispelled don't stop the simulation!
-cmd(inter, "destroytop $s");
+cmd( "destroytop $s" );
 Tcl_UnlinkVar(inter, "value_search");
 Tcl_UnlinkVar(inter, "condition");
 
@@ -642,7 +628,7 @@ case 7:
 
 if ( mode == 1 )
  {
- cmd(inter, "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'Ok' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
+ cmd( "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'Ok' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
  } 
 else
  choice=0; 
@@ -653,11 +639,11 @@ if(choice==1)
  break;
  }
 
-cmd(inter, "set a [winfo exists .intval]");
-cmd(inter, "if { $a==1} {destroytop .intval} {}");
-cmd( inter, "set a [winfo exists .net]" );
-cmd( inter, "if { $a==1 } { destroytop .net }" );
-cmd( inter, "destroytop .deb" );
+cmd( "set a [winfo exists .intval]" );
+cmd( "if { $a==1} {destroytop .intval} {}" );
+cmd( "set a [winfo exists .net]" );
+cmd( "if { $a==1 } { destroytop .net }" );
+cmd( "destroytop .deb" );
 choice=1;
 
 // prevent changing run parameters when only data browse was called
@@ -668,7 +654,7 @@ if ( mode == 1 )
 }
 
 if ( mode == 3 )
-	cmd( inter, "wm deiconify .log; raise .log; focus .log" );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
 
 break;
 
@@ -691,68 +677,61 @@ cv=r->search_var(NULL, ch1);
 i=cv->last_update;
 count=(cv->debug=='d'?1:0);
 
-cmd( inter, "set e .execdeb" );
-cmd( inter, "newtop $e \"Execute\" { set choice 1 }" );
+cmd( "set e .execdeb" );
+cmd( "newtop $e \"Execute\" { set choice 1 }" );
 
-cmd(inter, "button $e.eq -width -9 -text Equation -command {set choice 8}");
+cmd( "button $e.eq -width -9 -text Equation -command {set choice 8}" );
 if(cv->param==0 || cv->param==2)
- cmd(inter, "button $e.exec -width -9 -text \"Execute\" -command {set choice 9}");
-cmd(inter, "button $e.cond -width -9 -text \"Set Conditional Break\" -command {set choice 7}");
-cmd(inter, "frame $e.past");
-cmd(inter, "frame $e.past.tit");
-cmd(inter, "label $e.past.tit.lab -text \"Values of: $res\"");
-cmd(inter, "label $e.past.tit.time -text \"Current time: $time\"");
+ cmd( "button $e.exec -width -9 -text \"Execute\" -command {set choice 9}" );
+cmd( "button $e.cond -width -9 -text \"Set Conditional Break\" -command {set choice 7}" );
+cmd( "frame $e.past" );
+cmd( "frame $e.past.tit" );
+cmd( "label $e.past.tit.lab -text \"Values of: $res\"" );
+cmd( "label $e.past.tit.time -text \"Current time: $time\"" );
 if(cv->param==0)
-  {sprintf(msg, "label $e.past.tit.lu -text \"Time of last computation: %d\"",cv->last_update);
-   cmd(inter, msg);
-  }
+  cmd( "label $e.past.tit.lu -text \"Time of last computation: %d\"", cv->last_update );
 else
-  cmd(inter, "label $e.past.tit.lu -text \"Parameter\"");
-cmd(inter, "pack $e.past.tit.lab $e.past.tit.time $e.past.tit.lu");
-cmd(inter, "pack $e.past.tit");
+  cmd( "label $e.past.tit.lu -text \"Parameter\"" );
+cmd( "pack $e.past.tit.lab $e.past.tit.time $e.past.tit.lu" );
+cmd( "pack $e.past.tit" );
 
 Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
 app_values=new double[cv->num_lag+1];
 for(i=0; i<cv->num_lag+1; i++)
  {
-  sprintf(msg, "set val%d %g",i, cv->val[i]);
-
-  cmd(inter, msg);
+  cmd( "set val%d %g",i, cv->val[i] );
   app_values[i]=cv->val[i];
   sprintf(ch, "val%d",i);
   Tcl_LinkVar(inter, ch, (char *) &(app_values[i]), TCL_LINK_DOUBLE);
-  cmd(inter, "frame $e.past.l$i");
+  cmd( "frame $e.past.l$i" );
 
   if(cv->param==0)
-    cmd(inter, "label $e.past.l$i.n$i -text \"Lag $i: \"");
+    cmd( "label $e.past.l$i.n$i -text \"Lag $i: \"" );
   else
-    cmd(inter, "label $e.past.l$i.n$i -text \"Value: \"");
+    cmd( "label $e.past.l$i.n$i -text \"Value: \"" );
 
-  sprintf( msg, "entry $e.past.l%d.e%d -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i, i );
-  cmd( inter, msg );
-  sprintf( msg, "$e.past.l%d.e%d insert 0 $val%d", i, i, i ); 
-  cmd( inter, msg );
+  cmd( "entry $e.past.l%d.e%d -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i, i );
+  cmd( "$e.past.l%d.e%d insert 0 $val%d", i, i, i ); 
 
-  sprintf(msg, "button $e.past.l$i.sa -width -9 -text \"Set All\" -command {set sa %i; set choice 10}", i);
-  cmd(inter, msg);
-  cmd(inter, "pack $e.past.l$i.n$i $e.past.l$i.e$i $e.past.l$i.sa -side left");
-  cmd(inter, "pack $e.past.l$i");
+  cmd( "button $e.past.l$i.sa -width -9 -text \"Set All\" -command {set sa %i; set choice 10}", i );
+  cmd( "pack $e.past.l$i.n$i $e.past.l$i.e$i $e.past.l$i.sa -side left" );
+  cmd( "pack $e.past.l$i" );
  }
 
-cmd(inter, "checkbutton $e.deb -text \"Debug \" -variable debug");
-cmd(inter, "checkbutton $e.deball -text \"Apply debug option to all copies\" -variable debugall");
+cmd( "checkbutton $e.deb -text \"Debug \" -variable debug" );
+cmd( "checkbutton $e.deball -text \"Apply debug option to all copies\" -variable debugall" );
 
 if(cv->param==0 || cv->param==2)
- cmd(inter, "pack $e.past $e.deb $e.deball $e.eq $e.exec $e.cond");
+ cmd( "pack $e.past $e.deb $e.deball $e.eq $e.exec $e.cond" );
 else
- cmd(inter, "pack $e.past $e.deb $e.eq $e.cond"); 
+ cmd( "pack $e.past $e.deb $e.eq $e.cond" ); 
 
-cmd( inter, "donehelp $e b { set choice 1 } { LsdHelp debug.html#content }" );
-cmd(inter, "bind $e.past.l0.e0 <Return> {set choice 1}");
+cmd( "donehelp $e b { set choice 1 } { LsdHelp debug.html#content }" );
+cmd( "bind $e.past.l0.e0 <Return> {set choice 1}" );
 
-cmd( inter, "showtop $e" );
-cmd(inter, "$e.past.l0.e0 selection range 0 end");
-cmd(inter, "focus $e.past.l0.e0");
+cmd( "showtop $e" );
+cmd( "$e.past.l0.e0 selection range 0 end" );
+cmd( "focus $e.past.l0.e0" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -761,25 +740,24 @@ cv->data_loaded='+';
 
 for(i=0; i<cv->num_lag+1; i++)
  {
-  sprintf( msg, "set val%d [ $e.past.l%d.e%d get ]", i, i, i ); 
-  cmd( inter, msg );
+  cmd( "set val%d [ $e.past.l%d.e%d get ]", i, i, i ); 
 
   cv->val[i]=app_values[i];
   sprintf(ch, "val%d",i);
 
   Tcl_UnlinkVar(inter, ch);
-  cmd(inter, "unset val$i");
+  cmd( "unset val$i" );
  }
 
 delete[] app_values;
 Tcl_UnlinkVar(inter, "i");
 
 cv->debug=(count==1?'d':'n');
-cmd(inter, "destroytop $e");
+cmd( "destroytop $e" );
 
 Tcl_UnlinkVar(inter, "debug");
 count=choice;
-cmd(inter, "set choice $debugall");
+cmd( "set choice $debugall" );
 if(choice==1)
  {
   for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label) )
@@ -807,7 +785,7 @@ if(choice==10)
  ch1=(char *)Tcl_GetVar(inter, "res",0);
  strcpy(ch, ch1);
  
- cmd(inter, "set choice $sa");
+ cmd( "set choice $sa" );
  i=choice;
  choice=0;
  set_all(&choice, r, ch, i);
@@ -819,8 +797,8 @@ break;
 
 //Analysis
 case 11:
-cmd( inter, "if [ winfo exists .intval ] { destroytop .intval }");
-cmd( inter, "if [ winfo exists .net ] { destroytop .net }" );
+cmd( "if [ winfo exists .intval ] { destroytop .intval }" );
+cmd( "if [ winfo exists .net ] { destroytop .net }" );
 
 actual_steps=t;
 for(cur=r; cur->up!=NULL; cur=cur->up);
@@ -832,27 +810,24 @@ break;
 //Print stack
 case 13:
 print_stack();
-cmd(inter, "raise .log; focus .log");
+cmd( "raise .log; focus .log" );
 choice=0;
 break;
 
 case 15:
-cmd( inter, "set a [winfo exists .intval]" );
-cmd( inter, "if { $a==1 } { destroytop .intval }" );
-cmd(inter, "set a [winfo exists .net]");
-cmd( inter, "if { $a==1 } { destroytop .net }" );
+cmd( "set a [winfo exists .intval]" );
+cmd( "if { $a==1 } { destroytop .intval }" );
+cmd( "set a [winfo exists .net]" );
+cmd( "if { $a==1 } { destroytop .net }" );
 
-cmd(inter, "set in .intval; newtop $in \"v\\[...\\]\" { destroytop $in }; text $in.t -width 20 -yscrollcommand \"$in.yscroll set\" -wrap word; scrollbar $in.yscroll -command \"$in.t yview\"; pack $in.yscroll -side right -fill y; pack $in.t -expand yes -fill both; done $in c { destroytop $in }; bind $in <Escape> { destroytop $in }; showtop $in topleftW 0 1 0");
+cmd( "set in .intval; newtop $in \"v\\[...\\]\" { destroytop $in }; text $in.t -width 20 -yscrollcommand \"$in.yscroll set\" -wrap word; scrollbar $in.yscroll -command \"$in.t yview\"; pack $in.yscroll -side right -fill y; pack $in.t -expand yes -fill both; done $in c { destroytop $in }; bind $in <Escape> { destroytop $in }; showtop $in topleftW 0 1 0" );
 
-cmd(inter, "$in.t tag configure v -foreground red");
-cmd(inter, "align $in .deb");
+cmd( "$in.t tag configure v -foreground red" );
+cmd( "align $in .deb" );
 for(i=0; i<100; i++)
  {
-  sprintf(msg, "$in.t insert end \"v\\\[%d\\]\" v",i);
-  cmd(inter, msg);
-  sprintf(msg, "$in.t insert end \"=%g\n\"",i_values[i]);
-  cmd(inter, msg);
-
+  cmd( "$in.t insert end \"v\\\[%d\\]\" v",i );
+  cmd( "$in.t insert end \"=%g\n\"",i_values[i] );
  }
 choice=0;
 break;
@@ -861,38 +836,37 @@ case 16:
 //run until
 choice=0;
 
-cmd( inter, "set t .tdebug" );
-cmd( inter, "newtop $t \"Time Debugger\" { set choice 1 }" );
+cmd( "set t .tdebug" );
+cmd( "newtop $t \"Time Debugger\" { set choice 1 }" );
 
-cmd(inter, "label $t.l -text \"Time for activation of debug mode\"");
-sprintf(msg, "set when_debug %d",t+1);
-cmd(inter, msg);
-cmd( inter, "entry $t.val -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set when_debug %P; return 1 } { %W delete 0 end; %W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
-cmd( inter, "$t.val insert 0 $when_debug" ); 
-cmd(inter, "$t.val selection range 0 end");
-cmd(inter, "pack $t.l $t.val");
+cmd( "label $t.l -text \"Time for activation of debug mode\"" );
+cmd( "set when_debug %d", t+1 );
+cmd( "entry $t.val -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$t.val insert 0 $when_debug" ); 
+cmd( "$t.val selection range 0 end" );
+cmd( "pack $t.l $t.val" );
 
-cmd( inter, "okhelp $t b {set choice 1} {LsdHelp debug.html#until}" );
-cmd(inter, "bind $t <KeyPress-Return> {set choice 1}");
+cmd( "okhelp $t b {set choice 1} {LsdHelp debug.html#until}" );
+cmd( "bind $t <KeyPress-Return> {set choice 1}" );
 
-cmd( inter, "showtop $t" );
-cmd(inter, "$t.val selection range 0 end");
-cmd(inter, "focus $t.val");
+cmd( "showtop $t" );
+cmd( "$t.val selection range 0 end" );
+cmd( "focus $t.val" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
 
-cmd( inter, "set when_debug [ $t.val get ]" ); 
-cmd(inter, "destroytop $t");
+cmd( "set when_debug [ $t.val get ]" ); 
+cmd( "destroytop $t" );
 
 //restart execution
 choice=2;
-cmd(inter, "set a [winfo exists .intval]");
-cmd(inter, "if { $a==1} {destroytop .intval} {}");
-cmd( inter, "set a [winfo exists .net]" );
-cmd( inter, "if { $a==1 } { destroytop .net }" );
+cmd( "set a [winfo exists .intval]" );
+cmd( "if { $a==1} {destroytop .intval} {}" );
+cmd( "set a [winfo exists .net]" );
+cmd( "if { $a==1 } { destroytop .net }" );
 debug_flag=false;
-cmd( inter, "destroytop .deb" );
+cmd( "destroytop .deb" );
 
 break;
 
@@ -909,13 +883,12 @@ break;
 case 44:
 //see model report
 
-sprintf(msg, "set name_rep %s", name_rep);
-cmd(inter, msg);
+cmd( "set name_rep %s", name_rep );
 
-cmd(inter, "set choice [file exists $name_rep]");
+cmd( "set choice [file exists $name_rep]" );
 
-cmd(inter, "if {$choice == 1} {LsdHtml $name_rep} {}");
-cmd(inter, "if {$choice == 0} {tk_messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\"} {}");
+cmd( "if {$choice == 1} {LsdHtml $name_rep} {}" );
+cmd( "if {$choice == 0} {tk_messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\"} {}" );
 choice=0;
 break;
 
@@ -940,115 +913,96 @@ DEB_SHOW
 ********************************************/
 void deb_show(object *r)
 {
-char ch[TCL_BUFF_STR];
+char ch[2*MAX_ELEM_LENGTH];
 variable *ap_v;
 int count, i;
 object *ap_o;
 
 // fix the top frame before proceeding
-cmd( inter, "if { ! [ winfo exists .deb.v ] } { frame .deb.v -relief groove -bd 2 }" );
-cmd( inter, "if { ! [ winfo exists .deb.v.v2 ] } { \
-				frame .deb.v.v2; \
-				label .deb.v.v2.obj -text \"Level & object instance: \"; \
-				label .deb.v.v2.instance -fg red -text \"\"; \
-				pack .deb.v.v2.obj .deb.v.v2.instance -side left; \
-				if [ winfo exists .deb.v.v1 ] { \
-					pack .deb.v.v1 .deb.v.v2 -padx 5 -pady 5 -anchor w \
-				} { \
-					pack .deb.v.v2 -padx 5 -pady 5 -anchor w \
-				}; \
-				pack .deb.v -anchor w -expand no -fill x \
-			}" );
+cmd( "if { ! [ winfo exists .deb.v ] } { frame .deb.v -relief groove -bd 2 }" );
+cmd( "if { ! [ winfo exists .deb.v.v2 ] } { \
+		frame .deb.v.v2; \
+		label .deb.v.v2.obj -text \"Level & object instance: \"; \
+		label .deb.v.v2.instance -fg red -text \"\"; \
+		pack .deb.v.v2.obj .deb.v.v2.instance -side left; \
+		if [ winfo exists .deb.v.v1 ] { \
+			pack .deb.v.v1 .deb.v.v2 -padx 5 -pady 5 -anchor w \
+		} { \
+			pack .deb.v.v2 -padx 5 -pady 5 -anchor w \
+		}; \
+		pack .deb.v -anchor w -expand no -fill x \
+	}" );
 
 if(r->up!=NULL)
- cmd(inter, "bind .deb.v.v2.obj <Button-1> {if { [winfo exist .deb.w] } { destroy .deb.w }; set choice 17}");
+ cmd( "bind .deb.v.v2.obj <Button-1> {if { [winfo exist .deb.w] } { destroy .deb.w }; set choice 17}" );
 
 strcpy( ch, "" );
 attach_instance_number( ch, r );
-sprintf( msg, ".deb.v.v2.instance config -text \"%s\"", ch );
-cmd( inter, msg );
+cmd( ".deb.v.v2.instance config -text \"%s\"", ch  );
 
 // adjust spacing to align labels with data and increase columns width to better fill window
-cmd( inter, "if {$tcl_platform(platform) == \"windows\"} {set w1 26; set w2 10; set w3 20} {set w1 19; set w2 9; set w3 15}" );
-cmd( inter, "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}" );
+cmd( "if {$tcl_platform(platform) == \"windows\"} {set w1 26; set w2 10; set w3 20} {set w1 19; set w2 9; set w3 15}" );
+cmd( "if {$tcl_platform(os)==\"Darwin\"} {set wwidth 115} {set wwidth 100}" );
 
-cmd( inter, "if { ! [ winfo exists .deb.tit ] } { \
-				frame .deb.tit; \
-				frame .deb.tit.h1; \
-				label .deb.tit.h1.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-				label .deb.tit.h1.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
-				label .deb.tit.h1.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
-				pack .deb.tit.h1.name .deb.tit.h1.val .deb.tit.h1.last -side left; \
-				frame .deb.tit.h2; \
-				label .deb.tit.h2.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
-				label .deb.tit.h2.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
-				label .deb.tit.h2.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
-				pack .deb.tit.h2.name .deb.tit.h2.val .deb.tit.h2.last -side left -anchor w; \
-				pack .deb.tit.h1 .deb.tit.h2 -expand no -side left; \
-				pack .deb.tit -side top -anchor w -expand no -after .deb.v \
-			}" );
+cmd( "if { ! [ winfo exists .deb.tit ] } { \
+		frame .deb.tit; \
+		frame .deb.tit.h1; \
+		label .deb.tit.h1.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
+		label .deb.tit.h1.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
+		label .deb.tit.h1.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
+		pack .deb.tit.h1.name .deb.tit.h1.val .deb.tit.h1.last -side left; \
+		frame .deb.tit.h2; \
+		label .deb.tit.h2.name -text Variable -width $w1 -pady 0 -bd 0 -anchor w; \
+		label .deb.tit.h2.last -text LastUpdate -width $w2 -pady 0 -bd 0 -anchor w; \
+		label .deb.tit.h2.val -text Value -width $w3 -pady 0 -bd 0 -fg red -anchor w; \
+		pack .deb.tit.h2.name .deb.tit.h2.val .deb.tit.h2.last -side left -anchor w; \
+		pack .deb.tit.h1 .deb.tit.h2 -expand no -side left; \
+		pack .deb.tit -side top -anchor w -expand no -after .deb.v \
+	}" );
 
-cmd( inter, "if { ! [ winfo exists .deb.cc ] } { \
-				frame .deb.cc; \
-				scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"; \
-				pack .deb.cc.scroll -side right -fill y; \
-				text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap word -width $wwidth  -cursor arrow; \
-				mouse_wheel .deb.cc.l; \
-				pack .deb.cc.l -expand yes -fill y; \
-				pack .deb.cc -expand yes -fill y\
-			}" );
+cmd( "if { ! [ winfo exists .deb.cc ] } { \
+		frame .deb.cc; \
+		scrollbar .deb.cc.scroll -command \".deb.cc.l yview\"; \
+		pack .deb.cc.scroll -side right -fill y; \
+		text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap word -width $wwidth  -cursor arrow; \
+		mouse_wheel .deb.cc.l; \
+		pack .deb.cc.l -expand yes -fill y; \
+		pack .deb.cc -expand yes -fill y\
+	}" );
 
-cmd( inter, ".deb.cc.l delete 1.0 end");
+cmd( ".deb.cc.l delete 1.0 end" );
 
 if(r->v==NULL)
-  {cmd(inter, "label .deb.cc.l.no_var -text \"(no variables defined)\"");
-	cmd(inter,".deb.cc.l window create end -window .deb.cc.l.no_var");
+  {cmd( "label .deb.cc.l.no_var -text \"(no variables defined)\"" );
+	cmd( ".deb.cc.l window create end -window .deb.cc.l.no_var" );
   }
 else
   {Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
 
   for(i=1,ap_v=r->v; ap_v!=NULL; ap_v=ap_v->next, i++)
 	 {
-     sprintf(msg, "set last %d", ap_v->last_update);
-     cmd(inter, msg);
-
-     sprintf( msg, "set val %.4g", ap_v->val[0] );
-     cmd(inter, msg);
-	  cmd(inter, "frame .deb.cc.l.e$i");
-	  strcpy(ch, "label .deb.cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text ");
-	  strcat(ch, ap_v->label);
-	  cmd(inter, ch);
+      cmd( "set last %d", ap_v->last_update );
+      cmd( "set val %.4g", ap_v->val[0] );
+	  cmd( "frame .deb.cc.l.e$i" );
+	  cmd( "label .deb.cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text %s", ap_v->label );
 	  if(ap_v->param==0)
-		 cmd(inter, "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text $last");
+		 cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text $last" );
 	  if(ap_v->param==1)
-		 cmd(inter, "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Par");
+		 cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Par" );
 	  if(ap_v->param==2)
-		 cmd(inter, "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Fun");
-	  cmd(inter, "label .deb.cc.l.e$i.val -width $w3 -pady 0 -bd 0 -fg red -anchor w -text $val");
-
-	  cmd(inter, "pack .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left");
-	  
-	  strcpy(ch, "bind .deb.cc.l.e$i.name <Double-Button-1> {set res ");
-	  strcat(ch, ap_v->label);
-	  strcat(ch, "; set lstDebPos [ .deb.cc.l index @%x,%y ]; set choice 8}");
-	  cmd(inter, ch);
-	  
-	  strcpy(ch, "bind .deb.cc.l.e$i.name <Button-3> {set res ");
-	  strcat(ch, ap_v->label);
-	  strcat(ch, "; set lstDebPos [ .deb.cc.l index @%x,%y ]; set choice 29}");
-	  cmd(inter, ch);
-	  
-	  strcpy(ch, "bind .deb.cc.l.e$i.name <Button-2> {set res ");
-	  strcat(ch, ap_v->label);
-	  strcat(ch, "; set lstDebPos [ .deb.cc.l index @%x,%y ]; set choice 29}");
-	  cmd(inter, ch);
+		 cmd( "label .deb.cc.l.e$i.last -width $w2 -pady 0 -bd 0 -text Fun" );
+	  cmd( "label .deb.cc.l.e$i.val -width $w3 -pady 0 -bd 0 -fg red -anchor w -text $val" );
+	  cmd( "pack .deb.cc.l.e$i.name .deb.cc.l.e$i.val .deb.cc.l.e$i.last -side left" );
+	  cmd( "bind .deb.cc.l.e$i.name <Double-Button-1> {set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 8}", ap_v->label );
+	  cmd( "bind .deb.cc.l.e$i.name <Button-3> {set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 29}", ap_v->label );
+	  cmd( "bind .deb.cc.l.e$i.name <Button-2> {set res %s; set lstDebPos [ .deb.cc.l index @%%x,%%y ]; set choice 29}", ap_v->label );
       
-	  cmd(inter,".deb.cc.l window create end -window .deb.cc.l.e$i");
+	  cmd( ".deb.cc.l window create end -window .deb.cc.l.e$i" );
      if( (i%2)==0)
-       cmd(inter, ".deb.cc.l insert end \\n");
+       cmd( ".deb.cc.l insert end \\n" );
 	 }
    
-	cmd( inter, "if [ info exists lstDebPos ] { .deb.cc.l see $lstDebPos; unset lstDebPos }" );
+	cmd( "if [ info exists lstDebPos ] { .deb.cc.l see $lstDebPos; unset lstDebPos }" );
 	
 	Tcl_UnlinkVar(inter, "i");
   }
@@ -1061,24 +1015,23 @@ SET_COND
 void set_cond(variable *cv)
 {
 int old;
-char ch[TCL_BUFF_STR];
 Tcl_LinkVar(inter, "cond", (char *) &cv->deb_cond, TCL_LINK_INT);
 Tcl_LinkVar(inter, "cond_val", (char *) &cv->deb_cnd_val, TCL_LINK_DOUBLE);
 
-cmd( inter, "set c .condbrk" );
-cmd( inter, "newtop $c \"Conditional Breaks\" { set choice 1 }" );
+cmd( "set c .condbrk" );
+cmd( "newtop $c \"Conditional Breaks\" { set choice 1 }" );
 
 choice=0;
 while(choice==0)
 {
 switch(cv->deb_cond)
- {case 0: cmd(inter, "label $c.cnd_type -text \"No conditional break\"");
+ {case 0: cmd( "label $c.cnd_type -text \"No conditional break\"" );
           break;
-  case 1: cmd(inter, "label $c.cnd_type -text \"Condition: = \"");
+  case 1: cmd( "label $c.cnd_type -text \"Condition: = \"" );
           break;
-  case 2: cmd(inter, "label $c.cnd_type -text \"Condition: < \"");
+  case 2: cmd( "label $c.cnd_type -text \"Condition: < \"" );
           break;
-  case 3: cmd(inter, "label $c.cnd_type -text \"Condition: > \"");
+  case 3: cmd( "label $c.cnd_type -text \"Condition: > \"" );
           break;
   default: 
 		  sprintf( msg, "debug condition for var '%s' set to '%d'",cv->label, cv->deb_cond);
@@ -1087,33 +1040,30 @@ switch(cv->deb_cond)
           break;
  }
 old=cv->deb_cond;
-strcpy(ch, "label $c.name -text \"Conditional stop for variable:");
-strcat(ch, cv->label);
-strcat(ch, "\"");
-cmd(inter, ch);       
-cmd( inter, "entry $c.cond -validate focusout -vcmd { if [ string is double %P ] { set cond_val %P; return 1 } { %W delete 0 end; %W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center" );
-cmd( inter, "$c.cond insert 0 $cond_val" ); 
-cmd(inter, "frame $c.c");
-cmd(inter, "button $c.c.eq -width -9 -text \" = \" -command {set cond 1}");
-cmd(inter, "button $c.c.min -width -9 -text \" < \" -command {set cond 2}");
-cmd(inter, "button $c.c.max -width -9 -text \" > \" -command {set cond 3}");
-cmd(inter, "button $c.no -width -9 -text \"No Condition\" -command {set cond 0}");
+cmd( "label $c.name -text \"Conditional stop for variable: %s\"", cv->label );
+cmd( "entry $c.cond -validate focusout -vcmd { if [ string is double %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$c.cond insert 0 $cond_val" ); 
+cmd( "frame $c.c" );
+cmd( "button $c.c.eq -width -9 -text \" = \" -command {set cond 1}" );
+cmd( "button $c.c.min -width -9 -text \" < \" -command {set cond 2}" );
+cmd( "button $c.c.max -width -9 -text \" > \" -command {set cond 3}" );
+cmd( "button $c.no -width -9 -text \"No Condition\" -command {set cond 0}" );
 
-cmd(inter, "pack $c.c.min $c.c.eq $c.c.max -side left");
-cmd(inter, "pack $c.name $c.cnd_type $c.c $c.cond $c.no -side top");
+cmd( "pack $c.c.min $c.c.eq $c.c.max -side left" );
+cmd( "pack $c.name $c.cnd_type $c.c $c.cond $c.no -side top" );
 
-cmd( inter, "done $c b { set choice 1 }" );
+cmd( "done $c b { set choice 1 }" );
 
-cmd( inter, "showtop $c" );
+cmd( "showtop $c" );
 
 while(choice==0 && cv->deb_cond==old)
  Tcl_DoOneEvent(0);
 
-cmd( inter, "set cond_val [ $c.cond get ]" ); 
-cmd(inter, "destroy $c.cnd_type $c.name $c.cond $c.c $c.no $c.b");
+cmd( "set cond_val [ $c.cond get ]" ); 
+cmd( "destroy $c.cnd_type $c.name $c.cond $c.c $c.no $c.b" );
 }
 
-cmd(inter, "destroytop $c");
+cmd( "destroytop $c" );
 
 Tcl_UnlinkVar(inter, "cond");
 Tcl_UnlinkVar(inter, "cond_val");

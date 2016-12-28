@@ -27,7 +27,7 @@ returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 
-- void cmd(Tcl_Interp *inter, char *cc);
+- void cmd(char *cc);
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
 It should be enough to make a call to Tcl_Eval. But there are problems due to the
@@ -76,24 +76,6 @@ CMD
 ****************************************************/
 bool firstCall = true;
 
-void cmd( Tcl_Interp *inter, const char *cm )
-{
-	if ( strlen( cm ) >= TCL_BUFF_STR )
-	{
-		char message[ TCL_BUFF_STR ];
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) );
-		log_tcl_error( cm, message );
-		cmd( inter, "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
-		myexit( 24 );
-	}
-
-	int code = Tcl_Eval( inter, cm );
-
-	if( code != TCL_OK )
-		log_tcl_error( cm, Tcl_GetStringResult( inter ) );
-}
-
-
 void cmd( const char *cm, ... )
 {
 	char message[ TCL_BUFF_STR ];
@@ -102,7 +84,7 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
-		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
+		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
 		myexit( 24 );
 	}
 
@@ -117,7 +99,7 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", reqSz + 1 );
 		log_tcl_error( cm, message );
-		cmd( inter, "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
 	}
 	else
 	{
@@ -155,9 +137,7 @@ void log_tcl_error( const char *cm, const char *message )
 	}
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
-	plog( "\nTcl/Tk Error. See file '" );
-	plog( fname );
-	plog( "'\n" );
+	plog( "\nTcl/Tk Error. See file '%s'\n", "", fname );
 }
 
 #else
@@ -2012,56 +1992,48 @@ void show_description(char *lab)
 description *cur;
 int i;
 Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
-sprintf(msg, "if { [winfo exists .desc_%s]==1} {set i 1} {set i 0}", lab);
-cmd(inter, msg);
+cmd( "if { [winfo exists .desc_%s]==1} {set i 1} {set i 0}", lab );
 Tcl_UnlinkVar(inter, "i");
 if(i==1)
  {
   
-  sprintf(msg, "set vname %s",lab);
-  cmd(inter, msg);
-  cmd(inter, "set raise_description 1");
-  cmd(inter, "raise .desc_$vname .");
+  cmd( "set vname %s", lab );
+  cmd( "set raise_description 1" );
+  cmd( "raise .desc_$vname ." );
   return;
  }
  
- cmd(inter, "set w .desc_$vname");
+ cmd( "set w .desc_$vname" );
  cur=search_description(lab);
  if(!strcmp(cur->type,"Parameter") )
-   cmd( inter, "newtop $w \"Description: Parameter $vname\" { destroy .desc_%s }" );
+   cmd( "newtop $w \"Description: Parameter $vname\" { destroy .desc_%s }" );
  else
-   cmd(inter, "newtop $w \"Description: Variable $vname\" { destroy .desc_%s }");  
+   cmd( "newtop $w \"Description: Variable $vname\" { destroy .desc_%s }" );  
 
- cmd(inter, "frame $w.f");
- cmd(inter, "scrollbar $w.f.yscroll -command \"$w.f.text yview\"");
- cmd(inter, "text $w.f.text -wrap word -width 60 -height 5 -relief sunken -yscrollcommand \"$w.f.yscroll set\"");
- cmd(inter, "pack $w.f.yscroll -side right -fill y");
- cmd(inter, "pack $w.f.text -expand yes -fill both");
- cmd(inter, "pack $w.f");
- sprintf(msg, "$w.f.text insert end \"%s\"",cur->text);
- cmd(inter, msg);
- cmd(inter, "frame $w.b");
- sprintf(msg, "button $w.b.save -width -9 -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}",lab, lab, lab);
- cmd(inter, msg); 
- sprintf(msg, "button $w.b.eq -width -9 -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}",lab, lab);
- cmd(inter, msg); 
- sprintf(msg, "button $w.b.us -width -9 -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}",lab, lab);
- cmd(inter, msg); 
+ cmd( "frame $w.f" );
+ cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
+ cmd( "text $w.f.text -wrap word -width 60 -height 5 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
+ cmd( "pack $w.f.yscroll -side right -fill y" );
+ cmd( "pack $w.f.text -expand yes -fill both" );
+ cmd( "pack $w.f" );
+ cmd( "$w.f.text insert end \"%s\"", cur->text );
+ cmd( "frame $w.b" );
+ cmd( "button $w.b.save -width -9 -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}", lab, lab, lab ); 
+ cmd( "button $w.b.eq -width -9 -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}", lab, lab ); 
+ cmd( "button $w.b.us -width -9 -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}", lab, lab ); 
  if(!strcmp(cur->type, "Parameter"))
-   cmd(inter, "pack $w.b.save $w.b.us -padx 10 -pady 5 -side left");
+   cmd( "pack $w.b.save $w.b.us -padx 10 -pady 5 -side left" );
  else
-   cmd(inter, "pack $w.b.save $w.b.eq $w.b.us -padx 5 -pady 5 -side left");
+   cmd( "pack $w.b.save $w.b.eq $w.b.us -padx 5 -pady 5 -side left" );
   
- cmd(inter, "pack $w.b");
+ cmd( "pack $w.b" );
  
- sprintf( msg, "donehelp $w b2 { destroy .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab );
- cmd(inter, msg); 
+ cmd( "donehelp $w b2 { destroy .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab  ); 
 
-sprintf(msg, "set vname %s",lab);
-cmd(inter, msg);
-cmd(inter, "set raise_description 1");
+cmd( "set vname %s", lab );
+cmd( "set raise_description 1" );
 
-cmd(inter, "showtop .desc_$vname");
+cmd( "showtop .desc_$vname" );
 }
 
 
@@ -2164,8 +2136,8 @@ int choice;
 char *r; 
 
 scan_used_lab(lab, &choice);
-cmd(inter, "set l [join [$list.l get 0 end] \", \"]");
-cmd(inter, "destroytop $list"); 
+cmd( "set l [join [$list.l get 0 end] \", \"]" );
+cmd( "destroytop $list" ); 
 r=(char *)Tcl_GetVar(inter, "l",0);
 strcpy(s, r);
 }
@@ -2198,13 +2170,12 @@ double i, j,color;
 init_canvas();
 dimH=pixH/nrow;
 dimW=pixW/ncol;
-cmd( inter, "if { [winfo exists .lat] } { destroytop .lat }" );
+cmd( "if { [winfo exists .lat] } { destroytop .lat }" );
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-sprintf( msg, "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
-cmd(inter, msg);
+cmd( "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol  );
 
-cmd(inter, "set lat_update 1");
-cmd(inter, "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }");
+cmd( "set lat_update 1" );
+cmd( "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
 cmd( "bind .lat <2> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
 cmd( "bind .lat <3> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
 
@@ -2217,32 +2188,25 @@ else
 	{
 		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
 		// create (white) pallete entry if invalid palette in init_color
-		sprintf( msg, "if { ! [info exist c%d] } { set c%d white }", init_color, init_color );
-		cmd( inter, msg );
+		cmd( "if { ! [info exist c%d] } { set c%d white }", init_color, init_color  );
 	}
 		
 if(init_color==1001)
 {
-sprintf(msg, "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW);
-cmd(inter, msg);
+cmd( "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW );
 
-sprintf(msg, ".lat.c create rect 0 0 %d %d -fill white", (int)pixW, (int)pixH);
-cmd(inter, msg);
+cmd( ".lat.c create rect 0 0 %d %d -fill white", (int)pixW, (int)pixH );
 }
 else
 {
-sprintf(msg, "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string);
-cmd(inter, msg);
+cmd( "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string );
 
-sprintf(msg, ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string);
-cmd(inter, msg);
+cmd( ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string );
 }
-cmd(inter, "pack .lat.c");
+cmd( "pack .lat.c" );
 
-sprintf(msg, "set dimH %lf", dimH);
-cmd(inter, msg);
-sprintf(msg, "set dimW %lf", dimW);
-cmd(inter, msg);
+cmd( "set dimH %lf", dimH );
+cmd( "set dimW %lf", dimW );
 
 if(lattice_type==1)
 {
@@ -2250,14 +2214,13 @@ for(i=1; i<=nrow; i++)
  {
   for(j=1; j<=nrow; j++)
    {
-    sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string);
-   cmd(inter, msg);
+    cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
 
    }
  }
 } 
 
-cmd( inter, "showtop .lat centerS no no no" );
+cmd( "showtop .lat centerS no no no" );
 set_shortcuts_log( ".lat" );
 return(0);
 }
@@ -2271,7 +2234,7 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 double update_lattice(double line, double col, double val)
 {
 	// avoid operation if canvas was closed
-	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
+	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
 	if ( latcanv[ 0 ] == '0' )
 		return 0;
@@ -2284,20 +2247,17 @@ double update_lattice(double line, double col, double val)
 	{
 		sprintf( val_string, "$c%.0lf", val );		// no: use the positive RGB value
 		// create (white) pallete entry if invalid palette in val
-		sprintf( msg, "if { ! [info exist c%.0lf] } { set c%.0lf white }", val, val );
-		cmd( inter, msg );
+		cmd( "if { ! [info exist c%.0lf] } { set c%.0lf white }", val, val  );
 	}
 		
  if(lattice_type==1)
  {
- sprintf(msg, ".lat.c itemconfigure c%d_%d -fill %s",(int)line, (int)col, val_string);
- cmd(inter, msg);
+ cmd( ".lat.c itemconfigure c%d_%d -fill %s", (int)line, (int)col, val_string );
  return 0;
-}
+ }
 
-sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
-cmd(inter, msg);
-cmd(inter, "if {$lat_update == 1} {update} {}");
+cmd( ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string  );
+cmd( "if {$lat_update == 1} {update} {}" );
 return 0;  
 }
 
@@ -2308,13 +2268,13 @@ Save the existing lattice (if any) to the specified file name.
 double save_lattice( const char *fname )
 {
 	// avoid operation if no canvas or no file name
-	cmd( inter, "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
+	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
 	if ( latcanv[ 0 ] == '0' || strlen( fname ) == 0 )
 		return -1;
 	
 	Tcl_SetVar( inter, "latname", fname, 0 );
-	cmd(inter, "append latname \".eps\"; .lat.c postscript -colormode color -file $latname");
+	cmd( "append latname \".eps\"; .lat.c postscript -colormode color -file $latname" );
 	return 0;
 }
 
@@ -2416,7 +2376,7 @@ char lab[MAX_PATH_LENGTH];
 f=fopen("model_options.txt", "r");
 if(f==NULL)
  {
-  cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"");
+  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"" );
   return;
  }
 fscanf(f, "%499s", lab);
@@ -2424,7 +2384,7 @@ for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF &
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
-  cmd(inter, "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"");
+  cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"" );
   return;
  }
 
@@ -2471,8 +2431,7 @@ FILE *f;
 Tcl_LinkVar(inter, "eqfiledim", (char *) &i, TCL_LINK_INT);
 
 read_eq_filename(s);
-sprintf(msg, "set eqfiledim [file size %s]",s);
-cmd(inter, msg);
+cmd( "set eqfiledim [file size %s]", s );
 
 Tcl_UnlinkVar(inter, "eqfiledim");
 

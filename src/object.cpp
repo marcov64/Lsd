@@ -457,8 +457,7 @@ if( caller!=up)
 #ifdef TEST_OPTIMIZATION
 if(stairs>0 && sig_stairs==0)
  {
-  sprintf(msg, "\nMax searching steps for '%s' (equation for '%s', obj.='%s') = %d", l, stacklog->label, label, stairs);
-  plog(msg);
+  plog( "\nMax searching steps for '%s' (equation for '%s', obj.='%s') = %d", "", l, stacklog->label, label, stairs );
   sig_stairs=1;
  }
 stairs--;
@@ -1132,8 +1131,8 @@ void object::write(char const *lab, double value, int time, int lag)
         return;
     }
     if((!use_nan && is_nan(value)) || is_inf(value))
-    {sprintf(msg, "\nWarning: write of '%s' requested with an invalid value", lab);
-        plog(msg);
+    {
+		plog( "\nWarning: write of '%s' requested with an invalid value", "", lab);
         debug_flag=true;
         stacklog->vs->debug='d';
         return;
@@ -1148,8 +1147,7 @@ void object::write(char const *lab, double value, int time, int lag)
     }
         if(cv->param!=1 && time <= 0 && t>1)
         {
-            sprintf(msg, "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", lab, stacklog->vs->label, lab, t);
-            plog(msg);
+            plog( "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", "", lab, stacklog->vs->label, lab, t );
             cv->val[0]=value;
             cv->last_update=t;
         }
@@ -1159,8 +1157,7 @@ void object::write(char const *lab, double value, int time, int lag)
             {
                 if ( - time > cv->num_lag )		// check for invalid lag
                 {
-                    sprintf( msg, "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, ignored", lab, stacklog->vs->label, time );
-                    plog( msg );
+                    plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, ignored", "", lab, stacklog->vs->label, time );
                 }
                 else
                 {
@@ -1197,8 +1194,8 @@ if(this==NULL)
  return;
 }
 if((!use_nan && is_nan(value)) || is_inf(value))
-{sprintf(msg, "\nWarning: write of %s requested with an invalid value", lab);
- plog(msg);
+{
+ plog( "\nWarning: write of %s requested with an invalid value", "", lab );
  debug_flag=true;
  stacklog->vs->debug='d';
  return;
@@ -1213,8 +1210,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
      }
    if(cv->param!=1 && time <= 0 && t>1)
    {
-      sprintf(msg, "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", lab, stacklog->vs->label, lab, t);
-      plog(msg);
+      plog( "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", "", lab, stacklog->vs->label, lab, t );
 	  cv->val[0]=value;
       cv->last_update=t;
     }
@@ -1224,8 +1220,7 @@ for(cv=v; cv!=NULL; cv=cv->next)
 	{
 		if ( - time > cv->num_lag )		// check for invalid lag
 		{
-			sprintf( msg, "\nWarning: while writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored", lab, stacklog->vs->label, time );
-			plog( msg );
+			plog( "\nWarning: while writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored", "", lab, stacklog->vs->label, time );
 		}
 		else
 		{
@@ -1911,10 +1906,9 @@ cur1=cur=(search_var(this, lv))->up;
 for(a=0 ; cur!=NULL; cur=cur->next )
   a+=cur->cal(lv,lag);
 if(is_inf(a))
-   {sprintf(msg, "\nWarning: sum of values for '%s' is too high (eq. for '%s')", stacklog->vs->label, lv);
-    plog(msg);
-    sprintf(msg, "\nThe first object '%s' of the list is used",lo);
-    plog(msg);
+   {
+	plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs->label, lv );
+    plog( "\nThe first object '%s' of the list is used", "", lo );
     return(cur1);
    }
 
@@ -1922,10 +1916,9 @@ b=RND*a;
 while(b==a) //avoid RND ==1
  {b=RND*a;
   if(a==0)
-   {sprintf(msg, "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", stacklog->vs->label, lv);
-    plog(msg);
-    sprintf(msg, "\nThe first object '%s' of the list is used",lo);
-    plog(msg);
+   {
+	plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs->label, lv );
+    plog( "\nThe first object '%s' of the list is used", "", lo );
     return(cur1);
    }
  }
@@ -2025,8 +2018,8 @@ if(this==NULL)
 }
 
 if((!use_nan && is_nan(value)) || is_inf(value))
-{sprintf(msg, "\nWarning: increment of %s requested with an invalid value", lv);
- plog(msg);
+{
+ plog( "\nWarning: increment of %s requested with an invalid value", "", lv );
  debug_flag=true;
  stacklog->vs->debug='d';
  return value;
@@ -2065,8 +2058,8 @@ if(this==NULL)
 }
 
 if((!use_nan && is_nan(value)) || is_inf(value))
-{sprintf(msg, "\nWarning: multiply of %s requested with a wrong value", lv);
- plog(msg);
+{
+ plog( "\nWarning: multiply of %s requested with a wrong value", "", lv );
  debug_flag=true;
  stacklog->vs->debug='d';
  return value;
@@ -2098,24 +2091,17 @@ object *cur;
 if ( quit == 2 )		// simulation already being stopped
 	return;
 	
-char *buffer = new char[ strlen( logText ) + 20 ];
-sprintf( buffer, "\n\nERROR: %s\n", logText );
-plog( buffer );
-delete [] buffer;
+plog( "\n\nERROR: %s\n", "", logText );
 
 #ifndef NO_WINDOW
 if ( running )		// handle running events differently
 {
 	uncover_browser( );
-	cmd( inter, "wm deiconify .log; raise .log; focus -force .log" );
-	sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText );
-	cmd( inter, msg );
+	cmd( "wm deiconify .log; raise .log; focus -force .log" );
+	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 }
 else
-{
-	sprintf( msg, "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText );
-	cmd( inter, msg );
-}
+	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
 #endif
 
 if( ! running )
@@ -2123,50 +2109,48 @@ if( ! running )
 
 quit = 2;				// do not continue simulation
 
-sprintf(msg, "\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
-plog(msg);
-sprintf(msg, "\nOffending code contained in the equation for variable '%s'\n", stacklog->vs->label);
-plog(msg);
+plog( "\nFatal error detected at time %d", "highlight", t );
+plog( "\nOffending code contained in the equation for variable '%s'\n", "", stacklog->vs->label );
 
 print_stack();
 
 #ifndef NO_WINDOW
-cmd(inter, "wm deiconify .; wm deiconify .log; raise .log; focus -force .log");
+cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 
 choice=0;
-cmd( inter, "newtop .cazzo Error { set err 1 }" );
+cmd( "newtop .cazzo Error { set err 1 }" );
 
-cmd(inter, "frame .cazzo.t");
-cmd(inter, "label .cazzo.t.l -fg red -text \"An error occurred during the simulation run\"");
-cmd(inter, "pack .cazzo.t.l -pady 10");
-cmd(inter, "label .cazzo.t.l1 -text \"Information about the error and on the state of the model are reported\nin the log window. Current results are available in the Lsd browser.\n\nChoose one of the following options to continue\"");
-cmd(inter, "pack .cazzo.t.l1 -expand yes -fill both");
-cmd(inter, "pack .cazzo.t");
-cmd(inter, "set err 2");
-cmd(inter, "frame .cazzo.e -relief groove -bd 2");
-cmd(inter, "radiobutton .cazzo.e.r -variable err -value 2 -text \"Return to Lsd browser: choose this option to edit the model configuration\"");
-cmd(inter, "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code\"");
+cmd( "frame .cazzo.t" );
+cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation run\"" );
+cmd( "pack .cazzo.t.l -pady 10" );
+cmd( "label .cazzo.t.l1 -text \"Information about the error and on the state of the model are reported\nin the log window. Current results are available in the Lsd browser.\n\nChoose one of the following options to continue\"" );
+cmd( "pack .cazzo.t.l1 -expand yes -fill both" );
+cmd( "pack .cazzo.t" );
+cmd( "set err 2" );
+cmd( "frame .cazzo.e -relief groove -bd 2" );
+cmd( "radiobutton .cazzo.e.r -variable err -value 2 -text \"Return to Lsd browser: choose this option to edit the model configuration\"" );
+cmd( "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code\"" );
 
-cmd(inter, "pack .cazzo.e.r .cazzo.e.e -anchor w");
-cmd(inter, "pack .cazzo.e  -fill both -expand yes");
+cmd( "pack .cazzo.e.r .cazzo.e.e -anchor w" );
+cmd( "pack .cazzo.e  -fill both -expand yes" );
 
-cmd( inter, "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
+cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-cmd(inter, "bind .cazzo.e.r <Down> {focus .cazzo.e.e; .cazzo.e.e invoke}");
-cmd(inter, "bind .cazzo.e.e <Up> {focus .cazzo.e.r; .cazzo.e.r invoke}");
+cmd( "bind .cazzo.e.r <Down> {focus .cazzo.e.e; .cazzo.e.e invoke}" );
+cmd( "bind .cazzo.e.e <Up> {focus .cazzo.e.r; .cazzo.e.r invoke}" );
 
-cmd(inter, "bind .cazzo.e.r <Return> {set choice 1}");
-cmd(inter, "bind .cazzo.e.e <Return> {set choice 1}");
-cmd(inter, "bind .cazzo.e <Return> {set choice 1}");
-cmd(inter, "bind .cazzo <Return> {set choice 1}");
+cmd( "bind .cazzo.e.r <Return> {set choice 1}" );
+cmd( "bind .cazzo.e.e <Return> {set choice 1}" );
+cmd( "bind .cazzo.e <Return> {set choice 1}" );
+cmd( "bind .cazzo <Return> {set choice 1}" );
 
-cmd(inter, "showtop .cazzo");
+cmd( "showtop .cazzo" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
 
-cmd(inter, "set choice $err");
-cmd(inter, "destroytop .cazzo");
+cmd( "set choice $err" );
+cmd( "destroytop .cazzo" );
 
 if(choice==2)
  {
@@ -2192,10 +2176,7 @@ lsdstack *app;
 plog("\nList of variables currently under computation.\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)");
 plog("\n\nLevel\tVariable Label");
 for(app=stacklog; app!=NULL; app=app->prev)
- {
- sprintf(msg, "\n%d\t%s",app->ns, app->label);
- plog(msg);
- }
+ plog( "\n%d\t%s", "",app->ns, app->label );
 plog("\n");
 
 }

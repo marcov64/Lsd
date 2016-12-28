@@ -55,12 +55,6 @@ $(TARGET): $(SRC_DIR)modman.o
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
 
-
-
-
-
-
-
-
-
-
+# Clean object files for building for another distribution
+clean:
+	$(RM) $(SRC_DIR)modman.o

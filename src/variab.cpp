@@ -297,11 +297,9 @@ if(stackinfo_flag>=stack)
  {end_profile[stack-1]=clock();
   set_lab_tit(this);
   if(caller==NULL)
-    sprintf(msg, "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = SYSTEM", label, lab_tit, val[0], t, stack,(double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC) );
+    plog( "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = SYSTEM", "", label, lab_tit, val[0], t, stack,(double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC) );
   else
-    sprintf(msg, "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = %s, triggering var. = %s", label, lab_tit, val[0], t, stack, (double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC), caller->label, stacklog->prev->label);
-
-  plog(msg);
+    plog( "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = %s, triggering var. = %s", "", label, lab_tit, val[0], t, stack, (double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC), caller->label, stacklog->prev->label );
  }
 
 last_update++;

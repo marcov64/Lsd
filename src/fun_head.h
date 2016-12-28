@@ -92,7 +92,6 @@ double _abs(double a)
 
 #ifndef NO_WINDOW
 #include <tk.h>
-void cmd( Tcl_Interp *inter, const char *cm );
 
 extern Tcl_Interp *inter;
 extern double i_values[];

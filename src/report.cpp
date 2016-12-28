@@ -64,13 +64,12 @@ variable *cv;
 
 
 sprintf(name_rep, "report_%s.html", simul_name);
-sprintf(msg, "set mrep %s", name_rep);
-cmd(inter, msg);
-cmd(inter, "set choice [file exists $mrep]");
+cmd( "set mrep %s", name_rep );
+cmd( "set choice [file exists $mrep]" );
 if(*choice == 1)
  {
-  cmd(inter, "set answer [tk_messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok]");
-  cmd(inter, "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}");
+  cmd( "set answer [tk_messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok]" );
+  cmd( "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 0} {set choice 1}" );
   if ( *choice == 1 )
 	  return;
  }
@@ -78,103 +77,100 @@ if(*choice == 1)
 
 *choice=0;
 
-cmd( inter, "newtop .w \"Report Generation\" { set choice 3 }" );
+cmd( "newtop .w \"Report Generation\" { set choice 3 }" );
 
-cmd(inter, "label .w.l1 -text \"Report Generation\" -font {System 14 bold}");
-cmd(inter, "frame .w.f");
-cmd(inter, "label .w.f.l -text \"Model title: \"");
-sprintf(msg, "set reptit %s", simul_name);
-cmd(inter, msg);
-cmd(inter, "entry .w.f.e -width 40 -textvariable reptit");
-cmd(inter, "pack .w.f.l .w.f.e -side left");
+cmd( "label .w.l1 -text \"Report Generation\" -font {System 14 bold}" );
+cmd( "frame .w.f" );
+cmd( "label .w.f.l -text \"Model title: \"" );
+cmd( "set reptit %s", simul_name );
+cmd( "entry .w.f.e -width 40 -textvariable reptit" );
+cmd( "pack .w.f.l .w.f.e -side left" );
 
-cmd(inter, "frame .w.l");
+cmd( "frame .w.l" );
 
 
-cmd(inter, "frame .w.l.opt");
-cmd(inter, "label .w.l.opt.l -text \"Variables listing format: \"");
-cmd(inter, "set lmenu 1; set ltext 0");
-cmd(inter, "checkbutton .w.l.opt.popup -text \"Scrolling boxes\" -variable lmenu");
-cmd(inter, "checkbutton .w.l.opt.text -text \"Simple text\" -variable ltext");
-cmd(inter, "pack .w.l.opt.l .w.l.opt.popup .w.l.opt.text -anchor w -side left");
-cmd(inter, "pack .w.l.opt");
+cmd( "frame .w.l.opt" );
+cmd( "label .w.l.opt.l -text \"Variables listing format: \"" );
+cmd( "set lmenu 1; set ltext 0" );
+cmd( "checkbutton .w.l.opt.popup -text \"Scrolling boxes\" -variable lmenu" );
+cmd( "checkbutton .w.l.opt.text -text \"Simple text\" -variable ltext" );
+cmd( "pack .w.l.opt.l .w.l.opt.popup .w.l.opt.text -anchor w -side left" );
+cmd( "pack .w.l.opt" );
 
-cmd(inter, "checkbutton .w.code -text \"Include equations code\" -underline 8 -variable code");
-cmd(inter, "bind .w <Control-e> {.w.code invoke}; bind .w <Control-E> {.w.code invoke}");
-cmd(inter, "checkbutton .w.init -text \"Include initial values\" -underline 8 -variable init");
-cmd(inter, "bind .w <Control-i> {.w.init invoke}; bind .w <Control-I> {.w.init invoke}");
+cmd( "checkbutton .w.code -text \"Include equations code\" -underline 8 -variable code" );
+cmd( "bind .w <Control-e> {.w.code invoke}; bind .w <Control-E> {.w.code invoke}" );
+cmd( "checkbutton .w.init -text \"Include initial values\" -underline 8 -variable init" );
+cmd( "bind .w <Control-i> {.w.init invoke}; bind .w <Control-I> {.w.init invoke}" );
 
-cmd(inter, "frame .w.s -bd 2 -relief groove");
-cmd(inter, "label .w.s.lab -text \"Extra sections\"");
-cmd(inter, "frame .w.s.e1 -bd 2 -relief groove");
-cmd(inter, "label .w.s.e1.lab -text \"First extra section\"");
-cmd(inter, "set es1 1");
-cmd(inter, "frame .w.s.e1.c");
-cmd(inter, "checkbutton .w.s.e1.c.c -text \"Include section 1\" -variable es1 -command {if {$es1==1} {.w.s.e1.header.tit conf -state normal; .w.s.e1.file.tit conf -state normal} {.w.s.e1.header.tit conf -state disabled; .w.s.e1.file.tit conf -state disabled}}");
-cmd(inter, "set html1 0");
-cmd(inter, "checkbutton .w.s.e1.c.h -text \"Accept HTML formatting tags\" -variable html1");
-cmd(inter, "pack .w.s.e1.c.c .w.s.e1.c.h -side left -fill x");
-cmd(inter, "frame .w.s.e1.header");
-cmd(inter, "label .w.s.e1.header.tlab -text \"Title for section 1\"");
-cmd(inter, "set tit1 Description");
-cmd(inter, "entry .w.s.e1.header.tit -width 50  -textvariable tit1");
-cmd(inter, "pack .w.s.e1.header.tlab .w.s.e1.header.tit -side left");
+cmd( "frame .w.s -bd 2 -relief groove" );
+cmd( "label .w.s.lab -text \"Extra sections\"" );
+cmd( "frame .w.s.e1 -bd 2 -relief groove" );
+cmd( "label .w.s.e1.lab -text \"First extra section\"" );
+cmd( "set es1 1" );
+cmd( "frame .w.s.e1.c" );
+cmd( "checkbutton .w.s.e1.c.c -text \"Include section 1\" -variable es1 -command {if {$es1==1} {.w.s.e1.header.tit conf -state normal; .w.s.e1.file.tit conf -state normal} {.w.s.e1.header.tit conf -state disabled; .w.s.e1.file.tit conf -state disabled}}" );
+cmd( "set html1 0" );
+cmd( "checkbutton .w.s.e1.c.h -text \"Accept HTML formatting tags\" -variable html1" );
+cmd( "pack .w.s.e1.c.c .w.s.e1.c.h -side left -fill x" );
+cmd( "frame .w.s.e1.header" );
+cmd( "label .w.s.e1.header.tlab -text \"Title for section 1\"" );
+cmd( "set tit1 Description" );
+cmd( "entry .w.s.e1.header.tit -width 50  -textvariable tit1" );
+cmd( "pack .w.s.e1.header.tlab .w.s.e1.header.tit -side left" );
 
-cmd(inter, "frame .w.s.e1.file");
-cmd(inter, "label .w.s.e1.file.tlab -text \"File name\"");
-cmd(inter, "set file1 description.txt");
-cmd(inter, "entry .w.s.e1.file.tit -width 50 -textvariable file1");
-cmd(inter, "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}");
-cmd(inter, "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left");
+cmd( "frame .w.s.e1.file" );
+cmd( "label .w.s.e1.file.tlab -text \"File name\"" );
+cmd( "set file1 description.txt" );
+cmd( "entry .w.s.e1.file.tit -width 50 -textvariable file1" );
+cmd( "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}" );
+cmd( "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left" );
 
-cmd(inter, "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w ");
+cmd( "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w " );
 
-cmd(inter, "frame .w.s.e2 -bd 2 -relief groove");
-cmd(inter, "label .w.s.e2.lab -text \"Second extra section\"");
-cmd(inter, "frame .w.s.e2.c");
-cmd(inter, "checkbutton .w.s.e2.c.c -text \"Include section 2\" -variable es2 -command {if {$es2==1} {.w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal} {.w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled}}");
-cmd(inter, "set html2 0");
-cmd(inter, "checkbutton .w.s.e2.c.h -text \"Accept HTML formatting tags\" -variable html2");
-cmd(inter, "pack .w.s.e2.c.c .w.s.e2.c.h -side left -fill x");
+cmd( "frame .w.s.e2 -bd 2 -relief groove" );
+cmd( "label .w.s.e2.lab -text \"Second extra section\"" );
+cmd( "frame .w.s.e2.c" );
+cmd( "checkbutton .w.s.e2.c.c -text \"Include section 2\" -variable es2 -command {if {$es2==1} {.w.s.e2.header.tit conf -state normal; .w.s.e2.file.tit conf -state normal} {.w.s.e2.header.tit conf -state disabled; .w.s.e2.file.tit conf -state disabled}}" );
+cmd( "set html2 0" );
+cmd( "checkbutton .w.s.e2.c.h -text \"Accept HTML formatting tags\" -variable html2" );
+cmd( "pack .w.s.e2.c.c .w.s.e2.c.h -side left -fill x" );
 
-cmd(inter, "frame .w.s.e2.header");
-cmd(inter, "label .w.s.e2.header.tlab -text \"Title for section 2 \"");
-cmd(inter, "set tit2 Comments");
-cmd(inter, "entry .w.s.e2.header.tit -width 50 -state disabled -textvariable tit2");
-cmd(inter, "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left");
+cmd( "frame .w.s.e2.header" );
+cmd( "label .w.s.e2.header.tlab -text \"Title for section 2 \"" );
+cmd( "set tit2 Comments" );
+cmd( "entry .w.s.e2.header.tit -width 50 -state disabled -textvariable tit2" );
+cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left" );
 
-cmd(inter, "frame .w.s.e2.file");
-cmd(inter, "label .w.s.e2.file.tlab -text \"File name\"");
-cmd(inter, "set file2 comments.txt");
-cmd(inter, "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2");
-cmd(inter, "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}");
-cmd(inter, "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left");
+cmd( "frame .w.s.e2.file" );
+cmd( "label .w.s.e2.file.tlab -text \"File name\"" );
+cmd( "set file2 comments.txt" );
+cmd( "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2" );
+cmd( "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}" );
+cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left" );
 
-cmd(inter, "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w ");
+cmd( "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w " );
 
 Tcl_LinkVar(inter, "es1", (char *) &es1, TCL_LINK_INT);
 Tcl_LinkVar(inter, "es2", (char *) &es2, TCL_LINK_INT);
 
-cmd(inter, "pack .w.s.lab .w.s.e1 .w.s.e2");
+cmd( "pack .w.s.lab .w.s.e1 .w.s.e2" );
 
-cmd(inter, "pack .w.l1 .w.f .w.l .w.s");
+cmd( "pack .w.l1 .w.f .w.l .w.s" );
 
-cmd( inter, "okXhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
+cmd( "okXhelpcancel .w b Search { set res [tk_getSaveFile -parent .w -title \"Save Report File\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }" );
 
-cmd(inter, "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}");
-cmd(inter, "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}");
-cmd(inter, "bind .w <Control-c> {.w.b.can invoke}; bind .w <Control-C> {.w.b.can invoke}");
-cmd(inter, "bind .w <Return> {.w.b.ok invoke}");
+cmd( "bind .w <Control-o> {.w.b.ok invoke}; bind .w <Control-O> {.w.b.ok invoke}" );
+cmd( "bind .w <Control-n> {.w.b.x invoke}; bind .w <Control-N> {.w.b.x invoke}" );
+cmd( "bind .w <Control-c> {.w.b.can invoke}; bind .w <Control-C> {.w.b.can invoke}" );
+cmd( "bind .w <Return> {.w.b.ok invoke}" );
 
-sprintf(msg, "set code %d", code);
-cmd(inter, msg);
-sprintf(msg, "set init %d", init);
-cmd(inter, msg);
+cmd( "set code %d", code );
+cmd( "set init %d", init );
 
 Tcl_LinkVar(inter, "code", (char *) &code, TCL_LINK_INT);
 Tcl_LinkVar(inter, "init", (char *) &init, TCL_LINK_INT);
 
-cmd(inter, "showtop .w centerS");
+cmd( "showtop .w centerS" );
 
 here_create_report:
 while(*choice==0)
@@ -185,7 +181,7 @@ Tcl_UnlinkVar(inter, "init");
 Tcl_UnlinkVar(inter, "es1");
 Tcl_UnlinkVar(inter, "es2");
 
-cmd(inter, "destroytop .w");
+cmd( "destroytop .w" );
   if(*choice==2)
    { app=(char *)Tcl_GetVar(inter, "res",0);
      strcpy(name_rep, app);
@@ -202,7 +198,7 @@ cmd(inter, "destroytop .w");
 start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
  {
-  cmd( inter, "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
+  cmd( "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
 
 if(*choice==1)
  {
@@ -224,9 +220,9 @@ if(*choice==2)
  goto start;
 }
 
-cmd(inter, "set choice $ltext");
+cmd( "set choice $ltext" );
 ltext=*choice;
-cmd(inter, "set choice $lmenu");
+cmd( "set choice $lmenu" );
 lmenu=*choice;
 
 
@@ -261,7 +257,7 @@ if(es1==1)
   app=(char *)Tcl_GetVar(inter, "tit1",0);
   sprintf(msg, "<BR><I><U>%s</U></I><BR>", app);
   fprintf(frep, "%s",msg);
-  cmd(inter, "set choice $html1");
+  cmd( "set choice $html1" );
   for(ch=fgetc(f); ch!=EOF; ch=fgetc(f) )
    {
    if(*choice==0)
@@ -293,8 +289,7 @@ if(es1==1)
    {
    fprintf(frep, "<BR><I><U><B>Description</B></U></I><BR>");
    fprintf(frep, "No description file available.<BR>\n");
-   sprintf(msg, "File %s not found. First extra section skipped\n", app);
-   plog(msg);
+   plog( "File %s not found. First extra section skipped\n", "", app );
    }
   }
  }
@@ -311,7 +306,7 @@ if(es2==1)
   sprintf(msg, "<BR><I><U>%s</U></I><BR>", app);
   fprintf(frep, "%s",msg);
 
-  cmd(inter, "set choice $html2");
+  cmd( "set choice $html2" );
   for(ch=fgetc(f); ch!=EOF; ch=fgetc(f) )
    {
    if(*choice==0)
@@ -340,8 +335,8 @@ if(es2==1)
   fprintf(frep, "<BR>");
   }
   else
-   {sprintf(msg, "File %s not found. Second extra section skipped\n", app);
-   plog(msg);
+   {
+	plog( "File %s not found. Second extra section skipped\n", "", app );
    }
 
   }
@@ -355,8 +350,7 @@ fprintf(frep, "<I><U>Object structure</I></U><BR>\n");
 write_str(r, frep, count, "");
 write_list(frep, r, 1, "");
 fprintf(frep, "<BR><I><U>Equation file</I></U>: &nbsp;");
-sprintf(msg, "set app [file tail \"%s\"]", equation_name);
-cmd(inter, msg);
+cmd( "set app [file tail \"%s\"]", equation_name );
 app=(char *)Tcl_GetVar(inter, "app",0);
 strcpy(msg, app);
 fprintf(frep, "<B>%s</B><BR><BR>\n", msg);
@@ -376,11 +370,9 @@ fprintf(frep,"</BODY> </HTML>");
 fclose(frep);
 
 
-sprintf(msg, "Finished. Report in file: \n%s\n", name_rep);
-plog(msg);
-sprintf(msg, "set namerep %s", name_rep);
-cmd(inter, msg);
-cmd(inter, "LsdHtml $namerep");
+plog( "Finished. Report in file: \n%s\n", "", name_rep );
+cmd( "set namerep %s", name_rep );
+cmd( "LsdHtml $namerep" );
 
 }
 
@@ -450,7 +442,7 @@ char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], c3_lab[2*MAX_LINE_SIZE], 
 int done, i, one, j,flag_begin, flag_string, flag_comm, flag_var;
 object *cur, *cur2;
 
-cmd(inter, "update");
+cmd( "update" );
 if(v->param==1)
   fprintf(frep, "<P>\n<A NAME=\"_d_%s\"><u><I>Parameter</I></u><B> %s</B></A>", v->label, v->label);
 if(v->param==0)
@@ -667,9 +659,7 @@ for(cur=r; cur!=NULL; cur=skip_next_obj(cur, &count) )
           if(frep!=NULL)
             fprintf(frep, "<A HREF=\"#%s\">%s</A> ", cv->label, cv->label);
           else
-            {sprintf(msg, "$list.l insert end %s",cv->label);
-             cmd(inter, msg);
-            } 
+            cmd( "$list.l insert end %s", cv->label );
           fatto=1;
          }
        }
@@ -771,17 +761,17 @@ if(flag_all==1) //initial listing
 else
   fprintf(frep, "<I>List of variables:</I> &nbsp;");
 
-cmd(inter, "lappend rawlist"); //create the list if not existed
-cmd(inter, "unset rawlist"); //empty the list
-cmd(inter, "lappend rawlist"); //create a surely empty list
+cmd( "lappend rawlist" ); //create the list if not existed
+cmd( "unset rawlist" ); //empty the list
+cmd( "lappend rawlist" ); //create a surely empty list
 
 if(!strcmp(prefix, "_i_") )
  fill_list_var(root, flag_all, 1); //insert only lagged variables
 else
  fill_list_var(root, flag_all, 0); //insert all the variables
 
-cmd(inter, "set alphalist [lsort -dictionary $rawlist]");
-cmd(inter, "set num [llength $alphalist]");
+cmd( "set alphalist [lsort -dictionary $rawlist]" );
+cmd( "set num [llength $alphalist]" );
 if(flag_all==0) //distinguish the case you are compiling the initial list of element (all) or for a single Object)
   sprintf(s1, "form_v_%s_%s",root->label, prefix);
 else
@@ -791,8 +781,7 @@ if(lmenu==1 || (lmenu==0 && ltext==0) )
 if(ltext==1)
 {
 for(i=0; i<num; i++)
- {sprintf(msg, "set app [lindex $alphalist %d]",i);
-  cmd(inter, msg);
+ {cmd( "set app [lindex $alphalist %d]", i );
   app=(char *)Tcl_GetVar(inter, "app",0);
   strcpy(msg, app);
   sscanf(msg, "%s %s", s1, s2);
@@ -808,14 +797,14 @@ if(flag_all==1) //initial listing
 else
  fprintf(frep, "<BR><I>List of parameters:</I> &nbsp;");
 
-cmd(inter, "lappend rawlist"); //create the list if not existed
-cmd(inter, "unset rawlist"); //empty the list
-cmd(inter, "lappend rawlist"); //create a surely empty list
+cmd( "lappend rawlist" ); //create the list if not existed
+cmd( "unset rawlist" ); //empty the list
+cmd( "lappend rawlist" ); //create a surely empty list
 
 fill_list_par(root, flag_all);
 
-cmd(inter, "set alphalist [lsort -dictionary $rawlist]");
-cmd(inter, "set num [llength $alphalist]");
+cmd( "set alphalist [lsort -dictionary $rawlist]" );
+cmd( "set num [llength $alphalist]" );
 if(flag_all==0) //distinguish the case you are compiling the initial list of element (all) or for a single Object)
  sprintf(s1, "form_p_%s_%s",root->label, prefix);
 else
@@ -826,8 +815,7 @@ if(lmenu==1 || (lmenu==0 && ltext==0) )
 if(ltext==1)
 {
 for(i=0; i<num; i++)
- {sprintf(msg, "set app [lindex $alphalist %d]",i);
-  cmd(inter, msg);
+ {cmd( "set app [lindex $alphalist %d]", i );
   app=(char *)Tcl_GetVar(inter, "app",0);
   strcpy(msg, app);
   fprintf(frep, "<A HREF=\"#%s%s\">%s</A>",prefix, msg, msg);
@@ -838,7 +826,7 @@ for(i=0; i<num; i++)
 if(num==0)
  fprintf(frep, "(no parameters)");
 else
- cmd(inter, "unset app");
+ cmd( "unset app" );
 }
 Tcl_UnlinkVar(inter, "num");
 
@@ -859,10 +847,7 @@ bridge *cb;
 
 for(cv=r->v; cv!=NULL; cv=cv->next)
  {if( (cv->param==0 || cv->param==2) && (flag_init==0 || cv->num_lag>0))
-   {sprintf(msg, "lappend rawlist \"%s (%d)\"", cv->label, cv->num_lag);
-    cmd(inter, msg);
-   }
-
+   cmd( "lappend rawlist \"%s (%d)\"", cv->label, cv->num_lag );
  }
 if(flag_all==0)
  return;
@@ -882,10 +867,7 @@ bridge *cb;
 
 for(cv=r->v; cv!=NULL; cv=cv->next)
  {if(cv->param==1)
-   {sprintf(msg, "lappend rawlist \"%s\"", cv->label);
-    cmd(inter, msg);
-   }
-
+   cmd( "lappend rawlist \"%s\"", cv->label );
  }
 if(flag_all==0)
  return;
@@ -947,8 +929,7 @@ cur_descr=search_description(r->label);
 if(cur_descr==NULL)
   {
    add_description(r->label, "Object", "(no description available)");
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", r->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", r->label);
    cur_descr=search_description(r->label);
   } 
 
@@ -1005,8 +986,7 @@ if(r->v!=NULL)
      add_description(curv->label, "Parameter", "(no description available)");  
    if(curv->param==2)
      add_description(curv->label, "Function", "(no description available)");  
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cur->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", cur->label );
    cur_descr=search_description(curv->label);
   } 
 
@@ -1218,8 +1198,7 @@ fprintf(frep,"%s", msg);
 
 
 for(i=0; i<num; i++)
- {sprintf(msg, "set app [lindex $alphalist %d]",i);
-  cmd(inter, msg);
+ {cmd( "set app [lindex $alphalist %d]", i );
   app=(char *)Tcl_GetVar(inter, "app",0);
   strcpy(msg, app);
   sscanf(msg, "%s %s", s1, s2);
@@ -1253,8 +1232,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
      add_description(cv->label, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
    cd=search_description(cv->label);
   } 
 
@@ -1332,8 +1310,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
      add_description(cv->label, "Parameter", "(no description available)");  
    if(cv->param==2)
      add_description(cv->label, "Function", "(no description available)");  
-   sprintf(msg, "\nWarning: description for '%s' not found. New one created.", cv->label);
-   plog(msg);
+   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
    cd=search_description(cv->label);
   } 
 

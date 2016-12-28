@@ -53,7 +53,7 @@ Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 
-- void cmd(Tcl_Interp *inter, char *cc);
+- void cmd(char *cc);
 Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
@@ -115,6 +115,7 @@ char *eq_file=NULL;			// equation file content
 char *equation_name = NULL;	// equation file name
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
+char *lsdroot = NULL;		// path of Lsd root directory
 char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
@@ -122,6 +123,7 @@ char *struct_file = NULL;	// name of current configuration file
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ];// equations saved in configuration file
 char msg[ TCL_BUFF_STR ];	// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
+char tcl_dir[ MAX_PATH_LENGTH ] = "";	// Tcl/Tk directory
 description *descr = NULL;	// model description structure
 int actual_steps=0;			// number of executed time steps
 int choice;					// Tcl menu control variable (main window)
@@ -154,7 +156,7 @@ LSD MAIN
 *********************************/
 int lsdmain(int argn, char **argv)
 {
-char tcl_dir[MAX_PATH_LENGTH], str[MAX_PATH_LENGTH], *lsdroot;
+char *str;
 int i, len, done;
 FILE *f;
 
@@ -315,66 +317,64 @@ Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug_flag", (char *) &debug_flag, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 
-cmd(inter, "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}");
+cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}" );
 if(debug_flag)
  {
- cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"Spaces in file path\" -detail \"The directory containing the model is:\n[pwd]\nIt appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"");
+ cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Spaces in file path\" -detail \"The directory containing the model is:\n[pwd]\nIt appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
  myexit(5);
  
  }
 
-cmd(inter, "tk appname browser");
+cmd( "tk appname browser" );
 // check if LSDROOT already exists and use it if so, if not, search the current directory tree
-cmd( inter, "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
-cmd( inter, "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
-lsdroot = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-if ( lsdroot == NULL || strlen( lsdroot ) == 0 )
+cmd( "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
+cmd( "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
+str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
+if ( str == NULL || strlen( str ) == 0 )
  {
- cmd(inter, "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"");
+ cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"" );
  myexit(6);
  }
-strcpy( str, lsdroot );
-lsdroot = ( char * ) calloc( strlen( str ) + 1, sizeof ( char ) );
+lsdroot = new char[ strlen( str ) + 1 ];
 strcpy( lsdroot, str );
-sprintf(msg, "set RootLsd \"%s\"",lsdroot);
-len=strlen(msg);
-for(i=0; i<len; i++)
- if(msg[i]=='\\')
-  msg[i]='/';
-cmd(inter, msg);
+len = strlen( lsdroot );
+for ( i = 0; i < len; ++i )
+	if ( lsdroot[ i ] == '\\' )
+		lsdroot[ i ] = '/';
+cmd( "set RootLsd \"%s\"", lsdroot );
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-cmd(inter, "set done [file exist $RootLsd/lmm_options.txt]");
+cmd( "set done [file exist $RootLsd/lmm_options.txt]" );
 if(done==1)
  {
-  cmd(inter, "set f [open $RootLsd/lmm_options.txt r]");
-  cmd(inter, "gets $f Terminal");
-  cmd(inter, "gets $f HtmlBrowser");
-  cmd(inter, "gets $f fonttype");
-  cmd(inter, "gets $f wish");
-  cmd(inter, "gets $f LsdSrc");
-  cmd(inter, "close $f");
+  cmd( "set f [open $RootLsd/lmm_options.txt r]" );
+  cmd( "gets $f Terminal" );
+  cmd( "gets $f HtmlBrowser" );
+  cmd( "gets $f fonttype" );
+  cmd( "gets $f wish" );
+  cmd( "gets $f LsdSrc" );
+  cmd( "close $f" );
  }
 else
  { 
-  cmd(inter, "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"");
+  cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"" );
  }
 
 Tcl_UnlinkVar(inter, "done");
 
 // load native Tcl procedures for windows management
-cmd( inter, "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/align.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/align.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	myexit( 7 + choice );
 
 // load native Tcl procedures for external files handling
-cmd( inter, "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/ls2html.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/ls2html.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 	myexit( 7 + choice );
 
 #ifdef TKCON
 // launch TkCon as an auxiliary window for debugging
-cmd( inter, "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is continuing with no debug console.\" } }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is continuing with no debug console.\" } }" );
 #endif
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
@@ -385,15 +385,15 @@ Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
 // set main window icon
-cmd(inter, "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lsd.xbm}");
+cmd( "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lsd.xbm}" );
 // set main window position parameters now
-cmd(inter, "wm geometry . \"[expr $hsizeB]x$vsizeB+$hmargin+$vmargin\"");
-cmd( inter, "wm minsize . [ expr $hsizeB ] [ expr $vsizeB / 2 ]" );
-cmd( inter, "wm protocol . WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
+cmd( "wm geometry . \"[expr $hsizeB]x$vsizeB+$hmargin+$vmargin\"" );
+cmd( "wm minsize . [ expr $hsizeB ] [ expr $vsizeB / 2 ]" );
+cmd( "wm protocol . WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
 
-cmd(inter, "label .l -text \"Starting Lsd\"");
-cmd(inter, "pack .l");
-cmd(inter, "update");
+cmd( "label .l -text \"Starting Lsd\"" );
+cmd( "pack .l" );
+cmd( "update" );
 
 create_logwindow( );
 
@@ -407,7 +407,7 @@ eq_file=upload_eqfile();
 strcpy( lsd_eq_file, "" );
 sprintf( name_rep, "report_%s.html", simul_name );
 
-cmd(inter, "destroy .l");
+cmd( "destroy .l" );
 #endif
 
 stacklog = new lsdstack;
@@ -452,6 +452,7 @@ delete [ ] struct_file;
 delete [ ] equation_name;
 delete [ ] path;
 delete [ ] simul_name;
+delete [ ] lsdroot;
 
 return 0;
 }
@@ -479,11 +480,10 @@ Tcl_LinkVar(inter, "done_in", (char *) &done_in, TCL_LINK_INT);
 Tcl_SetVar(inter, "done", "0", 0);
 
 cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
-cmd( inter, "wm deiconify .log; raise .log; focus .log" );
+cmd( "wm deiconify .log; raise .log; focus .log" );
 
 #else
-sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
-plog(msg);
+plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
 
 for(i=1; i<=sim_num && quit!=2; i++)
@@ -495,8 +495,7 @@ empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry N
 prepare_plot(root, i);
 #endif
 
-sprintf(msg, "\nSimulation %d running...", i);
-plog(msg);
+plog( "\nSimulation %d running...", "", i );
 
 // if new batch configuration file, reload all
 if ( batch_sequential_loop )
@@ -504,10 +503,9 @@ if ( batch_sequential_loop )
 	if ( load_configuration( root, false ) != 0 )
 	{
 #ifndef NO_WINDOW 
-		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
 #else
-		sprintf(msg, "\nFile %s not found or corrupted", struct_file);
-		plog(msg);
+		plog( "\nFile %s not found or corrupted", "", struct_file );
 #endif
 		myexit(9);
 	}
@@ -519,10 +517,9 @@ if ( i > 1 )
 	if ( load_configuration( root, true ) != 0 )
 	{
 #ifndef NO_WINDOW 
-		cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
 #else
-		sprintf(msg, "\nFile %s not found or corrupted", struct_file);
-		plog(msg);
+		plog( "\nFile %s not found or corrupted", "", struct_file );
 #endif
 		myexit(9);
 	}
@@ -534,11 +531,9 @@ print_title(root);
 if ( no_more_memory )
  {
 #ifndef NO_WINDOW 
- sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLsd will close now.\"", series_saved, max_step);
- cmd(inter, msg);
+ cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLsd will close now.\"", series_saved, max_step );
 #else
- sprintf(msg, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step);
- plog(msg);
+ plog( "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", "", series_saved, max_step );
 #endif
  myexit(10);
  }
@@ -568,7 +563,7 @@ if ( pause_run )
 if(when_debug==t)
 {
   debug_flag=true;
-  cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+  cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
 }
 #endif
 
@@ -583,39 +578,31 @@ switch( done_in )
 {
 case 0:
  if ( ! pause_run && ! fast )
-  {
-	if(cur_plt==0)
-	{
-		sprintf(msg,"\nSim. %d step %d done",i,t);
-		plog(msg);
-	}
-  }
+	if ( cur_plt == 0 )
+		plog( "\nSim. %d step %d done", "", i, t );
 break;
 
 case 1:			// Stop button in Log window / s/S key in Runtime window
   if ( pause_run )
-	cmd( inter, "wm title .log \"$origLogTit\"" );
-  sprintf(msg, "\nSimulation stopped at t = %d", t);
-  plog(msg);
+	cmd( "wm title .log \"$origLogTit\"" );
+  plog( "\nSimulation stopped at t = %d", "", t );
   quit=2;
 break;
 
 case 2:			// Fast button in Log window / f/F key in Runtime window
  fast = true;
  debug_flag=false;
- cmd(inter, "set a [split [winfo children .] ]");
- cmd(inter, " foreach i $a {if [string match .plt* $i] {wm withdraw $i}}");
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}",i, i);
- cmd(inter, msg);
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i);
- cmd(inter, msg);
+ cmd( "set a [split [winfo children .] ]" );
+ cmd( " foreach i $a {if [string match .plt* $i] {wm withdraw $i}}" );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}", i, i );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i );
 break;
 
 case 3:			// Debug button in Log window / d/D key in Runtime window
 if ( ! pause_run )
 {
 	debug_flag=true;
-	cmd( inter, "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+	cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
 }
 else			// if paused, just call the data browser
 {
@@ -627,28 +614,24 @@ break;
 
 case 4:			// Observe button in Log window / o/O key in Runtime window
  fast = false;
- cmd(inter, "set a [split [winfo children .] ]");
- cmd(inter, " foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}");
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}",i, i);
- cmd(inter, msg);
- sprintf(msg, "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}",i, i);
- cmd(inter, msg);
+ cmd( "set a [split [winfo children .] ]" );
+ cmd( " foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}" );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}", i, i );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}", i, i );
 break;
  
 // plot window DELETE_WINDOW button handler
 case 5:
  if ( pause_run )
-	cmd( inter, "wm title .log \"$origLogTit\"" );
- sprintf(msg, "if { [winfo exist .plt%d]} {destroytop .plt%d} {}", i, i);
- cmd(inter, msg);
- sprintf(msg, "\nSimulation stopped at t = %d", t);
- plog(msg);
+	cmd( "wm title .log \"$origLogTit\"" );
+ cmd( "if { [winfo exist .plt%d]} {destroytop .plt%d} {}", i, i );
+ plog( "\nSimulation stopped at t = %d", "", t );
  quit=2;
 break;
 
 case 6:
  Tcl_LinkVar(inter, "app_refresh", (char *) &app, TCL_LINK_DOUBLE);
- cmd(inter, "set app_refresh $refresh");
+ cmd( "set app_refresh $refresh" );
  Tcl_UnlinkVar(inter, "app_refresh");
  if(app<2 && app > 1)
   refresh=app;
@@ -656,10 +639,8 @@ break;
 
 // runtime plot events
 case 7:  		// Center button
- sprintf(msg, "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step);
- cmd(inter, msg);
- sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i);
- cmd(inter, msg);
+ cmd( "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step );
+ cmd( "if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i );
 break;
 
 case 8: 		// Scroll checkbox
@@ -670,16 +651,15 @@ case 9: 		// Pause simulation
  pause_run = ! pause_run;
  if ( pause_run )
  {
-	cmd( inter, "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-	sprintf( msg, "\nSimulation paused at t = %d", t );
-	plog( msg );
-	cmd( inter, ".log.but.pause conf -text Resume" );
+	cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
+	plog( "\nSimulation paused at t = %d", "", t );
+	cmd( ".log.but.pause conf -text Resume" );
  }
  else
  {
-	cmd( inter, "wm title .log \"$origLogTit\"" );
+	cmd( "wm title .log \"$origLogTit\"" );
 	plog( "\nSimulation resumed" );
-	cmd( inter, ".log.but.pause conf -text Pause" );
+	cmd( ".log.but.pause conf -text Pause" );
  }
 break;
 
@@ -694,12 +674,11 @@ break;
 // perform scrolling if enabled
 if ( ! pause_run && scroll )
 {
-	sprintf(msg,"if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}",i);
-	cmd(inter, msg);
+	cmd( "if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}", i );
 }
 
 done_in = 0;
-cmd(inter, "update");
+cmd( "update" );
 #endif
 }//end of for t
 
@@ -711,14 +690,12 @@ end=clock();
 if(quit==1) 			//For multiple simulation runs you need to reset quit
  quit=0;
 
-sprintf(msg, "\nSimulation %d finished (%2g sec.)\n",i,(float)(end - start) /CLOCKS_PER_SEC);
-plog(msg);
+plog( "\nSimulation %d finished (%2g sec.)\n", "",i,(float)(end - start) /CLOCKS_PER_SEC);
 
 #ifndef NO_WINDOW 
-cmd( inter, "update" );
+cmd( "update" );
 // allow for run time plot window destruction
-sprintf( msg, "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i );
-cmd( inter, msg);
+cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
 #endif
 
 close_sim();
@@ -762,10 +739,7 @@ else											// generate single grand total file
 }
 
 if ( i == sim_num )								// print only for last
-{
-	sprintf( ch, "\nSaving totals in file %s%s... ", msg, dozip ? ".gz" : "" );
-	plog( ch );
-}
+	plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
 
 if ( ( i == 1 && ! add_to_tot ) || ( grandTotal && firstRes ) )
 {
@@ -792,13 +766,12 @@ if ( batch_sequential && i == sim_num)  		// last run of current batch file?
    f=fopen(struct_file, "r");			
    if(f==NULL || (fend!=0 && findex>fend))  	// no more file to process
    {
-	 if(f!=NULL) fclose(f);
-     sprintf(msg, "\nFinished processing %s.\n",simul_name);
-     plog(msg);
+	 if(f!=NULL) 
+		 fclose(f);
+     plog( "\nFinished processing %s.\n", "", simul_name );
      break;
    }
-   sprintf(msg, "\nProcessing configuration file %s ...\n",struct_file);
-   plog(msg);
+   plog( "\nProcessing configuration file %s ...\n", "", struct_file );
    fclose(f);  									// process next file
    struct_loaded = true;
    i = 0;   									// force restarting run count
@@ -809,7 +782,7 @@ if ( batch_sequential && i == sim_num)  		// last run of current batch file?
 
 #ifndef NO_WINDOW 
 uncover_browser( );
-cmd( inter, "wm deiconify .log; raise .log; focus .log" );
+cmd( "wm deiconify .log; raise .log; focus .log" );
 Tcl_UnlinkVar(inter, "done_in");
 #endif
 quit=0;
@@ -852,8 +825,7 @@ for(var=root->v; var!=NULL; var=var->next)
     
     catch(...) {
      set_lab_tit(var);
-       sprintf(msg, "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n",var->lab_tit);
-        plog(msg);
+        plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
         var->save=0;
         no_more_memory = true;
        }
@@ -864,15 +836,14 @@ for(var=root->v; var!=NULL; var=var->next)
       var->save=0;
     }
 	if(var->data_loaded=='-')
-	  {sprintf(msg,"\nData for %s in object %s not loaded\n", var->label, root->label);
-		plog(msg);
-		plog("Use the Initial Values editor to set its values\n");
+	  {
+		plog( "\nData for %s in object %s not loaded\n", "", var->label, root->label );
+		plog( "Use the Initial Values editor to set its values\n" );
      #ifndef NO_WINDOW   
      if(var->param==1)
-       sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label);
+       cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
      else
-       sprintf(msg, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label);
-     cmd(inter, msg);  
+       cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
      #endif
 		toquit=2;
 	  }
@@ -896,30 +867,40 @@ has some problems, because the log window tends to interpret the message
 as tcl/tk commands
 The optional tag parameter has to correspond to the log window existing tags
 *********************************/
+#define NUM_TAGS 4
+const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series" };
 
 void plog( char const *cm, char const *tag, ... )
 {
-	char buffer1[ TCL_BUFF_STR ];
+	char buffer[ TCL_BUFF_STR ];
 	va_list argptr;
 	
 	va_start( argptr, tag );
 	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
-	int reqSz = vsnprintf( buffer1, maxSz, cm, argptr );
+	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
 	va_end( argptr );
 	
 	if ( reqSz >= maxSz )
 		plog( "\nWarning: message truncated\n" );
 
 #ifdef NO_WINDOW 
-	printf( "%s", buffer1 );
+	printf( "%s", buffer );
 	fflush( stdout );
 #else
-	char buffer2[ TCL_BUFF_STR ];
+	bool ok = false;
+
+	for ( int i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			ok = true;
 	
-	sprintf( buffer2, ".log.text.text.internal insert end \"%s\" %s", buffer1, tag );
-	cmd( inter, buffer2 );
-	cmd( inter, ".log.text.text.internal see end" );
-	cmd( inter, "update" );
+	if ( ok )
+	{
+		cmd( ".log.text.text.internal insert end \"%s\" %s", buffer, tag );
+		cmd( ".log.text.text.internal see end" );
+		cmd( "update" );
+	}
+	else
+		plog( "\nError: invalid tag, message ignored:\n%s\n", "", buffer );
 #endif 
 	message_logged = true;
 }
@@ -999,48 +980,47 @@ CREATE_LOG_WINDOW
 
 void create_logwindow(void)
 {
-cmd( inter, "newtop .log \"Lsd Log\" { if { [ discard_change ] == \"ok\" } { exit } { } } \"\"" );
+cmd( "newtop .log \"Lsd Log\" { if { [ discard_change ] == \"ok\" } { exit } { } } \"\"" );
 
-cmd(inter, "set w .log.text");
-cmd(inter, "frame $w");
-cmd(inter, "scrollbar $w.scroll -command \"$w.text yview\"");
-cmd(inter, "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor");
-cmd(inter, "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none");
-sprintf( msg, "$w.text configure -tabs {%s}", tabs );
-cmd( inter, msg );
+cmd( "set w .log.text" );
+cmd( "frame $w" );
+cmd( "scrollbar $w.scroll -command \"$w.text yview\"" );
+cmd( "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
+cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none" );
+cmd( "$w.text configure -tabs {%s}", tabs  );
 
 // Log window tags
-cmd(inter, "$w.text tag configure highlight -foreground red");
-cmd(inter, "$w.text tag configure tabel");
-cmd(inter, "$w.text tag configure series -tabs {2c 5c 8c}");
+cmd( "$w.text tag configure highlight -foreground red" );
+cmd( "$w.text tag configure tabel" );
+cmd( "$w.text tag configure series -tabs {2c 5c 8c}" );
 
-cmd(inter, "pack $w.scroll -side right -fill y");
-cmd(inter, "pack $w.text -expand yes -fill both");
-cmd(inter, "pack $w.scrollx -side bottom -fill x");
-cmd(inter, "pack $w -expand yes -fill both");
+cmd( "pack $w.scroll -side right -fill y" );
+cmd( "pack $w.text -expand yes -fill both" );
+cmd( "pack $w.scrollx -side bottom -fill x" );
+cmd( "pack $w -expand yes -fill both" );
 
-cmd(inter, "set w .log.but");
-cmd(inter, "frame $w");
-cmd(inter, "button $w.stop -width -9 -text Stop -command {set done_in 1} -underline 0");
-cmd(inter, "button $w.pause -width -9 -text Pause -command {set done_in 9} -underline 0");
-cmd(inter, "button $w.speed -width -9 -text Fast -command {set done_in 2} -underline 0");
-cmd(inter, "button $w.obs -width -9 -text Observe -command {set done_in 4} -underline 0");
-cmd(inter, "button $w.deb -width -9 -text Debug -command {set done_in 3} -underline 0");
-cmd(inter, "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0");
-cmd(inter, "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0");
+cmd( "set w .log.but" );
+cmd( "frame $w" );
+cmd( "button $w.stop -width -9 -text Stop -command {set done_in 1} -underline 0" );
+cmd( "button $w.pause -width -9 -text Pause -command {set done_in 9} -underline 0" );
+cmd( "button $w.speed -width -9 -text Fast -command {set done_in 2} -underline 0" );
+cmd( "button $w.obs -width -9 -text Observe -command {set done_in 4} -underline 0" );
+cmd( "button $w.deb -width -9 -text Debug -command {set done_in 3} -underline 0" );
+cmd( "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0" );
+cmd( "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
-cmd(inter, "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left");
-cmd(inter, "pack $w -side right");
+cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left" );
+cmd( "pack $w -side right" );
 
-cmd( inter, "showtop .log bottomrightS 1 1 0" );
+cmd( "showtop .log bottomrightS 1 1 0" );
 set_shortcuts_log( ".log" );
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
-cmd( inter, "rename .log.text.text .log.text.text.internal" );
-cmd( inter, "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
+cmd( "rename .log.text.text .log.text.text.internal" );
+cmd( "proc .log.text.text { args } { switch -exact -- [lindex $args 0] { insert { } delete { } replace { } default { return [ eval .log.text.text.internal $args] } } }" );
 
 // a Tcl/Tk version of plog
-cmd( inter, "proc plog cm { .log.text.text.internal insert end $cm; .log.text.text.internal see end }" );
+cmd( "proc plog cm { .log.text.text.internal insert end $cm; .log.text.text.internal see end }" );
 }
 
 void set_shortcuts_log( const char *window )
@@ -1068,20 +1048,17 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	if ( brCovered )		// ignore if already covered
 		return;
 		
-	cmd(inter, "if [ winfo exists .str ] { wm withdraw .str }");
-	cmd( inter, "disable_window \"\" m bbar l" );		// disable main window
-	cmd( inter, "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
-	cmd( inter, "newtop .t [ wm title . ]" );
-	sprintf( msg, "label .t.l1 -font {-weight bold} -text \"%s\"", text1 );
-	cmd( inter, msg );
-	sprintf( msg, "label .t.l2 -text \"\n%s\"", text2 );
-	cmd( inter, msg );
-	cmd( inter, "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
-	sprintf( msg, "label .t.l4 -justify left -text \"\n%s\"", text3 );
-	cmd( inter, msg );
-	cmd( inter, "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
-	cmd( inter, "showtop .t coverW no no no" );
-	cmd( inter, "update" );
+	cmd( "if [ winfo exists .str ] { wm withdraw .str }" );
+	cmd( "disable_window \"\" m bbar l" );		// disable main window
+	cmd( "set origMainTit [ wm title . ]; wm title . \"$origMainTit (DISABLED)\"" );
+	cmd( "newtop .t [ wm title . ]" );
+	cmd( "label .t.l1 -font {-weight bold} -text \"%s\"", text1  );
+	cmd( "label .t.l2 -text \"\n%s\"", text2  );
+	cmd( "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
+	cmd( "label .t.l4 -justify left -text \"\n%s\"", text3  );
+	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
+	cmd( "showtop .t coverW no no no" );
+	cmd( "update" );
 	
 	brCovered = true;
 }
@@ -1096,11 +1073,11 @@ void uncover_browser( void )
 	if ( ! brCovered || running )	// ignore if not covered or running
 		return;
 
-	cmd( inter, "if [ winfo exist .t ] { destroytop .t }"  );
-	cmd( inter, "wm title . $origMainTit" );
-	cmd( inter, "enable_window \"\" m bbar l" );	// enable main window
-	cmd( inter, "if { [ string equal [ wm state . ] normal ] && [ winfo exist .str ] && ! [ string equal [ wm state .str ] normal ] } { wm deiconify .str; lower .str }" );
-	cmd( inter, "update" );
+	cmd( "if [ winfo exist .t ] { destroytop .t }" );
+	cmd( "wm title . $origMainTit" );
+	cmd( "enable_window \"\" m bbar l" );	// enable main window
+	cmd( "if { [ string equal [ wm state . ] normal ] && [ winfo exist .str ] && ! [ string equal [ wm state .str ] normal ] } { wm deiconify .str; lower .str }" );
+	cmd( "update" );
 	
 	brCovered = false;
 }
@@ -1216,7 +1193,7 @@ SIGNAL_HANDLER
 // handle critical system signals
 void signal_handler(int signum)
 {
-	char msg2[TCL_BUFF_STR];
+	char msg2[2*MAX_ELEM_LENGTH];
 	double useless = -1;
 	
 	switch(signum)
@@ -1238,11 +1215,9 @@ void signal_handler(int signum)
 	}
 	
 #ifdef NO_WINDOW
-	sprintf(msg2, "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
-	plog(msg2);
+	plog( "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", "", msg );
 #else
-	sprintf(msg2, "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
-	cmd(inter, msg2);
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
 	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
 	deb( stacklog->vs->up, NULL, msg2, &useless );
 #endif

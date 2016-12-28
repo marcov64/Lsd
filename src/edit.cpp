@@ -79,7 +79,7 @@ SET_OBJ_NUMBER
 void set_obj_number(object *r, int *choice)
 {
 
-char ch[TCL_BUFF_STR], *l;
+char ch[2*MAX_ELEM_LENGTH], *l;
 int i, num, res, count, done;
 object *cur, *first;
 Tcl_LinkVar(inter, "val", (char *) &count, TCL_LINK_INT);
@@ -88,8 +88,8 @@ Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "result", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "max_depth", (char *) &max_depth, TCL_LINK_INT);
 
-cmd( inter, "set ini .ini" );
-cmd( inter, "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeN $vsizeN } { resizetop .ini $hsizeN $vsizeN }" );
+cmd( "set ini .ini" );
+cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeN $vsizeN } { resizetop .ini $hsizeN $vsizeN }" );
 
 in_set_obj = true;
 strcpy(lab_view,"");
@@ -99,47 +99,46 @@ max_depth=1;
 while(*choice==0)
 {
   // reset title and destroy command because may be coming from edit_data
-  sprintf( ch, "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
-  cmd( inter, ch );
+  cmd( "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
   
-  cmd(inter, "frame .ini.obj");
-  cmd(inter, "pack .ini.obj -fill both -expand yes");
-  cmd(inter, "set b .ini.obj");
-  cmd(inter, "scrollbar $b.scroll -command \"$b.list yview\"");
-  cmd(inter, "scrollbar $b.scrollh -command \"$b.list xview\" -orient horizontal");
-  cmd(inter, "set t $b.list");
-  cmd(inter, "text $t -yscrollcommand \"$b.scroll set\" -xscrollcommand \"$b.scrollh set\" -wrap none -cursor arrow");
+  cmd( "frame .ini.obj" );
+  cmd( "pack .ini.obj -fill both -expand yes" );
+  cmd( "set b .ini.obj" );
+  cmd( "scrollbar $b.scroll -command \"$b.list yview\"" );
+  cmd( "scrollbar $b.scrollh -command \"$b.list xview\" -orient horizontal" );
+  cmd( "set t $b.list" );
+  cmd( "text $t -yscrollcommand \"$b.scroll set\" -xscrollcommand \"$b.scrollh set\" -wrap none -cursor arrow" );
 
-   strcpy(ch, "");
+  strcpy(ch, "");
   i=0;
-  insert_obj_num( r,  ch, "",1, &i, &count);
+  insert_obj_num( r,  ch, "", 1, &i, &count);
 
-  cmd(inter, "pack $b.scroll -side right -fill y");
-  cmd(inter, "pack $b.scrollh -side bottom -fill x");  
-  cmd(inter, "pack $b.list -fill both -expand yes");
-  cmd(inter, "pack $b");
-  cmd(inter, "set msg \"\"");
-  cmd(inter, "label .ini.msglab -textvariable msg");
-  cmd(inter, "frame .ini.f");
+  cmd( "pack $b.scroll -side right -fill y" );
+  cmd( "pack $b.scrollh -side bottom -fill x" );  
+  cmd( "pack $b.list -fill both -expand yes" );
+  cmd( "pack $b" );
+  cmd( "set msg \"\"" );
+  cmd( "label .ini.msglab -textvariable msg" );
+  cmd( "frame .ini.f" );
 
-  cmd(inter, "label .ini.f.tmd -text \"Show hierarchical level: \"");
-  cmd( inter, "entry .ini.f.emd -width 5 -validate focusout -vcmd { if [ string is integer %P ] { set max_depth %P; return 1 } { %W delete 0 end; %W insert 0 $max_depth; return 0 } } -invcmd { bell } -justify center" );
-  cmd( inter, ".ini.f.emd insert 0 $max_depth" ); 
-  cmd(inter, "button .ini.f.ud -width -9 -text Update -command {set choice 4}");
-  cmd(inter, "pack .ini.f.tmd .ini.f.emd .ini.f.ud -side left");
+  cmd( "label .ini.f.tmd -text \"Show hierarchical level: \"" );
+  cmd( "entry .ini.f.emd -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set max_depth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_depth; return 0 } } -invcmd { bell } -justify center" );
+  cmd( ".ini.f.emd insert 0 $max_depth" ); 
+  cmd( "button .ini.f.ud -width -9 -text Update -command {set choice 4}" );
+  cmd( "pack .ini.f.tmd .ini.f.emd .ini.f.ud -side left" );
 
-  cmd(inter, "pack .ini.msglab .ini.f");
-  cmd( inter, "donehelp .ini fb { set choice 1; set result -1 } { LsdHelp mdataobjn.html }" );
+  cmd( "pack .ini.msglab .ini.f" );
+  cmd( "donehelp .ini fb { set choice 1; set result -1 } { LsdHelp mdataobjn.html }" );
   
-  cmd(inter, "$t configure -state disabled");
-  cmd(inter, "bind .ini.f.emd <Return> {set choice 4}");
+  cmd( "$t configure -state disabled" );
+  cmd( "bind .ini.f.emd <Return> {set choice 4}" );
 
   if(strlen(lab_view)>0)
-    cmd(inter, "$t see $toview");
+    cmd( "$t see $toview" );
 
 noredraw:
 
-  cmd( inter, "write_any .ini.f.emd $max_depth" ); 
+  cmd( "write_any .ini.f.emd $max_depth" ); 
 
   while(*choice==0)
    {
@@ -149,7 +148,7 @@ noredraw:
     }
    } 
 
-cmd( inter, "set max_depth [ .ini.f.emd get ]" ); 
+cmd( "set max_depth [ .ini.f.emd get ]" ); 
 
 if ( *choice == 3 && in_edit_data )		// avoid recursion
 {
@@ -165,7 +164,7 @@ if(*choice==2)
  *choice=2;
  }
 
-  cmd(inter, "destroy $b .ini.msglab .ini.f .ini.fb");
+  cmd( "destroy $b .ini.msglab .ini.f .ini.fb" );
 
   strcpy(ch, "");
   i=0;
@@ -198,7 +197,7 @@ Tcl_UnlinkVar(inter, "result");
 Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "max_depth");
 
-cmd(inter, "unset result num choice val i");
+cmd( "unset result num choice val i" );
 }
 
 
@@ -207,7 +206,7 @@ INSERT_OBJ_NUM
 ****************************************************/
 void insert_obj_num(object *root, char const *tag, char const *ind, int counter, int *i, int *value)
 {
-char ch[TCL_BUFF_STR], indent[30];
+char ch[2*MAX_ELEM_LENGTH], indent[30];
 object *c, *cur;
 variable *var;
 int num=0, multi=0;
@@ -219,61 +218,50 @@ strcpy(indent, ind);
 if(root->up!=NULL)
   strcat(indent, "  +  ");
 
-//for(c=root->son, counter=1; c!=NULL;c=skip_next_obj(c, &num), counter=1)
 for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
  {  *i=*i+1;
 
-	 //skip_next_obj(c, &num);
    c=cb->head;
    for(cur=c, num=0; cur!=NULL; cur=cur->next, num++);
-	 sprintf(ch, "label $t.lab$i -text \"%s %s \" -foreground red -bg white -justify left", indent, c->label);
-	 cmd(inter, ch);
-	 cmd(inter, "pack $t.lab$i -anchor w");
+	 cmd( "label $t.lab$i -text \"%s %s \" -foreground red -bg white -justify left", indent, c->label );
+	 cmd( "pack $t.lab$i -anchor w" );
 
 	 if(strlen(tag)!=0)
-	  sprintf(ch, "label $t.tag$i -text \" in %s %s\" -bg white", (c->up)->label , tag);
+	  cmd( "label $t.tag$i -text \" in %s %s\" -bg white", (c->up)->label , tag );
 	 else
-	  sprintf(ch, "label $t.tag$i -text \" \" -bg white");
-	 cmd(inter, ch);
-	 cmd(inter, "pack $t.tag$i -anchor w");
+	  cmd( "label $t.tag$i -text \" \" -bg white" );
+
+     cmd( "pack $t.tag$i -anchor w" );
 
 	 *value=num;
-	 cmd(inter, "set count$i $val");
-	 cmd(inter, "label $t.val$i -text $val -width 7 -relief raised");
-	 cmd(inter, "pack $t.val$i");
-	 cmd(inter, "$t window create end -window $t.lab$i");
-	 cmd(inter, "$t window create end -window $t.tag$i");
-	 cmd(inter, "$t window create end -window $t.val$i");
+	 cmd( "set count$i $val" );
+	 cmd( "label $t.val$i -text $val -width 7 -relief raised" );
+	 cmd( "pack $t.val$i" );
+	 cmd( "$t window create end -window $t.lab$i" );
+	 cmd( "$t window create end -window $t.tag$i" );
+	 cmd( "$t window create end -window $t.val$i" );
     if(strlen(lab_view)>0)
      {if(!strcmp(lab_view, c->label) && !strcmp(tag_view, tag) )
-       cmd(inter, "set toview \"$t.val$i\"");
+       cmd( "set toview \"$t.val$i\"" );
 
      }
     if(level >= max_depth && c->b != NULL)
      {
-     sprintf(ch, "label $t.more$i -text \"   (click here to see the descendants)\" -bg white");
-     cmd(inter, ch);
-     cmd(inter, "pack $t.more$i");
-     cmd(inter, "$t window create end -window $t.more$i");
-     sprintf(ch, "bind $t.more$i <Button-1> {incr max_depth; set toview \"$t.val%d\"; set choice 4}", *i);
-     cmd(inter, ch);
+     cmd( "label $t.more$i -text \"   (click here to see the descendants)\" -bg white" );
+     cmd( "pack $t.more$i" );
+     cmd( "$t window create end -window $t.more$i" );
+     cmd( "bind $t.more$i <Button-1> {incr max_depth; set toview \"$t.val%d\"; set choice 4}", *i );
      }
 
-
-  	 cmd(inter, "$t insert end \\n");
-
-	 sprintf(ch,"bind $t.val$i <Button-1> {set result %d;set num $count%d; set toview \"$t.val%d\" ; set choice 2}", *i, *i, *i);
-	 cmd(inter, ch);
-
-	 sprintf(ch,"bind $t.lab$i <Button-1> {set obj_name %s; set choice 3}", c->label);
-	 cmd(inter, ch);
-	 if ( ! in_edit_data )				// show only if not already recursing
-	 {
-		sprintf(ch,"bind $t.lab$i <Enter> {set msg \"Click here to edit initial values for %s\"}", c->label);
-		cmd(inter, ch);
-	 }
-	 cmd(inter, "bind $t.lab$i <Leave> {set msg \"\"}");
-   Tcl_DoOneEvent(0);
+    cmd( "$t insert end \\n" );
+    cmd( "bind $t.val$i <Button-1> {set result %d;set num $count%d; set toview \"$t.val%d\" ; set choice 2}", *i, *i, *i );
+    cmd( "bind $t.lab$i <Button-1> {set obj_name %s; set choice 3}", c->label );
+   
+    if ( ! in_edit_data )				// show only if not already recursing
+   	cmd( "bind $t.lab$i <Enter> {set msg \"Click here to edit initial values for %s\"}", c->label );
+    cmd( "bind $t.lab$i <Leave> {set msg \"\"}" );
+    
+    Tcl_DoOneEvent(0);
 
  if( go_brother(c)!=NULL)
 	 multi=1;
@@ -305,54 +293,44 @@ int i,j, k,h, res;
 
 if ( c->up == NULL )
 {
-	cmd( inter, "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Element in Root object\" -detail \"The Root object is always single-instanced, so any element contained in it has only one instance.\"" );
 	return 1;
 }
 
-cmd( inter, "set c .compcopy" );
-cmd( inter, "newtop $c \"Instance Number\" { set cconf 1; set choice 1 }" );
+cmd( "set c .compcopy" );
+cmd( "newtop $c \"Instance Number\" { set cconf 1; set choice 1 }" );
 
-cmd(inter, "set conf 0");
-sprintf(msg, "label $c.l -text \"Determine the sequential number of the instance of '%s' \\nby setting the sequential number of the containing objects.\\nPressing 'Compute' will give the sequential number.\\npressing 'Done' will copy the number and exit.\"", c->label);
-cmd(inter, msg);
-cmd(inter, "frame $c.f -relief groove -bd 2");
+cmd( "set conf 0" );
+cmd( "label $c.l -text \"Determine the sequential number of the instance of '%s' \\nby setting the sequential number of the containing objects.\\nPressing 'Compute' will give the sequential number.\\npressing 'Done' will copy the number and exit.\"", c->label );
+cmd( "frame $c.f -relief groove -bd 2" );
 for(j=1, cur=c; cur->up!=NULL; cur=cur->up, j++) 
   {
-  sprintf(msg, "frame $c.f.f%d", j);
-  cmd(inter, msg);
-  sprintf(msg, "label $c.f.f%d.l -text \"Instance of '%s' number: \"", j, cur->label);
-  cmd(inter, msg);
-  sprintf(msg, "entry $c.f.f%d.e -width 8 -textvariable num%d -justify center", j,j);
-  cmd(inter, msg);
-  sprintf(msg, "pack $c.f.f%d.l $c.f.f%d.e -side left", j, j);
-  cmd(inter, msg);
+  cmd( "frame $c.f.f%d", j );
+  cmd( "label $c.f.f%d.l -text \"Instance of '%s' number: \"", j, cur->label );
+  cmd( "entry $c.f.f%d.e -width 8 -textvariable num%d -justify center", j,j );
+  cmd( "pack $c.f.f%d.l $c.f.f%d.e -side left", j, j );
+  
   for(i=1, cur1=cur->up->search(cur->label); cur1!=cur; cur1=cur1->next, i++);
 
-  sprintf(msg, "set num%d %d", j,i);
-  cmd(inter, msg); 
+  cmd( "set num%d %d", j,i );
   }
   
-sprintf(msg, "focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end", j-1, j-1);
-cmd(inter, msg);
+cmd( "focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end", j-1, j-1 );
 
 for(j--, cur=c; cur->up!=NULL; cur=cur->up, j--)
   {//pack in inverse order
-  sprintf(msg, "pack $c.f.f%d -fill both -expand yes", j);
-  cmd(inter, msg);
-  sprintf(msg, "bind $c.f.f%d.e <Return> {focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end}", j,j-1, j-1);
-  cmd(inter, msg);
+  cmd( "pack $c.f.f%d -fill both -expand yes", j );
+  cmd( "bind $c.f.f%d.e <Return> {focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end}", j,j-1, j-1 );
   }
 
-  sprintf(msg, "bind $c.f.f1.e <Return> \"focus $c.com\"");
-  cmd(inter, msg);
+cmd( "bind $c.f.f1.e <Return> \"focus $c.com\"" );
 
-sprintf(msg, "label $c.res -fg red -text \"Instance chosen is number: %d\"",i);
-cmd(inter, msg);
+cmd( "label $c.res -fg red -text \"Instance chosen is number: %d\"", i );
 res=i;
-cmd(inter, "pack $c.l $c.f $c.res -pady 5 -fill both -expand yes");
-cmd( inter, "comphelpdone $c b { set cconf 1; set choice 2 } { LsdHelp mdataobjn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
+cmd( "pack $c.l $c.f $c.res -pady 5 -fill both -expand yes" );
+cmd( "comphelpdone $c b { set cconf 1; set choice 2 } { LsdHelp mdataobjn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
 
-cmd( inter, "showtop $c centerS" );
+cmd( "showtop $c centerS" );
 
 here_ccompute:
 for(cur=c->up; cur->up!=NULL; cur=cur->up); //cur is root
@@ -363,8 +341,7 @@ for(i=0, k=0; k==0 && cur!=NULL ; cur3=cur, cur=cur->hyper_next(c->label), i++)
   k=1;
   for(j=1, cur1=cur; cur1->up!=NULL; cur1=cur1->up, j++)
    {
-   sprintf( msg, "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
-   cmd( inter, msg );
+   cmd( "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
    if ( *choice < 0 )
 	   break;
    
@@ -384,22 +361,20 @@ for(j=1, cur2=cur3; cur2->up!=NULL; cur2=cur2->up, j++)
   {
   for(i=1, cur1=cur2->up->search(cur2->label); cur1!=cur2; cur1=cur1->next, i++);
 
-  sprintf(msg, "set num%d %d", j,i);
-  cmd(inter, msg); 
+  cmd( "set num%d %d", j,i );
   }
 
-sprintf(msg, "$c.res conf -text \"Instance chosen is num: %d\"",res);
-cmd(inter, msg); 
+cmd( "$c.res conf -text \"Instance chosen is num: %d\"", res ); 
    
 
 here_cfrom:
 *choice=0;
-cmd(inter, "set ccfrom 0");
+cmd( "set ccfrom 0" );
 while(*choice==0)
  Tcl_DoOneEvent(0);
 i=*choice;
 
-cmd(inter, "set choice $cconf");
+cmd( "set choice $cconf" );
 if(*choice==0)
   goto here_cfrom;
 else
@@ -410,7 +385,7 @@ if(*choice==2)
 
 
 
-cmd(inter, "destroytop $c");
+cmd( "destroytop $c" );
 return res;
 }
 
@@ -422,24 +397,22 @@ int cfrom, j, affect, k, pippo[1000], num;
 
 for(num=0, cur=c->up->search(c->label);cur!=NULL; cur=go_brother(cur),num++ );
 
-sprintf(msg, "set num %d",num);
-cmd(inter, msg);
+cmd( "set num %d", num );
 
-cmd( inter, "set n .numobj" );
-cmd( inter, "newtop $n \"Number of Objects\" { set conf 1; set choice 2 }" );
-cmd(inter, "set conf 0");
+cmd( "set n .numobj" );
+cmd( "newtop $n \"Number of Objects\" { set conf 1; set choice 2 }" );
+cmd( "set conf 0" );
 
 *choice=0;
 strcpy(lab_view, c->label);
 strcpy(tag_view, tag);
-sprintf(msg, "label $n.l -text \"Number of objects '%s' in %s %s \"", c->label, c->up->label, tag);
-cmd(inter, msg);
-cmd( inter, "entry $n.e -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set num %P; return 1 } { %W delete 0 end; %W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
-cmd( inter, "$n.e insert 0 $num" ); 
-cmd( inter, "pack $n.l $n.e" );
+cmd( "label $n.l -text \"Number of objects '%s' in %s %s \"", c->label, c->up->label, tag );
+cmd( "entry $n.e -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$n.e insert 0 $num" ); 
+cmd( "pack $n.l $n.e" );
 
-cmd(inter, "frame $n.ef -relief groove -bd 2");
-cmd(inter, "label $n.ef.l -text \"Groups to be modified\"");
+cmd( "frame $n.ef -relief groove -bd 2" );
+cmd( "label $n.ef.l -text \"Groups to be modified\"" );
 
 for(j=1, cur=c->up; cur->up!=NULL; cur=cur->up, j++)
  {
@@ -447,62 +420,55 @@ for(j=1, cur=c->up; cur->up!=NULL; cur=cur->up, j++)
   {
   first=cur->up->search(cur->label);
   for(k=1; first!=cur; first=go_brother(first), k++);
-  sprintf(msg, "set affect%d %d",j,k);
-  cmd(inter, msg);        
-  sprintf(msg, "checkbutton $n.ef.r%d -text \"This group of '%s' contained in '%s' # %d\" -variable affect%d -onvalue %d -offvalue -1", j,c->label,cur->label, k,j, k);
-  cmd(inter, msg);
+  cmd( "set affect%d %d",j,k );
+  cmd( "checkbutton $n.ef.r%d -text \"This group of '%s' contained in '%s' # %d\" -variable affect%d -onvalue %d -offvalue -1", j,c->label,cur->label, k,j, k );
   }
   else
   {first=cur->up->search(cur->label);
   for(k=1; first!=cur; first=go_brother(first), k++);
-  sprintf(msg, "set affect%d -1",j);
-  cmd(inter, msg);
-  sprintf(msg, "checkbutton $n.ef.r%d -text \"All groups of '%s' contained in '%s' # %d\" -variable affect%d -onvalue %d -offvalue -1 ", j, c->label ,cur->label, k, j,k);
-  cmd(inter, msg);
+  cmd( "set affect%d -1", j );
+  cmd( "checkbutton $n.ef.r%d -text \"All groups of '%s' contained in '%s' # %d\" -variable affect%d -onvalue %d -offvalue -1 ", j, c->label ,cur->label, k, j,k );
   
   }
   
  }
-  sprintf(msg, "set affect%d -1",j);
-  cmd(inter, msg);       
-  sprintf(msg, "checkbutton $n.ef.r%d -text \"All groups of '%s' in the model\" -variable affect%d -onvalue 1 -offvalue -1", j,c->label,j);
-  cmd(inter, msg);
+  cmd( "set affect%d -1", j );       
+  cmd( "checkbutton $n.ef.r%d -text \"All groups of '%s' in the model\" -variable affect%d -onvalue 1 -offvalue -1", j,c->label,j );
   if(j==1) //we are dealing with root's descendants
-   cmd(inter, "set affect1 1");
-cmd(inter, "pack $n.ef.l");        
+   cmd( "set affect1 1" );
+cmd( "pack $n.ef.l" );        
 for( ; j>0;  j--)
  {
- sprintf(msg, "if {[winfo exist $n.ef.r%d] == 1} {pack $n.ef.r%d  -anchor w} {}",j,j);
- cmd(inter, msg);
+ cmd( "if {[winfo exist $n.ef.r%d] == 1} {pack $n.ef.r%d  -anchor w} {}", j,j );
  }
-cmd(inter, "set affect 1");
+cmd( "set affect 1" );
 
-cmd(inter, "frame $n.cp -relief groove -bd 2");
-cmd(inter, "label $n.cp.l -text \"Copy from instance: \"");
-cmd(inter, "set cfrom 1");
-cmd( inter, "entry $n.cp.e -width 10 -validate focusout -vcmd { if [ string is integer %P ] { set cfrom %P; return 1 } { %W delete 0 end; %W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
-cmd( inter, "$n.cp.e insert 0 $cfrom" ); 
-cmd(inter, "button $n.cp.compute -width -9 -text Compute -command {set conf 1; set choice 3}");
-cmd(inter, "pack $n.cp.l $n.cp.e $n.cp.compute -side left");
- cmd(inter, "$n.e selection range 0 end");
- cmd(inter, "bind $n.e <KeyPress-Return> {set conf 1; set choice 1}");
- cmd(inter, "bind $n <KeyPress-Return> {set conf 1; set choice 1}");
- cmd(inter, "pack $n.cp $n.ef -pady 5 -fill both -expand yes");
- cmd( inter, "okhelpcancel $n b { set conf 1; set choice 1 } { LsdHelp mdataobjn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
+cmd( "frame $n.cp -relief groove -bd 2" );
+cmd( "label $n.cp.l -text \"Copy from instance: \"" );
+cmd( "set cfrom 1" );
+cmd( "entry $n.cp.e -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$n.cp.e insert 0 $cfrom" ); 
+cmd( "button $n.cp.compute -width -9 -text Compute -command {set conf 1; set choice 3}" );
+cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left" );
+ cmd( "$n.e selection range 0 end" );
+ cmd( "bind $n.e <KeyPress-Return> {set conf 1; set choice 1}" );
+ cmd( "bind $n <KeyPress-Return> {set conf 1; set choice 1}" );
+ cmd( "pack $n.cp $n.ef -pady 5 -fill both -expand yes" );
+ cmd( "okhelpcancel $n b { set conf 1; set choice 1 } { LsdHelp mdataobjn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
 
- cmd( inter, "showtop $n centerS" );
- cmd(inter, "focus $n.e");
+ cmd( "showtop $n centerS" );
+ cmd( "focus $n.e" );
 
 here_objec_num:
  while(*choice==0)
   Tcl_DoOneEvent(0);
 	  
-cmd( inter, "set num [ $n.e get ]" ); 
-cmd( inter, "set cfrom [ $n.cp.e get ]" ); 
+cmd( "set num [ $n.e get ]" ); 
+cmd( "set cfrom [ $n.cp.e get ]" ); 
 
 k=*choice;
 
-cmd(inter, "set choice $conf");
+cmd( "set choice $conf" );
 if(*choice==0)
   goto here_objec_num;
 else
@@ -513,10 +479,9 @@ else
    k=compute_copyfrom(c, choice);
    if(k>0)
    {
-   sprintf(msg, "set cfrom %d",k);
-   cmd(inter, msg);
+   cmd( "set cfrom %d", k );
    }
-   cmd(inter, "set conf 0");
+   cmd( "set conf 0" );
    *choice=0;
    goto here_objec_num;
   } 
@@ -525,24 +490,23 @@ skip_next_obj(c, &j);
 
 		 
  if(*choice==2)
- {cmd(inter, "destroytop $n");
+ {cmd( "destroytop $n" );
   return;
   }
-cmd(inter, "destroytop $n");  
-cmd(inter, "set choice $cfrom");  
+cmd( "destroytop $n" );  
+cmd( "set choice $cfrom" );  
 cfrom=*choice;
 
 
 for(cur=c->up, j=1; cur!=NULL; cur=cur->up, j++)
- {sprintf(msg, "set choice $affect%d", j);
-  cmd(inter, msg);
+ {cmd( "set choice $affect%d", j );
   pippo[j]=*choice;
   if(*choice!=-1)
    affect=j;
  } 
 if(affect>0)
   {
-   cmd(inter, "set choice $num");
+   cmd( "set choice $num" );
    chg_obj_num(&c, *choice, affect,pippo, choice, cfrom);
   } 
 }
@@ -552,7 +516,7 @@ EDIT_STR
 
 void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done)
 {
-char ch[MAX_ELEM_LENGTH+20];
+char ch[2*MAX_ELEM_LENGTH];
 object *c, *cur, *first;
 variable *var;
 int multi=0, cazzo, param, cfrom, j, affect, k;
@@ -605,31 +569,28 @@ bridge *cb, *first;
 
 *choice=0;
 
-cmd( inter, "set d .delobj" );
-cmd( inter, "newtop $d \"Delete Objects\" { set choice 3 }" );
-cmd(inter, "set conf 0");
+cmd( "set d .delobj" );
+cmd( "newtop $d \"Delete Objects\" { set choice 3 }" );
+cmd( "set conf 0" );
 
-sprintf(ch, "label $d.txt1 -text \"Do you want to delete the last\"");
-cmd(inter, ch);
+cmd( "label $d.txt1 -text \"Do you want to delete the last\"" );
 
-sprintf(ch, "label $d.txt2 -text \"%d object(s)\" -fg red", actual-desired);
-cmd(inter, ch);
-sprintf(ch, "label $d.txt3 -text \"or you want to choose them?\"");
-cmd(inter, ch);
-cmd(inter, "pack $d.txt1 $d.txt2 $d.txt3");
-cmd(inter, "frame $d.b");
-cmd(inter, "button $d.b.last -width -9 -text Last -command {set choice 1}");
-cmd(inter, "button $d.b.choose -width -9 -text Choose -command {set choice 2}");
-cmd(inter, "pack $d.b.last $d.b.choose -padx 10 -side left");
-cmd(inter, "pack $d.b -pady 5");
-cmd( inter, "helpcancel $d b2 { LsdHelp mdataobjn.html#pick_remove } { set choice 3 }" );
+cmd( "label $d.txt2 -text \"%d object(s)\" -fg red", actual-desired );
+cmd( "label $d.txt3 -text \"or you want to choose them?\"" );
+cmd( "pack $d.txt1 $d.txt2 $d.txt3" );
+cmd( "frame $d.b" );
+cmd( "button $d.b.last -width -9 -text Last -command {set choice 1}" );
+cmd( "button $d.b.choose -width -9 -text Choose -command {set choice 2}" );
+cmd( "pack $d.b.last $d.b.choose -padx 10 -side left" );
+cmd( "pack $d.b -pady 5" );
+cmd( "helpcancel $d b2 { LsdHelp mdataobjn.html#pick_remove } { set choice 3 }" );
 
-cmd( inter, "showtop $d centerS" );
+cmd( "showtop $d centerS" );
 
 while(*choice==0)
   Tcl_DoOneEvent(0);
 
-cmd(inter, "destroytop $d");
+cmd( "destroytop $d" );
 if( *choice==3)
  return;
 
@@ -647,20 +608,19 @@ else
 { del=new int[actual-desired];
   Tcl_LinkVar(inter, "val", (char *) &val, TCL_LINK_INT);
   Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
-  cmd( inter, "newtop $d \"Delete Objects\" { set choice 2 }" );
-  cmd(inter, "set conf 0");
+  cmd( "newtop $d \"Delete Objects\" { set choice 2 }" );
+  cmd( "set conf 0" );
 
-  sprintf(ch, "label $d.tit -text \"Select instances of %s to delete\"", (*r)->label);
-  cmd(inter, ch);
-    cmd( inter, "entry $d.e -width 6 -validate focusout -vcmd { if [ string is integer %P ] { set val %P; return 1 } { %W delete 0 end; %W insert 0 $val; return 0 } } -invcmd { bell } -justify center" );
-	 cmd(inter, "label $d.tit1 -text \"(0 instance(s) done)\"");
-    cmd(inter, "bind $d.e <KeyPress-Return> {set choice 1}");
-	 cmd(inter, "pack $d.tit $d.tit1 $d.e");
-	cmd( inter, "okhelpcancel $d b { set choice 1 } { LsdHelp mdataobjn.html#pick_remove } { set choice 2 }" );
+  cmd( "label $d.tit -text \"Select instances of %s to delete\"", (*r)->label );
+    cmd( "entry $d.e -width 6 -validate focusout -vcmd { if [ string is integer %%P ] { set val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val; return 0 } } -invcmd { bell } -justify center" );
+	 cmd( "label $d.tit1 -text \"(0 instance(s) done)\"" );
+    cmd( "bind $d.e <KeyPress-Return> {set choice 1}" );
+	 cmd( "pack $d.tit $d.tit1 $d.e" );
+	cmd( "okhelpcancel $d b { set choice 1 } { LsdHelp mdataobjn.html#pick_remove } { set choice 2 }" );
 	
-	cmd( inter, "showtop $d centerS" );
-    cmd(inter, "$d.e selection range 0 end");
-    cmd(inter, "focus $d.e");
+	cmd( "showtop $d centerS" );
+    cmd( "$d.e selection range 0 end" );
+    cmd( "focus $d.e" );
   
   last=0;
   val=1;
@@ -668,19 +628,19 @@ else
    {
    do
     {
-    cmd(inter, "$d.tit1 conf -text \"([ expr $i - 1 ] instance(s) done)\"");
-	cmd( inter, "write_any $d.e $val" ); 
-    cmd(inter, "$d.e selection range 0 end");
+    cmd( "$d.tit1 conf -text \"([ expr $i - 1 ] instance(s) done)\"" );
+	cmd( "write_any $d.e $val" ); 
+    cmd( "$d.e selection range 0 end" );
 	
     *choice=0;
     while(*choice==0)
      Tcl_DoOneEvent(0);
 
-	cmd( inter, "set val [ $d.e get ]" ); 
+	cmd( "set val [ $d.e get ]" ); 
 
     if(*choice==2)
       {
-       cmd(inter, "destroytop $d");
+       cmd( "destroytop $d" );
        Tcl_UnlinkVar(inter, "val");
        Tcl_UnlinkVar(inter, "i");
        *choice=0;
@@ -695,17 +655,10 @@ else
     val++;
 	}
  
-   cmd(inter, "destroytop $d");
+   cmd( "destroytop $d" );
    Tcl_UnlinkVar(inter, "val");
    Tcl_UnlinkVar(inter, "i");
    
-   
-   /***
-   if( ((*r)->up)->son==(*r))
-		prev=(*r)->up;
-   else 
-    for(prev=((*r)->up)->son; strcmp( (prev->next)->label, (*r)->label); prev=prev->next);
-   *****/  
    for(cb=(*r)->up->b; cb!=NULL; cb=cb->next)
     if(!strcmp(cb->blabel,(*r)->label) )
      break;
@@ -737,6 +690,7 @@ else
   }//choice==2
 }
 
+
 int check_pippo(object *c, object *pivot, int level, int pippo[])
 {
 int res=1, i, j;
@@ -755,6 +709,7 @@ for(cur=c->up, i=1; i<=level && res==1; i++, cur=cur->up)
 return res;
 }
 
+
 void chg_obj_num(object **c, int value, int level, int pippo[], int *choice, int cfrom)
 {
 object *cur, *cur1, *last, *app, *first, *pivot;
@@ -765,8 +720,7 @@ for(cur=*c; cur->up!=NULL; cur=cur->up); //goto root
 for(first=cur->search((*c)->label), i=1; i<cfrom && first!=NULL; first=first->hyper_next(first->label), i++);
 if(first==NULL)
  {
- sprintf(msg, "set mess \"Error: instance %d of object %s not found.\"", cfrom, (*c)->label);
- cmd(inter, "tk_message -type ok -icon error -message \"$mess\"");
+ cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, (*c)->label );
  return;
  }
  
@@ -819,6 +773,3 @@ for( ;cur!=NULL; )
 
  }
 }
-
-
-
