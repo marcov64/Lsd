@@ -57,7 +57,9 @@ The widget of importance are:
 #include <ctype.h>
 #include <math.h>
 #include <time.h>
+#include <signal.h>
 #include <sys/stat.h>
+#include <new>
 
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
@@ -65,105 +67,72 @@ The widget of importance are:
 #define _LSD_VERSION_ "7.0"
 #define _LSD_DATE_ __DATE__
 
+// general buffer limits
 #define TCL_BUFF_STR 3000		// standard Tcl buffer size (>1000)
 #define MAX_PATH_LENGTH 500		// maximum path length
 #define MAX_LINE_SIZE 1000		// max size of a text line to read from files (>999)
 
+// user defined signals
+#define SIGMEM NSIG + 1			// out of memory signal
+#define SIGSTL NSIG + 2			// standard library exception signal
+
 // auxiliary C procedures
-Tcl_Interp *InterpInitWin(void);
-int ModManMain(int argn, char **argv);
-int errormsg(char *lpszText,  char *lpszTitle);
+int ModManMain( int argn, char **argv );
 void cmd( const char *cm, ... );
-void color(int hiLev, long iniLin, long finLin);
-void create_compresult_window(void);
+void color( int hiLev, long iniLin, long finLin );
+void create_compresult_window( void );
 void delete_compresult_window( void );
+void handle_signals( void );
 void log_tcl_error( const char *cm, const char *message );
-void make_makefile(void);
-void make_makefileNW(void);
-void signal(char *s);
+void make_makefile( void );
+void make_makefileNW( void );
+void signal_handler( int signum );
 
 // global variables
 Tcl_Interp *inter;
+bool tk_ok = false;				// control for tk_ready to operate
 char msg[ TCL_BUFF_STR ]; 
 int choice;
 int shigh;						// syntax highlighting state (0, 1 or 2)
 int v_counter=0; 				//counter of the v[i] variables inserted in the equations
 
 
-int main(int argn, char **argv)
+/*************************************
+ MAIN
+ *************************************/
+int main( int argn, char **argv )
 {
+	int res;
+	
+	// register all signal handlers
+	handle_signals( );
 
-#ifndef TK_LOCAL_APPINIT
-#define TK_LOCAL_APPINIT Tcl_AppInit    
-#endif
-
-extern int TK_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
-    
-/*
- * The following #if block allows you to change how Tcl finds the startup
- * script, prime the library or encoding paths, fiddle with the argv,
- * etc., without needing to rewrite Tk_Main()
- */
-    
-#ifdef TK_LOCAL_MAIN_HOOK
-extern int TK_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
-TK_LOCAL_MAIN_HOOK(&argc, &argv);
-#endif
-
-Tcl_FindExecutable(argv[0]);
-ModManMain(argn, argv);
-Tcl_Exit(0);
-return 0;
-}
-
-/*********************************
-INTERPINITWIN
-Calls tclinit and tkinit, managing he errors
-WARNING !!!
-This function presumes the installation of a /gnu (or gnu64 for Win64) 
-directory along the model's one. Tcl and Tk initialization files MUST be in
-/gnu[64]/share/tcl8.X
-/gnu[64]/share/tk8.X
-*********************************/
-Tcl_Interp *InterpInitWin(void)
-{
-Tcl_Interp *app;
-char *s;
-int res;
-app=Tcl_CreateInterp();
-
-if((res=Tcl_Init(app))!=TCL_OK)
- {
-  char estring[TCL_BUFF_STR];
-  sprintf(estring,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\nTcl Error = %d : %s\n",res,  Tcl_GetStringResult( app ) );
-  errormsg(estring,NULL);
-  exit(1);
- 
- }
-
-if((res=Tk_Init(app))!=TCL_OK)
- {
-  errormsg( (char *)"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n", NULL);
-  char estring[TCL_BUFF_STR];
-  sprintf(estring,"Tk Error = %d : %s\n",res, Tcl_GetStringResult( app ) );
-  errormsg(estring,NULL);
-  exit(2);
- }
-
-return app;
-}
-
-int errormsg( char *lpszText,  char *lpszTitle)
-{
-
-printf("\n%s", (char *)lpszText);
-exit(3);
+	try
+	{
+		res = ModManMain( argn, argv );
+	}
+	catch ( std::bad_alloc&  )	// out of memory conditions
+	{
+		signal_handler( SIGMEM );
+	}
+	catch ( std::exception& exc )// other known error conditions
+	{
+		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
+		signal_handler( SIGSTL );
+	}
+	catch ( ... )				// other unknown error conditions
+	{
+		abort( );				// raises a SIGABRT exception, tell user & close
+	}
+	
+	Tcl_Exit( res );
+	return res;
 }
 
 
-/****************************************************
-CMD
-****************************************************/
+/*************************************
+ CMD
+ *************************************/
 bool firstCall = true;
 
 // enhanced cmd with embedded sprintf capabilities and integrated buffer underrun protection
@@ -175,7 +144,8 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", strlen( cm ) );
 		log_tcl_error( cm, message );
-		cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'Ok'.\"" );
+		if ( tk_ok )
+			cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'Ok'.\"" );
 	}
 
 	char buffer[ TCL_BUFF_STR ];
@@ -189,7 +159,8 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR to at least %d bytes.", reqSz + 1 );
 		log_tcl_error( cm, message );
-		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+		if ( tk_ok )
+			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
 	}
 	else
 	{
@@ -201,6 +172,9 @@ void cmd( const char *cm, ... )
 }
 
 
+/*************************************
+ LOG_TCL_ERROR
+ *************************************/
 void log_tcl_error( const char *cm, const char *message )
 {
 	FILE *f;
@@ -222,26 +196,68 @@ void log_tcl_error( const char *cm, const char *message )
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
 	
-	cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"More information in file 'tk_err.err').\"" );
+	if ( tk_ok )
+		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"More information in file 'tk_err.err'.\"" );
 }
 
 
 /*************************************
-ModManMain
+ MODMANMAIN
  *************************************/
-int ModManMain(int argn, char **argv)
+int ModManMain( int argn, char **argv )
 {
-int i, num, tosave, sourcefile, macro;
+int i, num, sourcefile;
+bool tosave = false, macro = true;
 char str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
 char *s;
 FILE *f;
 
-//Initialize the tcl interpreter,
-inter=InterpInitWin();
+// initialize the tcl interpreter
+Tcl_FindExecutable( argv[0] );
+inter = Tcl_CreateInterp( );
+num = Tcl_Init( inter );
+if ( num != TCL_OK )
+{
+	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall Lsd\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+	log_tcl_error( "Create Tcl interpreter", msg );
+	return 1;
+}
 
-//Set variables in TCL interpreter
+// set variables and links in TCL interpreter
 Tcl_SetVar( inter, "_LSD_VERSION_", _LSD_VERSION_, 0 );
 Tcl_SetVar( inter, "_LSD_DATE_", _LSD_DATE_, 0 );
+Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
+
+// test Tcl interpreter
+cmd( "set choice 1234567890" );
+Tcl_UpdateLinkedVar(inter, "choice" );
+if ( choice != 1234567890 )
+{
+	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall Lsd" );
+	return 2;
+}
+	
+// initialize & test the tk application
+choice = 1;
+num = Tk_Init( inter );
+if ( num == TCL_OK )
+	cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
+if ( choice )
+{
+	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall Lsd\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+	log_tcl_error( "Start Tk", msg );
+	return 3;
+}
+tk_ok = true;
+cmd( "tk appname lmm" );
+
+cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}" );
+if ( choice )
+ {
+ cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\"" );
+ log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+ return 4;
+ }
 
 if(argn>1)
  {
@@ -262,8 +278,6 @@ if(!strncmp(msg, "//", 2))
  sprintf(str, "%s",msg+3);
 else
  sprintf(str, "%s",msg);
-
-Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 
 cmd( "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file dirname \"%s\"]; set choice 1} {cd [pwd]; set choice 0}", str, str );
 
@@ -330,14 +344,6 @@ if ( choice != 1 )
   cmd( "close $f" );
  }
  
-cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}" );
-if(choice==1)
- {
- cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd model.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\"" );
- exit(4);
- 
- }
-
 cmd( "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}" );
 if(choice==1)
  { //the src/system_options.txt file doesn't exists, so I invent it
@@ -350,13 +356,6 @@ if(choice==1)
     cmd( "close $f1" );    
  }
 
-// procedures to adjust tab size according to font type and size and text wrapping
-cmd( "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
-cmd( "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
-
-cmd( "wm title . \"LMM - Lsd Model Manager\"" );
-cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
-cmd( "bind . <Destroy> {set choice -1}" );
 cmd( "set choice 0" );
 cmd( "set recolor \"\"" );
 cmd( "set docase 0" );
@@ -365,9 +364,12 @@ cmd( "set endsearch end" );
 cmd( "set currentpos \"\"" );
 cmd( "set currentdoc \"\"" );
 cmd( "set v_num 0" );
-cmd( "set macro 1" );
 cmd( "set shigh_temp $shigh" );
 cmd( "set alignMode \"LMM\"" );
+
+// procedures to adjust tab size according to font type and size and text wrapping
+cmd( "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
+cmd( "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
 
 cmd( "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
@@ -376,16 +378,27 @@ cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $R
 cmd( "if [ file exists $RootLsd/$LsdSrc/dblclick.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/dblclick.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Files missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
-	exit( 10 + choice );
+{
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Source file(s) missing\" -detail \"Required Tcl/Tk source file(s) is(are) missing.\nCheck the installation of Lsd or reinstall Lsd if the problem persists.\n\nLMM is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) is(are) missing, check the installation of Lsd or reinstall Lsd if the problem persists" );
+	return 10 + choice;
+}
 
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
-Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_INT);
-Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_INT);
-macro=1;    
+Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "shigh", (char *) &shigh, TCL_LINK_INT);
 cmd( "set shigh $shigh_temp" );	// restore correct value
 
+// set main window
+cmd( "wm title . \"Lsd Model Manager - LMM\"" );
+cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
+cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
+cmd( "bind . <Destroy> { set choice 1 }" );
+cmd( "icontop . lmm" );
+cmd( "sizetop lmm" );
 
+// main menu
 cmd( "menu .m -tearoff 0" );
 
 cmd( "set w .m.file" );
@@ -408,7 +421,7 @@ cmd( "if { $showFileCmds == 1 } { $w add separator }" );
 
 cmd( "$w add command -label \"Options...\" -command { set choice 60} -underline 1" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Quit\" -command {; set choice 1} -underline 0 -accelerator Ctrl+q" );
+cmd( "$w add command -label \"Quit\" -command {set choice 1} -underline 0 -accelerator Ctrl+q" );
 
 cmd( "set w .m.edit" );
 cmd( "menu $w -tearoff 0" );
@@ -471,15 +484,14 @@ cmd( "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline
 cmd( "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro" );
 
 cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
-
+cmd( "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value true -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
+cmd( "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value false -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on LMM\" -underline 4 -command {LsdHelp \"LMM_help.html\"}" );
-if(macro==1)
+if( macro )
   cmd( "$w add command -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}" );
 else
   cmd( "$w add command -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}" ); 
@@ -491,49 +503,29 @@ cmd( "$w add separator" );
 cmd( "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}" );
 cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
 
+
 // Button bar
 cmd( "frame .bbar -bd 2" );
 
-cmd( "if [ string equal [ info tclversion ] \"8.6\" ] { set iconExt \"png\" } { set iconExt \"gif\" }" );
-cmd( "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.$iconExt\"" );
-cmd( "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.$iconExt\"" );
-cmd( "image create photo undoImg -file \"$RootLsd/$LsdSrc/icons/undo.$iconExt\"" );
-cmd( "image create photo redoImg -file \"$RootLsd/$LsdSrc/icons/redo.$iconExt\"" );
-cmd( "image create photo cutImg -file \"$RootLsd/$LsdSrc/icons/cut.$iconExt\"" );
-cmd( "image create photo copyImg -file \"$RootLsd/$LsdSrc/icons/copy.$iconExt\"" );
-cmd( "image create photo pasteImg -file \"$RootLsd/$LsdSrc/icons/paste.$iconExt\"" );
-cmd( "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.$iconExt\"" );
-cmd( "image create photo replaceImg -file \"$RootLsd/$LsdSrc/icons/replace.$iconExt\"" );
-cmd( "image create photo indentImg -file \"$RootLsd/$LsdSrc/icons/indent.$iconExt\"" );
-cmd( "image create photo deindentImg -file \"$RootLsd/$LsdSrc/icons/deindent.$iconExt\"" );
-cmd( "image create photo comprunImg -file \"$RootLsd/$LsdSrc/icons/comprun.$iconExt\"" );
-cmd( "image create photo compileImg -file \"$RootLsd/$LsdSrc/icons/compile.$iconExt\"" );
-cmd( "image create photo infoImg -file \"$RootLsd/$LsdSrc/icons/info.$iconExt\"" );
-cmd( "image create photo descrImg -file \"$RootLsd/$LsdSrc/icons/descr.$iconExt\"" );
-cmd( "image create photo equationImg -file \"$RootLsd/$LsdSrc/icons/equation.$iconExt\"" );
-cmd( "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
-cmd( "image create photo hideImg -file \"$RootLsd/$LsdSrc/icons/hide.$iconExt\"" );
-cmd( "image create photo helpImg -file \"$RootLsd/$LsdSrc/icons/help.$iconExt\"" );
-
-cmd( "button .bbar.open -image openImg -relief flat -overrelief groove -command {set choice 33}" );
-cmd( "button .bbar.save -image saveImg -relief flat -overrelief groove -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
-cmd( "button .bbar.undo -image undoImg -relief flat -overrelief groove -command {catch {.f.t.t edit undo}}" );
-cmd( "button .bbar.redo -image redoImg -relief flat -overrelief groove -command {catch {.f.t.t edit redo}}" );
-cmd( "button .bbar.cut -image cutImg -relief flat -overrelief groove -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( "button .bbar.copy -image copyImg -relief flat -overrelief groove -command {tk_textCopy .f.t.t}" );
-cmd( "button .bbar.paste -image pasteImg -relief flat -overrelief groove -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( "button .bbar.find -image findImg -relief flat -overrelief groove -command {set choice 11}" );
-cmd( "button .bbar.replace -image replaceImg -relief flat -overrelief groove -command {set choice 21}" );
-cmd( "button .bbar.indent -image indentImg -relief flat -overrelief groove -command {set choice 42}" );
-cmd( "button .bbar.deindent -image deindentImg -relief flat -overrelief groove -command {set choice 43}" );
-cmd( "button .bbar.comprun -image comprunImg -relief flat -overrelief groove -command {set choice 2}" );
-cmd( "button .bbar.compile -image compileImg -relief flat -overrelief groove -command {set choice 6}" );
-cmd( "button .bbar.info -image infoImg -relief flat -overrelief groove -command {set choice 44}" );
-cmd( "button .bbar.descr -image descrImg -relief flat -overrelief groove -command {set choice 5}" );
-cmd( "button .bbar.equation -image equationImg -relief flat -overrelief groove -command {set choice 8}" );
-cmd( "button .bbar.set -image setImg -relief flat -overrelief groove -command {set choice 48}" );
-cmd( "button .bbar.hide -image hideImg -relief flat -overrelief groove -command {set autoHide [ expr ! $autoHide ]}" );
-cmd( "button .bbar.help -image helpImg -relief flat -overrelief groove -command {LsdHelp lsdfuncMacro.html}" );
+cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 33}" );
+cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
+cmd( "button .bbar.undo -image undoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit undo}}" );
+cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit redo}}" );
+cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( "button .bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command {tk_textCopy .f.t.t}" );
+cmd( "button .bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 11}" );
+cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
+cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 42}" );
+cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 43}" );
+cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command {set choice 2}" );
+cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command {set choice 6}" );
+cmd( "button .bbar.info -image infoImg -relief $bRlf -overrelief $ovBrlf -command {set choice 44}" );
+cmd( "button .bbar.descr -image descrImg -relief $bRlf -overrelief $ovBrlf -command {set choice 5}" );
+cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf -command {set choice 8}" );
+cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command {set choice 48}" );
+cmd( "button .bbar.hide -image hideImg -relief $bRlf -overrelief $ovBrlf -command {set autoHide [ expr ! $autoHide ]}" );
+cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command {LsdHelp lsdfuncMacro.html}" );
 cmd( "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
 
 cmd( "bind .bbar.open <Enter> {set ttip \"Browse models...\"}" );
@@ -588,6 +580,7 @@ cmd( "set b [lindex $a 3]" );
 cmd( "if {$dim_character == 0} {set dim_character [lindex $b 1]}" );
 cmd( "if { $dim_character == \"\"} {set dim_character 12} {}" );
 cmd( "set a [list $fonttype $dim_character]" );
+
 
 // set preferred tab size and wrap option
 cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
@@ -651,6 +644,7 @@ cmd( "bind . <Control-n> {tk_menuSetFocus .m.file}; bind . <Control-N> {tk_menuS
 cmd( "proc savCurIni {} {global curSelIni curPosIni; set curSelIni [.f.t.t tag nextrange sel 1.0]; set curPosIni [.f.t.t index insert]; .f.t.t edit modified false}" );
 cmd( "proc savCurFin {} {global curSelFin curPosFin; set curSelFin [.f.t.t tag nextrange sel 1.0]; set curPosFin [.f.t.t index insert]; .f.t.t edit modified false}" );
 cmd( "proc updCurWnd {} {.f.hea.line.line conf -text [.f.t.t index insert]}" );
+
 
 // redefine bindings to better support new syntax highlight routine
 cmd( "bind .f.t.t <KeyPress> {savCurIni}" );
@@ -718,7 +712,7 @@ cmd( ".v add command -label \"Find...\" -command {set choice 11}" );
 cmd( ".v add command -label \"Match \\\{ \\}\" -command {set choice 17}" );
 cmd( ".v add command -label \"Match \\\( \\)\" -command {set choice 32}" );
 
-if ( macro == 0 )
+if ( ! macro )
 {
 	cmd( "menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"Lsd equation\" -command {set choice 25} -accelerator Ctrl+E" );
@@ -778,11 +772,8 @@ cmd( "bind .f.t.t <F1> {set choice 34}" );
 cmd( "setDoubleclickBinding .f.t.t" );
 cmd( "set tcl_wordchars {\\w}" );
 cmd( "set tcl_nonwordchars {\\W}" );
-
 cmd( "set textsearch \"\"" );
 cmd( "set datasel \"\"" );
-
-cmd( ". configure -menu .m" );
 
 cmd( "pack .f -expand yes -fill both" );
 cmd( "pack .f.t -expand yes -fill both" );
@@ -797,11 +788,6 @@ cmd( "set groupdir [pwd]" );
 
 cmd( ".f.t.t tag conf sel -foreground white" );
 cmd( "set before [.f.t.t get 1.0 end]" );
-cmd( "set a [wm maxsize .]" );
-cmd( "set c \"[ expr [lindex $a 0] - 80]x[expr [lindex $a 1] - 105]+80+30\"" );
-cmd( "wm geometry . $c" );
-cmd( "wm minsize . 600 300" );
-cmd( "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lmm.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lmm.xbm}" );
 
 if(argn>1)
  {cmd( "if {[file exists \"$filetoload\"] == 1} {set choice 0} {set choice -2}" );
@@ -833,7 +819,7 @@ if(argn>1)
    
   }
  else
-  choice= -2; 
+  choice= 33; 			// open model browser
   
 cmd( "focus -force .f.t.t" );
 
@@ -848,31 +834,32 @@ if ( tosave )
 else
 	cmd( "wm title . \" $filename - LMM\"" );
 
-while(choice==0)
- {
-  try{
- Tcl_DoOneEvent(0);
-   }
-  catch(...)
-   {
-    goto loop;
-   }
- }   
+// main command loop
+while( ! choice )
+{
+	try
+	{
+		Tcl_DoOneEvent( 0 );
+	}
+	catch ( std::bad_alloc& ) 	// raise memory problems
+	{
+		throw;
+	}
+	catch ( ... )				// ignore the rest
+	{
+		goto loop;
+	}
+}   
 
-if(choice==-1)
- {
-  Tcl_Exit(0);
-  exit(5);
- }
-
+ 
 cmd( "set b [.f.t.t tag ranges sel]" );
 cmd( "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}" );
 
 // update the file changes status
 cmd( "if [ winfo exists . ] { set after [ .f.t.t get 1.0 end] } { set after $before }" );
-cmd( "if [ string compare $before $after ] { set tosave 1 } { set tosave 0 }" );
+cmd( "if [ string compare $before $after ] { set tosave true } { set tosave false }" );
 
-if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
+if( tosave && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {
 
   cmd( "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save File?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]" );
@@ -882,31 +869,9 @@ if( tosave==1 && (choice==2 || choice==15 || choice==1 || choice==13 || choice==
 
   }
 
-
+  
 if(choice==1)
- {
-  Tcl_Exit(0);
-  exit(0);
- }
-
-if(choice==-2)
-{
-/*
-Initial stuff. Don't ask me why, it does not work if it is placed before the loop...
-*/
-
-choice=0;
-
-cmd( "if {[expr [winfo screenwidth .]] < ($hsizeL + 2*$bordsize)} {set w [expr [winfo screenwidth .] - 2*$bordsize]} {set w $hsizeL}" );
-cmd( "set h [expr [winfo screenheight .] - $tbarsize - 2*$vmargin - 2*$bordsize]; if {$h < $vsizeL} {set h [expr [winfo screenheight .] - $tbarsize - 2*$bordsize]}" );
-cmd( "if {[expr [winfo screenwidth .]] < ($hsizeL + 2*$bordsize + $hmargin)} {set x 0} {set x [expr [winfo screenwidth .] -$hmargin - $bordsize - $w]}" );
-cmd( "set y [expr ([winfo screenheight .]-$tbarsize)/2 - $bordsize - $h/2]" );
-cmd( "wm geom . [expr $w]x$h+$x+$y" ); // main window geometry setting
-
-cmd( "set choice 33" );		// Open Browse Models Window on start-up
-
-goto loop;
-}
+  return 0;
 
 
 if ( choice == 2 || choice == 6 )
@@ -1711,7 +1676,7 @@ cmd( "destroytop .a" );
 cmd( "file mkdir $dirname" );
 
 
-if(macro==1)
+if( macro )
  cmd( "set fun_base \"fun_baseMacro.cpp\"" );
 else 
  cmd( "set fun_base \"fun_baseC.cpp\"" );
@@ -1981,7 +1946,7 @@ goto loop;
 }
 
 
-if(choice==25 && macro==1)
+if ( choice == 25 && macro )
 {
 /*
 Insert a Lsd equation
@@ -2052,7 +2017,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==25 && macro==0)
+if ( choice == 25 && ! macro )
 {
 /*
 Insert a Lsd equation
@@ -2128,7 +2093,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==26 && macro==1)
+if ( choice == 26 && macro )
 {
 /*
 Insert a v[0]=p->cal("Var",0);
@@ -2203,7 +2168,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==26 && macro==0)
+if ( choice == 26 && ! macro )
 {
 /*
 Insert a v[0]=p->cal("Var",0);
@@ -2272,7 +2237,7 @@ goto loop;
 }
 
 
-if(choice==27 && macro==1)
+if ( choice == 27 && macro )
 {
 /*
 Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
@@ -2364,7 +2329,7 @@ goto loop;
 
 }
 
-if(choice==27 && macro==0)
+if ( choice == 27 && ! macro )
 {
 /*
 Insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
@@ -2429,7 +2394,7 @@ goto loop;
 }
 
 
-if(choice==28 && macro==1)
+if ( choice == 28 && macro )
 {
 /*
 MACRO VERSION
@@ -2506,7 +2471,7 @@ goto loop;
 
 }
 
-if(choice==28 && macro==0)
+if ( choice == 28 && ! macro )
 {
 /*
 C++ VERSION
@@ -2585,7 +2550,7 @@ goto loop;
 
 
 
-if(choice==40 && macro==1)
+if ( choice == 40 && macro )
 {
 /*
 Insert a v[0]=p->increment("Var",0);
@@ -2656,7 +2621,7 @@ goto loop;
 }
 
 
-if(choice==40 && macro==0)
+if ( choice == 40 && ! macro )
 {
 /*
 Insert a v[0]=p->increment("Var",0);
@@ -2725,7 +2690,7 @@ goto loop;
 }
 
 
-if(choice==45 && macro==1)
+if ( choice == 45 && macro )
 {
 /*
 Insert a v[0]=p->multiply("Var",0);
@@ -2798,7 +2763,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==45 && macro==0)
+if ( choice == 45 && ! macro )
 {
 /*
 Insert a v[0]=p->multiply("Var",0);
@@ -2868,7 +2833,7 @@ goto loop;
 }
 
 
-if(choice==29 && macro==1)
+if ( choice == 29 && macro )
 {
 /*
 Insert a p->write("Var",0,0);
@@ -2935,7 +2900,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==29 && macro==0)
+if ( choice == 29 && ! macro )
 {
 /*
 Insert a p->write("Var",0,0);
@@ -2998,7 +2963,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==30 && macro==0)
+if ( choice == 30 && ! macro )
 {
 /*
 Insert a cur=p->search_var_cond("Var",1,0);
@@ -3066,7 +3031,7 @@ goto loop;
 }
 
 
-if(choice==30 && macro==1)
+if ( choice == 30 && macro )
 {
 /*
 Insert a cur=p->search_var_cond("Var",1,0);
@@ -3136,7 +3101,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==31 && macro==1)
+if ( choice == 31 && macro )
 {
 /*
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
@@ -3195,7 +3160,7 @@ cmd( "set choice $v_direction" );
 cmd( "savCurIni" );	// save data for recolor
 cmd( "set a [.f.t.t index insert]" );
 
-if(choice==1)
+if ( choice == 1)
   cmd( "set direction \"UP\"" );
 else
   cmd( "set direction \"DOWN\"" );
@@ -3208,7 +3173,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==31 && macro==0)
+if ( choice == 31 && ! macro )
 {
 /*
 Insert a p->lsdqsort("Object", "Variable", "DIRECTION");
@@ -3370,7 +3335,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==52 && macro==1)
+if ( choice == 52 && macro )
 {
 /*
 Insert a add_an_obj;
@@ -3462,7 +3427,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==52 && macro==0)
+if ( choice == 52 && ! macro )
 {
 /*
 Insert a add_an_obj;
@@ -3533,7 +3498,7 @@ goto loop;
 }
 
 
-if(choice==53 && macro==1)
+if ( choice == 53 && macro )
 {
 /*
 Insert a delete_obj;
@@ -3582,7 +3547,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==53 && macro==0)
+if ( choice == 53 && ! macro )
 {
 /*
 Insert a delete_obj;
@@ -3632,7 +3597,7 @@ goto loop;
 }
 
 
-if(choice==54 && macro==1)
+if ( choice == 54 && macro )
 {
 /*
 Insert a RNDDRAW
@@ -3722,7 +3687,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==54 && macro==0)
+if ( choice == 54 && ! macro )
 {
 /*
 Insert a RNDDRAW
@@ -3799,7 +3764,7 @@ goto loop;
 }
 
 
-if(choice==55&& macro==1)
+if ( choice == 55 && macro )
 {
 /*
 Insert a SEARCH;
@@ -3858,7 +3823,7 @@ goto loop;
 }
 
 
-if(choice==55&& macro==0)
+if ( choice == 55 && ! macro )
 {
 /*
 Insert a SEARCH;
@@ -3916,7 +3881,7 @@ goto loop;
 }
 
 
-if(choice==56 && macro==1)
+if ( choice == 56 && macro )
 {
 /*
 Insert a SUM;
@@ -3992,7 +3957,7 @@ choice=23;	// do syntax coloring
 goto loop;
 }
 
-if(choice==56 && macro==0)
+if ( choice == 56 && ! macro )
 {
 /*
 Insert a p->sum;
@@ -5230,11 +5195,6 @@ Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "tosave");
 Tcl_UnlinkVar(inter, "macro");
 Tcl_UnlinkVar(inter, "shigh");
-
-Tcl_Exit(0);
-
-exit(0);
-
 }
 
 // data structures for color syntax (used by color/rm_color)
@@ -5494,15 +5454,6 @@ cmd( "update" );
 }
 
 
-void signal(char *s)
-{
-FILE *f;
-f=fopen("signal.txt", "w");
-fprintf(f, "%s",s);
-fclose(f);
-}
-
-
 void create_compresult_window(void)
 {
 
@@ -5547,4 +5498,83 @@ void delete_compresult_window( void )
 {
 	cmd( "set a [winfo exists .mm]" );
 	cmd( "if { $a == 1 } { destroytop .mm } { }" );
+}
+
+
+/*********************************
+ HANDLE_SIGNALS
+ *********************************/
+// provide support to the old 32-bit gcc compiler
+#ifdef SIGSYS
+#define NUM_SIG 11
+int signals[ NUM_SIG ] = { SIGINT, SIGQUIT, SIGTERM, SIGWINCH, SIGABRT, SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGSYS, SIGXFSZ };
+#else
+#define NUM_SIG 6
+int signals[ NUM_SIG ] = { SIGINT, SIGTERM, SIGABRT, SIGFPE, SIGILL, SIGSEGV };
+const char *signal_names[ NUM_SIG ] = { "", "", "", "Floating-point exception", "Illegal instruction", "Segmentation violation", };
+const char *strsignal( int signum ) 
+{ 
+	int i;
+	for ( i = 0; i < NUM_SIG && signals[ i ] != signum; ++i );
+	if ( i == NUM_SIG )
+		return "Unknow exception";
+	return signal_names[ i ];
+}
+#endif
+
+void handle_signals( void )
+{
+	for ( int i = 0; i < NUM_SIG; ++i )
+		signal( signals[ i ], signal_handler );  
+}
+
+
+/*********************************
+ SIGNAL_HANDLER
+ *********************************/
+// handle critical system signals
+void signal_handler( int signum )
+{
+	char msg2[ MAX_LINE_SIZE ];
+
+	switch( signum )
+	{
+#ifdef SIGQUIT
+		case SIGQUIT:
+#endif
+		case SIGINT:
+		case SIGTERM:
+			choice = 1;				// regular quit (checking for save)
+			return;
+#ifdef SIGWINCH
+		case SIGWINCH:
+			cmd( "sizetop all" );	// readjust windows size/positions
+			cmd( "update idletasks" );
+			return;
+#endif
+		case SIGMEM:
+			sprintf( msg, "Out of memory" );
+			break;
+			
+		case SIGSTL:
+			break;
+			
+		case SIGABRT:
+		case SIGFPE:
+		case SIGILL:
+		case SIGSEGV:
+#ifdef SIGBUS
+		case SIGBUS:
+		case SIGSYS:
+		case SIGXFSZ:
+#endif
+		default:
+			strcpy( msg, strsignal( signum ) );
+			break;			
+	}
+	
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
+	sprintf( msg2, "System Signal received: %s", msg );
+	log_tcl_error( "FATAL ERROR", msg2 );
+	Tcl_Exit( -signum );			// abort program
 }

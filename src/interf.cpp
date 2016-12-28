@@ -445,7 +445,7 @@ cmd( "frame .l.p -relief groove -bd 2" );
 
 cmd( "frame .l.p.up_name" );
 cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.p.up_name.n -relief flat -overrelief groove -anchor e -text \"" );
+strcpy( ch, "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \"" );
 if( r->up==NULL )
   strcat( ch, "(none)\" -command { }" );
 else
@@ -464,7 +464,7 @@ cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 cmd( "frame .l.p.tit" );
 cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.p.tit.but -foreground red -relief flat -overrelief groove -anchor e -text " );
+strcpy( ch, "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
  strcat( ch, " -command { set choice 6 }" );
@@ -586,7 +586,6 @@ cmd( "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Brow
 cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
 cmd( "$w add separator" );
 cmd( "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
-cmd( ". configure -menu .m" );
 
 // set shortcuts on open windows
 set_shortcuts( "." );
@@ -596,30 +595,17 @@ set_shortcuts( ".log" );
 cmd( "destroy .bbar" );
 cmd( "frame .bbar -bd 2" );
 
-cmd( "if [ string equal [ info tclversion ] \"8.6\" ] { set iconExt \"png\" } { set iconExt \"gif\" }" );
-cmd( "image create photo openImg -file \"$RootLsd/$LsdSrc/icons/open.$iconExt\"" );
-cmd( "image create photo reloadImg -file \"$RootLsd/$LsdSrc/icons/reload.$iconExt\"" );
-cmd( "image create photo saveImg -file \"$RootLsd/$LsdSrc/icons/save.$iconExt\"" );
-cmd( "image create photo structImg -file \"$RootLsd/$LsdSrc/icons/struct.$iconExt\"" );
-cmd( "image create photo findImg -file \"$RootLsd/$LsdSrc/icons/find.$iconExt\"" );
-cmd( "image create photo initImg -file \"$RootLsd/$LsdSrc/icons/init.$iconExt\"" );
-cmd( "image create photo numberImg -file \"$RootLsd/$LsdSrc/icons/number.$iconExt\"" );
-cmd( "image create photo setImg -file \"$RootLsd/$LsdSrc/icons/set.$iconExt\"" );
-cmd( "image create photo runImg -file \"$RootLsd/$LsdSrc/icons/run.$iconExt\"" );
-cmd( "image create photo dataImg -file \"$RootLsd/$LsdSrc/icons/data.$iconExt\"" );
-cmd( "image create photo resultImg -file \"$RootLsd/$LsdSrc/icons/result.$iconExt\"" );
-
-cmd( "button .bbar.open -image openImg -relief flat -overrelief groove -command {set choice 17}" );
-cmd( "button .bbar.reload -image reloadImg -relief flat -overrelief groove -command {set choice 38}" );
-cmd( "button .bbar.save -image saveImg -relief flat -overrelief groove -command {set choice 18}" );
-cmd( "button .bbar.struct -image structImg -relief flat -overrelief groove -command {set strWindowOn [expr ! $strWindowOn]; set choice 70} -state $strWindowB" );
-cmd( "button .bbar.find -image findImg -relief flat -overrelief groove -command {set choice 50}" );
-cmd( "button .bbar.init -image initImg -relief flat -overrelief groove -command {set choice 21}" );
-cmd( "button .bbar.number -image numberImg -relief flat -overrelief groove -command {set choice 19}" );
-cmd( "button .bbar.set -image setImg -relief flat -overrelief groove -command {set choice 22}" );
-cmd( "button .bbar.run -image runImg -relief flat -overrelief groove -command {set choice 1}" );
-cmd( "button .bbar.data -image dataImg -relief flat -overrelief groove -command {set choice 34}" );
-cmd( "button .bbar.result -image resultImg -relief flat -overrelief groove -command {set choice 26}" );
+cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 17}" );
+cmd( "button .bbar.reload -image reloadImg -relief $bRlf -overrelief $ovBrlf -command {set choice 38}" );
+cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {set choice 18}" );
+cmd( "button .bbar.struct -image structImg -relief $bRlf -overrelief $ovBrlf -command {set strWindowOn [expr ! $strWindowOn]; set choice 70} -state $strWindowB" );
+cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 50}" );
+cmd( "button .bbar.init -image initImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
+cmd( "button .bbar.number -image numberImg -relief $bRlf -overrelief $ovBrlf -command {set choice 19}" );
+cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command {set choice 22}" );
+cmd( "button .bbar.run -image runImg -relief $bRlf -overrelief $ovBrlf -command {set choice 1}" );
+cmd( "button .bbar.data -image dataImg -relief $bRlf -overrelief $ovBrlf -command {set choice 34}" );
+cmd( "button .bbar.result -image resultImg -relief $bRlf -overrelief $ovBrlf -command {set choice 26}" );
 cmd( "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 17 -anchor w" );
 
 cmd( "bind .bbar.open <Enter> {set ttip \"Open...\"}" );
@@ -669,6 +655,7 @@ cmd( "pack .l -fill both -expand yes" );
 
 cmd( "update" );
 
+
 main_cycle:
 
 cmd( "if [ info exists ModElem ] { set ModElem [ lsort -dictionary $ModElem ] }" );
@@ -681,15 +668,23 @@ cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked 
 
 *choice=0;
 
-while(*choice==0 && choice_g==0)
- {
- try{
- Tcl_DoOneEvent(0);
-   }
- catch(...) {
- goto main_cycle;
-  }
- } 
+// main command loop
+while( ! *choice  && ! choice_g )
+{
+	try
+	{
+		Tcl_DoOneEvent( 0 );
+	}
+	catch ( std::bad_alloc& ) 	// raise memory problems
+	{
+		throw;
+	}
+	catch ( ... )				// ignore the rest
+	{
+		goto main_cycle;
+	}
+}   
+
 
 if(choice_g!=0)
  {*choice=choice_g;

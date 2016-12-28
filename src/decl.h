@@ -23,7 +23,7 @@ Comments and bug reports to marco.valente@univaq.it
 #include <unistd.h>
 #include <signal.h>
 #include <sys/stat.h>
-#include <exception>
+#include <new>
 
 // comment the next line to compile without libz
 #define LIBZ 							
@@ -52,6 +52,10 @@ Comments and bug reports to marco.valente@univaq.it
 #define MAX_COLS 100					// max numbers of columns in init. editor
 #define MAX_PLOTS 1000					// max numbers of plots in analysis
 #define ERR_LIM 10						// maximum number of repeated error messages
+
+// user defined signals
+#define SIGMEM NSIG + 1			// out of memory signal
+#define SIGSTL NSIG + 2			// standard library exception signal
 
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
@@ -435,6 +439,7 @@ void fill_list_var(object *r, int flag_all, int flag_init);
 void find_lags(object *r);
 void find_using(object *r, variable *v, FILE *frep);
 void go_next(object **t);
+void handle_signals( void );
 void histograms(int *choice);
 void histograms_cs(int *choice);
 void init_canvas(void);
@@ -506,6 +511,7 @@ void show_initial(object *n);
 void show_observe(object *n);
 void show_plot_gnu(int n, int *choice, int type);
 void show_save(object *n);
+void signal_handler(int);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_on_end(store *app);
@@ -545,6 +551,7 @@ extern bool struct_loaded;	// a valid configuration file is loaded
 extern bool use_nan;		// flag to allow using Not a Number value
 extern bool unsavedData;	// control for unsaved simulation results
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
+extern bool tk_ok;			// control for tk_ready to operate
 extern bool watch;			// allow for graph generation interruption
 extern char *eq_file;		// equation file content
 extern char *equation_name;	// equation file name
@@ -590,7 +597,6 @@ extern variable *cemetery;  // Lsd saved data series (from last simulation run)
 
 #include <tk.h>
 
-Tcl_Interp *InterpInitWin( char *tcl_dir );
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );

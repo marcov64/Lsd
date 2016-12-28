@@ -77,24 +77,23 @@ void show_graph( object *t)
 {
 object *top;
 
-cmd( "set c .str" );
-
 if(!strWindowOn)	// model structure window is deactivated?
 {
-	cmd( "if [ winfo exists $c ] { destroytop $c }" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	return;
 }
 
+cmd( "set c .str" );
 cmd( "set color white" );
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd( "set strExist [ winfo exists $c ]" );
+cmd( "set strExist [ winfo exists .str ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 {
-	cmd( "if [ winfo exists $c ] { destroytop $c}" );
-	cmd( "newtop $c \"\" { set strWindowOn 0; set choice 70 } \"\"" );
-	cmd( "wm transient $c ." );
-	cmd( "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+	cmd( "newtop .str \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+	cmd( "wm transient .str ." );
+	cmd( "wm title .str \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+
 
 	cmd( "frame $c.f" );
 	cmd( "scrollbar $c.f.vs -command \"$c.f.c yview\"" );
@@ -141,11 +140,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd( "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
 	cmd( "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	cmd( "set posXstr [ expr [ winfo x . ] + $corrX + $hmargin + [ winfo width . ] ]" );
-	cmd( "set posYstr [ expr [ winfo y . ] + $corrY ]" );
-	cmd( "wm geometry $c ${hsizeM}x${vsizeM}+${posXstr}+${posYstr}" );	
-	cmd( "showtop $c current yes yes no 0 0 b yes" );
-	cmd( "wm minsize $c [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]" );	
+	cmd( "sizetop str" );
+	cmd( "showtop .str current yes yes no 0 0 b" );
+
 	set_shortcuts( "$c" );
 }
 else	// or just update canvas

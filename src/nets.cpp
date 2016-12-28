@@ -130,7 +130,7 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		{
 			sprintf( msg, "out of memory when creating net node" );
 			error_hard( msg, "Out of memory" );
-			myexit(103);
+			myexit(25);
 		}
 	}
 	if ( destNode->node == NULL )		// destination is not yet a node?
@@ -140,7 +140,7 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		{
 			sprintf( msg, "out of memory when creating net node" );
 			error_hard( msg, "Out of memory" );
-			myexit(103);
+			myexit(25);
 		}
 	}
 	
@@ -207,7 +207,7 @@ netLink *object::add_link_net( object *destPtr, double weight = 0, double probTo
 	{
 		sprintf( msg, "out of memory when creating net link" );
 		error_hard( msg, "Out of memory" );
-		myexit(103);
+		myexit(26);
 		return NULL;
 	}
 
@@ -315,7 +315,7 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 		{
 			sprintf( msg, "out of memory when creating net node name" );
 			error_hard( msg, "Out of memory" );
-			myexit(103);
+			myexit(27);
 		}
 		strcpy( name, nodeName );
 	}
@@ -359,7 +359,7 @@ netNode *object::add_node_net( long id = -1, char const nodeName[] = "",
 	{
 		sprintf( msg, "out of memory when creating net node" );
 		error_hard( msg, "Out of memory" );
-		myexit(103);
+		myexit(25);
 		return NULL;
 	}
 	
@@ -397,7 +397,7 @@ void object::name_node_net( char const *nodeName )
 		{
 			sprintf( msg, "out of memory when creating net node name" );
 			error_hard( msg, "Out of memory" );
-			myexit(103);
+			myexit(27);
 		}
 		strcpy( node->name, nodeName );
 	}

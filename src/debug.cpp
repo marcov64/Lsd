@@ -277,15 +277,22 @@ if ( mode == 1 )
 	}
 }
 
-while(choice==0)
- {
- try{ 
- Tcl_DoOneEvent(0);
- }
- catch(...) {
- goto debug_maincycle;
- }
- }
+// debug command loop
+while( ! choice )
+{
+	try
+	{
+		Tcl_DoOneEvent( 0 );
+	}
+	catch ( std::bad_alloc& ) 	// raise memory problems
+	{
+		throw;
+	}
+	catch ( ... )				// ignore the rest
+	{
+		goto debug_maincycle;
+	}
+}   
  
 if ( mode == 1 )
 {

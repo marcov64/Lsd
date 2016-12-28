@@ -84,7 +84,8 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
-		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
+		if ( tk_ok )
+			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
 		myexit( 24 );
 	}
 
@@ -99,7 +100,8 @@ void cmd( const char *cm, ... )
 	{
 		sprintf( message, "Tcl buffer too small. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", reqSz + 1 );
 		log_tcl_error( cm, message );
-		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
+		if ( tk_ok )
+			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer too small\" -detail \"Tcl/Tk command was canceled.\"" );
 	}
 	else
 	{
@@ -137,7 +139,9 @@ void log_tcl_error( const char *cm, const char *message )
 	}
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
-	plog( "\nTcl/Tk Error. See file '%s'\n", "", fname );
+	
+	if ( tk_ok )
+		plog( "\nTcl/Tk Error. See file '%s'\n", "", fname );
 }
 
 #else

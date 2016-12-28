@@ -276,15 +276,13 @@ if(!fast)				// not running in fast mode?
 	}
 	catch(std::exception& exc)
 	{
-		sprintf(msg, "an exception of type '%s' was detected while computing the equation for\n'%s' requested by object '%s'", exc.what(), label, caller==NULL?"(No label)":((object *)caller)->label);
-		error_hard( msg, "Exception: unknown problem", "Please close Lsd before continuing!!!" );
-		return -1;
+		plog( "\nAn exception was detected while computing the equation for\n'%s' requested by object '%s'", "", label, caller==NULL?"(No label)":((object *)caller)->label);
+		throw;
 	}
 	catch(...)
 	{
-		sprintf(msg, "an unknown problem was detected while computing the equation for\n'%s' requested by object '%s'", label, caller==NULL?"(No label)":((object *)caller)->label);
-		error_hard( msg, "Exception: unknown problem", "Please close Lsd before continuing!!!" );
-		return -1;
+		plog( "\nAn unknown problem was detected while computing the equation for\n'%s' requested by object '%s'", "", label, caller==NULL?"(No label)":((object *)caller)->label);
+		throw;
 	}
 }
 else

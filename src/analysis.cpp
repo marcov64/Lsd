@@ -483,14 +483,22 @@ cmd( "write_disabled .da.f.h.v.y2.f.e $numy2" );
 cmd( "write_any .da.f.tit.ps.e $point_size" ); 
 cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
 
-while(*choice==0)
- {
-  try{ Tcl_DoOneEvent(0); }
-  catch(...) 
-  {
-   goto there;
-  }
- }
+// analysis command loop
+while( ! *choice )
+{
+	try
+	{
+		Tcl_DoOneEvent( 0 );
+	}
+	catch ( std::bad_alloc& ) 	// raise memory problems
+	{
+		throw;
+	}
+	catch ( ... )				// ignore the rest
+	{
+		goto there;
+	}
+}   
 
 // update linked variables with values in entry boxes
 cmd( "set minc [ .da.f.h.v.ft.from.mnc get ]" );

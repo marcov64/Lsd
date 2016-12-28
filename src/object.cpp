@@ -1356,15 +1356,7 @@ for(cv=begin->v; cv!=NULL; cv=cv->next)
 
   if(running==1)
   {
-  try {
   cv->data=new double[max_step+1];
-  }
- catch(...)
-   {
-    sprintf(msg, "out of memory: data for '%s' will not be saved",cv->lab_tit);
-	error_hard( msg, "Out of memory" );
-    cv->save=0;
-   }
   cv->start=t;
   cv->end=max_step;
   }
@@ -1482,19 +1474,10 @@ for(cv=cur->v; cv!=NULL; cv=cv->next)
   if(cv->save || cv->savei)
   {
   if(running==1)
-   {   try 
-	   {
+   { 
 	   amem=max_step+1;
 	   appMem=new double[amem];
 	   cv->data=appMem;
-	   
-	   }
-	   catch(...)
-		{
-		plog("\nNot enough memory to save series for new objects.");
-		cv->save=false;
-		cv->savei=false;
-		}
    }
   cv->start=t;
   cv->end=max_step;
@@ -2094,6 +2077,8 @@ if ( quit == 2 )		// simulation already being stopped
 plog( "\n\nERROR: %s\n", "", logText );
 
 #ifndef NO_WINDOW
+log_tcl_error( "ERROR", logText );
+
 if ( running )		// handle running events differently
 {
 	uncover_browser( );
@@ -2160,10 +2145,11 @@ if(choice==2)
  }
 
 #else
-printf("\nAborting simulation...\n");
+
+fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 #endif
 
-myexit(100);
+myexit(13);
 }
 
 /****************************

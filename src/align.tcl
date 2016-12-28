@@ -33,6 +33,8 @@ set bordsize	2	; # width of windows borders
 set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
 set hsizeL		800	; # LMM horizontal size in pixels
 set vsizeL		600	; # LMM vertical size in pixels
+set hsizeLmin	600	; # LMM minimum horizontal size in pixels
+set vsizeLmin	300	; # LMM minimum vertical size in pixels
 set hsizeB 		400	; # browser horizontal size in pixels
 set vsizeB		620	; # browser vertical size in pixels
 set hsizeM 		600	; # model structure horizontal size in pixels
@@ -50,12 +52,30 @@ set corrYlinux	-47
 set corrXwindows 0
 set corrYwindows 0
 
+# list of windows with predefined sizes & positions
+set wndLst [ list lsd lmm log str ]
+
 # Enable window functions operation logging
 set logWndFn	false
 
 
-# register static special configurations
+# toolbar buttons style
+if [ string equal [ tk windowingsystem ] aqua ] { 
+	set bRlf ""
+	set ovBrlf "" 
+} { 
+	set bRlf flat
+	set ovBrlf groove 
+}
 
+# toolbar images format
+if [ string equal [ info tclversion ] 8.6 ] { 
+	set iconExt png 
+} { 
+	set iconExt gif 
+}
+
+# register static special configurations
 if [ string equal $tcl_platform(platform) unix ] {
 	if [ string equal $tcl_platform(os) Darwin ] {
 		set corrX $corrXmac
@@ -74,6 +94,47 @@ if [ string equal $tcl_platform(platform) unix ] {
 } {
 	set corrY $corrYwindows
 }
+
+# current position of structure window
+set posXstr 0
+set posYstr 0
+
+# images format according to Tk version
+if [ string equal [ info tclversion ] 8.6 ] { 
+	set iconExt png 
+} { 
+	set iconExt gif 
+}
+
+# load images
+image create photo lsdImg -file "$RootLsd/$LsdSrc/icons/lsd.$iconExt"
+image create photo lmmImg -file "$RootLsd/$LsdSrc/icons/lmm.$iconExt"
+image create photo openImg -file "$RootLsd/$LsdSrc/icons/open.$iconExt"
+image create photo saveImg -file "$RootLsd/$LsdSrc/icons/save.$iconExt"
+image create photo undoImg -file "$RootLsd/$LsdSrc/icons/undo.$iconExt"
+image create photo redoImg -file "$RootLsd/$LsdSrc/icons/redo.$iconExt"
+image create photo cutImg -file "$RootLsd/$LsdSrc/icons/cut.$iconExt"
+image create photo copyImg -file "$RootLsd/$LsdSrc/icons/copy.$iconExt"
+image create photo pasteImg -file "$RootLsd/$LsdSrc/icons/paste.$iconExt"
+image create photo findImg -file "$RootLsd/$LsdSrc/icons/find.$iconExt"
+image create photo replaceImg -file "$RootLsd/$LsdSrc/icons/replace.$iconExt"
+image create photo indentImg -file "$RootLsd/$LsdSrc/icons/indent.$iconExt"
+image create photo deindentImg -file "$RootLsd/$LsdSrc/icons/deindent.$iconExt"
+image create photo comprunImg -file "$RootLsd/$LsdSrc/icons/comprun.$iconExt"
+image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.$iconExt"
+image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.$iconExt"
+image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.$iconExt"
+image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.$iconExt"
+image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.$iconExt"
+image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.$iconExt"
+image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.$iconExt"
+image create photo reloadImg -file "$RootLsd/$LsdSrc/icons/reload.$iconExt"
+image create photo structImg -file "$RootLsd/$LsdSrc/icons/struct.$iconExt"
+image create photo initImg -file "$RootLsd/$LsdSrc/icons/init.$iconExt"
+image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.$iconExt"
+image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.$iconExt"
+image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.$iconExt"
+image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
 
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus
@@ -122,9 +183,6 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
-	if { $tcl_platform(platform) != "windows"} {
-		wm iconbitmap $w @$RootLsd/$LsdSrc/icons/lsd.xbm
-	}
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
@@ -159,63 +217,79 @@ proc settop { w { name no } { destroy no } { par no } } {
 
 # configure the window
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
-	global defaultPos parWndLst grabLst noParLst logWndFn
+	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
 	
-	if { ! [ string equal $pos xy ] && $sizeX != 0 } {
-		$w configure -width $sizeX 
-	}
-	if { ! [ string equal $pos xy ] && $sizeY != 0 } {
-		$w configure -height $sizeY 
-	}
-	update idletasks
-	# handle different window default position
-	if [ string equal $pos none ] {
-		if [ info exists defaultPos ] {
-			set pos $defaultPos
-		} {
-			set pos centerS
+	#handle main windows differently
+	if { [ lsearch $wndLst .$w ] < 0 } {
+		# unknown window (not a main one)
+		if { ! [ string equal $pos xy ] && $sizeX != 0 } {
+			$w configure -width $sizeX 
 		}
-	}
-	if { ! [ string equal $pos current ] } {
-		if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
+		if { ! [ string equal $pos xy ] && $sizeY != 0 } {
+			$w configure -height $sizeY 
+		}
+		
+		update idletasks
+		
+		# handle different window default position
+		if [ string equal $pos none ] {
 			if [ info exists defaultPos ] {
 				set pos $defaultPos
 			} {
 				set pos centerS
 			}
 		}
-		if { ! [ string equal $pos xy ]	} {
-			set x [ getx $w $pos ]
-			set y [ gety $w $pos ]
-		} {
-			set x $sizeX
-			set y $sizeY
-		}
-		if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
-			if { [ string equal $pos coverW ] } {
-				set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
-				set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
+		
+		if { ! [ string equal $pos current ] } {
+			if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
+				if [ info exists defaultPos ] {
+					set pos $defaultPos
+				} {
+					set pos centerS
+				}
 			}
-			if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
-				wm geom $w ${sizeX}x${sizeY}+$x+$y 
+			
+			if { ! [ string equal $pos xy ]	} {
+				set x [ getx $w $pos ]
+				set y [ gety $w $pos ]
 			} {
-				wm geom $w +$x+$y
+				set x $sizeX
+				set y $sizeY
+			}
+			
+			if { ! [ string equal "" $x ] && ! [ string equal "" $y ] } {
+				if { [ string equal $pos coverW ] } {
+					set sizeX [ expr [ winfo width [ winfo parent $w ] ] + 10 ]
+					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
+				}
+				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
+					wm geom $w ${sizeX}x${sizeY}+$x+$y 
+				} {
+					wm geom $w +$x+$y
+				}
 			}
 		}
-	}
-	wm resizable $w $resizeX $resizeY
-	if { ! $noMinSize && ( $resizeX || $resizeY ) } {
-		wm minsize $w [ winfo width $w ] [ winfo height $w ]
-	}
-	if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
-		set parWndLst [ linsert $parWndLst 0 $w ]
-		if $grab {
-			if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
-				lappend grabLst "$w [ grab current $w ]"
-			}
-			grab set $w
+		
+		if { ! $noMinSize && ( $resizeX || $resizeY ) } {
+			wm minsize $w [ winfo width $w ] [ winfo height $w ]
 		}
+		
+		wm resizable $w $resizeX $resizeY
+		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+			set parWndLst [ linsert $parWndLst 0 $w ]
+			
+			if $grab {
+				if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+					lappend grabLst "$w [ grab current $w ]"
+				}
+				grab set $w
+			}
+		}
+	} {
+		#known windows - simply apply defaults
+		sizetop .$w
 	}
+	
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
 		wm deiconify $w
 	}
@@ -263,6 +337,60 @@ proc destroytop w {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
+# size the window to default size & positions
+proc sizetop { w } {
+	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM logWndFn
+
+	update idletasks
+	
+	foreach wnd $wndLst {
+		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {
+		
+			switch $wnd {
+				lsd {
+					wm geometry . "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
+					wm minsize . $hsizeB [ expr $vsizeB / 2 ]
+				}
+				lmm {
+					if { [ expr [ winfo screenwidth . ] ] < ( $hsizeL + 2 * $bordsize ) } {
+						set W [ expr [winfo screenwidth . ] - 2 * $bordsize ] 
+					} {
+						set W $hsizeL
+					}
+					set H [ expr [ winfo screenheight . ] - $tbarsize - 2 * $vmargin - 2 * $bordsize ]
+					if { $H < $vsizeL } {
+						set H [ expr [ winfo screenheight . ] - $tbarsize - 2 * $bordsize ] 
+					}
+					if { [ expr [ winfo screenwidth . ] ] < ( $hsizeL + 2 * $bordsize + $hmargin ) } {
+						set X 0
+					} {
+						set X [ expr [ winfo screenwidth . ] - $hmargin - $bordsize - $W ]
+					}
+					set Y [ expr ( [ winfo screenheight . ] - $tbarsize ) / 2 - $bordsize - $H / 2]
+					wm geom . "${W}x$H+$X+$Y"
+					wm minsize . $hsizeLmin $vsizeLmin
+				}
+				log {
+					set X [ getx .log bottomrightS ]
+					set Y [ gety .log bottomrightS ]
+					wm geom .log +$X+$Y
+					wm minsize .log [ winfo width .log ] [ winfo height .log ]
+				}
+				str {
+					set posXstr [ expr [ getx . topleftS ] + [ winfo width . ] + $hmargin ]
+					set posYstr [ gety . topleftS ]
+					wm geometry .str ${hsizeM}x${vsizeM}+${posXstr}+${posYstr}	
+					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]	
+				}
+			}
+		}
+	}
+
+	update
+
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+}
+
 # resize the window
 proc resizetop { w sizeX { sizeY 0 } } {
 	global parWndLst grabLst logWndFn
@@ -290,6 +418,27 @@ proc resizetop { w sizeX { sizeY 0 } } {
 	update
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nresizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+}
+
+# set window icon
+proc icontop { w { type lsd } } {
+	global tcl_platform RootLsd LsdSrc lmmImg lsdImg iconExt
+	
+	if { $tcl_platform(platform) == "windows" } {
+		if [ string equal $w . ] {
+			wm iconbitmap $w -default $RootLsd/$LsdSrc/icons/$type.ico
+		} {
+			wm iconbitmap $w $RootLsd/$LsdSrc/icons/$type.ico
+		}
+	} {
+		if [ string equal $w . ] {
+			wm iconphoto $w -default ${type}Img
+			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+		} {
+			wm iconphoto $w ${type}Img
+			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+		}
+	}
 }
 
 # alignment of window w1 to the to right side of w2
@@ -330,8 +479,7 @@ proc getx { w pos } {
 			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
 		topleftS { 
-			global hmargin
-			return $hmargin
+			return [ expr $hmargin + $corrX ]
 		}
 		topleftW { 
 			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
@@ -362,8 +510,7 @@ proc gety { w pos } {
 			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
 		topleftS { 
-			global vmargin
-			return $vmargin
+			return [ expr $vmargin + $corrY ]
 		}
 		topleftW { 
 			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]

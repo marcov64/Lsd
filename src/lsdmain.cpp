@@ -108,6 +108,7 @@ bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
 bool scroll;				// scroll state in current runtime plot
 bool struct_loaded = false;	// a valid configuration file is loaded
+bool tk_ok = false;			// control for tk_ready to operate
 bool unsavedData = false;	// flag unsaved simulation results
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
 char *alt_path = NULL;		// alternative output path
@@ -171,15 +172,22 @@ strcpy(equation_name,"fun.cpp");
 exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
 exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
 
+root=new object;
+root->init(NULL, "Root");
+add_description("Root", "Object", "(no description available)");
+blueprint=new object;
+blueprint->init(NULL, "Root");
+
 #ifdef NO_WINDOW
 
+no_window = true;
 findex=1;
 fend=0;		// no file number limit
 
 if(argn<3)
  {
-  printf("\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n");
-  myexit(1);
+  fprintf( stderr, "\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n" );
+  myexit( 1 );
  }
 else
  {
@@ -228,52 +236,10 @@ else
 	continue;
  }
   
-  printf("\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1]);
-  myexit(2);
+  fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1] );
+  myexit( 2 );
   }
  } 
-
-#else 
-for(i=1; argv[i]!=NULL; i++)
-{if(argv[i][0]!='-' || (argv[i][1]!='f' && argv[i][1]!='i') )
-  {printf(msg,"\nInvalid option: %s\nAvailable options:\n-i tcl_directory\n-f model_name\n", argv[i]);
-	myexit(1);
-  }
- if(argv[i][1]=='f')
-	{delete[] simul_name;
-	 simul_name=new char[strlen(argv[i+1])+3];
-	 strcpy(simul_name,argv[i+1]);
-    len=strlen(simul_name);
-    if(len>4 && !strcmp(".lsd",simul_name+len-4) )
-     *(simul_name+len-4)=(char)NULL;
-    i++;
-	}
- if(argv[i][1]=='i')
-	{
-   strcpy(tcl_dir,argv[i+1]+2);
-   i++;
-  } 
-}
-
-grandTotal = true;				// not in parallel mode: use .tot headers
-struct_file=new char[strlen(simul_name)+5];
-sprintf(struct_file, "%s.lsd", simul_name);
-#endif
-
-// register critical signal handlers
-void signal_handler(int);
-signal(SIGFPE, signal_handler);  
-signal(SIGILL, signal_handler);  
-signal(SIGSEGV, signal_handler);  
-
-root=new object;
-root->init(NULL, "Root");
-add_description("Root", "Object", "(no description available)");
-blueprint=new object;
-blueprint->init(NULL, "Root");
-
-#ifdef NO_WINDOW
-no_window = true;
 
 if ( ! batch_sequential )
  {
@@ -291,41 +257,88 @@ else
 f=fopen(struct_file, "r");
 if(f==NULL)
  {
-  printf("\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", struct_file);
-  myexit(3);
+  fprintf( stderr, "\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", struct_file );
+  myexit( 3 );
  }
 fclose(f);
 struct_loaded = true;
 
 if ( load_configuration( root, false ) != 0 )
 {
-	printf( "\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n", struct_file );
-	myexit(3);
+	fprintf( stderr, "\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n", struct_file );
+	myexit( 4 );
 }
 
 #else 
 	
-Tcl_FindExecutable(argv[0]); 
-inter=InterpInitWin(tcl_dir);
-if(inter==NULL)
-{
-	printf( "Tcl/Tk failed to load.\nCheck the Tcl/Tk installation and configuration or reinstall  Lsd if the problem persists.\n" );
-	myexit(4);
+for(i=1; argv[i]!=NULL; i++)
+{if(argv[i][0]!='-' || (argv[i][1]!='f' && argv[i][1]!='i') )
+  {
+	log_tcl_error( "Command line parameters", "Invalid option, available options: -i tcl_directory / -f model_name" );
+	myexit( 1 );
+  }
+ if(argv[i][1]=='f')
+	{delete[] simul_name;
+	 simul_name=new char[strlen(argv[i+1])+3];
+	 strcpy(simul_name,argv[i+1]);
+    len=strlen(simul_name);
+    if(len>4 && !strcmp(".lsd",simul_name+len-4) )
+     *(simul_name+len-4)=(char)NULL;
+    i++;
+	}
+ if(argv[i][1]=='i')
+	{
+   strcpy(tcl_dir,argv[i+1]+2);
+   i++;
+  } 
 }
 
+// initialize the tcl interpreter
+Tcl_FindExecutable( argv[0] ); 
+inter = Tcl_CreateInterp( );
+done = Tcl_Init( inter );
+if ( done != TCL_OK )
+{
+	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+	log_tcl_error( "Create Tcl interpreter", msg );
+	myexit( 5 );
+}
+
+// set variables and links in TCL interpreter
 Tcl_LinkVar(inter, "choice", (char *) &choice, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug_flag", (char *) &debug_flag, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 
-cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set debug_flag 1} {set debug_flag 0}" );
-if(debug_flag)
+// test Tcl interpreter
+cmd( "set choice 1234567890" );
+if ( choice != 1234567890 )
+{
+	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall Lsd" );
+	myexit( 6 );
+}
+	
+// initialize & test the tk application
+choice = 1;
+done = Tk_Init( inter );
+if ( done == TCL_OK )
+	cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
+if ( choice )
+{
+	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+	log_tcl_error( "Start Tk", msg );
+	myexit( 7 );
+}
+tk_ok = true;
+cmd( "tk appname browser" );
+
+cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}" );
+if ( choice )
  {
  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Spaces in file path\" -detail \"The directory containing the model is:\n[pwd]\nIt appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
- myexit(5);
- 
+ log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+ myexit( 8 ); 
  }
 
-cmd( "tk appname browser" );
 // check if LSDROOT already exists and use it if so, if not, search the current directory tree
 cmd( "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
 cmd( "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
@@ -333,7 +346,8 @@ str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 if ( str == NULL || strlen( str ) == 0 )
  {
  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"" );
- myexit(6);
+ log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where Lsd is installed" );
+ myexit( 9 );
  }
 lsdroot = new char[ strlen( str ) + 1 ];
 strcpy( lsdroot, str );
@@ -343,9 +357,8 @@ for ( i = 0; i < len; ++i )
 		lsdroot[ i ] = '/';
 cmd( "set RootLsd \"%s\"", lsdroot );
 
-Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-cmd( "set done [file exist $RootLsd/lmm_options.txt]" );
-if(done==1)
+cmd( "set choice [file exist $RootLsd/lmm_options.txt]" );
+if ( choice )
  {
   cmd( "set f [open $RootLsd/lmm_options.txt r]" );
   cmd( "gets $f Terminal" );
@@ -360,21 +373,23 @@ else
   cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"" );
  }
 
-Tcl_UnlinkVar(inter, "done");
-
+choice = 0;
 // load native Tcl procedures for windows management
-cmd( "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/align.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
-if ( choice != 0 )
-	myexit( 7 + choice );
+cmd( "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 
 // load native Tcl procedures for external files handling
-cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] == 0 } { set choice 0 } { set choice 1 } } { set choice 2 }; if { $choice != 0 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/ls2html.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+
 if ( choice != 0 )
-	myexit( 7 + choice );
+{
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Source file(s) missing\" -detail \"Required Tcl/Tk source file(s) is(are) missing.\nCheck the installation of Lsd or reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) is(are) missing, check the installation of Lsd or reinstall Lsd if the problem persists" );
+	myexit( 200 + choice );
+}
 
 #ifdef TKCON
 // launch TkCon as an auxiliary window for debugging
-cmd( "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Please check your installation and reinstall Lsd if required.\n\nLsd is continuing with no debug console.\" } }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Lsd is continuing with no debug console.\" } }" );
 #endif
 
 // create a Tcl command that calls the C discard_change function before killing Lsd
@@ -384,12 +399,12 @@ Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
-// set main window icon
-cmd( "if {$tcl_platform(platform) == \"windows\"} {wm iconbitmap . -default $RootLsd/$LsdSrc/icons/lsd.ico} {wm iconbitmap . @$RootLsd/$LsdSrc/icons/lsd.xbm}" );
-// set main window position parameters now
-cmd( "wm geometry . \"[expr $hsizeB]x$vsizeB+$hmargin+$vmargin\"" );
-cmd( "wm minsize . [ expr $hsizeB ] [ expr $vsizeB / 2 ]" );
-cmd( "wm protocol . WM_DELETE_WINDOW { if { [ discard_change ] == \"ok\" } { exit } { } }" ); 
+// set main window
+cmd( "wm title . \"Lsd Browser\"" );
+cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
+cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
+cmd( "icontop . lsd" );
+cmd( "sizetop lsd" );
 
 cmd( "label .l -text \"Starting Lsd\"" );
 cmd( "pack .l" );
@@ -397,15 +412,20 @@ cmd( "update" );
 
 create_logwindow( );
 
-// use the new exec_path variable to change to the model directory
+// use exec_path to change to the model directory
 delete [] path;
 path = new char[ strlen( exec_path ) + 1 ];
 strcpy( path, exec_path );
 cmd( "set path \"%s\"; cd \"$path\"", path );
 
-eq_file=upload_eqfile();
+struct_file = new char[ strlen( simul_name ) + 5 ];
+sprintf( struct_file, "%s.lsd", simul_name );
+
+eq_file = upload_eqfile();
 strcpy( lsd_eq_file, "" );
 sprintf( name_rep, "report_%s.html", simul_name );
+
+grandTotal = true;				// not in parallel mode: use .tot headers
 
 cmd( "destroy .l" );
 #endif
@@ -424,22 +444,27 @@ while(1)
 root=create( root);
 no_more_memory = false;
 series_saved=0;
-try {
-run(root);
-}
 
-/**/
-catch(int p)
- {
- while(stacklog->prev!=NULL)
-   stacklog=stacklog->prev;
- stack=0; 
- }
-/**/ 
+try 
+{
+	run(root);
+}
+catch( int p )			// handle this here
+{
+	while(stacklog->prev!=NULL)
+		stacklog=stacklog->prev;
+	stack=0; 
+}
+catch ( ... )			// send the rest upward
+{
+	throw;
+}
 }
 
 #else
- run(root);
+
+run(root);
+
 #endif 
 
 empty_cemetery();
@@ -504,10 +529,11 @@ if ( batch_sequential_loop )
 	{
 #ifndef NO_WINDOW 
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 #else
-		plog( "\nFile %s not found or corrupted", "", struct_file );
+		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );	
 #endif
-		myexit(9);
+		myexit( 10 );
 	}
 	batch_sequential_loop = false;
 }
@@ -518,10 +544,11 @@ if ( i > 1 )
 	{
 #ifndef NO_WINDOW 
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 #else
-		plog( "\nFile %s not found or corrupted", "", struct_file );
+		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
-		myexit(9);
+		myexit( 10 );
 	}
 
 strcpy(ch, "");
@@ -532,10 +559,11 @@ if ( no_more_memory )
  {
 #ifndef NO_WINDOW 
  cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLsd will close now.\"", series_saved, max_step );
+ log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 #else
- plog( "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", "", series_saved, max_step );
+ fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
 #endif
- myexit(10);
+ myexit( 11 );
  }
  
 //new random routine' initialization
@@ -664,7 +692,9 @@ case 9: 		// Pause simulation
 break;
 
 case 35:
- myexit(11);
+ cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Unexpected termination\" -detail \"Please try again.\"" );
+ log_tcl_error( "Unexpected termination", "Please try again" );
+ myexit( 12 );
 break;
 
 default:
@@ -816,19 +846,23 @@ for(var=root->v; var!=NULL; var=var->next)
      var->end=max_step;
      if(var->data!=NULL)
       delete[] var->data;
-    try {
-     var->data=new double[max_step+1];
+  
+     try 
+	 {
+      var->data=new double[max_step+1];
+     }
+     catch( std::bad_alloc& ) 
+	 {
+	 	set_lab_tit(var);
+         plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
+         var->save=0;
+         no_more_memory = true;
+	 	throw;
+     }
+   
      series_saved++;
      if(var->num_lag>0  || var->param==1)
       var->data[0]=var->val[0];
-     }
-    
-    catch(...) {
-     set_lab_tit(var);
-        plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
-        var->save=0;
-        no_more_memory = true;
-       }
     }
    else
     {
@@ -906,45 +940,6 @@ void plog( char const *cm, char const *tag, ... )
 }
 
 
-/*********************************
-INTERPINITWIN
-Calls tclinit and tkinit, managing he errors
-WARNING !!!
-This function presumes the installation of a /gnu directory along
-the model's one. Tcl and Tk initialization files MUST be in
-/gnu[64]/lib/tcl8.X
-/gnu[64]/lib/tk8.X
-
-*********************************/
-
-#ifndef NO_WINDOW 
-
-Tcl_Interp *InterpInitWin(char *tcl_dir)
-{
-Tcl_Interp *app;
-char *s;
-FILE *f;
-
-app=Tcl_CreateInterp();
-
-if(Tcl_Init(app)!=TCL_OK)
-   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
-    fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
-    fclose(f);
-    myexit(12);
-   }
-   
-if(Tk_Init(app)!=TCL_OK)
-   {f=fopen("tk_err.err","wt");  // use text mode for Windows better compatibility
-    fprintf(f,"Tcl/Tk initialization directories not found. Check the installation of Tcl/Tk.\n%s", Tcl_GetStringResult(app));
-    fclose(f);
-    myexit(13);
-   }
-
-return app;
-}
-#endif
-
 void reset_end(object *r)
 {
 object *cur;
@@ -1012,7 +1007,8 @@ cmd( "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} 
 cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left" );
 cmd( "pack $w -side right" );
 
-cmd( "showtop .log bottomrightS 1 1 0" );
+cmd( "sizetop log" );
+cmd( "showtop .log current 1 1 0" );
 set_shortcuts_log( ".log" );
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it
@@ -1184,43 +1180,4 @@ char *clean_path(char *filepath)
 			filepath[i]='/';
 			
 	return filepath;
-}
-
-
-/*********************************
-SIGNAL_HANDLER
-*********************************/
-// handle critical system signals
-void signal_handler(int signum)
-{
-	char msg2[2*MAX_ELEM_LENGTH];
-	double useless = -1;
-	
-	switch(signum)
-	{
-		case SIGFPE:
-			sprintf(msg, "SIGFPE (Floating-Point Exception):\n  Maybe a division by 0 or similar?");
-		break;
-		
-		case SIGILL:
-			sprintf(msg, "SIGILL (Illegal Instruction):\n  Maybe executing data?");		
-		break;
-		
-		case SIGSEGV:
-			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer?\nAlso ensure no group of objects has zero elements.");		
-		break;
-		
-		default:
-			sprintf(msg, "Unknown signal");			
-	}
-	
-#ifdef NO_WINDOW
-	plog( "FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", "", msg );
-#else
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg);
-	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
-	deb( stacklog->vs->up, NULL, msg2, &useless );
-#endif
-
-	myexit(-signum);			// abort program
 }

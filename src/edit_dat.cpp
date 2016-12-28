@@ -186,13 +186,22 @@ noredraw:
 
 cmd( "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter  );
 
-while(*choice==0)
-    {
-   try{ Tcl_DoOneEvent(0);}
-   catch(...) {
-   goto noredraw;
-   }
-  } 
+// editor main command loop
+while( ! *choice )
+{
+	try
+	{
+		Tcl_DoOneEvent( 0 );
+	}
+	catch ( std::bad_alloc& ) 	// raise memory problems
+	{
+		throw;
+	}
+	catch ( ... )				// ignore the rest
+	{
+		goto noredraw;
+	}
+}   
 
 // handle both resizing event and block object # setting while editing initial values
 if ( *choice == 5 || ( *choice == 4 && in_set_obj ) )		// avoid recursion
