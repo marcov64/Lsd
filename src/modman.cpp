@@ -396,7 +396,7 @@ cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "bind . <Destroy> { set choice 1 }" );
 cmd( "icontop . lmm" );
-cmd( "sizetop lmm" );
+cmd( "sizetop .lmm" );
 
 // main menu
 cmd( "menu .m -tearoff 0" );
@@ -806,7 +806,7 @@ if(argn>1)
      choice=0;
      if(s[0]!='\0')
        {strcpy(str, s);
-        if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++")|| !strcmp(str, ".h")|| !strcmp(str, ".H"))
+        if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H") || !strcmp(str, ".hpp") || !strcmp(str, ".HPP") || !strcmp(str, ".Hpp"))
           {sourcefile=1;
 			color(shigh, 0, 0);			// set color types (all text)
           }
@@ -929,15 +929,17 @@ if(s==NULL || !strcmp(s, ""))
 	 goto end_run;
    }
 
+  choice = run;
   cmd( "set init_time [clock seconds]" ); 
-  cmd( "newtop .t \"Please Wait\" \"\" \"\"" );
+  cmd( "if { ! $autoHide || ! $choice } { set parWnd .; set posWnd centerW } { set parWnd \"\"; set posWnd centerS }" );
+  cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
   cmd( "label .t.l1 -font {-weight bold} -text \"Making model...\"" );
   if ( run )
 	cmd( "label .t.l2 -text \"The system is checking the files modified since the last compilation and recompiling as necessary.\nOn success the new model program will be launched.\nOn failure a text window will show the compiling error messages.\"" );
   else
 	cmd( "label .t.l2 -text \"The system is recompiling the model.\nOn failure a text window will show the compiling error messages.\"" );
   cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
-  cmd( "showtop .t centerS" );
+  cmd( "showtop .t $posWnd" );
   
   s = ( char * ) Tcl_GetVar( inter, "autoHide", 0 );	// get auto hide status
   if ( run && ! strcmp( s, "1" ) )	// auto hide LMM if appropriate
@@ -5021,7 +5023,7 @@ cmd( "newtop .t \"Please Wait\"" );
 cmd( "label .t.l1 -font {-weight bold} -text \"Making non-graphical version of model...\"" );
 cmd( "label .t.l2 -text \"The executable 'lsd_gnuNW' for this system is being created.\nThe make file 'makefileNW' and the 'src' folder are being created\nin the model folder and can be used to recompile the\n'No Window' version in other systems.\"" );
 cmd( "pack .t.l1 .t.l2 -padx 5 -pady 5" );
-cmd( "showtop .t" );
+cmd( "showtop .t centerW" );
 
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && ! [ string equal $tcl_platform(machine) amd64 ] } {set choice 1} {set choice 0}" );
 if(choice==0)
@@ -5195,6 +5197,8 @@ Tcl_UnlinkVar(inter, "num");
 Tcl_UnlinkVar(inter, "tosave");
 Tcl_UnlinkVar(inter, "macro");
 Tcl_UnlinkVar(inter, "shigh");
+
+return 0;
 }
 
 // data structures for color syntax (used by color/rm_color)

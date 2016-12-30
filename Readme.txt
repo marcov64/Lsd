@@ -1,10 +1,11 @@
 Laboratory for Simulation Development - Lsd
 and
 Lsd Model Manager - LMM
-May 2016
+January 2017
 
-Version 7.0 alpha
+Version 7.0 beta
 by Marco Valente - marco.valente@univaq.it
+Version 7 additions by Marcelo Pereira - marcelocpereira@uol.com.br
 
 This Readme.txt file contains:
 - Brief introduction on Lsd
@@ -32,9 +33,9 @@ Lsd installation content
 This distribution contains:
 - Lsd source code, for the creation of simulation models
 - Several Lsd example models
-- Lsd Model Manager (LMM), a developing environment for Lsd models
+- Lsd Model Manager (LMM), a development environment for Lsd models
 - Documentation, as context dependent help pages 
-- (Windows 32-bit version only) GNU C++ compiler and other GNU stuff. 
+- (Windows 32-bit version only) GNU C++ compiler and other GNU stuff
 
 Lsd source code
 The Lsd source files are usually managed (e.g. for compilation) automatically, so that users need not to worry for technical issues. Upgrading to new versions of Lsd (which always guarantees backward compatibility) necessitates only to replace the source files.
@@ -43,7 +44,7 @@ Lsd example models
 Several models contained in the distribution provide examples on the design of a whole models or can be used to copy-and-past single equations or chunks of code.
 
 LMM
-Lsd models can be developed using a text editor and pre-defined compilation instructions (i.e. makefile), so that users are allowed to use their preferred coding environment. However, the distribution contains a simple IDE providing all the functionalities required by the (limited) programming needs of a Lsd model project. LMM permits to manage easily several modelling projects, develop Lsd models' code with extensive assistance, exploit debugging tools.
+Lsd models can be developed using a text editor and pre-defined compilation instructions (i.e. makefile), so that users are allowed to use their preferred coding environment. However, the distribution contains a simple IDE providing all the functionalities required by the (limited) programming needs of a Lsd model project. LMM permits to manage easily several modeling projects, develop Lsd models' code with extensive assistance, exploit debugging tools.
  
 Documentation
 All the documentation is accessible through the help menus, presented as HTML pages. In particular, there documentation is made of:
@@ -61,101 +62,131 @@ Optionally, Windows x64 users may use LMM/Lsd under native 64-bit support. This 
 ***********************************
 MS Windows Installation (32/64-bit)
 ***********************************
-The installation consists simply in unpacking the Lsd files that are structured in a root directory (e.g. C:\Lsd) and several subdirectories for the models, manuals and source code. 
+To unpack the distribution file, e.g., LsdXX.zip, simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
 *** IMPORTANT ***
 Lsd cannot be installed within a directory (or having an ancestor directory) containing a space in its name. For example, the directory:
 C:\Documents and Settings\Lsd
-cannot work. If you installed the system in such a wrong directory, simply move the whole Lsd directory in another location.
+cannot work. If you installed the system in such a wrong directory, simply move the whole Lsd directory structure in another location (drag and drop in Windows Explorer).
 *****************
 
 *** WARNING ***
 Lsd operates by creating and modifying executable (.exe) files for your simulation models. This kind of procedure may be INCORRECTLY detected as suspicious by some antivirus software and incorrect operation of Lsd may arise, particularly when you try to compile and/or run your model. In this case, you may try to reconfigure your antivirus to allow Lsd operation or try to TEMPORARILY disable it entirely. Microsoft standard antivirus software (included with Windows 8/10 and available as a download for Vista/7) is known to operate properly with Lsd.
 ***************
 
-When the installation is completed, run this file inside the Lsd directory (double clicking in Windows Explorer is fine):
+If you want to create a desktop link (icon) to run Lsd/LMM, you can use the batch file available in the installation directory executing the command (or double-clicking it in Windows Explorer):
 
-> run.bat
+add-shortcut.bat
 
-in the installation directory. This will run LMM (Lsd Model Manager) in 32-bit mode, which allows to create new models, or select existing models. Never invoke the file "lmm.exe" directly, because it needs some environment variables to be set by "run.bat".
+Double-clicking the created desktop icon will run LMM (Lsd Model Manager) in 32-bit mode, which allows to create new models, or select existing models. Never invoke the file "lmm.exe" directly, because it needs some environment variables to be set by "run.bat".
+
+Alternatively, you may run this file inside the Lsd directory (double-clicking in Windows Explorer is fine) to run LMM:
+
+run.bat
 
 If you have the full Cygwin or MinGW 32-bit distribution installed and want to use it instead of the minimum version installed with Lsd, please make sure you have it minimally configured with the packages "gcc-core", "gcc-g++" (C++ compiler), "zlib-devel" (library), "make" (make tool) and "gdb". Then execute "config-cygwin32.bat" to remove the version of these tools that comes with Lsd. Please use the guide below (for 64-bit) as a reference to the process of setting up Cygwin 32-bit. Don't forget to have your preferred tools included in your PATH environment variable.
 
-In some cases, the included minimum tool set may not work properly with your particular Windows configuration (double-clicking not working, graphical glitches, compiler errors). In this case, you may need to perform a full installation of Cygwin 32-bits. Please use the guide below (for 64-bit) as a reference to the process of setting it up.
+In some rare cases, the included minimum tool set may not work properly with your particular Windows configuration (double-clicking not working, graphical glitches, compiler errors). In this case, you may need to perform a full installation of Cygwin 32-bits. Please use the guide below (for 64-bit) as a reference to the process of setting it up.
 
 
 *************************************
 MS Windows Installation (64-bit only)
 *************************************
 
-To use the 64-bit of Lsd, additionally, you need the Cygwin 64-bit version installed plus some optional packages (or another compatible GNU gcc 4.9+ compiler). The installer can be downloaded at http://www.cygwin.com/ (make sure you download the "setup-x86_64.exe" file). Install it to any appropriate directory (the same restrictions mentioned above, about folder names with spaces, also apply to Cygwin). Verify in the installer that "gcc-core", "gcc-g++" (C++ compiler), "zlib-devel" (library), "make" (make tool) and "gdb" (debugger), all 64-bit versions (x86_64) were selected for installation in the "Select Packages" window of Cygwin Setup. Alternatively, MinGW gcc-g++ 64-bit (plus zlib, make and gdb) can also be used. You don't have to install Tcl/Tk or gnuplot in Cygwin, the required versions are already included with Lsd.
+To use the 64-bit of Lsd, additionally, you need the Cygwin 64-bit version installed plus some optional packages. The installer can be downloaded at http://www.cygwin.com/ (make sure you download the "setup-x86_64.exe" file). Install it to any appropriate directory (the same restrictions mentioned above, about folder names with spaces, also apply to Cygwin). Verify in the installer that "gcc-core", "gcc-g++" (C++ compiler), "zlib-devel" (library), "make" (make tool) and "gdb" (debugger), all 64-bit versions (x86_64) were selected for installation in the "Select Packages" window of Cygwin Setup. You don't have to install Tcl/Tk or gnuplot in Cygwin, the required versions are already included with Lsd.
 
-After installation check that Cygwin (or MinGW) was added to the PATH environment variable. To do that, in Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin (or MinGW) bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin/MinGW bin folder in PATH.
+After installation you MUST add Cygwin to the PATH environment variable. To do that, open a Windows Command Prompt in the Lsd installation directory (shift-right-click in Explorer, then select "Open command prompt here") and use the command (replace CYGWIN_DIR with your Cygwin installation directory, usually "C:\cygwin64"):
 
-When the installation is completed, run this file inside the Lsd directory (double clicking in Windows Explorer is fine):
+add-to-path CYGWIN_DIR
 
-> run64.bat
+Alternatively, or if you have problems with the command above, you can use Windows GUI to add Cygwin to the PATH. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin (or MinGW) bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
 
-in the installation directory. This will run LMM (Lsd Model Manager) that allows to create new models, or select existing models. Never invoke the file "lmm.exe" or "lmm64.exe" directly, because they need some environment variables to be set by "run.bat"/"run64.bat".
+When the installation is completed, if you want to create a desktop link (icon) to run Lsd/LMM, you can use the batch file available in the installation directory executing in the command prompt (double-clicking it in Windows Explorer is NOT ok here):
 
-If you switch between the 32 and 64-bit versions, make sure you adjust the "System Compilation Options" (in the "Model" menu in LMM), at least by clicking on the button "Default Windows[64]".
+add-shortcut 64
 
-Please note that you need to FULLY install Cygwin64/MinGW64 to use Lsd 64-bit. Just copying the minimum required .dll files is not enough because full compiler support is needed.
+Double-clicking the created desktop icon will run LMM (Lsd Model Manager) in 64-bit mode, which allows to create new models, or select existing models.  Never invoke the file "lmm.exe" or "lmm64.exe" directly, because they need some environment variables to be set by "run.bat"/"run64.bat".
+
+Alternatively, you may run this file inside the Lsd directory (double-clicking in Windows Explorer is fine) to run LMM:
+
+run64.bat
+
+If you switch between the 32 and 64-bit versions, make sure you adjust the "System Compilation Options" (in the "Model" menu in LMM), at least by clicking on the button "Default Windows[32/64]".
+
+Please note that you need a FULLY installed Cygwin64 to use Lsd 64-bit. Just copying the minimum required .dll files is not enough because full compiler support is needed.
 
  
-*****************
-Unix Installation
-*****************
-To use the Lsd system it is necessary to have a GNU GCC compiler with the standard libraries and the Tcl/Tk 8.6 package; you likely have already Tcl/Tk installed on your system, but you also need the "development" package for your Tcl/Tk version. Use your preferred package manager to get the 'dev' package. In Debian or Ubuntu, you can use "sudo apt-get install tcl8.6-dev" and  "sudo apt-get install tk8.6-dev". Remember you need the packages to match the architecture (32 or 64-bit) you are using for Lsd (apt-get manages that transparently).
+******************
+Linux Installation
+******************
 
-Though not striclty necessary, it is also suggested to have the GDB debugger (for low-level inspection of a simulation working) and the gnuplot graphical package. 
+To use the Lsd system it is necessary to have a GNU GCC compiler with the standard libraries and the Tcl/Tk 8.5/8.6 package; you likely have Tcl/Tk already installed on your system, but you may need the "development" package for your Tcl/Tk version. Use your preferred package manager to get the 'dev' package. In Debian or Ubuntu, you can use "sudo apt-get install tcl8.6-dev tk8.6-dev". Remember you need the packages to match the architecture (32 or 64-bit) you are using for Lsd (apt-get manages that transparently).
 
-To unpack the file, e.g. LsdXX.zip, simple unzip it in the chosen directory. This will create the whole directory structure. 
+Though not strictly necessary, it is also suggested to have the GDB debugger (for low-level inspection of a simulation working) and the gnuplot graphical package (for advanced graphics). In Debian or Ubuntu, use "sudo apt-get install gdb gnuplot" to install both. 
 
-To run LMM, please open a terminal in the chosen installation directory (or use your graphical file browser) and execute:
+To unpack the distribution file (e.g., LsdXX.zip) simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
-# ./lmm
+If you want to create a desktop link (icon) to run Lsd/LMM, you can use the script available in the installation directory executing the command (Ubuntu and Gnome based distributions):
+
+./add-shortcut.sh
 
 or (for 32-bit machines)
 
-# ./lmm32
+./add-shortcut.sh 32
 
-Optionally, you may need to recompile LMM, in particular if the included pre-compiled versions have problems with your Unix setup. Move in the new Lsd directory and use the makefile "makefile.ln" (64/32-bit, native) or "makefile32.ln" for creating a 32-bit version in a 64-bit machine:
+If you get an error when trying to execute the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x *.sh" in the installation directory).
 
-# make -f makefile.ln
+To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
-If the compilation fails the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similary, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
+./lmm
+
+or (for 32-bit machines)
+
+./lmm32
+
+You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the new Lsd directory and use the makefile "makefile.ln" (64/32-bit, native) ("makefile32.ln" is used ONLY for creating a 32-bit version in a 64-bit machine):
+
+make -f makefile.ln
+
+If the compilation fails, the most likely reason is the mis-specification of the locations of the files required for the compilation. The major problem is that Tcl/Tk may be installed in your systems in several different locations. The makefile contains a list of variables for the directory needed for the Tcl/Tk libraries and include files. For example, on some systems you have the Tcl/Tk library located in /usr/lib, or /usr/local/lib, or usr/share/lib, etc. Similary, the include files may be located in different directories. The makefile lists the files you need to identify; check the location for those files and edit the makefile as appropriate for your system. 
 
 It is also possible that Tcl/Tk requires further libraries besides those specified in the makefile. If you have errors even after having specified the correct path to the Tcl/Tk libraries, then find out where the file wish is located (using the command "whereis wish"), and then find out which libraries are used with the command:
 
-# ldd /usr/bin/wish
+ldd /usr/bin/wish
 
-If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY>
+If the system lists further libraries, add the appropriate option to the linker (e.g. -lieee to add the library libieee.a) in the makefile to the variable DUMMY.
 
 !!!!!!!! IMPORTANT !!!!!!!!!!!!
-If you modified the makefile to compile LMM, the same changes will need to be made to the makefiles used to generate the Lsd Model Programs. You need to make these changes only once using a command in LMM. Use the menu item System Compilation Options in menu Model. You will have the same variables as in the makefile used to compile LMM that must be set to the same values.
+If you modified the makefile to compile LMM, the same changes need to be made to the makefiles used to generate the Lsd Model Programs. You need to make these changes only once using a command in LMM. Use the menu item System Compilation Options in menu Model. You will have the same variables as in the makefile used to compile LMM that must be set to the same values.
 
 
-**********************************
-Mac OS X (Mavericks+) Installation
-**********************************
-Mac users have two options. Either compile Lsd as a Unix system, or use the package native for Mac OS X. In both cases you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
+***********************************
+MacOS (Mavericks+) Installation
+***********************************
 
-In the first case you also need to install the Tcl/Tk 8.5 developer toolkit, as described above. Then, open a terminal and follow the remaining instructions for installing Lsd on Unix systems. For updates and tips see:
+Mac users have two options. Either use the package native for MacOS (Aqua), or compile Lsd as a Unix system. In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
 
-http://andre.lorentz.pagesperso-orange.fr/Site/%5BLSD_on_a_Mac%5D.html
+To unpack the distribution file, e.g. LsdXX.zip, simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
-For a native Mac look&feel (and simpler setup) you may need to install the ActiveState ActiveTcl distribution of Tcl/Tk 8.5 (http://www.activestate.com/activetcl/downloads). Unpack the Lsd distribution on your preferred location. 
+After unpacking is completed, run the Mac App named LMM located inside the Lsd directory (double click it in Finder).
+
+To create a desktop or dock shortcut to Lsd, you click and hold over the LMM app in Finder, select "Make Alias" and move (drag and drop) the created shortcut file to the desktop or to the dock.
+
+Alternatively, you can run LMM from the terminal. Please open a terminal in the chosen installation directory and execute:
+
+./lmmOSX
 
 Optionally, you can recompile LMM, in particular if the included pre-compiled version has problems with your Mac setup. Open a terminal and go to the directory of Lsd installation. Then use the command:
 
-> make -f makefile.osx
+make -f makefile.osx
 
-To run LMM, please open a terminal in the chosen installation directory and execute:
+You may have to install Gnuplot if you want to produce more elaborated plots in Lsd. If you have a standard installation of MacOS (Aqua), the easiest way is to use Homebrew for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
-> ./lmmOSX
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-or simply double-click on its icon from the Finder.
+When Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the command:
+
+brew install gnuplot
 
 
 ******************
@@ -164,25 +195,25 @@ Use of LMM and Lsd
 
 LMM (Lsd Model Manager) is a program used to manage Lsd model programs. Lsd (Laboratory for Simulation Development) model programs are stand-alone programs that execute fast and efficiently difference-equation simulation models. For a user to develop a new simulation model it is only requested to specify the equations of the model in a simplified C++ language, with the assistance of automatic help. Lsd model programs generate automatically the code necessary to link the equations in a coherent sequence within a simulated time steps, saving and elaborating the result, allowing easy access to initialization values, and many other operations required for fully exploiting the simulation model. Both LMM and Lsd offer extensive manual pages for each operation available.
 
-When LMM starts the first operation is to choose a model to work with. Using the LMM's Models' Browser you can either select one of the existing models, or create a new empty one  (that is, no equations, variables etc.). When a model is selected you can ask LMM to:
+When LMM starts the first operation is to choose a model to work with. Using the LMM's Model Browser you can either select one of the existing models, or create a new empty one  (that is, no equations, variables etc.). KNOWN BUG: MacOS users may have some of Model Browser menu options grayed-out because of an old version of Tcl/Tk. In this case, please use LMM main File menu to create new models or copy an existing one.
+
+After a model is selected in Model Browser, you can ask LMM to:
 - compile the model and run it;
 - set compilation options
 - edit the equations of the model;
 - debug the code of the equations with gdb;
 
-Besides this model-specific operations, LMM is also a standard editor for creating and editing text files.
-
 ATTENTION: the very first time a model is compiled an error can be caused by the misspecification of the system directories or the operating system. In this case, use menu Model/System Compilation Option and use the default values for your operative system to let LMM adjust automatically the error.
 
-KNOWN PROBLEM: there is a bug on some versions of GCC that sometimes generates duplicate definition errors for some C standard library functions like 'isinf', 'isnan' etc. In this case add the command '#define STLBUG' to the very first line of your equations file (.cpp).
-
-When a model program is successfully compiled and run by LMM it can interact with the user with the Lsd interfaces. These permit to control every aspect of the simulation runs (e.g. setting initial values, observing and saving results, reading the model documentation etc.) but for the modification of the code for the equations. For this latter operation you need to close the Lsd model program, tell LMM to show the equation file, edit it and re-compile a new Lsd model program.
+When a model program is successfully compiled and run by LMM, then the user can interact with the Lsd Browser interface. This window permits to control every aspect of the simulation run (e.g., setting initial values, observing and saving results, reading the model documentation etc.) except for the modification of the code for the equations, done in LMM. For this latter operation you need to close the Lsd model program, tell LMM to show the equation file if necessary, edit the model's equations and compile/run a new Lsd model program.
 
 
 For persisting problems email us: valente@ec.univaq.it or marcelocpereira@uol.com.br
-(is anybody willing to write a stupid configure for Lsd?)
 
 
 Legal stuff
-Lsd is copyright by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices
+Lsd is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices
 
+Shortcut.exe 1.11 is copyrighted by  Marty List, http://www.OptimumX.com
+
+Silk icon set 1.3 is copyrighted by Mark James, http://www.famfamfam.com/lab/icons/silk

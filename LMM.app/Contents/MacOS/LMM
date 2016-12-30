@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ -z "$LSDROOT" ]; then
+	LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && cd ../../.. && pwd -P )"
+	export LSDROOT			
+fi
+"$LSDROOT"/lmmOSX $2

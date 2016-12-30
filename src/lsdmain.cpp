@@ -404,7 +404,7 @@ cmd( "wm title . \"Lsd Browser\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "icontop . lsd" );
-cmd( "sizetop lsd" );
+cmd( "sizetop .lsd" );
 
 cmd( "label .l -text \"Starting Lsd\"" );
 cmd( "pack .l" );
@@ -1007,8 +1007,7 @@ cmd( "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} 
 cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left" );
 cmd( "pack $w -side right" );
 
-cmd( "sizetop log" );
-cmd( "showtop .log current 1 1 0" );
+cmd( "showtop .log none 1 1 0" );
 set_shortcuts_log( ".log" );
 
 // replace text widget default insert, delete and replace bindings, preventing the user to change it

@@ -87,13 +87,13 @@ cmd( "set c .str" );
 cmd( "set color white" );
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd( "set strExist [ winfo exists .str ]" );
+cmd( "set strExist [ winfo exists $c ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 {
-	cmd( "newtop .str \"\" { set strWindowOn 0; set choice 70 } \"\"" );
-	cmd( "wm transient .str ." );
-	cmd( "wm title .str \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
-
+	cmd( "newtop $c \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+	cmd( "wm transient $c ." );
+	cmd( "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+	cmd( "sizetop $c" );
 
 	cmd( "frame $c.f" );
 	cmd( "scrollbar $c.f.vs -command \"$c.f.c yview\"" );
@@ -140,8 +140,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 	cmd( "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
 	cmd( "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	cmd( "sizetop str" );
-	cmd( "showtop .str current yes yes no 0 0 b" );
+	cmd( "showtop $c current yes yes no 0 0 b" );
 
 	set_shortcuts( "$c" );
 }

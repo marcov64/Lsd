@@ -48,12 +48,12 @@ set vsizeN		550	; # objects numbers editor vertical size in pixels
 set corrXmac	0
 set corrYmac	0
 set corrXlinux	0
-set corrYlinux	-47
+set corrYlinux	-55
 set corrXwindows 0
 set corrYwindows 0
 
 # list of windows with predefined sizes & positions
-set wndLst [ list lsd lmm log str ]
+set wndLst [ list .lsd .lmm .log .str ]
 
 # Enable window functions operation logging
 set logWndFn	false
@@ -61,7 +61,7 @@ set logWndFn	false
 
 # toolbar buttons style
 if [ string equal [ tk windowingsystem ] aqua ] { 
-	set bRlf ""
+	set bRlf raised
 	set ovBrlf "" 
 } { 
 	set bRlf flat
@@ -220,7 +220,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
 	
 	#handle main windows differently
-	if { [ lsearch $wndLst .$w ] < 0 } {
+	if { [ lsearch $wndLst $w ] < 0 } {
+	
 		# unknown window (not a main one)
 		if { ! [ string equal $pos xy ] && $sizeX != 0 } {
 			$w configure -width $sizeX 
@@ -271,6 +272,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		
 		if { ! $noMinSize && ( $resizeX || $resizeY ) } {
+			update
 			wm minsize $w [ winfo width $w ] [ winfo height $w ]
 		}
 		
@@ -286,8 +288,10 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 			}
 		}
 	} {
-		#known windows - simply apply defaults
-		sizetop .$w
+		#known windows - simply apply defaults if not done before
+		if { ! [ string equal $pos current ] } {
+			sizetop $w
+		}
 	}
 	
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
@@ -301,7 +305,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	update
 	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 proc destroytop w {
@@ -337,9 +341,9 @@ proc destroytop w {
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\ndestroytop (w:$w, parWndLst:$parWndLst, grab:$grabLst)" }
 }
 
-# size the window to default size & positions
-proc sizetop { w } {
-	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM logWndFn
+# adjust main windows to default size & positions
+proc sizetop { { w all } } {
+	global wndLst hsizeB vsizeB hsizeL vsizeL hsizeLmin vsizeLmin bordsize hmargin vmargin tbarsize posXstr posYstr hsizeM vsizeM corrX corrY parWndLst grabLst logWndFn
 
 	update idletasks
 	
@@ -347,11 +351,11 @@ proc sizetop { w } {
 		if { ! [ string compare $w all ] || ! [ string compare $w $wnd ] } {
 		
 			switch $wnd {
-				lsd {
+				.lsd {
 					wm geometry . "${hsizeB}x$vsizeB+[ getx . topleftS ]+[ gety . topleftS ]"
 					wm minsize . $hsizeB [ expr $vsizeB / 2 ]
 				}
-				lmm {
+				.lmm {
 					if { [ expr [ winfo screenwidth . ] ] < ( $hsizeL + 2 * $bordsize ) } {
 						set W [ expr [winfo screenwidth . ] - 2 * $bordsize ] 
 					} {
@@ -370,15 +374,15 @@ proc sizetop { w } {
 					wm geom . "${W}x$H+$X+$Y"
 					wm minsize . $hsizeLmin $vsizeLmin
 				}
-				log {
+				.log {
 					set X [ getx .log bottomrightS ]
 					set Y [ gety .log bottomrightS ]
 					wm geom .log +$X+$Y
 					wm minsize .log [ winfo width .log ] [ winfo height .log ]
 				}
-				str {
-					set posXstr [ expr [ getx . topleftS ] + [ winfo width . ] + $hmargin ]
-					set posYstr [ gety . topleftS ]
+				.str {
+					set posXstr [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX ]
+					set posYstr [ expr [ winfo y . ] + $corrY ]
 					wm geometry .str ${hsizeM}x${vsizeM}+${posXstr}+${posYstr}	
 					wm minsize .str [ expr $hsizeM / 2 ] [ expr $vsizeM / 2 ]	
 				}
@@ -388,7 +392,7 @@ proc sizetop { w } {
 
 	update
 
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nsizetop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 # resize the window

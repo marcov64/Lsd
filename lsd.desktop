@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name=LMM
+Comment=Lsd Model Manager
+Exec=$LSDROOT/run.sh
+Icon=$LSDROOT/src/icons/lsd.png
