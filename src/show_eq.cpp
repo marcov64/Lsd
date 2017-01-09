@@ -69,13 +69,16 @@ strcpy(msg,app);
 if(strcmp(msg, "yes"))
  return;
 
+// define the correct parent window
+cmd( "switch %d { 0 { set parWnd . } 1 { set parWnd .chgelem } 2 { set parWnd .da } 3 { set parWnd .deb } }", *choice );
+
 start:
 if( (f=fopen(equation_name,"r"))==NULL)
  {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
   cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] }" );
 
-  if(*choice==1)
+ if(*choice==1)
  {
  app=(char *)Tcl_GetVar(inter, "res",0);
  if ( app == NULL || ! strcmp( app, "" ) )
@@ -93,7 +96,7 @@ if(*choice==2)
  return;
 goto start;
 }
- strcpy(c1_lab, "");
+strcpy(c1_lab, "");
 strcpy(c2_lab, "");
 
 for(done=0; done==0 && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
@@ -120,13 +123,13 @@ for(done=0; done==0 && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
  }
 if(done==0)
  {fclose(f);
-  sprintf(msg,"equation for '%s' not found (check the spelling or equation file name)", lab);
-  error_hard( msg, "Equation code missing", "Check your configuration or code to prevent this situation." );
+  cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
   return;
   }
 
 cmd( "set w .eq_%s", lab );
-cmd( "newtop $w \"%s Equation\" { destroytop .eq_%s }", lab, lab  );
+cmd( "set s \"\"" );
+cmd( "newtop $w \"%s Equation\" { destroytop .eq_%s } $parWnd", lab, lab  );
 
 cmd( "frame $w.f" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
@@ -137,8 +140,44 @@ cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.xscroll -side bottom -fill x" );
 cmd( "pack $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f -expand yes -fill both" );
-cmd( "finddone $w b { set W .eq_%s; set cur1 [ $W.f.text index insert ]; newtop $W.s \"\" { destroytop $W.s } $W; label $W.s.l -text \"Find\"; entry $W.s.e -textvariable s -justify center; focus $W.s.e; button $W.s.b -width -9 -text Ok -command { destroytop $W.s; set cur1 [ $W.f.text search -count length $s $cur1 ]; if { [ string length $cur1 ] > 0 } { $W.f.text tag remove sel 1.0 end; $W.f.text tag add sel $cur1 \"$cur1 + $length char\"; update; $W.f.text see $cur1 } }; pack $W.s.l $W.s.e; pack $W.s.b -padx 10 -pady 10; bind $W.s <KeyPress-Return> { $W.s.b invoke }; showtop $W.s } { destroytop .eq_%s }", lab, lab  );
-cmd( "bind .eq_%s <Control-f> {.eq_%s.search invoke}; bind .eq_%s <Control-F> {.eq_%s.search invoke}", lab, lab, lab, lab );
+cmd( "finddone $w b { \
+		set W .eq_%s; \
+		set cur1 [ $W.f.text index insert ]; \
+		newtop $W.s \"\" { destroytop $W.s } $W; \
+		label $W.s.l -text \"Find\"; \
+		entry $W.s.e -textvariable s -justify center; \
+		focus $W.s.e; \
+		button $W.s.b -width -9 -text Ok -command { \
+			destroytop $W.s; \
+			set cur1 [ $W.f.text search -count length $s $cur1 ]; \
+			if { [ string length $cur1 ] > 0 } { \
+				$W.f.text tag remove sel 1.0 end; \
+				$W.f.text tag add sel $cur1 \"$cur1 + $length char\"; \
+				$W.f.text mark set insert \"$cur1 + $length char\"; \
+				update; \
+				focus $W.f.text; \
+				$W.f.text see $cur1 \
+			} \
+		}; \
+		pack $W.s.l $W.s.e; \
+		pack $W.s.b -padx 10 -pady 10; \
+		bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
+		showtop $W.s \
+	} { destroytop .eq_%s }", lab, lab  );
+cmd( "bind .eq_%s <Control-f> {.eq_%s.b.search invoke}; bind .eq_%s <Control-F> {.eq_%s.b.search invoke}", lab, lab, lab, lab );
+cmd( "bind .eq_%s <F3> { \
+		set W .eq_%s; \
+		set cur1 [ $W.f.text index insert ]; \
+		set cur1 [ $W.f.text search -count length $s $cur1 ]; \
+		if { [ string length $cur1 ] > 0 } { \
+			$W.f.text tag remove sel 1.0 end; \
+			$W.f.text tag add sel $cur1 \"$cur1 + $length char\"; \
+			$W.f.text mark set insert \"$cur1 + $length char\"; \
+			update; \
+			focus $W.f.text; \
+			$W.f.text see $cur1 \
+		} \
+	}", lab, lab );
 cmd( ".eq_%s.f.text conf -font {Courier 10}", lab );
 cmd( ".eq_%s.f.text tag conf vars -foreground blue4", lab );
 
@@ -266,6 +305,8 @@ else
  }
 fclose(f);
 
+cmd( ".eq_%s.f.text mark set insert 1.0", lab );
+
 cmd( "bind .eq_%s.f.text <KeyPress-Prior> {.eq_%s.f.text yview scroll -1 pages}", lab, lab );
 cmd( "bind .eq_%s.f.text <KeyPress-Next> {.eq_%s.f.text yview scroll 1 pages}", lab, lab );
 cmd( "bind .eq_%s.f.text <KeyPress-Up> {.eq_%s.f.text yview scroll -1 units}", lab, lab );
@@ -273,7 +314,7 @@ cmd( "bind .eq_%s.f.text <KeyPress-Down> {.eq_%s.f.text yview scroll 1 units}", 
 cmd( "bind .eq_%s.f.text <KeyPress-Left> {.eq_%s.f.text xview scroll -1 units}", lab, lab );
 cmd( "bind .eq_%s.f.text <KeyPress-Right> {.eq_%s.f.text xview scroll 1 units}", lab, lab );
 
-cmd( "bind .eq_%s.f.text <Double-1> {.eq_%s.f.text tag remove sel 0.0 end; set a @%%x,%%y; .eq_%s.f.text tag add sel \"$a wordstart\" \"$a wordend\"; set res [.eq_%s.f.text get sel.first sel.last]; set choice 29 }", lab, lab, lab, lab );
+cmd( "bind .eq_%s.f.text <Double-1> {.eq_%s.f.text tag remove sel 1.0 end; set a @%%x,%%y; .eq_%s.f.text tag add sel \"$a wordstart\" \"$a wordend\"; set res [.eq_%s.f.text get sel.first sel.last]; set choice 29 }", lab, lab, lab, lab );
 
 cmd( "showtop $w centerS 1 1" );
 }
@@ -287,6 +328,7 @@ void scan_used_lab(char *lab, int *choice)
 char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE];
 FILE *f;
 int i,j, done, bra, start, exist;
+int caller = *choice;
 
 cmd( "set list .list_%s", lab );
 
@@ -296,16 +338,25 @@ if(*choice==1)
  return;
 
 cmd( "newtop $list \"Users\" { destroytop .list_%s }", lab  );
-cmd( "listbox $list.l -width 25" );
+
+cmd( "frame $list.l" );
+cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
+cmd( "listbox $list.l.l -width 25 -yscroll \".list_%s.l.v_scroll set\"", lab );
+cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $list.l.l" );
+
 cmd( "frame $list.lf " );
 cmd( "label $list.lf.l1 -text \"Equations using\"" );
 cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
-cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+if ( caller != 1 )
+	cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+else
+	cmd( "label $list.l3" );
 
 cmd( "pack $list.lf.l1 $list.lf.l2" );
 cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
-cmd( msg, "done $list b { destroytop .list_%s }", lab );		// done button
+cmd( "done $list b { destroytop .list_%s }", lab );		// done button
 
 exist = 0;
 
@@ -331,22 +382,23 @@ for(done=0; fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
 	 c2_lab[j]=(char)NULL;
     done=contains(f, lab, strlen(lab));
     if(done==1)
-     {cmd( "$list.l insert end %s", c2_lab );
+     {cmd( "$list.l.l insert end %s", c2_lab );
       exist=1;
      }
-
 	}
  }
-
 fclose(f);
 }
 
 if(exist==1)
- cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}" );
+{
+	if ( caller != 1 )
+		cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}" );
+}
 else
- cmd( "$list.l insert end \"(never used)\"" );
+ cmd( "$list.l.l insert end \"(never used)\"" );
 
-cmd( "showtop $list centerW 0 1" );
+cmd( "showtop $list centerW" );
 }
 
 /****************************************************
@@ -357,6 +409,7 @@ void scan_using_lab(char *lab, int *choice)
 FILE *f;
 int i,j, done, bra, start, exist;
 variable *cv;
+int caller = *choice;
 
 cmd( "set list .listusing_%s", lab );
 
@@ -366,12 +419,21 @@ if(*choice==1)
   return;
 
 cmd( "newtop $list \"Using\" { destroytop .listusing_%s }", lab  );
-cmd( "listbox $list.l -width 25" );
+
+cmd( "frame $list.l" );
+cmd( "scrollbar $list.l.v_scroll -command \".listusing_%s.l.l yview\"", lab );
+cmd( "listbox $list.l.l -width 25 -yscroll \".listusing_%s.l.v_scroll set\"", lab );
+cmd( "pack $list.l.l $list.l.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $list.l.l" );
+
 cmd( "frame $list.lf " );
 cmd( "label $list.lf.l1 -justify center -text \"Elements used in\"" );
 cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
-cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
-
+if ( caller != 1 )
+	cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+else
+	cmd( "label $list.l3" );
+	
 cmd( "pack $list.lf.l1 $list.lf.l2" );
 cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
@@ -379,22 +441,25 @@ cmd( "done $list b { destroytop .listusing_%s }", lab );		// done button
 
 cv=root->search_var(root, lab);
 find_using(root,cv,NULL);
-cmd( "set choice [$list.l size]" );
+cmd( "set choice [$list.l.l size]" );
 if(*choice!=0)
- cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set choice 55; set done 8}" );
+{
+	if ( caller != 1 )
+		cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set choice 55; set done 8}" );
+}
 else
- cmd( "$list.l insert end \"(none)\"" );
+ cmd( "$list.l.l insert end \"(none)\"" );
 
-cmd( "showtop $list centerW 0 1" );
+cmd( "showtop $list centerW" );
 }
 
 
-//scans an equation checking if it contains anywhere the string
-//lab between quotes. Returns 1 if found, and 0 otherwise.
-//The file passed is moved to point to the next equation
-//It correctly skip the commented text, either by // or by /* ... */
 /****************************************************
 SHOW_EQ
+ scans an equation checking if it contains anywhere the string
+ lab between quotes. Returns 1 if found, and 0 otherwise.
+ The file passed is moved to point to the next equation
+ It correctly skip the commented text, either by // or by / * ... * /
 ****************************************************/
 int contains (FILE *f, char *lab, int len)
 {

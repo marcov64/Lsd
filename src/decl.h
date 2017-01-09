@@ -370,6 +370,7 @@ int deb(object *r, object *c, char const *lab, double *res);
 int is_equation_header(char *line, char *var);
 int load_configuration( object *, bool reload = false );
 int lsdmain(int argn, char **argv);
+int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int my_strcmp(char *a, char *b);
 int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
 int reset_bridges(object *r);
@@ -438,11 +439,12 @@ void fill_list_par(object *r, int flag_all);
 void fill_list_var(object *r, int flag_all, int flag_init);
 void find_lags(object *r);
 void find_using(object *r, variable *v, FILE *frep);
+void get_double( const char *tcl_var, double *var );
+void get_int( const char *tcl_var, int *var );
 void go_next(object **t);
 void handle_signals( void );
 void histograms(int *choice);
 void histograms_cs(int *choice);
-void init_canvas(void);
 void init_plot(int i, int id_sim);
 void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
@@ -462,13 +464,14 @@ void log_tcl_error( const char *cm, const char *message );
 void myexit(int v);
 void plog( char const *msg, char const *tag = "", ... );
 void plog_series(int *choice);
-void plot(int *choice);
+void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice );
 void plot_cross(int *choice);
 void plot_cs_xy(int *choice);
 void plot_gnu(int *choice);
 void plot_lattice(int *choice);
 void plot_phase_diagram(int *choice);
 void plot_rt(variable *var);
+void plot_tseries(int *choice);
 void prepare_plot(object *r, int id_sim);
 void print_stack(void);
 void print_title(object *root);
@@ -495,6 +498,7 @@ void sensitivity_doe( int *findex, design *doe );
 void sensitivity_sequential(int *findexSens, sense *s, double probSampl = 1.0);
 void set_all(int *choice, object *original, char *lab, int lag);
 void set_blueprint(object *container, object *r);
+void set_buttons_log( bool on );
 void set_cond(variable *cv);
 void set_cs_data(int *choice);
 void set_lab_tit(variable *var);
@@ -572,7 +576,6 @@ extern int actual_steps;	// number of executed time steps
 extern int choice;			// Tcl menu control variable (main window)
 extern int choice_g;		// Tcl menu control variable (structure window)
 extern int cur_plt;			// current graph plot number
-extern int done_in;			// Tcl menu control variable (log window)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
 extern int lattice_type;	// lattice window mode
 extern int max_step;		// last simulation time step
@@ -600,6 +603,8 @@ extern variable *cemetery;  // Lsd saved data series (from last simulation run)
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );	// ask before discarding unsaved changes
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
+int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] );
+int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[] );
 
 extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
 

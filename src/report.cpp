@@ -659,7 +659,7 @@ for(cur=r; cur!=NULL; cur=skip_next_obj(cur, &count) )
           if(frep!=NULL)
             fprintf(frep, "<A HREF=\"#%s\">%s</A> ", cv->label, cv->label);
           else
-            cmd( "$list.l insert end %s", cv->label );
+            cmd( "$list.l.l insert end %s", cv->label );
           fatto=1;
          }
        }

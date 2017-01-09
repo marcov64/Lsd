@@ -12,11 +12,16 @@
 
 
 # ****************************************************
-# Procedures to adjust window positioning. 
+# Procedures to adjust window positioning & startup code. 
+#
 #	Types of window positioning:
-#	centerS: center over the primary display, only available if the parent window center is also in the primary display (if not, falback to centerW)
+#
+#	centerS: center over the primary display, only available if the parent window
+#		center is also in the primary display (if not, falback to centerW)
 #	centerW: center over the parent window (in any display)
-#	topleftS: put over the top left corner of screen of primary display, only available if the parent window center is also in the primary display (if not, falback to topleftW)
+#	topleftS: put over the top left corner of screen of primary display, only 
+#		available if the parent window center is also in the primary display (if not,
+#		falback to topleftW)
 #	topleftW: put over the top left corner of parent window (around menu bar)
 #	coverW: cover the parent window (same size & position)
 #	overM: over the main window (same top-left position)
@@ -26,54 +31,11 @@
 
 package require Tk 8.5
 
-# Main windows size and margins (must be even numbers)
-set hmargin		20	; # horizontal right margin from the screen borders
-set vmargin		20	; # vertical margins from the screen borders
-set bordsize	2	; # width of windows borders
-set tbarsize	55	; # size in pixels of bottom taskbar (exclusion area) - Windows 7+ = 82
-set hsizeL		800	; # LMM horizontal size in pixels
-set vsizeL		600	; # LMM vertical size in pixels
-set hsizeLmin	600	; # LMM minimum horizontal size in pixels
-set vsizeLmin	300	; # LMM minimum vertical size in pixels
-set hsizeB 		400	; # browser horizontal size in pixels
-set vsizeB		620	; # browser vertical size in pixels
-set hsizeM 		600	; # model structure horizontal size in pixels
-set vsizeM		400	; # model structure vertical size in pixels
-set hsizeI 		800	; # initial values editor horizontal size in pixels
-set vsizeI		600	; # initial values editor vertical size in pixels
-set hsizeN 		350	; # objects numbers editor horizontal size in pixels
-set vsizeN		550	; # objects numbers editor vertical size in pixels
-
-# OS specific screen location offset adjustments
-set corrXmac	0
-set corrYmac	0
-set corrXlinux	0
-set corrYlinux	-55
-set corrXwindows 0
-set corrYwindows 0
-
-# list of windows with predefined sizes & positions
-set wndLst [ list .lsd .lmm .log .str ]
-
 # Enable window functions operation logging
 set logWndFn	false
 
-
-# toolbar buttons style
-if [ string equal [ tk windowingsystem ] aqua ] { 
-	set bRlf raised
-	set ovBrlf "" 
-} { 
-	set bRlf flat
-	set ovBrlf groove 
-}
-
-# toolbar images format
-if [ string equal [ info tclversion ] 8.6 ] { 
-	set iconExt png 
-} { 
-	set iconExt gif 
-}
+# list of windows with predefined sizes & positions
+set wndLst [ list .lsd .lmm .log .str ]
 
 # register static special configurations
 if [ string equal $tcl_platform(platform) unix ] {
@@ -95,11 +57,24 @@ if [ string equal $tcl_platform(platform) unix ] {
 	set corrY $corrYwindows
 }
 
+# text line default canvas height & minimum horizontal border width
+set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
+set hbordsizeP	$hmbordsizeP
+
 # current position of structure window
 set posXstr 0
 set posYstr 0
 
-# images format according to Tk version
+# toolbar buttons style
+if [ string equal [ tk windowingsystem ] aqua ] { 
+	set bRlf raised
+	set ovBrlf "" 
+} { 
+	set bRlf flat
+	set ovBrlf groove 
+}
+
+# toolbar images format
 if [ string equal [ info tclversion ] 8.6 ] { 
 	set iconExt png 
 } { 
@@ -232,16 +207,17 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		
 		update idletasks
 		
-		# handle different window default position
-		if [ string equal $pos none ] {
-			if [ info exists defaultPos ] {
-				set pos $defaultPos
-			} {
-				set pos centerS
-			}
-		}
-		
 		if { ! [ string equal $pos current ] } {
+		
+			# handle different window default position
+			if [ string equal $pos none ] {
+				if [ info exists defaultPos ] {
+					set pos $defaultPos
+				} {
+					set pos centerS
+				}
+			}
+					
 			if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
@@ -268,6 +244,10 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				} {
 					wm geom $w +$x+$y
 				}
+			}
+		} {
+			if { $sizeX != 0 && $sizeY != 0 } {
+				wm geom $w ${sizeX}x${sizeY} 
 			}
 		}
 		
@@ -299,7 +279,11 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	raise $w
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
+		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
+	} elseif { [ info exists buttonF ] && [ winfo exists $w.$buttonF.r2.ok ] } {
+		$w.$buttonF.r2.ok configure -default active -state active
+		focus $w.$buttonF.r2.ok
 	} {
 		focus $w
 	}
@@ -590,6 +574,19 @@ proc ok { w fr comOk } {
 	pack $w.$fr -side right 
 }
 
+proc okXcancel { w fr nameX comX comOk comCancel } {
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	button $w.$fr.ok -width -9 -text Ok -command $comOk
+	button $w.$fr.x -width -9 -text $nameX -command $comX
+	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
+	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	pack $w.$fr.ok $w.$fr.x $w.$fr.can -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.ok -width -9 -text Ok -command $comOk
@@ -602,6 +599,28 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
 	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
+proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	frame $w.$fr.r1
+	button $w.$fr.r1.x -width -9 -text $nameX -command $comX
+	button $w.$fr.r1.y -width -9 -text $nameY -command $comY
+	frame $w.$fr.r2
+	button $w.$fr.r2.ok -width -9 -text Ok -command $comOk
+	button $w.$fr.r2.help -width -9 -text Help -command $comHelp
+	button $w.$fr.r2.can -width -9 -text Cancel -command $comCancel
+	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
+	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
+	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
+	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
+	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
+	pack $w.$fr.r1.x $w.$fr.r1.y -padx 10 -side left
+	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
+	pack $w.$fr.r1 -anchor w
+	pack $w.$fr.r2  -pady 10
 	pack $w.$fr -side right 
 }
 
@@ -708,15 +727,417 @@ proc write_disabled { w val } {
 
 # bind the mouse wheel to the y scrollbar
 proc mouse_wheel { w } {
-	global tcl_platform
+	global tcl_platform sfmwheel winmwscale
+	
 	if [ string equal $tcl_platform(platform) windows ] {
-		bind $w <MouseWheel> { %W yview scroll [ expr { -%D / 40 } ] units }
+		bind $w <MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W yview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Shift-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Control-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Alt-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
 	} {
 		if [ string equal $tcl_platform(os) Darwin ] {
-			bind $w <MouseWheel> { %W yview scroll [ expr { -%D } ] units }
+			bind $w <MouseWheel> { %W yview scroll [ expr -1 * $sfmwheel * %D ] units }
+			bind $w <Shift-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
+			bind $w <Control-MouseWheel> { %W xview scroll [ expr -1 * $sfmwheel * %D ] units }
 		} {
-			bind $w <4> { %W yview scroll -1 units }
-			bind $w <5> { %W yview scroll 1 units }
+			bind $w <4> { %W yview scroll [ expr -1 * $sfmwheel ] units }
+			bind $w <5> { %W yview scroll $sfmwheel units }
+			bind $w <Shift-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
+			bind $w <Shift-5> { %W xview scroll $sfmwheel units }
+			bind $w <Control-4> { %W xview scroll [ expr -1 * $sfmwheel ] units }
+			bind $w <Control-5> { %W xview scroll $sfmwheel units }
+		}
+	}
+}
+
+# move all items in canvas to point (x,y) (from (x0,y0))
+proc move_canvas { c x y { x0 -1 } { y0 -1 } } {
+	global hereX hereY
+	
+	if { $x0 > 0 } { set hereX $x0 }
+	if { $y0 > 0 } { set hereY $y0 }
+	
+	if { [ info exists hereX ] && [ info exists hereY ] } {
+		$c move all [ expr { $x - $hereX } ] [ expr { $y - $hereY } ]
+    }   
+    set hereX $x
+    set hereY $y
+}
+
+# scale all items in canvas around point (0,0), including the scroll region
+proc scale_canvas { c type ratio } {
+	global vsizeP tbordsizeP bbordsizeP maxzoomP minzoomP
+	upvar $ratio finalRatio
+	
+    if { $type == "+" } {
+        set ratio [ expr sqrt( 2.0 ) ]
+    } else {
+        set ratio [ expr 1.0 / sqrt( 2.0 ) ]
+    }  
+	
+	set sro [ $c cget -scrollregion ]
+	
+	set newH [ expr ( [ lindex $sro 3 ] - [ lindex $sro 1 ] ) * $ratio ]
+	set origH [ expr $vsizeP + $tbordsizeP + $bbordsizeP ]
+	set newRatio [ expr $newH / $origH ]
+	
+	if { $newRatio < $maxzoomP && $newRatio > $minzoomP } {
+		set srn [ list ]
+		for { set i 0 } { $i < 4 } { incr i } {
+			lappend srn [ expr round( [ lindex $sro $i ] * $ratio ) ]
+		}
+		$c configure -scrollregion $srn 
+		$c scale all 0 0 $ratio $ratio
+		set finalRatio $newRatio
+	}
+}
+
+# create the canvas plotting axes and the optional grid
+proc canvas_axis { c type grid { y2 0 } } {
+	global hsizeP vsizeP hbordsizeP tbordsizeP hticksP vticksP axcolorP grcolorP 
+	
+	# x-axis, ticks & x-grid
+	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $axcolorP -tag p
+	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
+
+	if { $type == 0 } {
+		for { set i 1 } { $i < [ expr $hticksP + 1 ] } { incr i } {
+			if $grid {
+				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p} 
+			} {
+				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
+			}
+		}
+	}
+	
+	# y-axis, ticks & y-grid
+	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
+	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
+
+	for { set i 1 } { $i < [ expr $vticksP + 1 ] } { incr i } {
+		if $grid {
+			$c create line [ expr $hbordsizeP + 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP - 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $grcolorP -width 1 -tags {g p}
+		} {
+			$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+			if $y2 {
+				$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+			}
+		}
+	}
+}
+
+# plot one series as a line on canvas (may be discontinuous)
+proc plot_line { c x y { tags "" } { fill c0 } { width 1 } } {
+	global smoothP splstepsP
+
+	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
+	set xy [ list ]
+	set tagsdots $tags
+	lappend tags line series
+	lappend tagsdots dots series
+
+	for { set i 0 } { $i < $size } { incr i } {
+		# valid point?
+		set xi [ lindex $x $i ]
+		set yi [ lindex $y $i ]
+		if { $xi >= 0 && $yi >= 0 } {
+			# add one more segment
+			lappend xy $xi $yi
+		} { # last point in segment?
+			set lenxy [ llength $xy ]
+			if { $lenxy > 0 } {
+				# plot line segment/single point till now
+				if { $lenxy >= 4 } {
+					$c create line $xy -width $width -fill $fill -smooth $smoothP \
+						-splinesteps $splstepsP -tags $tags
+				} {
+					if { $lenxy == 2 } {
+						set xi [ lindex $xy 0 ]
+						set yi [ lindex $xy 1 ]
+						$c create oval [ expr $xi - $width / 2 ] \
+							[ expr $yi - $width / 2 ] [ expr $xi + $width / 2 ] \
+							[ expr $yi + $width / 2 ] -fill $fill \
+							-width 0 -outline white -tags $tagsdots
+					}
+				}
+				# restart line
+				set xy [ list ]
+			}
+		}
+	}
+	
+	# plot last segment, if any
+	if { [ llength $xy ] >= 4 } {
+		$c create line $xy -width $width -fill $fill -tags $tags
+	} {
+		if { [ llength $xy ] == 2 } {
+			set xi [ lindex $xy 0 ]
+			set yi [ lindex $xy 1 ]
+			$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \
+				[ expr $xi + $width / 2 ] [ expr $yi + $width / 2 ] -fill $fill \
+				-width 0 -outline white -tags $tagsdots
+		}
+	}
+}
+
+# plot one series as a set of points on canvas
+proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
+	lappend tagsdots dots series
+
+	set size [ expr min( [ llength $x ], [ llength $y ] ) ]
+	
+	for { set i 0 } { $i < $size } { incr i } {
+		set xi [ lindex $x $i ]
+		set yi [ lindex $y $i ]
+		if { $xi >= 0 && $yi >= 0 } {
+			if { $width < 1 } {
+				# small point
+				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
+					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
+					-width 0 -outline white -tags $tagsdots
+			} elseif { $width < 2.0 } {
+				# x
+				$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
+					[ expr $xi - 3 ] [ expr $yi - 3 ] \
+					-width 1 -fill $fill -tags $tagsdots
+				$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
+					[ expr $xi - 3 ] [ expr $yi + 3 ] \
+					-width 1 -fill $fill -tags $tagsdots
+			} elseif { $width < 3.0 } {
+				# +
+				$c create line [ expr $xi + 2 ] $yi [ expr $xi - 3 ] $yi \
+					-width 1 -fill $fill -tags $tagsdots
+				$c create line $xi [ expr $yi + 2 ] $xi [ expr $yi - 3 ] \
+					-width 1 -fill $fill -tags $tagsdots
+			} else {
+				# filled circle
+				$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \
+					[ expr $xi + $width / 2 ] [ expr $yi + $width / 2 ] -fill $fill \
+					-width 0 -outline white -tags $tagsdots
+			}
+		}
+	}
+}
+
+# set a byte array to hold data series that can be accessed from C
+# based on code by Arjen Markus (http://wiki.tcl.tk/4179) 
+proc get_series { size data } {
+	upvar $data _data
+
+	set _data [ list ]
+	# Create a list with the correct number of integer elements
+	for { set i 0 } { $i < $size } { incr i } {
+	   lappend _data 0
+	}
+
+	# Convert the list to a byte array
+	set c_data [ intsToByteArray $_data ]
+
+	# Call the C routine - that will fill the byte array
+	upload_series $size $c_data
+
+	# Convert the byte array into an ordinary list
+	set _data [ byteArrayToInts $c_data ]
+}
+
+# Generic routine to convert a list into a bytearray
+proc listToByteArray { valuetype list { elemsize 0 } } {
+	if { $valuetype == "i" || $valuetype == "I" } {
+		if { $::tcl_platform(byteOrder) == "littleEndian" } {
+			set valuetype "i"
+	   } {
+			set valuetype "I"
+	   }
+	}
+
+	switch -- $valuetype {
+		f - d - i - I {
+		   set result [ binary format ${valuetype}* $list ]
+		}
+		s {
+			set result {}
+			foreach elem $list {
+			  append result [ binary format a$elemsize $elem ]
+			}
+		}
+		default {
+			error "Unknown value type: $valuetype"
+		}
+	}
+	
+	return $result
+}
+
+interp alias {} stringsToByteArray {} listToByteArray s
+interp alias {} intsToByteArray    {} listToByteArray i
+interp alias {} floatsToByteArray  {} listToByteArray f
+interp alias {} doublesToByteArray {} listToByteArray d
+
+# Generic routine to convert a bytearray into a list
+proc byteArrayToList { valuetype bytearray {elemsize 0} } {
+	if { $valuetype == "i" || $valuetype == "I" } {
+	   if { $::tcl_platform(byteOrder) == "littleEndian" } {
+		  set valuetype "i"
+	   } else {
+		  set valuetype "I"
+	   }
+	}
+
+	switch -- $valuetype {
+		f - d - i - I {
+		   binary scan $bytearray ${valuetype}* result
+		}
+		s {
+			set result  {}
+			set length  [ string length $bytearray ]
+			set noelems [ expr { $length / $elemsize } ]
+			for { set i 0 } { $i < $noelems } { incr i } {
+				set elem [ string range $bytearray \
+						[ expr { $i * $elemsize } ] \
+						[ expr { ( $i + 1 ) * $elemsize - 1 } ] ]
+				set posnull [ string first "\000" $elem ]
+				if { $posnull != -1 } {
+					set elem [ string range $elem 0 [ expr { $posnull - 1 } ] ]
+				}
+				lappend result $elem
+			}
+		}
+		default {
+			error "Unknown value type: $valuetype"
+		}
+	}
+	
+	return $result
+}
+
+interp alias {} byteArrayToStrings {} byteArrayToList s
+interp alias {} byteArrayToInts    {} byteArrayToList i
+interp alias {} byteArrayToFloats  {} byteArrayToList f
+interp alias {} byteArrayToDoubles {} byteArrayToList d
+
+
+# list of all Tk named colors
+set allcolors { 
+	snow {ghost white} {white smoke} gainsboro {floral white}
+	{old lace} linen {antique white} {papaya whip} {blanched almond}
+	bisque {peach puff} {navajo white} moccasin cornsilk ivory
+	{lemon chiffon} seashell honeydew {mint cream} azure {alice blue}
+	lavender {lavender blush} {misty rose} white black {dark slate gray}
+	{dim gray} {slate gray} {light slate gray} gray {light grey}
+	{midnight blue} navy {cornflower blue} {dark slate blue} {slate blue}
+	{medium slate blue} {light slate blue} {medium blue} {royal blue}
+	blue {dodger blue} {deep sky blue} {sky blue} {light sky blue}
+	{steel blue} {light steel blue} {light blue} {powder blue}
+	{pale turquoise} {dark turquoise} {medium turquoise} turquoise
+	cyan {light cyan} {cadet blue} {medium aquamarine} aquamarine
+	{dark green} {dark olive green} {dark sea green} {sea green}
+	{medium sea green} {light sea green} {pale green} {spring green}
+	{lawn green} green chartreuse {medium spring green} {green yellow}
+	{lime green} {yellow green} {forest green} {olive drab} {dark khaki}
+	khaki {pale goldenrod} {light goldenrod yellow} {light yellow} yellow
+	gold {light goldenrod} goldenrod {dark goldenrod} {rosy brown}
+	{indian red} {saddle brown} sienna peru burlywood beige wheat
+	{sandy brown} tan chocolate firebrick brown {dark salmon} salmon
+	{light salmon} orange {dark orange} coral {light coral} tomato
+	{orange red} red {hot pink} {deep pink} pink {light pink}
+	{pale violet red} maroon {medium violet red} {violet red}
+	magenta violet plum orchid {medium orchid} {dark orchid} {dark violet}
+	{blue violet} purple {medium purple} thistle snow2 snow3
+	snow4 seashell2 seashell3 seashell4 AntiqueWhite1 AntiqueWhite2
+	AntiqueWhite3 AntiqueWhite4 bisque2 bisque3 bisque4 PeachPuff2
+	PeachPuff3 PeachPuff4 NavajoWhite2 NavajoWhite3 NavajoWhite4
+	LemonChiffon2 LemonChiffon3 LemonChiffon4 cornsilk2 cornsilk3
+	cornsilk4 ivory2 ivory3 ivory4 honeydew2 honeydew3 honeydew4
+	LavenderBlush2 LavenderBlush3 LavenderBlush4 MistyRose2 MistyRose3
+	MistyRose4 azure2 azure3 azure4 SlateBlue1 SlateBlue2 SlateBlue3
+	SlateBlue4 RoyalBlue1 RoyalBlue2 RoyalBlue3 RoyalBlue4 blue2 blue4
+	DodgerBlue2 DodgerBlue3 DodgerBlue4 SteelBlue1 SteelBlue2
+	SteelBlue3 SteelBlue4 DeepSkyBlue2 DeepSkyBlue3 DeepSkyBlue4
+	SkyBlue1 SkyBlue2 SkyBlue3 SkyBlue4 LightSkyBlue1 LightSkyBlue2
+	LightSkyBlue3 LightSkyBlue4 SlateGray1 SlateGray2 SlateGray3
+	SlateGray4 LightSteelBlue1 LightSteelBlue2 LightSteelBlue3
+	LightSteelBlue4 LightBlue1 LightBlue2 LightBlue3 LightBlue4
+	LightCyan2 LightCyan3 LightCyan4 PaleTurquoise1 PaleTurquoise2
+	PaleTurquoise3 PaleTurquoise4 CadetBlue1 CadetBlue2 CadetBlue3
+	CadetBlue4 turquoise1 turquoise2 turquoise3 turquoise4 cyan2 cyan3
+	cyan4 DarkSlateGray1 DarkSlateGray2 DarkSlateGray3 DarkSlateGray4
+	aquamarine2 aquamarine4 DarkSeaGreen1 DarkSeaGreen2 DarkSeaGreen3
+	DarkSeaGreen4 SeaGreen1 SeaGreen2 SeaGreen3 PaleGreen1 PaleGreen2
+	PaleGreen3 PaleGreen4 SpringGreen2 SpringGreen3 SpringGreen4
+	green2 green3 green4 chartreuse2 chartreuse3 chartreuse4
+	OliveDrab1 OliveDrab2 OliveDrab4 DarkOliveGreen1 DarkOliveGreen2
+	DarkOliveGreen3 DarkOliveGreen4 khaki1 khaki2 khaki3 khaki4
+	LightGoldenrod1 LightGoldenrod2 LightGoldenrod3 LightGoldenrod4
+	LightYellow2 LightYellow3 LightYellow4 yellow2 yellow3 yellow4
+	gold2 gold3 gold4 goldenrod1 goldenrod2 goldenrod3 goldenrod4
+	DarkGoldenrod1 DarkGoldenrod2 DarkGoldenrod3 DarkGoldenrod4
+	RosyBrown1 RosyBrown2 RosyBrown3 RosyBrown4 IndianRed1 IndianRed2
+	IndianRed3 IndianRed4 sienna1 sienna2 sienna3 sienna4 burlywood1
+	burlywood2 burlywood3 burlywood4 wheat1 wheat2 wheat3 wheat4 tan1
+	tan2 tan4 chocolate1 chocolate2 chocolate3 firebrick1 firebrick2
+	firebrick3 firebrick4 brown1 brown2 brown3 brown4 salmon1 salmon2
+	salmon3 salmon4 LightSalmon2 LightSalmon3 LightSalmon4 orange2
+	orange3 orange4 DarkOrange1 DarkOrange2 DarkOrange3 DarkOrange4
+	coral1 coral2 coral3 coral4 tomato2 tomato3 tomato4 OrangeRed2
+	OrangeRed3 OrangeRed4 red2 red3 red4 DeepPink2 DeepPink3 DeepPink4
+	HotPink1 HotPink2 HotPink3 HotPink4 pink1 pink2 pink3 pink4
+	LightPink1 LightPink2 LightPink3 LightPink4 PaleVioletRed1
+	PaleVioletRed2 PaleVioletRed3 PaleVioletRed4 maroon1 maroon2
+	maroon3 maroon4 VioletRed1 VioletRed2 VioletRed3 VioletRed4
+	magenta2 magenta3 magenta4 orchid1 orchid2 orchid3 orchid4 plum1
+	plum2 plum3 plum4 MediumOrchid1 MediumOrchid2 MediumOrchid3
+	MediumOrchid4 DarkOrchid1 DarkOrchid2 DarkOrchid3 DarkOrchid4
+	purple1 purple2 purple3 purple4 MediumPurple1 MediumPurple2
+	MediumPurple3 MediumPurple4 thistle1 thistle2 thistle3 thistle4 
+}
+
+# initialize canvas colors
+proc init_canvas_colors { } {
+	global defcolors allcolors
+	set unusedcolors [ lsort $allcolors ]
+	
+	# load default colors
+	for { set i 0 } { $i < [ llength $defcolors ] } { incr i } {
+		set color [ lindex $defcolors $i ]
+		set ::c$i $color
+		
+		# remove from list
+		set pos [ lsearch -sorted $unusedcolors $color ]
+		set unusedcolors [ lreplace $unusedcolors $pos $pos ]
+	}
+	
+	# load remaining colors
+	set n [ expr $i + [ llength $unusedcolors ] ]
+	for { } { $i < $n } { incr i } {
+		# pick random color
+		set m [ llength $unusedcolors ]
+		set j [ expr min( int( rand( ) * $m ), $m - 1 ) ]
+		set color [ lindex $unusedcolors $j ]
+		set ::c$i $color
+		
+		# remove from list
+		set pos [ lsearch -sorted $unusedcolors $color ]
+		set unusedcolors [ lreplace $unusedcolors $pos $pos ]
+	}
+
+	# fill the rest till color 1000
+	if { $i < 1000 } {
+		for { } { $i < 1000 } { incr i } {
+			set ::c$i black
+		}
+	}
+	set ::c$i white
+	
+	# fill the colors 1001-1100 with gray shades
+	for { set j 0 } { $j < 10 } { incr j } {
+		for { set k 0 } { $k < 10 } { incr k; incr i } {
+			if { ! ( $j == 0 && $k == 0 ) } {
+				if { $k == 0 } {
+					set ::c$i gray$j
+				} {
+					set ::c$i gray$k$j
+				}
+			}			
 		}
 	}
 }

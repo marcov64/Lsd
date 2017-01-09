@@ -39,10 +39,7 @@ to plot
 7) delete the variables selected in the list of the variables to plot
 9) plot the cross-section plot
 
-- void init_canvas(void);
-Simply sets the colors for any integer number
-
-- void plot(int *choice);
+- void plot_tseries(int *choice);
 Plot the plot with the variable indicated in the list of the variables
 to plot. If the option says to use the automatic y scaling, it makes first
 a scan of the file to spot the maximum and minimum y, then it plots. Otherwise,
@@ -91,56 +88,48 @@ Exit function, which is customized on the operative system.
 
 #include "decl.h"
 
-#define PI 3.141592654
-
-bool allblack = false;
+bool allblack;
 bool autom = true;
 bool autom_x = true;
-bool grid = false;
+bool grid;
 bool logs = false;		// log scale flag for the y-axis
 bool time_cross = false;
 bool xy = false;
 bool watch = true;
-char filename[MAX_PATH_LENGTH];
-double maxy;
-double miny;
-double point_size = 1.0;
-double truemaxy;
+char filename[ MAX_PATH_LENGTH ];
+double maxy, maxy2;
+double miny, miny2;
+double point_size;
+int *cdata;
 int cur_plot;
-int file_counter=0;
+int dir;
+int file_counter = 0;
 int gnu = 1;			// don't use gnuplot for plots
 int line_point = 1;
 int max_c;
 int min_c;
 int num_c;
 int num_var;
+int num_y2;
+int nv;
 int pdigits = 4;   		// precision parameter for labels in y scale
-int plot_l[MAX_PLOTS];
-int plot_nl[MAX_PLOTS];
-int res, dir;
-int type_plot[MAX_PLOTS];
+int plot_l[ MAX_PLOTS ];
+int plot_nl[ MAX_PLOTS ];
+int plot_w[ MAX_PLOTS ];
+int res;
+int type_plot[ MAX_PLOTS ];
 store *vs;
 
 
 /***************************************************
 ANALYSIS
 ****************************************************/
-
 void analysis(int *choice)
 {
-char *app;
-
-cmd( "set a [info vars c0]" );
-cmd( "if {$a==\"\" } {set choice 0} {set choice 1}" );
-if(*choice==0)
- init_canvas();
-
 *choice=0;
+while( *choice == 0 )
+	read_data( choice ); 	//Cases and Variables
 
-while(*choice==0)
-{read_data(choice); //Cases and Variables
-
-}
 *choice=0;
 }
 
@@ -165,6 +154,7 @@ cmd( "set daCwidth 36" );				     	// lists width (even number)
 cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
 
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
+Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 
 cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the Lsd Browser." );
 
@@ -216,6 +206,7 @@ cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
 cmd( "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
+cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> {.da.vars.b.in invoke}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.lb.v <Return> }" );
 cmd( "bind $f.v <Button-2> {.da.vars.lb.v selection clear 0 end;.da.vars.lb.v selection set @%%x,%%y; set res [selection get]; set choice 30}" );
@@ -231,6 +222,7 @@ cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
 cmd( "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
+cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <KeyPress-o> {.da.vars.b.out invoke}; bind $f.v <KeyPress-O> {.da.vars.b.out invoke}" );
 cmd( "bind $f.v <Return> {.da.b.ts invoke}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <Return> }" );
@@ -244,6 +236,7 @@ cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
 cmd( "listbox $f.v -width $daCwidth -yscroll \"$f.v_scroll set\" -selectmode single" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
+cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <Return> {set it [selection get];set choice 3}" );
 cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.pl.v <Return> }" );
 cmd( "bind $f.v <Button-2> {.da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set @%%x,%%y; set it [selection get]; set n_it [.da.vars.pl.v curselection]; set choice 20}" );
@@ -273,6 +266,7 @@ cmd( "label .da.com.pad -width 6" );
 cmd( "label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ expr $daCwidth - 3 ]" );
 cmd( "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwidth - 3 ]" );
 cmd( "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -side left" );
+cmd( "pack .da.com" );
 
 num_c=1;
 num_var=0;
@@ -295,12 +289,17 @@ Tcl_LinkVar(inter, "xy", (char *) &xy, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "pdigits", (char *) &pdigits, TCL_LINK_INT);
 Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "gnu", (char *) &gnu, TCL_LINK_INT);
+Tcl_LinkVar(inter, "num_y2", (char *) &num_y2, TCL_LINK_INT);
 
 min_c=1;
 max_c=num_c;
 miny=maxy=0;
-
-cmd( "set numy2 2" );
+cmd( "set y2 0" );
+cmd( "set allblack $grayscaleP" );
+cmd( "set grid $gridP" );
+cmd( "set point_size $pointsizeP" );
+cmd( "set line_point $linemodeP" );
+cmd( "set pdigits $pdigitsP" );
 
 cmd( "frame .da.f" );
 cmd( "frame .da.f.h" );
@@ -340,12 +339,11 @@ cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -ipadx
 
 cmd( "frame .da.f.h.v.y2" );
 cmd( "checkbutton .da.f.h.v.y2.logs -text \"Series in logs\" -variable logs" );
-cmd( "set y2 0" );
 cmd( "checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command {if {$y2==0} {.da.f.h.v.y2.f.e conf -state disabled} {.da.f.h.v.y2.f.e conf -state normal}}" );
 
 cmd( "frame .da.f.h.v.y2.f" );
 cmd( "label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"" );
-cmd( "entry .da.f.h.v.y2.f.e -width 4 -validate focusout -vcmd { if [ string is integer %%P ] { set numy2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numy2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.y2.f.e -width 4 -validate focusout -vcmd { if [ string is integer %%P ] { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -side left" );
 
 cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ipadx 7" );
@@ -353,8 +351,8 @@ cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ipadx 7"
 cmd( "pack .da.f.h.v.ft .da.f.h.v.sc .da.f.h.v.y2" );
 
 cmd( "frame .da.f.h.tc -relief groove -bd 2" );
-cmd( "radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0" );
-cmd( "radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1" );
+cmd( "radiobutton .da.f.h.tc.time -text \"Time series\" -variable tc -value 0 -command { .da.f.h.v.y2.y2 conf -state normal }" );
+cmd( "radiobutton .da.f.h.tc.cross -text \"Cross-section\" -variable tc -value 1 -command { .da.f.h.v.y2.y2 deselect; .da.f.h.v.y2.y2 conf -state disabled; .da.f.h.v.y2.f.e conf -state disabled }" );
 cmd( "pack .da.f.h.tc.time .da.f.h.tc.cross -anchor w" );
 
 cmd( "frame .da.f.h.xy -relief groove -bd 2" );
@@ -391,7 +389,7 @@ cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
 
 cmd( "frame .da.f.tit.pr" );			// field for adjusting y-axis precision
 cmd( "label .da.f.tit.pr.l -text \"Precision\"" );
-cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is double %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
 cmd( "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5" );
@@ -401,7 +399,7 @@ cmd( "pack .da.f" );
 
 cmd( "frame .da.b" );
 cmd( "button .da.b.ts -width -9 -text Plot -command {set choice 1} -underline 0" );
-cmd( "button .da.b.dump -width -9 -text \"Save Plot\" -command {set choice 11} -underline 2" );
+cmd( "button .da.b.dump -width -9 -text \"Save Plot\" -command {set fromPlot false; set choice 11} -underline 2" );
 cmd( "button .da.b.sv -width -9 -text \"Save Data\" -command {set choice 10} -underline 3" );
 cmd( "button .da.b.sp -width -9 -text \"Show Data\" -command {set choice 36} -underline 5" );
 cmd( "button .da.b.st -width -9 -text Statistics -command {set choice 12} -underline 1" );
@@ -428,31 +426,40 @@ cmd( "bind .da <Control-r> { set choice 15 }; bind .da <Control-R> { set choice 
 cmd( "bind .da <Control-u> { set choice 14 }; bind .da <Control-U> { set choice 14 }" );	// un-sort
 cmd( "bind .da <Control-g> { set choice 4 }; bind .da <Control-G> { set choice 4 }" );	// launch gnuplot
 cmd( "bind .da <Control-p> { set choice 1 }; bind .da <Control-P> { set choice 1 }" );	// plot
-cmd( "bind .da <Control-v> { set choice 11 }; bind .da <Control-V> { set choice 11 }" );	// save plot
+cmd( "bind .da <Control-v> { set fromPlot false; set choice 11 }; bind .da <Control-V> { set fromPlot false; set choice 11 }" );	// save plot
 cmd( "bind .da <Control-e> { set choice 10 }; bind .da <Control-E> { set choice 10 }" );	// save data
 cmd( "bind .da <Control-d> { set choice 36 }; bind .da <Control-D> { set choice 36 }" );	// show data
 cmd( "bind .da <Control-t> { set choice 12 }; bind .da <Control-D> { set choice 12 }" );	// statistics
 
 // create special sort procedure to keep names starting with underline at the end
 cmd( "proc comp_und { n1 n2 } { \
-	if [ string equal $n1 $n2 ] { \
-		return 0 \
-	}; \
-	if { ! [ expr { [ string index $n1 0 ] == \"_\" && [ string index $n2 0 ] == \"_\" } ] } { \
-		if { [ string index $n1 0 ] == \"_\" } { \
+		if [ string equal $n1 $n2 ] { \
+			return 0 \
+		}; \
+		if { ! [ expr { [ string index $n1 0 ] == \"_\" && [ string index $n2 0 ] == \"_\" } ] } { \
+			if { [ string index $n1 0 ] == \"_\" } { \
+				return 1 \
+			}; \
+			if { [ string index $n2 0 ] == \"_\" } { \
+				return -1 \
+			}; \
+		}; \
+		set listn [ lsort -dictionary [ list $n1 $n2 ] ]; \
+		if [ string equal [ lindex $listn 0 ] $n1 ] { \
+			return -1 \
+		} { \
 			return 1 \
 		}; \
-		if { [ string index $n2 0 ] == \"_\" } { \
-			return -1 \
-		}; \
-	}; \
-	set listn [ lsort -dictionary [ list $n1 $n2 ] ]; \
-	if [ string equal [ lindex $listn 0 ] $n1 ] { \
-		return -1 \
-	} { \
-		return 1 \
-	}; \
-}" );
+	}" );
+
+// procedure to add a new plot to the plot list
+cmd( "proc add_plot { plot name } { \
+		.da.vars.pl.v insert end \"$plot) $name\"; \
+		.da.vars.pl.v selection clear 0 end; \
+		.da.vars.pl.v selection set end; \
+		.da.vars.pl.v activate end; \
+		.da.vars.pl.v see end \
+	}" );
 
 // grab focus when called from LSD Debugger
 Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
@@ -474,14 +481,23 @@ cmd( "if [ info exists DaModElem ] { set DaModElem [ lsort -unique -dictionary $
 // enable/disable the remove series button in the series toolbar
 cmd( "if { [ .da.vars.ch.v size ] > 0 } { .da.vars.b.out conf -state normal } { .da.vars.b.out conf -state disabled }" );
 
+// reset first second scale series if option is disabled
+cmd( "if { ! $y2 } { set num_y2 2 }" );
+
 // update entry boxes with linked variables
 cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
 cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
 cmd( "write_disabled .da.f.h.v.sc.min.min [ format \"%%.[ expr $pdigits ]g\" $miny ]" );
 cmd( "write_disabled .da.f.h.v.sc.max.max [ format \"%%.[ expr $pdigits ]g\" $maxy ]" );
-cmd( "write_disabled .da.f.h.v.y2.f.e $numy2" );
+cmd( "write_disabled .da.f.h.v.y2.f.e $num_y2" );
 cmd( "write_any .da.f.tit.ps.e $point_size" ); 
 cmd( "write_any .da.f.tit.pr.e $pdigits" ); 
+
+// update on-screen statistics
+cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
+cmd( ".da.com.ncas conf -text \"Cases = %d\"", num_c );
+cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
+cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
 
 // analysis command loop
 while( ! *choice )
@@ -505,9 +521,16 @@ cmd( "set minc [ .da.f.h.v.ft.from.mnc get ]" );
 cmd( "set maxc [ .da.f.h.v.ft.to.mxc get ]" );
 cmd( "set miny [ .da.f.h.v.sc.min.min get ]" );
 cmd( "set maxy [ .da.f.h.v.sc.max.max get ]" );
-cmd( "set numy2 [ .da.f.h.v.y2.f.e get ]" );
+cmd( "set num_y2 [ .da.f.h.v.y2.f.e get ]" );
 cmd( "set point_size [ .da.f.tit.ps.e get ]" ); 
 cmd( "set pdigits [ .da.f.tit.pr.e get ]" ); 
+
+cmd( "set nv [ .da.vars.ch.v size ]" );
+
+if ( point_size <= 1 || point_size > 10 )
+	point_size = 1.0;
+if ( pdigits < 1 || pdigits > 8 )
+	pdigits = 4;
 
 if(*choice==1 && time_cross==1 && xy==0) //Plot cross section
  *choice=9;
@@ -520,9 +543,6 @@ if(*choice==1 && time_cross==1 && xy==1) //Plot XY Cross section
 
 if(*choice==12 && time_cross==1) //Statistics cross section
  *choice=13;
-
-if(pdigits<1 || pdigits>8)
-	pdigits=4;
 
 switch(*choice)
 {
@@ -557,7 +577,9 @@ Tcl_UnlinkVar(inter,"xy");
 Tcl_UnlinkVar(inter, "pdigits");
 Tcl_UnlinkVar(inter, "watch");
 Tcl_UnlinkVar(inter, "gnu");
+Tcl_UnlinkVar(inter, "num_y2");
 Tcl_UnlinkVar(inter, "cur_plot");
+Tcl_UnlinkVar(inter, "nv");
 
 cmd( "catch [set a [glob -nocomplain plotxy_*]]" ); //remove directories
 cmd( "catch [foreach b $a {catch [file delete -force $b]}]" );
@@ -574,33 +596,15 @@ myexit(20);
 
 //Plot
 case 1:
-  if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
   cur_plot++;
   
-  plot(choice);
+  plot_tseries(choice);
   
-  if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
-
   if(*choice==2) //plot aborted
-   {
    cur_plot--;
-   *choice=0;
-   goto there;
-   }
-
-  cmd( "set exttit \"$cur_plot) $tit\"" );
-  cmd( ".da.vars.pl.v insert end $exttit" );
-  cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
+  else
+   cmd( "add_plot $cur_plot $tit" );
   
-  type_plot[cur_plot]=0; //Lsd standard plot
-  plot_l[cur_plot]=390; //height of plot with labels
-  plot_nl[cur_plot]=325; //height of plot without labels  
-
-  cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
-
   *choice=0;
   goto there;
 
@@ -616,32 +620,14 @@ case 9:
     goto there;
     }
 
-   if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
    cur_plot++;
 	
    plot_cross(choice);
 
-   if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
-
    if(*choice==2) //plot aborted
-    {
     cur_plot--;
-    *choice=0;
-    goto there;
-    }
-
-    cmd( "set exttit \"$cur_plot) $tit\"" );
-    cmd( ".da.vars.pl.v insert end $exttit" );
-	cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
-	
-    type_plot[cur_plot]=0; //Lsd standard plot
-    plot_l[cur_plot]=390; //height of plot with labels
-    plot_nl[cur_plot]=325; //height of plot with labels  
-
-    cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
+   else
+	cmd( "add_plot $cur_plot $tit" );
 	
     *choice=0;
     goto there;
@@ -649,19 +635,12 @@ case 9:
 	
 //Plot_gnu AND phase diagram, depending on how many series are selected
 case 17:
-  if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
   cur_plot++;
   
-  cmd( "set choice [.da.vars.ch.v size]" );
-  if(*choice>1)
+  if(nv>1)
     plot_gnu(choice);
   else
     plot_phase_diagram(choice);
-
-  if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
 
   if(*choice==2)
    {
@@ -670,15 +649,11 @@ case 17:
    goto there;
    }
 
-  cmd( "set exttit \"$cur_plot) $tit\"" );
-  cmd( ".da.vars.pl.v insert end $exttit" );
-  cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
+  cmd( "add_plot $cur_plot $tit" );
   
   type_plot[cur_plot]=1; //Gnuplot plot
   plot_l[cur_plot]=430; //height of plot with labels
   plot_nl[cur_plot]=430; //height of plot without labels  
-  
-  cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
   
   *choice=0;
   goto there;
@@ -686,15 +661,9 @@ case 17:
   
 //Plot_cs_xy
 case 18:
-  if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
   cur_plot++;
 
   plot_cs_xy(choice);
-
-  if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
 
   if(*choice==2) //plot aborted
    {
@@ -703,16 +672,12 @@ case 18:
    goto there;
    }
 
-  cmd( "set exttit \"$cur_plot) $tit\"" );
-  cmd( ".da.vars.pl.v insert end $exttit" );
-  cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
+  cmd( "add_plot $cur_plot $tit" );
   
   type_plot[cur_plot]=1; //gnuplot standard plot
   plot_l[cur_plot]=430; //height of plot with labels
   plot_nl[cur_plot]=430; //height of plot with labels  
   
-  cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
-
   *choice=0;
   goto there;
 
@@ -723,16 +688,10 @@ sequence
 
 */
 case 23:
-  if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
   cur_plot++;
 
   plot_lattice(choice);
   
-  if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
-
   if(*choice==2) //plot aborted
    {
    cur_plot--;
@@ -740,15 +699,11 @@ case 23:
    goto there;
    }
    
-  cmd( "set exttit \"$cur_plot) $tit\"" );
-  cmd( ".da.vars.pl.v insert end $exttit" );
-  cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
+  cmd( "add_plot $cur_plot $tit" );
   
   type_plot[cur_plot]=3; //Lattice canvas standard plot
   plot_l[cur_plot]=-1; //height of plot with labels
   plot_nl[cur_plot]=-1; //height of plot with labels  
-
-  cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
 
   *choice=0;
   goto there;
@@ -756,9 +711,6 @@ case 23:
 
 // plot histograms
 case 32:
-  if ( watch )
-	cmd( ".da.b.ts conf -text Stop" );
-
   cur_plot++;
   
   cmd( "set choice $tc" );
@@ -767,9 +719,6 @@ case 32:
   else
     histograms_cs(choice);
   
-  if ( watch )
-	cmd( ".da.b.ts conf -text Plot" );
-
   if(*choice==2) //plot aborted
    {
    cur_plot--;
@@ -777,15 +726,11 @@ case 32:
    goto there;
    }
    
-  cmd( "set exttit \"$cur_plot) $tit\"" );
-  cmd( ".da.vars.pl.v insert end $exttit" );
-  cmd( ".da.vars.pl.v selection clear 0 end; .da.vars.pl.v selection set end; .da.vars.pl.v activate end; .da.vars.pl.v see end" );
+  cmd( "add_plot $cur_plot $tit" );
     
   type_plot[cur_plot]=0; //Lsd standard plot
   plot_l[cur_plot]=325; //height of plot with labels
   plot_nl[cur_plot]=325; //height of plot with labels  
-  
-  cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
   
   *choice=0;
   goto there;
@@ -794,18 +739,18 @@ case 32:
 //Print the data series in the log window
 case 36: 
    plog_series(choice);
-   cmd( "wm deiconify .log" );
-   cmd( "raise .log .da" );
+   cmd( "wm deiconify .log; raise .log .da" );
    *choice=0;
    goto there;
    
    
 //show the equation for the selected variable
 case 16:
-cmd( "set a [split $res]" );
-cmd( "set b [lindex $a 0]" );
-app=(char *)Tcl_GetVar(inter, "b",0);
+cmd( "set a [split $res]; set b [lindex $a 0]" );
+app=(char *)Tcl_GetVar(inter, "b", 0);
+*choice = 2;	// point .da window as parent for the following window
 show_eq(app, choice);
+cmd( "raise .da .; focus .da" );
 *choice=0;
 goto there;
 
@@ -820,8 +765,7 @@ case 10:
 //Statistics
 case 12:
  statistics(choice);
- cmd( "wm deiconify .log" );
- cmd( "raise .log .da" );
+ cmd( "wm deiconify .log; raise .log .da" );
  *choice=0;
  goto there;
 
@@ -835,51 +779,55 @@ case 13:
     goto there;
   }
  statistics_cross(choice);
- cmd( "wm deiconify .log" );
- cmd( "raise .log .da" );
+ cmd( "wm deiconify .log; raise .log .da" );
  *choice=0;
  goto there;
 
 
 //create the postscript for a plot
 case 11:
-cmd( "set choice [ .da.vars.pl.v size ]" );
-if ( *choice == 0 )		 // no plots to save
+cmd( "if $fromPlot { set choice 1 } { set choice 0 }" );
+if ( ! choice )
 {
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"" );
-	goto there;
-}
+	cmd( "set choice [ .da.vars.pl.v size ]" );
+	if ( *choice == 0 )		 // no plots to save
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"" );
+		goto there;
+	}
 
-do
-{
-	*choice=0;
-	cmd( "set iti [.da.vars.pl.v curselection]" );
-	cmd( "if {[string length $iti] == 0} {set choice 1}" );
-
-	if(*choice==1)
+	do
 	{
 		*choice=0;
-		cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
-		cmd( "label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'Ok'\"" );
-		cmd( "pack .da.a.l -pady 10" );
-		cmd( "okcancel .da.a b { set choice 1 } { set choice 2 }" );
-		cmd( "showtop .da.a centerW 0 0 0" );
-		while(*choice==0)
-			Tcl_DoOneEvent(0);
-		cmd( "destroytop .da.a" );
+		cmd( "set iti [.da.vars.pl.v curselection]" );
+		cmd( "if {[string length $iti] == 0} {set choice 1}" );
+
+		if(*choice==1)
+		{
+			*choice=0;
+			cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
+			cmd( "label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'Ok'\"" );
+			cmd( "pack .da.a.l -pady 10 -padx 5" );
+			cmd( "okcancel .da.a b { set choice 1 } { set choice 2 }" );
+			cmd( "showtop .da.a centerW 0 0 0" );
+			while(*choice==0)
+				Tcl_DoOneEvent(0);
+			cmd( "destroytop .da.a" );
+		}
 	}
+	while ( *choice == 1 );
+
+	if(*choice==2)
+	   {*choice=0;
+		goto there;
+	   }
+
+	*choice=0;
+	cmd( "set iti [.da.vars.pl.v curselection]" );
+	cmd( "set it [.da.vars.pl.v get $iti]" );
 }
-while ( *choice == 1 );
 
-if(*choice==2)
-   {*choice=0;
-    goto there;
-   }
-
-*choice=0;
-cmd( "set iti [.da.vars.pl.v curselection]" );
-cmd( "set it [.da.vars.pl.v get $iti]" );
-cmd( "scan $it %d)%s a b" );
+cmd( "scan $it %%d)%%s a b" );
 cmd( "set choice [winfo exist .da.f.new$a]" );
 
 if( *choice == 0 )
@@ -958,13 +906,13 @@ if ( plot_l[ *choice ] == plot_nl[ *choice ] )	// no labels?
 	else
 	{
 		cmd( "set str [.da.f.new$a.f.plots conf -height]" );
-		cmd( " scan $str \"%s %s %s %s %d\" trash1 trash2 trash3 trash4 heighpost" );
+		cmd( "scan $str \"%%s %%s %%s %%s %%d\" trash1 trash2 trash3 trash4 heighpost" );
 	} 
 }
 else
 	cmd( "if { $heightpost == 1 } { set heightpost %d } { set heightpost %d }", plot_l[ *choice ], plot_nl[ *choice ] );
 
-cmd( ".da.f.new$a.f.plots postscript -height $heightpost -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"" );
+cmd( ".da.f.new$a.f.plots postscript -x 0 -y 0 -height [ expr round( $heightpost * $zoomLevel%d ) ] -width [ expr round( %d * $zoomLevel%d ) ] -pagewidth $dd -rotate $res -colormode $cm -file \"$fn\"", *choice, plot_w[ *choice ], *choice );
 cmd( "plog \"\nPlot saved: $fn\n\"" );
 
 *choice = 0;
@@ -1192,7 +1140,6 @@ for(i=0; i<j; i++)
 cmd( "destroytop .da.a" );
 
 cmd( "if {\"$tit\" == \"\"} {set tit [.da.vars.ch.v get 0]} {}" );
-cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
 
 *choice=0;
 goto there;
@@ -1423,8 +1370,6 @@ cmd( "destroytop .da.a" );
 
 cmd( "if { ! $selOnly } { set steps 0; foreach i [ .da.vars.ch.v curselection ] { .da.vars.ch.v delete [ expr $i - $steps ]; incr steps} } { if { [ llength [ .da.vars.ch.v curselection ] ] > 0 } { .da.vars.ch.v see [ lindex [ .da.vars.ch.v curselection ] 0 ] } }" );
 
-cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
-
 *choice=0;
 goto there;
 
@@ -1437,11 +1382,9 @@ cmd( "set answer [tk_messageBox -parent .da -type yesno -title Confirmation -mes
 cmd( "if {[string compare $answer yes] == 0} { set choice 1} {set choice 0}" );
 if(*choice==0)
  goto there;
-cmd( "scan $it %d)%s a b" );
+cmd( "scan $it %%d)%%s a b" );
 cmd( "set ex [winfo exists .da.f.new$a]" );
 cmd( "if { $ex == 1 } {destroy .da.f.new$a; .da.vars.pl.v delete $n_it} {.da.vars.pl.v delete $n_it}" );
-
-cmd( ".da.com.plot conf -text \"Plots = [ .da.vars.pl.v size ]\"" );
 
 *choice=0;
 goto there;
@@ -1449,7 +1392,7 @@ goto there;
 
 //Raise the clicked plot
 case 3:
-  cmd( "scan $it %d)%s a b" );
+  cmd( "scan $it %%d)%%s a b" );
   cmd( "set ex [winfo exists .da.f.new$a]" );
   *choice=0;
   cmd( "if { $ex == 1 } { wm deiconify .da.f.new$a; raise .da.f.new$a; focus .da.f.new$a } { set choice 1 }" );
@@ -1615,7 +1558,6 @@ case 6:
   *choice=0;
   cmd( "set tit [.da.vars.ch.v get 0]" );
 
-  cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
   goto there;
 
   
@@ -1624,10 +1566,8 @@ case 7:
 
   cmd( "set steps 0" );
   cmd( "foreach i [.da.vars.ch.v curselection] {.da.vars.ch.v delete [expr $i - $steps]; incr steps}" );
-  cmd( "if [.da.vars.ch.v size]==0 {$f.out conf -state disabled}" );
   *choice=0;
 
-  cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
   goto there;
 
   
@@ -1636,16 +1576,12 @@ case 8:
   cmd( ".da.vars.ch.v delete 0 end" );
   *choice=0;
 
-  cmd( ".da.com.selec conf -text \"Series = [ .da.vars.ch.v size ]\"" );
   goto there;
 
 
+//Insert new series (from disk or combining existing series).
 case 24:
-/*
-Insert new series (from disk or combining existing series).
-*/
-cmd( "set choice [.da.vars.ch.v size]" );
-if ( *choice > 0 )
+if ( nv > 0 )
 {
 	cmd( "newtop .da.s \"Choose Data Source\" { set choice 2 } .da" );
 	cmd( "label .da.s.l -text \"Source of additional series\"" );
@@ -1731,8 +1667,6 @@ if ( *choice == 1 )
 	fclose(f);
     file_counter++;
     insert_data_file(gz, &num_var, &num_c);
-    cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
-    cmd( ".da.com.ncas conf -text \"Cases = %d\"", num_c );
     }
    else
 	plog( "\nError: could not open file: %s\n", "", filename );
@@ -1865,7 +1799,7 @@ while ( *choice == 0 )
 
 if ( *choice == 1 )
 {
-	cmd( "set a [ tk_chooseColor -initialcolor $col ]" );
+	cmd( "set a [ tk_chooseColor -parent .da.a -title \"Choose Color\" -initialcolor $col ]" );
 	cmd( "if { $a != \"\" } { set choice 1 } { set choice 0 }" );
 	if ( *choice == 1 )
 	{
@@ -1884,7 +1818,7 @@ goto there;
 
 case 22:
 //set default colors
-init_canvas();
+cmd( "init_canvas_colors" );
 *choice=0;
 goto there;
 
@@ -1927,63 +1861,70 @@ goto there;
 
 //Edit labels
 case 26:
-*choice=0;
- cmd( "toplevel .da.a" );
- cmd( "wm title .da.a \"Edit Label\"" );
- cmd( "wm geometry .da.a +$hereX+$hereY" );
- cmd( "wm transient .da.a $ccanvas" );
- cmd( "label .da.a.l -text \"New label for the selected label\"" );
- cmd( "set itext [$ccanvas itemcget selected -text]" );
- cmd( "entry .da.a.e -textvariable itext -width 30" );
- cmd( "frame .da.a.format -relief groove -bd 2" );
- cmd( "label .da.a.format.tit -text \"Font name, size, style and color\"" );
- cmd( "pack .da.a.format.tit" );
- cmd( "set ifont [lindex [$ccanvas itemcget selected -font] 0]" );
- cmd( "set idim [lindex [$ccanvas itemcget selected -font] 1]" );
- cmd( "set istyle [lindex [$ccanvas itemcget selected -font] 2]" );
- cmd( "frame .da.a.format.e" );
- cmd( "entry .da.a.format.e.font -textvariable ifont -width 30" );
- cmd( "entry .da.a.format.e.dim -textvariable idim -width 4 -justify center" );
-  cmd( "entry .da.a.format.e.sty -textvariable istyle -width 10 -justify center" );
- cmd( "set icolor [$ccanvas itemcget selected -fill]" );  
- cmd( "button .da.a.format.e.color -width -9 -text Color -background white -foreground $icolor -command {set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}; .da.a.format.e.color configure -foreground $icolor; focus .da.a.format.e.color}" );
-
- cmd( "bind .da.a.format.e.font <Return> {.da.a.b.ok invoke}" );
- cmd( "bind .da.a.format.e.dim <Return> {.da.a.b.ok invoke}" );
- 
- cmd( "pack .da.a.format.e.font .da.a.format.e.dim .da.a.format.e.sty .da.a.format.e.color -side left" );
-
- cmd( "frame .da.a.format.fall" );
+ cmd( "set itext [$ccanvas itemcget current -text]" );
+ cmd( "set ifont [lindex [$ccanvas itemcget current -font] 0]" );
+ cmd( "set idim [lindex [$ccanvas itemcget current -font] 1]" );
+ cmd( "set istyle [lindex [$ccanvas itemcget current -font] 2]" );
+ cmd( "set icolor [$ccanvas itemcget current -fill]" );  
  cmd( "set fontall 0" );
  cmd( "set colorall 0" );
- cmd( "checkbutton .da.a.format.fall.font -text \"Apply font to all text items\" -variable fontall" );
- cmd( "checkbutton .da.a.format.fall.color -text \"Apply color to all text items\" -variable colorall" );
-
- cmd( "pack .da.a.format.fall.font .da.a.format.fall.color -anchor w" );
- cmd( "pack .da.a.format.e .da.a.format.fall -anchor w" );
-
- cmd( "frame .da.a.b" );
  
- cmd( "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}" );
- cmd( "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}" );
- cmd( "pack .da.a.b.ok .da.a.b.esc -side left" );
- cmd( "pack .da.a.l .da.a.e .da.a.format .da.a.b" );
- cmd( ".da.a.e selection range 0 end" );
- cmd( "focus .da.a.e" );
- cmd( "bind .da.a.e <Return> {.da.a.b.ok invoke}" );
- 
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
+ cmd( "set w $ccanvas.a" );
+ cmd( "newtop $w \"Edit Label\" { set choice 2 } $ccanvas" );
+ cmd( "wm geometry $w +$LX+$LY" );
 
-if(*choice==1)
+ cmd( "frame $w.l" );
+ cmd( "label $w.l.t -text \"New label\"" );
+ cmd( "entry $w.l.e -textvariable itext -width 30 -justify center" );
+ cmd( "pack $w.l.t $w.l.e" );
+ 
+ cmd( "frame $w.format" );
+ cmd( "label $w.format.tit -text \"Font name, size and style\"" );
+ 
+ cmd( "frame $w.format.e" );
+ cmd( "ttk::combobox $w.format.e.font -textvariable ifont -values [ font families ] -width 15" );
+ cmd( "ttk::combobox $w.format.e.dim -textvariable idim -values [ list 4 6 8 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center" );
+ cmd( "ttk::combobox $w.format.e.sty -textvariable istyle -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center" );
+ cmd( "pack $w.format.e.font $w.format.e.dim $w.format.e.sty -padx 2 -side left" );
+ 
+ cmd( "pack $w.format.tit $w.format.e" );
+
+ cmd( "frame $w.c" );
+ cmd( "label $w.c.l -text \"Text color\"" );
+ cmd( "button $w.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $w -title \"Text Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $w.c.color configure -background $icolor }" );
+ cmd( "pack $w.c.l $w.c.color -padx 2 -side left" );
+ 
+ cmd( "frame $w.fall" );
+ cmd( "checkbutton $w.fall.font -text \"Apply font to all text items\" -variable fontall" );
+ cmd( "checkbutton $w.fall.color -text \"Apply color to all text items\" -variable colorall" );
+ cmd( "pack $w.fall.font $w.fall.color" );
+
+ cmd( "pack $w.l $w.format $w.c $w.fall -padx 5 -pady 5" );
+
+ cmd( "okXcancel $w b Delete { set itext \"\"; set choice 1 } { set choice 1 } { set choice 2 }" );
+ 
+ cmd( "bind $w.l.e <Return> { $w.b.ok invoke }" );
+ cmd( "bind $w.format.e.font <Return> { $w.b.ok invoke }" );
+ cmd( "bind $w.format.e.dim <Return> { $w.b.ok invoke }" );
+ cmd( "bind $w.format.e.sty <Return> { $w.b.ok invoke }" );
+ 
+ cmd( "showtop $w current" );
+ cmd( "$w.l.e selection range 0 end" );
+ cmd( "focus $w.l.e" );
+ 
+ *choice = 0;
+ while ( ! *choice )
+	Tcl_DoOneEvent( 0 );
+
+ if(*choice==1)
  {
-  cmd( " if { $itext==\"\"} {$ccanvas delete selected; set choice 0} {}" );
+  cmd( "if { $itext==\"\" } {$ccanvas delete current; set choice 0}" );
   if(*choice==1)
   {
-   cmd( "$ccanvas itemconf selected -text \"$itext\"" );
+   cmd( "$ccanvas itemconf current -text \"$itext\"" );
    cmd( "set ml [list $ifont $idim $istyle]" );
-   cmd( "$ccanvas itemconf selected -font \"$ml\"" );
-   cmd( "$ccanvas itemconf selected -fill $icolor" );  
+   cmd( "$ccanvas itemconf current -font \"$ml\"" );
+   cmd( "$ccanvas itemconf current -fill $icolor" );  
   }
   cmd( "set choice $fontall" );
   if(*choice==1)
@@ -1991,101 +1932,230 @@ if(*choice==1)
   cmd( "set choice $colorall" );
   if(*choice==1)
    cmd( "$ccanvas itemconf text -fill $icolor" );
- 
  } 
  
-cmd( "$ccanvas dtag selected" ); 
-cmd( "destroy .da.a" ); 
-cmd( "focus $ccanvas" );
+ cmd( "destroytop $w" ); 
+ 
  *choice=0;
  goto there;
 
 
 //New labels
 case 27:
-*choice=0;
- cmd( "toplevel .da.a" );
- cmd( "wm geometry .da.a +$hereX+$hereY" );
- cmd( "wm title .da.a \"New Labels\"" );
- cmd( "wm transient .da.a $ncanvas" );
- cmd( "label .da.a.l -text \"New label\"" );
  cmd( "set itext \"new text\"" );
- cmd( "entry .da.a.e -textvariable itext -width 30" );
- cmd( "frame .da.a.b" );
  
- cmd( "button .da.a.b.ok -width -9 -text Ok -command {set choice 1}" );
- cmd( "button .da.a.b.esc -width -9 -text Cancel -command {set choice 2}" );
- cmd( "pack .da.a.b.ok .da.a.b.esc -side left" );
- cmd( "pack .da.a.l .da.a.e .da.a.b" );
- cmd( ".da.a.e selection range 0 end" );
- cmd( "focus .da.a.e" );
- cmd( "bind .da.a.e <Return> {.da.a.b.ok invoke}" );
+ cmd( "set w $ccanvas.a" );
+ cmd( "newtop $w \"New Labels\" { set choice 2 } \"$ccanvas\"" );
+ cmd( "wm geometry $w +$LX+$LY" );
  
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
-cmd( "destroy .da.a" ); 
-if(*choice==2)
-{
+ cmd( "frame $w.l" );
+ cmd( "label $w.l.t -text \"New label\"" );
+ cmd( "entry $w.l.e -textvariable itext -width 30" );
+ cmd( "pack $w.l.t $w.l.e" );
+ cmd( "pack $w.l -padx 5 -pady 5" );
+
+ cmd( "okcancel $w b { set choice 1 } { set choice 2 }" );
+ 
+ cmd( "bind $w.l.e <Return> { $w.b.ok invoke}" );
+ 
+ cmd( "showtop $w current" );
+ cmd( "$w.l.e selection range 0 end" );
+ cmd( "focus $w.l.e" );
+ 
+ *choice = 0;
+ while ( ! *choice )
+	Tcl_DoOneEvent( 0 );
+
+ cmd( "destroytop $w" ); 
+ 
+ if(*choice==1)
+	cmd( "$ccanvas create text $hereX $hereY -text \"$itext\" -font $fontP -tags { text draw }" );
 
  *choice=0;
  goto there;
-}
-
-cmd( "set choice $ncanvas" );
-i=*choice;
-cmd( "set choice [.da.f.new%d.f.plots create text $LX $LY -text \"$itext\" -font {{Times} 10}]", i );
-
-cmd( ".da.f.new%d.f.plots bind $choice <1> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; .da.f.new%d.f.plots raise current; set LX %%x; set LY %%y}", i,i,i,*choice,i );
-cmd( ".da.f.new%d.f.plots bind $choice <ButtonRelease-1> {.da.f.new%d.f.plots dtag selected}",i,i);
-cmd( ".da.f.new%d.f.plots bind $choice <B1-Motion> {.da.f.new%d.f.plots move selected [expr %%x-$LX] [expr %%y - $LY]; set LX %%x; set LY %%y}",i,i );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",i,i,i, *choice,i );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",i,i,i, *choice,i );
-*choice=0;
-goto there;
 
  
 case 31:
 /*
-Edit line's color
+Edit line
 */
-*choice=0;
+ cmd( "if { [ lsearch $type dots ] >= 0 } { \
+			set dots true; \
+			set iwidth \"\"; \
+			set iarrow \"\"; \
+			set idash \"\" \
+		} { \
+			set dots false; \
+			set iwidth [ $ccanvas itemcget $cline -width ]; \
+			set iarrow [ $ccanvas itemcget $cline -arrow ]; \
+			set idash [ $ccanvas itemcget $cline -dash ] \
+		}" );
+ cmd( "set icolor [$ccanvas itemcget $cline -fill ]" );
+ cmd( "set widthall 0" );
+ cmd( "set colorall 0" );
+ 
+ cmd( "set w $ccanvas.a" );
+ cmd( "newtop $w \"Edit Line\" { set choice 2 } $ccanvas" );
+ cmd( "wm geometry $w +$LX+$LY" );
 
-cmd( "set icolor [$ccanvas itemcget $cline -fill]" );
-cmd( "set app [tk_chooseColor -initialcolor $icolor]; if { $app != \"\"} {set icolor $app} {}" );
-cmd( "$ccanvas itemconfig $cline -fill $icolor" );
-cmd( "focus $ccanvas" );
+ cmd( "frame $w.l" );
+ cmd( "label $w.l.t -text \"Width\"" );
+ cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -vcmd { if [ string is double %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
+ cmd( "pack $w.l.t $w.l.e -padx 2 -side left" );
+ 
+ cmd( "frame $w.c" );
+ cmd( "label $w.c.l -text \"Color\"" );
+ cmd( "button $w.c.color -width 5 -text Set -foreground white -background $icolor -command { set app [ tk_chooseColor -parent $w -title \"Line Color\" -initialcolor $icolor ]; if { $app != \"\" } { set icolor $app }; $w.c.color configure -background $icolor }" );
+ cmd( "label $w.c.t -text \"   Dash pattern\"" );
+ cmd( "ttk::combobox $w.c.e -textvariable idash -values [ list \"\" \". \" \"- \" \"-.\" \"-..\" ] -width 3 -justify center -state disabled" ); 
+ cmd( "pack $w.c.l $w.c.color $w.c.t $w.c.e -padx 2 -side left" );
+ 
+ cmd( "frame $w.d" );
+ cmd( "label $w.d.t -text \"Line-end arrow(s)\"" );
+ cmd( "ttk::combobox $w.d.e -textvariable iarrow -values [ list none first last both ] -width 7 -state disabled" );
+ cmd( "pack $w.d.t $w.d.e -padx 2 -side left" );
+ 
+ cmd( "frame $w.fall" );
+ cmd( "checkbutton $w.fall.font -text \"Apply width to all line items\" -variable widthall -state disabled" );
+ cmd( "checkbutton $w.fall.color -text \"Apply color to all line items\" -variable colorall" );
+ cmd( "pack $w.fall.font $w.fall.color" );
 
-goto there;
-*choice=0;
+ cmd( "pack $w.l $w.c $w.d $w.fall -padx 5 -pady 5" );
+
+ cmd( "okXcancel $w b Delete { set iwidth 0; set choice 1 } { set choice 1 } { set choice 2 }" );
+ 
+ cmd( "bind $w.l.e <Return> { $w.b.ok invoke }" );
+ cmd( "bind $w.c.e <Return> { $w.b.ok invoke }" );
+ cmd( "bind $w.d.e <Return> { $w.b.ok invoke }" );
+ 
+ cmd( "showtop $w current" );
+ cmd( "$w.l.e selection range 0 end" );
+ cmd( "focus $w.l.e" );
+ 
+// enable most options for non-dotted lines
+cmd( "if { ! $dots } { $w.l.e  configure -state normal; $w.c.e  configure -state normal; $w.fall.font  configure -state normal }");
+// enable dashes & arrows for drawing lines only
+cmd( "if $draw { $w.d.e  configure -state normal }");
+
+ *choice = 0;
+ while ( ! *choice )
+	Tcl_DoOneEvent( 0 );
+
+ if(*choice==1)
+ {
+  cmd( "if { $iwidth==0 } { $ccanvas delete $cline; set choice 0 } { if $dots { set choice 2 } }" );
+  if(*choice==1)	// regular line made of lines & dots
+  {// avoid changing the dots parts in regular lines
+   cmd( "$ccanvas dtag selected" );
+   cmd( "$ccanvas addtag selected withtag \"$cline&&line\"" );
+   cmd( "$ccanvas itemconf selected -width $iwidth" );
+   cmd( "$ccanvas itemconf selected -dash \"$idash\"" );
+   cmd( "$ccanvas itemconf selected -arrow $iarrow" );
+   cmd( "$ccanvas dtag selected" );
+   
+   cmd( "$ccanvas itemconf $cline -fill $icolor" );  
+  }
+  if(*choice==2)	// line of dots
+   cmd( "$ccanvas itemconf $cline -fill $icolor" );  
+
+  cmd( "set choice $widthall" );
+  if(*choice==1)
+   cmd( "$ccanvas itemconf line -width $iwidth" );
+  cmd( "set choice $colorall" );
+  if(*choice==1)
+   cmd( "$ccanvas itemconf line -fill $icolor" );
+ } 
+ 
+ cmd( "destroytop $w" ); 
+
+ *choice=0;
+ goto there;
 
 
 case 28: 
-/*insert a line item
-
-NON ACTIVATED
+/*
+Insert a line item
 */
-cmd( "set choice $ncanvas" );
-cmd( "set c .da.f.new%d.f.plots", *choice );
+ cmd( "set choice $ncanvas" );
+ i = *choice;
+ 
+ cmd( "bind $ccanvas <B1-Motion> { \
+		set ccanvas .da.f.new%d.f.plots; \
+		if [ info exists cl ] { \
+			$ccanvas delete $cl\
+		}; \
+		set ax [ $ccanvas canvasx %%x ]; \
+		set ay [ $ccanvas canvasy %%y ]; \
+		set cl [ $ccanvas create line $hereX $hereY $ax $ay -tags { line draw selected } ] \
+	}", i );
 
-cmd( "bind $c <B1-Motion> {$c delete selected; set ax %%x; set ay %%y; set cl [$c create line $px $py $ax $ay]; $c addtag selected withtag $cl}" );
-cmd( "bind $c <ButtonRelease-1> {$c dtag selected}" );
-
-cmd( "bind $c <1> {set px %%x; set py %%y; set ax [expr $px+1]; set ay [expr $py+1]; $c dtag selected; set cl [$c create line $px $py $ax $ay]; $c addtag selected withtag $cl }" );
-*choice=0;
-goto there;
+ cmd( "bind $ccanvas <Shift-B1-Motion> { \
+		set ccanvas .da.f.new%d.f.plots; \
+		if [ info exists cl ] { \
+			$ccanvas delete $cl\
+		}; \
+		set ax [ $ccanvas canvasx %%x ]; \
+		set ay [ $ccanvas canvasy %%y ]; \
+		if { [ expr abs( $ax - $hereX ) ] > [ expr abs( $ay - $hereY ) ] } { \
+			set ay $hereY \
+		} { \
+			set ax $hereX \
+		}; \
+		set cl [ $ccanvas create line $hereX $hereY $ax $ay -tags { line draw selected } ] \
+	}", i );
+	
+ cmd( "bind $ccanvas <ButtonRelease-1> { \
+		set ccanvas .da.f.new%d.f.plots; \
+		$ccanvas dtag selected; \
+		bind $ccanvas <B1-Motion> {\
+			set ccanvas .da.f.new%d.f.plots; \
+			if $moving { \
+				$ccanvas move current [ expr [ $ccanvas canvasx %%%%x ] - $hereX ] \
+					[ expr [ $ccanvas canvasy %%%%y ] - $hereY ]; \
+				set hereX [ $ccanvas canvasx %%%%x ]; \
+				set hereY [ $ccanvas canvasy %%%%y ] \
+			} \
+		}; \
+		bind $ccanvas <Shift-B1-Motion> { }; \
+		bind $ccanvas <ButtonRelease-1> { set moving false }; \
+		if [ info exists cl ] { \
+			$ccanvas bind $cl <1> \" \
+				set ccanvas .da.f.new%d.f.plots; \
+				$ccanvas dtag selected; \
+				$ccanvas addtag selected withtag $cl; \
+				$ccanvas raise selected; \
+				set hereX %%%%x; \
+				set hereY %%%%y \
+			\"; \
+			$ccanvas bind $cl <ButtonRelease-1> { \
+				.da.f.new%d.f.plots dtag selected \
+			}; \
+			$ccanvas bind $cl <B1-Motion> { \
+				set ax %%%%x; \
+				set ay %%%%y; \
+				.da.f.new%d.f.plots move selected [ expr $ax - $hereX ] [ expr $ay - $hereY ]; \
+				set hereX $ax; \
+				set hereY $ay \
+			}; \
+			unset cl \
+		} \
+	}", i, i, i, i, i );
+		
+ *choice=0;
+ goto there;
 
 
 default:
-*choice=0;
+ *choice=0;
  goto there;
 }
 
 }
 
 /***************************************************
-PLOT
-****************************************************/
-void plot(int *choice)
+ PLOT_TSERIES
+ ****************************************************/
+void plot_tseries(int *choice)
 {
 
 char *app;
@@ -2093,14 +2163,9 @@ char **str, **tag;
 int idseries;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
-bool stopErr = false;
+bool y2on, stopErr = false;
 
-int i, nv, j, k, *start, *end, done, doney2, color,  numy2;
-double x1,x01, *y1, x2, x02, *y2,  cminy, cmaxy, miny2, maxy2, truemaxy2;
-double step;
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
+int i, j, k, *start, *end, done, doney2;
 double **data,**logdata;
 
 if(nv>1000)
@@ -2124,11 +2189,13 @@ start=new int[nv];
 end=new int[nv];
 str=new char *[nv];
 tag=new char *[nv];
+
 if(autom_x)
  {min_c=1;
   max_c=num_c;
  }
 
+// prepare data from selected series
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
@@ -2137,10 +2204,13 @@ for(i=0; i<nv; i++)
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
+  
+  // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-
-   data[i]=find_data(idseries);
+    data[i]=find_data(idseries);
+    if(data[i]==NULL)
+      plog("\nError: invalid data\n");
    
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
@@ -2153,7 +2223,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -2167,9 +2237,7 @@ for(i=0; i<nv; i++)
   }
  }
 
-y1=new double[nv];
-y2=new double[nv];
-
+// handle case selection
 if(autom_x||min_c>=max_c)
 {
 
@@ -2183,27 +2251,31 @@ for(i=0; i<nv; i++)
  }
 }
 
+// handle 2nd y-axis scale
 cmd( "set choice $y2" );
-if(*choice==1)
- {
-  cmd( "set choice $numy2" );
-  numy2=*choice;
-  if(numy2>nv||numy2<2)
-   numy2=nv+3;
- }
-else
- numy2=nv+3; 
- 
-numy2--;
- 
-if(autom||miny>=maxy)
-{
+y2on = *choice;
 
+if ( y2on )
+{
+  if ( num_y2 > nv || num_y2 < 2 )
+  {
+   num_y2 = nv + 1;
+   y2on = false;
+  }
+}
+else
+ num_y2 = nv + 1; 
+ 
+// auto-find minimums and maximums
+if ( miny>=maxy )
+	autom = true;
+if ( autom )
+{
 miny2=miny;
 maxy2=maxy;
 for(done=doney2=0, i=0; i<nv; i++)
  {
-  if(i<numy2)
+  if ( i < num_y2 - 1 )
   {
   for(j=min_c; j<=max_c; j++)
    {
@@ -2215,7 +2287,6 @@ for(done=doney2=0, i=0; i<nv; i++)
      miny=data[i][j];
     if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy )		// ignore NaNs
      maxy=data[i][j];
-
    }
   }
   else
@@ -2230,15 +2301,13 @@ for(done=doney2=0, i=0; i<nv; i++)
      miny2=data[i][j];
     if(start[i]<=j && end[i]>=j && is_finite(data[i][j]) && data[i][j]>maxy2 )		// ignore NaNs
      maxy2=data[i][j];
-
    }
   }
  }
-
 } //End for finding min-max
 
-
-if(miny==maxy) //To avoid divisions by zero for constant values
+//To avoid divisions by zero for constant values
+if(miny==maxy)
  {if(miny==0)
    {maxy=0.1;
     miny=-0.1;
@@ -2277,299 +2346,8 @@ cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
 cmd( "write_disabled .da.f.h.v.ft.from.mnc $minc" );
 cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
 
-truemaxy=maxy;
-maxy+=(maxy-miny)/100; //The f... Windows does not plot the very firt pixels...
-
-if(numy2!=nv+2)
- {truemaxy2=maxy2;
-  maxy2+=(maxy2-miny2)/100;
- } 
-cmd( "set p .da.f.new%d", cur_plot );
-
-cmd( "toplevel $p" );
-cmd( "wm title $p $tit" );
-cmd( "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}" );
-cmd( "wm protocol $p WM_DELETE_WINDOW { wm withdraw .da.f.new%d}", cur_plot );
-cmd( "bind $p <Double-Button-1> { raise .da; focus .da.b.ts}" );
-cmd( "frame $p.f -width 640 -height 430" );
-cmd( "pack $p.f" );
-
-//Reset p to point to the canvas (shit...)
-cmd( "set p $p.f.plots" );
-
-cmd( "canvas $p -width 640 -height 430 -background white -relief flat" );
-cmd( "pack $p" );
-
-cmd( "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p" );
-
-if(grid)
-{
-cmd( "$p create line 40 0 40 310 -fill grey60 -width 1p -tag p" );
-cmd( "$p create line 190 0 190 310 -fill grey60 -width 1p -tag p" );
-cmd( "$p create line 340 0 340 310 -fill grey60 -width 1p -tag p" );
-cmd( "$p create line 490 0 490 310 -fill grey60 -width 1p -tag p" );
-}
-else
-{
-cmd( "$p create line 640 295 640 305  -width 1 -tag p" );
-cmd( "$p create line 190 295 190 305 -width 1 -tag p" );
-cmd( "$p create line 340 295 340 305 -width 1 -tag p" );
-cmd( "$p create line 490 295 490 305 -width 1 -tag p" );
-}
-
-
-cmd( "set choice [$p create text 40 312 -font {Times 10 normal} -anchor nw -text %d -tag {p text}]", min_c );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-
-cmd( "set choice [$p create text 190 312 -font {Times 10 normal} -anchor n -text %d -tag {p text}]", min_c+(max_c-min_c)/4 );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 340 312 -font {Times 10 normal} -anchor n -text %d -tag {p  text}]", min_c+(max_c-min_c)/2 );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 490 312 -font {Times 10 normal} -anchor n -text %d -tag {p text}]", min_c+(max_c-min_c)*3/4 );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-
-cmd( "set choice [$p create text 635 312 -font {Times 10 normal} -anchor ne -text %d -tag {p  text}]", max_c );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p" );
-
-if(grid)
-{
-cmd( "$p create line 38 300 640 300 -fill grey60 -tag p" );
-cmd( "$p create line 38 225 640 225 -fill grey60 -tag p" );
-cmd( "$p create line 38 150 640 150 -fill grey60 -tag p" );
-cmd( "$p create line 38 75 640 75 -fill grey60 -tag p" );
-cmd( "$p create line 38 0 640 0 -fill grey60 -tag p" );
-}
-else
-{
-cmd( "$p create line 35 225 45 225  -tag p" );
-cmd( "$p create line 35 150 45 150  -tag p" );
-cmd( "$p create line 35 75 45 75  -tag p" );
-cmd( "$p create line 35 2 45 2 -tag p" );
-}
-
-cmd( "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,miny );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p  text}]", pdigits,(miny+(truemaxy-miny)/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(miny+(truemaxy-miny)/2) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(miny+(truemaxy-miny)*3/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]", pdigits,(truemaxy) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-if(numy2!=nv+2)
- {
-cmd( "set choice [$p create text 4 312 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,miny2 );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 237 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 162 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)/2) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 87 -font {Times 10 normal} -anchor sw -text (%.*g) -tag {p text}]", pdigits,(miny2+(truemaxy2-miny2)*3/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 16 -font {Times 10 normal} -anchor nw -text (%.*g) -tag {p text}]", pdigits,(truemaxy2) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
- 
- }
-cmd( "set xlabel 4" );
-cmd( "set ylabel 0" );
-for(i=0, j=4, k=0, color=0; i<nv && k<4; i++)
- { if(start[i]<=max_c && end[i]>=min_c)
-  {
-  cmd( "set app [font measure {Times 10 normal} \"%s_%s\"]", str[i],tag[i] );
-
-  cmd( "if {[expr $xlabel + $app]>600} {set xlabel 4; set ylabel [expr $ylabel + 1]} {}" );
-  cmd( "set app1 [expr 330+14*$ylabel]" );
-  cmd( "$p create text $xlabel $app1 -font {Times 10 normal} -anchor nw -text %s_%s -tag {txt%d text} ", str[i], tag[i], i );
-  cmd( "$p addtag p%d withtag txt%d",i,i );
-  
-//add the mobility and editability of the labels
-  cmd( "$p bind txt%d <1> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag current; .da.f.new%d.f.plots raise current; set LX %%x; set LY %%y}",i, cur_plot, cur_plot, cur_plot );
-  cmd( "$p bind txt%d <ButtonRelease-1> {.da.f.new%d.f.plots dtag selected}",i, cur_plot );
-  cmd( "$p bind txt%d <B1-Motion> {.da.f.new%d.f.plots move selected [expr %%x-$LX] [expr %%y - $LY]; set LX %%x; set LY %%y}", i, cur_plot );
-  cmd( "$p bind txt%d <Button-3> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag txt%d; set hereX %%X ; set hereY %%y;set choice 26}", i, cur_plot, cur_plot, cur_plot,i );
-  cmd( "$p bind txt%d <Button-2> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag txt%d; set hereX %%X ; set hereY %%y;set choice 26}", i, cur_plot, cur_plot, cur_plot,i );
-  cmd( "set xlabel [expr $xlabel+$app+4]" );
-  cmd( "set choice $ylabel" );
-  k=*choice;
-  if(!allblack)
-	cmd( "$p itemconf p%d -fill $c%d",i,color );
-  color++;
-  }
- }
-
-*choice=0;
-
-if(i<nv)
-  { cmd( "set choice [$p create text $xlabel %d -font {Times 10 normal} -anchor nw -text (more) -tag {p%d text}]", 330+k*14, i );
-    cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-    cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}",cur_plot,cur_plot,cur_plot, *choice,cur_plot );
- }
-
-cmd( "update" );
-
-step=600/(double)(max_c-min_c);
-
-for(k=0; k<nv; k++)
-  y2[k]=y1[k]=0;
-
-for(x01=0,x1=40,i=min_c ;x1==40 ;i++ ) //, and record the first to be used
- {
-  for(k=0; k<nv; k++)
-   {if(start[k]<=i && end[k]>=i && is_finite(data[k][i]))		// ignore NaNs
-      y1[k]+=data[k][i];
-   }
-  x1=40+(int)((double)(1+i)*step);
-  x01++;
- }
-
-x1=40;
-
-
-for(k=0; k<nv; k++)
-  {
-  if(k<numy2)
-   {
-   y1[k]/=x01;
-   if(y1[k]<miny)
-    y1[k]=miny;
-	 y1[k]=300-((y1[k]-miny)/(maxy-miny))*300;
-   }
-  else
-   {
-   y1[k]/=x01;
-   if(y1[k]<miny2)
-    y1[k]=miny2;
-	 y1[k]=300-((y1[k]-miny2)/(maxy2-miny2))*300;
-   }
-  }
-
-for(x02=0; i<=max_c; i++)
-{
- x2=40+(int)((double)(1+i-x01-min_c)*step);
- x02++;                     //counter for the average when many values occupy one point
-	for(k=0, color=-1; k<nv; k++)
-	{
-    if(k<numy2)
-     {
-     cminy=miny;
-     cmaxy=maxy;
-     }
-    else
-     {
-     cminy=miny2;
-     cmaxy=maxy2;
-     }
-      
-    color++;
-    if( (start[k]<i) && (end[k]>=i) && is_finite(data[k][i]))		// ignore NaNs
-	  {y2[k]+=data[k][i];
-		if(x1!=x2 )
-		{y2[k]/=x02;
-       if(y2[k]<cminy)
-         y2[k]=cminy;
-		 y2[k]=(300-((y2[k]-cminy)/(cmaxy-cminy))*300);
-       if ( ! allblack && color < 1100 )
-       {
-       if(line_point==1)
-        {
-           cmd( "$p create line %d %d %d %d -width $point_size -tag p%d -fill $c%d",(int)x1,(int)y1[k],(int)x2,(int)y2[k], k, color );
-        }
-       else
-        {
-           cmd( "$p create oval %d %d %d %d -tag p%d -width 1 -fill $c%d -outline $c%d ",(int)x1 -(int)(point_size-1),(int)y1[k]-(int)(point_size-1),(int)x1+(int)(point_size-1),(int)y1[k]+(int)(point_size-1), k, color, color );
-           cmd( "$p create oval %d %d %d %d -tag p%d -width 1 -fill $c%d -outline $c%d ",(int)x2-(int)(point_size-1),(int)y2[k]-(int)(point_size-1),(int)x2+(int)(point_size-1),(int)y2[k]+(int)(point_size-1), k, color, color );
-        }
-       }
-       else
-       {
-		 cmd( "$p create line %d %d %d %d -tag p%d -width $point_size",(int)x1,(int)y1[k],(int)x2,(int)y2[k], k );
-       }
-
-		 y1[k]=y2[k];
-		 y2[k]=0;
-		 }
-	  }
-     else
-      if(start[k]==i && is_finite(data[k][i]))		// ignore NaNs
-       { //series entrying after the min_c
-
-        y1[k]=(300-((data[k][i]-cminy)/(cmaxy-cminy))*300);
-        if(x1==x2)
-          y2[k]=data[k][i]*x02;
-       }
-
-   if(*choice==1) //Button STOP pressed
-    {
-     i=max_c;
-    }
-  
-  }
- if(watch)
-	cmd( "update" );
- if(x1!=x2 )
- { x1=x2;
-	x02=0;
- }
- }
-
-cmd( "$p create text 200 420 -font {Times 10 normal} -text \"Case num: \" -anchor w " );
-if(logs)
- cmd( "$p create text 360 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w " );
-else
- cmd( "$p create text 380 420 -font {Times 10 normal} -text \"Y value: \" -anchor w " );
-
-cmd( "bind $p <Motion> {.da.f.new%d.f.plots delete xpos%d; .da.f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.da.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .da.f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}", cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy, miny, miny, cur_plot );
-
-if(numy2!=nv+2)
-{
-cmd( "bind $p <Shift-Motion> {.da.f.new%d.f.plots delete xpos%d; .da.f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} {.da.f.new%d.f.plots create text 290 420 -font {Times 10 normal} -text [expr (%%x-40)*(%d-%d)/600+%d] -anchor w -tag xpos%d; .da.f.new%d.f.plots create text 490 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}", cur_plot, cur_plot, cur_plot, cur_plot, cur_plot, max_c, min_c, min_c,cur_plot,cur_plot, maxy2, miny2, miny2, cur_plot );
-}
-for(i=0; i<nv; i++)
-{
-cmd( "$p bind p%d <Enter> {.da.f.new%d.f.plots create text 5 420 -font {Times 10 normal} -text \"%s_%s\" -tag p%d -tag pp -anchor w}", i,cur_plot, str[i], tag[i],i );
-cmd( "$p bind p%d <Leave> {.da.f.new%d.f.plots delete pp}", i,cur_plot );
-cmd( "$p dtag txt%i p%d", i,i );
-cmd( "$p bind txt%d <Enter> {.da.f.new%d.f.plots create text 5 420 -font {Times 10 normal} -text \"%s_%s\" -tag p%d -tag pp -anchor w}", i,cur_plot, str[i], tag[i],i );
-cmd( "$p bind txt%d <Leave> {.da.f.new%d.f.plots delete pp}", i,cur_plot );
-
-cmd( "$p bind p%d <Button-3> {set ccanvas .da.f.new%d.f.plots; set cline p%d; set hereX %%X; set hereY %%Y; set choice 31}", i,cur_plot,i );
-cmd( "$p bind p%d <Button-2> {set ccanvas .da.f.new%d.f.plots; set cline p%d; set hereX %%X; set hereY %%Y; set choice 31}", i,cur_plot,i );
-
-}
-*choice=0;
-cmd( "bind $p <Shift-1> {set ncanvas %d; set LX %%x; set LY %%y; set hereX %%X ; set hereY %%y; set choice 27}", cur_plot );
+// plot all series
+plot( 0, nv, data, start, end, str, tag, choice );	// standard Lsd TS plot (type=0)
 
 for(i=0; i<nv; i++)
  {delete[] str[i];
@@ -2579,9 +2357,6 @@ for(i=0; i<nv; i++)
  }
 delete[] str;
 delete[] tag;
-delete[] y1;
-delete[] y2;
-
 delete[] logdata;
 delete[] data;
 delete[] start;
@@ -2600,43 +2375,31 @@ int idseries;
 char *app;
 char **str;
 char **tag;
-
 int *start, *end, app1, app2, new_nv;
 int *erase;
 FILE *f;
-int i, nv, j, *pos, k, nt, *list_times, h,  first;
+int i, j, *pos, k, nt, *list_times, h,  first;
 double x1, y01, x2,  y02;
-double val1,  step, **val, **data, **logdata, truemaxy;
+double val1,  step, **val, **data, **logdata;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	*choice = 2;
-	return;
-}
-
 Tcl_LinkVar(inter, "nt", (char *) &nt, TCL_LINK_INT);
-cmd( "set nt $num_t" );
+cmd( "if [ info exists num_t ] { set nt $num_t } { set nt \"-1\" }" );
 Tcl_UnlinkVar(inter, "nt");
 
-if(nv<2 || nt==0)
+if(nv<2 || nt<=0)
 {
 	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place at least two series in the Series Selected listbox and select at least one case.\"" );
 	*choice = 2;
 	return;
 }
 
+//Sets the list of cases to plot
 list_times=new int[nt];
-cmd( "set k 0" );
 Tcl_LinkVar(inter, "k", (char *) &k, TCL_LINK_INT);
-
-for(i=0; i<nt; i++)    //Sets the list of cases to plot
+for(i=0; i<nt; i++)
  {
   cmd( "set k [lindex $list_times %d]", i );
   list_times[i]=k;
@@ -2652,6 +2415,8 @@ str=new char *[nv];
 tag=new char *[nv];
 data=new double *[nv];
 logdata=new double *[nv];
+
+// prepare data from selected series
 for(i=0, new_nv=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
@@ -2660,11 +2425,16 @@ for(i=0, new_nv=0; i<nv; i++)
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
+  
+  // check if series has data for all CS selected cases
   for(k=0, erase[i]=0; k<nt; k++)
     if(list_times[k]<start[i] || list_times[k]>end[i])
-        {erase[i]=1;
-         k=nt;
+        {
+		 erase[i]=1;
+         break;
         }
+	
+  // get series data and take logs if necessary
   if(erase[i]==0)
    {
     data[i]=find_data(idseries);
@@ -2682,7 +2452,7 @@ for(i=0, new_nv=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -2691,221 +2461,88 @@ for(i=0, new_nv=0; i<nv; i++)
 				stopErr = true;
 			}
 	  }
-	  
 	  data[i]=logdata[new_nv];				// replace the data series
     }
     val[new_nv]=new double[nt];
     new_nv++;
    }
   else
-   data[i]=NULL;
+   data[i]=NULL;			// discard series not in all selected cases
  }
-
+ 
+ // organize useful/valid data in 'val' matrix and find max/mins
+ if ( miny>=maxy )
+	 autom = true;
  for(j=0, first=1, i=0; j<nv; j++)
   {
 	for(k=0; k<nt; k++)
-	{if(erase[j]==0 && is_finite(data[j][list_times[k]]))		// ignore NaNs
-	  {val[i][k]=data[j][list_times[k]];
-     if(first==1)  //The first value is assigned to both min and max
-      {miny=maxy=val[i][k];
-       first=0;
-      }
-     if(miny>val[i][k])
-      miny=val[i][k];
-     if(maxy<val[i][k])
-      maxy=val[i][k];
+	{
+	 if(erase[j]==0 && is_finite(data[j][list_times[k]]))		// ignore NaNs
+	  {
+		val[i][k]=data[j][list_times[k]];
+		
+		// auto-find minimums and maximums
+		if ( autom )
+		{
 
-     }//End if of erase[]
+			if(first==1)  //The first value is assigned to both min and max
+			{
+				miny=maxy=val[i][k];
+				first=0;
+			}
+			if(miny>val[i][k])
+				miny=val[i][k];
+			if(maxy<val[i][k])
+				maxy=val[i][k];
+		}
+     }
+	 else
+	 {
+		 if ( ! erase[ j ] )	// mark NANs
+			val[ i ][ k ] = NAN;
+	 }//End if of erase[]
 
 	} //end for over times
     if(erase[j]==0)
      i++;
   } //End for (j on num_var)
 
-delete[] data;
-
-if(dir==-1)
-  sort_cs_desc(str, tag, val, new_nv, nt, res);
-if(dir==1)
-  sort_cs_asc(str, tag, val, new_nv, nt, res);
-
+//To avoid divisions by zero for constant values
 if(miny==maxy)
- {miny*=0.75; //To avoid divisions by zero for constant values
-  maxy*=1.25;
- }
-
-
-cmd( "set miny %lf", miny );
-cmd( "set maxy %lf", maxy );
-
-truemaxy=maxy;
-maxy+=(maxy-miny)/100; //The f... windows does not plot the very firt pixels...
-
-cmd( "set p .da.f.new%d", cur_plot );
-cmd( "toplevel $p" );
-cmd( "wm title $p $tit" );
-cmd( "if {$tcl_platform(platform) != \"windows\"} {wm iconbitmap $p @$RootLsd/$LsdSrc/icons/lsd.xbm} {}" );
-cmd( "wm protocol $p WM_DELETE_WINDOW { wm withdraw .da.f.new%d}", cur_plot );
-cmd( "bind $p <Double-Button-1> {raise .da; focus .da.b.ts}" );
-cmd( "frame $p.f -width 640 -height 430" );
-cmd( "pack $p.f" );
-
-//Reset p to point to the canvas (shit...)
-cmd( "set p $p.f.plots" );
-
-cmd( "canvas $p -width 640 -height 430 -relief flat -background white" );
-cmd( "pack $p" );
-
-cmd( "$p create line 40 300 640 300 -width 1 -fill grey50 -tag p" );
-if(grid)
-{
-cmd( "$p create line 40 0 40 310 -fill grey60 -tag p" );
-cmd( "$p create line 190 0 190 310 -fill grey60 -tag p" );
-cmd( "$p create line 340 0 340 310 -fill grey60 -tag p" );
-cmd( "$p create line 490 0 490 310 -fill grey60 -tag p" );
-}
-else
-{
-cmd( "$p create line 640 295 640 305  -width 1 -tag p" );
-cmd( "$p create line 190 295 190 305 -width 1 -tag p" );
-cmd( "$p create line 340 295 340 305 -width 1 -tag p" );
-cmd( "$p create line 490 295 490 305 -width 1 -tag p" );
-}
-
-cmd( "set app [$p create text 40 312 -font {Times 10 normal} -anchor nw -text \"%d series used\" -tag {p  text}]", new_nv );
-cmd( "set choice $app" );
-
-//add the mobility and editability of the labels
-cmd( "$p bind %d <1> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag current; .da.f.new%d.f.plots raise current; set LX %%x; set LY %%y}", *choice, cur_plot, cur_plot, cur_plot );
-cmd( "$p bind %d <ButtonRelease-1> {.da.f.new%d.f.plots dtag selected}", *choice, cur_plot );
-cmd( "$p bind %d <B1-Motion> {.da.f.new%d.f.plots move selected [expr %%x-$LX] [expr %%y - $LY]; set LX %%x; set LY %%y}", *choice, cur_plot );
-cmd( "$p bind %d <Button-3> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set hereX %%X ; set hereY %%y;set choice 26}", *choice, cur_plot, cur_plot, cur_plot,*choice );
-cmd( "$p bind %d <Button-2> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set hereX %%X ; set hereY %%y;set choice 26}", *choice, cur_plot, cur_plot, cur_plot,*choice );
-
-cmd( "$p create line 40 0 40 300 -width 1 -fill grey50 -tag p" );
-
-if(grid)
-{
-cmd( "$p create line 38 300 640 300 -fill grey60 -tag p" );
-cmd( "$p create line 38 225 640 225 -fill grey60 -tag p" );
-cmd( "$p create line 38 150 640 150 -fill grey60 -tag p" );
-cmd( "$p create line 38 75 640 75 -fill grey60 -tag p" );
-cmd( "$p create line 38 0 640 0 -fill grey60 -tag p" );
-}
-else
-{
-cmd( "$p create line 35 225 45 225  -tag p" );
-cmd( "$p create line 35 150 45 150  -tag p" );
-cmd( "$p create line 35 75 45 75  -tag p" );
-cmd( "$p create line 35 2 45 2 -tag p" );
-}
-
-cmd( "set choice [$p create text 4 300 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,miny );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 225 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(miny+(truemaxy-miny)/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 150 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(miny+(truemaxy-miny)/2) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 75 -font {Times 10 normal} -anchor sw -text %.*g -tag {p text}]", pdigits,(miny+(truemaxy-miny)*3/4) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "set choice [$p create text 4 4 -font {Times 10 normal} -anchor nw -text %.*g -tag {p text}]", pdigits,(truemaxy) );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-3> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-cmd( ".da.f.new%d.f.plots bind $choice <Button-2> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set ccanvas .da.f.new%d.f.plots; set hereX %%X ; set hereY %%y; set choice 26}", cur_plot,cur_plot,cur_plot, *choice,cur_plot );
-
-cmd( "update" );
-
-step=600/(double)(new_nv-1);
-for(i=0 ; i<new_nv-1; i++)
- {
-  for(k=j=0; j<i || erase[k]==1; k++) //find the index for the labels
-    if(erase[k]==0)
-     j++;
-  x1=40+(int)( (double)(i*step));
-  x2=40+(int)( (double)((i+1)*step));
-  for(j=0; j<nt; j++)
-   {
-    y01=300-((val[i][j]-miny)/(maxy-miny))*300;
-    y02=300-((val[i+1][j]-miny)/(maxy-miny))*300;
-
-   if(!allblack)
-    {// draw colorful lines
-    if(line_point==1)
-      {
-     	 cmd( "$p create line %d %d %d %d  -width $point_size -tag {p%d v%d_%d} -fill $c%d",(int)x1,(int)y01,(int)x2,(int)y02, j,i,j, j );
-      }
-    else
-      {
-     	 cmd( "$p create oval %d %d %d %d -tag {p%d v%d_%d} -fill $c%d -outline $c%d ",(int)x1,(int)y01,(int)x1,(int)y01, j,i,j, j, j );
-     	 cmd( "$p create oval %d %d %d %d -tag {p%d v%d_%d} -fill $c%d -outline $c%d ",(int)x2,(int)y02,(int)x2,(int)y02, j,i,j, j, j );
-      }
+ {if(miny==0)
+   {maxy=0.1;
+    miny=-0.1;
+   }
+  else
+   {if(miny>0)
+    {miny*=0.9;
+     maxy*=1.1;
     }
     else
-     {//draw only black lines
-     if(line_point==1)
-      {
-     	 cmd( "$p create line %d %d %d %d  -width $point_size -tag {p%d v%d_%d}",(int)x1,(int)y01,(int)x2,(int)y02, j,i,j );
-       }
-    else
-      {
-     	 cmd( "$p create oval %d %d %d %d -tag {p%d v%d_%d}",(int)x1,(int)y01,(int)x1,(int)y01, j,i,j );
-     	 cmd( "$p create oval %d %d %d %d -tag {p%d v%d_%d}",(int)x2,(int)y02,(int)x2,(int)y02, j,i,j );
-      }
-     }
-    cmd( "$p bind v%d_%d <Enter> {.da.f.new%d.f.plots create text 70 400 -font {Times 10 normal} -text \"%s_%s in Order %d at time %d\" -tag pp -anchor w}",i,j,cur_plot, str[k], tag[k], i+1, list_times[j] );
-    cmd( "$p bind v%d_%d <Leave> {.da.f.new%d.f.plots delete pp}", i, j, cur_plot );
+    {miny*=1.1;
+     maxy*=0.9;
+    }
    }
-
  }
+ 
+cmd( "write_disabled .da.f.h.v.sc.min.min $miny" );
+cmd( "write_disabled .da.f.h.v.sc.max.max $maxy" );
 
- for(i=0; i<nt ; i++)
- {
-  cmd( "$p bind p%d <Button-3> {set ccanvas .da.f.new%d.f.plots; set cline p%d; set hereX %%X; set hereY %%Y; set choice 31}",i,cur_plot,i );
-  cmd( "$p bind p%d <Button-2> {set ccanvas .da.f.new%d.f.plots; set cline p%d; set hereX %%X; set hereY %%Y; set choice 31}",i,cur_plot,i );
- }  
- for(i=0, j=0, k=0; i<nt && i<20; i++)
- {
-  cmd( "set app [$p create text %d %d -font {Times 10 normal} -anchor nw -text \"Time = [lindex $list_times %d]\" -tag {p%d text}]",4+j*100, 330+k*12, i, i );
-  cmd( "set choice $app" );
-  
-  //add the mobility and editability of the labels
-  cmd( "$p bind %d <1> {.da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag current; .da.f.new%d.f.plots raise current; set LX %%x; set LY %%y}", *choice, cur_plot, cur_plot, cur_plot );
-  cmd( "$p bind %d <ButtonRelease-1> {.da.f.new%d.f.plots dtag selected}", *choice, cur_plot );
-  cmd( "$p bind %d <B1-Motion> {.da.f.new%d.f.plots move selected [expr %%x-$LX] [expr %%y - $LY]; set LX %%x; set LY %%y}", *choice, cur_plot );
-  cmd( "$p bind %d <Button-3> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set hereX %%X ; set hereY %%y;set choice 26}", *choice, cur_plot, cur_plot, cur_plot,*choice );
-  cmd( "$p bind %d <Button-2> {set ccanvas .da.f.new%d.f.plots; .da.f.new%d.f.plots dtag selected; .da.f.new%d.f.plots addtag selected withtag %d; set hereX %%X ; set hereY %%y;set choice 26}", *choice, cur_plot, cur_plot, cur_plot,*choice );
-  
-  if(j<5)
-	j++;
-  else
-	{k++;
-	 j=0;
-	}
+// sort series if required
+for ( k = 0; k < nt; ++k )		// find index to time reference
+	if ( list_times[ k ] == res )
+		break;
 
-  if(!allblack)
-    cmd( "$p itemconf p%d -fill $c%d",i,i );
- }
+if ( k < nt )
+{
+	if(dir==-1)
+	  sort_cs_desc(str, tag, val, new_nv, nt, k);
+	if(dir==1)
+	  sort_cs_asc(str, tag, val, new_nv, nt, k);
+}
 
-
-cmd( "set lab \"\"" );
-
-  cmd( "$p create text 5 400 -font {Times 10 normal} -text \"X value: \" -anchor w " );
-if(logs)
-  cmd( "$p create text 5 420 -font {Times 10 normal} -text \"log(Y) value: \" -anchor w " );
-else
-  cmd( "$p create text 5 420 -font {Times 10 normal} -text \"Y value: \" -anchor w " );
-
-cmd( "bind $p <Motion> {.da.f.new%d.f.plots delete ypos%d ;if {%%x>39 && %%y<301} { .da.f.new%d.f.plots create text 130 420 -font {Times 10 normal} -text [expr double(round((10**$pdigits)*((300.0-%%y)*(%lf-%lf)/300+%lf)))/(10**$pdigits)] -tag ypos%d}}", cur_plot, cur_plot,cur_plot, maxy, miny, miny, cur_plot );
-
-
-cmd( "bind $p <Shift-1> {set ncanvas %d; set LX %%x; set LY %%y; set hereX %%X ; set hereY %%y; set choice 27}", cur_plot );
+// plot all series
+plot( 1, new_nv, val, list_times, &nt, str, tag, choice );	// standard Lsd CS plot (type=1)
 
 for(i=0; i<nv; i++)
  {delete[] str[i];
@@ -2917,6 +2554,7 @@ for(i=0; i<new_nv; i++)
   if(logs)
     delete[] logdata[i];
 }
+delete[] list_times;
 delete[] str;
 delete[] tag;
 delete[] pos;
@@ -2925,46 +2563,9 @@ delete[] start;
 delete[] end;
 delete[] erase;
 delete[] logdata;
+delete[] data;
 }
 
-
-/***************************************************
-INIT_CANVAS
-****************************************************/
-void init_canvas(void)
-{
-int i;
-cmd( "set c0 black" );
-cmd( "set c1 red" );
-cmd( "set c2 green" );
-cmd( "set c3 #d0d000" );
-cmd( "set c4 #fb46bc" );
-cmd( "set c5 blue" );
-cmd( "set c6 DeepSkyBlue1" );
-cmd( "set c7 grey40" );
-cmd( "set c8 PaleTurquoise2" );
-cmd( "set c9 cyan" );
-cmd( "set c10 aquamarine1" );
-cmd( "set c11 DarkSeaGreen1" );
-cmd( "set c12 chartreuse1" );
-cmd( "set c13 OliveDrab" );
-cmd( "set c14 khaki3" );
-cmd( "set c15 LightGoldenrod4" );
-cmd( "set c16 sienna1" );
-cmd( "set c17 chocolate4" );
-cmd( "set c18 firebrick3" );
-cmd( "set c19 orange1" );
-cmd( "set c20 salmon3" );
-cmd( "set c1000 white" );
-
-for(i=21; i<1000; i++)
-  cmd( "set c%d black", i );
-
-for(i=0; i<100; i++)
-  cmd( "set c1%03d grey%d", i,i );
-  
-cmd( "set c1000 white" );  
-}
 
 /***************************************************
 SET_CS_DATA
@@ -2972,85 +2573,102 @@ SET_CS_DATA
 void set_cs_data(int *choice)
 {
 
-cmd( "set choice [.da.vars.ch.v size]" );
-if ( *choice < 2 )
+if ( nv < 2 )
 {
 	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place two or more series in the Series Selected listbox and select 'Plot' to produce a cross-section plot.\"" );
 	*choice = 2;
 	return;
 }
 	
-cmd( "set bidi $maxc" );
-cmd( "set res 0" );
-cmd( "set dir 0" );
-cmd( "set count 0" );
-cmd( "set sfrom -1" );
-cmd( "set sto -1" );
-
-cmd( "toplevel .da.s" );
-cmd( "wm protocol .da.s WM_DELETE_WINDOW {set choice 2}" );
-cmd( "wm transient .da.s .da" );
-cmd( "set p .da.s" );
-cmd( "wm title $p \"Cases for Cross Section Analysis\"" );
-
 Tcl_LinkVar(inter, "res", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "dir", (char *) &dir, TCL_LINK_INT);
+cmd( "set bidi $maxc" );
+cmd( "set res $maxc" );
+cmd( "set dir 0" );
+cmd( "set list_times [ list ]" );
+cmd( "unset -nocomplain sfrom sto sskip" );
 
-cmd( "frame .da.s.i -relief groove -bd 2" );
-cmd( "label .da.s.i.l -text \"Insert time steps to use\"" );
-cmd( "entry .da.s.i.e -validate focusout -vcmd { if [ string is integer %%P ] { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.i.e insert 0 $bidi" ); 
-cmd( "label .da.s.i.l1 -text \"Time steps selected\"" );
-cmd( "listbox .da.s.i.lb" );
-cmd( "pack .da.s.i.l .da.s.i.e .da.s.i.l1 .da.s.i.lb" );
+cmd( "set p .da.s" );
+cmd( "newtop $p \"Cross Section Time Steps\" { set choice 2 } .da" );
 
-cmd( "frame .da.s.fb -relief groove -bd 2" );
-cmd( "set p .da.s.fb" );
+cmd( "frame $p.u" );
 
-cmd( "bind .da.s.i.e <KeyPress-Return> {$p.add invoke}" );
-cmd( "button $p.add -width -9 -text Add -command {set bidi [ .da.s.i.e get ]; .da.s.i.lb insert end $bidi; incr count 1; focus .da.s.i.e; .da.s.i.e selection range 0 end; .da.s.i.lb selection set end }" );
-cmd( "button $p.del -width -9 -text Delete -command {.da.s.i.lb delete [.da.s.i.lb curselection]; incr count -1; focus .da.s.i.e; .da.s.i.e selection range 0 end }" );
-cmd( "button $p.end -width -9 -text Ok -command {set choice 1}" );
-cmd( "button $p.help -width -9 -text Help -command {LsdHelp mdatares.html#crosssection}" );
-cmd( "button $p.can -width -9 -text Cancel -command {set choice 2}" );
-cmd( "pack $p.add $p.del $p.end $p.help $p.can -expand yes -fill x -anchor n" );
+cmd( "frame $p.u.i" );
 
-cmd( "frame .da.s.s -relief groove -bd 2" );
-cmd( "label .da.s.s.l -text \"Use series in the same order as selected\"" );
-cmd( "button .da.s.s.up -width -9 -text \"Sort Ascending\" -command {set res [.da.s.i.lb curselection]; .da.s.s.l config -text \"User series according to increasing values at time: [selection get]\"; set dir 1}" );
-cmd( "button .da.s.s.down -width -9 -text \"Sort Descending\" -command {set res [.da.s.i.lb curselection]; .da.s.s.l config -text \"User series according to decreasing values at time: [selection get]\"; set dir -1}" );
-cmd( "button .da.s.s.nosort -width -9 -text \"No Sort\" -command {.da.s.s.l config -text \"Use series in the same order as selected\"; set dir 0}" );
-cmd( "pack .da.s.s.l .da.s.s.up .da.s.s.down .da.s.s.nosort -anchor n" );
+cmd( "frame $p.u.i.e" );
+cmd( "label $p.u.i.e.l -text \"Time step to add\"" );
+cmd( "entry $p.u.i.e.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >=0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$p.u.i.e.e insert 0 $bidi" );
+cmd( "pack $p.u.i.e.l $p.u.i.e.e" );
+ 
+cmd( "frame $p.u.i.lb" );
+cmd( "label $p.u.i.lb.l -text \"Selected time steps\"" );
 
-cmd( "pack .da.s.i .da.s.fb .da.s.s -side left -anchor n" );
-cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
-cmd( "set sfrom [format \"%%d\" $bidi]" );
-cmd( "set sto [format \"%%d\" $bidi]" );
-cmd( "set sskip 1" );
+cmd( "frame $p.u.i.lb.lb" );
+cmd( "scrollbar $p.u.i.lb.lb.v_scroll -command \".da.s.u.i.lb.lb.lb yview\"" );
+cmd( "listbox $p.u.i.lb.lb.lb -listvariable list_times -width 8 -height 7 -justify center -selectmode extended -yscroll \".da.s.u.i.lb.lb.v_scroll set\"" );
+cmd( "mouse_wheel $p.u.i.lb.lb.lb" );
+cmd( "pack $p.u.i.lb.lb.lb $p.u.i.lb.lb.v_scroll -side left -fill y" );
 
-cmd( "bind .da.s <KeyPress-c> {set choice 1}; bind .da.s <KeyPress-C> {set choice 1}" );
-cmd( "bind .da.s <Control-f> {set bidi [ .da.s.i.e get ]; set sfrom $bidi}; bind .da.s <Control-F> {set bidi [ .da.s.i.e get ]; set sfrom $bidi}" );
-cmd( "bind .da.s <Control-t> {set bidi [ .da.s.i.e get ]; set sto $bidi}; bind .da.s <Control-T> {set bidi [ .da.s.i.e get ]; set sto $bidi}" );
-cmd( "bind .da.s <Control-x> {set bidi [ .da.s.i.e get ]; set sskip $bidi}; bind .da.s <Control-X> {set bidi [ .da.s.i.e get ]; set sskip $bidi}" );
-cmd( "bind .da.s <Control-z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}; bind .da.s <Control-Z> { if { [expr $sto - $sfrom] > 0 } {for {set x $sfrom} {$x<$sto} {incr x $sskip} {	.da.s.i.lb insert end $x} } {}}" );
+cmd( "pack $p.u.i.lb.l $p.u.i.lb.lb" );
 
-*choice=0;
-while(*choice==0)
-  Tcl_DoOneEvent(0);
+cmd( "pack $p.u.i.e $p.u.i.lb -padx 5 -pady 5" );
 
-if(*choice==2)
- goto end;
+cmd( "frame $p.u.s" );
+cmd( "label $p.u.s.l -text \"\nTime series order\"" );
+cmd( "pack $p.u.s.l" );
 
-cmd( "if { [.da.s.i.lb size] == 0 } {tk_messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step has been selected\" -detail \"No plot will be created.\";set choice 2} { }" );
-cmd( "set num_t [.da.s.i.lb size]" );
-cmd( "set list_times [.da.s.i.lb get 0 end]" );
+cmd( "frame $p.u.s.b -relief groove -bd 2" );
+cmd( "radiobutton $p.u.s.b.nosort -width -9 -text \"As selected\" -variable dir -value 0 -command { .da.s.u.s.r.e configure -state disabled; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e }" );
+cmd( "radiobutton $p.u.s.b.up -text \"Ascending order\" -variable dir -value 1 -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
+cmd( "radiobutton $p.u.s.b.down -text \"Descending order\" -variable dir -value \"-1\" -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
+cmd( "pack $p.u.s.b.nosort $p.u.s.b.up $p.u.s.b.down -padx 5 -anchor w" );
+cmd( "pack $p.u.s.b -padx 5" );
 
+cmd( "frame $p.u.s.r" );
+cmd( "label $p.u.s.r.l -text \"Time step reference\nfor series sorting\"" );
+cmd( "entry $p.u.s.r.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && [ lsearch $list_times %%P ] >=0 } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "write_disabled $p.u.s.r.e $res" );
+cmd( "pack $p.u.s.r.l $p.u.s.r.e" );
+cmd( "pack $p.u.s.r -pady 10" );
+
+cmd( "pack $p.u.i $p.u.s -side left -anchor n" );
+cmd( "pack $p.u -pady 5");
+
+cmd( "bind $p.u.i.e.e <KeyPress-Return> { .da.s.fb.r1.x invoke }" );
+
+cmd( "bind $p.u.i.e.e <Control-f> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-F> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
+cmd( "bind $p.u.i.e.e <Control-t> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-T> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
+cmd( "bind $p.u.i.e.e <Control-s> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-S> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
+cmd( "bind $p.u.i.e.e <Control-z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-Z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }" );
+
+cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp mdatares.html#crosssection } { set choice 2 }" );
+
+cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
+cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
+
+*choice = 0;
+while ( ! *choice )
+	Tcl_DoOneEvent( 0 );
+
+if ( *choice == 2 )
+	goto end;
+
+cmd( "if { [.da.s.u.i.lb.lb.lb size] == 0 } { tk_messageBox -parent .da.s -type ok -title Error -icon error -message \"No time step selected\" -detail \"At least one case/time step must be selected. Please try again.\"; set choice 2 }" );
+
+if ( *choice == 2 )
+	goto end;
+
+cmd( "set res [ $p.u.s.r.e get ]" );
+cmd( "if { $dir != 0 && [ lsearch $list_times $res ] < 0 } { tk_messageBox -parent .da.s -type ok -title Warning -icon warning -message \"Invalid time step reference selected\" -detail \"The selected time step reference is not one of the selected for the cross-section(s), no sorting will be performed.\"; set dir 0 }" );
+cmd( "set num_t [ llength $list_times ]" );
+*choice = 0;
 
 end:
+cmd( "destroytop .da.s" );
 Tcl_UnlinkVar(inter, "res");
 Tcl_UnlinkVar(inter, "dir");
 
-cmd( "destroy .da.s" );
 return;
 }
 
@@ -3063,7 +2681,6 @@ void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c)
 int i, j, h;
 double dapp;
 char sapp[MAX_ELEM_LENGTH];
-
 
 for(i=nv-2; i>=0; i--)
  {
@@ -3082,12 +2699,10 @@ for(i=nv-2; i>=0; i--)
    strcpy(sapp,t[j]);
    strcpy(t[j],t[j+1]);
    strcpy(t[j+1],sapp);
-
-//   printf("%d",j);
   }
-
  }
 }
+
 
 /***************************************************
 SORT_CS_ASC
@@ -3097,7 +2712,6 @@ void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c)
 int i, j, h;
 double dapp;
 char sapp[MAX_ELEM_LENGTH];
-
 
 for(i=nv-2; i>=0; i--)
  {
@@ -3116,9 +2730,7 @@ for(i=nv-2; i>=0; i--)
    strcpy(sapp,t[j]);
    strcpy(t[j],t[j+1]);
    strcpy(t[j+1],sapp);
-
   }
-
  }
 }
 
@@ -3258,9 +2870,6 @@ vs=app;
 *num_v=num_var;
 insert_store_nosave(r,lab, num_v);
 num_var=*num_v;
-
-
-cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
 }
 
 /***************************************************
@@ -3649,14 +3258,10 @@ int idseries;
 char *app;
 char **str, **tag;
 char str1[50], longmsg[300];
-int i, nv, j, *start, *end;
+int i, j, *start, *end;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
 {
@@ -3700,7 +3305,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -3773,13 +3378,10 @@ for(i=0; i<nv; i++)
  }
 delete[] str;
 delete[] tag;
-
 delete[] logdata;
 delete[] data;
 delete[] start;
 delete[] end;
-
-
 } //end Statistics
 
 
@@ -3792,16 +3394,12 @@ int idseries;
 char *app;
 char **str, **tag;
 char str1[50], longmsg[300];
-int i, nv, j, *start, *end, nt, *list_times, h, k;
+int i, j, *start, *end, nt, *list_times, h, k;
 double **data,**logdata, av, var, num, ymin, ymax, sig;
 bool first;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
 {
@@ -3862,7 +3460,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -4023,12 +3621,9 @@ double **data,**logdata;
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-int i, nv,nanv=0, j, k, *start, *end, done, box;
+int i, nanv=0, j, k, *start, *end, done, box;
 int idseries, ndim, gridd;
 
-cmd( "set choice [.da.vars.ch.v size]" );
-nv=*choice;
-*choice=0;
 if ( nv == 0 )
 {
 	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
@@ -4132,7 +3727,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -4480,10 +4075,8 @@ for(i=0; i<nv; i++)
   if(logs)
     delete[] logdata[i];
  }
-
 delete[] str;
 delete[] tag;
-
 delete[] logdata;
 delete[] data;
 delete[] start;
@@ -4502,16 +4095,14 @@ char **str, **tag;
 char str1[5*MAX_ELEM_LENGTH], str2[5*MAX_ELEM_LENGTH], str3[10], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata;
-int i, nv, j, k, *start, *end, done, color;
+int i, j, k, *start, *end, done, color;
 int time_sel, block_length, ndim;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
 double previous_row;
-cmd( "set choice [.da.vars.ch.v size]" );
-nv=*choice;
-*choice=0;
+
 if(nv==0)
  {
  cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
@@ -4553,7 +4144,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -4876,10 +4467,8 @@ for(i=0; i<nv; i++)
   if(logs)
     delete[] logdata[i];
  }
-
 delete[] str;
 delete[] tag;
-
 delete[] logdata;
 delete[] data;
 delete[] start;
@@ -4900,13 +4489,12 @@ char str1[50], str2[100], str3[100], dirname[MAX_PATH_LENGTH];
 FILE *f, *f2;
 double **data,**logdata;
 
-int i, nv, j, k, *start, *end, done, nlags;
+int i, j, k, *start, *end, done, nlags;
 
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-cmd( "set choice [.da.vars.ch.v size]" );
-if(*choice!=1)
+if(nv!=1)
  {
  cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid number of series\" -detail \"One and only one series must be selected.\"" );
  *choice = 2;
@@ -4949,7 +4537,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -5126,6 +4714,7 @@ fclose(f2);
 cmd( "set choice $gnu" );
 show_plot_gnu(cur_plot, choice, *choice);
 chdir(dirname);
+
 end:
 for(i=0; i<nv; i++)
  {delete[] str[i];
@@ -5133,10 +4722,8 @@ for(i=0; i<nv; i++)
   if(logs)
     delete[] logdata[i];
  }
-
 delete[] str;
 delete[] tag;
-
 delete[] logdata;
 delete[] data;
 delete[] start;
@@ -5229,10 +4816,8 @@ void plot_lattice(int *choice)
 
 FILE *f, *f2;
 double **data;
-int i, nv, j, hi, le, done, nlags, ncol, nlin, end;
+int i, j, hi, le, done, nlags, ncol, nlin, end;
 
-cmd( "set choice [.da.vars.ch.v size]" );
-nv=*choice;
 if ( nv == 0 )		 // no plots to save
 {
 	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No plot available\" -detail \"Place one or more series in the Series Selected listbox and select 'Plot' to produce a plot.\"" );
@@ -5247,13 +4832,13 @@ if(autom_x)
  }
 
 cmd( "set res [.da.vars.ch.v get 0]" );
-cmd( "scan $res \"%s %s (%d - %d) # %d\" a b c d choice" );
+cmd( "scan $res \"%%s %%s (%%d - %%d) # %%d\" a b c d choice" );
 end=vs[nv].end;
 
 for(i=0; i<nv; i++)
  {
   cmd( "set res [.da.vars.ch.v get %d]", i );
-  cmd( "scan $res \"%s %s (%d - %d) # %d\" a b c d choice" );
+  cmd( "scan $res \"%%s %%s (%%d - %%d) # %%d\" a b c d choice" );
   data[i]=vs[nv].data;
  }
 
@@ -5439,7 +5024,6 @@ int x1, x2, y1,y2;
 double ap, mx,mn, *data, step, a, b, s, lminy, miny2, truemaxy, truemaxy2, average, sigma, tot, totnorm;
 bin *cl;
 
-cmd( "set choice [.da.vars.ch.v size]" );
 if(*choice!=1)
  {
 	if ( *choice == 0 )			// no variables selected
@@ -5801,9 +5385,9 @@ if(*choice==1)
  for(i=0; i<num_bin; i++)
   {
    a=cl[i].lowb;
-   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    s=cl[i].highb;
-   ap=exp(-(s-average)*(s-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   ap=exp(-(s-average)*(s-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    totnorm+=(b+ap)/2;
   }
   
@@ -5811,11 +5395,11 @@ if(*choice==1)
  for(i=0; i<num_bin-1; i++)
   {
    a=cl[i].center;
-   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    b=b*tot/totnorm;
    b=300-((b-lminy)/(truemaxy-lminy))*300;    
    a=cl[i+1].center;  
-   s=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   s=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    s=s*tot/totnorm;
    s=300-((s-lminy)/(truemaxy-lminy))*300;  
    
@@ -5827,6 +5411,8 @@ if(*choice==1)
 } 
     
 cmd( "bind $p <Shift-1> {set ncanvas %d; set LX %%x; set LY %%y; set hereX %%X ; set hereY %%y; set choice 27}", cur_plot );
+cmd( "bind $p <Control-1> { set ncanvas %d; set px %%x; set py %%y; set ax [expr $px+1]; set ay [expr $py+1]; .da.f.new%d.f.plots dtag selected; set cl [.da.f.new%d.f.plots create line $px $py $ax $ay]; .da.f.new%d.f.plots addtag selected withtag $cl; set choice 28 }", cur_plot, cur_plot, cur_plot, cur_plot );
+
 *choice=0;
 
 delete[] cl;
@@ -5844,7 +5430,7 @@ char **str;
 char **tag;
 double **data,**logdata;
 int *start, *end;
-int i, num_bin, j, first, last, stat, nv, time, active_v;
+int i, num_bin, j, first, last, stat, time, active_v;
 int x1, x2, y1,y2;
 double ap, mx,mn,  step, a, b, s, lminy, miny2, truemaxy, truemaxy2, average, sigma, tot, totnorm;
 bin *cl;
@@ -5852,8 +5438,6 @@ bin *cl;
 int logErrCnt = 0;				// log errors counter to prevent excess messages
 bool stopErr = false;
 
-cmd( "set choice [.da.vars.ch.v size]" );
-nv=*choice;
 if(nv<2)
 {
 	if ( nv == 0 )			// no variables selected
@@ -5905,7 +5489,7 @@ for(i=0; i<nv; i++)
 		 logdata[i][j]=NAN;
 		 if ( ++logErrCnt < ERR_LIM )	// prevent slow down due to I/O
 		 {
-			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d\n", "", i + 1, j );
+			plog( "\nWarning: zero or negative values in log plot (set to NaN)\n         Series: %d, Case: %d", "", i + 1, j );
 		 }
 		 else
 			if ( ! stopErr )
@@ -5975,9 +5559,8 @@ if(*choice==2)
   {
   delete[] str[i];
   delete[] tag[i];
-  
   if(logs)
-    delete[] logdata[i]; 
+    delete[] logdata[i];
   }
  delete[] logdata;
  delete[] str;
@@ -6286,9 +5869,9 @@ if(*choice==1)
  for(i=0; i<num_bin; i++)
   {
    a=cl[i].lowb;
-   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    s=cl[i].highb;
-   ap=exp(-(s-average)*(s-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   ap=exp(-(s-average)*(s-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    totnorm+=(b+ap)/2;
   }
   
@@ -6296,11 +5879,11 @@ if(*choice==1)
  for(i=0; i<num_bin-1; i++)
   {
    a=cl[i].center;
-   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   b=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    b=b*tot/totnorm;
    b=300-((b-lminy)/(truemaxy-lminy))*300;    
    a=cl[i+1].center;  
-   s=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*PI*sigma));
+   s=exp(-(a-average)*(a-average)/(2*sigma))/(sqrt(2*M_PI*sigma));
    s=s*tot/totnorm;
    s=300-((s-lminy)/(truemaxy-lminy))*300;  
    
@@ -6312,6 +5895,7 @@ if(*choice==1)
 } 
     
 cmd( "bind $p <Shift-1> {set ncanvas %d; set LX %%x; set LY %%y; set hereX %%X ; set hereY %%y; set choice 27}", cur_plot );
+cmd( "bind $p <Control-1> { set ncanvas %d; set px %%x; set py %%y; set ax [expr $px+1]; set ay [expr $py+1]; .da.f.new%d.f.plots dtag selected; set cl [.da.f.new%d.f.plots create line $px $py $ax $ay]; .da.f.new%d.f.plots addtag selected withtag $cl; set choice 28 }", cur_plot, cur_plot, cur_plot, cur_plot );
 
 *choice=0;
 
@@ -6337,16 +5921,12 @@ CREATE_SERIES
 ****************************************************/
 void create_series(int *choice)
 {
-int i, nv, j, k, *start, *end, idseries, flt;
+int i, j, k, *start, *end, idseries, flt;
 double nmax, nmin, nmean, nvar, nn, thflt, confi;
 double step;
 bool first;
 char *lapp, **str, **tag;
 store *app;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )
 {
@@ -6658,7 +6238,6 @@ cmd( "lappend DaModElem %s", vs[num_var].label  );
 }
 cmd( ".da.vars.lb.v see end" );
 num_var++; 
-cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
 
 delete[] start;
 delete[] end;
@@ -6675,16 +6254,12 @@ delete[] tag;
 
 void create_maverag(int *choice)
 {
-int i, nv, j, h, *start, *end, flt, idseries;
+int i, j, h, *start, *end, flt, idseries;
 double xapp;
 double step;
 
 char *lapp, **str, **tag;
 store *app;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )
 {
@@ -6817,7 +6392,6 @@ for(i=0; i<nv; i++)
 
 cmd( ".da.vars.lb.v see end" );
 num_var+=nv; 
-cmd( ".da.com.nvar conf -text \"Series = %d\"", num_var );
 
 delete[] start;
 delete[] end;
@@ -6832,15 +6406,15 @@ delete[] tag;
 }
 
 /************************
-SAVE_DATAzip
-************************/
+ SAVE_DATAzip
+ ************************/
 void save_datazip(int *choice)
 {
 int idseries, memstep;
 char *app;
 char **str, **tag;
 char str1[100], delimiter[10], misval[10];
-int i, nv, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
+int i, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
 double **data, *dd, *ddstart;
 const char *descr, *ext;
 const char descrRes[] = "Lsd Result File";
@@ -6855,12 +6429,6 @@ gzFile fsavez;
 #else
 FILE *fsavez; 
 #endif 
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
-
-*choice=0;
 
 if ( nv == 0 )			// no variables selected
 {
@@ -6893,8 +6461,8 @@ for(i=0; i<nv; i++)
    max_c=end[i];
  }
 
+Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
-Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_INT);
 Tcl_LinkVar(inter, "deli", (char *) &del, TCL_LINK_INT);
 Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
 Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
@@ -6927,6 +6495,7 @@ cmd( "bind .da.lab <Escape> {.da.lab.esc invoke}" );
 cmd( "focus .da.lab" );
 cmd( "set w .da.lab; wm withdraw $w; update idletasks; set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2]; set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2]; wm geom $w +$x+$y; update; wm deiconify $w" );
 
+*choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -7260,18 +6829,17 @@ delete[] end;
 } //end of save_datazip
 
 
+/************************
+ PLOG_SERIES
+ ************************/
 void plog_series(int *choice)
 {
-int i, nv, j, k, *start, *end, idseries, flt;
+int i, j, k, *start, *end, idseries, flt;
 double nmax, nmin, nmean, nvar, nn, thflt;
 double step;
 
 char *lapp, **str, **tag;
 store *app;
-
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
-cmd( "set nv [.da.vars.ch.v size]" );
-Tcl_UnlinkVar(inter, "nv");
 
 if ( nv == 0 )			// no variables selected
 {
@@ -7367,3 +6935,576 @@ for(i=0; i<nv; i++)
 delete[] str;
 delete[] tag; 
 }    
+
+
+/*******************************************************
+ MIN_HBORDER
+ 
+ calculate horizontal borders required for legends 
+ *******************************************************/
+int min_hborder( int *choice, int pdigits, double miny, double maxy )
+{
+	int vticks, largest = 0;
+	
+	cmd( "set choice $vticksP" );
+	vticks = *choice;
+	
+	for ( int i = 0; i < vticks + 2; ++i ) // search for the longest legend
+	{
+		cmd( "set choice [ font measure $fontP \"%.*g\" ]", pdigits, miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 ) );
+		if ( *choice > largest )
+			largest = *choice;
+	}
+	
+	return largest;
+}
+
+ 
+ /*****************************************
+ PLOT
+ 
+ Effectively create the plot in canvas
+ *****************************************/
+// plot types
+#define TSERIES	0
+#define CRSSECT	1
+#define GNUPLOT	2
+
+void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice )
+{
+	// create canvas for the plot
+	int h, i, j, k, color, hsize, vsize, hbordsize, tbordsize, bbordsize, sbordsize, htmargin, vtmargin, hticks, vticks, lheight, hcanvas, vcanvas, hscroll, vscroll, *htick, *vtick, nLine, endCase, iniCase;
+	char *txtCase, *txtLine, txtLab[ 2 * MAX_ELEM_LENGTH ];
+	double x1, x2, *y, yVal, cminy, cmaxy, step;
+	bool first, tOk, y2on = ( type == TSERIES ) ? ( num_y2 <= nv ? true : false ) : false;
+	
+	// define type-specific parameters
+	switch ( type )
+	{
+		case TSERIES:
+			txtCase = ( char * ) "Case number";
+			txtLine = ( char * ) "Series";
+			nLine = nv;
+			iniCase = min_c;
+			endCase = max_c;
+			break;
+			
+		case CRSSECT:
+			txtCase = ( char * ) "Series";
+			txtLine = ( char * ) "Cross-section";
+			nLine = *end;
+			iniCase = 1;
+			endCase = nv;
+			break;
+	}
+	
+	// get graphical configuration from Tk (file defaults.tcl)
+	get_int( "hsizeP", & hsize );			// 600
+	get_int( "vsizeP", & vsize );			// 300
+	get_int( "hmbordsizeP", & hbordsize );	// 40
+	get_int( "tbordsizeP", & tbordsize );	// 5
+	get_int( "bbordsizeP", & bbordsize );	// 90
+	get_int( "sbordsizeP", & sbordsize );	// 0
+	get_int( "htmarginP", & htmargin );		// 4
+	get_int( "vtmarginP", & vtmargin );		// 5
+	get_int( "hticksP", & hticks );			// 3
+	get_int( "vticksP", & vticks );			// 3
+	get_int( "lheightP", & lheight );		// 15
+
+	// calculate horizontal borders required for legends
+	h = min_hborder( choice, pdigits, miny, maxy );
+	if ( y2on )								// repeat for 2nd y axis
+		h = max( k, min_hborder( choice, pdigits, miny2, maxy2 ) );
+		
+	// include margins and tick size (if present)
+	hbordsize = max( hbordsize, h ) + 2 * htmargin + ( grid ? 0 : 5 );
+	cmd( "set hbordsizeP %d", hbordsize );
+	
+	// initial canvas size
+	hcanvas = hsize + hbordsize * ( y2on ? 2 : 1 ) + 
+				( y2on ? 0 : ( max_c < 1000 ? 10 : 20 ) );
+	vcanvas = vsize + tbordsize + bbordsize;
+	hscroll = hcanvas + sbordsize;
+	vscroll = vcanvas + sbordsize;
+	
+	// create plot window
+	
+	cmd( "set w .da.f.new%d", cur_plot );	// plot window
+	cmd( "set p $w.f.plots" );				// plot canvas
+	
+	cmd( "newtop $w $tit \"wm withdraw $w\" \"\"" );
+
+	cmd( "frame $w.f" );
+	cmd( "scrollbar $w.f.vs -command \"$p yview\"" );
+	cmd( "scrollbar $w.f.hs -orient horiz -command \"$p xview\"" );
+	cmd( "pack $w.f.vs -side right -fill y" );
+	cmd( "pack $w.f.hs -side bottom -fill x" );
+
+	cmd( "canvas $p -width %d -height %d -background white -relief flat -yscrollcommand \"$w.f.vs set\" -xscrollcommand \"$w.f.hs set\" -scrollregion \"%d %d %d %d\" -relief flat -highlightthickness 0", 
+		hcanvas, vcanvas, - sbordsize, - sbordsize, hcanvas + sbordsize, vcanvas + sbordsize  );
+	cmd( "pack $p -expand yes -fill both" );
+	cmd( "pack $w.f -expand yes -fill both" );
+	
+	// add buttons bottom bar
+	cmd( "frame $w.b" );
+
+	cmd( "frame $w.b.c" );
+
+	cmd( "frame $w.b.c.case" );
+	cmd( "label $w.b.c.case.l -text \"%s:\" -width 11 -anchor e", txtCase );
+	cmd( "label $w.b.c.case.v -text \"\" -fg red -width 10 -anchor w" );
+	cmd( "pack $w.b.c.case.l $w.b.c.case.v -side left -anchor w" );
+
+	cmd( "frame $w.b.c.y" );
+	if( logs )
+		cmd( "label $w.b.c.y.l -text \"log(Y) value:\" -width 11 -anchor e" );
+	else
+		cmd( "label $w.b.c.y.l -text \"Y value:\" -width 11 -anchor e" );
+	cmd( "label $w.b.c.y.v1 -text \"\" -fg red -width 10 -anchor w" );
+	cmd( "label $w.b.c.y.v2 -text \"\" -fg red -width 10 -anchor w" );
+	cmd( "pack $w.b.c.y.l $w.b.c.y.v1 $w.b.c.y.v2 -side left -anchor w");
+
+	cmd( "frame $w.b.c.var" );
+	cmd( "label $w.b.c.var.l -text \"%s:\" -width 11 -anchor e", txtLine );
+	cmd( "label $w.b.c.var.v -text \"\" -fg red -width 10 -anchor w" );
+	cmd( "pack $w.b.c.var.l $w.b.c.var.v -side left -anchor w" );
+
+	cmd( "pack $w.b.c.case $w.b.c.y $w.b.c.var -anchor w" );
+
+	cmd( "frame $w.b.o" );
+	cmd( "label $w.b.o.l1 -text \"Right-click: edit properties\"" );
+	cmd( "label $w.b.o.l2 -text \"Shift-click: insert text\"" );
+	cmd( "label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
+	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
+
+	cmd( "frame $w.b.s" );
+	cmd( "button $w.b.s.save -width 9 -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot true; set choice 11 } -state disabled -underline 0" );
+	cmd( "button $w.b.s.stop -width 9 -text Stop -command { set choice 2 } -state disabled -underline 0" );
+	cmd( "pack $w.b.s.save $w.b.s.stop -pady 5" );
+
+	cmd( "label $w.b.pad -width 6" );
+
+	cmd( "frame $w.b.z -bd 2 -relief groove" );
+	cmd( "label $w.b.z.l -text Zoom" );
+
+	cmd( "frame $w.b.z.b" );
+	cmd( "button $w.b.z.b.p -width 3 -text + -command { scale_canvas .da.f.new%d.f.plots \"+\" zoomLevel%d } -state disabled", cur_plot, cur_plot );
+	cmd( "button $w.b.z.b.m -width 3 -text - -command { scale_canvas .da.f.new%d.f.plots \"-\" zoomLevel%d } -state disabled", cur_plot, cur_plot  );
+	cmd( "pack $w.b.z.b.p $w.b.z.b.m" );
+
+	cmd( "pack  $w.b.z.l $w.b.z.b -side left -padx 2 -pady 2" );
+
+	cmd( "pack $w.b.c $w.b.o $w.b.pad $w.b.s $w.b.z -expand no -padx 10 -pady 5 -side left" );
+	cmd( "pack $w.b -side right -expand no" );
+
+	cmd( "mouse_wheel $p" );
+	
+	if ( watch )
+	{	
+		cmd( "$w.b.s.stop configure -state normal" );
+		cmd( "bind $w <s> { $w.b.s.stop invoke }; bind $w <S> { $w.b.s.stop invoke }" );
+		cmd( "bind $w <Escape> { $w.b.s.stop invoke }" );
+	}
+
+	cmd( "showtop $w current yes yes no" );
+	cmd( "$p xview moveto 0; $p yview moveto 0");
+	cmd( "set zoomLevel%d 1.0", cur_plot );
+	
+	// create list with the series names+tags in Tk
+	cmd( "set series%d [ list ]", cur_plot );
+	for ( i = 0; i < nv; ++i )
+		cmd( "lappend series%d \"%s_%s\"", cur_plot, str[ i ], tag[ i ] );
+		
+
+	// axis lines, ticks & grid
+	cmd( "canvas_axis $p %d %d %d", type, grid, y2on );
+
+	// x-axis values
+	switch ( type )
+	{
+		case TSERIES:
+			for ( i = 0; i < hticks + 2; ++i )
+				cmd( "$p create text %d %d -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight - 3, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
+			break;
+			
+		case CRSSECT:
+			cmd( "$p create text %d %d -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight - 3, nv );
+			break;
+	}
+
+	// y-axis values
+	for ( i = 0; i < vticks + 2; ++i )
+	{
+		cmd( "$p create text %d %d -font $fontP -anchor e -text %.*g -tag { p text }", hbordsize - htmargin - ( grid ? 0 : 5), tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, miny + ( vticks + 1 - i ) * ( maxy - miny ) / ( vticks + 1 ) );
+		
+		// second y-axis series values (if any)
+		if ( y2on )
+			cmd( "$p create text %d %d -font $fontP -anchor w -text %.*g -tag { p text }", hbordsize + hsize + htmargin + ( grid ? 0 : 5), tbordsize + ( int ) round( i * ( double ) vsize / ( vticks + 1 ) ), pdigits, miny2 + ( vticks + 1 - i ) * ( maxy2 - miny2 ) / ( vticks + 1 ) );
+	}
+
+	// series labels
+	cmd( "set xlabel $htmarginP" ); 
+	cmd( "set ylabel [ expr $tbordsizeP + $vsizeP + 2 * $lheightP ]" );
+	color = allblack ? 1001 : 0;		// select gray scale or color range
+	
+	for ( i = 0; i < nLine; ++i, ++color )
+	{
+		switch ( type )
+		{
+			case TSERIES:
+				if ( start[ i ] <= max_c && end[ i ] >= min_c )
+					tOk = true;
+				else
+					tOk = false;
+				sprintf( txtLab, "%s_%s", str[ i ], tag[ i ] );
+				break;
+			case CRSSECT:
+				sprintf( txtLab, "t = %d ", start[ i ] );
+				tOk = true;
+				break;
+		}
+		
+		if ( tOk )
+		{
+			cmd( "set app [ font measure $fontP \"%s\"]", txtLab );
+			cmd( "if { [expr $xlabel + $app] > %d } { set xlabel %d; incr ylabel %d }", hcanvas - htmargin, htmargin, lheight );
+			get_int( "ylabel", & k );
+			if ( k > tbordsize + vsize + bbordsize - 2 * lheight )
+				break;
+
+			cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"%s\" -tag { txt%d text legend } -fill $c%d", txtLab, i, ( color < 1100 ) ? color : 0 );
+			cmd( "set xlabel [ expr $xlabel + $app + $htmarginP ]" );
+		}
+	}
+
+	if ( i < nLine )
+		cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text (more...)" );
+
+	cmd( "update" );
+
+	// create data structure to hold image to be presented
+	y = new double[ nLine ];		// cross section consolidated "intra" step average value
+	int pdataX[ hsize + 1 ];		// visible time step values (max)
+	for ( i = 0; i < hsize + 1; ++i )
+		pdataX[ i ] = -1;			// mark all as non plot
+	int **pdataY = new int *[ nLine ];	// matrix of visual average scaled/rounded values
+	for ( k = 0; k < nLine; ++k )
+	{
+		pdataY[ k ] = new int[ hsize + 1 ];
+		for ( i = 0; i < hsize + 1; ++i )
+			pdataY[ k ][ i ] = -1;	// mark all as non plot
+	}
+	
+	// calculate screen plot values for all series
+	x1 = hbordsize - 1;
+	step = hsize / ( double ) ( endCase - iniCase );
+	for ( h = 0, j = 0, i = iniCase; i <= endCase; ++i )
+	{
+		// move the x-axis pointer in discrete steps
+		x2 = x1 + ( 1 + h ) * step;
+		h++;            	// counter for the average when many values occupy one x point
+		
+		// fix initial x point if scale is too coarse
+		if ( i == iniCase && x2 - x1 > 1 )
+			x2 = x1 + 1;
+		
+		// moved to another canvas step?
+		bool xnext = ( floor( x1 ) != floor ( x2 ) );
+
+		// process each curve (series or cross-section)
+		for ( k = 0; k < nLine; ++k, ++color )	
+		{
+			switch ( type )
+			{
+				case TSERIES:
+					yVal = data[ k ][ i ];
+					if ( start[ k ] < i && end[ k ] >= i )
+						tOk = true;
+					else
+						tOk = false;
+					break;
+					
+				case CRSSECT:
+					yVal = data[ i - 1 ][ k ];
+					tOk = true;
+					break;
+			}
+
+			// pick the right limits according to the y-axis of series
+			if ( ! y2on || k < num_y2 - 1 )
+			{
+				cminy = miny;
+				cmaxy = maxy;
+			}
+			else
+			{
+				cminy = miny2;
+				cmaxy = maxy2;
+			}
+		  
+			if ( is_finite( yVal ) )
+			{
+				if ( tOk )
+				{
+					y[ k ] += yVal;
+					if ( xnext )
+					{	// average "intra" steps
+						y[ k ] /= h;		
+						// constrain to canvas virtual limits
+						y[ k ] = min( max( y[ k ], cminy ), cmaxy );
+						// scale to the canvas physical y range
+						y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+						// save to visual vertical line buffer
+						pdataY[ k ][ j ] = round( y[ k ] );
+						// restart averaging
+						y[ k ] = 0;
+					}
+				}
+				else
+				{
+					if ( start[ k ] == i )
+					{ 	//series entering after x1
+						if ( ! xnext )					// "intra" step?
+							y[ k ] = yVal * h;			// suppose from the beginning of x1
+						else
+						{	// just plot as usual
+							y[ k ] = yVal;
+							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
+							y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
+							pdataY[ k ][ j ] = round( y[ k ] );
+							y[ k ] = 0;
+						}
+					}
+				}
+			}
+		}
+		
+		if ( xnext )
+		{ 
+			x1 = x2;
+			h = 0;			// restart averaging (more than 1 step per canvas step)
+			pdataX[ j ] = floor( x2 );
+			if ( ++j > hsize )	// buffer full?
+				break;
+		}
+	}
+
+	// transfer data to Tcl and plot it
+	cdata = pdataX;					// send series x values to Tcl
+	cmd( "get_series %d pdataX", j );
+//	cmd( "plog \"\npdataX:$pdataX\"" );
+	
+	color = allblack ? 1001 : 0;	// select gray scale or color range
+		
+	*choice = 0;
+	for ( k = 0; k < nLine; ++k, ++color )
+	{
+		cdata = pdataY[ k ];		// send series y values to Tcl
+		cmd( "get_series %d pdataY", j );
+//		cmd( "plog \"\npdataY:$pdataY\"" );
+		
+		int colorPlot = ( color < 1100 ) ? color : 0;	// use black if out of colors
+
+		if( line_point == 1 )
+			cmd( "plot_line $p $pdataX $pdataY p%d $c%d %lf", k, colorPlot, point_size );
+		else
+			cmd( "plot_points $p $pdataX $pdataY p%d $c%d %lf", k, colorPlot, point_size );
+		
+		if ( watch )
+			cmd( "update" );
+		if	( *choice == 2 ) 		// button STOP pressed
+			break;  
+	}
+	
+	// garbage collection
+	cmd( "unset pdataX pdataY");
+	for ( i = 0; i < nLine; ++i )
+		delete [] pdataY[ i ];
+	delete [] pdataY;
+	delete [] y;
+	
+	if	( *choice == 2 ) 			// Button STOP pressed
+	{
+		cmd( "destroytop $w" );
+		return;
+	}
+	
+	// enable/disable buttons
+	cmd( "$w.b.s.save configure -state normal" );
+	cmd( "$w.b.s.stop configure -state disabled" );
+	cmd( "$w.b.z.b.p configure -state normal" );
+	cmd( "$w.b.z.b.m configure -state normal" );
+
+	// raise axis, legends & draws to the front and lower grid to the back
+	cmd( "$p raise p" );
+	cmd( "$p lower g" );
+	cmd( "if { [ $p find withtag draw ] != \"\" } { $p raise draw }" );
+	
+	// update cursor indicators at bottom window
+	if ( y2on )
+		cmd( "bind $p <Motion> { \
+				set zoom $zoomLevel%d; \
+				set w .da.f.new%d; \
+				set llim [ expr %d * $zoom ]; \
+				set rlim [ expr %d * $zoom ]; \
+				set tlim [ expr %d * $zoom ]; \
+				set blim [ expr %d * $zoom ]; \
+				set cx [ $w.f.plots canvasx %%x ]; \
+				set cy [ $w.f.plots canvasy %%y ]; \
+				if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim } { \
+					$w.b.c.case.v configure -text [ expr int( ( $cx - $llim ) * ( %d - %d ) / ( $rlim - $llim ) + %d ) ]; \
+					$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
+					$w.b.c.y.v2 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ] \
+				} \
+			}", cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, endCase, iniCase, iniCase, maxy, miny, miny, maxy2, miny2, miny2 );
+	else
+		cmd( "bind $p <Motion> { \
+				set type %d; \
+				set zoom $zoomLevel%d; \
+				set series $series%d; \
+				set w .da.f.new%d; \
+				set llim [ expr %d * $zoom ]; \
+				set rlim [ expr %d * $zoom ]; \
+				set tlim [ expr %d * $zoom ]; \
+				set blim [ expr %d * $zoom ]; \
+				set cx [ $w.f.plots canvasx %%x ]; \
+				set cy [ $w.f.plots canvasy %%y ]; \
+				if { $cx >= $llim && $cx <= $rlim && $cy >= $tlim && $cy <= $blim } { \
+					set case  [ expr int( ( $cx - $llim ) * ( %d - %d ) / ( $rlim - $llim ) + %d ) ]; \
+					if { $type == 0 } { \
+						$w.b.c.case.v configure -text $case \
+					} elseif { $type == 1 } { \
+						$w.b.c.case.v configure -text [ lindex $series [ expr $case - 1 ] ] \
+					}; \
+					$w.b.c.y.v1 configure -text [ format \"%%%%.[ expr $pdigits ]g\" [ expr ( $blim - $cy ) * ( %lf - %lf ) / ( $blim - $tlim ) + %lf ] ]; \
+				} \
+			}", type, cur_plot, cur_plot, cur_plot, hbordsize, hbordsize + hsize, tbordsize, tbordsize + vsize, endCase, iniCase, iniCase, maxy, miny, miny );
+
+	for ( i = 0; i < nLine; ++i )
+	{
+		switch ( type )
+		{
+			case TSERIES:
+				sprintf( txtLab, "%s_%s", str[ i ], tag[ i ] );
+				break;
+			case CRSSECT:
+				sprintf( txtLab, "t = %d ", start[ i ] );
+				break;
+		}
+			
+		cmd( "$p bind p%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i, cur_plot, txtLab );
+		cmd( "$p bind p%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+
+		cmd( "$p bind txt%d <Enter> { .da.f.new%d.b.c.var.v configure -text \"%s\" }", i,cur_plot, txtLab );
+		cmd( "$p bind txt%d <Leave> { .da.f.new%d.b.c.var.v configure -text \"\" }", i, cur_plot );
+	}
+
+	// window bindings (return to Analysis, insert text, insert line)
+	cmd( "bind $w <Escape> \"wm withdraw $w\"" );
+	cmd( "bind $w <s> { $w.b.s.save invoke }; bind $w <S> { $w.b.s.save invoke }" );
+	cmd( "bind $w <plus> { $w.b.z.b.p invoke }" );
+	cmd( "bind $w <minus> { $w.b.z.b.m invoke }" );
+	cmd( "bind $p <Double-Button-1> { raise .da }" );
+	
+	cmd( "bind $p <Shift-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; \
+			set LY %%Y; \
+			set hereX [ $ccanvas canvasx %%x ]; \
+			set hereY [ $ccanvas canvasy %%y ]; \
+			set choice 27 \
+		}", cur_plot );
+		
+	cmd( "bind $p <Control-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set ncanvas %d; \
+			set hereX [ $ccanvas canvasx %%x ]; \
+			set hereY [ $ccanvas canvasy %%y ]; \
+			unset -nocomplain cl; \
+			set choice 28 \
+		}", cur_plot, cur_plot );
+
+	// moving and editing lines and text
+	cmd( "bind $p <Button-1> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch -regexp $type (draw|legend) ] >= 0 } { \
+				set moving true; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ]; \
+				$ccanvas raise current \
+			} { \
+				set moving false \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <B1-Motion> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			if $moving { \
+				$ccanvas move current [ expr [ $ccanvas canvasx %%x ] - $hereX ] \
+					[ expr [ $ccanvas canvasy %%y ] - $hereY ]; \
+				set hereX [ $ccanvas canvasx %%x ]; \
+				set hereY [ $ccanvas canvasy %%y ] \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <ButtonRelease-1> { set moving false }" );
+	
+	cmd( "bind $p <Button-2> { \
+			set ccanvas .da.f.new%d.f.plots; \
+			set LX %%X; set LY %%Y; \
+			set type [ $ccanvas gettags current ]; \
+			if { [ lsearch $type line ] >= 0 || [ lsearch $type dots ] >= 0 } { \
+				if { [ lsearch $type series ] >= 0 } { \
+					set cline [ lindex $type 0 ]; \
+					set draw false \
+				} { \
+					set cline current; \
+					set draw true \
+				}; \
+				set choice 31 \
+			} { \
+				if { [ lsearch $type text ] >= 0 } { \
+					set choice 26 \
+				} \
+			} \
+		}", cur_plot );
+	cmd( "bind $p <Button-3> { event generate .da.f.new%d.f.plots <Button-2> -x %%x -y %%y }", cur_plot );
+	
+	// save plot info
+	type_plot[ cur_plot ] = type; 					// plot type
+	plot_w[ cur_plot ] = hcanvas;					// plot width
+	plot_nl[ cur_plot ] = tbordsize + vsize + lheight ; // height of plot without labels  
+	cmd( "set choice $ylabel" );
+	plot_l[ cur_plot ] = *choice + lheight; 		// height of plot with labels
+
+	*choice = 0;
+}
+
+/*****************************
+ TCL_UPLOAD_SERIES
+ 
+ data transfer routine from C to Tcl 
+ *****************************/
+int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[] )
+{
+	int size, *data;
+
+	if ( oc != 3 ) 
+	{
+		Tcl_WrongNumArgs( inter, 1, ov, "size data");
+		return TCL_ERROR;
+	}
+
+	if ( Tcl_GetIntFromObj( inter, ov[ 1 ], &size ) != TCL_OK )
+		return TCL_ERROR;
+	
+	data = ( int * ) Tcl_GetByteArrayFromObj( ov[ 2 ], NULL );
+	if ( data == NULL )
+		return TCL_ERROR;
+
+	Tcl_InvalidateStringRep( ov[ 2 ] );
+
+	for ( int i = 0; i < size; ++i )
+		data[ i ] = cdata[ i ];
+
+	return TCL_OK;
+}

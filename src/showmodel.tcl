@@ -52,6 +52,7 @@ frame .l.l -relief groove -bd 2
 label .l.l.tit -text "Group: $modelgroup" -fg red
 scrollbar .l.l.vs -command ".l.l.l yview"
 listbox .l.l.l -height 12 -width 30 -yscroll ".l.l.vs set" -selectmode single
+mouse_wheel .l.l.l
 
 frame .l.t -relief groove -bd 2
 label .l.t.tit -text Description -foreground red
@@ -75,7 +76,7 @@ if { [ file isdirectory $pippo ] != 1 } {
  set pippo $RootLsd
 }
 cd $pippo
-if { [string compare $pippo $RootLsd] != 0 } {.l.l.l insert end "<UP>"; lappend lver "-1"; lappend group 1; lappend lmd "Return to group: [file dirname $modelgroup]"; lappend lrn [pwd]; lappend ldn "[file dirname $pippo]"; lappend lmn "<UP>"} {}
+if { [string compare -nocase $pippo $RootLsd] != 0 } {.l.l.l insert end "<UP>"; lappend lver "-1"; lappend group 1; lappend lmd "Return to group: [file dirname $modelgroup]"; lappend lrn [pwd]; lappend ldn "[file dirname $pippo]"; lappend lmn "<UP>"} {}
 
 set dir [glob *]
 

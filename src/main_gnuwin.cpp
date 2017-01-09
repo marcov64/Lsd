@@ -154,9 +154,19 @@ void signal_handler(int signum)
 	}
 	
 #ifndef NO_WINDOW
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)...\"", msg );
-	sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
-	deb( stacklog->vs->up, NULL, msg2, &useless );
+	if ( running )
+		strcpy( msg2, "\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)..." );
+	else
+		strcpy( msg2, "" );
+	
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.%s\"", msg, msg2 );
+	
+	if ( running )
+	{
+		sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
+		deb( stacklog->vs->up, NULL, msg2, &useless );
+	}
+	
 	sprintf( msg2, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
 #else
@@ -164,5 +174,3 @@ void signal_handler(int signum)
 #endif
 	myexit( -signum );				// abort program
 }
-
-

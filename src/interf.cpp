@@ -226,6 +226,7 @@ cmd( "frame .l.v.c" );
 cmd( "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
 cmd( "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"" );
 
+cmd( "mouse_wheel .l.v.c.var_name" );
 cmd( "bind .l.v.c.var_name <Left> { focus .l.s.c.son_name; set listfocus 2; set itemfocus 0; ; .l.s.c.son_name selection set 0; .l.s.c.son_name activate 0; .l.s.c.son_name see 0 }" );
 
 if(r->v==NULL)
@@ -387,8 +388,9 @@ cmd( "frame .l.s" );
 
 cmd( "frame .l.s.c" );
 cmd( "scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
-cmd( "listbox .l.s.c.son_name" );
+cmd( "listbox .l.s.c.son_name -yscroll \".l.s.c.v_scroll set\"" );
 
+cmd( "mouse_wheel .l.s.c.son_name" );
 cmd( "bind .l.s.c.son_name <Right> { focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0; .l.v.c.var_name see 0 }" );
 cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
 
@@ -541,6 +543,11 @@ cmd( "$w add cascade -label \"Sensitivity Analysis\" -underline 0 -menu $w.setse
 
 cmd( "$w add separator" );
 
+cmd( "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 1" );
+cmd( "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 0" );
+
+cmd( "$w add separator" );
+
 cmd( "$w add command -label \"Analysis of Results...\" -command {set choice 26} -underline 0 -accelerator Ctrl+A" );
 cmd( "$w add command -label \"Data Browse...\" -command {set choice 34} -underline 5 -accelerator Ctrl+B" );
 
@@ -564,15 +571,15 @@ cmd( "$w add command -label \"Simulation Settings...\" -command {set choice 22} 
 cmd( "$w add checkbutton -label \"Frequent Lattice Updating\" -variable lattype -command {set choice 56} -underline 2" );
 
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F" );
-cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7" );
-cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 1 -accelerator Ctrl+G" );
-cmd( "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 20" );
-cmd( "$w add separator" );
 cmd( "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17" );
 cmd( "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17" );
 cmd( "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1" );
-cmd( "$w add command -label \"Show Elements of Sens. Anal.\" -command {set choice 66} -underline 17" );
+
+cmd( "$w add separator" );
+cmd( "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F" );
+cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7" );
+cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 1 -accelerator Ctrl+G" );
+
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 0" );
 
@@ -810,7 +817,7 @@ cmd( "label $T.f.lab_ent -text \"New variable name: \"" );
 cmd( "label $T.f.lab_num -text \"Maximum lags used: \"" );
 cmd( "label $T.f.sp -text \"     \"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab" );
-cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
 cmd( "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}" );
 cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left" );
 }
@@ -826,7 +833,7 @@ cmd( "label $T.f.lab_ent -text \"New Function Name: \"" );
 cmd( "label $T.f.lab_num -text \"Maximum lags used: \"" );
 cmd( "label $T.f.sp -text \"     \"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab" );
-cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
 cmd( "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}" );
 cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left" );
 }
@@ -1675,7 +1682,7 @@ done = 0;
 while(done==0)
  Tcl_DoOneEvent(0);
 
-*choice = 1;	// point .top window as parent for the following windows
+*choice = 1;	// point .chgelem window as parent for the following windows
 if(done == 3)
  show_eq(lab_old, choice);
 if(done == 4)
@@ -2793,6 +2800,7 @@ if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
 sscanf(lab1, "%s", lab_old);
 
+*choice = 0;	// point . window as parent for the following window
 show_eq(lab_old, choice);
 
 break;
@@ -2933,8 +2941,8 @@ cmd( "$T.ent selection range 0 end" );
 
 here_objec_num1:
 
-cmd( "write_any $T.ent insert $num" ); 
-cmd( "write_any $T.cp.e insert $cfrom" ); 
+cmd( "write_any $T.ent $num" ); 
+cmd( "write_any $T.cp.e $cfrom" ); 
 
 while(*choice==0)
  Tcl_DoOneEvent(0);
@@ -5057,6 +5065,7 @@ cmd( "frame $TT.v" );
 cmd( "scrollbar $TT.v.v_scroll -command \"$TT.v.lb yview\"" );
 cmd( "listbox $TT.v.lb -selectmode single -yscroll \"$TT.v.v_scroll set\"" );
 cmd( "pack $TT.v.lb $TT.v.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $TT.v.lb" );
 
 insert_lb_object(root);
 

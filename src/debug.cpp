@@ -168,7 +168,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd( "set stack_flag %d",stackinfo_flag );
 		cmd( "button .deb.b.act.run -width -9 -text Run -command {set choice 2} -underline 0" );
 		cmd( "button .deb.b.act.until -width -9 -text Until -command {set choice 16} -underline 3" );
-		cmd( "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set done_in 3} -underline 0" );
+		cmd( "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
 		cmd( "button .deb.b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0" );
 		cmd( "button .deb.b.act.net -width -9 -text Network -command {set choice 22} -underline 3" );
 		cmd( "button .deb.b.act.call -width -9 -text Caller -command {set choice 9} -underline 0" );
@@ -780,6 +780,7 @@ if(choice==7)
 
 if(choice==8)
 {
+ choice = 3;	// point .deb window as parent for the following window
  show_eq(cv->label, &choice);
  choice = 8;
 }

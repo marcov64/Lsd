@@ -282,7 +282,7 @@ else
 cmd( "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file dirname \"%s\"]; set choice 1} {cd [pwd]; set choice 0}", str, str );
 
 // check if LSDROOT already exists and use it if so
-cmd( "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
+cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
 cmd( "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSDROOT) $RootLsd }" );
 cmd( "set groupdir [pwd]" );
 cmd( "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier} {}" );
@@ -373,14 +373,14 @@ cmd( "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf
 
 cmd( "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/window.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/window.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists $RootLsd/$LsdSrc/dblclick.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/dblclick.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if { $choice != 0 } { tk_messageBox -type ok -icon error -title Error -message \"Files missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if required.\n\nLsd is aborting now.\" }" );
 if ( choice != 0 )
 {
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Source file(s) missing\" -detail \"Required Tcl/Tk source file(s) is(are) missing.\nCheck the installation of Lsd or reinstall Lsd if the problem persists.\n\nLMM is aborting now.\"" );
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) is(are) missing, check the installation of Lsd or reinstall Lsd if the problem persists" );
+	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
 	return 10 + choice;
 }
 
@@ -1344,7 +1344,7 @@ cmd( "cd $modeldir" );
 
 if(choice==58)
  {
- cmd( "scan $vmenuInsert %d.%d line col" );
+ cmd( "scan $vmenuInsert %%d.%%d line col" );
  cmd( "catch { set f [open break.txt w]; puts $f \"break $filename:$line\nrun\n\"; close $f }" );
  cmd( "set cmdbreak \"--command=break.txt\"" );
  
@@ -1780,7 +1780,7 @@ if(choice == 16)
 {
 /*insert automatic tabs */
 cmd( "set in [.f.t.t index insert]" );
-cmd( "scan $in %d.%d line col" );
+cmd( "scan $in %%d.%%d line col" );
 cmd( "set line [expr $line -1]" );
 cmd( "set s [.f.t.t get $line.0 $line.end]" );
 s=(char *)Tcl_GetVar(inter, "s",0);
@@ -2297,7 +2297,7 @@ cmd( "if { $v_par == \"p\"} {.f.t.t insert insert \"CYCLE($v_obj,\\\"$v_label\\\
 //Trying making automatic indent in cycles
 
 cmd( "set in [.f.t.t index insert]" );
-cmd( "scan $in %d.%d line col" );
+cmd( "scan $in %%d.%%d line col" );
 cmd( "set line [expr $line -1]" );
 cmd( "set s [.f.t.t get $line.0 $line.end]" );
 s=(char *)Tcl_GetVar(inter, "s",0);
@@ -4263,7 +4263,7 @@ cmd( "set in [.f.t.t tag range sel]" );
 cmd( "if { [string length $in] == 0 } {set choice 0} {set choice 1}" );
 if(choice==0)
  goto loop;
-cmd( "scan $in \"%d.%d %d.%d\" line1 col1 line2 col2" );
+cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 cmd( "set num $line1" );
 i=num;
 cmd( "set num $line2" );
@@ -4289,7 +4289,7 @@ cmd( "set in [.f.t.t tag range sel]" );
 cmd( "if { [string length $in] == 0 } {set choice 0} {set choice 1}" );
 if(choice==0)
  goto loop;
-cmd( "scan $in \"%d.%d %d.%d\" line1 col1 line2 col2" );
+cmd( "scan $in \"%%d.%%d %%d.%%d\" line1 col1 line2 col2" );
 cmd( "set num $line1" );
 i=num;
 cmd( "set num $line2" );

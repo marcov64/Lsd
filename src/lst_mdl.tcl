@@ -72,6 +72,7 @@ frame .l.l -relief groove -bd 2
 label .l.l.tit -text "List of models" -fg red
 scrollbar .l.l.vs -command ".l.l.l yview"
 listbox .l.l.l -height 30 -width 70 -yscroll ".l.l.vs set" -selectmode browse
+mouse_wheel .l.l.l
 bind .l.l.l <ButtonRelease> {set glabel [lindex $lgroup [.l.l.l curselection]]; .l.l.gl configu -text "$glabel"}
 bind .l.l.l <KeyRelease-Up> {set glabel [lindex $lgroup [.l.l.l curselection]]; .l.l.gl configu -text "$glabel"}
 bind .l.l.l <KeyRelease-Down> {set glabel [lindex $lgroup [.l.l.l curselection]]; .l.l.gl configu -text "$glabel"}

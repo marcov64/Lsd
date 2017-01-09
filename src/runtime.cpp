@@ -56,9 +56,6 @@ did not issue an error message.
 - void plog(char *m);
 print  message string m in the Log screen. It is in LSDMAIN.CPP
 
-- void init_canvas(void);
-Contained in ANALYSIS.CPP. Simply sets the colors for any integer number
-
 ****************************************************/
 
 #include "decl.h"
@@ -112,7 +109,6 @@ for(a=r->v; a!=NULL; a=a->next)
  if(a->plot==1)
   *i=*i+1;
 
-//
 for(cb=r->b; cb!=NULL; cb=cb->next)
 {
  for(c=cb->head; c!=NULL; c=c->next)
@@ -140,9 +136,9 @@ for(a=r->v; a!=NULL; a=a->next)
 	 strcpy(tp[*i], msg);
 	 *i=*i+1;
 	}
-//for(c=r->son; c!=NULL; c=skip_next_obj(c,&j))
+
 for(cb=r->b; cb!=NULL; cb=cb->next)
- {//skip_next_obj(c,&j);
+ {
   c=cb->head;
   if(c->next!=NULL) //Multiple instances
 	{for(j=1,c1=c ;c1!=NULL; c1=go_brother(c1), j++ )
@@ -160,7 +156,6 @@ INIT_PLOT
 **************************************/
 void init_plot(int num, int id_sim)
 {
-init_canvas();
 int i, j, k;
 
 if(max_step>500)
@@ -172,14 +167,14 @@ cmd( "set activeplot .plt%d", id_sim );
 
 cmd( "if {[winfo exists $activeplot]==1} {destroytop $activeplot}" );
 
-cmd( "newtop $activeplot \"\" { set done_in 5 } \"\"" );
+cmd( "newtop $activeplot \"\" { set_c_var done_in 5 } \"\"" );
 cmd( "wm transient $activeplot ." );
 cmd( "wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
 
-cmd( "bind $activeplot <s> { set done_in 1 }; bind $activeplot <S> { set done_in 1 }" );
-cmd( "bind $activeplot <f> { set done_in 2 }; bind $activeplot <F> { set done_in 2 }" );
-cmd( "bind $activeplot <d> { set done_in 3 }; bind $activeplot <D> { set done_in 3 }" );
-cmd( "bind $activeplot <o> { set done_in 4 }; bind $activeplot <O> { set done_in 4 }" );
+cmd( "bind $activeplot <s> { set_c_var done_in 1 }; bind $activeplot <S> { set_c_var done_in 1 }" );
+cmd( "bind $activeplot <f> { set_c_var done_in 2 }; bind $activeplot <F> { set_c_var done_in 2 }" );
+cmd( "bind $activeplot <d> { set_c_var done_in 3 }; bind $activeplot <D> { set_c_var done_in 3 }" );
+cmd( "bind $activeplot <o> { set_c_var done_in 4 }; bind $activeplot <O> { set_c_var done_in 4 }" );
 
 cmd( "frame $activeplot.c" );
 cmd( "frame $activeplot.c.c  " );
@@ -195,6 +190,7 @@ cmd( "canvas $activeplot.c.yscale -width 80 -height 370" );
 cmd( "pack $activeplot.c.yscale -anchor w -side left -anchor n -expand no" );
 cmd( "pack $activeplot.c.c -anchor w -side left -fill both -expand yes" );
 cmd( "pack $activeplot.c -anchor w -expand yes -fill both" );
+cmd( "mouse_wheel $p" );
 
 for(i=0; i<(int)((double)max_step*plot_step); i+=100)
  {cmd( "$p create line %d 0 %d 310 -fill grey60", i, i );
@@ -209,8 +205,8 @@ cmd( "$activeplot.c.yscale create text 2 2 -font {{MS Times New Roman} 10} -anch
 cmd( "$activeplot.c.yscale create text 2 150 -font {{MS Times New Roman} 10} -anchor w -text \"\" -tag medy" );
 cmd( "$activeplot.c.yscale create text 2 305 -font {{MS Times New Roman} 10} -anchor sw -text \"\" -tag ymin" );
 cmd( "set scrollB 0" );
-cmd( "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set done_in 8 }" );
-cmd( "button $activeplot.c.yscale.go -width -7 -text Center -command {set done_in 7}" );
+cmd( "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );
+cmd( "button $activeplot.c.yscale.go -width -7 -text Center -command {set_c_var done_in 7}" );
 cmd( "$activeplot.c.c.cn conf -xscrollincrement 1" );
 
 cmd( "$activeplot.c.yscale create window 42 313 -window $activeplot.c.yscale.shift -anchor n" );
@@ -248,6 +244,10 @@ void plot_rt(variable *v)
 {
 int y1, y2;
 double dy, step, value;
+
+// limit the number of run time plot variables
+if ( cur_plt > 100 )
+	return;
 
 if(ymax==ymin) //Very initial setting
  { if(v->val[0]>0)

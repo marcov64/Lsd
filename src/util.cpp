@@ -834,12 +834,6 @@ return(floor(r));
 }
 
 
-
-
-
-
-
-
 double gammaln(double xx)
 {
 double x, y, tmp, ser;
@@ -853,7 +847,6 @@ for(j=0;j<=5;j++) ser += cof[j]/++y;
 return -tmp+log(2.5066282746310005*ser/x);
 
 }
-
 
 
 /*
@@ -1803,7 +1796,6 @@ for(cur=descr; cur!=NULL; cur=cur->next)
 return NULL;
 } 
 
-#ifndef NO_WINDOW
 /********************
 autofill_descr
 generate recur. the descriptions of the model as it is
@@ -1838,7 +1830,6 @@ for(cb=o->b; cb!=NULL; cb=cb->next)
   autofill_descr(cb->head);
 }
 
-#endif
 
 void change_descr_lab(char const *lab_old, char const *lab, char const *type, char const *text, char const *init)
 {
@@ -2145,6 +2136,18 @@ cmd( "destroytop $list" );
 r=(char *)Tcl_GetVar(inter, "l",0);
 strcpy(s, r);
 }
+
+
+void get_int( const char *tcl_var, int *var )
+{
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", var );
+}
+
+
+void get_double( const char *tcl_var, double *var )
+{
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%lf", var );
+}
 #endif
 
 
@@ -2171,7 +2174,6 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 object *cur;
 double i, j,color;
 
-init_canvas();
 dimH=pixH/nrow;
 dimW=pixW/ncol;
 cmd( "if { [winfo exists .lat] } { destroytop .lat }" );

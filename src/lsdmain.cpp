@@ -340,7 +340,7 @@ if ( choice )
  }
 
 // check if LSDROOT already exists and use it if so, if not, search the current directory tree
-cmd( "if [ info exists env(LSDROOT) ] { set RootLsd $env(LSDROOT); if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
+cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
 cmd( "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
 str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 if ( str == NULL || strlen( str ) == 0 )
@@ -374,16 +374,19 @@ else
  }
 
 choice = 0;
-// load native Tcl procedures for windows management
-cmd( "if [ file exists $RootLsd/$LsdSrc/align.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/align.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+// load native Tk windows defaults
+cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+
+// load native Tk procedures for windows management
+cmd( "if [ file exists $RootLsd/$LsdSrc/window.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/window.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 
 // load native Tcl procedures for external files handling
 cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 
 if ( choice != 0 )
 {
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Source file(s) missing\" -detail \"Required Tcl/Tk source file(s) is(are) missing.\nCheck the installation of Lsd or reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) is(are) missing, check the installation of Lsd or reinstall Lsd if the problem persists" );
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
 	myexit( 200 + choice );
 }
 
@@ -399,6 +402,12 @@ Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 Tcl_CreateCommand( inter, "get_var_conf", Tcl_get_var_conf, NULL, NULL );
 Tcl_CreateCommand( inter, "set_var_conf", Tcl_set_var_conf, NULL, NULL );
 
+// create a Tcl command to set a c variable when not in a Tcl idle loop
+Tcl_CreateCommand( inter, "set_c_var", Tcl_set_c_var, NULL, NULL );
+
+// create Tcl command to upload series data
+Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
+
 // set main window
 cmd( "wm title . \"Lsd Browser\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
@@ -411,6 +420,7 @@ cmd( "pack .l" );
 cmd( "update" );
 
 create_logwindow( );
+cmd( "init_canvas_colors" );
 
 // use exec_path to change to the model directory
 delete [] path;
@@ -488,7 +498,7 @@ RUN
 *********************************/
 void run(object *root)
 {
-int i, j, done=0;
+int i, j;
 bool batch_sequential_loop = false; // second or higher iteration of a batch
 char ch[MAX_PATH_LENGTH];
 FILE *f;
@@ -497,12 +507,8 @@ double app=0;
 double refresh=1.01;		// runtime refresh
 clock_t start, end;
 
-done_in=done=0;
-quit=0;
- 
 #ifndef NO_WINDOW
-Tcl_LinkVar(inter, "done_in", (char *) &done_in, TCL_LINK_INT);
-Tcl_SetVar(inter, "done", "0", 0);
+set_buttons_log( true );
 
 cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
 cmd( "wm deiconify .log; raise .log; focus .log" );
@@ -511,7 +517,7 @@ cmd( "wm deiconify .log; raise .log; focus .log" );
 plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
 
-for(i=1; i<=sim_num && quit!=2; i++)
+for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 {
 cur_sim = i;	 //Update the global variable holding information on the current run in the set of runs
 empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry Nadia!)
@@ -571,7 +577,6 @@ init_random(seed);
 
 seed++;
 stack=0;
-
 scroll = false;
 pause_run = false;
 running = true;
@@ -580,36 +585,34 @@ done_in = 0;
 actual_steps = 0;
 start = clock();
 
-for(t=1; quit==0 && t<=max_step;t++)
+for ( t = 1; quit == 0 && t <= max_step; ++t )
 {
 	
+#ifndef NO_WINDOW 
+// restart runtime variables color cycle
+cur_plt = 0;
+
 // adjust "clock" backwards if simulation is paused
 if ( pause_run )
 	t--;
 
-#ifndef NO_WINDOW 
-if(when_debug==t)
+if ( when_debug == t )
 {
-  debug_flag=true;
-  cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+	debug_flag = true;
+	cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
 }
-#endif
-
-cur_plt=0;
 
 // only update if simulation not paused
 if ( ! pause_run )
+#endif
 	root->update();
 
-#ifndef NO_WINDOW 
-switch( done_in )
+#ifndef NO_WINDOW
+if ( ! fast && ! cur_plt && ! pause_run )
+	plog( "\nSimulation %d step %d done", "", i, t );
+	
+switch ( done_in )
 {
-case 0:
- if ( ! pause_run && ! fast )
-	if ( cur_plt == 0 )
-		plog( "\nSim. %d step %d done", "", i, t );
-break;
-
 case 1:			// Stop button in Log window / s/S key in Runtime window
   if ( pause_run )
 	cmd( "wm title .log \"$origLogTit\"" );
@@ -619,7 +622,7 @@ break;
 
 case 2:			// Fast button in Log window / f/F key in Runtime window
  fast = true;
- debug_flag=false;
+ debug_flag = false;
  cmd( "set a [split [winfo children .] ]" );
  cmd( " foreach i $a {if [string match .plt* $i] {wm withdraw $i}}" );
  cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}", i, i );
@@ -701,13 +704,13 @@ default:
 break;
 }
 
+done_in = 0;
+
 // perform scrolling if enabled
 if ( ! pause_run && scroll )
 {
 	cmd( "if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}", i );
 }
-
-done_in = 0;
 cmd( "update" );
 #endif
 }//end of for t
@@ -812,24 +815,57 @@ if ( batch_sequential && i == sim_num)  		// last run of current batch file?
 
 #ifndef NO_WINDOW 
 uncover_browser( );
+set_buttons_log( false );
 cmd( "wm deiconify .log; raise .log; focus .log" );
-Tcl_UnlinkVar(inter, "done_in");
 #endif
 quit=0;
 }
 
 
 /*********************************
+SET_VAR
+*********************************/
+// function to set a c variable when not in a Tcl idle loop (hardcoded vars only)
+#ifndef NO_WINDOW   
+int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+{
+	char vname[ MAX_ELEM_LENGTH ];
+	int value;
+	
+	if ( argc != 3 )					// require 2 parameters: variable name and value
+		return TCL_ERROR;
+		
+	if ( argv[ 1 ] == NULL || argv[ 2 ] == NULL )
+		return TCL_ERROR;
+	
+	if ( ! sscanf( argv[ 1 ], "%99s", vname ) )	// remove unwanted spaces
+		return TCL_ERROR;
+	
+	// set the appropriate variable (hardcoded in an else-if chain)
+	if ( ! strcmp( vname, "done_in" ) )
+	{
+		if ( ! sscanf( argv[ 2 ], "%d", &value ) )	// transform to integer
+			return TCL_ERROR;
+	
+		done_in = value;
+	}
+	else 
+		return TCL_ERROR;
+	
+	return TCL_OK;		
+}
+#endif
+
+
+/*********************************
 PRINT_TITLE
 *********************************/
-
 void print_title(object *root)
 {
 object *c, *cur;
 variable *var;
 int num=0, multi, toquit;
 bridge *cb;
-
 
 toquit=quit;
 //for each variable set the data saving support
@@ -873,12 +909,12 @@ for(var=root->v; var!=NULL; var=var->next)
 	  {
 		plog( "\nData for %s in object %s not loaded\n", "", var->label, root->label );
 		plog( "Use the Initial Values editor to set its values\n" );
-     #ifndef NO_WINDOW   
+#ifndef NO_WINDOW   
      if(var->param==1)
        cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
      else
        cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
-     #endif
+#endif
 		toquit=2;
 	  }
  }
@@ -996,11 +1032,11 @@ cmd( "pack $w -expand yes -fill both" );
 
 cmd( "set w .log.but" );
 cmd( "frame $w" );
-cmd( "button $w.stop -width -9 -text Stop -command {set done_in 1} -underline 0" );
-cmd( "button $w.pause -width -9 -text Pause -command {set done_in 9} -underline 0" );
-cmd( "button $w.speed -width -9 -text Fast -command {set done_in 2} -underline 0" );
-cmd( "button $w.obs -width -9 -text Observe -command {set done_in 4} -underline 0" );
-cmd( "button $w.deb -width -9 -text Debug -command {set done_in 3} -underline 0" );
+cmd( "button $w.stop -width -9 -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
+cmd( "button $w.pause -width -9 -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
+cmd( "button $w.speed -width -9 -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
+cmd( "button $w.obs -width -9 -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
+cmd( "button $w.deb -width -9 -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
 cmd( "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0" );
 cmd( "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
@@ -1030,6 +1066,17 @@ void set_shortcuts_log( const char *window )
 	cmd( "bind %s <KeyPress-c> {.log.but.copy invoke}; bind %s <KeyPress-C> {.log.but.copy invoke}", window, window );
 	cmd( "bind %s <Control-c> {.log.but.copy invoke}; bind %s <Control-C> {.log.but.copy invoke}", window, window );
 	cmd( "bind %s <KeyPress-Escape> {focus -force .}", window );
+}
+
+void set_buttons_log( bool on )
+{
+	const char *state = ( char * ) ( on ? "normal" : "disabled" );
+		
+	cmd( ".log.but.stop configure -state %s", state );
+	cmd( ".log.but.pause configure -state %s", state );
+	cmd( ".log.but.speed configure -state %s", state );
+	cmd( ".log.but.obs configure -state %s", state );
+	cmd( ".log.but.deb configure -state %s", state );
 }
 
 
