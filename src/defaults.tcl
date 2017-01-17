@@ -37,14 +37,16 @@ set hsizeN 		350	; # objects numbers editor horizontal size in pixels
 set vsizeN		550	; # objects numbers editor vertical size in pixels
 
 # plot windows size and margins
-set hsizeP 		600	; # default plot horizontal size in pixels
-set vsizeP		300	; # default plot vertical size in pixels
+set hsizeP 		600	; # default plot (time series) horizontal size in pixels
+set vsizeP		300	; # default plot (time series) vertical size in pixels
 set hmbordsizeP	40	; # minimum width of plot horizontal (left/right) border area (for legends)
 set tbordsizeP	5	; # width of plot top border area (for legends)
 set bbordsizeP	90	; # width of plot bottom border area (for legends)
 set sbordsizeP	0	; # width of plot scroll border area
 set htmarginP	4	; # horizontal margin for legends text in plots
 set vtmarginP	2	; # vertical margin for legends text in plots
+set hsizePxy	640	; # default plot (XY) horizontal size in pixels
+set vsizePxy	450	; # default plot (XY) vertical size in pixels
 
 # line smoothing for series line plot
 set smoothP		no	; # options are no, yes or raw

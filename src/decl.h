@@ -354,7 +354,6 @@ char *clean_path(char *);
 char *upload_eqfile(void);
 description *search_description(char *lab);
 double *find_data(int id_series);
-double *search_lab_tit_file(char *s,  char *t,int st, int en);
 double exp(double c);
 double log(double v);
 double max(double a, double b);
@@ -439,6 +438,7 @@ void fill_list_par(object *r, int flag_all);
 void fill_list_var(object *r, int flag_all, int flag_init);
 void find_lags(object *r);
 void find_using(object *r, variable *v, FILE *frep);
+void get_bool( const char *tcl_var, bool *var );
 void get_double( const char *tcl_var, double *var );
 void get_int( const char *tcl_var, int *var );
 void go_next(object **t);
@@ -449,14 +449,11 @@ void init_plot(int i, int id_sim);
 void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem(object *r, int *num_v, int *num_c);
-void insert_data_nosave(object *r, char * lab, int *num_v);
 void insert_docuoptions(FILE *frep, object *r);
 void insert_labels_mem(object *r, int *num_v, int *num_c);
-void insert_labels_nosave(object *r,char * lab,  int *num_v);
 void insert_lb_object(object *r);
 void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
 void insert_store_mem(object *r, int *num_v);
-void insert_store_nosave(object *r,char * lab,  int *num_v);
 void insert_summary(object *r, FILE *frep);
 void kill_trailing_newline(char *s);
 void link_data(object *root, char *lab);
@@ -513,7 +510,7 @@ void show_eq(char *lab, int *choice);
 void show_graph( object *t);
 void show_initial(object *n);
 void show_observe(object *n);
-void show_plot_gnu(int n, int *choice, int type);
+void show_plot_gnu(int n, int *choice, int type, char **str, char **tag);
 void show_save(object *n);
 void signal_handler(int);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
@@ -535,28 +532,20 @@ void write_var(variable *v, FILE *frep);
 
 // global variables
 
-extern bool add_to_tot;		// type of totals file generated
-extern bool debug_flag;		// debug enable control
-extern bool dozip;			// compressed results file flag
 extern bool fast;			// fast mode (log window)
 extern bool ignore_eq_file;	// control of configuration files equation updating
 extern bool iniShowOnce;	// prevent repeating warning on # of columns
 extern bool in_edit_data;	// in initial settings mode
 extern bool in_set_obj;		// in setting number of objects mode
-extern bool macro;			// equations style (macros or C++)
 extern bool message_logged;	// new message posted in log window
 extern bool no_error;		// object search error control	
-extern bool no_res;			// do not produce .res results files
-extern bool overwConf;		// overwrite current configuration file on run
 extern bool redrawRoot;		// control for redrawing root window (.)
 extern bool running;		// simulation is running
-extern bool strWindowOn;	// control the presentation of the model structure window
 extern bool struct_loaded;	// a valid configuration file is loaded
 extern bool use_nan;		// flag to allow using Not a Number value
 extern bool unsavedData;	// control for unsaved simulation results
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 extern bool tk_ok;			// control for tk_ready to operate
-extern bool watch;			// allow for graph generation interruption
 extern char *eq_file;		// equation file content
 extern char *equation_name;	// equation file name
 extern char *exec_file;		// name of executable file
@@ -573,20 +562,28 @@ extern description *descr;	// model description structure
 extern double ymax;			// runtime plot max limit
 extern double ymin;			// runtime plot min limit
 extern int actual_steps;	// number of executed time steps
+extern int add_to_tot;		// type of totals file generated (bool)
 extern int choice;			// Tcl menu control variable (main window)
 extern int choice_g;		// Tcl menu control variable (structure window)
 extern int cur_plt;			// current graph plot number
+extern int debug_flag;		// debug enable control (bool)
+extern int dozip;			// compressed results file flag (bool)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
 extern int lattice_type;	// lattice window mode
+extern int macro;			// equations style (macros or C++) (bool)
 extern int max_step;		// last simulation time step
+extern int no_res;			// do not produce .res results files (bool)
+extern int overwConf;		// overwrite current configuration file on run (bool)
 extern int quit;			// simulation interruption mode (0=none)
 extern int seed;			// pseudo random number generator seed in use
 extern int sim_num;			// simulation number running
 extern int stack;			// Lsd stack call level
 extern int stackinfo_flag; 	// Lsd stack control
+extern int strWindowOn;	// control the presentation of the model structure window (bool)
 extern int t;               // current time step
 extern int total_obj;		// total objects in model
 extern int total_var;       // total variables/parameters in model
+extern int watch;			// allow for graph generation interruption (bool)
 extern int when_debug;      // next debug stop time step (0 for none)
 extern long nodesSerial;	// network node serial number global counter
 extern lsdstack *stacklog;	// Lsd stack

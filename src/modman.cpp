@@ -207,7 +207,7 @@ void log_tcl_error( const char *cm, const char *message )
 int ModManMain( int argn, char **argv )
 {
 int i, num, sourcefile;
-bool tosave = false, macro = true;
+int tosave = false, macro = true;
 char str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
 char *s;
 FILE *f;

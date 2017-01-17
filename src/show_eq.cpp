@@ -51,8 +51,6 @@ did not issue an error message.
 
 #include "decl.h"
 
-bool macro;
-
 
 /****************************************************
 SHOW_EQ

@@ -78,29 +78,27 @@ Tcl_Interp *inter;
 #endif
 
 #ifdef LIBZ
-bool dozip = true;			// compressed results file flag
+int dozip = true;			// compressed results file flag (bool)
 #else
-bool dozip = false;
+int dozip = false;
 #endif
 
 // some program defaults
-bool add_to_tot = true;		// flag to append results to existing totals file
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
-bool overwConf = true;		// overwrite configuration on run flag
-bool strWindowOn = true;	// control the presentation of the model structure window
 char nonavail[] = "NA";		// string for unavailable values (use R default)
 char tabs[] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
+int add_to_tot = true;		// flag to append results to existing totals file (bool)
 int lattice_type = 0;		// default lattice type (infrequent cells changes)
 int max_step = 100;			// default number of simulation runs
+int overwConf = true;		// overwrite configuration on run flag (bool)
 int seed = 1;				// random number generator initial seed
+int strWindowOn = true;		// control the presentation of the model structure window (bool)
 
 bool batch_sequential = false;	// no-window multi configuration job running
-bool debug_flag = false;	// debug enable control
 bool firstRes = true;		// mark first results file (init grand total file)
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
-bool no_res = false;		// do not produce .res results files
 bool no_window = false;		// no-window command line job
 bool pause_run;				// pause running simulation
 bool redrawRoot = true;		// control for redrawing root window (.)
@@ -131,10 +129,13 @@ int choice;					// Tcl menu control variable (main window)
 int choice_g;               // Tcl menu control variable (structure window)
 int cur_plt;				// current graph plot number
 int cur_sim;				// current simulation run
+int debug_flag = false;		// debug enable control (bool)
 int done_in;				// Tcl menu control variable (log window)
 int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
 int findexSens=0;			// index to sequential sensitivity configuration filenames
+int macro;					// equations style (macros or C++) (bool)
+int no_res = false;			// do not produce .res results files (bool)
 int quit=0;					// simulation interruption mode (0=none)
 int series_saved;			// number of series saved
 int sim_num=1;				// simulation number running

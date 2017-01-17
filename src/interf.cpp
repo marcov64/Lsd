@@ -107,9 +107,9 @@ Exit function, which is customized on the operative system.
 #include "decl.h"
 
 bool justAddedVar = false;			// control the selection of last added variable
-bool natBat = true;					// native (Windows/Linux) batch format flag
 char lastObj[MAX_ELEM_LENGTH]="";	// to save last shown object for quick reload (choice=38)
 char *res_g;
+int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int result_loaded;
 object *currObj;
 // list of choices that are bad with existing run data

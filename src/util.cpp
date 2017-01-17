@@ -1548,11 +1548,8 @@ int store(struct s *c, int x3, int x4);
 int store(struct s *c, int x4);
 void free_storage(struct s *c);
 
-
 int shrink_gnufile(void)
 {
-
-
 d.son=NULL;
 d.next=NULL;
 d.x=-1;
@@ -1581,7 +1578,7 @@ if(f==NULL)
 
 while(fgets(str, 2*MAX_ELEM_LENGTH, f)!=NULL)
  {if(h++==1)
-   fprintf(f1, "set font \"{Times 10}\"\n");
+   fprintf(f1, "set font \"{$::fontP}\"\n");
  sscanf(str, "%s %s", str1, str2);
  if(!strcmp(str1, "$can") && !strcmp(str2, "create") )
    {
@@ -1633,6 +1630,7 @@ if(d.son!=NULL)
 return 0;
 }
 
+
 int store(int x1, int x2, int x3, int x4)
 {
 int flag=0, res;
@@ -1673,6 +1671,7 @@ error_hard( msg, "Internal error", "If error persists, please contact developers
 myexit(16);
 }
 
+
 int store(struct s *c, int x2, int x3, int x4)
 {
 int flag=0, res;
@@ -1710,6 +1709,7 @@ error_hard( msg, "Internal error", "If error persists, please contact developers
 myexit(17);
 }
 
+
 int store(struct s *c, int x3, int x4)
 {
 int flag=0, res;
@@ -1743,6 +1743,7 @@ error_hard( msg, "Internal error", "If error persists, please contact developers
 myexit(18);
 }
 
+
 int store(struct s *c, int x4)
 {
 int flag=0, res;
@@ -1771,6 +1772,7 @@ error_hard( msg, "Internal error", "If error persists, please contact developers
 myexit(19);
 }
 
+
 void free_storage(struct s *c)
 {
 struct s *app, *n, *down;
@@ -1784,6 +1786,7 @@ delete c;
 
 }
 
+
 description *search_description(char *lab)
 {
 description *cur;
@@ -1796,8 +1799,9 @@ for(cur=descr; cur!=NULL; cur=cur->next)
 return NULL;
 } 
 
+
 /********************
-autofill_descr
+AUTOFILL_DESCR
 generate recur. the descriptions of the model as it is
 *********************/
 void autofill_descr(object *o)
@@ -2135,6 +2139,14 @@ cmd( "set l [join [$list.l get 0 end] \", \"]" );
 cmd( "destroytop $list" ); 
 r=(char *)Tcl_GetVar(inter, "l",0);
 strcpy(s, r);
+}
+
+
+void get_bool( const char *tcl_var, bool *var )
+{
+	int intvar;
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", &intvar );
+	*var = intvar ? true : false;
 }
 
 
