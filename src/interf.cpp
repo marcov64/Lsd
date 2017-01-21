@@ -805,16 +805,18 @@ cmd( "set T .addelem" );
 cmd( "newtop $T \"Add Element\" { set done 2 }" );
 
 cmd( "set copy_param $param" );
+cmd( "set num 0" );
+cmd( "set lab \"\"" );
 
 if(param==0)
 {
-
-cmd( "set num 0" );
-cmd( "set lab \"\"" );
-cmd( "label $T.l -text \"Insert a new variable in object: %s\" -fg red", r->label );
+cmd( "frame $T.l" );
+cmd( "label $T.l.l1 -text \"New variable in object: \"" );
+cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+cmd( "pack $T.l.l1 $T.l.l2 -side left" );
 cmd( "frame $T.f" );
-cmd( "label $T.f.lab_ent -text \"New variable name: \"" );
-cmd( "label $T.f.lab_num -text \"Maximum lags used: \"" );
+cmd( "label $T.f.lab_ent -text \"Variable name \"" );
+cmd( "label $T.f.lab_num -text \"Maximum lags \"" );
 cmd( "label $T.f.sp -text \"     \"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab" );
 cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
@@ -825,12 +827,13 @@ cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side lef
 if(param==2)
 {
 
-cmd( "set num 0" );
-cmd( "set lab \"\"" );
-cmd( "label $T.l -text \"Insert a new function in object: %s\" -fg red", r->label );
+cmd( "frame $T.l" );
+cmd( "label $T.l.l1 -text \"New function in object: \"" );
+cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+cmd( "pack $T.l.l1 $T.l.l2 -side left" );
 cmd( "frame $T.f" );
-cmd( "label $T.f.lab_ent -text \"New Function Name: \"" );
-cmd( "label $T.f.lab_num -text \"Maximum lags used: \"" );
+cmd( "label $T.f.lab_ent -text \"Function name \"" );
+cmd( "label $T.f.lab_num -text \"Maximum lags \"" );
 cmd( "label $T.f.sp -text \"     \"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab" );
 cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
@@ -840,14 +843,16 @@ cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side lef
 
 if(param==1)
 { //insert a parameter
-cmd( "set lab \"\"" );
-cmd( "label $T.l -text \"Insert a new parameter in object: %s\" -fg red", r->label );
+cmd( "label $T.l.l1 -text \"New parameter in object: \"" );
+cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+cmd( "pack $T.l.l1 $T.l.l2 -side left" );
 cmd( "frame $T.f" );
-cmd( "label $T.f.lab_ent -text \"New Parameter Name: \"" );
+cmd( "label $T.f.lab_ent -text \"Parameter name \"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab" );
 
 cmd( "pack $T.f.lab_ent $T.f.ent_var -side left" );
 }
+
 cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
 cmd( "set w $T.d" );
@@ -875,13 +880,13 @@ cmd( "focus $T.f.ent_var" );
 here_newelem:
 
 if ( param != 1 )
-	cmd( "write_any $T.f.ent $num" ); 
+	cmd( "write_any .addelem.f.ent_num $num" ); 
 
 while(done==0)
  Tcl_DoOneEvent(0);
 
 if ( param != 1 )
-	cmd( "set num [ $T.f.ent get ]" ); 
+	cmd( "set num [ .addelem.f.ent_num get ]" ); 
 
 if(done==1)
  {
@@ -2624,39 +2629,38 @@ Tcl_LinkVar(inter, "max_step", (char *) &max_step, TCL_LINK_INT);
 cmd( "set T .simset" );
 cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
-cmd( "label $T.tit -text \"Settings for running the simulation\"" );
-cmd( "frame $T.f -relief groove -bd 2" );
+cmd( "frame $T.f" );
 cmd( "frame $T.f.a -bd 2" );
-cmd( "label $T.f.a.l -width 25 -text \"Number of simulation runs\"" );
+cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
 cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.a.e insert 0 $sim_num" ); 
-cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w" );
+cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 cmd( "frame $T.f.b -bd 2" );
-cmd( "label $T.f.b.l1 -width 25 -text \"Random numbers initial seed\"" );
+cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
 cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.b.e1 insert 0 $seed" ); 
-cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w" );
+cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 cmd( "frame $T.f.c -bd 2" );
-cmd( "label $T.f.c.l2 -width 25 -text \"Simulation steps\"" );
+cmd( "label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
 cmd( "entry $T.f.c.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.c.e2 insert 0 $max_step" ); 
-cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w" );
+cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.d -bd 2" );
-cmd( "label $T.f.d.l2 -width 25 -text \"Start debugger at step\"" );
+cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step\"" );
 cmd( "entry $T.f.d.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
-cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w" );
+cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.e -bd 2" );
-cmd( "label $T.f.e.l2 -width 25 -text \"Print until stack\"" );
+cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Print until stack\"" );
 cmd( "set stack_info %d", stackinfo_flag );
 cmd( "entry $T.f.e.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.e.e2 insert 0 $stack_info" ); 
-cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w" );
+cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e -anchor w" );
-cmd( "pack $T.tit $T.f -expand yes -fill both" );
+cmd( "pack $T.f -padx 5 -pady 5" );
 cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
 cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
 cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.c.e2; $T.f.c.e2 selection range 0 end}" );
@@ -2664,7 +2668,7 @@ cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection ran
 cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
 cmd( "bind $T.f.e.e2 <KeyPress-Return>  {focus $T.b.ok}" );
 
-cmd( "showtop $T centerS" );
+cmd( "showtop $T centerW" );
 cmd( "$T.f.a.e selection range 0 end" );
 cmd( "$T.f.b.e1 selection range 0 end" );
 cmd( "$T.f.c.e2 selection range 0 end" );
@@ -3130,7 +3134,7 @@ cmd( "pack .warn.l .warn.o -fill both -expand yes" );
 
 cmd( "okhelpcancel .warn f { set choice 1 } { LsdHelp menumodel.html#auto_docu } { set choice 2 }" );
 
-cmd( "showtop .warn centerS" );
+cmd( "showtop .warn centerW" );
 
 cmd( "set x 1" );
 

@@ -150,7 +150,7 @@ void signal_handler(int signum)
 			break;
 #endif
 		default:
-			sprintf( msg, strsignal( signum ) );			
+			sprintf( msg, "Unknown signal: %s\n", strsignal( signum ) );			
 	}
 	
 #ifndef NO_WINDOW

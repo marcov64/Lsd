@@ -96,6 +96,7 @@ int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
 
 bool batch_sequential = false;	// no-window multi configuration job running
+bool fast;					// flag to hide LOG messages & runtime plot
 bool firstRes = true;		// mark first results file (init grand total file)
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
@@ -109,6 +110,7 @@ bool struct_loaded = false;	// a valid configuration file is loaded
 bool tk_ok = false;			// control for tk_ready to operate
 bool unsavedData = false;	// flag unsaved simulation results
 bool unsavedSense = false;	// control for unsaved changes in sensitivity data
+bool use_nan;				// flag to allow using Not a Number value
 char *alt_path = NULL;		// alternative output path
 char *eq_file=NULL;			// equation file content
 char *equation_name = NULL;	// equation file name
@@ -511,9 +513,9 @@ clock_t start, end;
 #ifndef NO_WINDOW
 set_buttons_log( true );
 
-cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  trigger the debugger at a flagged variable" );
+cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
 cmd( "wm deiconify .log; raise .log; focus .log" );
-
+fast = false;
 #else
 plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
@@ -582,6 +584,7 @@ scroll = false;
 pause_run = false;
 running = true;
 debug_flag = false;
+use_nan = false;
 done_in = 0;
 actual_steps = 0;
 start = clock();
@@ -625,9 +628,9 @@ case 2:			// Fast button in Log window / f/F key in Runtime window
  fast = true;
  debug_flag = false;
  cmd( "set a [split [winfo children .] ]" );
- cmd( " foreach i $a {if [string match .plt* $i] {wm withdraw $i}}" );
- cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled} {}", i, i );
- cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled} {}", i, i );
+ cmd( "foreach i $a {if [string match .plt* $i] {wm withdraw $i}}" );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled}", i, i );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled}", i, i );
 break;
 
 case 3:			// Debug button in Log window / d/D key in Runtime window
@@ -647,9 +650,9 @@ break;
 case 4:			// Observe button in Log window / o/O key in Runtime window
  fast = false;
  cmd( "set a [split [winfo children .] ]" );
- cmd( " foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}" );
- cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal} {}", i, i );
- cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal} {}", i, i );
+ cmd( "foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}" );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal}", i, i );
+ cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal}", i, i );
 break;
  
 // plot window DELETE_WINDOW button handler

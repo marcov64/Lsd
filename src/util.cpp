@@ -82,7 +82,7 @@ void cmd( const char *cm, ... )
 	
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
-		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %d bytes.", strlen( cm ) + 1 );
+		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
 			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );

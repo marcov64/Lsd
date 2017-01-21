@@ -207,7 +207,7 @@ void log_tcl_error( const char *cm, const char *message )
 int ModManMain( int argn, char **argv )
 {
 int i, num, sourcefile;
-int tosave = false, macro = true;
+int tosave = 0, macro = 1;
 char str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
 char *s;
 FILE *f;
@@ -484,8 +484,8 @@ cmd( "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline
 cmd( "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro" );
 
 cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value true -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value false -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
+cmd( "$w.macro add radio -label \" Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
+cmd( "$w.macro add radio -label \" Use Lsd C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
@@ -857,7 +857,7 @@ cmd( "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}" );
 
 // update the file changes status
 cmd( "if [ winfo exists . ] { set after [ .f.t.t get 1.0 end] } { set after $before }" );
-cmd( "if [ string compare $before $after ] { set tosave true } { set tosave false }" );
+cmd( "if [ string compare $before $after ] { set tosave 1 } { set tosave 0 }" );
 
 if( tosave && (choice==2 || choice==15 || choice==1 || choice==13 || choice==14 ||choice==6 ||choice==8 ||choice==3 || choice==33||choice==5||choice==39||choice==41))
   {

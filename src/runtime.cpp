@@ -227,10 +227,17 @@ for ( i = 0, j = 0, k = 0; i < ( num < 18 ? num : 18 ); ++i )
 i=(id_sim)*shift;				// calculate window shift position
 sprintf(intval,"%i",i);
 Tcl_SetVar(inter, "shift", intval, 0);
-cmd( "set posXrt [expr $posXstr + $shift]" );
-cmd( "set posYrt [expr $posYstr + $shift]" );
+cmd( "set posXrt [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX + $shift ]" );
+cmd( "set posYrt [ expr [ winfo y . ] + $corrY + $shift ]" );
 
 cmd( "showtop  $activeplot xy no no no $posXrt $posYrt" );
+if ( fast )
+{
+	cmd( "wm withdraw $activeplot" );
+	cmd( "$activeplot.c.yscale.go conf -state disabled" );
+	cmd( "$activeplot.c.yscale.shift conf -state disabled" );
+}
+
 cmd( "raise .log" );
 cmd( "focus .log" );
 

@@ -23,11 +23,11 @@ This file contains all the declarations and macros available in a model's equati
 #define FUN
 #include "decl.h"
 
-bool use_nan = false;									// flag to allow using Not a Number value
-bool fast = false;										// make fast persistent across runs
 double def_res = 0;										// default equation result
 
+extern bool fast;										// flag to hide LOG messages & runtime
 extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
+extern bool use_nan;									// flag to allow using Not a Number value
 extern char *path;										// folder where the configuration is
 extern char *simul_name;								// configuration name being run (for saving networks)
 extern char msg[];

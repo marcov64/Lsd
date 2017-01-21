@@ -217,7 +217,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2 ){
   else
     transp <- FALSE
 
-  # Allocate 2D arrrays
+  # Allocate 2D arrays
   avg <- sDev <- M <- m <-
     array( as.numeric( NA ), dim = c( dimArray[ rows ], dimArray[ cols ] ),
            dimnames = list( dimNames[[ rows ]], dimNames[[ cols ]] ) )
@@ -255,11 +255,13 @@ info.stats.lsd <- function( array, rows = 1, cols = 2 ){
       # calculate the statistics
       avg[ i, j ] <- mean( elem, na.rm = TRUE )
       sDev[ i, j ] <- sd( elem, na.rm = TRUE )
-      if( ! is.na( avg[ i, j ] ) ){
+      if( is.finite( avg[ i, j ] ) ){
         M[ i, j ] <- max( elem, na.rm = TRUE )
         m[ i, j ] <- min( elem, na.rm = TRUE )
       }
       else{                           # avoid Inf/-Inf when all is NA
+		avg[ i, j ] <- NA
+		sDev[ i, j ] <- NA
         M[ i, j ] <- NA
         m[ i, j ] <- NA
       }
