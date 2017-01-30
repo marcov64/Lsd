@@ -96,7 +96,7 @@ void handle_signals( void )
 // handle critical system signals
 void signal_handler(int signum)
 {
-	char msg2[ MAX_LINE_SIZE ];
+	char msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 	double useless = -1;
 	
 	switch(signum)
@@ -118,57 +118,71 @@ void signal_handler(int signum)
 			break;
 			
 		case SIGMEM:
-			sprintf( msg, "SIGMEM (Out of memory):\n  Maybe too many series saved?\n  Try to reduce the number of series saved or the number of time steps" );
+			sprintf( msg, "SIGMEM (Out of memory)" );
+			strcpy( msg2, "Maybe too many series saved?\n  Try to reduce the number of series saved or the number of time steps" );
 			break;
 			
 		case SIGABRT:
-			sprintf( msg, "SIGABRT (%s):\n  Maybe an invalid call to library or Tcl/Tk?", strsignal( signum ) );		
+			sprintf( msg, "SIGABRT (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe an invalid call to library or Tcl/Tk?" );		
 			break;
 
 		case SIGFPE:
-			sprintf( msg, "SIGFPE (%s):\n  Maybe a division by 0 or similar?", strsignal( signum ) );
+			sprintf( msg, "SIGFPE (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe a division by 0 or similar?" );
 		break;
 		
 		case SIGILL:
-			sprintf( msg, "SIGILL (%s):\n  Maybe executing data?", strsignal( signum ) );		
+			sprintf( msg, "SIGILL (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe executing data?" );		
 		break;
 		
 		case SIGSEGV:
-			sprintf( msg, "SIGSEGV (%s):\n  Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements.", strsignal( signum ) );		
+			sprintf( msg, "SIGSEGV (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe an invalid pointer?\n  Also ensure no group of objects has zero elements." );		
 		break;
 #ifdef SIGBUS
 		case SIGBUS:
-			sprintf( msg, "SIGBUS (%s):\n  Maybe incorrect pointer handling?\n  Also ensure no group of objects has zero elements.", strsignal( signum ) );		
+			sprintf( msg, "SIGBUS (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe incorrect pointer handling?\n  Also ensure no group of objects has zero elements." );		
 			break;
 		
 		case SIGSYS:
-			sprintf( msg, "SIGSYS (%s):\n  Maybe a system-specific function?", strsignal( signum ) );		
+			sprintf( msg, "SIGSYS (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe a system-specific function?" );		
 			break;
 		
 		case SIGXFSZ:
-			sprintf( msg, "SIGXFSZ (%s):\n  Maybe a loop while saving data?", strsignal( signum ) );		
+			sprintf( msg, "SIGXFSZ (%s)", strsignal( signum ) );
+			strcpy( msg2, "Maybe a loop while saving data?" );		
 			break;
 #endif
 		default:
-			sprintf( msg, "Unknown signal: %s\n", strsignal( signum ) );			
+			sprintf( msg, "Unknown signal (%s)", strsignal( signum ) );
+			strcpy( msg2, "" );			
 	}
 	
 #ifndef NO_WINDOW
-	if ( running )
-		strcpy( msg2, "\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)..." );
-	else
-		strcpy( msg2, "" );
-	
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.%s\"", msg, msg2 );
-	
-	if ( running )
+	if ( ! user_exception )
 	{
-		sprintf( msg2, "Error in equation for '%s'", stacklog->vs->label );
-		deb( stacklog->vs->up, NULL, msg2, &useless );
+		strcpy( msg2, "There is an internal Lsd error\n  If error persists, please contact developers" );
+		strcpy( msg3, "Lsd will close now..." );
 	}
+	else
+		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger) ..." );
 	
-	sprintf( msg2, "System Signal received: %s", msg );
-	log_tcl_error( "FATAL ERROR", msg2 );
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\"", msg, msg2, msg3 );
+	
+	if ( user_exception )
+	{
+		sprintf( msg3, "Error in equation for '%s'", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+		deb( stacklog->vs == NULL ? root : stacklog->vs->up, NULL, msg3, &useless );
+	}
+	else
+	{
+		sprintf( msg3, "System Signal received: %s", msg );
+		log_tcl_error( "FATAL ERROR", msg3 );
+	}
 #else
 	fprintf( stderr, "FATAL ERROR: System Signal received:\n %s\n", msg );
 #endif

@@ -122,9 +122,9 @@ void log_tcl_error( const char *cm, const char *message )
 	char ftime[ 80 ];
 
 	if( strlen( path ) > 0 )
-		sprintf( fname, "%s/tk_err.err", path );
+		sprintf( fname, "%s/Lsd.err", path );
 	else
-		sprintf( fname, "tk_err.err" );
+		sprintf( fname, "Lsd.err" );
 
 	f = fopen( fname,"a" );
 
@@ -141,7 +141,7 @@ void log_tcl_error( const char *cm, const char *message )
 	fclose( f );
 	
 	if ( tk_ok )
-		plog( "\nTcl/Tk Error. See file '%s'\n", "", fname );
+		plog( "\nInternal Lsd error. See file '%s'\n", "", fname );
 }
 
 #else
@@ -1524,8 +1524,8 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	if ( res == NULL )
 	{
 		sprintf( msg, "object '%s' not found in %s (variable '%s')", 
-				 label, command, stacklog->vs->label ); \
-		error_hard( msg, "Object not found", "Check your code to prevent this situation." ); \
+				 label, command, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	}
 	
 	return res;

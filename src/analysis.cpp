@@ -1076,7 +1076,7 @@ for(i=0; i<j; i++)
   sscanf(msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k);
   if(h>=l && h<=m && !strcmp(str1, str3))
    {
-   datum=find_data(k);
+   datum = vs[ k ].data;
    r=0;
    if(is_finite(datum[h]))		// ignore NaNs
     switch(p)
@@ -1305,7 +1305,7 @@ for(i=0; i<j; i++)
   sscanf(msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k);
   if(h>=l && h<=m && !strcmp(str1, str3))
    {
-   datum=find_data(k);
+   datum = vs[ k ].data;
    r=0;
    if(is_finite(datum[h]))		// ignore NaNs
     switch(p)
@@ -2181,7 +2181,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-    data[i]=find_data(idseries);
+    data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -2413,7 +2413,7 @@ for(i=0, new_nv=0; i<nv; i++)
   // get series data and take logs if necessary
   if(erase[i]==0)
    {
-    data[i]=find_data(idseries);
+    data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -2739,33 +2739,14 @@ return res;
 
 
 /***************************************************
-FIND_DATA
-****************************************************/
-double *find_data(int id)
-{
-int i;
-
-double *d, app;
-
-return vs[id].data;
-
-cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Series %d not found\" -detail \"To continue the very first series is returned.\"", id );
-return vs[0].data;
-}
-
-
-/***************************************************
 insert_data_mem
 ****************************************************/
 void insert_data_mem(object *r, int *num_v, int *num_c)
 {
-
-
-insert_labels_mem(r,num_v, num_c);
-vs=new store[*num_v];
-*num_v=0;
-insert_store_mem(r, num_v);
-
+	insert_labels_mem(r,num_v, num_c);
+	vs=new store[*num_v];
+	*num_v=0;
+	insert_store_mem(r, num_v);
 }
 
 
@@ -2786,7 +2767,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
      if(cv->end>*num_c)
        *num_c=cv->end;
      *num_v+=1;
-}
+    }
 
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
@@ -2796,6 +2777,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
      insert_labels_mem(cur, num_v, num_c);
    }  
  }
+ 
 if(r->up==NULL)
  for(cv=cemetery; cv!=NULL; cv=cv->next)
   {  
@@ -2828,16 +2810,13 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
    vs[*num_v].data=cv->data;
    *num_v+=1;
   }
+  
 for(cb=r->b; cb!=NULL; cb=cb->next)
- {cur=cb->head;
+ {
+ cur=cb->head;
  if(cur->to_compute==1)
-   {
    for(cur=cb->head; cur!=NULL; cur=cur->next)
-     {
       insert_store_mem(cur, num_v);
-      
-     }
-   }
  }    
  
 if(r->up==NULL)
@@ -2850,7 +2829,6 @@ if(r->up==NULL)
      vs[*num_v].rank=*num_v;
      vs[*num_v].data=cv->data;
      *num_v+=1;
-
   }
 }
 
@@ -3147,7 +3125,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-   data[i]=find_data(idseries); 
+    data[ i ] = vs[ idseries ].data; 
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -3300,7 +3278,7 @@ for(i=0; i<nv; i++)
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  data[i]=find_data(idseries); 
+  data[ i ] = vs[ idseries ].data;
    
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
@@ -3567,7 +3545,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-    data[i]=find_data(idseries); 
+    data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
 
@@ -3984,7 +3962,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-    data[i]=find_data(idseries); 
+    data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -4373,7 +4351,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-   data[i]=find_data(idseries);
+   data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -5074,7 +5052,7 @@ app=(char *)Tcl_GetVar(inter, "res",0);
 strcpy(msg,app);
 sscanf(msg, "%s %s (%d - %d) # %d", str, tag, &start, &end, &idseries);
 
-data=find_data(idseries);
+data = vs[ idseries ].data;
 if(autom_x)
  {first=start;
   last=end;
@@ -5504,16 +5482,8 @@ for(i=0; i<nv; i++)
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  data[i]=find_data(idseries);
+  data[ i ] = vs[ idseries ].data;
   
-  /*****************
-  IT IS CS, SO THE TIME MUST BE DECIDED YET
-  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
-   {
-   data[i]=find_data(idseries);
-   }
-  *********************/
-   
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
@@ -6101,10 +6071,7 @@ for(i=0; i<nv; i++)
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
-   {
-
-   data[i]=find_data(idseries);
-   }
+    data[ i ] = vs[ idseries ].data;
  }
 
 if(autom_x||min_c>=max_c)
@@ -6390,7 +6357,7 @@ for(i=0; i<nv; i++)
   vs[num_var+i].data = new double[max_c+2];
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-   data[i]=find_data(idseries);
+   data[ i ] = vs[ idseries ].data;
    xapp=0;
 
    for(h=0, j=start[i]; j<start[i]+flt;j++)
@@ -6488,8 +6455,8 @@ for(i=0; i<nv; i++)
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
+  data[ i ] = vs[ idseries ].data;
 
-  data[i]=find_data(idseries);
   if(max_c<end[i])
    max_c=end[i];
  }
@@ -6901,11 +6868,6 @@ tag=new char *[nv];
  delete[] vs;
  vs=app;
 
-if(autom_x)
- {min_c=1;
-  max_c=num_c;
- }
-
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
@@ -6915,10 +6877,7 @@ for(i=0; i<nv; i++)
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
-   {
-   
-   data[i]=find_data(idseries);
-   }
+   data[ i ] = vs[ idseries ].data;
  }
 
 if(autom_x||min_c>=max_c)

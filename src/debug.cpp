@@ -312,6 +312,12 @@ cmd( "set a [winfo exists .intval]" );
 cmd( "if { $a==1} {destroytop .intval} {}" );
 cmd( "set a [winfo exists .net]" );
 cmd( "if { $a==1 } { destroytop .net }" );
+if ( t >= max_step )
+{
+	cmd( "destroytop .deb" );
+	debug_flag = false;
+	when_debug = 0;
+}
 break;
 
 case 2:

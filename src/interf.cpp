@@ -826,7 +826,6 @@ cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side lef
 
 if(param==2)
 {
-
 cmd( "frame $T.l" );
 cmd( "label $T.l.l1 -text \"New function in object: \"" );
 cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
@@ -843,6 +842,7 @@ cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side lef
 
 if(param==1)
 { //insert a parameter
+cmd( "frame $T.l" );
 cmd( "label $T.l.l1 -text \"New parameter in object: \"" );
 cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
 cmd( "pack $T.l.l1 $T.l.l2 -side left" );
@@ -2653,7 +2653,7 @@ cmd( "$T.f.d.e2 insert 0 $when_debug" );
 cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.e -bd 2" );
-cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Print until stack\"" );
+cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level\"" );
 cmd( "set stack_info %d", stackinfo_flag );
 cmd( "entry $T.f.e.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.e.e2 insert 0 $stack_info" ); 

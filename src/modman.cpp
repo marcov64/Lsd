@@ -182,7 +182,7 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char ftime[ 80 ];
 
-	f = fopen( "tk_err.err","a" );
+	f = fopen( "LMM.err","a" );
 
 	time( &rawtime );
 	timeinfo = localtime( &rawtime );
@@ -197,7 +197,7 @@ void log_tcl_error( const char *cm, const char *message )
 	fclose( f );
 	
 	if ( tk_ok )
-		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl/Tk error\" -detail \"More information in file 'tk_err.err'.\"" );
+		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Internal LMM error\" -detail \"More information in file 'LMM.err'.\"" );
 }
 
 
@@ -5217,7 +5217,7 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,2}]|cur(l)?\[0-9]?",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?|V(S)?_(NODEID)?(NODENAME)?(WEIGHT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|rnd_integer|norm|poisson|gamma|abs|min|max|round|exp|log|sqrt|pow|(init)?(update)?(save)?_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?(_DEL)?(_SNAP)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?(_EXT)?|CYCLE_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCHS(_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE(S)?(_EXT)?|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|LOG|PLOG|rnd_integer|norm|poisson|gamma|abs|min|max|round|exp|log|sqrt|pow|(init)?(update)?(save)?_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?(_DEL)?(_SNAP)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)|ADD(S)?_EXT|P(S)?_EXT|EXEC(S)?_EXT",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };

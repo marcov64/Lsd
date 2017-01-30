@@ -208,44 +208,73 @@ CAL
 
 double variable::cal(object *caller, int lag)
 {
-int i;
+int i, eff_lag;
 double app;
-if(param==1 ) //it is a parameter 
- {
-  return val[0];
- }
 
-if(num_lag<lag ) //check lag error
- {sprintf(msg, "in object '%s' variable or function '%s' requested with lag=%d but declared with lag=%d,\nTwo possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d, or\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum", stacklog->vs->label, label, lag, num_lag, label, num_lag, stacklog->vs->label, label, num_lag);
-  error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
-  return -1;
- }
+if ( param == 1 ) //it is a parameter, ignore lags
+	return val[ 0 ];
 
-if(param==0)
- {//variable
-  if( last_update >= t  || lag > 0 )//lagged value or already computed
-   return(val[last_update+lag-t]);
- 
- }
+// effective lag for variables (compatible with older versions)
+eff_lag = last_update - t + lag;
+
+// check lag error
+if ( lag != 0 )
+{	
+	bool lag_ok = true;
+	
+	if ( param == 0 )		// it's a variable
+	{
+		if ( eff_lag < 0 )	// with negative lag
+			lag_ok = false;
+
+		if ( ! ( save || savei ) && eff_lag > num_lag )	// not saved with too large lag
+			lag_ok = false;
+
+		if ( ( save || savei ) && eff_lag > num_lag && lag > t - start )	// saved with too large lag
+			lag_ok = false;
+	}
+	else					// function
+		if ( lag < 0 || lag > num_lag )	// with invalid lag
+			lag_ok = false;
+
+	if ( ! lag_ok )
+	{
+		sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d,\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(no label)" : caller->label, label, num_lag, label );
+		error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
+		return NAN;
+	}
+}
+
+if ( param == 0 )
+{	//variable
+	if ( last_update >= t  || lag > 0 )	// lagged value or already computed
+	{
+		if ( eff_lag <= num_lag )
+			return val[ eff_lag ];
+		else
+			return data[ t - lag ];		// use saved data
+	}
+}
 else
- {//function
- if(lag > 0  )//lagged value
-   return(val[lag-1]); 
- if(caller==NULL)
-   return(val[0]);   
- } 
+{	//function
+	if ( lag > 0  )						// lagged value
+		return val[ lag - 1 ]; 
 
+	if ( caller == NULL )
+		return val[ 0 ];   
+ } 
 
 //value to be computed
 stack++;
 
-if(under_computation==1)
- {sprintf(msg, "the equation for '%s' (in object '%s') requested its own value while computing its current value",label, caller==NULL?"(No label)":((object *)caller)->label);
-  error_hard( msg, "Dead lock", "Check your code to prevent this situation." );
-  return -1;
- }
+if ( under_computation )
+{
+	sprintf( msg, "the equation for '%s' (in object '%s') requested \nits own value while computing its current value", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+	error_hard( msg, "Dead lock", "Check your code to prevent this situation." );
+	return NAN;
+}
 
-under_computation=1;
+under_computation = true;
 
 //Add the Variable to the stack
 if(stacklog->next==NULL)
@@ -261,49 +290,48 @@ stacklog->next->vs=this;
 stacklog->next->prev=stacklog;
 stacklog=stacklog->next;
 
-
+#ifndef NO_WINDOW
 if(stackinfo_flag>=stack)
- {
   start_profile[stack-1]=clock();
- }
+#endif
 
 //Compute the Variable's equation
-if(!fast)				// not running in fast mode?
+try 				// do it while catching exceptions to avoid obscure aborts
 {
-	try 				// do it while catching exceptions to avoid obscure aborts
-	{
-		app=fun(caller);
-	}
-	catch(std::exception& exc)
-	{
-		plog( "\nAn exception was detected while computing the equation for\n'%s' requested by object '%s'", "", label, caller==NULL?"(No label)":((object *)caller)->label);
-		throw;
-	}
-	catch(...)
-	{
-		plog( "\nAn unknown problem was detected while computing the equation for\n'%s' requested by object '%s'", "", label, caller==NULL?"(No label)":((object *)caller)->label);
-		throw;
-	}
+	app = fun( caller );
 }
-else
-	app=fun(caller);	// or simply do it unsupervised
+catch ( std::exception& exc )
+{
+	plog( "\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+	user_exception = true;
+	throw;
+}
+catch ( ... )
+{
+	plog( "\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+	user_exception = true;
+	throw;
+}
 
-for(i=0; i<num_lag; i++) //scale down the past values
- val[num_lag-i]=val[num_lag-i-1];
-val[0]=app;
-if(stackinfo_flag>=stack)
- {end_profile[stack-1]=clock();
-  set_lab_tit(this);
-  if(caller==NULL)
-    plog( "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = SYSTEM", "", label, lab_tit, val[0], t, stack,(double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC) );
-  else
-    plog( "\n%s (%s) = %g \t t = %d, stack = %d, %g secs, caller = %s, triggering var. = %s", "", label, lab_tit, val[0], t, stack, (double)(( end_profile[stack-1] - start_profile[stack-1]) /(double)CLOCKS_PER_SEC), caller->label, stacklog->prev->label );
- }
+for ( i = 0; i < num_lag; ++i ) 	//scale down the past values
+	val[ num_lag - i ] = val[ num_lag - i - 1 ];
+val[ 0 ] = app;
 
 last_update++;
+
 #ifndef NO_WINDOW
+if ( stackinfo_flag >= stack )
+ {
+  end_profile[stack-1]=clock();
+  set_lab_tit(this);
+  if(caller==NULL)
+    plog( "\n%s (%s) = %6g,\t t = %d, stack = %d, %4g secs, caller = SYSTEM", "", label, lab_tit, val[0], t, stack, ( end_profile[stack-1] - start_profile[stack-1] ) / (double) CLOCKS_PER_SEC );
+  else
+    plog( "\n%s (%s) = %6g,\t t = %d, stack = %d, %4g secs, caller = %s, trigger var. = %s", "", label, lab_tit, val[0], t, stack, ( end_profile[stack-1] - start_profile[stack-1] ) / (double) CLOCKS_PER_SEC, caller->label, stacklog->prev->label );
+ }
+
 if(debug_flag && debug=='d')
-	 deb( (object *)up, caller, label, &val[0] );
+ deb( (object *)up, caller, label, &val[0] );
 else
  switch(deb_cond)
  {
@@ -325,17 +353,17 @@ else
 #endif
 
 //Remove the element of the stack
-stack --;
-stacklog=stacklog->prev;
+stack--;
+stacklog = stacklog->prev;
 if ( stacklog != NULL )
 {
-delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
-stacklog->next=NULL; //REIINSERTED
+	delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
+	stacklog->next = NULL; //REINSERTED
 }
 
-under_computation=0;
+under_computation = false;
 
-return(val[0]);
+return val[ 0 ];
 //by default the requested value is the last one, not yet computed
 }
 
@@ -347,8 +375,9 @@ EMPTY
 void variable::empty(void)
 {
 
-if((data!=NULL && save!=true && savei !=true) || this==NULL || label==NULL)
- {sprintf(msg, "failure in emptying Variable %s", label);
+if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+ {
+  sprintf(msg, "failure in emptying Variable %s", label);
   error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
   return;
  }

@@ -343,14 +343,6 @@ double res;
 
 if(quit==2)
  return -1;
-if(this==NULL)
-{if(lag==0)
-   sprintf(msg, "value of '%s' requested to a NULL pointer  (var. '%s')",l, stacklog->vs->label);
- else
-   sprintf(msg, "value of variable '%s' requested (lag %d) to a NULL pointer (var. '%s')",l, lag, stacklog->vs->label);  
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
 
 curr=search_var(this, l);
 if(curr==NULL)
@@ -539,11 +531,6 @@ object *object::hyper_next(char const *lab)
 {
 object *cur, *cur1=NULL;
 int count;
-if(this==NULL)
-{sprintf(msg, "hypernext of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return NULL;
-}
 
 for(cur=next; cur!=NULL; cur=skip_next_obj(cur))
  {cur1=cur->search(lab);
@@ -721,14 +708,6 @@ object *object::search(char const *lab)
 object *cur;
 bridge *cb;
 
-
-if(this==NULL)
-{sprintf(msg, "search of object '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return NULL;
-}
-
-
 if(!strcmp(label, lab))
   return(this);
 
@@ -808,7 +787,7 @@ UPDATE
 Compute the value of all the Variables in the Object, saving the values and updating the runtime
 plot. 
 
-For optimization purposes the system tries to ignores decending objects
+For optimization purposes the system tries to ignores descending objects
 marked to be not computed. The implementation is quite baroque, but it
 should be the fastest.
 ****************************************************/
@@ -857,12 +836,6 @@ object *cur;
 variable *cur_v;
 int done, count=0;
 
-if(this==NULL)
-{sprintf(msg, "sum of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
-
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
 {sprintf(msg, "variable '%s' not found trying to sum it up", lab);
@@ -894,12 +867,6 @@ object *cur;
 variable *cur_v;
 int done, count=0;
 
-if(this==NULL)
-{sprintf(msg, "max of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
-
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
  {sprintf(msg, "variable '%s' not found in overall_max", lab);
@@ -928,12 +895,6 @@ double tot, c1, c2;
 object *cur;
 variable *cur_v;
 int done, count=0;
-
-if(this==NULL)
-{sprintf(msg, "whg_av of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
 
 cur_v=search_var(this, lab);
 
@@ -974,12 +935,6 @@ object *object::search_var_cond(char const *lab, double value, int lag)
 object *cur, *cur1;
 variable *cv;
 double res;
-
-if(this==NULL)
-{sprintf(msg, "conditional search of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return NULL;
-}
 
 for(cur1=this; cur1!=NULL; cur1=cur1->up)
 {
@@ -1117,127 +1072,82 @@ if(cv->data_loaded=='+')
 
 
 /****************************************************
- WRITELL
- Write the value value in the Varible or Parameter lab, making it appearing as if
+ WRITE
+ Write the value in the Varible or Parameter lab, making it appearing as if
  it was computed at time time-lag and the variable updated at time time.
  ***************************************************/
-void object::write(char const *lab, double value, int time, int lag)
+void object::write( char const *lab, double value, int time, int lag )
 {
     variable *cv;
-    
-    if(this==NULL)
-    {sprintf(msg, "write of '%s' requested to a NULL pointer in the equation for '%s'", lab, stacklog->vs->label);
-		error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
-        return;
-    }
-    if((!use_nan && is_nan(value)) || is_inf(value))
+	
+    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\nWarning: write of '%s' requested with an invalid value", "", lab);
-        debug_flag=true;
-        stacklog->vs->debug='d';
+		plog( "\nWarning: write of '%s' requested with an invalid value", "", lab );
+        debug_flag = true;
+        stacklog->vs->debug = 'd';
         return;
     }
     
-    for(cv=v; cv!=NULL; cv=cv->next)
-    {if(!strcmp(cv->label, lab))
-    {if(cv->under_computation==1)
+    for ( cv = v; cv != NULL; cv = cv->next)
     {
-        sprintf(msg, "trying to write '%s' while it is under computation", lab);
-		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
+		if ( ! strcmp( cv->label , lab ) )
+		{
+			if ( cv->under_computation == 1 )
+			{
+				sprintf( msg, "trying to write '%s' while it is under computation", lab );
+				error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
+			}
+			
+			if ( cv->param != 1 && time <= 0 && t > 1)
+			{
+				plog( "\nWarning: while writing variable '%s' in equation for '%s' \nthe time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', \nand has been forced to take the time of %d", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lab, t );
+				cv->val[ 0 ] = value;
+				cv->last_update = t;
+			}
+			else
+			{	// allow for change of initial lagged values when starting simulation (t=1)
+				if ( cv->param != 1 && time < 0 && t == 1 )
+				{
+					if ( - time > cv->num_lag )		// check for invalid lag
+					{
+						plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
+					}
+					else
+					{
+						cv->val[ - time - 1 ] = value;
+						cv->last_update = 0;	// force new updating
+						if ( time == -1 && ( cv->save || cv->savei ) )
+							cv->data[ 0 ] = value;
+					}
+				}
+				else
+				{
+					if ( lag < 0 || lag > cv->num_lag || time < 0 )
+					{
+						plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
+					}
+					else
+					{
+						cv->val[ lag ] = value;
+						cv->last_update = time;
+						int eff_time = time - lag;
+						if ( eff_time >= 0 && eff_time <= max_step && ( cv->save || cv->savei ) )
+							cv->data[ eff_time ] = value;
+					}
+				}
+			}
+			
+			return;
+		}
     }
-        if(cv->param!=1 && time <= 0 && t>1)
-        {
-            plog( "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", "", lab, stacklog->vs->label, lab, t );
-            cv->val[0]=value;
-            cv->last_update=t;
-        }
-        else
-            // allow for change of initial lagged values when starting simulation (t=1)
-            if ( cv->param != 1 && time < 0 && t == 1 )
-            {
-                if ( - time > cv->num_lag )		// check for invalid lag
-                {
-                    plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, ignored", "", lab, stacklog->vs->label, time );
-                }
-                else
-                {
-                    cv->val[ - time - 1 ] = value;
-                    cv->last_update = 0;	// force new updating
-                }
-            }
-            else
-            {
-                cv->val[lag]=value;
-                cv->last_update=time;
-            }
-        return;
-    }
-    }
-    sprintf(msg, "attempt to write variable '%s' not found in object '%s'", lab, label);
+	
+    sprintf(msg, "attempt to write variable '%s' not found \nin object '%s'", lab, label);
 	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 }
 
-
-
-/****************************************************
-WRITE
-Write the value value in the Varible or Parameter lab, making it appearing as if 
-it was computed at time time
-***************************************************/
 void object::write(char const *lab, double value, int time)
 {
-variable *cv;
-
-if(this==NULL)
-{sprintf(msg, "write of '%s' requested to a NULL pointer", lab);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return;
-}
-if((!use_nan && is_nan(value)) || is_inf(value))
-{
- plog( "\nWarning: write of %s requested with an invalid value", "", lab );
- debug_flag=true;
- stacklog->vs->debug='d';
- return;
-}
-
-for(cv=v; cv!=NULL; cv=cv->next)
- {if(!strcmp(cv->label, lab))
-	{if(cv->under_computation==1)
-     {
-      sprintf(msg, "trying to write '%s' while it is under computation", lab);
-	  error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
-     }
-   if(cv->param!=1 && time <= 0 && t>1)
-   {
-      plog( "\nWarning: while writing variable '%s' in equation for '%s' the time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', and has been forced to take the time of %d", "", lab, stacklog->vs->label, lab, t );
-	  cv->val[0]=value;
-      cv->last_update=t;
-    }
-   else
-	// allow for change of initial lagged values when starting simulation (t=1)
-	if ( cv->param != 1 && time < 0 && t == 1 )
-	{
-		if ( - time > cv->num_lag )		// check for invalid lag
-		{
-			plog( "\nWarning: while writing variable '%s' in equation for '%s' the selected lag (%d) is invalid, ignored", "", lab, stacklog->vs->label, time );
-		}
-		else
-		{
-			cv->val[ - time - 1 ] = value;
-			cv->last_update = 0;	// force new updating
-		}
-	}
-	else
-	{
-	 cv->val[0]=value;
-   	 cv->last_update=time;
-	}
-	 return;
-	 }
- }
-sprintf(msg, "attempt to write variable '%s' not found in object '%s'", lab, label);
-error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+	this->write( lab, value, time, 0 );
 }
 
 
@@ -1420,7 +1330,7 @@ bridge *cb, *cb1, *cb2;
 for(cb2=b; cb2!=NULL && strcmp(cb2->blabel,lab); cb2=cb2->next);
 if(cb2==NULL)
 {
- sprintf(msg, "object '%s' does not contain objects of type '%s' when adding new object(s)", label, lab);
+ sprintf(msg, "object '%s' does not contain objects of type '%s' \nwhen adding new object(s)", label, lab);
  error_hard( msg, "Object not found", "Check your code to prevent this situation." );
  return NULL;
 }
@@ -1592,12 +1502,6 @@ void object::delete_obj(void)
 object *cur;
 variable *cv;
 bridge *cb, *a;
-
-if(this==NULL)
-{sprintf(msg, "delete_obj requested to a NULL pointer");
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return;
-}
 
 collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
@@ -1890,7 +1794,7 @@ for(a=0 ; cur!=NULL; cur=cur->next )
   a+=cur->cal(lv,lag);
 if(is_inf(a))
    {
-	plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs->label, lv );
+	plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lv );
     plog( "\nThe first object '%s' of the list is used", "", lo );
     return(cur1);
    }
@@ -1900,7 +1804,7 @@ while(b==a) //avoid RND ==1
  {b=RND*a;
   if(a==0)
    {
-	plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs->label, lv );
+	plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lv );
     plog( "\nThe first object '%s' of the list is used", "", lo );
     return(cur1);
    }
@@ -1962,7 +1866,7 @@ double a, b;
 
 if(tot<=0)
  {
-  sprintf(msg, "draw random of an object '%s' requested with a negative total\nof values for '%s' (%g) during the equation for '%s'",lo,lv,tot, stacklog->vs->label);  
+  sprintf( msg, "draw random of an object '%s' requested with a negative \ntotal of values for '%s' (%g) during the equation for '%s'", lo, lv, tot, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );  
   error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
  }  
 
@@ -1977,7 +1881,7 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next )
   }
 if(a>tot)
  {
-  sprintf(msg, "draw random of an object '%s' requested with a wrong total\nof values for '%s' during the equation for '%s'",lo,lv, stacklog->vs->label);  
+  sprintf( msg, "draw random of an object '%s' requested with a wrong \ntotal of values for '%s' during the equation for '%s'", lo, lv, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );  
   error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
  }  
 return cur;
@@ -1993,12 +1897,6 @@ return the new value.
 double object::increment(char const *lv, double value)
 {
 variable *cv;
-if(this==NULL)
-{
- sprintf(msg, "increment of '%s' requested to a NULL pointer  (var. '%s')",lv, stacklog->vs->label);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
 
 if((!use_nan && is_nan(value)) || is_inf(value))
 {
@@ -2032,13 +1930,6 @@ return the new value.
 double object::multiply(char const *lv, double value)
 {
 variable *cv;
-
-if(this==NULL)
-{
- sprintf(msg, "multiplication of '%s' requested to a NULL pointer  (var. '%s')",lv, stacklog->vs->label);
- error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
- return -1;
-}
 
 if((!use_nan && is_nan(value)) || is_inf(value))
 {
@@ -2074,11 +1965,17 @@ object *cur;
 if ( quit == 2 )		// simulation already being stopped
 	return;
 	
-plog( "\n\nERROR: %s\n", "", logText );
+if ( running )
+{
+	plog( "\n\nError detected at time %d", "highlight", t );
+	plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+	plog( "\n\nError message: %s\n", "", logText );
+	print_stack();
+}
+else
+	plog( "\n\nERROR: %s\n", "", logText );
 
 #ifndef NO_WINDOW
-log_tcl_error( "ERROR", logText );
-
 if ( running )		// handle running events differently
 {
 	uncover_browser( );
@@ -2086,18 +1983,16 @@ if ( running )		// handle running events differently
 	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 }
 else
+{
 	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
+	log_tcl_error( "ERROR", logText );
+}
 #endif
 
 if( ! running )
 	return;
 
 quit = 2;				// do not continue simulation
-
-plog( "\nFatal error detected at time %d", "highlight", t );
-plog( "\nOffending code contained in the equation for variable '%s'\n", "", stacklog->vs->label );
-
-print_stack();
 
 #ifndef NO_WINDOW
 cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
@@ -2365,14 +2260,14 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "failure in equation for '%s' when searching object '%s' in TSEARCH_CNDS",stacklog->label, label); 
+   sprintf(msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS",stacklog->label, label); 
    error_hard( msg, "Object not found", "Check your code to prevent this situation." );
    return NULL;
   } 
 
 if(cb->mn==NULL)
  {
-    sprintf(msg, "failure in equation for '%s' when searching for '%s' with TSEARCH_CNDS,\nTurbosearch can be used only after initializing the object with INI_TSEARCHS",stacklog->label, label); 
+    sprintf(msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS",stacklog->label, label); 
     error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return NULL;
   } 
@@ -2402,7 +2297,7 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-    sprintf(msg, "failure in equation for '%s' when searching '%s' to initialize Turbosearch:\nthe model does not contain any element '%s' in the expected position",stacklog->label, label, label); 
+    sprintf(msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position",stacklog->label, label, label); 
 	error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return;
   } 
