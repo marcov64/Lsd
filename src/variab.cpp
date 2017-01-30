@@ -215,7 +215,7 @@ if ( param == 1 ) //it is a parameter, ignore lags
 	return val[ 0 ];
 
 // effective lag for variables (compatible with older versions)
-eff_lag = last_update - t + lag;
+eff_lag = ( last_update < t ) ? lag - 1 : lag;
 
 // check lag error
 if ( lag != 0 )
@@ -239,7 +239,7 @@ if ( lag != 0 )
 
 	if ( ! lag_ok )
 	{
-		sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d,\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(no label)" : caller->label, label, num_lag, label );
+		sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(no label)" : caller->label, label, num_lag, label );
 		error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
 		return NAN;
 	}

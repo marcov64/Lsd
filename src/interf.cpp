@@ -732,7 +732,7 @@ if(actual_steps>0)
    while(*choice==0 && choice_g==0)
      Tcl_DoOneEvent(0);
  
-   cmd( "destroytop $T" );
+   cmd( "destroytop .warn" );
 
    if(*choice==1)
      cmd( "set choice $temp" );
@@ -740,7 +740,6 @@ if(actual_steps>0)
      { *choice=0;  
        goto main_cycle;
      }  
-
    }
   } 
  
@@ -899,22 +898,22 @@ if(sl!=0)
  done=check_label(lab, cur);
  if(done==1)
    {
-	cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+	cmd( "tk_messageBox -parent .addelem -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+   cmd( "focus .addelem.f.ent_var; .addelem.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newelem;
    }
 if ( done == 2 )
 {
-	cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+	cmd( "tk_messageBox -parent .addelem -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd( "focus .addelem.f.ent_var; .addelem.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newelem;
 }
 
  if(done==0)
  {
- cmd( "set text_description [$T.d.f.text get 1.0 end]" );
+ cmd( "set text_description [.addelem.d.f.text get 1.0 end]" );
  cmd( "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}" );
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  if(param==1)
@@ -950,7 +949,7 @@ if ( done == 2 )
 
  }
 
-cmd( "destroytop $T" );
+cmd( "destroytop .addelem" );
 redrawRoot = ( done == 2 ) ? false : true;
 
 if(done!=2)
@@ -1035,21 +1034,21 @@ if(done==1)
  done=check_label(lab, cur); //check that the label does not exist already
  if(done==1)
    {
-	cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+	cmd( "tk_messageBox -parent .addobj -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+   cmd( "focus .addobj.f.ent_var; .addobj.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newobject;
    }
  if(done==2)
   {
-   cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+   cmd( "tk_messageBox -parent .addobj -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd( "focus .addobj.f.ent_var; .addobj.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newobject;
   }
 
  r->add_obj(lab, 1, 1);
- cmd( "set text_description [$T.d.f.text get 1.0 end]" );  
+ cmd( "set text_description [.addobj.d.f.text get 1.0 end]" );  
  cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
@@ -1063,7 +1062,7 @@ here_endobject:
 if ( cur2 != NULL )			// restore original current object
 	r = cur2;
 
-cmd( "destroytop $T" );
+cmd( "destroytop .addobj" );
 Tcl_UnlinkVar(inter, "done");
 cmd( "unset done" );
 
@@ -1146,15 +1145,15 @@ if(done==1)
  done=check_label(lab1, cur); //check that the label does not exist already
  if(done==1)
    {
-	cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+	cmd( "tk_messageBox -parent .inspar -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+   cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newparent;
    }
  if(done==2)
   {
-   cmd( "tk_messageBox -parent $T -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-   cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
+   cmd( "tk_messageBox -parent .inspar -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+   cmd( "focus .inspar.f.ent_var; .inspar.f.ent_var selection range 0 end" );
    done = 0;
    goto here_newparent;
   }
@@ -1186,7 +1185,7 @@ if(done==1)
 
  }
 
- cmd( "set text_description [$T.d.f.text get 1.0 end]" );  
+ cmd( "set text_description [.inspar.d.f.text get 1.0 end]" );  
  cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
  lab1=(char *)Tcl_GetVar(inter, "text_description",0);
  add_description(lab, "Object", lab1);
@@ -1199,7 +1198,7 @@ here_endparent:
 if ( cur2 != NULL )			// restore original current object
 	r = cur2;
 
-cmd( "destroytop $T" );
+cmd( "destroytop .inspar" );
 Tcl_UnlinkVar(inter, "done");
 cmd( "unset done" );
 
@@ -1348,7 +1347,7 @@ if(*choice==1|| *choice==5 || *choice==3)
 unsaved_change( true );		// signal unsaved change
 
 // save description changes
-cmd( "set text_description \"[$T.desc.f.text get 1.0 end]\"" );
+cmd( "set text_description \"[.objprop.desc.f.text get 1.0 end]\"" );
 cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
 change_descr_text(lab_old);
 
@@ -1356,7 +1355,7 @@ if(*choice==5 || *choice==3)
 {
 if(*choice==3)
 {
-	 cmd( "set answer [tk_messageBox -parent $T -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting:\n$lab\n\nNote that all descendants will be also deleted!\"]" );
+	 cmd( "set answer [tk_messageBox -parent .objprop -title Confirmation -icon question -type yesno -default yes -message \"Delete object?\" -detail \"Press 'Yes' to confirm deleting:\n$lab\n\nNote that all descendants will be also deleted!\"]" );
 	 cmd( "switch -- $answer {yes {set choice 1} no {set choice 2}}" );
 	 if(*choice == 1)				// simulate a name change
 		cmd( "set lab \"\"" );	// to empty string (delete)
@@ -1392,14 +1391,14 @@ if ( *choice == 1 )
 		done = check_label( lab, cur );
 		if(done==1)
 		{
-			cmd( "tk_messageBox -parent $TT -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-			cmd( "focus $TT.e; $TT.e selection range 0 end" );
+			cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
+			cmd( "focus .chgnam.e; .chgnam.e selection range 0 end" );
 			goto here_newname;
 		}
 		if(done==2)
 		{
-			cmd( "tk_messageBox -parent $TT -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-			cmd( "focus $TT.e; $TT.e selection range 0 end" );
+			cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
+			cmd( "focus .chgnam.e; .chgnam.e selection range 0 end" );
 			goto here_newname;
 		}
 
@@ -1407,7 +1406,7 @@ if ( *choice == 1 )
 	else
 		*choice = 2;
 }
-cmd( "destroytop $TT" );
+cmd( "destroytop .chgnam" );
 }
 
 if(*choice==2)
@@ -1455,7 +1454,7 @@ if(*choice==0)
 {
 control_tocompute(r, r->label);
 }
-cmd( "set text_description \"[$T.desc.f.text get 1.0 end]\"" );
+cmd( "set text_description \"[.objprop.desc.f.text get 1.0 end]\"" );
 cmd( "if { $text_description==\"\\n\" || $text_description==\"\"} {set text_description \"(no description available)\"} {}" );
 lab1=(char *)Tcl_GetVar(inter, "text_description",0);
 add_description(lab, "Object", lab1);
@@ -1468,7 +1467,7 @@ redrawRoot = true;			// force browser redraw
 if ( cur2 != NULL )			// restore original current object
 	r = cur2;
 
-cmd( "destroytop $T" );
+cmd( "destroytop .objprop" );
 
 break;
 
@@ -1699,21 +1698,21 @@ if(done == 7)
 if(done == 9) 
 {
   auto_document( choice, lab_old, "ALL", true );
-  cmd( "$Td.f.text delete 1.0 end" );
+  cmd( ".chgelem.desc.f.text delete 1.0 end" );
 
   for(i=0; cur_descr->text[i]!=(char)NULL; i++)
    {
    if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' )
      {
-      cmd( "$Td.f.text insert end \"%c\"", cur_descr->text[i] );
+      cmd( ".chgelem.desc.f.text insert end \"%c\"", cur_descr->text[i] );
      }
     else
      {
-      cmd( "$Td.f.text insert end \"\\%c\"", cur_descr->text[i] );
+      cmd( ".chgelem.desc.f.text insert end \"\\%c\"", cur_descr->text[i] );
      }
       
    } 
-  cmd( "$Td.f.text delete \"end - 1 char\"" );
+  cmd( ".chgelem.desc.f.text delete \"end - 1 char\"" );
   unsaved_change( true );		// signal unsaved change
 }
 if(done == 7 || done == 4 || done == 3 || done == 9)
@@ -1742,11 +1741,11 @@ else
    cur_descr->initial=initial;
    cur_descr->observe=observe;
   
-   cmd( "set text_description \"[$Td.f.text get 1.0 end]\"" );
+   cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
    change_descr_text(lab_old);
    if(cv->param==1 || cv->num_lag>0)
    {
-	 cmd( "set text_description \"[$Td.i.text get 1.0 end]\"" );
+	 cmd( "set text_description \"[.chgelem.desc.i.text get 1.0 end]\"" );
      change_init_text(lab_old);
    }
   
@@ -1757,7 +1756,7 @@ else
       for(cur=r; cur!=NULL; cur=cur->up)
 		if(cur->to_compute==0)
 		 {
-		   cmd( "tk_messageBox -parent $T -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
+		   cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
 		 }
    }
 }
@@ -1769,7 +1768,7 @@ else
 
 here_endelem:
 
-cmd( "destroytop $T" );
+cmd( "destroytop .chgelem" );
 Tcl_UnlinkVar(inter, "done");
 Tcl_UnlinkVar(inter, "save");
 Tcl_UnlinkVar(inter, "savei");
@@ -1875,7 +1874,7 @@ else
 while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-cmd( "if [ winfo exists $T ] { if { $nature == 0 } { set numlag [ $T.v.e get ] } { set numlag [ $T.f.e get ] }; destroytop $T }" );
+cmd( "if [ winfo exists .prop ] { if { $nature == 0 } { set numlag [ .prop.v.e get ] } { set numlag [ .prop.f.e get ] }; destroytop .prop }" );
 
 if(*choice==2)
 	goto here_endprop;
@@ -2103,8 +2102,8 @@ if ( ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
 	while ( *choice == -1 )		// wait for user action
 		Tcl_DoOneEvent( 0 );
 		
-	cmd( "set lag [ $T.i.e get ]; set choice $lag" ); 
-	cmd( "destroytop $T" );
+	cmd( "set lag [ .lag.i.e get ]; set choice $lag" ); 
+	cmd( "destroytop .lag" );
 	
 	lag = abs( *choice ) - 1;	// try to extract chosed lag
 	
@@ -2289,7 +2288,7 @@ cmd( "showtop $T centerW" );
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
-cmd( "destroytop $T" );
+cmd( "destroytop .run" );
 Tcl_UnlinkVar(inter, "no_res");
 Tcl_UnlinkVar(inter, "add_to_tot");
 Tcl_UnlinkVar(inter, "dozip");
@@ -2679,13 +2678,13 @@ cmd( "focus $T.f.a.e" );
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
-cmd( "set sim_num [ $T.f.a.e get ]" ); 
-cmd( "set seed [ $T.f.b.e1 get ]" ); 
-cmd( "set max_step [ $T.f.c.e2 get ]" ); 
-cmd( "set when_debug [ $T.f.d.e2 get ]" ); 
-cmd( "set stack_info [ $T.f.e.e2 get ]" ); 
+cmd( "set sim_num [ .simset.f.a.e get ]" ); 
+cmd( "set seed [ .simset.f.b.e1 get ]" ); 
+cmd( "set max_step [ .simset.f.c.e2 get ]" ); 
+cmd( "set when_debug [ .simset.f.d.e2 get ]" ); 
+cmd( "set stack_info [ .simset.f.e.e2 get ]" ); 
 
-cmd( "destroytop $T" );
+cmd( "destroytop .simset" );
 
 if ( *choice == 2 )	// Escape - revert previous values
 {
@@ -2945,14 +2944,14 @@ cmd( "$T.ent selection range 0 end" );
 
 here_objec_num1:
 
-cmd( "write_any $T.ent $num" ); 
-cmd( "write_any $T.cp.e $cfrom" ); 
+cmd( "write_any .numinst.ent $num" ); 
+cmd( "write_any .numinst.cp.e $cfrom" ); 
 
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
-cmd( "set num [ $T.ent get ]" ); 
-cmd( "set cfrom [ $T.cp.e get ]" ); 
+cmd( "set num [ .numinst.ent get ]" ); 
+cmd( "set cfrom [ .numinst.cp.e get ]" ); 
 
 if(*choice==3)
 {	k=compute_copyfrom(r, choice);
@@ -2965,7 +2964,7 @@ if(*choice==3)
 	goto here_objec_num1;
 } 
 
-cmd( "destroytop $T" );
+cmd( "destroytop .numinst" );
 Tcl_UnlinkVar(inter, "num");
 
 if(*choice==2)
@@ -4639,7 +4638,7 @@ case 69:
 	while(*choice==0)
 		Tcl_DoOneEvent(0);
 	
-	cmd( "destroytop $b" );
+	cmd( "destroytop .batch" );
 	Tcl_UnlinkVar(inter, "no_res");
 	Tcl_UnlinkVar(inter, "dozip");
 	Tcl_UnlinkVar(inter, "overwConf");
@@ -5088,11 +5087,11 @@ while(done1==0)
 
 if ( done1 == 1 )
 {
-	cmd( "set movelabel [$TT.v.lb get [$TT.v.lb curselection]]" );
+	cmd( "set movelabel [.objs.v.lb get [.objs.v.lb curselection]]" );
 	ol=(char *)Tcl_GetVar(inter, "movelabel",0);
 }
 
-cmd( "destroytop $TT" );
+cmd( "destroytop .objs" );
 Tcl_UnlinkVar(inter,"done1");
 return ol;
 }

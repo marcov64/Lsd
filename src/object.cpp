@@ -1082,7 +1082,7 @@ void object::write( char const *lab, double value, int time, int lag )
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\nWarning: write of '%s' requested with an invalid value", "", lab );
+		plog( "\n\nWarning: write of '%s' requested with an invalid value\n", "", lab );
         debug_flag = true;
         stacklog->vs->debug = 'd';
         return;
@@ -1098,9 +1098,9 @@ void object::write( char const *lab, double value, int time, int lag )
 				error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
 			}
 			
-			if ( cv->param != 1 && time <= 0 && t > 1)
+			if ( cv->param != 1 && time < t && t > 1)
 			{
-				plog( "\nWarning: while writing variable '%s' in equation for '%s' \nthe time for the last update is invalid.\nThis undermines the correct updating of the variable '%s', \nand has been forced to take the time of %d", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lab, t );
+				plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid. This would \nundermine the correct updating of variable '%s', \nand has been forced to take the current time (%d)\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, time, lab, t );
 				cv->val[ 0 ] = value;
 				cv->last_update = t;
 			}
@@ -1110,7 +1110,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				{
 					if ( - time > cv->num_lag )		// check for invalid lag
 					{
-						plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
 					}
 					else
 					{
@@ -1122,9 +1122,9 @@ void object::write( char const *lab, double value, int time, int lag )
 				}
 				else
 				{
-					if ( lag < 0 || lag > cv->num_lag || time < 0 )
+					if ( lag < 0 || lag > cv->num_lag )
 					{
-						plog( "\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag );
 					}
 					else
 					{
