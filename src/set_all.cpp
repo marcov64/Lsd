@@ -296,7 +296,7 @@ cmd( "bind .sa.m.f2.s.sel2.c.to <Return> {focus .sa.b.ok}" );
 cmd( "bind .sa.m.f2.rnd.le.s.e1 <Return> {focus .sa.b.ok}" );
 
 cmd( "showtop .sa topleftW" );
-cmd( ".sa.m.f1.val.l1.e1 selection range 0 end; focus .sa.m.f1.val.l1.e1; .sa.m.f1.rd.r1 invoke" );	// speed-up data entry focusing first data field
+bool selFocus = true;
 
 here_setall:
 
@@ -307,6 +307,12 @@ cmd( "write_any .sa.m.f2.s.l.a.e $step_in" );
 cmd( "write_any .sa.m.f2.s.sel2.c.from $cases_from" ); 
 cmd( "write_any .sa.m.f2.s.sel2.c.to $cases_to" ); 
 cmd( "write_any .sa.m.f2.rnd.le.s.e1 $rnd_seed" ); 
+
+if ( selFocus )
+{
+	cmd( "focus .sa.m.f1.val.l1.e1; .sa.m.f1.val.l1.e1 selection range 0 end" );	// speed-up data entry focusing first data field
+	selFocus = false;
+}
 
 *choice = 0;
 while(*choice==0)

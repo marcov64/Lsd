@@ -2939,13 +2939,18 @@ cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp mdataobjn.html#this } { set c
 cmd( "bind $T.ent <KeyPress-Return> {set choice 1}" );
 
 cmd( "showtop $T" );
-cmd( "focus $T.ent" );
-cmd( "$T.ent selection range 0 end" );
+i = 1;
 
 here_objec_num1:
 
 cmd( "write_any .numinst.ent $num" ); 
 cmd( "write_any .numinst.cp.e $cfrom" ); 
+
+if ( i == 1 )
+{
+	cmd( "focus .numinst.ent; .numinst.ent selection range 0 end" );
+	i = 0;
+}
 
 while(*choice==0)
  Tcl_DoOneEvent(0);
@@ -3648,8 +3653,8 @@ if (rsense!=NULL)
 	cmd( "okcancel .s b { set choice 1 } { set choice 2 }" );
 
 	cmd( "showtop .s centerW" );
-	cmd( ".s.i.e selection range 0 end" );
 	cmd( "focus .s.i.e" );
+	cmd( ".s.i.e selection range 0 end" );
 
 	*choice = 0;
 	while(*choice == 0)
@@ -3861,8 +3866,8 @@ if (rsense!=NULL)
 	cmd( "okcancel .s b { set choice 1 } { set choice 2 }" );
 	
 	cmd( "showtop .s centerW" );
-	cmd( ".s.i.e selection range 0 end" );
 	cmd( "focus .s.i.e" );
+	cmd( ".s.i.e selection range 0 end" );
 	
 	*choice = 0;
 	while(*choice == 0)
@@ -4405,8 +4410,8 @@ case 68:
 	cmd( "bind .s <KeyPress-Return> { .s.b.ok invoke }" );
 	
 	cmd( "showtop .s centerW" );
-	cmd( ".s.i.c.e selection range 0 end" );
 	cmd( "focus .s.i.c.e" );
+	cmd( ".s.i.c.e selection range 0 end" );
 	
 	*choice=-1;
 	while(*choice==-1)

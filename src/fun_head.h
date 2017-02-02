@@ -394,17 +394,17 @@ else \
 
 
 // EXTENDED DATA/ATTRIBUTES MANAGEMENT MACROS
-// macros for handling extended attributes (usually lists) attached to objects' hook pointer
+// macros for handling extended attributes (usually lists) attached to objects' cext pointer
 
-// add/delete extension c++ data structures of type CLASS to the LSD object pointer by current/PTR
-#define ADD_EXT( CLASS ) p->hook = reinterpret_cast< object * >( new CLASS );
-#define ADDS_EXT( PTR, CLASS ) PTR->hook = reinterpret_cast< object * >( new CLASS );
-#define DELETE_EXT( CLASS ) { delete reinterpret_cast< CLASS * >( p->hook ); p->hook = NULL; }
-#define DELETES_EXT( PTR, CLASS ) { delete reinterpret_cast< CLASS * >( PTR->hook ); PTR->hook = NULL; }
+// add/delete extension c++ data structures of type CLASS to a void pointer by current/PTR
+#define ADD_EXT( CLASS ) p->cext = reinterpret_cast< void * >( new CLASS );
+#define ADDS_EXT( PTR, CLASS ) PTR->cext = reinterpret_cast< void * >( new CLASS );
+#define DELETE_EXT( CLASS ) { delete reinterpret_cast< CLASS * >( p->cext ); p->cext = NULL; }
+#define DELETES_EXT( PTR, CLASS ) { delete reinterpret_cast< CLASS * >( PTR->cext ); PTR->cext = NULL; }
 
-// convert current (or a pointer PTR from) LSD object type in the user defined CLASS type
-#define P_EXT( CLASS ) ( reinterpret_cast< CLASS * >( p->hook ) )
-#define PS_EXT( PTR, CLASS ) ( reinterpret_cast< CLASS * >( PTR->hook ) )
+// convert current (or a pointer PTR from) void type in the user defined CLASS type
+#define P_EXT( CLASS ) ( reinterpret_cast< CLASS * >( p->cext ) )
+#define PS_EXT( PTR, CLASS ) ( reinterpret_cast< CLASS * >( PTR->cext ) )
 
 // read/write from object OBJ pointed by pointer current/PTR of type CLASS
 #define V_EXT( CLASS, OBJ ) ( P_EXT( CLASS ) -> OBJ )

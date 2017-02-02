@@ -534,8 +534,8 @@ cmd( "bind $s.e1 <KeyPress-Return> {focus $s.e2}" );
 cmd( "bind $s.e2 <KeyPress-Return> {focus $s.ok}" );
 
 cmd( "showtop $s" );
-cmd( "$s.e2 selection range 0 end" );
 cmd( "focus $s.e1" );
+cmd( "$s.e2 selection range 0 end" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -743,8 +743,8 @@ cmd( "donehelp $e b { set choice 1 } { LsdHelp debug.html#content }" );
 cmd( "bind $e.past.l0.e0 <Return> {set choice 1}" );
 
 cmd( "showtop $e" );
-cmd( "$e.past.l0.e0 selection range 0 end" );
 cmd( "focus $e.past.l0.e0" );
+cmd( "$e.past.l0.e0 selection range 0 end" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);
@@ -864,8 +864,8 @@ cmd( "okhelp $t b {set choice 1} {LsdHelp debug.html#until}" );
 cmd( "bind $t <KeyPress-Return> {set choice 1}" );
 
 cmd( "showtop $t" );
-cmd( "$t.val selection range 0 end" );
 cmd( "focus $t.val" );
+cmd( "$t.val selection range 0 end" );
 
 while(choice==0)
  Tcl_DoOneEvent(0);

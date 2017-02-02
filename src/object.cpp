@@ -478,7 +478,8 @@ label=new char[lab_len+1];
 strcpy(label, _label);
 b=NULL;
 hook=NULL;
-node=NULL;	// not part of a network yet
+node = NULL;	// not part of a network yet
+cext = NULL;	// no C++ object extension yet
 acounter=0;	// "fail safe" when creating labels
 lstCntUpd=0; // counter never updated
 return 0;

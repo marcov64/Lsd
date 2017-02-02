@@ -1882,8 +1882,8 @@ case 26:
  cmd( "bind $w.format.e.sty <Return> { $w.b.ok invoke }" );
  
  cmd( "showtop $w current" );
- cmd( "$w.l.e selection range 0 end" );
  cmd( "focus $w.l.e" );
+ cmd( "$w.l.e selection range 0 end" );
  
  *choice = 0;
  while ( ! *choice )
@@ -1932,8 +1932,8 @@ case 27:
  cmd( "bind $w.l.e <Return> { $w.b.ok invoke}" );
  
  cmd( "showtop $w current" );
- cmd( "$w.l.e selection range 0 end" );
  cmd( "focus $w.l.e" );
+ cmd( "$w.l.e selection range 0 end" );
  
  *choice = 0;
  while ( ! *choice )
@@ -2002,8 +2002,8 @@ Edit line
  cmd( "bind $w.d.e <Return> { $w.b.ok invoke }" );
  
  cmd( "showtop $w current" );
- cmd( "$w.l.e selection range 0 end" );
  cmd( "focus $w.l.e" );
+ cmd( "$w.l.e selection range 0 end" );
  
 // enable most options for non-dotted lines
 cmd( "if { ! $dots } { $w.l.e  configure -state normal; $w.c.e  configure -state normal; $w.fall.font  configure -state normal }");
@@ -4089,8 +4089,8 @@ cmd( "bind .da.s.v.e <KeyPress-Return> {focus .da.s.b.ok}" );
 
 cmd( "showtop .da.s centerW" );
 
-cmd( ".da.s.i.e selection range 0 end" );
 cmd( "focus .da.s.i.e" );
+cmd( ".da.s.i.e selection range 0 end" );
 
 *choice=0;
 while(*choice==0)
@@ -5102,7 +5102,6 @@ cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
 cmd( "showtop .da.s centerW" );
-
 cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 
 *choice=0;
@@ -6024,8 +6023,8 @@ cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 cmd( "showtop .da.s centerW" );
-cmd( ".da.s.n.nv selection range 0 end" );
 cmd( "focus .da.s.n.nv" );
+cmd( ".da.s.n.nv selection range 0 end" );
  
 *choice=0;
 while(*choice==0)
@@ -6293,8 +6292,8 @@ cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
 cmd( "showtop .da.s centerW" );
-cmd( ".da.s.o.th selection range 0 end" );
 cmd( "focus .da.s.o.th" );
+cmd( ".da.s.o.th selection range 0 end" );
 
 *choice=0;
   while(*choice==0)

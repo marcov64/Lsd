@@ -629,8 +629,8 @@ else
 	cmd( "okhelpcancel $d b { set choice 1 } { LsdHelp mdataobjn.html#pick_remove } { set choice 2 }" );
 	
 	cmd( "showtop $d centerS" );
-    cmd( "$d.e selection range 0 end" );
     cmd( "focus $d.e" );
+    cmd( "$d.e selection range 0 end" );
   
   last=0;
   val=1;

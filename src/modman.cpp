@@ -5124,8 +5124,8 @@ cmd( "pack .a.l1 .a.v_num" );
 cmd( "pack .a.f -side right" );
 
 cmd( "showtop .a" );
-cmd( ".a.v_num selection range 0 end" );
 cmd( "focus .a.v_num" );
+cmd( ".a.v_num selection range 0 end" );
 
 choice=0;
 while(choice==0)

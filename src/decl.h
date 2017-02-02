@@ -187,6 +187,7 @@ int acounter;
 int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 int to_compute;
 netNode *node;		// pointer to network node data structure
+void *cext;			// pointer to a C++ object extension to the Lsd object
 
 double cal(object *caller,  char const *l, int lag);
 double cal( char const *l, int lag);
