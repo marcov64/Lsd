@@ -263,10 +263,6 @@ return res; \
 #define RNDDRAWTOTLS(O,X,Y,Z, T) O->draw_rnd((char*)X, (char*)Y, Z, T)
 
 #define PARAMETER param=1;
-#define FAST fast = true;
-#define OBSERVE fast = false;
-#define NAN use_nan = true;
-#define NO_NAN use_nan = false;
 
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
