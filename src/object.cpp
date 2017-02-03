@@ -550,7 +550,7 @@ return(cur);
 }
 
 /****************************************************
-
+ADD_OBJ
 Add num sons with label lab to ANY object like this one, wherever is on the
 tree 
 ****************************************************/
@@ -1069,9 +1069,6 @@ if(cv->data_loaded=='+')
 }
 
 
-
-
-
 /****************************************************
  WRITE
  Write the value in the Varible or Parameter lab, making it appearing as if
@@ -1083,7 +1080,7 @@ void object::write( char const *lab, double value, int time, int lag )
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\n\nWarning: write of '%s' requested with an invalid value\n", "", lab );
+		plog( "\n\nWarning: write of '%s' requested with an invalid value, ignoring\n", "", lab );
         debug_flag = true;
         stacklog->vs->debug = 'd';
         return;
@@ -1091,7 +1088,7 @@ void object::write( char const *lab, double value, int time, int lag )
     
     for ( cv = v; cv != NULL; cv = cv->next)
     {
-		if ( ! strcmp( cv->label , lab ) )
+		if ( ! strcmp( cv->label, lab ) )
 		{
 			if ( cv->under_computation == 1 )
 			{
@@ -1099,7 +1096,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
 			}
 			
-			if ( cv->param != 1 && time < t && t > 1)
+			if ( cv->param != 1 && time < t && t > 1 )
 			{
 				plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid. This would \nundermine the correct updating of variable '%s', \nand has been forced to take the current time (%d)\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, time, lab, t );
 				cv->val[ 0 ] = value;
@@ -1142,11 +1139,11 @@ void object::write( char const *lab, double value, int time, int lag )
 		}
     }
 	
-    sprintf(msg, "attempt to write variable '%s' not found \nin object '%s'", lab, label);
+    sprintf( msg, "attempt to write variable '%s' not found in object '%s'", lab, label );
 	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 }
 
-void object::write(char const *lab, double value, int time)
+void object::write( char const *lab, double value, int time )
 {
 	this->write( lab, value, time, 0 );
 }
@@ -1209,77 +1206,6 @@ if(node!=NULL)		// network data to delete?
 }
 }
 
-/****************************************************
-ADD_AN_OBJECT 
-Add an object to the model making a copy of the example object ex
-
-****************************************************
-object *object::add_an_object(char *lab, object *ex)
-{
-FILE *f;
-object *cur, *begin;
-variable *cv;
-int ctr, found=0;
-bridge *cb;
-
-
-
-begin=new object;
-if(begin==NULL)
-{sprintf(msg, "out of memory in add_an_object");
- error_hard( msg, "Out of memory" );
- return NULL;
- }
-begin->init(this, lab);
-
-for(cv=ex->v; cv!=NULL; cv=cv->next)
- begin->add_var_from_example(cv);
-
-//Seems to mess up the value of counter. It has been moved down
-//for(cur=ex->son; cur!=NULL; cur=cur->next)
-// begin->add_an_object(cur->label, cur);
-begin->next=NULL;
-begin->to_compute=ex->to_compute;
-
-for(cb=b; strcmp(cb->blabel,lab); cb=cb->next);
-
-if(cb->head==NULL)
- cb->head=begin;
-else 
- {
-  cur=cb->head;
-  for( ;go_brother(cur)!=NULL; cur=go_brother(cur) );
-  begin->next=cur->next;
-  cur->next=begin;
- }
-
-for(cur=ex->son; cur!=NULL; cur=cur->next)
- begin->add_an_object(cur->label, cur);
-
-begin->up=this;
-for(cv=begin->v; cv!=NULL; cv=cv->next)
- {cv->last_update=t;
-  if(cv->save)
-  {
-  set_lab_tit(cv, msg);
-  cv->lab_tit=new char[strlen(msg)+1];
-  strcpy(cv->lab_tit, msg);
-
-  if(running==1)
-  {
-  cv->data=new double[max_step+1];
-  cv->start=t;
-  cv->end=max_step;
-  }
-  }
- }
-
-return begin;
-}
-***********************/
-long int amem;
-double *appMem;
-
 
 /****************************************************
 ADD_N_OBJECTS2 
@@ -1318,6 +1244,9 @@ object *object::add_n_objects2( char const *lab, int n, int t_update )
 {
 	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
 }
+
+long int amem;
+double *appMem;
 
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
@@ -1781,7 +1710,6 @@ else
 }
 
 
-
 /*********************
 Draw randomly an object with label lo with probabilities proportional to the values of their Variables or Parameters lv
 *********************/
@@ -1817,8 +1745,6 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next)
   {a+=cur1->cal(lv,lag);
    cur=cur1;
   }
-//if(cur->cal(lv,lag)==0)
-// deb(cur, NULL, "Error", &b);
 return cur;
 
 }
@@ -1851,8 +1777,6 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next )
   {a++;
    cur=cur1;
   }
-//if(cur->cal(lv,lag)==0)
-// deb(cur, NULL, "Error", &b);
 return cur;
 
 }
@@ -1889,68 +1813,76 @@ return cur;
 
 }
 
-/*
+
+/************************************************
 INCREMENT
-Increment the value of the variable lv with value.
-last_update untouched.
-return the new value.
-*/
-double object::increment(char const *lv, double value)
+Increment the value of the variable lab with value.
+If variable was not updated in the current period, first updates it.
+Return the new value.
+*************************************************/
+double object::increment( char const *lab, double value )
 {
-variable *cv;
+    variable *cv;
+	double new_value;
+	
+    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+    {
+		plog( "\n\nWarning: increment of '%s' requested with an invalid value, ignoring\n", "", lab );
+        debug_flag = true;
+        stacklog->vs->debug = 'd';
+        return value;
+    }
 
-if((!use_nan && is_nan(value)) || is_inf(value))
-{
- plog( "\nWarning: increment of %s requested with an invalid value", "", lv );
- debug_flag=true;
- stacklog->vs->debug='d';
- return value;
+	for ( cv = v; cv != NULL; cv = cv->next)
+		if ( ! strcmp( cv->label, lab ) )
+			break;
+
+	if ( cv == NULL )
+	{
+		sprintf( msg, "attempt to increment variable '%s' not found in object '%s'", lab, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+	}
+	
+	new_value = cv->cal( this, 0 ) + value;
+	this->write( lab, new_value, t );
+	
+	return new_value;
 }
 
-for(cv=v; cv!=NULL; cv=cv->next)
- if(!strcmp(cv->label, lv) )
-  break;
 
-if(cv==NULL)
- {sprintf(msg, "increment variable '%s' not contained in object '%s'", lv, label);
-  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-  return -1;
- }
- 
-
-cv->val[0]+=value;
-return cv->val[0];
-}
-
-/*
+/************************************************
 MULTIPLY
 Multiply the value of the variable lv with value.
-last_update untouched.
-return the new value.
-*/
-double object::multiply(char const *lv, double value)
+If variable was not updated in the current period, first updates it.
+Return the new value.
+*************************************************/
+double object::multiply(char const *lab, double value)
 {
-variable *cv;
+    variable *cv;
+	double new_value;
+	
+    if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
+    {
+		plog( "\n\nWarning: multiply of '%s' requested with an invalid value, ignoring\n", "", lab );
+        debug_flag = true;
+        stacklog->vs->debug = 'd';
+        return value;
+    }
 
-if((!use_nan && is_nan(value)) || is_inf(value))
-{
- plog( "\nWarning: multiply of %s requested with a wrong value", "", lv );
- debug_flag=true;
- stacklog->vs->debug='d';
- return value;
-}
+	for ( cv = v; cv != NULL; cv = cv->next)
+		if ( ! strcmp( cv->label, lab ) )
+			break;
 
-for(cv=v; cv!=NULL; cv=cv->next)
- if(!strcmp(cv->label, lv) )
-  break;
-
-if(cv==NULL)
- {sprintf(msg, "multiply variable '%s' not contained in object '%s'", lv, label);
-  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-  return -1;
- }
-cv->val[0]*=value;
-return cv->val[0];
+	if ( cv == NULL )
+	{
+		sprintf( msg, "attempt to multiply variable '%s' not found in object '%s'", lab, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+	}
+	
+	new_value = cv->cal( this, 0 ) * value;
+	this->write( lab, new_value, t );
+	
+	return new_value;
 }
 
 
@@ -1970,8 +1902,8 @@ if ( running )
 {
 	plog( "\n\nError detected at time %d", "highlight", t );
 	plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
-	plog( "\n\nError message: %s\n", "", logText );
-	print_stack();
+	plog( "\n\nError message: %s", "", logText );
+	print_stack( );
 }
 else
 	plog( "\n\nERROR: %s\n", "", logText );
@@ -2051,16 +1983,17 @@ myexit(13);
 /****************************
 Print the state of the stack in the log window. This tells the user which variable is computed because of other equations' request.
 *****************************/
-void print_stack(void)
+void print_stack( void )
 {
 lsdstack *app;
 
-plog("\nList of variables currently under computation.\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)");
-plog("\n\nLevel\tVariable Label");
-for(app=stacklog; app!=NULL; app=app->prev)
- plog( "\n%d\t%s", "",app->ns, app->label );
-plog("\n");
+plog( "\n\nList of variables currently under computation" );
+plog( "\n\nLevel\tVariable Label" );
 
+for ( app=stacklog; app != NULL; app = app->prev )
+  plog( "\n%d\t%s", "",app->ns, app->label );
+
+plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
 }
 
 

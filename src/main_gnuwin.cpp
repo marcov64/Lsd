@@ -169,7 +169,15 @@ void signal_handler(int signum)
 		strcpy( msg3, "Lsd will close now..." );
 	}
 	else
+	{
 		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger) ..." );
+		if ( quit != 2 )
+		{
+			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+			quit = 2;
+		}
+		print_stack( );
+	}
 	
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\"", msg, msg2, msg3 );
 	

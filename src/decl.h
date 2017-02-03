@@ -230,9 +230,8 @@ void write(char const *lab, double value, int time, int lag);//write value in th
 object *draw_rnd(char const *lo, char const *lv, int lag);
 object *draw_rnd(char const *lo);
 object *draw_rnd(char const *lo, char const *lv, int lag, double tot);
-object *find_the_one(char const *lv, double value);
-double increment(char const *lv, double value);
-double multiply(char const *lv, double value);
+double increment(char const *lab, double value);
+double multiply(char const *lab, double value);
 object *lat_up(void);
 object *lat_down(void);
 object *lat_left(void);

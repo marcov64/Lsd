@@ -125,7 +125,7 @@ int time_cross = false;
 int type_plot[ MAX_PLOTS ];
 int watch = true;
 int xy = false;
-store *vs;
+store *vs = NULL;
 
 
 /***************************************************
@@ -565,6 +565,7 @@ if(*choice==0)
   goto there;
 
 delete[] vs;
+vs = NULL;
 
 cmd( "destroytop .da" );
 uncover_browser( );

@@ -2646,13 +2646,13 @@ cmd( "$T.f.c.e2 insert 0 $max_step" );
 cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.d -bd 2" );
-cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step\"" );
+cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
 cmd( "entry $T.f.d.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
 cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.e -bd 2" );
-cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level\"" );
+cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
 cmd( "set stack_info %d", stackinfo_flag );
 cmd( "entry $T.f.e.e2 -width 8 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.e.e2 insert 0 $stack_info" ); 

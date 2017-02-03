@@ -206,7 +206,7 @@ return 0;
 CAL
 ****************************************************/
 
-double variable::cal(object *caller, int lag)
+double variable::cal( object *caller, int lag )
 {
 int i, eff_lag;
 double app;
@@ -241,7 +241,6 @@ if ( lag != 0 )
 	{
 		sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(no label)" : caller->label, label, num_lag, label );
 		error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
-		return NAN;
 	}
 }
 
@@ -271,7 +270,6 @@ if ( under_computation )
 {
 	sprintf( msg, "the equation for '%s' (in object '%s') requested \nits own value while computing its current value", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
 	error_hard( msg, "Dead lock", "Check your code to prevent this situation." );
-	return NAN;
 }
 
 under_computation = true;
@@ -296,22 +294,32 @@ if(stackinfo_flag>=stack)
 #endif
 
 //Compute the Variable's equation
-try 				// do it while catching exceptions to avoid obscure aborts
+user_exception = true;			// allow distinguishing among internal & user exceptions
+try 							// do it while catching exceptions to avoid obscure aborts
 {
 	app = fun( caller );
 }
 catch ( std::exception& exc )
 {
-	plog( "\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
-	user_exception = true;
+	plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+	quit = 2;
 	throw;
 }
 catch ( ... )
 {
-	plog( "\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
-	user_exception = true;
-	throw;
+	if ( quit != 2 )			// error message not already presented?
+	{
+		plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+		quit = 2;
+		throw;
+	}
+	else
+	{
+		app = NAN;				// mark result as invalid
+		use_nan = true;			// and allow propagation
+	}
 }
+user_exception = false;
 
 for ( i = 0; i < num_lag; ++i ) 	//scale down the past values
 	val[ num_lag - i ] = val[ num_lag - i - 1 ];

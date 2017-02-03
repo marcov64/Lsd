@@ -267,6 +267,14 @@ return res; \
 #define OBSERVE fast = false;
 #define USE_NAN use_nan = true;
 #define NO_NAN use_nan = false;
+#define DEFAULT_RESULT( X ) def_res = X;
+#define PATH ( ( const char * ) path )
+#define CONFIG ( ( const char * ) simul_name )
+#define T t
+#define LAST_T max_step
+#define RND_GENERATOR( X ) ran_gen = X;
+#define RND_SETSEED( X ) seed = X; init_random( X );
+#define RND_SEED seed
 
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
@@ -283,7 +291,6 @@ return res; \
 	sprintf( msg, __VA_ARGS__ ); \
 	plog( msg ); \
 }
-
 
 // NETWORK MACROS
 // create a network using as nodes object label X, located inside object O,
