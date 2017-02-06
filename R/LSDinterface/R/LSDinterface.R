@@ -1,6 +1,7 @@
 ########### Functions to load LSD result files in R ############
 
 require( abind, warn.conflicts = FALSE, quietly = TRUE )
+require( parallel, warn.conflicts = FALSE, quietly = TRUE )
 
 
 # ==== Get the original LSD variable name from a R column name ====
@@ -466,43 +467,83 @@ read.multi.lsd <- function( file, col.names = NULL, nrows = -1,
 
 # ==== Read LSD variables from multiple runs into a 3D array ====
 
-read.3d.lsd <- function( files, col.names = NULL, nrows = -1,
-                         skip = 0, check.names = TRUE, instance = 1){
+read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
+                         check.names = TRUE, instance = 1, nnodes = 1 ) {
 
   # ---- check column names to adjust to R imported column names ----
 
   fixedLabels <- name.check.lsd( files[ 1 ], col.names, check.names )
+  n <- length( files )
 
   if( instance <= 0 )                 # only single instance
     instance <- 1
 
-  # ---- Run across all files ----
+  # ---- Function to read data files (can be parallelized) ----
 
-  for ( i in 1:length( files ) ) {
+  readFile <- function( file ) {
 
     # ---- Read data from file and remove artifacts ----
 
-    dataSet <- read.raw.lsd( files[ i ], nrows = nrows, skip = skip )
+    dataSet <- read.raw.lsd( file, nrows = nrows, skip = skip )
 
     # ---- Select only required columns ----
 
     fileData <- select.colnames.lsd( dataSet, fixedLabels, instance )
 
-    # ---- Stack multiple 2D files as a 3D array ----
+    return( fileData )
+  }
+
+  # ---- Read files in parallel ----
+
+  if( nnodes != 1 ) {
+
+    if( nnodes == 0 )
+      nnodes <- detectCores( )
+
+    # find the maximum useful number of cores ( <= nnodes )
+    i <- 1
+    while( ceiling( n / i ) > nnodes )
+      i <- i + 1
+    nnodes <- ceiling( n / i )
+
+    # initiate cluster for parallel loading
+    cl <- makeCluster( min( nnodes, n ) )
+
+    # configure cluster: export required variables & packages
+    clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
+                   envir = environment( readFile ) )
+    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+
+    # read files in parallel
+    fileData <- parLapply( cl, files, readFile )
+
+    # stop the cluster
+    stopCluster( cl )
+
+  } else {
+
+    # read files serially
+    fileData <- lapply( files, readFile )
+  }
+
+  # ---- Stack multiple 2D files as a 3D array ----
+
+  for ( i in 1 : n ) {
 
     if( i == 1 ){                     # don't bind if first file
-      dataArray <- fileData
-      nrows <- nrow( fileData )      # define base dimensions
-      ncols <- ncol( fileData )
-    } else{
+      dataArray <- fileData[[ i ]]
+      nrows <- nrow( fileData[[ i ]] )      # define base dimensions
+      ncols <- ncol( fileData[[ i ]] )
+    } else {
       # check consistency
-      if( nrow( fileData ) != nrows || ncol( fileData ) != ncols )
+      if( nrow( fileData[[ i ]] ) != nrows || ncol( fileData[[ i ]] ) != ncols )
         stop( paste0( "File '", files[ i ], "' has incompatible dimensions!") )
 
       # 3D binding
-      dataArray <- abind( dataArray, fileData, along = 3, use.first.dimnames = TRUE )
+      dataArray <- abind( dataArray, fileData[[ i ]], along = 3, use.first.dimnames = TRUE )
     }
   }
+
   dimnames( dataArray )[[ 3 ]] <- files
 
   return( dataArray )
@@ -512,60 +553,106 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1,
 # ==== Read LSD variables from multiple runs into a list ====
 
 read.list.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
-                           check.names = TRUE, instance = 0, pool = FALSE ){
+                           check.names = TRUE, instance = 0, pool = FALSE,
+                           nnodes = 1 ) {
 
   # ---- check column names to adjust to R imported column names ----
 
   fixedLabels <- name.check.lsd( files[ 1 ], col.names, check.names )
+  n <- length( files )
 
-  # ---- Run across all files ----
+  # ---- Function to read data files (can be parallelized) ----
 
-  fileData <- list( )                # create list to hold data
-
-  for( i in 1:length( files ) ) {
+  readFile <- function( file ) {
 
     # ---- Read data from file and remove artifacts ----
 
-    dataSet <- read.raw.lsd( files[ i ], nrows = nrows, skip = skip )
+    dataSet <- read.raw.lsd( file, nrows = nrows, skip = skip )
 
     # ---- Select only required columns ----
 
     subSet <- select.colnames.lsd( dataSet, fixedLabels, instance )
 
-    # ---- select aggregation mode
-
-    if( ! pool )
-      fileData[[ i ]] <- subSet
-    else
-      if( i == 1 )
-        fileData[[ 1 ]] <- subSet
-      else{
-        # bind one column (instance > 0) or all matching (instance = 0)
-        if( is.vector( subSet ) || instance == 0 )
-          fileData[[ 1 ]] <- cbind( fileData[[ 1 ]], subSet )
-        else
-          fileData[[ 1 ]] <- cbind( fileData[[ 1 ]], subSet[ , instance ] )
-
-        # add column name if needed
-        if( is.vector( subSet ) && length( fixedLabels ) >= i )
-          colnames( fileData[[ 1 ]] )[ ncol( fileData[[ 1 ]] ) ] <- fixedLabels[ i ]
-        if( ! is.vector( subSet ) && instance != 0 )
-          colnames( fileData[[ 1 ]] )[ ncol( fileData[[ 1 ]] ) ] <- colnames( subSet )[ instance ]
-      }
+    return( subSet )
   }
 
-  return( fileData )
+  # ---- Read files in parallel ----
+
+  if( nnodes != 1 ) {
+
+    if( nnodes == 0 )
+      nnodes <- detectCores( )
+
+    # find the maximum useful number of cores ( <= nnodes )
+    i <- 1
+    while( ceiling( n / i ) > nnodes )
+      i <- i + 1
+    nnodes <- ceiling( n / i )
+
+    # initiate cluster for parallel loading
+    cl <- makeCluster( min( nnodes, n ) )
+
+    # configure cluster: export required variables & packages
+    clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
+                   envir = environment( readFile ) )
+    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+
+    # read files in parallel
+    subSet <- parLapply( cl, files, readFile )
+
+    # stop the cluster
+    stopCluster( cl )
+
+  } else {
+
+    # read files serially
+    subSet <- lapply( files, readFile )
+  }
+
+  # ---- select aggregation mode
+
+  if( ! pool ) {
+
+    return( subSet )
+
+  } else {
+
+    fileData <- list( )                # create list to hold data
+
+    for( i in 1 : n ) {
+
+      if( i == 1 )
+        fileData[[ 1 ]] <- subSet[[ 1 ]]
+      else {
+        # bind one column (instance > 0) or all matching (instance = 0)
+        if( is.vector( subSet[[ i ]] ) || instance == 0 )
+          fileData[[ 1 ]] <- cbind( fileData[[ 1 ]], subSet[[ i ]] )
+        else
+          fileData[[ 1 ]] <- cbind( fileData[[ 1 ]], subSet[[ i ]][ , instance ] )
+
+        # add column name if needed
+        if( is.vector( subSet[[ i ]] ) && length( fixedLabels ) >= i )
+          colnames( fileData[[ 1 ]] )[ ncol( fileData[[ 1 ]] ) ] <- fixedLabels[ i ]
+        if( ! is.vector( subSet[[ i ]] ) && instance != 0 )
+          colnames( fileData[[ 1 ]] )[ ncol( fileData[[ 1 ]] ) ] <- colnames( subSet[[ i ]] )[ instance ]
+      }
+    }
+
+    return( fileData )
+  }
 }
 
 
 # ==== Read LSD variables from multiple runs into a 4D array ====
 
 read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
-                         check.names = TRUE, pool = FALSE ){
+                         check.names = TRUE, pool = FALSE, nnodes = 1 ) {
 
   # ---- check column names to adjust to R imported column names ----
 
   fixedLabels <- name.check.lsd( files[ 1 ], col.names, check.names )
+  m <- length( fixedLabels )
+  n <- length( files )
 
   # ---- Run across all files ----
 
@@ -574,33 +661,73 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
   # register the number of instances per variable and per file
   nInst <- matrix( 0, nrow = length( fixedLabels ), ncol = length( files ) )
 
-  for( i in 1 : length( files ) ) {
+  # ---- Function to read data files (can be parallelized) ----
 
-    # ---- Read data from file and remove artifacts ----
+  readFile <- function( file ) {
 
-    dataSet <- read.raw.lsd( files[ i ], nrows = nrows, skip = skip )
+    # ---- Read data from file ----
 
-    nTsteps <- max( nTsteps, nrow( dataSet ) )  # updates max timespan
+    dataSet <- read.raw.lsd( file, nrows = nrows, skip = skip )
 
-    # ---- Select only required columns ----
+    return( dataSet )
+  }
 
-    fieldData <- list( )                    # list to store each variable
+  # ---- Read files in parallel ----
 
-    for( j in 1 : length( fixedLabels ) ){  # do for all selected columns
+  if( nnodes != 1 ) {
+
+    if( nnodes == 0 )
+      nnodes <- detectCores( )
+
+    # find the maximum useful number of cores ( <= nnodes )
+    i <- 1
+    while( ceiling( n / i ) > nnodes )
+      i <- i + 1
+    nnodes <- ceiling( n / i )
+
+    # initiate cluster for parallel loading
+    cl <- makeCluster( min( nnodes, n ) )
+
+    # configure cluster: export required variables & packages
+    clusterExport( cl, c( "nrows", "skip" ),
+                   envir = environment( readFile ) )
+    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+
+    # read files in parallel
+    dataSet <- parLapply( cl, files, readFile )
+
+    # stop the cluster
+    stopCluster( cl )
+
+  } else {
+
+    # read files serially
+    dataSet <- lapply( files, readFile )
+  }
+
+  # ---- Select only required columns ----
+
+  for( i in 1 : n ) {
+
+    nTsteps <- max( nTsteps, nrow( dataSet[[ i ]] ) )  # updates max timespan
+
+    fieldData <- list( )                  # list to store each variable
+
+    for( j in 1 : m ) {                   # do for all selected columns
 
       # ---- get all instances of current column/variable ----
 
-      subSet <- select.colnames.lsd( dataSet, fixedLabels[ j ], instance = 0 )
+      subSet <- select.colnames.lsd( dataSet[[ i ]], fixedLabels[ j ], instance = 0 )
 
-      nInst[ j, i ] <- ncol( subSet )       # save number of instances
+      nInst[ j, i ] <- ncol( subSet )	    # save number of instances
 
       if( ncol( subSet ) == 0 )
         warning( paste0( "Variable '", col.names[ j ],"' not found in '",
                          files[ i ], "', skipping...") )
 
-      instData <- list( )                   # list to store each instance
+      instData <- list( )                 # list to store each instance
 
-      for( k in 1 : ncol( subSet ) )        # do for all instances
+      for( k in 1 : ncol( subSet ) )      # do for all instances
         instData[[ k ]] <- subSet[ , k ]
 
       fieldData[[ j ]] <- instData
@@ -609,21 +736,23 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
     fileData[[ i ]] <- fieldData
   }
 
+  rm( dataSet, subSet, fieldData )
+
   # ---- allocate 4D array and migrate list data to it  ----
 
   # If in pool mode, dimension array accordingly
-  if( ! pool ){
-    dimFiles <- length( files )
+  if( ! pool ) {
+    dimFiles <- n
     namFiles <- files
     dimInst <- max( nInst )
     namInst <- c( 1 : dimInst )
   }
-  else{
+  else {
     dimFiles <- 1
     namFiles <- files[ 1 ]
     dimInst <- max( rowSums( nInst ) )      # maximum number of instances req'd
     namInst <- c( 1 : dimInst )
-    l <- rep( 1, length( fixedLabels ) )
+    l <- rep( 1, m )
   }
 
   # Alocate array and apply the labels
@@ -633,12 +762,12 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
                                        fixedLabels, namInst, namFiles ) )
 
   # Copy only existing t-series (vectors), let the rest as NA
-  for( i in 1 : length( files ) )           # do for all files
-    for( j in 1 : length( fileData[[ i ]] ) ) # all found variables
+  for( i in 1 : n )                                     # do for all files
+    for( j in 1 : length( fileData[[ i ]] ) )           # all found variables
       for( k in 1 : length( fileData[[ i ]][[ j ]] ) )  # and all instances
         if( ! pool )
           dataArray[ , j, k, i ] <- fileData[[ i ]][[ j ]][[ k ]]
-        else{
+        else {
           dataArray[ , j, l[ j ], 1 ] <- fileData[[ i ]][[ j ]][[ k ]]
           l[ j ] <- l[ j ] + 1
         }

@@ -8,7 +8,8 @@ This function reads the data series associated to a specific or all instances of
 }
 \usage{
 read.list.lsd(files, col.names = NULL, nrows = -1, skip = 0,
-              check.names = TRUE, instance = 0, pool = FALSE)
+              check.names = TRUE, instance = 0, pool = FALSE, 
+			  nnodes = 1)
 }
 \arguments{
   \item{files}{
@@ -31,6 +32,9 @@ integer: the instance of the variable to be read, for variables that exist in mo
 }
   \item{pool}{
 logical. If TRUE, variables instances from all files are concatenated (by colums) into a single matrix. If FALSE (the default), each file is saved as a separated matrix.
+}
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \value{

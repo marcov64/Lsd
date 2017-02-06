@@ -1,11 +1,11 @@
 Package: LSDinterface
 Type: Package
 Title: Reading LSD Results (.res) Files
-Version: 0.2.3
-Date: 2017-01-20
+Version: 0.3.0
+Date: 2017-02-05
 Author: Marcelo C. Pereira
 Maintainer: Marcelo C. Pereira <marcelocpereira@uol.com.br>
-Description: Interfaces R with LSD. Reads object-oriented data in results files (.res) produced by LSD and creates appropriate multi-dimensional arrays in R. Also provides functions to extract basic information and statistics from those files. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente (documentation and downloads available at <http://labsimdev.org>).
-Depends: abind, utils, stats
+Description: Interfaces R with LSD. Reads object-oriented data in results files (.res) produced by LSD and creates appropriate multi-dimensional arrays in R. Supports multiple core parallelization of multi-file data reading for increased performance. Also provides functions to extract basic information and statistics from data files. LSD (Laboratory for Simulation Development) is free software developed by Marco Valente (documentation and downloads available at <http://labsimdev.org>).
+Depends: abind, utils, stats, parallel
 License: GPL-3
 LazyData: TRUE

@@ -1,2 +1,2 @@
 exportPattern("^[[:alpha:]]+")
-import(abind, utils, stats)
+import(abind, utils, stats, parallel)

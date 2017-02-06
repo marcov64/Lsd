@@ -8,7 +8,7 @@ This function reads the data series associated to all instances of each selected
 }
 \usage{
 read.4d.lsd(files, col.names = NULL, nrows = -1, skip = 0,
-            check.names = TRUE, pool = FALSE)
+            check.names = TRUE, pool = FALSE, nnodes = 1)
 }
 \arguments{
   \item{files}{
@@ -28,6 +28,9 @@ logical. If TRUE then the names of the variables are checked to ensure that they
 }
   \item{pool}{
 logical. If TRUE, variables instances from all files are concatenated (by colums) as a single file. If FALSE (the default), each file is saved as a separated dimension (4th) in the array.
+}
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \value{
