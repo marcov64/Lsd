@@ -2373,7 +2373,7 @@ if ( ! reload )
   cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir [pwd] -initialfile \"$res.lsd\" -filetypes {{{Lsd model files} {.lsd}}  }]" );
   
   *choice=0;
-  cmd( "if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
+  cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
   if(*choice==2)
     break;
 
@@ -2782,6 +2782,7 @@ if ( ! struct_loaded )
 cmd( "set res %s", equation_name );
 
 cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]]" );
+cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" }" );
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
 if ( lab1 == NULL || strlen ( lab1 ) == 0 )
@@ -3173,7 +3174,7 @@ if(*choice == 0)
  if(*choice == 1)
   break;
  cmd( "set fname [tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
- cmd( "if {$fname == \"\"} {set choice 0} {set fname [file tail $fname]; set choice 1}" );
+ cmd( "if { $fname == \"\" || [ fn_spaces $fname . ] } {set choice 0} {set fname [file tail $fname]; set choice 1}" );
  if(*choice == 0)
   break;
 
@@ -3414,8 +3415,9 @@ if ( ! struct_loaded )
 	break;
 }
 
-cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Comapre to\" -initialdir [pwd] -filetypes { { {Lsd configuration files} {.lsd} } } ]" );
+cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir [pwd] -filetypes { { {Lsd configuration files} {.lsd} } } ]" );
 cmd( "set res2 [ file tail $res1 ]" );
+cmd( "if [ fn_spaces $res1 . ] { set res1 \"\"; set res2 \"\" }" );
 
 lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
 lab2 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
@@ -4089,7 +4091,7 @@ case 64:
 
 	// open dialog box to get file name & folder
 	cmd( " set bah [tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]" );
-	cmd( "if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
+	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
 	if(*choice==2)
 		break;
 	lab1=(char *)Tcl_GetVar(inter, "res",0);
@@ -4348,7 +4350,7 @@ case 68:
 		if( fSeq )								// file sequence?
 		{
 			cmd( "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple no]" );
-			cmd( "if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}" );
+			cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}" );
 			if(*choice == 0)
 				break;
 			ffirst=*choice;
@@ -4370,7 +4372,7 @@ case 68:
 		else									// bunch of files?
 		{
 			cmd( "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple yes]" );
-			cmd( "set choice [llength $bah]; if {$choice > 0} {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
+			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
 			ffirst = 1;

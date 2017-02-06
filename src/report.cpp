@@ -122,7 +122,7 @@ cmd( "frame .w.s.e1.file" );
 cmd( "label .w.s.e1.file.tlab -text \"File name\"" );
 cmd( "set file1 description.txt" );
 cmd( "entry .w.s.e1.file.tit -width 50 -textvariable file1" );
-cmd( "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}" );
+cmd( "button .w.s.e1.file.new -width -9 -text \"Search File\" -command {set file1 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]; if [ fn_spaces $file1 .w ] { set file1 \"\" } }" );
 cmd( "pack .w.s.e1.file.tlab .w.s.e1.file.tit .w.s.e1.file.new -anchor w -side left" );
 
 cmd( "pack .w.s.e1.lab .w.s.e1.c .w.s.e1.header .w.s.e1.file -anchor w " );
@@ -145,7 +145,7 @@ cmd( "frame .w.s.e2.file" );
 cmd( "label .w.s.e2.file.tlab -text \"File name\"" );
 cmd( "set file2 comments.txt" );
 cmd( "entry .w.s.e2.file.tit -width 50 -state disabled -textvariable file2" );
-cmd( "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]}" );
+cmd( "button .w.s.e2.file.new -width -9 -text \"Search File\" -command {set file2 [tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} }]; if [ fn_spaces $file2 .w ] { set file2 \"\" } }" );
 cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -anchor w -side left" );
 
 cmd( "pack .w.s.e2.lab .w.s.e2.c .w.s.e2.header .w.s.e2.file -anchor w " );
@@ -198,7 +198,7 @@ cmd( "destroytop .w" );
 start:
 if( (ffun=fopen(equation_name,"r"))==NULL)
  {
-  cmd( "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; set choice 1 } { set choice 2 }" );
+  cmd( "answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }" );
 
 if(*choice==1)
  {

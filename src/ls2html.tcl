@@ -158,3 +158,17 @@ if { [file exist description.txt] } {
   } {}
 close $f
 }
+
+
+# FN_SPACES
+# 	Checks is a filename has spaces
+#
+
+proc fn_spaces { fn { par . } } {
+	if { [ string first " " $fn ] == -1 } {
+		return false
+	} {
+		tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLsd files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
+		return true
+	}
+}

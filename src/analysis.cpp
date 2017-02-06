@@ -1615,8 +1615,7 @@ if ( *choice == 1 )
 #endif 
  
   cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd result files} {%s}} {{Lsd total files} {%s}} {{All files} {*}} }]", extRes, extTot );
-  
-  cmd( "set choice [llength $lab]" );
+  cmd( "if { ! [ fn_spaces $lab .da ] } { set choice [ llength $lab ] } { set choice 0 }" );
   if(*choice==0 )
    {//no file selected
     goto there; 
@@ -1816,7 +1815,7 @@ if(*choice == 0)
  if(*choice == 0)
   goto there;
  cmd( "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
- cmd( "if {$fname == \"\"} {set choice 0} {set choice 0}" );
+ cmd( "if { $fname == \"\" || [ fn_spaces $fname .da ] } { set choice 0 } { set choice 1 }" );
  if(*choice == 0)
   goto there;
 
