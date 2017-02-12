@@ -1898,25 +1898,20 @@ object *cur;
 if ( quit == 2 )		// simulation already being stopped
 	return;
 	
-if ( running )
+#ifndef NO_WINDOW
+if ( running )		// handle running events differently
 {
 	plog( "\n\nError detected at time %d", "highlight", t );
 	plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
 	plog( "\n\nError message: %s", "", logText );
 	print_stack( );
-}
-else
-	plog( "\n\nERROR: %s\n", "", logText );
-
-#ifndef NO_WINDOW
-if ( running )		// handle running events differently
-{
 	uncover_browser( );
 	cmd( "wm deiconify .log; raise .log; focus -force .log" );
 	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 }
 else
 {
+	plog( "\n\nERROR: %s\n", "", logText );
 	cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
 	log_tcl_error( "ERROR", logText );
 }

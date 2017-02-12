@@ -2518,6 +2518,8 @@ void sensitivity_doe( int *findex, design *doe )
 	char *fname;
 	FILE *f;
 	
+	plog( "\nCreating a configuration file for each sample.\nIt may take a while, please wait..." );
+	
 	for ( i = 0; i < doe->n; i++ )				// run through all experiments
 	{
 		// set up the variables (factors) with the experiment values
@@ -2543,4 +2545,5 @@ void sensitivity_doe( int *findex, design *doe )
 		
 		*findex = *findex + 1;
 	}
+	plog( " Done" );
 }

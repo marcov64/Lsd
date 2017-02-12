@@ -3807,7 +3807,7 @@ if (rsense!=NULL)
 
     findexSens = 1;
     sensitivity_doe( &findexSens, NOLHdoe );
-	plog( "\nSensitivity analysis samples produced: %d", "", findexSens - 1 );
+	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
 	delete NOLHdoe;
@@ -3917,7 +3917,7 @@ if (rsense!=NULL)
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 
     sensitivity_doe( &findexSens, rand_doe );
-	plog( "\nSensitivity analysis samples produced: %d", "", findexSens - 1 );
+	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;
@@ -4033,7 +4033,7 @@ if (rsense!=NULL)
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 
     sensitivity_doe( &findexSens, rand_doe );
-	plog( "\nSensitivity analysis samples produced: %d", "", findexSens - 1 );
+	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
 	delete rand_doe;

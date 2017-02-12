@@ -968,6 +968,7 @@ void plog( char const *cm, char const *tag, ... )
 	
 	if ( ok )
 	{
+		cmd( ".log.text.text.internal see [ .log.text.text.internal index insert ]" );
 		cmd( ".log.text.text.internal insert end \"%s\" %s", buffer, tag );
 		cmd( ".log.text.text.internal see end" );
 		cmd( "update" );

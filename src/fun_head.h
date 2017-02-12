@@ -135,7 +135,7 @@ return -1; \
 end : \
 if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
  { \
-  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD Debugger will open next.", t, label, res ); \
+  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
   error_hard( msg, "Invalid result", "Check your code to prevent this situation." ); \
   debug_flag = true; \
   debug = 'd'; \

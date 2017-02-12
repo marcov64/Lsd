@@ -106,8 +106,13 @@ void signal_handler(int signum)
 #endif
 		case SIGINT:
 		case SIGTERM:
+#ifdef NO_WINDOW
+			sprintf( msg, "SIGINT/SIGTERM (%s)", strsignal( signum ) );
+			break;
+#else
 			choice = 1;				// regular quit (checking for save)
 			return;
+#endif
 #ifdef SIGWINCH
 		case SIGWINCH:
 			cmd( "sizetop all" );	// readjust windows size/positions
@@ -192,7 +197,7 @@ void signal_handler(int signum)
 		log_tcl_error( "FATAL ERROR", msg3 );
 	}
 #else
-	fprintf( stderr, "FATAL ERROR: System Signal received:\n %s\n", msg );
+	fprintf( stderr, "\nFATAL ERROR: System Signal received: %s\n", msg );
 #endif
 	myexit( -signum );				// abort program
 }
