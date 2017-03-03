@@ -745,7 +745,7 @@ if(actual_steps>0)
  
 if(*choice!=35)
 {cmd( "if {[winfo exists .]==1} {bind . <Destroy> {}} {}" );
- cmd( "if {[winfo exists $c]==1} {bind $c <Destroy> {}} {}" );
+ cmd( "if {[winfo exists .str]==1} {bind .str <Destroy> {}} {}" );
  cmd( "if {[winfo exists .list]==1} {destroy .list} {}" );
 }
 
@@ -2343,11 +2343,11 @@ if ( struct_loaded )
 	 break;
 
    cmd( "set a [split [winfo children .] ]" );  // remove old runtime plots
-   cmd( " foreach i $a {if [string match .plt* $i] {destroy $i}}" );
-   cmd( "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
+   cmd( " foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
+   cmd( "if [ winfo exists .lat ] { destroytop .lat }" );	// remove lattice
    for(n=r; n->up!=NULL; n=n->up);
    r=n;
-   cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+   cmd( "if [ winfo exists .str ] { destroytop .str }" );
   
   empty_sensitivity(rsense); 	// discard sensitivity analysis data
   rsense=NULL;
@@ -2571,10 +2571,10 @@ case 20:
 if ( ! discard_change( ) )	// check for unsaved configuration changes
 	break;
 
-cmd( "if [ winfo exists .str ] { destroy .str }" );
+cmd( "if [ winfo exists .str ] { destroytop .str }" );
 cmd( "set a [split [winfo children .] ]" );
-cmd( " foreach i $a {if [string match .plt* $i] {destroy $i}}" );
-cmd( "if [ winfo exists .lat ] { destroy .lat }" );	// remove lattice
+cmd( " foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
+cmd( "if [ winfo exists .lat ] { destroytop .lat }" );	// remove lattice
 
 for(n=r; n->up!=NULL; n=n->up);
 n->empty();
@@ -2866,7 +2866,7 @@ break;
 case 40:
 
 cmd( "set a [split [winfo children .] ]" );
-cmd( " foreach i $a {if [string match .plt* $i] {destroy $i}}" );
+cmd( " foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
 
 break;
 
@@ -3279,7 +3279,7 @@ cmd( "pack .srch.i.l1 .srch.i.e .srch.i.l2 -pady 10" );
 cmd( "pack .srch.i" );
 cmd( "okcancel .srch b { set choice 1 } { set choice 2 }" );
 cmd( "bind .srch.i.e <KeyPress-Return> {set choice 1}" );
-cmd( "bind .srch.i.e <KeyRelease> {if { %%N < 256 && [info exists ModElem] } { set b [.srch.i.e index insert]; set c [.srch.i.e get]; set f [lsearch -glob $ModElem $c*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }" );
+cmd( "bind .srch.i.e <KeyRelease> {if { %%N < 256 && [info exists ModElem] } { set b [.srch.i.e index insert]; set s [.srch.i.e get]; set f [lsearch -glob $ModElem $s*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }" );
 
 cmd( "showtop .srch centerW" );
 cmd( "focus .srch.i.e" );
@@ -3606,7 +3606,7 @@ if (rsense!=NULL)
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
-	cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	if ( load_configuration( r ) != 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
@@ -3699,7 +3699,7 @@ if (rsense!=NULL)
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
-	cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	if ( load_configuration( r ) != 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
@@ -3815,7 +3815,7 @@ if (rsense!=NULL)
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
-	cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	if ( load_configuration( r ) != 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
@@ -3876,7 +3876,7 @@ if (rsense!=NULL)
 		Tcl_DoOneEvent(0);
 	
 	cmd( "set sizMC [ .s.i.e get ]" ); 
-	cmd( "destroy .s" );
+	cmd( "destroytop .s" );
 	Tcl_UnlinkVar(inter, "sizMC");
 	
 	if(*choice == 2)
@@ -3925,7 +3925,7 @@ if (rsense!=NULL)
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
-	cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	if ( load_configuration( r ) != 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
@@ -3996,7 +3996,7 @@ if (rsense!=NULL)
 	cmd( "set nSampl [ .s.i.e2 get ]" ); 
 	cmd( "set nLevels [ .s.i.e3 get ]" ); 
 	cmd( "set jumpSz [ .s.i.e4 get ]" ); 
-	cmd( "destroy .s" );
+	cmd( "destroytop .s" );
 	Tcl_UnlinkVar(inter, "varSA");
 	Tcl_UnlinkVar(inter, "nLevels");
 	Tcl_UnlinkVar(inter, "jumpSz");
@@ -4041,7 +4041,7 @@ if (rsense!=NULL)
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
 	r = n;
-	cmd( "if {[winfo exists $c.c]==1} {destroy $c.c} {}" );
+	cmd( "if [ winfo exists .str ] { destroytop .str }" );
 	if ( load_configuration( r ) != 0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );

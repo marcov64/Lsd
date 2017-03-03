@@ -1032,20 +1032,20 @@ int old;
 Tcl_LinkVar(inter, "cond", (char *) &cv->deb_cond, TCL_LINK_INT);
 Tcl_LinkVar(inter, "cond_val", (char *) &cv->deb_cnd_val, TCL_LINK_DOUBLE);
 
-cmd( "set c .condbrk" );
-cmd( "newtop $c \"Conditional Breaks\" { set choice 1 }" );
+cmd( "set cb .condbrk" );
+cmd( "newtop $cb \"Conditional Breaks\" { set choice 1 }" );
 
 choice=0;
 while(choice==0)
 {
 switch(cv->deb_cond)
- {case 0: cmd( "label $c.cnd_type -text \"No conditional break\"" );
+ {case 0: cmd( "label $cb.cnd_type -text \"No conditional break\"" );
           break;
-  case 1: cmd( "label $c.cnd_type -text \"Condition: = \"" );
+  case 1: cmd( "label $cb.cnd_type -text \"Condition: = \"" );
           break;
-  case 2: cmd( "label $c.cnd_type -text \"Condition: < \"" );
+  case 2: cmd( "label $cb.cnd_type -text \"Condition: < \"" );
           break;
-  case 3: cmd( "label $c.cnd_type -text \"Condition: > \"" );
+  case 3: cmd( "label $cb.cnd_type -text \"Condition: > \"" );
           break;
   default: 
 		  sprintf( msg, "debug condition for var '%s' set to '%d'",cv->label, cv->deb_cond);
@@ -1054,30 +1054,30 @@ switch(cv->deb_cond)
           break;
  }
 old=cv->deb_cond;
-cmd( "label $c.name -text \"Conditional stop for variable: %s\"", cv->label );
-cmd( "entry $c.cond -validate focusout -vcmd { if [ string is double %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center" );
-cmd( "$c.cond insert 0 $cond_val" ); 
-cmd( "frame $c.c" );
-cmd( "button $c.c.eq -width -9 -text \" = \" -command {set cond 1}" );
-cmd( "button $c.c.min -width -9 -text \" < \" -command {set cond 2}" );
-cmd( "button $c.c.max -width -9 -text \" > \" -command {set cond 3}" );
-cmd( "button $c.no -width -9 -text \"No Condition\" -command {set cond 0}" );
+cmd( "label $cb.name -text \"Conditional stop for variable: %s\"", cv->label );
+cmd( "entry $cb.cond -validate focusout -vcmd { if [ string is double %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$cb.cond insert 0 $cond_val" ); 
+cmd( "frame $cb.c" );
+cmd( "button $cb.c.eq -width -9 -text \" = \" -command {set cond 1}" );
+cmd( "button $cb.c.min -width -9 -text \" < \" -command {set cond 2}" );
+cmd( "button $cb.c.max -width -9 -text \" > \" -command {set cond 3}" );
+cmd( "button $cb.no -width -9 -text \"No Condition\" -command {set cond 0}" );
 
-cmd( "pack $c.c.min $c.c.eq $c.c.max -side left" );
-cmd( "pack $c.name $c.cnd_type $c.c $c.cond $c.no -side top" );
+cmd( "pack $cb.c.min $cb.c.eq $cb.c.max -side left" );
+cmd( "pack $cb.name $cb.cnd_type $cb.c $cb.cond $cb.no -side top" );
 
-cmd( "done $c b { set choice 1 }" );
+cmd( "done $cb b { set choice 1 }" );
 
-cmd( "showtop $c" );
+cmd( "showtop $cb" );
 
 while(choice==0 && cv->deb_cond==old)
  Tcl_DoOneEvent(0);
 
-cmd( "set cond_val [ $c.cond get ]" ); 
-cmd( "destroy $c.cnd_type $c.name $c.cond $c.c $c.no $c.b" );
+cmd( "set cond_val [ $cb.cond get ]" ); 
+cmd( "destroy $cb.cnd_type $cb.name $cb.cond $cb.c $cb.no $cb.b" );
 }
 
-cmd( "destroytop $c" );
+cmd( "destroytop $cb" );
 
 Tcl_UnlinkVar(inter, "cond");
 Tcl_UnlinkVar(inter, "cond_val");

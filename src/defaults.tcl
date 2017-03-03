@@ -18,6 +18,46 @@
 
 package require Tk
 
+# plot windows size and margins
+set hsizeP 		600	; # default plot (time series) horizontal size in pixels
+set vsizeP		300	; # default plot (time series) vertical size in pixels
+set hmbordsizeP	40	; # minimum width of plot horizontal (left/right) border area (for legends)
+set tbordsizeP	5	; # width of plot top border area (for legends)
+set bbordsizeP	90	; # width of plot bottom border area (for legends)
+set sbordsizeP	0	; # width of plot scroll border area
+set htmarginP	4	; # horizontal margin for legends text in plots
+set vtmarginP	2	; # vertical margin for legends text in plots
+set hsizePxy	640	; # default plot (XY) horizontal size in pixels
+set vsizePxy	450	; # default plot (XY) vertical size in pixels
+
+# internal plot options
+set fontP		{ Times 10 normal }; # default plot text font/size/mode
+set hticksP		3	; # number of horizontal plot legend ticks
+set vticksP		3	; # number of vertical plot legend ticks
+set smoothP		no	; # options are no, yes or raw
+set splstepsP 	3	; # number of spline segments when smoothP is raw
+
+# lattice options (maximum & default, color scale)
+set hsizeLatMax	600	; # maximum lattice horizontal size in pixels
+set vsizeLatMax	600	; # maximum lattice vertical size in pixels
+set hsizeLat	400	; # default lattice horizontal size in pixels
+set vsizeLat	400	; # default lattice vertical size in pixels
+set cscaleLat	1.0	; # default color scale (1:1.0)
+
+# plot windows defaults
+set grayscaleP	0	; # default color mode for plots (0=color)
+set gridP		0	; # defaut grid mode (0=no grid)
+set linemodeP	1	; # default line mode (1:lines/2:points)
+set pdigitsP	4	; # default precision digits
+set pointsizeP	1.0	; # default size of points (<1:./<2:x/<3:+/>=3:round)
+set maxzoomP	4.0	; # maximum zoom magnification factor in plots
+set minzoomP	0.5	; # minimum zoom shrinking factor in plots
+
+# default colors in palette and other elements
+set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
+set axcolorP	gray25	; # color of plot axis
+set grcolorP	gray75	; # color of plot grid
+
 # main windows size and margins (must be even numbers)
 set hmargin		20	; # horizontal right margin from the screen borders
 set vmargin		20	; # vertical margins from the screen borders
@@ -35,39 +75,6 @@ set hsizeI 		800	; # initial values editor horizontal size in pixels
 set vsizeI		600	; # initial values editor vertical size in pixels
 set hsizeN 		350	; # objects numbers editor horizontal size in pixels
 set vsizeN		550	; # objects numbers editor vertical size in pixels
-
-# plot windows size and margins
-set hsizeP 		600	; # default plot (time series) horizontal size in pixels
-set vsizeP		300	; # default plot (time series) vertical size in pixels
-set hmbordsizeP	40	; # minimum width of plot horizontal (left/right) border area (for legends)
-set tbordsizeP	5	; # width of plot top border area (for legends)
-set bbordsizeP	90	; # width of plot bottom border area (for legends)
-set sbordsizeP	0	; # width of plot scroll border area
-set htmarginP	4	; # horizontal margin for legends text in plots
-set vtmarginP	2	; # vertical margin for legends text in plots
-set hsizePxy	640	; # default plot (XY) horizontal size in pixels
-set vsizePxy	450	; # default plot (XY) vertical size in pixels
-
-# line smoothing for series line plot
-set smoothP		no	; # options are no, yes or raw
-set splstepsP 	3	; # number of spline segments when smoothP is raw
-
-# other plot windows defaults
-set grayscaleP	0	; # default color mode for plots (0=color)
-set gridP		0	; # defaut grid mode (0=no grid)
-set fontP		{ Times 10 normal }; # default plot text font/size/mode
-set linemodeP	1	; # default line mode (1:lines/2:points)
-set pdigitsP	4	; #default precision digits
-set hticksP		3	; # number of horizontal plot legend ticks
-set vticksP		3	; # number of vertical plot legend ticks
-set pointsizeP	1.0	; # default size of points (<1:./<2:x/<3:+/>=3:round)
-set maxzoomP	4.0	; # maximum zoom magnification factor in plots
-set minzoomP	0.5	; # minimum zoom shrinking factor in plots
-
-# default colors in palette and other elements
-set defcolors	{ black red green #d0d000 #fb46bc blue DeepSkyBlue1 grey40 PaleTurquoise2 cyan aquamarine DarkSeaGreen1 chartreuse1 OliveDrab khaki3 LightGoldenrod4 sienna1 chocolate4 firebrick3 orange1 salmon3 }
-set axcolorP	gray25	; # color of plot axis
-set grcolorP	gray75	; # color of plot grid
 
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down

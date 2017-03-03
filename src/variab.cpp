@@ -251,7 +251,10 @@ if ( param == 0 )
 		if ( eff_lag <= num_lag )
 			return val[ eff_lag ];
 		else
-			return data[ t - lag ];		// use saved data
+			if ( save || savei )
+				return data[ t - lag ];	// use saved data
+			else
+				return val[ 0 ];		// ignore lag request
 	}
 }
 else

@@ -460,7 +460,9 @@ void log_tcl_error( const char *cm, const char *message );
 void myexit(int v);
 void plog( char const *msg, char const *tag = "", ... );
 void plog_series(int *choice);
+void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
 void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice );
+void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag, int *choice );
 void plot_cross(int *choice);
 void plot_cs_xy(int *choice);
 void plot_gnu(int *choice);
@@ -536,6 +538,7 @@ extern bool ignore_eq_file;	// control of configuration files equation updating
 extern bool iniShowOnce;	// prevent repeating warning on # of columns
 extern bool in_edit_data;	// in initial settings mode
 extern bool in_set_obj;		// in setting number of objects mode
+extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
 extern bool no_error;		// object search error control	
 extern bool redrawRoot;		// control for redrawing root window (.)

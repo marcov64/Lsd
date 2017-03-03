@@ -307,40 +307,40 @@ if ( c->up == NULL )
 	return 1;
 }
 
-cmd( "set c .compcopy" );
-cmd( "newtop $c \"Instance Number\" { set cconf 1; set choice 1 }" );
+cmd( "set cc .compcopy" );
+cmd( "newtop $cc \"Instance Number\" { set cconf 1; set choice 1 }" );
 
 cmd( "set conf 0" );
-cmd( "label $c.l -text \"Determine the sequential number of the instance of '%s' \\nby setting the sequential number of the containing objects.\\nPressing 'Compute' will give the sequential number.\\npressing 'Done' will copy the number and exit.\"", c->label );
-cmd( "frame $c.f -relief groove -bd 2" );
+cmd( "label $cc.l -text \"Determine the sequential number of the instance of '%s' \\nby setting the sequential number of the containing objects.\\nPressing 'Compute' will give the sequential number.\\npressing 'Done' will copy the number and exit.\"", c->label );
+cmd( "frame $cc.f -relief groove -bd 2" );
 for(j=1, cur=c; cur->up!=NULL; cur=cur->up, j++) 
   {
-  cmd( "frame $c.f.f%d", j );
-  cmd( "label $c.f.f%d.l -text \"Instance of '%s' number: \"", j, cur->label );
-  cmd( "entry $c.f.f%d.e -width 8 -textvariable num%d -justify center", j,j );
-  cmd( "pack $c.f.f%d.l $c.f.f%d.e -side left", j, j );
+  cmd( "frame $cc.f.f%d", j );
+  cmd( "label $cc.f.f%d.l -text \"Instance of '%s' number: \"", j, cur->label );
+  cmd( "entry $cc.f.f%d.e -width 8 -textvariable num%d -justify center", j,j );
+  cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left", j, j );
   
   for(i=1, cur1=cur->up->search(cur->label); cur1!=cur; cur1=cur1->next, i++);
 
   cmd( "set num%d %d", j,i );
   }
   
-cmd( "focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end", j-1, j-1 );
+cmd( "focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end", j-1, j-1 );
 
 for(j--, cur=c; cur->up!=NULL; cur=cur->up, j--)
   {//pack in inverse order
-  cmd( "pack $c.f.f%d -fill both -expand yes", j );
-  cmd( "bind $c.f.f%d.e <Return> {focus $c.f.f%d.e; $c.f.f%d.e selection range 0 end}", j,j-1, j-1 );
+  cmd( "pack $cc.f.f%d -fill both -expand yes", j );
+  cmd( "bind $cc.f.f%d.e <Return> {focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end}", j,j-1, j-1 );
   }
 
-cmd( "bind $c.f.f1.e <Return> \"focus $c.com\"" );
+cmd( "bind $cc.f.f1.e <Return> \"focus $cc.com\"" );
 
-cmd( "label $c.res -fg red -text \"Instance chosen is number: %d\"", i );
+cmd( "label $cc.res -fg red -text \"Instance chosen is number: %d\"", i );
 res=i;
-cmd( "pack $c.l $c.f $c.res -pady 5 -fill both -expand yes" );
-cmd( "comphelpdone $c b { set cconf 1; set choice 2 } { LsdHelp mdataobjn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
+cmd( "pack $cc.l $cc.f $cc.res -pady 5 -fill both -expand yes" );
+cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp mdataobjn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
 
-cmd( "showtop $c centerS" );
+cmd( "showtop $cc centerS" );
 
 here_ccompute:
 for(cur=c->up; cur->up!=NULL; cur=cur->up); //cur is root
@@ -374,7 +374,7 @@ for(j=1, cur2=cur3; cur2->up!=NULL; cur2=cur2->up, j++)
   cmd( "set num%d %d", j,i );
   }
 
-cmd( "$c.res conf -text \"Instance chosen is num: %d\"", res ); 
+cmd( "$cc.res conf -text \"Instance chosen is num: %d\"", res ); 
    
 
 here_cfrom:
@@ -395,7 +395,7 @@ if(*choice==2)
 
 
 
-cmd( "destroytop $c" );
+cmd( "destroytop $cc" );
 return res;
 }
 

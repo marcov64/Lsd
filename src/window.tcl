@@ -34,6 +34,9 @@ package require Tk 8.5
 # Enable window functions operation logging
 set logWndFn	false
 
+# Enable coordinates test window
+set testWnd		false
+
 # list of windows with predefined sizes & positions
 set wndLst [ list .lsd .lmm .log .str ]
 
@@ -800,13 +803,12 @@ proc canvas_axis { c type grid { y2 0 } } {
 	$c create line $hbordsizeP $tbordsizeP [ expr $hbordsizeP + $hsizeP ] $tbordsizeP -width 1 -fill $axcolorP -tag p
 	$c create line $hbordsizeP [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
 
-	if { $type == 0 } {
-		for { set i 1 } { $i < [ expr $hticksP + 1 ] } { incr i } {
-			if $grid {
+	if { $type == 0 || $type == 4 || $type == 5 } {
+		for { set i 0 } { $i < [ expr $hticksP + 2 ] } { incr i } {
+			if { $grid && $i > 0 && $i < [ expr $hticksP + 1 ] } {
 				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + 1 ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP - 1 ] -fill $grcolorP -width 1 -tags {g p} 
-			} {
-				$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
 			}
+			$c create line [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP ] [ expr $hbordsizeP + round( $i * $hsizeP / ( $hticksP + 1 ) ) ] [ expr $tbordsizeP + $vsizeP + 5 ] -fill $axcolorP -width 1 -tags p
 		}
 	}
 	
@@ -814,14 +816,32 @@ proc canvas_axis { c type grid { y2 0 } } {
 	$c create line $hbordsizeP $tbordsizeP $hbordsizeP [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
 	$c create line [ expr $hbordsizeP + $hsizeP ]  $tbordsizeP [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + $vsizeP ] -width 1 -fill $axcolorP -tag p
 
-	for { set i 1 } { $i < [ expr $vticksP + 1 ] } { incr i } {
-		if $grid {
+	for { set i 0 } { $i < [ expr $vticksP + 2 ] } { incr i } {
+		if { $grid && $i > 0 && $i < [ expr $vticksP + 1 ] } {
 			$c create line [ expr $hbordsizeP + 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP - 1 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $grcolorP -width 1 -tags {g p}
-		} {
-			$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
-			if $y2 {
-				$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
-			}
+		}
+		$c create line [ expr $hbordsizeP - 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] $hbordsizeP [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+		if $y2 {
+			$c create line [ expr $hbordsizeP + $hsizeP ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] [ expr $hbordsizeP + $hsizeP + 5 ] [ expr $tbordsizeP + round( $i * $vsizeP / ( $vticksP + 1 ) ) ] -fill $axcolorP -width 1 -tag p
+		}
+	}
+}
+
+# plot color filled bars
+proc plot_bars { c x1 y1 x2 y2 { tags "" } { fill white } { width 1 } } {
+
+	set size [ expr min( [ llength $x1 ], [ llength $y1 ], [ llength $x2 ], [ llength $y2 ]  ) ]
+	lappend tags bar series
+	
+	for { set i 0 } { $i < $size } { incr i } {
+		# valid point?
+		set x1i [ lindex $x1 $i ]
+		set y1i [ lindex $y1 $i ]
+		set x2i [ lindex $x2 $i ]
+		set y2i [ lindex $y2 $i ]
+		if { $x1i != $x2i && $y1i != $y2i } {
+			# plot bar
+			$c create rect $x1i $y1i $x2i $y2i -width $width -fill $fill -tags $tags
 		}
 	}
 }
@@ -1141,3 +1161,70 @@ proc init_canvas_colors { } {
 		}
 	}
 }
+
+# Open test window if enabled
+if $testWnd {
+	newtop .test "LSD Coordinates Test Window" { destroytop .test } ""
+	
+	frame .test.xy
+	label .test.xy.l1 -anchor e -text "X:"
+	label .test.xy.v1 -anchor w -fg red
+	label .test.xy.l2 -anchor e -text "   Y:"
+	label .test.xy.v2 -anchor w -fg red
+	pack .test.xy.l1 .test.xy.v1 .test.xy.l2 .test.xy.v2 -side left -padx 2 -pady 2
+	
+	frame .test.r
+	label .test.r.l1 -anchor e -text "rootx:"
+	label .test.r.v1 -anchor w -fg red
+	label .test.r.l2 -anchor e -text "   rooty:"
+	label .test.r.v2 -anchor w -fg red
+	pack .test.r.l1 .test.r.v1 .test.r.l2 .test.r.v2 -side left -padx 2 -pady 2
+	
+	frame .test.v
+	label .test.v.l1 -anchor e -text "vrootx:"
+	label .test.v.v1 -anchor w -fg red
+	label .test.v.l2 -anchor e -text "   vrooty:"
+	label .test.v.v2 -anchor w -fg red
+	pack .test.v.l1 .test.v.v1 .test.v.l2 .test.v.v2 -side left -padx 2 -pady 2
+	
+	frame .test.s
+	label .test.s.l1 -anchor e -text "screenwidth:"
+	label .test.s.v1 -anchor w -fg red
+	label .test.s.l2 -anchor e -text "   screenheight:"
+	label .test.s.v2 -anchor w -fg red
+	pack .test.s.l1 .test.s.v1 .test.s.l2 .test.s.v2 -side left -padx 2 -pady 2
+	
+	frame .test.t
+	label .test.t.l1 -anchor e -text "vrootwidth:"
+	label .test.t.v1 -anchor w -fg red
+	label .test.t.l2 -anchor e -text "   vrootheight:"
+	label .test.t.v2 -anchor w -fg red
+	pack .test.t.l1 .test.t.v1 .test.t.l2 .test.t.v2 -side left -padx 2 -pady 2
+	
+	frame .test.m
+	label .test.m.l1 -anchor e -text "maxwidth:"
+	label .test.m.v1 -anchor w -fg red
+	label .test.m.l2 -anchor e -text "   maxheight:"
+	label .test.m.v2 -anchor w -fg red
+	pack .test.m.l1 .test.m.v1 .test.m.l2 .test.m.v2 -side left -padx 2 -pady 2
+	
+	pack .test.xy .test.r .test.v .test.s .test.t .test.m
+	
+	bind .test <Motion> { 
+		.test.xy.v1 configure -text %X
+		.test.xy.v2 configure -text %Y
+		.test.r.v1 configure -text [ winfo rootx .test ]
+		.test.r.v2 configure -text [ winfo rooty .test ]
+		.test.v.v1 configure -text [ winfo vrootx .test ]
+		.test.v.v2 configure -text [ winfo vrooty .test ]
+		.test.s.v1 configure -text [ winfo screenwidth .test ]
+		.test.s.v2 configure -text [ winfo screenheight .test ]
+		.test.t.v1 configure -text [ winfo vrootwidth .test ]
+		.test.t.v2 configure -text [ winfo vrootheight .test ]
+		.test.m.v1 configure -text [ lindex [ wm maxsize .test ] 0 ]
+		.test.m.v2 configure -text [ lindex [ wm maxsize .test ] 1 ]
+	}
+	
+	showtop .test current yes yes no
+}
+

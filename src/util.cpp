@@ -140,8 +140,7 @@ void log_tcl_error( const char *cm, const char *message )
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
 	
-	if ( tk_ok )
-		plog( "\nInternal Lsd error. See file '%s'\n", "", fname );
+	plog( "\nInternal Lsd error. See file '%s'\n", "", fname );
 }
 
 #else
@@ -2005,9 +2004,9 @@ if(i==1)
  cmd( "set w .desc_$vname" );
  cur=search_description(lab);
  if(!strcmp(cur->type,"Parameter") )
-   cmd( "newtop $w \"Description: Parameter $vname\" { destroy .desc_%s }" );
+   cmd( "newtop $w \"Description: Parameter $vname\" { destroytop .desc_%s }" );
  else
-   cmd( "newtop $w \"Description: Variable $vname\" { destroy .desc_%s }" );  
+   cmd( "newtop $w \"Description: Variable $vname\" { destroytop .desc_%s }" );  
 
  cmd( "frame $w.f" );
  cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
@@ -2027,7 +2026,7 @@ if(i==1)
   
  cmd( "pack $w.b" );
  
- cmd( "donehelp $w b2 { destroy .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab  ); 
+ cmd( "donehelp $w b2 { destroytop .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab  ); 
 
 cmd( "set vname %s", lab );
 cmd( "set raise_description 1" );
@@ -2166,7 +2165,7 @@ void get_double( const char *tcl_var, double *var )
 /*
 init_lattice
 Create a new run time lattice having:
-- pix=maximum pixel (600 should fit in typical screens)
+- pix=maximum pixel (600 should fit in typical screens, 0=default size)
 - nrow= number of rows
 - ncol= number of columns
 - lrow= label of variable or parameter indicating the row value
@@ -2184,7 +2183,18 @@ double dimW, dimH;
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
 {
 object *cur;
-double i, j,color;
+int hsize, vsize, hsizeMax, vsizeMax;
+double i, j, color;
+
+get_int( "hsizeLat", & hsize );			// 400
+get_int( "vsizeLat", & vsize );			// 400
+get_int( "hsizeLatMax", & hsizeMax );	// 600
+get_int( "vsizeLatMax", & vsizeMax );	// 600
+
+pixW = pixW > 0 ? pixW : hsize;
+pixH = pixH > 0 ? pixH : vsize;
+pixW = min( pixW, hsizeMax );
+pixH = min( pixH, vsizeMax );
 
 dimH=pixH/nrow;
 dimW=pixW/ncol;

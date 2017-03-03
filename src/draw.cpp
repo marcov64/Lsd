@@ -83,72 +83,73 @@ if(!strWindowOn)	// model structure window is deactivated?
 	return;
 }
 
-cmd( "set c .str" );
+cmd( "set g .str" );
 cmd( "set color white" );
 for(top=t; top->up!=NULL; top=top->up);
 
-cmd( "set strExist [ winfo exists $c ]" );
+cmd( "set strExist [ winfo exists $g ]" );
 if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only if needed
 {
-	cmd( "newtop $c \"\" { set strWindowOn 0; set choice 70 } \"\"" );
-	cmd( "wm transient $c ." );
-	cmd( "wm title $c \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
-	cmd( "sizetop $c" );
+	cmd( "newtop $g \"\" { set strWindowOn 0; set choice 70 } \"\"" );
+	cmd( "wm transient $g ." );
+	cmd( "sizetop $g" );
 
-	cmd( "frame $c.f" );
-	cmd( "scrollbar $c.f.vs -command \"$c.f.c yview\"" );
-	cmd( "scrollbar $c.f.hs -orient horiz -command \"$c.f.c xview\"" );
-	cmd( "canvas $c.f.c -width %d -height %d -yscrollcommand \"$c.f.vs set\" -xscrollcommand \"$c.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
+	cmd( "frame $g.f" );
+	cmd( "scrollbar $g.f.vs -command \"$g.f.c yview\"" );
+	cmd( "scrollbar $g.f.hs -orient horiz -command \"$g.f.c xview\"" );
+	cmd( "canvas $g.f.c -width %d -height %d -yscrollcommand \"$g.f.vs set\" -xscrollcommand \"$g.f.hs set\" -scrollregion \"0 0 %d %d\"", hcvsz, vcvsz, hcvsz, vcvsz );
 
-	cmd( "pack $c.f.vs -side right -fill y" );
-	cmd( "pack $c.f.hs -side bottom -fill x" );
-	cmd( "pack $c.f.c -expand yes -fill both" );
-	cmd( "pack $c.f -expand yes -fill both" );
+	cmd( "pack $g.f.vs -side right -fill y" );
+	cmd( "pack $g.f.hs -side bottom -fill x" );
+	cmd( "pack $g.f.c -expand yes -fill both" );
+	cmd( "pack $g.f -expand yes -fill both" );
 	cmd( "set hpan0win %f; set hpan0lin %f; set hpan0mac %f", hpan0win, hpan0lin, hpan0mac );
-	cmd( "mouse_wheel $c.f.c" );
+	cmd( "mouse_wheel $g.f.c" );
     cmd( "if [ string equal $tcl_platform(platform) windows ] { \
-				$c.f.c xview moveto $hpan0win \
+				$g.f.c xview moveto $hpan0win \
 			} { \
 				if [ string equal $tcl_platform(os) Darwin ] { \
-					$c.f.c xview moveto $hpan0mac \
+					$g.f.c xview moveto $hpan0mac \
 				} { \
-					$c.f.c xview moveto $hpan0lin \
+					$g.f.c xview moveto $hpan0lin \
 				} \
 			}" );
 
 	draw_obj(t, top, v0, h0, 0);
 
-	cmd( "bind $c.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
-	cmd( "bind $c.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %%X %%Y } }" );
-	cmd( "bind $c.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $c.f.c.v %%X %%Y } }" );
+	cmd( "bind $g.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
+	cmd( "bind $g.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
+	cmd( "bind $g.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
 
-	cmd( "menu $c.f.c.v -tearoff 0" );
-	cmd( "$c.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
-	cmd( "$c.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
-	cmd( "$c.f.c.v add separator" );
-	cmd( "$c.f.c.v add command -label Change -command { set choice 6 }" );
-	cmd( "$c.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
-	cmd( "$c.f.c.v add command -label Delete -command { set choice 74 }" );
-	cmd( "$c.f.c.v add separator" );
-	cmd( "$c.f.c.v add cascade -label Add -menu $c.f.c.v.a" );
-	cmd( "$c.f.c.v add separator" );
-	cmd( "$c.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
-	cmd( "$c.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
-	cmd( "menu $c.f.c.v.a -tearoff 0" );
-	cmd( "$c.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
-	cmd( "$c.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
-	cmd( "$c.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
-	cmd( "$c.f.c.v.a add command -label Object -command { set choice 3 }" );
+	cmd( "menu $g.f.c.v -tearoff 0" );
+	cmd( "$g.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
+	cmd( "$g.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
+	cmd( "$g.f.c.v add separator" );
+	cmd( "$g.f.c.v add command -label Change -command { set choice 6 }" );
+	cmd( "$g.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
+	cmd( "$g.f.c.v add command -label Delete -command { set choice 74 }" );
+	cmd( "$g.f.c.v add separator" );
+	cmd( "$g.f.c.v add cascade -label Add -menu $g.f.c.v.a" );
+	cmd( "$g.f.c.v add separator" );
+	cmd( "$g.f.c.v add command -label \"Initial Values\" -command { set choice 21 }" );
+	cmd( "$g.f.c.v add command -label \"Browse Data\" -command { set choice 34 }" );
+	cmd( "menu $g.f.c.v.a -tearoff 0" );
+	cmd( "$g.f.c.v.a add command -label Variable -command { set choice 2; set param 0 }" );
+	cmd( "$g.f.c.v.a add command -label Parameter -command { set choice 2; set param 1 }" );
+	cmd( "$g.f.c.v.a add command -label Function -command { set choice 2; set param 2 }" );
+	cmd( "$g.f.c.v.a add command -label Object -command { set choice 3 }" );
 
-	cmd( "showtop $c current yes yes no 0 0 b" );
+	cmd( "showtop $g current yes yes no 0 0 b" );
 
-	set_shortcuts( "$c" );
+	set_shortcuts( "$g" );
 }
 else	// or just update canvas
 {
-	cmd( "$c.f.c delete all" );
+	cmd( "$g.f.c delete all" );
 	draw_obj(t, top, v0, h0, 0);
 }
+
+cmd( "wm title $g \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
 }
 
 
@@ -236,7 +237,7 @@ PUT_NODE
 ****************************************************/
 void put_node(int x1, int y1, int x2, int y2, char *str)
 {
-	cmd( "$c.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str );
+	cmd( "$g.f.c create oval %d.m %d.m %d.m %d.m -tags node -tags %s -fill $color",x1, y1, x2, y2, str );
 }
 
 
@@ -246,7 +247,7 @@ PUT_LINE
 ****************************************************/
 void put_line(int x1, int y1, int x2, int y2)
 {
-    cmd( "$c.f.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2 );
+    cmd( "$g.f.c create line %d.m %d.m %d.m %d.m -tags node", x1, y1, x2, y2 );
 }
 
 
@@ -256,12 +257,12 @@ PUT_TEXT
 ****************************************************/
 void put_text(char *str, char *n, int x, int y, char *str2)
 {
-cmd( "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s", x,y,str,str2  );
+cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s", x,y,str,str2  );
 
 //text for node numerosity
 y+=8;
-cmd( "$c.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s", x,y,n,str2  );
+cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s", x,y,n,str2  );
 
-cmd( "$c.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $c; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $c }", str2, str2, str2 );
-cmd( "$c.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2 );
+cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $g }", str2, str2, str2 );
+cmd( "$g.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2 );
 }
