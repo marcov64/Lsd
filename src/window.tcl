@@ -37,6 +37,17 @@ set logWndFn	false
 # Enable coordinates test window
 set testWnd		false
 
+# Variable 'alignMode' configure special, per module (LMM, LSD), settings
+unset -nocomplain defaultPos defaultFocus
+if [ info exists alignMode ] {
+	if [ string equal -nocase $alignMode "LMM" ] {
+		set defaultPos centerW
+		set defaultFocus .f.t.t
+	} else {
+		set defaultPos centerW
+	}
+}
+
 # list of windows with predefined sizes & positions
 set wndLst [ list .lsd .lmm .log .str ]
 
@@ -103,6 +114,7 @@ image create photo compileImg -file "$RootLsd/$LsdSrc/icons/compile.$iconExt"
 image create photo infoImg -file "$RootLsd/$LsdSrc/icons/info.$iconExt"
 image create photo descrImg -file "$RootLsd/$LsdSrc/icons/descr.$iconExt"
 image create photo equationImg -file "$RootLsd/$LsdSrc/icons/equation.$iconExt"
+image create photo extraImg -file "$RootLsd/$LsdSrc/icons/extra.$iconExt"
 image create photo setImg -file "$RootLsd/$LsdSrc/icons/set.$iconExt"
 image create photo hideImg -file "$RootLsd/$LsdSrc/icons/hide.$iconExt"
 image create photo helpImg -file "$RootLsd/$LsdSrc/icons/help.$iconExt"
@@ -113,15 +125,6 @@ image create photo numberImg -file "$RootLsd/$LsdSrc/icons/number.$iconExt"
 image create photo runImg -file "$RootLsd/$LsdSrc/icons/run.$iconExt"
 image create photo dataImg -file "$RootLsd/$LsdSrc/icons/data.$iconExt"
 image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
-
-# Variable 'alignMode' configure special, per module (LMM, LSD), settings
-unset -nocomplain defaultPos defaultFocus
-if [ info exists alignMode ] {
-	if [ string equal -nocase $alignMode "LMM" ] {
-		set defaultPos centerW
-		set defaultFocus .f.t.t
-	}
-}
 
 # lists to hold the windows parents stacks and exceptions to the parent mgmt.
 set parWndLst [ list ]
@@ -217,15 +220,16 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
 				} {
-					set pos centerS
+					set pos centerW
 				}
 			}
 					
+			# don't use screen based positioning if not in primary display
 			if { [ string equal $pos centerS ] && ! [ primdisp [ winfo parent $w ] ] } {
 				if [ info exists defaultPos ] {
 					set pos $defaultPos
 				} {
-					set pos centerS
+					set pos centerW
 				}
 			}
 			
@@ -433,17 +437,22 @@ proc icontop { w { type lsd } } {
 }
 
 # alignment of window w1 to the to right side of w2
-proc align {w1 w2} {
+proc align { w1 w2 { side R } } {
 	global hmargin corrX corrY logWndFn
 	
 	set a [ winfo width $w1 ]
 	set b [ winfo height $w1 ]
 	set c [ expr [ winfo x $w2 ] + $corrX ]
 	set d [ expr [ winfo y $w2 ] + $corrY ]
-	set e [ winfo width $w2 ]
+	set e [ winfo width $w1 ]
+	set f [ winfo width $w2 ]
 
-	set f [ expr $c + $e + $hmargin ]
-	wm geometry $w1 +$f+$d
+	if { $side == "L" } {
+		set g [ expr $c - $e - $hmargin ]
+	} else {
+		set g [ expr $c + $f + $hmargin ]
+	}
+	wm geometry $w1 +$g+$d
 	update
 
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nalign w1:$w1 w2:$w2 (w1 width:$a, w1 height:$b, w2 x:$c, w2 y:$d, w2 width:$e)" }
@@ -487,6 +496,14 @@ proc getx { w pos } {
 		righttoW {
 			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
 		}
+		lefttoW {
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
+			if { $hpos < 0 && [ primdisp [ winfo parent $w ] ] } {
+				return 0
+			} else {
+				return $hpos
+			}
+		}
 	}
 }
 
@@ -516,6 +533,9 @@ proc gety { w pos } {
 			return [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
 		}
 		righttoW {
+			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+		}
+		lefttoW {
 			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 	} 
@@ -574,6 +594,17 @@ proc ok { w fr comOk } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
+proc Xcancel { w fr nameX comX comCancel } {
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	button $w.$fr.ok -width -9 -text $nameX -command $comX
+	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
+	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	pack $w.$fr.ok $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 
@@ -668,6 +699,14 @@ proc finddone { w fr comFind comDone } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.search $w.$fr.ok -padx 10 -pady 10 -side left
+	pack $w.$fr -side right 
+}
+
+proc save { w fr comSave } {
+	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	button $w.$fr.ok -width -9 -text Save -command $comSave
+	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
+	pack $w.$fr.ok -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 

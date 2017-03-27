@@ -1925,35 +1925,38 @@ quit = 2;				// do not continue simulation
 #ifndef NO_WINDOW
 cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 
-choice=0;
+cmd( "set err 2" );
+
 cmd( "newtop .cazzo Error { set err 1 }" );
 
 cmd( "frame .cazzo.t" );
-cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation run\"" );
+cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
 cmd( "pack .cazzo.t.l -pady 10" );
-cmd( "label .cazzo.t.l1 -text \"Information about the error and on the state of the model are reported\nin the log window. Current results are available in the Lsd browser.\n\nChoose one of the following options to continue\"" );
-cmd( "pack .cazzo.t.l1 -expand yes -fill both" );
-cmd( "pack .cazzo.t" );
-cmd( "set err 2" );
-cmd( "frame .cazzo.e -relief groove -bd 2" );
-cmd( "radiobutton .cazzo.e.r -variable err -value 2 -text \"Return to Lsd browser: choose this option to edit the model configuration\"" );
-cmd( "radiobutton .cazzo.e.e -variable err -value 1 -text \"Quit Lsd: choose this option to edit equations' code\"" );
+cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the Lsd browser.\"" );
+cmd( "pack .cazzo.t.l1" );
 
-cmd( "pack .cazzo.e.r .cazzo.e.e -anchor w" );
-cmd( "pack .cazzo.e  -fill both -expand yes" );
+cmd( "frame .cazzo.e" );
+cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
+
+cmd( "frame .cazzo.e.b -relief groove -bd 2" );
+cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to Lsd browser to edit the model configuration\"" );
+cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit Lsd browser to edit the model equations' code in LMM\"" );
+cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
+
+cmd( "pack .cazzo.e.l .cazzo.e.b" );
+
+cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
 
 cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-cmd( "bind .cazzo.e.r <Down> {focus .cazzo.e.e; .cazzo.e.e invoke}" );
-cmd( "bind .cazzo.e.e <Up> {focus .cazzo.e.r; .cazzo.e.r invoke}" );
+cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
+cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
+cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
+cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
 
-cmd( "bind .cazzo.e.r <Return> {set choice 1}" );
-cmd( "bind .cazzo.e.e <Return> {set choice 1}" );
-cmd( "bind .cazzo.e <Return> {set choice 1}" );
-cmd( "bind .cazzo <Return> {set choice 1}" );
+cmd( "showtop .cazzo centerS" );
 
-cmd( "showtop .cazzo" );
-
+choice=0;
 while(choice==0)
  Tcl_DoOneEvent(0);
 
@@ -2067,12 +2070,12 @@ Remove a bridge, used when an object is removed from the model.
 */
 void delete_bridge(object *d)
 {
-
 bridge *cb, *a;
 object *cur, *cur1; 
 
 if(d->up->b==NULL)
  return;
+
 if(d->up->b->head==d)
  {
   a=d->up->b;

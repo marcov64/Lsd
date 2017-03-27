@@ -56,6 +56,7 @@ int main( int argn, char **argv )
 void myexit( int v )
 {
 #ifndef NO_WINDOW
+	cmd( "LsdExit" );
 	Tcl_Exit( v );
 #endif
 	exit( v );

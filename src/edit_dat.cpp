@@ -131,7 +131,7 @@ ch1[ MAX_ELEM_LENGTH - 1 ] = '\0';
 cmd( "label $w.tit_empty -width 32 -relief raised -text \"Object: %-17s \" -borderwidth 4", ch1 );
 cmd( "bind $w.tit_empty <Button-1> {set choice 4}" );
 if ( ! in_set_obj )				// show only if not already recursing
-	cmd( "bind $w.tit_empty <Enter> {set msg \"Click to edit number of objects\"}" );
+	cmd( "bind $w.tit_empty <Enter> {set msg \"Click to edit number of instances\"}" );
 cmd( "bind $w.tit_empty <Leave> {set msg \"\"}" );
 cmd( "$w window create end -window $w.tit_empty" );
 
@@ -160,7 +160,7 @@ cmd( "label .ini.st.err -text \"\"" );
 cmd( "label .ini.st.pad -text \"         \"" );
 cmd( "checkbutton .ini.st.aw -text \"Automatic width\" -variable autoWidth -command { set choice 5 }" );
 cmd( "pack .ini.st.err .ini.st.pad .ini.st.aw -side left" );
-cmd( "pack .ini.st -anchor e -padx 10" );
+cmd( "pack .ini.st -anchor e -padx 10 -pady 5" );
 
 cmd( "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
 
@@ -375,7 +375,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       ch1[MAX_ELEM_LENGTH - 1]=0;
       cmd( "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1 );
       cmd( "$w window create end -window $w.tit_t%s", cv1->label );
-      cmd( "bind $w.tit_t%s <Enter> {set msg \"Parameter: %s\"}", cv1->label,cv1->label );
+      cmd( "bind $w.tit_t%s <Enter> {set msg \"Parameter '%s'\"}", cv1->label,cv1->label );
 		cmd( "bind $w.tit_t%s <Leave> {set msg \" \"}", cv1->label );
 	cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s}", cv1->label, j, cv1->label, j,cv1->label  );
 	cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
@@ -389,7 +389,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
        ch1[MAX_ELEM_LENGTH - 1]=0;
        cmd( "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label,j, ch1, j+1 );
 		 cmd( "$w window create end -window $w.tit_t%s_%d", cv1->label, j );
-		 cmd( "bind $w.tit_t%s_%d <Enter> {set msg \"Variable: %s with lag %d\" }", cv1->label, j, cv1->label, j+1 );
+		 cmd( "bind $w.tit_t%s_%d <Enter> {set msg \"Variable '%s' with lag %d\" }", cv1->label, j, cv1->label, j+1 );
 		 cmd( "bind $w.tit_t%s_%d <Leave> {set msg \" \" }", cv1->label, j );
 	cmd( "button $w.b%s_%d -text \"Set All\" -pady 0m -padx 1m -command {set choice 2; set var-S-A %s; set lag %d; set position $w.tit_t%s_%d}", cv1->label, j, cv1->label, j,cv1->label, j );
 	cmd( "$w window create end -window $w.b%s_%d", cv1->label, j );
@@ -417,7 +417,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
         cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label );
         cmd( "bind $w.c%d_v%sp <KeyPress-Up> {focus %s; %s selection range 0 end; $w see %s}", i, cv->label, previous, previous, previous );
        }
-      cmd( "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting: parameter %s in %s $tag_%d\"}", i,cv->label,cv->label,cur1->label,i );
+      cmd( "bind $w.c%d_v%sp <FocusIn> {set msg \"Inserting parameter '%s' in '%s' $tag_%d\"}", i,cv->label,cv->label,cur1->label,i );
       cmd( "bind $w.c%d_v%sp <FocusOut> {set msg \" \"}", i, cv->label );
 
       sprintf(previous, "$w.c%d_v%sp", i, cv->label);
@@ -441,7 +441,7 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
         cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j );
         cmd( "bind  $w.c%d_v%s_%d <KeyPress-Up> {focus %s; %s selection range 0 end; $w see  %s}", i, cv->label, j, previous, previous, previous );
        }
-      cmd( "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting: variable %s (lag %d) in %s $tag_%d\"}", i,cv->label,j,cv->label,j+1,cur1->label,i );
+      cmd( "bind $w.c%d_v%s_%d <FocusIn> {set msg \"Inserting variable '%s' (lag %d) in '%s' $tag_%d\"}", i,cv->label,j,cv->label,j+1,cur1->label,i );
       cmd( "bind $w.c%d_v%s_%d <FocusOut> {set msg \" \"}", i,cv->label,j );
 
       sprintf(previous, "$w.c%d_v%s_%d", i, cv->label, j);

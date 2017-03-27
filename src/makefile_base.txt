@@ -6,13 +6,14 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 # Do not modify
 INCLD_TCL_TK=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) 
 
-$(TARGET)$(EXT): $(SRC_DIR)choose.h model_options.txt $(SRC_DIR)system_options.txt $(SRC_DIR)fun_head.h $(SRC_DIR)main_gnuwin.o \
-$(SRC_DIR)file.o $(SRC_DIR)util.o $(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o $(SRC_DIR)runtime.o \
-$(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o $(FUN).o $(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o \
-$(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o
-	$(CC) $(SWITCH_CC) -L$(PATH_LIB) $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o $(SRC_DIR)draw.o $(SRC_DIR)object.o \
-	$(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o \
-	$(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(FUN).o $(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o \
+$(TARGET)$(EXT): $(FUN).o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)file.o $(SRC_DIR)util.o $(SRC_DIR)object.o \
+$(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o \
+$(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o $(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o $(SRC_DIR)lsdmain.o \
+$(SRC_DIR)report.o $(SRC_DIR)nets.o
+	$(CC) $(SWITCH_CC) -L$(PATH_LIB) $(FUN).o $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o \
+	$(SRC_DIR)draw.o $(SRC_DIR)object.o $(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o \
+	$(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
+	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o \
 	$(TCL_LIB) $(TK_LIB) $(EXTRA_PAR) -L$(PATH_LIB) -lm $(SWITCH_CC_LNK) -o $(TARGET) $(DUMMY)
 
 $(SRC_DIR)file.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
@@ -66,10 +67,8 @@ $(SRC_DIR)report.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)re
 $(SRC_DIR)nets.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
 	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
 
-	
-$(FUN).o: $(SRC_DIR)choose.h model_options.txt $(SRC_DIR)system_options.txt $(FUN).cpp $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
+$(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
 	$(CC) $(SWITCH_CC) -c $(FUN).cpp $(INCLD_TCL_TK) $(INCLUDE_LIB) -I$(LSDROOT)/src
-
 	
 clean:
 	rm $(SRC_DIR)*.o $(FUN).o $(TARGET)*

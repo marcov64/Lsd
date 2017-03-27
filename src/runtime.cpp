@@ -165,7 +165,7 @@ else
 
 cmd( "set activeplot .plt%d", id_sim );
 
-cmd( "if {[winfo exists $activeplot]==1} {destroytop $activeplot}" );
+cmd( "destroytop $activeplot" );
 
 cmd( "newtop $activeplot \"\" { set_c_var done_in 5 } \"\"" );
 cmd( "wm transient $activeplot ." );
@@ -238,8 +238,7 @@ if ( fast )
 	cmd( "$activeplot.c.yscale.shift conf -state disabled" );
 }
 
-cmd( "raise .log" );
-cmd( "focus .log" );
+cmd( "wm deiconify .log; raise .log; focus .log" );
 
 set_shortcuts_log( "$activeplot" );
 }

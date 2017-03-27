@@ -79,7 +79,7 @@ object *top;
 
 if(!strWindowOn)	// model structure window is deactivated?
 {
-	cmd( "if [ winfo exists .str ] { destroytop .str }" );
+	cmd( "destroytop .str" );
 	return;
 }
 
@@ -117,15 +117,16 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 
 	draw_obj(t, top, v0, h0, 0);
 
-	cmd( "bind $g.f.c <1> { if [ info exists res_g ] { set choice_g 24 } }" );
-	cmd( "bind $g.f.c <2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
-	cmd( "bind $g.f.c <3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
+	cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
+	cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
+	cmd( "bind $g.f.c <Button-3> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
 
 	cmd( "menu $g.f.c.v -tearoff 0" );
 	cmd( "$g.f.c.v add command -label \"Make Current\" -command { set choice 4 }" );
 	cmd( "$g.f.c.v add command -label \"Insert Parent\" -command { set choice 32 }" );
 	cmd( "$g.f.c.v add separator" );
 	cmd( "$g.f.c.v add command -label Change -command { set choice 6 }" );
+	cmd( "$g.f.c.v add command -label Rename -command { set choice 83 }" );
 	cmd( "$g.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
 	cmd( "$g.f.c.v add command -label Delete -command { set choice 74 }" );
 	cmd( "$g.f.c.v add separator" );
@@ -173,24 +174,23 @@ begin=center-step*(num-1)/2;
 x=center;
 //writing to appear on the left of the window
 cmd( "set list_%s \"\"", t->label );
-cmd( "append list_%s \"Object: %s\n\n\"", t->label, t->label );
 
 if(t->v==NULL)
- cmd( "append list_%s \"(no variables)\"", t->label);
+ cmd( "append list_%s \"(no elements)\"", t->label );
 
 for(cv=t->v; cv!=NULL; cv=cv->next)
 {sprintf(ch,"append list_%s \"%s", t->label,cv->label);
  if(cv->param==1)
-  sprintf(str," (P)\n\"");
+  sprintf(str," (P%s)\n\"", ( cv->save || cv->savei ) ? "+" : "" );
  else
-  sprintf(str, " (%d)\n\"", cv->num_lag);
+  sprintf( str, " (%d%s)\n\"", cv->num_lag, ( cv->save || cv->savei ) ? "+" : "" );
  strcat(ch, str);
   cmd( ch );
 }
 
 // drawn only if it is not the root
 if(t->up!=NULL)
-  { // computes numerosity of groups of this typy
+  { // computes numerosity of groups of this type
    sprintf(ch, "%s",t->label);
 	strcpy(ch1,"");
 	for(cur=t, num_groups=0; cur!=NULL ; num_groups++, cur=cur->hyper_next(cur->label) )
@@ -257,12 +257,13 @@ PUT_TEXT
 ****************************************************/
 void put_text(char *str, char *n, int x, int y, char *str2)
 {
-cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s", x,y,str,str2  );
+cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill red -tags %s", x, y, str, str2 );
 
 //text for node numerosity
 y+=8;
-cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s", x,y,n,str2  );
+cmd( "$g.f.c create text %d.m %d.m -font {{MS Times New Roman} 10} -text \"%s\" -tags node -fill black -tags %s", x, y, n, str2 );
 
-cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; label .list.l -text \"$list_%s\" -justify left; pack .list.l; align .list $g }", str2, str2, str2 );
+cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
+
 cmd( "$g.f.c bind %s <Leave> { if [ info exists res_g ] { unset res_g }; destroy .list}", str2 );
 }

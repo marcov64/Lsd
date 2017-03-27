@@ -52,10 +52,11 @@ Comments and bug reports to marco.valente@univaq.it
 #define MAX_COLS 100					// max numbers of columns in init. editor
 #define MAX_PLOTS 1000					// max numbers of plots in analysis
 #define ERR_LIM 10						// maximum number of repeated error messages
+#define SIG_DIG 10						// number of significant digits in data files
 
 // user defined signals
-#define SIGMEM NSIG + 1			// out of memory signal
-#define SIGSTL NSIG + 2			// standard library exception signal
+#define SIGMEM NSIG + 1					// out of memory signal
+#define SIGSTL NSIG + 2					// standard library exception signal
 
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
@@ -348,7 +349,6 @@ bool load_description(char *label, char *type);
 bool save_configuration( object *, int findex = 0 );
 bool unsaved_change(  );						// control for unsaved changes in configuration
 bool unsaved_change( bool );
-char *choose_object( char *msg );
 char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
@@ -390,7 +390,7 @@ void NOLH_clear( void );						// external DoE	cleanup
 void add_cemetery(variable *v);
 void add_description(char const *lab, char const *type, char const *text);
 void analysis(int *choice);
-void ancestors(object *r, FILE *f);
+void ancestors( object *r, FILE *f, bool html = true );
 void assign(object *r, int *i, char *lab);
 void attach_instance_number(char *ch, object *r);
 void auto_document( int *choice, char const *lab, char const *which, bool append = false );
@@ -419,7 +419,6 @@ void create_logwindow(void);
 void create_maverag(int *choice);
 void create_series(int *choice);
 void create_table_init(object *r);
-void createmodelhelp(int *choice, object *r);
 void dataentry_sensitivity(int *choice, sense *s, int nval);
 void deb_show(object *r);
 void delete_bridge(object *d);
@@ -448,12 +447,10 @@ void init_plot(int i, int id_sim);
 void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem(object *r, int *num_v, int *num_c);
-void insert_docuoptions(FILE *frep, object *r);
 void insert_labels_mem(object *r, int *num_v, int *num_c);
-void insert_lb_object(object *r);
+void insert_object( char *w, object *r );
 void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
 void insert_store_mem(object *r, int *num_v);
-void insert_summary(object *r, FILE *frep);
 void kill_trailing_newline(char *s);
 void link_data(object *root, char *lab);
 void log_tcl_error( const char *cm, const char *message );
@@ -497,7 +494,6 @@ void sensitivity_sequential(int *findexSens, sense *s, double probSampl = 1.0);
 void set_all(int *choice, object *original, char *lab, int lag);
 void set_blueprint(object *container, object *r);
 void set_buttons_log( bool on );
-void set_cond(variable *cv);
 void set_cs_data(int *choice);
 void set_lab_tit(variable *var);
 void set_obj_number(object *r, int *choice);
@@ -506,12 +502,13 @@ void set_shortcuts_log( const char *window );
 void set_title(object *c, char *lab, char *tag, int *incr);
 void shift_desc(int direction, char *dlab, object *r);
 void shift_var(int direction, char *vlab, object *r);
-void show_description(char *lab);
 void show_eq(char *lab, int *choice);
 void show_graph( object *t);
 void show_initial(object *n);
 void show_observe(object *n);
 void show_plot_gnu(int n, int *choice, int type, char **str, char **tag);
+void show_rep_initial(FILE *f, object *n, int *begin);
+void show_rep_observe(FILE *f, object *n, int *begin);
 void show_save(object *n);
 void signal_handler(int);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
@@ -519,10 +516,10 @@ void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_on_end(store *app);
 void statistics(int *choice);
 void statistics_cross(int *choice);
-void tex_report(object *r, FILE *f);
 void tex_report_init(object *r, FILE *f);
+void tex_report_initall(object *r, FILE *f);
 void tex_report_observe(object *r, FILE *f);
-void this_instance_number(object *r);
+void tex_report_struct(object *r, FILE *f);
 void uncover_browser( void );
 void wipe_out(object *d);
 void write_list(FILE *frep, object *root, int flag_all, char const *prefix);

@@ -240,41 +240,44 @@ if { $answer == "yes" } {
 proc edit i {
 global lrn ldn lmn group lmd result memory
 
-set memory 0
 .l.m.edit entryconf 2 -state disabled
-
-newtop .l.e "Edit" { .l.e.b.esc invoke }
-
-if { [lindex $group $i] == 1} {set item group} {set item model}
-label .l.e.ln -text "Insert new label for the $item [lindex $lmn $i]"
-set app "[lindex $lmn $i]"
-
-entry .l.e.n -width 30
-.l.e.n insert 1 "[file tail [lindex $lmn $i]]"
-label .l.e.ld -text "Insert a new description"
-frame .l.e.t
-scrollbar .l.e.t.yscroll -command ".l.e.t.text yview"
-text .l.e.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.e.t.yscroll set"
-
-pack .l.e.ln .l.e.n .l.e.ld -fill x
-pack .l.e.t.yscroll -side right -fill y
-pack .l.e.t.text -expand yes -fill both
-pack .l.e.t
-frame .l.e.b
-button .l.e.b.ok -width -9 -text Ok -command {set app "[.l.e.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.e.t.text get 0.0 end]; close $f; destroytop .l.e; showmodel [lindex $lrn $result]}
-button .l.e.b.esc -width -9 -text Cancel -command {destroytop .l.e; showmodel [lindex $lrn $result]}
-pack .l.e.b.ok .l.e.b.esc -padx 10 -pady 10 -side left
-pack .l.e.b
-
-.l.e.t.text insert end "[lindex $lmd $i]"
+set memory 0
 set result $i
-focus .l.e.n
-.l.e.n selection range 0 end
-bind .l.e.n <Return> {focus .l.e.t.text; .l.e.t.text mark set insert 1.0}
-bind .l.e <Escape> {.l.e.b.esc invoke}
-bind .l.e.t.text <Control-e> {.l.e.b.ok invoke}
+set app "[lindex $lmn $i]"
+if { [lindex $group $i] == 1} {set item group} {set item model}
 
-showtop .l.e centerS
+newtop .l.e "Edit" { .l.e.b.can invoke }
+
+frame .l.e.tit
+label .l.e.tit.l -text "Current $item:"
+label .l.e.tit.n -fg red -text "[lindex $lmn $i]"
+pack .l.e.tit.l  .l.e.tit.n -side left -padx 2
+
+frame .l.e.n
+label .l.e.n.l -text "Name"
+entry .l.e.n.n -width 25 -justify center
+.l.e.n.n insert 1 "[file tail [lindex $lmn $i]]"
+pack .l.e.n.l  .l.e.n.n
+
+frame .l.e.t
+label .l.e.t.l -text "Description"
+frame .l.e.t.t
+scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
+text .l.e.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.e.t.t.yscroll set"
+.l.e.t.t.text insert end "[lindex $lmd $i]"
+pack .l.e.t.t.yscroll -side right -fill y
+pack .l.e.t.t.text
+pack .l.e.t.l .l.e.t.t
+
+pack .l.e.tit .l.e.n .l.e.t -padx 5 -pady 5
+
+okcancel .l.e b { set app "[.l.e.n.n get]"; if { [lindex $group $result] == 1} {set f [open [lindex $ldn $result]/groupinfo.txt w]} {set f [open [lindex $ldn $result]/modelinfo.txt w]}; puts -nonewline $f "$app"; close $f; set f [open [lindex $ldn $result]/description.txt w]; puts -nonewline $f [.l.e.t.t.text get 0.0 end]; close $f; destroytop .l.e; showmodel [lindex $lrn $result] } { destroytop .l.e; showmodel [lindex $lrn $result] }
+
+bind .l.e.n.n <Return> {focus .l.e.t.t.text; .l.e.t.t.text mark set insert 1.0}
+
+showtop .l.e
+.l.e.n.n selection range 0 end
+focus .l.e.n.n
 }
 
 
@@ -286,59 +289,70 @@ global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM
 
 set pastedir [lindex $lrn $i]
 
-newtop .l.p "Paste Model" { .l.b.esc invoke }
+newtop .l.p "Paste Model" { .l.b.can invoke }
 
-update
+frame .l.p.tit
 
+frame .l.p.tit.t1
+label .l.p.tit.t1.l -text "Original model:"
+label .l.p.tit.t1.n -fg red -text "$copylabel"
+pack .l.p.tit.t1.l  .l.p.tit.t1.n -side left -padx 2
 
-label .l.p.ln -text "Insert a label for the copy of model: $copylabel"
-entry .l.p.n -width 30
-.l.p.n insert 0 "$copylabel"
+frame .l.p.tit.t2
+label .l.p.tit.t2.l -text "Current group:"
+label .l.p.tit.t2.n -fg red -text "[lindex $lrn $i]"
+pack .l.p.tit.t2.l  .l.p.tit.t2.n -side left -padx 2
 
-label .l.p.lv -text "Insert a new version number for the new model"
-entry .l.p.v -width 30
-.l.p.v insert 0 "$copyver"
+pack .l.p.tit.t1  .l.p.tit.t2
 
-label .l.p.ld -text "Insert a directory name for the new model to be created in [lindex $lrn $i]"
-entry .l.p.d -width 30
-.l.p.d insert 0 "[file tail $copydir]"
+frame .l.p.n
+label .l.p.n.l -text "New name"
+entry .l.p.n.n -width 25 -justify center
+.l.p.n.n insert 0 "$copylabel"
+pack .l.p.n.l  .l.p.n.n
 
-label .l.p.ldsc -text "Insert a description for the new model"
+frame .l.p.v
+label .l.p.v.l -text "Version"
+entry .l.p.v.v -width 10 -justify center
+.l.p.v.v insert 0 "$copyver"
+pack .l.p.v.l  .l.p.v.v
+
+frame .l.p.d
+label .l.p.d.l -text "New (non-existing) subdirectory name"
+entry .l.p.d.d -width 35 -justify center
+.l.p.d.d insert 0 "[file tail $copydir]"
+pack .l.p.d.l  .l.p.d.d
 
 frame .l.p.t
-scrollbar .l.p.t.yscroll -command ".l.p.t.text yview"
-text .l.p.t.text -wrap word -width 60 -relief sunken -yscrollcommand ".l.p.t.yscroll set"
-.l.p.t.text insert end "$copydscr"
+label .l.p.t.l -text "Model description"
 
-pack .l.p.ln .l.p.n .l.p.lv .l.p.v .l.p.ld .l.p.d .l.p.ldsc -fill x
+frame .l.p.t.t
+scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
+text .l.p.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.p.t.t.yscroll set"
+.l.p.t.t.text insert end "$copydscr"
+pack .l.p.t.t.yscroll -side right -fill y
+pack .l.p.t.t.text
+pack .l.p.t.l .l.p.t.t
 
-pack .l.p.t.yscroll -side right -fill y
-pack .l.p.t.text -expand yes -fill both
-pack .l.p.t
-frame .l.p.b
+pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx 5 -pady 5
 
-button .l.p.b.ok -width -9 -text Ok -command {set choiceSM 1}
-button .l.p.b.esc -width -9 -text Cancel -command {set choiceSM 2}
-pack .l.p.b.ok .l.p.b.esc -padx 10 -pady 10 -side left
-pack .l.p.b
+okcancel .l.p b { set choiceSM 1 } { set choiceSM 2 }
+bind .l.p.n.n <Return> { focus .l.p.v.v; .l.p.v.v selection range 0 end }
+bind .l.p.v.v <Return> { focus .l.p.d.d; .l.p.d.d selection range 0 end }
+bind .l.p.d.d <Return> { focus .l.p.t.t.text; .l.p.t.t.text mark set insert 1.0 }
 
-showtop .l.p centerS
-
-focus .l.p.n
-bind .l.p.n <Return> {focus .l.p.v}
-bind .l.p.v <Return> {focus .l.p.d}
-bind .l.p.d <Return> {focus .l.p.b.ok}
-bind .l.p.b.ok <Return> {.l.p.b.ok invoke}
-bind .l.p <Escape> {.l.p.b.esc invoke}
+showtop .l.p
+.l.p.n.n selection range 0 end
+focus .l.p.n.n
 
 tkwait variable choiceSM
 
 if { $choiceSM == 2 } { } {
 
-  set appd [.l.p.d get]
-  set appv [.l.p.v get]
-  set appl [.l.p.n get]
-  set appdsc "[.l.p.t.text get 1.0 end]"
+  set appd [.l.p.d.d get]
+  set appv [.l.p.v.v get]
+  set appl [.l.p.n.n get]
+  set appdsc "[.l.p.t.t.text get 1.0 end]"
   
   set confirm [tk_messageBox -parent .l.p -type okcancel -icon question -title Confirmation -default ok -message "Confirm copy?" -detail "Every file in dir.:\n$copydir\n is going to be copied in dir.:\n$pastedir/$appd"]
   if { $confirm == "ok" } {
@@ -358,11 +372,10 @@ if { $choiceSM == 2 } { } {
        puts $f "[clock format [clock seconds] -format "$frmt"]"
        close $f
      } 
-  
-} {}
+  }
 }
+
 destroytop .l.p
 set choiceSM 0
 showmodel [lindex $lrn $i]
-
 }

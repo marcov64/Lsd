@@ -374,7 +374,7 @@ cmd( "pack .da.f.h.v .da.f.h.tc .da.f.h.xy -side left -padx 11" );
 
 cmd( "frame .da.f.tit -relief groove -bd 2" );
 cmd( "label .da.f.tit.l -text Title" );
-cmd( "entry .da.f.tit.e -textvariable tit -width 36" );
+cmd( "entry .da.f.tit.e -textvariable tit -width 36 -justify center" );
 
 cmd( "frame .da.f.tit.chk" );
 
@@ -847,7 +847,7 @@ if ( plot_l[ *choice ] == plot_nl[ *choice ] )
 
 cmd( "pack .da.file.l .da.file.col .da.file.pos .da.file.dim .da.file.lab -pady 5 -padx 5" );
 cmd( "okcancel .da.file b { set choice 1 } { set choice 2 }" );
-cmd( "showtop .da.file centerW" );
+cmd( "showtop .da.file" );
 
 *choice=0;
   while(*choice==0)
@@ -1476,13 +1476,13 @@ cmd( "set srchTxt \"\"; set srchInst 1" );
 cmd( "newtop .da.a \"Find Series\" { set choice 2 } .da" );
 cmd( "label .da.a.l -text \"Series name (or part)\"" );
 cmd( "entry .da.a.e -textvariable srchTxt -width 20 -justify center" );
-cmd( "bind .da.a.e <KeyRelease> {if { %%N < 256 && [info exists DaModElem] } { set bb1 [.da.a.e index insert]; set bc1 [.da.a.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1 !=-1 } {set bd1 [lindex $DaModElem $bf1]; .da.a.e delete 0 end; .da.a.e insert 0 $bd1; .da.a.e index $bb1; .da.a.e selection range $bb1 end } } }" );
+cmd( "bind .da.a.e <KeyRelease> {if { %%N < 256 && [info exists DaModElem] } { set bb1 [.da.a.e index insert]; set bc1 [.da.a.e get]; set bf1 [lsearch -glob $DaModElem $bc1*]; if { $bf1 !=-1 } { set bd1 [lindex $DaModElem $bf1]; .da.a.e delete 0 end; .da.a.e insert 0 $bd1; .da.a.e index $bb1; .da.a.e selection range $bb1 end } } }" );
 cmd( "label .da.a.n -text \"(finds first instance only,\nuse 'F3' or 'Ctrl+N' to find others)\"" );
 cmd( "pack .da.a.l .da.a.e .da.a.n -pady 5 -padx 5" );
 cmd( "okcancel .da.a b  { set choice 1 } { set choice 2 }" );
 cmd( "bind .da.a.e <Return> { set choice 1 }" );
 cmd( "bind .da.a.e <Escape> { set choice 2 }" );
-cmd( "showtop .da.a centerW" );
+cmd( "showtop .da.a" );
 cmd( "focus .da.a.e" );
 
 *choice = 0;
@@ -1571,7 +1571,7 @@ if ( nv > 0 )
 
 	cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
 	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#add_series } { set choice 2 }" );
-	cmd( "showtop .da.s centerW" );
+	cmd( "showtop .da.s" );
 
 	*choice = 0;
 	while ( *choice == 0 )
@@ -1704,7 +1704,7 @@ cmd( "pack .da.a.o.l .da.a.o.t" );
 cmd( "pack .da.a.l .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
 cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp mdatares.html#gpoptions } { set choice 2 }" );
 
-cmd( "showtop .da.a centerW" );
+cmd( "showtop .da.a" );
 
 gpoptions:
 *choice=0;
@@ -1769,7 +1769,7 @@ cmd( "pack .da.a.o.l1 .da.a.o.l2 -side left -pady 5 -padx 15" );
 cmd( "pack .da.a.l .da.a.o -pady 5 -padx 5" );
 
 cmd( "okXcancel .da.a b Default { set choice 3 } { set choice 1 } { set choice 2 }" );
-cmd( "showtop .da.a centerW" );
+cmd( "showtop .da.a" );
 
 set_col:
 *choice = 0;
@@ -1923,7 +1923,7 @@ cmd( "bind .da.s.t.e1 <KeyPress-Return> { focus .da.s.t.e2; .da.s.t.e2 selection
 cmd( "bind .da.s.t.e2 <KeyPress-Return> { set choice 1 }" );
 cmd( "bind .da.s.s.e1 <<ComboboxSelected>> { if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal } { .da.s.s.e2 configure -state disabled } }" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.x.e1; .da.s.x.e1 selection range 0 end" );
 
 set_plot:
@@ -2009,7 +2009,7 @@ cmd( "bind .da.s.s.e <KeyPress-Return> { focus .da.s.x.e; .da.s.x.e selection ra
 cmd( "bind .da.s.x.e <KeyPress-Return> { focus .da.s.y.e; .da.s.y.e selection range 0 end }" );
 cmd( "bind .da.s.y.e <KeyPress-Return> { set choice 1 }" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.s.e; .da.s.s.e selection range 0 end" );
 
 set_lattice:
@@ -2165,7 +2165,7 @@ case 27:
  
  cmd( "frame $w.l" );
  cmd( "label $w.l.t -text \"New label\"" );
- cmd( "entry $w.l.e -textvariable itext -width 30" );
+ cmd( "entry $w.l.e -textvariable itext -width 30 -justify center" );
  cmd( "pack $w.l.t $w.l.e" );
  cmd( "pack $w.l -padx 5 -pady 5" );
 
@@ -3814,7 +3814,7 @@ if(nv>2)
 
  cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#3dTime } { set choice 2 }" );
 
- cmd( "showtop .da.s centerW" );
+ cmd( "showtop .da.s" );
 
 *choice=0;
 while(*choice==0)
@@ -4397,7 +4397,7 @@ cmd( "bind .da.s.d.r.2d <KeyPress-Return> {.da.s.v.e selection range 0 end; focu
 cmd( "bind .da.s.d.r.3d <KeyPress-Return> {.da.s.v.e selection range 0 end; focus .da.s.v.e}" );
 cmd( "bind .da.s.v.e <KeyPress-Return> {focus .da.s.b.ok}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 
 cmd( "focus .da.s.i.e" );
 cmd( ".da.s.i.e selection range 0 end" );
@@ -4740,7 +4740,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#plot } { set
 cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 
 *choice=0;
@@ -5213,7 +5213,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#lattice } { 
 
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 	
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 
 *choice=0;
 while(*choice==0)
@@ -5598,7 +5598,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { s
 
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 
 *choice=0;
@@ -5840,7 +5840,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { s
 cmd( "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.t.e; .da.s.t.e selection range 0 end" );
 
 *choice=0;
@@ -6089,12 +6089,12 @@ cmd( "set vname $headname$basename" );
 
 cmd( "frame .da.s.n" );
 cmd( "label .da.s.n.lnv -text \"New series label\"" );
-cmd( "entry .da.s.n.nv -width 30 -textvariable vname" );
+cmd( "entry .da.s.n.nv -width 30 -textvariable vname -justify center" );
 cmd( "pack .da.s.n.lnv .da.s.n.nv" );
 
 cmd( "frame .da.s.t" );
 cmd( "label .da.s.t.tnv -text \"New series tag\"" );
-cmd( "entry .da.s.t.tv -width 20 -textvariable vtag" );
+cmd( "entry .da.s.t.tv -width 20 -textvariable vtag -justify center" );
 cmd( "pack .da.s.t.tnv .da.s.t.tv" );
 
 cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
@@ -6104,7 +6104,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { s
 cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.n.nv" );
 cmd( ".da.s.n.nv selection range 0 end" );
  
@@ -6373,7 +6373,7 @@ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#create_maver
 cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
 
-cmd( "showtop .da.s centerW" );
+cmd( "showtop .da.s" );
 cmd( "focus .da.s.o.th" );
 cmd( ".da.s.o.th selection range 0 end" );
 
@@ -6489,15 +6489,20 @@ delete[] tag;
 /************************
  SAVE_DATAzip
  ************************/
+ 
+int numcol = 16;
+
 void save_datazip(int *choice)
 {
 int idseries, memstep;
 char *app;
 char **str, **tag;
-char str1[100], delimiter[10], misval[10];
-int i, j, *start, *end, typelab, numcol, del, fr, gp, type_res;
+char delimiter[10], misval[10], labprefix[MAX_ELEM_LENGTH];
+int i, j, *start, *end, fr, typelab, del, headprefix, type_res;
 double **data, *dd, *ddstart;
 const char *descr, *ext;
+const char str0[] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
+const char strsp[] = "                                                                                ";
 const char descrRes[] = "Lsd Result File";
 const char descrTxt[] = "Text File";
 const char extResZip[] = ".res.gz";
@@ -6542,31 +6547,35 @@ for(i=0; i<nv; i++)
    max_c=end[i];
  }
 
+Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "typelab", (char *) &typelab, TCL_LINK_INT);
 Tcl_LinkVar(inter, "deli", (char *) &del, TCL_LINK_INT);
 Tcl_LinkVar(inter, "numcol", (char *) &numcol, TCL_LINK_INT);
-Tcl_LinkVar(inter, "fr", (char *) &fr, TCL_LINK_INT);
 
-//Variables' Name in first column
-strcpy(misval,nonavail);
-fr=1;
-typelab=3;
+strncpy( misval, nonavail, 9 );
+typelab = 3;
+fr = 1;
+del = 1;
+
 cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
 
-cmd( "label .da.lab.l -text \"File format\"" );
+cmd( "frame .da.lab.f" );
+cmd( "label .da.lab.f.l -text \"File format\"" );
 
-cmd( "frame .da.lab.f -relief groove -bd 2" );
-cmd( "radiobutton .da.lab.f.lsd -text \"Lsd results file\" -variable typelab -value 3" );
-cmd( "radiobutton .da.lab.f.nolsd -text \"Text file\" -variable typelab -value 4" );
-cmd( "pack .da.lab.f.lsd .da.lab.f.nolsd -anchor w" );
+cmd( "frame .da.lab.f.t -relief groove -bd 2" );
+cmd( "radiobutton .da.lab.f.t.lsd -text \"Lsd results file\" -variable typelab -value 3" );
+cmd( "radiobutton .da.lab.f.t.nolsd -text \"Text file\" -variable typelab -value 4" );
+cmd( "pack .da.lab.f.t.lsd .da.lab.f.t.nolsd -anchor w" );
+
+cmd( "pack .da.lab.f.l .da.lab.f.t" );
 
 cmd( "checkbutton .da.lab.dozip -text \"Generate zipped file\" -variable dozip" );
 
 #ifdef LIBZ
-cmd( "pack .da.lab.l .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
+cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
 #else
-cmd( "pack .da.lab.l .da.lab.f -padx 5 -pady 5" );
+cmd( "pack .da.lab.f -padx 5 -pady 5" );
 #endif
 
 cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp mdatares.html#save } { set choice 2 }" );
@@ -6574,7 +6583,7 @@ cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp mdatares.html#save } { s
 cmd( "bind .da.lab <Return> {.da.lab.ok invoke}" );
 cmd( "bind .da.lab <Escape> {.da.lab.esc invoke}" );
 
-cmd( "showtop .da.lab centerW" );
+cmd( "showtop .da.lab" );
 
 *choice=0;
 while(*choice==0)
@@ -6589,74 +6598,79 @@ cmd( "destroytop .da.lab" );
 
 if(typelab==4)
 {
+typelab=1;
+cmd( "if { ! [ info exists labprefix ] } { set labprefix \"V\" }" );
+cmd( "if { ! [ info exists headprefix ] } { set headprefix 0 }" );
+cmd( "if { ! [ info exists delimiter ] } { set delimiter \",\" }" );
+cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", nonavail );
+
 cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );
 
+cmd( "checkbutton .da.lab.fr -text \"Header in first row\" -variable fr -command { if { $fr == 0 } { .da.lab.gp configure -state disabled; .da.lab.f.r.orig configure -state disabled; .da.lab.f.r.new configure -state disabled; .da.lab.d.r.tab configure -state disabled; .da.lab.d.r.oth configure -state disabled; .da.lab.d.r.col configure -state disabled; .da.lab.gen.mis_val configure -state disabled; if { $typelab == 2 } { .da.lab.n.en configure -state disabled }; if { $deli == 2 } { .da.lab.c.del configure -state disabled }; if { $deli == 3 } { .da.lab.e.ecol configure -state disabled } } else { .da.lab.gp configure -state normal; .da.lab.f.r.orig configure -state normal; .da.lab.f.r.new configure -state normal; .da.lab.d.r.tab configure -state normal; .da.lab.d.r.oth configure -state normal; .da.lab.d.r.col configure -state normal; .da.lab.gen.mis_val configure -state normal; if { $typelab == 2 } { .da.lab.n.en configure -state normal }; if { $deli == 2 } { .da.lab.c.del configure -state normal }; if { $deli == 3 } { .da.lab.e.ecol configure -state normal } } }" );
+cmd( "checkbutton .da.lab.gp -text \"Prefix header with #\" -variable headprefix" );
+
 cmd( "frame .da.lab.f" );
-cmd( "label .da.lab.f.tit -text \"Labels to use\"" );
+cmd( "label .da.lab.f.tit -text \"First row labels\"" );
 
 cmd( "frame .da.lab.f.r -relief groove -bd 2" );
-typelab=1;
-cmd( "radiobutton .da.lab.f.r.orig -text Original -variable typelab -value 1 -command { .da.lab.f.en configure -state disabled }" );
-cmd( "radiobutton .da.lab.f.r.new -text \"New names\" -variable typelab -value 2 -command { .da.lab.f.en configure -state normal }" );
+cmd( "radiobutton .da.lab.f.r.orig -text Original -variable typelab -value 1 -command { .da.lab.n.en configure -state disabled }" );
+cmd( "radiobutton .da.lab.f.r.new -text Numeric -variable typelab -value 2 -command { .da.lab.n.en configure -state normal }" );
 cmd( "pack .da.lab.f.r.orig .da.lab.f.r.new -anchor w" );
 
-cmd( "set newlab \"\"" );
-cmd( "entry .da.lab.f.en -width 20 -textvariable newlab -state disabled" );
-cmd( "set gp 0" );
-cmd( "checkbutton .da.lab.f.gp -text \"Add #\" -variable gp" );
-cmd( "bind .da.lab.f.en <FocusIn> {.da.lab.f.new invoke}" );
-cmd( "pack .da.lab.f.tit .da.lab.f.r .da.lab.f.en .da.lab.f.gp" );
+cmd( "pack .da.lab.f.tit .da.lab.f.r" );
+
+cmd( "frame .da.lab.n" );
+cmd( "label .da.lab.n.l -text \"Numeric labels prefix\"" );
+cmd( "entry .da.lab.n.en -width 10 -justify center -textvariable labprefix -state disabled" );
+cmd( "pack .da.lab.n.l .da.lab.n.en" );
 
 cmd( "frame .da.lab.d" );
 cmd( "label .da.lab.d.tit -text \"Columns delimiter\"" );
+
 cmd( "frame .da.lab.d.r -relief groove -bd 2" );
-del=1;
-cmd( "radiobutton .da.lab.d.r.tab -text \"Tab delimited\" -variable deli -value 1 -command { .da.lab.d.r.del configure -state disabled; .da.lab.d.r.ecol configure -state disabled }" );
-cmd( "radiobutton .da.lab.d.r.oth -text \"Other delimiter\" -variable deli -value 2 -command { .da.lab.d.r.del configure -state normal; .da.lab.d.r.ecol configure -state disabled }" );
-cmd( "set delimiter \"\"" );
-cmd( "entry -width 3 .da.lab.d.r.del -textvariable delimiter -justify center -state disabled" );
-cmd( "bind .da.lab.d.r.del <FocusIn> {.da.lab.d.r.oth invoke}" );
-cmd( "radiobutton .da.lab.d.r.col -text \"Fixed length columns\" -variable deli -value 3 -command { .da.lab.d.r.del configure -state disabled; .da.lab.d.r.ecol configure -state normal }" );
-numcol=16;
-cmd( "entry .da.lab.d.r.ecol -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
-cmd( "write_disabled .da.lab.d.r.ecol $numcol" ); 
-cmd( "bind .da.lab.d.r.ecol <FocusIn> {.da.lab.d.r.col invoke}" );
-cmd( "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.del .da.lab.d.r.col .da.lab.d.r.ecol -anchor w" );
+cmd( "radiobutton .da.lab.d.r.tab -text Tabs -variable deli -value 1 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state disabled }" );
+cmd( "radiobutton .da.lab.d.r.oth -text Custom -variable deli -value 2 -command { .da.lab.c.del configure -state normal; .da.lab.e.ecol configure -state disabled }" );
+cmd( "radiobutton .da.lab.d.r.col -text \"Fixed width\" -variable deli -value 3 -command { .da.lab.c.del configure -state disabled; .da.lab.e.ecol configure -state normal }" );
+cmd( "pack .da.lab.d.r.tab .da.lab.d.r.oth .da.lab.d.r.col -anchor w" );
 
 cmd( "pack .da.lab.d.tit .da.lab.d.r" );
 
+cmd( "frame .da.lab.c" );
+cmd( "label .da.lab.c.l -text \"Custom delimiter\"" );
+cmd( "entry .da.lab.c.del -width 3 -textvariable delimiter -justify center -state disabled" );
+cmd( "pack .da.lab.c.l .da.lab.c.del" );
+
+cmd( "frame .da.lab.e" );
+cmd( "label .da.lab.e.l -text \"Column width (10-80 chars)\"" );
+cmd( "entry .da.lab.e.ecol -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "write_disabled .da.lab.e.ecol $numcol" );
+cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
+
 cmd( "frame .da.lab.gen" );
 cmd( "label .da.lab.gen.miss -text \"Missing values\"" );
-cmd( "set misval \"n/a\"" );
 cmd( "entry .da.lab.gen.mis_val -width 5 -textvariable misval -justify center" );
 cmd( "pack .da.lab.gen.miss .da.lab.gen.mis_val" );
 
-cmd( "checkbutton .da.lab.fr -text \"Names in first row\" -variable fr" );
-
-cmd( "pack .da.lab.f .da.lab.d .da.lab.gen .da.lab.fr -padx 5 -pady 5" );
+cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx 5 -pady 5" );
 
 cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp mdatares.html#save } { set choice 2 }" );
 
-cmd( "bind .da.lab <KeyPress-Return> {.da.lab.ok invoke}" );
-
-cmd( "showtop .da.lab centerW" );
+cmd( "showtop .da.lab" );
 
 *choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
-cmd( "set numcol [ .da.lab.d.r.ecol get ]" ); 
-
 if(*choice==2)
  goto end;
 
-cmd( "set choice $gp" );
-gp=*choice;
+cmd( "set numcol [ .da.lab.e.ecol get ]" ); 
+cmd( "set choice $headprefix" );
+headprefix=*choice;
+app=(char *)Tcl_GetVar(inter, "misval", 0);
+strncpy( misval, app, 9 );
 
 *choice=0;
-
-app=(char *)Tcl_GetVar(inter, "misval", 0);
-strcpy(misval,app);
 }
 
 if ( type_res == 4 )
@@ -6682,6 +6696,7 @@ strcpy(msg, app);
 
 if(strlen(msg)==0)
  goto end;
+
 if(dozip==1) 
  {
  #ifdef LIBZ
@@ -6697,11 +6712,23 @@ if(del!=3) //Delimited files
   if(strlen(app)==0)
     strcpy(delimiter,"\t");
   else
-    strcpy(delimiter,app);
+    strncpy( delimiter, app, 9 );
  }
  else
   strcpy(delimiter, "\t");
 }
+
+if ( typelab == 2 )
+{
+	app = ( char * ) Tcl_GetVar( inter, "labprefix", 0 );
+	if ( strlen( app ) == 0 )
+		strcpy( labprefix, "V" );
+	else
+		strncpy( labprefix, app, MAX_ELEM_LENGTH - 1  );
+}
+
+numcol = max( 10, min( numcol, 80 ) );
+
 if(fr==1)
 {
 if(del!=3)
@@ -6709,8 +6736,9 @@ if(del!=3)
 switch(typelab)
 {
 case 1:   //Original labels
-if(gp==1)
- {if(dozip==1) 
+if(headprefix==1)
+ {
+  if(dozip==1) 
     {
      #ifdef LIBZ
      gzprintf(fsavez, "#");
@@ -6718,28 +6746,33 @@ if(gp==1)
     } 
   else
     fprintf(fsave, "#");
- }   
+ }  
+ 
 for(i=0; i<nv; i++)
-  {
+ {
    if(dozip==1) 
-    {
+   {
     #ifdef LIBZ 
-     gzprintf(fsavez, "%s_%s%s", str[i], tag[i], delimiter);
+     gzprintf( fsavez, "%s_%s", str[i], tag[i] );
+	   
+     if ( i < nv - 1 )  
+		gzprintf( fsavez, "%s", delimiter );
     #endif 
-    } 
+   } 
    else
-    fprintf(fsave, "%s_%s%s", str[i], tag[i], delimiter); 
-  }  
+   {
+     fprintf( fsave, "%s_%s", str[i], tag[i] ); 
+	   
+     if ( i < nv - 1 )  
+		fprintf( fsave, "%s", delimiter );
+   } 
+ }  
 break;
 
 case 2: //New names for labels
-  app=(char *)Tcl_GetVar(inter, "newlab",0);
-  if(strlen(app)==0)
-    strcpy(msg,"Var");
-  else
-    strcpy(msg,app);
-if(gp==1)
- {if(dozip==1) 
+ if(headprefix==1)
+ {
+  if(dozip==1) 
    {
     #ifdef LIBZ
     gzprintf(fsavez, "#");
@@ -6748,60 +6781,80 @@ if(gp==1)
   else
    fprintf(fsave, "#");
  }  
+ 
  for(i=0; i<nv; i++)
-   {if(dozip==1) 
-      {
+  {
+	if(dozip==1) 
+    {
        #ifdef LIBZ
-       gzprintf(fsavez, "%s%d%s", msg, i, delimiter);
+       gzprintf( fsavez, "%s%d", labprefix, i );
+	   
+       if ( i < nv - 1 )  
+		  gzprintf( fsavez, "%s", delimiter );
        #endif
-      } 
+    } 
     else
-      fprintf(fsave, "%s%d%s", msg, i, delimiter);  
-   }   
+	{
+       fprintf( fsave, "%s%d", labprefix, i );  
+	   
+       if ( i < nv - 1 )  
+		  fprintf( fsave, "%s", delimiter );
+	}
+  }   
  break;
 
-case 3:
-for(i=0; i<nv; i++) //Lsd result files
-  {if(dozip==1) 
-     {
+case 3: //Lsd result files
+for(i=0; i<nv; i++)
+ {
+	if(dozip==1) 
+    {
      #ifdef LIBZ 
       gzprintf(fsavez, "%s %s (%d %d)\t", str[i], tag[i], start[i], end[i]);
      #endif 
-     } 
-   else
-     fprintf(fsave, "%s %s (%d %d)\t", str[i], tag[i], start[i], end[i]);  
-  }   
+    } 
+    else
+      fprintf(fsave, "%s %s (%d %d)\t", str[i], tag[i], start[i], end[i]);  
+ }   
 break;
  } //end switch delimiter
 } //and of delimiter header writing
-else //header for Column text files
-  {
-if(gp==1)
- {
-  if(dozip==1) 
+else //header for fixed Column text files
+{
+   if(headprefix==1)
     {
-    #ifdef LIBZ 
-     gzprintf(fsavez, "#");
-    #endif 
-    } 
-  else
-    fprintf(fsave, "#");  
- }    
+     if(dozip==1) 
+       {
+       #ifdef LIBZ 
+        gzprintf(fsavez, "#");
+       #endif 
+       } 
+     else
+       fprintf(fsave, "#");  
+    }    
 
-  strcpy(str1, "                                                                                ");
    for(i=0; i<nv; i++)
-    {sprintf(msg, "%s_%s", str[i], tag[i]);
-     if(strlen(msg)<=numcol)
-      strcat(msg, str1);
-     msg[numcol]=(char)NULL;
-    if(dozip==1) 
-     {
-      #ifdef LIBZ
-      gzprintf(fsavez,"%s", msg);
-      #endif
-     } 
-    else
-     fprintf(fsave,"%s", msg); 
+    {
+	 if ( typelab == 2 )
+		sprintf( msg, "%s%d", labprefix, i + 1 );
+	 else
+		sprintf( msg, "%s_%s", str[i], tag[i] );
+		 
+     if ( strlen( msg ) < numcol )
+		strcat( msg, strsp );
+	
+	 if ( i == 0 && headprefix == 1 )
+		msg[ numcol - 1 ] = '\0';
+	 else
+		msg[ numcol ] = '\0';
+		 
+     if(dozip==1) 
+      {
+       #ifdef LIBZ
+       gzprintf(fsavez,"%s", msg);
+       #endif
+      } 
+     else
+      fprintf(fsave,"%s", msg); 
     }
   }
 
@@ -6825,10 +6878,12 @@ for(j=min_c; j<=max_c; j++)
  {
   for(i=0; i<nv; i++)
    {if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
-      gzprintf(fsavez, "%g%s", data[i][j], delimiter);
+      gzprintf( fsavez, "%.*G", SIG_DIG, data[i][j] );
     else
-      gzprintf(fsavez, "%s%s", misval, delimiter);
-      
+      gzprintf( fsavez, "%s", misval );
+  
+    if ( typelab == 3 || i < nv - 1 )  
+      gzprintf( fsavez, "%s", delimiter );
    }
   gzprintf(fsavez,"\n");
  }
@@ -6839,27 +6894,35 @@ else
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
    {if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
-      fprintf(fsave, "%g%s", data[i][j], delimiter);  
+      fprintf( fsave, "%.*G", SIG_DIG, data[i][j] );  
     else
-      fprintf(fsave, "%s%s", misval, delimiter);  
+      fprintf( fsave, "%s", misval );  
+  
+    if ( typelab == 3 || i < nv - 1 )  
+      fprintf( fsave, "%s", delimiter );
    }
    fprintf(fsave,"\n");  
  }
 }
 }
-else //column data writing
-{ strcpy(str1, "00000000000000000000000000000000000000000000000000000000000000000000000000000000");
+else //fixed column data writing
+{
 for(j=min_c; j<=max_c; j++)
  {for(i=0; i<nv; i++)
    {
    if(j>=start[i] && j<=end[i] && !is_nan(data[i][j]))		// write NaN as n/a
    {
-      sprintf(msg, "%.10lf", data[i][j]);
-	  strcat(msg, str1);
-	  msg[numcol]=(char)NULL;
+      sprintf( msg, "%.*G", ( int ) min( numcol - 6, SIG_DIG ), data[i][j] );
+	  strcat( msg, str0 );
+	  msg[ numcol ] = '\0';
    }
    else
-      sprintf(msg, "%s", misval);
+   {
+      sprintf( msg, "%s", misval );
+	  strcat( msg, strsp );
+	  msg[ numcol ] = '\0';
+   }
+  
    if(dozip==1) 
      {
      #ifdef LIBZ

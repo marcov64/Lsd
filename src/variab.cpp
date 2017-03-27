@@ -169,13 +169,6 @@ up=_up;
 label=NULL;
 i=strlen(_label)+1;
 label=new char[i];
-if(label==NULL)
-{
-	sprintf(msg, "out of memory in init");
-	error_hard( msg, "Out of memory" );
-	return -1;
-}
-
 strcpy(label, _label);
 num_lag=_num_lag;
 if ( num_lag >= 0 )
@@ -341,7 +334,7 @@ if ( stackinfo_flag >= stack )
     plog( "\n%s (%s) = %6g,\t t = %d, stack = %d, %4g secs, caller = %s, trigger var. = %s", "", label, lab_tit, val[0], t, stack, ( end_profile[stack-1] - start_profile[stack-1] ) / (double) CLOCKS_PER_SEC, caller->label, stacklog->prev->label );
  }
 
-if(debug_flag && debug=='d')
+if ( debug_flag && debug == 'd' && deb_cond == 0 )
  deb( (object *)up, caller, label, &val[0] );
 else
  switch(deb_cond)
@@ -350,10 +343,10 @@ else
   case 1: if(val[0]==deb_cnd_val)
 			  deb( (object *)up, caller, label, &val[0] );
 			 break;
-  case 2: if(val[0]<deb_cnd_val)
+  case 2: if(val[0]>deb_cnd_val)
 			  deb( (object *)up,caller, label, &val[0] );
 			 break;
-  case 3: if(val[0]>deb_cnd_val)
+  case 3: if(val[0]<deb_cnd_val)
 			  deb( (object *)up,caller, label, &val[0] );
 			 break;
   default:

@@ -661,7 +661,7 @@ break;
 case 5:
  if ( pause_run )
 	cmd( "wm title .log \"$origLogTit\"" );
- cmd( "if { [winfo exist .plt%d]} {destroytop .plt%d} {}", i, i );
+ cmd( "destroytop .plt%d", i );
  plog( "\nSimulation stopped at t = %d", "", t );
  quit=2;
 break;
@@ -732,6 +732,7 @@ if(quit==1) 			//For multiple simulation runs you need to reset quit
 plog( "\nSimulation %d finished (%2g sec.)\n", "",i,(float)(end - start) /CLOCKS_PER_SEC);
 
 #ifndef NO_WINDOW 
+cmd( "destroytop .deb" );
 cmd( "update" );
 // allow for run time plot window destruction
 cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
@@ -1129,10 +1130,11 @@ void uncover_browser( void )
 	if ( ! brCovered || running )	// ignore if not covered or running
 		return;
 
-	cmd( "if [ winfo exist .t ] { destroytop .t }" );
+	cmd( "destroytop .t" );
 	cmd( "wm title . $origMainTit" );
 	cmd( "enable_window \"\" m bbar l" );	// enable main window
 	cmd( "if { [ string equal [ wm state . ] normal ] && [ winfo exist .str ] && ! [ string equal [ wm state .str ] normal ] } { wm deiconify .str; lower .str }" );
+	cmd( "if { [ string equal [ wm state . ] normal ] } { raise .; focus . }" );
 	cmd( "update" );
 	
 	brCovered = false;

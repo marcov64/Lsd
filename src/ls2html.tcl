@@ -13,6 +13,19 @@
 
 # Collection of procedures to manage HTML and other external files
 
+# Remove existing Lsd temporary files
+proc LsdExit { } {
+	global RootLsd
+	if { [ file exists $RootLsd/Manual/temp.html ] } { 
+		file delete $RootLsd/Manual/temp.html
+	}
+	
+	if { [ file exists temp.html ] } { 
+		file delete temp.html
+	}	
+}
+
+
 proc LsdHelp a {
 	global HtmlBrowser tcl_platform RootLsd
 	set here [ pwd ]
@@ -26,32 +39,6 @@ proc LsdHelp a {
 		exec cmd.exe /c start $b &
 	}
 }
-
-
-# proc LsdHelp a {
-	# global tcl_platform RootLsd
-	# set here [ pwd ]
-	# cd $RootLsd
-	# cd Manual
-	# set f [ open temp.html w ]
-	# puts $f "<meta http-equiv=\"Refresh\" content=\"0;url=$a\">"
-	# close $f
-	# set b "temp.html"
-	# if { $tcl_platform(platform) == "unix" } {
-		# exec konqueror $b &
-	# } {
-		# if { $tcl_platform(os) == "Windows NT" } {
-			# if { $tcl_platform(osVersion) == "4.0" || $tcl_platform(osVersion) == "5.1" || $tcl_platform(osVersion) == "5.0" } {
-				# exec cmd.exe /c start $b &
-			# } {
-				# catch [ exec open.bat & ]
-			# }
-		# } {
-			# exec command.com /c start $b &
-		# }
-	# } 
-	# cd $here 
-# }
 
 
 proc LsdHtml a {
@@ -73,15 +60,7 @@ proc LsdTkDiff { a b { c "" } { d "" } } {
 	if { $tcl_platform(platform) == "unix" } {
 		exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 	} {
-		if { $tcl_platform(os) == "Windows NT" } {
-			if { $tcl_platform(osVersion) == "4.0" } {
-				exec cmd /c start $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
-			} {
-				exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
-			} 
-		} {
-			exec start $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
-		}
+		exec $wish $RootLsd/$LsdSrc/tkdiff.tcl -L "$c" -L "$d" -lsd $a $b &
 	}
 }
 

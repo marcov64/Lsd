@@ -6,10 +6,11 @@ INCLUDE_LIB=
 SSWITCH_CC=-march=native -O3
 TARGETNW=$(TARGET)NW
 
-$(TARGETNW): $(SRC_DIR)choose.h  model_options.txt $(SRC_DIR)system_options.txt $(SRC_DIR)fun_head.h $(SRC_DIR)main_gnuwin.obj \
-$(SRC_DIR)file.obj $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(FUN).obj $(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj
-	$(CC) $(SWITCH_CC)  $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj \
-	$(FUN).obj $(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj \
+$(TARGETNW): $(FUN).obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)file.obj $(SRC_DIR)util.obj \
+$(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj
+	$(CC) $(SWITCH_CC)  $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
+	$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj \
+	$(SRC_DIR)lsdmain.obj $(SRC_DIR)nets.obj \
 	$(EXTRA_PAR) -L$(PATH_LIB) -lm $(SWITCH_CC_LNK) -o $(TARGETNW) $(DUMMY)
 
 $(SRC_DIR)file.obj: $(SRC_DIR)choose.h  $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
@@ -28,6 +29,8 @@ $(SRC_DIR)report.obj: $(SRC_DIR)choose.h  $(SRC_DIR)system_options.txt $(SRC_DIR
 	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.obj $(INCLUDE_LIB)
 $(SRC_DIR)nets.obj: $(SRC_DIR)choose.h  $(SRC_DIR)system_options.txt $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
 	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE_LIB)
-$(FUN).obj: $(SRC_DIR)choose.h model_options.txt $(FUN).cpp $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
+$(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
 	$(CC) $(SWITCH_CC) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE_LIB) -I$(LSDROOT)/src
 
+clean:
+	rm $(SRC_DIR)*.obj $(FUN).obj $(TARGET)*

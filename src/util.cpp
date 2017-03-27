@@ -113,6 +113,9 @@ void cmd( const char *cm, ... )
 }
 
 
+/****************************************************
+LOG_TCL_ERROR
+****************************************************/
 void log_tcl_error( const char *cm, const char *message )
 {
 	FILE *f;
@@ -121,8 +124,8 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char ftime[ 80 ];
 
-	if( strlen( path ) > 0 )
-		sprintf( fname, "%s/Lsd.err", path );
+	if( strlen( exec_path ) > 0 )
+		sprintf( fname, "%s/Lsd.err", exec_path );
 	else
 		sprintf( fname, "Lsd.err" );
 
@@ -156,10 +159,32 @@ GO_BROTHER
 ****************************************************/
 object *go_brother(object *c)
 {
-if(c->next==NULL)
-  return(NULL);
-return(c->next);
+if ( c == NULL )
+	return NULL;
+if ( c->next == NULL )
+	return NULL;
+return c->next;
 }
+
+
+/****************************************************
+SKIP_NEXT_OBJ
+This is the new version, after moving to the bridge-based representation
+****************************************************/
+object *skip_next_obj(object *t, int *count)
+{
+char *lab;
+register object *c;
+register int i;
+
+*count=0;
+if(t==NULL)
+ return(NULL);
+for(c=t, i=0;c!=NULL; c=c->next, i++);
+*count=i;
+
+return skip_next_obj(t);
+};
 
 object *skip_next_obj(object *tr)
 {
@@ -182,54 +207,6 @@ for(cb=tr->up->b; cb!=NULL; cb=cb->next)
  return( NULL );
 }
 
-/****************************************************
-SKIP_NEXT_OBJ
-This is the old version, before moving to the bridge-based representation
-****************************************************/
-object *skip_next_objOLD(object *t, int *count)
-{
-char *lab;
-register object *c;
-register int i;
-
-*count=0;
-if(t==NULL)
- return(NULL);
-if(t->next==NULL)
- {*count+=1;
-  return(NULL);
- }
-
-for(lab=t->label,c=t, i=0; !strcmp(lab,c->label); i++)
-  if(c->next==NULL)
-    {c=NULL;
-    i++;
-    break;
-    }
-  else
-    c=c->next;
-*count=i;
-return (c);
-};
-
-/****************************************************
-SKIP_NEXT_OBJ
-This is the new version, after moving to the bridge-based representation
-****************************************************/
-object *skip_next_obj(object *t, int *count)
-{
-char *lab;
-register object *c;
-register int i;
-
-*count=0;
-if(t==NULL)
- return(NULL);
-for(c=t, i=0;c!=NULL; c=c->next, i++);
-*count=i;
-
-return skip_next_obj(t);
-};
 
 /****************************************************
 MY_STRCMP
@@ -243,6 +220,7 @@ if(a==NULL && b==NULL)
 res=strcmp(a,b);
 return res;
 };
+
 
 /****************************************************
 GO_NEXT
@@ -667,11 +645,11 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 		if ( dozip )
 		{
 			#ifdef LIBZ
-				gzprintf( fz, "%g\t", cv->data[i] );
+				gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[i] );
 			#endif
 		}
 		else
-			fprintf( f, "%g\t", cv->data[i] );
+			fprintf( f, "%.*G\t", SIG_DIG, cv->data[i] );
    else
 		if ( dozip )
 		{
@@ -700,11 +678,11 @@ if(r->up==NULL)
 		if ( dozip )
 		{
 			#ifdef LIBZ
-				gzprintf( fz, "%g\t", cv->data[i] );
+				gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[i] );
 			#endif
 		}
 		else
-			fprintf( f, "%g\t", cv->data[i] );
+			fprintf( f, "%.*G\t", SIG_DIG, cv->data[i] );
      else
 		if ( dozip )
 		{
@@ -1961,6 +1939,7 @@ for(cur=descr; cur!=NULL; cur=cur->next)
  }
 }
 
+
 void change_init_text(char *lab)
 {
 description *cur, *cur1;
@@ -1984,56 +1963,6 @@ for(cur=descr; cur!=NULL; cur=cur->next)
  }
 }
 
-void show_description(char *lab)
-{
-
-description *cur;
-int i;
-Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
-cmd( "if { [winfo exists .desc_%s]==1} {set i 1} {set i 0}", lab );
-Tcl_UnlinkVar(inter, "i");
-if(i==1)
- {
-  
-  cmd( "set vname %s", lab );
-  cmd( "set raise_description 1" );
-  cmd( "raise .desc_$vname ." );
-  return;
- }
- 
- cmd( "set w .desc_$vname" );
- cur=search_description(lab);
- if(!strcmp(cur->type,"Parameter") )
-   cmd( "newtop $w \"Description: Parameter $vname\" { destroytop .desc_%s }" );
- else
-   cmd( "newtop $w \"Description: Variable $vname\" { destroytop .desc_%s }" );  
-
- cmd( "frame $w.f" );
- cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
- cmd( "text $w.f.text -wrap word -width 60 -height 5 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
- cmd( "pack $w.f.yscroll -side right -fill y" );
- cmd( "pack $w.f.text -expand yes -fill both" );
- cmd( "pack $w.f" );
- cmd( "$w.f.text insert end \"%s\"", cur->text );
- cmd( "frame $w.b" );
- cmd( "button $w.b.save -width -9 -text Save -command {set vname %s; raise .desc_%s; set raise_description 1; set text_description [.desc_%s.f.text get 1.0 end]; set choice 45}", lab, lab, lab ); 
- cmd( "button $w.b.eq -width -9 -text Equation -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 46}", lab, lab ); 
- cmd( "button $w.b.us -width -9 -text Used -command {set vname %s; raise .desc_%s; set raise_description 1; set choice 47}", lab, lab ); 
- if(!strcmp(cur->type, "Parameter"))
-   cmd( "pack $w.b.save $w.b.us -padx 10 -pady 5 -side left" );
- else
-   cmd( "pack $w.b.save $w.b.eq $w.b.us -padx 5 -pady 5 -side left" );
-  
- cmd( "pack $w.b" );
- 
- cmd( "donehelp $w b2 { destroytop .desc_%s } { LsdHelp equation.html; set raise_description 1 }", lab  ); 
-
-cmd( "set vname %s", lab );
-cmd( "set raise_description 1" );
-
-cmd( "showtop .desc_$vname" );
-}
-
 
 void auto_document( int *choice, char const *lab, char const *which, bool append )
 {
@@ -2041,16 +1970,17 @@ FILE *f;
 description *cd;
 char str1[MAX_LINE_SIZE], app[10*MAX_LINE_SIZE];
 int i, j=0, done;
+bool var;
 
 for(cd=descr; cd!=NULL; cd=cd->next)
- {
-  if( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
-  { 
-  app[0]=(char)NULL;
+{
+ app[ 0 ] = '\0';
+ if( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
+ { 
   //for each description
   if( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
-   { //if it is a Variable
-   
+  { //if it is a Variable
+    var = true;
     sprintf(msg, "EQUATION(\"%s\")", cd->label); //search its equation
     f=search_str_nospaces(equation_name, msg);
     if(f==NULL)
@@ -2062,18 +1992,19 @@ for(cd=descr; cd!=NULL; cd=cd->next)
       f=search_str_nospaces(equation_name, msg);
      }
     if(f!=NULL)
-     {
+    {
      done=-1;
      j=0;
      while(done!=1)
-      {
+     {
       fgets(str1, MAX_LINE_SIZE, f);
-      for(i=0; str1[i]!=(char)NULL && done!=1; i++)
-       {
+      for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
+      {
        if(done==-1) //no comment found yet
         {
          if(isalpha(str1[i])!=0) //no comment exists
           done=1;
+		  
          if(str1[i]=='/' && str1[i+1]=='*')
           { done=0; //beginning of a multiline comment
            i+=2;
@@ -2083,50 +2014,49 @@ for(cd=descr; cd!=NULL; cd=cd->next)
 		   while ( str1[ i ] == '\n' )
 				i++;
 		   if ( str1[ i ] == '\0')
-				continue;
+				break;
           } 
          if(str1[i]=='/' && str1[i+1]=='/')
           { done=2; //beginning of a single line comment
            i+=2;
           } 
-
         }
+		
         if(done==0 ) //we are in a comment
-         {
          if(str1[i]=='*' && str1[i+1]=='/')
           done=1;
-          
-         }
+
         if(done==0 || done ==2)
-         {
          if(str1[i]!='\r')
            app[j++]=str1[i];
-         }
+
         if(done==2 && str1[i]=='\n')
          done=-1; 
-       }
+	 
+	    if ( j >= 10 * MAX_LINE_SIZE )
+			done = 1;
       }
-       strcat(app, "\n");
-       
-       
-     } //end of the if(found equation)
-   
+     }
+     strcat(app, "\n");
+    } //end of the if(found equation)
   } //end of the if(cd==Variable)
-  
-  app[j]=(char)NULL; //close the string
-  return_where_used(cd->label, str1); 
-  if ( append && strcmp( cd->text, "(no description available)" ) )
-	sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s.", cd->text, app, cd->label, str1 );
   else
-  	sprintf( msg, "%s\n'%s' appears in the equation for: %s.", app, cd->label, str1 );
+    var = false;
+  
+  app[j]='\0'; //close the string
+  return_where_used(cd->label, str1); 
+  if ( ( append || ! var ) && strcmp( cd->text, "(no description available)" ) )
+	sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+  else
+  	sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
   delete[] cd->text;
   cd->text= new char[strlen(msg)+1];
   strcpy(cd->text, msg);
-  } //end of the label to document
- }//end of the for(desc)
-
+ } //end of the label to document
+}//end of the for(desc)
 }
+
 
 void return_where_used(char *lab, char s[]) 
 {
@@ -2134,10 +2064,13 @@ int choice;
 char *r; 
 
 scan_used_lab(lab, &choice);
-cmd( "set l [join [$list.l get 0 end] \", \"]" );
+cmd( "set l [join [$list.l.l get 0 end] \", \"]" );
 cmd( "destroytop $list" ); 
 r=(char *)Tcl_GetVar(inter, "l",0);
-strcpy(s, r);
+if ( r != NULL )
+	strcpy(s, r);
+else
+	strcpy( s, "" );
 }
 
 
@@ -2198,14 +2131,14 @@ pixH = min( pixH, vsizeMax );
 
 dimH=pixH/nrow;
 dimW=pixW/ncol;
-cmd( "if { [winfo exists .lat] } { destroytop .lat }" );
+cmd( "destroytop .lat" );
 //create the window with the lattice, roughly 600 pixels as maximum dimension
 cmd( "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol  );
 
 cmd( "set lat_update 1" );
-cmd( "bind .lat <1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
-cmd( "bind .lat <2> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
-cmd( "bind .lat <3> { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
+cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
+cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
+cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 
 char init_color_string[32];		// the final string to be used to define tk color to use
 
@@ -2231,22 +2164,18 @@ cmd( "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_colo
 
 cmd( ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string );
 }
+
 cmd( "pack .lat.c" );
+
+cmd( "save .lat b { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
 
 cmd( "set dimH %lf", dimH );
 cmd( "set dimW %lf", dimW );
 
 if(lattice_type==1)
-{
-for(i=1; i<=nrow; i++)
- {
-  for(j=1; j<=nrow; j++)
-   {
-    cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
-
-   }
- }
-} 
+  for(i=1; i<=nrow; i++)
+    for(j=1; j<=nrow; j++)
+      cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
 
 cmd( "showtop .lat centerS no no no" );
 set_shortcuts_log( ".lat" );

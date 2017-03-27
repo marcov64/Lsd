@@ -160,7 +160,7 @@ cmd( "finddone $w b { \
 		pack $W.s.l $W.s.e; \
 		pack $W.s.b -padx 10 -pady 10; \
 		bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
-		showtop $W.s \
+		showtop $W.s centerS \
 	} { destroytop .eq_%s }", lab, lab  );
 cmd( "bind .eq_%s <Control-f> {.eq_%s.b.search invoke}; bind .eq_%s <Control-F> {.eq_%s.b.search invoke}", lab, lab, lab, lab );
 cmd( "bind .eq_%s <F3> { \
@@ -335,23 +335,24 @@ cmd( "if {[winfo exists $list]==1} {set choice 1} {}" );
 if(*choice==1)
  return;
 
-cmd( "newtop $list \"Users\" { destroytop .list_%s }", lab  );
-
-cmd( "frame $list.l" );
-cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
-cmd( "listbox $list.l.l -width 25 -yscroll \".list_%s.l.v_scroll set\"", lab );
-cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
-cmd( "mouse_wheel $list.l.l" );
+cmd( "newtop $list \"Used In\" { destroytop .list_%s }", lab  );
 
 cmd( "frame $list.lf " );
 cmd( "label $list.lf.l1 -text \"Equations using\"" );
 cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
+cmd( "pack $list.lf.l1 $list.lf.l2" );
+
+cmd( "frame $list.l" );
+cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
+cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".list_%s.l.v_scroll set\"", lab );
+cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $list.l.l" );
+
 if ( caller != 1 )
 	cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
 else
 	cmd( "label $list.l3" );
 
-cmd( "pack $list.lf.l1 $list.lf.l2" );
 cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
 cmd( "done $list b { destroytop .list_%s }", lab );		// done button
@@ -396,7 +397,7 @@ if(exist==1)
 else
  cmd( "$list.l.l insert end \"(never used)\"" );
 
-cmd( "showtop $list centerW" );
+cmd( "showtop $list" );
 }
 
 /****************************************************
@@ -418,21 +419,22 @@ if(*choice==1)
 
 cmd( "newtop $list \"Using\" { destroytop .listusing_%s }", lab  );
 
-cmd( "frame $list.l" );
-cmd( "scrollbar $list.l.v_scroll -command \".listusing_%s.l.l yview\"", lab );
-cmd( "listbox $list.l.l -width 25 -yscroll \".listusing_%s.l.v_scroll set\"", lab );
-cmd( "pack $list.l.l $list.l.v_scroll -side left -fill y" );
-cmd( "mouse_wheel $list.l.l" );
-
 cmd( "frame $list.lf " );
 cmd( "label $list.lf.l1 -justify center -text \"Elements used in\"" );
 cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
+cmd( "pack $list.lf.l1 $list.lf.l2" );
+
+cmd( "frame $list.l" );
+cmd( "scrollbar $list.l.v_scroll -command \".listusing_%s.l.l yview\"", lab );
+cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".listusing_%s.l.v_scroll set\"", lab );
+cmd( "pack $list.l.l $list.l.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $list.l.l" );
+
 if ( caller != 1 )
 	cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
 else
 	cmd( "label $list.l3" );
-	
-cmd( "pack $list.lf.l1 $list.lf.l2" );
+
 cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
 cmd( "done $list b { destroytop .listusing_%s }", lab );		// done button
@@ -448,7 +450,7 @@ if(*choice!=0)
 else
  cmd( "$list.l.l insert end \"(none)\"" );
 
-cmd( "showtop $list centerW" );
+cmd( "showtop $list" );
 }
 
 
