@@ -3872,7 +3872,7 @@ cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
 cmd( "frame .l.t" );
 cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 60 -height 16 -relief sunken -yscrollcommand \".l.t.yscroll set\"" );
+cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
 cmd( ".l.t.text insert end $a" );
 cmd( "pack .l.t.yscroll -side right -fill y" );
 
@@ -3989,38 +3989,119 @@ cmd( "set gcc_conf \"$gcc_base\\n$gcc_par\"" );
 cmd( "set gcc_deb \"-O0 -g\"" );
 cmd( "set gcc_opt \"-O3\"" );
 
-if(choice==1)
- {
+if ( choice == 1 )
+{
   cmd( "set f [open model_options.txt r]" );
   cmd( "set a [read -nonewline $f]" );
   cmd( "close $f" );
- }
-else
- {
-  cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Model compilation options not found or corrupted\" -detail \"The system will use default values.\"" );
-  cmd( "set a \"$gcc_conf $gcc_opt\\n\"" );
+  cmd( "set pos [ string first \"SWITCH_CC=\" $a ]; if { $pos == -1 } { set choice 0 } { if { [ string first \" -g\" $a $pos ] == -1 } { set debug 0 } { set debug 1 } }" );
+}
+
+if ( choice == 0 )
+{
+  cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Model options not found or corrupted\" -detail \"The system will use default values.\"" );
+  cmd( "set a \"$gcc_conf $gcc_deb\\n\"" );
   cmd( "set f [open model_options.txt w]" );
   cmd( "puts -nonewline $f $a" );
   cmd( "close $f" );
- }
-  
-cmd( "if { ! [ info exists debug ] } { set debug 0 }" );
+  cmd( "set debug 1" );
+}
 
 cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
 cmd( "frame .l.t" );
 cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 60 -height 10 -yscrollcommand \".l.t.yscroll set\"" );
+cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
 cmd( ".l.t.text insert end $a" );
 cmd( "pack .l.t.yscroll -side right -fill y" );
 
 cmd( "frame .l.t.d" );
 
 cmd( "frame .l.t.d.opt" );
-cmd( "checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { .l.t.d.opt.def invoke }" );
-cmd( "button .l.t.d.opt.def -width -9 -text \"Default\" -command { if { $debug == 0 } { set default \"$gcc_conf $gcc_opt\\n\" } { set default \"$gcc_conf $gcc_deb\\n\" }; .l.t.text delete 1.0 end; .l.t.text insert end \"$default\" }" );
-cmd( "button .l.t.d.opt.cle -width -9 -text \"Clean Files\" -command { if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { foreach i $objs { catch { file delete -force $i } } } }" );
-cmd( "pack .l.t.d.opt.debug .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left" );
+cmd( "checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { \
+		set a [.l.t.text get 1.0 end]; \
+		set pos [ string first \"SWITCH_CC=\" $a ]; \
+		if { $pos == -1 } { \
+			.l.t.d.opt.def invoke \
+		} else { \
+			if $debug { \
+				if { [ string first \" -g\" $a $pos ] != -1 } { \
+					return \
+				}; \
+				set pos1 [ string first \"\n\" $a $pos ]; \
+				if { $pos1 == -1 } { \
+					set a \"$a -g\" \
+				} else { \
+					set a [ string replace $a $pos1 $pos1 \" -g\n\" ] \
+				}; \
+				set pos2 [ string first \" -O\" $a $pos ]; \
+				if { $pos2 != -1 } { \
+					set a [ string replace $a $pos2 $pos2+3 \" -O0\" ] \
+				} \
+			} else { \
+				set pos1 [ string first \" -g\" $a $pos ]; \
+				if { $pos1 != -1 } { \
+					set a [ string replace $a $pos1 $pos1+2 \"\" ] \
+				} else { \
+					return \
+				}; \
+				set pos2 [ string first \" -O\" $a $pos ]; \
+				if { $pos2 != -1 } { \
+					set a [ string replace $a $pos2 $pos2+3 \" -O3\" ] \
+				} \
+			}; \
+			.l.t.text delete 1.0 end; \
+			.l.t.text insert end \"[ string trim $a ]\n\" \
+		} \
+	}" );
+cmd( "button .l.t.d.opt.ext -width -9 -text \"Add Extra\" -command { \
+		set a [.l.t.text get 1.0 end]; \
+		set pos [ string first \"FUN_EXTRA=\" $a ]; \
+		if { $pos == -1 } { \
+			.l.t.d.opt.def invoke; \
+			set a [.l.t.text get 1.0 end]; \
+			set pos [ string first \"FUN_EXTRA=\" $a ]; \
+		}; \
+		set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir $modeldir -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
+		if { $fun_extra == \"\" } { \
+			return \
+		}; \
+		set extra_files [ list ]; \
+		foreach x $fun_extra { \
+			if { [ string equal [ file dirname $x ] $modeldir ] } { \
+				lappend extra_files [ file tail $x ] \
+			} else { \
+				lappend extra_files $x \
+			} \
+		}; \
+		set pos1 [ string first \"\n\" $a $pos ]; \
+		if { $pos1 == -1 } { \
+			set a \"$a $extra_files\" \
+		} else { \
+			set a [ string replace $a $pos1 $pos1 \" $extra_files\n\" ] \
+		}; \
+		.l.t.text delete 1.0 end; \
+		.l.t.text insert end \"[ string trim $a ]\n\" \
+	}" );
+cmd( "button .l.t.d.opt.def -width -9 -text \"Default\" -command { \
+		if { $debug == 0 } { \
+			set default \"$gcc_conf $gcc_opt\\n\" \
+		} else { \
+			set default \"$gcc_conf $gcc_deb\\n\" \
+		}; \
+		.l.t.text delete 1.0 end; \
+		.l.t.text insert end \"$default\" \
+	}" );
+cmd( "button .l.t.d.opt.cle -width -9 -text \"Clean Obj.\" -command { \
+		if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { \
+			foreach i $objs { \
+				catch { \
+					file delete -force $i \
+				} \
+			} \
+		} \
+	}" );
+cmd( "pack .l.t.d.opt.debug .l.t.d.opt.ext .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left" );
 
 cmd( "pack .l.t.d.opt" );
 cmd( "pack .l.t.text .l.t.d" );
@@ -4552,7 +4633,7 @@ if ( choice == 70 )
 	fclose( f );
 	if ( sscanf( str + 10, "%s", str1 ) < 1 )
 	{
-		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu Model and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces. If there is no such line, click on 'Default' button first.\"" );
+		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu Model and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, click on 'Default' button first.\"" );
 		goto loop;
 	}
 	i = strlen( str ) - 1;
@@ -5087,3 +5168,4 @@ void signal_handler( int signum )
 	log_tcl_error( "FATAL ERROR", msg2 );
 	Tcl_Exit( -signum );			// abort program
 }
+
