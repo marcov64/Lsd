@@ -57,9 +57,9 @@ SHOW_EQ
 ****************************************************/
 void show_eq(char *lab, int *choice)
 {
-char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE], c3_lab[MAX_LINE_SIZE], *app;
+char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE], c3_lab[MAX_LINE_SIZE], *app, *fname;
 FILE *f;
-int i,j, done, bra, start, lun, printing_var=0, comment_line=0, temp_var=0;
+int i, j, k, done, bra, start, lun, printing_var=0, comment_line=0, temp_var=0;
 
 cmd( "if [string compare [info command .eq_%s] .eq_%s ] {set ex yes} {set ex no}", lab, lab );
 app= (char *)Tcl_GetVar(inter, "ex",0);
@@ -71,6 +71,7 @@ if(strcmp(msg, "yes"))
 cmd( "switch %d { 0 { set parWnd . } 1 { set parWnd .chgelem } 2 { set parWnd .da } 3 { set parWnd .deb } }", *choice );
 
 start:
+fname = equation_name;
 if( (f=fopen(equation_name,"r"))==NULL)
  {
   cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
@@ -94,46 +95,87 @@ if(*choice==2)
  return;
 goto start;
 }
-strcpy(c1_lab, "");
-strcpy(c2_lab, "");
 
-for(done=0; done==0 && fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
- {
-  clean_spaces(c1_lab); //eliminate the spaces
-  for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL; i++)
-   c2_lab[i]=c1_lab[i];
-  c2_lab[i]=(char)NULL; //close the string
+// search in all extra source files
+cmd( "if [ file exists \"%s/model_options.txt\" ] { \
+		set f [ open model_options.txt r ]; \
+		set a [ read -nonewline $f ]; \
+		close $f; \
+		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
+		if { $pos1 != -1 } { \
+			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
+			if { $pos2 == -1 } { \
+				set pos2 end \
+			}; \
+			set fun_extra [ string range $a $pos1 $pos2 ]; \
+			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
+			set extra_files [ list ]; \
+			foreach x $fun_extra { \
+				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
+					lappend extra_files $x \
+				} \
+			}; \
+			set choice [ llength $extra_files ] \
+		} else { \
+			set choice 0 \
+		} \
+	}", exec_path, exec_path );
 
-  if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
+for ( done = 0, k = 0; done == 0 && k <= *choice; ++k )
+{
+	if ( k > 0 )
 	{
-   if(!strcmp(c2_lab, "if(!strcmp(label,"))
-    macro=false;
-   else
-    macro=true;
-   for(j=i+1; c1_lab[j]!='"'; j++)
-     c3_lab[j-i-1]=c1_lab[j];
-   c3_lab[j-i-1]=(char)NULL;
-	if(!strcmp(c3_lab, lab) )
-	  {
-     done=1;
-    } 
+		if ( f != NULL )
+			fclose( f );
+		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		if ( ( f = fopen( fname, "r" ) ) == NULL )
+			continue;
 	}
- }
+	
+	strcpy(c1_lab, "");
+	strcpy(c2_lab, "");
+
+	while ( done==0 && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL )
+	{
+		clean_spaces(c1_lab); //eliminate the spaces
+		for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL; i++)
+			c2_lab[i]=c1_lab[i];
+		c2_lab[i]=(char)NULL; //close the string
+
+		if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
+		{
+			if(!strcmp(c2_lab, "if(!strcmp(label,"))
+				macro=false;
+			else
+				macro=true;
+			for(j=i+1; c1_lab[j]!='"'; j++)
+				c3_lab[j-i-1]=c1_lab[j];
+			c3_lab[j-i-1]=(char)NULL;
+			if(!strcmp(c3_lab, lab) )
+				done=1;
+		}
+	}
+}
+
 if(done==0)
- {fclose(f);
-  cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
-  return;
-  }
+{
+	if ( f != NULL )
+		fclose( f );
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation not found\" -detail \"Equation for '%s' not found (check the spelling or equation file name).\"", lab  );
+	return;
+}
 
 cmd( "set w .eq_%s", lab );
 cmd( "set s \"\"" );
-cmd( "newtop $w \"%s Equation\" { destroytop .eq_%s } $parWnd", lab, lab  );
+cmd( "newtop $w \"%s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, fname, lab  );
 
 cmd( "frame $w.f" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 cmd( "scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"" );
 cmd( "set tabwidth \"[ expr { 4 * [ font measure Courier 0 ] } ] left\"" );
-cmd( "text $w.f.text -wrap none -tabs $tabwidth -tabstyle wordprocessor -relief sunken -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
+cmd( "text $w.f.text -font {Courier 10 normal} -wrap none -tabs $tabwidth -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.xscroll -side bottom -fill x" );
 cmd( "pack $w.f.text -expand yes -fill both" );
@@ -323,15 +365,14 @@ SCAN_USED_LAB
 ****************************************************/
 void scan_used_lab(char *lab, int *choice)
 {
-char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE];
+char c1_lab[MAX_LINE_SIZE], c2_lab[MAX_LINE_SIZE], *fname;
 FILE *f;
-int i,j, done, bra, start, exist;
+int i, j, k, done, bra, start, exist;
 int caller = *choice;
 
 cmd( "set list .list_%s", lab );
 
-*choice=0;
-cmd( "if {[winfo exists $list]==1} {set choice 1} {}" );
+cmd( "if {[winfo exists $list]==1} { set choice 1 } { set choice 0 }" );
 if(*choice==1)
  return;
 
@@ -357,36 +398,71 @@ cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
 cmd( "done $list b { destroytop .list_%s }", lab );		// done button
 
-exist = 0;
+// search in all extra source files
+cmd( "if [ file exists \"%s/model_options.txt\" ] { \
+		set f [ open model_options.txt r ]; \
+		set a [ read -nonewline $f ]; \
+		close $f; \
+		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
+		if { $pos1 != -1 } { \
+			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
+			if { $pos2 == -1 } { \
+				set pos2 end \
+			}; \
+			set fun_extra [ string range $a $pos1 $pos2 ]; \
+			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
+			set extra_files [ list ]; \
+			foreach x $fun_extra { \
+				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
+					lappend extra_files $x \
+				} \
+			}; \
+			set choice [ llength $extra_files ] \
+		} else { \
+			set choice 0 \
+		} \
+	}", exec_path, exec_path );
 
-if ( ( f = fopen( equation_name, "r" ) ) != NULL )
+for ( exist = 0, k = 0; k <= *choice; ++k )
 {
-strcpy(c1_lab, "");
-strcpy(c2_lab, "");
-
-for(done=0; fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
- {
-  clean_spaces(c1_lab); //eliminate the spaces
-  for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL ; i++)
-   c2_lab[i]=c1_lab[i];
-  c2_lab[i]=(char)NULL; //close the string
-  if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
+	if ( k == 0 )
+		fname = equation_name;
+	else
 	{
-   if(!strcmp(c2_lab, "if(!strcmp(label,") )
-    macro=false;
-   else
-    macro=true;
-   for(j=0;c1_lab[i+1+j]!='"'; j++)
-	  c2_lab[j]=c1_lab[i+1+j]; //prepare the c2_lab to store the var's label
-	 c2_lab[j]=(char)NULL;
-    done=contains(f, lab, strlen(lab));
-    if(done==1)
-     {cmd( "$list.l.l insert end %s", c2_lab );
-      exist=1;
-     }
+		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 	}
- }
-fclose(f);
+	
+	if ( ( f = fopen( fname, "r" ) ) != NULL )
+	{
+		strcpy(c1_lab, "");
+		strcpy(c2_lab, "");
+
+		for(done=0; fgets(c1_lab, MAX_LINE_SIZE, f)!=NULL;  )
+		{
+		  clean_spaces(c1_lab); //eliminate the spaces
+		  for(i=0; c1_lab[i]!='"' && c1_lab[i]!=(char)NULL ; i++)
+		   c2_lab[i]=c1_lab[i];
+		  c2_lab[i]=(char)NULL; //close the string
+		  if(!strcmp(c2_lab, "if(!strcmp(label,")||!strcmp(c2_lab, "EQUATION(")||!strcmp(c2_lab, "FUNCTION("))
+			{
+		   if(!strcmp(c2_lab, "if(!strcmp(label,") )
+			macro=false;
+		   else
+			macro=true;
+		   for(j=0;c1_lab[i+1+j]!='"'; j++)
+			  c2_lab[j]=c1_lab[i+1+j]; //prepare the c2_lab to store the var's label
+			 c2_lab[j]=(char)NULL;
+			done=contains(f, lab, strlen(lab));
+			if(done==1)
+			 {cmd( "$list.l.l insert end %s", c2_lab );
+			  exist=1;
+			 }
+			}
+		}
+		fclose(f);
+	}
 }
 
 if(exist==1)
@@ -395,7 +471,7 @@ if(exist==1)
 		cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}" );
 }
 else
- cmd( "$list.l.l insert end \"(never used)\"" );
+	cmd( "$list.l.l insert end \"(never used)\"" );
 
 cmd( "showtop $list" );
 }
@@ -455,7 +531,7 @@ cmd( "showtop $list" );
 
 
 /****************************************************
-SHOW_EQ
+CONTAINS
  scans an equation checking if it contains anywhere the string
  lab between quotes. Returns 1 if found, and 0 otherwise.
  The file passed is moved to point to the next equation
@@ -528,7 +604,3 @@ else
  }
 return found;
 }
-
-
-
-

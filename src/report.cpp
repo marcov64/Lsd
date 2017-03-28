@@ -437,8 +437,8 @@ WRITE_VAR
 void write_var(variable *v, FILE *frep)
 {
 FILE *ffun ;
-char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], c3_lab[2*MAX_LINE_SIZE], *app;
-int done, i, one, j,flag_begin, flag_string, flag_comm, flag_var;
+char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], c3_lab[2*MAX_LINE_SIZE], *app, *fname;
+int done, i, one, j, k, flag_begin, flag_string, flag_comm, flag_var, nfiles;
 object *cur, *cur2;
 
 cmd( "update" );
@@ -456,184 +456,237 @@ fprintf(frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", 
  
 fprintf(frep, "<I>Used in: &nbsp;</I>");
 
-if ( ( ffun = fopen( equation_name,"r" ) ) == NULL )
- return;
-
-strcpy(c1_lab, "");
-strcpy(c2_lab, "");
-
-for(one=0 ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
- {
-  if(is_equation_header(c1_lab,c2_lab)==1)
+// search in all extra source files
+cmd( "if [ file exists \"%s/model_options.txt\" ] { \
+		set f [ open model_options.txt r ]; \
+		set a [ read -nonewline $f ]; \
+		close $f; \
+		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
+		if { $pos1 != -1 } { \
+			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
+			if { $pos2 == -1 } { \
+				set pos2 end \
+			}; \
+			set fun_extra [ string range $a $pos1 $pos2 ]; \
+			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
+			set extra_files [ list ]; \
+			foreach x $fun_extra { \
+				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
+					lappend extra_files $x \
+				} \
+			}; \
+			set res [ llength $extra_files ] \
+		} else { \
+			set res 0 \
+		} \
+	}", exec_path, exec_path );
+get_int( "res", &nfiles );
+	
+for ( one = 0, k = 0; k <= nfiles; ++k )
+{
+	if ( k == 0 )
+		fname = equation_name;
+	else
 	{
-    done=0;
-    done=contains(ffun, v->label, strlen(v->label));
-
-    if(done==1)
-     {
-	   fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", c2_lab,  c2_lab );
-       one=1;
-     }
+		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 	}
- }
-if(one==0)
- fprintf(frep, "(never used)");
+
+	if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+		continue;
+
+	strcpy(c1_lab, "");
+	strcpy(c2_lab, "");
+
+	while( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
+	{
+	  if(is_equation_header(c1_lab,c2_lab)==1)
+	  {
+		done=0;
+		done=contains(ffun, v->label, strlen(v->label));
+
+		if(done==1)
+		{
+		   fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", c2_lab,  c2_lab );
+		   one=1;
+		}
+	  }
+	}
+
+	fclose( ffun );
+}
+
+if ( one == 0 )
+	fprintf(frep, "(never used)");
 
 fprintf(frep, "<BR>\n");
 
-fclose(ffun);
-
 if(v->param==0 || v->param==2)
- {
+{
  fprintf(frep,"<I>Using: &nbsp;</I>");
  for(cur=v->up; cur->up!=NULL; cur=cur->up); //Reach the root
  fatto=0;
  find_using(cur, v, frep);
  if(fatto==0)
   fprintf(frep, "(none)");
- } 
+} 
 
 fprintf(frep,"<BR>\n");
 
 if ( v->param == 1 )
 	return;
 
-fprintf(frep,"<BR><I>Equation code:</I><BR>\n");
-
-if ( ( ffun = fopen( equation_name, "r" ) ) == NULL )
+for ( one = 0, k = 0; one == 0 && k <= nfiles; ++k )
 {
- fprintf(frep,"(not available)<BR><BR>\n");
- return;
-}
-strcpy(c1_lab, "");
-strcpy(c2_lab, "");
-flag_comm=0;
+	if ( k == 0 )
+		fname = equation_name;
+	else
+	{
+		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+	}
 
-for ( one = 0 ; fgets(c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL;  )
-{
-  if(is_equation_header(c1_lab,c2_lab)==1)
-  {
-   if(!macro)
-     done=0;
-   else
-     done=1; //will never stop with {} only
- 
-   if(!strcmp(c2_lab, v->label))
-   {
-	 fatto=0;
-	 one = 1;
-     fprintf(frep, "<BR>\n<TT>%s</TT>",c1_lab);
-     
-     while(done>0 || fatto==0)
-     {
-	  fatto=1;
-      fgets(c1_lab, 2*MAX_LINE_SIZE, ffun);
-      app=strstr(c1_lab, "{");
-      if(app!=NULL)
-        done++;
-      app=strstr(c1_lab, "}");
-      if(app!=NULL)
-        done--;
-      flag_string=flag_var=0;
-      fprintf(frep, "<BR><TT>");
-      if(flag_comm==1)
-        fprintf(frep, "<FONT COLOR=\"#009900\">");
-      flag_begin=0;
-      for(j=0; c1_lab[j]!=(char)NULL; j++)
-      {
-        if(flag_comm==0 && flag_string==0 && c1_lab[j]=='\"')
-        {
-		   for(i=j+1; c1_lab[i]!='\"'; i++)
-           c2_lab[i-j-1]=c1_lab[i];
-           c2_lab[i-j-1]=(char)NULL;
-           fprintf(frep, "\"<A HREF=\"#_d_%s\">", c2_lab);
-           flag_string=1;
-           j++;
-        }
-		
-        if(flag_comm==0 && flag_string==1 && c1_lab[j]=='\"')
-        {
-		   fprintf(frep, "</A>\"");
-           flag_string=0;
-           j++ ;
-        }
+	if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+		continue;
 
-        if(flag_comm==0 && c1_lab[j]=='/' && c1_lab[j+1]=='*')
-        {
-		   fprintf(frep, "<FONT COLOR=\"#009900\">");
-           flag_comm=1;
-        }
-		
-        if(flag_comm==1 && c1_lab[j]=='/' && c1_lab[j-1]=='*')
-        {
-		   fprintf(frep, "/</FONT>");
-           flag_comm=0;
-           j++;
-        }
-		
-        if(flag_comm==0 && c1_lab[j]=='/' && c1_lab[j+1]=='/')
-        {
-		   fprintf(frep, "<FONT COLOR=\"#009900\">");
-           flag_comm=2;
-        }
-		
-        if(flag_comm==0 && c1_lab[j]=='v' && c1_lab[j+1]=='[')
-        {
-		   fprintf(frep, "<FONT COLOR=\"#FF0000\">");
-           flag_var=1;
-        }
-		
-        if(flag_comm==0 && flag_var==1 && c1_lab[j]==']')
-        {
-		   fprintf(frep, "]</FONT>");
-           flag_var=0;
-           j++;
-        }
+	strcpy(c1_lab, "");
+	strcpy(c2_lab, "");
+	flag_comm=0;
 
-        if(c1_lab[j]=='<' || c1_lab[j]=='>')
-        {
-          if(c1_lab[j]=='<')
-            fprintf(frep, "&lt;");
-          else
-            fprintf(frep, "&gt;");
-        }
-        else
-          if(c1_lab[j]==' ' && flag_begin==0)
-			fprintf(frep, "&nbsp;");
-          else
-            if(c1_lab[j]!='\n')
-            {
-			  fprintf(frep, "%c", c1_lab[j]);
-              flag_begin=1;
-            }
-            else
-              if(flag_comm==1)
-                fprintf(frep, "</FONT>");
-      }
-	  
-      if(flag_comm==2)
-      {
-		fprintf(frep, "</FONT>");
-        flag_comm=0;
-      }
+	while ( fgets(c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL  )
+	{
+	  if(is_equation_header(c1_lab,c2_lab)==1)
+	  {
+	   if(!macro)
+		 done=0;
+	   else
+		 done=1; //will never stop with {} only
+	 
+	   if(!strcmp(c2_lab, v->label))
+	   {
+		 fatto=0;
+		 one = 1;
+		 
+		 if ( k == 0 )
+			fprintf( frep,"<BR><I>Equation code:</I><BR>\n" );
+		 else
+			fprintf( frep,"<BR><I>Equation code</I> <TT>(%s)</TT>:<BR>\n", fname );
+		
+		 fprintf( frep, "<BR>\n<TT>%s</TT>", c1_lab );
+		 
+		 while(done>0 || fatto==0)
+		 {
+		  fatto=1;
+		  fgets(c1_lab, 2*MAX_LINE_SIZE, ffun);
+		  app=strstr(c1_lab, "{");
+		  if(app!=NULL)
+			done++;
+		  app=strstr(c1_lab, "}");
+		  if(app!=NULL)
+			done--;
+		  flag_string=flag_var=0;
+		  fprintf(frep, "<BR><TT>");
+		  if(flag_comm==1)
+			fprintf(frep, "<FONT COLOR=\"#009900\">");
+		  flag_begin=0;
+		  for(j=0; c1_lab[j]!=(char)NULL; j++)
+		  {
+			if(flag_comm==0 && flag_string==0 && c1_lab[j]=='\"')
+			{
+			   for(i=j+1; c1_lab[i]!='\"'; i++)
+			   c2_lab[i-j-1]=c1_lab[i];
+			   c2_lab[i-j-1]=(char)NULL;
+			   fprintf(frep, "\"<A HREF=\"#_d_%s\">", c2_lab);
+			   flag_string=1;
+			   j++;
+			}
+			
+			if(flag_comm==0 && flag_string==1 && c1_lab[j]=='\"')
+			{
+			   fprintf(frep, "</A>\"");
+			   flag_string=0;
+			   j++ ;
+			}
 
-      fprintf(frep, "</TT>\n");
-      
-      clean_spaces(c1_lab);
-      if(!strncmp(c1_lab, "RESULT(",7) && macro)
-        done=0; //force it to stop
-     }//end of the while()
-      
-     fprintf(frep, "</FONT><BR><BR>\n");
-     break; 
-   }
-  }
+			if(flag_comm==0 && c1_lab[j]=='/' && c1_lab[j+1]=='*')
+			{
+			   fprintf(frep, "<FONT COLOR=\"#009900\">");
+			   flag_comm=1;
+			}
+			
+			if(flag_comm==1 && c1_lab[j]=='/' && c1_lab[j-1]=='*')
+			{
+			   fprintf(frep, "/</FONT>");
+			   flag_comm=0;
+			   j++;
+			}
+			
+			if(flag_comm==0 && c1_lab[j]=='/' && c1_lab[j+1]=='/')
+			{
+			   fprintf(frep, "<FONT COLOR=\"#009900\">");
+			   flag_comm=2;
+			}
+			
+			if(flag_comm==0 && c1_lab[j]=='v' && c1_lab[j+1]=='[')
+			{
+			   fprintf(frep, "<FONT COLOR=\"#FF0000\">");
+			   flag_var=1;
+			}
+			
+			if(flag_comm==0 && flag_var==1 && c1_lab[j]==']')
+			{
+			   fprintf(frep, "]</FONT>");
+			   flag_var=0;
+			   j++;
+			}
+
+			if(c1_lab[j]=='<' || c1_lab[j]=='>')
+			{
+			  if(c1_lab[j]=='<')
+				fprintf(frep, "&lt;");
+			  else
+				fprintf(frep, "&gt;");
+			}
+			else
+			  if(c1_lab[j]==' ' && flag_begin==0)
+				fprintf(frep, "&nbsp;");
+			  else
+				if(c1_lab[j]!='\n')
+				{
+				  fprintf(frep, "%c", c1_lab[j]);
+				  flag_begin=1;
+				}
+				else
+				  if(flag_comm==1)
+					fprintf(frep, "</FONT>");
+		  }
+		  
+		  if(flag_comm==2)
+		  {
+			fprintf(frep, "</FONT>");
+			flag_comm=0;
+		  }
+
+		  fprintf(frep, "</TT>\n");
+		  
+		  clean_spaces(c1_lab);
+		  if(!strncmp(c1_lab, "RESULT(",7) && macro)
+			done=0; //force it to stop
+		 }//end of the while()
+		  
+		 fprintf(frep, "</FONT><BR><BR>\n");
+		 break; 
+	   }
+	  }
+	}
+
+	fclose(ffun);
 }
 
 if ( ! one )
-	 fprintf(frep,"(not available)<BR><BR>\n");
- 
-fclose(ffun);
+	fprintf( frep,"<BR><I>Equation code</I>: (not available)<BR><BR>\n" );
 }
 
 
@@ -644,44 +697,83 @@ void find_using(object *r, variable *v, FILE *frep)
 {
 object *cur;
 variable *cv;
-int count, done, i, one;
-char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE];
+int count, done, i, one, nfiles;
+char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], *fname;
 FILE *ffun;
 
-for(one=0, cur=r; cur!=NULL; cur=skip_next_obj(cur, &count) )
+// search in all extra source files
+cmd( "if [ file exists \"%s/model_options.txt\" ] { \
+		set f [ open model_options.txt r ]; \
+		set a [ read -nonewline $f ]; \
+		close $f; \
+		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
+		if { $pos1 != -1 } { \
+			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
+			if { $pos2 == -1 } { \
+				set pos2 end \
+			}; \
+			set fun_extra [ string range $a $pos1 $pos2 ]; \
+			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
+			set extra_files [ list ]; \
+			foreach x $fun_extra { \
+				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
+					lappend extra_files $x \
+				} \
+			}; \
+			set res [ llength $extra_files ] \
+		} else { \
+			set res 0 \
+		} \
+	}", exec_path, exec_path );
+get_int( "res", &nfiles );
+	
+for ( one = 0, cur = r; cur != NULL; cur = skip_next_obj( cur, &count ) )
 {
- for(cv=cur->v; cv!=NULL; cv=cv->next)
-  {if( (ffun=fopen(equation_name,"r"))==NULL)
-    return;
+	for ( cv = cur->v; cv != NULL; cv = cv->next )
+	{
+		for ( i = 0; i <= nfiles; ++i )
+		{
+			if ( i == 0 )
+				fname = equation_name;
+			else
+			{
+				cmd( "set brr [ lindex $extra_files %d ]", i - 1 );
+				cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+				fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+			}
 
-    strcpy(c1_lab, "");
-    strcpy(c2_lab, "");
+			if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+				continue;
 
-    for( ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
-     {
-      if(is_equation_header(c1_lab,c2_lab)==1)
-	    {
-        done=0;
-        if(!strcmp(c2_lab, v->label) )
-         done=contains(ffun, cv->label, strlen(cv->label));
-        if(done==1)
-         {
-          if(frep!=NULL)
-		  {
-            fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", cv->label, cv->label );
-			one = 1;
-		  }
-          else
-            cmd( "$list.l.l insert end %s", cv->label );
-          fatto=1;
-         }
-       }
-     }
-   fclose(ffun);
-  }
+			strcpy(c1_lab, "");
+			strcpy(c2_lab, "");
 
- if(cur->b!=NULL)
-  find_using(cur->b->head, v, frep);
+			for( ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
+			{
+				if(is_equation_header(c1_lab,c2_lab)==1)
+				{
+					done=0;
+					if(!strcmp(c2_lab, v->label) )
+						done=contains(ffun, cv->label, strlen(cv->label));
+					if(done==1)
+					{
+						if(frep!=NULL)
+						{
+							fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", cv->label, cv->label );
+							one = 1;
+						}
+						else
+							cmd( "$list.l.l insert end %s", cv->label );
+						fatto=1;
+					}
+				}
+			}
+			fclose(ffun);
+		}
+	}
+
+	if(cur->b!=NULL)
+		find_using(cur->b->head, v, frep);
 }
 }
 

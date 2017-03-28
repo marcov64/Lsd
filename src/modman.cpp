@@ -220,7 +220,7 @@ cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $t
 
 cmd( "set Terminal $DefaultTerminal" );
 cmd( "set HtmlBrowser $DefaultHtmlBrowser" );
-cmd( "set fonttype $DefaultFont" );
+cmd( "set fonttype \"$DefaultFont\"" );
 cmd( "set wish $DefaultWish" );
 cmd( "set LsdSrc src" );
 
@@ -4188,7 +4188,7 @@ if(choice==2)
   goto loop;
  }
 
-cmd( "set fonttype $ifont" );
+cmd( "set fonttype \"$ifont\"" );
 cmd( "set dim_character $idim" );
 cmd( "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"" );
 
@@ -4203,7 +4203,7 @@ if(choice==60)
 
 cmd( "set temp_var1 $Terminal" );
 cmd( "set temp_var2 $HtmlBrowser" );
-cmd( "set temp_var3 $fonttype" );
+cmd( "set temp_var3 \"$fonttype\"" );
 cmd( "set temp_var4 $wish" );
 cmd( "set temp_var5 $LsdSrc" );
 cmd( "set temp_var6 $dim_character" );
@@ -4287,7 +4287,7 @@ cmd( "bind .a.num8.v_num11 <Return> { focus .a.f2.ok }" );
 cmd( "pack .a.num .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 cmd( "frame .a.f1" );
-cmd( "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 $DefaultFont; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work}" );
+cmd( "button .a.f1.def -width -9 -text Default -command {set temp_var1 $DefaultTerminal; set temp_var2 $DefaultHtmlBrowser; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 12; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work}" );
 cmd( "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}" );
 cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 cmd( "pack .a.f1 -anchor e" );
@@ -4310,7 +4310,7 @@ if(choice==1)
 
  cmd( "set Terminal $temp_var1" );
  cmd( "set HtmlBrowser $temp_var2" );
- cmd( "set fonttype $temp_var3" );
+ cmd( "set fonttype \"$temp_var3\"" );
  cmd( "set wish $temp_var4" );
  cmd( "set LsdSrc $temp_var5" );
  cmd( "if [string is integer $temp_var6] {set dim_character $temp_var6}" );
