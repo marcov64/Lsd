@@ -58,6 +58,11 @@ Comments and bug reports to marco.valente@univaq.it
 #define SIGMEM NSIG + 1					// out of memory signal
 #define SIGSTL NSIG + 2					// standard library exception signal
 
+// define PI for C++11
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 // redefine NAN to use faster non-signaling NaNs
 #if has_quiet_NaN 
 #undef NAN
@@ -448,7 +453,7 @@ void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem(object *r, int *num_v, int *num_c);
 void insert_labels_mem(object *r, int *num_v, int *num_c);
-void insert_object( char *w, object *r );
+void insert_object( const char *w, object *r );
 void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
 void insert_store_mem(object *r, int *num_v);
 void kill_trailing_newline(char *s);

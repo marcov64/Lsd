@@ -169,6 +169,7 @@ label=NULL;
 i=strlen(_label)+1;
 label=new char[i];
 strcpy(label, _label);
+	param = 0;
 num_lag=_num_lag;
 if ( num_lag >= 0 )
 {

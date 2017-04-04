@@ -5409,7 +5409,7 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 }
 
 
-void insert_object( char *w, object *r )
+void insert_object( const char *w, object *r )
 {
 object *cur;
 bridge *cb;
