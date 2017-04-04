@@ -15,7 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /*
-USED CASE 83
+USED CASE 87
 */
 
 /****************************************************
@@ -111,6 +111,7 @@ char lastObj[MAX_ELEM_LENGTH]="";	// to save last shown object for quick reload 
 char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int result_loaded;
+int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
@@ -573,7 +574,7 @@ cmd( "$w add command -label \"Add Function...\" -command {set param 2; set choic
 cmd( "$w add command -label \"Add Descending Object...\" -command {set choice 3} -underline 4 -accelerator Ctrl+D" );
 cmd( "$w add command -label \"Insert New Parent...\" -command {set choice 32} -underline 9" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Change Element...\" -command { if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 7 } { tk_messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\" } } -underline 0" );
+cmd( "$w add command -label \"Change Element...\" -command { set choice 7 } -underline 0" );
 cmd( "$w add command -label \"Change Object...\" -command {set choice 6} -underline 7" );
 cmd( "$w add command -label \"Change Number...\" -command {set choice 33} -underline 7" );
 cmd( "$w add separator" );
@@ -627,11 +628,13 @@ cmd( "$w add separator" );
 cmd( "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17" );
 cmd( "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17" );
 cmd( "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1" );
+cmd( "$w add command -label \"Show Elements to Plot\" -command {set choice 84} -underline 2" );
+cmd( "$w add command -label \"Show Elements to Debug\" -command {set choice 85} -underline 17" );
 
 cmd( "$w add separator" );
+cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Ctrl+G" );
+cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 4" );
 cmd( "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F" );
-cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 7" );
-cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 1 -accelerator Ctrl+G" );
 
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 0" );
@@ -1173,7 +1176,7 @@ cmd( "frame $T.l" );
 cmd( "label $T.l.l1 -text \"New parent to:\"" );
 cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
 cmd( "label $T.l.l3 -text \"descending from:\"" );
-cmd( "label $T.l.l4 -text \"%s\" -fg red",  r->up->label );
+cmd( "label $T.l.l4 -text \"%s\" -fg red", r->up == NULL ? "(none)" : r->up->label );
 cmd( "pack $T.l.l1 $T.l.l2 $T.l.l3 $T.l.l4 -side left -padx 2" );
 
 cmd( "frame $T.f" );
@@ -1553,6 +1556,12 @@ case 7:
 redrawRoot = true;					// assume browser redraw required
 
 int savei;
+cmd( "if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 1 } { set choice 0 }" );
+if ( *choice == 0 )
+{ 
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No element selected\" -detail \"Please select an element (variable, parameter) before using this option.\"" );
+	break;
+}
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 if ( lab1 == NULL || ! strcmp( lab1, "(none)" ) )
@@ -1573,10 +1582,10 @@ if(cur_descr==NULL)
  } 
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
-Tcl_LinkVar(inter, "debug", (char *) &num, TCL_LINK_INT);
-Tcl_LinkVar(inter, "save", (char *) &save, TCL_LINK_INT);
-Tcl_LinkVar(inter, "savei", (char *) &savei, TCL_LINK_INT);
-Tcl_LinkVar(inter, "plot", (char *) &plot, TCL_LINK_INT);
+Tcl_LinkVar(inter, "debug", (char *) &num, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "save", (char *) &save, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "savei", (char *) &savei, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "plot", (char *) &plot, TCL_LINK_BOOLEAN);
 
 save=cv->save;
 num=cv->debug=='d'?1:0;
@@ -2955,7 +2964,10 @@ case 42:
 
 for(n=r; n->up!=NULL; n=n->up);
 plog("\n\nVariables and parameters containing results:\n");
+lcount = 0;
 show_observe(n);
+if ( lcount == 0 )
+	plog( "(none)\n" );
 
 break;
 
@@ -2965,7 +2977,36 @@ case 49:
 
 for(n=r; n->up!=NULL; n=n->up);
 plog("\n\nVariables and parameters relevant to initialize:\n");
+lcount = 0;
 show_initial(n);
+if ( lcount == 0 )
+	plog( "(none)\n" );
+
+break;
+
+
+//Show variables to be plot
+case 84:
+
+for(n=r; n->up!=NULL; n=n->up);
+plog("\n\nVariables and parameters to plot in run time:\n");
+lcount = 0;
+show_plot(n);
+if ( lcount == 0 )
+	plog( "(none)\n" );
+
+break;
+
+
+//Show variables to debug
+case 85:
+
+for(n=r; n->up!=NULL; n=n->up);
+plog("\n\nVariables to debug:\n");
+lcount = 0;
+show_debug(n);
+if ( lcount == 0 )
+	plog( "(none)\n" );
 
 break;
 
@@ -5007,9 +5048,9 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
   if ( cv->save == 1 || cv->savei == 1 )
   {
    if(cv->param==1)
-    sprintf(msg, "Object: %s \tParam:\t", n->label);
+    sprintf(msg, "Object: %s \tParameter:\t", n->label);
    else
-    sprintf(msg, "Object: %s \tVar:\t", n->label);
+    sprintf(msg, "Object: %s \tVariable :\t", n->label);
    if ( cv->savei == 1 )
    {
 	if ( cv->save == 1 )
@@ -5019,6 +5060,7 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
    }
    plog( msg );
    plog( "%s\n", "highlight", cv->label );
+   lcount++;
   }
  }
 
@@ -5075,11 +5117,12 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
  if(cd!=NULL && cd->observe=='y')
   {
    if(cv->param==1)
-    plog( "Object: %s \tParam:\t", "", n->label );
+    plog( "Object: %s \tParameter:\t", "", n->label );
    else
-    plog( "Object: %s \tVar:\t", "", n->label );
+    plog( "Object: %s \tVariable :\t", "", n->label );
 
    plog( "%s (%lf)\n", "highlight", cv->label, cv->val[0] );
+   lcount++;
   }
  }
 
@@ -5111,12 +5154,13 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
  if(cd!=NULL && cd->initial=='y')
   {
    if(cv->param==1)
-    plog( "Object: %s \tParam:\t", "", n->label);
+    plog( "Object: %s \tParameter:\t", "", n->label);
    if(cv->param==0)
-    plog( "Object: %s \tVar:\t", "", n->label);
+    plog( "Object: %s \tVariable :\t", "", n->label);
    if(cv->param==2)
-    plog( "Object: %s \tFunc:\t", "", n->label);
+    plog( "Object: %s \tFunction :\t", "", n->label);
 
+   lcount++;
    plog( "%s \t", "highlight", cv->label );
  
    if(cd->init==NULL || strlen(cd->init)==0)
@@ -5161,6 +5205,70 @@ for(cb=n->b; cb!=NULL; cb=cb->next)
    show_initial(co);
   }
  } 
+}
+
+
+/****************************************************
+SHOW_PLOT
+****************************************************/
+void show_plot( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->plot )
+	{
+		if ( cv->param == 1 )
+			plog( "Object: %s \tParameter:\t", "", n->label );
+		if ( cv->param == 0 )
+			plog( "Object: %s \tVariable :\t", "", n->label );
+		if ( cv->param == 2 )
+			plog( "Object: %s \tFunction :\t", "", n->label );
+		plog( "%s\n", "highlight", cv->label );
+		lcount++;
+	}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		show_plot( co );
+	}
+}
+
+
+/****************************************************
+SHOW_DEBUG
+****************************************************/
+void show_debug( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->debug == 'd' )
+	{
+		if ( cv->param == 0 )
+			plog( "Object: %s \tVariable :\t", "", n->label );
+		if ( cv->param == 2 )
+			plog( "Object: %s \tFunction :\t", "", n->label );
+		plog( "%s\n", "highlight", cv->label );
+		lcount++;
+	}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		show_debug( co );
+	}
 }
 
 

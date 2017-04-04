@@ -35,16 +35,14 @@ flag set by default to 1. If it is zero, the system will not compute the equatio
 of this object as a default, but only if they are requested by other equations.
 Used to speed up the simulation.
 
+- object *b;
+pointer to the object's linked-list of bridges. The bridges connect the object with
+its sons. There is one bridge for each son object (even if it has many instances).
+The bridge points to the head of a linked list of the son instances.
 
 - object *up;
 pointer to the parent object. Root is the only object having no parent (the
 value of up is then NULL).
-
-- object *son;
-pointer to the first descendant object. All the descendants are listed one after
-another in a linked chain.
-The methods managing the model structure must take care of keeping the
-descendant of the same type one after another
 
 - object *next;
 pointer to the next object in the linked chain of the descendant of the parent
@@ -57,9 +55,8 @@ pointer to the data structure containing the network links from the object
 The drawing below sketches one object. All the object of the same chain
 same parent, that is up. They can only provide a way to continue along the
 linked chain (via next). The only way to "go back" is by starting again: go
-"up", then go in "son" and follow all the chain again.
-The parent of a set of descendants cannot reach directly all its descendants. It
-needs to go first in son, and then moving son->next, son->next->next and so on.
+"up", pick the bridge to the desired son object and pick the head of the
+corresponding linked list and then follow all the chain again.
 
 
    object *up
@@ -71,30 +68,14 @@ needs to go first in son, and then moving son->next, son->next->next and so on.
       |variable *v  |
       |_____________|
        ||
-       ||
-       \/
-   object *son
-
-
+       ||-----> bridge *b -----> object *b->head ------> *b->head->next ----> ...
+	   ||
+       ||-----> bridge *b->next --> object *b->next->head --> *b->next->head->next --> ...
+	   ..
+	   ..
 
 This definition of object allows to define a model as a multiple dimensional
 tree, where it is possible to browse the model with very limited code.
-For example, a typical method to do something to all the objects in the model
-will work as follow:
-
-void object::do_something(void)
-{
-object *cur;
-
-for(cur=son; cur!=NULL; cur=cur->next) //cycle through all the sons
- cur->do_something(); //have them doing something
-
-do_something(); //do_something yourself
-}
-
-If such a function is called from the root of the model, it will go through the
-whole model.
-
 
 METHODS
 The methods for object implemented here all refer always to the "this" object.
@@ -321,11 +302,9 @@ see nets.cpp
 
 #include "decl.h"
 
-bool no_error=false;
+bool no_error = false;
 char *qsort_lab;
 char *qsort_lab_secondary;
-int sig_stairs=0;
-int stairs=0;
 object *globalcur;
 
 
@@ -335,33 +314,34 @@ Return the value of Variable or Parameter with label l with lag lag.
 The method search for the Variable starting from this Object and then calls
 the function variable->cal(caller, lag)
 ***************************************************/
-double object::cal(object *caller,  char const *l, int lag)
+double object::cal( object *caller,  char const *l, int lag )
 {
-variable *curr;
+	variable *curr;
 
-double res;
+	if ( quit == 2 )
+		return -1;
 
-if(quit==2)
- return -1;
+	curr = search_var( this, l );
+	if ( curr == NULL )
+	{
+		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return 0;
+	}
 
-curr=search_var(this, l);
-if(curr==NULL)
- {sprintf(msg, "search for variable or parameter '%s' failed in object '%s'",l, label);
- error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
- return 0;
- }
-res=curr->cal(caller, lag);
-
-return(res);
+		return curr->cal( caller, lag );
+	
+	
 }
+
 
 /****************************************************
 CAL
 Interface for object->cal(...), using the "this" object by default
 ****************************************************/
-double object::cal( char const *l, int lag)
+double object::cal( char const *l, int lag )
 {
-return(cal(this, l, lag));
+	return cal( this, l, lag );
 }
 
 
@@ -390,99 +370,70 @@ variable *object::search_var(object *caller, char const *l)
 register variable *curr;
 register object *curr1;
 bridge *cb; 
-int bah=0;
 
 /* Search among the variables *********************/
-
-//#define TEST_OPTIMIZATION
-/******/
-#ifdef TEST_OPTIMIZATION
-if(stairs==0)
- sig_stairs=0;
-stairs++;
-#endif
-/*******/
-
 for(curr=v; curr!=NULL;curr=curr->next)
 	if(!strcmp(l,curr->label) )
-  {
-   /**********/
-   #ifdef TEST_OPTIMIZATION
-     stairs--;
-   #endif  
-   /************/
-   return(curr);
-  }
-
+		return(curr);
 
 /* Search among descendents *********************/
 for(cb=b, curr=NULL; cb!=NULL; cb=cb->next)
 {
-  
-  curr1=cb->head; 
-  if(strcmp(curr1->label, caller->label) ) //search down only if the desc. is different from caller
-   {
-    curr=curr1->search_var(this,l);
-    if(curr!=NULL)
-      return(curr);
-   }   
-  else
-    curr=NULL; 
-  }
+	curr1=cb->head; 
+	if(strcmp(curr1->label, caller->label) ) //search down only if the desc. is different from caller
+	{
+		curr=curr1->search_var(this,l);
+		if(curr!=NULL)
+		return(curr);
+	}   
+	else
+		curr=NULL; 
+}
 
 /* Search up in the tree *********************/
 if( caller!=up)
- { if(up==NULL)
-	 {
-   if(!no_error)
-   {
-    sprintf(msg, "search for '%s' failed in the equation of variable '%s'",l, stacklog->label);
-	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-    return NULL;
-    }
-   else
-	 return NULL;
-	 }
+{ 
+	if(up==NULL)
+	{
+		if(!no_error)
+		{
+			sprintf(msg, "search for '%s' failed in the equation of variable '%s'",l, stacklog->label);
+			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+			return NULL;
+		}
+		else
+			return NULL;
+	}
 	curr=up->search_var(this,l);
- }
+}
 
-#ifdef TEST_OPTIMIZATION
-if(stairs>0 && sig_stairs==0)
- {
-  plog( "\nMax searching steps for '%s' (equation for '%s', obj.='%s') = %d", "", l, stacklog->label, label, stairs );
-  sig_stairs=1;
- }
-stairs--;
-#endif
-/*******/
 return(curr);
 }
+
 
 /****************************************************
 INIT
 Set the basics for a newly created object
 ****************************************************/
-
 int object::init(object *_up, char const *_label)
 {
-int lab_len;
+	int lab_len;
 
-total_obj++;
-up=_up;
-v=NULL;
-next=NULL;
-//son=NULL;
-to_compute=1;
-lab_len=strlen(_label);
-label=new char[lab_len+1];
-strcpy(label, _label);
-b=NULL;
-hook=NULL;
-node = NULL;	// not part of a network yet
-cext = NULL;	// no C++ object extension yet
-acounter=0;	// "fail safe" when creating labels
-lstCntUpd=0; // counter never updated
-return 0;
+	total_obj++;
+	up=_up;
+	v=NULL;
+	next=NULL;
+	to_compute=1;
+	lab_len=strlen(_label);
+	label=new char[lab_len+1];
+	strcpy(label, _label);
+	b=NULL;
+	hook=NULL;
+	node = NULL;	// not part of a network yet
+	cext = NULL;	// no C++ object extension yet
+	acounter=0;	// "fail safe" when creating labels
+	lstCntUpd=0; // counter never updated
+	return 0;
 }
 
 
@@ -490,20 +441,17 @@ return 0;
 ADD_VAR
 Add a Variable to all the Objects of this type in the model
 ****************************************************/
-
 void object::add_var(char const *lab, int lag, double *val, int save)
 {
 variable *a;
 object *cur;
-double *new_val;
-
 
 for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
 {
-
 a=cur->v;
 if(a!=NULL)
- {for(  ; ; a=a->next)
+		{
+			for(  ; ; a=a->next)
 		if(a->next==NULL)
 		  break;
   a->next=new variable;
@@ -514,40 +462,35 @@ else
   {cur->v=new variable;
    (cur->v)->init( cur, lab, lag, val, save);
   }
-
-new_val=val+lag+1;
-
 }
-
-
 }
 
 
 /****************************************************
 HYPER_NEXT
 Return the next Object in the model with the label lab. The Object is searched
-in the whole model, inclduing different branches
+in the whole model, including different branches
 ****************************************************/
-object *object::hyper_next(char const *lab)
+object *object::hyper_next( char const *lab )
 {
-object *cur, *cur1=NULL;
-int count;
+	object *cur, *cur1;
 
-for(cur=next; cur!=NULL; cur=skip_next_obj(cur))
- {cur1=cur->search(lab);
-  if(cur1!=NULL)
-	break;
- }
+	for ( cur1 = NULL, cur = next; cur != NULL; cur = skip_next_obj( cur ) )
+	{
+		cur1 = cur->search( lab );
+		if ( cur1 != NULL )
+		break;
+	}
 
+	if ( cur1 != NULL )
+	 return cur1;
 
-if(cur1!=NULL)
- return(cur1);
+	if ( up != NULL )
+	 cur = up->hyper_next( lab );
 
-if(up!=NULL)
- cur=up->hyper_next(lab);
-
-return(cur);
+	return cur;
 }
+
 
 /****************************************************
 ADD_OBJ
@@ -557,9 +500,8 @@ tree
 void object::add_obj(char const *lab, int num, int propagate)
 {
 bridge *cb;
-object *a, *cur, *first;
+object *a, *cur;
 int i;
-
 
 for(cur=this; cur!=NULL; propagate==1?cur=cur->hyper_next(label):cur=NULL)
 {
@@ -590,6 +532,7 @@ for(cur=this; cur!=NULL; propagate==1?cur=cur->hyper_next(label):cur=NULL)
 return;
 }
 
+
 /****************************************************
 INSERT_PARENT_OBJ_ONE
 Insert a new parent in the model structure. The this object is placed below
@@ -599,8 +542,6 @@ void object::insert_parent_obj_one(char const *lab)
 {
 object *cur,*c2, *newo;
 bridge *cb, *cb1, *newb;
-int i, res;
-char *ch_me, *ch_up;
 
 c2=up->hyper_next(up->label);
 if(c2!=NULL)
@@ -619,8 +560,7 @@ strcpy(newb->blabel, lab);
 newb->head=newo;
 newb->counter_updated=false;
 
-cb1=NULL;
-for(cb=up->b; strcmp(cb->blabel,label); cb1=cb, cb=cb->next);
+for (cb1 = NULL, cb = up->b; strcmp( cb->blabel, label ); cb1 = cb, cb = cb->next );
 
 if(cb1==NULL)
  {//the replaced object is the first
@@ -637,66 +577,6 @@ cb->next=NULL; //replaced object becomes single son;
 newo->b=cb;
 for(cur=cb->head; cur!=NULL; cur=cur->next)
  cur->up=newo;
- 
-
-return;
-
-
-delete [] cb->blabel;
-cb->blabel=new char[strlen(lab)+1];
-strcpy(cb->blabel, lab);
-
-cur=new object;
-cur->init(up, lab);
-cb->head=cur;
-
-//create a new object pointing to this
-cur->b=new bridge;
-cur->b->mn=NULL;
-cur->b->next=NULL;
-cur->b->blabel=new char[strlen(label)+1];
-strcpy(cur->b->blabel, label);
-cur->b->head=this;
-cur->b->counter_updated=false;
-return;
-
-/**********************/
-if(up==NULL)
- return;
-c2=up->hyper_next(up->label);
-  
-  cur=new object;
-  cur->init(up, lab);
-  
-  if(!strcmp(up->b->blabel,label))
-   {
-    delete up->b->blabel;
-    i=strlen(lab);
-    up->b->blabel=new char[i+1];
-    strcpy(up->b->blabel, lab);
-    up->b->head=cur;
-      
-   } 
-  else 
-   {
-   for(cb=up->b; strcmp(cb->blabel, label); cb=cb->next);
-   delete cb->blabel;
-   i=strlen(lab);
-   cb->blabel=new char[i+1];
-   strcpy(cb->blabel, lab);
-   cb->head=cur;
-   }
- cur->b=new bridge;
- cur->b->mn=NULL;
- i=strlen(label);
- cur->b->blabel=new char[i+1];
- strcpy(cur->b->blabel, label);
- cur->b->head=this;
- cur->b->next=NULL;
- cur->b->counter_updated=false;
- 
- cur=c2->search(label);
- cur->insert_parent_obj_one(lab);
 } 
 
 
@@ -730,10 +610,8 @@ return NULL;
 CHG_LAB
 Change the label of the Object, for all the instances
 ****************************************************/
-
 void object::chg_lab(char const *lab)
 {
-
 object *cur;
 bridge *cb, *cb1;
 
@@ -764,6 +642,7 @@ else
 }
 }
 
+
 /****************************************************
 CHG_VAR_LAB
 Change the label of the Variable from old to n
@@ -785,22 +664,19 @@ for(cur=v; cur!=NULL; cur=cur->next)
 
 /****************************************************
 UPDATE
-Compute the value of all the Variables in the Object, saving the values and updating the runtime
-plot. 
+Compute the value of all the Variables in the Object, saving the values 
+and updating the runtime plot. 
 
 For optimization purposes the system tries to ignores descending objects
 marked to be not computed. The implementation is quite baroque, but it
 should be the fastest.
 ****************************************************/
-
 void object::update(void)
 {
 object *cur;
 bridge *cb;
 variable *var;
-FILE *app;
-int i=0;
-double cv ;
+
 for(var=v; var!=NULL && quit!=2; var=var->next)
  { 
 	if(var->last_update<t)
@@ -829,13 +705,12 @@ SUM
 Compute the sum of Variables or Parameters lab with lag lag.
 The sum is computed over the elements in a single branch of the model
 ****************************************************/
-
 double object::sum(char const *lab, int lag)
 {
 double tot;
 object *cur;
 variable *cur_v;
-int done, count=0;
+int done;
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
@@ -860,13 +735,12 @@ return(tot);
 OVERALL_MAX
 Compute the maximum of lab, considering only the Objects in a single branch of the model.
 ****************************************************/
-
 double object::overall_max(char const *lab, int lag)
 {
 double tot, temp;
 object *cur;
 variable *cur_v;
-int done, count=0;
+int done;
 
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
@@ -885,17 +759,17 @@ for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
 return(tot);
 }
 
+
 /****************************************************
 WHG_AV
 Compute the weighted average of lab (lab2 are the weights)
 ****************************************************/
-
 double object::whg_av(char const *lab, char const *lab2, int lag)
 {
 double tot, c1, c2;
 object *cur;
 variable *cur_v;
-int done, count=0;
+int done;
 
 cur_v=search_var(this, lab);
 
@@ -926,11 +800,11 @@ for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
 return(tot);
 }
 
+
 /****************************************************
 SEARCH_VAR_COND
 Search for the Variable or Parameter lab with value value and return it, if found.
 ****************************************************/
-
 object *object::search_var_cond(char const *lab, double value, int lag)
 {
 object *cur, *cur1;
@@ -963,18 +837,15 @@ return NULL;
 }
 
 
-
-
 /****************************************************
 ADD_EMPTY_VAR
 Add a new (empty) Variable, used in the creation of the model structure
 ****************************************************/
-
 variable *object::add_empty_var(char const *str)
 {
 variable *cv;
 variable *app;
-char *ch;
+
 if(v==NULL)
  {app=new variable;
   if(app==NULL)
@@ -992,17 +863,8 @@ else
   cv->next=new variable;
   cv=cv->next;
  }
-cv->init(this, str, -1,NULL, 0);
-cv->up=this;
-
-cv->next=NULL;
-cv->under_computation=0;
-cv->last_update=0;
-cv->num_lag=-1;
-cv->val=NULL;
-cv->save=-1;
-cv->savei=false;
-cv->param=0;
+ 
+cv->init( this, str, -1, NULL, 0 );
 
 return cv;
 }
@@ -1012,7 +874,6 @@ return cv;
 ADD_VAR_FROM_EXAMPLE
 Add a Variable identical to the example.
 ****************************************************/
-
 void object::add_var_from_example(variable *example)
 {
 variable *cv;
@@ -1043,35 +904,21 @@ else
   cv=cv->next;
  }
 
-cv->init(this,example->label, example->num_lag, example->val, example->save);
+cv->init( this, example->label, example->num_lag, example->val, example->save);
 cv->savei=example->savei;
-cv->next=NULL;
-cv->under_computation=0;
 cv->last_update=example->last_update; //changed before of f... Karen's model
-if(running==0)
- cv->plot=example->plot;
+cv->plot = ( ! running ) ? example->plot : false;
 cv->param=example->param;
 cv->deb_cond=example->deb_cond;
 cv->debug=example->debug;
 cv->deb_cnd_val=example->deb_cnd_val;
 cv->data_loaded=example->data_loaded;
-cv->lab_tit=NULL;
-if(cv->data_loaded=='+')
-{
- if(cv->param==1)
-  cv->val[0]=example->val[0];
- else
-  {
-   for(i=0; i<cv->num_lag; i++)
-    cv->val[i]=example->val[i];
-  }  
- }
 }
 
 
 /****************************************************
  WRITE
- Write the value in the Varible or Parameter lab, making it appearing as if
+ Write the value in the Variable or Parameter lab, making it appearing as if
  it was computed at time time-lag and the variable updated at time time.
  ***************************************************/
 void object::write( char const *lab, double value, int time, int lag )
@@ -1154,7 +1001,6 @@ EMPTY
 Garbage collection for Objects. Before killing the Variables data to be saved are stored
 in the "cemetery", a linked chain storing data to be analysed.
 ****************************************************/
-
 void object::empty(void)
 {
 variable *cv, *cv1;
@@ -1220,6 +1066,7 @@ cur=add_n_objects2(lab, n, cur, -1);
 return(cur);
 }
 
+
 /****************************************************
 ADD_N_OBJECTS2 
 Add N objects to the model making a copies of the example object ex
@@ -1231,6 +1078,7 @@ object *object::add_n_objects2(char const *lab, int n, object *ex)
 {
 	return add_n_objects2( lab, n, ex, -1 );
 }
+
 
 /****************************************************
 ADD_N_OBJECTS2 
@@ -1250,11 +1098,11 @@ double *appMem;
 
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
-FILE *f;
-object *cur, *last, *cur1, *cur2, *first;
+object *cur, *last, *cur1, *first;
 variable *cv;
-int ctr, found=0, i, counter;
+int i;
 bridge *cb, *cb1, *cb2;
+bool net=false;
 
 //check the labels and prepare the bridge to attach to
 for(cb2=b; cb2!=NULL && strcmp(cb2->blabel,lab); cb2=cb2->next);
@@ -1267,7 +1115,6 @@ if(cb2==NULL)
 cb2->counter_updated=false;
 
 //check if the objects are nodes in a network (avoid using EX from blueprint)
-bool net=false;
 cur=search(lab);
 if(cur!=NULL && cur->node!=NULL)
 	net=true;
@@ -1326,7 +1173,6 @@ for(cv=cur->v; cv!=NULL; cv=cv->next)
 
 //insert the descending objects in the newly created objects
 cb1=NULL;
-
 for(cb=ex->b; cb!=NULL; cb=cb->next)
  {
   if(cb1==NULL)
@@ -1379,11 +1225,11 @@ r[3]=max
 r[4]=min
 
 ****************************************************/
-
 void object::stat(char const *lab, double *r)
 {
 object *cur;
 variable *cur_v;
+
 cur_v=search_var(this, lab);
 if(cur_v==NULL)
  { r[0]=r[1]=r[2]=r[3]=r[4]=0;
@@ -1426,12 +1272,10 @@ DELETE_OBJ
 Remove the object from the model, calling object->empty for garbage collection
 and data storing
 ****************************************************/
-
 void object::delete_obj(void)
 {
 object *cur;
-variable *cv;
-bridge *cb, *a;
+bridge *cb;
 
 collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
@@ -1465,16 +1309,14 @@ Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
 ****************************************************/
-
 void object::lsdqsort(char const *obj, char const *var, char const *direction)
 {
-object *cur, *cur1, *nex, *first, **mylist;
-;
+object *cur, *nex, **mylist;
 bridge *cb;
 variable *cur_v;
-int num, flag_f, i;
+int num, i;
+bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
 
-bool useNodeId = var==NULL?true:false;		// sort on node id and not on variable
 if ( ! useNodeId )
 {
 cur_v=search_var(this, var);
@@ -1571,6 +1413,7 @@ else
  return 1;
 }
 
+
 /************************
 Comparison function used in lsdqsort
 *************************/
@@ -1590,15 +1433,16 @@ else
  return 1;
 }
 
+
 /****************************************************
 LSDQSORT
 Two stage sorting. Objects with identical values of var1 are sorted according to their value of var2
 ****************************************************/
 void object::lsdqsort(char const *obj, char const *var1, char const *var2, char const *direction)
 {
-object *cur, *cur1, *nex, *first, **mylist;
-variable *cur_v1, *cur_v2;
-int num, flag_f, i;
+object *cur, *nex, **mylist;
+variable *cur_v1;
+int num, i;
 bridge *cb;
 
 cur_v1=search_var(this, var1);
@@ -1665,6 +1509,7 @@ mylist[i-1]->next=NULL;
 delete[] mylist;
 }
 
+
 /************************
 Comparison function used in lsdqsort with two stages
 *************************/
@@ -1683,9 +1528,8 @@ else
     return -1;
   else
     return 1;
-
-
 }
+
 
 /************************
 Comparison function used in lsdqsort with two stages
@@ -1706,7 +1550,6 @@ else
     return -1;
   else
     return 1;
-
 }
 
 
@@ -1717,6 +1560,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag)
 {
 object *cur, *cur1;
 double a, b;
+
 cur1=cur=(search_var(this, lv))->up;
 
 for(a=0 ; cur!=NULL; cur=cur->next )
@@ -1746,8 +1590,8 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next)
    cur=cur1;
   }
 return cur;
-
 }
+
 
 /*********************
 Draw randomly an object with label lo with identical probabilities 
@@ -1756,6 +1600,7 @@ object *object::draw_rnd(char const *lo)
 {
 object *cur, *cur1;
 double a, b;
+
 cur1=cur=search(lo);
 
 for(a=0 ; cur!=NULL; cur=cur->next )
@@ -1778,8 +1623,8 @@ for(; a<=b && cur1!=NULL; cur1=cur1->next )
    cur=cur1;
   }
 return cur;
-
 }
+
 
 /*************
 Same as draw_rnd but faster, assuming the sum of the probabilities to be tot
@@ -1810,7 +1655,6 @@ if(a>tot)
   error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
  }  
 return cur;
-
 }
 
 
@@ -1891,10 +1735,6 @@ Procedure called when an unrecoverable error occurs. Information about the state
 *************/
 void error_hard( const char *logText, const char *boxTitle, const char *boxText )
 {
-int pippo=1;
-double app=0;
-object *cur;
-
 if ( quit == 2 )		// simulation already being stopped
 	return;
 	
@@ -1978,6 +1818,7 @@ fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 myexit(13);
 }
 
+
 /****************************
 Print the state of the stack in the log window. This tells the user which variable is computed because of other equations' request.
 *****************************/
@@ -1995,11 +1836,12 @@ plog( "\n\n(the first-level variable is computed by the simulation manager, \nwh
 }
 
 
+/****************************
+LAT_DOWN
+return the object "up" the cell of a lattice
+*****************************/
 object *object::lat_down(void)
 {
-/*
-return the object "up" the cell of a lattice
-*/
 object register *cur;
 int i, j;
 for(i=1, cur=up->search(label); cur!=this; cur=go_brother(cur),i++ );
@@ -2013,11 +1855,13 @@ for(j=1, cur=cur->search(label); j<i; cur=go_brother(cur),j++ );
 return cur;
 }
 
+
+/****************************
+LAT_UP
+return the object "down" the cell of a lattice
+*****************************/
 object *object::lat_up(void)
 {
-/*
-return the object "down" the cell of a lattice
-*/
 object register *cur, *cur1, *cur2;
 int i, k;
 
@@ -2035,11 +1879,13 @@ for(cur2=cur1->search(label),k=1; k<i; cur2=go_brother(cur2),k++ );
 return cur2;
 }
 
+
+/****************************
+LAT_RIGHT
+return the object "right" the cell of a lattice
+*****************************/
 object *object::lat_right(void)
 {
-/*
-return the object "right" the cell of a lattice
-*/
 object *cur;
 
 cur=go_brother(this);
@@ -2048,11 +1894,13 @@ if(cur==NULL)
 return cur;
 }
 
+
+/****************************
+LAT_LEFT
+return the object "left" the cell of a lattice
+*****************************/
 object *object::lat_left(void)
 {
-/*
-return the object "left" the cell of a lattice
-*/
 object register *cur;
 
 if(up->search(label)==this)
@@ -2063,11 +1911,11 @@ else
 return cur;
 }
 
-/*
 
+/****************************
+DELETE_BRIDGE
 Remove a bridge, used when an object is removed from the model.
-
-*/
+*****************************/
 void delete_bridge(object *d)
 {
 bridge *cb, *a;
@@ -2120,6 +1968,10 @@ for(cb=d->up->b; cb!=NULL; a=cb,cb=cb->next)
    }
 }
 
+
+/****************************
+EMPTY
+*****************************/
 void mnode::empty(void)
 {
 int i;
@@ -2131,6 +1983,10 @@ if (son!=NULL)
  }
 }
 
+
+/****************************
+CREATE
+*****************************/
 void mnode::create(double level)
 {
 
@@ -2154,6 +2010,10 @@ if(globalcur->next!=NULL)
  
 }
 
+
+/****************************
+CREATE
+*****************************/
 object *mnode::fetch(double *n, double level)
 {
 
@@ -2176,14 +2036,15 @@ else
 return cur; 
 }
 
-object *object::turbosearch(char const *label, double tot, double num)
-{
-/*
+
+/****************************
+turbosearch
 Search the object label placed in num position.
 This search exploits the structure created with 'initturbo'
 If tot is 0, previous set value is used
-*/
-
+*****************************/
+object *object::turbosearch(char const *label, double tot, double num)
+{
 bridge *cb;
 double val, lev;
 
@@ -2210,16 +2071,17 @@ if(tot>0)					// if size is informed
 else
 	lev=0;					// if not, use default
 return(cb->mn->fetch(&val, lev));
-
 }
 
-void object::initturbo(char const *label, double tot=0)
-{
-/*
+
+/****************************
+INITTURBO
 Generate the data structure required to use the turbo-search.
 - label must be the label of the descending object whose set is to be organized 
 - num is the total number of objects (if not provided or zero, it's calculated).
-*/
+*****************************/
+void object::initturbo(char const *label, double tot=0)
+{
 bridge *cb;
 object *cur;
 double lev;
@@ -2248,7 +2110,11 @@ lev=floor(log10(tot-1))+1;
 cb->mn->create(lev);
 }
 
-// remove all turbo search nodes
+
+/****************************
+EMPTYTURBO
+remove all turbo search nodes
+*****************************/
 void object::emptyturbo(void)
 {
 bridge *cb;

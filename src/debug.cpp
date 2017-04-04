@@ -333,13 +333,13 @@ case 3: if( r->up!=NULL)
 
 case 77: 
         if(asl==NULL && stacklog->vs!=NULL)
-            {
+        {
             asl=stacklog;
             plog( "\nVariable: %s", "", asl->label );
    			choice=deb(asl->vs->up,c, lab, res);
-            }
-          else
-           {
+        }
+        else
+        {
             if(asl->next==NULL)
              {
              while(asl->prev->prev!=NULL)
@@ -353,21 +353,21 @@ case 77:
                plog( "\nVariable: %s", "", asl->label );
                choice=deb(asl->vs->up,c, lab, res);
               }
-           }  
-         break;  
+        }  
+        break;  
 
 case 4: if( r->next!=NULL)
-			 choice=deb(r->next,c, lab, res);
-		  else
-			 {
-        cur=skip_next_obj(r);
-        if(cur!=NULL)
-         choice=deb(cur,c, lab, res);
-        else 
-         choice=0;
+			choice=deb(r->next,c, lab, res);
+		else
+		{
+			cur=skip_next_obj(r);
+			if(cur!=NULL)
+				choice=deb(cur,c, lab, res);
+			else 
+				choice=0;
         } 
+		break;
 
-			break;
 case 21: if(r->hook!=NULL)
 		{
 			if ( ! invalidHooks )

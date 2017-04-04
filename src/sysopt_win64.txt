@@ -10,7 +10,7 @@ INCLUDE_LIB=-I$(LSDROOT)/gnu64/include
 CC=g++
 SRC=src
 EXTRA_PAR=-lz
-SSWITCH_CC=-march=native -O3
+SSWITCH_CC=-march=native -std=gnu++14 -O3
 EXT=.exe
 
 # Set the complete option for the libraries to link to the models.

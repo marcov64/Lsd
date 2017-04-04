@@ -48,13 +48,13 @@ at time last_update - 1; val[2] at time last_update - 2 and so on.
 number of lagged values stored for the variable
 
 - int save;
-flag indentifying whether the variable has to be saved or not in the result file
+flag identifying whether the variable has to be saved or not in the result file
 
 - int plot;
 Flag used to indicate variables that are plotted in the run time graph.
 
 - char debug;
-flag used to indicate the variables to debug. If this flag is equal 1, when the
+flag used to indicate the variables to debug. If this flag is equal 'd', when the
 simulation is run in debug mode it stops immediately after the computation of
 its value.
 
@@ -64,7 +64,7 @@ satisfied. It does not require that the simulation is run in debug mode.
 Its different values represent the different conditions for stopping: <, > or ==
 
 - double deb_cnd_val;
-numberical value used for the conditional stop
+numerical value used for the conditional stop
 
 - int under_computation;
 control flag used to avoid infinite recursion of an equation calling itself.
@@ -158,7 +158,6 @@ clock_t start_profile[100], end_profile[100];
 /****************************************************
 INIT
 ****************************************************/
-
 int variable::init(object *_up, char const *_label, int _num_lag, double *v, int _save)
 {
 int i;
@@ -182,12 +181,12 @@ else
 next=NULL;
 last_update=0;
 save=_save;
-savei=0;
-under_computation=0;
+savei = false;
+under_computation = false;
 deb_cond=0;
 deb_cnd_val=0;
 data_loaded='-';
-plot=0;
+plot = false;
 data=NULL;
 lab_tit=NULL;
 
@@ -198,7 +197,6 @@ return 0;
 /***************************************************
 CAL
 ****************************************************/
-
 double variable::cal( object *caller, int lag )
 {
 int i, eff_lag;
@@ -239,7 +237,7 @@ if ( lag != 0 )
 
 if ( param == 0 )
 {	//variable
-	if ( last_update >= t  || lag > 0 )	// lagged value or already computed
+	if ( lag > 0 || last_update >= t )	// lagged value or already computed
 	{
 		if ( eff_lag <= num_lag )
 			return val[ eff_lag ];
@@ -375,7 +373,6 @@ return val[ 0 ];
 /****************************************************
 EMPTY
 ****************************************************/
-
 void variable::empty(void)
 {
 

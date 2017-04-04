@@ -247,14 +247,8 @@ for(cv=v; cv!=NULL; cv=cv->next)
     cur_descr->initial='n';
    }
 
- if(cv->save==true && cv->savei==false)
-  ch1='s';
- if(cv->save==false && cv->savei==false)
-  ch1='n';
- if(cv->save==true && cv->savei==true)
-  ch1='S';
- if(cv->save==false && cv->savei==true)
-  ch1='N';
+ ch1 = cv->save ? 's' : 'n';
+ ch1 = cv->savei ? toupper( ch1 ) : ch1;
   
 
  if(cv->param==0)
@@ -347,32 +341,10 @@ for(cv=v; cv!=NULL; cv=cv->next)
   if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2   )!=5)
 	 return false;
 
-  if(ch1=='s')
-	{
-     cv->save=true;
-     cv->savei=false;
-    }
-  if(ch1=='n')
-	{
-     cv->save=false;
-     cv->savei=false;
-    }
-  if(ch1=='S')
-	{
-     cv->save=true;
-     cv->savei=true;
-    }
-  if(ch1=='N')
-	{
-     cv->save=false;
-     cv->savei=true;
-    }
-     
+  cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
+  cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
 
-  if(ch2=='p')
-	cv->plot=1;
-  else
-	cv->plot=0;
+  cv->plot = ( tolower( ch2 ) == 'p' ) ? true : false;
 
   for(cur=this; cur!=NULL; repl==1?cur=cur->hyper_next(label):cur=NULL)
 	{cv1=cur->search_var(NULL, cv->label);

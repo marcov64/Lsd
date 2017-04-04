@@ -876,12 +876,12 @@ bridge *cb;
 
 toquit=quit;
 //for each variable set the data saving support
-for(var=root->v; var!=NULL; var=var->next)
- {
- var->last_update=0;
+for ( var = root->v; var != NULL; var = var->next )
+{
+	var->last_update=0;
 
 	if ( ( var->save || var->savei ) && ! no_more_memory )
-	 {
+	{
      if(var->num_lag>0 || var->param==1)
        var->start=0;
      else
@@ -897,9 +897,9 @@ for(var=root->v; var!=NULL; var=var->next)
      catch( std::bad_alloc& ) 
 	 {
 	 	set_lab_tit(var);
-         plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
-         var->save = var->savei = 0;
-         no_more_memory = true;
+        plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
+        var->save = var->savei = 0;
+        no_more_memory = true;
 	 	throw;
      }
    
@@ -907,25 +907,25 @@ for(var=root->v; var!=NULL; var=var->next)
      if(var->num_lag>0  || var->param==1)
       var->data[0]=var->val[0];
     }
-   else
+    else
     {
      if ( no_more_memory )
       var->save = var->savei = 0;
     }
 	
-	if(var->data_loaded=='-')
-	  {
+	if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
+	{
 		plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
 #ifndef NO_WINDOW   
 		plog( "Use the Initial Values editor to set its values\n" );
-     if(var->param==1)
-       cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
-     else
-       cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
+		if(var->param==1)
+			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
+		else
+			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
 #endif
 		toquit=2;
-	  }
- }
+	}
+}
 
 for(cb=root->b; cb!=NULL; cb=cb->next)
   for(cur=cb->head; cur!=NULL && quit!=2; cur=go_brother(cur))

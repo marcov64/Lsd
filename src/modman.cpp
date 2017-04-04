@@ -3984,7 +3984,7 @@ if ( choice == 0 )
 }
 
 cmd( "set gcc_base \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC_LNK=\"" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native\" }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native -std=c++14\" }" );
 cmd( "set gcc_conf \"$gcc_base\\n$gcc_par\"" );
 cmd( "set gcc_deb \"-O0 -g\"" );
 cmd( "set gcc_opt \"-O3\"" );
@@ -4068,8 +4068,12 @@ cmd( "button .l.t.d.opt.ext -width -9 -text \"Add Extra\" -command { \
 		}; \
 		set extra_files [ list ]; \
 		foreach x $fun_extra { \
-			if { [ string equal [ file dirname $x ] $modeldir ] } { \
-				lappend extra_files [ file tail $x ] \
+			set dirlen [ string length $modeldir ]; \
+			if { [ string equal -length $dirlen $modeldir $x ] } { \
+				if { [ string index $x $dirlen ] == \"/\" || [ string index $x $dirlen ] == \"\\\\\" } {  \
+					incr dirlen; \
+				}; \
+				lappend extra_files [ string range $x $dirlen end ] \
 			} else { \
 				lappend extra_files $x \
 			} \
@@ -4631,7 +4635,7 @@ if ( choice == 70 )
 	
 	while ( fgets( str, MAX_LINE_SIZE - 1, f ) != NULL && strncmp( str, "FUN_EXTRA=", 10 ) );
 	fclose( f );
-	if ( sscanf( str + 10, "%s", str1 ) < 1 )
+	if ( strncmp( str, "FUN_EXTRA=", 10 ) || sscanf( str + 10, "%s", str1 ) < 1 )
 	{
 		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu Model and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, click on 'Default' button first.\"" );
 		goto loop;
@@ -4641,9 +4645,9 @@ if ( choice == 70 )
 	if ( str[ --i ] == '\r' )
 		str[ i ] = '\0';			// remove CR (Windows)
 	
-	cmd( "set fun_extra [ split \"%s\" \" \t\" ]", str + 10 );
+	cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 	cmd( "set extra_files [ list ]" );
-	cmd( "foreach x $fun_extra { if { [ file exists $x ] || [ file exists \"$modeldir/$x\" ] } { lappend extra_files $x } }" );
+	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists $x ] || [ file exists \"$modeldir/$x\" ] ) } { lappend extra_files $x } }" );
 	cmd( "set brr \"\"" );
 	cmd( "set e .extra" );
 
