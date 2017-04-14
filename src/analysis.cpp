@@ -3285,7 +3285,7 @@ if(*num_v>-1)
 else
  strcpy(app_str, "");
 
-linsiz = max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
+linsiz = ( int ) max( linsiz, new_v * ( DBL_DIG + 4 ) ) + 1;
 linbuf = new char[ linsiz ];
 if ( linbuf == NULL )
 {
@@ -5170,7 +5170,7 @@ get_double( "cscaleLat", & cscale );	// 1.0
 
 // find column number suggestion
 tot = time_cross == 1 ? nv : max_c - min_c + 1;
-ncol = max( sqrt( tot ), 1 );
+ncol = ( int ) max( sqrt( tot ), 1 );
 while ( tot % ncol != 0 && ncol > 0 )
 	ncol--;
 
@@ -5614,7 +5614,7 @@ if(*choice==2)
 cmd( "set choice $bidi" );
 num_bins=*choice;
 
-cases=mean=var=0;
+mean = var = cases = 0;
 for(i=first; i<=last; i++)
 {
  if ( is_nan( data[ i ] ) || !is_finite( data[ i ] ) )		// ignore NaNs
@@ -5662,7 +5662,7 @@ for(i=first; i<=last; i++)
   a=floor( num_bins*(data[i]-mn)/(mx-mn) );
   s=num_bins*(data[i]-mn)/(mx-mn);
     
-  j=a;
+  j = ( int ) a;
   if(j==num_bins)
    j--;
 
@@ -5859,7 +5859,7 @@ num_bins=*choice;
 cmd( "set choice $time" );
 time_cs=*choice;
 
-cases=mean=var=0;
+mean = var = cases = 0;
 active_v=0;
 for(i=0; i<nv; i++)
  {
@@ -5910,7 +5910,7 @@ for(i=0; i<nv; i++)
   a=floor( num_bins*(data[i][time_cs]-mn)/(mx-mn) );
   s=num_bins*(data[i][time_cs]-mn)/(mx-mn);
     
-  j=a;
+  j = ( int ) a;
   if(j==num_bins)
    j--;
 
@@ -6727,7 +6727,7 @@ if ( typelab == 2 )
 		strncpy( labprefix, app, MAX_ELEM_LENGTH - 1  );
 }
 
-numcol = max( 10, min( numcol, 80 ) );
+numcol = ( int ) max( 10, min( numcol, 80 ) );
 
 if(fr==1)
 {
@@ -7193,7 +7193,7 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 						// scale to the canvas physical y range
 						y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
 						// save to visual vertical line buffer
-						pdataY[ k ][ j ] = round( y[ k ] );
+						pdataY[ k ][ j ] = ( int ) round( y[ k ] );
 						// restart averaging
 						y[ k ] = 0;
 					}
@@ -7209,7 +7209,7 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 							y[ k ] = yVal;
 							y[ k ] = min( max( y[ k ], cminy ), cmaxy );
 							y[ k ] = round( tbordsize + vsize * ( 1 - ( y[ k ] - cminy ) / ( cmaxy - cminy ) ) );
-							pdataY[ k ][ j ] = round( y[ k ] );
+							pdataY[ k ][ j ] = ( int ) round( y[ k ] );
 							y[ k ] = 0;
 						}
 					}
@@ -7221,7 +7221,7 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 		{ 
 			x1 = x2;
 			h = 0;			// restart averaging (more than 1 step per canvas step)
-			pdataX[ j ] = floor( x2 );
+			pdataX[ j ] = ( int ) floor( x2 );
 			if ( ++j > hsize )	// buffer full?
 				break;
 		}
@@ -7449,17 +7449,17 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 	{
 		if( line_point == 1 )
 		{
-			x1 = hbordsize + floor( hsize * ( bins[ i ].lowb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[0].lowb ) );
-			x2 = hbordsize + floor( hsize * ( bins[ i ].highb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[0].lowb ) );
-			y1 = min( max( tbordsize + vsize - floor( vsize * ( bins[i].num / cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
+			x1 = hbordsize + ( int ) floor( hsize * ( bins[ i ].lowb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[0].lowb ) );
+			x2 = hbordsize + ( int ) floor( hsize * ( bins[ i ].highb - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[0].lowb ) );
+			y1 = ( int ) min( max( tbordsize + vsize - floor( vsize * ( bins[i].num / cases - miny ) / ( maxy - miny ) ), tbordsize ), tbordsize + vsize );
 			y2 = tbordsize + vsize;
 
 			cmd( "plot_bars $p %d %d %d %d p%d $c%d %lf", x1, y1, x2, y2, i, color + 1, point_size );
 		}
 		else
 		{
-			x1 = hbordsize + floor( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
-			y1 = tbordsize + vsize - floor( vsize * ( bins[i].num / cases - miny ) / ( maxy - miny ) );
+			x1 = hbordsize + ( int ) floor( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
+			y1 = tbordsize + vsize - ( int ) floor( vsize * ( bins[i].num / cases - miny ) / ( maxy - miny ) );
 			if ( y1 <= tbordsize + vsize && y1 >= tbordsize )
 				cmd( "plot_points $p %d %d p%d $c%d %lf", x1, y1, i, color, point_size );
 		}
@@ -7497,12 +7497,12 @@ void plot( int type, int *start, int *end, char **str, char **tag, int *choice, 
 			b = exp( - ( a - mean ) * ( a - mean ) / ( 2 * var ) ) / 
 				( sqrt( 2 * M_PI * var ) );
 			b /= tot_norm;
-			y2 = min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ), 
-						   tbordsize ), 
-					  tbordsize + vsize );  
+			y2 = ( int ) min( max( tbordsize + vsize - round( vsize * ( b - miny ) / ( maxy - miny ) ), 
+								   tbordsize ), 
+							  tbordsize + vsize );  
 
-			x2 = hbordsize + round( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / 
-									( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
+			x2 = hbordsize + ( int ) round( hsize * ( bins[ i ].center - bins[ 0 ].lowb ) / 
+											( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) );
 									
 			if ( i > 0 && ( y1 > tbordsize || y2 > tbordsize ) && 
 				 ( y1 < tbordsize + vsize || y2 < tbordsize + vsize ) )
@@ -7718,10 +7718,10 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	// calculate horizontal borders required for legends
 	h = min_hborder( choice, pdigits, miny, maxy );
 	if ( y2on )								// repeat for 2nd y axis
-		h = max( h, min_hborder( choice, pdigits, cminy2, cmaxy2 ) );
+		h = ( int ) max( h, min_hborder( choice, pdigits, cminy2, cmaxy2 ) );
 		
 	// include margins and tick size (if present)
-	hbordsize = max( hbordsize, h ) + 2 * htmargin + 5;
+	hbordsize = ( int ) max( hbordsize, h ) + 2 * htmargin + 5;
 	cmd( "set hbordsizeP %d", hbordsize );
 	
 	// initial canvas size

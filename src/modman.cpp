@@ -226,10 +226,10 @@ cmd( "set LsdSrc src" );
 
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } {set LsdGnu gnu} {set LsdGnu gnu64}" );
 	
-cmd( "set choice [file exist $RootLsd/lmm_options.txt]" );
+cmd( "set choice [file exist \"$RootLsd/lmm_options.txt\"]" );
 if(choice==1)
  {
-  cmd( "set f [open $RootLsd/lmm_options.txt r]" );
+  cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
   cmd( "gets $f Terminal" );
   cmd( "gets $f HtmlBrowser" );
   cmd( "gets $f fonttype" );
@@ -256,7 +256,7 @@ if ( choice != 1 )
 	cmd( "set autoHide 0" );			// default is to not auto hide LMM on run
 	cmd( "set showFileCmds 0" );		// default is no text file commands in File menu
 	cmd( "set LsdNew Work" );		// default new model subdirectory is "Work"
-  cmd( "set f [open $RootLsd/lmm_options.txt w]" );
+  cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
   cmd( "puts $f $Terminal" );
   cmd( "puts $f $HtmlBrowser" );
   cmd( "puts $f $fonttype" );
@@ -272,12 +272,12 @@ if ( choice != 1 )
   cmd( "close $f" );
  }
  
-cmd( "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}" );
+cmd( "if { [file exists \"$RootLsd/$LsdSrc/system_options.txt\"] == 1} {set choice 0} {set choice 1}" );
 if(choice==1)
  { //the src/system_options.txt file doesn't exists, so I invent it
 	cmd( "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
-    cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt w]" );
-    cmd( "set f1 [open $RootLsd/$LsdSrc/$sysfile r]" );
+    cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" w]" );
+    cmd( "set f1 [open \"$RootLsd/$LsdSrc/$sysfile\" r]" );
     cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
     cmd( "puts -nonewline $f [read $f1]" );
     cmd( "close $f" );
@@ -299,12 +299,12 @@ cmd( "set alignMode \"LMM\"" );
 cmd( "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
 cmd( "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
 
-cmd( "if [ file exists $RootLsd/$LsdSrc/showmodel.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/showmodel.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/lst_mdl.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/lst_mdl.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/window.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/window.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists $RootLsd/$LsdSrc/dblclick.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/dblclick.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 if ( choice != 0 )
 {
 	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
@@ -334,7 +334,7 @@ cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label File -menu $w -underline 0" );
 cmd( "$w add command -label \"New Model...\" -underline 0 -command { set choice 14}" );	// entryconfig 0
 cmd( "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b" );	// entryconfig 1
-cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} } -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
+cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} } -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
 cmd( "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41} -underline 11 -accelerator Ctrl+a" );	// entryconfig 3
 cmd( "$w add separator" );	// entryconfig 4
 cmd( "$w add command -label \"Compare Models...\" -underline 3 -command {set choice 61} -underline 0" );
@@ -343,7 +343,7 @@ cmd( "$w add separator" );
 
 cmd( "if { $showFileCmds == 1 } { $w add command -label \"New Text File\" -command { set choice 39} -underline 4 }" );
 cmd( "if { $showFileCmds == 1 } { $w add command -label \"Open Text File...\" -command { set choice 15} -underline 0 -accelerator Ctrl+o }" );
-cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File\" -command { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 2 }" );
+cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File\" -command { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}} -underline 2 }" );
 cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command {set choice 4} -underline 3 }" );
 cmd( "if { $showFileCmds == 1 } { $w add separator }" );
 
@@ -437,7 +437,7 @@ cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . 
 cmd( "frame .bbar -bd 2" );
 
 cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 33}" );
-cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
+cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
 cmd( "button .bbar.undo -image undoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit undo}}" );
 cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit redo}}" );
 cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
@@ -589,7 +589,7 @@ cmd( "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwra
 
 cmd( "bind .f.t.t <Control-f> {set choice 11}; bind .f.t.t <Control-F> {set choice 11}" );
 cmd( "bind .f.t.t <F3> {set choice 12}" );
-cmd( "bind .f.t.t <Control-s> { if {[string length $filename] > 0} {if { [file exist $dirname/$filename] == 1} {catch {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}} {}; set f [open $dirname/$filename w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}}" ); 
+cmd( "bind .f.t.t <Control-s> { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}}" ); 
 cmd( "bind .f.t.t <Control-a> { set choice 4}" );
 cmd( "bind .f.t.t <Control-r> {set choice 2}; bind .f.t.t <Control-R> {set choice 2}" );
 cmd( "bind .f.t.t <Control-e> {set choice 8}" );
@@ -730,7 +730,7 @@ if(argn>1)
      cmd( ".f.t.t edit reset" );
      cmd( "close $file" );
      cmd( ".f.t.t mark set insert 1.0" );
-     cmd( "set filename \"[file tail $filetoload]\"" );
+     cmd( "set filename \"[file tail \"$filetoload\"]\"" );
      cmd( "set dirname [file dirname \"$filetoload\"]" );
      cmd( "set before [.f.t.t get 1.0 end]; .f.hea.file.dat conf -text \"$filename\"" );
 
@@ -795,7 +795,7 @@ if ( tosave && ( choice==2 || choice==15 || choice==1 || choice==13 || choice==1
 {
 
   cmd( "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save File?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]" );
-  cmd( " if { $answer == yes} {set curfile [file join $dirname $filename]; set file [open $curfile w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal $answer cancel] {set choice 0} {}}" );  
+  cmd( " if { $answer == yes} {set curfile [file join \"$dirname\" \"$filename\"]; set file [open \"$curfile\" w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal $answer cancel] {set choice 0} {}}" );  
   if(choice==0)
   goto loop;
 
@@ -821,19 +821,19 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
-  cmd( "cd $modeldir" );
+  cmd( "cd \"$modeldir\"" );
   
   cmd( "destroytop .mm" );			// close any open compilation results window
 
   if ( ! run )						// delete existing object file if it's just compiling
   {									// to force recompilation
 	cmd( "set oldObj \"[ file rootname [ lindex [ glob *.cpp ] 0 ] ].o\"" );
-	cmd( "if { [ file exists $oldObj ] } { file delete $oldObj }" );
+	cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
   }
   
   make_makefile();
 
-  cmd( "set fapp [file nativename $modeldir/makefile]" );
+  cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
   s=(char *)Tcl_GetVar(inter, "fapp",0);
   f=fopen(s, "r");
   if(f==NULL)
@@ -885,9 +885,9 @@ if(s==NULL || !strcmp(s, ""))
   cmd( "set file [open make.bat w]" );
   cmd( "puts -nonewline $file \"make.exe -f makefile 2> makemessage.txt\\n\"" );
   cmd( "close  $file" );
-  cmd( "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}" );
-  cmd( "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7 );
-  cmd( "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .}" );
+  cmd( "if { [file exists \"$RootLsd/$LsdSrc/system_options.txt\"] == 1} {set choice 0} {set choice 1}" );
+  cmd( "if { [file exists \"%s.exe\"]  == 1} {file rename -force \"%s.exe\" \"%sOld.exe\"} { }", str+7, str+7, str+7 );
+  cmd( "if { [file exists \"$RootLsd/$LsdGnu/bin/crtend.o\"] == 1} { file copy -force \"$RootLsd/$LsdGnu/bin/crtend.o\" .;file copy -force \"$RootLsd/$LsdGnu/bin/crtbegin.o\" .;file copy -force \"$RootLsd/$LsdGnu/bin/crt2.o\" .}" );
   cmd( "catch { exec make.bat } result" );
   cmd( "file delete make.bat" );
   cmd( "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o }" );
@@ -899,10 +899,10 @@ if(s==NULL || !strcmp(s, ""))
   if(choice==1)
   {
 	cmd( "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}" );  
-    cmd( "set funtime [file mtime $fname]" );
-    cmd( "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}", str+7,str+7 );
+    cmd( "set funtime [file mtime \"$fname\"]" );
+    cmd( "if { [file exist \"%s$add_exe\"] } { set exectime [file mtime \"%s$add_exe\"] } { set exectime \"$init_time\"}", str + 7, str + 7 );
   
-    cmd( "if {$init_time < $exectime } {set choice 0}" );
+    cmd( "if { $init_time < $exectime } {set choice 0}" );
     //turn choice into 0 if the executable is newer than the compilation command, implying just warnings
   }
 
@@ -928,7 +928,7 @@ if(s==NULL || !strcmp(s, ""))
      } 
 	 
  end_run:
- cmd( "cd $RootLsd" );
+ cmd( "cd \"$RootLsd\"" );
  choice=0;
  goto loop;
  }
@@ -948,13 +948,13 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 make_makefile(); 
-cmd( "cd $RootLsd" );
-cmd( "if { [file exists $modeldir/makefile]==1} {set choice 1} {set choice 0}" );
+cmd( "cd \"$RootLsd\"" );
+cmd( "if { [file exists \"$modeldir/makefile\"]==1} {set choice 1} {set choice 0}" );
 if(choice==1)
  {
-  cmd( "set file [open $modeldir/makefile]" );
+  cmd( "set file [open \"$modeldir/makefile\" r]" );
   cmd( ".f.t.t insert end [read -nonewline $file]" );
   cmd( ".f.t.t edit reset" );
   cmd( "close $file" );
@@ -981,13 +981,13 @@ s=(char *)Tcl_GetVar(inter, "curfilename",0);
 
 if(s!=NULL && strcmp(s, ""))
  {
-  cmd( "if { [file exist $dirname/$filename] == 1} {file copy -force $dirname/$filename $dirname/[file rootname $filename].bak}" );
-  cmd( "set file [open $curfilename w]" );
+  cmd( "if { [file exist \"$dirname/$filename\"] == 1} {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}" );
+  cmd( "set file [open \"$curfilename\" w]" );
   cmd( "puts -nonewline $file [.f.t.t get 0.0 end]" );
   cmd( "close $file" );
   cmd( "set before [.f.t.t get 0.0 end]" );
-  cmd( "set dirname [file dirname $curfilename]" );
-  cmd( "set filename [file tail $curfilename]" );
+  cmd( "set dirname [file dirname \"$curfilename\"]" );
+  cmd( "set filename [file tail \"$curfilename\"]" );
   cmd( ".f.hea.file.dat conf -text \"$filename\"" );
   cmd( "wm title . \"$filename - LMM\"" );
  }
@@ -1010,9 +1010,9 @@ if(s==NULL || !strcmp(s, ""))
   cmd( "set filename description.txt" );
   
   cmd( ".f.t.t delete 0.0 end" );
-  cmd( "set choice 0; if { [ file exists $modeldir/$filename ] } { set choice 1; if { [ file size $modeldir/$filename ] <= 2 } { set choice 0; file delete $modeldir/$filename } }" );
+  cmd( "set choice 0; if { [ file exists \"$modeldir/$filename\" ] } { set choice 1; if { [ file size \"$modeldir/$filename\" ] <= 2 } { set choice 0; file delete \"$modeldir/$filename\" } }" );
  if(choice==1)
-  {cmd( "set file [open $modeldir/description.txt]" );
+  {cmd( "set file [open \"$modeldir/description.txt\" r]" );
    cmd( ".f.t.t insert end [read -nonewline $file]" );
    cmd( "close $file" );
    cmd( "set before [.f.t.t get 1.0 end]" );
@@ -1036,7 +1036,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd( ".f.t.t mark set insert 1.0" );
   cmd( "focus -force .f.t.t" );
 
-  cmd( ".f.hea.file.dat conf -text $filename" );
+  cmd( ".f.hea.file.dat conf -text \"$filename\"" );
   cmd( "wm title . \"$filename - LMM\"" );
   
   cmd( "catch [unset -nocomplain ud]" );
@@ -1069,7 +1069,7 @@ create_compresult_window();
 choice=0;
 goto loop;
 
-  cmd( "if [file exists $modeldir/makemessage.txt]==1 {set choice 1} {set choice 0}" );
+  cmd( "if [file exists \"$modeldir/makemessage.txt\"]==1 {set choice 1} {set choice 0}" );
  if(choice==1)
   {
     
@@ -1109,12 +1109,12 @@ if(s==NULL || !strcmp(s, ""))
   choice=0;
   goto loop;
  }
-  cmd( "cd $modeldir" );
+  cmd( "cd \"$modeldir\"" );
   
 
   make_makefile();
 
-  cmd( "set fapp [file nativename $modeldir/makefile]" );
+  cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
   s=(char *)Tcl_GetVar(inter, "fapp",0);
   
   f=fopen(s, "r");
@@ -1124,7 +1124,7 @@ if(s==NULL || !strcmp(s, ""))
     cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Options', in menu Model, to create it.\"" );
 
     choice=0;
-    cmd( "cd $RootLsd" );
+    cmd( "cd \"$RootLsd\"" );
     goto loop;
    }
   fscanf(f, "%999s", str);
@@ -1137,8 +1137,8 @@ if(s==NULL || !strcmp(s, ""))
     goto loop;
    }
 
-cmd( "set filename %s.cpp", str+4 );
-cmd( "cd $RootLsd" );
+cmd( "set filename \"%s.cpp\"", str+4 );
+cmd( "cd \"$RootLsd\"" );
 s=(char *)Tcl_GetVar(inter, "filename",0);
 
 if(s==NULL || !strcmp(s, ""))
@@ -1153,7 +1153,7 @@ if(s==NULL || !strcmp(s, ""))
  
 cmd( "focus -force .f.t.t" );
 cmd( "set dirname $modeldir" );
-cmd( "set file [open $modeldir/$filename]" );
+cmd( "set file [open \"$modeldir/$filename\" r]" );
 cmd( ".f.t.t insert end [read -nonewline $file]" );
 cmd( "close $file" );
 cmd( ".f.t.t edit reset" );
@@ -1331,7 +1331,7 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
   
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 
 if(choice==58)
  {
@@ -1344,7 +1344,7 @@ else
  cmd( "set cmdbreak \"--args\"" ); 
 
 make_makefile();  
-cmd( "set fapp [file nativename $modeldir/makefile]" );
+cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
 s=(char *)Tcl_GetVar(inter, "fapp",0);
 f=fopen(s, "r");
 
@@ -1401,7 +1401,7 @@ else
 cmd( msg );			// if all ok, run command
 
 end_gdb:
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 choice =0;
 goto loop;
 }
@@ -1416,7 +1416,7 @@ choice=0;
 // prevent creating new groups in Lsd directory
 cmd( "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
 				{	set groupdir \"$groupdir/$LsdNew\"; \
-					set f [open $groupdir/groupinfo.txt r]; \
+					set f [open \"$groupdir/groupinfo.txt\" r]; \
 					set app \"[gets $f]\"; \
 					close $f; \
 					set modelgroup \"$modelgroup/$app\" }");
@@ -1518,7 +1518,7 @@ if(choice==-1)
   goto here_newgroup;
  } 
 //control for existing directory
-cmd( "if {[file exists $groupdir/$mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
+cmd( "if {[file exists \"$groupdir/$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
 if(choice==3)
 {
   cmd( "focus .a.mdir.e" );
@@ -1526,8 +1526,8 @@ if(choice==3)
   goto here_newgroup;
 }
 
-cmd( "file mkdir $groupdir/$mdir" );
-cmd( "cd $groupdir/$mdir" );
+cmd( "file mkdir \"$groupdir/$mdir\"" );
+cmd( "cd \"$groupdir/$mdir\"" );
 cmd( "set groupdir \"$groupdir/$mdir\"" );
 
 cmd( "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $f" );
@@ -1538,7 +1538,7 @@ cmd( "destroytop .a" );
 //end of creation of a new group
 }
 else
- cmd( "cd $groupdir" ); //if no group is created, move in the current group
+ cmd( "cd \"$groupdir\"" ); //if no group is created, move in the current group
 
 //create a new model
 cmd( "set mname \"New model\"" );
@@ -1603,7 +1603,7 @@ if(choice==-1)
  } 
 
 //control for existing directory
-cmd( "if {[file exists $mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
+cmd( "if {[file exists \"$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
 if(choice==3)
  {
   cmd( "focus .a.mdir.e" );
@@ -1622,11 +1622,11 @@ for(i=0; i<num; i++)
   strcpy(str, s);
   if(strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
    {
-    cmd( "set ex [file exists $curdir/modelinfo.txt]" );
+    cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
     cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
     if(choice==1)
     {
-      cmd( "set f [open $curdir/modelinfo.txt r]" );
+      cmd( "set f [open \"$curdir/modelinfo.txt\" r]" );
       cmd( "set cname [gets $f]; set cver [gets $f];" );
       cmd( "close $f" );
     } 
@@ -1672,7 +1672,7 @@ cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
 cmd( ".f.hea.ver.dat conf -text \"$version\"" );
 cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
 
-cmd( "file mkdir $dirname" );
+cmd( "file mkdir \"$dirname\"" );
 
 if( macro )
  cmd( "set fun_base \"fun_baseMacro.cpp\"" );
@@ -1680,14 +1680,14 @@ else
  cmd( "set fun_base \"fun_baseC.cpp\"" );
 
 //create the empty equation file
-cmd( "file copy $RootLsd/$LsdSrc/$fun_base $modeldir/fun_$mdir.cpp" ); 
+cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modeldir/fun_$mdir.cpp\"" ); 
 
-cmd( "cd $dirname" );
+cmd( "cd \"$dirname\"" );
 
 //create the model_options.txt file
 cmd( "set dir [glob *.cpp]" );
 cmd( "set b [lindex $dir 0]" );
-cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
+cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
 cmd( "set f [open model_options.txt w]" );
 cmd( "puts $f $a" );
 cmd( "close $f" );
@@ -1701,7 +1701,7 @@ cmd( "set frmt \"%d %%B, %%Y\"" );
 cmd( "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"" );
 cmd( "close $f" );
 
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 
 cmd( ".m.file entryconf 2 -state normal" );
 cmd( ".m.file entryconf 3 -state normal" );
@@ -1739,15 +1739,15 @@ if ( choice == 15 )
 		goto loop;
 }
 
-cmd( "if {[file exists $brr] == 1} {set choice 1} {set choice 0}" );
+cmd( "if {[file exists \"$brr\"] == 1} {set choice 1} {set choice 0}" );
 if(choice==0)
  goto loop; 
 
 cmd( ".f.t.t delete 1.0 end" ); 
 cmd( "focus -force .f.t.t" );
-cmd( "set dirname [file dirname $brr]" ); 
-cmd( "set filename [file tail $brr]" ); 
-cmd( "set file [open $brr]" ); 
+cmd( "set dirname [file dirname \"$brr\"]" ); 
+cmd( "set filename [file tail \"$brr\"]" ); 
+cmd( "set file [open \"$brr\" r]" ); 
 cmd( ".f.t.t insert end [read -nonewline $file]" ); 
 cmd( "close $file" ); 
 cmd( ".f.t.t edit reset" ); 
@@ -1757,7 +1757,7 @@ cmd( ".f.hea.file.dat conf -text \"$filename\"" );
 cmd( "wm title . \"$filename - LMM\"" );          
 cmd( "update" );
 
-cmd( "set s [file extension $filename]" );
+cmd( "set s [file extension \"$filename\"]" );
 s=(char *)Tcl_GetVar(inter, "s",0);
 if(s[0]!='\0')
 {
@@ -3521,7 +3521,7 @@ if(choice==-1)
  } 
 
 //control for existing directory
-cmd( "if {[file exists $mdir] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
+cmd( "if {[file exists \"$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
 if(choice==3)
  {
   cmd( "focus .a.mdir.e" );
@@ -3541,11 +3541,11 @@ for(i=0; i<num && choice!=3; i++)
   if(strcmp(str,"___") && strcmp(str, "gnu") && strcmp(str, "src") && strcmp(str, "Manual") )
    {
 
-    cmd( "set ex [file exists $curdir/modelinfo.txt]" );
+    cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
     cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
     if(choice==1)
     {
-      cmd( "set f [open $curdir/modelinfo.txt r]" );
+      cmd( "set f [open \"$curdir/modelinfo.txt\" r]" );
       cmd( "set cname [gets $f]; set cver [gets $f];" );
       cmd( "close $f" );
     }
@@ -3568,18 +3568,18 @@ if(choice==3)
 cmd( "destroytop .a" );
 
 //here we are: create a new copycat model
-cmd( "file copy $dirname $mdir" );
-cmd( "set dirname $mdir" );
-cmd( "set modeldir $mdir" );
-cmd( "set modelname $mname" );
-cmd( "set version $mver" );
+cmd( "file copy \"$dirname\" \"$mdir\"" );
+cmd( "set dirname \"$mdir\"" );
+cmd( "set modeldir \"$mdir\"" );
+cmd( "set modelname \"$mname\"" );
+cmd( "set version \"$mver\"" );
 cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
 cmd( ".f.hea.ver.dat conf -text \"$version\"" );
-cmd( "set ex [file exists $dirname/modelinfo.txt]" );
+cmd( "set ex [file exists \"$dirname/modelinfo.txt\"]" );
 cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
 if(choice==1)
-  cmd( "file delete $dirname/modelinfo.txt" );
-cmd( "set f [open $dirname/modelinfo.txt w]" );
+  cmd( "file delete \"$dirname/modelinfo.txt\"" );
+cmd( "set f [open \"$dirname/modelinfo.txt\" w]" );
 cmd( "puts $f \"$modelname\"" );
 cmd( "puts $f \"$version\"" );
 cmd( "set frmt \"%d %%B, %%Y\"" );
@@ -3659,26 +3659,26 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
-cmd( "set ex [file exists $modeldir/modelinfo.txt]" );
+cmd( "set ex [file exists \"$modeldir/modelinfo.txt\"]" );
 cmd( "set choice $ex" );
 i = choice;
 if ( i == 0 )
   cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot find file for model info\" -detail \"Please, check the date of creation.\"" );
 else
 {
-  cmd( "set f [open $modeldir/modelinfo.txt r]" );
+  cmd( "set f [open \"$modeldir/modelinfo.txt\" r]" );
   cmd( "gets $f; gets $f; set date [gets $f]" ); 
   cmd( "close $f" );
 }
   
-cmd( "set complete_dir [file nativename [file join [pwd] $modeldir]]" );
+cmd( "set complete_dir [file nativename [file join [pwd] \"$modeldir\"]]" );
 
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 make_makefile();
-cmd( "set fapp [file nativename $modeldir/makefile]" );
+cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
 s=(char *)Tcl_GetVar(inter, "fapp",0);
 f=fopen(s, "r");
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 if(f==NULL)
  {
   cmd( "tk_messageBox -parent .a -title Error -icon error -type ok -message \"File 'makefile' not found\" -detail \"Use the 'Model Options', in menu Model, to create it.\"" );
@@ -3697,7 +3697,7 @@ if(strncmp(str, "FUN=", 4)!=0)
 cmd( "set eqname %s.cpp", str+4 );
 
 cmd( "set frmt \"%%d %%B, %%Y\"" );
-cmd( "set last \"[clock format [file mtime $modeldir/$eqname] -format \"$frmt\"]\"" );
+cmd( "set last \"[clock format [file mtime \"$modeldir/$eqname\"] -format \"$frmt\"]\"" );
 
 cmd( "set mname $modelname" );
 cmd( "set mver $version" );
@@ -3750,7 +3750,7 @@ if(choice==1)
  {
   cmd( "set modelname $mname" );
   cmd( "set version $mver" );
-  cmd( "set f [open $modeldir/modelinfo.txt w]" );
+  cmd( "set f [open \"$modeldir/modelinfo.txt\" w]" );
   cmd( "puts $f \"$modelname\"" );
   cmd( "puts $f \"$version\"" );
   cmd( "puts $f \"$date\"" );
@@ -3793,14 +3793,14 @@ if(choice==46 || choice==49)
 /*
 Create the makefile
 */
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 
 cmd( "set choice [file exists model_options.txt]" );
 if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd( "set dir [glob *.cpp]" );
    cmd( "set b [lindex $dir 0]" );
-   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
+   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
    cmd( "set f [open model_options.txt w]" );
    cmd( "puts -nonewline $f $a" );
    cmd( "close $f" );
@@ -3810,14 +3810,14 @@ cmd( "set f [open model_options.txt r]" );
 cmd( "set a [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 
-cmd( "set choice [file exists $LsdSrc/system_options.txt]" );
+cmd( "set choice [file exists \"$LsdSrc/system_options.txt\"]" );
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
 	cmd( "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
-    cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt w]" );
-    cmd( "set f1 [open $RootLsd/$LsdSrc/$sysfile r]" );
+    cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" w]" );
+    cmd( "set f1 [open \"$RootLsd/$LsdSrc/$sysfile\" r]" );
     cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
     cmd( "puts -nonewline $f [read $f1]" );
     cmd( "close $f" );
@@ -3825,21 +3825,21 @@ if(choice==0)
  }
 choice=0; 
 
-cmd( "set f [open $LsdSrc/system_options.txt r]" );
+cmd( "set f [open \"$LsdSrc/system_options.txt\" r]" );
 cmd( "set d [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "set f [open $LsdSrc/makefile_base.txt r]" );
+cmd( "set f [open \"$LsdSrc/makefile_base.txt\" r]" );
 cmd( "set b [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 cmd( "set c \"# Model compilation options\\n$a\\n\\n# System compilation option\\n$d\\n\\n# body of the makefile (in $LsdSrc/makefile_base.txt)\\n$b\"" );
 cmd( "set f [open makefile w]" );
 cmd( "puts -nonewline $f $c" );
 cmd( "close $f" );
 
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 if(choice==46)
   choice=0; //just create the makefile
 if(choice==49) //after this show the description file (and a model is created)
@@ -3857,10 +3857,10 @@ if(choice==47)
 System Options
 */
 
-cmd( "set choice [file exists $LsdSrc/system_options.txt]" );
+cmd( "set choice [file exists \"$LsdSrc/system_options.txt\"]" );
 if(choice==1)
  {
-  cmd( "set f [open $LsdSrc/system_options.txt r]" );
+  cmd( "set f [open \"$LsdSrc/system_options.txt\" r]" );
   cmd( "set a [read -nonewline $f]" );
   cmd( "close $f" );
   choice=0;
@@ -3872,7 +3872,7 @@ cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
 cmd( "frame .l.t" );
 cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
+cmd( "text .l.t.text -wrap word -font {Courier 10 normal} -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
 cmd( ".l.t.text insert end $a" );
 cmd( "pack .l.t.yscroll -side right -fill y" );
 
@@ -3881,7 +3881,7 @@ cmd( "frame .l.t.d" );
 cmd( "frame .l.t.d.os" );
 cmd( "if [ string equal $tcl_platform(machine) intel ] { \
 		button .l.t.d.os.win -width -15 -text \"Default Windows x32\" -command { .l.t.text delete 1.0 end; \
-			set file [ open $RootLsd/$LsdSrc/sysopt_win32.txt r ]; \
+			set file [ open \"$RootLsd/$LsdSrc/sysopt_win32.txt\" r ]; \
 			set a [ read -nonewline $file ]; \
 			close $file; \
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
@@ -3890,7 +3890,7 @@ cmd( "if [ string equal $tcl_platform(machine) intel ] { \
 	} else { \
 		button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command { \
 			.l.t.text delete 1.0 end; \
-			set file [ open $RootLsd/$LsdSrc/sysopt_win64.txt r ]; \
+			set file [ open \"$RootLsd/$LsdSrc/sysopt_win64.txt\" r ]; \
 			set a [ read -nonewline $file ]; \
 			close $file; \
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
@@ -3899,7 +3899,7 @@ cmd( "if [ string equal $tcl_platform(machine) intel ] { \
 	} " ); 
 cmd( "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command { \
 		.l.t.text delete 1.0 end; \
-		set file [open $RootLsd/$LsdSrc/sysopt_linux.txt r]; \
+		set file [open \"$RootLsd/$LsdSrc/sysopt_linux.txt\" r]; \
 		set a [read -nonewline $file]; \
 		close $file; \
 		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
@@ -3907,7 +3907,7 @@ cmd( "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command { \
 	}" );
 cmd( "button .l.t.d.os.mac -width -15 -text \"Default Mac OSX\" -command { \
 		.l.t.text delete 1.0 end; \
-		set file [open $RootLsd/$LsdSrc/sysopt_mac.txt r]; \
+		set file [open \"$RootLsd/$LsdSrc/sysopt_mac.txt\" r]; \
 		set a [read -nonewline $file]; \
 		close $file; \
 		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
@@ -3931,7 +3931,7 @@ while(choice==0)
 
 if(choice==1)
  {
-  cmd( "set f [open $LsdSrc/system_options.txt w]" );
+  cmd( "set f [open \"$LsdSrc/system_options.txt\" w]" );
   cmd( "puts -nonewline $f [.l.t.text get 1.0 end]" );
   cmd( "close $f" );
   choice=46; //go to create makefile
@@ -3959,7 +3959,7 @@ if(s==NULL || !strcmp(s, ""))
   goto loop;
  }
 
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
 strcpy( str, s );
 strcat( str, "/model_options.txt" );
@@ -3983,11 +3983,9 @@ if ( choice == 0 )
 	cmd( "set b [lindex $dir 0]" );
 }
 
-cmd( "set gcc_base \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC_LNK=\"" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set gcc_par \"SWITCH_CC=-march=pentium-mmx -mtune=prescott\" } { set gcc_par \"SWITCH_CC=-march=native -std=c++14\" }" );
-cmd( "set gcc_conf \"$gcc_base\\n$gcc_par\"" );
-cmd( "set gcc_deb \"-O0 -g\"" );
-cmd( "set gcc_opt \"-O3\"" );
+cmd( "set gcc_conf \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
+cmd( "set gcc_deb \"$gcc_conf-O0 -ggdb3\\nSWITCH_CC_LNK=\\n\"" );
+cmd( "set gcc_opt \"$gcc_conf-O3\\nSWITCH_CC_LNK=\\n\"" );
 
 if ( choice == 1 )
 {
@@ -4000,7 +3998,7 @@ if ( choice == 1 )
 if ( choice == 0 )
 {
   cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Model options not found or corrupted\" -detail \"The system will use default values.\"" );
-  cmd( "set a \"$gcc_conf $gcc_deb\\n\"" );
+  cmd( "set a \"$gcc_deb\"" );
   cmd( "set f [open model_options.txt w]" );
   cmd( "puts -nonewline $f $a" );
   cmd( "close $f" );
@@ -4030,24 +4028,34 @@ cmd( "checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { \
 				}; \
 				set pos1 [ string first \"\n\" $a $pos ]; \
 				if { $pos1 == -1 } { \
-					set a \"$a -g\" \
+					set a \"$a -ggdb3\" \
 				} else { \
-					set a [ string replace $a $pos1 $pos1 \" -g\n\" ] \
+					set a [ string replace $a $pos1 $pos1 \" -ggdb3\n\" ] \
 				}; \
-				set pos2 [ string first \" -O\" $a $pos ]; \
+				set pos2 [ string first \"-O\" $a $pos ]; \
 				if { $pos2 != -1 } { \
-					set a [ string replace $a $pos2 $pos2+3 \" -O0\" ] \
+					set a [ string replace $a $pos2 $pos2+2 \"-O0\" ] \
 				} \
 			} else { \
-				set pos1 [ string first \" -g\" $a $pos ]; \
+				set pos1 [ string first \" -ggdb3\" $a $pos ]; \
 				if { $pos1 != -1 } { \
-					set a [ string replace $a $pos1 $pos1+2 \"\" ] \
+					set a [ string replace $a $pos1 $pos1+6 \"\" ] \
 				} else { \
-					return \
+					set pos1 [ string first \" -ggdb\" $a $pos ]; \
+					if { $pos1 != -1 } { \
+						set a [ string replace $a $pos1 $pos1+5 \"\" ] \
+					} else { \
+						set pos1 [ string first \" -g\" $a $pos ]; \
+						if { $pos1 != -1 } { \
+							set a [ string replace $a $pos1 $pos1+2 \"\" ] \
+						} else { \
+							return \
+						} \
+					} \
 				}; \
-				set pos2 [ string first \" -O\" $a $pos ]; \
+				set pos2 [ string first \"-O\" $a $pos ]; \
 				if { $pos2 != -1 } { \
-					set a [ string replace $a $pos2 $pos2+3 \" -O3\" ] \
+					set a [ string replace $a $pos2 $pos2+2 \"-O3\" ] \
 				} \
 			}; \
 			.l.t.text delete 1.0 end; \
@@ -4089,9 +4097,9 @@ cmd( "button .l.t.d.opt.ext -width -9 -text \"Add Extra\" -command { \
 	}" );
 cmd( "button .l.t.d.opt.def -width -9 -text \"Default\" -command { \
 		if { $debug == 0 } { \
-			set default \"$gcc_conf $gcc_opt\\n\" \
+			set default \"$gcc_opt\" \
 		} else { \
-			set default \"$gcc_conf $gcc_deb\\n\" \
+			set default \"$gcc_deb\" \
 		}; \
 		.l.t.text delete 1.0 end; \
 		.l.t.text insert end \"$default\" \
@@ -4100,7 +4108,7 @@ cmd( "button .l.t.d.opt.cle -width -9 -text \"Clean Obj.\" -command { \
 		if { [ catch { glob $RootLsd/$LsdSrc/*.o } objs ] == 0 } { \
 			foreach i $objs { \
 				catch { \
-					file delete -force $i \
+					file delete -force \"$i\" \
 				} \
 			} \
 		} \
@@ -4131,7 +4139,7 @@ if(choice==1)
 else
  choice=0; 
 
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 
 cmd( "destroytop .l" );
 
@@ -4330,7 +4338,7 @@ if(choice==1)
  cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
  cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
  color(shigh, 0, 0);							// set color highlights (all text)
-cmd( "set f [open $RootLsd/lmm_options.txt w]" );
+ cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
  cmd( "puts -nonewline $f  \"$Terminal\n\"" );
  cmd( "puts $f $HtmlBrowser" );
  cmd( "puts $f $fonttype" );
@@ -4369,9 +4377,9 @@ if(choice==-1)
  
 cmd( "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {set choice 2}" );
 if(choice==1) //unix
- cmd( "exec $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2] &" );
+ cmd( "exec $wish src/tkdiff.tcl [file join \"$d1\" \"$f1\"] [file join \"$d2\" \"$f2\"] &" );
 if(choice==2) //win2k, xp, ...,10
- cmd( "exec $wish src/tkdiff.tcl [file join $d1 $f1] [file join $d2 $f2]  &" );
+ cmd( "exec $wish src/tkdiff.tcl [file join \"$d1\" \"$f1\"] [file join \"$d2\" \"$f2\"]  &" );
  
 choice=0;
 goto loop;
@@ -4383,30 +4391,30 @@ if(choice==62)
 /*
 Generate the no window distribution
 */
-cmd( "cd $modeldir" );
+cmd( "cd \"$modeldir\"" );
 
 make_makefileNW();
 
 cmd( "if { ! [ file exists src ] } { file mkdir src }" );
 
-cmd( "file copy -force $RootLsd/$LsdSrc/lsdmain.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/main_gnuwin.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/file.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/variab.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/object.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/report.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/util.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/nets.cpp src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/fun_head.h src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/decl.h src" );
-cmd( "file copy -force $RootLsd/$LsdSrc/system_options.txt src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/main_gnuwin.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/file.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/variab.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/object.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/report.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/util.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/nets.cpp\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head.h\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" src" );
+cmd( "file copy -force \"$RootLsd/$LsdSrc/system_options.txt\" src" );
 
 cmd( "set f [open src/choose.h w]" );
 cmd( "puts -nonewline $f \"#define NO_WINDOW\\n\"" );
 cmd( "close $f" );
 
 // Compile a local machine version of lsd_gnuNW
-cmd( "set fapp [file nativename $modeldir/makefileNW]" );
+cmd( "set fapp [file nativename \"$modeldir/makefileNW\"]" );
 s=(char *)Tcl_GetVar(inter, "fapp",0);
 f=fopen(s, "r");
 if(f==NULL)
@@ -4451,9 +4459,9 @@ else
   cmd( "set file [open make.bat w]" );
   cmd( "puts -nonewline $file \"make.exe -fmakefileNW 2> makemessage.txt\\n\"" );
   cmd( "close  $file" );
-  cmd( "if { [file exists $RootLsd/$LsdSrc/system_options.txt] == 1} {set choice 0} {set choice 1}" );
-  cmd( "if { [file exists %s.exe]  == 1} {file rename -force %s.exe %sOld.exe} { }", str+7, str+7, str+7 );
-  cmd( "if { [file exists $RootLsd/$LsdGnu/bin/crtend.o] == 1} { file copy -force $RootLsd/$LsdGnu/bin/crtend.o .;file copy -force $RootLsd/$LsdGnu/bin/crtbegin.o .;file copy -force $RootLsd/$LsdGnu/bin/crt2.o .}" );
+  cmd( "if { [file exists \"$RootLsd/$LsdSrc/system_options.txt\"] == 1} {set choice 0} {set choice 1}" );
+  cmd( "if { [file exists \"%s.exe\"]  == 1} {file rename -force \"%s.exe\" \"%sOld.exe\"} { }", str+7, str+7, str+7 );
+  cmd( "if { [file exists \"$RootLsd/$LsdGnu/bin/crtend.o\"] == 1} { file copy -force \"$RootLsd/$LsdGnu/bin/crtend.o\" .;file copy -force \"$RootLsd/$LsdGnu/bin/crtbegin.o\" .;file copy -force \"$RootLsd/$LsdGnu/bin/crt2.o\" .}" );
   cmd( "catch { exec make.bat } result" );
   cmd( "file delete make.bat" );
   cmd( "if { [file exists crtend.o] == 1} { file delete crtend.o;file delete crtbegin.o ;file delete crt2.o }" );
@@ -4465,8 +4473,8 @@ cmd( "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; se
 if(choice==1)
 {
   cmd( "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}" );
-  cmd( "set funtime [file mtime $fname]" );
-  cmd( "if { [file exist %s$add_exe] == 1 } {set exectime [file mtime %s$add_exe]} {set exectime $init_time}", str+7,str+7 );
+  cmd( "set funtime [file mtime \"$fname\"]" );
+  cmd( "if { [file exist \"%s$add_exe\"] == 1 } {set exectime [file mtime \"%s$add_exe\"]} {set exectime $init_time}", str+7,str+7 );
   cmd( "if {$init_time < $exectime } {set choice 0} { }" );
   //turn choice into 0 if the executable is newer than the compilation command, implying just warnings
 }
@@ -4477,7 +4485,7 @@ else
   cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n$modeldir\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in Lsd result files named after the seed generator used.\"" );
 
 end_compNW:
-cmd( "cd $RootLsd" );
+cmd( "cd \"$RootLsd\"" );
 choice=0;
 goto loop;
 }
@@ -4620,12 +4628,12 @@ if ( choice == 70 )
 	}
 	
 	// Create model options file if it doesn't exist
-	cmd( "set choice [ file exists $modeldir/model_options.txt ]" );
+	cmd( "set choice [ file exists \"$modeldir/model_options.txt\" ]" );
 	if ( choice == 0 )
 		make_makefile( );
 
 	choice = 0;
-	cmd( "set fapp [ file nativename $modeldir/model_options.txt ]" );
+	cmd( "set fapp [ file nativename \"$modeldir/model_options.txt\" ]" );
 	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 	if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 	{
@@ -4647,7 +4655,7 @@ if ( choice == 70 )
 	
 	cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
 	cmd( "set extra_files [ list ]" );
-	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists $x ] || [ file exists \"$modeldir/$x\" ] ) } { lappend extra_files $x } }" );
+	cmd( "foreach x $fun_extra { if { [ string trim $x ] != \"\" && ( [ file exists \"$x\" ] || [ file exists \"$modeldir/$x\" ] ) } { lappend extra_files \"$x\" } }" );
 	cmd( "set brr \"\"" );
 	cmd( "set e .extra" );
 
@@ -4691,7 +4699,7 @@ if ( choice == 70 )
 	
 	if ( choice == 1 && strlen( s ) > 0 )
 	{
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"$modeldir/$brr\" ] } { set brr \"$modeldir/$brr\" }" );
+		cmd( "if { ! [ file exists \"$brr\" ] && [ file exists \"$modeldir/$brr\" ] } { set brr \"$modeldir/$brr\" }" );
 		choice = 71;
 	}
 	else
@@ -4964,7 +4972,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd( "set dir [glob *.cpp]" );
    cmd( "set b [lindex $dir 0]" );
-   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
+   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
    cmd( "set f [open model_options.txt w]" );
    cmd( "puts -nonewline $f $a" );
    cmd( "close $f" );
@@ -4974,12 +4982,12 @@ cmd( "set f [open model_options.txt r]" );
 cmd( "set a [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]" );
+cmd( "set choice [file exists \"$RootLsd/$LsdSrc/system_options.txt\"]" );
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
 	cmd( "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
-    cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt w]" );
-    cmd( "set f1 [open $RootLsd/$LsdSrc/$sysfile r]" );
+    cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" w]" );
+    cmd( "set f1 [open \"$RootLsd/$LsdSrc/$sysfile\" r]" );
     cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
     cmd( "puts -nonewline $f [read $f1]" );
     cmd( "close $f" );
@@ -4987,11 +4995,11 @@ if(choice==0)
  }
 choice=0; 
 
-cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt r]" );
+cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" r]" );
 cmd( "set d [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "set f [open $RootLsd/$LsdSrc/makefile_base.txt r]" );
+cmd( "set f [open \"$RootLsd/$LsdSrc/makefile_base.txt\" r]" );
 cmd( "set b [read -nonewline $f]" );
 cmd( "close $f" );
 
@@ -5014,7 +5022,7 @@ if(choice==0)
  {//the model_options.txt file does not exists, probably an old version
    cmd( "set dir [glob *.cpp]" );
    cmd( "set b [lindex $dir 0]" );
-   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname $b]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
+   cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3\\nSWITCH_CC_LNK=\\n\"" );
    cmd( "set f [open model_options.txt w]" );
    cmd( "puts -nonewline $f $a" );
    cmd( "close $f" );
@@ -5024,12 +5032,12 @@ cmd( "set f [open model_options.txt r]" );
 cmd( "set a [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "set choice [file exists $RootLsd/$LsdSrc/system_options.txt]" );
+cmd( "set choice [file exists \"$RootLsd/$LsdSrc/system_options.txt\"]" );
 if(choice==0)
  { //the src/system_options.txt file doesn't exists, so I invent it
 	cmd( "if [ string equal $tcl_platform(platform) windows ] { if [ string equal $tcl_platform(machine) intel ] { set sysfile \"sysopt_win32.txt\" } { set sysfile \"sysopt_win64.txt\" } } { if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" } { set sysfile \"sysopt_linux.txt\" } }" );
-    cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt w]" );
-    cmd( "set f1 [open $RootLsd/$LsdSrc/$sysfile r]" );
+    cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" w]" );
+    cmd( "set f1 [open \"$RootLsd/$LsdSrc/$sysfile\" r]" );
     cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
     cmd( "puts -nonewline $f [read $f1]" );
     cmd( "close $f" );
@@ -5037,12 +5045,11 @@ if(choice==0)
  }
 choice=0; 
 
-cmd( "set f [open $RootLsd/$LsdSrc/system_options.txt r]" );
+cmd( "set f [open \"$RootLsd/$LsdSrc/system_options.txt\" r]" );
 cmd( "set d [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW32.txt } { set fnameNW $RootLsd/$LsdSrc/makefile_baseNW.txt }" );
-cmd( "set f [open $fnameNW r]" );
+cmd( "set f [open \"$RootLsd/$LsdSrc/makefile_baseNW.txt\" r]" );
 cmd( "set b [read -nonewline $f]" );
 cmd( "close $f" );
 
@@ -5089,7 +5096,7 @@ cmd( "bind .mm <Escape> {destroytop .mm}" );
 cmd( "showtop .mm lefttoW no no no" );
 cmd( "focus .mm.t" );
 
-cmd( "if [ file exists $modeldir/makemessage.txt ] { set file [open $modeldir/makemessage.txt]; .mm.t insert end [read $file]; close $file } { .mm.t insert end \"(no compilation errors)\" }" );
+cmd( "if [ file exists \"$modeldir/makemessage.txt\" ] { set file [open \"$modeldir/makemessage.txt\"]; .mm.t insert end [read $file]; close $file } { .mm.t insert end \"(no compilation errors)\" }" );
 cmd( ".mm.t mark set insert \"1.0\"" );
 cmd( "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;}" );
 }

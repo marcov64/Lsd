@@ -4,72 +4,72 @@ SRC_DIR=$(LSDROOT)/$(SRC)/
 
 # Variable used to prepare the options to search for the tcl and tk headers
 # Do not modify
-INCLD_TCL_TK=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) 
+INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/$(SRC)
 
 $(TARGET)$(EXT): $(FUN).o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)file.o $(SRC_DIR)util.o $(SRC_DIR)object.o \
 $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o \
 $(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o $(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o $(SRC_DIR)lsdmain.o \
 $(SRC_DIR)report.o $(SRC_DIR)nets.o
-	$(CC) $(SWITCH_CC) -L$(PATH_LIB) $(FUN).o $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o \
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o \
 	$(SRC_DIR)draw.o $(SRC_DIR)object.o $(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o \
 	$(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
 	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o \
-	$(TCL_LIB) $(TK_LIB) $(EXTRA_PAR) -L$(PATH_LIB) -lm $(SWITCH_CC_LNK) -o $(TARGET) $(DUMMY)
+	$(SWITCH_CC_LNK) -L$(PATH_TCL_LIB) $(TCL_LIB) -L$(PATH_TK_LIB) $(TK_LIB) -L$(PATH_LIB) $(LIBS) \
+	-o $(TARGET)
 
 $(SRC_DIR)file.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.o $(INCLUDE)
 
 $(SRC_DIR)interf.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)interf.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)interf.cpp  -o $(SRC_DIR)interf.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)interf.cpp  -o $(SRC_DIR)interf.o $(INCLUDE)
 
 $(SRC_DIR)main_gnuwin.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)main_gnuwin.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.o $(INCLUDE)
 
 $(SRC_DIR)util.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)util.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.o $(INCLUDE)
 
 $(SRC_DIR)variab.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.o $(INCLUDE)
 
 $(SRC_DIR)object.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)object.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.o $(INCLUDE)
 
 $(SRC_DIR)debug.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)debug.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)debug.cpp -o $(SRC_DIR)debug.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)debug.cpp -o $(SRC_DIR)debug.o $(INCLUDE)
 
 $(SRC_DIR)edit.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)edit.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)edit.cpp -o $(SRC_DIR)edit.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)edit.cpp -o $(SRC_DIR)edit.o $(INCLUDE)
 
 $(SRC_DIR)edit_dat.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt  $(SRC_DIR)edit_dat.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)edit_dat.cpp -o $(SRC_DIR)edit_dat.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)edit_dat.cpp -o $(SRC_DIR)edit_dat.o $(INCLUDE)
 
 $(SRC_DIR)set_all.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)set_all.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o $(INCLUDE)
 
 $(SRC_DIR)draw.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)draw.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)draw.cpp -o $(SRC_DIR)draw.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)draw.cpp -o $(SRC_DIR)draw.o $(INCLUDE)
 
 $(SRC_DIR)analysis.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)analysis.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)analysis.cpp -o $(SRC_DIR)analysis.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)analysis.cpp -o $(SRC_DIR)analysis.o $(INCLUDE)
 
 $(SRC_DIR)show_eq.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)show_eq.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)show_eq.cpp -o $(SRC_DIR)show_eq.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)show_eq.cpp -o $(SRC_DIR)show_eq.o $(INCLUDE)
 
 $(SRC_DIR)runtime.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)runtime.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)runtime.cpp -o $(SRC_DIR)runtime.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)runtime.cpp -o $(SRC_DIR)runtime.o $(INCLUDE)
 
 $(SRC_DIR)lsdmain.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.o $(INCLUDE)
 
 $(SRC_DIR)report.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)report.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.o $(INCLUDE)
 
 $(SRC_DIR)nets.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
-	$(CC) $(SSWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o $(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.o $(INCLUDE)
 
 $(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
-	$(CC) $(SWITCH_CC) -c $(FUN).cpp $(INCLD_TCL_TK) $(INCLUDE_LIB) -I$(LSDROOT)/src
+	$(CC) $(GLOBAL_CC) $(SWITCH_CC) -c $(FUN).cpp $(INCLUDE)
 	
 clean:
 	rm $(SRC_DIR)*.o $(FUN).o $(TARGET)*
-

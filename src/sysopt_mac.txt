@@ -1,18 +1,19 @@
-TCL_VERSION=
-TK_VERSION=
-DUMMY=
-PATH_TCL_LIB=.
-PATH_TK_LIB=.
-PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers
-PATH_TCL_HEADER=/System/Library/Frameworks/Tcl.framework/Headers
-PATH_LIB=.
-INCLUDE_LIB=-I/opt/X11/include
-CC=g++
 SRC=src
-EXTRA_PAR=-lz
-SSWITCH_CC=-march=native -std=c++14 -O3
 EXT=
 
-# Set the complete option for the libraries to link to the models.
+# Libraries options
+TCL_VERSION=
+PATH_TCL_HEADER=/System/Library/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers
+PATH_HEADER=/opt/X11/include
+PATH_TCL_LIB=.
+PATH_TK_LIB=.
+PATH_LIB=/usr/X11/lib
 TCL_LIB=-framework Tcl
 TK_LIB=-framework Tk
+LIBS=-lz -lpthread
+
+# Compiler options
+CC=g++
+GLOBAL_CC=-march=native -std=gnu++14
+SSWITCH_CC=-fnon-call-exceptions -O3

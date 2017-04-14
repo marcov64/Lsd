@@ -1,37 +1,34 @@
-# Makefile for lmm in OSX (tested up to 10.11)
+# Makefile for lmm in MacOS (tested up to 10.11)
 
+CC=g++
 TARGET=lmmOSX
+EXT=
 SWITCH_CC=-Wno-unused-result -O3
 
+# For MacOS, using native compiler and Tcl/Tk.
 LSDROOT=.
-PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers
 PATH_TCL_HEADER=/System/Library/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=/System/Library/Frameworks/Tk.framework/Headers
+PATH_HEADER=/opt/X11/include
+TCL_LIB=-framework Tcl
+TK_LIB=-framework Tk
 PATH_LIB=.
-INCLUDE_LIB=-I/opt/X11/include
+LIBS=
 
 # from here you should not need to modify anything
-CC=g++
 RM=rm -f
 SRC=src
-
 SRC_DIR=$(LSDROOT)/$(SRC)/
 
 # Variable used to prepare the options to search for the tcl and tk headers
 # Do not modify
-INCLD_TCL_TK=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) 
+INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/src
 
-
-# Set the complete option for the libraries to link to the models.
-TCL_LIB=-framework Tcl
-TK_LIB=-framework Tk
-
-$(TARGET): $(SRC_DIR)modman.o
-	$(CC) $(SWITCH_CC)  $(SRC_DIR)modman.o \
-	$(TCL_LIB) $(TK_LIB) -L$(PATH_LIB) -o $(TARGET)
+$(TARGET)$(EXT): $(SRC_DIR)modman.o
+	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o $(TCL_LIB) $(TK_LIB) -L$(PATH_LIB) $(LIBS) -o $(TARGET)
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
-	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o \
-	$(INCLD_TCL_TK) $(INCLUDE_LIB)
+	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
 
 # Clean object files for building for another distribution
 clean:

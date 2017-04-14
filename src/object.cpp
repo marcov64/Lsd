@@ -330,8 +330,6 @@ double object::cal( object *caller,  char const *l, int lag )
 	}
 
 		return curr->cal( caller, lag );
-	
-	
 }
 
 
@@ -367,8 +365,8 @@ from descendants the search goes up again, or from the parent down.
 *************************************************/
 variable *object::search_var(object *caller, char const *l)
 {
-register variable *curr;
-register object *curr1;
+	variable *curr;
+	object *curr1;
 bridge *cb; 
 
 /* Search among the variables *********************/
@@ -376,7 +374,7 @@ for(curr=v; curr!=NULL;curr=curr->next)
 	if(!strcmp(l,curr->label) )
 		return(curr);
 
-/* Search among descendents *********************/
+	/* Search among descendants *********************/
 for(cb=b, curr=NULL; cb!=NULL; cb=cb->next)
 {
 	curr1=cb->head; 
@@ -397,7 +395,7 @@ if( caller!=up)
 	{
 		if(!no_error)
 		{
-			sprintf(msg, "search for '%s' failed in the equation of variable '%s'",l, stacklog->label);
+				sprintf(msg, "search for '%s' failed in the equation of variable '%s'", l, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
 			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 			return NULL;
 		}
@@ -755,7 +753,6 @@ for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
   if(tot<(temp=cur->cal(this, lab, lag)))
 	 tot=temp;
 
-
 return(tot);
 }
 
@@ -795,7 +792,6 @@ for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
 	c2=cur->cal(this, lab2, lag);
 	tot+=c1*c2;
   }
-
 
 return(tot);
 }
@@ -1809,7 +1805,6 @@ if(choice==2)
   running=0;
   return;
  }
-
 #else
 
 fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
@@ -1842,8 +1837,9 @@ return the object "up" the cell of a lattice
 *****************************/
 object *object::lat_down(void)
 {
-object register *cur;
+	object *cur;
 int i, j;
+	
 for(i=1, cur=up->search(label); cur!=this; cur=go_brother(cur),i++ );
 
 cur=go_brother(up);
@@ -1862,9 +1858,8 @@ return the object "down" the cell of a lattice
 *****************************/
 object *object::lat_up(void)
 {
-object register *cur, *cur1, *cur2;
+	object *cur, *cur1, *cur2;
 int i, k;
-
 
 for(i=1, cur=up->search(label); cur!=this; cur=go_brother(cur),i++ );
 
@@ -1901,7 +1896,7 @@ return the object "left" the cell of a lattice
 *****************************/
 object *object::lat_left(void)
 {
-object register *cur;
+	object *cur;
 
 if(up->search(label)==this)
  for(cur=this; go_brother(cur)!=NULL; cur=go_brother(cur));
@@ -1989,10 +1984,9 @@ CREATE
 *****************************/
 void mnode::create(double level)
 {
-
 int i;
 
-deflev = ( long ) level;
+	deflev = ( long int ) level;
 
 if(level>0)
  {
@@ -2005,9 +1999,9 @@ if(level>0)
 
 son=NULL;
 pntr=globalcur;
+	
 if(globalcur->next!=NULL)
   globalcur=globalcur->next;
- 
 }
 
 
@@ -2016,7 +2010,6 @@ CREATE
 *****************************/
 object *mnode::fetch(double *n, double level)
 {
-
 object *cur;
 double a,b;
 
@@ -2053,14 +2046,14 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-   sprintf(msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS",stacklog->label, label); 
+	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label ); 
    error_hard( msg, "Object not found", "Check your code to prevent this situation." );
    return NULL;
   } 
 
 if(cb->mn==NULL)
  {
-    sprintf(msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS",stacklog->label, label); 
+		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label ); 
     error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return NULL;
   } 
@@ -2091,7 +2084,7 @@ for(cb=b; cb!=NULL; cb=cb->next)
   break;
 if(cb==NULL)
  {
-    sprintf(msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position",stacklog->label, label, label); 
+		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label, label ); 
 	error_hard( msg, "Object not found", "Check your code to prevent this situation." );
     return;
   } 
@@ -2119,10 +2112,12 @@ void object::emptyturbo(void)
 {
 bridge *cb;
 object *cur;
+	
 for(cb=this->b; cb!=NULL; cb=cb->next)
  {
   if(cb->mn!=NULL)
-   {cb->mn->empty();
+	  {
+		cb->mn->empty();
 	delete cb->mn;
     cb->mn=NULL;
    } 

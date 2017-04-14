@@ -1,18 +1,19 @@
-TCL_VERSION=8.6
-TK_VERSION=8.6
-DUMMY=
-PATH_TCL_LIB=.
-PATH_TK_LIB=.
-PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h/usr/include/tcl$(TCL_VERSION) #path to the tk.h
-PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
-PATH_LIB=.
-INCLUDE_LIB=
-CC=g++
 SRC=src
-EXTRA_PAR=-lz
-SSWITCH_CC=-march=native -std=gnu++14 -O3
 EXT=
 
-# Set the complete option for the libraries to link to the models.
-TCL_LIB=-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION)
-TK_LIB=-L$(PATH_TK_LIB) -ltk$(TK_VERSION)
+# Libraries options
+TCL_VERSION=8.6
+PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
+PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
+PATH_HEADER=.
+PATH_TCL_LIB=.
+PATH_TK_LIB=.
+PATH_LIB=.
+TCL_LIB=-ltcl$(TCL_VERSION)
+TK_LIB=-ltk$(TCL_VERSION)
+LIBS=-lz -lpthread
+
+# Compiler options
+CC=g++
+GLOBAL_CC=-march=native -std=gnu++14
+SSWITCH_CC=-fnon-call-exceptions -O3

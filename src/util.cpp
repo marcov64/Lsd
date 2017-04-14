@@ -174,8 +174,8 @@ This is the new version, after moving to the bridge-based representation
 object *skip_next_obj(object *t, int *count)
 {
 char *lab;
-register object *c;
-register int i;
+object *c;
+int i;
 
 *count=0;
 if(t==NULL)
@@ -560,18 +560,19 @@ but to be used for analysis.
 */
 void add_cemetery(variable *v)
 {
-variable *cv;
-if(v->savei==true)
-  save_single(v);
-if(cemetery==NULL)
- {cemetery=v;
-  v->next=NULL;
- }
-else
- {for(cv=cemetery; cv->next!=NULL; cv=cv->next);
-  cv->next=v;
-  v->next=NULL;
- }
+	variable *cv;
+	
+	if(v->savei==true)
+	  save_single(v);
+	if(cemetery==NULL)
+	 {cemetery=v;
+	  v->next=NULL;
+	 }
+	else
+	 {for(cv=cemetery; cv->next!=NULL; cv=cv->next);
+	  cv->next=v;
+	  v->next=NULL;
+	 }
 }
 
 // Processes variables from an object required to go to cemetery 
@@ -595,14 +596,14 @@ void collect_cemetery( object *o )
 
 void empty_cemetery(void)
 {
-variable *cv, *cv1;
-for(cv=cemetery; cv!=NULL; )
- {cv1=cv->next;
-  cv->empty();
-  delete cv;
-  cv=cv1;
- }
-cemetery=NULL;
+	variable *cv, *cv1;
+	for(cv=cemetery; cv!=NULL; )
+	 {cv1=cv->next;
+	  cv->empty();
+	  delete cv;
+	  cv=cv1;
+	 }
+	cemetery=NULL;
 }
 
 /*
@@ -1610,143 +1611,147 @@ return 0;
 
 int store(int x1, int x2, int x3, int x4)
 {
-int flag=0, res;
-struct s *app, *prev;
+	int flag=0, res;
+	struct s *app, *prev;
 
-for(app=&d; app!=NULL; app=app->next)
- {if(app->x==x1)
-   { res=store(app->son,x2, x3, x4);
-     return res;
-     break;
-   }
-  else
-   prev=app;
- }
-if(app==NULL)
- {prev->next=new struct s;
-  app=prev->next;
-  app->x=x1;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x2;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x3;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x4;
-  app->next=NULL;
-  app->son=NULL;
-  return 1;
- }
+	for(app=&d; app!=NULL; app=app->next)
+	 {if(app->x==x1)
+	   { res=store(app->son,x2, x3, x4);
+		 return res;
+		 break;
+	   }
+	  else
+	   prev=app;
+	 }
+	if(app==NULL)
+	 {prev->next=new struct s;
+	  app=prev->next;
+	  app->x=x1;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x2;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x3;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x4;
+	  app->next=NULL;
+	  app->son=NULL;
+	  return 1;
+	 }
 
-sprintf( msg, "invalid data structure" );
-error_hard( msg, "Internal error", "If error persists, please contact developers." );
-myexit(16);
+	sprintf( msg, "invalid data structure" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(16);
+	return 0;
 }
 
 
 int store(struct s *c, int x2, int x3, int x4)
 {
-int flag=0, res;
-struct s *app, *prev;
+	int flag=0, res;
+	struct s *app, *prev;
 
-for(app=c; app!=NULL; app=app->next)
- {if(app->x==x2)
-   { res=store(app->son, x3, x4);
-     return res;
-     break;
-   }
-  else
-   prev=app;
- }
-if(app==NULL)
- {prev->next=new struct s;
-  app=prev->next;
-  app->x=x2;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x3;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x4;
-  app->next=NULL;
-  app->son=NULL;
+	for(app=c; app!=NULL; app=app->next)
+	 {if(app->x==x2)
+	   { res=store(app->son, x3, x4);
+		 return res;
+		 break;
+	   }
+	  else
+	   prev=app;
+	 }
+	if(app==NULL)
+	 {prev->next=new struct s;
+	  app=prev->next;
+	  app->x=x2;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x3;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x4;
+	  app->next=NULL;
+	  app->son=NULL;
 
-  return 1;
- }
+	  return 1;
+	 }
 
-sprintf( msg, "invalid data structure" );
-error_hard( msg, "Internal error", "If error persists, please contact developers." );
-myexit(17);
+	sprintf( msg, "invalid data structure" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(17);
+	return 0;
 }
 
 
 int store(struct s *c, int x3, int x4)
 {
-int flag=0, res;
-struct s *app, *prev;
+	int flag=0, res;
+	struct s *app, *prev;
 
-for(app=c; app!=NULL; app=app->next)
- {if(app->x==x3)
-   { res=store(app->son, x4);
-     return res;
-     break;
-   }
-  else
-   prev=app;
- }
-if(app==NULL)
- {prev->next=new struct s;
-  app=prev->next;
-  app->x=x3;
-  app->next=NULL;
-  app->son=new struct s;
-  app=app->son;
-  app->x=x4;
-  app->next=NULL;
-  app->son=NULL;
+	for(app=c; app!=NULL; app=app->next)
+	 {if(app->x==x3)
+	   { res=store(app->son, x4);
+		 return res;
+		 break;
+	   }
+	  else
+	   prev=app;
+	 }
+	if(app==NULL)
+	 {prev->next=new struct s;
+	  app=prev->next;
+	  app->x=x3;
+	  app->next=NULL;
+	  app->son=new struct s;
+	  app=app->son;
+	  app->x=x4;
+	  app->next=NULL;
+	  app->son=NULL;
 
-  return 1;
- }
+	  return 1;
+	 }
 
-sprintf( msg, "invalid data structure" );
-error_hard( msg, "Internal error", "If error persists, please contact developers." );
-myexit(18);
+	sprintf( msg, "invalid data structure" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(18);
+	return 0;
 }
 
 
 int store(struct s *c, int x4)
 {
-int flag=0, res;
-struct s *app, *prev;
+	int flag=0, res;
+	struct s *app, *prev;
 
-for(app=c; app!=NULL; app=app->next)
- {if(app->x==x4)
-   { return 0;
-     break;
-   }
-  else
-   prev=app; 
- }
-if(app==NULL)
- {prev->next=new struct s;
-  app=prev->next;
-  app->x=x4;
-  app->next=NULL;
-  app->son=NULL;
+	for(app=c; app!=NULL; app=app->next)
+	 {if(app->x==x4)
+	   { return 0;
+		 break;
+	   }
+	  else
+	   prev=app; 
+	 }
+	if(app==NULL)
+	 {prev->next=new struct s;
+	  app=prev->next;
+	  app->x=x4;
+	  app->next=NULL;
+	  app->son=NULL;
 
-  return 1;
- }
+	  return 1;
+	 }
 
-sprintf( msg, "invalid data structure" );
-error_hard( msg, "Internal error", "If error persists, please contact developers." );
-myexit(19);
+	sprintf( msg, "invalid data structure" );
+	error_hard( msg, "Internal error", "If error persists, please contact developers." );
+	myexit(19);
+	return 0;
 }
 
 

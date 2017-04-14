@@ -1,18 +1,19 @@
-TCL_VERSION=86
-TK_VERSION=86
-DUMMY=-mwindows
-PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
-PATH_TK_LIB=$(LSDROOT)/gnu64/lib
-PATH_TK_HEADER=$(LSDROOT)/gnu64/include
-PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
-PATH_LIB=$(LSDROOT)/gnu64/lib
-INCLUDE_LIB=-I$(LSDROOT)/gnu64/include
-CC=g++
 SRC=src
-EXTRA_PAR=-lz
-SSWITCH_CC=-march=native -std=gnu++14 -O3
 EXT=.exe
 
-# Set the complete option for the libraries to link to the models.
-TCL_LIB=-L$(PATH_TCL_LIB) -ltcl$(TCL_VERSION)
-TK_LIB=-L$(PATH_TK_LIB) -ltk$(TK_VERSION)
+# Libraries options
+TCL_VERSION=86
+PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
+PATH_TK_HEADER=$(LSDROOT)/gnu64/include
+PATH_HEADER=$(LSDROOT)/gnu64/include
+PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
+PATH_TK_LIB=$(LSDROOT)/gnu64/lib
+PATH_LIB=$(LSDROOT)/gnu64/lib
+TCL_LIB=-ltcl$(TCL_VERSION)
+TK_LIB=-ltk$(TCL_VERSION)
+LIBS=-lz
+
+# Compiler options
+CC=x86_64-w64-mingw32-g++
+GLOBAL_CC=-march=native -std=gnu++14
+SSWITCH_CC=-mthreads -mwindows -fnon-call-exceptions -O3

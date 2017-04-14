@@ -36,11 +36,11 @@ TK_LIBS='-lnetapi32 -lkernel32 -luser32 -ladvapi32 -luserenv -lws2_32 -lgdi32 -l
 
 # Top-level directory in which Tcl's platform-independent files are
 # installed.
-TK_PREFIX='/home/Marcelo/gnu64'
+TK_PREFIX='/Lsd/gnu64'
 
 # Top-level directory in which Tcl's platform-specific files (e.g.
 # executables) are installed.
-TK_EXEC_PREFIX='/home/Marcelo/gnu64'
+TK_EXEC_PREFIX='/Lsd/gnu64'
 
 # -l flag to pass to the linker to pick up the Tcl library
 TK_LIB_FLAG='-ltk86'
@@ -51,7 +51,7 @@ TK_BUILD_LIB_SPEC='-L/home/Marcelo/tk8.6.6/win -ltk86'
 
 # String to pass to linker to pick up the Tk library from its
 # installed directory.
-TK_LIB_SPEC='-L/home/Marcelo/gnu64/lib -ltk86'
+TK_LIB_SPEC='-L/Lsd/gnu64/lib -ltk86'
 
 # Location of the top-level source directory from which Tk was built.
 # This is the directory that contains a README file as well as
@@ -78,10 +78,10 @@ TK_BUILD_STUB_LIB_SPEC='-L/home/Marcelo/tk8.6.6/win -ltkstub86'
 
 # String to pass to linker to pick up the Tk stub library from its
 # installed directory.
-TK_STUB_LIB_SPEC='-L/home/Marcelo/gnu64/lib -ltkstub86'
+TK_STUB_LIB_SPEC='-L/Lsd/gnu64/lib -ltkstub86'
 
 # Path to the Tk stub library in the build directory.
 TK_BUILD_STUB_LIB_PATH='/home/Marcelo/tk8.6.6/win/libtkstub86.a'
 
 # Path to the Tk stub library in the install directory.
-TK_STUB_LIB_PATH='/home/Marcelo/gnu64/lib/libtkstub86.a'
+TK_STUB_LIB_PATH='/Lsd/gnu64/lib/libtkstub86.a'
