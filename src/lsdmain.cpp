@@ -102,6 +102,7 @@ bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_window = false;		// no-window command line job
+bool parallel_mode;			// flag defining if parallel mode (multithreading) is enabled
 bool pause_run;				// pause running simulation
 bool redrawRoot = true;		// control for redrawing root window (.)
 bool running = false;		// simulation is running
@@ -139,7 +140,11 @@ int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
 int findexSens=0;			// index to sequential sensitivity configuration filenames
 int macro;					// equations style (macros or C++) (bool)
+int max_threads = 1;		// suggested maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
+int prof_aggr_time = false;	// show aggregate profiling times
+int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
+int prof_obs_only = false;	// profile only observed variables
 int quit=0;					// simulation interruption mode (0=none)
 int series_saved;			// number of series saved
 int sim_num=1;				// simulation number running
@@ -155,6 +160,12 @@ object *blueprint = NULL;	// Lsd blueprint (effective model in use)
 object *root = NULL;		// Lsd root object
 sense *rsense = NULL;		// Lsd sensitivity analysis structure
 variable *cemetery = NULL;	// Lsd saved data series (from last simulation run)
+map < string, profile > prof;	// set of saved profiling times
+
+#ifdef PARALLEL_MODE
+map< thread::id, worker * > thr_ptr;	// worker thread pointers
+worker *workers = NULL;			// multi-thread parallel worker data
+#endif
 
 
 /*********************************
@@ -163,7 +174,7 @@ LSD MAIN
 int lsdmain(int argn, char **argv)
 {
 char *str;
-int i, len, done;
+int i, j = 0, len, done;
 FILE *f;
 
 path=new char[strlen("")+1];
@@ -176,6 +187,12 @@ strcpy(simul_name, "Sim1");
 strcpy(equation_name,"fun.cpp");
 exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
 exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
+
+#ifdef PARALLEL_MODE
+max_threads = ( MAX_CORES <= 0 ) ? thread::hardware_concurrency( ) : MAX_CORES;
+#else
+max_threads = ( MAX_CORES <= 0 ) ? 4 : MAX_CORES;
+#endif	
 
 root=new object;
 root->init(NULL, "Root");
@@ -190,32 +207,32 @@ findex=1;
 fend=0;		// no file number limit
 
 if(argn<3)
- {
-  fprintf( stderr, "\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n" );
+{
+  fprintf( stderr, "\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n" );
   myexit( 1 );
- }
+}
 else
- {
+{
  for(i=1; i<argn; i+=2)
  {
  if(argv[i][0]=='-' && argv[i][1]=='f' )
-  {
+ {
    delete[] simul_name;
    simul_name=new char[strlen(argv[1+i])+1];
    strcpy(simul_name,argv[1+i]);
    continue;
-  }
+ }
  if(argv[i][0]=='-' && argv[i][1]=='s' )
-  {
+ {
 	findex=atoi(argv[i+1]);
 	batch_sequential = true;   
 	continue;
-  }
+ }
  if(argv[i][0]=='-' && argv[i][1]=='e' )	// read -e parameter : last sequential file to process
-  {
+ {
  	fend=atoi(argv[i+1]);
 	continue;
-  }
+ }
  if( argv[i][0] == '-' && argv[i][1] == 'r' )	// read -r parameter : do not produce intermediate .res files
  {
 	i--; 	// no parameter for this option
@@ -240,11 +257,16 @@ else
 	results_alt_path( argv[ 1 + i ] );
 	continue;
  }
+ if(argv[i][0]=='-' && argv[i][1]=='c' )	// read -c parameter : max number of cores
+ {
+ 	j = atoi( argv[ i + 1 ] );
+	continue;
+ }
   
-  fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1] );
+  fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1] );
   myexit( 2 );
-  }
- } 
+ }
+} 
 
 if ( ! batch_sequential )
  {
@@ -274,29 +296,46 @@ if ( load_configuration( root, false ) != 0 )
 	myexit( 4 );
 }
 
+#ifdef PARALLEL_MODE
+if ( j > 0 && j < max_threads )
+	max_threads = j;
+#endif	
+
 #else 
 	
 for(i=1; argv[i]!=NULL; i++)
-{if(argv[i][0]!='-' || (argv[i][1]!='f' && argv[i][1]!='i') )
+{
+  if ( argv[i][0] != '-' || ( argv[i][1] != 'f' && argv[i][1] != 'i' && argv[i][1] != 'c' ) )
   {
-	log_tcl_error( "Command line parameters", "Invalid option, available options: -i tcl_directory / -f model_name" );
-	myexit( 1 );
+	 log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_CORES" );
+	 myexit( 1 );
   }
- if(argv[i][1]=='f')
-	{delete[] simul_name;
+  if(argv[i][1]=='f')
+  {
+	 delete[] simul_name;
 	 simul_name=new char[strlen(argv[i+1])+3];
 	 strcpy(simul_name,argv[i+1]);
-    len=strlen(simul_name);
-    if(len>4 && !strcmp(".lsd",simul_name+len-4) )
-     *(simul_name+len-4)=(char)NULL;
-    i++;
-	}
- if(argv[i][1]=='i')
-	{
-   strcpy(tcl_dir,argv[i+1]+2);
-   i++;
+     len=strlen(simul_name);
+     if(len>4 && !strcmp(".lsd",simul_name+len-4) )
+       *(simul_name+len-4)=(char)NULL;
+     i++;
+  }
+  if(argv[i][1]=='i')
+  {
+     strcpy(tcl_dir,argv[i+1]+2);
+     i++;
   } 
+  if(argv[i][0]=='-' && argv[i][1]=='c' )	// read -c parameter : max number of cores
+  {
+ 	 j = atoi( argv[ i + 1 ] );
+	 continue;
+  }
 }
+
+#ifdef PARALLEL_MODE
+if ( j > 0 && j < max_threads )
+	max_threads = j;
+#endif	
 
 // initialize the tcl interpreter
 Tcl_FindExecutable( argv[0] ); 
@@ -504,7 +543,7 @@ RUN
 void run(object *root)
 {
 int i, j;
-bool batch_sequential_loop = false; // second or higher iteration of a batch
+bool batch_sequential_loop = false;
 char ch[MAX_PATH_LENGTH];
 FILE *f;
 result *rf;					// pointer for results files (may be zipped or not)
@@ -512,8 +551,23 @@ double app=0;
 double refresh=1.01;		// runtime refresh
 clock_t start, end;
 
+#ifdef PARALLEL_MODE
+// check if there are parallel computing variables
+parallel_mode = search_parallel( root );
+
+// start multi-thread workers
+if ( parallel_mode )
+	workers = new worker[ max_threads ];
+#else
+if ( search_parallel( root ) )
+	plog( "\nWarning: parallel mode is not supported under current configuration\n" );
+parallel_mode = false;
+#endif	
+
 #ifndef NO_WINDOW
 set_buttons_log( true );
+
+prof.clear( );				// reset profiling times
 
 cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
 cmd( "wm deiconify .log; raise .log; focus .log" );
@@ -531,7 +585,10 @@ empty_cemetery(); //ensure that previous data are not erroneously mixed (sorry N
 prepare_plot(root, i);
 #endif
 
-plog( "\nSimulation %d running...", "", i );
+if ( parallel_mode )
+	plog( "\nSimulation %d running (up to %d cores)...", "", i, max_threads );
+else
+	plog( "\nSimulation %d running...", "", i );
 
 // if new batch configuration file, reload all
 if ( batch_sequential_loop )
@@ -729,7 +786,7 @@ end=clock();
 if(quit==1) 			//For multiple simulation runs you need to reset quit
  quit=0;
 
-plog( "\nSimulation %d finished (%2g sec.)\n", "",i,(float)(end - start) /CLOCKS_PER_SEC);
+plog( "\nSimulation %d finished (%2g sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 #ifndef NO_WINDOW 
 cmd( "destroytop .deb" );
@@ -823,8 +880,16 @@ if ( batch_sequential && i == sim_num)  		// last run of current batch file?
 #ifndef NO_WINDOW 
 uncover_browser( );
 set_buttons_log( false );
+show_prof_aggr( );
 cmd( "wm deiconify .log; raise .log; focus .log" );
 #endif
+
+#ifdef PARALLEL_MODE
+// stop multi-thread workers
+delete [ ] workers;
+workers = NULL;
+#endif	
+
 quit=0;
 }
 
@@ -894,7 +959,7 @@ for ( var = root->v; var != NULL; var = var->next )
 	 {
       var->data=new double[max_step+1];
      }
-     catch( std::bad_alloc& ) 
+     catch( bad_alloc& ) 
 	 {
 	 	set_lab_tit(var);
         plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
@@ -937,88 +1002,9 @@ if(quit!=2)
 
 
 /*********************************
-PLOG
-has some problems, because the log window tends to interpret the message
-as tcl/tk commands
-The optional tag parameter has to correspond to the log window existing tags
-*********************************/
-#define NUM_TAGS 4
-const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series" };
-
-void plog( char const *cm, char const *tag, ... )
-{
-	char buffer[ TCL_BUFF_STR ];
-	va_list argptr;
-	
-	va_start( argptr, tag );
-	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
-	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
-	va_end( argptr );
-	
-	if ( reqSz >= maxSz )
-		plog( "\nWarning: message truncated\n" );
-
-#ifdef NO_WINDOW 
-	printf( "%s", buffer );
-	fflush( stdout );
-#else
-	if ( ! tk_ok || ! log_ok )
-		return;
-	
-	bool ok = false;
-
-	for ( int i = 0; i < NUM_TAGS; ++i )
-		if ( ! strcmp( tag, tags[ i ] ) )
-			ok = true;
-	
-	if ( ok )
-	{
-		cmd( "if [ winfo exists .log ] { set log_ok true } { set log_ok false }" );
-		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
-		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", buffer, tag );
-		cmd( "if $log_ok { .log.text.text.internal see end }" );
-		cmd( "update" );
-	}
-	else
-		plog( "\nError: invalid tag, message ignored:\n%s\n", "", buffer );
-#endif 
-	message_logged = true;
-}
-
-
-void reset_end(object *r)
-{
-object *cur;
-variable *cv;
-bridge *cb;
-
-for(cv=r->v; cv!=NULL; cv=cv->next)
-  { if(cv->save)
-      {
-       cv->end=t-1;
-      } 
-   if(cv->savei==1)
-       save_single(cv);
-
-  } 
-
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {cur=cb->head;
- if(cur->to_compute==1)   
-   {
-   for(; cur!=NULL;cur=go_brother(cur) )
-     reset_end(cur);
-   }  
- }
-}
-
-
-/*********************************
 CREATE_LOG_WINDOW
 *********************************/
-
 #ifndef NO_WINDOW
-
 void create_logwindow(void)
 {
 if ( ! tk_ok )
@@ -1037,6 +1023,8 @@ cmd( "$w.text configure -tabs {%s}", tabs  );
 cmd( "$w.text tag configure highlight -foreground red" );
 cmd( "$w.text tag configure tabel" );
 cmd( "$w.text tag configure series -tabs {2c 5c 8c}" );
+cmd( "$w.text tag configure prof1 -tabs {5c 7.5c 9c 11.2c 13.2c 17.5c}" );
+cmd( "$w.text tag configure prof2 -tabs {3c 6c 9c}" );
 
 cmd( "pack $w.scroll -side right -fill y" );
 cmd( "pack $w.text -expand yes -fill both" );
@@ -1068,7 +1056,92 @@ cmd( "proc plog cm { .log.text.text.internal insert end $cm; .log.text.text.inte
 
 log_ok = true;
 }
+#endif
 
+/*********************************
+PLOG
+has some problems, because the log window tends to interpret the message
+as tcl/tk commands
+The optional tag parameter has to correspond to the log window existing tags
+*********************************/
+#define NUM_TAGS 6
+const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "prof2" };
+
+void plog( char const *cm, char const *tag, ... )
+{
+	char buffer[ TCL_BUFF_STR ];
+	va_list argptr;
+	
+	va_start( argptr, tag );
+	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
+	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
+	va_end( argptr );
+	
+	if ( reqSz >= maxSz )
+		plog( "\nWarning: message truncated\n" );
+
+#ifdef NO_WINDOW 
+	printf( "%s", buffer );
+	fflush( stdout );
+#else
+	if ( ! tk_ok || ! log_ok )
+		return;
+	
+	bool ok = false;
+
+	for ( int i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			ok = true;
+	
+	if ( ok )
+	{
+		cmd( "set log_ok [ winfo exists .log ]" );
+		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
+		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", buffer, tag );
+		cmd( "if $log_ok { .log.text.text.internal see end }" );
+		cmd( "update idletasks" );
+	}
+	else
+		plog( "\nError: invalid tag, message ignored:\n%s\n", "", buffer );
+#endif 
+	message_logged = true;
+}
+
+
+/*********************************
+RESET_END
+*********************************/
+void reset_end(object *r)
+{
+object *cur;
+variable *cv;
+bridge *cb;
+
+for(cv=r->v; cv!=NULL; cv=cv->next)
+  { if(cv->save)
+      {
+       cv->end=t-1;
+      } 
+   if(cv->savei==1)
+       save_single(cv);
+
+  } 
+
+for(cb=r->b; cb!=NULL; cb=cb->next)
+ {cur=cb->head;
+ if(cur->to_compute==1)   
+   {
+   for(; cur!=NULL;cur=go_brother(cur) )
+     reset_end(cur);
+   }  
+ }
+}
+
+
+/*********************************
+SET_SHORTCUTS_LOG
+*********************************/
+#ifndef NO_WINDOW
 void set_shortcuts_log( const char *window )
 {
 	cmd( "bind %s <KeyPress-s> {.log.but.stop invoke}; bind %s <KeyPress-S> {.log.but.stop invoke}", window, window );
@@ -1083,6 +1156,10 @@ void set_shortcuts_log( const char *window )
 	cmd( "bind %s <KeyPress-Escape> {focus -force .}", window );
 }
 
+
+/*********************************
+SET_BUTTONS_LOG
+*********************************/
 void set_buttons_log( bool on )
 {
 	const char *state = ( char * ) ( on ? "normal" : "disabled" );
@@ -1124,7 +1201,6 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 /*********************************
 UNCOVER_BROWSER
 *********************************/
-
 void uncover_browser( void )
 {
 	if ( ! brCovered || running )	// ignore if not covered or running
@@ -1139,6 +1215,59 @@ void uncover_browser( void )
 	
 	brCovered = false;
 }
+
+
+/*********************************
+SHOW_PROF_AGGR
+*********************************/
+struct item
+{
+	const char *var, *obj;
+	unsigned int time;
+	unsigned int count;
+};
+
+bool comp_item( item& item1, item& item2 )
+{
+	int comp_str = strcmp( item1.obj, item2.obj );
+	if ( ! comp_str )
+		return item1.time > item2.time;
+	else
+		return comp_str < 0;
+}
+
+void show_prof_aggr( void )
+{
+	if ( ! prof_aggr_time )
+		return;
+
+	item elem;
+	list < item > vars;
+	list < item >::iterator it1;
+	variable *cv;
+	map < string, profile >::iterator it2;
+	
+	plog( "\nProfiling aggregated results" );
+	plog( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
+	
+	for ( it2 = prof.begin(); it2 != prof.end(); ++it2 )
+	{
+		elem.var = it2->first.c_str( );
+		cv = root->search_var( NULL, elem.var );
+		elem.obj = ( cv == NULL ) ? NULL : cv->up->label;
+		elem.time = 1000 * it2->second.ticks / CLOCKS_PER_SEC;
+		elem.count = it2->second.comp;
+		vars.push_back( elem );
+	}
+	
+	vars.sort( comp_item );
+	
+	for ( it1 = vars.begin(); it1 != vars.end(); ++it1 )
+		plog( "\n%-12.12s\t%-12.12s\t%d\t%d", "prof2", it1->obj, it1->var, it1->time, it1->count );
+	
+	plog( "\n" );
+}
+
 #endif
 
 
@@ -1181,27 +1310,30 @@ void results_alt_path( const char *altPath )
 /*********************************
 SAVE_SINGLE
 *********************************/
-
 void save_single(variable *vcv)
 {
-FILE *f;
-int i;
+	FILE *f;
+	int i;
 
-set_lab_tit(vcv);
-sprintf(msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
-f=fopen(msg, "wt");  // use text mode for Windows better compatibility
+#ifdef PARALLEL_MODE
+	// prevent concurrent use by more than one thread
+	lock_guard < mutex > lock( vcv->parallel_comp );
+#endif	
+	set_lab_tit(vcv);
+	sprintf(msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
+	f=fopen(msg, "wt");  // use text mode for Windows better compatibility
 
-fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
+	fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
 
-for(i=0; i<=t-1; i++)
- {
-  if(i>=vcv->start && i <=vcv->end && !is_nan(vcv->data[i]))		// save NaN as n/a
-    fprintf(f,"%lf\t\n",vcv->data[i]);
-  else
-    fprintf(f,"%s\t\n", nonavail);
-  }
-  
-fclose(f); 
+	for(i=0; i<=t-1; i++)
+	 {
+	  if(i>=vcv->start && i <=vcv->end && !is_nan(vcv->data[i]))		// save NaN as n/a
+		fprintf(f,"%lf\t\n",vcv->data[i]);
+	  else
+		fprintf(f,"%s\t\n", nonavail);
+	  }
+	  
+	fclose(f); 
 }
 
 
@@ -1242,4 +1374,28 @@ char *clean_path(char *filepath)
 			filepath[i]='/';
 			
 	return filepath;
+}
+
+
+/***************************************
+SEARCH_PARALLEL
+***************************************/
+bool search_parallel( object *r )
+{
+	variable *cv;
+	object *co;
+	bridge *cb; 
+
+	// search among the variables 
+	for ( cv = r->v; cv != NULL; cv=cv->next )
+		if ( cv->parallel )
+			return true;
+
+	// search among descendants
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			if( search_parallel( cb->head ) )
+				return true;
+
+	return false;
 }

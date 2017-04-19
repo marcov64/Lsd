@@ -11,6 +11,12 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************
 ****************************************************/
 
+// check compiler C++ standard support
+#if __cplusplus >= 201103L
+#define CPP11
+#endif
+
+// standard libraries used
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,7 +29,22 @@ Comments and bug reports to marco.valente@univaq.it
 #include <unistd.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <string>
+#include <list>
 #include <new>
+#include <map>
+
+#ifdef CPP11
+// comment the next line to disable parallel mode (multi-threading)
+#define PARALLEL_MODE
+// multithreading libraries for C++11
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <exception>
+#include <condition_variable>
+#include <chrono>
+#endif
 
 // comment the next line to compile without libz
 #define LIBZ 							
@@ -51,6 +72,9 @@ Comments and bug reports to marco.valente@univaq.it
 #define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
 #define MAX_COLS 100					// max numbers of columns in init. editor
 #define MAX_PLOTS 1000					// max numbers of plots in analysis
+#define MAX_CORES 0						// maximum number of cores to use (0=auto)
+#define MAX_WAIT_TIME 10				// maximum wait time for a variable computation (sec.)
+#define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define ERR_LIM 10						// maximum number of repeated error messages
 #define SIG_DIG 10						// number of significant digits in data files
 
@@ -81,70 +105,76 @@ double ran1( long *idum_loc = NULL );
 #define RND ( (double) ran1( ) )
 #endif
 
+using namespace std;
 
 // classes definitions
 class object;
 
 class variable
 {
-public:
-char *label;
-object *up;
-double *val;
-int last_update;
-int num_lag;
-variable *next;
-bool save;
-bool savei;
-bool under_computation;
-bool plot;
-int param;
-char debug;
-int deb_cond;
-double deb_cnd_val;
-char data_loaded;
-char computable;
-double *data;
-char *lab_tit;
-int start;
-int end;
+	public:
+	char *label;
+	object *up;
+	double *val;
+	int last_update;
+	int num_lag;
+	variable *next;
+	bool save;
+	bool savei;
+	bool under_computation;
+	bool plot;
+	bool parallel;
+	bool observe;
+	int param;
+	char debug;
+	int deb_cond;
+	double deb_cnd_val;
+	char data_loaded;
+	char computable;
+	double *data;
+	char *lab_tit;
+	int start;
+	int end;
+#ifdef PARALLEL_MODE
+	mutex parallel_comp;// mutex lock for parallel computation
+#endif
 
-int init(object *_up, char const *_label, int _num_lag, double *val, int _save);
-double cal(object *caller, int lag);
-double fun(object *caller);
-void empty(void);
+	int init(object *_up, char const *_label, int _num_lag, double *val, int _save);
+	double cal( object *caller, int lag );
+	double fun(object *caller);
+	void empty(void);
 };
 
 class mnode
 {
-public:
-mnode *son;
-object *pntr;
-long deflev;		// saves the log of number of objects to allow defaulting
+	public:
+	mnode *son;
+	object *pntr;
+	long deflev;		// saves the log of number of objects to allow defaulting
 
-void create(double level);
-void empty(void);
-object *fetch(double *n, double level=0);
+	void create(double level);
+	void empty(void);
+	object *fetch(double *n, double level=0);
 };
 
 class bridge
 {
-public:
-object *head;
-char *blabel;
-bridge *next;
-bool counter_updated;
-mnode *mn;
+	public:
+	object *head;
+	char *blabel;
+	bridge *next;
+	bool counter_updated;
+	mnode *mn;
 };
 
 struct store
 {
-char label[MAX_ELEM_LENGTH];
-int start;
-int end;
-char tag[MAX_ELEM_LENGTH];
-double *data;
-int rank;
+	char label[MAX_ELEM_LENGTH];
+	int start;
+	int end;
+	char tag[MAX_ELEM_LENGTH];
+	double *data;
+	int rank;
 };
 
 // network data structures
@@ -182,127 +212,127 @@ struct netNode		// network node data
 
 class object
 {
-public:
-char *label;
-object *up;
-object *next;
-object *hook;
-variable *v;
-bridge *b;
-int acounter;
-int lstCntUpd;		// period of last counter update (to avoid multiple updates)
-int to_compute;
-netNode *node;		// pointer to network node data structure
-void *cext;			// pointer to a C++ object extension to the Lsd object
+	public:
+	char *label;
+	object *up;
+	object *next;
+	object *hook;
+	variable *v;
+	bridge *b;
+	int acounter;
+	int lstCntUpd;		// period of last counter update (to avoid multiple updates)
+	int to_compute;
+	netNode *node;		// pointer to network node data structure
+	void *cext;			// pointer to a C++ object extension to the Lsd object
 
-double cal(object *caller,  char const *l, int lag);
-double cal( char const *l, int lag);
-variable *search_var(object *caller,char const *label);
-object *search_var_cond(char const *lab, double value, int lag);
-double overall_max(char const *lab, int lag);
-double sum(char const *lab, int lag);
-double whg_av(char const *lab, char const *lab2, int lag);
-int init(object *_up, char const *_label);
-void update(void);
-object *hyper_next(char const *lab);
-void add_var(char const *label, int lag, double *val, int save);
-void add_obj(char const *label, int num, int propagate);
-void insert_parent_obj_one(char const *lab);
-object *search(char const *lab);
-void chg_lab(char const *lab);
-void chg_var_lab(char const *old, char const *n);
-variable *add_empty_var(char const *str);
-void add_var_from_example(variable *example);
-void replicate(int num, int propagate);
-bool load_param(char *file_name, int repl, FILE *f);
-bool load_struct(FILE *f);
-void save_param(FILE *f);
-void save_struct(FILE *f, char const *tab);
-int read_param(char *file_name);
-void sort_asc( object *from, char *l_var);
-void sort_desc( object *from, char *l_var);
-void sort(char const *obj, char const *var, char *direction);
-void lsdqsort(char const *obj, char const *var, char const *direction);
-void lsdqsort(char const *obj, char const *var1, char const *var2, char const *direction);
-void empty(void);
-void delete_obj(void);
-void stat(char const *lab, double *v);
-object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
-object *add_n_objects2(char const *lab, int n, object *ex);
-object *add_n_objects2( char const *lab, int n, int t_update );
-object *add_n_objects2(char const *lab, int n);
-void write(char const *lab, double value, int time);//write value as if computed at time
-void write(char const *lab, double value, int time, int lag);//write value in the lag field
-object *draw_rnd(char const *lo, char const *lv, int lag);
-object *draw_rnd(char const *lo);
-object *draw_rnd(char const *lo, char const *lv, int lag, double tot);
-double increment(char const *lab, double value);
-double multiply(char const *lab, double value);
-object *lat_up(void);
-object *lat_down(void);
-object *lat_left(void);
-object *lat_right(void);
-double interact(char const *text, double v, double *tv);
-void initturbo(char const *label, double num);	// set the structure to use turbo search
-void emptyturbo(void);							// remove turbo search structure
-object *turbosearch(char const *label, double tot, double num);
+	double cal(object *caller,  char const *l, int lag);
+	double cal( char const *l, int lag);
+	variable *search_var(object *caller,char const *label);
+	object *search_var_cond(char const *lab, double value, int lag);
+	double overall_max(char const *lab, int lag);
+	double sum(char const *lab, int lag);
+	double whg_av(char const *lab, char const *lab2, int lag);
+	int init(object *_up, char const *_label);
+	void update(void);
+	object *hyper_next(char const *lab);
+	void add_var(char const *label, int lag, double *val, int save);
+	void add_obj(char const *label, int num, int propagate);
+	void insert_parent_obj_one(char const *lab);
+	object *search(char const *lab);
+	void chg_lab(char const *lab);
+	void chg_var_lab(char const *old, char const *n);
+	variable *add_empty_var(char const *str);
+	void add_var_from_example(variable *example);
+	void replicate(int num, int propagate);
+	bool load_param(char *file_name, int repl, FILE *f);
+	bool load_struct(FILE *f);
+	void save_param(FILE *f);
+	void save_struct(FILE *f, char const *tab);
+	int read_param(char *file_name);
+	void sort_asc( object *from, char *l_var);
+	void sort_desc( object *from, char *l_var);
+	void sort(char const *obj, char const *var, char *direction);
+	void lsdqsort(char const *obj, char const *var, char const *direction);
+	void lsdqsort(char const *obj, char const *var1, char const *var2, char const *direction);
+	void empty(void);
+	void delete_obj(void);
+	void stat(char const *lab, double *v);
+	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
+	object *add_n_objects2(char const *lab, int n, object *ex);
+	object *add_n_objects2( char const *lab, int n, int t_update );
+	object *add_n_objects2(char const *lab, int n);
+	void write(char const *lab, double value, int time);//write value as if computed at time
+	void write(char const *lab, double value, int time, int lag);//write value in the lag field
+	object *draw_rnd(char const *lo, char const *lv, int lag);
+	object *draw_rnd(char const *lo);
+	object *draw_rnd(char const *lo, char const *lv, int lag, double tot);
+	double increment(char const *lab, double value);
+	double multiply(char const *lab, double value);
+	object *lat_up(void);
+	object *lat_down(void);
+	object *lat_left(void);
+	object *lat_right(void);
+	double interact(char const *text, double v, double *tv);
+	void initturbo(char const *label, double num);	// set the structure to use turbo search
+	void emptyturbo(void);							// remove turbo search structure
+	object *turbosearch(char const *label, double tot, double num);
 
-// set the network handling methods
-netNode *add_node_net( long id, char const *nodeName, bool silent );
-void delete_node_net( void );
-void name_node_net( char const *nodeName );
-void stats_net( char const *lab, double *r );
-object *search_node_net( char const *lab, long id ); 
-object *draw_node_net( char const *lab ); 
-object *shuffle_nodes_net( char const *lab );
-netLink *add_link_net( object *destPtr, double weight, double probTo );
-void delete_link_net( netLink *ptr );
-netLink *search_link_net( long id ); 
-netLink *draw_link_net( void ); 
-long read_file_net( char const *lab, char const *dir, char const *base_name, int serial, char const *ext );
-long write_file_net( char const *lab, char const *dir, char const *base_name, int serial, bool append );
-long init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 );
-long init_discon_net( char const *lab, long numNodes );
-long init_random_dir_net( char const *lab, long numNodes, long numLinks );
-long init_random_undir_net( char const *lab, long numNodes, long numLinks );
-long init_uniform_net( char const *lab, long numNodes, long outDeg );
-long init_circle_net( char const *lab, long numNodes, long outDeg );
-long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
-long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
-long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
-void delete_net( char const *lab );
+	// set the network handling methods
+	netNode *add_node_net( long id, char const *nodeName, bool silent );
+	void delete_node_net( void );
+	void name_node_net( char const *nodeName );
+	void stats_net( char const *lab, double *r );
+	object *search_node_net( char const *lab, long id ); 
+	object *draw_node_net( char const *lab ); 
+	object *shuffle_nodes_net( char const *lab );
+	netLink *add_link_net( object *destPtr, double weight, double probTo );
+	void delete_link_net( netLink *ptr );
+	netLink *search_link_net( long id ); 
+	netLink *draw_link_net( void ); 
+	long read_file_net( char const *lab, char const *dir, char const *base_name, int serial, char const *ext );
+	long write_file_net( char const *lab, char const *dir, char const *base_name, int serial, bool append );
+	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 );
+	long init_discon_net( char const *lab, long numNodes );
+	long init_random_dir_net( char const *lab, long numNodes, long numLinks );
+	long init_random_undir_net( char const *lab, long numNodes, long numLinks );
+	long init_uniform_net( char const *lab, long numNodes, long outDeg );
+	long init_circle_net( char const *lab, long numNodes, long outDeg );
+	long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
+	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
+	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
+	void delete_net( char const *lab );
 };
 
 struct lsdstack
 {
-lsdstack *prev;
-lsdstack *next;
-char label[MAX_ELEM_LENGTH];
-int ns;
-variable *vs;
+	lsdstack *prev;
+	lsdstack *next;
+	char label[MAX_ELEM_LENGTH];
+	int ns;
+	variable *vs;
 };
 
 struct description
 {
-char *label;
-char *type;
-char *text;
-char *init;
-char initial;
-char observe;
-description *next;
+	char *label;
+	char *type;
+	char *text;
+	char *init;
+	char initial;
+	char observe;
+	description *next;
 };
 
 struct sense
 {
- char *label;
- int param;						// save element type/lag to allow
- int lag;						// handling lags > 1
- int nvalues;
- int i;
- double *v;
- sense *next;
- bool entryOk;					// flag valid data entered
+	char *label;
+	int param;						// save element type/lag to allow
+	int lag;						// handling lags > 1
+	int nvalues;
+	int i;
+	double *v;
+	sense *next;
+	bool entryOk;					// flag valid data entered
 };
 
 // design of experiment object
@@ -336,6 +366,42 @@ public:
 	void data( object *root, int initstep, int endtstep = 0 );	// write data
 };
 
+// profiled variable object
+struct profile
+{
+	unsigned long long ticks;
+	unsigned int comp;
+	
+	profile( ) { ticks = 0; comp = 0; };	// constructor
+};
+
+#ifdef PARALLEL_MODE
+// multi-thread parallel worker data structure
+struct worker
+{
+	bool running = false;
+	bool free = false;
+	bool user_excpt;
+	char err_msg1[ TCL_BUFF_STR ] = "";
+	char err_msg2[ TCL_BUFF_STR ] = "";
+	char err_msg3[ TCL_BUFF_STR ] = "";
+	condition_variable run;
+	exception_ptr pexcpt = nullptr;
+	int signum = -1;
+	mutex lock;
+	thread thr;
+	thread::id thr_id;
+	variable *var = NULL;
+	
+	worker( void );								// constructor
+	~worker( void );							// destructor
+	bool check( void );							// handle worker problems
+	void cal( variable *var );					// start worker calculation
+	void cal_worker( void );					// worker thread code
+	void signal( int signum );					// signal handler
+	static void signal_wrapper( int signun );	// wrapper for signal_handler
+};
+#endif
 
 #ifndef FUN						// prevent exposing internals in users' fun_xxx.cpp
 
@@ -351,8 +417,9 @@ bool is_inf( double x );
 bool is_nan( double x );
 bool load_description( char *msg, FILE *f );
 bool load_description(char *label, char *type);
-bool save_configuration( object *, int findex = 0 );
-bool unsaved_change(  );						// control for unsaved changes in configuration
+bool save_configuration( object *r, int findex = 0 );
+bool search_parallel( object *r );
+bool unsaved_change( void );					// control for unsaved changes in configuration
 bool unsaved_change( bool );
 char *clean_file(char *);
 char *clean_path(char *);
@@ -407,6 +474,7 @@ void change_init_text(char *lab);
 void chg_obj_num(object **c, int value, int all, int pippo[], int *choice, int cfrom);
 void clean_cell(object *root, char *tag, char *lab);
 void clean_debug(object *n);
+void clean_parallel( object *n );
 void clean_plot(object *n);
 void clean_save(object *n);
 void clean_spaces(char *s);
@@ -445,7 +513,7 @@ void get_bool( const char *tcl_var, bool *var );
 void get_double( const char *tcl_var, double *var );
 void get_int( const char *tcl_var, int *var );
 void go_next(object **t);
-void handle_signals( void );
+void handle_signals( void ( * handler )( int signum ) );
 void histograms(int *choice);
 void histograms_cs(int *choice);
 void init_plot(int i, int id_sim);
@@ -512,8 +580,10 @@ void show_eq(char *lab, int *choice);
 void show_graph( object *t);
 void show_initial(object *n);
 void show_observe(object *n);
+void show_parallel( object *n );
 void show_plot( object *n );
 void show_plot_gnu(int n, int *choice, int type, char **str, char **tag);
+void show_prof_aggr( void );
 void show_rep_initial(FILE *f, object *n, int *begin);
 void show_rep_observe(FILE *f, object *n, int *begin);
 void show_save(object *n);
@@ -534,6 +604,10 @@ void write_obj(object *r, FILE *frep);
 void write_str(object *r, FILE *frep, int dep, char const *prefix );
 void write_var(variable *v, FILE *frep);
 
+#ifdef PARALLEL_MODE
+void parallel_update( variable *v, object* p, object *caller = NULL );
+#endif
+
 
 // global variables
 
@@ -545,6 +619,7 @@ extern bool in_set_obj;		// in setting number of objects mode
 extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
 extern bool no_error;		// object search error control	
+extern bool parallel_mode;	// flag defining if parallel mode (multithreading) is enabled
 extern bool redrawRoot;		// control for redrawing root window (.)
 extern bool running;		// simulation is running
 extern bool struct_loaded;	// a valid configuration file is loaded
@@ -579,8 +654,12 @@ extern int findexSens;		// index to sequential sensitivity configuration filenam
 extern int lattice_type;	// lattice window mode
 extern int macro;			// equations style (macros or C++) (bool)
 extern int max_step;		// last simulation time step
+extern int max_threads;		// suggested maximum number of parallel threads 
 extern int no_res;			// do not produce .res results files (bool)
 extern int overwConf;		// overwrite current configuration file on run (bool)
+extern int prof_aggr_time;	// show aggregate profiling times
+extern int prof_min_msecs;	// profile only variables taking more than X msecs.
+extern int prof_obs_only;	// profile only observed variables
 extern int quit;			// simulation interruption mode (0=none)
 extern int seed;			// pseudo random number generator seed in use
 extern int sim_num;			// simulation number running
@@ -598,6 +677,14 @@ extern object *blueprint;   // Lsd blueprint (effective model in use)
 extern object *root;        // Lsd root object
 extern sense *rsense;       // Lsd sensitivity analysis structure
 extern variable *cemetery;  // Lsd saved data series (from last simulation run)
+extern map< string, profile > prof;// set of saved profiling times
+
+// multi-threading control 
+#ifdef PARALLEL_MODE
+extern atomic< bool > parallel_ready;			// flag to indicate multitasking is available
+extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
+extern worker *workers;							// multi-thread parallel worker data
+#endif
 
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef NO_WINDOW

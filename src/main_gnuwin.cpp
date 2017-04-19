@@ -22,17 +22,17 @@ int main( int argn, char **argv )
 	int res;
 
 	// register all signal handlers
-	handle_signals( );
+	handle_signals( signal_handler );
 
 	try
 	{
 		res = lsdmain( argn, argv );
 	}
-	catch ( std::bad_alloc& )	// out of memory conditions
+	catch ( bad_alloc& )	// out of memory conditions
 	{
 		signal_handler( SIGMEM );
 	}
-	catch ( std::exception& exc )// other known error conditions
+	catch ( exception& exc )// other known error conditions
 	{
 		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
 		signal_handler( SIGSTL );
@@ -55,6 +55,11 @@ int main( int argn, char **argv )
 // exit Lsd finishing 
 void myexit( int v )
 {
+#ifdef PARALLEL_MODE
+// stop multi-thread workers, if needed
+delete [ ] workers;
+#endif
+
 #ifndef NO_WINDOW
 	cmd( "LsdExit" );
 	Tcl_Exit( v );
@@ -84,10 +89,10 @@ const char *strsignal( int signum )
 }
 #endif
 
-void handle_signals( void )
+void handle_signals( void ( * handler )( int signum ) )
 {
 	for ( int i = 0; i < NUM_SIG; ++i )
-		signal( signals[ i ], signal_handler );  
+		signal( signals[ i ], handler );  
 }
 
 
@@ -95,7 +100,7 @@ void handle_signals( void )
  SIGNAL_HANDLER
  *********************************/
 // handle critical system signals
-void signal_handler(int signum)
+void signal_handler( int signum )
 {
 	char msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 	double useless = -1;

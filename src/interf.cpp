@@ -282,19 +282,20 @@ cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 2
 cmd( ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
 cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }" );	// entryconfig 4
 cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
-cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 6
-cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 7
-cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 8
-cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 9
-cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 10
-cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 11
-cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 12
-cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 13
-cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 14
-cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 15
-cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 16
-cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 17
-cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 18
+cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel\" -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
+cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 7
+cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 8
+cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 9
+cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 10
+cmd( ".l.v.c.var_name.v add command -label Move -command { set choice 79 }" );	// entryconfig 11
+cmd( ".l.v.c.var_name.v add command -label Delete -command { set choice 76 }" );	// entryconfig 12
+cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 13
+cmd( ".l.v.c.var_name.v add command -label Equation -state disabled -command { set choice 29 }" );	// entryconfig 14
+cmd( ".l.v.c.var_name.v add command -label Using -state disabled -command { set choice 46 }" );	// entryconfig 15
+cmd( ".l.v.c.var_name.v add command -label \"Used In\" -state disabled -command { set choice 47 }" );	// entryconfig 16
+cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 17
+cmd( ".l.v.c.var_name.v add command -label \"Initial Values\" -state disabled -command { set choice 77 }" );	// entryconfig 18
+cmd( ".l.v.c.var_name.v add command -label Sensitivity -state disabled -command { set choice 78 }" );	// entryconfig 19
 
 if(r->v!=NULL)
   {
@@ -318,44 +319,50 @@ if(r->v!=NULL)
 		if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
 		{ \
 			.l.v.c.var_name.v entryconfig 5 -state normal; \
-			.l.v.c.var_name.v entryconfig 7 -state normal; \
+			.l.v.c.var_name.v entryconfig 6 -state normal; \
 			.l.v.c.var_name.v entryconfig 8 -state normal; \
-			.l.v.c.var_name.v entryconfig 13 -state normal; \
+			.l.v.c.var_name.v entryconfig 9 -state normal; \
 			.l.v.c.var_name.v entryconfig 14 -state normal; \
 			.l.v.c.var_name.v entryconfig 15 -state normal; \
-			.l.v.c.var_name.v entryconfig 17 -state normal; \
+			.l.v.c.var_name.v entryconfig 16 -state normal; \
 			.l.v.c.var_name.v entryconfig 18 -state normal; \
+			.l.v.c.var_name.v entryconfig 19 -state normal; \
 			set save [ get_var_conf $vname save ]; \
 			set plot [ get_var_conf $vname plot ]; \
 			set num [ get_var_conf $vname debug ]; \
+			set parallel [ get_var_conf $vname parallel ]; \
 			switch $color \
 			{ \
 				purple { } \
 				blue \
 				{ \
-					.l.v.c.var_name.v entryconfig 17 -state disabled; \
 					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+					.l.v.c.var_name.v entryconfig 19 -state disabled; \
 				} \
 				black \
 				{ \
 					.l.v.c.var_name.v entryconfig 5 -state disabled; \
-					.l.v.c.var_name.v entryconfig 13 -state disabled; \
-					.l.v.c.var_name.v entryconfig 14 -state disabled \
+					.l.v.c.var_name.v entryconfig 6 -state disabled; \
+					.l.v.c.var_name.v entryconfig 14 -state disabled; \
+					.l.v.c.var_name.v entryconfig 15 -state disabled \
 				} \
-				tomato { } \
+				tomato { \
+					.l.v.c.var_name.v entryconfig 6 -state disabled; \
+				} \
 				firebrick \
 				{ \
-					.l.v.c.var_name.v entryconfig 17 -state disabled; \
+					.l.v.c.var_name.v entryconfig 6 -state disabled; \
 					.l.v.c.var_name.v entryconfig 18 -state disabled; \
+					.l.v.c.var_name.v entryconfig 19 -state disabled; \
 				} \
 			}; \
 			if { $itemfocus == 0 } \
 			{ \
-				.l.v.c.var_name.v entryconfig 7 -state disabled \
+				.l.v.c.var_name.v entryconfig 8 -state disabled \
 			}; \
 			if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } \
 			{ \
-				.l.v.c.var_name.v entryconfig 8 -state disabled \
+				.l.v.c.var_name.v entryconfig 9 -state disabled \
 			}; \
 			tk_popup .l.v.c.var_name.v %%X %%Y \
 		} \
@@ -630,11 +637,13 @@ cmd( "$w add command -label \"Show Elements to Observe\" -command {set choice 42
 cmd( "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1" );
 cmd( "$w add command -label \"Show Elements to Plot\" -command {set choice 84} -underline 2" );
 cmd( "$w add command -label \"Show Elements to Debug\" -command {set choice 85} -underline 17" );
+cmd( "$w add command -label \"Show Elements to Parallelize\" -command {set choice 86} -underline 3" );
 
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Ctrl+G" );
 cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 4" );
 cmd( "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F" );
+cmd( "$w add command -label \"Remove Parallel Flags\" -command {set choice 87}" );
 
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 0" );
@@ -738,7 +747,7 @@ while( ! *choice  && ! choice_g )
 	{
 		Tcl_DoOneEvent( 0 );
 	}
-	catch ( std::bad_alloc& ) 	// raise memory problems
+	catch ( bad_alloc& ) 	// raise memory problems
 	{
 		throw;
 	}
@@ -1554,8 +1563,8 @@ break;
 case 7:
 
 redrawRoot = true;					// assume browser redraw required
+int savei, parallel;
 
-int savei;
 cmd( "if { ! [ catch { set vname [ .l.v.c.var_name get [ .l.v.c.var_name curselection ] ] } ] && ! [ string equal $vname \"\" ] } { set choice 1 } { set choice 0 }" );
 if ( *choice == 0 )
 { 
@@ -1563,7 +1572,7 @@ if ( *choice == 0 )
 	break;
 }
 
-lab1=(char *)Tcl_GetVar(inter, "vname",0);
+lab1=(char *)Tcl_GetVar(inter, "vname", 0);
 if ( lab1 == NULL || ! strcmp( lab1, "(none)" ) )
 	break;
 sscanf(lab1, "%s", lab_old);
@@ -1571,7 +1580,8 @@ cv=r->search_var(NULL, lab_old);
 
 cur_descr=search_description(lab_old);
 if(cur_descr==NULL)
- {if(cv->param==0)
+{
+  if(cv->param==0)
     add_description(lab_old, "Variable", "(no description available)");
   if(cv->param==1)
     add_description(lab_old, "Parameter", "(no description available)");  
@@ -1579,18 +1589,21 @@ if(cur_descr==NULL)
     add_description(lab_old, "Function", "(no description available)");  
   plog( "\nWarning: description for '%s' not found. New one created.", "", lab_old );
   cur_descr=search_description(lab_old);
- } 
+} 
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 Tcl_LinkVar(inter, "debug", (char *) &num, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "save", (char *) &save, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "savei", (char *) &savei, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "plot", (char *) &plot, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "parallel", (char *) &parallel, TCL_LINK_BOOLEAN);
 
 save=cv->save;
 num=cv->debug=='d'?1:0;
 plot=cv->plot;
 savei=cv->savei;
+parallel = cv->parallel;
+
 cmd( "set observe %d", cur_descr->observe=='y'?1:0 );
 cmd( "set initial %d", cur_descr->initial=='y'?1:0 );
 cmd( "set vname %s", lab_old );
@@ -1628,13 +1641,21 @@ cmd( "checkbutton $T.b1.sav -text \"Save: save the series for later analysis\" -
 cmd( "checkbutton $T.b1.savi -text \"Save file: save the series in a separate file\" -variable savei -underline 5" );
 cmd( "checkbutton $T.b1.plt -text \"Run time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
 cmd( "checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
+cmd( "checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
 
-if(cv->param==1)
-  cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt -anchor w" );
-else
+switch ( cv->param )
 {
-  cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb -anchor w" );
-  cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
+	case 1:
+		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt -anchor w" );
+		break;
+	case 2:
+		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb -anchor w" );
+		cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
+		break;
+	case 0:
+		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb $T.b1.par -anchor w" );
+		cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
+		cmd( "bind $T <Control-p> \"$T.b1.par invoke\"; bind $T <Control-P> \"$T.b1.par invoke\"" );
 }
 
 cmd( "pack $T.h $T.b0 $T.b1 -pady 5" );
@@ -1777,6 +1798,13 @@ if ( done == 2 || done == 8 )	// esc/cancel
 }
 else
 {
+   cmd( "set choice $observe" );
+   *choice==1?observe='y':observe='n';
+   cmd( "set choice $initial" );
+   *choice==1?initial='y':initial='n';
+   cur_descr->initial=initial;
+   cur_descr->observe=observe;
+   
    for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
    {
 	   cv=cur->search_var(NULL, lab_old);
@@ -1784,15 +1812,10 @@ else
 	   cv->savei=savei;
 	   cv->debug=num==1?'d':'n';
 	   cv->plot=plot;
+	   cv->parallel = parallel;
+	   cv->observe = ( observe == 'y' ) ? true : false;
    }
-    
-   cmd( "set choice $observe" );
-   *choice==1?observe='y':observe='n';
-   cmd( "set choice $initial" );
-   *choice==1?initial='y':initial='n';
-   cur_descr->initial=initial;
-   cur_descr->observe=observe;
-  
+      
    cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
    change_descr_text(lab_old);
    if(cv->param==1 || cv->num_lag>0)
@@ -1826,6 +1849,7 @@ Tcl_UnlinkVar(inter, "save");
 Tcl_UnlinkVar(inter, "savei");
 Tcl_UnlinkVar(inter, "debug");
 Tcl_UnlinkVar(inter, "plot");
+Tcl_UnlinkVar( inter, "parallel" );
 cmd( "unset done" );
 
 // options to be handled in a second run of the operate function
@@ -1966,6 +1990,8 @@ if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 		cv->param=nature;
 		if(cv->param==1 || cv->num_lag>0)
 			cv->data_loaded='-';
+		if ( cv->param != 0 )
+			cv->parallel = false;
 	}
 }
 
@@ -2302,6 +2328,18 @@ if ( i == 0 )
 		*choice=0;
 		break;
 	}
+}
+
+// warn missing debugger
+if ( search_parallel( root ) && ( when_debug > 0 || stackinfo_flag > 0 || prof_aggr_time ) )
+{
+	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'Ok' to proceed and ignore debugging/profiling settings or 'Cancel' to return to Lsd Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
+	if( *choice == 2 )
+	{
+		*choice=0;
+		break;
+	}
+	when_debug = stackinfo_flag = prof_aggr_time = 0;
 }
 
 Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
@@ -2737,52 +2775,69 @@ temp[2] = seed;
 temp[3] = max_step; 
 temp[4] = when_debug;
 temp[5] = stackinfo_flag;
+temp[6] = prof_min_msecs;
+temp[7] = prof_obs_only;
 
 Tcl_LinkVar(inter, "sim_num", (char *) &sim_num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "seed", (char *) &seed, TCL_LINK_INT);
 Tcl_LinkVar(inter, "max_step", (char *) &max_step, TCL_LINK_INT);
+Tcl_LinkVar(inter, "stack_info", (char *) &stackinfo_flag, TCL_LINK_INT);
+Tcl_LinkVar(inter, "prof_min_msecs", (char *) &prof_min_msecs, TCL_LINK_INT);
+Tcl_LinkVar(inter, "prof_obs_only", (char *) &prof_obs_only, TCL_LINK_BOOLEAN);
+Tcl_LinkVar(inter, "prof_aggr_time", (char *) &prof_aggr_time, TCL_LINK_BOOLEAN);
 
 cmd( "set T .simset" );
 cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
 cmd( "frame $T.f" );
-cmd( "frame $T.f.a -bd 2" );
+cmd( "frame $T.f.a" );
 cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
 cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.a.e insert 0 $sim_num" ); 
 cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
-cmd( "frame $T.f.b -bd 2" );
+cmd( "frame $T.f.b" );
 cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
 cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.b.e1 insert 0 $seed" ); 
 cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
-cmd( "frame $T.f.c -bd 2" );
+cmd( "frame $T.f.c" );
 cmd( "label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
 cmd( "entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.c.e2 insert 0 $max_step" ); 
 cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
-cmd( "frame $T.f.d -bd 2" );
+cmd( "frame $T.f.d" );
 cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
 cmd( "entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
 cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
-cmd( "frame $T.f.e -bd 2" );
+cmd( "frame $T.f.e" );
 cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
-cmd( "set stack_info %d", stackinfo_flag );
 cmd( "entry $T.f.e.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.e.e2 insert 0 $stack_info" ); 
 cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
 
-cmd( "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e -anchor w" );
+cmd( "frame $T.f.f" );
+cmd( "label $T.f.f.l2 -width 25 -anchor e -text \"Profile minimum time (0:all)\"" );
+cmd( "entry $T.f.f.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" ); 
+cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
+
+cmd( "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e $T.f.f -anchor w" );
+
+cmd( "checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
+cmd( "checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
+cmd( "pack $T.f.obs $T.f.aggr -anchor e" );
+
 cmd( "pack $T.f -padx 5 -pady 5" );
 cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
 cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
 cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.c.e2; $T.f.c.e2 selection range 0 end}" );
 cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
 cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
-cmd( "bind $T.f.e.e2 <KeyPress-Return>  {focus $T.b.ok}" );
+cmd( "bind $T.f.e.e2 <KeyPress-Return> {focus $T.f.f.e2; $T.f.f.e2 selection range 0 end}" );
+cmd( "bind $T.f.f.e2 <KeyPress-Return>  {focus $T.b.ok}" );
 
 cmd( "showtop $T centerW" );
 cmd( "$T.f.a.e selection range 0 end" );
@@ -2790,6 +2845,7 @@ cmd( "$T.f.b.e1 selection range 0 end" );
 cmd( "$T.f.c.e2 selection range 0 end" );
 cmd( "$T.f.d.e2 selection range 0 end" );
 cmd( "$T.f.e.e2 selection range 0 end" );
+cmd( "$T.f.f.e2 selection range 0 end" );
 cmd( "focus $T.f.a.e" );
 
 while(*choice==0)
@@ -2800,6 +2856,7 @@ cmd( "set seed [ .simset.f.b.e1 get ]" );
 cmd( "set max_step [ .simset.f.c.e2 get ]" ); 
 cmd( "set when_debug [ .simset.f.d.e2 get ]" ); 
 cmd( "set stack_info [ .simset.f.e.e2 get ]" ); 
+cmd( "set prof_min_msecs [ .simset.f.f.e2 get ]" ); 
 
 cmd( "destroytop .simset" );
 
@@ -2810,18 +2867,19 @@ if ( *choice == 2 )	// Escape - revert previous values
 	max_step = temp[3];
 	when_debug = temp[4];
 	stackinfo_flag = temp[5];
+	prof_min_msecs = temp[6];
+	prof_obs_only = temp[7];
 }
 else
-{
-	cmd( "set choice $stack_info" );
-	stackinfo_flag=*choice;
-
 	unsaved_change( true );		// signal unsaved change
-}
 
 Tcl_UnlinkVar(inter, "sim_num");
 Tcl_UnlinkVar(inter, "seed");
 Tcl_UnlinkVar(inter, "max_step");
+Tcl_UnlinkVar(inter, "stack_info");
+Tcl_UnlinkVar(inter, "prof_min_msecs");
+Tcl_UnlinkVar(inter, "prof_obs_only");
+Tcl_UnlinkVar(inter, "prof_aggr_time");
 
 break;
 
@@ -3011,6 +3069,19 @@ if ( lcount == 0 )
 break;
 
 
+//Show variables to parallelize
+case 86:
+
+for(n=r; n->up!=NULL; n=n->up);
+plog("\n\nMulti-object variables to run in parallel:\n");
+lcount = 0;
+show_parallel(n);
+if ( lcount == 0 )
+	plog( "(none)\n" );
+
+break;
+
+
 //Close all Runtime Plots
 case 40:
 
@@ -3029,6 +3100,21 @@ if(*choice==1)
 {
 	for(n=r; n->up!=NULL; n=n->up);
 	clean_plot(n);
+	unsaved_change( true );		// signal unsaved change
+}
+
+break;
+
+
+//Remove all the parallel flags
+case 87:
+
+cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove parallel flags?\" -detail \"Confirm the removal of all parallel processing information. No parallelization will be performed.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+
+if ( *choice == 1 )
+{
+	for ( n = r; n->up != NULL; n = n->up );
+	clean_parallel(n);
 	unsaved_change( true );		// signal unsaved change
 }
 
@@ -4623,11 +4709,12 @@ case 68:
 	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar(inter, "natBat", (char *)&natBat, TCL_LINK_BOOLEAN);
 	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
-	cmd( "set cores 4" );
+	cmd( "set cores %d", max_threads );
+	cmd( "set threads 1" );
 	
 	// confirm number of cores to use
 	cmd( "set res2 $res" );
-	cmd( "newtop .s \"Parallel Batch\" { set choice 0 }" );
+	cmd( "newtop .s \"Parallel Batch\" { set choice 2 }" );
 
 	cmd( "frame .s.t" );
 	cmd( "label .s.t.l -text \"Batch file base name\"" );
@@ -4635,11 +4722,18 @@ case 68:
 	cmd( "pack .s.t.l .s.t.e" );
 		
 	cmd( "frame .s.c" );
-	cmd( "label .s.c.l -text \"Number of parallel processes\"" );
+	cmd( "label .s.c.l -text \"Number of parallel\nLsd processes\"" );
 	cmd( "entry .s.c.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
 	cmd( "label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
+	
+	cmd( "frame .s.p" );
+	cmd( "label .s.p.l -text \"Number of threads\nper Lsd process\"" );
+	cmd( "entry .s.p.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".s.p.e insert 0 $threads" ); 
+	cmd( "label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
+	cmd( "pack .s.p.l .s.p.e .s.p.w" );
 	
 	cmd( "frame .s.o" );
 	cmd( "checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res" );
@@ -4647,30 +4741,38 @@ case 68:
 	cmd( "checkbutton .s.o.dozip -text \"Generate zipped files\" -variable dozip" );
 	cmd( "pack .s.o.nores .s.o.n .s.o.dozip" );
 	
-	cmd( "pack .s.t .s.c .s.o -padx 5 -pady 5" );
+	cmd( "pack .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
 
-	cmd( "okcancel .s b { set cores [ .s.c.e get ]; set choice $cores } { set choice 0 }" );
+	cmd( "okcancel .s b { set choice 1 } { set choice 2 }" );
 	cmd( "bind .s.c.e <KeyPress-Return> { .s.b.ok invoke }" );
 	
 	cmd( "showtop .s" );
 	cmd( "focus .s.c.e" );
 	cmd( ".s.c.e selection range 0 end" );
 	
-	*choice=-1;
-	while(*choice==-1)
-		Tcl_DoOneEvent(0);
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+	
+	cmd( "set cores [ .s.c.e get ]" );
+	cmd( "set threads [ .s.p.e get ]" );
 	
 	cmd( "destroytop .s" );
+	
 	Tcl_UnlinkVar(inter, "natBat");
 	Tcl_UnlinkVar(inter, "no_res");
 	Tcl_UnlinkVar(inter, "dozip");
 
-	if(*choice==0)
+	if ( *choice == 2 )
 		break;
-	param=*choice;
 	
-	if(param < 1 || param > 64) 
-		param=4;
+	get_int( "cores", & param );
+	if ( param < 1 || param > 64 ) 
+		param = max_threads;
+	
+	get_int( "threads", & num );
+	if ( num < 1 || num > 64 ) 
+		num = max_threads;
 	
 	lab3 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
 	
@@ -4737,9 +4839,9 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, j);
+				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, wpath, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, j);
 			else							// Unix
-				fprintf(f, "%s -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, j);
+				fprintf(f, "%s -c %d -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, lab2, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, j);
 			j <= sl ? i+=num+1 : i+=num;
 		}
 	}
@@ -4747,18 +4849,18 @@ case 68:
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if( fSeq )
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, wpath, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, i);
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, wpath, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, i);
 				else						// Unix
-					fprintf(f, "%s -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, lab2, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, i);
+					fprintf(f, "%s -c %d -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, lab2, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, i);
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
 				lab1 = ( char * ) Tcl_GetVar( inter, "res3", 0 );
 				
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, wpath, lab1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1);
+					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, wpath, lab1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1);
 				else						// Unix
-					fprintf(f, "%s -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, lab2, lab1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1);
+					fprintf(f, "%s -c %d -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, num, lab2, lab1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1);
 			}
 	
 	if ( fSeq )
@@ -5194,7 +5296,6 @@ for(cv=n->v; cv!=NULL; cv=cv->next)
     
     } 
    plog("\n");
-
   }
  }
 
@@ -5219,16 +5320,16 @@ void show_plot( object *n )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->plot )
-	{
-		if ( cv->param == 1 )
-			plog( "Object: %s \tParameter:\t", "", n->label );
-		if ( cv->param == 0 )
-			plog( "Object: %s \tVariable :\t", "", n->label );
-		if ( cv->param == 2 )
-			plog( "Object: %s \tFunction :\t", "", n->label );
-		plog( "%s\n", "highlight", cv->label );
-		lcount++;
-	}
+		{
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", "", n->label );
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable :\t", "", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction :\t", "", n->label );
+			plog( "%s\n", "highlight", cv->label );
+			lcount++;
+		}
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
@@ -5252,14 +5353,14 @@ void show_debug( object *n )
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->debug == 'd' )
-	{
-		if ( cv->param == 0 )
-			plog( "Object: %s \tVariable :\t", "", n->label );
-		if ( cv->param == 2 )
-			plog( "Object: %s \tFunction :\t", "", n->label );
-		plog( "%s\n", "highlight", cv->label );
-		lcount++;
-	}
+		{
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable :\t", "", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction :\t", "", n->label );
+			plog( "%s\n", "highlight", cv->label );
+			lcount++;
+		}
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
@@ -5273,20 +5374,66 @@ void show_debug( object *n )
 
 
 /****************************************************
+SHOW_PARALLEL
+****************************************************/
+void show_parallel( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->parallel )
+		{
+			plog( "Object: %s \tVariable :\t", "", n->label );
+			plog( "%s\n", "highlight", cv->label );
+			lcount++;
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		show_parallel( co );
+	}
+}
+
+
+/****************************************************
 CLEAN_PLOT
 ****************************************************/
-void clean_plot(object *n)
+void clean_plot( object *n )
 {
-variable *cv;
-object *co;
-bridge *cb;
+	variable *cv;
+	object *co;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
- cv->plot=0;
- 
-for(cb=n->b; cb!=NULL; cb=cb->next)
-for(co=cb->head; co!=NULL; co=co->next)
- clean_plot(co);
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->plot = false;
+	 
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co !=NULL; co = co->next )
+			clean_plot( co );
+}
+
+
+/****************************************************
+CLEAN_PARALLEL
+****************************************************/
+void clean_parallel( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->parallel = false;
+	 
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co !=NULL; co = co->next )
+			clean_parallel( co );
 }
 
 
@@ -5384,6 +5531,9 @@ void set_shortcuts( const char *window )
 }
 
 
+/****************************************************
+CONTROL_TOCOMPUTE
+****************************************************/
 void control_tocompute(object *r, char *l)
 {
 object *cur;
@@ -5409,6 +5559,9 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 }
 
 
+/****************************************************
+INSERT_OBJECT
+****************************************************/
 void insert_object( const char *w, object *r )
 {
 object *cur;
@@ -5427,6 +5580,9 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
 }
 
 
+/****************************************************
+SHIFT_VAR
+****************************************************/
 void shift_var(int direction, char *vlab, object *r)
 {
 variable *cv, *cv1=NULL, *cv2=NULL;
@@ -5491,6 +5647,9 @@ plog("\nWarning: should never reach this point in move_var");
 }
 
 
+/****************************************************
+SHIFT_DESC
+****************************************************/
 void shift_desc(int direction, char *dlab, object *r)
 {
 bridge *cb, *cb1=NULL, *cb2=NULL;
@@ -5707,7 +5866,10 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 			if ( ! strcmp( argv[ 2 ], "debug" ) )
 				res[ 0 ] = cv->debug == 'd' ? '1' : '0';
 			else
-				return TCL_ERROR;
+				if ( ! strcmp( argv[ 2 ], "parallel" ) )
+					res[ 0 ] = cv->parallel ? '1' : '0';
+				else
+					return TCL_ERROR;
 	
 	Tcl_SetResult( inter, res, TCL_VOLATILE );
 	return TCL_OK;		
@@ -5750,7 +5912,10 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 					if ( ! strcmp( argv[ 2 ], "debug" ) )
 						cv->debug  = ( ! strcmp( argv[ 3 ], "1" ) ) ? 'd' : 'n';
 					else
-						return TCL_ERROR;
+						if ( ! strcmp( argv[ 2 ], "parallel" ) )
+							cv->parallel  = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+						else
+							return TCL_ERROR;
 	}
 	unsaved_change( true );				// signal unsaved change
 

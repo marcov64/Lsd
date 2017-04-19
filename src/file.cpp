@@ -202,90 +202,89 @@ OBJECT::SAVE_PARAM
 
 void object::save_param(FILE *f)
 {
+	int i, count;
+	object *cur;
+	variable *cv, *cv1;
+	char ch, ch1, ch2;
+	description *cur_descr;
+	bridge *cb;
 
-int i, count;
-object *cur;
-variable *cv, *cv1;
-char ch,ch1;
-description *cur_descr;
-bridge *cb;
+	count=0;
+	fprintf(f, "\nObject: %s", label);
+	if(to_compute==1)
+	  fprintf(f, " C");
+	else
+	  fprintf(f, " N");
 
-count=0;
-fprintf(f, "\nObject: %s", label);
-if(to_compute==1)
-  fprintf(f, " C");
-else
-  fprintf(f, " N");
+	for(cur=this;cur!=NULL; )
+	 {skip_next_obj(cur, &count);
+	  fprintf(f, "\t%d", count);  
+	  for( ;go_brother(cur)!=NULL; cur=cur->next);
 
-for(cur=this;cur!=NULL; )
- {skip_next_obj(cur, &count);
-  fprintf(f, "\t%d", count);  
-  for( ;go_brother(cur)!=NULL; cur=cur->next);
+	  cur=cur->hyper_next(cur->label);
+	 }
+	fprintf(f, "\n");
 
-  cur=cur->hyper_next(cur->label);
+	for(cv=v; cv!=NULL; cv=cv->next)
+	{
+	  //search for unloaded data
+	  ch='+';
+	  if(cv->param==1 || cv->num_lag>0)
+	  {
+	  for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
+		{cv1=cur->search_var(NULL, cv->label);
+		 if(cv1->data_loaded=='-')
+		  {ch='-';
+		   break;
+		  }
+		}
+	  }
+	  else
+	   {//avoid marking as to initialize for elements not worth it
+		cur_descr = search_description(cv->label);
+		cur_descr->initial='n';
+	   }
 
- }
-fprintf(f, "\n");
+	 ch1 = cv->save ? 's' : 'n';
+	 ch1 = cv->savei ? toupper( ch1 ) : ch1;
 
-for(cv=v; cv!=NULL; cv=cv->next)
-{
-  //search for unloaded data
-  ch='+';
-  if(cv->param==1 || cv->num_lag>0)
-  {
-  for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
-    {cv1=cur->search_var(NULL, cv->label);
-     if(cv1->data_loaded=='-')
-      {ch='-';
-       break;
-      }
-    }
-  }
-  else
-   {//avoid marking as to initialize for elements not worth it
-    cur_descr = search_description(cv->label);
-    cur_descr->initial='n';
-   }
+	 ch2 = cv->plot ? 'p' : 'n';
+	 ch2 = cv->parallel ? toupper( ch2 ) : ch2;
+	 
+	 if(cv->param==0)
+		fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
+	 if(cv->param==1)
+		fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
+	 if(cv->param==2)
+		fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
 
- ch1 = cv->save ? 's' : 'n';
- ch1 = cv->savei ? toupper( ch1 ) : ch1;
-  
-
- if(cv->param==0)
-	fprintf(f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug,cv->plot==1?'p':'n');
- if(cv->param==1)
-	fprintf(f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug,cv->plot==1?'p':'n');
- if(cv->param==2)
-	fprintf(f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug,cv->plot==1?'p':'n');
-
- for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
-   {cv1=cur->search_var(NULL, cv->label);
-    if(cv1->param==1)
-      {if(cv1->data_loaded=='+')
-        fprintf(f, "\t%g", cv1->val[0]);
-       else
-        fprintf(f, "\t%c", '0');
-       }
-     else
-      {
-      for(i=0; i<cv->num_lag; i++)
+	 for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
+	   {cv1=cur->search_var(NULL, cv->label);
+		if(cv1->param==1)
+		  {if(cv1->data_loaded=='+')
+			fprintf(f, "\t%g", cv1->val[0]);
+		   else
+			fprintf(f, "\t%c", '0');
+		   }
+		 else
 		  {
+		  for(i=0; i<cv->num_lag; i++)
+			  {
 
-         if(cv1->data_loaded=='+')
-          fprintf(f, "\t%g", cv1->val[i]);
-         else
-			 fprintf(f, "\t%c", '0');
-        }  
-      }  
-   }
- fprintf(f, "\n");
-}
-for(cb=b; cb!=NULL; cb=cb->next)
-{
-  cur=cb->head;
-  cur->save_param(f);
- 
-}
+			 if(cv1->data_loaded=='+')
+			  fprintf(f, "\t%g", cv1->val[i]);
+			 else
+				 fprintf(f, "\t%c", '0');
+			}  
+		  }  
+	   }
+	 fprintf(f, "\n");
+	}
+	for(cb=b; cb!=NULL; cb=cb->next)
+	{
+	  cur=cb->head;
+	  cur->save_param(f);
+	}
 }
 
 /****************************************************
@@ -295,99 +294,103 @@ OBJECT::LOAD_PARAM
 
 bool object::load_param(char *file_name, int repl, FILE *f)
 {
+	char str[MAX_ELEM_LENGTH], ch, ch1, ch2;
+	int num, i;
+	object *cur;
+	variable *cv, *cv1;
+	double app;
+	bridge *cb;
 
-char str[MAX_ELEM_LENGTH], ch, ch1, ch2;
-int num, i;
-object *cur;
-variable *cv, *cv1;
-double app;
-bridge *cb;
+	if(f==NULL)
+	 f=search_data_str(file_name, "DATA", label); 
+	else
+	 {
+	  fscanf(f, "%99s", str); //skip the 'Object: '
+	  fscanf(f, " %99s", str); //skip the 'label'  
+	 } 
 
-if(f==NULL)
- f=search_data_str(file_name, "DATA", label); 
-else
- {
-  fscanf(f, "%99s", str); //skip the 'Object: '
-  fscanf(f, " %99s", str); //skip the 'label'  
- } 
+	if(f==NULL)
+		return false;
 
-if(f==NULL)
-	return false;
-else
-{
-if(fscanf(f, " %c", &ch)!=1)
-	 return false;
-if(ch=='C')
- to_compute=1;
-else
- to_compute=0;
-for(cur=this;cur!=NULL; )
- {if(fscanf(f, "\t%d", &num)!=1)
-	 return false;
-  cur->to_compute=to_compute;
-  cur->replicate(num, 0);
+	if(fscanf(f, " %c", &ch)!=1)
+		 return false;
+	if(ch=='C')
+	 to_compute=1;
+	else
+	 to_compute=0;
 
-  for( ;go_brother(cur)!=NULL; cur=cur->next);
-  cur=cur->hyper_next(cur->label);
- }
+	for(cur=this;cur!=NULL; )
+	{
+	  if(fscanf(f, "\t%d", &num)!=1)
+		 return false;
+	  cur->to_compute=to_compute;
+	  cur->replicate(num, 0);
 
-for(cv=v; cv!=NULL; cv=cv->next)
- {
-  fscanf(f, "%99s ", str); //skip the 'Element: '
-  fscanf(f, "%99s ", str); //skip the 'label'
-  if(f==NULL)
-	 return false;
-
-  if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2   )!=5)
-	 return false;
-
-  cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
-  cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
-
-  cv->plot = ( tolower( ch2 ) == 'p' ) ? true : false;
-
-  for(cur=this; cur!=NULL; repl==1?cur=cur->hyper_next(label):cur=NULL)
-	{cv1=cur->search_var(NULL, cv->label);
-	 cv1->val=new double[cv->num_lag+1];
-
-	 cv1->num_lag=cv->num_lag;
-	 cv1->save=cv->save;
-     cv1->savei=cv->savei;
-	 cv1->plot=cv->plot;
-	 cv1->param=cv->param;
-	 cv1->debug=cv->debug;
-	 cv1->data_loaded=ch;
-	 if(cv1->param==1)
-	  {if(fscanf(f, "%lf", &app )!=1)
-			  return false;
-			else
-			  cv1->val[0]=app;
-	  }
-	 else
-	 {for(i=0; i<cv->num_lag; i++)
-		{
-		  if ( ( num = fscanf(f, "\t%lf", &app ) ) != 1 )
-			  return false;
-			else // Places values shifted one position, since they are "time 0" values
-			  cv1->val[i]=app;
-		}
-	  cv1->val[cv->num_lag]=0;
-	 }
+	  for( ;go_brother(cur)!=NULL; cur=cur->next);
+	  cur=cur->hyper_next(cur->label);
 	}
-  }
-}
-for(cb=b; cb!=NULL; cb=cb->next)
- {
-  cur=cb->head;
-  if ( ! cur->load_param( file_name, repl, f ) )
-	return false;
-  num=0;
- }
 
-if(up==NULL)	//this is the root, and therefore the end of the loading
-  set_blueprint(blueprint, this);
- 
-return true;
+	for(cv=v; cv!=NULL; cv=cv->next)
+	{
+	  fscanf(f, "%99s ", str); //skip the 'Element: '
+	  fscanf(f, "%99s ", str); //skip the 'label'
+	  if(f==NULL)
+		 return false;
+
+	  if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2   )!=5)
+		 return false;
+
+	  cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
+	  cv->savei = ( ch1 == 'S' || ch1 == 'N' ) ? true : false;
+
+	  cv->plot = ( tolower( ch2 ) == 'p' ) ? true : false;
+	  cv->parallel = ( ch2 == 'P' || ch2 == 'N' ) ? true : false;
+
+	  for(cur=this; cur!=NULL; repl==1?cur=cur->hyper_next(label):cur=NULL)
+	  {
+		 cv1=cur->search_var(NULL, cv->label);
+		 cv1->val=new double[cv->num_lag+1];
+		 cv1->num_lag=cv->num_lag;
+		 cv1->save=cv->save;
+		 cv1->savei=cv->savei;
+		 cv1->plot=cv->plot;
+		 cv1->parallel = cv->parallel;
+		 cv1->param=cv->param;
+		 cv1->debug=cv->debug;
+		 cv1->data_loaded=ch;
+		 if(cv1->param==1)
+		 {
+			if(fscanf(f, "%lf", &app )!=1)
+				return false;
+			else
+				cv1->val[0]=app;
+		 }
+		 else
+		 {
+			for(i=0; i<cv->num_lag; i++)
+			{
+			  if ( ( num = fscanf(f, "\t%lf", &app ) ) != 1 )
+				  return false;
+				else // Places values shifted one position, since they are "time 0" values
+				  cv1->val[i]=app;
+			}
+			cv1->val[cv->num_lag]=0;
+		 }
+	  }
+	}
+
+	for(cb=b; cb!=NULL; cb=cb->next)
+	 {
+	  cur=cb->head;
+	  if ( ! cur->load_param( file_name, repl, f ) )
+		return false;
+	  num=0;
+	 }
+
+	if(up==NULL)	//this is the root, and therefore the end of the loading
+	  set_blueprint(blueprint, this);
+	 
+	return true;
 }
 
 
@@ -953,6 +956,7 @@ int load_configuration( object *r, bool reload )
 	int i, j = 0, load = 0;
 	char msg[ MAX_LINE_SIZE ];
 	object *cur;
+	variable *cur_var, *cur_var1;
 	description *cur_descr;
 	
 	for ( cur = r; cur->up != NULL; cur = cur->up );
@@ -1063,7 +1067,7 @@ int load_configuration( object *r, bool reload )
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{ 
 		i = load_description( msg, f );
-		if( ! fscanf( f, "%999s", msg ) ) 
+		if ( ! fscanf( f, "%999s", msg ) ) 
 			i = 0;
 	}
 	
@@ -1077,8 +1081,18 @@ int load_configuration( object *r, bool reload )
 	for ( j = 0; strcmp( msg, "END_DOCUOBSERVE" ) && j < MAX_FILE_TRY; ++j )
 	{
 		cur_descr = search_description( msg );
-		if( cur_descr != NULL )
+		if ( cur_descr != NULL )
+		{
 			cur_descr->observe = 'y';
+			cur_var = r->search_var( NULL, msg );
+			if ( cur_var != NULL )
+				for ( cur = cur_var->up; cur != NULL; cur = cur->hyper_next( cur_var->up->label ) )
+				{
+					cur_var1 = cur->search_var( NULL, cur_var->label );
+					if ( cur_var1 != NULL )
+						cur_var1->observe = true;
+				}
+		}
 		fscanf( f, "%999s", msg );
 	}
 	

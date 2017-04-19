@@ -16,4 +16,4 @@ LIBS=-lz
 # Compiler options
 CC=x86_64-w64-mingw32-g++
 GLOBAL_CC=-march=native -std=gnu++14
-SSWITCH_CC=-mthreads -mwindows -fnon-call-exceptions -O3
+SSWITCH_CC=-mthreads -mwindows -O3

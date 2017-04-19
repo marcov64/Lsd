@@ -76,6 +76,8 @@ The widget of importance are:
 #define SIGMEM NSIG + 1			// out of memory signal
 #define SIGSTL NSIG + 2			// standard library exception signal
 
+using namespace std;
+
 // auxiliary C procedures
 int ModManMain( int argn, char **argv );
 void cmd( const char *cm, ... );
@@ -110,11 +112,11 @@ int main( int argn, char **argv )
 	{
 		res = ModManMain( argn, argv );
 	}
-	catch ( std::bad_alloc&  )	// out of memory conditions
+	catch ( bad_alloc&  )	// out of memory conditions
 	{
 		signal_handler( SIGMEM );
 	}
-	catch ( std::exception& exc )// other known error conditions
+	catch ( exception& exc )// other known error conditions
 	{
 		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
 		signal_handler( SIGSTL );
@@ -213,8 +215,8 @@ cmd( "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file di
 cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
 cmd( "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSDROOT) $RootLsd }" );
 cmd( "set groupdir [pwd]" );
-cmd( "if {$tcl_platform(platform) == \"unix\"} {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier}" );
-cmd( "if {$tcl_platform(os) == \"Darwin\"} {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier}" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] {set DefaultWish wish; set DefaultTerminal xterm; set DefaultHtmlBrowser firefox; set DefaultFont Courier}" );
+cmd( "if [ string equal $tcl_platform(os) Darwin ] {set DefaultWish wish8.5; set DefaultTerminal terminal; set DefaultHtmlBrowser open; set DefaultFont Courier}" );
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultWish wish85.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultTerminal cmd; set DefaultHtmlBrowser open; set DefaultFont \"Courier New\"}" );
 
@@ -447,8 +449,9 @@ cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -comman
 cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
 cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 42}" );
 cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 43}" );
-cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command {set choice 2}" );
 cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command {set choice 6}" );
+cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command {set choice 2}" );
+cmd( "button .bbar.gdb -image gdbImg -relief $bRlf -overrelief $ovBrlf -command {set choice 13}" );
 cmd( "button .bbar.info -image infoImg -relief $bRlf -overrelief $ovBrlf -command {set choice 44}" );
 cmd( "button .bbar.descr -image descrImg -relief $bRlf -overrelief $ovBrlf -command {set choice 5}" );
 cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf -command {set choice 8}" );
@@ -480,10 +483,12 @@ cmd( "bind .bbar.indent <Enter> {set ttip \"Indent selection\"}" );
 cmd( "bind .bbar.indent <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.deindent <Enter> {set ttip \"De-indent selection\"}" );
 cmd( "bind .bbar.deindent <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.comprun <Enter> {set ttip \"Compile and run model...\"}" );
-cmd( "bind .bbar.comprun <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.compile <Enter> {set ttip \"Recompile model\"}" );
 cmd( "bind .bbar.compile <Leave> {set ttip \"\"}" );
+cmd( "bind .bbar.comprun <Enter> {set ttip \"Compile and run model...\"}" );
+cmd( "bind .bbar.comprun <Leave> {set ttip \"\"}" );
+cmd( "bind .bbar.gdb <Enter> {set ttip \"Run in GDB debugger\"}" );
+cmd( "bind .bbar.gdb <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.info <Enter> {set ttip \"Model information...\"}" );
 cmd( "bind .bbar.info <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.descr <Enter> {set ttip \"Show description\"}" );
@@ -499,7 +504,7 @@ cmd( "bind .bbar.hide <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for Lsd equations\"}" );
 cmd( "bind .bbar.help <Leave> {set ttip \"\"}" );
 
-cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.comprun .bbar.compile .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
+cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( "pack .bbar -anchor w -fill x" );
 
 cmd( "frame .f -bd 2" );
@@ -612,8 +617,8 @@ cmd( "bind .f.t.t <Control-semicolon> {set choice 64}" );
 cmd( "bind .f.t.t <Control-comma> {set choice 65}" );
 cmd( "bind .f.t.t <Control-period> {set choice 66}" );
 cmd( "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m postcascade 0}" );
-cmd( "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}}" );
-cmd( "if {\"$tcl_platform(platform)\" == \"unix\"} {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}}" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}}" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}}" );
 cmd( "if { [ string equal $tcl_platform(platform) unix ] && ! [ string equal $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
 
 cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
@@ -774,7 +779,7 @@ while( ! choice )
 	{
 		Tcl_DoOneEvent( 0 );
 	}
-	catch ( std::bad_alloc& ) 	// raise memory problems
+	catch ( bad_alloc& ) 	// raise memory problems
 	{
 		throw;
 	}
@@ -794,17 +799,14 @@ cmd( "if [ string compare $before $after ] { set tosave 1 } { set tosave 0 }" );
 if ( tosave && ( choice==2 || choice==15 || choice==1 || choice==13 || choice==14 || choice==6 || choice==8 || choice==3 || choice==33 || choice==5 || choice==39 || choice==41 || choice==71 ) )
 {
 
-  cmd( "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save File?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]" );
-  cmd( " if { $answer == yes} {set curfile [file join \"$dirname\" \"$filename\"]; set file [open \"$curfile\" w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]} {if [string equal $answer cancel] {set choice 0} {}}" );  
+  cmd( "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]" );
+  cmd( " if { $answer == yes} {set curfile [file join \"$dirname\" \"$filename\"]; set file [open \"$curfile\" w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]; wm title . \" $filename - LMM\"} {if [string equal $answer cancel] {set choice 0} {}}" );  
   if(choice==0)
-  goto loop;
-
+	goto loop;
 }
-
   
 if(choice==1)
   return 0;
-
 
 if ( choice == 2 || choice == 6 )
  {
@@ -898,7 +900,7 @@ if(s==NULL || !strcmp(s, ""))
   cmd( "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set choice 0 } { set choice 1 }" );
   if(choice==1)
   {
-	cmd( "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}" );  
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set add_exe \".exe\" } { set add_exe \"\" }" );  
     cmd( "set funtime [file mtime \"$fname\"]" );
     cmd( "if { [file exist \"%s$add_exe\"] } { set exectime [file mtime \"%s$add_exe\"] } { set exectime \"$init_time\"}", str + 7, str + 7 );
   
@@ -916,15 +918,11 @@ if(s==NULL || !strcmp(s, ""))
 	if ( run )
     {//no problem
      strcpy(str1, str+7);
-      cmd( "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {if {$tcl_platform(os) == \"Windows NT\"} {if {$tcl_platform(osVersion) == \"4.0\"} {set choice 4} {set choice 2}} {set choice 3}}" );
+      cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
       if(choice==1) //unix
        cmd( "catch { exec ./%s & } result",str1 );
       if(choice==2) //win2k, XP, 7, 8, 10...
        cmd( "catch { exec %s.exe & } result", str1 ); //Changed
-      if(choice==3) //win 95/98
-       cmd( "catch { exec start %s.exe & } result", str1 );
-      if(choice==4)  //win NT
-       cmd( "catch { exec cmd /c start %s.exe & } result", str1 );
      } 
 	 
  end_run:
@@ -1336,12 +1334,13 @@ cmd( "cd \"$modeldir\"" );
 if(choice==58)
  {
  cmd( "scan $vmenuInsert %%d.%%d line col" );
- cmd( "catch { set f [open break.txt w]; puts $f \"break $filename:$line\nrun\n\"; close $f }" );
- cmd( "set cmdbreak \"--command=break.txt\"" );
+ cmd( "if [ string equal $tcl_platform(os) Darwin ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
+ cmd( "catch { set f [open break.$breakExt w]; puts $f $breakTxt; close $f }" );
  
+ cmd( "if [ string equal $tcl_platform(os) Darwin ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
  }
 else
- cmd( "set cmdbreak \"--args\"" ); 
+ cmd( "if [ string equal $tcl_platform(os) Darwin ] { set cmdbreak \"\" } { set cmdbreak \"--args\" }" ); 
 
 make_makefile();  
 cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
@@ -1363,12 +1362,16 @@ if(strncmp(str, "TARGET=", 7)!=0)
 
 strcpy(str1, str+7);
 
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
 if(choice==1)
  {//Unix
   sprintf( msg, "catch { exec $Terminal -e gdb $cmdbreak %s & } result", str1);
  }
 if(choice==2)
+ {//Mac
+  sprintf( msg, "catch { exec osascript -e \"tell application \\\"Terminal\\\" to do script \\\"cd $dirname; clear; lldb $cmdbreak -f%s\\\"\" & } result", str1 );
+ }
+if(choice==3)
  {//Windows 2000, XP, 7, 8, 10...
   strcat( str1, ".exe" );
   sprintf( msg, "catch { exec $Terminal /c gdb $cmdbreak %s & } result", str1);
@@ -4151,7 +4154,7 @@ if(choice==57)
 {
 //launch tkdiff
 
-cmd( "if {$tcl_platform(platform) == \"unix\"} {if {$tcl_platform(os) == \"Darwin\" } {set choice 1} {set choice 1} } {set choice 2}" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
 if(choice==1) //unix
  cmd( "exec $wish $LsdSrc/tkdiff.tcl &" );
 if(choice==2) //win2k, xp,..., 10
@@ -4375,7 +4378,7 @@ if(choice==-1)
 
  }
  
-cmd( "if {$tcl_platform(platform) == \"unix\"} {set choice 1} {set choice 2}" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set choice 1 } { set choice 2 }" );
 if(choice==1) //unix
  cmd( "exec $wish src/tkdiff.tcl [file join \"$d1\" \"$f1\"] [file join \"$d2\" \"$f2\"] &" );
 if(choice==2) //win2k, xp, ...,10
@@ -4472,7 +4475,7 @@ cmd( "destroytop .t" );
 cmd( "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set choice 0 } { set choice 1 }" );
 if(choice==1)
 {
-  cmd( "if { $tcl_platform(platform) == \"windows\"} {set add_exe \".exe\"} {set add_exe \"\"}" );
+  cmd( "if [ string equal $tcl_platform(platform) windows ] { set add_exe \".exe\" } { set add_exe \"\" }" );
   cmd( "set funtime [file mtime \"$fname\"]" );
   cmd( "if { [file exist \"%s$add_exe\"] == 1 } {set exectime [file mtime \"%s$add_exe\"]} {set exectime $init_time}", str+7,str+7 );
   cmd( "if {$init_time < $exectime } {set choice 0} { }" );

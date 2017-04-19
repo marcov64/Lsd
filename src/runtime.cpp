@@ -68,7 +68,7 @@ double ymax;
 double *old_val;
 double plot_step;
 int shift=20;					// new window shift
-variable **list;
+variable **list_var;
 
 
 /**************************************
@@ -88,7 +88,7 @@ count(r, &i);
 if(i==0)
   return;
 tp=new char*[i];
-list=new variable*[i];
+list_var=new variable*[i];
 old_val=new double[i];
 i=0;
 assign(r, &i, lab);
@@ -130,7 +130,7 @@ bridge *cb;
 for(a=r->v; a!=NULL; a=a->next)
  if(a->plot==1)
 	{
-	 list[*i]=a; //assigns the address of a to the list to plot
+	 list_var[*i]=a; //assigns the address of a to the list to plot
 	 sprintf(msg, "%s%s",a->label, lab);
 	 tp[*i]=new char[strlen(msg)+1];
 	 strcpy(tp[*i], msg);

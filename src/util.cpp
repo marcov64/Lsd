@@ -302,6 +302,7 @@ if(a<b)
 return(b);
 }
 
+
 // function redefinitions to handle GCC standard library bugs
 bool is_finite( double x )
 {

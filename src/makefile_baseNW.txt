@@ -1,7 +1,9 @@
-#CORRECTIONS: need to reset these variables to allow for no window version
+# CORRECTIONS: need to reset these variables to allow for no window version
+CC=g++
 SRC_DIR=$(SRC)/
 LSDROOT=.
 INCLUDE=-I$(PATH_HEADER) -I$(SRC)
+LIBS_NW=$(LIBS) -lpthread
 SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3
 TARGET_NW=$(TARGET)NW
 
@@ -10,7 +12,7 @@ $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.o
 $(SRC_DIR)nets.obj
 	$(CC) $(SWITCH_CC_NW) $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
 	$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
-	$(SRC_DIR)nets.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS) -o $(TARGET_NW)
+	$(SRC_DIR)nets.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
 
 $(SRC_DIR)file.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp \
 $(SRC_DIR)decl.h

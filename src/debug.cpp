@@ -281,7 +281,7 @@ while( ! choice )
 	{
 		Tcl_DoOneEvent( 0 );
 	}
-	catch ( std::bad_alloc& ) 	// raise memory problems
+	catch ( bad_alloc& ) 	// raise memory problems
 	{
 		throw;
 	}
