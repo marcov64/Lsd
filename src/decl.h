@@ -333,6 +333,7 @@ struct sense
 	double *v;
 	sense *next;
 	bool entryOk;					// flag valid data entered
+	bool integer;					// integer element
 };
 
 // design of experiment object
@@ -341,6 +342,7 @@ struct design
 	int typ, tab, n, k, *par, *lag;	// experiment parameters
 	double *hi, *lo, **ptr; 
 	char **lab;
+	bool *intg;
 
 	design( sense *rsens, int typ = 1, char const *fname = "", int findex = 1, 
 			int samples = 0, int factors = 0, int jump = 2, int trajs = 4 );	// constructor

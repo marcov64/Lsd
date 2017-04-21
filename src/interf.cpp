@@ -4470,8 +4470,21 @@ case 64:
 		cs->label=new char[strlen(lab)+1];  // save element name
 		strcpy(cs->label,lab);
 		// get lags and # of values to test
-		if(!fscanf(f, "%d %d:", &cs->lag, &cs->nvalues))
+		if ( fscanf( f, "%d %d ", &cs->lag, &cs->nvalues ) < 2 )
 			goto error64;
+		// get variable type (newer versions)
+		if ( fscanf( f, "%c ", &cc ) < 1 )
+			goto error64;
+		if ( cc == 'i' || cc == 'd' || cc == 'f' )
+		{
+			cs->integer = ( cc == 'i' ) ? true : false;
+			fscanf( f, ": " ); 			// remove separator
+		}
+		else
+			if ( cc == ':' )
+				cs->integer = false;
+			else
+				goto error64;				
 		
 		if(cs->lag==0)						// adjust type and lag #
 			cs->param=1;
@@ -4485,6 +4498,9 @@ case 64:
 		for (i=0; i < cs->nvalues; i++)
 			if(!fscanf(f, "%lf", &cs->v[i]))
 				goto error64;
+			else
+				if ( cs->integer )
+					cs->v[ i ] = round( cs->v[ i ] );
 	}	
 	fclose(f);
 	break;
@@ -4537,9 +4553,9 @@ case 65:
 	for(cs=rsense; cs!=NULL; cs=cs->next)
 	{
 		if(cs->param==1)
-			fprintf(f, "%s 0 %d:", cs->label, cs->nvalues);	
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );	
 		else
-			fprintf(f, "%s -%d %d:", cs->label, cs->lag+1, cs->nvalues);
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag+1, cs->nvalues, cs->integer ? 'i' : 'f' );
 		for(i=0; i<cs->nvalues; i++)
 			fprintf(f," %g", cs->v[i]);
 		fprintf(f,"\n");
@@ -4564,9 +4580,9 @@ case 66:
 	for(cs=rsense; cs!=NULL; cs=cs->next)
 	{
 		if(cs->param==1)
-			plog( "Param: %s\t#%d:\t", "", cs->label, cs->nvalues );
+			plog( "Param: %s\\[%s\\]\t#%d:\t", "", cs->label, cs->integer ? "int" : "flt", cs->nvalues );
 		else
-			plog( "Var: %s(-%d)\t#%d:\t", "", cs->label, cs->lag+1, cs->nvalues );
+			plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", "", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->nvalues );
 
 		for(i=0; i<cs->nvalues; i++)
 			plog( "%g\t", "highlight", cs->v[i] );

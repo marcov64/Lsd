@@ -1043,12 +1043,14 @@ int num_sensitivity_variables( sense *rsens )
 void dataentry_sensitivity(int *choice, sense *s, int nval = 0)
 {
 
-int i, nPar, samples;
+int i, j, nPar, samples, integerV;
 double start, end;
 char *lab, *sss = NULL, *tok = NULL, type;
 FILE *f;
 
-*choice=0;
+Tcl_LinkVar( inter, "integerV", (char *) &integerV, TCL_LINK_BOOLEAN );
+integerV = s->entryOk ? s->integer : false;
+
 cmd( "set sens .sens" );
 cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
 
@@ -1064,14 +1066,15 @@ cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
 cmd( "pack .sens.lab .sens.obs -pady 5" );
 
-cmd( "text .sens.t -height 12 -width 70" ); 
+cmd( "text .sens.t -height 12 -width 60" ); 
 cmd( "pack .sens.t" ); 
 
 cmd( "frame .sens.fb" );
 cmd( "button .sens.fb.paste -width -9 -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
 cmd( "button .sens.fb.del -width -9 -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
 cmd( "button .sens.fb.rem -width -9 -text \"Remove from Analysis\" -command {set choice 3}" );
-cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem -padx 10 -pady 10 -side left" );
+cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
+cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
 cmd( "pack .sens.fb" );
 
 cmd( "okcancel .sens fb2 { set choice 1 } { set choice 2 }" );
@@ -1096,6 +1099,8 @@ if ( s->entryOk )	// is there valid data from a previous data entry?
 
 cmd( "showtop .sens topleftW" );
 
+*choice=0;
+
 do			// finish only after reading all values
 {
 
@@ -1109,10 +1114,7 @@ if ( *choice == 3 )	// force error to delete variable from list
 }
 
 if(*choice==2)
- {
-  cmd( "destroytop .sens" );
-  return; 
- }
+	goto end;
 
 cmd( "set sss [.sens.t get 0.0 end]" );
 sss=(char*)Tcl_GetVar(inter,"sss",0);
@@ -1171,23 +1173,36 @@ for(i=0; i<s->nvalues;)
   {
 	if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
 	{
-		s->v[ i++ ] = fmin( start, end );
+		s->v[ i++ ] = integerV ? round( fmin( start, end ) ) : fmin( start, end );
 		for ( int j = 1; j < samples; ++j, ++i )
+		{
 			s->v[ i ] = s->v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
+			s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+		}
 	}
 	if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
 		for ( int j = 0; j < samples; ++j, ++i )
+		{
 			s->v[ i ] = fmin( start, end ) + RND * ( fmax( start, end ) - fmin( start, end ) );
+			s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+		}
   }
   else											// no, read as regular double float
+  {
+	j = i;
 	i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
+	s->v[ j ] = integerV ? round( s->v[ j ] ) : s->v[ j ];
+  }
  }
 }
 while( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
-	
-s->entryOk = true;	// flag valid data
 
+s->integer = integerV;			// save integer restriction flag
+s->entryOk = true;				// flag valid data
+
+end:
 cmd( "destroytop .sens" );
+Tcl_UnlinkVar( inter, "integerV" );
 }
 
 
@@ -2275,6 +2290,7 @@ design::~design( void )
 	delete [] lo; 
 	delete [] par; 
 	delete [] lag;
+	delete [] intg;
 }
 
 // Constructor function to the design object
@@ -2344,6 +2360,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value)
 			lag = new int[ k ];				// vector of lags
+			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
 			lo = new double[ k ];			// vector of low factor value
 			lab = new char *[ k ];			// vector of variable labels
@@ -2362,6 +2379,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
 				
+				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
@@ -2394,6 +2412,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value)
 			lag = new int[ k ];				// vector of lags
+			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
 			lo = new double[ k ];			// vector of low factor value
 			lab = new char *[ k ];			// vector of variable labels
@@ -2412,6 +2431,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
 				
+				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
@@ -2442,6 +2462,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			// allocate memory for data
 			par = new int[ k ];				// vector of variable type (parameter / lagged value)
 			lag = new int[ k ];				// vector of lags
+			intg = new bool[ k ];			// vector of format (integer/float)
 			hi = new double[ k ];			// vector of high factor value
 			lo = new double[ k ];			// vector of low factor value
 			lab = new char *[ k ];			// vector of variable labels
@@ -2465,6 +2486,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 					lo[ i ] = fmin( cs->v[ j ], lo[ i ] );
 				}
 				
+				intg[ i ] = cs->integer;	// set variable format
 				par[ i ] = cs->param;		// set variable type
 				lag[ i ] = cs->lag;			// set number of lags
 				
@@ -2497,6 +2519,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			typ = tab = n = k = 0;
 			par = lag = NULL;
 			hi = lo = NULL;
+			intg = NULL;
 			ptr = NULL;
 			lab = NULL;
 			return;
@@ -2525,7 +2548,13 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 		
 	for ( i = 0; i < n; i++ )		// for all experiments
 		for ( j = 0; j < k; j++ )	// write variable experimental values
+		{
+			// round to integer if necessary
+			if ( intg[ j ] )
+				ptr[ i ][ j ] = round( ptr[ i ][ j ] );
+			
 			fprintf( f, "%lf%c", ptr[ i ][ j ], ( j == ( k - 1 ) ? '\n' : ',' ) );
+		}
 			
 	fclose( f );
 	
