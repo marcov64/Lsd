@@ -2957,7 +2957,7 @@ if ( ! struct_loaded )
 cmd( "set res %s", equation_name );
 
 cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]]" );
-cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" }" );
+cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
 if ( lab1 == NULL || strlen ( lab1 ) == 0 )
