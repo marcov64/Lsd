@@ -401,21 +401,22 @@ for ( i = 0; i < len; ++i )
 		lsdroot[ i ] = '/';
 cmd( "set RootLsd \"%s\"", lsdroot );
 
-cmd( "set choice [file exist $RootLsd/lmm_options.txt]" );
+cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
 if ( choice )
- {
-  cmd( "set f [open $RootLsd/lmm_options.txt r]" );
-  cmd( "gets $f Terminal" );
-  cmd( "gets $f HtmlBrowser" );
-  cmd( "gets $f fonttype" );
-  cmd( "gets $f wish" );
-  cmd( "gets $f LsdSrc" );
-  cmd( "close $f" );
- }
+{
+	cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
+	cmd( "gets $f Terminal" );
+	cmd( "gets $f HtmlBrowser" );
+	cmd( "gets $f fonttype" );
+	cmd( "gets $f wish" );
+	cmd( "gets $f LsdSrc" );
+	cmd( "gets $f dim_character" );
+	cmd( "gets $f tabsize" );
+	cmd( "close $f" );
+	cmd( "set small_character [ expr $dim_character - 2 ]" );
+}
 else
- { 
-  cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the system options in menu File.\"" );
- }
+  cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
 
 choice = 0;
 // load native Tk windows defaults
@@ -1016,7 +1017,7 @@ cmd( "set w .log.text" );
 cmd( "frame $w" );
 cmd( "scrollbar $w.scroll -command \"$w.text yview\"" );
 cmd( "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
-cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none" );
+cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -font \"$fonttype $dim_character normal\"" );
 cmd( "$w.text configure -tabs {%s}", tabs  );
 
 // Log window tags

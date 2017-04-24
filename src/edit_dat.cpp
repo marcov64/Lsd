@@ -94,7 +94,6 @@ int set_focus;
 EDIT_DATA
 
 ****************************************************/
-
 void edit_data(object *root, int *choice, char *obj_name)
 {
 char ch[2*MAX_ELEM_LENGTH], *l , ch1[MAX_ELEM_LENGTH];

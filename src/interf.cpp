@@ -931,7 +931,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
+cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -987,7 +987,7 @@ if ( done == 2 )
  {
  cmd( "set text_description [.addelem.d.f.text get 1.0 end]" );
  cmd( "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}" );
- lab1=(char *)Tcl_GetVar(inter, "text_description",0);
+ lab1=(char *)Tcl_GetVar(inter, "text_description", 0);
  if(param==1)
   add_description(lab, "Parameter", lab1);
  if(param==0)
@@ -1085,7 +1085,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
+cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1199,7 +1199,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
+cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1383,7 +1383,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.int -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\"" );
+cmd( "text $w.f.text -wrap word -width 70 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.int $w.f.text -anchor w -expand yes -fill both" );
 
@@ -1679,7 +1679,7 @@ cmd( "frame $Td.f -bd 2 -relief groove" );
 cmd( "label $Td.f.int -text \"Description\"" );
 
 cmd( "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"" );
-cmd( "text $Td.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\"" );
+cmd( "text $Td.f.text -wrap word -width 70 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $Td.f.yscroll -side right -fill y" );
 cmd( "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both" );
 
@@ -1710,7 +1710,7 @@ if(cv->param==1 || cv->num_lag>0)
   cmd( "frame $Td.i -bd 2 -relief groove" );
   cmd( "label $Td.i.int -text \"Comments on initial values\"" );
   cmd( "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"" );
-  cmd( "text $Td.i.text -wrap word -width 60 -height 4 -relief sunken -yscrollcommand \"$Td.i.yscroll set\"" );
+  cmd( "text $Td.i.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$fonttype $small_character normal\"" );
   cmd( "pack $Td.i.yscroll -side right -fill y" );
   if(cur_descr->init!=NULL)
   {

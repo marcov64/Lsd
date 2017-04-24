@@ -423,7 +423,7 @@ case 22:
 	else
 		cmd( "pack $n.l1 $n.l2 $n.l3 $n.l4 $n.l5" );
 	cmd( "pack $n.l6 -anchor w" );
-	cmd( "text $n.t -width 15 -yscrollcommand \"$n.yscroll set\" -wrap word" );
+	cmd( "text $n.t -width 15 -yscrollcommand \"$n.yscroll set\" -wrap word -font \"$fonttype $dim_character normal\"" );
 	cmd( "scrollbar $n.yscroll -command \"$n.t yview\"" );
 	cmd( "pack $n.yscroll -side right -fill y" );
 	cmd( "pack $n.t -expand yes -fill both" );
@@ -933,7 +933,7 @@ cmd( "destroytop $in" );
 
 cmd( "newtop $in \"v\\[...\\]\" { destroytop .deb.val } .deb" ); 
 
-cmd( "text $in.t -width 20 -yscrollcommand \"$in.yscroll set\" -wrap word" ); 
+cmd( "text $in.t -width 20 -height 30 -yscrollcommand \"$in.yscroll set\" -wrap word -font \"$fonttype $dim_character normal\"" ); 
 cmd( "scrollbar $in.yscroll -command \"$in.t yview\"" ); 
 cmd( "pack $in.yscroll -side right -fill y" ); 
 cmd( "pack $in.t -expand yes -fill both" );

@@ -217,7 +217,6 @@ cmd( "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file di
 // check if LSDROOT already exists and use it if so
 cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
 cmd( "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSDROOT) $RootLsd }" );
-cmd( "set groupdir [pwd]" );
 s =  ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 strcpy( rootLsd, s );
 
@@ -237,9 +236,9 @@ cmd( "set small_character [ expr $DefaultFontSize - 2 ]" );
 cmd( "set wish \"$DefaultWish\"" );
 cmd( "set LsdSrc src" );
 
-cmd( "set choice [file exist \"$RootLsd/lmm_options.txt\"]" );
-if(choice==1)
- {
+cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
+if ( choice )
+{
 	cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
 	cmd( "gets $f DbgTerm" );
 	cmd( "gets $f HtmlBrowser" );
@@ -256,7 +255,7 @@ if(choice==1)
 	cmd( "close $f" );
 	// handle old options file
 	cmd( "if {$dim_character == \"\" || $showFileCmds == \"\"} {set choice 0}" );
- }
+}
 // handle non-existent or old options file for new options
 if ( choice != 1 )
  {
@@ -295,10 +294,6 @@ cmd( "set currentdoc \"\"" );
 cmd( "set v_num 0" );
 cmd( "set shigh_temp $shigh" );
 cmd( "set alignMode \"LMM\"" );
-
-// procedures to adjust tab size according to font type and size and text wrapping
-cmd( "proc settab {w size font} { set tabwidth \"[ expr { $size * [ font measure \"$font\" 0 ] } ] left\"; $w conf -font \"$font\" -tabs $tabwidth -tabstyle wordprocessor }" );
-cmd( "proc setwrap {w wrap} { if { $wrap == 1 } { $w conf -wrap word } { $w conf -wrap none } }" );
 
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
@@ -576,7 +571,6 @@ cmd( "proc savCurIni {} {global curSelIni curPosIni; set curSelIni [.f.t.t tag n
 cmd( "proc savCurFin {} {global curSelFin curPosFin; set curSelFin [.f.t.t tag nextrange sel 1.0]; set curPosFin [.f.t.t index insert]; .f.t.t edit modified false}" );
 cmd( "proc updCurWnd {} {.f.hea.line.line conf -text [.f.t.t index insert]}" );
 
-
 // redefine bindings to better support new syntax highlight routine
 cmd( "bind .f.t.t <KeyPress> {savCurIni}" );
 cmd( "bind .f.t.t <KeyRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
@@ -714,9 +708,9 @@ cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
 cmd( "set filename \"noname.txt\"" );
-cmd( "set dirname [pwd]" );
+cmd( "set dirname \"[pwd]\"" );
 cmd( "set modeldir \"[pwd]\"" );
-cmd( "set groupdir [pwd]" );
+cmd( "set groupdir \"[pwd]\"" );
 
 cmd( ".f.t.t tag conf sel -foreground white" );
 cmd( "set before [.f.t.t get 1.0 end]" );
@@ -747,8 +741,7 @@ if(argn>1)
        }
     }
    else
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File\\n$filetoload\\nnot found.\"" );
-   
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File\\n$filetoload\\nnot found.\"" ); 
   }
  else
   choice= 33; 			// open model browser
@@ -1272,15 +1265,29 @@ if(choice==14)
 {
 /* Create a new model/group */
 
-choice=0;
-
 // prevent creating new groups in Lsd directory
 cmd( "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
-				{	set groupdir \"$groupdir/$LsdNew\"; \
-					set f [open \"$groupdir/groupinfo.txt\" r]; \
-					set app \"[gets $f]\"; \
-					close $f; \
-					set modelgroup \"$modelgroup/$app\" }");
+		{	set answer [ tk_messageBox -type okcancel -title Warning -icon warning \
+			-default ok -message \"Invalid parent group\" \
+			-detail \"Cannot create group/model in the Root group. Press 'Ok' to change to the '$LsdNew' group before proceeding.\" ]; \
+			if [ string equal $answer ok ] { \
+				set groupdir \"$groupdir/$LsdNew\"; \
+				set f [open \"$groupdir/groupinfo.txt\" r]; \
+				set app \"[gets $f]\"; \
+				close $f; \
+				if [ string equal \"$modelgroup\" \"$rootname\" ] { \
+					set modelgroup \"$app\" \
+				} else { \
+					set modelgroup \"$modelgroup/$app\" \
+				}; \
+				.f.hea.grp.dat conf -text \"$modelgroup\"; \
+				set choice 1 \
+			} else { \
+				set choice 0 \
+			} \
+		}");		
+if ( choice == 0 )
+	goto loop;
 
 cmd( "set temp 1" );
 
@@ -1305,6 +1312,7 @@ cmd( "bind .a <Down> {.a.f.r2 invoke}" );
 
 cmd( "showtop .a" );
 
+choice=0;
 while(choice==0)
  Tcl_DoOneEvent(0);
 
@@ -1342,7 +1350,7 @@ cmd( "pack .a.mdir.l .a.mdir.e" );
 
 cmd( "frame .a.tdes" );
 cmd( "label .a.tdes.l -text \"Group description\"" );
-cmd( "text .a.tdes.e -width 25 -height 4" );
+cmd( "text .a.tdes.e -width 50 -height 15 -font \"$fonttype $small_character normal\"" );
 cmd( "pack .a.tdes.l .a.tdes.e" );
 
 cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
@@ -1390,10 +1398,9 @@ if(choice==3)
 cmd( "file mkdir \"$groupdir/$mdir\"" );
 cmd( "cd \"$groupdir/$mdir\"" );
 cmd( "set groupdir \"$groupdir/$mdir\"" );
-
 cmd( "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $f" );
 cmd( "set f [open description.txt w]; puts -nonewline $f \"[.a.tdes.e get 0.0 end]\"; close $f" );
-cmd( "set modelgroup $modelgroup/$mname" );
+cmd( "if [ string equal \"$modelgroup\" \"$rootname\" ] { set modelgroup \"$mname\" } { set modelgroup \"$modelgroup/$mname\" }" );
 
 cmd( "destroytop .a" );
 //end of creation of a new group
@@ -3269,7 +3276,7 @@ if(choice==2 || choice==0)
  {choice=0;
   goto loop;
  }
-cmd( "set groupdir [lindex $lrn 0]" ); //the group dir is the same for every element
+cmd( "set groupdir [lindex $lrn 0]" );	//the group dir is the same for every element
 if(choice == 14)
  { //create a new model/group
  goto loop;
@@ -4918,7 +4925,7 @@ void create_compresult_window( bool nw )
 	cmd( "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in Lsd installation directory for information on particular problems.\"" );
 	cmd( "pack .mm.lab" );
 
-	cmd( "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word; scrollbar .mm.yscroll -command \".mm.t yview\"" );
+	cmd( "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word -font \"$fonttype $small_character normal\"; scrollbar .mm.yscroll -command \".mm.t yview\"" );
 	cmd( "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both" );
 
 	cmd( "frame .mm.b" );
@@ -4938,6 +4945,8 @@ void create_compresult_window( bool nw )
 	cmd( "if [ file exists \"$modeldir/makemessage.txt\" ] { set file [open \"$modeldir/makemessage.txt\"]; .mm.t insert end [read $file]; close $file } { .mm.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t mark set insert \"1.0\"" );
 	cmd( "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;}" );
+	
+	cmd( ".mm.t configure -state disabled" );
 }
 
 

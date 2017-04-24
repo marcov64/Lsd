@@ -768,6 +768,20 @@ proc write_disabled { w val } {
 }
 
 
+# procedures to adjust tab size according to font type and size and text wrapping
+proc settab { w size font } { 
+	set tabwidth "[ expr { $size * [ font measure "$font" 0 ] } ] left"
+	$w conf -font "$font" -tabs $tabwidth -tabstyle wordprocessor 
+}
+
+proc setwrap { w wrap } { 
+	if { $wrap == 1 } { 
+		$w conf -wrap word 
+	} else { 
+		$w conf -wrap none } 
+}
+
+
 # bind the mouse wheel to the y scrollbar
 proc mouse_wheel { w } {
 	global tcl_platform sfmwheel winmwscale
