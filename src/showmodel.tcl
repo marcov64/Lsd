@@ -14,19 +14,13 @@
 set rootname "Root"
 set modelgroup "$rootname"
 set upsym "\u21E7.."
+set grpsym "GROUP: "
 set result 0
 set memory 0
-
-lappend lmn
-lappend lver
-lappend lmd
-lappend ldn
-lappend lrn
-lappend lbn
-lappend group
+set ltip ""
 
 proc showmodel pippo {
-	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upsym RootLsd memory fonttype small_character
+	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upsym grpsym RootLsd memory ltip fonttype small_character bRlf ovBrlf
 
 	unset -nocomplain lmn lver lmd ldn lrn lbn group
 	lappend lmn
@@ -40,39 +34,204 @@ proc showmodel pippo {
 	set choiceSM 0
 
 	if [ winfo exists .l ] {
-		destroy .l.l .l.t
-		set menuOk 1
+		.l.l.l delete 0 end
+		.l.t.text conf -state normal
+		.l.t.text delete 1.0 end
 	} else { 
 		newtop .l "Lsd Model Browser" { .l.m.file invoke 2 }
-		set menuOk 0
+		
+		menu .l.m -tearoff 0 -relief groove -bd 2
+		
+		set m .l.m.file 
+		menu $m -tearoff 0
+		.l.m add cascade -label File -menu $m -underline 0
+		$m add command -label "Select Model" -underline 0 -accelerator Enter -command {
+			set result [.l.l.l curselection]
+			if { [lindex $group $result] == 1 } { 
+				set modelgroup "[lindex $lmn $result]"
+				showmodel [lindex $ldn $result]
+			} else { 
+				set choiceSM 1
+				destroytop .l
+			} 
+		}
+		$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { 
+			destroytop .l
+			set memory 0
+			set choiceSM 14
+		} 
+		$m add command -label Quit -underline 0 -accelerator Escape -command {
+			set result -1
+			destroytop .l
+			set memory 0
+			set choiceSM 2 
+		}
+
+		set m .l.m.edit 
+		menu $m -tearoff 0 -relief groove -bd 2
+		.l.m add cascade -label Edit -menu $m -underline 0
+		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
+			edit [.l.l.l curselection] 
+		}
+		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
+			copy [.l.l.l curselection] 
+		}
+		if { $memory == 0 } {
+			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
+				paste [.l.l.l curselection] 
+			} 
+		} else {
+			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
+				paste [.l.l.l curselection] 
+			} 
+		}
+		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
+			delete [.l.l.l curselection] 
+		}
+
+		set m .l.m.help 
+		menu $m -tearoff 0 -relief groove -bd 2
+		.l.m add cascade -label Help -menu $m -underline 0
+		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
+			LsdHelp LMM_help.html#select 
+		}
+		$m add separator
+		$m add command -label "About Lsd..." -underline 0 -command { 
+			tk_messageBox -parent .l -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" 
+			}
+
+		.l configure -menu .l.m
+
+		frame .l.bbar -bd 2
+		button .l.bbar.new -image newImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.file invoke 1 }
+		button .l.bbar.edit -image editImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.edit invoke 0 }
+		button .l.bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.edit invoke 1 }
+		button .l.bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.edit invoke 2 }
+		button .l.bbar.delete -image deleteImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.edit invoke 3 }
+		button .l.bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command { .l.m.help invoke 0 }
+		label .l.bbar.tip -textvariable ltip -font {Arial 8} -fg gray -width 30 -anchor w
+		bind .l.bbar.new <Enter> { set ltip "New model/group..." }
+		bind .l.bbar.new <Leave> { set ltip "" }
+		bind .l.bbar.edit <Enter> { set ltip "Edit name/description..." }
+		bind .l.bbar.edit <Leave> { set ltip "" }
+		bind .l.bbar.copy <Enter> { set ltip "Copy" }
+		bind .l.bbar.copy <Leave> { set ltip "" }
+		bind .l.bbar.paste <Enter> { set ltip "Paste" }
+		bind .l.bbar.paste <Leave> { set ltip "" }
+		bind .l.bbar.delete <Enter> { set ltip "Delete..." }
+		bind .l.bbar.delete <Leave> { set ltip "" }
+		bind .l.bbar.help <Enter> { set ltip "Help" }
+		bind .l.bbar.help <Leave> { set ltip "" }
+		pack .l.bbar.new .l.bbar.edit .l.bbar.copy .l.bbar.paste .l.bbar.delete .l.bbar.help .l.bbar.tip -padx 3 -side left
+		pack .l.bbar -anchor w -fill x
+		
+		frame .l.l -relief groove -bd 2
+
+		frame .l.l.tit
+		label .l.l.tit.g -text "Group:"
+		label .l.l.tit.n -fg red
+		pack .l.l.tit.g .l.l.tit.n -side left
+
+		pack .l.l.tit
+
+		scrollbar .l.l.vs -command ".l.l.l yview"
+		listbox .l.l.l -height 15 -width 30 -yscroll ".l.l.vs set" -selectmode single
+		mouse_wheel .l.l.l
+		pack .l.l.vs -side right -fill y
+		pack .l.l.l -expand yes -fill both
+		
+		menu .l.l.l.m -tearoff 0
+		.l.l.l.m  add command -label Select -command { .l.m.file invoke 0 }
+		.l.l.l.m  add command -label New -command { .l.m.file invoke 1 }
+		.l.l.l.m  add separator
+		.l.l.l.m  add command -label Edit -command { .l.m.edit invoke 0 }
+		.l.l.l.m  add command -label Copy -command { .l.m.edit invoke 1 }
+		.l.l.l.m  add command -label Paste -state disabled -command { .l.m.edit invoke 2 }
+		.l.l.l.m  add command -label Delete -command { .l.m.edit invoke 3 }
+
+		frame .l.t -relief groove -bd 2
+		label .l.t.tit -text Description
+		pack .l.t.tit -expand yes -fill x
+		scrollbar .l.t.yscroll -command ".l.t.text yview"
+		text .l.t.text -wrap word -font "$fonttype $small_character normal" -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
+		pack .l.t.yscroll -side right -fill y
+		pack .l.t.text -expand yes -fill both
+
+		pack .l.l .l.t -expand yes -fill both -side left
+		
+		bind .l <F1> {.l.m.help invoke 0}
+		bind .l <Control-e> {.l.m.edit invoke 0}
+		bind .l <Control-E> {.l.m.edit invoke 0}
+		bind .l <Control-c> {.l.m.edit invoke 1}
+		bind .l <Control-C> {.l.m.edit invoke 1}
+		bind .l <Control-v> {.l.m.edit invoke 2}
+		bind .l <Control-V> {.l.m.edit invoke 2}
+		bind .l <Delete> {.l.m.edit invoke 3}
+		bind .l <Escape> {.l.m.file invoke 2}
+		bind .l <Insert> {.l.m.file invoke 1}
+		bind .l <Return> {.l.m.file invoke 0}
+		bind .l.l.l <Double-1> {.l.m.file invoke 0} 
+
+		bind .l.l.l <1> {
+			.l.l.l selection clear 0 end
+			.l.l.l selection set [.l.l.l nearest %y]
+			set app [.l.l.l curselection]
+			.l.t.text conf -state normal
+			.l.t.text delete 0.0 end
+			.l.t.text insert end "[lindex $lmd $app ]"
+			.l.t.text conf -state disable
+		}
+		bind .l.l.l <2> {
+			.l.l.l selection clear 0 end
+			.l.l.l selection set [ .l.l.l nearest %y ]
+			if { ! [ catch { set name [ selection get ] } ] } {
+				if { [ string equal -length [ string length "$grpsym" ] $name "$grpsym" ] || [ string equal -length [ string length "$upsym" ] $name "$upsym" ] } {
+					.l.l.l.m entryconf 4 -state disabled
+				} else {
+					.l.l.l.m entryconf 4 -state normal
+				}
+			} else {
+				.l.l.l.m entryconf 4 -state disabled
+			}
+			if $memory {
+				.l.l.l.m entryconf 5 -state normal
+			} else {
+				.l.l.l.m entryconf 5 -state disabled
+			}
+			tk_popup .l.l.l.m %X %Y
+		}
+		bind .l.l.l <3> {
+			event generate .l.l.l <2> -x %x -y %y 
+		}
+		bind .l <Up> {
+			if { [.l.l.l curselection] > 0 } {
+				set app [expr [.l.l.l curselection] - 1]
+				.l.l.l selection clear 0 end
+				.l.l.l selection set $app
+				.l.t.text conf -state normal
+				.l.t.text delete 0.0 end
+				.l.t.text insert end "[lindex $lmd $app ]"
+				.l.t.text conf -state disable 
+			} 
+		}
+
+		bind .l <Down> {
+			if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {
+				set app [expr [.l.l.l curselection] + 1]
+				.l.l.l selection clear 0 end
+				.l.l.l selection set $app
+				.l.t.text conf -state normal
+				.l.t.text delete 0.0 end
+				.l.t.text insert end "[lindex $lmd $app ]"
+				.l.t.text conf -state disable
+			} 
+		}
+		
+		# call procedure to adjust geometry and block lmm window, if fresh new window
+		showtop .l centerS
 	}
 
-	frame .l.l -relief groove -bd 2
-
-	frame .l.l.tit
-	label .l.l.tit.g -text "Group:"
-	label .l.l.tit.n -text "$modelgroup" -fg red
-	pack .l.l.tit.g .l.l.tit.n -side left
-
-	pack .l.l.tit
-
-	scrollbar .l.l.vs -command ".l.l.l yview"
-	listbox .l.l.l -height 12 -width 30 -yscroll ".l.l.vs set" -selectmode single
-	mouse_wheel .l.l.l
-	pack .l.l.vs -side right -fill y
-	pack .l.l.l -expand yes -fill both
-
-	frame .l.t -relief groove -bd 2
-	label .l.t.tit -text Description
-	pack .l.t.tit -expand yes -fill x
-	scrollbar .l.t.yscroll -command ".l.t.text yview"
-	text .l.t.text -wrap word -font "$fonttype $small_character normal" -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set" -state disable
-	pack .l.t.yscroll -side right -fill y
-	pack .l.t.text -expand yes -fill both
-
-	pack .l.l .l.t -expand yes -fill both -side left
-
-	bind .l.l.l <1> {.l.l.l selection set [.l.l.l nearest %y]; .l.t.text delete 0.0 end; .l.t.text insert end "[lindex $lmd [.l.l.l nearest %y] ]"}
+	.l.l.tit.n conf -text "$modelgroup"
 
 	set curdir [pwd]
 	if { ! [ file isdirectory "$pippo" ] } {
@@ -141,130 +300,19 @@ proc showmodel pippo {
 						lappend lmd "Group directory: $app\n(description not available)"
 					}
 					lappend group 1
-					.l.l.l insert end "GROUP: $app"
+					.l.l.l insert end "$grpsym$app"
 				}
 			}
 		}
 	}
 
-	.l.t.text conf -state normal
 	.l.t.text insert end "[lindex $lmd 0]"
 	.l.t.text conf -state disable
 	.l.l.l selection set 0
 
 	cd $curdir
-
-	if { ! $menuOk } { # only redraw menu/window if needed
-		menu .l.m -tearoff 0 -relief groove -bd 2
-		
-		set m .l.m.file 
-		menu $m -tearoff 0
-		.l.m add cascade -label File -menu $m -underline 0
-		$m add command -label "Select Model" -underline 0 -accelerator Enter -command {
-			set result [.l.l.l curselection]
-			if { [lindex $group $result] == 1 } { 
-				set modelgroup "[lindex $lmn $result]"
-				showmodel [lindex $ldn $result]
-			} else { 
-				set choiceSM 1
-				destroytop .l
-			} 
-		}
-		$m add command -label "New Model/Group..." -underline 0  -accelerator Insert -command { 
-			destroytop .l
-			set memory 0
-			set choiceSM 14
-		} 
-		$m add command -label Quit -underline 0 -accelerator Escape -command {
-			set result -1
-			destroytop .l
-			set memory 0
-			set choiceSM 2 
-		}
-
-		set m .l.m.edit 
-		menu $m -tearoff 0 -relief groove -bd 2
-		.l.m add cascade -label Edit -menu $m -underline 0
-		$m add command -label "Edit Name/Description..." -underline 0 -command {
-			edit [.l.l.l curselection] 
-		}
-		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
-			copy [.l.l.l curselection] 
-		}
-		if { $memory == 0 } {
-			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
-				paste [.l.l.l curselection] 
-			} 
-		} else {
-			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
-				paste [.l.l.l curselection] 
-			} 
-		}
-		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
-			delete [.l.l.l curselection] 
-		}
-
-		set m .l.m.help 
-		menu $m -tearoff 0 -relief groove -bd 2
-		.l.m add cascade -label Help -menu $m -underline 0
-		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
-			LsdHelp LMM_help.html#select 
-		}
-		$m add separator
-		$m add command -label "About Lsd..." -underline 0 -command { 
-			tk_messageBox -parent .l -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" 
-			}
-
-		.l configure -menu .l.m
-
-		# call procedure to adjust geometry and block lmm window, if fresh new window
-		showtop .l centerS
-	}
-
-	bind .l <F1> {.l.m.help invoke 0}
-	bind .l <Control-c> {.l.m.edit invoke 1}
-	bind .l <Control-C> {.l.m.edit invoke 1}
-	bind .l <Control-v> {.l.m.edit invoke 2}
-	bind .l <Control-V> {.l.m.edit invoke 2}
-	bind .l <Delete> {.l.m.edit invoke 3}
-	bind .l <Escape> {.l.m.file invoke 2}
-	bind .l <Insert> {.l.m.file invoke 1}
-	bind .l <Return> {.l.m.file invoke 0}
-	bind .l.l.l <Double-1> {.l.m.file invoke 0} 
-
-	bind .l.l.l <1> {
-		.l.l.l selection clear 0 end
-		.l.l.l selection set [.l.l.l nearest %y]
-		set app [.l.l.l curselection]
-		.l.t.text conf -state normal
-		.l.t.text delete 0.0 end
-		.l.t.text insert end "[lindex $lmd $app ]"
-		.l.t.text conf -state disable
-	}
-
-	bind .l <Up> {
-		if { [.l.l.l curselection] > 0 } {
-			set app [expr [.l.l.l curselection] - 1]
-			.l.l.l selection clear 0 end
-			.l.l.l selection set $app
-			.l.t.text conf -state normal
-			.l.t.text delete 0.0 end
-			.l.t.text insert end "[lindex $lmd $app ]"
-			.l.t.text conf -state disable 
-		} 
-	}
-
-	bind .l <Down> {
-		if { [.l.l.l curselection] < [expr [.l.l.l size] - 1] } {
-			set app [expr [.l.l.l curselection] + 1]
-			.l.l.l selection clear 0 end
-			.l.l.l selection set $app
-			.l.t.text conf -state normal
-			.l.t.text delete 0.0 end
-			.l.t.text insert end "[lindex $lmd $app ]"
-			.l.t.text conf -state disable
-		} 
-	}
+	
+	update
 }
 
 
@@ -275,10 +323,9 @@ proc copy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
 	
 	if { [lindex $group $i] == 1  } {
-		tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again" 
+		tk_messageBox -parent .l -title Error -type ok -icon error -message "Cannot copy groups" -detail "Check for existing names and try again." 
 	} else {
 		set memory 1
-
 		.l.m.edit entryconf 2 -state normal
 
 		set copylabel [lindex $lmn $i]
@@ -337,10 +384,11 @@ proc delete i {
 # Edit the model/group name and description
 ################################
 proc edit i {
-	global lrn ldn lmn group lmd result memory
+	global lrn ldn lmn group lmd result memory fonttype small_character
 
-	.l.m.edit entryconf 2 -state disabled
 	set memory 0
+	.l.m.edit entryconf 2 -state disabled
+	
 	set result $i
 	set app "[lindex $lmn $i]"
 	if { [lindex $group $i] == 1} {
@@ -366,7 +414,7 @@ proc edit i {
 	label .l.e.t.l -text "Description"
 	frame .l.e.t.t
 	scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
-	text .l.e.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.e.t.t.yscroll set"
+	text .l.e.t.t.text -wrap word -width 60 -height 20 -font "$fonttype $small_character normal" -yscrollcommand ".l.e.t.t.yscroll set"
 	.l.e.t.t.text insert end "[lindex $lmd $i]"
 	pack .l.e.t.t.yscroll -side right -fill y
 	pack .l.e.t.t.text
@@ -408,11 +456,11 @@ proc edit i {
 # Paste a previously copied model/group
 ################################
 proc paste i {
-	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM
+	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM fonttype small_character
 
 	set pastedir [lindex $lrn $i]
 
-	newtop .l.p "Paste Model" { .l.b.can invoke }
+	newtop .l.p "Paste Model" { set choiceSM 2 }
 
 	frame .l.p.tit
 
@@ -451,7 +499,7 @@ proc paste i {
 
 	frame .l.p.t.t
 	scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
-	text .l.p.t.t.text -wrap word -width 60 -height 20 -yscrollcommand ".l.p.t.t.yscroll set"
+	text .l.p.t.t.text -wrap word -width 60 -height 20 -font "$fonttype $small_character normal" -yscrollcommand ".l.p.t.t.yscroll set"
 	.l.p.t.t.text insert end "$copydscr"
 	pack .l.p.t.t.yscroll -side right -fill y
 	pack .l.p.t.t.text
@@ -460,6 +508,7 @@ proc paste i {
 	pack .l.p.tit .l.p.n .l.p.v .l.p.d .l.p.t -padx 5 -pady 5
 
 	okcancel .l.p b { set choiceSM 1 } { set choiceSM 2 }
+	
 	bind .l.p.n.n <Return> { focus .l.p.v.v; .l.p.v.v selection range 0 end }
 	bind .l.p.v.v <Return> { focus .l.p.d.d; .l.p.d.d selection range 0 end }
 	bind .l.p.d.d <Return> { focus .l.p.t.t.text; .l.p.t.t.text mark set insert 1.0 }
@@ -468,9 +517,10 @@ proc paste i {
 	.l.p.n.n selection range 0 end
 	focus .l.p.n.n
 
+	set choiceSM 0
 	tkwait variable choiceSM
-
-	if { ! $choiceSM == 2 } {
+	
+	if { $choiceSM == 1 } {
 		set appd [.l.p.d.d get]
 		set appv [.l.p.v.v get]
 		set appl [.l.p.n.n get]

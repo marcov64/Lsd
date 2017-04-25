@@ -174,8 +174,8 @@ cmd( "newtop $w \"%s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, fname,
 cmd( "frame $w.f" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
 cmd( "scrollbar $w.f.xscroll -orient horiz -command \"$w.f.text xview\"" );
-cmd( "text $w.f.text -font \"$fonttype $dim_character normal\" -wrap none -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
-cmd( "settab $w.f.text $tabsize \"[ list $fonttype $dim_character ]\"" );
+cmd( "text $w.f.text -font \"$fonttype $small_character normal\" -wrap none -tabstyle wordprocessor -yscrollcommand \"$w.f.yscroll set\" -xscrollcommand \"$w.f.xscroll set\"" );
+cmd( "settab $w.f.text $tabsize \"[ list $fonttype $small_character ]\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.xscroll -side bottom -fill x" );
 cmd( "pack $w.f.text -expand yes -fill both" );
@@ -218,8 +218,8 @@ cmd( "bind .eq_%s <F3> { \
 			$W.f.text see $cur1 \
 		} \
 	}", lab, lab );
-cmd( ".eq_%s.f.text tag conf vars -foreground blue4", lab );
 
+cmd( ".eq_%s.f.text tag conf vars -foreground blue4", lab );
 cmd( ".eq_%s.f.text tag conf comment_line -foreground green4", lab );
 cmd( ".eq_%s.f.text tag conf temp_var -foreground red4", lab );
 

@@ -102,7 +102,7 @@ bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_window = false;		// no-window command line job
-bool parallel_mode;			// flag defining if parallel mode (multithreading) is enabled
+bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
 bool redrawRoot = true;		// control for redrawing root window (.)
 bool running = false;		// simulation is running
@@ -142,6 +142,7 @@ int findexSens=0;			// index to sequential sensitivity configuration filenames
 int macro;					// equations style (macros or C++) (bool)
 int max_threads = 1;		// suggested maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
+int parallel_disable = false;// flag to control parallel mode
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
@@ -554,7 +555,13 @@ clock_t start, end;
 
 #ifdef PARALLEL_MODE
 // check if there are parallel computing variables
-parallel_mode = search_parallel( root );
+if ( parallel_disable || max_threads < 2 )
+	parallel_mode = parallel_ready = false;
+else
+{
+	parallel_mode = search_parallel( root );
+	parallel_ready = true;
+}
 
 // start multi-thread workers
 if ( parallel_mode )
@@ -787,7 +794,7 @@ end=clock();
 if(quit==1) 			//For multiple simulation runs you need to reset quit
  quit=0;
 
-plog( "\nSimulation %d finished (%2g sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+plog( "\nSimulation %d finished (%.2g sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 #ifndef NO_WINDOW 
 cmd( "destroytop .deb" );

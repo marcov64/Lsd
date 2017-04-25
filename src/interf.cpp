@@ -230,7 +230,7 @@ cmd( "frame .l.v" );
 
 cmd( "frame .l.v.c" );
 cmd( "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
-cmd( "listbox .l.v.c.var_name -yscroll \".l.v.c.v_scroll set\"" );
+cmd( "listbox .l.v.c.var_name -selectmode browse -yscroll \".l.v.c.v_scroll set\"" );
 
 cmd( "mouse_wheel .l.v.c.var_name" );
 cmd( "bind .l.v.c.var_name <Left> { focus .l.s.c.son_name; set listfocus 2; set itemfocus 0; ; .l.s.c.son_name selection set 0; .l.s.c.son_name activate 0; .l.s.c.son_name see 0 }" );
@@ -401,7 +401,7 @@ cmd( "frame .l.s" );
 
 cmd( "frame .l.s.c" );
 cmd( "scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
-cmd( "listbox .l.s.c.son_name -yscroll \".l.s.c.v_scroll set\"" );
+cmd( "listbox .l.s.c.son_name -selectmode browse -yscroll \".l.s.c.v_scroll set\"" );
 
 cmd( "mouse_wheel .l.s.c.son_name" );
 cmd( "bind .l.s.c.son_name <Right> { focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0; .l.v.c.var_name see 0 }" );
@@ -931,7 +931,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
+cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1085,7 +1085,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
+cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1199,7 +1199,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
+cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1383,7 +1383,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.int -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 70 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
+cmd( "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.int $w.f.text -anchor w -expand yes -fill both" );
 
@@ -1679,7 +1679,7 @@ cmd( "frame $Td.f -bd 2 -relief groove" );
 cmd( "label $Td.f.int -text \"Description\"" );
 
 cmd( "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"" );
-cmd( "text $Td.f.text -wrap word -width 70 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
+cmd( "text $Td.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$fonttype $small_character normal\"" );
 cmd( "pack $Td.f.yscroll -side right -fill y" );
 cmd( "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both" );
 
@@ -1710,7 +1710,7 @@ if(cv->param==1 || cv->num_lag>0)
   cmd( "frame $Td.i -bd 2 -relief groove" );
   cmd( "label $Td.i.int -text \"Comments on initial values\"" );
   cmd( "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"" );
-  cmd( "text $Td.i.text -wrap word -width 70 -height 6 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$fonttype $small_character normal\"" );
+  cmd( "text $Td.i.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$fonttype $small_character normal\"" );
   cmd( "pack $Td.i.yscroll -side right -fill y" );
   if(cur_descr->init!=NULL)
   {
@@ -2768,7 +2768,6 @@ break;
 //Simulation manager: sets seeds, number of steps, number of simulations
 case 22:
 
-*choice=0;
 // save previous values to allow canceling operation
 temp[1] = sim_num; 
 temp[2] = seed; 
@@ -2777,14 +2776,16 @@ temp[4] = when_debug;
 temp[5] = stackinfo_flag;
 temp[6] = prof_min_msecs;
 temp[7] = prof_obs_only;
+temp[8] = parallel_disable;
 
-Tcl_LinkVar(inter, "sim_num", (char *) &sim_num, TCL_LINK_INT);
-Tcl_LinkVar(inter, "seed", (char *) &seed, TCL_LINK_INT);
-Tcl_LinkVar(inter, "max_step", (char *) &max_step, TCL_LINK_INT);
-Tcl_LinkVar(inter, "stack_info", (char *) &stackinfo_flag, TCL_LINK_INT);
-Tcl_LinkVar(inter, "prof_min_msecs", (char *) &prof_min_msecs, TCL_LINK_INT);
-Tcl_LinkVar(inter, "prof_obs_only", (char *) &prof_obs_only, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "prof_aggr_time", (char *) &prof_aggr_time, TCL_LINK_BOOLEAN);
+Tcl_LinkVar( inter, "sim_num", (char *) &sim_num, TCL_LINK_INT );
+Tcl_LinkVar( inter, "seed", (char *) &seed, TCL_LINK_INT );
+Tcl_LinkVar( inter, "max_step", (char *) &max_step, TCL_LINK_INT );
+Tcl_LinkVar( inter, "stack_info", (char *) &stackinfo_flag, TCL_LINK_INT );
+Tcl_LinkVar( inter, "prof_min_msecs", (char *) &prof_min_msecs, TCL_LINK_INT );
+Tcl_LinkVar( inter, "prof_obs_only", (char *) &prof_obs_only, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "prof_aggr_time", (char *) &prof_aggr_time, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "parallel_disable", (char *) &parallel_disable, TCL_LINK_BOOLEAN );
 
 cmd( "set T .simset" );
 cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
@@ -2828,7 +2829,15 @@ cmd( "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e $T.f.f -anchor w" );
 
 cmd( "checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 cmd( "checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
+
+#ifdef PARALLEL_MODE
+cmd( "checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
+if ( ! search_parallel( root ) || max_threads < 2 )
+	cmd( "$T.f.npar configure -state disabled" );
+cmd( "pack $T.f.obs $T.f.aggr $T.f.npar -anchor e" );
+#else
 cmd( "pack $T.f.obs $T.f.aggr -anchor e" );
+#endif
 
 cmd( "pack $T.f -padx 5 -pady 5" );
 cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
@@ -2848,6 +2857,7 @@ cmd( "$T.f.e.e2 selection range 0 end" );
 cmd( "$T.f.f.e2 selection range 0 end" );
 cmd( "focus $T.f.a.e" );
 
+*choice=0;
 while(*choice==0)
  Tcl_DoOneEvent(0);
 
@@ -2869,17 +2879,19 @@ if ( *choice == 2 )	// Escape - revert previous values
 	stackinfo_flag = temp[5];
 	prof_min_msecs = temp[6];
 	prof_obs_only = temp[7];
+	parallel_disable = temp[8];
 }
 else
 	unsaved_change( true );		// signal unsaved change
 
-Tcl_UnlinkVar(inter, "sim_num");
-Tcl_UnlinkVar(inter, "seed");
-Tcl_UnlinkVar(inter, "max_step");
-Tcl_UnlinkVar(inter, "stack_info");
-Tcl_UnlinkVar(inter, "prof_min_msecs");
-Tcl_UnlinkVar(inter, "prof_obs_only");
-Tcl_UnlinkVar(inter, "prof_aggr_time");
+Tcl_UnlinkVar( inter, "sim_num");
+Tcl_UnlinkVar( inter, "seed");
+Tcl_UnlinkVar( inter, "max_step");
+Tcl_UnlinkVar( inter, "stack_info");
+Tcl_UnlinkVar( inter, "prof_min_msecs" );
+Tcl_UnlinkVar( inter, "prof_obs_only" );
+Tcl_UnlinkVar( inter, "prof_aggr_time" );
+Tcl_UnlinkVar( inter, "parallel_disable" );
 
 break;
 

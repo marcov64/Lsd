@@ -621,7 +621,7 @@ extern bool in_set_obj;		// in setting number of objects mode
 extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
 extern bool no_error;		// object search error control	
-extern bool parallel_mode;	// flag defining if parallel mode (multithreading) is enabled
+extern bool parallel_mode;	// parallel mode (multithreading) status
 extern bool redrawRoot;		// control for redrawing root window (.)
 extern bool running;		// simulation is running
 extern bool struct_loaded;	// a valid configuration file is loaded
@@ -659,6 +659,7 @@ extern int max_step;		// last simulation time step
 extern int max_threads;		// suggested maximum number of parallel threads 
 extern int no_res;			// do not produce .res results files (bool)
 extern int overwConf;		// overwrite current configuration file on run (bool)
+extern int parallel_disable;// flag to control parallel mode
 extern int prof_aggr_time;	// show aggregate profiling times
 extern int prof_min_msecs;	// profile only variables taking more than X msecs.
 extern int prof_obs_only;	// profile only observed variables

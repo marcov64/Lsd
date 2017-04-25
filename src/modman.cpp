@@ -1267,8 +1267,8 @@ if(choice==14)
 
 // prevent creating new groups in Lsd directory
 cmd( "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
-		{	set answer [ tk_messageBox -type okcancel -title Warning -icon warning \
-			-default ok -message \"Invalid parent group\" \
+		{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
+			-icon warning -default ok -message \"Invalid parent group\" \
 			-detail \"Cannot create group/model in the Root group. Press 'Ok' to change to the '$LsdNew' group before proceeding.\" ]; \
 			if [ string equal $answer ok ] { \
 				set groupdir \"$groupdir/$LsdNew\"; \
@@ -1350,7 +1350,7 @@ cmd( "pack .a.mdir.l .a.mdir.e" );
 
 cmd( "frame .a.tdes" );
 cmd( "label .a.tdes.l -text \"Group description\"" );
-cmd( "text .a.tdes.e -width 50 -height 15 -font \"$fonttype $small_character normal\"" );
+cmd( "text .a.tdes.e -width 60 -height 15 -font \"$fonttype $small_character normal\"" );
 cmd( "pack .a.tdes.l .a.tdes.e" );
 
 cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );

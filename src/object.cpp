@@ -330,7 +330,7 @@ double object::cal( object *caller,  char const *l, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( curr->parallel && parallel_ready && curr->last_update < t && lag == 0 )
+	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 )
 		parallel_update( curr, this, caller );
 #endif
 	return curr->cal( caller, lag );
@@ -692,7 +692,7 @@ void object::update(void)
 		if ( var->last_update < t && var->param == 0 )
 		{
 #ifdef PARALLEL_MODE
-			if ( var->parallel && parallel_ready )
+			if ( parallel_ready && var->parallel )
 				parallel_update( var, this );
 			else
 #endif
@@ -1782,7 +1782,8 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	if ( running )		// handle running events differently
 	{
 		plog( "\n\nError detected at time %d", "highlight", t );
-		plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+		if ( stacklog->vs != NULL )
+			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs->label );
 		plog( "\n\nError message: %s", "", logText );
 		print_stack( );
 		uncover_browser( );
