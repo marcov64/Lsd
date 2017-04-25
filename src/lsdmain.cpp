@@ -148,7 +148,7 @@ void set_lab_tit(variable *var);
 void reset_end(object *r);
 void close_sim(void);
 double ran1(long *idum);
-//int deb(object *r, object *c, char *lab, double *res);
+int deb(object *r, object *c, char *lab, double *res);
 void run_no_window(void);
 void analysis(int *choice);
 void init_random(int seed);
@@ -163,8 +163,6 @@ char *clean_file(char *);
 char *clean_path(char *);
 
 char *upload_eqfile(void);
-int deb(object *r, object *c,  char const *lab, double *res);
-
 lsdstack *stacklog;
 
 object *root;
@@ -1212,7 +1210,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
- if(cur->to_compute==1)   
+ if(cur!=NULL && cur->to_compute==1)
    {
    for(; cur!=NULL;cur=go_brother(cur) )
      reset_end(cur);
@@ -1472,9 +1470,6 @@ char *clean_path(char *filepath)
 // handle critical system signals
 void signal_handler(int signum)
 {
-char localmsg[1000];
-double useless=-1;
-
 	switch(signum)
 	{
 		case SIGFPE:
@@ -1486,7 +1481,7 @@ double useless=-1;
 		break;
 		
 		case SIGSEGV:
-			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer? Also, ensure no group of objects has zero elements.");		
+			sprintf(msg, "SIGSEGV (Segmentation Violation):\n  Maybe an invalid pointer?");		
 		break;
 		
 		default:
@@ -1496,12 +1491,9 @@ double useless=-1;
 	printf("FATAL ERROR: System Signal received:\n %s\nLsd is aborting...", msg);
 #else
 	char msg2[1000];
-	//sprintf(msg2, "tk_messageBox -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'gdb debug' option.\n\nLsd is aborting...\"", msg);
-  sprintf(msg2, "tk_messageBox -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'gdb debug' option.\n\nAttempting to open the LSD Debugger...\"", msg);
+	sprintf(msg2, "tk_messageBox -icon error -type ok -message \"FATAL ERROR: System Signal received:\n\n %s\n\nAdditional information can be obtained running the simulation using the 'Model'/'gdb debug' option.\n\nLsd is aborting...\"", msg);
 	cmd(inter, msg2);
-
-sprintf(localmsg, "Error in eq. for '%s'", stacklog->vs->label);
-deb(stacklog->vs->up, NULL,  localmsg, &useless);
 #endif
+
 	exit(signum);			// abort program
 }

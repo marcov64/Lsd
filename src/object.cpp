@@ -543,7 +543,7 @@ int bah=0;
 /* Search among the variables *********************/
 
 //#define TEST_OPTIMIZATION
-/******/
+/******
 #ifdef TEST_OPTIMIZATION
 if(stairs==0)
  sig_stairs=0;
@@ -567,7 +567,14 @@ for(curr=v; curr!=NULL;curr=curr->next)
 for(cb=b, curr=NULL; cb!=NULL; cb=cb->next)
 {
   
-  curr1=cb->head; 
+  curr1=cb->head;
+   if(curr1==NULL)
+   {
+    sprintf(msg, "\nObject %s does not have a single instance, simulation may crash. Discovered while searching for elment %s during the computation of %s.",cb->blabel,l, stacklog->label);
+    plog(msg);
+       error_hard();
+   }
+   
   if(strcmp(curr1->label, caller->label) ) //search down only if the desc. is different from caller
    {
     curr=curr1->search_var(this,l);
@@ -1344,6 +1351,7 @@ void object::write(char const *lab, double value, int time, int lag)
         plog(msg);
         debug_flag=1;
         stacklog->vs->debug='d';
+        error_hard();
         return;
     }
     
@@ -1416,6 +1424,7 @@ if((!use_nan && isnan(value)) || isinf(value)==1)
  plog(msg);
  debug_flag=1;
  stacklog->vs->debug='d';
+    error_hard();
  return;
 }
 
@@ -2273,7 +2282,7 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value)==1)
+if((!use_nan && isnan(value)) || isinf(value==1))
 {sprintf(msg, "\nMath error: increment of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;
@@ -2317,7 +2326,7 @@ if(this==NULL)
  return -1;
 }
 
-if((!use_nan && isnan(value)) || isinf(value)==1)
+if((!use_nan && isnan(value)) || isinf(value==1))
 {sprintf(msg, "\nMath error: multiply of %s requested with a wrong value\n\n", lv);
  plog(msg);
  debug_flag=1;
@@ -2433,10 +2442,10 @@ if(choice==4)
   reset_end(root);
   close_sim();
   running=0;
- // while(stacklog->prev!=NULL)
-   //stacklog=stacklog->prev;
-  //stack=0; 
-  //throw pippo;
+  while(stacklog->prev!=NULL)
+   stacklog=stacklog->prev;
+  stack=0;
+  throw pippo;
      return;
  }
 

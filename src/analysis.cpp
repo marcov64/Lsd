@@ -3620,7 +3620,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 //for(cur=r->son; cur!=NULL; )
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
- if(cur->to_compute==1)
+ if(cur!=NULL && cur->to_compute==1)
    {
    for(cur=cb->head; cur!=NULL; cur=cur->next)
      {
@@ -3677,7 +3677,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
   }
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
- if(cur->to_compute==1)
+ if(cur!=NULL && cur->to_compute==1)
    {
    for(cur=cb->head; cur!=NULL; cur=cur->next)
      {

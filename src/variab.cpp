@@ -310,7 +310,8 @@ if(!fast)				// not running in fast mode?
 	catch(...)
 	{
 		sprintf(msg, "\nException! An unknown problem was detected while computing the Equation for:\n %s\nrequested by Object:\n %s\n\nPLEASE CLOSE LSD BEFORE CONTINUING!!!\n", label, caller==NULL?"(No label)":((object *)caller)->label);
-		plog(msg);
+        sprintf(msg, "Simulation aborted.\n");
+        plog(msg);
 		error_hard();
 		quit=2;
 		return -1;
