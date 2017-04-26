@@ -1901,7 +1901,7 @@ cmd( "frame .da.s.f.e" );
 cmd( "set ifont [ lindex $fontP 0 ]" ); 
 cmd( "ttk::combobox .da.s.f.e.font -textvariable ifont -values [ font families ] -width 15" );
 cmd( "set idim [ lindex $fontP 1 ]" ); 
-cmd( "ttk::combobox .da.s.f.e.dim -textvariable idim -values [ list 4 6 8 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center" );
+cmd( "ttk::combobox .da.s.f.e.dim -textvariable idim -values [ list 4 6 8 9 10 11 12 14 18 24 32 48 60 ] -width 3 -justify center" );
 cmd( "set istyle [ lindex $fontP 2 ]" ); 
 cmd( "ttk::combobox .da.s.f.e.sty -textvariable istyle -values [ list normal bold italic \"bold italic\" ] -width 10 -justify center" );
 cmd( "pack .da.s.f.e.font .da.s.f.e.dim .da.s.f.e.sty -padx 2 -side left" );

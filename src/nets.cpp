@@ -272,7 +272,7 @@ netLink *object::draw_link_net( void )
 		
 	if ( ! is_finite( sum ) || sum <= 0 )		// check valid probabilities
 	{
-		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
 		return node->first;
 	}
@@ -482,7 +482,7 @@ object *object::draw_node_net( char const *lab )
 		
 	if ( ! is_finite( sum ) || sum <= 0 )			// check valid probabilities
 	{
-		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+		sprintf( msg, "draw probabilities are invalid (network node draw for '%s').", stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 		error_hard( msg, "Invalid network draw parameters", "Check your code to prevent this situation." );
 		return cur1;
 	}

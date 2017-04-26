@@ -80,6 +80,12 @@ void cmd( const char *cm, ... )
 {
 	char message[ TCL_BUFF_STR ];
 	
+#ifdef PARALLEL_MODE
+	// abort if not running in main Lsd thread
+	if ( this_thread::get_id( ) != main_thread )
+		return;
+#endif
+	
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", strlen( cm ) + 1 );
@@ -1503,7 +1509,7 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	if ( res == NULL )
 	{
 		sprintf( msg, "object '%s' not found in %s (variable '%s')", 
-				 label, command, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+				 label, command, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	}
 	

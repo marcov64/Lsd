@@ -165,7 +165,8 @@ map < string, profile > prof;	// set of saved profiling times
 
 #ifdef PARALLEL_MODE
 map< thread::id, worker * > thr_ptr;	// worker thread pointers
-worker *workers = NULL;			// multi-thread parallel worker data
+thread::id main_thread;		// Lsd main thread ID
+worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
 
@@ -190,6 +191,7 @@ exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
 exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
 
 #ifdef PARALLEL_MODE
+main_thread = this_thread::get_id( );
 max_threads = ( MAX_CORES <= 0 ) ? thread::hardware_concurrency( ) : MAX_CORES;
 #else
 max_threads = ( MAX_CORES <= 0 ) ? 4 : MAX_CORES;
@@ -497,29 +499,15 @@ strcpy(stacklog->label, "Lsd Simulation Manager");
 
 while(1)
 {
-root=create( root);
-no_more_memory = false;
-series_saved=0;
-
-try 
-{
-	run(root);
-}
-catch( int p )			// handle this here
-{
-	while(stacklog->prev!=NULL)
-		stacklog=stacklog->prev;
-	stack=0; 
-}
-catch ( ... )			// send the rest upward
-{
-	throw;
-}
+	root = create( root );
+	no_more_memory = false;
+	series_saved = 0;
+	run( root );
 }
 
 #else
 
-run(root);
+run( root );
 
 #endif 
 
@@ -794,7 +782,7 @@ end=clock();
 if(quit==1) 			//For multiple simulation runs you need to reset quit
  quit=0;
 
-plog( "\nSimulation %d finished (%.2g sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 #ifndef NO_WINDOW 
 cmd( "destroytop .deb" );
@@ -1080,6 +1068,12 @@ void plog( char const *cm, char const *tag, ... )
 	char buffer[ TCL_BUFF_STR ];
 	va_list argptr;
 	
+#ifdef PARALLEL_MODE
+	// abort if not running in main Lsd thread
+	if ( this_thread::get_id( ) != main_thread )
+		return;
+#endif
+
 	va_start( argptr, tag );
 	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
 	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );

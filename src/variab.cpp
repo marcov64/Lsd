@@ -342,7 +342,7 @@ double variable::cal( object *caller, int lag )
 	}
 	catch ( exception& exc )
 	{
-		plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+		plog( "\n\nAn exception was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(none)" : caller->label );
 		quit = 2;
 		throw;
 	}
@@ -350,7 +350,7 @@ double variable::cal( object *caller, int lag )
 	{
 		if ( quit != 2 )			// error message not already presented?
 		{
-			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(no label)" : ( ( object * ) caller )->label );
+			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s' requested by object '%s'", "", label, caller == NULL ? "(none)" : caller->label );
 			quit = 2;
 			throw;
 		}
@@ -405,7 +405,7 @@ double variable::cal( object *caller, int lag )
 			  plog( "%d\t", "highlight", time );
 			  plog( "stack=" );
 			  plog( "%d\t", "highlight", stack );
-			  plog( "caller=%s%s%s", "", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL ? "" : stacklog->prev->label );
+			  plog( "caller=%s%s%s", "", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || stacklog->prev == NULL ? "" : stacklog->prev->label );
 		  }
 		}
 
@@ -448,7 +448,7 @@ double variable::cal( object *caller, int lag )
 
 	error:
 	
-	sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(no label)" : caller->label, label, num_lag, label );
+	sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
 	error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
 	
 	return 0;
@@ -601,7 +601,10 @@ Handle system signals in worker
 ****************************************************/
 void worker::signal( int sig )
 {
-	sprintf( err_msg1, "\n\nUnknown error: a signal was detected while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", var->label, var->up->label );
+	if ( var != NULL && var->label != NULL  )
+		sprintf( err_msg1, "\n\nUnknown error: signal received while parallel-computing the equation\nfor '%s' in object '%s'. Disable parallel computation for this variable\nor check your code to prevent this situation.", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+	else
+		sprintf( err_msg1, "\n\nUnknown error: signal received by a parallel worker thread.\nDisable parallel computation to prevent this situation." );
 
 	// signal & kill thread
 	signum = sig;
@@ -668,7 +671,11 @@ bool worker::check( void )
 			}
 			else
 			{
-				sprintf( msg, "in object '%s' variable '%s' a multi-threading worker crashed", var == NULL ? "(none)" : var->up->label, var == NULL ? "(none)" : var->label );
+				if ( var != NULL && var->label != NULL )
+					sprintf( msg, "while computing variable '%s' in object '%s' a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+				else
+					sprintf( msg, "a multi-threading worker crashed" );
+				
 				error_hard( msg, "Parallel computation error", "Disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
 			}
 		}

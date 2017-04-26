@@ -684,9 +684,10 @@ extern map< string, profile > prof;// set of saved profiling times
 
 // multi-threading control 
 #ifdef PARALLEL_MODE
-extern atomic< bool > parallel_ready;			// flag to indicate multitasking is available
+extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
-extern worker *workers;							// multi-thread parallel worker data
+extern thread::id main_thread;			// Lsd main thread ID
+extern worker *workers;					// multi-thread parallel worker data
 #endif
 
 // Tcl/Tk specific definitions (for the windowed version only)

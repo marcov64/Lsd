@@ -181,21 +181,31 @@ void signal_handler( int signum )
 	}
 	else
 	{
-		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option.\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger) ..." );
+		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option" );
 		if ( quit != 2 )
 		{
-			plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+			if ( ! parallel_mode && stacklog->vs != NULL )
+			{
+				strcat( msg3, "\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)..." );
+				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs->label );
+				print_stack( );				
+			}
+			else
+				plog( "\n\nAn unknown problem was detected while executing user's equations code" );
+				
 			quit = 2;
 		}
-		print_stack( );
 	}
 	
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s:\n  %s\n\n%s\"", msg, msg2, msg3 );
 	
 	if ( user_exception )
 	{
-		sprintf( msg3, "Error in equation for '%s'", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
-		deb( stacklog->vs == NULL ? root : stacklog->vs->up, NULL, msg3, &useless );
+		if ( ! parallel_mode && stacklog->vs != NULL )
+		{
+			sprintf( msg3, "%s (equation error)", stacklog->vs->label );
+			deb( stacklog->vs == NULL ? root : stacklog->vs->up, NULL, msg3, &useless );
+		}
 	}
 	else
 	{

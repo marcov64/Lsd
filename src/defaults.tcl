@@ -31,7 +31,7 @@ set hsizePxy	640	; # default plot (XY) horizontal size in pixels
 set vsizePxy	450	; # default plot (XY) vertical size in pixels
 
 # internal plot options
-set fontP		{ Times 10 normal }; # default plot text font/size/mode
+set fontP		{ Helvetica 9 normal }; # default plot text font/size/mode
 set hticksP		3	; # number of horizontal plot legend ticks
 set vticksP		3	; # number of vertical plot legend ticks
 set smoothP		no	; # options are no, yes or raw

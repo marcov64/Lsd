@@ -400,7 +400,7 @@ variable *object::search_var(object *caller, char const *l)
 		{
 			if ( ! no_error )
 			{
-				sprintf( msg, "search for '%s' failed in the equation of variable '%s'", l, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );
+				sprintf( msg, "search for '%s' failed in the equation of variable '%s'", l, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 				return NULL;
 			}
@@ -969,7 +969,7 @@ void object::write( char const *lab, double value, int time, int lag )
 #endif	
 			if ( cv->param != 1 && time < t && t > 1 )
 			{
-				plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid. This would \nundermine the correct updating of variable '%s', \nand has been forced to take the current time (%d)\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, time, lab, t );
+				plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid. This would \nundermine the correct updating of variable '%s', \nand has been forced to take the current time (%d)\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, lab, t );
 				cv->val[ 0 ] = value;
 				cv->last_update = t;
 			}
@@ -979,7 +979,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				{
 					if ( - time > cv->num_lag )		// check for invalid lag
 					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag, time );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag, time );
 					}
 					else
 					{
@@ -993,7 +993,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				{
 					if ( lag < 0 || lag > cv->num_lag )
 					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lag );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag );
 					}
 					else
 					{
@@ -1598,7 +1598,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag)
 	  a+=cur->cal(lv,lag);
 	if(is_inf(a))
 	   {
-		plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lv );
+		plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
 		plog( "\nThe first object '%s' of the list is used", "", lo );
 		return(cur1);
 	   }
@@ -1608,7 +1608,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag)
 	 {b=RND*a;
 	  if(a==0)
 	   {
-		plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, lv );
+		plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
 		plog( "\nThe first object '%s' of the list is used", "", lo );
 		return(cur1);
 	   }
@@ -1667,7 +1667,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag, double tot)
 
 	if(tot<=0)
 	 {
-	  sprintf( msg, "draw random of an object '%s' requested with a negative \ntotal of values for '%s' (%g) during the equation for '%s'", lo, lv, tot, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );  
+	  sprintf( msg, "draw random of an object '%s' requested with a negative \ntotal of values for '%s' (%g) during the equation for '%s'", lo, lv, tot, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
 	  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
 	 }  
 
@@ -1682,7 +1682,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag, double tot)
 	  }
 	if(a>tot)
 	 {
-	  sprintf( msg, "draw random of an object '%s' requested with a wrong \ntotal of values for '%s' during the equation for '%s'", lo, lv, stacklog->vs == NULL ? "(no label)" : stacklog->vs->label );  
+	  sprintf( msg, "draw random of an object '%s' requested with a wrong \ntotal of values for '%s' during the equation for '%s'", lo, lv, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
 	  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
 	 }  
 	return cur;
@@ -1782,7 +1782,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	if ( running )		// handle running events differently
 	{
 		plog( "\n\nError detected at time %d", "highlight", t );
-		if ( stacklog->vs != NULL )
+		if ( ! parallel_mode && stacklog->vs != NULL )
 			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs->label );
 		plog( "\n\nError message: %s", "", logText );
 		print_stack( );
@@ -1868,7 +1868,7 @@ void print_stack( void )
 
 	if ( parallel_mode )
 	{
-		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(Remove parallel flags from all variables to run in standard mode)\n" );
+		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
 		return;
 	}
 
@@ -1876,7 +1876,7 @@ void print_stack( void )
 	plog( "\n\nLevel\tVariable Label" );
 
 	for ( app=stacklog; app != NULL; app = app->prev )
-	  plog( "\n%d\t%s", "",app->ns, app->label );
+		plog( "\n%d\t%s", "", app->ns, app->label );
 
 	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
 }
@@ -2097,14 +2097,14 @@ object *object::turbosearch(char const *label, double tot, double num)
 	  break;
 	if(cb==NULL)
 	{
-	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label ); 
+	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 	   error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	   return NULL;
 	} 
 
 	if(cb->mn==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return NULL;
 	} 
@@ -2135,7 +2135,7 @@ void object::initturbo(char const *label, double tot=0)
 	  break;
 	if(cb==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog->vs == NULL ? "(no label)" : stacklog->vs->label, label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return;
 	} 
