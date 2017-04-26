@@ -3049,7 +3049,7 @@ return res;
 
 
 /***************************************************
-insert_data_mem
+INSERT_DATA_MEM
 ****************************************************/
 void insert_data_mem(object *r, int *num_v, int *num_c)
 {
@@ -3081,7 +3081,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
- if(cur->to_compute==1)
+ if(cur!=NULL && cur->to_compute==1)
    {
    for(cur=cb->head; cur!=NULL; cur=cur->next)
      insert_labels_mem(cur, num_v, num_c);
@@ -3124,7 +3124,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {
  cur=cb->head;
- if(cur->to_compute==1)
+ if(cur!=NULL && cur->to_compute==1)
    for(cur=cb->head; cur!=NULL; cur=cur->next)
       insert_store_mem(cur, num_v);
  }    

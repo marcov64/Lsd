@@ -489,20 +489,34 @@ cmd( "destroy .l" );
 #endif
 
 stacklog = new lsdstack;
-stacklog->next=NULL;
-stacklog->prev=NULL;
-stacklog->ns=0;
-stacklog->vs=NULL;
-strcpy(stacklog->label, "Lsd Simulation Manager");
+stacklog->next = NULL;
+stacklog->prev = NULL;
+stacklog->ns = 0;
+stacklog->vs = NULL;
+strcpy( stacklog->label, "Lsd Simulation Manager" );
 
 #ifndef NO_WINDOW
 
-while(1)
+while( 1 )
 {
 	root = create( root );
 	no_more_memory = false;
 	series_saved = 0;
-	run( root );
+	
+	try 
+	{
+		run( root );
+	}
+	catch( int p )           	// return point from error_hard() (in object.cpp)
+	{		
+		if ( p != 919293 )		// check throw signature
+			throw;	
+		quit = 0;
+	}
+	catch ( ... )            	// send the rest upward
+	{
+		throw;
+	}
 }
 
 #else
@@ -791,9 +805,9 @@ cmd( "update" );
 cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
 #endif
 
-close_sim();
-reset_end(root);
-root->emptyturbo();
+close_sim( );
+reset_end( root );
+root->emptyturbo( );
 
 if ( sim_num > 1 || no_window ) //Save results for multiple simulation runs
 {
@@ -886,7 +900,7 @@ delete [ ] workers;
 workers = NULL;
 #endif	
 
-quit=0;
+quit = 0;
 }
 
 
@@ -1131,7 +1145,7 @@ for(cv=r->v; cv!=NULL; cv=cv->next)
 
 for(cb=r->b; cb!=NULL; cb=cb->next)
  {cur=cb->head;
- if(cur->to_compute==1)   
+ if(cur!=NULL && cur->to_compute==1)
    {
    for(; cur!=NULL;cur=go_brother(cur) )
      reset_end(cur);
@@ -1269,7 +1283,6 @@ void show_prof_aggr( void )
 	
 	plog( "\n" );
 }
-
 #endif
 
 

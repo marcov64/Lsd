@@ -346,6 +346,10 @@ double variable::cal( object *caller, int lag )
 		quit = 2;
 		throw;
 	}
+	catch ( int p )		// avoid general catch of error_hard() throwing to lsdmain()
+	{
+		throw p;
+	}
 	catch ( ... )
 	{
 		if ( quit != 2 )			// error message not already presented?
@@ -410,7 +414,7 @@ double variable::cal( object *caller, int lag )
 		}
 
 		if ( debug_flag && debug == 'd' && deb_cond == 0 )
-		 deb( (object *)up, caller, label, &val[0] );
+			deb( ( object * ) up, caller, label, &val[ 0 ] );
 		else
 		 switch(deb_cond)
 		 {

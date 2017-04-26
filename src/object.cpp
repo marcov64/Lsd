@@ -382,6 +382,13 @@ variable *object::search_var(object *caller, char const *l)
 	for ( cb = b, curr = NULL; cb != NULL; cb = cb->next )
 	{
 		curr1=cb->head; 
+		if ( curr1 == NULL )
+		{
+			sprintf( msg, "object '%s' does not have a single instance, simulation may crash (while searching for '%s' during the computation of '%s'", cb->blabel, l, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
+			error_hard( msg, "Object has no instance", "Check your code to prevent this situation." );
+			return NULL;
+		}
+
 		//search down only if the label is different from caller
 		if ( caller == NULL || strcmp( curr1->label, caller->label ) )
 		{
@@ -947,9 +954,8 @@ void object::write( char const *lab, double value, int time, int lag )
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\n\nWarning: write of '%s' requested with an invalid value, ignoring\n", "", lab );
-        debug_flag = true;
-        stacklog->vs->debug = 'd';
+		sprintf( msg, "write of '%s' requested with an invalid value", lab );
+		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
         return;
     }
     
@@ -961,6 +967,7 @@ void object::write( char const *lab, double value, int time, int lag )
 			{
 				sprintf( msg, "trying to write '%s' while it is under computation", lab );
 				error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
+				return;
 			}
 			
 #ifdef PARALLEL_MODE
@@ -1702,10 +1709,9 @@ double object::increment( char const *lab, double value )
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\n\nWarning: increment of '%s' requested with an invalid value, ignoring\n", "", lab );
-        debug_flag = true;
-        stacklog->vs->debug = 'd';
-        return value;
+		sprintf( msg, "increment of '%s' requested with an invalid value", lab );
+		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
+        return 0;
     }
 
 	for ( cv = v; cv != NULL; cv = cv->next)
@@ -1738,10 +1744,9 @@ double object::multiply(char const *lab, double value)
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		plog( "\n\nWarning: multiply of '%s' requested with an invalid value, ignoring\n", "", lab );
-        debug_flag = true;
-        stacklog->vs->debug = 'd';
-        return value;
+		sprintf( msg, "multiply of '%s' requested with an invalid value", lab );
+		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation." );
+        return 0;
     }
 
 	for ( cv = v; cv != NULL; cv = cv->next)
@@ -1786,7 +1791,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs->label );
 		plog( "\n\nError message: %s", "", logText );
 		print_stack( );
-		uncover_browser( );
 		cmd( "wm deiconify .log; raise .log; focus -force .log" );
 		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
@@ -1844,18 +1848,41 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
 
-	if(choice==2)
+	if (  choice == 2 )
 	{
-		actual_steps=t;
-		running=0;
-		return;
+		// remove stack allocation
+		while ( stacklog->prev != NULL )
+		{
+			auto cur_stack = stacklog;
+			stacklog = stacklog->prev;
+			delete cur_stack;
+		}
+		delete stacklog;
+		stacklog = NULL;
+		
+		// do run( ) cleanup
+		stack = 0; 
+		actual_steps = t;
+		running = 0;
+		close_sim( );
+		reset_end( root );
+		root->emptyturbo( );
+		set_buttons_log( false );
+		uncover_browser( );
+
+#ifdef PARALLEL_MODE
+		// stop multi-thread workers
+		delete [ ] workers;
+		workers = NULL;
+#endif	
+		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
 	}
 #else
 
 	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 #endif
 
-	myexit(13);
+	myexit( 13 );
 }
 
 
