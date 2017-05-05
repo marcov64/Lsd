@@ -175,6 +175,8 @@ extern char msg[];
 extern lsdstack *stacklog;
 extern int total_var;
 extern int fast;
+extern int running;
+
 
 
 void set_lab_tit(variable *var);
@@ -323,7 +325,7 @@ else
 for(i=0; i<num_lag; i++) //scale down the past values
  val[num_lag-i]=val[num_lag-i-1];
 val[0]=app;
-if(stackinfo_flag>=stack)
+if(running ==1 && stackinfo_flag>=stack)
  {end_profile[stack-1]=clock();
   set_lab_tit(this);
   if(caller==NULL)
@@ -360,7 +362,8 @@ else
 /*****************/
 stack --;
 //Remove the element of the stack
-stacklog=stacklog->prev;
+if(stacklog!=NULL)
+  stacklog=stacklog->prev;
 if ( stacklog != NULL )
 {
 delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED

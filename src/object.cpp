@@ -2361,6 +2361,8 @@ double app=0;
 object *cur;
 if(running==0)
  return;
+
+quit=2;
 sprintf(msg, "\n\nGENERAL INFORMATION:\nFatal error detected at time %d.", t);
 plog(msg);
 sprintf(msg, "\nOffending code contained in the equation for Variable: %s\n", stacklog->vs->label);
@@ -2445,7 +2447,7 @@ if(choice==4)
   while(stacklog->prev!=NULL)
    stacklog=stacklog->prev;
   stack=0;
-  throw pippo;
+  //throw pippo;
      return;
  }
 
