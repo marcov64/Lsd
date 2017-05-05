@@ -414,8 +414,8 @@ cmd(inter, "entry .f.ft.mnc -width 10 -relief sunken -textvariable minc -state d
 cmd(inter, "label .f.ft.maxc -text \" to case:\"");
 Tcl_LinkVar(inter, "maxc", (char *) &max_c, TCL_LINK_INT);
 cmd(inter, "entry .f.ft.mxc -width 10 -relief sunken -textvariable maxc -state disabled");
-cmd(inter, "set auto_x 1");
-autom_x=1;
+cmd(inter, "set auto_x 0");
+autom_x=0;
 Tcl_LinkVar(inter, "auto_x", (char *) &autom_x, TCL_LINK_INT);
 cmd(inter, "checkbutton .f.ft.auto -text \"Use all cases \" -variable auto_x -command {if {$auto_x==1} {.f.ft.mxc conf -state disabled; .f.ft.mnc conf -state disabled} {.f.ft.mxc conf -state normal; .f.ft.mnc conf -state normal}}");
 
@@ -516,7 +516,7 @@ cmd(inter, "checkbutton .b.watch -text Watch -variable watch");
 
 cmd(inter, "pack .b.watch .b.ts .b.sv .b.sp .b.st .b.fr .b.dump .b.lat .b.tc .b.xy -side left");
 cmd(inter, "pack .f .b");
-cmd(inter, "set watch 1");
+cmd(inter, "set watch 0");
 cmd(inter, "set auto 1");
 //cmd(inter, "raise .");
 cmd(inter, "focus .");
@@ -4647,7 +4647,7 @@ cmd(inter, "pack .s.o.l .s.o.a .s.o.c .s.o.b .s.o.g .s.o.p -expand yes -fill x -
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 1");
+cmd(inter, "set wind 2");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
