@@ -409,11 +409,11 @@ cmd(inter, "pack .f.com.nvar .f.com.ncas -side left");
 cmd(inter, "frame .f.ft");
 cmd(inter, "label .f.ft.minc -text \"From case:\"");
 Tcl_LinkVar(inter, "minc", (char *) &min_c, TCL_LINK_INT);
-cmd(inter, "entry .f.ft.mnc -width 10 -relief sunken -textvariable minc -state disabled");
+cmd(inter, "entry .f.ft.mnc -width 10 -relief sunken -textvariable minc");
 
 cmd(inter, "label .f.ft.maxc -text \" to case:\"");
 Tcl_LinkVar(inter, "maxc", (char *) &max_c, TCL_LINK_INT);
-cmd(inter, "entry .f.ft.mxc -width 10 -relief sunken -textvariable maxc -state disabled");
+cmd(inter, "entry .f.ft.mxc -width 10 -relief sunken -textvariable maxc");
 cmd(inter, "set auto_x 0");
 autom_x=0;
 Tcl_LinkVar(inter, "auto_x", (char *) &autom_x, TCL_LINK_INT);
