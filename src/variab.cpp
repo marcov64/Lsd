@@ -436,7 +436,8 @@ double variable::cal( object *caller, int lag )
 #endif
 		//Remove the element of the stack
 		stack--;
-		stacklog = stacklog->prev;
+		if ( stacklog != NULL )
+			stacklog = stacklog->prev;
 		if ( stacklog != NULL )
 		{
 			delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
