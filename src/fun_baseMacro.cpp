@@ -1,4 +1,4 @@
-#include "fun_head.h"
+#include "fun_head_fast.h"
 
 MODELBEGIN
 

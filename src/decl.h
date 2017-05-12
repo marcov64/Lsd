@@ -43,6 +43,7 @@ Comments and bug reports to marco.valente@univaq.it
 #include <mutex>
 #include <exception>
 #include <condition_variable>
+#include <functional>
 #include <chrono>
 #endif
 
@@ -518,6 +519,7 @@ void go_next(object **t);
 void handle_signals( void ( * handler )( int signum ) );
 void histograms(int *choice);
 void histograms_cs(int *choice);
+void init_map( void );
 void init_plot(int i, int id_sim);
 void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
@@ -614,6 +616,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 // global variables
 
 extern bool fast;			// fast mode (log window)
+extern bool fast_lookup;	// flag for fast look-up mode
 extern bool ignore_eq_file;	// control of configuration files equation updating
 extern bool iniShowOnce;	// prevent repeating warning on # of columns
 extern bool in_edit_data;	// in initial settings mode
@@ -706,3 +709,9 @@ extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
 #endif						// NO_WINDOW
 
 #endif						// FUN
+
+// map to fast equation look-up
+#ifdef CPP11
+typedef map< const string, function< double( object *caller, variable *var ) > > eq_mapT;
+extern eq_mapT eq_map;		// equations map
+#endif

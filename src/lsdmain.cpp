@@ -169,6 +169,10 @@ thread::id main_thread;		// Lsd main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
+#ifdef CPP11
+eq_mapT eq_map;				// fast equation look-up map
+#endif
+
 
 /*********************************
 LSD MAIN
@@ -487,6 +491,10 @@ grandTotal = true;				// not in parallel mode: use .tot headers
 
 cmd( "destroy .l" );
 #endif
+
+// create fast equation look-up map if required
+if ( fast_lookup )
+	init_map( );
 
 stacklog = new lsdstack;
 stacklog->next = NULL;

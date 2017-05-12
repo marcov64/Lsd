@@ -26,11 +26,11 @@ This file contains all the declarations and macros available in a model's equati
 double def_res = 0;										// default equation result
 
 extern bool fast;										// flag to hide LOG messages & runtime
+extern bool fast_lookup;								// flag for fast look-up mode
 extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
 extern bool use_nan;									// flag to allow using Not a Number value
 extern char *path;										// folder where the configuration is
 extern char *simul_name;								// configuration name being run (for saving networks)
-extern char msg[];
 extern int cur_sim;
 extern int debug_flag;
 extern int max_step;
@@ -96,63 +96,166 @@ double _abs(double a)
 extern Tcl_Interp *inter;
 extern double i_values[];
 
-#define DEBUG_CODE if ( debug_flag ) \
-{ \
-	for ( i = 0; i < 1000; i++ ) \
-		i_values[i] = v[i]; \
-}
+#define DEBUG_CODE \
+	if ( debug_flag ) \
+	{ \
+		for ( i = 0; i < 1000; i++ ) \
+			i_values[ i ] = v[ i ]; \
+	};
 #else
 #define DEBUG_CODE
 #endif
 
-#define DEBUG f=fopen("log.log","a"); \
- fprintf(f,"t=%d %s (cur=%g)\n",t,label, val[0]); \
- fclose(f);
+// user defined variables for all equations (to be defined in equation file)
+#define EQ_USER_VARS
+
+#define EQ_BEGIN \
+	double res = def_res; \
+	object *p = var->up, *c = caller, app; \
+	int i, j, h, k; \
+	double v[1000]; \
+	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
+	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = NULL; \
+	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
+	curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
+	FILE *f = NULL; \
+	EQ_USER_VARS
+
+#define EQ_NOT_FOUND \
+	char msg[ TCL_BUFF_STR ]; \
+	sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
+	error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." ); \
+	return res;
+	
+#define EQ_TEST_RESULT \
+	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
+		error_hard( msg, "Invalid result", "Check your code to prevent this situation." ); \
+		debug_flag = true; \
+		debug = 'd'; \
+	}
+
+// handle fast equation look-up if enabled and C++11 is available
+#if ! defined FAST_LOOKUP || ! defined CPP11
+// use standard chain method for look-up
+#define MODELBEGIN \
+	bool fast_lookup = false; \
+	void init_map( ) { } \
+	double variable::fun( object *caller ) \
+	{ \
+		if( quit == 2 ) \
+			return def_res; \
+		variable *var = this; \
+		EQ_BEGIN
+		
+#define MODELEND \
+		EQ_NOT_FOUND \
+		end : \
+		EQ_TEST_RESULT \
+		DEBUG_CODE \
+		return res; \
+	}
+
+#define EQUATION( X ) \
+	if ( ! strcmp( label, X ) ) { 
+
+#define FUNCTION( X ) \
+	if ( ! strcmp( label, X ) ) { \
+	last_update--; \
+	if ( caller == NULL ) \
+	{ \
+		res = val[0]; \
+		goto end; \
+	};
+
+#define RESULT( X ) \
+		res = X; \
+		goto end; \
+	}
+
+#define END_EQUATION( X ) \
+	{ \
+		res = X; \
+		goto end; \
+	}
+
+#define DEBUG \
+	f = fopen( "log.txt", "a" ); \
+	fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0]); \
+	fclose( f );
  
-#define DEBUG_AT(X) if(t>=X) \
- { f=fopen("log.log","a"); \
-   fprintf(f,"t=%d %s (cur=%g)\n",t,label, val[0]); \
-   fclose(f); \
- }  
+#define DEBUG_AT( X ) \
+	if ( t >= X ) \
+	{ \
+		DEBUG \
+	};
 
-#define MODELBEGIN double variable::fun(object *caller) \
-{ \
-if( quit == 2 ) \
-	return -1; \
-double res = def_res; \
-object *p = up, *c = caller, app; \
-int i, j, h, k; \
-double v[1000]; \
-object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
-cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = NULL; \
-netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
-curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
-FILE *f = NULL;
+#else
+// use fast map method for equation look-up
+#define MODELBEGIN \
+	bool fast_lookup = true; \
+	double variable::fun( object *caller ) \
+	{ \
+		double res = def_res; \
+		if( quit == 2 ) \
+			return res; \
+		auto eq_it = eq_map.find( label ); \
+		if ( eq_it != eq_map.end( ) ) \
+			res = ( eq_it->second )( caller, this ); \
+		else \
+		{ \
+			EQ_NOT_FOUND \
+		} \
+		EQ_TEST_RESULT \
+		return res; \
+	} \
+	void init_map( ) \
+	{ \
+		eq_map = \
+		{
 
-#define MODELEND sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
-error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." ); \
-return -1; \
-end : \
-if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
- { \
-  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
-  error_hard( msg, "Invalid result", "Check your code to prevent this situation." ); \
-  debug_flag = true; \
-  debug = 'd'; \
- } \
-DEBUG_CODE \
-return res; \
-}
+#define MODELEND \
+		}; \
+	}
+			
+#define EQUATION( X ) \
+	{ X, [ ]( object *caller, variable *var ) \
+		{ \
+			EQ_BEGIN
+		
+#define FUNCTION( X ) \
+	{ X, [ ]( object *caller, variable *var ) \
+		{ \
+			EQ_BEGIN \
+			var->last_update--; \
+			if ( caller == NULL ) \
+			{ \
+				res = var->val[0]; \
+				DEBUG_CODE \
+				return res; \
+			};
+	
+#define RESULT( X ) \
+			res = X; \
+			DEBUG_CODE \
+			return res; \
+		} \
+	},
 
+#define END_EQUATION( X ) \
+	{ \
+		res = X; \
+		DEBUG_CODE \
+		return res; \
+	}
 
-#define EQUATION(X) if(!strcmp(label,X)) {
-#define FUNCTION(X) if(!strcmp(label,X)) { last_update--; if(c==NULL) {  res=val[0];  goto end; } }; \
- if(!strcmp(label,X)) {
-#define END_EQUATION(X) {res=X; goto end; }
+#endif
 
-#define ABORT quit=1;
-#define RESULT(X) res=X; goto end; }
-#define CURRENT val[0]
+#define ABORT quit = 1;
+#define CURRENT var->val[ 0 ]
+#define PARAMETER var->param = 1;
 
 #define V(X) p->cal(p,(char*)X,0)
 #define VL(X,Y) p->cal(p,(char*)X,Y)
@@ -262,7 +365,6 @@ return res; \
 #define RNDDRAWTOTS(Z,X,Y, T) Z->draw_rnd((char*)X, (char*)Y,0, T)
 #define RNDDRAWTOTLS(O,X,Y,Z, T) O->draw_rnd((char*)X, (char*)Y, Z, T)
 
-#define PARAMETER param=1;
 #define FAST fast = true;
 #define OBSERVE fast = false;
 #define USE_NAN use_nan = true;
@@ -280,17 +382,20 @@ return res; \
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
 
 // regular logging (disabled in fast mode)
-#define LOG( ... ) if ( ! fast ) \
-{ \
-	sprintf( msg, __VA_ARGS__ ); \
-	plog( msg ); \
-}
+#define LOG( ... ) \
+	if ( ! fast ) \
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, __VA_ARGS__ ); \
+		plog( msg ); \
+	}
 // priority logging (show even in in fast mode)
 #define PLOG( ... ) \
-{ \
-	sprintf( msg, __VA_ARGS__ ); \
-	plog( msg ); \
-}
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, __VA_ARGS__ ); \
+		plog( msg ); \
+	}
 
 // NETWORK MACROS
 // create a network using as nodes object label X, located inside object O,
