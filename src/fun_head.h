@@ -145,7 +145,7 @@ extern double i_values[];
 	void init_map( ) { } \
 	double variable::fun( object *caller ) \
 	{ \
-		if( quit == 2 ) \
+		if ( quit == 2 ) \
 			return def_res; \
 		variable *var = this; \
 		EQ_BEGIN
@@ -199,15 +199,19 @@ extern double i_values[];
 	double variable::fun( object *caller ) \
 	{ \
 		double res = def_res; \
-		if( quit == 2 ) \
+		if ( quit == 2 ) \
 			return res; \
-		auto eq_it = eq_map.find( label ); \
-		if ( eq_it != eq_map.end( ) ) \
-			res = ( eq_it->second )( caller, this ); \
-		else \
+		if ( eq_func == NULL ) \
 		{ \
-			EQ_NOT_FOUND \
+			auto eq_it = eq_map.find( label ); \
+			if ( eq_it != eq_map.end( ) ) \
+				eq_func = eq_it->second; \
+			else \
+			{ \
+				EQ_NOT_FOUND \
+			} \
 		} \
+		res = ( eq_func )( caller, this ); \
 		EQ_TEST_RESULT \
 		return res; \
 	} \
@@ -256,6 +260,35 @@ extern double i_values[];
 #define ABORT quit = 1;
 #define CURRENT var->val[ 0 ]
 #define PARAMETER var->param = 1;
+#define FAST fast = true;
+#define OBSERVE fast = false;
+#define USE_NAN use_nan = true;
+#define NO_NAN use_nan = false;
+#define DEFAULT_RESULT( X ) def_res = X;
+#define RND_GENERATOR( X ) ran_gen = X;
+#define RND_SETSEED( X ) seed = X; init_random( X );
+
+#define RND_SEED seed
+#define PATH ( ( const char * ) path )
+#define CONFIG ( ( const char * ) simul_name )
+#define T t
+#define LAST_T max_step
+
+// regular logging (disabled in fast mode)
+#define LOG( ... ) \
+	if ( ! fast ) \
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, __VA_ARGS__ ); \
+		plog( msg ); \
+	}
+// priority logging (show even in in fast mode)
+#define PLOG( ... ) \
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, __VA_ARGS__ ); \
+		plog( msg ); \
+	}
 
 #define V(X) p->cal(p,(char*)X,0)
 #define VL(X,Y) p->cal(p,(char*)X,Y)
@@ -365,37 +398,8 @@ extern double i_values[];
 #define RNDDRAWTOTS(Z,X,Y, T) Z->draw_rnd((char*)X, (char*)Y,0, T)
 #define RNDDRAWTOTLS(O,X,Y,Z, T) O->draw_rnd((char*)X, (char*)Y, Z, T)
 
-#define FAST fast = true;
-#define OBSERVE fast = false;
-#define USE_NAN use_nan = true;
-#define NO_NAN use_nan = false;
-#define DEFAULT_RESULT( X ) def_res = X;
-#define PATH ( ( const char * ) path )
-#define CONFIG ( ( const char * ) simul_name )
-#define T t
-#define LAST_T max_step
-#define RND_GENERATOR( X ) ran_gen = X;
-#define RND_SETSEED( X ) seed = X; init_random( X );
-#define RND_SEED seed
-
 #define INTERACT(X,Y)  p->interact((char*)X,Y, v)
 #define INTERACTS(Z,X,Y) Z->interact((char*)X,Y, v)
-
-// regular logging (disabled in fast mode)
-#define LOG( ... ) \
-	if ( ! fast ) \
-	{ \
-		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, __VA_ARGS__ ); \
-		plog( msg ); \
-	}
-// priority logging (show even in in fast mode)
-#define PLOG( ... ) \
-	{ \
-		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, __VA_ARGS__ ); \
-		plog( msg ); \
-	}
 
 // NETWORK MACROS
 // create a network using as nodes object label X, located inside object O,

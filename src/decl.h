@@ -37,6 +37,7 @@ Comments and bug reports to marco.valente@univaq.it
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
 #define PARALLEL_MODE
+
 // multithreading libraries for C++11
 #include <atomic>
 #include <thread>
@@ -110,6 +111,13 @@ using namespace std;
 
 // classes definitions
 class object;
+class variable;
+
+#ifdef CPP11
+// special types used for fast equation lookup
+typedef function< double( object *caller, variable *var ) > eq_funcT;
+typedef map< const string, eq_funcT > eq_mapT;
+#endif
 
 class variable
 {
@@ -136,8 +144,13 @@ class variable
 	char *lab_tit;
 	int start;
 	int end;
+	
 #ifdef PARALLEL_MODE
-	mutex parallel_comp;// mutex lock for parallel computation
+	mutex parallel_comp;		// mutex lock for parallel computation
+#endif
+
+#ifdef CPP11
+	eq_funcT eq_func = NULL;	// pointer to equation function for fast look-up
 #endif
 
 	int init(object *_up, char const *_label, int _num_lag, double *val, int _save);
@@ -712,6 +725,5 @@ extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
 
 // map to fast equation look-up
 #ifdef CPP11
-typedef map< const string, function< double( object *caller, variable *var ) > > eq_mapT;
 extern eq_mapT eq_map;		// equations map
 #endif
