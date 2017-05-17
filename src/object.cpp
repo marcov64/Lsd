@@ -2275,7 +2275,10 @@ double object::increment(char const *lv, double value)
 variable *cv;
 if(this==NULL)
 {
- sprintf(msg, "\nError: Increment of %s requested to a NULL pointer  (var. '%s').",lv, stacklog->vs->label);
+ if(stacklog!=NULL && stacklog->vs!=NULL)
+   sprintf(msg, "\nError: Increment of %s requested to a NULL pointer  (var. '%s').",lv, stacklog->vs->label);
+ else
+     sprintf(msg, "\nError: increment of %s requested to a NULL pointer", lv);
  plog(msg);  
  error_hard();
  quit=2;

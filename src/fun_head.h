@@ -119,7 +119,7 @@ double res; \
 object *p, *c, app; \
 int i,j,h,k; \
 double v[1000]; \
-object register *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
+object register *cur=NULL, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur, *cyccur2, *cyccur3; \
 cur=cur1=cur2=cur3=cur4=cur5=cyccur=NULL; \
 netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5, *curl6, *curl7, *curl8, *curl9; \
 if(quit==2) \
@@ -216,6 +216,16 @@ return(res); \
 O!=NULL;O=cyccur, cyccur!=NULL?cyccur=go_brother(cyccur):cyccur=cyccur)
 #define CYCLE_SAFE(O,L) for(O=p->search((char*)L), cyccur=go_brother(O); \
 O!=NULL;O=cyccur, cyccur!=NULL?cyccur=go_brother(cyccur):cyccur=cyccur)
+
+#define CYCLE2_SAFES(C,O,L) for(O=C->search((char*)L), cyccur2=go_brother(O); \
+O!=NULL;O=cyccur2, cyccur2!=NULL?cyccur2=go_brother(cyccur2):cyccur2=cyccur2)
+#define CYCLE2_SAFE(O,L) for(O=p->search((char*)L), cyccur2=go_brother(O); \
+O!=NULL;O=cyccur2, cyccur2!=NULL?cyccur2=go_brother(cyccur2):cyccur2=cyccur2)
+
+#define CYCLE3_SAFES(C,O,L) for(O=C->search((char*)L), cyccur3=go_brother(O); \
+O!=NULL;O=cyccur3, cyccur3!=NULL?cyccur3=go_brother(cyccur3):cyccur3=cyccur3)
+#define CYCLE3_SAFE(O,L) for(O=p->search((char*)L), cyccur3=go_brother(O); \
+O!=NULL;O=cyccur3, cyccur3!=NULL?cyccur3=go_brother(cyccur3):cyccur3=cyccur3)
 
 
 #define CYCLE(O,L) O=p->search((char*)L); \
