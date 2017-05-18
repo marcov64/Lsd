@@ -2219,12 +2219,12 @@ double **data,**logdata;
 
 if(nv>1000)
  {
-  cmd(inter, "set answer [tk_messageBox -type yesno -message \"You selected $nv series to be plotted. So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nDo you want to continue anyway?\"]" );
+  cmd(inter, "set answer [tk_messageBox -type yesno -message \"You selected $nv series to be plotted. So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become extremely slow.\nThe graph will use only black symbols to reduce the likelihood of the problem. Do you want to continue anyway?\"]" );
   *choice=0;
   cmd(inter, "if {[string compare $answer \"yes\"] == 0} {set choice 1 } {set choice 22}");
   if(*choice==22)
    return;
-  
+   allblack=1;
  }
 if(nv==0)
  return;
@@ -5242,7 +5242,7 @@ cmd(inter, "pack .s.l.l ");
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 1");
+cmd(inter, "set wind 2");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x -anchor w");
@@ -5343,7 +5343,7 @@ else
      fprintf(f,"%lf\t", data[i+j][end[i+j]]);
   else
    {
-    if(start[i+j]<=max_c && end[i+j]>=min_c)
+    if(start[i+j]<=max_c && end[i+j]>=min_c && start[i+j]<=time_sel && end[i+j]>=time_sel)
       fprintf(f,"%lf\t", data[i+j][time_sel]);
    }
   } 
@@ -5602,7 +5602,7 @@ cmd(inter, "pack .s.i.l .s.i.e .s.i.arrow");
 
 cmd(inter, "frame .s.w -relief groove -bd 2");
 cmd(inter, "label .s.w.l -text \"Select window type\"");
-cmd(inter, "set wind 1");
+cmd(inter, "set wind 2");
 cmd(inter, "radiobutton .s.w.g -text \"Lsd window\" -variable wind -value 1 -anchor w");
 cmd(inter, "radiobutton .s.w.p -text \"Gnuplot window\" -variable wind -value 2 -anchor w");
 cmd(inter, "pack .s.w.l .s.w.g .s.w.p -expand yes -fill x");

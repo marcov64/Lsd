@@ -2447,9 +2447,9 @@ if(choice==4)
   reset_end(root);
   close_sim();
   running=0;
-  while(stacklog->prev!=NULL)
-   stacklog=stacklog->prev;
-  stack=0;
+  //while(stacklog->prev!=NULL)
+   //stacklog=stacklog->prev;
+  //stack=0;
   //throw pippo;
      return;
  }

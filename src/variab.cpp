@@ -362,7 +362,7 @@ else
 /*****************/
 stack --;
 //Remove the element of the stack
-if(stacklog!=NULL)
+if(stacklog!=NULL && stacklog->prev!=NULL)
   stacklog=stacklog->prev;
 if ( stacklog != NULL )
 {
