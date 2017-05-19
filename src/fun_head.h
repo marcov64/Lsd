@@ -114,8 +114,8 @@ extern double i_values[];
 	object *p = var->up, *c = caller, app; \
 	int i, j, h, k; \
 	double v[1000]; \
-	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur; \
-	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = NULL; \
+	object *cur, *cur1, *cur2, *cur3, *cur4, *cur5, *cur6, *cur7, *cur8, *cur9, *cur10, *cyccur, *cyccur2, *cyccur3; \
+	cur = cur1 = cur2 = cur3 = cur4 = cur5 = cur6 = cur7 = cur8 = cur9 = cur10 = cyccur = cyccur2 = cyccur3 = NULL; \
 	netLink *curl, *curl1, *curl2, *curl3, *curl4, *curl5; \
 	curl = curl1 = curl2 = curl3 = curl4 = curl5 = NULL; \
 	FILE *f = NULL; \
@@ -325,9 +325,21 @@ extern double i_values[];
 #define CYCLE_SAFE(O,L) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE_SAFE" ), \
 							  cyccur = go_brother( O ); O != NULL; O = cyccur, \
 							  cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
+#define CYCLE2_SAFE(O,L) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE_SAFE" ), \
+							  cyccur2 = go_brother( O ); O != NULL; O = cyccur2, \
+							  cyccur2 != NULL ? cyccur2 = go_brother( cyccur2 ) : cyccur2 = cyccur2 )
+#define CYCLE3_SAFE(O,L) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE_SAFE" ), \
+							  cyccur3 = go_brother( O ); O != NULL; O = cyccur3, \
+							  cyccur3 != NULL ? cyccur3 = go_brother( cyccur3 ) : cyccur3 = cyccur3 )
 #define CYCLE_SAFES(C,O,L) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLE_SAFES" ), \
 								 cyccur = go_brother( O ); O != NULL; O = cyccur, \
 								 cyccur != NULL ? cyccur = go_brother( cyccur ) : cyccur = cyccur )
+#define CYCLE2_SAFES(C,O,L) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLE_SAFES" ), \
+								 cyccur2 = go_brother( O ); O != NULL; O = cyccur2, \
+								 cyccur2 != NULL ? cyccur2 = go_brother( cyccur2 ) : cyccur2 = cyccur2 )
+#define CYCLE3_SAFES(C,O,L) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLE_SAFES" ), \
+								 cyccur3 = go_brother( O ); O != NULL; O = cyccur3, \
+								 cyccur3 != NULL ? cyccur3 = go_brother( cyccur3 ) : cyccur3 = cyccur3 )
 
 #define MAX(X) p->overall_max((char*)X,0)
 #define MAXL(X,Y) p->overall_max((char*)X,Y)

@@ -102,6 +102,7 @@ proc showmodel pippo {
 
 		.l configure -menu .l.m
 
+		set ltip ""
 		frame .l.bbar -bd 2
 		button .l.bbar.new -image newImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.file invoke 1 }
 		button .l.bbar.edit -image editImg -relief $bRlf -overrelief $ovBrlf -command  { .l.m.edit invoke 0 }
