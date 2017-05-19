@@ -436,7 +436,7 @@ double variable::cal( object *caller, int lag )
 #endif
 		//Remove the element of the stack
 		stack--;
-		if ( stacklog != NULL )
+		if ( stacklog != NULL && stacklog->prev != NULL )
 			stacklog = stacklog->prev;
 		if ( stacklog != NULL )
 		{

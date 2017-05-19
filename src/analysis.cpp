@@ -4470,7 +4470,7 @@ else
      fprintf(f,"%.*g\t", pdigits, data[i+j][end[i+j]]);
   else
    {
-    if(start[i+j]<=max_c && end[i+j]>=min_c)
+	if(start[i+j]<=max_c && end[i+j]>=min_c && start[i+j]<=time_sel && end[i+j]>=time_sel)
       fprintf(f,"%.*g\t", pdigits, data[i+j][time_sel]);
    }
   } 
