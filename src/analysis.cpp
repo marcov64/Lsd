@@ -5086,7 +5086,7 @@ char str1[500], str2[500], str3[10], dirname[300];
 FILE *f, *f2;
 double **data,**logdata;
 int i, nv, j, k, *start, *end, done, color;
-int time_sel, block_length, ndim;
+int time_sel, block_length, ndim, checkcount=0;
 
 double previous_row;
 cmd(inter, "set choice [.f.vars.ch.v size]");
@@ -5123,7 +5123,7 @@ for(i=0; i<nv; i++)
   if(autom_x==1 ||(start[i]<=max_c && end[i]>=min_c))
    {
   data[i]=find_data(idseries); 
-   
+   checkcount++;
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
 	 logdata[i]=new double[end[i]+1];	// create space for the logged values
@@ -5141,6 +5141,14 @@ for(i=0; i<nv; i++)
    }
 
  }
+if(checkcount==0)
+ {
+  cmd(inter, "tk_messageBox -type ok -title \"Error\" -message \"No data found within the time limits indicated.\nCheck on the option 'Use all cases' and try again.\"");
+  goto end;
+  
+ }
+    
+    
 
 
 
