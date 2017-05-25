@@ -1,5 +1,5 @@
 # CORRECTIONS: need to reset these variables to allow for no window version
-CC=g++
+CC_NW=$(CC_CROSS)g++
 SRC_DIR=$(SRC)/
 LSDROOT=.
 INCLUDE=-I$(PATH_HEADER) -I$(SRC)
@@ -10,38 +10,38 @@ TARGET_NW=$(TARGET)NW
 $(TARGET_NW)$(EXT): $(FUN).obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)file.obj \
 $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
 $(SRC_DIR)nets.obj
-	$(CC) $(SWITCH_CC_NW) $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
+	$(CC_NW) $(SWITCH_CC_NW) $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
 	$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
 	$(SRC_DIR)nets.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
 
 $(SRC_DIR)file.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp \
 $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE)
 $(SRC_DIR)main_gnuwin.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)main_gnuwin.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.obj \
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.obj \
 	$(INCLUDE)
 $(SRC_DIR)util.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)util.cpp \
 $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.obj $(INCLUDE)
 $(SRC_DIR)variab.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)variab.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.obj $(INCLUDE)
 $(SRC_DIR)object.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)object.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.obj $(INCLUDE)
 $(SRC_DIR)lsdmain.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.obj $(INCLUDE)
 $(SRC_DIR)report.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)report.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.obj $(INCLUDE)
 $(SRC_DIR)nets.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
-	$(CC) $(SWITCH_CC_NW) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
 $(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
 $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
-	$(CC) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)
+	$(CC_NW) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)
 
 clean:
 	rm $(SRC_DIR)*.obj $(FUN).obj $(TARGET_NW)*
