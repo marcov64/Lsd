@@ -107,7 +107,9 @@ extern double i_values[];
 #endif
 
 // user defined variables for all equations (to be defined in equation file)
+#if ! defined EQ_USER_VARS
 #define EQ_USER_VARS
+#endif
 
 #define EQ_BEGIN \
 	double res = def_res; \
@@ -193,6 +195,7 @@ extern double i_values[];
 	};
 
 #else
+
 // use fast map method for equation look-up
 #define MODELBEGIN \
 	bool fast_lookup = true; \
@@ -225,12 +228,12 @@ extern double i_values[];
 	}
 			
 #define EQUATION( X ) \
-	{ X, [ ]( object *caller, variable *var ) \
+	{ string( X ), [ ]( object *caller, variable *var ) \
 		{ \
 			EQ_BEGIN
 		
 #define FUNCTION( X ) \
-	{ X, [ ]( object *caller, variable *var ) \
+	{ string( X ), [ ]( object *caller, variable *var ) \
 		{ \
 			EQ_BEGIN \
 			var->last_update--; \

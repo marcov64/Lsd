@@ -116,7 +116,7 @@ class variable;
 #ifdef CPP11
 // special types used for fast equation lookup
 typedef function< double( object *caller, variable *var ) > eq_funcT;
-typedef map< const string, eq_funcT > eq_mapT;
+typedef map< string, eq_funcT > eq_mapT;
 #endif
 
 class variable
