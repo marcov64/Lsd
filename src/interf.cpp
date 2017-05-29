@@ -827,8 +827,8 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r)
 {
-char *lab1,*lab2,*lab3,lab[2*MAX_PATH_LENGTH],lab_old[2*MAX_PATH_LENGTH], ch[2*MAX_PATH_LENGTH];
-int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, temp[10];
+char *lab1, *lab2, lab[2*MAX_PATH_LENGTH], lab_old[2*MAX_PATH_LENGTH], ch[2*MAX_PATH_LENGTH], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+int sl, done=0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[10];
 bool saveAs, delVar, renVar, reload;
 char observe, initial, cc;
 bridge *cb;
@@ -852,9 +852,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -962,7 +962,7 @@ if ( param != 1 )
 if(done==1)
  {
 lab1=(char *)Tcl_GetVar(inter, "lab",0);
-strcpy(lab, lab1);
+strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
 sl=strlen(lab);
 if(sl!=0)
  {
@@ -1049,9 +1049,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -1103,7 +1103,7 @@ while(done==0)
 if(done==1)
 {
  lab1=(char *)Tcl_GetVar(inter, "lab",0);
- strcpy(lab, lab1);
+ strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
  if(strlen(lab)==0)
 	goto here_endobject;
  for(cur=r; cur->up!=NULL; cur=cur->up);
@@ -1153,9 +1153,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -1217,9 +1217,9 @@ while(done==0)
 if(done==1)
 {
  lab1=(char *)Tcl_GetVar(inter, "lab",0);
- sscanf( lab1, "%s", lab );
- if(strlen(lab)==0)
+ if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	goto here_endparent;
+ sscanf( lab1, "%99s", lab );
  for(cur=r; cur->up!=NULL; cur=cur->up);
  done=check_label(lab1, cur); //check that the label does not exist already
  if(done==1)
@@ -1289,9 +1289,9 @@ case 4:
 
 *choice=0;
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
-if ( lab1 == NULL || ! strcmp( lab1, "(none)" ) )
+if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 n=r->search(lab_old);
 if(n==NULL)
@@ -1327,8 +1327,7 @@ lab1=(char *)Tcl_GetVar(inter, "lab",0);
 
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-
-sscanf(lab1, "%s", lab_old);
+sscanf( lab1, "%99s", lab_old );
 
 // check if current or pointed object and save current if needed
 if ( strcmp( r->label, lab_old ) )	// check if not current variable
@@ -1466,7 +1465,7 @@ nature = *choice;
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 for ( cur = r; cur->up != NULL; cur = cur->up );
 cur = cur->search( lab_old );		// get pointer to vname
@@ -1520,9 +1519,10 @@ else					// rename
 	if ( *choice == 1 )
 	{
 		lab1= ( char * ) Tcl_GetVar( inter, "vname", 0 );
-		sscanf( lab1, "%s", lab );
-		if ( strlen( lab ) == 0 )
+		if ( lab1 == NULL || ! strcmp( lab1, "" ) )		
 			break;
+		sscanf( lab1, "%99s", lab );
+
 		if ( strcmp( lab, r->label ) )
 		{
 			for ( cur1 = r; cur1->up != NULL; cur1 = cur1->up );
@@ -1573,9 +1573,9 @@ if ( *choice == 0 )
 }
 
 lab1=(char *)Tcl_GetVar(inter, "vname", 0);
-if ( lab1 == NULL || ! strcmp( lab1, "(none)" ) )
+if ( lab1 == NULL || ! strcmp( lab1, "" ) || ! strcmp( lab1, "(none)" ) )		
 	break;
-sscanf(lab1, "%s", lab_old);
+sscanf( lab1, "%99s", lab_old );
 cv=r->search_var(NULL, lab_old);
 
 cur_descr=search_description(lab_old);
@@ -1892,7 +1892,7 @@ case 76:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );		// get var/par name in lab_old
+sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
 
 if ( *choice == 76 )
 {
@@ -1996,9 +1996,9 @@ if ( ! delVar && ( nature != cv->param || numlag != cv->num_lag ) )
 }
 
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-if ( strlen( lab1 ) > 0 )
+if ( lab1 != NULL && strcmp( lab1, "" ) )
 {
-	sscanf( lab1, "%s", lab );				// new name in lab (empty if delete)
+	sscanf( lab1, "%99s", lab );			// new name in lab (empty if delete)
 	if ( strcmp( lab, lab_old ) )			// check new name if different
 		renVar = true;
 }
@@ -2086,7 +2086,7 @@ case 79:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );		// get var/par name in lab_old
+sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
 
 cmd( "set TT .objs" );
 cmd( "newtop $TT \"Move\" { set choice 2 }" );
@@ -2179,7 +2179,7 @@ done = ( *choice == 77 ) ? 1 : 2;
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );		// get var/par name in lab_old
+sscanf( lab1, "%99s", lab_old );		// get var/par name in lab_old
 cv = r->search_var( NULL, lab_old );	// get var/par pointer
 if ( cv == NULL )
 	break;
@@ -2532,7 +2532,7 @@ if ( ! reload )
     break;
 
   lab1=(char *)Tcl_GetVar(inter, "res",0);
-  strcpy(lab, lab1);
+  strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
   
   if(strlen(lab)==0)
     break;
@@ -2643,7 +2643,7 @@ if(done==2)
   break;
  }
 lab1=(char *)Tcl_GetVar(inter, "res",0);
-strcpy(lab, lab1);
+strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 
 if(strlen(lab)==0)
  break;
@@ -2651,7 +2651,7 @@ delete[] simul_name;
 simul_name=new char[strlen(lab)+1];
 strcpy(simul_name, lab);
 lab1=(char *)Tcl_GetVar(inter, "path",0);
-strcpy(msg, lab1);
+strncpy( msg, lab1, MAX_PATH_LENGTH - 1 );
 delete[] path;
 path =new char[strlen(msg)+1];
 strcpy(path, msg);
@@ -2693,9 +2693,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -2972,7 +2972,7 @@ cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation
 cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
-if ( lab1 == NULL || strlen ( lab1 ) == 0 )
+if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
 sscanf( lab1, "%499s", lab );
 delete[] equation_name;
@@ -2989,7 +2989,7 @@ case 29:
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf(lab1, "%s", lab_old);
+sscanf(lab1, "%99s", lab_old);
 
 *choice = 0;	// point . window as parent for the following window
 show_eq(lab_old, choice);
@@ -3142,9 +3142,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -3258,9 +3258,9 @@ lab1 = ( char * ) Tcl_GetVar( inter, "useCurrObj", 0 );
 if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 {
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-	if ( lab1 == NULL )
+	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%s", lab_old );
+	sscanf( lab1, "%99s", lab_old );
 	for ( n = r; n->up != NULL; n = n->up );
 	n = n->search( lab_old );		// set pointer to $vname
 	if ( n == NULL )
@@ -3350,7 +3350,7 @@ if ( *choice == 2 )
 	break;
 
 lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-strcpy( lab, lab1 );
+strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
 plog( "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...", "", lab, lab );
 cmd( "wm deiconify .log; raise .log; focus .log" );
@@ -3473,7 +3473,7 @@ break;
 case 45:
 
 lab1=(char *)Tcl_GetVar(inter, "vname",0);
-strcpy(lab, lab1);
+strncpy(lab, lab1, MAX_PATH_LENGTH - 1);
 
 change_descr_text(lab);
 
@@ -3488,7 +3488,7 @@ case 46:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab );
+sscanf( lab1, "%99s", lab );
 
 *choice = 0;				// make . the parent window
 scan_using_lab(lab, choice);
@@ -3502,7 +3502,7 @@ case 47:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab );
+sscanf( lab1, "%99s", lab );
 
 *choice = 0;				// make . the parent window
 scan_used_lab(lab, choice);
@@ -3578,7 +3578,7 @@ case 55: //arrive here from the list of vars used (keep together with case 50!)
 
 *choice = 0;
 lab1=(char *)Tcl_GetVar(inter, "bidi",0);
-strcpy(msg,lab1);
+strncpy( msg, lab1, MAX_ELEM_LENGTH - 1 );
 no_error=true;
 cv=r->search_var(r, msg);
 no_error=false;
@@ -3648,7 +3648,7 @@ if ( *choice == 0 )
   break;
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
-strcpy(lab, lab1);
+strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 
 if(strlen(lab)==0)
  break;
@@ -3778,7 +3778,7 @@ case 58:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 shift_var(-1, lab_old, r);
 
@@ -3794,7 +3794,7 @@ case 59:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 shift_var(1, lab_old, r);
 
@@ -3810,7 +3810,7 @@ case 60:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 shift_desc(-1, lab_old, r);
 
@@ -3826,7 +3826,7 @@ case 61:
 lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
-sscanf( lab1, "%s", lab_old );
+sscanf( lab1, "%99s", lab_old );
 
 shift_desc(1, lab_old, r);
 
@@ -3861,7 +3861,11 @@ if (rsense!=NULL)
         i*=cs->nvalues;
     cur=root->b->head;
     root->add_n_objects2(cur->label, i-1, cur);
+	
+	plog( "\nUpdating configuration, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
     sensitivity_parallel(cur,rsense);
+	
 	unsaved_change( true );		// signal unsaved change
  	cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
   }
@@ -3894,9 +3898,13 @@ if (rsense!=NULL)
 	
 	// save the current object & cursor position for quick reload
 	save_pos( r );
-
     findexSens=1;
+	
+	// create a design of experiment (DoE) for the sensitivity data
+	plog( "\nCreating design of experiment, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
     sensitivity_sequential(&findexSens,rsense);
+
 	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the sequential sensitivity analysis. To run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
@@ -3995,7 +4003,12 @@ if (rsense!=NULL)
 
 	plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", "", (long)(sizMC * maxMC), 100 * sizMC );
     findexSens=1;
+	
+	// create a design of experiment (DoE) for the sensitivity data
+	plog( "\nCreating design of experiment, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
     sensitivity_sequential(&findexSens, rsense, sizMC);
+	
 	plog( "\nSensitivity analysis samples produced: %d", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
@@ -4115,9 +4128,13 @@ if (rsense!=NULL)
 	
 	// save the current object & cursor position for quick reload
 	save_pos( r );
-
     findexSens = 1;
+	
+	// create a design of experiment (DoE) for the sensitivity data
+	plog( "\nCreating design of experiment, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
     sensitivity_doe( &findexSens, NOLHdoe );
+	
 	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 	
@@ -4230,10 +4247,11 @@ if (rsense!=NULL)
 		findexSens = 1;
 	
 	// adjust a design of experiment (DoE) for the sensitivity data
-	plog( "\nCreating design of experiments, it may take a while, please wait... " );
+	plog( "\nCreating design of experiment, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
-
     sensitivity_doe( &findexSens, rand_doe );
+	
 	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
@@ -4361,14 +4379,14 @@ if (rsense!=NULL)
 	
 	// save the current object & cursor position for quick reload
 	save_pos( r );
-
 	findexSens = 1;
 	
 	// adjust a design of experiment (DoE) for the sensitivity data
-	plog( "\nCreating design of experiments, it may take a while, please wait... " );
+	plog( "\nCreating design of experiment, it may take a while, please wait... " );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
-
     sensitivity_doe( &findexSens, rand_doe );
+	
 	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
  	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
 
@@ -4668,7 +4686,6 @@ case 68:
 		break;
 	
 	// get configuration files to use
-	int ffirst, fnext;
 	if(*choice == 1)							// use current configuration files
 	{
 		if ( strlen( path ) == 0 || strlen( simul_name ) == 0 )
@@ -4678,11 +4695,11 @@ case 68:
 			break;
 		}
 		
-		ffirst=1;
-		fnext=findexSens;
+		ffirst = fSeq = 1;
+		fnext = findexSens;
 		findexSens = 0;
-		lab1=simul_name;
-		lab2=path;
+		strncpy( out_file, simul_name, MAX_PATH_LENGTH - 1 );
+		strncpy( out_dir, path, MAX_PATH_LENGTH - 1 );
 		Tcl_SetVar(inter, "res", simul_name, 0);
 		Tcl_SetVar(inter, "path", path, 0);
 	}
@@ -4707,15 +4724,15 @@ case 68:
 			if(*choice == 0)
 				break;
 			ffirst=*choice;
-			lab1=(char *)Tcl_GetVar(inter, "res",0);
-			lab2=(char *)Tcl_GetVar(inter, "path",0);
+			strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res", 0 ), MAX_PATH_LENGTH - 1 );
+			strncpy( out_dir, ( char * ) Tcl_GetVar( inter, "path", 0 ), MAX_PATH_LENGTH - 1 );
 			f=NULL;
 			do									// search for all sequential files
 			{
-				if(strlen(lab2) == 0)			// default path
-					sprintf(lab, "%s_%d.lsd", lab1, (*choice)++);
+				if ( strlen( out_dir ) == 0 )			// default path
+					sprintf( lab, "%s_%d.lsd", out_file, ( *choice )++ );
 				else
-					sprintf(lab, "%s/%s_%d.lsd", lab2, lab1, (*choice)++);
+					sprintf(lab, "%s/%s_%d.lsd", out_dir, out_file, (*choice)++);
 				if(f != NULL) fclose(f);
 				f=fopen(lab, "r");
 			}
@@ -4730,7 +4747,7 @@ case 68:
 				break;
 			ffirst = 1;
 			fnext = *choice + 1;
-			lab2=(char *)Tcl_GetVar(inter, "path",0);
+			strncpy( out_dir, ( char * ) Tcl_GetVar( inter, "path", 0 ), MAX_PATH_LENGTH - 1 );
 		}
 	}
 
@@ -4802,22 +4819,20 @@ case 68:
 	if ( num < 1 || num > 64 ) 
 		num = max_threads;
 	
-	lab3 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
+	strncpy( out_bat, ( char * ) Tcl_GetVar( inter, "res2", 0 ), MAX_PATH_LENGTH - 1 );
 	
 	// select batch format & create batch file
-	char wpath[MAX_PATH_LENGTH];
-	
 	cmd( "if {$tcl_platform(platform) == \"windows\"} {if {$natBat == 1} {set choice 1} {set choice 0}} {if {$natBat == 1} {set choice 0} {set choice 1}}" );
 	if ( fSeq )
 		if(*choice == 1)
-			sprintf(lab, "%s/%s_%d_%d.bat", lab2, lab3, ffirst, fnext - 1);
+			sprintf( lab, "%s/%s_%d_%d.bat", out_dir, out_bat, ffirst, fnext - 1 );
 		else
-			sprintf(lab, "%s/%s_%d_%d.sh", lab2, lab3, ffirst, fnext - 1);
+			sprintf( lab, "%s/%s_%d_%d.sh", out_dir, out_bat, ffirst, fnext - 1 );
 	else
 		if( *choice == 1 )
-			sprintf( lab, "%s/%s.bat", lab2, lab3 );
+			sprintf( lab, "%s/%s.bat", out_dir, out_bat );
 		else
-			sprintf( lab, "%s/%s.sh", lab2, lab3 );
+			sprintf( lab, "%s/%s.sh", out_dir, out_bat );
 		
 	f=fopen(lab, "wt");
 	if(*choice == 1)						// Windows header
@@ -4827,11 +4842,13 @@ case 68:
 
 		// convert to Windows folder separators (\)
 		for(i=0; i < strlen(ch); i++) 
-			if(ch[i] == '/') ch[i]='\\';
-		wpath[ MAX_PATH_LENGTH - 1 ] = '\0';
-		strncpy(wpath, lab2, MAX_PATH_LENGTH - 1);
-		for(i=0; i < strlen(wpath); i++) 
-			if(wpath[i] == '/') wpath[i]='\\';
+			if(ch[i] == '/') 
+				ch[i]='\\';
+		win_dir[ MAX_PATH_LENGTH - 1 ] = '\0';
+		strcpy( win_dir, out_dir );
+		for ( i = 0; i < strlen( win_dir ); i++ ) 
+			if ( win_dir[ i ] == '/' ) 
+				win_dir[ i ]='\\';
 		
 	}
 	else									// Unix header
@@ -4846,17 +4863,17 @@ case 68:
 				strcpy( msg, strchr( ch, ':' ) + 1 );
 				strcpy( ch, msg );
 			}
-			if( strchr( lab2, ':' ) != NULL )				// remove Windows drive letter
+			if( strchr( out_dir, ':' ) != NULL )				// remove Windows drive letter
 			{
-				strcpy( msg, strchr( lab2, ':' ) + 1 );
-				strcpy( lab2, msg );
+				strcpy( msg, strchr( out_dir, ':' ) + 1 );
+				strcpy( out_dir, msg );
 			}
 
-			if ( ( lab3 = strstr( ch, ".exe" ) ) != NULL )	// remove Windows extension, if present
-				lab3[0]='\0';
+			if ( ( lab1 = strstr( ch, ".exe" ) ) != NULL )	// remove Windows extension, if present
+				lab1[0]='\0';
 			else
-				if ( ( lab3 = strstr( ch, ".EXE" ) ) != NULL ) 
-					lab3[0]='\0';
+				if ( ( lab1 = strstr( ch, ".EXE" ) ) != NULL ) 
+					lab1[0]='\0';
 		}
 	}
 	
@@ -4867,9 +4884,9 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, wpath, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, j);
+				fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, j );
 			else							// Unix
-				fprintf(f, "%s -c %d -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, lab2, lab1, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, j);
+				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, j );
 			j <= sl ? i+=num+1 : i+=num;
 		}
 	}
@@ -4877,29 +4894,29 @@ case 68:
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if( fSeq )
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, wpath, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1, i);
+					fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, i );
 				else						// Unix
-					fprintf(f, "%s -c %d -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, lab2, lab1, i, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1, i);
+					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, i );
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
-				lab1 = ( char * ) Tcl_GetVar( inter, "res3", 0 );
+				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				if(*choice == 1)			// Windows
-					fprintf(f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, wpath, lab1, no_res ? "-r" : "", dozip ? "" : "-z", wpath, lab1);
+					fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file );
 				else						// Unix
-					fprintf(f, "%s -c %d -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, num, lab2, lab1, no_res ? "-r" : "", dozip ? "" : "-z", lab2, lab1);
+					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, num, out_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file );
 			}
 	
 	if ( fSeq )
 		if(*choice == 1)					// Windows closing
 		{
-			fprintf(f, "echo %d log files being generated: %s_1.log to %s_%d.log .\n", j - 1, lab1, lab1, j - 1);
+			fprintf(f, "echo %d log files being generated: %s_1.log to %s_%d.log .\n", j - 1, out_file, out_file, j - 1);
 			fclose(f);
 		}
 		else								// Unix closing
 		{
-			fprintf(f, "echo \"%d log files being generated: %s_1.log to %s_%d.log .\"\n", j - 1, lab1, lab1, j - 1);
+			fprintf(f, "echo \"%d log files being generated: %s_1.log to %s_%d.log .\"\n", j - 1, out_file, out_file, j - 1);
 			fprintf(f, "echo \"This terminal shell must not be closed during processing.\"\n");
 			fclose(f);
 			chmod(lab, ACCESSPERMS);		// set executable perms
@@ -4930,8 +4947,8 @@ case 68:
 
 	// start the job
 	cmd( "set oldpath [pwd]" );
-	cmd( "set path \"%s\"", lab2 );
-	if ( strlen( lab2 ) > 0 )
+	cmd( "set path \"%s\"", out_dir );
+	if ( strlen( out_dir ) > 0 )
 		cmd( "cd $path" );
 
 	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
