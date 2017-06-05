@@ -573,6 +573,15 @@ WORKER constructor
 ****************************************************/
 worker::worker( void )
 {
+	running = false;
+	free = false;
+	pexcpt = nullptr;
+	signum = -1;
+	var = NULL;
+	strcpy( err_msg1, "" );
+	strcpy( err_msg2, "" );
+	strcpy( err_msg3, "" );
+
 	// launch new thread (waiting mode)
 	thr = thread( & worker::cal_worker, this );
 }

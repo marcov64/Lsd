@@ -395,19 +395,19 @@ struct profile
 // multi-thread parallel worker data structure
 struct worker
 {
-	bool running = false;
-	bool free = false;
+	bool running;
+	bool free;
 	bool user_excpt;
-	char err_msg1[ TCL_BUFF_STR ] = "";
-	char err_msg2[ TCL_BUFF_STR ] = "";
-	char err_msg3[ TCL_BUFF_STR ] = "";
+	char err_msg1[ TCL_BUFF_STR ];
+	char err_msg2[ TCL_BUFF_STR ];
+	char err_msg3[ TCL_BUFF_STR ];
 	condition_variable run;
-	exception_ptr pexcpt = nullptr;
-	int signum = -1;
+	exception_ptr pexcpt;
+	int signum;
 	mutex lock;
 	thread thr;
 	thread::id thr_id;
-	variable *var = NULL;
+	variable *var;
 	
 	worker( void );								// constructor
 	~worker( void );							// destructor

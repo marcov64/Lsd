@@ -1853,7 +1853,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 		// remove stack allocation
 		while ( stacklog->prev != NULL )
 		{
-			auto cur_stack = stacklog;
+			lsdstack *cur_stack = stacklog;
 			stacklog = stacklog->prev;
 			delete cur_stack;
 		}

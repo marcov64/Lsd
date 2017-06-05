@@ -1,11 +1,11 @@
 Laboratory for Simulation Development - Lsd
 and
 Lsd Model Manager - LMM
-January 2017
+June 2017
 
 Version 7.0 beta
 by Marco Valente - marco.valente@univaq.it
-Version 7 additions by Marcelo Pereira - marcelocpereira@uol.com.br
+Version 7 additions by Marcelo Pereira - mcper@unicamp.br
 
 This Readme.txt file contains:
 - Brief introduction on Lsd
@@ -52,6 +52,9 @@ All the documentation is accessible through the help menus, presented as HTML pa
 - The LMM manual concerns the use of the LMM environment to develop Lsd model programs.
 - A few documents describe how to use Lsd. See the Documentation entry in the menu Help of LMM.
 - The distributed Lsd models produce automatically their own documentation.
+
+First time configuration
+After Lsd installation it may be necessary to configure the system to your operating system. After launching LMM, select "Options..." in menu "File" then press the button "Default", change any configuration if needed and then press "Ok". Next select "System Options..." in menu "Model", press the button corresponding to your system and then "Ok". Please redo these steps if reinstalling Lsd.
 
 MS Windows users
 Contrary to Linux and Mac systems, MS Windows systems normally do not contain C++ programming tools (compiler, libraries, debugger, etc.). The Windows distribution of Lsd contains a selection of the MinGW 32-bit package with all (and only) the packages required to use Lsd, so that no extra software must be installed to use Lsd on such systems. 
@@ -120,9 +123,11 @@ Please note that you need a FULLY installed Cygwin64 to use Lsd 64-bit. Just cop
 Linux Installation
 ******************
 
-To use the Lsd system it is necessary to have a GNU GCC compiler with the standard libraries and the Tcl/Tk 8.5/8.6 package; you likely have Tcl/Tk already installed on your system, but you may need the "development" package for your Tcl/Tk version. Use your preferred package manager to get the 'dev' package. In Debian or Ubuntu, you can use "sudo apt-get install tcl8.6-dev tk8.6-dev". Remember you need the packages to match the architecture (32 or 64-bit) you are using for Lsd (apt-get manages that transparently).
+To use the Lsd system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.5/8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. In Debian or Ubuntu, you can use "sudo apt-get install zlib1g-dev tcl8.6-dev tk8.6-dev" to make sure you have the correct libraries.
 
-Though not strictly necessary, it is also suggested to have the GDB debugger (for low-level inspection of a simulation working) and the gnuplot graphical package (for advanced graphics). In Debian or Ubuntu, use "sudo apt-get install gdb gnuplot" to install both. 
+Please check your configuration has at least g++ 4.9 installed (you may check it by issuing the command "g++ -v" in terminal). In Debian or Ubuntu you may use "sudo apt-get install g++", if necessary. Ubuntu minimum supported version is 15.04 (older versions can be updated to use g++ 4.9 but this is not the default configuration).
+
+Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics). In Debian or Ubuntu, use "sudo apt-get install gdb gnuplot" to install both. 
 
 To unpack the distribution file (e.g., LsdXX.zip) simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
@@ -134,8 +139,6 @@ or (for 32-bit machines)
 
 ./add-shortcut.sh 32
 
-If you get an error when trying to execute the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x *.sh" in the installation directory).
-
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
 ./lmm
@@ -143,6 +146,8 @@ To run LMM from a system shell, please open a terminal in the installation direc
 or (for 32-bit machines)
 
 ./lmm32
+
+If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
 
 You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the new Lsd directory and use the makefile "makefile.ln" (64/32-bit, native) ("makefile32.ln" is used ONLY for creating a 32-bit version in a 64-bit machine):
 
@@ -161,7 +166,7 @@ If you modified the makefile to compile LMM, the same changes need to be made to
 
 
 ***********************************
-MacOS (Mavericks+) Installation
+MacOS (10.10+) Installation
 ***********************************
 
 Mac users have two options. Either use the package native for MacOS (Aqua), or compile Lsd as a Unix system. In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
@@ -175,6 +180,8 @@ To create a desktop or dock shortcut to Lsd, you click and hold over the LMM app
 Alternatively, you can run LMM from the terminal. Please open a terminal in the chosen installation directory and execute:
 
 ./lmmOSX
+
+If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x lmmOSX" and "chmod +x LMM.app/Contents/MacOS/LMM" in the installation directory).
 
 Optionally, you can recompile LMM, in particular if the included pre-compiled version has problems with your Mac setup. Open a terminal and go to the directory of Lsd installation. Then use the command:
 
@@ -195,7 +202,7 @@ Use of LMM and Lsd
 
 LMM (Lsd Model Manager) is a program used to manage Lsd model programs. Lsd (Laboratory for Simulation Development) model programs are stand-alone programs that execute fast and efficiently difference-equation simulation models. For a user to develop a new simulation model it is only requested to specify the equations of the model in a simplified C++ language, with the assistance of automatic help. Lsd model programs generate automatically the code necessary to link the equations in a coherent sequence within a simulated time steps, saving and elaborating the result, allowing easy access to initialization values, and many other operations required for fully exploiting the simulation model. Both LMM and Lsd offer extensive manual pages for each operation available.
 
-When LMM starts the first operation is to choose a model to work with. Using the LMM's Model Browser you can either select one of the existing models, or create a new empty one  (that is, no equations, variables etc.). KNOWN BUG: MacOS users may have some of Model Browser menu options grayed-out because of an old version of Tcl/Tk. In this case, please use LMM main File menu to create new models or copy an existing one.
+When LMM starts the first operation is to choose a model to work with. Using the LMM's Model Browser you can either select one of the existing models, or create a new empty one  (that is, no equations, variables etc.). KNOWN BUG: MacOS users may have some of Model Browser menu options grayed-out because of an old version of Tcl/Tk. In this case, please use the toolbar or the LMM main File menu to create new models or copy an existing one.
 
 After a model is selected in Model Browser, you can ask LMM to:
 - compile the model and run it;
@@ -208,7 +215,7 @@ ATTENTION: the very first time a model is compiled an error can be caused by the
 When a model program is successfully compiled and run by LMM, then the user can interact with the Lsd Browser interface. This window permits to control every aspect of the simulation run (e.g., setting initial values, observing and saving results, reading the model documentation etc.) except for the modification of the code for the equations, done in LMM. For this latter operation you need to close the Lsd model program, tell LMM to show the equation file if necessary, edit the model's equations and compile/run a new Lsd model program.
 
 
-For persisting problems email us: valente@ec.univaq.it or marcelocpereira@uol.com.br
+For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 
 
 Legal stuff
