@@ -1620,6 +1620,14 @@ object *object::add_n_objects2(char const *lab, int n)
 object *cur;
 
 cur=blueprint->search(lab);
+if(cur==NULL)
+ {
+ sprintf(msg, "\nError adding new object(s): object '%s' does not contain objects of type '%s'.\n", label, lab);
+ plog(msg);
+ error_hard();
+ quit=2;
+ return NULL;
+ }
 cur=add_n_objects2(lab, n, cur);
 return(cur);
 }
@@ -1646,7 +1654,7 @@ for(cb2=b; cb2!=NULL && strcmp(cb2->blabel,lab); cb2=cb2->next);
 cb2->counter_updated=false;
 if(cb2==NULL)
 {
-sprintf(msg, "\nError adding new object(s): object '%s' does not contain objects of type '%s'.\n", label, lab);
+ sprintf(msg, "\nError adding new object(s): object '%s' does not contain objects of type '%s'.\n", label, lab);
  plog(msg);
  error_hard();
  quit=2;
