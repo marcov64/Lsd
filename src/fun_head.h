@@ -366,9 +366,11 @@ extern double i_values[];
 
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
+#define TSEARCH_INI(X) p->initturbo((char*)X,0)
 #define TSEARCHS_INI(O,X) O->initturbo((char*)X,0)
 // Performs turbo search: O, X as in TSEARCHS_INI
 //                        Y=position of object X to be searched for
+#define TSEARCH(X,Y) p->turbosearch((char*)X,0,Y)
 #define TSEARCHS(O,X,Y) O->turbosearch((char*)X,0,Y)
 
 #define SORT(X,Y,Z) p->lsdqsort((char*)X,(char*)Y,(char*)Z)
