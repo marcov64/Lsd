@@ -227,15 +227,24 @@ O!=NULL;O=cyccur3, cyccur3!=NULL?cyccur3=go_brother(cyccur3):cyccur3=cyccur3)
 #define CYCLE3_SAFE(O,L) for(O=p->search((char*)L), cyccur3=go_brother(O); \
 O!=NULL;O=cyccur3, cyccur3!=NULL?cyccur3=go_brother(cyccur3):cyccur3=cyccur3)
 
+#define CYCLE(O,L) CYCLES(p,O,L)
 
-#define CYCLE(O,L) O=p->search((char*)L); \
+/*
+#define CYCLES(C,O,L) O=C->search((char*)L); \
 if(O==NULL) error_cycle((char*)L); \
-for(;O!=NULL;O=go_brother(O))
+if(cyccur!=NULL) { for(O=C->search((char*)L), cyccur=go_brother(O); \
+O!=NULL;O=cyccur, cyccur!=NULL?cyccur=go_brother(cyccur):cyccur2=cyccur)} \
+else { \
+if(cyccur2!=NULL) { for(O=C->search((char*)L), cyccur2=go_brother(O); \
+O!=NULL;O=cyccur2, cyccur2!=NULL?cyccur2=go_brother(cyccur2):cyccur2=cyccur2)} \
+else { if(cyccur3!=NULL) { for(O=C->search((char*)L), cyccur3=go_brother(O); \
+O!=NULL;O=cyccur3, cyccur3!=NULL?cyccur3=go_brother(cyccur3):cyccur2=cyccur3)} }}  \
+
+***/
 
 #define CYCLES(C,O,L) O=C->search((char*)L); \
 if(O==NULL) error_cycle((char*)L); \
 for(;O!=NULL;O=go_brother(O))
-
 
 #define MAX(X) p->overall_max((char*)X,0)
 #define MAXL(X,Y) p->overall_max((char*)X,Y)

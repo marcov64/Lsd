@@ -102,7 +102,7 @@ bool firstRes = true;		// flag to mark first results file (init grand total file
 double refresh=1.01;
 char *eq_file=NULL;
 char lsd_eq_file[200000];
-int lattice_type=2;
+int lattice_type=1;
 int watch;
 char msg[1000];
 
