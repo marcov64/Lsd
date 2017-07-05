@@ -126,6 +126,7 @@ extern char msg[];
 extern int seed;
 extern long idum;
 extern lsdstack *stacklog;
+extern int quit;
 
 long nodesSerial = 0;					// node's serial number global counter
 
@@ -446,7 +447,7 @@ object *object::draw_node_net( char const *lab )
 	{
 		sprintf( msg, "\nError (network node draw for '%s'): draw probabilities are invalid.", stacklog->vs->label );
 		plog( msg );
-		sprintf( msg, "\nFirst object returned.\n", lab );
+		sprintf( msg, "\nFirst object %s returned.\n", lab );
 		plog( msg );
 		return cur1;
 	}
@@ -1168,3 +1169,123 @@ long object::write_file_net( char const *lab, char const dir[] = "", char const 
 	
 	return numLinks;
 }
+
+
+/*
+Generates a lattice, regulare square network where each cell in row i and column j is connected to its 4 or 8 neighbours, depending on an optional parameter
+The links a genereated clockwise starting from "North", that is cell (i-1, j), then either East or Northeast, depending on the final option, cells (i,j+1) or (i-1,j+1), respectively.
+The lattice is a torus, i.e. cells at the borders are connected to the opposite border
+*/
+void object::init_lattice_net(int nrow, int ncol, char const *labnode, int eightneighbors)
+{
+
+long idNode, i, j, h;
+object *cur, *cur1;
+
+if(quit!=0)
+ return;
+if(nrow<=0 || ncol<=0 || labnode==NULL)
+ {
+  plog("Error in creating a lattice network: wrong parameters values.\n");
+  error_hard();
+  return;
+ }
+add_n_objects2( labnode , nodes2create( this, labnode, nrow*ncol ) );	// creates the missing node objects,
+																	// cloning the first one
+for ( idNode = 1, cur = search( labnode ), i=j=0; cur != NULL; cur = go_brother( cur ) )
+		{
+         idNode=ncol*i+j+1;
+         
+         cur->add_node_net( idNode, labnode );
+         if(++j>=ncol)
+          {
+           i++;
+           j=0;
+          }
+        }
+    
+initturbo( labnode, nrow*ncol );
+if(eightneighbors==0)
+{
+for(cur=search(labnode), i=j=0; cur!=NULL; cur=go_brother(cur))
+ {
+  idNode=ncol*i+j;
+  
+  h= ncol * ( i == 0 ? nrow-1 : i - 1 ) + j + 1; //north
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  h=ncol * i + ( j == ncol-1 ? 0 : j + 1 ) + 1; //east
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  
+  h=ncol * ( i == nrow - 1 ? 0 : i + 1 ) + j + 1; //south
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  
+  h=ncol * i + ( j == 0 ? ncol-1 : j - 1 ) + 1; //west
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+  
+  if(++j>=ncol)
+   {
+    i++;
+    j=0;
+   }
+
+ }
+}
+else
+ {
+for(cur=search(labnode), i=j=0; cur!=NULL; cur=go_brother(cur))
+ {
+  idNode=ncol*i+j;
+  
+  h = ncol * ( i == 0 ? nrow-1 : i - 1 ) + j + 1; //north
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == 0 ? nrow-1 : i - 1 ) + ( j == ncol-1 ? 0 : j + 1 ) + 1 ; //northeast
+   cur1=search_node_net( labnode, h );
+   cur->add_link_net(cur1,0,1);
+   
+  h = ncol * i + ( j == ncol-1 ? 0 : j + 1 ) + 1; //east
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+
+  h = ncol * ( i == nrow-1 ? 0 : i + 1 ) + ( j == ncol-1 ? 0 : j + 1 ) + 1 ; //southeast
+   cur1=search_node_net( labnode, h );
+   cur->add_link_net(cur1,0,1);
+  
+  h = ncol * ( i == nrow - 1 ? 0 : i + 1 ) + j + 1; //south
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == nrow-1 ? 0 : i + 1 ) + ( j == 0 ? ncol-1 : j - 1 ) + 1 ; //southwest
+   cur1=search_node_net( labnode, h );
+   cur->add_link_net(cur1,0,1);
+
+  h = ncol * i + ( j == 0 ? ncol-1 : j - 1 ) + 1; //west
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == 0 ? nrow-1 : i - 1 ) + ( j == 0 ? ncol-1 : j - 1 )  + 1; //northwest
+  cur1=search_node_net( labnode, h );
+  cur->add_link_net(cur1,0,1);
+ 
+   if(++j>=ncol)
+   {
+    i++;
+    j=0;
+   }
+  
+   
+ }
+ }
+
+
+}
+

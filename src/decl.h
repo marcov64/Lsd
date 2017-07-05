@@ -219,6 +219,8 @@ long init_circle_net( char const *lab, long numNodes, long outDeg );
 long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
 long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
+void init_lattice_net(int nrow, int ncol, char const *labnode, int eightneighbors);
+
 };
 
 struct lsdstack
