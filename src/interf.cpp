@@ -4558,7 +4558,7 @@ case 65:
 	cmd( "set path \"%s\"", path );
 
 	// open dialog box to get file name & folder
-	cmd( "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -confirmoverwrite yes -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]" );
+	cmd( "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]" );
 	cmd( "if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
 	if(*choice==2)
 		break;

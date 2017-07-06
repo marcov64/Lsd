@@ -3708,7 +3708,7 @@ cmd( "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command { \
 		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 		.l.t.text insert end \"$a\" \
 	}" );
-cmd( "button .l.t.d.os.mac -width -15 -text \"Default Mac OSX\" -command { \
+cmd( "button .l.t.d.os.mac -width -15 -text \"Default MacOS\" -command { \
 		.l.t.text delete 1.0 end; \
 		set file [open \"$RootLsd/$LsdSrc/sysopt_mac.txt\" r]; \
 		set a [read -nonewline $file]; \
