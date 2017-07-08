@@ -268,6 +268,9 @@ for(;O!=NULL;O=go_brother(O))
 
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
+#define TSEARCHT_INI(X,Y) p->initturbo((char*)X,Y)
+#define TSEARCHTS_INI(O,X,Y) O->initturbo((char*)X,Y)
+#define TSEARCH_INI(X) p->initturbo((char*)X,0)
 #define TSEARCHS_INI(O,X) O->initturbo((char*)X,0)
 // Performs turbo search: O, X as in TSEARCHS_INI
 //                        Y=position of object X to be searched for

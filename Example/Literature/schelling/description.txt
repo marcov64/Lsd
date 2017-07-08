@@ -1,0 +1,22 @@
+Schelling Model
+
+The model represents a population of agents located on a lattice. Agents are divided in two groups, and each agent has a weak preference for having neighbours members of the same group. 
+
+The model shows that even when the agents have a high degree of tolerance, e.g. are content with even only 40% of their neighbours being of the same group, the result is full segregation.
+
+The model assumes that at each time step a randomly chosen agent who is dissatisfied with its neighbours is randomly relocated to an empty slot of the lattice.
+
+Technically the model exploits the optimized network tools and the LSD-based lattices' representation.
+
+The user can set the following values:
+- lattice size (num. of rows and colums); 
+- grafical window size (pixels of the lattice graph);
+- density of agents in the lattice, as a share of the total cells;
+- threshold of minimal share of neighbours to be happy and not relocated (the higher the less tolerant); (par. meanThreshold, see below)
+- share of agents in between the two types (normally 50%);
+- flag to plot the lattive live during the simulation run; skipping the plotting allow for faster execution and permits to run many simulation in parallel, e.g. to appreciate difference in results depending on the parameters.
+
+The model returns the average share of same-type neighbours across all agents. A value of 50% is the default initial value, and 100% means complete ssegregation, no neighbours from the different group.
+Users can observe the plot at run time or generate one from the Analysis of Result window. The runtime lattice represents in green the empty cells, and in red and black those occupied by agents of the two types.
+
+The model allows also to assign randomly generated threshold levels that change through time approximating the average threshold from neighbours. The user needs to specify the mean value of the random number generator (normally distributed) and the variance. Setting the variance to 0 assigns to all agents the same threshold level.
