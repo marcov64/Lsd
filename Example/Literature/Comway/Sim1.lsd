@@ -1,0 +1,289 @@
+	
+Label Root
+{
+	Son: Lattice
+	Label Lattice
+	{
+		Son: node
+		Label node
+		{
+			Param: row
+			Param: col
+			Var: State
+
+		}
+
+		Var: InitLattice
+		Param: nrow
+		Param: ncol
+		Param: PixWidth
+		Param: PixHeight
+		Param: PercActive
+		Var: SlowDown
+		Param: TimeSleep
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Lattice C	1
+Var: InitLattice 0 n + d n
+Param: nrow 0 n + n n	50
+Param: ncol 0 n + n n	100
+Param: PixWidth 0 n + n n	1200
+Param: PixHeight 0 n + n n	600
+Param: PercActive 0 n + n n	0.3
+Var: SlowDown 0 n + d n
+Param: TimeSleep 0 n + n n	50000
+
+Object: node C	1
+Param: row 0 n + n n	0
+Param: col 0 n + n n	0
+Var: State 1 n + n n	0
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 1000000
+EQUATION fun_Comway.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Lattice
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_InitLattice
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nrow
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ncol
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PixWidth
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PixHeight
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PercActive
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_SlowDown
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_TimeSleep
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_node
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_row
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_col
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_State
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+
+
+EQUATION("State")
+/*
+
+Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+Any live cell with two or three live neighbours lives on to the next generation.
+Any live cell with more than three live neighbours dies, as if by overpopulation.
+Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+*/
+
+v[0]=0;
+CYCLE_LINK(curl)
+ {
+  cur=LINKTO(curl);
+  v[0]+=VLS(cur,"State",1);
+ }
+if(v[0]==3)
+ END_EQUATION(1);
+if(CURRENT==1 && v[0]==2)
+ END_EQUATION(1); 
+RESULT(0 )
+
+
+EQUATION("InitLattice")
+/*
+Initialize the model. Generate the lattice and place agents randomly.
+*/
+v[0]= V("nrow");    // n. of rows in the lattice
+v[1]= V("ncol"); //n.columns in the lattice
+p->init_lattice_net(v[0],v[1],"node", 1);
+
+p->initturbo("node", v[0]*v[1] );
+   
+v[3]=V("PercActive");
+CYCLE(cur, "node")
+ { k=VS_NODEID(cur)-1;
+   i=k/(int)v[1];
+   j=k-i*(int)v[1];
+   WRITES(cur,"row",(double)i+1);
+   WRITES(cur,"col",(double)j+1);
+   if(RND<v[3])
+    WRITELS(cur,"State",1, t-1);
+   else
+    WRITELS(cur,"State",0, t-1); 
+ 
+ }
+PARAMETER 
+END_EQUATION(0);
+/***
+CYCLE(cur, "node")
+ {
+ ADDNOBJS(cur,"testLink",7);
+ cur1=SEARCHS(cur,"testLink");
+
+ CYCLES_LINK(cur,curl)
+ {
+  cur2=LINKTO(curl);
+  v[50]=VS(cur2,"row");
+  WRITES(cur1,"tlrow",v[50]);
+  v[50]=VS(cur2,"col");
+  WRITES(cur1,"tlcol",v[50]);
+  cur1->hook=cur2;
+  cur1=go_brother(cur1);
+ }
+}
+INTERACT("PROVA", v[0]);    
+***/
+
+v[2]=v[1];
+v[3]=v[0];
+
+v[80]=V("PlotLattice");
+if(v[80]==1)
+{
+v[4]=V("PixWidth");
+v[5]=V("PixHeight"); 
+init_lattice(v[4],v[5], v[3], v[2], "", "", "", NULL, 2);
+}
+v[10]=V("numAgents");
+ADDNOBJ("Agent",v[10]-1);
+
+v[12]=v[0]*v[1];
+v[16]=V("shareType");
+v[99]=0;
+CYCLE(cur, "Agent")
+ {v[99]++;
+  v[13]=rnd_integer(1, v[12]);
+  cur1=p->turbosearch("node", v[12],v[13]);
+  while(cur1!=NULL && cur1->hook!=NULL)    cur1=go_brother(cur1);
+  if(cur1==NULL)
+     {
+      cur1=SEARCH("node");
+      while( cur1!=NULL && cur1->hook!=NULL)    cur1=go_brother(cur1);
+     } 
+  if(cur1==NULL)
+   { plog("\nError, lattice saturated, too many agents.\n");
+     INTERACT("Saturation", v[13]);
+     PARAMETER;
+     END_EQUATION(-1);
+   }
+  cur->hook=cur1;
+  cur1->hook=cur;   
+  v[14]=VS(cur1,"row");
+  v[15]=VS(cur1,"col");
+  if(RND<v[16])
+   v[17]=1;
+  else
+   v[17]=0; 
+  if(v[80]==1) 
+    update_lattice(v[14], v[15], v[17]);
+  WRITES(cur,"Type",v[17]);     
+ }
+p->initturbo("Agent", v[10] ); 
+PARAMETER
+RESULT(1 )
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE
