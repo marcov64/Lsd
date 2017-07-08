@@ -1191,19 +1191,105 @@ if(nrow<=0 || ncol<=0 || labnode==NULL)
   return;
  }
 add_n_objects2( labnode , nodes2create( this, labnode, nrow*ncol ) );	// creates the missing node objects,
-																	// cloning the first one
+			
+    
+initturbo( labnode, nrow*ncol );
 for ( idNode = 1, cur = search( labnode ), i=j=0; cur != NULL; cur = go_brother( cur ) )
+  {
+   idNode=ncol*i+j+1;
+   cur->add_node_net( idNode, labnode );
+   
+   if(++j>=ncol)
+      {
+       i++;
+       j=0;
+      }
+
+   
+  }
+if(eightneighbors==0)
+ {
+ for ( idNode = 1, cur = search( labnode ), i=j=0; cur != NULL; cur = go_brother( cur ) )
 		{
          idNode=ncol*i+j+1;
          
-         cur->add_node_net( idNode, labnode );
+  h= ncol * ( i == 0 ? nrow-1 : i - 1 ) + j + 1; //north
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  h=ncol * i + ( j == ncol-1 ? 0 : j + 1 ) + 1; //east
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  
+  h=ncol * ( i == nrow - 1 ? 0 : i + 1 ) + j + 1; //south
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  
+  h=ncol * i + ( j == 0 ? ncol-1 : j - 1 ) + 1; //west
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+ 
          if(++j>=ncol)
           {
            i++;
            j=0;
           }
         }
-    
+  }
+else
+ {
+ for ( idNode = 1, cur = search( labnode ), i=j=0; cur != NULL; cur = go_brother( cur ) )
+		{
+         idNode=ncol*i+j+1;
+         
+        // cur->add_node_net( idNode, labnode );
+  h= ncol * ( i == 0 ? nrow-1 : i - 1 ) + j + 1; //north
+  //cur1=search_node_net( labnode, h );
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == 0 ? nrow-1 : i - 1 ) + ( j == ncol-1 ? 0 : j + 1 ) + 1 ; //northeast
+  cur1=turbosearch(labnode, nrow*ncol, h);
+   cur->add_link_net(cur1,0,1);
+
+  h=ncol * i + ( j == ncol-1 ? 0 : j + 1 ) + 1; //east
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == nrow-1 ? 0 : i + 1 ) + ( j == ncol-1 ? 0 : j + 1 ) + 1 ; //southeast
+  cur1=turbosearch(labnode, nrow*ncol, h);
+   cur->add_link_net(cur1,0,1);
+
+  
+  h=ncol * ( i == nrow - 1 ? 0 : i + 1 ) + j + 1; //south
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+
+  h = ncol * ( i == nrow-1 ? 0 : i + 1 ) + ( j == 0 ? ncol-1 : j - 1 ) + 1 ; //southwest
+  cur1=turbosearch(labnode, nrow*ncol, h);
+   cur->add_link_net(cur1,0,1);
+
+  h=ncol * i + ( j == 0 ? ncol-1 : j - 1 ) + 1; //west
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+ 
+    h = ncol * ( i == 0 ? nrow-1 : i - 1 ) + ( j == 0 ? ncol-1 : j - 1 )  + 1; //northwest
+  cur1=turbosearch(labnode, nrow*ncol, h);
+  cur->add_link_net(cur1,0,1);
+         
+         
+         if(++j>=ncol)
+          {
+           i++;
+           j=0;
+          }
+        }
+  }
+
+ return;
+ 
 initturbo( labnode, nrow*ncol );
 if(eightneighbors==0)
 {

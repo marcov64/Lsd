@@ -1953,7 +1953,7 @@ if(lattice_type==1)
 {
 for(i=1; i<=nrow; i++)
  {
-  for(j=1; j<=nrow; j++)
+  for(j=1; j<=ncol; j++)
    {
     sprintf(msg, ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]",(int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string);
    cmd(inter, msg);
@@ -1996,7 +1996,12 @@ double update_lattice(double line, double col, double val)
 
 //sprintf(msg, ".lat.c dtag [.lat.c create rect %d %d %d %d -outline %s -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)(col*dimW), (int)(line*dimH), val_string, val_string );
 //sprintf(msg, ".lat.c dtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
-sprintf(msg, ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
+sprintf(msg, "set tempc [.lat.c find withtag c%d_%d] ", (int)line, (int)col);
+cmd(inter, msg);
+sprintf(msg, "if {$tempc != \"\"} {.lat.c itemconfigure c%d_%d -fill %s} {}",(int)line, (int)col, val_string);
+cmd(inter, msg);
+
+sprintf(msg, "if {$tempc == \"\"} {.lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]} {}", (int)line, (int)col, (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
 cmd(inter, msg);
 cmd(inter, "if {$lat_update == 1} {update} {}");
 return 0;  

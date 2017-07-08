@@ -271,7 +271,10 @@ for(;O!=NULL;O=go_brother(O))
 #define TSEARCHS_INI(O,X) O->initturbo((char*)X,0)
 // Performs turbo search: O, X as in TSEARCHS_INI
 //                        Y=position of object X to be searched for
+#define TSEARCH(X,Y) p->turbosearch((char*)X,0,Y) //version without knowledge of the total number of objects
+#define TSEARCHT(X,Y,Z) p->turbosearch((char*)X,Y,Z) //version with total number of objects, Y
 #define TSEARCHS(O,X,Y) O->turbosearch((char*)X,0,Y)
+#define TSEARCHTS(O,X,Y,Z) O->turbosearch((char*)X,Y,Z)
 
 #define SORT(X,Y,Z) p->lsdqsort((char*)X,(char*)Y,(char*)Z)
 #define SORTS(O,X,Y,Z) O->lsdqsort((char*)X,(char*)Y,(char*)Z)
