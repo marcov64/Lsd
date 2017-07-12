@@ -104,9 +104,9 @@ add-to-path CYGWIN_DIR
 
 Alternatively, or if you have problems with the command above, you can use Windows GUI to add Cygwin to the PATH. In Windows open "Control Panel", sequentially select "System and Security", "System", "Advanced system settings", "Advanced" tab and then "Environment Variables...". In the "System variables" list, select "Path" and press "Edit..." (be carefull to NOT DELETE the existing text). Run across the lines to see if your Cygwin bin folder, i.e. "C:\cygwin64\bin", is already there. If Yes, just press "Cancel" 3 times. If not, at the end of the "Variable value" field type ";" (next to the existing text) and add your Cygwin bin folder. Press "Ok" 3 times and you are done. Make sure you don't have any older version of gcc ahead of your Cygwin bin folder in PATH.
 
-When the installation is completed, if you want to create a desktop link (icon) to run Lsd/LMM, you can use the batch file available in the installation directory executing in the command prompt (double-clicking it in Windows Explorer is NOT ok here):
+When the installation is completed, you can use the batch file available in the installation directory executing the command (or double-clicking it in Windows Explorer):
 
-add-shortcut 64
+add-shortcut64.bat
 
 Double-clicking the created desktop icon will run LMM (Lsd Model Manager) in 64-bit mode, which allows to create new models, or select existing models.  Never invoke the file "lmm.exe" or "lmm64.exe" directly, because they need some environment variables to be set by "run.bat"/"run64.bat".
 
