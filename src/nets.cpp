@@ -55,18 +55,26 @@ NETS.CPP
 	file is located. The format for the network file name is "<base_name>_<serial>.<ext>".
 	If multiple simulation runs are used, <serial> is incremented sequentially.
 	
-	There are also some alternative pseudo-random network generator algorithms available:
+	There are also some alternative network generator algorithms available using:
 
-	parent->uniform_net( lab, numNodes, outDeg )
+	parent->init_discon_net( lab, numNodes )
 	
-	parent->circle_net( lab, numNodes, outDeg )
+	parent->init_random_dir_net( lab, numNodes, numLinks )
 	
-	parent->renyi_erdos_net( lab, numNodes, linkProb )
+	parent->init_random_undir_net( lab, numNodes, numLinks )
 	
-	parent->small_world_net( lab, numNodes, outDeg, rho )
+	parent->init_uniform_net( lab, numNodes, outDeg )
+	
+	parent->init_circle_net( lab, numNodes, outDeg )
+	
+	parent->init_renyi_erdos_net( lab, numNodes, linkProb )
+	
+	parent->init_small_world_net( lab, numNodes, outDeg, rho )
 
-	parent->power_law_net( lab, numNodes, outDeg, expLink )
-		
+	parent->init_scale_free_net( lab, numNodes, outDeg, expLink )
+	
+	parent->init_lattice_net( nRow, nCol, lab, eightNeigbr )
+
 	The additional parameters for those generators are:
 	
 	numNodes : number of nodes in network
@@ -75,7 +83,19 @@ NETS.CPP
 	linkProb : probability of link between two nodes
     expLink : power degree (power-law networks only)
     rho : rewiring link probability (small-world networks only)
+	nRow : number of rows in the lattice
+	nCol : number of columns in the lattice
+	eightNeigbr : eight (true) or four (false) neighbors
+
+	Another, more general method for creating networks is (network type is a parameter):
 	
+	parent->init_stub_net( lab, gen, numNodes, par1, par2 )
+	
+	gen : "DISCONNECTED" , "RANDOM-DIR" (par1: numLinks), "RANDOM-UNDIR" (par1: numLinks),
+		  "UNIFORM" (par1: outDeg), "CIRCLE" (par1: outDeg), "RENYI-ERDOS" (par1: linkProb),
+		  "SMALL-WORLD" (par1: outDeg, par2: rho), "SCALE-FREE" (par1: outDeg, par2: expLink),
+		  "LATTICE" (par1: nCol, par2: eightNeigbr)
+		
 	All generators return the effective number of directed links (arcs) of the generated
 	network. According to the generator used, the network may have to be reshuffled before
 	use, applying the method:
@@ -562,16 +582,21 @@ long nodes2create( object *parent, char const *lab, long numNodes )
 	Stub function to call the appropriate network generator.
 */
 
-long object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 = 0 )
+long object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 )
 {
 	char option[32];
 	strncpy( option, gen, 31 );
 	option[31] = '\0';
 	strupr( option );
 	
-	if ( numNodes < 2 )								// less than 2 nodes?
+	if ( numNodes < 2 || lab == NULL )				// less than 2 nodes?
+	{
+		error_hard( "wrong parameter values for the specified network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
 		return 0;
-		
+	}
+	
 	if ( ! strcmp( option, "DISCONNECTED" ) )
 			return init_discon_net( lab, numNodes );
 	
@@ -607,6 +632,13 @@ long object::init_stub_net( char const *lab, const char* gen, long numNodes, lon
 		if ( par1 > 0 && par2 > 0 )
 			return init_scale_free_net( lab, numNodes, par1, par2 );
 	
+	if ( ! strcmp( option, "LATTICE" ) )
+		if ( numNodes % par1 == 0 && par1 > 0 )
+			return init_lattice_net( numNodes / par1, par1, lab, ( bool ) par2 );
+	
+	error_hard( "wrong parameter values for the specified network", 
+				"Error while creating network", 
+				"Check your code to prevent this situation." );
 	return 0;
 }
 
@@ -620,6 +652,14 @@ long object::init_discon_net( char const *lab, long numNodes )
 {
 	long idNode;
 	object *cur;
+	
+	if ( numNodes < 2 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for disconnected network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
 	
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	// creates the missing node objects,
 																	// cloning the first one
@@ -639,6 +679,14 @@ long object::init_random_dir_net( char const *lab, long numNodes, long numLinks 
 {
 	long idNode, links = 0;
 	object *cur, *cur1;
+	
+	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for random directed network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
 	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) )				// test if net is achievable
 	{
@@ -680,6 +728,14 @@ long object::init_random_undir_net( char const *lab, long numNodes, long numLink
 	long idNode, links = 0;
 	object *cur, *cur1;
 	
+	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for random undirected network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) / 2 )			// test if net is achievable
 	{
 		sprintf( msg, "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2", lab );
@@ -720,6 +776,14 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 {
 	long link, idNode, numLinks, newNode, tryNode;
 	object *firstNode, *cur, *cur1;
+	
+	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
+	{
+		error_hard( "wrong parameter values for random uniform network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
 	
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	// creates the missing node objects,
 																	// cloning the first one
@@ -765,6 +829,14 @@ long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkPr
 	long idNode, numLinks, startNode, endNode;
 	object *cur, *cur1;
 
+	if ( numNodes < 2 || linkProb < 0 || linkProb > 1 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for Renyi-Erdos network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+	
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	// creates the missing node objects,
 																	// cloning the first one
 	for ( idNode = 1, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
@@ -802,6 +874,14 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 	long link, idNode, numLinks, lowNeigh;
 	object *firstNode, *cur, *cur1;
 
+	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
+	{
+		error_hard( "wrong parameter values for circle network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+	
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );
 																	// creates the missing node objects,
 																	// cloning the first one
@@ -856,6 +936,14 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 	object *cur, *cur1;
 	netLink *curl;
 
+	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || rho < 0 || rho > 1 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for Small-World network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+	
 	numLinks = init_circle_net( lab, numNodes, outDeg );			// first generate a circle regular network	
 
 	numNeigh = outDeg / 2;											// number of neighbors (each side)
@@ -915,6 +1003,14 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 	object *firstNode, *cur, *cur1;
 	netLink *cur2;
 
+	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || expLink <= 0 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for scale-free network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+	
 	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	// creates the missing node objects,
 																	// cloning the first one
 	firstNode = search( lab );										// start from first node
@@ -1172,7 +1268,7 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 	{
 		sprintf( msg, "error creating network file '%s'", fileName );
 		error_hard( msg, "Network file error", "Check disk space and permissions." );
-		return  0;
+		return 0;
 	}
 	
 	if ( append )
@@ -1223,6 +1319,109 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 			}
 	fclose( pajekFile );				
 	
+	return numLinks;
+}
+
+
+/*
+	Generates a lattice, a regular square network where each cell in row i and 
+	column j is connected to its 4 or 8 neighbours, depending on an optional parameter
+	The links are generated clockwise starting from "North", that is cell (i-1, j), 
+	then either East or Northeast, depending on the final option, cells (i,j+1) or
+	(i-1,j+1), respectively.
+	The lattice is a torus, i.e. cells at the borders are connected to the opposite 
+	border.
+*/
+
+long object::init_lattice_net( int nRow, int nCol, char const *lab, bool eightNeigbr )
+{
+	long idNode, i, j, h, numLinks = 0;
+	object *cur, *cur1;
+
+	if ( nRow <= 0 || nCol <= 0 || lab == NULL )
+	{
+		error_hard( "wrong parameter values for lattice network", 
+					"Error while creating network", 
+					"Check your code to prevent this situation." );
+		return 0;
+	}
+ 
+	add_n_objects2( lab , nodes2create( this, lab, nRow * nCol ) );	
+													// creates the missing node objects,
+													// cloning the first one
+	for ( i = j = 0, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
+	{
+		idNode = nCol * i + j + 1;
+			 
+		cur->add_node_net( idNode, lab );
+		if ( ++j >= nCol )
+		{
+			i++;
+			j = 0;
+		}
+	}
+		
+	initturbo( lab, nRow * nCol );
+	
+	for ( i = j = 0, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
+	{
+		idNode = nCol * i + j + 1;
+	  
+		h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + j + 1;	// north
+		cur1 = search_node_net( lab, h );
+		cur->add_link_net( cur1, 0, 1 );
+
+		if ( eightNeigbr )
+		{
+			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1;
+			cur1 = search_node_net( lab, h );				// northeast
+			cur->add_link_net( cur1, 0, 1 );
+		}	
+		
+		h = nCol * i + ( j == nCol - 1 ? 0 : j + 1 ) + 1;	// east
+		cur1 = search_node_net( lab, h );
+		cur->add_link_net( cur1, 0, 1 );
+
+		if ( eightNeigbr )
+		{
+			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1; 
+			cur1 = search_node_net( lab, h );				// southeast
+			cur->add_link_net( cur1, 0, 1 );
+		}
+	  
+		h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + j + 1;	// south
+		cur1 = search_node_net( lab, h );
+		cur->add_link_net( cur1, 0, 1 );
+
+		if ( eightNeigbr )
+		{
+			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == 0 ? nCol - 1 : j - 1 ) + 1;
+			cur1 = search_node_net( lab, h );				// southwest
+			cur->add_link_net( cur1, 0, 1 );
+		}
+	  
+		h = nCol * i + ( j == 0 ? nCol - 1 : j - 1 ) + 1;	// west
+		cur1 = search_node_net( lab, h );
+		cur->add_link_net( cur1, 0, 1 );
+
+		if ( eightNeigbr )
+		{
+			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == 0 ? nCol - 1 : j - 1 )  + 1; 
+			cur1 = search_node_net( lab, h );				// northwest
+			cur->add_link_net( cur1, 0, 1 );
+ 
+			numLinks += 8;
+		}
+		else
+			numLinks += 4;
+		
+		if ( ++j >= nCol )
+		{
+			i++;
+			j = 0;
+		}
+	}
+
 	return numLinks;
 }
 

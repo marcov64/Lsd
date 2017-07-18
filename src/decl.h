@@ -305,7 +305,7 @@ class object
 	netLink *draw_link_net( void ); 
 	long read_file_net( char const *lab, char const *dir, char const *base_name, int serial, char const *ext );
 	long write_file_net( char const *lab, char const *dir, char const *base_name, int serial, bool append );
-	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 );
+	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1 = 0, double par2 = 0.0 );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_random_dir_net( char const *lab, long numNodes, long numLinks );
 	long init_random_undir_net( char const *lab, long numNodes, long numLinks );
@@ -314,6 +314,7 @@ class object
 	long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
+	long init_lattice_net( int nRow, int nCol, char const *lab, bool eightNeigbr );
 	void delete_net( char const *lab );
 };
 

@@ -33,6 +33,8 @@ v[3] = V( "avgOutDeg" );					// average outgoing degree
 v[4] = V( "linkProb" );						// probability of two nodes linking
 v[5] = V( "rho" );							// small-world rewiring parameter
 v[6] = V( "expLink" );						// power-law exponential parameter
+v[7] = V( "nCol" );							// number of columns in lattice
+v[8] = V( "eightNeigbr" );					// flag to use 8 neighbors instead of 4
 
 switch ( (int) v[0] )						// executes initialization for each type
 {
@@ -100,6 +102,11 @@ switch ( (int) v[0] )						// executes initialization for each type
 		v[2] = 2 * ( v[10] - 1 );			// two links per node
 											// except first
 		strcpy( message, "\n Star network created" );
+	break;
+		
+	case 9:									// Lattice network
+		v[2] = NETWORKS_INI( cur, "Node", "LATTICE", v[1], v[7], v[8] );
+		strcpy( message, "\n Lattice network created" );
 	break;
 		
 	default:

@@ -19,6 +19,8 @@ Label Root
 		Param: rho
 		Param: avgOutDeg
 		Param: linkProb
+		Param: nCol
+		Param: eightNeigbr
 		Var: NewLink
 		Var: TotalLinks
 
@@ -42,6 +44,8 @@ Param: expLink 0 n + n n	2
 Param: rho 0 n + n n	0.1
 Param: avgOutDeg 0 n + n n	10
 Param: linkProb 0 n + n n	0.01
+Param: nCol 0 n + n n	40
+Param: eightNeigbr 0 n + n n	1
 Var: NewLink 0 s + n n
 Var: TotalLinks 0 s + n n
 
@@ -53,7 +57,7 @@ SIM_NUM 1
 SEED 1
 MAX_STEP 100
 EQUATION fun_nets.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 
@@ -90,13 +94,18 @@ END_DESCRIPTION
 Parameter_typeNet
 Type of user network initialization:
 0 - Reads network from file in Pajek format, according to LSD seed value (1, 2 ...)
-1 - Uniform random network: numNodes: total nodes, avgOutDeg: out links per node
-2 - Renyi-Erdos random network: numNodes: total nodes, avgOutDeg: average out links per node
-3 - Circle network: numNodes: total nodes, avgOutDeg: out neighbours per node
-4 - Small-World network: numNodes: total nodes, avgOutDeg: out neighbours per node, rho: rewires out of total number of links
-5 - Power-law network: numNodes: total nodes, avgOutDeg: average out links per node, expLink: power degree
+1 - Directed random network: numNodes: total nodes, numLinks: number of links in network
+2 - Undirected random network: numNodes: total nodes, numLinks: number of links in network
+3 - Uniform random network: numNodes: total nodes, avgOutDeg: out links per node
+4 - Renyi-Erdos random network: numNodes: total nodes, avgOutDeg: average out links per node
+5 - Circle network: numNodes: total nodes, avgOutDeg: out neighbours per node
+6 - Small-World network: numNodes: total nodes, avgOutDeg: out neighbours per node, rho: rewires out of total number of links
+7 - Power-law network: numNodes: total nodes, avgOutDeg: average out links per node, expLink: power degree
+8 - Star network: numNodes: total nodes
+9 - Lattice network: numNodes: total nodes, nCol: number of columns in lattice, eightNeigbr: flag to use 8 neighbors instead of 4
+
 _INIT_
- All 1 instances equal to 0.
+ All 1 instances equal to 8.
 END_DESCRIPTION
 
 Parameter_expLink
@@ -121,6 +130,18 @@ Parameter_linkProb
 Probability of two links connecting (Renyi-Erdos networks)
 _INIT_
  All 1 instances equal to 0.01.
+END_DESCRIPTION
+
+Parameter_nCol
+Number of columns in a lattice network
+_INIT_
+All 1 instances equal to 40.
+END_DESCRIPTION
+
+Parameter_eightNeigbr
+Flag to use 8 (=1) neighbors instead of 4 (=0)
+_INIT_
+All 1 instances equal to 1.
 END_DESCRIPTION
 
 Variable_NewLink
