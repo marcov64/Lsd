@@ -2171,7 +2171,7 @@ dimH=pixH/nrow;
 dimW=pixW/ncol;
 cmd( "destroytop .lat" );
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-cmd( "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol  );
+cmd( "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
 cmd( "set lat_update 1" );
 cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
@@ -2212,7 +2212,7 @@ cmd( "set dimW %lf", dimW );
 
 if(lattice_type==1)
   for(i=1; i<=nrow; i++)
-    for(j=1; j<=nrow; j++)
+    for(j=1; j<=ncol; j++)
       cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
 
 cmd( "showtop .lat centerS no no no" );
@@ -2245,15 +2245,18 @@ double update_lattice(double line, double col, double val)
 		cmd( "if { ! [info exist c%.0lf] } { set c%.0lf white }", val, val  );
 	}
 		
- if(lattice_type==1)
- {
- cmd( ".lat.c itemconfigure c%d_%d -fill %s", (int)line, (int)col, val_string );
- return 0;
- }
+	if(lattice_type==1)
+	{
+		cmd( ".lat.c itemconfigure c%d_%d -fill %s", (int)line, (int)col, val_string );
+		return 0;
+	}
 
-cmd( ".lat.c create poly %d %d %d %d %d %d %d %d -fill %s", (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string  );
-cmd( "if {$lat_update == 1} {update} {}" );
-return 0;  
+	cmd( "set tempc [.lat.c find withtag c%d_%d] ", (int)line, (int)col );
+	cmd( "if { $tempc != \"\" } { .lat.c itemconfigure c%d_%d -fill %s }", (int)line, (int)col, val_string );
+	cmd( "if { $tempc == \"\" } { .lat.c addtag c%d_%d withtag [ .lat.c create poly %d %d %d %d %d %d %d %d -fill %s ] }", (int)line, (int)col, (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
+
+	cmd( "if { $lat_update == 1 } { update }" );
+	return 0;  
 }
 
 

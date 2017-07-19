@@ -1335,7 +1335,7 @@ long object::write_file_net( char const *lab, char const dir[] = "",
 
 long object::init_lattice_net( int nRow, int nCol, char const *lab, bool eightNeigbr )
 {
-	long idNode, i, j, h, numLinks = 0;
+	long idNode, i, j, h, numNodes = nRow * nCol, numLinks = 0;
 	object *cur, *cur1;
 
 	if ( nRow <= 0 || nCol <= 0 || lab == NULL )
@@ -1346,14 +1346,14 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, bool eightNe
 		return 0;
 	}
  
-	add_n_objects2( lab , nodes2create( this, lab, nRow * nCol ) );	
+	add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	
 													// creates the missing node objects,
 													// cloning the first one
 	for ( i = j = 0, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
-	{
+	{												// scan all nodes aplying ID numbers
 		idNode = nCol * i + j + 1;
 			 
-		cur->add_node_net( idNode, lab );
+		cur->add_node_net( idNode );
 		if ( ++j >= nCol )
 		{
 			i++;
@@ -1361,53 +1361,51 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, bool eightNe
 		}
 	}
 		
-	initturbo( lab, nRow * nCol );
+	initturbo( lab, numNodes );						// seed the turbosearch linked list
 	
 	for ( i = j = 0, cur = search( lab ); cur != NULL; cur = go_brother( cur ) )
 	{
-		idNode = nCol * i + j + 1;
-	  
 		h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + j + 1;	// north
-		cur1 = search_node_net( lab, h );
+		cur1 = turbosearch( lab, numNodes, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1;
-			cur1 = search_node_net( lab, h );				// northeast
+			cur1 = turbosearch( lab, numNodes, h );			// northeast
 			cur->add_link_net( cur1, 0, 1 );
 		}	
 		
 		h = nCol * i + ( j == nCol - 1 ? 0 : j + 1 ) + 1;	// east
-		cur1 = search_node_net( lab, h );
+		cur1 = turbosearch( lab, numNodes, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == nCol - 1 ? 0 : j + 1 ) + 1; 
-			cur1 = search_node_net( lab, h );				// southeast
+			cur1 = turbosearch( lab, numNodes, h );			// southeast
 			cur->add_link_net( cur1, 0, 1 );
 		}
 	  
 		h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + j + 1;	// south
-		cur1 = search_node_net( lab, h );
+		cur1 = turbosearch( lab, numNodes, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == nRow - 1 ? 0 : i + 1 ) + ( j == 0 ? nCol - 1 : j - 1 ) + 1;
-			cur1 = search_node_net( lab, h );				// southwest
+			cur1 = turbosearch( lab, numNodes, h );			// southwest
 			cur->add_link_net( cur1, 0, 1 );
 		}
 	  
 		h = nCol * i + ( j == 0 ? nCol - 1 : j - 1 ) + 1;	// west
-		cur1 = search_node_net( lab, h );
+		cur1 = turbosearch( lab, numNodes, h );
 		cur->add_link_net( cur1, 0, 1 );
 
 		if ( eightNeigbr )
 		{
 			h = nCol * ( i == 0 ? nRow - 1 : i - 1 ) + ( j == 0 ? nCol - 1 : j - 1 )  + 1; 
-			cur1 = search_node_net( lab, h );				// northwest
+			cur1 = turbosearch( lab, numNodes, h );			// northwest
 			cur->add_link_net( cur1, 0, 1 );
  
 			numLinks += 8;
@@ -1417,7 +1415,7 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, bool eightNe
 		
 		if ( ++j >= nCol )
 		{
-			i++;
+			++i;
 			j = 0;
 		}
 	}
