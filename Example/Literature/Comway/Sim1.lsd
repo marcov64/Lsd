@@ -40,7 +40,7 @@ Param: PixWidth 0 n + n n	1200
 Param: PixHeight 0 n + n n	600
 Param: PercActive 0 n + n n	0.3
 Var: SlowDown 0 n + d n
-Param: TimeSleep 0 n + n n	50000
+Param: TimeSleep 0 n + n n	50
 
 Object: node C	1
 Param: row 0 n + n n	0

@@ -1,5 +1,21 @@
 #include "fun_head.h"
-//#include "tcl.h"
+
+// define an interoperable sleep function
+#ifdef _WIN32
+#include <windows.h>
+void msleep( unsigned milliseconds )
+{
+   Sleep( milliseconds );
+}
+#else
+#include <unistd.h>
+void msleep( unsigned milliseconds )
+{
+   usleep( milliseconds * 1000 );			// takes microseconds
+}
+#endif
+
+
 MODELBEGIN
 
 const char *chstr;
@@ -40,7 +56,7 @@ EQUATION("SlowDown")
 Equation wasting time to slow down the graph
 */
 v[0]=V("TimeSleep");
-usleep((int)v[0]);
+msleep((int)v[0]);
 RESULT(1
  )
 
@@ -74,7 +90,7 @@ CYCLE(cur, "node")
  }
 if(v[3]<0)
  {
-  cmd(inter, "set fname [tk_getOpenFile -message \"Select file with initial active cells\"]");
+  cmd(inter, "set fname [tk_getOpenFile -title \"Select file with initial active cells\"]");
   chstr=(char *)Tcl_GetVar(inter, "fname",0);
   
   f=fopen(chstr, "r");
