@@ -1,0 +1,358 @@
+	
+Label Root
+{
+	Son: Lattice
+	Label Lattice
+	{
+		Son: node
+		Label node
+		{
+			Param: row
+			Param: col
+			Param: State
+
+		}
+
+		Son: Agent
+		Label Agent
+		{
+			Param: Type
+			Var: Threshold
+
+		}
+
+		Var: InitLattice
+		Param: nrow
+		Param: ncol
+		Param: PixWidth
+		Param: PixHeight
+		Var: numAgents
+		Param: shareType
+		Func: Assess
+		Var: Action
+		Func: Check
+		Var: ShareSameType
+		Param: ShareAgents
+		Func: AssignState
+		Param: PlotLattice
+		Param: Complete
+		Param: meanThreshold
+		Param: varThreshold
+		Param: aThreshold
+		Param: ActAvThreshold
+		Param: ActVarThreshold
+
+	}
+
+
+}
+
+
+DATA
+
+Object: Root C	1
+
+Object: Lattice C	100
+Var: InitLattice 0 n + d n
+Param: nrow 0 n + n n	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50
+Param: ncol 0 n + n n	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50	50
+Param: PixWidth 0 n + n n	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600	600
+Param: PixHeight 0 n + n n	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300	300
+Var: numAgents 0 n + n n
+Param: shareType 0 n + n n	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5
+Func: Assess 0 n + n n
+Var: Action 0 n + d n
+Func: Check 0 n + n n
+Var: ShareSameType 0 s + n n
+Param: ShareAgents 0 s + n n	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85	0.4	0.45	0.5	0.55	0.6	0.65	0.7	0.75	0.8	0.85
+Func: AssignState 0 n + n n
+Param: PlotLattice 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: Complete 0 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: meanThreshold 0 s + n n	0.4	0.4	0.4	0.4	0.4	0.4	0.4	0.4	0.4	0.4	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.45	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.5	0.55	0.55	0.55	0.55	0.55	0.55	0.55	0.55	0.55	0.55	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.6	0.65	0.65	0.65	0.65	0.65	0.65	0.65	0.65	0.65	0.65	0.7	0.7	0.7	0.7	0.7	0.7	0.7	0.7	0.7	0.7	0.75	0.75	0.75	0.75	0.75	0.75	0.75	0.75	0.75	0.75	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.8	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85	0.85
+Param: varThreshold 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: aThreshold 0 n + n n	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999	0.999
+Param: ActAvThreshold 0 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: ActVarThreshold 0 s + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+Object: node N	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: row 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: col 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Param: State 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+Object: Agent C	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: Type 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: Threshold 1 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 100000
+EQUATION fun_schelling.cpp
+ MODELREPORT modelreport.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Object_Lattice
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Variable_InitLattice
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nrow
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ncol
+(no description available)
+_INIT_
+ All 100 instances equal to 50.
+END_DESCRIPTION
+
+Parameter_PixWidth
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PixHeight
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_numAgents
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_shareType
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_Assess
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Action
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_Check
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_ShareSameType
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ShareAgents
+(no description available)
+
+_INIT_
+
+
+END_DESCRIPTION
+
+Function_AssignState
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_PlotLattice
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Complete
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_meanThreshold
+(no description available)
+
+_INIT_
+
+
+END_DESCRIPTION
+
+Parameter_varThreshold
+(no description available)
+
+_INIT_
+
+
+END_DESCRIPTION
+
+Parameter_aThreshold
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ActAvThreshold
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_ActVarThreshold
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_node
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_row
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_col
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_State
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+(no description available )
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Type
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Threshold
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+#include "fun_head.h"
+
+MODELBEGIN
+
+
+
+
+EQUATION("InitLattice")
+/*
+Comment
+*/
+k = V( "lattSz" );    // lattice size (assuming a square)
+
+// first create all nodes
+for ( i = 1; i <= k; ++i ) 
+    for ( j = 1; j <= k; ++j ) 
+    {
+        int nodeID = k * i + j;
+
+        if ( i != 1  && j != 1 )   // supposing just 1 node initially exists
+            cur = ADDOBJ( "node" );    // node object name is "node"
+
+  //      ADDNODES( cur, nodeID );    // make object into a network node
+         cur->add_node_net(nodeID, "node", 1);
+    }
+TSEARCHS_INI( p, "node" );    // speed-up links creation
+
+// then add all the links (wrapping sphere lattice)
+CYCLE( cur, "node" )
+{
+    // get coordinates of current node
+    i = VS_NODEID( cur ) / k;
+    j = VS_NODEID( cur ) - i * k;
+    // find node ID of neighbors
+    int down = k * ( i == k ? 1 : i + 1 ) + j;
+    int up = k * ( i == 1 ? k : i - 1 ) + j;
+    int left = k * i + ( j == 1 ? k : j - 1 );
+    int right = k * i + ( j == k ? 1 : j + 1 );
+
+    // find pointers to neighbors objects
+    cur1 = TSEARCHS( p, "node", down );
+    cur2 = TSEARCHS( p, "node", up );
+    cur3 = TSEARCHS( p, "node", left );
+    cur4 = TSEARCHS( p, "node", right );
+
+    // create links to neighbors
+    ADDLINKS( cur, cur1 );
+    ADDLINKS( cur, cur2 );
+    ADDLINKS( cur, cur3 );
+    ADDLINKS( cur, cur4 );
+}
+
+
+PARAMETER
+RESULT(1 )
+
+
+
+
+
+
+
+MODELEND
+
+
+
+
+void close_sim(void)
+{
+
+}
+
+
+
+END_EQ_FILE
