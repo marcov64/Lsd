@@ -252,20 +252,25 @@ if ( choice )
 	cmd( "gets $f autoHide" );
 	cmd( "gets $f showFileCmds" );
 	cmd( "gets $f LsdNew" );
+	cmd( "gets $f DbgExe" );
 	cmd( "close $f" );
 	// handle old options file
-	cmd( "if {$dim_character == \"\" || $showFileCmds == \"\"} {set choice 0}" );
+	cmd( "if { $dim_character == \"\" || $showFileCmds == \"\" || $DbgExe == \"\" } {set choice 0}" );
 }
 // handle non-existent or old options file for new options
 if ( choice != 1 )
  {
-	cmd( "set dim_character $DefaultFontSize" );
-	cmd( "set tabsize 2" );				// default tab size
-	cmd( "set wrap 1" );				// default text wrapping mode (1=yes)
-	cmd( "set shigh 2" );				// default is full syntax highlighting
-	cmd( "set autoHide 0" );			// default is to not auto hide LMM on run
-	cmd( "set showFileCmds 0" );		// default is no text file commands in File menu
-	cmd( "set LsdNew Work" );			// default new model subdirectory is "Work"
+	// set new parameters
+	cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSize }" );
+	cmd( "if { $tabsize == \"\" } { set tabsize 2 }" );	// default tab size
+	cmd( "if { $wrap == \"\" } { set wrap 1 }" );		// default text wrapping mode (1=yes)
+	cmd( "if { $shigh == \"\" } { set shigh 2 }" );		// default is full syntax highlighting
+	cmd( "if { $autoHide == \"\" } { set autoHide 0 }" );// default is to not auto hide LMM on run
+	cmd( "if { $showFileCmds == \"\" } { set showFileCmds 0 }" );// default is no text file commands in File menu
+	cmd( "if { $LsdNew == \"\" } { set LsdNew Work }" );// default new model subdirectory is "Work"
+	cmd( "if { $DbgExe == \"\" } { set DbgExe \"$DefaultDbgExe\" }" );// default debugger
+	
+	// save to config file
 	cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
 	cmd( "puts $f \"$DbgTerm\"" );
 	cmd( "puts $f \"$HtmlBrowser\"" );
@@ -279,6 +284,7 @@ if ( choice != 1 )
 	cmd( "puts $f $autoHide" );
 	cmd( "puts $f $showFileCmds" );
 	cmd( "puts $f $LsdNew" );
+	cmd( "puts $f \"$DbgExe\"" );
 	cmd( "close $f" );
  }
  
@@ -3999,6 +4005,7 @@ cmd( "set temp_var9 $shigh" );
 cmd( "set temp_var10 $autoHide" );
 cmd( "set temp_var11 $showFileCmds" );
 cmd( "set temp_var12 $LsdNew" );
+cmd( "set temp_var13 $DbgExe" );
 
 cmd( "newtop .a \"Options\" { set choice 2 }" );
 
@@ -4006,7 +4013,13 @@ cmd( "frame .a.num" );
 cmd( "label .a.num.l -text \"Terminal for debugger\"" );
 cmd( "entry .a.num.v -width 25 -textvariable temp_var1 -justify center" );
 cmd( "pack .a.num.l .a.num.v" );
-cmd( "bind .a.num.v <Return> {focus .a.num2.v; .a.num2.v selection range 0 end}" );
+cmd( "bind .a.num.v <Return> {focus .a.num13.v; .a.num13.v selection range 0 end}" );
+
+cmd( "frame .a.num13" );
+cmd( "label .a.num13.l -text \"Debugger command\"" );
+cmd( "entry .a.num13.v -width 25 -textvariable temp_var13 -justify center" );
+cmd( "pack .a.num13.l .a.num13.v" );
+cmd( "bind .a.num13.v <Return> {focus .a.num2.v; .a.num2.v selection range 0 end}" );
 
 cmd( "frame .a.num2" );
 cmd( "label .a.num2.l -text \"HTML browser\"" );
@@ -4070,10 +4083,10 @@ cmd( "bind .a.num8.v_num8 <Return> { focus .a.num8.v_num10 }" );
 cmd( "bind .a.num8.v_num10 <Return> { focus .a.num8.v_num11 }" );
 cmd( "bind .a.num8.v_num11 <Return> { focus .a.f2.ok }" );
 
-cmd( "pack .a.num .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
+cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 cmd( "frame .a.f1" );
-cmd( "button .a.f1.def -width -9 -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work}" );
+cmd( "button .a.f1.def -width -9 -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
 cmd( "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}" );
 cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 cmd( "pack .a.f1 -anchor e" );
@@ -4106,14 +4119,17 @@ if(choice==1)
  cmd( "set autoHide $temp_var10" );
  cmd( "set showFileCmds $temp_var11" );
  cmd( "set LsdNew $temp_var12" );
+ cmd( "set DbgExe $temp_var13" );
  
  cmd( "set a [list $fonttype $dim_character]" );
  cmd( ".f.t.t conf -font \"$a\"" );
  cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
  cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
  color(shigh, 0, 0);							// set color highlights (all text)
+ 
+ // save to config file
  cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
- cmd( "puts -nonewline $f  \"$DbgTerm\n\"" );
+ cmd( "puts $f  \"$DbgTerm\"" );
  cmd( "puts $f \"$HtmlBrowser\"" );
  cmd( "puts $f \"$fonttype\"" );
  cmd( "puts $f $wish" );
@@ -4125,6 +4141,7 @@ if(choice==1)
  cmd( "puts $f $autoHide" );
  cmd( "puts $f $showFileCmds" );
  cmd( "puts $f $LsdNew" );
+ cmd( "puts $f  \"$DbgExe\"" );
  cmd( "close $f" );
  }
 
@@ -4520,7 +4537,7 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,2}]|cur(l)?\[0-9]?|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?(_EXT)?|CYCLE[23]_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCH[TS](_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE(S)?(_EXT)?|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|LOG|PLOG|rnd_integer|norm|poisson|gamma|abs|min|max|round|exp|log|sqrt|pow|(init)?(update)?(save)?_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?(_DEL)?(_SNAP)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)|ADD(S)?_EXT|P(S)?_EXT|EXEC(S)?_EXT|EQ_USER_VARS|USE_NAN|(NO|DEFAULT)_NAN|RND_(GENERATOR|SETSEED|SEED)|PATH|CONFIG|T|LAST_T|SLEEP|RECALC(S)",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|V[LS]*(_CHEAT)?(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SUM|SUM[LS]*|STAT(S)?(_NET)?(_NODE)?|WHTAVE[LS]*|INCR(S)?|MULT(S)?|CYCLE(S)?(_LINK)?(_EXT)?|CYCLE[23]_SAFE(S)?|MAX[LS]*|WRITE[LS]*(_NODEID)?(_NODENAME)?(_WEIGHT)?(_EXT)?|SEARCH_CND[LS]*|SEARCH(S)?(_NET)?(_LINK)?|TSEARCH[TS](_INI)?|SORT[S2]*|ADD(N)?OBJ(S)?(_EX)?|DELETE(S)?(_EXT)?|RND|UNIFORM|RNDDRAW(FAIR)?(TOT)?[LS]*(_NET)?|PARAMETER|INTERACT(S)?|LOG|PLOG|rnd_integer|norm|poisson|gamma|abs|min|max|round|exp|log|sqrt|pow|(init)?(update)?(save)?_lattice|NETWORK(S)?(_INI)?(_LOAD)?(_SAVE)?(_DEL)?(_SNAP)?|SHUFFLE(S)?|ADDLINK[WS]*|DELETELINK|LINK(TO|FROM)|ADD(S)?_EXT|P(S)?_EXT|EXEC(S)?_EXT|EQ_USER_VARS|USE_NAN|(NO|DEFAULT)_NAN|RND_(GENERATOR|SETSEED|SEED)|PATH|CONFIG|T|LAST_T|SLEEP|RECALC[S]*",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|register|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
