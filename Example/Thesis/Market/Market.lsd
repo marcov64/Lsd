@@ -436,9 +436,7 @@ Parameter_TimeActive
 Maximum time to wait before a new consumer can bring into the market a new consumer.
 
 'TimeActive' appears in the equation for: Action.
-
 _INIT_
-
 
 END_DESCRIPTION
 
@@ -446,9 +444,7 @@ Parameter_NumContagion
 Number of new consumers that the first consumer can bring to the market.. 
 
 'NumContagion' appears in the equation for: Action.
-
 _INIT_
-
 
 END_DESCRIPTION
 

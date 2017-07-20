@@ -1306,8 +1306,7 @@ Do not place equations beyond this point.
 
 *********************/
 
-sprintf(msg, "\nEquation for %s not found", label);
-plog(msg);
+PLOG("\nEquation for %s not found", label);
 quit=2;
 return -1;
 

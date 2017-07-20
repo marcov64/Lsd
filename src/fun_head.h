@@ -26,7 +26,6 @@ This file contains all the declarations and macros available in a model's equati
 double def_res = 0;										// default equation result
 
 extern bool fast;										// flag to hide LOG messages & runtime
-extern bool fast_lookup;								// flag for fast look-up mode
 extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
 extern bool use_nan;									// flag to allow using Not a Number value
 extern char *path;										// folder where the configuration is
@@ -77,6 +76,7 @@ object *go_brother(object *c);
 void cmd( const char *cm, ... );
 void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
 void init_random( int seed );							// reset the random number generator seed
+void msleep( unsigned msec );							// sleep process for milliseconds
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 
@@ -139,12 +139,18 @@ extern double i_values[];
 		debug = 'd'; \
 	}
 
+// create and set fast lookup flag
+#if ! defined FAST_LOOKUP || ! defined CPP11
+	bool fast_lookup = false;
+#else
+	bool fast_lookup = true;
+#endif
+
 // handle fast equation look-up if enabled and C++11 is available
 #if ! defined FAST_LOOKUP || ! defined CPP11
+	void init_map( ) { };
 // use standard chain method for look-up
 #define MODELBEGIN \
-	bool fast_lookup = false; \
-	void init_map( ) { } \
 	double variable::fun( object *caller ) \
 	{ \
 		if ( quit == 2 ) \
@@ -195,10 +201,8 @@ extern double i_values[];
 	};
 
 #else
-
 // use fast map method for equation look-up
 #define MODELBEGIN \
-	bool fast_lookup = true; \
 	double variable::fun( object *caller ) \
 	{ \
 		double res = def_res; \
@@ -270,6 +274,7 @@ extern double i_values[];
 #define DEFAULT_RESULT( X ) def_res = X;
 #define RND_GENERATOR( X ) ran_gen = X;
 #define RND_SETSEED( X ) seed = X; init_random( X );
+#define SLEEP( X ) msleep( ( unsigned ) X )
 
 #define RND_SEED seed
 #define PATH ( ( const char * ) path )
@@ -355,6 +360,9 @@ extern double i_values[];
 #define WRITES(O,X,Y) O->write((char*)X,Y,t)
 #define WRITELS(O,X,Y,Z) O->write((char*)X,Y,Z)
 #define WRITELLS(O,X,Y,Z,L) O->write((char*)X,Y,Z,L)
+
+#define RECALC( X ) p->recal( ( char * ) X )
+#define RECALCS( O, X ) O->recal( ( char * ) X )
 
 #define SEARCH_CND(X,Y) p->search_var_cond((char*)X,Y,0)
 #define SEARCH_CNDL(X,Y,Z) p->search_var_cond((char*)X,Y,Z)

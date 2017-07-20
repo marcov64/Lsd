@@ -189,7 +189,8 @@ CYCLE(cur, "Consumer")
  {
  cur1=RNDDRAWFAIR("Firm");  //choose randomly one of the products
  v[1]=VS(cur1,"IdFirm"); //return the ID of the chosen firm
- INCRS(cur1,"NumUsers",1);//increase the number of users for the chosen firm
+ //increase the number of users for the chosen firm
+ WRITELS( cur1, "NumUsers", VLS( cur1, "NumUsers", 1 ) + 1, -1 );
  WRITES(cur,"ProdUsed",v[1]);
  v[0]=v[0]+1; //count the number of consumers
  }

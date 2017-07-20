@@ -1248,8 +1248,7 @@ for(v[21]=1; v[21]>0; v[21]++ )
   v[1]=cur2->cal("TypeNumBits",0);
   if(v[1]>v[3]) //on hour lost ...
    {
-    sprintf(msg, "\\nTypeNumBits must be <= than N.\\nClass %d is forced to replace %d with %d\\n", (int)v[33], (int)v[1], (int)v[3]);
-    plog(msg);
+    PLOG("\\nTypeNumBits must be <= than N.\\nClass %d is forced to replace %d with %d\\n", (int)v[33], (int)v[1], (int)v[3]);
     v[1]=v[3];
    }
   cur->write("MaxBitLength",v[1], 0);
@@ -1385,9 +1384,8 @@ v[0]=p->cal("EvenK",0)+1;
 v[11]=p->cal("AftOverlap",0);
 v[12]=p->cal("ForeOverlap",0);
 if(v[7]<v[0]+v[11]+v[12])
- {sprintf(msg,"\nWarning: you set an unsensible parameterisation.\nN = %d, EvenK = %d, AftOverlap = %d, ForeOverlap = %d!\nThe setting must be such that EvenK+AftOveral+ForeOverlap<N\n", (int)v[7],(int)v[0],(int)v[11],(int)v[12]);
-  plog(msg);
-  plog("\nParameters forced to: EvenK=0, AftOverlap=0, ForeOverlap=0\n");
+ {PLOG("\nWarning: you set an unsensible parameterisation.\nN = %d, EvenK = %d, AftOverlap = %d, ForeOverlap = %d!\nThe setting must be such that EvenK+AftOveral+ForeOverlap<N\n", (int)v[7],(int)v[0],(int)v[11],(int)v[12]);
+  PLOG("\nParameters forced to: EvenK=0, AftOverlap=0, ForeOverlap=0\n");
   v[0]=1;
   v[11]=0;
   v[12]=0;
@@ -1492,8 +1490,9 @@ v[0]=fl->cal("N",0);
 v[1]=pow(2,v[0]);
 v[6]=fl->cal("EvenK",0)+1;
 
-sprintf(msg,"n%d_k%d.txt",(int)v[0], (int)v[6]);
-f=fopen(msg,"w");
+char buff[256];
+sprintf(buff,"n%d_k%d.txt",(int)v[0], (int)v[6]);
+f=fopen(buff,"w");
 
 for(v[3]=0; v[3]<v[1] ;v[3]++)
  {int2bin(v[3],v[0],str);
@@ -1526,14 +1525,15 @@ if(val[0]==0)
   goto end;
  }
 f=fopen("string.txt","r");
-fscanf(f, "%s",msg);
+char buff[3000];
+fscanf(f, "%s",buff);
 fclose(f);
 i=0;
 for(cur=p->search("Block"); cur!=NULL; cur=go_brother(cur) )
  {
   for(cur1=cur->search("BitBlock"); cur1!=NULL; cur1=go_brother(cur1) )
-    {cur1->write("Value",msg[i]=='1'?1:0, 0);
-     str[i]=msg[i++]=='1'?1:0;
+    {cur1->write("Value",buff[i]=='1'?1:0, 0);
+     str[i]=buff[i++]=='1'?1:0;
     } 
  }
 i=0;
@@ -1651,17 +1651,14 @@ goto end;
 }
 
 
-
-sprintf(msg, "\nError 04: Function for %s not found", label);
-plog(msg);
+PLOG("\nError 04: Function for %s not found", label);
 quit=2;
 return -1;
 
 end :
 if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
  { 
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
-  error(msg);
+  PLOG( "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
 
   debug_flag=1;
   debug='d';
@@ -1678,9 +1675,8 @@ return(res);
 double power(double a, double b)
 {
 if( a<=0)
- {sprintf(msg,"\na=%lf/tb=%lf", a, b);
-  plog(msg);
-  quit=2;
+ {PLOG("\na=%lf/tb=%lf", a, b);
+ quit=2;
  return 0;
  }
 return(pow(a,b));
@@ -1712,18 +1708,19 @@ void close_sim(void)
 double n;
 int i;
 
+extern int done_in;
+
 delete str2;
 delete str3;
 delete str4;
 delete str;
 
-
 n=fl->cal("N",0);
 for(i=0; i<(int)n; i++)
  {delete fc[i].link;
-  sprintf(msg, "Memory bit %d (of %d) freed (press Stop to interrupt)\n",i+1, (int)n);
-  plog(msg);
-  cmd("if {$done_in == 1} {set debug_flag -1} {}");
+  PLOG("Memory bit %d (of %d) freed (press Stop to interrupt)\n",i+1, (int)n);
+  if ( done_in == 1 )
+  	cmd("set debug_flag -1");
   if(debug_flag==-1)
    {
     debug_flag=0;

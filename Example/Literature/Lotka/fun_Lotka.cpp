@@ -274,8 +274,7 @@ Do not place equations beyond this point.
 
 *********************/
 
-sprintf(msg, "\nFunction for %s not found", label);
-plog(msg);
+PLOG("\nFunction for %s not found", label);
 quit=2;
 return -1;
 

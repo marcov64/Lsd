@@ -190,9 +190,7 @@ CYCLE(cur, "Row")
  {
   v[0]=v[9]=VS(cur, "IdRow");
   
-  sprintf(msg, "\n2) Row %d", (int)v[9]);
-  plog(msg);
-  cmd(inter, "update");
+  PLOG("\n2) Row %d", (int)v[9]);
   
   cur7=SEARCHS(cur,"Col");
   cur8=cur->hook;

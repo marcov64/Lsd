@@ -241,6 +241,7 @@ class object
 
 	double cal(object *caller,  char const *l, int lag);
 	double cal( char const *l, int lag);
+	void recal( char const *l );
 	variable *search_var(object *caller,char const *label);
 	object *search_var_cond(char const *lab, double value, int lag);
 	double overall_max(char const *lab, int lag);
@@ -545,6 +546,7 @@ void insert_store_mem(object *r, int *num_v);
 void kill_trailing_newline(char *s);
 void link_data(object *root, char *lab);
 void log_tcl_error( const char *cm, const char *message );
+void msleep( unsigned msec );
 void myexit(int v);
 void plog( char const *msg, char const *tag = "", ... );
 void plog_series(int *choice);

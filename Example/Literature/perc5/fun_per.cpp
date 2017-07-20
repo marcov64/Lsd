@@ -54,9 +54,7 @@ CYCLE(cur, "Row")
  {
   v[0]=VS(cur,"IdRow");
   
-  sprintf(msg, "\n2) Row %d", (int)v[0]);
-  plog(msg);
-  cmd(inter, "update");
+  LOG("\n2) Row %d", (int)v[0]);
   
   CYCLES(cur, cur1, "Col")
   { 
@@ -249,9 +247,7 @@ CYCLE(cur, "Row")
  {
   v[0]=v[9];
   WRITES(cur,"IdRow",v[9]++); 
-  sprintf(msg, "\n2) Row %d", (int)v[9]-1);
-  plog(msg);
-  cmd(inter, "update");
+  LOG("\n2) Row %d", (int)v[9]-1);
   //for(cur8=cur7=SEARCHS(cur,"Col"); go_brother(cur8)!=NULL; cur8=go_brother(cur8) );
   cur7=SEARCHS(cur,"Col");
   cur8=cur->hook;
@@ -391,9 +387,7 @@ CYCLE(cur, "Row")
  {
   v[0]=v[9];
   WRITES(cur,"IdRow",v[9]++); 
-  sprintf(msg, "\n2) Row %d", (int)v[9]-1);
-  plog(msg);
-  cmd(inter, "update");
+  LOG("\n2) Row %d", (int)v[9]-1);
   for(cur8=cur7=SEARCHS(cur,"Col"); go_brother(cur8)!=NULL; cur8=go_brother(cur8) );
   v[13]=1;
   CYCLES(cur, cur1, "Col")

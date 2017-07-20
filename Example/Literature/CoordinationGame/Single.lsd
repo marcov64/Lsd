@@ -49,7 +49,7 @@ SIM_NUM 1
 SEED 2
 MAX_STEP 2000
 EQUATION fun_coor.cpp
- MODELREPORT modelreport.html
+MODELREPORT modelreport.html
 
 DESCRIPTION
 

@@ -83,7 +83,7 @@ SIM_NUM 1
 SEED 0
 MAX_STEP 2000
 EQUATION fun_life.cpp
- MODELREPORT report_Option5_50_50.html
+MODELREPORT report_Option5_50_50.html
 
 DESCRIPTION
 

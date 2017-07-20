@@ -1,5 +1,5 @@
 #include "fun_head.h"
-//#include "tcl.h"
+
 MODELBEGIN
 
 const char *chstr;
@@ -40,7 +40,7 @@ EQUATION("SlowDown")
 Equation wasting time to slow down the graph
 */
 v[0]=V("TimeSleep");
-usleep((int)v[0]);
+SLEEP((int)v[0]);
 RESULT(1
  )
 
@@ -74,7 +74,7 @@ CYCLE(cur, "node")
  }
 if(v[3]<0)
  {
-  cmd(inter, "set fname [tk_getOpenFile -message \"Select file with initial active cells\"]");
+  cmd("set fname [tk_getOpenFile -title \"Select file with initial active cells\"]");
   chstr=(char *)Tcl_GetVar(inter, "fname",0);
   
   f=fopen(chstr, "r");
@@ -94,7 +94,7 @@ if(v[3]<0)
    }
   fclose(f);
  }
-cmd(inter,"update");
+cmd("update");
 PARAMETER 
 END_EQUATION(0);
 /***

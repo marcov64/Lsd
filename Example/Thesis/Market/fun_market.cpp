@@ -267,8 +267,7 @@ for(v[0]=2,v[11]=0,cur1=c->search("AgCh"); cur1!=NULL && v[0]>1; cur1=go_brother
       cur2=cur->search_var_cond("IdCh",v[1],0); //search the currently used characteristic
       v[6]=norm(v[7]=cur2->cal("Value",0),v[10]);//draw the random value
       if(v[6]<0)
-      {sprintf(msg, "Warning: Value observed below zero\nMean %lf, Dev %lf, Norm %lf\n", v[7], v[10], v[6]);
-       plog(msg); //warning due to the use of unbounded normal random function
+      {PLOG("Warning: Value observed below zero\nMean %lf, Dev %lf, Norm %lf\n", v[7], v[10], v[6]);
         v[6]=0; //negative values may cause problems
       }
       cur->write("PApp",v[6], 0);//The producer's value
@@ -475,7 +474,9 @@ for(v[2]=1, cur2=SEARCHS(c, "Ch"); cur2!=NULL; cur2=cur2->next, v[2]++)
   cur2->write("Positive",0,0);
   cur2->write("Negative",0,0);
   cur2->write("Capability",v[4],t);
-  cur2->write("UpperBound",0,t-1);
+//  cur2->write("UpperBound",0,t-1);
+  cur2->write("UpperBound",0,t);
+  cur2->recal("UpperBound");
   }
 
 for(v[8]=1,v[9]=0; v[8]==1 && quit!=2; v[9]++)
@@ -500,7 +501,9 @@ for(v[8]=1,v[9]=0; v[8]==1 && quit!=2; v[9]++)
      }
 
    }
-  cur2->write("UpperBound",v[7],t-1);
+//  cur2->write("UpperBound",v[7],t-1);
+  cur2->write("UpperBound",v[7],t);
+  cur2->recal("UpperBound");
  }
 }
 //for(cur2=c->son; cur2!=NULL; cur2=cur2->next)
@@ -637,7 +640,9 @@ for(v[30]=0,v[12]=0,cur=first; cur!=NULL; cur=cur->next )
      cur->write("Active",v[13],0); //set the time for the next generation
 //     cur1=p->add_an_object("Agent",cur, last); //create the offspring
      cur1=ADDOBJS_EX(cur->up,"Agent",cur);
-     cur1->write("Learning",0.01,t-1);//set the initial learning of the offspring
+//     cur1->write("Learning",0.01,t-1);//set the initial learning of the offspring
+     cur1->write("Learning",0.01,t,1);//set the initial learning of the offspring
+     cur1->recal("Learning");
      cur1->cal("Learning",0);
      cur1->write("Date",(double)t, 0); //set birthdate of the offspring
      cur1->write("IdAgent",v[10]=p->cal("IssuerId",0),0); //assign a unique ID to the offspring
@@ -1427,8 +1432,7 @@ v[3]=v[0]*v[1];
 res=val[0]*(1-v[2])+v[3]*v[2];
 goto end;
 }
-sprintf(msg, "\nFunction for %s not found", label);
-plog(msg);
+PLOG("\nFunction for %s not found", label);
 quit=2;
 return -1;
 
@@ -1436,8 +1440,7 @@ return -1;
 end :
 if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
  { 
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
-  error(msg);
+  PLOG( "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
 
   debug_flag=1;
   debug='d';

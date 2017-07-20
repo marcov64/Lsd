@@ -365,6 +365,26 @@ bool is_nan( double x )
 
 
 /****************************************************
+MSLEEP
+****************************************************/
+#ifdef _WIN32
+#include <windows.h>
+void msleep( unsigned msec )
+{
+	Sleep( msec );
+	return;
+}
+#else
+#include <unistd.h>	
+void msleep( unsigned msec )
+{
+	usleep( msec * 1000 );
+	return;
+}
+#endif
+
+
+/****************************************************
 SEARCH_STR
 ****************************************************/
 FILE *search_str(char const *name, char const *str)

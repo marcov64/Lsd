@@ -347,6 +347,26 @@ double object::cal( char const *l, int lag )
 }
 
 
+/****************************************************
+RECAL
+Mark variable as not calculated in the current time,
+forcing recalculation if already calculated
+****************************************************/
+void object::recal( char const *l )
+{
+	variable *curr = search_var( this, l );
+	
+	if ( curr == NULL )
+	{
+		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return;
+	}
+	
+	curr->last_update = t - 1;
+}
+
+
 /********************************************
 search_var
 Explore the model starting from this and

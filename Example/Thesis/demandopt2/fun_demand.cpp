@@ -280,8 +280,7 @@ for(v[0]=2,cur1=c->search("AgCh"); cur1!=NULL && v[0]>1; cur1=go_brother(cur1), 
       cur2=cur->search_var_cond("IdCh",v[1],0);
       v[6]=norm(v[7]=cur2->cal("Value",0),v[5]);
       if(v[6]<0)
-      {sprintf(msg, "Warning: Value observed below zero\nMean %lf, Dev %lf, Norm %lf\n", v[7], v[5], v[6]);
-       plog(msg);
+      {PLOG("Warning: Value observed below zero\nMean %lf, Dev %lf, Norm %lf\n", v[7], v[5], v[6]);
         v[6]=0;
       }
 
@@ -739,8 +738,7 @@ res=v[12];
 goto end;
 }
 
-sprintf(msg, "\nFunction for %s not found", label);
-plog(msg);
+PLOG("\nFunction for %s not found", label);
 quit=2;
 return -1;
 
@@ -748,8 +746,7 @@ return -1;
 end :
 if( (isnan(res)==1 || isinf(res)==1) && quit!=1)
  { 
-  sprintf(msg, "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
-  error(msg);
+  PLOG( "At time %d the equation for '%s' produces the non-valid value '%lf'. Check the equation code and the temporary values v\\[...\\] to find the faulty line.",t, label, res );
 
   debug_flag=1;
   debug='d';
