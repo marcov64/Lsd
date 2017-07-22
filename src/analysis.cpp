@@ -2467,6 +2467,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -2692,6 +2693,7 @@ for(i=0, new_nv=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -3413,6 +3415,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -3836,6 +3839,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -4254,6 +4258,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -4642,6 +4647,7 @@ for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
   data[ i ] = NULL;
+  logdata[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
