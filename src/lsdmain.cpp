@@ -155,6 +155,7 @@ int t;						// current time step
 int total_obj=0;			// total objects in model
 int total_var=0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
+int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 0;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// Lsd stack
 object *blueprint = NULL;	// Lsd blueprint (effective model in use)
@@ -664,6 +665,7 @@ debug_flag = false;
 use_nan = false;
 done_in = 0;
 actual_steps = 0;
+wr_warn_cnt = 0;
 start = clock();
 
 for ( t = 1; quit == 0 && t <= max_step; ++t )

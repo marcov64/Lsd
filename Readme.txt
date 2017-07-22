@@ -166,10 +166,10 @@ If you modified the makefile to compile LMM, the same changes need to be made to
 
 
 ***********************************
-MacOS (10.10+) Installation
+macOS (10.10+) Installation
 ***********************************
 
-Mac users have two options. Either use the package native for MacOS (Aqua), or compile Lsd as a Unix system. In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
+Mac users have two options. Either use the package native for macOS (Aqua), or compile Lsd as a Unix system. In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
 
 To unpack the distribution file, e.g. LsdXX.zip, simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
@@ -187,7 +187,13 @@ Optionally, you can recompile LMM, in particular if the included pre-compiled ve
 
 make -f makefile.osx
 
-You may have to install Gnuplot if you want to produce more elaborated plots in Lsd. If you have a standard installation of MacOS (Aqua), the easiest way is to use Homebrew for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
+Users of macOS Sierra (10.12) or newer MUST manually install the Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required line tools available in macOS. To install it, open the Terminal (located inside /Applications/Utilities) and enter the following command:
+
+xcode-select --install
+
+Then, in the just opened window, click on the Install button (do NOT click on the Get Xcode button), accept the license and wait installation completion (you may have to reboot to finish the installation).
+
+You may have to install Gnuplot if you want to produce more elaborated plots in Lsd. If you have a standard installation of macOS (Aqua), the easiest way is to use Homebrew for the installation. If you do not have Homebrew installed, at the terminal prompt, paste the following command and press ENTER:
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 

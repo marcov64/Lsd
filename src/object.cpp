@@ -996,9 +996,13 @@ void object::write( char const *lab, double value, int time, int lag )
 #endif	
 			if ( cv->param != 1 && time < t && t > 1 )
 			{
-				plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid. This would \nundermine the correct updating of variable '%s', \nand has been forced to take the current time (%d)\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, lab, t );
+				if ( wr_warn_cnt <= ERR_LIM )
+					plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This would \nundermine the correct updating of variable '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
+				if ( wr_warn_cnt == ERR_LIM )
+					plog( "\nWarning: too many invalid writes, stop reporting...\n" );
 				cv->val[ 0 ] = value;
-				cv->last_update = t;
+				cv->last_update = t - 1;
+				++wr_warn_cnt;
 			}
 			else
 			{	// allow for change of initial lagged values when starting simulation (t=1)

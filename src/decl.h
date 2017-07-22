@@ -693,6 +693,7 @@ extern int total_obj;		// total objects in model
 extern int total_var;       // total variables/parameters in model
 extern int watch;			// allow for graph generation interruption (bool)
 extern int when_debug;      // next debug stop time step (0 for none)
+extern int wr_warn_cnt;		// invalid write operations warning counter
 extern long nodesSerial;	// network node serial number global counter
 extern lsdstack *stacklog;	// Lsd stack
 extern object *blueprint;   // Lsd blueprint (effective model in use)

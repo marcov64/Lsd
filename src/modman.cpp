@@ -1187,13 +1187,13 @@ cmd( "cd \"$modeldir\"" );
 if(choice==58)
  {
  cmd( "scan $vmenuInsert %%d.%%d line col" );
- cmd( "if [ string equal $tcl_platform(os) Darwin ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
+ cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
  cmd( "catch { set f [open break.$breakExt w]; puts $f $breakTxt; close $f }" );
  
- cmd( "if [ string equal $tcl_platform(os) Darwin ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
+ cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
  }
 else
- cmd( "if [ string equal $tcl_platform(os) Darwin ] { set cmdbreak \"\" } { set cmdbreak \"--args\" }" ); 
+ cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
 
 make_makefile( );  
 cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
