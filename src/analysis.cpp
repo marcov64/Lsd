@@ -1072,22 +1072,23 @@ cmd( "set choice $tvar" );
 h=*choice;
 
 for(i=0; i<j; i++)
- {
+{
   cmd( "set res [lindex $tot %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k);
   if(h>=l && h<=m && !strcmp(str1, str3))
-   {
+  {
    datum = vs[ k ].data;
-   r=0;
    if(is_finite(datum[h]))		// ignore NaNs
+   {
+    r=0;
     switch(p)
     {
     case 0: if(datum[h]!=compvalue) r=1;
-    break;
+     break;
     case 1: if(datum[h]==compvalue) r=1;
-    break;
+     break;
     case 2: if(datum[h]>=compvalue) r=1;
      break;
     case 3: if(datum[h] > compvalue) r=1;
@@ -1096,21 +1097,12 @@ for(i=0; i<j; i++)
      break;
     case 5: if(datum[h] < compvalue) r=1;
      break;
-        
     }
     if(r==1)
-     { 
-      cmd( "set templ $tot" );
-      cmd( "set choice [lsearch $templ \"$b %s *\"]", str2 );
-
-      while(*choice>=0)
-       {
-       cmd( ".da.vars.ch.v insert end [lindex $templ $choice]" );
-       cmd( "set templ [lreplace $templ $choice $choice]" );
-       }
-     }
+       cmd( ".da.vars.ch.v insert end $res" );
    }
- }
+  }
+}
 }
 
 cmd( "destroytop .da.a" );
@@ -1301,22 +1293,23 @@ cmd( "set choice $tvar" );
 h=*choice;
 
 for(i=0; i<j; i++)
- {
+{
   cmd( "set res [lindex $tot %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str1, str2, &l, &m, &k);
   if(h>=l && h<=m && !strcmp(str1, str3))
-   {
+  {
    datum = vs[ k ].data;
-   r=0;
    if(is_finite(datum[h]))		// ignore NaNs
+   {
+    r=0;
     switch(p)
     {
     case 0: if(datum[h]!=compvalue) r=1;
-    break;
+     break;
     case 1: if(datum[h]==compvalue) r=1;
-    break;
+     break;
     case 2: if(datum[h]>=compvalue) r=1;
      break;
     case 3: if(datum[h] > compvalue) r=1;
@@ -1325,21 +1318,12 @@ for(i=0; i<j; i++)
      break;
     case 5: if(datum[h] < compvalue) r=1;
      break;
-        
     }
     if(r==1)
-     { 
-      cmd( "set templ $tot" );
-      cmd( "set choice [lsearch $templ \"$b %s *\"]", str2 );
-
-      while(*choice>=0)
-       {
-       cmd( ".da.vars.ch.v selection set $choice" );
-       cmd( "set templ [lreplace $templ $choice $choice]" );
-       }
-     }
+      cmd( ".da.vars.ch.v selection set %d", i );
    }
- }
+  }
+}
 }
 
 cmd( "destroytop .da.a" );
@@ -2482,6 +2466,7 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -2706,6 +2691,7 @@ if(autom_x)
 for(i=0, new_nv=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -3426,6 +3412,7 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -3589,6 +3576,8 @@ for(i=0; i<nv; i++)
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   data[ i ] = vs[ idseries ].data;
+  if(data[i]==NULL)
+    plog("\nError: invalid data\n");
    
    if(logs)			// apply log to the values to show "log scale" in the y-axis
    {
@@ -3846,6 +3835,7 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -4263,6 +4253,7 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -4650,6 +4641,7 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   app=(char *)Tcl_GetVar(inter, "res",0);
@@ -4659,7 +4651,7 @@ for(i=0; i<nv; i++)
   // get series data and take logs if necessary
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
-   data[ i ] = vs[ idseries ].data;
+    data[ i ] = vs[ idseries ].data;
     if(data[i]==NULL)
       plog("\nError: invalid data\n");
    
@@ -6146,13 +6138,18 @@ if(autom_x)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
+  {
     data[ i ] = vs[ idseries ].data;
+    if(data[i]==NULL)
+      plog("\nError: invalid data\n");
+  }
  }
 
 if(autom_x||min_c>=max_c)
@@ -6423,6 +6420,7 @@ if(flt<2)
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   lapp=(char *)Tcl_GetVar(inter, "res",0);
@@ -6439,6 +6437,9 @@ for(i=0; i<nv; i++)
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
    {
    data[ i ] = vs[ idseries ].data;
+   if(data[i]==NULL)
+     plog("\nError: invalid data\n");
+
    xapp=0;
 
    for(h=0, j=start[i]; j<start[i]+flt;j++)
@@ -6542,6 +6543,8 @@ for(i=0; i<nv; i++)
   strcpy(msg,app);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   data[ i ] = vs[ idseries ].data;
+  if(data[i]==NULL)
+    plog("\nError: invalid data\n");
 
   if(max_c<end[i])
    max_c=end[i];
@@ -7015,13 +7018,18 @@ tag=new char *[nv];
 for(i=0; i<nv; i++)
  {str[i]=new char[MAX_ELEM_LENGTH];
   tag[i]=new char[MAX_ELEM_LENGTH];
+  data[ i ] = NULL;
 
   cmd( "set res [.da.vars.ch.v get %d]", i );
   lapp=(char *)Tcl_GetVar(inter, "res",0);
   strcpy(msg,lapp);
   sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
   if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
+  {
    data[ i ] = vs[ idseries ].data;
+   if(data[i]==NULL)
+     plog("\nError: invalid data\n");
+  }
  }
 
 if(autom_x||min_c>=max_c)
@@ -7155,6 +7163,10 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 			switch ( type )
 			{
 				case TSERIES:
+					// ignore series not started/finished
+					if ( data[ k ] == NULL )
+						continue;
+					
 					yVal = data[ k ][ i ];
 					if ( start[ k ] < i && end[ k ] >= i )
 						tOk = true;
@@ -7163,6 +7175,10 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 					break;
 					
 				case CRSSECT:
+					// ignore series not started/finished
+					if ( data[ i ] == NULL )
+						continue;
+					
 					yVal = data[ i ][ k ];
 					tOk = true;
 					break;
