@@ -227,14 +227,7 @@ cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $t
 cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe \"gnumake.exe\" } { set DefaultMakeExe \"make.exe\" } }" );
 
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
-cmd( "set DbgExe \"$DefaultDbgExe\"" );
-cmd( "set DbgTerm \"$DefaultDbgTerm\"" );
-cmd( "set HtmlBrowser \"$DefaultHtmlBrowser\"" );
-cmd( "set fonttype \"$DefaultFont\"" );
-cmd( "set dim_character $DefaultFontSize" );
 cmd( "set small_character [ expr $DefaultFontSize - 2 ]" );
-cmd( "set wish \"$DefaultWish\"" );
-cmd( "set LsdSrc src" );
 
 cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
 if ( choice )
@@ -255,12 +248,34 @@ if ( choice )
 	cmd( "gets $f DbgExe" );
 	cmd( "close $f" );
 	// handle old options file
-	cmd( "if { $dim_character == \"\" || $showFileCmds == \"\" || $DbgExe == \"\" } {set choice 0}" );
+	cmd( "if { $DbgTerm == \"\" || $HtmlBrowser == \"\" || $fonttype == \"\" || $wish == \"\" || $LsdSrc == \"\" || $dim_character == \"\" || $tabsize == \"\" || $wrap == \"\" || $shigh == \"\" || $autoHide == \"\" || $showFileCmds == \"\" || $LsdNew == \"\" || $DbgExe == \"\" } { set choice 0 }" );
 }
+else
+{
+	cmd( "set DbgTerm \"\"" );
+	cmd( "set HtmlBrowser \"\"" );
+	cmd( "set fonttype \"\"" );
+	cmd( "set wish \"\"" );
+	cmd( "set LsdSrc \"\"" );
+	cmd( "set dim_character \"\"" );
+	cmd( "set tabsize \"\"" );
+	cmd( "set wrap \"\"" );
+	cmd( "set shigh \"\"" );
+	cmd( "set autoHide \"\"" );
+	cmd( "set showFileCmds \"\"" );
+	cmd( "set LsdNew \"\"" );
+	cmd( "set DbgExe \"\"" );
+}
+
 // handle non-existent or old options file for new options
-if ( choice != 1 )
+if ( ! choice )
  {
 	// set new parameters
+	cmd( "if { $DbgTerm == \"\" } { set DbgTerm \"$DefaultDbgTerm\" }" );// default debugger terminal
+	cmd( "if { $HtmlBrowser == \"\" } { set HtmlBrowser \"$DefaultHtmlBrowser\" }" );// default browser
+	cmd( "if { $wish == \"\" } { set wish \"$DefaultWish\" }" );// default tcl interpreter
+	cmd( "if { $LsdSrc == \"\" } { set LsdSrc src }" );	// source path
+	cmd( "if { $fonttype == \"\" } { set fonttype $DefaultFont }" );
 	cmd( "if { $dim_character == \"\" } { set dim_character $DefaultFontSize }" );
 	cmd( "if { $tabsize == \"\" } { set tabsize 2 }" );	// default tab size
 	cmd( "if { $wrap == \"\" } { set wrap 1 }" );		// default text wrapping mode (1=yes)
