@@ -154,7 +154,8 @@ proc showmodel pippo {
 		label .l.t.tit -text Description
 		pack .l.t.tit -expand yes -fill x
 		scrollbar .l.t.yscroll -command ".l.t.text yview"
-		text .l.t.text -wrap word -font "$fonttype $small_character normal" -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
+		set a [list "$fonttype" $small_character]
+		text .l.t.text -wrap word -font "$a" -width 60 -relief sunken -yscrollcommand ".l.t.yscroll set"
 		pack .l.t.yscroll -side right -fill y
 		pack .l.t.text -expand yes -fill both
 
@@ -415,7 +416,8 @@ proc edit i {
 	label .l.e.t.l -text "Description"
 	frame .l.e.t.t
 	scrollbar .l.e.t.t.yscroll -command ".l.e.t.t.text yview"
-	text .l.e.t.t.text -wrap word -width 60 -height 20 -font "$fonttype $small_character normal" -yscrollcommand ".l.e.t.t.yscroll set"
+	set a [list "$fonttype" $small_character]
+	text .l.e.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.e.t.t.yscroll set"
 	.l.e.t.t.text insert end "[lindex $lmd $i]"
 	pack .l.e.t.t.yscroll -side right -fill y
 	pack .l.e.t.t.text
@@ -500,7 +502,8 @@ proc paste i {
 
 	frame .l.p.t.t
 	scrollbar .l.p.t.t.yscroll -command ".l.p.t.t.text yview"
-	text .l.p.t.t.text -wrap word -width 60 -height 20 -font "$fonttype $small_character normal" -yscrollcommand ".l.p.t.t.yscroll set"
+	set a [list "$fonttype" $small_character]
+	text .l.p.t.t.text -wrap word -width 60 -height 20 -font "$a" -yscrollcommand ".l.p.t.t.yscroll set"
 	.l.p.t.t.text insert end "$copydscr"
 	pack .l.p.t.t.yscroll -side right -fill y
 	pack .l.p.t.t.text

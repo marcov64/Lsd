@@ -393,8 +393,8 @@ cmd( "$w add separator" );
 cmd( "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Ctrl+>" );
 cmd( "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Ctrl+<" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'" );
-cmd( "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'" );
+cmd( "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'" );
+cmd( "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'" );
 cmd( "$w add command -label \"Font...\" -command {set choice 59} -underline 8" );
 cmd( "$w add separator" );
 // add option to ajust syntax highlighting (word coloring)
@@ -531,7 +531,7 @@ cmd( "set a [.f.t.t conf -font]" );
 cmd( "set b [lindex $a 3]" );
 cmd( "if {$dim_character == 0} {set dim_character [lindex $b 1]}" );
 cmd( "if {$dim_character == \"\"} {set dim_character $DefaultFontSize}" );
-cmd( "set a [list $fonttype $dim_character]" );
+cmd( "set a [ list \"$fonttype\" $dim_character ]" );
 // set preferred tab size and wrap option
 cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
 cmd( "setwrap .f.t.t $wrap" );		// adjust text wrap
@@ -616,8 +616,8 @@ cmd( "bind .f.t.t <Control-m> {set choice 17}" );
 cmd( "bind .f.t.t <Control-g> {set choice 13}; bind .f.t.t <Control-G> {set choice 13}" );
 cmd( "bind .f.t.t <Control-d> {set choice 5; break}" );
 cmd( "bind .f.t.t <Control-b> {set choice 33; break}; bind .f.t.t <Control-B> {set choice 33; break}" );
-cmd( "bind .f.t.t <Control-minus> {incr dim_character -2; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"}" );
-cmd( "bind .f.t.t <Control-plus> {incr dim_character 2; set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"}" );
+cmd( "bind .f.t.t <Control-minus> {incr dim_character -2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
+cmd( "bind .f.t.t <Control-plus> {incr dim_character 2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
 cmd( "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\\{}" );
 cmd( "bind .f.t.t <Control-parenright> {.f.t.t insert insert \\}}" );
 cmd( "bind .f.t.t <Control-greater> {set choice 42}" );
@@ -1371,7 +1371,8 @@ cmd( "pack .a.mdir.l .a.mdir.e" );
 
 cmd( "frame .a.tdes" );
 cmd( "label .a.tdes.l -text \"Group description\"" );
-cmd( "text .a.tdes.e -width 60 -height 15 -font \"$fonttype $small_character normal\"" );
+cmd( "set a [ list \"$fonttype\" $small_character ]" );
+cmd( "text .a.tdes.e -width 60 -height 15 -font \"$a\"" );
 cmd( "pack .a.tdes.l .a.tdes.e" );
 
 cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
@@ -3960,7 +3961,7 @@ goto loop;
 if(choice==59)
 {
 //Change font
-cmd( "set ifont $fonttype" );
+cmd( "set ifont \"$fonttype\"" );
 cmd( "set idim $dim_character" );
 
 cmd( "newtop .a \"Change Font\" { set choice 2 }" );
@@ -3997,7 +3998,7 @@ if(choice==2)
 
 cmd( "set fonttype \"$ifont\"" );
 cmd( "set dim_character $idim" );
-cmd( "set a [list $fonttype $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"" );
+cmd( "set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"" );
 
 choice=0;
 goto loop;
@@ -4136,7 +4137,7 @@ if(choice==1)
  cmd( "set LsdNew $temp_var12" );
  cmd( "set DbgExe $temp_var13" );
  
- cmd( "set a [list $fonttype $dim_character]" );
+ cmd( "set a [ list \"$fonttype\" $dim_character ]" );
  cmd( ".f.t.t conf -font \"$a\"" );
  cmd( "settab .f.t.t $tabsize \"$a\"" );	// adjust tabs size to font type/size
  cmd( "setwrap .f.t.t $wrap" );			// adjust text wrap
@@ -4958,7 +4959,8 @@ void create_compresult_window( bool nw )
 	cmd( "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in Lsd installation directory for information on particular problems.\"" );
 	cmd( "pack .mm.lab" );
 
-	cmd( "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word -font \"$fonttype $small_character normal\"; scrollbar .mm.yscroll -command \".mm.t yview\"" );
+	cmd( "set a [ list \"$fonttype\" $small_character ]" );
+	cmd( "text .mm.t -yscrollcommand \".mm.yscroll set\" -wrap word -font \"$a\"; scrollbar .mm.yscroll -command \".mm.t yview\"" );
 	cmd( "pack .mm.yscroll -side right -fill y; pack .mm.t -expand yes -fill both" );
 
 	cmd( "frame .mm.b" );

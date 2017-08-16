@@ -421,10 +421,22 @@ if ( choice )
 	cmd( "gets $f dim_character" );
 	cmd( "gets $f tabsize" );
 	cmd( "close $f" );
-	cmd( "set small_character [ expr $dim_character - 2 ]" );
 }
 else
-  cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
+{
+	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
+	// set platform-specific variables
+	cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish wish; set Terminal xterm; set HtmlBrowser firefox; set fonttype Courier; set dim_character 12 }" );
+	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish wish8.5; set Terminal Terminal; set HtmlBrowser open; set fonttype Monaco; set dim_character 14 }" );
+	cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish wish85.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
+	cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish wish86.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
+	cmd( "set LsdSrc src" );
+	cmd( "set tabsize 2" );
+}
+
+cmd( "set small_character [ expr $dim_character - 2 ]" );
+cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
+cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 
 choice = 0;
 // load native Tk windows defaults
@@ -1036,7 +1048,7 @@ cmd( "set w .log.text" );
 cmd( "frame $w" );
 cmd( "scrollbar $w.scroll -command \"$w.text yview\"" );
 cmd( "scrollbar $w.scrollx -command \"$w.text xview\" -orient hor" );
-cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -font \"$fonttype $dim_character normal\"" );
+cmd( "text $w.text -relief sunken -yscrollcommand \"$w.scroll set\" -xscrollcommand \"$w.scrollx set\" -wrap none -font \"$font_normal\"" );
 cmd( "$w.text configure -tabs {%s}", tabs  );
 
 // Log window tags
