@@ -2002,13 +2002,13 @@ else
 	cmd( "newtop .a \"Insert 'cal'\" { set choice 2 }" );
 
 cmd( "frame .a.v" );
-cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign the result\"" );
+cmd( "label .a.v.l -text \"Number v\\\[x\\] to assign to\"" );
 cmd( "entry .a.v.e -width 2 -textvariable v_num -justify center" );
 cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
 cmd( "pack .a.v.l .a.v.e" );
 
 cmd( "frame .a.n" );
-cmd( "label .a.n.l -text \"Variable to compute\"" );
+cmd( "label .a.n.l -text \"Variable or parameter to retrieve\"" );
 cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
 cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
 cmd( "pack .a.n.l .a.n.e" );
@@ -2020,7 +2020,7 @@ cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.l.l .a.l.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object to request computation\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -2346,7 +2346,7 @@ cmd( "bind .a.a.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.a.l .a.a.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object containing the variable to increment\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -2431,7 +2431,7 @@ cmd( "bind .a.a.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.a.l .a.a.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object containing the variable to multiply\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -2516,7 +2516,7 @@ cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.l.l .a.l.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object containing the variable or parameter\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -2684,7 +2684,7 @@ cmd( "bind .a.s <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.s.l .a.s.u .a.s.d" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object containing the objects to be sorted\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -2857,7 +2857,7 @@ cmd( "bind .a.v.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.v.l .a.v.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Parent object containing the new object(s)\"" );
+cmd( "label .a.o.l -text \"Parent object for new object(s)\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -3106,7 +3106,7 @@ cmd( "bind .a.n.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.n.l .a.n.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object where to start the search\"" );
+cmd( "label .a.o.l -text \"Object from which to search\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -3167,7 +3167,7 @@ cmd( "bind .a.v.e <Return> {focus .a.n.e; .a.n.e selection range 0 end}" );
 cmd( "pack .a.v.l .a.v.e" );
 
 cmd( "frame .a.n" );
-cmd( "label .a.n.l -text \"Variable to sum\"" );
+cmd( "label .a.n.l -text \"Variable or parameter to sum\"" );
 cmd( "entry .a.n.e -width 25 -textvariable v_label -justify center" );
 cmd( "bind .a.n.e <Return> {focus .a.l.e; .a.l.e selection range 0 end}" );
 cmd( "pack .a.n.l .a.n.e" );
@@ -3179,7 +3179,7 @@ cmd( "bind .a.l.e <Return> {focus .a.o.e; .a.o.e selection range 0 end}" );
 cmd( "pack .a.l.l .a.l.e" );
 
 cmd( "frame .a.o" );
-cmd( "label .a.o.l -text \"Object to request computation\"" );
+cmd( "label .a.o.l -text \"Parent object\"" );
 cmd( "entry .a.o.e -width 25 -textvariable v_obj -justify center" );
 cmd( "bind .a.o.e <Return> {focus .a.f.ok}" );
 cmd( "pack .a.o.l .a.o.e" );
@@ -4975,13 +4975,14 @@ void create_compresult_window( bool nw )
 	cmd( "bind .mm <Escape> {destroytop .mm}" );
 
 	cmd( "showtop .mm lefttoW no no no" );
-	cmd( "focus .mm.t" );
 
 	cmd( "if [ file exists \"$modeldir/makemessage.txt\" ] { set file [open \"$modeldir/makemessage.txt\"]; .mm.t insert end [read $file]; close $file } { .mm.t insert end \"(no compilation errors)\" }" );
 	cmd( ".mm.t mark set insert \"1.0\"" );
 	cmd( "set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;}" );
 	
 	cmd( ".mm.t configure -state disabled" );
+	cmd( "wm deiconify .mm; raise .mm; focus .mm.t" );
+	cmd( "update" );
 }
 
 

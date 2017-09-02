@@ -107,6 +107,7 @@ Exit function, which is customized on the operative system.
 #include "decl.h"
 
 bool justAddedVar = false;			// control the selection of last added variable
+bool redrawReq = false;				// flag for asynchronous window redraw request
 char lastObj[MAX_ELEM_LENGTH]="";	// to save last shown object for quick reload (choice=38)
 char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
@@ -134,9 +135,9 @@ object *create( object *cr )
 object *cur;
 char *s;
 
-Tcl_LinkVar(inter, "strWindowOn", (char*)&strWindowOn, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "choice_g", (char *)&choice_g, TCL_LINK_INT);
-Tcl_LinkVar(inter, "actual_steps", (char *)&actual_steps, TCL_LINK_INT);
+Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
+Tcl_LinkVar( inter, "actual_steps", (char * ) &actual_steps, TCL_LINK_INT );
 
 // sort the list of choices with existing run data to use later
 qsort( badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints );
@@ -279,10 +280,10 @@ cmd( "menu .l.v.c.var_name.v -tearoff 0" );
 cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 2
-cmd( ".l.v.c.var_name.v add checkbutton -label \"Save\" -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
+cmd( ".l.v.c.var_name.v add checkbutton -label Save -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
 cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }" );	// entryconfig 4
-cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug\" -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
-cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel\" -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
+cmd( ".l.v.c.var_name.v add checkbutton -label Debug -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
+cmd( ".l.v.c.var_name.v add checkbutton -label Parallel -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
 cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 7
 cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 8
 cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 9
@@ -840,7 +841,13 @@ double fake=0;
 sense *cs;
 description *cur_descr;
 
-redrawRoot = false;			// assume no browser redraw
+if ( ! redrawReq )
+	redrawRoot = false;		// assume no browser redraw
+else
+{
+	redrawRoot = true;		// handle pending async redraw request
+	redrawReq = false;
+}
 
 switch(*choice)
 {
@@ -1401,7 +1408,6 @@ cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
 cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
 cmd( "bind $T <Control-c> \"$T.b1.com invoke\"; bind $T <Control-C> \"$T.b1.com invoke\"" );
-cmd( "bind $T <KeyPress-Delete> {set choice 3}" );
 
 cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName } { set choice 2 }" );
 
@@ -1679,7 +1685,7 @@ cmd( "frame $Td.f -bd 2 -relief groove" );
 cmd( "label $Td.f.int -text \"Description\"" );
 
 cmd( "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"" );
-cmd( "text $Td.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $Td.f.text -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $Td.f.yscroll -side right -fill y" );
 cmd( "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both" );
 
@@ -1692,7 +1698,7 @@ for(i=0; cur_descr->text[i]!='\0'; i++)
 cmd( "$Td.f.text delete \"end - 1 char\"" );
 
 cmd( "frame $Td.b" );
-cmd( "button $Td.b.eq -width -9 -text \"View Code\" -command {set done 3} -underline 0" );
+cmd( "button $Td.b.eq -width -9 -text \"View Code\" -command {set done 3} -underline 3" );
 cmd( "button $Td.b.auto_doc -width -9 -text \"Auto Desc.\" -command {set done 9} -underline 0" );
 cmd( "button $Td.b.us -width -9 -text \"Using Element\" -command {set done 4} -underline 0" );
 cmd( "button $Td.b.using -width -9 -text \"Elements Used\" -command {set done 7} -underline 0" );
@@ -1701,7 +1707,7 @@ if(!strcmp(cur_descr->type, "Parameter"))
 else
 {
   cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx 10 -side left" );
-  cmd( "bind $T <Control-v> \"$Td.b.eq invoke\"; bind $T <Control-V> \"$Td.b.eq invoke\"" );
+  cmd( "bind $T <Control-w> \"$Td.b.eq invoke\"; bind $T <Control-W> \"$Td.b.eq invoke\"" );
   cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 }
 
@@ -1710,7 +1716,7 @@ if(cv->param==1 || cv->num_lag>0)
   cmd( "frame $Td.i -bd 2 -relief groove" );
   cmd( "label $Td.i.int -text \"Comments on initial values\"" );
   cmd( "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"" );
-  cmd( "text $Td.i.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$font_small\"" );
+  cmd( "text $Td.i.text -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$font_small\"" );
   cmd( "pack $Td.i.yscroll -side right -fill y" );
   if(cur_descr->init!=NULL)
   {
@@ -5945,10 +5951,16 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	{
 		cv = cur->search_var( NULL, vname );
 		if ( ! strcmp( argv[ 2 ], "save" ) )
+		{
 			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+			redrawReq = true;
+		}
 		else 
 			if ( ! strcmp( argv[ 2 ], "savei" ) )
+			{
 				cv->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
+				redrawReq = true;
+			}
 			else
 				if ( ! strcmp( argv[ 2 ], "plot" ) )
 					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;

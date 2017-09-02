@@ -104,7 +104,7 @@ bool no_more_memory = false;// memory overflow when setting data save structure
 bool no_window = false;		// no-window command line job
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
-bool redrawRoot = true;		// control for redrawing root window (.)
+bool redrawRoot;			// control for redrawing root window (.)
 bool running = false;		// simulation is running
 bool save_alt_path = false;	// alternate save path flag
 bool scroll;				// scroll state in current runtime plot
