@@ -439,6 +439,8 @@ case 22:
 			cmd( "$n.t insert end \"\n\"" );
 	}
 	
+	cmd( "$n.t configure -state disabled" );
+ 
 	cmd( "showtop $n topleftW 0 1 0" );
 	
 	cmd( "if { ! [ winfo exists .deb.val ] } { align $n .deb } { align $n .deb.val }" );
@@ -947,10 +949,12 @@ cmd( "$in.t tag configure v -foreground red" );
 cmd( "if { ! [ winfo exists .deb.net ] } { align $in .deb } { align $in .deb.net }" );
 
 for(i=0; i<100; i++)
- {
+{
   cmd( "$in.t insert end \"v\\\[%d\\]\" v",i );
   cmd( "$in.t insert end \"=%g\n\"",i_values[i] );
- }
+}
+
+cmd( "$in.t configure -state disabled" );
  
 choice=0;
 break;

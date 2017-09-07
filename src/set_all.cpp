@@ -1066,7 +1066,7 @@ cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
 cmd( "pack .sens.lab .sens.obs -pady 5" );
 
-cmd( "text .sens.t -height 12 -width 60 -font \"$font_normal\"" ); 
+cmd( "text .sens.t -undo 1 -height 12 -width 60 -font \"$font_normal\"" ); 
 cmd( "pack .sens.t" ); 
 
 cmd( "frame .sens.fb" );

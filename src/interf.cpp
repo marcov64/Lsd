@@ -733,13 +733,13 @@ main_cycle:
 
 cmd( "if [ info exists ModElem ] { set ModElem [ lsort -dictionary $ModElem ] }" );
 
-cmd( "if { $listfocus == 1} {focus .l.v.c.var_name; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus} {}" );
-cmd( "if { $listfocus == 2} {focus .l.s.c.son_name; .l.s.c.son_name selection set $itemfocus; .l.s.c.son_name activate $itemfocus} {}" );
+cmd( "if { $listfocus == 1 } { focus .l.v.c.var_name; .l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus }" );
+cmd( "if { $listfocus == 2 } { focus .l.s.c.son_name; .l.s.c.son_name selection clear 0 end; .l.s.c.son_name selection set $itemfocus; .l.s.c.son_name activate $itemfocus }" );
 
 cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
-*choice=0;
+*choice = 0;
 
 // main command loop
 while( ! *choice  && ! choice_g )
@@ -759,14 +759,18 @@ while( ! *choice  && ! choice_g )
 }   
 
 
-if(choice_g!=0)
- {*choice=choice_g;
-  res_g=(char *)Tcl_GetVar(inter, "res_g",0);
-  cmd( "focus .l.v.c.var_name" );
-  choice_g=0;
- }
+if ( choice_g )		// coming from the structure window
+{
+	*choice = choice_g;
+	choice_g = 0;
+	res_g = ( char * )Tcl_GetVar( inter, "res_g", 0 );
+	cmd( "focus .l.v.c.var_name" );
+}
 
-if(actual_steps>0)
+// update focus memory
+cmd( "if { [ .l.v.c.var_name curselection ] != \"\" } { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ] } { if { [ .l.s.c.son_name curselection ] != \"\" } { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ] } }" );
+
+if ( actual_steps > 0 )
 { // search the sorted list of choices that are bad with existing run data
    if ( bsearch( choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
    { // prevent changing data if analysis is open
@@ -801,23 +805,24 @@ if(actual_steps>0)
      cmd( "showtop $T centerS" );
 	 cmd( "bell; update" );
    
-     *choice=0;
-     while(*choice==0 && choice_g==0)
+     *choice = 0;
+     while ( *choice == 0 && choice_g == 0 )
         Tcl_DoOneEvent(0);
  
      cmd( "destroytop .warn" );
 
-     if(*choice==1)
+     if ( *choice == 1 )
         cmd( "set choice $temp" );
      else 
-       goto main_cycle;
+        goto main_cycle;
    }
 } 
  
-if(*choice!=35)
-{cmd( "if {[winfo exists .]==1} {bind . <Destroy> {}} {}" );
- cmd( "if {[winfo exists .str]==1} {bind .str <Destroy> {}} {}" );
- cmd( "if {[winfo exists .list]==1} {destroy .list} {}" );
+if ( *choice != 35 )
+{
+	cmd( "if { [ winfo exists . ] == 1 } { bind . <Destroy> { } }" );
+	cmd( "if { [ winfo exists .str ] == 1 } { bind .str <Destroy> { } }" );
+	cmd( "if { [ winfo exists .list ] == 1 } { destroy .list }" );
 }
 
 return *choice;
@@ -938,7 +943,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1092,7 +1097,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1206,7 +1211,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.lab -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 6 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
@@ -1389,7 +1394,7 @@ cmd( "frame $w" );
 cmd( "frame $w.f -bd 2 -relief groove" );
 cmd( "label $w.f.int -text \"Description\"" );
 cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
-cmd( "text $w.f.text -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 10 -relief sunken -yscrollcommand \"$w.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.int $w.f.text -anchor w -expand yes -fill both" );
 
@@ -1685,7 +1690,7 @@ cmd( "frame $Td.f -bd 2 -relief groove" );
 cmd( "label $Td.f.int -text \"Description\"" );
 
 cmd( "scrollbar $Td.f.yscroll -command \"$Td.f.text yview\"" );
-cmd( "text $Td.f.text -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$font_small\"" );
+cmd( "text $Td.f.text -undo 1 -wrap word -width 60 -height 8 -relief sunken -yscrollcommand \"$Td.f.yscroll set\" -font \"$font_small\"" );
 cmd( "pack $Td.f.yscroll -side right -fill y" );
 cmd( "pack $Td.f.int $Td.f.text -anchor w -expand yes -fill both" );
 
@@ -1716,7 +1721,7 @@ if(cv->param==1 || cv->num_lag>0)
   cmd( "frame $Td.i -bd 2 -relief groove" );
   cmd( "label $Td.i.int -text \"Comments on initial values\"" );
   cmd( "scrollbar $Td.i.yscroll -command \"$Td.i.text yview\"" );
-  cmd( "text $Td.i.text -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$font_small\"" );
+  cmd( "text $Td.i.text -undo 1 -wrap word -width 60 -height 3 -relief sunken -yscrollcommand \"$Td.i.yscroll set\" -font \"$font_small\"" );
   cmd( "pack $Td.i.yscroll -side right -fill y" );
   if(cur_descr->init!=NULL)
   {

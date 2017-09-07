@@ -15,7 +15,7 @@ TCL_DLL_FILE="tcl86.dll"
 TCL_VERSION='8.6'
 TCL_MAJOR_VERSION='8'
 TCL_MINOR_VERSION='6'
-TCL_PATCH_LEVEL='.6'
+TCL_PATCH_LEVEL='.7'
 
 # C compiler to use for compilation.
 TCL_CC='x86_64-w64-mingw32-gcc'
@@ -92,10 +92,11 @@ TCL_DL_LIBS=''
 # an executable tclsh or tcltest binary.
 TCL_LD_FLAGS=''
 
-# Flags to pass to ld, such as "-R /usr/local/tcl/lib", that tell the
+# Flags to pass to cc/ld, such as "-R /usr/local/tcl/lib", that tell the
 # run-time dynamic linker where to look for shared libraries such as
 # libtcl.so.  Used when linking applications.  Only works if there
 # is a variable "LIB_RUNTIME_DIR" defined in the Makefile.
+TCL_CC_SEARCH_FLAGS=''
 TCL_LD_SEARCH_FLAGS=''
 
 # Additional object files linked with Tcl to provide compatibility
@@ -110,7 +111,7 @@ TCL_LIB_FLAG=''
 
 # String to pass to linker to pick up the Tcl library from its
 # build directory.
-TCL_BUILD_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win -ltcl86'
+TCL_BUILD_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.7/win -ltcl86'
 
 # String to pass to linker to pick up the Tcl library from its
 # installed directory.
@@ -145,7 +146,7 @@ TCL_UNSHARED_LIB_SUFFIX='${NODOT_VERSION}${DBGX}.a'
 # different place than the directory containing the source files, this
 # points to the location of the sources, not the location where Tcl was
 # compiled.
-TCL_SRC_DIR='C:/Windows/cygwin64/home/Marcelo/tcl8.6.6'
+TCL_SRC_DIR='C:/Windows/cygwin64/home/Marcelo/tcl8.6.7'
 
 # List of standard directories in which to look for packages during
 # "package require" commands.  Contains the "prefix" directory plus also
@@ -163,14 +164,14 @@ TCL_STUB_LIB_FLAG='-ltclstub86'
 
 # String to pass to linker to pick up the Tcl stub library from its
 # build directory.
-TCL_BUILD_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win -ltclstub86'
+TCL_BUILD_STUB_LIB_SPEC='-LC:/Windows/cygwin64/home/Marcelo/tcl8.6.7/win -ltclstub86'
 
 # String to pass to linker to pick up the Tcl stub library from its
 # installed directory.
 TCL_STUB_LIB_SPEC='-L/Lsd/gnu64/lib -ltclstub86'
 
 # Path to the Tcl stub library in the build directory.
-TCL_BUILD_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/tcl8.6.6/win/libtclstub86.a'
+TCL_BUILD_STUB_LIB_PATH='C:/Windows/cygwin64/home/Marcelo/tcl8.6.7/win/libtclstub86.a'
 
 # Path to the Tcl stub library in the install directory.
 TCL_STUB_LIB_PATH='/Lsd/gnu64/lib/libtclstub86.a'

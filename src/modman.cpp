@@ -526,7 +526,7 @@ cmd( "frame .f -bd 2" );
 cmd( "frame .f.t" );
 cmd( "scrollbar .f.t.vs -command \".f.t.t yview\"" );
 cmd( "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
-cmd( "text .f.t.t -height 2 -undo 1 -autoseparators 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
+cmd( "text .f.t.t -undo 1 -height 2 -autoseparators 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
 cmd( "set a [.f.t.t conf -font]" );
 cmd( "set b [lindex $a 3]" );
 cmd( "if {$dim_character == 0} {set dim_character [lindex $b 1]}" );
@@ -1372,7 +1372,7 @@ cmd( "pack .a.mdir.l .a.mdir.e" );
 cmd( "frame .a.tdes" );
 cmd( "label .a.tdes.l -text \"Group description\"" );
 cmd( "set a [ list \"$fonttype\" $small_character ]" );
-cmd( "text .a.tdes.e -width 60 -height 15 -font \"$a\"" );
+cmd( "text .a.tdes.e -undo 1 -width 60 -height 15 -font \"$a\"" );
 cmd( "pack .a.tdes.l .a.tdes.e" );
 
 cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
@@ -3697,7 +3697,7 @@ cmd( "newtop .l \"System Options\" { set choice 2 }" );
 
 cmd( "frame .l.t" );
 cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-cmd( "text .l.t.text -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
+cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
 cmd( ".l.t.text insert end $a" );
 cmd( "pack .l.t.yscroll -side right -fill y" );
 
@@ -3805,7 +3805,7 @@ cmd( "newtop .l \"Model Options\" { set choice 2 }" );
 
 cmd( "frame .l.t" );
 cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-cmd( "text .l.t.text -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
+cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
 cmd( ".l.t.text insert end $a" );
 cmd( "pack .l.t.yscroll -side right -fill y" );
 

@@ -95,7 +95,7 @@ a \fIresult set\fR object that represents a the results returned from
 executing SQL statement in a database. Instances of this object are created 
 by executing the \fBexecute\fR object command on a statement object.
 .PP
-The \fBcolumns\fR obect command returns a list of the names of the columns 
+The \fBcolumns\fR object command returns a list of the names of the columns 
 in the result set. The columns will appear in the same order as they appeared
 in the SQL statement that performed the database query. If the SQL statement
 does not return a set of columns (for instance, if it is an INSERT,

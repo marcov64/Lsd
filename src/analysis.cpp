@@ -1681,7 +1681,7 @@ cmd( "pack .da.a.d.l .da.a.d.e -side left" );
 
 cmd( "frame .da.a.o -relief groove -bd 2" );
 cmd( "label .da.a.o.l -text \"Other options\"" );
-cmd( "text .da.a.o.t -height 10 -width 50 -font \"$font_small\"" );
+cmd( "text .da.a.o.t -undo 1 -height 10 -width 50 -font \"$font_small\"" );
 cmd( ".da.a.o.t insert end \"$gpooptions\"" );
 cmd( "pack .da.a.o.l .da.a.o.t" );
 
