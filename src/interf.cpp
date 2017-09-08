@@ -3849,7 +3849,7 @@ break;
 //Create parallel sensitivity analysis configuration
 case 62:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
   {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -3858,29 +3858,30 @@ if (rsense!=NULL)
 	plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
 	long ptsSa = num_sensitivity_points(rsense);	// total number of points in sensitivity space
 	plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
+	
 	// Prevent running into too big sensitivity spaces (high computation times)
-	if(ptsSa > MAX_SENS_POINTS)
+	if ( ptsSa > MAX_SENS_POINTS )
 	{
-		plog("\nWarning: sensitivity analysis space size is too big!");
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+		plog( "\nWarning: sensitivity analysis space size is too big!" );
+		sensitivity_too_large( );		// ask user before proceeding
 		if(*choice == 0)
 			break;
 	}
 	
-    for (i=1,cs=rsense; cs!=NULL; cs=cs->next)
+    for ( i = 1, cs = rsense; cs!=NULL; cs = cs->next )
         i*=cs->nvalues;
-    cur=root->b->head;
-    root->add_n_objects2(cur->label, i-1, cur);
+    cur = root->b->head;
+    root->add_n_objects2( cur->label, i-1, cur );
 	
 	plog( "\nUpdating configuration, it may take a while, please wait... " );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
-    sensitivity_parallel(cur,rsense);
+    sensitivity_parallel( cur, rsense );
 	
-	unsaved_change( true );		// signal unsaved change
+	unsaved_change( true );				// signal unsaved change
  	cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
   }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );			// throw error
 
 break;
 
@@ -3888,7 +3889,7 @@ break;
 //Create sequential sensitivity analysis configuration
 case 63:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
 {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -3897,26 +3898,25 @@ if (rsense!=NULL)
 	plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
 	long ptsSa = num_sensitivity_points(rsense);	// total number of points in sensitivity space
 	plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
+	
 	// Prevent running into too big sensitivity spaces (high computation times)
-	if(ptsSa > MAX_SENS_POINTS)
+	if ( ptsSa > MAX_SENS_POINTS )
 	{
-		plog("\nWarning: sensitivity analysis space size is too big!");
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+		plog( "\nWarning: sensitivity analysis space size is too big!" );
+		sensitivity_too_large( );		// ask user before proceeding
 		if(*choice == 0)
 			break;
 	}
 	
 	// save the current object & cursor position for quick reload
 	save_pos( r );
-    findexSens=1;
+    findexSens = 1;
 	
 	// create a design of experiment (DoE) for the sensitivity data
 	plog( "\nCreating design of experiment, it may take a while, please wait... " );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
-    sensitivity_sequential(&findexSens,rsense);
-
-	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
- 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the sequential sensitivity analysis. To run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+    sensitivity_sequential( &findexSens, rsense );
+	sensitivity_created( );				// explain user how to proceed
 	
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
@@ -3925,7 +3925,7 @@ if (rsense!=NULL)
 	cmd( "destroytop .lat" );
 	if ( load_configuration( r ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		load_configuration_failed( );	// throw error message
 		*choice = 20;
 		break;
 	}
@@ -3939,7 +3939,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );			// throw error
 
 break;
 
@@ -3947,7 +3947,7 @@ break;
 //Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over user selected point values)
 case 71:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
 {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -3959,7 +3959,7 @@ if (rsense!=NULL)
 
 	// get the number of Monte Carlo samples to produce
 	double sizMC = 10;
-	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE);
+	Tcl_LinkVar( inter, "sizMC", (char *)&sizMC, TCL_LINK_DOUBLE );
 	
 	cmd( "newtop .s \"MC Point Sampling\" { set choice 2 }" );
 	
@@ -3980,19 +3980,19 @@ if (rsense!=NULL)
 	cmd( ".s.i.e selection range 0 end" );
 
 	*choice = 0;
-	while(*choice == 0)
-		Tcl_DoOneEvent(0);
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 
 	cmd( "set sizMC [ .s.i.e get ]" ); 
 	cmd( "destroytop .s" );
 	Tcl_UnlinkVar(inter, "sizMC");
 
-	if(*choice == 2)
+	if ( *choice == 2 )
 		break;
 	
 	// Check if number is valid
 	sizMC /= 100.0;
-	if( (sizMC * maxMC) < 1 || sizMC > 1.0)
+	if( ( sizMC * maxMC ) < 1 || sizMC > 1.0 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select a number between 0%% and 100%% that produces at least one sample (in average).\"" );
 		*choice=0;
@@ -4002,8 +4002,8 @@ if (rsense!=NULL)
 	// Prevent running into too big sensitivity space samples (high computation times)
 	if((sizMC * maxMC) > MAX_SENS_POINTS)
 	{
-		plog( "\nWarning: sampled sensitivity analysis space size (%ld) is still too big!", "", (long)(sizMC * maxMC) );
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+		plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", (long)(sizMC * maxMC) );
+		sensitivity_too_large( );		// ask user before proceeding
 		if(*choice == 0)
 			break;
 	}
@@ -4012,15 +4012,13 @@ if (rsense!=NULL)
 	save_pos( r );
 
 	plog( "\nTarget sensitivity analysis sample size: %ld (%.1f%%)", "", (long)(sizMC * maxMC), 100 * sizMC );
-    findexSens=1;
+    findexSens = 1;
 	
 	// create a design of experiment (DoE) for the sensitivity data
 	plog( "\nCreating design of experiment, it may take a while, please wait... " );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
-    sensitivity_sequential(&findexSens, rsense, sizMC);
-	
-	plog( "\nSensitivity analysis samples produced: %d", "", findexSens - 1 );
- 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+    sensitivity_sequential( &findexSens, rsense, sizMC );
+	sensitivity_created( );				// explain user how to proceed
 	
 	// now reload the previously existing configuration
 	for ( n = r; n->up != NULL; n = n->up );
@@ -4029,7 +4027,7 @@ if (rsense!=NULL)
 	cmd( "destroytop .lat" );
 	if ( load_configuration( r ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		load_configuration_failed( );	// throw error message
 		*choice = 20;
 		break;
 	}
@@ -4043,7 +4041,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );			// throw error
 
 break;
 
@@ -4051,7 +4049,7 @@ break;
 //Create Near Orthogonal Latin Hypercube (NOLH) sensitivity analysis sampling configuration
 case 72:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
 {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -4088,12 +4086,12 @@ if (rsense!=NULL)
 	cmd( "showtop .s" );
 	
 	*choice = 0;
-	while(*choice == 0)
-		Tcl_DoOneEvent(0);
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 	
 	cmd( "destroytop .s" );
 	
-	if(*choice == 2)
+	if ( *choice == 2 )
 		break;
 	
 	char NOLHfile[MAX_PATH_LENGTH];
@@ -4127,9 +4125,9 @@ if (rsense!=NULL)
 	// Prevent running into too big sensitivity space samples (high computation times)
 	if ( NOLHdoe -> n > MAX_SENS_POINTS )
 	{
-		plog( "\nWarning: sampled sensitivity analysis space size (%d) is still too big!", "", NOLHdoe -> n );
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
-		if( *choice == 0 )
+		plog( "\nWarning: sampled sensitivity analysis space size (%d) is too big!", "", NOLHdoe -> n );
+		sensitivity_too_large( );		// ask user before proceeding
+		if ( *choice == 0 )
 		{
 			delete NOLHdoe;
 			break;
@@ -4144,9 +4142,7 @@ if (rsense!=NULL)
 	plog( "\nCreating design of experiment, it may take a while, please wait... " );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
     sensitivity_doe( &findexSens, NOLHdoe );
-	
-	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
- 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+	sensitivity_created( );				// explain user how to proceed
 	
 	delete NOLHdoe;
 
@@ -4157,7 +4153,7 @@ if (rsense!=NULL)
 	cmd( "destroytop .lat" );
 	if ( load_configuration( r ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		load_configuration_failed( );	// throw error message
 		*choice = 20;
 		break;
 	}
@@ -4171,7 +4167,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );			// throw error
 
 break;
 
@@ -4179,7 +4175,7 @@ break;
 //Create Monte Carlo (MC) random sensitivity analysis sampling configuration (over selected range values)
 case 80:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
 {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -4189,7 +4185,7 @@ if (rsense!=NULL)
 
 	// get the number of Monte Carlo samples to produce
 	int sizMC = 10;
-	Tcl_LinkVar(inter, "sizMC", (char *)&sizMC, TCL_LINK_INT);
+	Tcl_LinkVar( inter, "sizMC", (char *)&sizMC, TCL_LINK_INT );
 	
 	cmd( "set applst 1" );	// flag for appending to existing configuration files
 	
@@ -4216,30 +4212,30 @@ if (rsense!=NULL)
 	cmd( ".s.i.e selection range 0 end" );
 	
 	*choice = 0;
-	while(*choice == 0)
-		Tcl_DoOneEvent(0);
+	while( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 	
 	cmd( "set sizMC [ .s.i.e get ]" ); 
 	cmd( "destroytop .s" );
-	Tcl_UnlinkVar(inter, "sizMC");
+	Tcl_UnlinkVar( inter, "sizMC" );
 	
-	if(*choice == 2)
+	if ( *choice == 2 )
 		break;
 	
 	// Check if number is valid
-	if( sizMC < 1 )
+	if ( sizMC < 1 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sample size\" -detail \"Invalid Monte Carlo sample size to perform the sensitivity analysis. Select at least one sample.\"" );
-		*choice=0;
+		*choice = 0;
 		break;
 	}
 
 	// Prevent running into too big sensitivity space samples (high computation times)
-	if( sizMC  > MAX_SENS_POINTS )
+	if ( sizMC  > MAX_SENS_POINTS )
 	{
-		plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", (long)sizMC );
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
-		if(*choice == 0)
+		plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", ( long )sizMC );
+		sensitivity_too_large( );		// ask user before proceeding
+		if ( *choice == 0 )
 			break;
 	}
 	
@@ -4261,9 +4257,7 @@ if (rsense!=NULL)
 	cmd( "wm deiconify .log; raise .log; focus .log" );
 	design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
     sensitivity_doe( &findexSens, rand_doe );
-	
-	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
- 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Monte Carlo sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+	sensitivity_created( );				// explain user how to proceed
 
 	delete rand_doe;
 	
@@ -4274,7 +4268,7 @@ if (rsense!=NULL)
 	cmd( "destroytop .lat" );
 	if ( load_configuration( r ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		load_configuration_failed( );	// throw error message
 		*choice = 20;
 		break;
 	}
@@ -4288,7 +4282,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );			// throw error
 
 break;
 
@@ -4296,7 +4290,7 @@ break;
 //Create Elementary Effects (EE) sensitivity analysis sampling configuration (over selected range values)
 case 81:
 
-if (rsense!=NULL) 
+if ( rsense != NULL ) 
 {
 	if ( ! discard_change( false ) )	// unsaved configuration?
 		break;
@@ -4353,8 +4347,8 @@ if (rsense!=NULL)
 	cmd( "focus .s.i.e1" );
 	
 	*choice = 0;
-	while(*choice == 0)
-		Tcl_DoOneEvent(0);
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 	
 	cmd( "set nTraj [ .s.i.e1 get ]" ); 
 	cmd( "set nSampl [ .s.p.e2 get ]" ); 
@@ -4367,11 +4361,11 @@ if (rsense!=NULL)
 	Tcl_UnlinkVar(inter, "nTraj");
 	Tcl_UnlinkVar(inter, "nSampl");
 	
-	if(*choice == 2)
+	if ( *choice == 2 )
 		break;
 	
 	// Check if numbers are valid
-	if( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
+	if ( nLevels < 2 || nLevels % 2 != 0 || nTraj < 2 || nSampl < nTraj || jumpSz < 1 )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid configuration\" -detail \"Invalid Elementary Effects configuration to perform the sensitivity analysis. Check Morris (1991) and Campolongo et al. (2007) for details.\"" );
 		*choice=0;
@@ -4382,7 +4376,7 @@ if (rsense!=NULL)
 	if( nTraj * ( varSA + 1 )  > MAX_SENS_POINTS )
 	{
 		plog( "\nWarning: sampled sensitivity analysis space size (%ld) is too big!", "", (long)( nTraj * ( varSA + 1 ) ) );
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"Press 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+		sensitivity_too_large( );		// ask user before proceeding
 		if(*choice == 0)
 			break;
 	}
@@ -4396,9 +4390,7 @@ if (rsense!=NULL)
 	cmd( "wm deiconify .log; raise .log; focus .log" );
 	design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
     sensitivity_doe( &findexSens, rand_doe );
-	
-	plog( "\nSensitivity analysis samples produced: %d\n", "", findexSens - 1 );
- 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files for the Elementary Effects sensitivity analysis.\\n\\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' option in LMM and following the instructions provided. This step has to be done every time you modify your equations file.\\n\\nThen execute this command in the directory of the model:\\n\\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\\n\\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to run (usually 1).\"" );
+	sensitivity_created( );				// explain user how to proceed
 
 	delete rand_doe;
 	
@@ -4409,7 +4401,7 @@ if (rsense!=NULL)
 	cmd( "destroytop .lat" );
 	if ( load_configuration( r ) != 0 )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nCurrent configuration will be reset now.\"" );
+		load_configuration_failed( );	// throw error message
 		*choice = 20;
 		break;
 	}
@@ -4423,7 +4415,7 @@ if (rsense!=NULL)
 	}
 }
 else
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid option\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+	sensitivity_undefined( );				// throw error
 
 break;
 
@@ -4560,7 +4552,7 @@ case 65:
 	// check for existing sensitivity data loaded
 	if (rsense==NULL) 
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to save\" -detail \"Before using this option you have to select at least one parameter or lagged variable to perform the sensitivity analysis and inform their values. To set the sensitivity analysis ranges of values, use the 'Data'/'Initial Values' menu option, click on 'Set All' in the appropriate parameters and variables, select 'Sensitivity Analysis' as the initialization function and inform the 'Number of values' to be entered for that parameter or variable.\\nAfter clicking 'Ok', enter the informed number of values, separated by spaces, tabs, commas, semicolons etc. (the decimal point has to be '.'). It's possible to simply paste the list of values from the clipboard.\"" );
+		sensitivity_undefined( );			// throw error
 		break;
 	}
 	// default file name and path
@@ -5158,16 +5150,16 @@ CLEAN_DEBUG
 ****************************************************/
 void clean_debug(object *n)
 {
-variable *cv;
-object *co;
-bridge *cb;
+	variable *cv;
+	object *co;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
- cv->debug='n';
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	 cv->debug='n';
 
-for(cb=n->b; cb!=NULL; cb=cb->next)
-for(co=cb->head; co!=NULL; co=co->next)
- clean_debug(co);
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+	for(co=cb->head; co!=NULL; co=co->next)
+	 clean_debug(co);
 }
 
 
@@ -5176,18 +5168,18 @@ CLEAN_SAVE
 ****************************************************/
 void clean_save(object *n)
 {
-variable *cv;
-object *co;
-bridge *cb; 
+	variable *cv;
+	object *co;
+	bridge *cb; 
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
-{
- cv->save=0;
- cv->savei=0;
-}
-for(cb=n->b; cb!=NULL; cb=cb->next)
-for(co=cb->head; co!=NULL; co=co->next)
- clean_save(co);
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	{
+	 cv->save=0;
+	 cv->savei=0;
+	}
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+	for(co=cb->head; co!=NULL; co=co->next)
+	 clean_save(co);
 }
 
 
@@ -5196,39 +5188,39 @@ SHOW_SAVE
 ****************************************************/
 void show_save(object *n)
 {
-variable *cv;
-object *co;
-bridge *cb;
+	variable *cv;
+	object *co;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
- {
-  if ( cv->save == 1 || cv->savei == 1 )
-  {
-   if(cv->param==1)
-    sprintf(msg, "Object: %s \tParameter:\t", n->label);
-   else
-    sprintf(msg, "Object: %s \tVariable :\t", n->label);
-   if ( cv->savei == 1 )
-   {
-	if ( cv->save == 1 )
-	   strcat( msg, " (memory and disk)" );
-    else
-	   strcat( msg, " (disk only)" );
-   }
-   plog( msg );
-   plog( "%s\n", "highlight", cv->label );
-   lcount++;
-  }
- }
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	 {
+	  if ( cv->save == 1 || cv->savei == 1 )
+	  {
+	   if(cv->param==1)
+		sprintf(msg, "Object: %s \tParameter:\t", n->label);
+	   else
+		sprintf(msg, "Object: %s \tVariable :\t", n->label);
+	   if ( cv->savei == 1 )
+	   {
+		if ( cv->save == 1 )
+		   strcat( msg, " (memory and disk)" );
+		else
+		   strcat( msg, " (disk only)" );
+	   }
+	   plog( msg );
+	   plog( "%s\n", "highlight", cv->label );
+	   lcount++;
+	  }
+	 }
 
-for(cb=n->b; cb!=NULL; cb=cb->next)
- {
- if(cb->head==NULL)
-  co=blueprint->search(cb->blabel);
- else
-  co=cb->head; 
- show_save(co);
- }
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+	 {
+	 if(cb->head==NULL)
+	  co=blueprint->search(cb->blabel);
+	 else
+	  co=cb->head; 
+	 show_save(co);
+	 }
 }
 
 
@@ -5237,22 +5229,22 @@ COUNT_SAVE
 ****************************************************/
 void count_save( object *n, int *count )
 {
-variable *cv;
-object *co;
-bridge *cb;
+	variable *cv;
+	object *co;
+	bridge *cb;
 
-for ( cv = n->v; cv!=NULL; cv=cv->next )
-	if ( cv->save == 1 || cv->savei == 1 )
-		( *count )++;
+	for ( cv = n->v; cv!=NULL; cv=cv->next )
+		if ( cv->save == 1 || cv->savei == 1 )
+			( *count )++;
 
-for ( cb = n->b; cb != NULL; cb = cb->next )
-{
-	if ( cb->head == NULL )
-		co = blueprint->search( cb->blabel );
-	else
-		co = cb->head; 
-	count_save( co, count );
- }
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		count_save( co, count );
+	 }
 }
 
 
@@ -5261,36 +5253,35 @@ SHOW_OBSERVE
 ****************************************************/
 void show_observe(object *n)
 {
-variable *cv;
-object *co;
-description *cd;
-int app;
-bridge *cb;
+	variable *cv;
+	object *co;
+	description *cd;
+	int app;
+	bridge *cb;
 
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	 {
+	 cd=search_description(cv->label);
+	 if(cd!=NULL && cd->observe=='y')
+	  {
+	   if(cv->param==1)
+		plog( "Object: %s \tParameter:\t", "", n->label );
+	   else
+		plog( "Object: %s \tVariable :\t", "", n->label );
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
- {
- cd=search_description(cv->label);
- if(cd!=NULL && cd->observe=='y')
-  {
-   if(cv->param==1)
-    plog( "Object: %s \tParameter:\t", "", n->label );
-   else
-    plog( "Object: %s \tVariable :\t", "", n->label );
+	   plog( "%s (%lf)\n", "highlight", cv->label, cv->val[0] );
+	   lcount++;
+	  }
+	 }
 
-   plog( "%s (%lf)\n", "highlight", cv->label, cv->val[0] );
-   lcount++;
-  }
- }
-
-for(cb=n->b; cb!=NULL; cb=cb->next)
- {
- if(cb->head==NULL)
-  co=blueprint->search(cb->blabel);
- else
-  co=cb->head; 
- show_observe(co);
- }
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+	 {
+	 if(cb->head==NULL)
+	  co=blueprint->search(cb->blabel);
+	 else
+	  co=cb->head; 
+	 show_observe(co);
+	 }
 }
 
 
@@ -5299,68 +5290,65 @@ SHOW_INITIAL
 ****************************************************/
 void show_initial(object *n)
 {
-variable *cv, *cv1;
-object *co;
-description *cd;
-int i;
-bridge *cb;
+	variable *cv, *cv1;
+	object *co;
+	description *cd;
+	int i;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
- {
- cd=search_description(cv->label);
- if(cd!=NULL && cd->initial=='y')
-  {
-   if(cv->param==1)
-    plog( "Object: %s \tParameter:\t", "", n->label);
-   if(cv->param==0)
-    plog( "Object: %s \tVariable :\t", "", n->label);
-   if(cv->param==2)
-    plog( "Object: %s \tFunction :\t", "", n->label);
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	 {
+	 cd=search_description(cv->label);
+	 if(cd!=NULL && cd->initial=='y')
+	  {
+	   if(cv->param==1)
+		plog( "Object: %s \tParameter:\t", "", n->label);
+	   if(cv->param==0)
+		plog( "Object: %s \tVariable :\t", "", n->label);
+	   if(cv->param==2)
+		plog( "Object: %s \tFunction :\t", "", n->label);
 
-   lcount++;
-   plog( "%s \t", "highlight", cv->label );
- 
-   if(cd->init==NULL || strlen(cd->init)==0)
-    {
-    for(co=n; co!=NULL; co=co->hyper_next(co->label))
-     {
-      cv1=co->search_var(NULL,cv->label);
-      plog( " %g", "", cv1->val[0] );
-     }
-    }
-   else
-    {
-     for(i=0; cd->init[i]!=0; i++)
-      {
-        switch(cd->init[i])
-        {
-        case '[': plog("\\\[");
-                  break;
-        case ']': plog("]");
-                  break;
-        case '"': plog("\\\"");
-                  break;
-        case '{': plog("\{");
-                  break;
-        default: plog( "%c", "", cd->init[i] );
-                 break;          
-                  
-        }
-  
-      }
-    
-    } 
-   plog("\n");
-  }
- }
+	   lcount++;
+	   plog( "%s \t", "highlight", cv->label );
+	 
+	   if(cd->init==NULL || strlen(cd->init)==0)
+		{
+		for(co=n; co!=NULL; co=co->hyper_next(co->label))
+		 {
+		  cv1=co->search_var(NULL,cv->label);
+		  plog( " %g", "", cv1->val[0] );
+		 }
+		}
+	   else
+		{
+		 for(i=0; cd->init[i]!=0; i++)
+		  {
+			switch(cd->init[i])
+			{
+			case '[': plog("\\\[");
+					  break;
+			case ']': plog("]");
+					  break;
+			case '"': plog("\\\"");
+					  break;
+			case '{': plog("\{");
+					  break;
+			default: plog( "%c", "", cd->init[i] );
+					 break;          
+			}
+		  }
+		} 
+	   plog("\n");
+	  }
+	 }
 
-for(cb=n->b; cb!=NULL; cb=cb->next)
- {
- if(cb->head!=NULL)
-  {co=cb->head; 
-   show_initial(co);
-  }
- } 
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+	 {
+	 if(cb->head!=NULL)
+	  {co=cb->head; 
+	   show_initial(co);
+	  }
+	 } 
 }
 
 
@@ -5497,25 +5485,25 @@ WIPE_OUT
 ****************************************************/
 void wipe_out(object *d)
 {
-object *cur;
-variable *cv;
+	object *cur;
+	variable *cv;
 
-cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", d->label );
+	cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", d->label );
 
-change_descr_lab( d->label, "", "", "", "" );
+	change_descr_lab( d->label, "", "", "", "" );
 
-for ( cv = d->v; cv != NULL; cv = cv->next )
-{
-	cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", cv->label  );
+	for ( cv = d->v; cv != NULL; cv = cv->next )
+	{
+		cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", cv->label  );
 
-	change_descr_lab( cv->label, "" , "", "", "" );
-}
+		change_descr_lab( cv->label, "" , "", "", "" );
+	}
 
-cur = d->hyper_next( d->label );
-if ( cur != NULL )
-	wipe_out( cur );
+	cur = d->hyper_next( d->label );
+	if ( cur != NULL )
+		wipe_out( cur );
 
-delete_bridge( d );
+	delete_bridge( d );
 }
 
 
@@ -5526,34 +5514,34 @@ Also prevents invalid characters in the names
 ****************************************************/
 int check_label(char *l, object *r)
 {
-object *cur;
-variable *cv;
-bridge *cb;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-Tcl_SetVar( inter, "nameVar", l, 0 );
- cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $nameVar ] { set answer 1 } { set answer 0 }" );
-const char *answer = Tcl_GetVar( inter, "answer", 0 );
-if ( *answer == '0' )
-	return 2;				// error if invalid characters (incl. spaces)
+	Tcl_SetVar( inter, "nameVar", l, 0 );
+	 cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $nameVar ] { set answer 1 } { set answer 0 }" );
+	const char *answer = Tcl_GetVar( inter, "answer", 0 );
+	if ( *answer == '0' )
+		return 2;				// error if invalid characters (incl. spaces)
 
-if(!strcmp(l, r->label) )
- return 1;
+	if(!strcmp(l, r->label) )
+	 return 1;
 
-for(cv=r->v; cv!=NULL; cv=cv->next)
- if(!strcmp(l, cv->label) )
-  return 1;
+	for(cv=r->v; cv!=NULL; cv=cv->next)
+	 if(!strcmp(l, cv->label) )
+	  return 1;
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-{
- if(cb->head==NULL)
-  cur=blueprint->search(cb->blabel);
- else
-  cur=cb->head; 
- if(check_label(l, cur)==1)
-   return 1;
-} 
+	for(cb=r->b; cb!=NULL; cb=cb->next)
+	{
+	 if(cb->head==NULL)
+	  cur=blueprint->search(cb->blabel);
+	 else
+	  cur=cb->head; 
+	 if(check_label(l, cur)==1)
+	   return 1;
+	} 
 
-return 0;
+	return 0;
 }
 
 
@@ -5591,26 +5579,26 @@ CONTROL_TOCOMPUTE
 ****************************************************/
 void control_tocompute(object *r, char *l)
 {
-object *cur;
-variable *cv;
-bridge *cb;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-for(cv=r->v; cv!=NULL; cv=cv->next)
-{
-  if(cv->save==1)
-   {
-   cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item '%s' set to be saved but it will not be registered for the Analysis of Results, since object '%s' is not set to be computed.\"", cv->label, l );
-   } 
-}
+	for(cv=r->v; cv!=NULL; cv=cv->next)
+	{
+	  if(cv->save==1)
+	   {
+	   cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item '%s' set to be saved but it will not be registered for the Analysis of Results, since object '%s' is not set to be computed.\"", cv->label, l );
+	   } 
+	}
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-{
- if(cb->head==NULL)
-  cur=blueprint->search(cb->blabel);
- else
-  cur=cb->head; 
-  control_tocompute(cur,l);
-} 
+	for(cb=r->b; cb!=NULL; cb=cb->next)
+	{
+	 if(cb->head==NULL)
+	  cur=blueprint->search(cb->blabel);
+	 else
+	  cur=cb->head; 
+	  control_tocompute(cur,l);
+	} 
 }
 
 
@@ -5619,19 +5607,19 @@ INSERT_OBJECT
 ****************************************************/
 void insert_object( const char *w, object *r )
 {
-object *cur;
-bridge *cb;
+	object *cur;
+	bridge *cb;
 
-cmd( "%s insert end %s", w, r->label );
+	cmd( "%s insert end %s", w, r->label );
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
-  if(cb->head==NULL)
-   cur=blueprint->search(cb->blabel);
-  else
-   cur=cb->head; 
-  insert_object( w, cur );
- }
+	for(cb=r->b; cb!=NULL; cb=cb->next)
+	 {
+	  if(cb->head==NULL)
+	   cur=blueprint->search(cb->blabel);
+	  else
+	   cur=cb->head; 
+	  insert_object( w, cur );
+	 }
 }
 
 
@@ -5640,65 +5628,65 @@ SHIFT_VAR
 ****************************************************/
 void shift_var(int direction, char *vlab, object *r)
 {
-variable *cv, *cv1=NULL, *cv2=NULL;
-if(direction==-1)
- {//shift up
-  if(!strcmp(vlab, r->v->label))
-   return; //variable already at the top
-  if(!strcmp(vlab, r->v->next->label))
-   {//second var, must become the head of the chain
-    cv=r->v->next->next;//third
-    cv1=r->v; //first
-    r->v=r->v->next; //shifted up
-    r->v->next=cv1;
-    cv1->next=cv;
-    return;
-   }  
-  for(cv=r->v; cv!=NULL; cv=cv->next)
-   {
-    if(!strcmp(vlab,cv->label) )
-     {
-      cv2->next=cv;
-      cv1->next=cv->next;
-      cv->next=cv1;
-      return;
-     }
-    cv2=cv1;
-    cv1=cv;
-   }
- }
-if(direction==1)
- {
-  //move down
-  if(!strcmp(vlab, r->v->label) )
-   {//it the first
-    if(r->v->next==NULL)
-     return; //it is unique
-    cv=r->v;//first
-    cv1=cv->next->next;//third
-    
-    r->v=cv->next;//first is former second
-    r->v->next=cv;//second is former first
-    cv->next=cv1;//second points to third
-    return;
-   }
-  for(cv=r->v; cv!=NULL; cv=cv->next)
-   {
-    
-    if(!strcmp(vlab,cv->label) )
-     {
-      if(cv->next==NULL)
-       return;//already at the end
-      cv1->next=cv->next;
-      cv->next=cv->next->next;
-      cv1->next->next=cv;
-      return;
-     }
-    cv1=cv;
-   }
-   
- } 
-plog("\nWarning: should never reach this point in move_var"); 
+	variable *cv, *cv1=NULL, *cv2=NULL;
+	if(direction==-1)
+	 {//shift up
+	  if(!strcmp(vlab, r->v->label))
+	   return; //variable already at the top
+	  if(!strcmp(vlab, r->v->next->label))
+	   {//second var, must become the head of the chain
+		cv=r->v->next->next;//third
+		cv1=r->v; //first
+		r->v=r->v->next; //shifted up
+		r->v->next=cv1;
+		cv1->next=cv;
+		return;
+	   }  
+	  for(cv=r->v; cv!=NULL; cv=cv->next)
+	   {
+		if(!strcmp(vlab,cv->label) )
+		 {
+		  cv2->next=cv;
+		  cv1->next=cv->next;
+		  cv->next=cv1;
+		  return;
+		 }
+		cv2=cv1;
+		cv1=cv;
+	   }
+	 }
+	if(direction==1)
+	 {
+	  //move down
+	  if(!strcmp(vlab, r->v->label) )
+	   {//it the first
+		if(r->v->next==NULL)
+		 return; //it is unique
+		cv=r->v;//first
+		cv1=cv->next->next;//third
+		
+		r->v=cv->next;//first is former second
+		r->v->next=cv;//second is former first
+		cv->next=cv1;//second points to third
+		return;
+	   }
+	  for(cv=r->v; cv!=NULL; cv=cv->next)
+	   {
+		
+		if(!strcmp(vlab,cv->label) )
+		 {
+		  if(cv->next==NULL)
+		   return;//already at the end
+		  cv1->next=cv->next;
+		  cv->next=cv->next->next;
+		  cv1->next->next=cv;
+		  return;
+		 }
+		cv1=cv;
+	   }
+	 } 
+
+	plog("\nWarning: should never reach this point in move_var"); 
 }
 
 
@@ -5707,71 +5695,110 @@ SHIFT_DESC
 ****************************************************/
 void shift_desc(int direction, char *dlab, object *r)
 {
-bridge *cb, *cb1=NULL, *cb2=NULL;
-if(direction==-1)
- {//shift up
-  if(!strcmp(dlab, r->b->blabel))
-   return; //object already at the top
-  if(!strcmp(dlab, r->b->next->blabel))
-   {//second var, must become the head of the chain
-    cb=r->b->next->next;//third
-    cb1=r->b; //first
-    r->b=r->b->next; //shifted up
-    r->b->next=cb1;
-    cb1->next=cb;
-    return;
-   }  
-  for(cb=r->b; cb!=NULL; cb=cb->next)
-   {
-    if(!strcmp(dlab,cb->blabel) )
-     {
-      cb2->next=cb;
-      cb1->next=cb->next;
-      cb->next=cb1;
-      return;
-     }
-    cb2=cb1;
-    cb1=cb;
-   }
- }
-if(direction==1)
- {
-  //move down
-  if(!strcmp(dlab, r->b->blabel) )
-   {//it the first
-    if(r->b->next==NULL)
-     return; //it is unique
-    cb=r->b;//first
-    cb1=cb->next->next;//third
-    
-    r->b=cb->next;//first is former second
-    r->b->next=cb;//second is former first
-    cb->next=cb1;//second points to third
-    return;
-   }
-  for(cb=r->b; cb!=NULL; cb=cb->next)
-   {
-    
-    if(!strcmp(dlab,cb->blabel) )
-     {
-      if(cb->next==NULL)
-       return;//already at the end
-      cb1->next=cb->next;
-      cb->next=cb->next->next;
-      cb1->next->next=cb;
-      return;
-     }
-    cb1=cb;
-   }
-   
- } 
-plog("\nWarning: should never reach this point in shift_desc"); 
+	bridge *cb, *cb1=NULL, *cb2=NULL;
+	if(direction==-1)
+	 {//shift up
+	  if(!strcmp(dlab, r->b->blabel))
+	   return; //object already at the top
+	  if(!strcmp(dlab, r->b->next->blabel))
+	   {//second var, must become the head of the chain
+		cb=r->b->next->next;//third
+		cb1=r->b; //first
+		r->b=r->b->next; //shifted up
+		r->b->next=cb1;
+		cb1->next=cb;
+		return;
+	   }  
+	  for(cb=r->b; cb!=NULL; cb=cb->next)
+	   {
+		if(!strcmp(dlab,cb->blabel) )
+		 {
+		  cb2->next=cb;
+		  cb1->next=cb->next;
+		  cb->next=cb1;
+		  return;
+		 }
+		cb2=cb1;
+		cb1=cb;
+	   }
+	 }
+	if(direction==1)
+	 {
+	  //move down
+	  if(!strcmp(dlab, r->b->blabel) )
+	   {//it the first
+		if(r->b->next==NULL)
+		 return; //it is unique
+		cb=r->b;//first
+		cb1=cb->next->next;//third
+		
+		r->b=cb->next;//first is former second
+		r->b->next=cb;//second is former first
+		cb->next=cb1;//second points to third
+		return;
+	   }
+	  for(cb=r->b; cb!=NULL; cb=cb->next)
+	   {
+		
+		if(!strcmp(dlab,cb->blabel) )
+		 {
+		  if(cb->next==NULL)
+		   return;//already at the end
+		  cb1->next=cb->next;
+		  cb->next=cb->next->next;
+		  cb1->next->next=cb;
+		  return;
+		 }
+		cb1=cb;
+	   }
+	   
+	 } 
+	 
+	plog("\nWarning: should never reach this point in shift_desc"); 
 }
 
 
-/*
-	Save user position in browser
-*/
+/****************************************************
+SENSITIVITY_TOO_LARGE
+****************************************************/
+void sensitivity_too_large( void )
+{
+	cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+}
+
+
+/****************************************************
+SENSITIVITY_CREATED
+****************************************************/
+void sensitivity_created( void )
+{
+	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
+	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (i.e. <path>/<configuration_file>).\"" );
+}
+
+
+/****************************************************
+SENSITIVITY_UNDEFINED
+****************************************************/
+void sensitivity_undefined( void )
+{
+ 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard Lsd configuration file (.lsd) and if needed they MUST be saved in a Lsd sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
+}
+
+
+/****************************************************
+LOAD_CONFIGURATION_FAILED
+****************************************************/
+void load_configuration_failed( void )
+{
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if Lsd still has WRITE access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+}
+
+
+/****************************************************
+SAVE_POS
+Save user position in browser
+****************************************************/
 void save_pos( object *r )
 {
 	// save the current object & cursor position for quick reload
@@ -5782,9 +5809,10 @@ void save_pos( object *r )
 }
 
 
-/*
-	Restore user position in browser
-*/
+/****************************************************
+RESTORE_POS
+Restore user position in browser
+****************************************************/
 object *restore_pos( object *r )
 {
 	object *n;
@@ -5804,10 +5832,10 @@ object *restore_pos( object *r )
 }
 
 
-/*
-	Read or set the UnsavedChange flag and update windows titles accordingly
-*/
-
+/****************************************************
+UNSAVED_CHANGE
+Read or set the UnsavedChange flag and update windows titles accordingly
+****************************************************/
 bool unsavedChange = false;		// control for unsaved changes in configuration
 #define WND_NUM 7
 const char *wndName[ ] = { ".", ".log", ".str", ".ini", ".da", ".deb", ".lat" };
@@ -5835,17 +5863,17 @@ bool unsaved_change( bool val )
 	return unsavedChange;
 }
 
-
 bool unsaved_change( void )
 {
 	return unsavedChange;
 }
 
 
-/*
-	Ask user to discard changes in configuration, if applicable
-	Returns: 0: abort, 1: continue without saving
-*/
+/****************************************************
+DISCARD_CHANGE
+Ask user to discard changes in configuration, if applicable
+Returns: 0: abort, 1: continue without saving
+****************************************************/
 bool discard_change( bool checkSense, bool senseOnly )
 {
 	// don't stop if simulation is runnig
@@ -5881,7 +5909,10 @@ bool discard_change( bool checkSense, bool senseOnly )
 }
 
 
-// Entry point function for access from the Tcl interpreter
+/****************************************************
+TCL_DISCARD_CHANGE
+Entry point function for access from the Tcl interpreter
+****************************************************/
 int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
 	if ( discard_change( ) == 1 )
@@ -5892,7 +5923,10 @@ int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const cha
 }
 
 
-// Function to get variable configuration from Tcl
+/****************************************************
+TCL_GET_VAR_CONF
+Function to get variable configuration from Tcl
+****************************************************/
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
 	char vname[ MAX_ELEM_LENGTH ], res[ 2 ];
@@ -5931,7 +5965,10 @@ int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 }
 
 
-// Function to set variable configuration from Tcl
+/****************************************************
+TCL_SET_VAR_CONF
+Function to set variable configuration from Tcl
+****************************************************/
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
 {
 	char vname[ MAX_ELEM_LENGTH ];

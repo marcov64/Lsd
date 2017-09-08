@@ -899,13 +899,12 @@ object *sensitivity_parallel(object *o, sense *s )
 This function fills the initial values according to the sensitivity analysis system performed by parallel simulations: 1 single run over many independent configurations
 descending in parallel from Root.
 
-In set all users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser. This command generates
-as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
+Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
+When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser. This command generates as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
 
 The user is supposed then to save the resulting configuration.
 
-Options concerning initialization for sensitivity analysis are not saved into the model configuration files, and are therefore lost when closing the LSD model program. 
+Options concerning initialization for sensitivity analysis are not saved into the model configuration files, and are therefore lost when closing the LSD model program if not saved in a .sa file. 
 
 */
 int i;
@@ -952,7 +951,7 @@ This function fills the initial values according to the sensitivity analysis sys
 
 Contrary to parallel sensitivity settings, this function initialize all elements in the configuration with the specified label.
 
-In set all users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
+Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
 When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser.
 
 Options concerning initialization for sensitivity analysis are saved into model configuration files, to be executed with a No Window version of the LSD model. 
