@@ -257,7 +257,7 @@ proc showmodel pippo {
 		lappend lmn "$upgroup"
 	}
 
-	set dir [glob *]
+	set dir [glob -nocomplain *]
 
 	foreach i $dir {
 		if [ file isdirectory "$i" ] {
@@ -538,7 +538,7 @@ proc paste i {
 			} else {
 				#viable directory name 
 				file mkdir $pastedir/$appd
-				set copylist [glob $copydir/*]
+				set copylist [glob -nocomplain $copydir/*]
 				foreach a $copylist {catch [file copy -force $a $pastedir/$appd]}
 				set f [open $pastedir/$appd/description.txt w]
 				puts -nonewline $f "$appdsc"

@@ -253,14 +253,18 @@ ergodicity.lsd <- function( data, vars, start.period = 0, signif = 0.05,
           }
         }
     }
+    # set all to NA for the case of errors
+    avgADF <- rADF <- avgPP <- rPP <- avgKPSS <- rKPSS <- avgBDS <- rBDS <-
+      avgKS <- rKS <- ad <- ww <- NA
     # do Anderson-Darling for same distribution function
-    ad <- kSamples::ad.test( series.list, method = ad.method )$ad[ 1, 3 ]
+    try( ad <- kSamples::ad.test( series.list, method = ad.method )$ad[ 1, 3 ],
+         silent = TRUE )
     # do Wald-Wolfowitz for ergodicity (Grazzini 2012)
-    ww <- ww.test( series.list,
-                   floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] )
-                          / nSize + 1 ) )$p.value
+    try( ww <- ww.test( series.list,
+                        floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] )
+                               / nSize + 1 ) )$p.value,
+         silent = TRUE )
 
-    avgADF <- rADF <- avgPP <- rPP <- avgKPSS <- rKPSS <- avgBDS <- rBDS <- avgKS <- rKS <- NA
     if( nADF > 0 ) {
       avgADF <- sumADF / nADF
       rADF <- rejADF / nADF
@@ -770,32 +774,19 @@ read.sens.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
     stop( "Sensitivity file does not exist!" )
 
   limits <- read.table( file, stringsAsFactors = FALSE )
-  j <- 0
-  for( i in 2 : ncol( limits ) ) {
-    if( grepl( ":", limits[ 1, i ] ) )
-      j <- i
-  }
-  if( j == 0 )
-    stop( "Invalid or corrupt sensitivity file" )
-
-  limits <- limits[ -2 : -j ]      # remove non data columns
-
-  for( i in 1 : nrow( limits ) ) {
-    if( length( limits[ i, ] ) > 3 )
-      warning( "Too many (>2) sensitivity values for a single parameter, using the max/min only!" )
-    minV <- Inf
-    maxV <- - Inf
-    for( j in 2 : length( limits[ i, ] ) ) {
-      minV <- min( minV, limits[ i, j ] )
-      maxV <- max( maxV, limits[ i, j ] )
-    }
-
-    limits[ i, 2 ] <- minV
-    limits[ i, 3 ] <- maxV
+  limits <- limits[ -2 : -3 ]
+  if( length( limits[ 1, ] ) > 3 ) {
+    warning( "Too many (>2) sensitivity values for a single parameter, using the first two only!" )
+    limits <- limits[ -4 : - length( limits[ 1, ] ) ]
   }
 
-  limits <- limits[ , 1 : 3 ]
   dimnames( limits )[[ 2 ]] <- c( "Par", "Min", "Max" )
+  for( i in 1 : length( limits[ , 1 ] ) )
+    if( limits[ i, "Min" ] > limits[ i, "Max" ] ) {
+      temp <- limits[ "Min", i ]
+      limits[ "Min", i ] <- limits[ "Max", i ]
+      limits[ "Max", i ] <- temp
+    }
 
   return( limits )
 }

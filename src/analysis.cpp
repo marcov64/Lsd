@@ -277,8 +277,8 @@ cmd( "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr 
 cmd( "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -side left" );
 cmd( "pack .da.com" );
 
-num_c=1;
-num_var=0;
+num_c = 1;
+num_var = 0;
 if(actual_steps>0)
   insert_data_mem(root, &num_var, &num_c);
 
@@ -300,9 +300,10 @@ Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "gnu", (char *) &gnu, TCL_LINK_BOOLEAN);
 Tcl_LinkVar(inter, "num_y2", (char *) &num_y2, TCL_LINK_INT);
 
-min_c=1;
-max_c=num_c;
-miny=maxy=0;
+min_c = 1;
+max_c = num_c;
+miny = maxy = 0;
+time_cross = xy = false;
 gnu = false;
 cmd( "set y2 0" );
 cmd( "set allblack $grayscaleP" );
@@ -773,11 +774,11 @@ if ( ! choice )
 
 	do
 	{
-		*choice=0;
+		*choice = 0;
 		cmd( "set iti [.da.vars.pl.v curselection]" );
 		cmd( "if {[string length $iti] == 0} {set choice 1}" );
 
-		if(*choice==1)
+		if ( *choice == 1 )
 		{
 			*choice=0;
 			cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
@@ -792,18 +793,19 @@ if ( ! choice )
 	}
 	while ( *choice == 1 );
 
-	if(*choice==2)
-	   {*choice=0;
+	if ( *choice == 2 )
+	{
+		*choice = 0;
 		goto there;
-	   }
+	}
 
-	*choice=0;
+	*choice = 0;
+	
+	cmd( "set it [.da.vars.pl.v get $iti]" );
 }
 
-cmd( "set iti [.da.vars.pl.v curselection]" );
-cmd( "set it [.da.vars.pl.v get $iti]" );
 cmd( "scan $it %%d)%%s a b" );
-cmd( "set choice [winfo exists .da.f.new$a]" );
+cmd( "set choice [ winfo exists .da.f.new$a ]" );
 
 if( *choice == 0 )
 {

@@ -139,6 +139,6 @@ if { $tmp=="" } {return; set sd ""; set sf ""} {}
 
 
 set sd [lindex $ldir $tmp]
-set sf [file tail [glob [file join $sd *.cpp]]]
+set sf [file tail [glob -nocomplain [file join $sd *.cpp]]]
 }
 

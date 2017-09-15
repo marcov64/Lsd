@@ -162,7 +162,8 @@ As example, consider a model having a number of Objects Capital defined as
 the only type of descendants from Object Firm.
 A Variable in Firm, can have an equation having the following line:
 ...
-(p->son)->sort_asc(p, "Productivity");
+cur=search("Capital")
+cur->sort_asc(p, "Productivity");
 ...
 which will sort the objects Capital according to the ascending values of
 Productivity

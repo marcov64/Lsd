@@ -1502,7 +1502,7 @@ if(choice==3)
  } 
 
 //control for an existing model with the same name AND same version
-cmd( "set dir [glob *]" );
+cmd( "set dir [glob -nocomplain *]" );
 cmd( "set num [llength $dir]" );
 strcpy(str, " ");
 for(i=0; i<num; i++)
@@ -3415,7 +3415,7 @@ if(choice==3)
  } 
 
 //control for an existing model with the same name AND same version
-cmd( "set dir [glob *]" );
+cmd( "set dir [glob -nocomplain *]" );
 cmd( "set num [llength $dir]" );
 strcpy(str, " ");
 for(i=0; i<num && choice!=3; i++)
@@ -4744,8 +4744,8 @@ void check_option_files( bool sys )
 		
 		if ( ! exists )
 		{
-			cmd( "set dir [ glob \"$modeldir/fun_*.cpp\" ]" );
-			cmd( "set b [ file tail [ lindex $dir 0 ] ]" );
+			cmd( "set dir [ glob -nocomplain \"$modeldir/fun_*.cpp\" ]" );
+			cmd( "if { $dir != \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
 			cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3 -ggdb3\\nSWITCH_CC_LNK=\"" );
 			cmd( "set f [ open \"$modeldir/model_options.txt\" w ]" );
 			cmd( "puts -nonewline $f $a" );
@@ -4839,7 +4839,7 @@ bool compile_run( bool run, bool nw )
 
 	if ( ! run && ! nw )			// delete existing object file if it's just compiling
 	{								// to force recompilation
-		cmd( "set oldObj \"[ file rootname [ lindex [ glob fun_*.cpp ] 0 ] ].o\"" );
+		cmd( "set oldObj \"[ file rootname [ lindex [ glob -nocomplain fun_*.cpp ] 0 ] ].o\"" );
 		cmd( "if { [ file exists \"$oldObj\" ] } { file delete \"$oldObj\" }" );
 	}
   
