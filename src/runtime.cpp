@@ -180,7 +180,7 @@ cmd( "frame $activeplot.c" );
 cmd( "frame $activeplot.c.c  " );
 cmd( "set p $activeplot.c.c.cn" );
 cmd( "scrollbar $activeplot.c.c.hscroll -orient horiz -command \"$p xview\"" );
-cmd( "canvas $p -width 500 -height 330 -relief sunken -background white -bd 2 -scrollregion {0 0 %d 400} -xscrollcommand \"$activeplot.c.c.hscroll set\"", max_step );
+cmd( "canvas $p -width 500 -height 330 -relief sunken -background white -bd 2 -scrollregion {0 0 %d 340} -xscrollcommand \"$activeplot.c.c.hscroll set\" -yscrollincrement 1", max_step );
 cmd( "pack $activeplot.c.c.hscroll -side bottom -expand yes -fill x" );
 cmd( "$p create line 0 302 %d 302", (int)((double)max_step*plot_step) );
 cmd( "$p create line 0 151 %d 151 -fill grey60", (int)((double) max_step*plot_step) );
@@ -206,7 +206,7 @@ cmd( "$activeplot.c.yscale create text 2 150 -font {{MS Times New Roman} 10} -an
 cmd( "$activeplot.c.yscale create text 2 305 -font {{MS Times New Roman} 10} -anchor sw -text \"\" -tag ymin" );
 cmd( "set scrollB 0" );
 cmd( "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );
-cmd( "button $activeplot.c.yscale.go -width -7 -text Center -command {set_c_var done_in 7}" );
+cmd( "button $activeplot.c.yscale.go -width 7 -text Center -command {set_c_var done_in 7}" );
 cmd( "$activeplot.c.c.cn conf -xscrollincrement 1" );
 
 cmd( "$activeplot.c.yscale create window 42 313 -window $activeplot.c.yscale.shift -anchor n" );

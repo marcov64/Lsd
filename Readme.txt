@@ -1,7 +1,7 @@
 Laboratory for Simulation Development - Lsd
 and
 Lsd Model Manager - LMM
-June 2017
+September 2017
 
 Version 7.0 beta
 by Marco Valente - marco.valente@univaq.it
@@ -83,7 +83,7 @@ add-shortcut.bat
 
 Double-clicking the created desktop icon will run LMM (Lsd Model Manager) in 32-bit mode, which allows to create new models, or select existing models. Never invoke the file "lmm.exe" directly, because it needs some environment variables to be set by "run.bat".
 
-Alternatively, you may run this file inside the Lsd directory (double-clicking in Windows Explorer is fine) to run LMM:
+Alternatively, you may run this file inside the Lsd directory (double-clicking in Windows Explorer is fine too) to run LMM:
 
 run.bat
 
@@ -133,11 +133,11 @@ To unpack the distribution file (e.g., LsdXX.zip) simple unzip it in the chosen 
 
 If you want to create a desktop link (icon) to run Lsd/LMM, you can use the script available in the installation directory executing the command (Ubuntu and Gnome based distributions):
 
-./add-shortcut.sh
+./add-shortcut-linux.sh
 
 or (for 32-bit machines)
 
-./add-shortcut.sh 32
+./add-shortcut-linux.sh 32
 
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
@@ -169,23 +169,28 @@ If you modified the makefile to compile LMM, the same changes need to be made to
 macOS (10.10+) Installation
 ***********************************
 
-Mac users have two options. Either use the package native for macOS (Aqua), or compile Lsd as a Unix system. In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
+Mac users have two options. Either use the native application for macOS (Aqua), or compile Lsd as a Unix system (usually not required). In the second case ONLY you need to install the X11/XQuartz package (see the help on your Mac documentation or http://xquartz.macosforge.org). 
 
 To unpack the distribution file, e.g. LsdXX.zip, simple unzip it in the chosen directory (e.g., ~/Lsd). This will create the whole directory structure. 
 
 After unpacking is completed, run the Mac App named LMM located inside the Lsd directory (double click it in Finder).
 
-To create a desktop or dock shortcut to Lsd, you click and hold over the LMM app in Finder, select "Make Alias" and move (drag and drop) the created shortcut file to the desktop or to the dock.
+If you want to create a desktop link (icon) to run Lsd/LMM, you can use the script available in the installation directory executing the command in terminal:
 
-Alternatively, you can run LMM from the terminal. Please open a terminal in the chosen installation directory and execute:
+./add-shortcut-mac.sh
+
+Alternatively, you can run LMM from the terminal (usually not required). Please open a terminal in the chosen installation directory and execute:
 
 ./lmmOSX
 
-If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x lmmOSX" and "chmod +x LMM.app/Contents/MacOS/LMM" in the installation directory).
+If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x LMM.app/Contents/MacOS/LMM" or "chmod +x lmmOSX"  in the installation directory).
 
-Optionally, you can recompile LMM, in particular if the included pre-compiled version has problems with your Mac setup. Open a terminal and go to the directory of Lsd installation. Then use the command:
+Optionally, you can recompile LMM, required only if the included pre-compiled version has problems with your Mac setup. Open a terminal and go to the directory of Lsd installation. Then use one of the commands:
 
+make -f makefile.mac
 make -f makefile.osx
+
+The first command produces the native macOS package (LMM), while the second creates the terminal executable (lmmOSX). The package version (LMM) should be preferred as it embeds a newer version of Tcl/Tk. The terminal version (lmmOSX) uses the macOS pre-installed Tcl/Tk bundle which has some bugs.
 
 Users of macOS Sierra (10.12) or newer MUST manually install the Command Line Tools package (the full Xcode package is NOT required) to make the compiler and other required line tools available in macOS. To install it, open the Terminal (located inside /Applications/Utilities) and enter the following command:
 
@@ -227,6 +232,6 @@ For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
 Legal stuff
 Lsd is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices
 
-Shortcut.exe 1.11 is copyrighted by  Marty List, http://www.OptimumX.com
-
+Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
+SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
 Silk icon set 1.3 is copyrighted by Mark James, http://www.famfamfam.com/lab/icons/silk

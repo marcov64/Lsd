@@ -74,7 +74,7 @@ start:
 fname = equation_name;
 if( (f=fopen(equation_name,"r"))==NULL)
  {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'Ok' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
   cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ]; if [ fn_spaces $res . ] { set res \"\" } }" );
 
  if(*choice==1)
@@ -187,7 +187,7 @@ cmd( "finddone $w b { \
 		label $W.s.l -text \"Find\"; \
 		entry $W.s.e -textvariable s -justify center; \
 		focus $W.s.e; \
-		button $W.s.b -width -9 -text Ok -command { \
+		button $W.s.b -width $butWid -text OK -command { \
 			destroytop $W.s; \
 			set cur1 [ $W.f.text search -count length $s $cur1 ]; \
 			if { [ string length $cur1 ] > 0 } { \

@@ -147,7 +147,7 @@ cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left -padx 2" );
 cmd( "frame .w.s.e2.file" );
 cmd( "label .w.s.e2.file.tlab -text \"Get from file\"" );
 cmd( "entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
-cmd( "button .w.s.e2.file.new -width -5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces $file2 .w ] { set file2 \"\" } }", exec_path );
+cmd( "button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces $file2 .w ] { set file2 \"\" } }", exec_path );
 cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx 2" );
 
 cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx 5 -pady 2" );
@@ -186,7 +186,7 @@ cmd( "destroytop .w" );
 
 while ( equation_name == NULL || ( ffun = fopen( equation_name, "r" ) ) == NULL )
 {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'Ok' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name == NULL ? "" : equation_name );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name == NULL ? "" : equation_name );
 
 if ( *choice == 1 )
 {
@@ -226,11 +226,11 @@ fprintf(frep, "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=is
 app=(char *)Tcl_GetVar(inter, "reptit",0);
 
 fprintf( frep, "<TITLE>Lsd Report - Model: \"%s\"</TITLE>", app );
-fprintf( frep, "<I>Automatically generated Lsd report.</I><BR>", msg );
+fprintf( frep, "<I>Automatically generated Lsd report.</I><BR>" );
 fprintf( frep, "<A NAME=\"_TOP_\"><H1>Model: <I><U>%s</U></I></H1></A>", app );
 
 if ( desc || extra || obs )
-	fprintf( frep, "<A NAME=\"_DESCRIPTION_\"><H2>Description</H2></A>", app );
+	fprintf( frep, "<A NAME=\"_DESCRIPTION_\"><H2>Description</H2></A>" );
 
 if ( desc )
 {

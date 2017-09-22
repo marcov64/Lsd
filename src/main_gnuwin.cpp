@@ -43,7 +43,12 @@ int main( int argn, char **argv )
 	}
 
 #ifndef NO_WINDOW	
-	Tcl_Exit( res );
+	if ( inter != NULL )
+	{
+		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
+		cmd( "LsdExit" );
+		Tcl_Finalize( );
+	}
 #endif
 	return res;
 }
@@ -61,8 +66,12 @@ delete [ ] workers;
 #endif
 
 #ifndef NO_WINDOW
-	cmd( "LsdExit" );
-	Tcl_Exit( v );
+	if ( inter != NULL )
+	{
+		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
+		cmd( "LsdExit" );
+		Tcl_Finalize( );
+	}
 #endif
 	exit( v );
 }

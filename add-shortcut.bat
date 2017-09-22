@@ -5,8 +5,8 @@ if "%1"=="/?" (
 	goto end
 )
 if "%1"=="64" (
-	Shortcut /f:"%USERPROFILE%\Desktop\LMM (64-bit).lnk" /a:c /t:"%CD%\run64.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"Lsd Model Manager 64-bit"
+	"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LMM (64-bit).lnk" /a:c /t:"%CD%\run64.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"Lsd Model Manager 64-bit"
 ) else (
-	Shortcut /f:"%USERPROFILE%\Desktop\LMM.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"Lsd Model Manager"
+	"%CD%\gnu\bin\Shortcut.exe" /f:"%USERPROFILE%\Desktop\LMM.lnk" /a:c /t:"%CD%\run.bat" /w:%CD% /r:7 /i:%CD%\src\icons\lsd.ico /d:"Lsd Model Manager"
 )
 :end

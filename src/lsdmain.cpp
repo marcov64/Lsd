@@ -74,7 +74,7 @@ position of the file is just after str.
 #include "decl.h"
 
 #ifndef NO_WINDOW			// global Tcl interpreter in LSD
-Tcl_Interp *inter;
+Tcl_Interp *inter = NULL;
 #endif
 
 #ifdef LIBZ
@@ -184,16 +184,16 @@ char *str;
 int i, j = 0, len, done;
 FILE *f;
 
-path=new char[strlen("")+1];
-simul_name=new char[strlen("Sim1")+1];
-equation_name=new char[strlen("fun.cpp")+1];
+path = new char[strlen("")+1];
+simul_name = new char[strlen("Sim1")+1];
+equation_name = new char[strlen("fun.cpp")+1];
 
 strcpy(path, "");
 strcpy(tcl_dir, "");
 strcpy(simul_name, "Sim1");
 strcpy(equation_name,"fun.cpp");
-exec_file=clean_file(argv[0]);	// global pointer to the name of executable file
-exec_path=clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
+exec_file = clean_file(argv[0]);	// global pointer to the name of executable file
+exec_path = clean_path(getcwd(NULL, 0));	// global pointer to path of executable file
 
 #ifdef PARALLEL_MODE
 main_thread = this_thread::get_id( );
@@ -351,7 +351,7 @@ inter = Tcl_CreateInterp( );
 done = Tcl_Init( inter );
 if ( done != TCL_OK )
 {
-	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
 	log_tcl_error( "Create Tcl interpreter", msg );
 	myexit( 5 );
 }
@@ -383,24 +383,76 @@ if ( choice )
 tk_ok = true;
 cmd( "tk appname browser" );
 
-cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}" );
+cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
- {
- cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Spaces in file path\" -detail \"The directory containing the model is:\n[pwd]\nIt appears to include spaces. This will make impossible to compile and run Lsd model. The Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory and delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
- log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
- myexit( 8 ); 
- }
+{
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+	myexit( 8 ); 
+}
+
+// try to use exec_path to change to the model directory
+if ( strlen( exec_path ) == 0 || ! strcmp( exec_path, "/" ) )
+{	// try to get name from Tcl
+	cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"\" }" );
+	str = ( char * ) Tcl_GetVar( inter, "path", 0 );
+	if ( str != NULL && strlen( str ) > 0 )
+	{
+		delete [ ] exec_path;
+		exec_path = new char[ strlen( str ) + 1 ];
+		strcpy( exec_path, str );
+	}
+}
+choice = 0;
+cmd( "set path [ file normalize \"%s\" ]", exec_path );
+// check if directory is ok and if executable is inside a macOS package
+cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
+		cd \"$path\" \
+	} { \
+		if [ file exists \"$path/../../../modelinfo.txt\" ] { \
+			cd \"$path/../../..\"; \
+			set path \"[ pwd ]\" \
+		} { \
+			set path \"\"; \
+			set choice 1 \
+		} \
+	}" );
+if ( choice )
+{
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
+	myexit( 200 );
+}
+str = ( char * ) Tcl_GetVar( inter, "path", 0 );
+delete [] path;
+path = new char[ strlen( str ) + 1 ];
+strcpy( path, str );
 
 // check if LSDROOT already exists and use it if so, if not, search the current directory tree
 cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
-cmd( "if { ! [ info exists RootLsd ] } { set here [ pwd ]; while { ! [ file exists \"src/interf.cpp\" ] && [ string length [ pwd ] ] > 3 } { cd .. }; if [ file exists \"src/interf.cpp\" ] { set RootLsd [ pwd ] } { set RootLsd \"\" }; cd $here; set env(LSDROOT) $RootLsd }" );
+
+// do some search for the right path to cope with Mac Acqua package
+choice = 0;
+cmd( "if { ! [ info exists RootLsd ] } { \
+		set here [ pwd ]; \
+		while { ! [ file exists \"src/interf.cpp\" ] && ! [ string equal [ pwd ] \"/\" ] && [ string length [ pwd ] ] > 3 } { \
+			cd .. \
+		}; \
+		if [ file exists \"src/interf.cpp\" ] { \
+			set RootLsd [ pwd ] \
+		} { \
+			set choice 1 \
+		}; \
+		cd $here; \
+	}" );
+if ( choice )
+{
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where Lsd is installed" );
+	myexit( 9 );
+}
+cmd( "set env(LSDROOT) $RootLsd" );
 str = ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-if ( str == NULL || strlen( str ) == 0 )
- {
- cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"" );
- log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where Lsd is installed" );
- myexit( 9 );
- }
 lsdroot = new char[ strlen( str ) + 1 ];
 strcpy( lsdroot, str );
 len = strlen( lsdroot );
@@ -486,12 +538,6 @@ cmd( "update" );
 
 create_logwindow( );
 cmd( "init_canvas_colors" );
-
-// use exec_path to change to the model directory
-delete [] path;
-path = new char[ strlen( exec_path ) + 1 ];
-strcpy( path, exec_path );
-cmd( "set path \"%s\"; cd \"$path\"", path );
 
 struct_file = new char[ strlen( simul_name ) + 5 ];
 sprintf( struct_file, "%s.lsd", simul_name );
@@ -1065,15 +1111,15 @@ cmd( "pack $w -expand yes -fill both" );
 
 cmd( "set w .log.but" );
 cmd( "frame $w" );
-cmd( "button $w.stop -width -9 -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
-cmd( "button $w.pause -width -9 -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
-cmd( "button $w.speed -width -9 -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
-cmd( "button $w.obs -width -9 -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
-cmd( "button $w.deb -width -9 -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
-cmd( "button $w.help -width -9 -text Help -command {LsdHelp Log.html} -underline 0" );
-cmd( "button $w.copy -width -9 -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
+cmd( "button $w.stop -width $butWid -text Stop -command {set_c_var done_in 1} -underline 0 -state disabled" );
+cmd( "button $w.pause -width $butWid -text Pause -command {set_c_var done_in 9} -underline 0 -state disabled" );
+cmd( "button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
+cmd( "button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
+cmd( "button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
+cmd( "button $w.help -width $butWid -text Help -command {LsdHelp Log.html} -underline 0" );
+cmd( "button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
-cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 10 -pady 10 -side left" );
+cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 5 -pady 10 -side left" );
 cmd( "pack $w -side right" );
 
 cmd( "showtop .log none 1 1 0" );

@@ -254,15 +254,15 @@ cmd( "bind .da <KeyPress-Delete> {set n_it [.da.vars.pl.v curselection]; if {$n_
 
 cmd( "frame .da.vars.b" );
 cmd( "set f .da.vars.b" );
-cmd( "button $f.in -width -6 -relief flat -overrelief groove -text \u25b6 -command {set choice 6}" );
-cmd( "button $f.out -width -6 -relief flat -overrelief groove -state disabled -text \u25c0 -command {set choice 7}" );
-cmd( "button $f.sort -width -6 -relief flat -overrelief groove -text \"Sort \u25b2\" -command {set choice 5} -underline 0" );
-cmd( "button $f.sortdesc -width -6 -relief flat -overrelief groove -text \"Sort \u25bc\" -command {set choice 38} -underline 1" );
-cmd( "button $f.sortend -width -6 -relief flat -overrelief groove -text \"Sort+\" -command {set choice 15} -underline 2" );
-cmd( "button $f.unsort -width -6 -relief flat -overrelief groove -text \"Unsort\" -command {set choice 14} -underline 0" );
-cmd( "button $f.search -width -6 -relief flat -overrelief groove -text Find... -command { set choice 39 } -underline 0" );
-cmd( "button $f.add -width -6 -relief flat -overrelief groove -text \"Add...\" -command {set choice 24} -underline 0" );
-cmd( "button $f.empty -width -6 -relief flat -overrelief groove -text Clear -command {set choice 8} -underline 0" );
+cmd( "button $f.in -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \u25b6 -command {set choice 6}" );
+cmd( "button $f.out -width [ expr $butWid - 3 ] -relief flat -overrelief groove -state disabled -text \u25c0 -command {set choice 7}" );
+cmd( "button $f.sort -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \"Sort \u25b2\" -command {set choice 5} -underline 0" );
+cmd( "button $f.sortdesc -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \"Sort \u25bc\" -command {set choice 38} -underline 1" );
+cmd( "button $f.sortend -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \"Sort+\" -command {set choice 15} -underline 2" );
+cmd( "button $f.unsort -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \"Unsort\" -command {set choice 14} -underline 0" );
+cmd( "button $f.search -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text Find... -command { set choice 39 } -underline 0" );
+cmd( "button $f.add -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text \"Add...\" -command {set choice 24} -underline 0" );
+cmd( "button $f.empty -width [ expr $butWid - 3 ] -relief flat -overrelief groove -text Clear -command {set choice 8} -underline 0" );
 cmd( "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.add $f.empty -padx 2 -pady 1 -fill y" );
 
 cmd( "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left  -expand true -fill y" );
@@ -409,13 +409,13 @@ cmd( "pack .da.f.h .da.f.tit" );
 cmd( "pack .da.f" );
 
 cmd( "frame .da.b" );
-cmd( "button .da.b.ts -width -9 -text Plot -command {set choice 1} -underline 0" );
-cmd( "button .da.b.dump -width -9 -text \"Save Plot\" -command {set fromPlot false; set choice 11} -underline 2" );
-cmd( "button .da.b.sv -width -9 -text \"Save Data\" -command {set choice 10} -underline 3" );
-cmd( "button .da.b.sp -width -9 -text \"Show Data\" -command {set choice 36} -underline 5" );
-cmd( "button .da.b.st -width -9 -text Statistics -command {set choice 12} -underline 1" );
-cmd( "button .da.b.fr -width -9 -text Histogram -command {set choice 32} -underline 0" );
-cmd( "button .da.b.lat -width -9 -text Lattice -command {set choice 23} -underline 0" );
+cmd( "button .da.b.ts -width $butWid -text Plot -command {set choice 1} -underline 0" );
+cmd( "button .da.b.dump -width $butWid -text \"Save Plot\" -command {set fromPlot false; set choice 11} -underline 2" );
+cmd( "button .da.b.sv -width $butWid -text \"Save Data\" -command {set choice 10} -underline 3" );
+cmd( "button .da.b.sp -width $butWid -text \"Show Data\" -command {set choice 36} -underline 5" );
+cmd( "button .da.b.st -width $butWid -text Statistics -command {set choice 12} -underline 1" );
+cmd( "button .da.b.fr -width $butWid -text Histogram -command {set choice 32} -underline 0" );
+cmd( "button .da.b.lat -width $butWid -text Lattice -command {set choice 23} -underline 0" );
 
 cmd( "pack .da.b.ts .da.b.dump .da.b.sv .da.b.sp .da.b.st .da.b.fr .da.b.lat -padx 10 -pady 10 -side left -expand no -fill none" );
 cmd( "pack .da.b -side right -expand no -fill none" );
@@ -782,7 +782,7 @@ if ( ! choice )
 		{
 			*choice=0;
 			cmd( "newtop .da.a \"Save Plot\" { set choice 2 } .da" );
-			cmd( "label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'Ok'\"" );
+			cmd( "label .da.a.l -text \"Select one plot from the \nPlots listbox before clicking 'OK'\"" );
 			cmd( "pack .da.a.l -pady 10 -padx 5" );
 			cmd( "okcancel .da.a b { set choice 1 } { set choice 2 }" );
 			cmd( "showtop .da.a centerW 0 0 0" );
@@ -2038,7 +2038,7 @@ sprintf(name_rep, "report_%s.html", simul_name);
 cmd( "set choice [file exists %s]", name_rep );
 if(*choice == 0)
  {
-  cmd( "set answer [tk_messageBox -parent .da -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]" );
+  cmd( "set answer [tk_messageBox -parent .da -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]" );
   cmd( "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}" );
  if(*choice == 0)
   goto there;
@@ -2439,7 +2439,7 @@ bool y2on, stopErr = false;
 
 if(nv>1000)
  {
-  cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"So many series may cause a crash of the Lsd model program, with the loss of all data.\nIf you continue the system may become slow, please be patient.\nPress 'Ok' to continue anyway.\"]" );
+  cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of Lsd, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\"]" );
   cmd( "if {[string compare $answer ok] == 0} {set choice 1 } {set choice 2}" );
   if(*choice==2)
    return;
@@ -2895,7 +2895,7 @@ cmd( "label $p.u.s.l -text \"\nTime series order\"" );
 cmd( "pack $p.u.s.l" );
 
 cmd( "frame $p.u.s.b -relief groove -bd 2" );
-cmd( "radiobutton $p.u.s.b.nosort -width -9 -text \"As selected\" -variable dir -value 0 -command { .da.s.u.s.r.e configure -state disabled; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e }" );
+cmd( "radiobutton $p.u.s.b.nosort -text \"As selected\" -variable dir -value 0 -command { .da.s.u.s.r.e configure -state disabled; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e }" );
 cmd( "radiobutton $p.u.s.b.up -text \"Ascending order\" -variable dir -value 1 -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
 cmd( "radiobutton $p.u.s.b.down -text \"Descending order\" -variable dir -value \"-1\" -command { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] == 1 } { set res [ lindex $list_times $sel ] } { set res $maxc }; .da.s.u.s.r.e configure -state normal; .da.s.u.s.r.e delete 0 end; .da.s.u.s.r.e insert 0 $res; .da.s.u.s.r.e selection range 0 end; focus .da.s.u.s.r.e }" );
 cmd( "pack $p.u.s.b.nosort $p.u.s.b.up $p.u.s.b.down -padx 5 -anchor w" );
@@ -4958,8 +4958,8 @@ cmd( "label $w.b.o.l3 -text \"Ctrl-click: insert line\"" );
 cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 cmd( "frame $w.b.s" );
-cmd( "button $w.b.s.save -width 9 -text Save -command { set it \"%d) $tit\"; set fromPlot true; set choice 11 } -state disabled -underline 0", n );
-cmd( "button $w.b.s.gnu -width 9 -text Gnuplot -command { set oldpath [pwd]; cd plotxy_%d; if { $tcl_platform(platform) == \"unix\" } { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } { if { $tcl_platform(os) == \"Windows NT\" } { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }; cd $oldpath; if { $choice != 0 } { tk_messageBox -parent .da.f.new%d -type ok -icon error -title Error -message \"Gnuplot returned error '$choice'\" -detail \"Please check if Gnuplot is set up properly.\" } } -state disabled -underline 0", n, n );
+cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot true; set choice 11 } -state disabled -underline 0", n );
+cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { set oldpath [pwd]; cd plotxy_%d; if { $tcl_platform(platform) == \"unix\" } { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } { if { $tcl_platform(os) == \"Windows NT\" } { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }; cd $oldpath; if { $choice != 0 } { tk_messageBox -parent .da.f.new%d -type ok -icon error -title Error -message \"Gnuplot returned error '$choice'\" -detail \"Please check if Gnuplot is set up properly.\" } } -state disabled -underline 0", n, n );
 cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
 
 cmd( "label $w.b.pad -width 6" );
@@ -7809,8 +7809,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 	cmd( "frame $w.b.s" );
-	cmd( "button $w.b.s.save -width 9 -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot true; set choice 11 } -state disabled -underline 0" );
-	cmd( "button $w.b.s.stop -width 9 -text Stop -command { set choice 2 } -state disabled -underline 0" );
+	cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"$cur_plot) $tit\"; set fromPlot true; set choice 11 } -state disabled -underline 0" );
+	cmd( "button $w.b.s.stop -width $butWid -text Stop -command { set choice 2 } -state disabled -underline 0" );
 	cmd( "pack $w.b.s.save $w.b.s.stop -pady 5" );
 
 	cmd( "frame $w.b.z -bd 2 -relief groove" );

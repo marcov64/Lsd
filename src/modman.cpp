@@ -92,8 +92,9 @@ void make_makefile( bool nw = false );
 void signal_handler( int signum );
 
 // global variables
-Tcl_Interp *inter;
+Tcl_Interp *inter = NULL;
 bool tk_ok = false;				// control for tk_ready to operate
+char *exec_path = NULL;			// path of executable file
 char msg[ TCL_BUFF_STR ]; 
 char rootLsd[ MAX_PATH_LENGTH ];
 int choice;
@@ -115,11 +116,11 @@ int main( int argn, char **argv )
 	{
 		res = ModManMain( argn, argv );
 	}
-	catch ( bad_alloc&  )	// out of memory conditions
+	catch ( bad_alloc&  )		// out of memory conditions
 	{
 		signal_handler( SIGMEM );
 	}
-	catch ( exception& exc )// other known error conditions
+	catch ( exception& exc )	// other known error conditions
 	{
 		sprintf( msg, "\nSTL exception of type: %s\n", exc.what( ) );
 		signal_handler( SIGSTL );
@@ -129,7 +130,11 @@ int main( int argn, char **argv )
 		abort( );				// raises a SIGABRT exception, tell user & close
 	}
 	
-	Tcl_Exit( res );
+	if ( inter != NULL )
+	{
+		cmd( "if { ! [ catch { package present Tk } ] } { destroy . }" );
+		Tcl_Finalize( );
+	}
 	return res;
 }
 
@@ -184,47 +189,84 @@ if ( choice )
 tk_ok = true;
 cmd( "tk appname lmm" );
 
-cmd( "if { [string first \" \" \"[pwd]\" ] >= 0  } {set choice 1} {set choice 0}" );
+// check installation directory for no spaces in name
+cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
- {
- cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[pwd]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\"" );
- log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
- return 4;
- }
+{
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
+	log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+	return 4;
+}
 
-if(argn>1)
- {
-  for(i=0; argv[1][i]!=0; i++)
-   {
-    if(argv[1][i]=='\\')
-     msg[i]='/';
-    else
-     msg[i]=argv[1][i];
-   }
-   msg[i]=argv[1][i];
-  cmd( "set filetoload %s", msg );
-  cmd( "if {[file pathtype \"$filetoload\"]==\"absolute\"} {} {set filetoload \"[pwd]/$filetoload\"}" );
- }
+// try to open text file if name is provided in the command line
+if ( argn > 1 )
+{
+	for ( i = 0; argv[1][i] != '\0'; ++i )
+	{
+		if ( argv[1][i] == '\\' )
+			msg[i] = '/';
+		else
+			msg[i] = argv[1][i];
+	}
+	msg[i] = '\0';
+	cmd( "set filetoload \"%s\"", msg );
+	cmd( "if { ! [ file pathtype \"$filetoload\" ] == \"absolute\" } { set filetoload \"[pwd]/$filetoload\" }" );
+}
 
-sprintf(msg, "%s",*argv);
-if(!strncmp(msg, "//", 2))
- sprintf(str, "%s",msg+3);
-else
- sprintf(str, "%s",msg);
+// prepare to use exec path to find LSD directory
+cmd( "if { [ info nameofexecutable ] != \"\" } { set path [ file dirname [ info nameofexecutable ] ] } { set path \"[ pwd ]\" }" );
+s = ( char * ) Tcl_GetVar( inter, "path", 0 );
+if ( s != NULL && strlen( s ) > 0 )
+{
+	exec_path = new char[ strlen( s ) + 1 ];
+	strcpy( exec_path, s );
+}
 
-cmd( "if {[file exists [file dirname \"[file nativename %s]\"]]==1} {cd [file dirname \"%s\"]; set choice 1} {cd [pwd]; set choice 0}", str, str );
+// check if LSDROOT environment variable exists and use it if so
+cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if [ file exists \"$RootLsd/src/decl.h\" ] { cd \"$RootLsd\"; set choice 0 } { set choice 1 } } { set choice 1 }" );
 
-// check if LSDROOT already exists and use it if so
-cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/decl.h\" ] } { unset RootLsd } }" );
-cmd( "if { ! [ info exists RootLsd ] } { set RootLsd [ pwd ]; set env(LSDROOT) $RootLsd }" );
+if ( choice )
+{
+	choice = 0;
+	cmd( "set RootLsd [ file normalize \"%s\" ]", exec_path );
+	// check if directory is ok and if executable is inside a macOS package
+	cmd( "if [ file exists \"$RootLsd/src/decl.h\" ] { \
+			cd \"$RootLsd\" \
+		} { \
+			if [ file exists \"$RootLsd/../../../src/decl.h\" ] { \
+				cd \"$RootLsd/../../..\"; \
+				set RootLsd \"[ pwd ]\" \
+			} { \
+				unset RootLsd; \
+				set choice 1 \
+			} \
+		}" );
+	if ( choice )
+	{
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Lsd files or folders are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
+		log_tcl_error( "Source files check", "Required Lsd source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
+		return 5;	
+	}
+	cmd( "set env(LSDROOT) $RootLsd" );
+}
+
 s =  ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
 strcpy( rootLsd, s );
+num = strlen( rootLsd );
+for ( i = 0; i < num; ++i )
+	if ( rootLsd[ i ] == '\\' )
+		rootLsd[ i ] = '/';
+cmd( "set RootLsd \"%s\"", rootLsd );
 
 // set platform-specific variables
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set DefaultMakeExe make; set DefaultWish wish; set DefaultDbgTerm xterm; set DefaultDbgExe gdb; set DefaultHtmlBrowser firefox; set DefaultFont Courier; set DefaultFontSize 12 }" );
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultMakeExe make; set DefaultWish wish8.5; set DefaultDbgTerm Terminal; set DefaultDbgExe lldb; set DefaultHtmlBrowser open; set DefaultFont Monaco; set DefaultFontSize 14 }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultMakeExe \"make.exe\"; set DefaultWish wish85.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultWish wish86.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe \"gnumake.exe\" } { set DefaultMakeExe \"make.exe\" } }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set DefaultExe lsd_gnu; set DefaultMakeExe make; set DefaultWish wish; set DefaultDbgTerm xterm; set DefaultDbgExe gdb; set DefaultHtmlBrowser firefox; set DefaultFont Courier; set DefaultFontSize 12 }" );
+#ifdef MAC_PKG
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe LSD; set DefaultMakeExe make; set DefaultWish wish8.6; set DefaultDbgTerm Terminal; set DefaultDbgExe lldb; set DefaultHtmlBrowser open; set DefaultFont Monaco; set DefaultFontSize 14 }" );
+#else
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe lsd_gnu; set DefaultMakeExe make; set DefaultWish wish8.5; set DefaultDbgTerm Terminal; set DefaultDbgExe lldb; set DefaultHtmlBrowser open; set DefaultFont Monaco; set DefaultFontSize 14 }" );
+#endif
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultExe lsd_gnu; set DefaultMakeExe \"make.exe\"; set DefaultWish wish85.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultExe lsd_gnu; set DefaultWish wish86.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe \"gnumake.exe\" } { set DefaultMakeExe \"make.exe\" } }" );
 
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
 cmd( "set small_character [ expr $DefaultFontSize - 2 ]" );
@@ -737,9 +779,11 @@ cmd( ".f.t.t tag conf sel -foreground white" );
 cmd( "set before [.f.t.t get 1.0 end]" );
 
 if(argn>1)
- {cmd( "if {[file exists \"$filetoload\"] == 1} {set choice 0} {set choice -2}" );
-  if(choice == 0)
-    {cmd( "set file [open \"$filetoload\"]" );
+{
+	cmd( "if [ file exists \"$filetoload\" ] { set choice 0 } { set choice -2 }" );
+	if(choice == 0)
+	{	
+     cmd( "set file [open \"$filetoload\"]" );
      cmd( ".f.t.t insert end [read $file]" );
      cmd( ".f.t.t edit reset" );
      cmd( "close $file" );
@@ -762,8 +806,8 @@ if(argn>1)
        }
     }
    else
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File\\n$filetoload\\nnot found.\"" ); 
-  }
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" ); 
+}
  else
   choice= 33; 			// open model browser
   
@@ -1236,7 +1280,11 @@ if(choice==1)
  }
 if(choice==2)
  {//Mac
+#ifdef MAC_PKG
+  sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s.app\\\"\" & } result", str1 );
+#else
   sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s\\\"\" & } result", str1 );
+#endif
  }
 if(choice==3)
  {//Windows 2000, XP, 7, 8, 10...
@@ -1253,7 +1301,11 @@ s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
 if ( s != NULL && strcmp( s, "" ) )
 {
 	sprintf( str2, "%s/%s", s, str );
+#ifdef MAC_PKG
+	sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
+#else
 	sprintf( str, "%s/%s", s, str1 );
+#endif
 }
 
 // get OS info for files
@@ -1262,7 +1314,7 @@ if ( stat( str, &stExe ) == 0 && stat( str2, &stMod ) == 0 )
 {
 	if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
 	{
-		cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'Ok' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+		cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
 		if ( choice == 2 )
 			goto end_gdb;
 	}
@@ -1290,7 +1342,7 @@ if(choice==14)
 cmd( "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
 		{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
 			-icon warning -default ok -message \"Invalid parent group\" \
-			-detail \"Cannot create group/model in the Root group. Press 'Ok' to change to the '$LsdNew' group before proceeding.\" ]; \
+			-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
 			if [ string equal $answer ok ] { \
 				set groupdir \"$groupdir/$LsdNew\"; \
 				set f [open \"$groupdir/groupinfo.txt\" r]; \
@@ -1540,7 +1592,7 @@ if(choice==3)
 if(choice==4)
  {
  choice=0;
- cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'Ok' to continue creating a new (empty) model '$mname'.\"]" );
+ cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
   s=(char *)Tcl_GetVar(inter, "answer",0);
 
   cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
@@ -1826,8 +1878,8 @@ cmd( "checkbutton .l.c -text \"Case sensitive\" -variable docase" );
 cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
 
 cmd( "frame .l.b1" );
-cmd( "button .l.b1.repl -width -9 -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.b2.ok invoke} {}}" );
-cmd( "button .l.b1.all -width -9 -state disabled -text \"Repl. All\" -command {set choice 4}" );
+cmd( "button .l.b1.repl -width $butWid -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.b2.ok invoke} {}}" );
+cmd( "button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command {set choice 4}" );
 cmd( "pack .l.b1.repl .l.b1.all -padx 10 -side left" );
 
 cmd( "pack .l.b1 -anchor e" );
@@ -3705,7 +3757,7 @@ cmd( "frame .l.t.d" );
 
 cmd( "frame .l.t.d.os" );
 cmd( "if [ string equal $tcl_platform(machine) intel ] { \
-		button .l.t.d.os.win -width -15 -text \"Default Windows x32\" -command { .l.t.text delete 1.0 end; \
+		button .l.t.d.os.win -width [ expr $butWid + 6 ] -text \"Default Windows32\" -command { .l.t.text delete 1.0 end; \
 			set file [ open \"$RootLsd/$LsdSrc/sysopt_win32.txt\" r ]; \
 			set a [ read -nonewline $file ]; \
 			close $file; \
@@ -3713,7 +3765,7 @@ cmd( "if [ string equal $tcl_platform(machine) intel ] { \
 			.l.t.text insert end \"$a\" \
 		} \
 	} else { \
-		button .l.t.d.os.win -width -15 -text \"Default Windows x64\" -command { \
+		button .l.t.d.os.win -width [ expr $butWid + 6 ] -text \"Default Windows64\" -command { \
 			.l.t.text delete 1.0 end; \
 			set file [ open \"$RootLsd/$LsdSrc/sysopt_win64.txt\" r ]; \
 			set a [ read -nonewline $file ]; \
@@ -3722,7 +3774,7 @@ cmd( "if [ string equal $tcl_platform(machine) intel ] { \
 			.l.t.text insert end \"$a\" \
 		} \
 	} " ); 
-cmd( "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command { \
+cmd( "button .l.t.d.os.lin -width [ expr $butWid + 6 ] -text \"Default Linux\" -command { \
 		.l.t.text delete 1.0 end; \
 		set file [open \"$RootLsd/$LsdSrc/sysopt_linux.txt\" r]; \
 		set a [read -nonewline $file]; \
@@ -3730,7 +3782,8 @@ cmd( "button .l.t.d.os.lin -width -15 -text \"Default Linux\" -command { \
 		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 		.l.t.text insert end \"$a\" \
 	}" );
-cmd( "button .l.t.d.os.mac -width -15 -text \"Default MacOS\" -command { \
+#ifdef MAC_PKG
+cmd( "button .l.t.d.os.mac -width [ expr $butWid + 6 ] -text \"Default MacOS\" -command { \
 		.l.t.text delete 1.0 end; \
 		set file [open \"$RootLsd/$LsdSrc/sysopt_mac.txt\" r]; \
 		set a [read -nonewline $file]; \
@@ -3738,6 +3791,16 @@ cmd( "button .l.t.d.os.mac -width -15 -text \"Default MacOS\" -command { \
 		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 		.l.t.text insert end \"$a\" \
 	}" ); 
+#else
+cmd( "button .l.t.d.os.mac -width [ expr $butWid + 6 ] -text \"Default OSX\" -command { \
+		.l.t.text delete 1.0 end; \
+		set file [open \"$RootLsd/$LsdSrc/sysopt_osx.txt\" r]; \
+		set a [read -nonewline $file]; \
+		close $file; \
+		.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
+		.l.t.text insert end \"$a\" \
+	}" ); 
+#endif
 cmd( "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 10 -pady 5 -side left" );
 
 cmd( "pack .l.t.d.os" );
@@ -3795,7 +3858,7 @@ cmd( "set f [open model_options.txt r]" );
 cmd( "set a [read -nonewline $f]" );
 cmd( "close $f" );
 
-cmd( "set gcc_conf \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
+cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
 cmd( "set gcc_deb \"$gcc_conf-O0 -ggdb3\\nSWITCH_CC_LNK=\"" );
 cmd( "set gcc_opt \"$gcc_conf-O3\\nSWITCH_CC_LNK=\"" );
 
@@ -3858,7 +3921,7 @@ cmd( "checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { \
 			.l.t.text insert end \"[ string trim $a ]\n\" \
 		} \
 	}" );
-cmd( "button .l.t.d.opt.ext -width -9 -text \"Add Extra\" -command { \
+cmd( "button .l.t.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
 		set a [.l.t.text get 1.0 end]; \
 		set pos [ string first \"FUN_EXTRA=\" $a ]; \
 		if { $pos == -1 } { \
@@ -3891,7 +3954,7 @@ cmd( "button .l.t.d.opt.ext -width -9 -text \"Add Extra\" -command { \
 		.l.t.text delete 1.0 end; \
 		.l.t.text insert end \"[ string trim $a ]\n\" \
 	}" );
-cmd( "button .l.t.d.opt.def -width -9 -text \"Default\" -command { \
+cmd( "button .l.t.d.opt.def -width $butWid -text \"Default\" -command { \
 		if { $debug == 0 } { \
 			set default \"$gcc_opt\" \
 		} else { \
@@ -3900,7 +3963,7 @@ cmd( "button .l.t.d.opt.def -width -9 -text \"Default\" -command { \
 		.l.t.text delete 1.0 end; \
 		.l.t.text insert end \"$default\" \
 	}" );
-cmd( "button .l.t.d.opt.cle -width -9 -text \"Clean Obj.\" -command { \
+cmd( "button .l.t.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
 		if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
 			foreach i $objs { \
 				catch { \
@@ -4102,8 +4165,8 @@ cmd( "bind .a.num8.v_num11 <Return> { focus .a.f2.ok }" );
 cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 cmd( "frame .a.f1" );
-cmd( "button .a.f1.def -width -9 -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
-cmd( "button .a.f1.help -width -9 -text Help -command {LsdHelp LMM_help.html#SystemOpt}" );
+cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
+cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM_help.html#SystemOpt}" );
 cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 cmd( "pack .a.f1 -anchor e" );
 
@@ -4471,12 +4534,19 @@ void cmd( const char *cm, ... )
 {
 	char message[ TCL_BUFF_STR ];
 	
+	// abort if Tcl interpreter not initialized
+	if ( inter == NULL )
+	{
+		printf( "\nTcl interpreter not initialized. Quitting Lsd now.\n" );
+		abort( );
+	}
+	
 	if ( strlen( cm ) >= TCL_BUFF_STR )
 	{
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR to at least %ld bytes.", strlen( cm ) );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'Ok'.\"" );
+			cmd( "tk_messageBox -type ok -title Error -icon warning -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Save your data and close LMM after pressing 'OK'.\"" );
 	}
 
 	char buffer[ TCL_BUFF_STR ];
@@ -4514,8 +4584,17 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char ftime[ 80 ];
 
-	sprintf( fname, "%s/LMM.err", rootLsd );
+	if( strlen( rootLsd ) > 0 )
+		sprintf( fname, "%s/LMM.err", rootLsd );
+	else
+		sprintf( fname, "LMM.err" );
+	
 	f = fopen( fname, "a" );
+	if ( f == NULL )
+	{
+		printf( "\nCannot write log file to disk. Check write permissions\n" );
+		return;
+	}
 
 	time( &rawtime );
 	timeinfo = localtime( &rawtime );
@@ -4718,8 +4797,15 @@ void make_makefile( bool nw )
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/system_options.txt\" r ]" );
 	cmd( "set d [ read -nonewline $f ]" );
 	cmd( "close $f" );
-
+	
+#ifdef MAC_PKG
+	if ( nw )
+		cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
+	else
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set f [ open \"$RootLsd/$LsdSrc/makefile_base_mac.txt\" r ] } { set f [ open \"$RootLsd/$LsdSrc/makefile_base.txt\" r ] }" );
+#else
 	cmd( "set f [ open \"$RootLsd/$LsdSrc/makefile_base%s.txt\" r ]", suffix );
+#endif
 	cmd( "set b [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
@@ -4746,7 +4832,7 @@ void check_option_files( bool sys )
 		{
 			cmd( "set dir [ glob -nocomplain \"$modeldir/fun_*.cpp\" ]" );
 			cmd( "if { $dir != \"\" } { set b [ file tail [ lindex $dir 0 ] ] } { set b \"fun_UNKNOWN.cpp\" }" );
-			cmd( "set a \"TARGET=lsd_gnu\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3 -ggdb3\\nSWITCH_CC_LNK=\"" );
+			cmd( "set a \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=-O3 -ggdb3\\nSWITCH_CC_LNK=\"" );
 			cmd( "set f [ open \"$modeldir/model_options.txt\" w ]" );
 			cmd( "puts -nonewline $f $a" );
 			cmd( "close $f" );
@@ -4762,13 +4848,13 @@ void check_option_files( bool sys )
 				} { \
 					set sysfile \"sysopt_win64.txt\" \
 				} \
-			} { \
-				if [ string equal $tcl_platform(os) Darwin ] { \
-					set sysfile \"sysopt_mac.txt\" \
-				} { \
-					set sysfile \"sysopt_linux.txt\" \
-				} \
 			}" );
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { set sysfile \"sysopt_linux.txt\" }" );
+#ifdef MAC_PKG
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_mac.txt\" }" );
+#else
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set sysfile \"sysopt_osx.txt\" }" );
+#endif
 		cmd( "set f [ open \"$RootLsd/$LsdSrc/system_options.txt\" w ]" );
 		cmd( "set f1 [ open \"$RootLsd/$LsdSrc/$sysfile\" r ]" );
 		cmd( "puts -nonewline $f \"LSDROOT=$RootLsd\\n\"" );
@@ -4913,7 +4999,14 @@ bool compile_run( bool run, bool nw )
 	if ( res == 1 )
 	{	// Check if the executable is newer than the compilation command, implying just warnings
 		cmd( "set funtime [ file mtime \"$fname\"] " );
-		cmd( "if [ file exist \"%s$add_exe\"] { set exectime [ file mtime \"%s$add_exe\" ] } { set exectime \"$init_time\" }", str + 7, str + 7 );
+#ifdef MAC_PKG
+		if ( ! nw )
+			cmd( "if [ string equal $tcl_platform(os) Darwin ] { set pkgPath \"%s.app/Contents/MacOS/\" } { set pkgPath \"\" }", str + 7 );
+		else
+#endif
+			cmd( "set pkgPath \"\"" );
+			
+		cmd( "if [ file exist \"${pkgPath}%s$add_exe\" ] { set exectime [ file mtime \"${pkgPath}%s$add_exe\" ] } { set exectime $init_time }", str + 7 , str + 7 );
 		cmd( "if { $init_time < $exectime } { set res 0 }" );
 	}
 	if ( res == 1 )
@@ -4930,11 +5023,23 @@ bool compile_run( bool run, bool nw )
 		
 		if ( run )
 		{	// no problem - execute
-			cmd( "if [ string equal $tcl_platform(platform) unix ] { set res 1 } { set res 2 }" );
-			if ( res == 1 )	// unix
-				cmd( "catch { exec ./%s & } result", str + 7 );
-			else 				// win2k, XP, 7, 8, 10...
-				cmd( "catch { exec %s.exe & } result", str + 7 );
+#ifdef MAC_PKG
+			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { if [ string equal $tcl_platform(os) Darwin ] { set res 2 } { set res 1 } }" );
+#else
+			cmd( "if [ string equal $tcl_platform(platform) windows ] { set res 3 } { set res 1 }" );
+#endif
+			switch ( res )
+			{
+				case 1:	// unix
+					cmd( "catch { exec ./%s & } result", str + 7 );
+					break;
+				case 2:	// mac package
+					cmd( "catch { exec open ./%s.app & } result", str + 7 );
+					break;
+				case 3:	// win2k, XP, 7, 8, 10...
+					cmd( "catch { exec %s.exe & } result", str + 7 );
+					break;
+			}
 		}
 	}
 
@@ -4965,12 +5070,12 @@ void create_compresult_window( bool nw )
 
 	cmd( "frame .mm.b" );
 	cmd( "set error \"error\"" );				// error string to be searched
-	cmd( "button .mm.b.ferr -width -9 -text \"Next Error\" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }" );
-	cmd( "button .mm.b.perr -width -9 -text \"Previous Error\" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }" );
+	cmd( "button .mm.b.ferr -width $butWid -text \"Next Error\" -command {set errtemp [.mm.t search -nocase -regexp -count errlen -- $error $cerr end]; if { [string length $errtemp] == 0} {} { set cerr \"$errtemp + $errlen ch\"; .mm.t mark set insert $cerr; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp;} }" );
+	cmd( "button .mm.b.perr -width $butWid -text \"Previous Error\" -command {set errtemp [ .mm.t search -nocase -regexp -count errlen -backward -- $error $cerr 0.0];  if { [string length $errtemp] == 0} {} { set cerr \"$errtemp - 1ch\"; .mm.t mark set insert $errtemp; .mm.t tag remove sel 1.0 end; .mm.t tag add sel \"$errtemp linestart\" \"$errtemp lineend\"; .mm.t see $errtemp} }" );
 	cmd( "pack .mm.b.perr .mm.b.ferr -padx 10 -pady 5 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -expand yes -fill x" );
 
-	cmd( "button .mm.close -width -9 -text Done -command {destroytop .mm}" );
+	cmd( "button .mm.close -width $butWid -text Done -command {destroytop .mm}" );
 	cmd( "pack .mm.close -padx 10 -pady 10 -side right" );
 	cmd( "bind .mm <Escape> {destroytop .mm}" );
 
@@ -5061,6 +5166,6 @@ void signal_handler( int signum )
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
 	sprintf( msg2, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
-	Tcl_Exit( -signum );			// abort program
+	Tcl_Finalize( );
+	exit( -signum );				// abort program
 }
-

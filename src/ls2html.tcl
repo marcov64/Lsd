@@ -17,11 +17,11 @@
 proc LsdExit { } {
 	global RootLsd
 	if { [ file exists $RootLsd/Manual/temp.html ] } { 
-		file delete $RootLsd/Manual/temp.html
+		file delete -force $RootLsd/Manual/temp.html
 	}
 	
 	if { [ file exists temp.html ] } { 
-		file delete temp.html
+		file delete -force temp.html
 	}	
 }
 

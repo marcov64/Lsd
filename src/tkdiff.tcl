@@ -5792,7 +5792,7 @@ proc newDiffDialog {} {
         # here are the buttons for this dialog...
         set commands [frame $w(newDiffPopup).buttons]
 
-        button $commands.ok -text "Ok" -width 5 -default active -command {
+        button $commands.ok -text "OK" -width 5 -default active -command {
             if {$g(mergefile) == ""} {
                 set g(mergefileset) 0
             } else {
@@ -6397,7 +6397,7 @@ You may also select any highlighted diff region as the current diff region by \
 1. From the <btn>File</btn> menu:
 
 The <btn>New...</btn> button displays a dialog where you may choose two files \
-      to compare. Selecting "Ok" from the dialog will diff the two files. The \
+      to compare. Selecting "OK" from the dialog will diff the two files. The \
       <btn>Recompute Diffs</btn> button recomputes the\
       differences between the two files whose names appear at the top of the \
       <itl>$g(name)</itl> window. The <btn>Write Report...</btn> lets you \

@@ -1069,9 +1069,9 @@ cmd( "text .sens.t -undo 1 -height 12 -width 60 -font \"$font_normal\"" );
 cmd( "pack .sens.t" ); 
 
 cmd( "frame .sens.fb" );
-cmd( "button .sens.fb.paste -width -9 -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
-cmd( "button .sens.fb.del -width -9 -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
-cmd( "button .sens.fb.rem -width -9 -text \"Remove from Analysis\" -command {set choice 3}" );
+cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
+cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
+cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command {set choice 3}" );
 cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
 cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
 cmd( "pack .sens.fb" );

@@ -80,6 +80,13 @@ void cmd( const char *cm, ... )
 {
 	char message[ TCL_BUFF_STR ];
 	
+	// abort if Tcl interpreter not initialized
+	if ( inter == NULL )
+	{
+		printf( "\nTcl interpreter not initialized. Quitting Lsd now.\n" );
+		myexit( 24 );
+	}
+	
 #ifdef PARALLEL_MODE
 	// abort if not running in main Lsd thread
 	if ( this_thread::get_id( ) != main_thread )
@@ -91,7 +98,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'Ok'.\"" );
+			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'OK'.\"" );
 		myexit( 24 );
 	}
 
@@ -136,6 +143,11 @@ void log_tcl_error( const char *cm, const char *message )
 		sprintf( fname, "Lsd.err" );
 
 	f = fopen( fname,"a" );
+	if ( f == NULL )
+	{
+		plog( "\nCannot write log file to disk. Check write permissions\n" );
+		return;
+	}
 
 	time( &rawtime );
 	timeinfo = localtime( &rawtime );
@@ -2394,7 +2406,7 @@ char lab[MAX_PATH_LENGTH];
 f=fopen("model_options.txt", "r");
 if(f==NULL)
  {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"" );
+  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
   return;
  }
 fscanf(f, "%499s", lab);
@@ -2402,7 +2414,7 @@ for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF &
 fclose(f);
 if(strncmp(lab, "FUN=", 4)!=0)
  {
-  cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model.\"" );
+  cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
   return;
  }
 

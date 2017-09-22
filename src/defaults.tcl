@@ -9,7 +9,7 @@
 # 
 # Comments and bug reports to marco.valente@univaq.it
 # ****************************************************
-
+# ****************************************************
 
 # ****************************************************
 # Default values for the Tk windowing system. 
@@ -79,6 +79,12 @@ set vsizeN		550	; # objects numbers editor vertical size in pixels
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
+
+# OS specific default window buttons widths
+set butLinux	9
+set butMacTk85	7
+set butMacTk86	8
+set butWindows	9
 
 # OS specific screen location offset adjustments
 set corrXmac	0

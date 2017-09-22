@@ -126,8 +126,8 @@ while(*choice==0)
   cmd( "frame .ini.f" );
   cmd( "label .ini.f.tmd -text \"Show level:\"" );
   cmd( "label .ini.f.emd -width 2 -fg red -text \"$max_depth \"" );
-  cmd( "button .ini.f.mn -width -2 -text \"-\" -command { if { $max_depth > 1 } { incr max_depth -1; set choice 4 } }" );
-  cmd( "button .ini.f.pl -width -2 -text \"+\" -command { if { %d } { incr max_depth; set choice 4 } }", hid_level );
+  cmd( "button .ini.f.mn -width 2 -text \"-\" -command { if { $max_depth > 1 } { incr max_depth -1; set choice 4 } }" );
+  cmd( "button .ini.f.pl -width 2 -text \"+\" -command { if { %d } { incr max_depth; set choice 4 } }", hid_level );
   cmd( "pack .ini.f.tmd .ini.f.emd .ini.f.mn .ini.f.pl -side left" );
 
   cmd( "pack .ini.f -anchor e -padx 10 -pady 5" );
@@ -456,7 +456,7 @@ cmd( "pack $n.e.l $n.e.e -side left -padx 2" );
 cmd( "frame $n.cp" );
 cmd( "label $n.cp.l -text \"Copy from instance\"" );
 cmd( "entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
-cmd( "button $n.cp.compute -width -7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
+cmd( "button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
 cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left -padx 2" );
 
 cmd( "frame $n.ef" );
@@ -634,8 +634,8 @@ cmd( "pack $d.t.txt1 $d.t.txt2 $d.t.txt3" );
 cmd( "pack $d.l $d.t -padx 5 -pady 5" );
 
 cmd( "frame $d.b" );
-cmd( "button $d.b.last -width -9 -text Last -command {set choice 1}" );
-cmd( "button $d.b.choose -width -9 -text Choose -command {set choice 2}" );
+cmd( "button $d.b.last -width $butWid -text Last -command {set choice 1}" );
+cmd( "button $d.b.choose -width $butWid -text Choose -command {set choice 2}" );
 cmd( "pack $d.b.last $d.b.choose -padx 10 -side left" );
 cmd( "pack $d.b" );
 

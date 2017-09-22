@@ -140,18 +140,18 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "frame .deb.b.move" );
 	cmd( "frame .deb.b.act" );
 
-	cmd( "button .deb.b.move.up -width -9 -text \"Up\" -command {set choice 3} -underline 0" );
-	cmd( "button .deb.b.move.down -width -9 -text \"Down\" -command {set choice 6} -underline 0" );
-	cmd( "button .deb.b.move.prev -width -9 -text \"Prev.\" -command {set choice 12} -underline 0" );
-	cmd( "button .deb.b.move.broth -width -9 -text \"Next\" -command {set choice 4} -underline 0" );
-	cmd( "button .deb.b.move.hypern -width -9 -text \"Next Type\" -command {set choice 5} -underline 5" );
-	cmd( "button .deb.b.move.last -width -9 -text \"Last\" -command {set choice 14} -underline 0" );
-	cmd( "button .deb.b.move.search -width -9 -text \"Find\" -command {set choice 10} -underline 0" );
+	cmd( "button .deb.b.move.up -width $butWid -text \"Up\" -command {set choice 3} -underline 0" );
+	cmd( "button .deb.b.move.down -width $butWid -text \"Down\" -command {set choice 6} -underline 0" );
+	cmd( "button .deb.b.move.prev -width $butWid -text \"Prev.\" -command {set choice 12} -underline 0" );
+	cmd( "button .deb.b.move.broth -width $butWid -text \"Next\" -command {set choice 4} -underline 0" );
+	cmd( "button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command {set choice 5} -underline 5" );
+	cmd( "button .deb.b.move.last -width $butWid -text \"Last\" -command {set choice 14} -underline 0" );
+	cmd( "button .deb.b.move.search -width $butWid -text \"Find\" -command {set choice 10} -underline 0" );
 	
 	if ( mode == 3 )
 	{
-		cmd( "button .deb.b.move.run -width -9 -text Resume -command {set choice 2} -underline 0" );
-		cmd( "button .deb.b.move.an -width -9 -text Analysis -command {set choice 11} -underline 0" );
+		cmd( "button .deb.b.move.run -width $butWid -text Resume -command {set choice 2} -underline 0" );
+		cmd( "button .deb.b.move.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
 		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.an .deb.b.move.run -padx 8 -pady 10 -side left -expand no -fill none" );
 
 		cmd( "bind .deb <KeyPress-r> {.deb.b.move.run invoke}; bind .deb <KeyPress-R> {.deb.b.move.run invoke}" );
@@ -163,15 +163,15 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	if ( mode == 1 )
 	{
 		cmd( "set stack_flag %d",stackinfo_flag );
-		cmd( "button .deb.b.act.run -width -9 -text Run -command {set choice 2} -underline 0" );
-		cmd( "button .deb.b.act.until -width -9 -text Until -command {set choice 16} -underline 3" );
-		cmd( "button .deb.b.act.ok -width -9 -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
-		cmd( "button .deb.b.act.an -width -9 -text Analysis -command {set choice 11} -underline 0" );
-		cmd( "button .deb.b.act.net -width -9 -text Network -command {set choice 22} -underline 3" );
-		cmd( "button .deb.b.act.call -width -9 -text Caller -command {set choice 9} -underline 0" );
-		cmd( "button .deb.b.act.hook -width -9 -text Hook -command {set choice 21} -underline 0" );
-		cmd( "button .deb.b.act.prn_v -width -9 -text \"v\\\[...\\]\" -command {set choice 15}" );
-		cmd( "button .deb.b.act.prn_stck -width -9 -text \"Print Stack\" -command {set choice 13}" );
+		cmd( "button .deb.b.act.run -width $butWid -text Run -command {set choice 2} -underline 0" );
+		cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16} -underline 3" );
+		cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
+		cmd( "button .deb.b.act.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
+		cmd( "button .deb.b.act.net -width $butWid -text Network -command {set choice 22} -underline 3" );
+		cmd( "button .deb.b.act.call -width $butWid -text Caller -command {set choice 9} -underline 0" );
+		cmd( "button .deb.b.act.hook -width $butWid -text Hook -command {set choice 21} -underline 0" );
+		cmd( "button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command {set choice 15}" );
+		cmd( "button .deb.b.act.prn_stck -width $butWid -text \"Print Stack\" -command {set choice 13}" );
 		cmd( "frame .deb.b.act.stack" );
 		cmd( "label .deb.b.act.stack.l -text \"Print stack level\"" );
 		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
@@ -663,7 +663,7 @@ case 7:
 
 if ( mode == 1 )
  {
- cmd( "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'Ok' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
+ cmd( "set answer [ tk_messageBox -parent .deb -type okcancel -default cancel -icon warning -title Warning -message \"Stop simulation\" -detail \"Quitting the simulation run.\nPress 'OK' to confirm.\" ]; if [ string equal -nocase $answer ok ] { set choice 0 } { set choice 1 }" );
  } 
 else
  choice=0; 
@@ -780,9 +780,9 @@ else
 	cmd( "pack $e.v $e.d -pady 5 -padx 5" );	
 
 	cmd( "frame $e.b1" );
-	cmd( "button $e.b1.eq -width -9 -text Equation -command {set choice 8}" );
-	cmd( "button $e.b1.cond -width -9 -text \"Set Break\" -command {set choice 7}" );
-	cmd( "button $e.b1.exec -width -9 -text Update -command {set choice 9}" );
+	cmd( "button $e.b1.eq -width $butWid -text Equation -command {set choice 8}" );
+	cmd( "button $e.b1.cond -width $butWid -text \"Set Break\" -command {set choice 7}" );
+	cmd( "button $e.b1.exec -width $butWid -text Update -command {set choice 9}" );
 	cmd( "pack $e.b1.eq $e.b1.cond $e.b1.exec -padx 10 -side left" );
 	cmd( "pack $e.b1" );	
 }

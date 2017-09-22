@@ -9,6 +9,7 @@
 # 
 # Comments and bug reports to marco.valente@univaq.it
 # ****************************************************
+# ****************************************************
 
 
 # ****************************************************
@@ -51,23 +52,24 @@ if [ info exists alignMode ] {
 # list of windows with predefined sizes & positions
 set wndLst [ list .lsd .lmm .log .str ]
 
-# register static special configurations
+# register static special, OS-dependent configurations
 if [ string equal $tcl_platform(platform) unix ] {
 	if [ string equal $tcl_platform(os) Darwin ] {
+		if [ string equal [ info tclversion ] 8.6 ] {		
+			set butWid $butMacTk86
+		} {
+			set butWid $butMacTk85
+		}
 		set corrX $corrXmac
-	} {
-		set corrX $corrXlinux
-	}
-} {
-	set corrX $corrXwindows
-}
-if [ string equal $tcl_platform(platform) unix ] {
-	if [ string equal $tcl_platform(os) Darwin ] {
 		set corrY $corrYmac
 	} {
+		set butWid $butLinux
+		set corrX $corrXlinux
 		set corrY $corrYlinux
 	}
 } {
+	set butWid $butWindows
+	set corrX $corrXwindows
 	set corrY $corrYwindows
 }
 
@@ -429,13 +431,19 @@ proc icontop { w { type lsd } } {
 		} {
 			wm iconbitmap $w $RootLsd/$LsdSrc/icons/$type.ico
 		}
-	} {
-		if [ string equal $w . ] {
-			wm iconphoto $w -default ${type}Img
-			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+	} 
+	
+	if { $tcl_platform(platform) == "unix" } { 
+		if { $tcl_platform(os) == "Darwin" } {
+			
 		} {
-			wm iconphoto $w ${type}Img
-			wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+			if [ string equal $w . ] {
+				wm iconphoto $w -default ${type}Img
+				wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+			} {
+				wm iconphoto $w ${type}Img
+				wm iconbitmap $w @$RootLsd/$LsdSrc/icons/$type.xbm
+			}
 		}
 	}
 }
@@ -547,10 +555,11 @@ proc gety { w pos } {
 
 # procedures to create standard button sets
 proc okhelpcancel { w fr comOk comHelp comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.help -width -9 -text Help -command $comHelp
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
@@ -560,9 +569,10 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 }
 
 proc okhelp { w fr comOk comHelp } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.help -width -9 -text Help -command $comHelp
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
@@ -571,9 +581,10 @@ proc okhelp { w fr comOk comHelp } {
 }
 
 proc okcancel { w fr comOk comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
@@ -582,9 +593,10 @@ proc okcancel { w fr comOk comCancel } {
 }
 
 proc helpcancel { w fr comHelp comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.help -width -9 -text Help -command $comHelp
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
@@ -593,8 +605,9 @@ proc helpcancel { w fr comHelp comCancel } {
 }
 
 proc ok { w fr comOk } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
@@ -602,9 +615,15 @@ proc ok { w fr comOk } {
 }
 
 proc Xcancel { w fr nameX comX comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text $nameX -command $comX
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	button $w.$fr.ok -width $Xwid -text $nameX -command $comX
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
@@ -613,10 +632,16 @@ proc Xcancel { w fr nameX comX comCancel } {
 }
 
 proc okXcancel { w fr nameX comX comOk comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.x -width -9 -text $nameX -command $comX
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.x -width $Xwid -text $nameX -command $comX
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
@@ -626,11 +651,17 @@ proc okXcancel { w fr nameX comX comOk comCancel } {
 }
 
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.x -width -9 -text $nameX -command $comX
-	button $w.$fr.help -width -9 -text Help -command $comHelp
-	button $w.$fr.can -width -9 -text Cancel -command $comCancel
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	button $w.$fr.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.x -width $Xwid -text $nameX -command $comX
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
@@ -641,14 +672,25 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 }
 
 proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
+	if { [ string length "$nameX" ] > $butWid } { 
+		set Xwid [ string length "$nameX" ] 
+	} else {
+		set Xwid $butWid 
+	}
+	if { [ string length "$nameY" ] > $butWid } { 
+		set Ywid [ string length "$nameY" ] 
+	} else {
+		set Ywid $butWid 
+	}
 	frame $w.$fr.r1
-	button $w.$fr.r1.x -width -9 -text $nameX -command $comX
-	button $w.$fr.r1.y -width -9 -text $nameY -command $comY
+	button $w.$fr.r1.x -width $Xwid -text $nameX -command $comX
+	button $w.$fr.r1.y -width $Ywid -text $nameY -command $comY
 	frame $w.$fr.r2
-	button $w.$fr.r2.ok -width -9 -text Ok -command $comOk
-	button $w.$fr.r2.help -width -9 -text Help -command $comHelp
-	button $w.$fr.r2.can -width -9 -text Cancel -command $comCancel
+	button $w.$fr.r2.ok -width $butWid -text OK -command $comOk
+	button $w.$fr.r2.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.r2.can -width $butWid -text Cancel -command $comCancel
 	bind $w.$fr.r1.x <KeyPress-Return> "$w.$fr.r1.x invoke"
 	bind $w.$fr.r1.y <KeyPress-Return> "$w.$fr.r1.y invoke"
 	bind $w.$fr.r2.ok <KeyPress-Return> "$w.$fr.r2.ok invoke"
@@ -663,9 +705,10 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 }
 
 proc donehelp { w fr comDone comHelp } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Done -command $comDone
-	button $w.$fr.help -width -9 -text Help -command $comHelp
+	button $w.$fr.ok -width $butWid -text Done -command $comDone
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
@@ -674,8 +717,9 @@ proc donehelp { w fr comDone comHelp } {
 }
 
 proc done { w fr comDone } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Done -command $comDone
+	button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
@@ -683,10 +727,11 @@ proc done { w fr comDone } {
 }
 
 proc comphelpdone { w fr comComp comHelp comDone } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.com -width -9 -text Compute -command $comComp
-	button $w.$fr.help -width -9 -text Help -command $comHelp
-	button $w.$fr.ok -width -9 -text Done -command $comDone
+	button $w.$fr.com -width $butWid -text Compute -command $comComp
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
+	button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.com <KeyPress-Return> "$w.$fr.com invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
@@ -696,9 +741,10 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 }
 
 proc finddone { w fr comFind comDone } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.search -width -9 -text Find -command $comFind
-	button $w.$fr.ok -width -9 -text Done -command $comDone
+	button $w.$fr.search -width $butWid -text Find -command $comFind
+	button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
@@ -707,8 +753,9 @@ proc finddone { w fr comFind comDone } {
 }
 
 proc save { w fr comSave } {
+	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	button $w.$fr.ok -width -9 -text Save -command $comSave
+	button $w.$fr.ok -width $butWid -text Save -command $comSave
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	pack $w.$fr.ok -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
@@ -790,10 +837,10 @@ proc mouse_wheel { w } {
 	global tcl_platform sfmwheel winmwscale
 	
 	if [ string equal $tcl_platform(platform) windows ] {
-		bind $w <MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W yview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Shift-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Control-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
-		bind $w <Alt-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ] }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W yview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Shift-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Control-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
+		bind $w <Alt-MouseWheel> { if { [ expr abs( %D ) ] < $winmwscale } { set winmwscale [ expr abs( %D ) ]; if { $winmwscale <= 0 } { set winmwscale 1 } }; %W xview scroll [ expr -1 * $sfmwheel * %D / $winmwscale ] units }
 	} {
 		if [ string equal $tcl_platform(os) Darwin ] {
 			bind $w <MouseWheel> { %W yview scroll [ expr -1 * $sfmwheel * %D ] units }

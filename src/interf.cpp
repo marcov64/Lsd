@@ -509,13 +509,13 @@ cmd( "frame .l.p -relief groove -bd 2" );
 
 cmd( "frame .l.p.up_name" );
 cmd( "label .l.p.up_name.d -text \"Parent Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \"" );
+strcpy( ch, "button .l.p.up_name.n -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
 if( r->up==NULL )
-  strcat( ch, "(none)\" -command { }" );
+  strcat( ch, "(none) \" -command { }" );
 else
  {
   strcat( ch, ( r->up )->label );
-  strcat( ch, "\" -command { set itemfocus 0; set choice 5 } -foreground red" );
+  strcat( ch, " \" -command { set itemfocus 0; set choice 5 } -foreground red" );
  }
 cmd( ch );
 
@@ -528,12 +528,12 @@ cmd( "pack .l.p.up_name -padx 9 -anchor w" );
 
 cmd( "frame .l.p.tit" );
 cmd( "label .l.p.tit.lab -text \"Current Object:\" -width 12 -anchor w" );
-strcpy( ch, "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text " );
+strcpy( ch, "button .l.p.tit.but -foreground red -relief $bRlf -overrelief $ovBrlf -anchor e -text \" " );
 strcat(ch, r->label);
 if(r->up!=NULL) 
- strcat( ch, " -command { set choice 6 }" );
+ strcat( ch, " \" -command { set choice 6 }" );
 else
- strcat( ch, " -command { }" );
+ strcat( ch, " \" -command { }" );
 cmd( ch );
 
 cmd( "bind .l.p.tit.but <Enter> {set ttip \"Change...\"}" );
@@ -1182,7 +1182,7 @@ Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
 if(r->up==NULL)
  {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'Ok' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -title Error -icon error -message \"Cannot insert a parent of Root\" -detail \"Press 'OK' if you want the new object to be a descendant of Root and contain all current descendants from Root.\" ]; if [ string equal -nocase $answer ok ] { set done 1 } { set done 2 }" );
   if ( done == 2 )
 	goto here_endparent;
   done=0;
@@ -1380,8 +1380,8 @@ cmd( "label $T.h.ent_var -fg red -text $lab" );
 cmd( "pack $T.h.lab_ent $T.h.ent_var -side left -padx 2" );
 
 cmd( "frame $T.b0" );
-cmd( "button $T.b0.prop -width -9 -text Rename -command {set choice 5} -underline 0" );
-cmd( "button $T.b0.del -width -9 -text Delete -command {set choice 3} -underline 0" );
+cmd( "button $T.b0.prop -width $butWid -text Rename -command {set choice 5} -underline 0" );
+cmd( "button $T.b0.del -width $butWid -text Delete -command {set choice 3} -underline 0" );
 cmd( "pack $T.b0.prop $T.b0.del -padx 10 -side left" );
 
 cmd( "frame $T.b1" );
@@ -1642,9 +1642,9 @@ cmd( "pack $T.h.o.l $T.h.o.obj -side left -padx 2" );
 cmd( "pack $T.h.l $T.h.o" );
 
 cmd( "frame $T.b0" );
-cmd( "button $T.b0.prop -width -9 -text Properties -command {set done 5} -underline 1" );
-cmd( "button $T.b0.mov -width -9 -text Move -command {set done 13} -underline 0" );
-cmd( "button $T.b0.del -width -9 -text Delete -command {set done 10} -underline 2" );
+cmd( "button $T.b0.prop -width $butWid -text Properties -command {set done 5} -underline 1" );
+cmd( "button $T.b0.mov -width $butWid -text Move -command {set done 13} -underline 0" );
+cmd( "button $T.b0.del -width $butWid -text Delete -command {set done 10} -underline 2" );
 cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx 10 -side left" );
 
 cmd( "frame $T.b1" );
@@ -1675,7 +1675,7 @@ cmd( "set Td $T.desc" );
 cmd( "frame $Td" );
 
 cmd( "frame $Td.opt" );
-cmd( "label $Td.opt.l -text \"Include element in model documentation to be\"" );
+cmd( "label $Td.opt.l -text \"Include in documentation to be\"" );
 cmd( "checkbutton $Td.opt.ini -text \"Initialized\" -variable initial -underline 0" ); 
 cmd( "checkbutton $Td.opt.obs -text \"Observed\" -variable observe -underline 0" );
 if(cv->param==1 || cv->num_lag>0)
@@ -1703,15 +1703,15 @@ for(i=0; cur_descr->text[i]!='\0'; i++)
 cmd( "$Td.f.text delete \"end - 1 char\"" );
 
 cmd( "frame $Td.b" );
-cmd( "button $Td.b.eq -width -9 -text \"View Code\" -command {set done 3} -underline 3" );
-cmd( "button $Td.b.auto_doc -width -9 -text \"Auto Desc.\" -command {set done 9} -underline 0" );
-cmd( "button $Td.b.us -width -9 -text \"Using Element\" -command {set done 4} -underline 0" );
-cmd( "button $Td.b.using -width -9 -text \"Elements Used\" -command {set done 7} -underline 0" );
+cmd( "button $Td.b.eq -width [ expr $butWid + 3 ] -text \"View Code\" -command {set done 3} -underline 3" );
+cmd( "button $Td.b.auto_doc -width [ expr $butWid + 3 ] -text \"Auto Descr.\" -command {set done 9} -underline 0" );
+cmd( "button $Td.b.us -width [ expr $butWid + 3 ] -text \"Using Element\" -command {set done 4} -underline 0" );
+cmd( "button $Td.b.using -width [ expr $butWid + 3 ] -text \"Elements Used\" -command {set done 7} -underline 0" );
 if(!strcmp(cur_descr->type, "Parameter"))
   cmd( "pack $Td.b.auto_doc $Td.b.us -padx 10 -side left" );
 else
 {
-  cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx 10 -side left" );
+  cmd( "pack $Td.b.eq $Td.b.auto_doc $Td.b.us $Td.b.using -padx 5 -side left" );
   cmd( "bind $T <Control-w> \"$Td.b.eq invoke\"; bind $T <Control-W> \"$Td.b.eq invoke\"" );
   cmd( "bind $T <Control-e> \"$Td.b.using invoke\"; bind $T <Control-E> \"$Td.b.using invoke\"" );
 }
@@ -1736,8 +1736,8 @@ if(cv->param==1 || cv->num_lag>0)
   cmd( "pack $Td.i.int $Td.i.text -anchor w -expand yes -fill both" );
   
   cmd( "frame $Td.b2" );
-  cmd( "button $Td.b2.setall -width -9 -text \"Initial Values\" -command {set done 11} -underline 1" );
-  cmd( "button $Td.b2.sens -width -9 -text \"Sensitivity Analysis\" -command {set done 12} -underline 5" );
+  cmd( "button $Td.b2.setall -width [ expr $butWid + 3 ] -text \"Initial Values\" -command {set done 11} -underline 1" );
+  cmd( "button $Td.b2.sens -width [ expr $butWid + 3 ] -text \"Sensitivity\" -command {set done 12} -underline 5" );
   cmd( "pack $Td.b2.setall $Td.b2.sens -padx 10 -side left" );
     
   cmd( "pack $Td.opt $Td.f $Td.b $Td.i $Td.b2 -pady 5" );
@@ -2343,7 +2343,7 @@ if ( i == 0 )
 // warn missing debugger
 if ( search_parallel( root ) && ( when_debug > 0 || stackinfo_flag > 0 || prof_aggr_time ) )
 {
-	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'Ok' to proceed and ignore debugging/profiling settings or 'Cancel' to return to Lsd Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
+	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'OK' to proceed and ignore debugging/profiling settings or 'Cancel' to return to Lsd Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
 	if( *choice == 2 )
 	{
 		*choice=0;
@@ -2470,7 +2470,7 @@ set_blueprint(blueprint, n);
 if ( overwConf )				// save if needed
 	if ( ! save_configuration( r ) )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
+		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
 		if( *choice == 2 )
 		{
 			*choice=0;
@@ -2624,7 +2624,7 @@ Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
 if(actual_steps>0)
 { 
-	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'Ok' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
+	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
 
    if(done==2)
 	{
@@ -3197,7 +3197,7 @@ cmd( "pack $T.e.e $T.e.l" );
 cmd( "frame $T.cp" );
 cmd( "label $T.cp.l -text \"Copy from instance\"" );
 cmd( "entry $T.cp.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
-cmd( "button $T.cp.compute -width -7 -text Compute -command { set choice 3 }" );
+cmd( "button $T.cp.compute -width 7 -text Compute -command { set choice 3 }" );
 cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
 cmd( "pack $T.l $T.e $T.cp -pady 5 -padx 5" );
@@ -3453,7 +3453,7 @@ sprintf(name_rep, "report_%s.html", simul_name);
 cmd( "set choice [file exists %s]", name_rep );
 if(*choice == 0)
  {
-  cmd( "set answer [tk_messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'Ok' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]" );
+  cmd( "set answer [tk_messageBox -parent . -message \"Model report not found\" -detail \"You may create a model report file from menu Model or press 'OK' to look for another HTML file.\" -type okcancel -title Warning -icon warning -default cancel]" );
   cmd( "if {[string compare $answer ok] == 0} {set choice 0} {set choice 1}" );
  if(*choice == 1)
   break;
@@ -3621,7 +3621,7 @@ if( !strcmp(eq_file, lsd_eq_file) )
  break;
  }
 
-cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'Ok' to confirm.\" -type okcancel -default ok]" );
+cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'OK' to confirm.\" -type okcancel -default ok]" );
 cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
  if(*choice == 0)
   break;
@@ -4432,7 +4432,7 @@ case 64:
 	// check for existing sensitivity data loaded
 	if (rsense!=NULL) 
 	{
-		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'Ok' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}" );
+		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}" );
 		if(*choice == 2)
 			break;
 		
@@ -5083,7 +5083,7 @@ case 69:
 	if ( overwConf )				// save if needed
 		if ( ! save_configuration( r ) )
 		{
-			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'Ok' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
+			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
 			if( *choice == 2 )
 			{
 				*choice=0;
@@ -5763,7 +5763,7 @@ SENSITIVITY_TOO_LARGE
 ****************************************************/
 void sensitivity_too_large( void )
 {
-	cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'Ok' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
+	cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default cancel -title Warning -message \"Too many cases to perform sensitivity analysis\" -detail \"The required number of configuration points to perform sensitivity analysis is likely too large to be processed in reasonable time.\n\nPress 'OK' if you want to continue anyway or 'Cancel' to abort the command now.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 0}}" );
 }
 
 
@@ -5879,7 +5879,7 @@ bool discard_change( bool checkSense, bool senseOnly )
 	// don't stop if simulation is runnig
 	if ( running )
 	{
-		cmd( "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit Lsd\" -detail \"Cannot quit while simulation is running. Press 'Ok' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
+		cmd( "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit Lsd\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
 		return false;
 	}
 	// nothing to save?

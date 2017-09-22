@@ -1,3 +1,16 @@
+#****************************************************
+#****************************************************
+#LSD 7.0 - August 2015
+#written by Marco Valente
+#Universita' dell'Aquila
+#
+#Copyright Marco Valente
+#Lsd is distributed according to the GNU Public License
+#
+#Comments and bug reports to marco.valente@univaq.it
+#****************************************************
+#****************************************************
+
 ####################################################
 # Tcl script used to browse in the Lsd models 
 # the script starts from the Lsd root and reads
