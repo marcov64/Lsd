@@ -157,8 +157,6 @@ cur_plot=0;
 file_counter=0;
 *choice=0;
 
-cmd( "set daCwidth 36" );				     	// lists width (even number)
-
 cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
 
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
@@ -198,12 +196,15 @@ cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent .d
 
 cmd( ".da configure -menu .da.m" );
 
+// adjust horizontal text space usage
+cmd( "if { $tcl_platform(os) == \"Windows NT\" } { set pad -3 } { if { $tcl_platform(os) == \"Darwin\" } { set pad 1 } { set pad 2 } }" );
+
 cmd( "set f .da.head" );
 cmd( "frame $f" );
-cmd( "label $f.lb -width [ expr $daCwidth - 3 ] -text \"Series Available\"" );
+cmd( "label $f.lb -width [ expr $daCwid + $pad ] -text \"Series Available\"" );
 cmd( "label $f.pad -width 6" );
-cmd( "label $f.ch -width [ expr $daCwidth - 3 ] -text \"Series Selected\"" );
-cmd( "label $f.pl -width [ expr $daCwidth - 3 ] -text \"Plots\"" );
+cmd( "label $f.ch -width [ expr $daCwid + $pad ] -text \"Series Selected\"" );
+cmd( "label $f.pl -width [ expr $daCwid + $pad ] -text \"Plots\"" );
 cmd( "pack $f.lb $f.pad $f.ch $f.pl -side left" );
 cmd( "pack $f" );
 
@@ -212,7 +213,7 @@ cmd( "frame .da.vars" );
 cmd( "set f .da.vars.lb" );
 cmd( "frame $f" );
 cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"" );
+cmd( "listbox $f.v -selectmode extended -width $daCwid -yscroll \"$f.v_scroll set\"" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
 cmd( "mouse_wheel $f.v" );
@@ -228,7 +229,7 @@ cmd( "bind $f.v <Shift-Button-3> { event generate .da.vars.lb.v <Shift-Button-2>
 cmd( "set f .da.vars.ch" );
 cmd( "frame $f" );
 cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "listbox $f.v -selectmode extended -width $daCwidth -yscroll \"$f.v_scroll set\"" );
+cmd( "listbox $f.v -selectmode extended -width $daCwid -yscroll \"$f.v_scroll set\"" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
 cmd( "mouse_wheel $f.v" );
@@ -242,7 +243,7 @@ cmd( "bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice
 cmd( "set f .da.vars.pl" );
 cmd( "frame $f" );
 cmd( "scrollbar $f.v_scroll -command \"$f.v yview\"" );
-cmd( "listbox $f.v -width $daCwidth -yscroll \"$f.v_scroll set\" -selectmode single" );
+cmd( "listbox $f.v -width $daCwid -yscroll \"$f.v_scroll set\" -selectmode single" );
 cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 
 cmd( "mouse_wheel $f.v" );
@@ -269,11 +270,11 @@ cmd( "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left  -expand tr
 cmd( "pack .da.vars -expand true -fill y" );
 
 cmd( "frame .da.com" );
-cmd( "label .da.com.nvar -text \"Series = %d\" -width [ expr [ expr $daCwidth - 4 ] / 2 ]", num_var  );
-cmd( "label .da.com.ncas -text \"Cases = %d\" -width [ expr [ expr $daCwidth - 4 ] / 2 ]", num_c  );
+cmd( "label .da.com.nvar -text \"Series = %d\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ]", num_var  );
+cmd( "label .da.com.ncas -text \"Cases = %d\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ]", num_c  );
 cmd( "label .da.com.pad -width 6" );
-cmd( "label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ expr $daCwidth - 3 ]" );
-cmd( "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwidth - 3 ]" );
+cmd( "label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ expr $daCwid + $pad ]" );
+cmd( "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwid + $pad ]" );
 cmd( "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -side left" );
 cmd( "pack .da.com" );
 
@@ -7783,6 +7784,10 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		cmd( "set datWid 26; if { $tcl_platform(os) == \"Windows NT\" } { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	else
 		cmd( "set datWid 20; if { $tcl_platform(os) == \"Windows NT\" } { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
+	
+	// adjust vertical text adjustment
+	cmd( "if { $tcl_platform(os) == \"Darwin\" } { set pad3 3 } { set pad3 -3 }" );
+	
 
 	cmd( "frame $w.b.c.case" );
 	cmd( "label $w.b.c.case.l -text \"%s:\" -width 11 -anchor e", txtCase );
@@ -7854,17 +7859,17 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	{
 		case TSERIES:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d %d -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight - 3, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
+				cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor n -text %d -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, min_c + ( int ) floor( i * ( double ) ( max_c - min_c ) / ( hticks + 1 ) ) );
 			break;
 			
 		case CRSSECT:
-			cmd( "$p create text %d %d -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight - 3, nv );
+			cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor nw -text \"%d series\" -tag { p text }", hbordsize, vsize + lheight, nv );
 			break;
 			
 		case HISTOGR:
 		case HISTOCS:
 			for ( i = 0; i < hticks + 2; ++i )
-				cmd( "$p create text %d %d -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight - 3, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
+				cmd( "$p create text %d [ expr %d + $pad3 ] -font $fontP -anchor n -text %.*g -tag { p text }", hbordsize + ( int ) round( i * ( double ) hsize / ( hticks + 1 ) ), vsize + lheight, pdigits, bins[ 0 ].lowb + i * ( bins[ num_bins - 1 ].highb - bins[ 0 ].lowb ) / ( hticks + 1 ) );
 			break;			
 	}
 

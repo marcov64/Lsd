@@ -76,12 +76,17 @@ set vsizeI		600	; # initial values editor vertical size in pixels
 set hsizeN 		350	; # objects numbers editor horizontal size in pixels
 set vsizeN		550	; # objects numbers editor vertical size in pixels
 
+# analysis window sizes (must be even numbers)
+set daCwidLinux		28	; # series lists width (Linux)
+set daCwidMac		28	; # Mac
+set daCwidWindows	36	; # Windows
+
 # mouse wheel scroll factor (sensitivity)
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
 # OS specific default window buttons widths
-set butLinux	9
+set butLinux	7
 set butMacTk85	7
 set butMacTk86	8
 set butWindows	9

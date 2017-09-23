@@ -60,15 +60,18 @@ if [ string equal $tcl_platform(platform) unix ] {
 		} {
 			set butWid $butMacTk85
 		}
+		set daCwid $daCwidMac
 		set corrX $corrXmac
 		set corrY $corrYmac
 	} {
 		set butWid $butLinux
+		set daCwid $daCwidLinux
 		set corrX $corrXlinux
 		set corrY $corrYlinux
 	}
 } {
 	set butWid $butWindows
+	set daCwid $daCwidWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
 }
