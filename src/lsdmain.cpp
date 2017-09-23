@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -119,7 +119,7 @@ char *eq_file=NULL;			// equation file content
 char *equation_name = NULL;	// equation file name
 char *exec_file = NULL;		// name of executable file
 char *exec_path = NULL;		// path of executable file
-char *lsdroot = NULL;		// path of Lsd root directory
+char *lsdroot = NULL;		// path of LSD root directory
 char *path = NULL;			// path of current configuration
 char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
@@ -149,24 +149,24 @@ int prof_obs_only = false;	// profile only observed variables
 int quit=0;					// simulation interruption mode (0=none)
 int series_saved;			// number of series saved
 int sim_num=1;				// simulation number running
-int stack;					// Lsd stack call level
-int stackinfo_flag=0;		// Lsd stack control
+int stack;					// LSD stack call level
+int stackinfo_flag=0;		// LSD stack control
 int t;						// current time step
 int total_obj=0;			// total objects in model
 int total_var=0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 0;		// network node's serial number global counter
-lsdstack *stacklog = NULL;	// Lsd stack
-object *blueprint = NULL;	// Lsd blueprint (effective model in use)
-object *root = NULL;		// Lsd root object
-sense *rsense = NULL;		// Lsd sensitivity analysis structure
-variable *cemetery = NULL;	// Lsd saved data series (from last simulation run)
+lsdstack *stacklog = NULL;	// LSD stack
+object *blueprint = NULL;	// LSD blueprint (effective model in use)
+object *root = NULL;		// LSD root object
+sense *rsense = NULL;		// LSD sensitivity analysis structure
+variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 map < string, profile > prof;	// set of saved profiling times
 
 #ifdef PARALLEL_MODE
 map< thread::id, worker * > thr_ptr;	// worker thread pointers
-thread::id main_thread;		// Lsd main thread ID
+thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
 #endif
 
@@ -216,7 +216,7 @@ fend=0;		// no file number limit
 
 if(argn<3)
 {
-  fprintf( stderr, "\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n" );
+  fprintf( stderr, "\nThis is the No Window version of LSD. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-z' for preventing the generation of compressed result file(s)\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n" );
   myexit( 1 );
 }
 else
@@ -251,7 +251,7 @@ else
  {
 	i--; 	// no parameter for this option
 	grandTotal = true;
-	printf( "Grand total file requested ('-g'), please don't run another instance of Lsd_gnuNW in this folder!\n" );
+	printf( "Grand total file requested ('-g'), please don't run another instance of 'lsd_gnuNW' in this folder!\n" );
 	continue;
  }
  if( argv[i][0] == '-' && argv[i][1] == 'z' )	// read -g parameter : don't create compressed result files
@@ -271,7 +271,7 @@ else
 	continue;
  }
   
-  fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of Lsd. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1] );
+  fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is the No Window version of LSD. Command line options:\n'-f FILENAME.lsd' to run a single configuration file\n'-f FILE_BASE_NAME -s FIRST_NUM [-e LAST_NUM]' for batch sequential mode\n'-o PATH' to save result file(s) to a different subdirectory\n'-r' for skipping the generation of intermediate result file(s)\n'-g' for the generation of a single grand total file\n'-c MAX_CORES' for defining the maximum number of CPU cores to use\n'-z' for preventing the generation of compressed result file(s)\n", argv[i][0], argv[i][1] );
   myexit( 2 );
  }
 } 
@@ -292,7 +292,7 @@ else
 f=fopen(struct_file, "r");
 if(f==NULL)
  {
-  fprintf( stderr, "\nFile %s not found.\nThis is the no window version of Lsd. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", struct_file );
+  fprintf( stderr, "\nFile %s not found.\nThis is the no window version of LSD. Specify a -f filename.lsd to run a simulation or -f simul_name -s 1 for batch sequential simulation mode (requires configuration files: simul_name_1.lsd, simul_name_2.lsd, etc).\n", struct_file );
   myexit( 3 );
  }
 fclose(f);
@@ -300,7 +300,7 @@ struct_loaded = true;
 
 if ( load_configuration( root, false ) != 0 )
 {
-	fprintf( stderr, "\nFile %s is invalid.\nThis is the no window version of Lsd. Check if the file is a valid Lsd configuration or regenerate it using the Lsd Browser.\n", struct_file );
+	fprintf( stderr, "\nFile %s is invalid.\nThis is the no window version of LSD. Check if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 	myexit( 4 );
 }
 
@@ -351,7 +351,7 @@ inter = Tcl_CreateInterp( );
 done = Tcl_Init( inter );
 if ( done != TCL_OK )
 {
-	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
 	log_tcl_error( "Create Tcl interpreter", msg );
 	myexit( 5 );
 }
@@ -365,7 +365,7 @@ Tcl_LinkVar(inter, "when_debug", (char *) &when_debug, TCL_LINK_INT);
 cmd( "set choice 1234567890" );
 if ( choice != 1234567890 )
 {
-	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall Lsd" );
+	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
 	myexit( 6 );
 }
 	
@@ -376,7 +376,7 @@ if ( done == TCL_OK )
 	cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
 if ( choice )
 {
-	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall Lsd\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
+	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall LSD\nTcl Error = %d : %s", done,  Tcl_GetStringResult( inter ) );
 	log_tcl_error( "Start Tk", msg );
 	myexit( 7 );
 }
@@ -386,8 +386,8 @@ cmd( "tk appname browser" );
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
 {
-	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
 	myexit( 8 ); 
 }
 
@@ -419,7 +419,7 @@ cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
 	}" );
 if ( choice )
 {
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLsd is aborting now.\"" );
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some model files are missing or corrupted.\nPlease recreate your model if the problem persists.\n\nLSD is aborting now.\"" );
 	log_tcl_error( "Model files check", "Required model file(s) missing or corrupted, check the model directory and recreate the model if the problem persists" );
 	myexit( 200 );
 }
@@ -450,8 +450,8 @@ cmd( "if { ! [ info exists RootLsd ] } { \
 	}" );
 if ( choice )
 {
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where Lsd is installed.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where Lsd is installed" );
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"LSDROOT not set\" -detail \"Please make sure the environment variable LSDROOT points to the directory where LSD is installed.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "LSDROOT check", "LSDROOT not set, make sure the environment variable LSDROOT points to the directory where LSD is installed" );
 	myexit( 9 );
 }
 cmd( "set env(LSDROOT) $RootLsd" );
@@ -505,17 +505,17 @@ cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $R
 
 if ( choice != 0 )
 {
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 	myexit( 200 + choice );
 }
 
 #ifdef TKCON
 // launch TkCon as an auxiliary window for debugging
-cmd( "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"Lsd is continuing with no debug console.\" } }" );
+cmd( "if [ file exists $RootLsd/$LsdSrc/tkcon.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/tkcon.tcl } ] == 0 } { package require tkcon; set tkcon::PRIV(showOnStartup) 0; set tkcon::PRIV(root) .console; set tkcon::PRIV(protocol) {tkcon hide}; set tkcon::OPT(exec) \"\"; tkcon::Init; tkcon title \"Tcl/Tk Debug Console\"; tkcon show } { tk_messageBox -parent . -type ok -icon error -title Error -message \"File 'src/tkcon.tcl' missing or corrupted\" -detail \"LSD is continuing with no debug console.\" } }" );
 #endif
 
-// create a Tcl command that calls the C discard_change function before killing Lsd
+// create a Tcl command that calls the C discard_change function before killing LSD
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
 // create Tcl commands that get and set LSD variable properties
@@ -529,13 +529,13 @@ Tcl_CreateCommand( inter, "set_c_var", Tcl_set_c_var, NULL, NULL );
 Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
 // set main window
-cmd( "wm title . \"Lsd Browser\"" );
+cmd( "wm title . \"LSD Browser\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "icontop . lsd" );
 cmd( "sizetop .lsd" );
 
-cmd( "label .l -text \"Starting Lsd\"" );
+cmd( "label .l -text \"Starting LSD\"" );
 cmd( "pack .l" );
 cmd( "update" );
 
@@ -563,7 +563,7 @@ stacklog->next = NULL;
 stacklog->prev = NULL;
 stacklog->ns = 0;
 stacklog->vs = NULL;
-strcpy( stacklog->label, "Lsd Simulation Manager" );
+strcpy( stacklog->label, "LSD Simulation Manager" );
 
 #ifndef NO_WINDOW
 
@@ -649,7 +649,7 @@ set_buttons_log( true );
 
 prof.clear( );				// reset profiling times
 
-cover_browser( "Running...", "The simulation is being executed", "Use the Lsd Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
+cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
 cmd( "wm deiconify .log; raise .log; focus .log" );
 fast = false;
 #else
@@ -676,7 +676,7 @@ if ( batch_sequential_loop )
 	if ( load_configuration( root, false ) != 0 )
 	{
 #ifndef NO_WINDOW 
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 		log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 #else
 		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );	
@@ -691,7 +691,7 @@ if ( i > 1 )
 	if ( load_configuration( root, true ) != 0 )
 	{
 #ifndef NO_WINDOW 
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if Lsd still has WRITE access to the model directory.\nLsd will close now.\"" );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 		log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
 #else
 		fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
@@ -706,7 +706,7 @@ print_title(root);
 if ( no_more_memory )
  {
 #ifndef NO_WINDOW 
- cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLsd will close now.\"", series_saved, max_step );
+ cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
  log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
 #else
  fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
@@ -1091,7 +1091,7 @@ void create_logwindow(void)
 if ( ! tk_ok )
 	myexit( 7 );
 
-cmd( "newtop .log \"Lsd Log\" { if { [ discard_change ] == \"ok\" } { exit } { } } \"\"" );
+cmd( "newtop .log \"LSD Log\" { if { [ discard_change ] == \"ok\" } { exit } { } } \"\"" );
 
 cmd( "set w .log.text" );
 cmd( "frame $w" );
@@ -1154,7 +1154,7 @@ void plog( char const *cm, char const *tag, ... )
 	va_list argptr;
 	
 #ifdef PARALLEL_MODE
-	// abort if not running in main Lsd thread
+	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
 #endif
@@ -1275,7 +1275,7 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	cmd( "newtop .t [ wm title . ]" );
 	cmd( "label .t.l1 -font {-weight bold} -text \"%s\"", text1  );
 	cmd( "label .t.l2 -text \"\n%s\"", text2  );
-	cmd( "label .t.l3 -fg red -text \"\nInteraction with the Lsd Browser is now disabled\"" );
+	cmd( "label .t.l3 -fg red -text \"\nInteraction with the LSD Browser is now disabled\"" );
 	cmd( "label .t.l4 -justify left -text \"\n%s\"", text3  );
 	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 	cmd( "showtop .t coverW no no no" );

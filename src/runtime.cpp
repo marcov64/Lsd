@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -18,7 +18,7 @@ RUN_TIME.CPP contains initialization and management of run time plotting
 The functions contained here are:
 
 - void prepare_plot(object *r, int id_sim)
-Checks is there are lsd variables to plot. If not, returns immediately. Otherwise
+Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
 initiliaze the run time globale variables. Namely, the vector of the labels for
 the variables of plot. The plot window is initialized according to the id_sim name
 
@@ -169,7 +169,7 @@ cmd( "destroytop $activeplot" );
 
 cmd( "newtop $activeplot \"\" { set_c_var done_in 5 } \"\"" );
 cmd( "wm transient $activeplot ." );
-cmd( "wm title $activeplot \"%s%s(%d) - Lsd Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
+cmd( "wm title $activeplot \"%s%s(%d) - LSD Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
 
 cmd( "bind $activeplot <s> { set_c_var done_in 1 }; bind $activeplot <S> { set_c_var done_in 1 }" );
 cmd( "bind $activeplot <f> { set_c_var done_in 2 }; bind $activeplot <F> { set_c_var done_in 2 }" );

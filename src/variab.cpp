@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -16,9 +16,9 @@ Comments and bug reports to marco.valente@univaq.it
 VARIAB.CPP
 The (C++) object variable is devoted to contain numerical values
 of the model. Only double precision floating point numbers are considered
-in Lsd.
+in LSD.
 Variables are mainly storages for information. Actually, all the work is
-done by lsd objects.
+done by LSD objects.
 The most important task of variables is to return their value when requested.
 It is done by comparing the global time of the simulation with the time
 the variable was most recently updated. If the value requested (considering the
@@ -135,7 +135,7 @@ goto end;
 
 The method is common to all the variables, so that the blocks ensure that
 only their piece of code is actually executed. Any code legal in C++ is allowed,
-including the methods and function provided with Lsd.
+including the methods and function provided with LSD.
 The value assigned to "res" is assigned as val[0] to the variable.
 The final line goto end; ensures that the equation has been computed.
 See file FUNXXX.CPP for more information on this
@@ -690,7 +690,7 @@ bool worker::check( void )
 				else
 					sprintf( msg, "a multi-threading worker crashed" );
 				
-				error_hard( msg, "Parallel computation error", "Disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
+				error_hard( msg, "Parallel computation error", "Disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
 			}
 		}
 	}
@@ -742,7 +742,7 @@ void parallel_update( variable *v, object* p, object *caller )
 	if ( nt > 0 )
 	{
 		sprintf( msg, "in object '%s' variable '%s' %d parallel worker(s) crashed", cv->up->label, cv->label, i );
-		error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
+		error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
 		return;
 	}
 				
@@ -769,7 +769,7 @@ void parallel_update( variable *v, object* p, object *caller )
 					if ( wait_time > MAX_WAIT_TIME )
 					{
 						sprintf( msg, "in object '%s' variable '%s' more than %d seconds elapsed\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-						error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
+						error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
 						return;
 					}
 				}
@@ -811,7 +811,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( i >= max_threads )
 			{
 				sprintf( msg, "in object '%s' variable '%s' a multi-threading inconsistency occurred, maybe a dead-lock state", cv->up->label, cv->label );
-				error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
+				error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
 				return;
 			}
 			else
@@ -837,7 +837,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( wait_time > MAX_WAIT_TIME )
 			{
 				sprintf( msg, "in object '%s' variable '%s' more than %d seconds elapsed\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-				error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit Lsd Browser' in the next dialog box." );
+				error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
 				return;
 			}
 		}

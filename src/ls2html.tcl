@@ -5,7 +5,7 @@
 # Universita' dell'Aquila
 # 
 # Copyright Marco Valente
-# Lsd is distributed according to the GNU Public License
+# LSD is distributed according to the GNU Public License
 # 
 # Comments and bug reports to marco.valente@univaq.it
 # ****************************************************
@@ -13,7 +13,7 @@
 
 # Collection of procedures to manage HTML and other external files
 
-# Remove existing Lsd temporary files
+# Remove existing LSD temporary files
 proc LsdExit { } {
 	global RootLsd
 	if { [ file exists $RootLsd/Manual/temp.html ] } { 
@@ -147,7 +147,7 @@ proc fn_spaces { fn { par . } } {
 	if { [ string first " " $fn ] == -1 } {
 		return false
 	} {
-		tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLsd files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
+		tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
 		return true
 	}
 }

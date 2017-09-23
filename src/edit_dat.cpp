@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -115,7 +115,7 @@ in_edit_data = true;
 while(*choice==0)
 {
 // reset title and destroy command because may be coming from set_obj_number
-cmd( "settop .ini \"%s%s - Lsd Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name  );
+cmd( "settop .ini \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name  );
 
 first=root->search(obj_name);
 
@@ -176,7 +176,7 @@ if ( colOvflw )
 	cmd( ".ini.st.err conf -text \"OBJECTS NOT SHOWN! (> %d)\" -fg red", MAX_COLS );
 	if ( ! iniShowOnce )
 	{
-		cmd( "update; tk_messageBox -parent .ini -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"Lsd Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS  );
+		cmd( "update; tk_messageBox -parent .ini -type ok -title Warning -icon warning -message \"Too many objects to edit\" -detail \"LSD Initial Values editor can show only the first %d objects' values. Please use the 'Set All' button to define values for objects beyond those.\" ", MAX_COLS  );
 		iniShowOnce = true;
 	}
 }

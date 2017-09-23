@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -82,7 +82,7 @@ end :
 
 if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
  {
-  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLsd debugger will open next.", t, label, res );
+  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
   error_hard( msg, "Invalid result", "Check your code to prevent this situation." );
   debug_flag = true;
   debug = 'd';

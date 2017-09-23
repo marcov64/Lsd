@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -102,7 +102,7 @@ int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : 1;
 Tcl_SetVar( inter, "lab", lab, 0 );
 
 cmd( "set deb .deb" );
-cmd( "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"Lsd Data Browser\" } { set debTitle \"Lsd Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name  );
+cmd( "if { ! [ winfo exists .deb ] } { if [ string equal $lab \"\" ] { set debTitle \"LSD Data Browser\" } { set debTitle \"LSD Debugger\" }; newtop .deb \"%s%s - $debTitle\" { set choice 7 } \"\"; set justCreated true }", unsaved_change() ? "*" : " ", simul_name  );
 
 // avoid redrawing the menu if it already exists and is configured
 cmd( "set existMenu [ winfo exists .deb.m ]" );
@@ -122,11 +122,11 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	cmd( "set w .deb.m.help" );
 	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 	cmd( ".deb.m add cascade -label Help -menu $w -underline 0" );
-	cmd( "$w add command -label \"Help on Lsd Debugger\" -command {LsdHelp debug.html} -underline 0" );
+	cmd( "$w add command -label \"Help on LSD Debugger\" -command {LsdHelp debug.html} -underline 0" );
 	cmd( "$w add separator" );
 	cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
 	cmd( "$w add separator" );
-	cmd( "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+	cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
 	cmd( ".deb configure -menu .deb.m" );
 }
 
@@ -373,13 +373,13 @@ case 21: if(r->hook!=NULL)
 			if ( ! invalidHooks )
 			{
 				int lstUpd;
-				// check if the hook contains a valid Lsd object pointer (not very effective, most likely will crash...)
+				// check if the hook contains a valid LSD object pointer (not very effective, most likely will crash...)
 				try { lstUpd = r->hook->lstCntUpd; }
 				catch ( ... ) {	lstUpd = 0; }
 				
 				if ( lstUpd <= 0 || lstUpd > t )
 				{
-					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to Lsd objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
+					cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
 					choice = 0;
 					break;
 				}

@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -100,7 +100,7 @@ max_depth=1;
 while(*choice==0)
 {
   // reset title and destroy command because may be coming from edit_data
-  cmd( "settop .ini \"%s%s - Lsd Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
+  cmd( "settop .ini \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
   
   cmd( "frame .ini.obj" );
   cmd( "pack .ini.obj -fill both -expand yes" );

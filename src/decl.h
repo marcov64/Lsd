@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -237,7 +237,7 @@ class object
 	int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 	int to_compute;
 	netNode *node;		// pointer to network node data structure
-	void *cext;			// pointer to a C++ object extension to the Lsd object
+	void *cext;			// pointer to a C++ object extension to the LSD object
 
 	double cal(object *caller,  char const *l, int lag);
 	double cal( char const *l, int lag);
@@ -689,8 +689,8 @@ extern int prof_obs_only;	// profile only observed variables
 extern int quit;			// simulation interruption mode (0=none)
 extern int seed;			// pseudo random number generator seed in use
 extern int sim_num;			// simulation number running
-extern int stack;			// Lsd stack call level
-extern int stackinfo_flag; 	// Lsd stack control
+extern int stack;			// LSD stack call level
+extern int stackinfo_flag; 	// LSD stack control
 extern int strWindowOn;	// control the presentation of the model structure window (bool)
 extern int t;               // current time step
 extern int total_obj;		// total objects in model
@@ -699,18 +699,18 @@ extern int watch;			// allow for graph generation interruption (bool)
 extern int when_debug;      // next debug stop time step (0 for none)
 extern int wr_warn_cnt;		// invalid write operations warning counter
 extern long nodesSerial;	// network node serial number global counter
-extern lsdstack *stacklog;	// Lsd stack
-extern object *blueprint;   // Lsd blueprint (effective model in use)
-extern object *root;        // Lsd root object
-extern sense *rsense;       // Lsd sensitivity analysis structure
-extern variable *cemetery;  // Lsd saved data series (from last simulation run)
+extern lsdstack *stacklog;	// LSD stack
+extern object *blueprint;   // LSD blueprint (effective model in use)
+extern object *root;        // LSD root object
+extern sense *rsense;       // LSD sensitivity analysis structure
+extern variable *cemetery;  // LSD saved data series (from last simulation run)
 extern map< string, profile > prof;// set of saved profiling times
 
 // multi-threading control 
 #ifdef PARALLEL_MODE
 extern atomic< bool > parallel_ready;	// flag to indicate multitasking is available
 extern map< thread::id, worker * > thr_ptr;	// worker thread pointers
-extern thread::id main_thread;			// Lsd main thread ID
+extern thread::id main_thread;			// LSD main thread ID
 extern worker *workers;					// multi-thread parallel worker data
 #endif
 

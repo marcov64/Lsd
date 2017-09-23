@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 /****************************************************
 OBJECT.CPP
-It contains the core code for Lsd, together with VARIAB.CPP.
+It contains the core code for LSD, together with VARIAB.CPP.
 A model is nothing but a link of objects, whose behavior is defined here.
 Only the methods for saving a loading a model are placed in another file, FILE.CPP.
 
@@ -24,7 +24,7 @@ used to identify the object type and to insert it in a model.
 - char *label;
 Name of the object. The name is used indicate one specific type of object in the
 model. Two objects are always identical in their definition. Inheritance is not
-used in Lsd, yet.
+used in LSD, yet.
 
 - variable *v;
 the first element of a linked chain of variable. They are the computational content
@@ -82,7 +82,7 @@ The methods for object implemented here all refer always to the "this" object.
 That is, if you consider the following as functions, then they have always as
 parameter the address of one object, refer to as "this", whose fields are
 addressed as if they were public variables.
-Methods as listed in two groups: the ones that can be used as functions in Lsd
+Methods as listed in two groups: the ones that can be used as functions in LSD
 and the ones used for management of the model. This distinction is only
 because of the functionalities, since all the methods are actually public, and
 could be used anyway. It is just that you wouldn't like to, say, save a model
@@ -212,7 +212,7 @@ v[4]=min
 Assign the value value to the variable lab, resulting as if this was the
 value at gloabal time time. It does not make a search looking for lab. Lab
 must be a variable of this.
-The function allows to override the default system to update variables in Lsd
+The function allows to override the default system to update variables in LSD
 during a simulation time step.
 In general, through update, a variable is computed either because the system
 requests its value via the "update" method, or because, before "update", another
@@ -234,7 +234,7 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 METHODS NOT USED IN THE EQUATIONS
 
 - double cal(object *caller, char *l, int lag, int *done);
-It is the basic function used in the equations for lsd variables.
+It is the basic function used in the equations for LSD variables.
 It is called by the former type of method cal(l,lag), because that
 is simpler to be used in the equation code. It activates the method
 search_var(caller, label)
@@ -1842,15 +1842,15 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	cmd( "frame .cazzo.t" );
 	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
 	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the Lsd browser.\"" );
+	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
 	cmd( "pack .cazzo.t.l1" );
 
 	cmd( "frame .cazzo.e" );
 	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
 
 	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
-	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to Lsd browser to edit the model configuration\" -state %s", parallel_mode ? "disabled" : "normal" );
-	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit Lsd browser to edit the model equations' code in LMM\"" );
+	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\" -state %s", parallel_mode ? "disabled" : "normal" );
+	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
 	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );

@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -164,9 +164,9 @@ cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; se
 Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
 Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
 
-cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the Lsd Browser." );
+cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the LSD Browser." );
 
-cmd( "newtop .da \"%s%s - Lsd Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
+cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
 
 cmd( "menu .da.m -tearoff 0 -relief groove -bd 2" );
 
@@ -194,7 +194,7 @@ cmd( ".da.m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0" );
 cmd( "$w add command -label \"Model Report\" -command {set choice 43} -underline 0" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  ); 
+cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  ); 
 
 cmd( ".da configure -menu .da.m" );
 
@@ -1602,7 +1602,7 @@ if ( *choice == 1 )
 	const char extTot[] = ".tot";
 #endif 
  
-  cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{Lsd result files} {%s}} {{Lsd total files} {%s}} {{All files} {*}} }]", extRes, extTot );
+  cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", extRes, extTot );
   cmd( "if { ! [ fn_spaces $lab .da ] } { set choice [ llength $lab ] } { set choice 0 }" );
   if(*choice==0 )
    {//no file selected
@@ -2439,7 +2439,7 @@ bool y2on, stopErr = false;
 
 if(nv>1000)
  {
-  cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of Lsd, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\"]" );
+  cmd( "set answer [tk_messageBox -parent .da -type okcancel -title \"Too Many Series\" -icon warning -default ok -message \"You selected too many ($nv) series to plot\" -detail \"This may cause a crash of LSD, with the loss of all unsaved data.\nIf you continue the system may become slow, please be patient.\nPress 'OK' to continue anyway.\"]" );
   cmd( "if {[string compare $answer ok] == 0} {set choice 1 } {set choice 2}" );
   if(*choice==2)
    return;
@@ -3690,7 +3690,7 @@ The variables are grouped according to:
 	1) their label (increasing: A first z last)
 	2) time of their last occurrence (decreasing: existing variable first)
    	3) time of their first occurrence (increasing: first born first)
-    4) lsd internal ID indexing system (used for the tag) (increasing)
+    4) LSD internal ID indexing system (used for the tag) (increasing)
 The function is complicated for the point 4) by the fact that the tag is recorded
 in the labels as a single string using the underscore '_' as joining character.
 */
@@ -6512,7 +6512,7 @@ double **data, *dd, *ddstart;
 const char *descr, *ext;
 const char str0[] = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
 const char strsp[] = "                                                                                ";
-const char descrRes[] = "Lsd Result File";
+const char descrRes[] = "LSD Result File";
 const char descrTxt[] = "Text File";
 const char extResZip[] = ".res.gz";
 const char extTxtZip[] = ".txt.gz";
@@ -6575,7 +6575,7 @@ cmd( "frame .da.lab.f" );
 cmd( "label .da.lab.f.l -text \"File format\"" );
 
 cmd( "frame .da.lab.f.t -relief groove -bd 2" );
-cmd( "radiobutton .da.lab.f.t.lsd -text \"Lsd results file\" -variable typelab -value 3" );
+cmd( "radiobutton .da.lab.f.t.lsd -text \"LSD results file\" -variable typelab -value 3" );
 cmd( "radiobutton .da.lab.f.t.nolsd -text \"Text file\" -variable typelab -value 4" );
 cmd( "pack .da.lab.f.t.lsd .da.lab.f.t.nolsd -anchor w" );
 
@@ -6814,7 +6814,7 @@ case 2: //New names for labels
   }   
  break;
 
-case 3: //Lsd result files
+case 3: //LSD result files
 for(i=0; i<nv; i++)
  {
 	if(dozip==1) 

@@ -230,7 +230,7 @@ array set opts {
     ignoreblanksopt   "-b"
     ignoreblanks      1
     editor            ""
-    filetypes         {{{{Text Files} .txt} {{Lsd Equation Files} .cpp} {{Lsd Configuration Files} .lsd} {All Files} *}}
+    filetypes         {{{{Text Files} .txt} {{LSD Equation Files} .cpp} {{LSD Configuration Files} .lsd} {All Files} *}}
     geometry          "60x30"
     showcbs           1
     showln            1

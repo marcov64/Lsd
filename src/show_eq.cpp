@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -75,7 +75,7 @@ fname = equation_name;
 if( (f=fopen(equation_name,"r"))==NULL)
  {
   cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
-  cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { Lsd Equation Files } { .cpp } } { { All Files } { * } } } ]; if [ fn_spaces $res . ] { set res \"\" } }" );
+  cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { LSD Equation Files } { .cpp } } { { All Files } { * } } } ]; if [ fn_spaces $res . ] { set res \"\" } }" );
 
  if(*choice==1)
  {

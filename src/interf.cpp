@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Silk icon set 1.3 by Mark James
 http://www.famfamfam.com/lab/icons/silk 
@@ -172,8 +172,8 @@ choice_g = choice = 0;
 //Main Cycle ********************************
 while(choice!=1)
 {
-	cmd( "wm title . \"%s%s - Lsd Browser\"", unsaved_change() ? "*" : " ", simul_name  );
-	cmd( "wm title .log \"%s%s - Lsd Log\"", unsaved_change() ? "*" : " ", simul_name  );
+	cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change() ? "*" : " ", simul_name  );
+	cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change() ? "*" : " ", simul_name  );
 
 	for(cur=cr; cur->up!=NULL; cur=cur->up);
 
@@ -653,12 +653,12 @@ cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on Browser\" -command {LsdHelp Browser.html} -underline 0" );
-cmd( "$w add command -label \"Lsd Quick Help\" -command {LsdHelp QuickHelp.html} -underline 0" );
+cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp QuickHelp.html} -underline 0" );
 cmd( "$w add separator" );
 cmd( "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}" );
 cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"About Lsd...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About Lsd\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
+cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
 
 // set shortcuts on open windows
 set_shortcuts( "." );
@@ -2343,7 +2343,7 @@ if ( i == 0 )
 // warn missing debugger
 if ( search_parallel( root ) && ( when_debug > 0 || stackinfo_flag > 0 || prof_aggr_time ) )
 {
-	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'OK' to proceed and ignore debugging/profiling settings or 'Cancel' to return to Lsd Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
+	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'OK' to proceed and ignore debugging/profiling settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
 	if( *choice == 2 )
 	{
 		*choice=0;
@@ -2483,7 +2483,7 @@ if ( overwConf )				// save if needed
 return(n);
 
 
-//Exit Lsd
+//Exit LSD
 case 11:
 
 if ( discard_change( ) )	// unsaved configuration changes ?
@@ -2534,7 +2534,7 @@ if ( ! reload )
   strcpy(lastObj,"");			// disable last object for quick reload
   cmd( "set res %s", simul_name );
 
-  cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"[pwd]\" -initialfile \"$res.lsd\" -filetypes {{{Lsd model files} {.lsd}}  }]" );
+  cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"[pwd]\" -initialfile \"$res.lsd\" -filetypes {{{LSD model files} {.lsd}}  }]" );
   
   *choice=0;
   cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
@@ -2641,7 +2641,7 @@ cmd( "set path \"%s\"", path );
 
 if ( saveAs )			// only asks file name if instructed to or necessary
 {
-cmd( "set bah [tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{Lsd model files} {.lsd}}}]" );
+cmd( "set bah [tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd] -filetypes {{{LSD model files} {.lsd}}}]" );
 
 cmd( "set res $bah" );
 
@@ -2978,7 +2978,7 @@ if ( ! struct_loaded )
 
 cmd( "set res %s", equation_name );
 
-cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]]" );
+cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{LSD equation files} {.cpp}} {{All files} {*}} }]]" );
 cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
@@ -3362,7 +3362,7 @@ if ( *choice == 2 )
 lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
 strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
 cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
-plog( "\nLsd result file: %s.res\nLsd data file: %s.lsd\nSaving data...", "", lab, lab );
+plog( "\nLSD result file: %s.res\nLSD data file: %s.lsd\nSaving data...", "", lab, lab );
 cmd( "wm deiconify .log; raise .log; focus .log" );
 
 if( strlen( path ) == 0 )
@@ -3562,7 +3562,7 @@ cmd( "label .srch.i.l -text \"Element name\"" );
 cmd( "entry .srch.i.e -width 20 -textvariable bidi -justify center" );
 cmd( "pack .srch.i.l .srch.i.e" );
 
-cmd( "label .srch.o -text \"(type the initial letters of the\nname, Lsd will complete it)\"" );
+cmd( "label .srch.o -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
 cmd( "pack .srch.i .srch.o -padx 5 -pady 5" );
 cmd( "pack .srch.i" );
 
@@ -3621,7 +3621,7 @@ if( !strcmp(eq_file, lsd_eq_file) )
  break;
  }
 
-cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the Lsd model program. Press 'OK' to confirm.\" -type okcancel -default ok]" );
+cmd( "set answer [tk_messageBox -parent . -title Confirmation -icon question -message \"Replace equations?\" -detail \"The equations associated to the configuration file are going to be replaced with the equations used for the LSD model program. Press 'OK' to confirm.\" -type okcancel -default ok]" );
 cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
  if(*choice == 0)
   break;
@@ -3651,7 +3651,7 @@ if( !strcmp(eq_file, lsd_eq_file) )
  }
 
 cmd( "set res1 fun_%s.cpp", simul_name );
-cmd( "set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{Lsd equation files} {.cpp}} {{All files} {*}} }]" );
+cmd( "set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{LSD equation files} {.cpp}} {{All files} {*}} }]" );
 
 cmd( "if {[string length $bah] > 0} { set choice 1; set res1 [file tail $bah]} {set choice 0}" );
 if ( *choice == 0 )
@@ -3665,7 +3665,7 @@ if(strlen(lab)==0)
 f=fopen(lab, "wb");
 fprintf(f, "%s", lsd_eq_file);
 fclose(f);
-cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new Lsd model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
+cmd( "tk_messageBox -parent . -title \"Offload Equations\" -icon info -message \"Equation file '$res1' created\" -detail \"You need to create a new LSD model to use these equations, replacing the name of the equation file in LMM with the command 'Model Compilation Options' (menu Model).\" -type ok" );
 
 break;
 
@@ -3705,7 +3705,7 @@ if ( ! struct_loaded )
 	break;
 }
 
-cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir [pwd] -filetypes { { {Lsd configuration files} {.lsd} } } ]" );
+cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir [pwd] -filetypes { { {LSD configuration files} {.lsd} } } ]" );
 cmd( "set res2 [ file tail $res1 ]" );
 cmd( "if [ fn_spaces $res1 . ] { set res1 \"\"; set res2 \"\" }" );
 
@@ -3878,7 +3878,7 @@ if ( rsense != NULL )
     sensitivity_parallel( cur, rsense );
 	
 	unsaved_change( true );				// signal unsaved change
- 	cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"Lsd has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
+ 	cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"LSD has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
   }
 else
 	sensitivity_undefined( );			// throw error
@@ -4710,7 +4710,7 @@ case 68:
 		// open dialog box to get file name & folder
 		if( fSeq )								// file sequence?
 		{
-			cmd( "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple no]" );
+			cmd( "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{LSD model files} {.lsd}}} -multiple no]" );
 			cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}" );
 			if(*choice == 0)
 				break;
@@ -4732,7 +4732,7 @@ case 68:
 		}
 		else									// bunch of files?
 		{
-			cmd( "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{Lsd model files} {.lsd}}} -multiple yes]" );
+			cmd( "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{LSD model files} {.lsd}}} -multiple yes]" );
 			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
@@ -4758,14 +4758,14 @@ case 68:
 	cmd( "pack .s.t.l .s.t.e" );
 		
 	cmd( "frame .s.c" );
-	cmd( "label .s.c.l -text \"Number of parallel\nLsd processes\"" );
+	cmd( "label .s.c.l -text \"Number of parallel\nLSD processes\"" );
 	cmd( "entry .s.c.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
 	cmd( "label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
 	
 	cmd( "frame .s.p" );
-	cmd( "label .s.p.l -text \"Number of threads\nper Lsd process\"" );
+	cmd( "label .s.p.l -text \"Number of threads\nper LSD process\"" );
 	cmd( "entry .s.p.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".s.p.e insert 0 $threads" ); 
 	cmd( "label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
@@ -4828,7 +4828,7 @@ case 68:
 	f=fopen(lab, "wt");
 	if(*choice == 1)						// Windows header
 	{
-		fprintf(f, "@echo off\nrem Batch generated by Lsd\n");
+		fprintf(f, "@echo off\nrem Batch generated by LSD\n");
 		fprintf(f, "echo Processing %d configuration files in up to %d parallel processes...\n", fnext - ffirst, param);
 
 		// convert to Windows folder separators (\)
@@ -4844,7 +4844,7 @@ case 68:
 	}
 	else									// Unix header
 	{
-		fprintf(f, "#!/bin/bash\n# Script generated by Lsd\n");
+		fprintf(f, "#!/bin/bash\n# Script generated by LSD\n");
 		fprintf(f, "echo \"Processing %d configuration files in up to %d parallel processes...\"\n", fnext - ffirst, param);
 
 		if ( ! natBat )						// Unix in Windows?
@@ -4875,7 +4875,7 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, j );
+				fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, j );
 			else							// Unix
 				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, j );
 			j <= sl ? i+=num+1 : i+=num;
@@ -4885,7 +4885,7 @@ case 68:
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if( fSeq )
 				if(*choice == 1)			// Windows
-					fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, i );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, i );
 				else						// Unix
 					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, i );
 			else
@@ -4894,7 +4894,7 @@ case 68:
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				if(*choice == 1)			// Windows
-					fprintf( f, "start \"Lsd Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file );
 				else						// Unix
 					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, num, out_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file );
 			}
@@ -5751,7 +5751,7 @@ SENSITIVITY_CREATED
 void sensitivity_created( void )
 {
 	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
-	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"Lsd has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (i.e. <path>/<configuration_file>).\"" );
+	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (i.e. <path>/<configuration_file>).\"" );
 }
 
 
@@ -5760,7 +5760,7 @@ SENSITIVITY_UNDEFINED
 ****************************************************/
 void sensitivity_undefined( void )
 {
- 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard Lsd configuration file (.lsd) and if needed they MUST be saved in a Lsd sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
+ 	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis items not found\" -detail \"Before using this option you have to select at least one parameter or lagged variable initial value to perform the sensitivity analysis and inform the corresponding values to be explored.\n\nTo set the sensitivity analysis values (or ranges), use the 'Sensitivity Analysis' button in the 'Model'/'Change Element...' menu option (or the corresponding context menu option) and inform the values or range(s) using the syntax explained in the 'Sensitivity Analysis' entry window (it is possible to paste a list of values from the clipboard). You can repeat this procedure for each required parameter or initial value.\n\nSensitivity Analysis values are NOT saved in the standard LSD configuration file (.lsd) and if needed they MUST be saved in a LSD sensitivity analysis file (.sa) using the 'File'/'Save Sensitivity...' menu option.\"" );
 }
 
 
@@ -5769,7 +5769,7 @@ LOAD_CONFIGURATION_FAILED
 ****************************************************/
 void load_configuration_failed( void )
 {
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if Lsd still has WRITE access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has WRITE access to the model directory.\n\nCurrent configuration will be reset now.\"" );
 }
 
 
@@ -5857,7 +5857,7 @@ bool discard_change( bool checkSense, bool senseOnly )
 	// don't stop if simulation is runnig
 	if ( running )
 	{
-		cmd( "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit Lsd\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
+		cmd( "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
 		return false;
 	}
 	// nothing to save?

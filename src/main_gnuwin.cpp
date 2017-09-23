@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -57,7 +57,7 @@ int main( int argn, char **argv )
 /*********************************
  MYEXIT
  *********************************/
-// exit Lsd finishing 
+// exit LSD finishing 
 void myexit( int v )
 {
 #ifdef PARALLEL_MODE
@@ -185,8 +185,8 @@ void signal_handler( int signum )
 #ifndef NO_WINDOW
 	if ( ! user_exception )
 	{
-		strcpy( msg2, "There is an internal Lsd error\n  If error persists, please contact developers" );
-		strcpy( msg3, "Lsd will close now..." );
+		strcpy( msg2, "There is an internal LSD error\n  If error persists, please contact developers" );
+		strcpy( msg3, "LSD will close now..." );
 	}
 	else
 	{
@@ -195,7 +195,7 @@ void signal_handler( int signum )
 		{
 			if ( ! parallel_mode && stacklog->vs != NULL )
 			{
-				strcat( msg3, "\n\nAttempting to open the Lsd Debugger (Lsd will close immediately after exiting the Debugger)..." );
+				strcat( msg3, "\n\nAttempting to open the LSD Debugger (LSD will close immediately after exiting the Debugger)..." );
 				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs->label );
 				print_stack( );				
 			}

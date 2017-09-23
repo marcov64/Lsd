@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -83,12 +83,12 @@ void cmd( const char *cm, ... )
 	// abort if Tcl interpreter not initialized
 	if ( inter == NULL )
 	{
-		printf( "\nTcl interpreter not initialized. Quitting Lsd now.\n" );
+		printf( "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		myexit( 24 );
 	}
 	
 #ifdef PARALLEL_MODE
-	// abort if not running in main Lsd thread
+	// abort if not running in main LSD thread
 	if ( this_thread::get_id( ) != main_thread )
 		return;
 #endif
@@ -98,7 +98,7 @@ void cmd( const char *cm, ... )
 		sprintf( message, "Tcl buffer overrun. Please increase TCL_BUFF_STR in 'decl.h' to at least %lu bytes.", strlen( cm ) + 1 );
 		log_tcl_error( cm, message );
 		if ( tk_ok )
-			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"Lsd will close immediately after pressing 'OK'.\"" );
+			cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl buffer overrun (memory corrupted!)\" -detail \"LSD will close immediately after pressing 'OK'.\"" );
 		myexit( 24 );
 	}
 
@@ -138,9 +138,9 @@ void log_tcl_error( const char *cm, const char *message )
 	char ftime[ 80 ];
 
 	if( strlen( exec_path ) > 0 )
-		sprintf( fname, "%s/Lsd.err", exec_path );
+		sprintf( fname, "%s/LSD.err", exec_path );
 	else
-		sprintf( fname, "Lsd.err" );
+		sprintf( fname, "LSD.err" );
 
 	f = fopen( fname,"a" );
 	if ( f == NULL )
@@ -161,7 +161,7 @@ void log_tcl_error( const char *cm, const char *message )
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
 	
-	plog( "\nInternal Lsd error. See file '%s'\n", "", fname );
+	plog( "\nInternal LSD error. See file '%s'\n", "", fname );
 }
 
 #else
@@ -2203,7 +2203,7 @@ dimH=pixH/nrow;
 dimW=pixW/ncol;
 cmd( "destroytop .lat" );
 //create the window with the lattice, roughly 600 pixels as maximum dimension
-cmd( "newtop .lat \"%s%s - Lsd Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
+cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
 cmd( "set lat_update 1" );
 cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );

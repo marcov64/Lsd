@@ -5,15 +5,15 @@
 #Universita' dell'Aquila
 #
 #Copyright Marco Valente
-#Lsd is distributed according to the GNU Public License
+#LSD is distributed according to the GNU Public License
 #
 #Comments and bug reports to marco.valente@univaq.it
 #****************************************************
 #****************************************************
 
 ####################################################
-# Tcl script used to browse in the Lsd models 
-# the script starts from the Lsd root and reads
+# Tcl script used to browse in the LSD models 
+# the script starts from the LSD root and reads
 # the modelinfo.txt or groupinfo.txt in all
 # the descending directories.
 # Users can browse through the model, create new models,
@@ -51,7 +51,7 @@ proc showmodel pippo {
 		.l.t.text conf -state normal
 		.l.t.text delete 1.0 end
 	} else { 
-		newtop .l "Lsd Model Browser" { .l.m.file invoke 2 }
+		newtop .l "LSD Model Browser" { .l.m.file invoke 2 }
 		
 		menu .l.m -tearoff 0 -relief groove -bd 2
 		
@@ -109,8 +109,8 @@ proc showmodel pippo {
 			LsdHelp LMM_help.html#select 
 		}
 		$m add separator
-		$m add command -label "About Lsd..." -underline 0 -command { 
-			tk_messageBox -parent .l -type ok -icon info -title "About Lsd" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" 
+		$m add command -label "About LSD..." -underline 0 -command { 
+			tk_messageBox -parent .l -type ok -icon info -title "About LSD" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" 
 			}
 
 		.l configure -menu .l.m

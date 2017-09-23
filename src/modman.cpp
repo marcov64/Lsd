@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Silk icon set 1.3 by Mark James
 http://www.famfamfam.com/lab/icons/silk 
@@ -19,18 +19,18 @@ used up to 71 options included
 *******/
 
 /*****************************************************
-This program is a front end for dealing with Lsd models code (running, compiling, editing, debugging 
-Lsd model programs). See the manual for help on its use (really needed?)
+This program is a front end for dealing with LSD models code (running, compiling, editing, debugging 
+LSD model programs). See the manual for help on its use (really needed?)
 
-IMPORTANT: this is _NOT_ a Lsd model, but the best I could produce of something similar to 
-a programming environment for Lsd model programs.
+IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to 
+a programming environment for LSD model programs.
 
 
 This file can be compiled with the command line:
 
 make -f <makefile>
 
-There are several makefiles in Lsd root directory appropriate to different environments (Windows, Mac & Linux) and configurations (32 or 64-bit)
+There are several makefiles in LSD root directory appropriate to different environments (Windows, Mac & Linux) and configurations (32 or 64-bit)
 
 LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick is required because under Windows there are troubles launchins external package from a "first instance" of a program.
 
@@ -156,7 +156,7 @@ inter = Tcl_CreateInterp( );
 num = Tcl_Init( inter );
 if ( num != TCL_OK )
 {
-	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall Lsd\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+	sprintf( msg, "Tcl initialization directories not found, check the Tcl/Tk installation  and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 	log_tcl_error( "Create Tcl interpreter", msg );
 	return 1;
 }
@@ -171,7 +171,7 @@ cmd( "set choice 1234567890" );
 Tcl_UpdateLinkedVar(inter, "choice" );
 if ( choice != 1234567890 )
 {
-	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall Lsd" );
+	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
 	return 2;
 }
 	
@@ -182,7 +182,7 @@ if ( num == TCL_OK )
 	cmd( "if { ! [ catch { package present Tk 8.5 } ] && [ winfo exists . ] } { set choice 0 } { set choice 1 }" );
 if ( choice )
 {
-	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall Lsd\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
+	sprintf( msg, "Tk failed, check the Tcl/Tk installation (version 8.5+) and configuration or reinstall LSD\nTcl Error = %d : %s", num,  Tcl_GetStringResult( inter ) );
 	log_tcl_error( "Start Tk", msg );
 	return 3;
 }
@@ -193,8 +193,8 @@ cmd( "tk appname lmm" );
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
 {
-	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The Lsd directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run Lsd models.\nThe Lsd directory must be located where there are no spaces in the full path name.\nMove all the Lsd directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "Path check", "Lsd directory path includes spaces, move all the Lsd directory in another directory without spaces in the path" );
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
 	return 4;
 }
 
@@ -243,8 +243,8 @@ if ( choice )
 		}" );
 	if ( choice )
 	{
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Lsd files or folders are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
-		log_tcl_error( "Source files check", "Required Lsd source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 		return 5;	
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
@@ -366,8 +366,8 @@ cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { sourc
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 if ( choice != 0 )
 {
-	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall Lsd if the problem persists.\n\nLsd is aborting now.\"" );
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of Lsd and reinstall Lsd if the problem persists" );
+	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
 	return 10 + choice;
 }
 
@@ -378,7 +378,7 @@ Tcl_LinkVar(inter, "shigh", (char *) &shigh, TCL_LINK_INT);
 cmd( "set shigh $shigh_temp" );	// restore correct value
 
 // set main window
-cmd( "wm title . \"Lsd Model Manager - LMM\"" );
+cmd( "wm title . \"LSD Model Manager - LMM\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { set choice 1 }" );
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "bind . <Destroy> { set choice 1 }" );
@@ -443,7 +443,7 @@ cmd( "$w add separator" );
 cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
 cmd( "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w " );
 cmd( "$w add command -label \"Tab Size...\" -command {set choice 67} -underline 7" );
-cmd( "$w add command -label \"Insert Lsd Macro...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i" );
+cmd( "$w add command -label \"Insert LSD Macro...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i" );
 
 cmd( "menu $w.color -tearoff 0" );
 cmd( "$w.color add radio -label \" Full\" -variable shigh -value 2 -command {set choice 64} -underline 1 -accelerator \"Ctrl+;\"" );
@@ -472,23 +472,23 @@ cmd( "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline
 cmd( "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
 
 cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \"Use Lsd Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \"Use Lsd C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
+cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
+cmd( "$w.macro add radio -label \"Use LSD C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on LMM\" -underline 4 -command {LsdHelp \"LMM_help.html\"}" );
 if( macro )
-  cmd( "$w add command -label \"Help on Macros for Lsd Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}" );
+  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}" );
 else
-  cmd( "$w add command -label \"Help on C++ for Lsd Equations\" -underline 8 -command {LsdHelp lsdfunc.html}" ); 
+  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp lsdfunc.html}" ); 
 
 cmd( "$w add separator" );
 //cmd( "$w add command -label \"Tutorial 1 - LMM First users\" -underline 6 -command {LsdHelp Tutorial1.html}" );
-//cmd( "$w add command -label \"Tutorial 2 - Using Lsd Models\" -underline 0 -command {LsdHelp ModelUsing.html}" );
-//cmd( "$w add command -label \"Tutorial 3 - Writing Lsd Models\" -underline 6 -command {LsdHelp ModelWriting.html}" );
-cmd( "$w add command -label \"Lsd Documentation\" -command {LsdHelp Lsd_Documentation.html}" );
+//cmd( "$w add command -label \"Tutorial 2 - Using LSD Models\" -underline 0 -command {LsdHelp ModelUsing.html}" );
+//cmd( "$w add command -label \"Tutorial 3 - Writing LSD Models\" -underline 6 -command {LsdHelp ModelWriting.html}" );
+cmd( "$w add command -label \"LSD Documentation\" -command {LsdHelp Lsd_Documentation.html}" );
 cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
 
 
@@ -558,7 +558,7 @@ cmd( "bind .bbar.set <Enter> {set ttip \"Model compilation options...\"}" );
 cmd( "bind .bbar.set <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.hide <Enter> {if $autoHide {set ttip \"Not hide LMM on run\"} {set ttip \"Hide LMM on run\"}}" );
 cmd( "bind .bbar.hide <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for Lsd equations\"}" );
+cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for LSD equations\"}" );
 cmd( "bind .bbar.help <Leave> {set ttip \"\"}" );
 
 cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
@@ -690,8 +690,8 @@ cmd( ".v add command -label \"Cut\" -command {tk_textCut .f.t.t}" );
 cmd( ".v add command -label \"Paste\" -command {tk_textPaste .f.t.t}" );
 
 cmd( ".v add separator" );
-cmd( ".v add cascade -label \"Lsd Macro\" -menu .v.i" );
-cmd( ".v add command -label \"Insert Lsd Macro...\" -command {set choice 28}" );
+cmd( ".v add cascade -label \"LSD Macro\" -menu .v.i" );
+cmd( ".v add command -label \"Insert LSD Macro...\" -command {set choice 28}" );
 cmd( ".v add command -label \"Indent Selection\" -command {set choice 42}" );
 cmd( ".v add command -label \"De-indent Selection\" -command {set choice 43}" );
 cmd( ".v add command -label \"Place Break & Run [ string toupper $DbgExe ]\" -command {set choice 58}" );
@@ -704,7 +704,7 @@ cmd( ".v add command -label \"Match \\\( \\)\" -command {set choice 32}" );
 if ( ! macro )
 {
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"Lsd Equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"LSD Equation\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
@@ -722,7 +722,7 @@ if ( ! macro )
 else
 {
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"Lsd Equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"LSD Equation\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
@@ -1338,7 +1338,7 @@ if(choice==14)
 {
 /* Create a new model/group */
 
-// prevent creating new groups in Lsd directory
+// prevent creating new groups in LSD directory
 cmd( "if { [ string equal $groupdir [pwd] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
 		{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
 			-icon warning -default ok -message \"Invalid parent group\" \
@@ -1954,7 +1954,7 @@ goto loop;
 if ( choice == 25 )
 {
 /*
-Insert a Lsd equation
+Insert a LSD equation
 */
 cmd( "set v_label \"\"" );
 cmd( "set isfun 0" );
@@ -2230,16 +2230,16 @@ if ( choice == 28 && macro )
 {
 /*
 MACRO VERSION
-Insert a Lsd macro, to be used in Lsd equations' code
+Insert a LSD macro, to be used in LSD equations' code
 */
 cmd( "set res 26" );
 
-cmd( "newtop .a \"Insert Lsd macro\" { set choice 2 }" );
+cmd( "newtop .a \"Insert LSD macro\" { set choice 2 }" );
 
-cmd( "label .a.tit -text \"Available Lsd macros\"" );
+cmd( "label .a.tit -text \"Available LSD macros\"" );
 
 cmd( "frame .a.r -bd 2 -relief groove" );
-cmd( "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new Lsd equation\" -underline 0 -variable res -value 25" );
+cmd( "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
 cmd( "radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26" );
 cmd( "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
 cmd( "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
@@ -2299,16 +2299,16 @@ if ( choice == 28 && ! macro )
 {
 /*
 C++ VERSION
-Insert a Lsd script, to be used in Lsd equations' code
+Insert a LSD script, to be used in LSD equations' code
 */
 cmd( "set res 26" );
 
-cmd( "newtop .a \"Insert Lsd Script\" { set choice 2 }" );
+cmd( "newtop .a \"Insert LSD Script\" { set choice 2 }" );
 
-cmd( "label .a.tit -text \"Available Lsd scripts\" -justify center" );
+cmd( "label .a.tit -text \"Available LSD scripts\" -justify center" );
 
 cmd( "frame .a.r -bd 2 -relief groove" );
-cmd( "radiobutton .a.r.equ -text \"Equation/Function - insert a new Lsd equation\" -underline 0 -variable res -value 25" );
+cmd( "radiobutton .a.r.equ -text \"Equation/Function - insert a new LSD equation\" -underline 0 -variable res -value 25" );
 cmd( "radiobutton .a.r.cal -text \"cal - request the value of a variable\" -underline 0 -variable res -value 26" );
 cmd( "radiobutton .a.r.for -text \"for - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
 cmd( "radiobutton .a.r.sum -text \"sum - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
@@ -4261,7 +4261,7 @@ if(choice==62)
 	Generate the no window distribution
 	*/
 
-	// copy the base Lsd source files to distribution directory
+	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modeldir/src\" ] } { file mkdir \"$modeldir/src\" }" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/main_gnuwin.cpp\" \"$modeldir/src\"" );
@@ -4373,7 +4373,7 @@ if ( choice == 68 )
 {	// Adjust context menu for LSD macros
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"Lsd Equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"LSD Equation\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
@@ -4396,7 +4396,7 @@ if ( choice == 69 )
 {	// Adjust context menu for LSD C++
 	cmd( "destroy .v.i" );
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"Lsd Equation\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"LSD Equation\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
@@ -4537,7 +4537,7 @@ void cmd( const char *cm, ... )
 	// abort if Tcl interpreter not initialized
 	if ( inter == NULL )
 	{
-		printf( "\nTcl interpreter not initialized. Quitting Lsd now.\n" );
+		printf( "\nTcl interpreter not initialized. Quitting LSD now.\n" );
 		abort( );
 	}
 	
@@ -5019,7 +5019,7 @@ bool compile_run( bool run, bool nw )
 	else
 	{
 		if ( nw )
-			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW$add_exe' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in Lsd result files named after the seed generator used.\"" );
+			cmd( "tk_messageBox -parent . -type ok -icon info -title \"No Window Version\" -message \"Compilation successful\" -detail \"LMM has created a non-graphical version of the model, to be transported on any system endowed with a GCC compiler and standard libraries.\\n\\nA local system version of the executable 'lsd_gnuNW$add_exe' was also generated in your current model folder and is ready to use in this computer.\\n\\nTo move the model in another system copy the content of the model's directory:\\n\\n$modeldir\\n\\nincluding also its new subdirectory 'src'.\\n\\nTo create a 'No Window' version of the model program follow these steps, to be executed within the directory of the model:\\n- compile with the command 'make -f makefileNW'\\n- run the model with the command 'lsd_gnuNW -f mymodelconf.lsd'\\n- the simulation will run automatically saving the results (for the variables indicated in the conf. file) in LSD result files named after the seed generator used.\"" );
 		
 		if ( run )
 		{	// no problem - execute
@@ -5061,7 +5061,7 @@ void create_compresult_window( bool nw )
 
 	cmd( "newtop .mm \"Compilation Errors%s\" { destroytop .mm } \"\"", nw ? " (No Window Version)" : "" );
 
-	cmd( "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in Lsd installation directory for information on particular problems.\"" );
+	cmd( "label .mm.lab -justify left -text \"- Each error is indicated by the file name and line number where it has been identified.\n- Check the relative file and search on the indicated line number, considering that the error may have occurred in the previous line.\n- Fix first errors at the beginning of the list, since the following errors may be due to previous ones.\n- Check the 'Readme.txt' in LSD installation directory for information on particular problems.\"" );
 	cmd( "pack .mm.lab" );
 
 	cmd( "set a [ list \"$fonttype\" $small_character ]" );

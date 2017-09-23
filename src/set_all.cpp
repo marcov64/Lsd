@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -900,7 +900,7 @@ This function fills the initial values according to the sensitivity analysis sys
 descending in parallel from Root.
 
 Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser. This command generates as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
+When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main LSD Browser. This command generates as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
 
 The user is supposed then to save the resulting configuration.
 
@@ -952,7 +952,7 @@ This function fills the initial values according to the sensitivity analysis sys
 Contrary to parallel sensitivity settings, this function initialize all elements in the configuration with the specified label.
 
 Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main Lsd Browser.
+When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main LSD Browser.
 
 Options concerning initialization for sensitivity analysis are saved into model configuration files, to be executed with a No Window version of the LSD model. 
 One configuration file is created for each possible combination of the sensitivity analysis values (parameters and initial conditions). Optionally, it is possible

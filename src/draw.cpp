@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -150,7 +150,7 @@ else	// or just update canvas
 	draw_obj(t, top, v0, h0, 0);
 }
 
-cmd( "wm title $g \"%s%s - Lsd Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
+cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
 }
 
 

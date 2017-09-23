@@ -5,7 +5,7 @@ written by Marco Valente (& Marcelo Pereira in this)
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -213,7 +213,7 @@ netLink::~netLink( void )
 
 
 /*
-	Add new link from Lsd object. Does NOT check if the link already exists.
+	Add new link from LSD object. Does NOT check if the link already exists.
 	So, if multiple links are to be prevented, caller has to check before calling.
 */
 
@@ -236,7 +236,7 @@ netLink *object::add_link_net( object *destPtr, double weight = 0, double probTo
 
 
 /*
-	Remove link from Lsd object.
+	Remove link from LSD object.
 */
 
 void object::delete_link_net( netLink *ptr )
@@ -253,7 +253,7 @@ void object::delete_link_net( netLink *ptr )
 
 
 /*
-	Search for existing link from Lsd object. Return pointer to the first 
+	Search for existing link from LSD object. Return pointer to the first 
 	link found or NULL if link to destination does not exist.
 */
 
@@ -361,7 +361,7 @@ netNode::~netNode( void )
 
 
 /*
-	Add netNode data structure to Lsd object
+	Add netNode data structure to LSD object
 */
 
 netNode *object::add_node_net( long id = -1, char const nodeName[] = "", 
@@ -388,7 +388,7 @@ netNode *object::add_node_net( long id = -1, char const nodeName[] = "",
 
 
 /*
-	Remove netNode data structure from Lsd object.
+	Remove netNode data structure from LSD object.
 */
 
 void object::delete_node_net( void )

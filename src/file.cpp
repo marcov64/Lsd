@@ -5,7 +5,7 @@ written by Marco Valente
 Universita' dell'Aquila
 
 Copyright Marco Valente
-Lsd is distributed according to the GNU Public License
+LSD is distributed according to the GNU Public License
 
 Comments and bug reports to marco.valente@univaq.it
 ****************************************************
@@ -1143,7 +1143,7 @@ int load_configuration( object *r, bool reload )
 	
 	if( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
 	{
-		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the Lsd model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
+		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 	}  
 	
 endLoad:
