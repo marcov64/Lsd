@@ -2534,7 +2534,7 @@ if ( ! reload )
   strcpy(lastObj,"");			// disable last object for quick reload
   cmd( "set res %s", simul_name );
 
-  cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir [pwd] -initialfile \"$res.lsd\" -filetypes {{{Lsd model files} {.lsd}}  }]" );
+  cmd( " set bah [tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"[pwd]\" -initialfile \"$res.lsd\" -filetypes {{{Lsd model files} {.lsd}}  }]" );
   
   *choice=0;
   cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .lsd $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
@@ -4657,21 +4657,10 @@ case 68:
 			break;
 
 	// check for existing NW executable
-	sprintf(ch, "%s/%s", exec_path, exec_file);			// form full executable name
+	sprintf( ch, "%s/lsd_gnuNW", exec_path );			// form full executable name
 	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
 	if(*choice == 1)
-	{
-		// remove Windows extension, if present
-		if((lab1 = strstr(ch, ".exe")) != NULL)
-			lab1[0]='\0';
-		else
-			if((lab1 = strstr(ch, ".EXE")) != NULL) 
-				lab1[0]='\0';
-			
-		strcat(ch, "NW.exe");							// add Windows ending
-	}
-	else
-		strcat(ch, "NW");								// add Unix ending
+		strcat(ch, ".exe");								// add Windows ending
 
 	if ((f=fopen(ch, "rb")) == NULL) 
 	{
@@ -4865,7 +4854,7 @@ case 68:
 				strcpy( msg, strchr( ch, ':' ) + 1 );
 				strcpy( ch, msg );
 			}
-			if( strchr( out_dir, ':' ) != NULL )				// remove Windows drive letter
+			if( strchr( out_dir, ':' ) != NULL )			// remove Windows drive letter
 			{
 				strcpy( msg, strchr( out_dir, ':' ) + 1 );
 				strcpy( out_dir, msg );
@@ -5092,21 +5081,10 @@ case 69:
 		}
 
 	// check for existing NW executable
-	sprintf(lab, "%s/%s", exec_path, exec_file);		// form full executable name
+	sprintf( lab, "%s/lsd_gnuNW", exec_path );			// form full executable name
 	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
 	if(*choice == 1)
-	{
-		// remove Windows extension, if present
-		if((lab1 = strstr(lab, ".exe")) != NULL)
-			lab1[0]='\0';
-		else
-			if((lab1 = strstr(lab, ".EXE")) != NULL) 
-				lab1[0]='\0';
-			
-		strcat(lab, "NW.exe");							// add Windows ending
-	}
-	else
-		strcat(lab, "NW");								// add Unix ending
+		strcat(lab, ".exe");							// add Windows ending
 
 	if ((f=fopen(lab, "rb")) == NULL) 
 	{

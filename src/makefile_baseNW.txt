@@ -5,7 +5,7 @@ LSDROOT=.
 INCLUDE=-I$(PATH_HEADER) -I$(SRC)
 LIBS_NW=$(LIBS) -lpthread
 SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3
-TARGET_NW=$(TARGET)NW
+TARGET_NW=lsd_gnuNW
 
 $(TARGET_NW)$(EXT): $(FUN).obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)file.obj \
 $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \

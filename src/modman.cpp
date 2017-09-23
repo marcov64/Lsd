@@ -4948,14 +4948,14 @@ bool compile_run( bool run, bool nw )
 		goto end;
 	}
 	if ( nw )
-		strcat( str, "NW" );
+		strcpy( str, "TARGET=lsd_gnuNW" );		// NW version use fixed name because of batches
 
 	// show compilation banner
 	cmd( "set init_time [clock seconds]" ); 
 	cmd( "if { ! $autoHide || ! %d } { set parWnd .; set posWnd centerW } { set parWnd \"\"; set posWnd centerS }", run );
 	cmd( "newtop .t \"Please Wait\" \"\" $parWnd" );
 	if ( nw )
-		cmd( "label .t.l1 -font {-weight bold } -text \"Making non-graphical version of model...\"" );
+		cmd( "label .t.l1 -font {-weight bold } -text \"Making 'No Window' version of model...\"" );
 	else
 		cmd( "label .t.l1 -font {-weight bold } -text \"Making model...\"" );
 	if ( run )

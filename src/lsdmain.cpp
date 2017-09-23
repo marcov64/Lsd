@@ -424,9 +424,12 @@ if ( choice )
 	myexit( 200 );
 }
 str = ( char * ) Tcl_GetVar( inter, "path", 0 );
-delete [] path;
+delete [ ] path;
 path = new char[ strlen( str ) + 1 ];
 strcpy( path, str );
+delete [ ] exec_path;
+exec_path = new char[ strlen( str ) + 1 ];
+strcpy( exec_path, str );
 
 // check if LSDROOT already exists and use it if so, if not, search the current directory tree
 cmd( "if [ info exists env(LSDROOT) ] { set RootLsd [ file normalize $env(LSDROOT) ]; if { ! [ file exists \"$RootLsd/src/interf.cpp\" ] } { unset RootLsd } }" );
