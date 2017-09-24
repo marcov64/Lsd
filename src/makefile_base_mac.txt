@@ -19,9 +19,9 @@ $(SRC_DIR)report.o $(SRC_DIR)nets.o $(TARGET).app/Contents/Info.plist
 	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o \
 	$(SWITCH_CC_LNK) -F$(PATH_TCLTK_FRMWRK) -L$(PATH_TCL_LIB) $(TCL_LIB) -L$(PATH_TK_LIB) \
 	$(TK_LIB) -L$(PATH_LIB) $(LIBS) -o $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` \
+	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's|^[^/]*\(@[^(]*Tcl\) .*$$|\1|p'` \
 	$(PATH_TCLTK_FRMWRK)/Tcl.framework/Tcl $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` \
+	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's|^[^/]*\(@[^(]*Tk\) .*$$|\1|p'` \
 	$(PATH_TCLTK_FRMWRK)/Tk.framework/Tk $(TARGET_PKG)
 	touch -c -f $(TARGET).app
 	
