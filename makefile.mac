@@ -2,7 +2,7 @@
 
 CC=g++
 TARGET=LMM
-SWITCH_CC=-DMAC_PKG -Wno-unused-result -O3
+SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.9 -O3
 
 # For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
 LSDROOT=.
