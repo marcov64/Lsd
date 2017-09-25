@@ -189,8 +189,8 @@ if ( choice )
 tk_ok = true;
 cmd( "tk appname lmm" );
 
-// close console if open (usually in Mac)
-cmd( "foreach i [ winfo interps ] { if { ! [ string equal $i lmm ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } }" );
+// close console if open (usually only in Mac)
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
 
 // check installation directory for no spaces in name
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
