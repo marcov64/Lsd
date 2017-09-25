@@ -381,7 +381,10 @@ if ( choice )
 	myexit( 7 );
 }
 tk_ok = true;
-cmd( "tk appname browser" );
+cmd( "tk appname lsd" );
+
+// close console if open (usually in Mac)
+cmd( "foreach i [ winfo interps ] { if { ! [ string equal $i lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } }" );
 
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )

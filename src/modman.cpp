@@ -189,6 +189,9 @@ if ( choice )
 tk_ok = true;
 cmd( "tk appname lmm" );
 
+// close console if open (usually in Mac)
+cmd( "foreach i [ winfo interps ] { if { ! [ string equal $i lmm ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } }" );
+
 // check installation directory for no spaces in name
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
@@ -814,7 +817,6 @@ if(argn>1)
 cmd( "focus -force .f.t.t" );
 
 cmd( "set lfindcounter -1" );
-
 
 loop:
 

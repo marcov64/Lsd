@@ -23,8 +23,7 @@ INCLUDE=-I$(PATH_TCL_HEADER) -I$(PATH_TK_HEADER) -I$(LSDROOT)/src
 # Adjust executable to use the provided Tcl/Tk frameworks
 $(TARGET_PKG): $(SRC_DIR)modman.o
 	$(CC) $(SWITCH_CC) $(SRC_DIR)modman.o -F$(PATH_LIB) -framework Tcl -framework Tk -o $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's/\(^[^/]*\(\/[^(]*Tcl\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tcl.framework/Versions/8.6/Tcl $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's/\(^[^/]*\(\/[^(]*Tk\) .*$$\)/\2/p'` @executable_path/../Frameworks/Tk.framework/Versions/8.6/Tk $(TARGET_PKG)
+	touch -c -f $(TARGET).app
 
 $(SRC_DIR)modman.o: $(SRC_DIR)modman.cpp 
 	$(CC) $(SWITCH_CC) -c $(SRC_DIR)modman.cpp -o $(SRC_DIR)modman.o $(INCLUDE)
