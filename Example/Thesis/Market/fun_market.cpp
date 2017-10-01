@@ -38,7 +38,7 @@ int i, j;
 //for(i=0; i<100; i++)
  //v[i]=0;
 //and an object (a pointer to)
-register object *cur;
+object *cur;
 
 
 if(quit==2)
@@ -1458,10 +1458,10 @@ return(res);
 
 object *turboskip(int n)
 {
-register object *c;
+object *c;
 
 return l[n-1];
-register int i;
+int i;
 i=n/500;
 c=l[i];
 i=500*i;

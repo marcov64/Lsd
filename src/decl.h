@@ -530,6 +530,7 @@ void find_using(object *r, variable *v, FILE *frep);
 void get_bool( const char *tcl_var, bool *var );
 void get_double( const char *tcl_var, double *var );
 void get_int( const char *tcl_var, int *var );
+void get_long( const char *tcl_var, long *var );
 void go_next(object **t);
 void handle_signals( void ( * handler )( int signum ) );
 void histograms(int *choice);
@@ -592,6 +593,7 @@ void set_all(int *choice, object *original, char *lab, int lag);
 void set_blueprint(object *container, object *r);
 void set_buttons_log( bool on );
 void set_cs_data(int *choice);
+void set_fast( bool on );
 void set_lab_tit(variable *var);
 void set_obj_number(object *r, int *choice);
 void set_shortcuts( const char *window );
@@ -603,6 +605,7 @@ void show_debug( object *n );
 void show_eq(char *lab, int *choice);
 void show_graph( object *t);
 void show_initial(object *n);
+void show_neighbors( object *r );
 void show_observe(object *n);
 void show_parallel( object *n );
 void show_plot( object *n );
@@ -611,6 +614,7 @@ void show_prof_aggr( void );
 void show_rep_initial(FILE *f, object *n, int *begin);
 void show_rep_observe(FILE *f, object *n, int *begin);
 void show_save(object *n);
+void show_tmp_vars( void );
 void signal_handler(int);
 void sort_cs_asc(char **s,char **t, double **v, int nv, int nt, int c);
 void sort_cs_desc(char **s,char **t, double **v, int nv, int nt, int c);
@@ -622,6 +626,7 @@ void tex_report_initall(object *r, FILE *f);
 void tex_report_observe(object *r, FILE *f);
 void tex_report_struct(object *r, FILE *f);
 void uncover_browser( void );
+void unwind_stack( void );
 void wipe_out(object *d);
 void write_list(FILE *frep, object *root, int flag_all, char const *prefix);
 void write_obj(object *r, FILE *frep);
@@ -635,7 +640,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global variables
 
-extern bool fast;			// fast mode (log window)
+extern bool fast_mode;		// fast mode (log window)
 extern bool fast_lookup;	// flag for fast look-up mode
 extern bool ignore_eq_file;	// control of configuration files equation updating
 extern bool iniShowOnce;	// prevent repeating warning on # of columns

@@ -73,69 +73,67 @@ proc LsdTkDiff { a b { c "" } { d "" } } {
 
 proc ls2html {from chop} {
 
-catch [set list [glob *]]
-if { [info exists list] == 0 } {return } {}
+	catch [set list [glob *]]
+	if { [info exists list] == 0 } {return }
 
+	foreach i $list {
+		if { [file isdirectory $i] == 1 } {lappend ldir $i} {lappend lfile $i } 
+	}
 
-foreach i $list {
+	if { [info exists ldir] == 1 } {
+		set sortedlist [lsort -dictionary $ldir]
+		foreach i $sortedlist {
+			cd $i; ls2html $from $chop; cd ..;
+		} 
+	}
 
- if { [file isdirectory $i] == 1 } {lappend ldir $i} {lappend lfile $i } 
-}
+	set f [open index.html w]
+	puts $f "<B><font size=+3><U>Directory: [string range [pwd] $chop end ]</U></font></B>"
+	if { [pwd] != $from } {
+		puts $f "\n<br><a href=\"../index.html\">Return</a> to UP directory" 
+	}
 
-if { [info exists ldir] == 1 } {
+	puts $f "\n<br>"
 
-set sortedlist [lsort -dictionary $ldir]
-foreach i $sortedlist {
+	if { [info exists ldir] == 1 } {
+		puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
+		puts $f "<B><font size=+2>List of directories</B></font>\n<br>"
+		foreach i $sortedlist {
+			puts $f "\n<br><B>Dir: </B><a href=\"$i/index.html\">$i</a>" 
+		} 
+	} 
 
- cd $i; ls2html $from $chop; cd ..;
- 
-} } {}
+	if { [info exists lfile] == 1 } {
+		set sortedlist [lsort -dictionary $lfile]
+		puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
+		puts $f "<B><font size=+2>List of files</font></B>\n<br>"
+		puts $f "<br><b><font face=\"Courier New,Courier\">File name...................Size, &nbsp Date</font></b><br>\n"
 
-set f [open index.html w]
-puts $f "<B><font size=+3><U>Directory: [string range [pwd] $chop end ]</U></font></B>"
-if { [pwd] != $from } {puts $f "\n<br><a href=\"../index.html\">Return</a> to UP directory" } {}
+		foreach i $sortedlist {
+			if { [string compare $i index.html] } {
+				puts $f "<font face=\"Courier New,Courier\"><a href=\"$i\">$i</a>" 
+				set len [string length $i]
+				set np [expr 30 -$len]
+				set np [expr $np - [string length [file size $i]]]
+				set fill [string repeat . $np]
+				puts $f "$fill [file size $i], "
+				set fdate [clock format [file mtime $i] -format "%e %h %Y"]
+				puts $f "$fdate </font>\n<br>"
+			}
+		}
+	}
 
-puts $f "\n<br>"
-
-if { [info exists ldir] == 1 } {
-puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
-puts $f "<B><font size=+2>List of directories</B></font>\n<br>"
-foreach i $sortedlist {
- puts $f "\n<br><B>Dir: </B><a href=\"$i/index.html\">$i</a>" 
- } 
-} {} 
-
-if { [info exists lfile] == 1 } {
-set sortedlist [lsort -dictionary $lfile]
-puts $f "\n<br><hr style=\"width: 100%; height: 2px;\">"
-puts $f "<B><font size=+2>List of files</font></B>\n<br>"
-puts $f "<br><b><font face=\"Courier New,Courier\">File name...................Size, &nbsp Date</font></b><br>\n"
-
-foreach i $sortedlist {
-  if { [string compare $i index.html] } {
-  puts $f "<font face=\"Courier New,Courier\"><a href=\"$i\">$i</a>" 
-  set len [string length $i]
-  set np [expr 30 -$len]
-  set np [expr $np - [string length [file size $i]]]
-  set fill [string repeat . $np]
-  puts $f "$fill [file size $i], "
-  set fdate [clock format [file mtime $i] -format "%e %h %Y"]
-  puts $f "$fdate </font>\n<br>"
-  } {}
-}
-} {}
-
-if { [file exist description.txt] } {
-  puts $f "<hr style=\"width: 100%; height: 2px;\">"
-  puts $f "<B><font size=+2>Description</font></B>\n<br>\n<br>"
-  set desc [open description.txt r]
-  while { ![eof $desc] } {
-    puts $f [gets $desc]
-    puts $f "<br>"
-   }   
-  close $desc
-  } {}
-close $f
+	if { [file exist description.txt] } {
+		puts $f "<hr style=\"width: 100%; height: 2px;\">"
+		puts $f "<B><font size=+2>Description</font></B>\n<br>\n<br>"
+		set desc [open description.txt r]
+		while { ![eof $desc] } {
+			puts $f [gets $desc]
+			puts $f "<br>"
+		}   
+		close $desc
+	}
+	close $f
 }
 
 
@@ -143,11 +141,21 @@ close $f
 # 	Checks is a filename has spaces
 #
 
-proc fn_spaces { fn { par . } } {
-	if { [ string first " " $fn ] == -1 } {
-		return false
-	} {
-		tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
-		return true
+proc fn_spaces { fn { par . } { mult 0 } } {
+	if $mult {
+		set count [ llength $fn ]
+	} else {
+		set count 0
 	}
+
+	for { set i 0 } { $i < $count } { incr i } {
+		set file "[ lindex $fn $i ]"
+		if { [ string first " " $file ] == -1 } {
+			return false
+		} else {
+			tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
+			return true
+		}
+	}
+	return false
 }

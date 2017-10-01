@@ -766,10 +766,10 @@ return(res);
 
 object *turboskip(int n)
 {
-register object *c;
+object *c;
 
 return l[n-1];
-register int i;
+int i;
 i=n/500;
 c=l[i];
 i=500*i;

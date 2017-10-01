@@ -49,7 +49,7 @@ variable *cur_v;
 //You may need an integer to be used as a counter
 int i, j;
 //and an object (a pointer to)
-register object *cur;
+object *cur;
 
 
 if(quit==2)

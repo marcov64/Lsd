@@ -299,24 +299,29 @@ double variable::cal( object *caller, int lag )
 	under_computation = true;
 
 #ifdef PARALLEL_MODE
-	if ( ! parallel_mode )
-	{
+	if ( ! fast_mode && ! parallel_mode )
+#else
+	if ( ! fast_mode )
 #endif	
-		//Add the Variable to the stack
-		stack++;
-
-		if(stacklog->next==NULL)
+	{
+		// add the Variable to the stack
+		if ( stacklog != NULL && stacklog->next == NULL )
 		{
-		 stacklog->next=new lsdstack;
-		 stacklog->next->next=NULL;
+			stack++;
+			stacklog->next=new lsdstack;
+			stacklog->next->next=NULL;
+			stacklog->next->prev = stacklog;
+			strcpy( stacklog->next->label, label );
+			stacklog->next->ns = stack;
+			stacklog->next->vs = this;
+			stacklog = stacklog->next;
 		} 
-
-		strcpy(stacklog->next->label, label);
-		stacklog->next->ns=stack;
-		stacklog->next->vs=this;
-
-		stacklog->next->prev=stacklog;
-		stacklog=stacklog->next;
+		else
+		{
+			sprintf( msg, "failure while pushing '%s' (in object '%s')", label, up->label );
+			error_hard( msg, "LSD trace stack corrupted", "Internal LSD error." );
+			return 0;
+		}
 
 #ifndef NO_WINDOW
 		if ( stackinfo_flag >= stack && ( ! prof_obs_only || observe ) )
@@ -325,13 +330,11 @@ double variable::cal( object *caller, int lag )
 			if ( prof_aggr_time )
 				start = clock( );				
 #endif
-#ifdef PARALLEL_MODE
 	}
 #ifndef NO_WINDOW
 	else
 		if ( prof_aggr_time )
 			start = clock( );				
-#endif	
 #endif	
 
 	// Compute the Variable's equation
@@ -373,9 +376,11 @@ double variable::cal( object *caller, int lag )
 	last_update++;
 
 #ifdef PARALLEL_MODE
-	if ( ! parallel_mode )
+	if ( ! fast_mode && ! parallel_mode )
+#else
+	if ( ! fast_mode )
+#endif	
 	{
-#endif
 #ifndef NO_WINDOW
 		if ( prof_aggr_time )
 		{
@@ -394,58 +399,65 @@ double variable::cal( object *caller, int lag )
 
 		if ( stackinfo_flag >= stack && ( ! prof_obs_only || observe ) )
 		{
-		  end_profile[ stack - 1 ] = prof_aggr_time ? end : clock( );
-		  
-		  time = 1000 * ( end_profile[ stack - 1 ] - start_profile[ stack - 1 ] ) / CLOCKS_PER_SEC;
-		  
-		  if ( time >= prof_min_msecs )
-		  {
-			  set_lab_tit( this );
-			  plog( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
-			  plog( "%.4g\t", "highlight", val[ 0 ] );
-			  plog( "t=" );
-			  plog( "%d\t", "highlight", t );
-			  plog( "msecs=" );
-			  plog( "%d\t", "highlight", time );
-			  plog( "stack=" );
-			  plog( "%d\t", "highlight", stack );
-			  plog( "caller=%s%s%s", "", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || stacklog->prev == NULL ? "" : stacklog->prev->label );
-		  }
+			end_profile[ stack - 1 ] = prof_aggr_time ? end : clock( );
+
+			time = 1000 * ( end_profile[ stack - 1 ] - start_profile[ stack - 1 ] ) / CLOCKS_PER_SEC;
+
+			if ( time >= prof_min_msecs )
+			{
+				set_lab_tit( this );
+				plog( "\n%-12.12s(%-.10s)\t=", "prof1", label, lab_tit );
+				plog( "%.4g\t", "highlight", val[ 0 ] );
+				plog( "t=" );
+				plog( "%d\t", "highlight", t );
+				plog( "msecs=" );
+				plog( "%d\t", "highlight", time );
+				plog( "stack=" );
+				plog( "%d\t", "highlight", stack );
+				plog( "caller=%s%s%s", "", caller == NULL ? "SYSTEM" : caller->label, caller == NULL ? "" : "\ttrigger=", caller == NULL || stacklog == NULL || stacklog->prev == NULL ? "" : stacklog->prev->label );
+			}
 		}
 
-		if ( debug_flag && debug == 'd' && deb_cond == 0 )
+		if ( debug_flag && when_debug >= t && debug == 'd' && deb_cond == 0 )
 			deb( ( object * ) up, caller, label, &val[ 0 ] );
 		else
-		 switch(deb_cond)
-		 {
-		  case 0: break;
-		  case 1: if(val[0]==deb_cnd_val)
-					  deb( (object *)up, caller, label, &val[0] );
-					 break;
-		  case 2: if(val[0]>deb_cnd_val)
-					  deb( (object *)up,caller, label, &val[0] );
-					 break;
-		  case 3: if(val[0]<deb_cnd_val)
-					  deb( (object *)up,caller, label, &val[0] );
-					 break;
-		  default:
+			switch( deb_cond )
+			{
+				case 0: 
+					break;
+				case 1: 
+					if ( val[0] == deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[0] );
+					break;
+				case 2: 
+					if( val[0] > deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[0] );
+					break;
+				case 3: 
+					if( val[0] < deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[0] );
+					break;
+				default:
 					sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
 					error_hard( msg, "Internal error", "If error persists, please contact developers." );
 					return -1;
-		 }
+			}
 #endif
-		//Remove the element of the stack
-		stack--;
+		// remove the element from the stack
 		if ( stacklog != NULL && stacklog->prev != NULL )
-			stacklog = stacklog->prev;
-		if ( stacklog != NULL )
 		{
-			delete stacklog->next; //removed. The stack is maintained to avoid creation/destruction of memory. REINSERTED
-			stacklog->next = NULL; //REINSERTED
+			stacklog = stacklog->prev;
+			delete stacklog->next;
+			stacklog->next = NULL;
+			stack--;
 		}
-#ifdef PARALLEL_MODE
+		else
+		{
+			sprintf( msg, "failure while poping '%s' (in object '%s')", label, up->label );
+			error_hard( msg, "LSD trace stack corrupted", "Internal LSD error." );
+			return 0;
+		}
 	}
-#endif
 	
 	under_computation = false;
 

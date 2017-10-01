@@ -958,7 +958,7 @@ else
 		cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html } { set done 2 }" );
 
 cmd( "showtop $T topleftW" );
-cmd( "focus $T.f.ent_var" );
+cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
 
 here_newelem:
 
@@ -1038,7 +1038,7 @@ redrawRoot = ( done == 2 ) ? false : true;
 
 if(done!=2)
  {
-  cmd( "lappend ModElem %s", lab );
+  cmd( "if [ info exists ModElem ] { lappend ModElem %s }", lab );
  }  
 
 if ( cur2 != NULL )			// restore original current object
@@ -1106,7 +1106,7 @@ cmd( "pack $T.l $T.f $w -pady 5" );
 cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddADesc } { set done 2 }" );
 
 cmd( "showtop $T topleftW" );
-cmd( "focus $T.f.ent_var" );
+cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
 
 here_newobject:
 while(done==0)
@@ -1220,7 +1220,7 @@ cmd( "pack $T.l $T.f $w -pady 5" );
 cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#InsertAParent } { set done 2 }" );
 
 cmd( "showtop $T topleftW" );
-cmd( "focus $T.f.ent_var" );
+cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
 
 here_newparent:
 while(done==0)
@@ -1541,18 +1541,17 @@ else					// rename
 			if ( done == 1 )
 			{
 				cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"The name already exists in the model\" -detail \"Choose a different name and try again.\"" );
-				cmd( "focus .chgnam.e; .chgnam.e selection range 0 end" );
+				cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 				goto here_newname;
 			}
 			if ( done == 2 )
 			{
 				cmd( "tk_messageBox -parent .chgnam -title Error -icon error -type ok -message \"Invalid characters in name\" -detail \"Names must begin with a letter (English alphabet) or underscore ('_') and may contain letters, numbers or '_' but no spaces. Choose a different label and try again.\"" );
-				cmd( "focus .chgnam.e; .chgnam.e selection range 0 end" );
+				cmd( "focus .chgnam.e.e; .chgnam.e.e selection range 0 end" );
 				goto here_newname;
 			}
 			
-			cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", r->label );
-			cmd( "lappend ModElem %s", lab );		
+			cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ]; lappend ModElem %s } }", r->label, lab );
    
 			change_descr_lab( cur->label, lab, "", "", "" );
 			cur->chg_lab( lab );
@@ -1648,8 +1647,13 @@ cmd( "button $T.b0.del -width $butWid -text Delete -command {set done 10} -under
 cmd( "pack $T.b0.prop $T.b0.mov $T.b0.del -padx 10 -side left" );
 
 cmd( "frame $T.b1" );
-cmd( "checkbutton $T.b1.sav -text \"Save: save the series for later analysis\" -variable save -underline 0" );
-cmd( "checkbutton $T.b1.savi -text \"Save file: save the series in a separate file\" -variable savei -underline 5" );
+
+cmd( "frame $T.b1.sav" );
+cmd( "checkbutton $T.b1.sav.n -text \"Save: save the series for analysis      \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
+cmd( "checkbutton $T.b1.sav.i -text \"Save in separate file\" -variable savei -underline 17" );
+cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
+cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
+
 cmd( "checkbutton $T.b1.plt -text \"Run time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
 cmd( "checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
 cmd( "checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
@@ -1657,14 +1661,14 @@ cmd( "checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updati
 switch ( cv->param )
 {
 	case 1:
-		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt -anchor w" );
+		cmd( "pack $T.b1.sav $T.b1.plt -anchor w" );
 		break;
 	case 2:
-		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb -anchor w" );
+		cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb -anchor w" );
 		cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
 		break;
 	case 0:
-		cmd( "pack $T.b1.sav $T.b1.savi $T.b1.plt $T.b1.deb $T.b1.par -anchor w" );
+		cmd( "pack $T.b1.sav $T.b1.plt $T.b1.deb $T.b1.par -anchor w" );
 		cmd( "bind $T <Control-d> \"$T.b1.deb invoke\"; bind $T <Control-D> \"$T.b1.deb invoke\"" );
 		cmd( "bind $T <Control-p> \"$T.b1.par invoke\"; bind $T <Control-P> \"$T.b1.par invoke\"" );
 }
@@ -1756,8 +1760,8 @@ cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#variables } { se
 cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 cmd( "bind $T <Control-m> \"$T.b0.mov invoke\"; bind $T <Control-M> \"$T.b0.mov invoke\"" );
 cmd( "bind $T <Control-l> \"$T.b0.del invoke\"; bind $T <Control-L> \"$T.b0.del invoke\"" );
-cmd( "bind $T <Control-s> \"$T.b1.sav invoke\"; bind $T <Control-S> \"$T.b1.sav invoke\"" );
-cmd( "bind $T <Control-f> \"$T.b1.savi invoke\"; bind $T <Control-F> \"$T.b1.savi invoke\"" );
+cmd( "bind $T <Control-s> \"$T.b1.sav.n invoke\"; bind $T <Control-S> \"$T.b1.sav.n invoke\"" );
+cmd( "bind $T <Control-f> \"$T.b1.sav.i invoke\"; bind $T <Control-F> \"$T.b1.sav.i invoke\"" );
 cmd( "bind $T <Control-p> \"$T.b1.plt invoke\"; bind $T <Control-P> \"$T.b1.plt invoke\"" );
 cmd( "bind $T <Control-o> \"$Td.opt.obs invoke\"; bind $T <Control-O> \"$Td.opt.obs invoke\"" );
 cmd( "bind $T <Control-a> \"$Td.b.auto_doc invoke\"; bind $T <Control-A> \"$Td.b.auto_doc invoke\"" );
@@ -2038,12 +2042,12 @@ if ( renVar )
 	}
 	
 	// remove from find list
-	cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", lab_old  );
+	cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", lab_old  );
 
 	if ( ! delVar )
 	{
 		change_descr_lab(lab_old, lab, "", "", "");
-		cmd( "lappend ModElem %s", lab );		// add to find list
+		cmd( "if [ info exists ModElem ] { lappend ModElem %s }", lab );		// add to find list
 	}
 	
 	for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
@@ -2487,7 +2491,8 @@ return(n);
 case 11:
 
 if ( discard_change( ) )	// unsaved configuration changes ?
-	myexit(0);
+	myexit( 0 );
+	
 break;
 
 
@@ -2503,22 +2508,22 @@ if ( reload )
 if ( struct_loaded )
 { 
 	if ( ! discard_change( ) )		// unsaved configuration?
-	 break;
+		break;
 
-   cmd( "set a [split [winfo children .] ]" );  // remove old runtime plots
-   cmd( "foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
-   for(n=r; n->up!=NULL; n=n->up);
-   r=n;
-   cmd( "destroytop .str" );
-   cmd( "destroytop .lat" );	// remove lattice
-   cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );
-  
-   empty_sensitivity(rsense); 	// discard sensitivity analysis data
-   rsense=NULL;
-   unsavedSense = false;			// nothing to save
-   findexSens=0;
-   nodesSerial=0;				// network node serial number global counter
-   cmd( "catch {unset ModElem}" );
+	cmd( "set a [split [winfo children .] ]" );  // remove old runtime plots
+	cmd( "foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
+	for(n=r; n->up!=NULL; n=n->up);
+	r=n;
+	cmd( "destroytop .str" );
+	cmd( "destroytop .lat" );	// remove lattice
+	cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );
+
+	empty_sensitivity(rsense); 	// discard sensitivity analysis data
+	rsense=NULL;
+	unsavedSense = false;			// nothing to save
+	findexSens=0;
+	nodesSerial=0;				// network node serial number global counter
+	cmd( "unset -nocomplain ModElem" );
 }
 
 struct_loaded = false;
@@ -2757,7 +2762,7 @@ unsavedSense = false;			// nothing to save
 findexSens=0;
 nodesSerial=0;				// network node serial number global counter
 add_description("Root", "Object", "(no description available)");      
-cmd( "catch {unset ModElem}" );
+cmd( "unset -nocomplain ModElem" );
 delete [] path;
 path = new char[ strlen( exec_path ) + 1 ];
 strcpy( path, exec_path );
@@ -2801,21 +2806,24 @@ cmd( "set T .simset" );
 cmd( "newtop $T \"Simulation Settings\" { set choice 2 }" );
 
 cmd( "frame $T.f" );
-cmd( "frame $T.f.a" );
-cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
-cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
-cmd( "$T.f.a.e insert 0 $sim_num" ); 
-cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
-cmd( "frame $T.f.b" );
-cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
-cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
-cmd( "$T.f.b.e1 insert 0 $seed" ); 
-cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
+
 cmd( "frame $T.f.c" );
 cmd( "label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
 cmd( "entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$T.f.c.e2 insert 0 $max_step" ); 
 cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
+
+cmd( "frame $T.f.a" );
+cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
+cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$T.f.a.e insert 0 $sim_num" ); 
+cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
+
+cmd( "frame $T.f.b" );
+cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
+cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
+cmd( "$T.f.b.e1 insert 0 $seed" ); 
+cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame $T.f.d" );
 cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
@@ -2835,7 +2843,7 @@ cmd( "entry $T.f.f.e2 -width 5 -validate focusout -vcmd { if [ string is integer
 cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" ); 
 cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
 
-cmd( "pack $T.f.a $T.f.b $T.f.c $T.f.d $T.f.e $T.f.f -anchor w" );
+cmd( "pack $T.f.c $T.f.a $T.f.b $T.f.d $T.f.e $T.f.f -anchor w" );
 
 cmd( "checkbutton $T.f.obs -text \"Profile observed variables only\" -variable prof_obs_only" );
 cmd( "checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable prof_aggr_time" );
@@ -2851,25 +2859,20 @@ cmd( "pack $T.f.obs $T.f.aggr -anchor e" );
 
 cmd( "pack $T.f -padx 5 -pady 5" );
 cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menurun.html#simsetting } { set choice 2 }" );
+cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.a.e; $T.f.a.e selection range 0 end}" );
 cmd( "bind $T.f.a.e <KeyPress-Return> {focus $T.f.b.e1; $T.f.b.e1 selection range 0 end}" );
-cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.c.e2; $T.f.c.e2 selection range 0 end}" );
-cmd( "bind $T.f.c.e2 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
+cmd( "bind $T.f.b.e1 <KeyPress-Return> {focus $T.f.d.e2; $T.f.d.e2 selection range 0 end}" );
 cmd( "bind $T.f.d.e2 <KeyPress-Return> {focus $T.f.e.e2; $T.f.e.e2 selection range 0 end}" );
 cmd( "bind $T.f.e.e2 <KeyPress-Return> {focus $T.f.f.e2; $T.f.f.e2 selection range 0 end}" );
 cmd( "bind $T.f.f.e2 <KeyPress-Return>  {focus $T.b.ok}" );
 
 cmd( "showtop $T centerW" );
-cmd( "$T.f.a.e selection range 0 end" );
-cmd( "$T.f.b.e1 selection range 0 end" );
 cmd( "$T.f.c.e2 selection range 0 end" );
-cmd( "$T.f.d.e2 selection range 0 end" );
-cmd( "$T.f.e.e2 selection range 0 end" );
-cmd( "$T.f.f.e2 selection range 0 end" );
-cmd( "focus $T.f.a.e" );
+cmd( "focus $T.f.c.e2" );
 
-*choice=0;
-while(*choice==0)
- Tcl_DoOneEvent(0);
+*choice = 0;
+while ( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
 
 cmd( "set sim_num [ .simset.f.a.e get ]" ); 
 cmd( "set seed [ .simset.f.b.e1 get ]" ); 
@@ -3293,7 +3296,7 @@ break;
 case 35:
 
 if ( discard_change( ) )	// check for unsaved configuration changes
-	myexit(0);
+	myexit( 0 );
 
 break;
 
@@ -3569,7 +3572,7 @@ cmd( "pack .srch.i" );
 cmd( "okcancel .srch b { set choice 1 } { set choice 2 }" );
 
 cmd( "bind .srch.i.e <KeyPress-Return> { set choice 1 }" );
-cmd( "bind .srch.i.e <KeyRelease> {if { %%N < 256 && [info exists ModElem] } { set b [.srch.i.e index insert]; set s [.srch.i.e get]; set f [lsearch -glob $ModElem $s*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }" );
+cmd( "bind .srch.i.e <KeyRelease> {if { %%N < 256 && [ info exists ModElem ] } { set b [.srch.i.e index insert]; set s [.srch.i.e get]; set f [lsearch -glob $ModElem $s*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }" );
 
 cmd( "showtop .srch" );
 cmd( "focus .srch.i.e" );
@@ -4733,7 +4736,7 @@ case 68:
 		else									// bunch of files?
 		{
 			cmd( "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{LSD model files} {.lsd}}} -multiple yes]" );
-			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
+			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
 			ffirst = 1;
@@ -5466,13 +5469,13 @@ void wipe_out(object *d)
 	object *cur;
 	variable *cv;
 
-	cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", d->label );
+	cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", d->label );
 
 	change_descr_lab( d->label, "", "", "", "" );
 
 	for ( cv = d->v; cv != NULL; cv = cv->next )
 	{
-		cmd( "set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] }", cv->label  );
+		cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", cv->label  );
 
 		change_descr_lab( cv->label, "" , "", "", "" );
 	}

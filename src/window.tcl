@@ -32,6 +32,9 @@
 
 package require Tk 8.5
 
+# Enable console window to be opened with CTRL+ALT+J
+set conWnd		true
+
 # Enable window functions operation logging
 set logWndFn	false
 
@@ -140,6 +143,36 @@ set parWndLst [ list ]
 set grabLst [ list ]
 set noParLst [ list .log .str .plt .lat ]
 
+# set global key mappings
+proc setglobkeys { w { chkChg 1 } } {
+	global conWnd grabLst
+	global parWndLst logWndFn
+	# soft/hard exit (check for unsaved changes or not)
+	if { $chkChg } {
+		bind $w <Control-Alt-x> { if [ string equal [ discard_change ] ok ] { exit }; break }
+		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
+	} else {
+		bind $w <Control-Alt-x> { exit }
+		bind $w <Control-Alt-X> { event generate . <Control-Alt-x> }
+	}
+	# open Tcl/Tk console
+	if { $conWnd } {
+		bind $w <Control-Alt-j> { 
+			# remove existing grabs
+			if [ info exists grabLst ] {
+				set lastGrab [ expr [ llength $grabLst ] - 1 ]
+				if { $lastGrab >= 0 } {
+					grab release [ lindex [ lindex $grabLst $lastGrab ] 0 ]
+					set grabLst [ list ]
+				}
+			}
+			tk_console
+			break 
+		}
+		bind $w <Control-Alt-J> { event generate . <Control-Alt-j> }
+	}
+}
+
 # procedures for create, update and destroy top level new windows
 proc newtop { w { name "" } { destroy { } } { par "." } } {
 	global tcl_platform RootLsd LsdSrc parWndLst grabLst noParLst logWndFn
@@ -173,9 +206,12 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 	wm group $w .
 	wm title $w $name
 	wm protocol $w WM_DELETE_WINDOW $destroy
+	setglobkeys $w
+	
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nnewtop (w:$w, master:[wm transient $w], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
+# show the window
 proc settop { w { name no } { destroy no } { par no } } {
 	global parWndLst grabLst logWndFn
 
@@ -764,7 +800,6 @@ proc save { w fr comSave } {
 	pack $w.$fr -side right 
 }
 
-
 # commands to disable/enable windows in cases where grab is inappropriate (only menus if not TK8.6)
 # call parameters are: container window, menu name, widgets names
 proc disable_window { w m { args "" } } {
@@ -1101,7 +1136,7 @@ interp alias {} floatsToByteArray  {} listToByteArray f
 interp alias {} doublesToByteArray {} listToByteArray d
 
 # Generic routine to convert a bytearray into a list
-proc byteArrayToList { valuetype bytearray {elemsize 0} } {
+proc byteArrayToList { valuetype bytearray { elemsize 0 } } {
 	if { $valuetype == "i" || $valuetype == "I" } {
 	   if { $::tcl_platform(byteOrder) == "littleEndian" } {
 		  set valuetype "i"
@@ -1266,6 +1301,60 @@ proc init_canvas_colors { } {
 				}
 			}			
 		}
+	}
+}
+
+# Update LMM main window title bar according to file save status
+proc update_title_bar { } {
+	global tosave before filename
+	
+	if [ winfo exists .f.t.t ] { 
+		set after [ .f.t.t get 1.0 end ] 
+	} else { 
+		set after $before 
+	}
+	if [ string compare $before $after ] { 
+		set tosave 1
+		wm title . "*$filename - LMM" 
+	} else { 
+		set tosave 0
+		wm title . "  $filename - LMM"
+	}
+}
+
+# Open Tk console window
+proc tk_console { } {
+	global conWnd
+	
+	if { ! $conWnd } {
+		return
+	}
+
+	if { ! [ winfo exists .console ] } {
+		tkcon::Init
+		tkcon title "Tcl/Tk Debug Console"
+	}
+	
+	tkcon show 
+}
+
+# load and set console configuration
+if { $conWnd } {
+	set msg "File(s) missing or corrupted"
+	set det "Tcl/Tk console file 'tkcon.tcl' is missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is continuing without console support."
+	if [ file exists "$RootLsd/$LsdSrc/tkcon.tcl" ] {
+		if { [ catch { source "$RootLsd/$LsdSrc/tkcon.tcl" } ] == 0 } {
+			set tkcon::PRIV(showOnStartup) 0
+			set tkcon::PRIV(root) .console
+			set tkcon::PRIV(protocol) { tkcon hide }
+			set tkcon::OPT(exec) ""
+		} else {
+			set conWnd false
+			tk_messageBox -type ok -icon warning -title Warning -message $msg -detail $det
+		}
+	} else {
+		set conWnd false
+			tk_messageBox -type ok -icon warning -title Warning -message $msg -detail $det
 	}
 }
 

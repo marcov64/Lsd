@@ -80,8 +80,10 @@ using namespace std;
 
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
+bool discard_change( void );	// ask before discarding unsaved changes
 char *get_fun_name( char *str, bool nw = false );
 int ModManMain( int argn, char **argv );
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );// Tcl entry point
 void check_option_files( bool sys = false );
 void cmd( const char *cm, ... );
 void color( int hiLev, long iniLin, long finLin );
@@ -99,7 +101,8 @@ char msg[ TCL_BUFF_STR ];
 char rootLsd[ MAX_PATH_LENGTH ];
 int choice;
 int shigh;						// syntax highlighting state (0, 1 or 2)
-int v_counter=0; 				//counter of the v[i] variables inserted in the equations
+int tosave = false;				// modified file flag
+int v_counter = 0; 				//counter of the v[i] variables inserted in the equations
 
 
 /*************************************
@@ -144,10 +147,8 @@ int main( int argn, char **argv )
  *************************************/
 int ModManMain( int argn, char **argv )
 {
-int i, num, sourcefile;
-int tosave = 0, macro = 1;
-char str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
-char *s;
+int i, num, sourcefile, macro = 1;
+char *s, str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
 FILE *f;
 
 // initialize the tcl interpreter
@@ -196,8 +197,8 @@ cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ]
 cmd( "if { [ string first \" \" \"[ pwd ]\" ] >= 0  } { set choice 1 } { set choice 0 }" );
 if ( choice )
 {
-	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
 	log_tcl_error( "Path check", "LSD directory path includes spaces, move all the LSD directory in another directory without spaces in the path" );
+	cmd( "tk_messageBox -icon error -title Error -type ok -message \"Installation error\" -detail \"The LSD directory is: '[ pwd ]'\n\nIt includes spaces, which makes impossible to compile and run LSD models.\nThe LSD directory must be located where there are no spaces in the full path name.\nMove all the LSD directory in another directory. If exists, delete the 'system_options.txt' file from the \\src directory.\n\nLSD is aborting now.\"" );
 	return 4;
 }
 
@@ -246,8 +247,8 @@ if ( choice )
 		}" );
 	if ( choice )
 	{
-		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		log_tcl_error( "Source files check", "Required LSD source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical LSD files or folders are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 		return 5;	
 	}
 	cmd( "set env(LSDROOT) $RootLsd" );
@@ -361,6 +362,7 @@ cmd( "set v_num 0" );
 cmd( "set shigh_temp $shigh" );
 cmd( "set alignMode \"LMM\"" );
 
+// load required Tcl/Tk data, procedures and packages
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
@@ -369,10 +371,13 @@ cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { sourc
 cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 if ( choice != 0 )
 {
-	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
 	return 10 + choice;
 }
+
+// create a Tcl command that calls the C discard_change function before killing LMM
+Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
 Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
 Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_BOOLEAN);
@@ -387,6 +392,7 @@ cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "bind . <Destroy> { set choice 1 }" );
 cmd( "icontop . lmm" );
 cmd( "sizetop .lmm" );
+cmd( "setglobkeys ." );				// set global keys for main window
 
 // main menu
 cmd( "menu .m -tearoff 0" );
@@ -409,7 +415,7 @@ cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File\" -comm
 cmd( "if { $showFileCmds == 1 } { $w add command -label \"Save Text File As...\" -command {set choice 4} -underline 3 }" );
 cmd( "if { $showFileCmds == 1 } { $w add separator }" );
 
-cmd( "$w add command -label \"Options...\" -command { set choice 60} -underline 1" );
+cmd( "$w add command -label \"Options...\" -command { set choice 60 } -underline 1" );
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Quit\" -command {set choice 1} -underline 0 -accelerator Ctrl+q" );
 
@@ -417,13 +423,14 @@ cmd( "set w .m.edit" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Edit -menu $w -underline 0" );
 // make menu the same as ctrl-z/y (more color friendly)
-cmd( "$w add command -label \"Undo\" -command {catch {.f.t.t edit undo}} -underline 0 -accelerator Ctrl+z" );
-cmd( "$w add command -label \"Redo\" -command {catch {.f.t.t edit redo}} -underline 2 -accelerator Ctrl+y" );
-cmd( "$w add separator" );
+cmd( "$w add command -label Undo -command { catch { savCurIni; .f.t.t edit undo; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } } -underline 0 -accelerator Ctrl+z" );	// entryconfig 0
+cmd( "$w add command -label Redo -command { catch { savCurIni; .f.t.t edit redo; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } } -underline 2 -accelerator Ctrl+y" );	// entryconfig 1
+cmd( "$w add separator" );	// entryconfig 2
 // collect information to focus recoloring
-cmd( "$w add command -label \"Cut\" -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 1 -accelerator Ctrl+x" );
-cmd( "$w add command -label \"Copy\" -command {tk_textCopy .f.t.t} -underline 0 -accelerator Ctrl+c" );
-cmd( "$w add command -label \"Paste\" -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd} -underline 0 -accelerator Ctrl+v" );
+cmd( "$w add command -label Cut -command { savCurIni; tk_textCut .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
+cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
+cmd( "$w add command -label Paste -command { savCurIni; tk_textPaste .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
+cmd( "$w add command -label Erase -command { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { .f.t.t delete insert } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -accelerator Del" );	// entryconfig 6
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f" );
 cmd( "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3" );
@@ -498,13 +505,13 @@ cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . 
 // Button bar
 cmd( "frame .bbar -bd 2" );
 
-cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command {set choice 33}" );
-cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command {if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999}}" );
-cmd( "button .bbar.undo -image undoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit undo}}" );
-cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -command {catch {.f.t.t edit redo}}" );
-cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command {savCurIni; tk_textCut .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
-cmd( "button .bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command {tk_textCopy .f.t.t}" );
-cmd( "button .bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command {savCurIni; tk_textPaste .f.t.t; if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
+cmd( "button .bbar.open -image openImg -relief $bRlf -overrelief $ovBrlf -command { set choice 33 }" );
+cmd( "button .bbar.save -image saveImg -relief $bRlf -overrelief $ovBrlf -command { .m.file invoke 2 }" );
+cmd( "button .bbar.undo -image undoImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 0 }" );
+cmd( "button .bbar.redo -image redoImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 1 }" );
+cmd( "button .bbar.cut -image cutImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 3 }" );
+cmd( "button .bbar.copy -image copyImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 4 }" );
+cmd( "button .bbar.paste -image pasteImg -relief $bRlf -overrelief $ovBrlf -command { .m.edit invoke 5 }" );
 cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -command {set choice 11}" );
 cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
 cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 42}" );
@@ -648,8 +655,8 @@ cmd( "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwra
 
 cmd( "bind .f.t.t <Control-f> {set choice 11}; bind .f.t.t <Control-F> {set choice 11}" );
 cmd( "bind .f.t.t <F3> {set choice 12}" );
-cmd( "bind .f.t.t <Control-s> { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}} {}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} {}}" ); 
-cmd( "bind .f.t.t <Control-a> { set choice 4}" );
+cmd( "bind .f.t.t <Control-s> { .m.file invoke 2 }" ); 
+cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
 cmd( "bind .f.t.t <Control-r> {set choice 2}; bind .f.t.t <Control-R> {set choice 2}" );
 cmd( "bind .f.t.t <Control-e> {set choice 8}" );
 cmd( "bind .f.t.t <Control-j> {set choice 70}" );
@@ -671,15 +678,21 @@ cmd( "bind .f.t.t <Control-semicolon> {set choice 64}" );
 cmd( "bind .f.t.t <Control-comma> {set choice 65}" );
 cmd( "bind .f.t.t <Control-period> {set choice 66}" );
 cmd( "bind .f.t.t <Alt-q> {.m postcascade 0}; bind .f.t.t <Alt-Q> {.m postcascade 0}" );
-cmd( "if [ string equal $tcl_platform(platform) unix ] {bind .f.t.t <Control-Insert> {tk_textCopy .f.t.t}}" );
-cmd( "if [ string equal $tcl_platform(platform) unix ] {bind .f.t.t <Shift-Insert> {tk_textPaste .f.t.t}}" );
-cmd( "if { [ string equal $tcl_platform(platform) unix ] && ! [ string equal $tcl_platform(os) Darwin ] } { bind .f.t.t <Control-c> { tk_textCopy .f.t.t } }" );
 
+// redefine the default Tk bindings adding "break" to avoid further event processing
+cmd( "bind .f.t.t <Control-z> { .m.edit invoke 0; break }; bind .f.t.t <Control-Z> { event generate .f.t.t <Control-z> }" );
+cmd( "bind .f.t.t <Control-y> { .m.edit invoke 1; break }; bind .f.t.t <Control-Y> { event generate .f.t.t <Control-y> }" );
+cmd( "bind .f.t.t <Control-x> { .m.edit invoke 3; break }; bind .f.t.t <Control-X> { event generate .f.t.t <Control-x> }" );
+cmd( "bind .f.t.t <Control-c> { .m.edit invoke 4; break }" );
+cmd( "bind .f.t.t <Control-v> { .m.edit invoke 5; break }" );
+cmd( "bind .f.t.t <Delete> { .m.edit invoke 6; break }" );
+cmd( "bind .f.t.t <BackSpace> { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { if { ! [ string equal [ .f.t.t index insert ] 1.0 ] } { .f.t.t delete insert-1c } } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd; break }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Control-Insert> { .m.edit invoke 4; break } }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { bind .f.t.t <Shift-Insert> { .m.edit invoke 5; break } }" );
+
+cmd( "bind . <KeyPress-Insert> {# nothing}" );
 cmd( "bind .f.t.t <KeyPress-Return> {+set choice 16}" );
 cmd( "bind .f.t.t <KeyRelease-space> {+.f.t.t edit separator}" );
-cmd( "bind .f.t.t <Control-z> {catch {.f.t.t edit undo}}; bind .f.t.t <Control-Z> {catch {.f.t.t edit undo}}" );
-cmd( "bind .f.t.t <Control-y> {catch {.f.t.t edit redo}}; bind .f.t.t <Control-Y> {catch {.f.t.t edit redo}}" );
-cmd( "bind . <KeyPress-Insert> {# nothing}" );
 
 /*
 POPUP menu
@@ -742,10 +755,10 @@ else
 }
 
 cmd( "bind .f.t.t <Control-E> {set choice 25}" );
-cmd( "bind .f.t.t <Control-V> {set choice 26}" );
+cmd( "bind .f.t.t <Control-V> {set choice 26; break}" );
 cmd( "bind .f.t.t <Control-U> {set choice 56}" );
 cmd( "bind .f.t.t <Control-A> {set choice 55}" );
-cmd( "bind .f.t.t <Control-C> {set choice 27}" );
+cmd( "bind .f.t.t <Control-C> {set choice 27; break}" );
 cmd( "bind .f.t.t <Control-i> {set choice 28; break}" );
 cmd( "bind .f.t.t <Control-T> {set choice 31}" );
 cmd( "bind .f.t.t <Control-I> {set choice 40}" );
@@ -820,11 +833,8 @@ cmd( "set lfindcounter -1" );
 
 loop:
 
-// indicate file save status in titlebar
-if ( tosave )
-	cmd( "wm title . \"*$filename - LMM\"" );
-else
-	cmd( "wm title . \" $filename - LMM\"" );
+// update file save status in titlebar
+cmd( "update_title_bar" );
 
 // main command loop
 while( ! choice )
@@ -843,24 +853,20 @@ while( ! choice )
 	}
 }   
 
-cmd( "set b [.f.t.t tag ranges sel]" );
-cmd( "if {$b==\"\"} {} {set textsearch [.f.t.t get sel.first sel.last]}" );
+// update file save status in titlebar
+cmd( "update_title_bar" );
 
-// update the file changes status
-cmd( "if [ winfo exists . ] { set after [ .f.t.t get 1.0 end] } { set after $before }" );
-cmd( "if [ string compare $before $after ] { set tosave 1 } { set tosave 0 }" );
+// verify if saving before command is necessary
+if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 33 || choice == 39 || choice == 41 || choice == 71 )
+	if ( ! discard_change( ) )
+		goto loop;
 
-if ( tosave && ( choice==2 || choice==15 || choice==1 || choice==13 || choice==14 || choice==6 || choice==8 || choice==3 || choice==33 || choice==5 || choice==39 || choice==41 || choice==71 ) )
-{
+// start evaluating the executed command
 
-  cmd( "set answer [tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\"]" );
-  cmd( " if { $answer == yes} {set curfile [file join \"$dirname\" \"$filename\"]; set file [open \"$curfile\" w]; puts -nonewline $file [.f.t.t get 0.0 end]; close $file; set before [.f.t.t get 0.0 end]; wm title . \" $filename - LMM\"} {if [string equal $answer cancel] {set choice 0} {}}" );  
-  if(choice==0)
-	goto loop;
-}
-  
-if(choice==1)
-  return 0;
+// exit LMM
+if ( choice == 1 )
+	return 0;
+
 
 if ( choice == 2 || choice == 6 )
 {
@@ -904,8 +910,7 @@ cmd( "set before [.f.t.t get 1.0 end]" );
 cmd( "set filename makefile" );
 cmd( ".f.t.t mark set insert 1.0" );
 cmd( ".f.hea.file.dat conf -text \"makefile\"" );
-cmd( "wm title . \"Makefile - LMM\"" );
-cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );  
+cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );  
 choice=0;
 goto loop;
 }
@@ -914,7 +919,6 @@ goto loop;
 if(choice==4)
 {
  /*Save the file currently shown*/
-
 
 cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
 s=(char *)Tcl_GetVar(inter, "curfilename",0);
@@ -929,7 +933,6 @@ if(s!=NULL && strcmp(s, ""))
   cmd( "set dirname [file dirname \"$curfilename\"]" );
   cmd( "set filename [file tail \"$curfilename\"]" );
   cmd( ".f.hea.file.dat conf -text \"$filename\"" );
-  cmd( "wm title . \"$filename - LMM\"" );
  }
  choice=0;
  goto loop;
@@ -977,7 +980,6 @@ if(s==NULL || !strcmp(s, ""))
   cmd( "focus -force .f.t.t" );
 
   cmd( ".f.hea.file.dat conf -text \"$filename\"" );
-  cmd( "wm title . \"$filename - LMM\"" );
   
   cmd( "catch [unset -nocomplain ud]" );
   cmd( "catch [unset -nocomplain udi]" );
@@ -1072,8 +1074,6 @@ cmd( ".f.t.t edit reset" );
 cmd( "set before [.f.t.t get 1.0 end]" );
 cmd( ".f.t.t mark set insert 1.0" );
 cmd( ".f.hea.file.dat conf -text \"$filename\"" );
-cmd( "wm title . \"$filename - LMM\"" );
-cmd( "update" );
 
 cmd( ".f.t.t tag add bc \"1.0\"" );
 cmd( ".f.t.t tag add fc \"1.0\"" );
@@ -1143,13 +1143,14 @@ goto loop;
 if(choice==11)
 {
 /* Find a text pattern in the text*/
-cmd( "if {[winfo exists .find]==1} {set choice 0; focus .find.e}" );
-if(choice==0)
- goto loop;
+cmd( "if [ winfo exists .find ] { set choice 0; focus .find. e}" );
+if ( choice == 0 )
+	goto loop;
 
 cmd( "set docase 0" );
 cmd( "set dirsearch \"-forwards\"" );
 cmd( "set curcounter $lfindcounter" );
+cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
 cmd( "newtop .find \"Find\" { .find.b.can invoke }" );
 
@@ -1693,8 +1694,6 @@ cmd( ".f.t.t edit reset" );
 cmd( "set before [.f.t.t get 1.0 end]" ); 
 cmd( ".f.t.t mark set insert 1.0" );
 cmd( ".f.hea.file.dat conf -text \"$filename\"" );
-cmd( "wm title . \"$filename - LMM\"" );          
-cmd( "update" );
 
 cmd( "set s [file extension \"$filename\"]" );
 s=(char *)Tcl_GetVar(inter, "s",0);
@@ -1850,13 +1849,14 @@ goto loop;
 if(choice==21)
 {
 /* Find and replace a text pattern in the text*/
-cmd( "if {[winfo exists .l]==1} {set choice 0; focus .l.e}" );
-if(choice==0)
- goto loop;
+cmd( "if [ winfo exists .l ] { set choice 0; focus .l.e }" );
+if ( choice == 0 )
+	goto loop;
 
 cmd( "set docase 1" );
 cmd( "set dirsearch \"-forwards\"" );
 cmd( "set cur \"\"" );
+cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
 
 cmd( "newtop .l \"Replace\" { .l.b2.can invoke }" );
 
@@ -1920,6 +1920,7 @@ cmd( "Xcancel .l b2 Find { \
 cmd( "bind .l <KeyPress-Return> {.l.b2.ok invoke}" );
 
 cmd( "showtop .l" );
+cmd( ".l.l.e selection range 0 end" );
 cmd( "focus .l.l.e" );
 cmd( ".f.t.t tag conf found -background red -foreground white" );
 
@@ -3700,7 +3701,6 @@ if(choice==39)
  cmd( "set dirname [pwd]" );
  cmd( ".f.t.t mark set insert 1.0" );
  cmd( ".f.hea.file.dat conf -text \"noname.txt\"" );
- cmd( "wm title . \"nomame.txt - LMM\"" );
  cmd( "catch [unset -nocomplain ud]" );
  cmd( "catch [unset -nocomplain udi]" );
  cmd( "catch [unset -nocomplain rd]" );
@@ -4509,10 +4509,11 @@ if ( choice == 70 )
 }
 
 
-if(choice!=1)
- {choice=0;
- goto loop;
- }
+if ( choice != 1 )
+{
+	choice = 0;
+	goto loop;
+}
 
 Tcl_UnlinkVar(inter, "choice");
 Tcl_UnlinkVar(inter, "num");
@@ -4570,7 +4571,11 @@ void cmd( const char *cm, ... )
 		int code = Tcl_Eval( inter, buffer );
 
 		if( code != TCL_OK )
+		{
 			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
+			if ( tk_ok )
+				cmd( "tk_messageBox -type ok -title Error -icon error -message \"Tcl error\" -detail \"More information in file 'LMM.err'.\"" );
+		}
 	}
 }
 
@@ -4609,9 +4614,6 @@ void log_tcl_error( const char *cm, const char *message )
 	}
 	fprintf( f, "\n(%s)\nCommand:\n%s\nMessage:\n%s\n-----\n", ftime, cm, message );
 	fclose( f );
-	
-	if ( tk_ok )
-		cmd( "tk_messageBox -type ok -title Error -icon error -message \"Internal LMM error\" -detail \"More information in file 'LMM.err'.\"" );
 }
 
 
@@ -5014,7 +5016,7 @@ bool compile_run( bool run, bool nw )
 	if ( res == 1 )
 	{ 	// real problem
 		cmd( "set res $autoHide" );			// get auto hide status
-		if ( run && ! res )					// auto unhide LMM if necessary
+		if ( run && res )					// auto unhide LMM if necessary
 			cmd( "wm deiconify ." );  		// only reopen if error
 		create_compresult_window( nw );		// show errors
 	}
@@ -5093,6 +5095,55 @@ void create_compresult_window( bool nw )
 }
 
 
+/****************************************************
+DISCARD_CHANGE
+Ask user to discard changes in edited file, if applicable
+Returns: 0: abort, 1: continue
+****************************************************/
+bool discard_change( void )
+{
+	if ( ! tosave )
+		return true;					// yes: simply discard configuration
+	
+	// ask for confirmation
+	cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -default yes -icon question -title Confirmation -message \"Save current file?\" -detail \"Recent changes to file '$filename' have not been saved.\\n\\nDo you want to save before continuing?\nNot doing so will not include recent changes to subsequent actions.\n\n - Yes: save the file and continue.\n - No: do not save and continue.\n - Cancel: do not save and return to editing.\" ]" );
+	cmd( "if [ string equal $answer yes ] { \
+			set curfile [ file join \"$dirname\" \"$filename\" ]; \
+			set file [ open \"$curfile\" w ]; \
+			puts -nonewline $file [ .f.t.t get 0.0 end ]; \
+			close $file; \
+			set before [ .f.t.t get 0.0 end ]; \
+			update_title_bar; \
+			set ans 1; \
+		} elseif [ string equal $answer cancel ] { \
+			set ans 0; \
+			set choice 0 \
+		} { \
+			set ans 1 \
+		}" );  
+
+	const char *ans = Tcl_GetVar( inter, "ans", 0 );
+	if ( atoi( ans ) == 0 )
+		return false;
+	
+	return true;
+}
+
+
+/****************************************************
+TCL_DISCARD_CHANGE
+Entry point function for access from the Tcl interpreter
+****************************************************/
+int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+{
+	if ( discard_change( ) == 1 )
+		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
+	else
+		Tcl_SetResult( inter, ( char * ) "cancel", TCL_VOLATILE );
+	return TCL_OK;
+}
+
+
 /*********************************
  HANDLE_SIGNALS
  *********************************/
@@ -5165,9 +5216,10 @@ void signal_handler( int signum )
 			break;			
 	}
 	
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
 	sprintf( msg2, "System Signal received: %s", msg );
 	log_tcl_error( "FATAL ERROR", msg2 );
+	if ( tk_ok )
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"FATAL ERROR\" -detail \"System Signal received:\n\n %s\n\nLMM will close now.\"", msg );
 	Tcl_Finalize( );
 	exit( -signum );				// abort program
 }

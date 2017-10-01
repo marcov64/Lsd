@@ -308,68 +308,250 @@ char *qsort_lab;
 char *qsort_lab_secondary;
 object *globalcur;
 
+#ifdef PARALLEL_MODE
+mutex error;
+#endif	
+
 
 /****************************************************
-CAL
-Return the value of Variable or Parameter with label l with lag lag.
-The method search for the Variable starting from this Object and then calls
-the function variable->cal(caller, lag)
-***************************************************/
-double object::cal( object *caller,  char const *l, int lag )
+UPDATE
+Compute the value of all the Variables in the Object, saving the values 
+and updating the runtime plot. 
+
+For optimization purposes the system tries to ignores descending objects
+marked to be not computed. The implementation is quite baroque, but it
+should be the fastest.
+****************************************************/
+void object::update(void)
 {
-	variable *curr;
+	object *cur;
+	bridge *cb;
+	variable *var;
 
-	if ( quit == 2 )
-		return -1;
-
-	curr = search_var( this, l );
-	if ( curr == NULL )
-	{
-		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
-		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-		return 0;
+	for ( var = v; var != NULL && quit!=2; var = var->next )
+	{ 
+		if ( var->last_update < t && var->param == 0 )
+		{
+#ifdef PARALLEL_MODE
+			if ( parallel_ready && var->parallel )
+				parallel_update( var, this );
+			else
+#endif
+				var->cal( NULL, 0 );
+		}
+		
+		if ( var->save || var->savei )
+			var->data[ t ] = var->val[ 0 ];
+#ifndef NO_WINDOW    
+		if ( var->plot == 1 )
+			plot_rt( var );
+#endif   
 	}
+
+	for ( cb = b; cb != NULL && quit != 2; cb = cb->next )
+		if( cb->head->to_compute == 1 )
+			for( cur = cb->head; cur != NULL; cur = cur->next )
+				cur->update( );
+} 
+
+
+/***********
+ERROR_HARD
+Procedure called when an unrecoverable error occurs. 
+Information about the state of the simulation when the error 
+occured is provided. Users can abort the program or analyse 
+the results collected up the latest time step available.
+*************/
+void error_hard( const char *logText, const char *boxTitle, const char *boxText )
+{
+	if ( quit == 2 )		// simulation already being stopped
+		return;
+		
+#ifdef PARALLEL_MODE
+	// prevent concurrent use by more than one thread
+	lock_guard < mutex > lock( error );
+#endif	
+		
+#ifndef NO_WINDOW
+	if ( running )			// handle running events differently
+	{
+		plog( "\n\nError detected at time %d", "highlight", t );
+		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
+			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog == NULL ? "(none)" : stacklog->vs->label );
+		plog( "\n\nError message: %s", "", logText );
+		print_stack( );
+		cmd( "wm deiconify .log; raise .log; focus -force .log" );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+	}
+	else
+	{
+		log_tcl_error( "ERROR", logText );
+		plog( "\n\nERROR: %s\n", "", logText );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
+	}
+#endif
+
+	if( ! running )
+		return;
+
+	quit = 2;				// do not continue simulation
+
+#ifndef NO_WINDOW
+	uncover_browser( );
+	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
+
+	cmd( "set err 1" );
+
+	cmd( "newtop .cazzo Error" );
+
+	cmd( "frame .cazzo.t" );
+	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
+	cmd( "pack .cazzo.t.l -pady 10" );
+	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
+	cmd( "pack .cazzo.t.l1" );
+
+	cmd( "frame .cazzo.e" );
+	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
+
+	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
+	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\"" );
+	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
+	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
+
+	cmd( "pack .cazzo.e.l .cazzo.e.b" );
+
+	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
+
+	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
+
+	cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
+	cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
+	cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
+	cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
+
+	cmd( "showtop .cazzo centerS" );
+
+	choice=0;
+	while(choice==0)
+		Tcl_DoOneEvent(0);
+
+	cmd( "set choice $err" );
+	cmd( "destroytop .cazzo" );
+
+	if ( choice == 2 )
+	{
+		// do run( ) cleanup
+		unwind_stack( );
+		actual_steps = t;
+		running = 0;
+		close_sim( );
+		reset_end( root );
+		root->emptyturbo( );
+		set_buttons_log( false );
+		uncover_browser( );
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 )
-		parallel_update( curr, this, caller );
+		// stop multi-thread workers
+		delete [ ] workers;
+		workers = NULL;
+#endif	
+		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
+	}
+#else
+
+	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
 #endif
-	return curr->cal( caller, lag );
+
+	myexit( 13 );
 }
 
 
-/****************************************************
-CAL
-Interface for object->cal(...), using the "this" object by default
-****************************************************/
-double object::cal( char const *l, int lag )
+/****************************
+PRINT_STACK
+Print the state of the stack in the log window. 
+This tells the user which variable is computed 
+because of other equations' request.
+*****************************/
+void print_stack( void )
 {
-	return cal( this, l, lag );
-}
+	lsdstack *app;
 
-
-/****************************************************
-RECAL
-Mark variable as not calculated in the current time,
-forcing recalculation if already calculated
-****************************************************/
-void object::recal( char const *l )
-{
-	variable *curr = search_var( this, l );
-	
-	if ( curr == NULL )
+	if ( parallel_mode )
 	{
-		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
-		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
 		return;
 	}
-	
-	curr->last_update = t - 1;
+
+	if ( fast_mode )
+	{
+		plog( "\n\nRunning in fast mode, list of variables under computation not available\n(You may temporarily not use fast mode to get additional information)\n" );
+		return;
+	}
+
+	plog( "\n\nList of variables currently under computation" );
+	plog( "\n\nLevel\tVariable Label" );
+
+	for ( app = stacklog; app != NULL; app = app->prev )
+		plog( "\n%d\t%s", "", app->ns, app->label );
+
+	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
+}
+
+
+/****************************************************
+HYPER_NEXT
+Return the next Object in the model with the label lab. The Object is searched
+in the whole model, including different branches
+****************************************************/
+object *object::hyper_next( char const *lab )
+{
+	object *cur, *cur1;
+
+	for ( cur1 = NULL, cur = next; cur != NULL; cur = skip_next_obj( cur ) )
+	{
+		cur1 = cur->search( lab );
+		if ( cur1 != NULL )
+		break;
+	}
+
+	if ( cur1 != NULL )
+	 return cur1;
+
+	if ( up != NULL )
+	 cur = up->hyper_next( lab );
+
+	return cur;
+}
+
+
+/****************************************************
+SEARCH
+Search the first Object lab in the branch of the model below this
+***************************************************/
+object *object::search(char const *lab)
+{
+	object *cur;
+	bridge *cb;
+
+	if(!strcmp(label, lab))
+	  return(this);
+
+	for(cb=b; cb!=NULL; cb=cb->next)
+	 {
+	  if(cb->head!=NULL)
+		cur=cb->head->search(lab);
+	  else
+		cur=NULL;  
+	  if(cur!=NULL)
+	   return(cur);
+	 }
+
+	return NULL;
 }
 
 
 /********************************************
-search_var
+SEARCH_VAR
 Explore the model starting from this and
 gradually extending till considering the whole model.
 It searches for an object having a variable whose label is l and returns the
@@ -405,7 +587,7 @@ variable *object::search_var(object *caller, char const *l)
 		curr1=cb->head; 
 		if ( curr1 == NULL )
 		{
-			sprintf( msg, "object '%s' does not have a single instance, simulation may crash (while searching for '%s' during the computation of '%s'", cb->blabel, l, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
+			sprintf( msg, "object '%s' does not have a single instance, simulation may crash (while searching for '%s' during the computation of '%s'", cb->blabel, l, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 			error_hard( msg, "Object has no instance", "Check your code to prevent this situation." );
 			return NULL;
 		}
@@ -428,7 +610,7 @@ variable *object::search_var(object *caller, char const *l)
 		{
 			if ( ! no_error )
 			{
-				sprintf( msg, "search for '%s' failed in the equation of variable '%s'", l, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
+				sprintf( msg, "search for '%s' failed in the equation of variable '%s'", l, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
 				return NULL;
 			}
@@ -495,32 +677,6 @@ void object::add_var(char const *lab, int lag, double *val, int save)
 			(cur->v)->init( cur, lab, lag, val, save );
 		}
 	}
-}
-
-
-/****************************************************
-HYPER_NEXT
-Return the next Object in the model with the label lab. The Object is searched
-in the whole model, including different branches
-****************************************************/
-object *object::hyper_next( char const *lab )
-{
-	object *cur, *cur1;
-
-	for ( cur1 = NULL, cur = next; cur != NULL; cur = skip_next_obj( cur ) )
-	{
-		cur1 = cur->search( lab );
-		if ( cur1 != NULL )
-		break;
-	}
-
-	if ( cur1 != NULL )
-	 return cur1;
-
-	if ( up != NULL )
-	 cur = up->hyper_next( lab );
-
-	return cur;
 }
 
 
@@ -613,32 +769,6 @@ void object::insert_parent_obj_one(char const *lab)
 
 
 /****************************************************
-SEARCH
-Search the first Object lab in the branch of the model below this
-***************************************************/
-object *object::search(char const *lab)
-{
-	object *cur;
-	bridge *cb;
-
-	if(!strcmp(label, lab))
-	  return(this);
-
-	for(cb=b; cb!=NULL; cb=cb->next)
-	 {
-	  if(cb->head!=NULL)
-		cur=cb->head->search(lab);
-	  else
-		cur=NULL;  
-	  if(cur!=NULL)
-	   return(cur);
-	 }
-
-	return NULL;
-}
-
-
-/****************************************************
 CHG_LAB
 Change the label of the Object, for all the instances
 ****************************************************/
@@ -701,45 +831,62 @@ void object::chg_var_lab(char const *old, char const *n)
 
 
 /****************************************************
-UPDATE
-Compute the value of all the Variables in the Object, saving the values 
-and updating the runtime plot. 
-
-For optimization purposes the system tries to ignores descending objects
-marked to be not computed. The implementation is quite baroque, but it
-should be the fastest.
-****************************************************/
-void object::update(void)
+CAL
+Return the value of Variable or Parameter with label l with lag lag.
+The method search for the Variable starting from this Object and then calls
+the function variable->cal(caller, lag)
+***************************************************/
+double object::cal( object *caller,  char const *l, int lag )
 {
-	object *cur;
-	bridge *cb;
-	variable *var;
+	variable *curr;
 
-	for ( var = v; var != NULL && quit!=2; var = var->next )
-	{ 
-		if ( var->last_update < t && var->param == 0 )
-		{
-#ifdef PARALLEL_MODE
-			if ( parallel_ready && var->parallel )
-				parallel_update( var, this );
-			else
-#endif
-				var->cal( NULL, 0 );
-		}
-		
-		if ( var->save || var->savei )
-			var->data[ t ] = var->val[ 0 ];
-#ifndef NO_WINDOW    
-		if ( var->plot == 1 )
-			plot_rt( var );
-#endif   
+	if ( quit == 2 )
+		return -1;
+
+	curr = search_var( this, l );
+	if ( curr == NULL )
+	{
+		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return 0;
 	}
 
-	for ( cb = b; cb != NULL && quit != 2; cb = cb->next )
-		if( cb->head->to_compute == 1 )
-			for( cur = cb->head; cur != NULL; cur = cur->next )
-				cur->update( );
-} 
+#ifdef PARALLEL_MODE
+	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 )
+		parallel_update( curr, this, caller );
+#endif
+	return curr->cal( caller, lag );
+}
+
+
+/****************************************************
+CAL
+Interface for object->cal(...), using the "this" object by default
+****************************************************/
+double object::cal( char const *l, int lag )
+{
+	return cal( this, l, lag );
+}
+
+
+/****************************************************
+RECAL
+Mark variable as not calculated in the current time,
+forcing recalculation if already calculated
+****************************************************/
+void object::recal( char const *l )
+{
+	variable *curr = search_var( this, l );
+	
+	if ( curr == NULL )
+	{
+		sprintf( msg, "search for variable or parameter '%s' failed in object '%s'", l, label );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return;
+	}
+	
+	curr->last_update = t - 1;
+}
 
 
 /****************************************************
@@ -998,7 +1145,7 @@ void object::write( char const *lab, double value, int time, int lag )
 			if ( cv->param != 1 && time < t && t > 1 )
 			{
 				if ( wr_warn_cnt <= ERR_LIM )
-					plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This would \nundermine the correct updating of variable '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
+					plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This would \nundermine the correct updating of variable '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
 				if ( wr_warn_cnt == ERR_LIM )
 					plog( "\nWarning: too many invalid writes, stop reporting...\n" );
 				cv->val[ 0 ] = value;
@@ -1011,7 +1158,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				{
 					if ( - time > cv->num_lag )		// check for invalid lag
 					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag, time );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) or time (%d) is invalid, \n write command ignored\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag, time );
 					}
 					else
 					{
@@ -1025,7 +1172,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				{
 					if ( lag < 0 || lag > cv->num_lag )
 					{
-						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag );
+						plog( "\n\nWarning: while writing variable '%s' in equation for '%s'\nthe selected lag (%d) is invalid, \n write command ignored\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lag );
 					}
 					else
 					{
@@ -1630,7 +1777,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag)
 	  a+=cur->cal(lv,lag);
 	if(is_inf(a))
 	   {
-		plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
+		plog( "\nWarning: sum of values for '%s' is too high (eq. for '%s')", "", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
 		plog( "\nThe first object '%s' of the list is used", "", lo );
 		return(cur1);
 	   }
@@ -1640,7 +1787,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag)
 	 {b=RND*a;
 	  if(a==0)
 	   {
-		plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
+		plog( "\nWarning: draw random on '%s' with Prob.=0 for each element (eq. for '%s')", "", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, lv );
 		plog( "\nThe first object '%s' of the list is used", "", lo );
 		return(cur1);
 	   }
@@ -1699,7 +1846,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag, double tot)
 
 	if(tot<=0)
 	 {
-	  sprintf( msg, "draw random of an object '%s' requested with a negative \ntotal of values for '%s' (%g) during the equation for '%s'", lo, lv, tot, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
+	  sprintf( msg, "draw random of an object '%s' requested with a negative \ntotal of values for '%s' (%g) during the equation for '%s'", lo, lv, tot, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
 	  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
 	 }  
 
@@ -1714,7 +1861,7 @@ object *object::draw_rnd(char const *lo, char const *lv, int lag, double tot)
 	  }
 	if(a>tot)
 	 {
-	  sprintf( msg, "draw random of an object '%s' requested with a wrong \ntotal of values for '%s' during the equation for '%s'", lo, lv, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
+	  sprintf( msg, "draw random of an object '%s' requested with a wrong \ntotal of values for '%s' during the equation for '%s'", lo, lv, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );  
 	  error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation." );
 	 }  
 	return cur;
@@ -1788,149 +1935,6 @@ double object::multiply(char const *lab, double value)
 	this->write( lab, new_value, t );
 	
 	return new_value;
-}
-
-
-/***********
-Procedure called when an unrecoverable error occurs. Information about the state of the simulation when the error occured is provided. Users can abort the program or analyse the results collected up the latest time step available.
-*************/
-#ifdef PARALLEL_MODE
-mutex error;
-#endif	
-
-void error_hard( const char *logText, const char *boxTitle, const char *boxText )
-{
-	if ( quit == 2 )		// simulation already being stopped
-		return;
-		
-#ifdef PARALLEL_MODE
-	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( error );
-#endif	
-		
-#ifndef NO_WINDOW
-	if ( running )		// handle running events differently
-	{
-		plog( "\n\nError detected at time %d", "highlight", t );
-		if ( ! parallel_mode && stacklog->vs != NULL )
-			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog->vs->label );
-		plog( "\n\nError message: %s", "", logText );
-		print_stack( );
-		cmd( "wm deiconify .log; raise .log; focus -force .log" );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
-	}
-	else
-	{
-		plog( "\n\nERROR: %s\n", "", logText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
-		log_tcl_error( "ERROR", logText );
-	}
-#endif
-
-	if( ! running )
-		return;
-
-	quit = 2;				// do not continue simulation
-
-#ifndef NO_WINDOW
-	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
-
-	cmd( "set err 1" );
-
-	cmd( "newtop .cazzo Error" );
-
-	cmd( "frame .cazzo.t" );
-	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
-	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
-	cmd( "pack .cazzo.t.l1" );
-
-	cmd( "frame .cazzo.e" );
-	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
-
-	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
-	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\" -state %s", parallel_mode ? "disabled" : "normal" );
-	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
-	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
-
-	cmd( "pack .cazzo.e.l .cazzo.e.b" );
-
-	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
-
-	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
-
-	cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
-	cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
-	cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
-	cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
-
-	cmd( "showtop .cazzo centerS" );
-
-	choice=0;
-	while(choice==0)
-		Tcl_DoOneEvent(0);
-
-	cmd( "set choice $err" );
-	cmd( "destroytop .cazzo" );
-
-	if (  choice == 2 )
-	{
-		// remove stack allocation
-		while ( stacklog->prev != NULL )
-		{
-			lsdstack *cur_stack = stacklog;
-			stacklog = stacklog->prev;
-			delete cur_stack;
-		}
-		delete stacklog;
-		stacklog = NULL;
-		
-		// do run( ) cleanup
-		stack = 0; 
-		actual_steps = t;
-		running = 0;
-		close_sim( );
-		reset_end( root );
-		root->emptyturbo( );
-		set_buttons_log( false );
-		uncover_browser( );
-
-#ifdef PARALLEL_MODE
-		// stop multi-thread workers
-		delete [ ] workers;
-		workers = NULL;
-#endif	
-		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
-	}
-#else
-
-	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
-#endif
-
-	myexit( 13 );
-}
-
-
-/****************************
-Print the state of the stack in the log window. This tells the user which variable is computed because of other equations' request.
-*****************************/
-void print_stack( void )
-{
-	lsdstack *app;
-
-	if ( parallel_mode )
-	{
-		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
-		return;
-	}
-
-	plog( "\n\nList of variables currently under computation" );
-	plog( "\n\nLevel\tVariable Label" );
-
-	for ( app=stacklog; app != NULL; app = app->prev )
-		plog( "\n%d\t%s", "", app->ns, app->label );
-
-	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
 }
 
 
@@ -2149,14 +2153,14 @@ object *object::turbosearch(char const *label, double tot, double num)
 	  break;
 	if(cb==NULL)
 	{
-	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
+	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 	   error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	   return NULL;
 	} 
 
 	if(cb->mn==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return NULL;
 	} 
@@ -2187,7 +2191,7 @@ void object::initturbo(char const *label, double tot=0)
 	  break;
 	if(cb==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return;
 	} 

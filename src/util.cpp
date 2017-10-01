@@ -1567,7 +1567,7 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	if ( res == NULL )
 	{
 		sprintf( msg, "object '%s' not found in %s (variable '%s')", 
-				 label, command, stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
+				 label, command, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	}
 	
@@ -2155,6 +2155,12 @@ void get_bool( const char *tcl_var, bool *var )
 void get_int( const char *tcl_var, int *var )
 {
 	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", var );
+}
+
+
+void get_long( const char *tcl_var, long *var )
+{
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%ld", var );
 }
 
 

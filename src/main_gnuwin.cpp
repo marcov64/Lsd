@@ -193,7 +193,7 @@ void signal_handler( int signum )
 		strcpy( msg3, "Additional information can be obtained running the simulation using the 'Model'/'GDB Debugger' menu option" );
 		if ( quit != 2 )
 		{
-			if ( ! parallel_mode && stacklog->vs != NULL )
+			if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
 			{
 				strcat( msg3, "\n\nAttempting to open the LSD Debugger (LSD will close immediately after exiting the Debugger)..." );
 				plog( "\n\nAn unknown problem was detected while computing the equation \nfor '%s'", "", stacklog->vs->label );
@@ -210,7 +210,7 @@ void signal_handler( int signum )
 	
 	if ( user_exception )
 	{
-		if ( ! parallel_mode && stacklog->vs != NULL )
+		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
 		{
 			sprintf( msg3, "%s (equation error)", stacklog->vs->label );
 			deb( stacklog->vs == NULL ? root : stacklog->vs->up, NULL, msg3, &useless );

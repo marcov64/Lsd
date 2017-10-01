@@ -594,8 +594,8 @@ Tcl_UnlinkVar(inter, "num_y2");
 Tcl_UnlinkVar(inter, "cur_plot");
 Tcl_UnlinkVar(inter, "nv");
 
-cmd( "catch [set a [glob -nocomplain plotxy_*]]" ); //remove directories
-cmd( "catch [foreach b $a {catch [file delete -force $b]}]" );
+cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); //remove directories
+cmd( "foreach b $a { catch { file delete -force $b } }" );
 return;
   
  
@@ -1604,7 +1604,7 @@ if ( *choice == 1 )
 #endif 
  
   cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", extRes, extTot );
-  cmd( "if { ! [ fn_spaces $lab .da ] } { set choice [ llength $lab ] } { set choice 0 }" );
+  cmd( "if { ! [ fn_spaces $lab .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
   if(*choice==0 )
    {//no file selected
     goto there; 
@@ -4994,8 +4994,8 @@ if ( str != NULL && tag != NULL )
 
 // draw canvas
 cmd( "source plot.file" );
-cmd( "catch [ gnuplot $p ]" );
-cmd( "catch [ rename gnuplot \"\" ]" );
+cmd( "catch { gnuplot $p }" );
+cmd( "catch { rename gnuplot \"\" }" );
 
 // canvas plot limits (canvas & series)
 cmd( "set cmx [ expr [ winfo width $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
@@ -5003,8 +5003,8 @@ cmd( "if { $cmx <= 1 } { set cmx [ $p cget -width ] }" );
 cmd( "set cmy [ expr [ winfo height $p ] - 2 * [ $p cget -border ] - 2 * [ $p cget -highlightthickness ] ]" );
 cmd( "if { $cmy <= 1 } { set cmy [ $p cget -height ] }" );
 cmd( "unset -nocomplain lim rang" );
-cmd( "catch [ set lim [ gnuplot_plotarea ] ]" );
-cmd( "catch [ set rang [ gnuplot_axisranges ] ]" );
+cmd( "catch { set lim [ gnuplot_plotarea ] }" );
+cmd( "catch { set rang [ gnuplot_axisranges ] }" );
 cmd( "if { [ info exists lim ] && [ info exists rang ] } { set choice 1 } { set choice 0 }" );
 if ( *choice == 1 )
 {
@@ -7786,9 +7786,8 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 		cmd( "set datWid 20; if { $tcl_platform(os) == \"Windows NT\" } { set pad1 6; set pad2 10 } { set pad1 0; set pad2 5 }" );
 	
 	// adjust vertical text adjustment
-	cmd( "if { $tcl_platform(os) == \"Darwin\" } { set pad3 3 } { set pad3 -3 }" );
+	cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set pad3 3 } { set pad3 0 } } { set pad3 -3 }" );
 	
-
 	cmd( "frame $w.b.c.case" );
 	cmd( "label $w.b.c.case.l -text \"%s:\" -width 11 -anchor e", txtCase );
 	cmd( "label $w.b.c.case.v -text \"\" -fg red -width $datWid -anchor w" );

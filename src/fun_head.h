@@ -25,7 +25,7 @@ This file contains all the declarations and macros available in a model's equati
 
 double def_res = 0;										// default equation result
 
-extern bool fast;										// flag to hide LOG messages & runtime
+extern bool fast;										// flag to hide LOG messages & runtime (read-only)
 extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
 extern bool use_nan;									// flag to allow using Not a Number value
 extern char *path;										// folder where the configuration is
@@ -39,7 +39,6 @@ extern int seed;
 extern int sim_num;
 extern int t;
 extern long idum;
-extern lsdstack *stacklog;
 extern object *root;
 
 bool is_finite( double x );
@@ -79,6 +78,7 @@ void init_random( int seed );							// reset the random number generator seed
 void msleep( unsigned msec );							// sleep process for milliseconds
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
+void set_fast( bool on );								// enable fast mode
 
 // redefine as macro to avoid conflicts with C++ version in <cmath.h>
 double _abs(double a)
@@ -267,8 +267,8 @@ extern double i_values[];
 #define ABORT quit = 1;
 #define CURRENT var->val[ 0 ]
 #define PARAMETER var->param = 1;
-#define FAST fast = true;
-#define OBSERVE fast = false;
+#define FAST set_fast( true );
+#define OBSERVE set_fast( false );
 #define USE_NAN use_nan = true;
 #define NO_NAN use_nan = false;
 #define DEFAULT_RESULT( X ) def_res = X;
