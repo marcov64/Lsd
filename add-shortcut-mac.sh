@@ -6,6 +6,8 @@ if [ "$1" = "-h" ]; then
 fi
 TARGET="LMM"
 LSDROOT="$( cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
+xattr -rd com.apple.quarantine "$LSDROOT/$TARGET.app"
+xattr -rd com.apple.quarantine "$LSDROOT/src/LSD.app"
 osascript >/dev/null <<END_SCRIPT
 	tell application "Finder"
 		make new alias to file (posix file "$LSDROOT/$TARGET.app") at desktop

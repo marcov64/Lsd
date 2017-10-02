@@ -1068,8 +1068,8 @@ cmd( "if { ! [ winfo exists .deb.cc ] } { \
 		pack .deb.cc.scroll -side right -fill y; \
 		text .deb.cc.l -yscrollcommand \".deb.cc.scroll set\" -wrap none -width $wwidth -cursor arrow; \
 		mouse_wheel .deb.cc.l; \
-		pack .deb.cc.l -expand yes -fill y; \
-		pack .deb.cc -expand yes -fill y\
+		pack .deb.cc.l -expand yes -fill both; \
+		pack .deb.cc -expand yes -fill both\
 	} { \
 		.deb.cc.l configure -state normal\
 	}" );
@@ -1134,8 +1134,8 @@ void show_tmp_vars( void )
 		cmd( "pack $in.n.yscroll -side right -fill y" ); 
 		cmd( "text $in.n.t -width 20 -height 30 -yscrollcommand \"$in.n.yscroll set\" -wrap none -font \"$font_normal\"" ); 
 		cmd( "mouse_wheel $in.n.t" );
-		cmd( "pack $in.n.t -expand yes -fill y" );
-		cmd( "pack $in.n -expand yes -fill y" );
+		cmd( "pack $in.n.t -expand yes -fill both" );
+		cmd( "pack $in.n -expand yes -fill both" );
 
 		cmd( "done $in c { destroytop .deb.val }" );
 
@@ -1203,8 +1203,8 @@ void show_neighbors( object *r )
 		cmd( "pack $n.n.yscroll -side right -fill y" );
 		cmd( "text $n.n.t -width 18 -height 19 -yscrollcommand \"$n.n.yscroll set\" -wrap none -cursor arrow" );
 		cmd( "mouse_wheel $n.n.t" );
-		cmd( "pack $n.n.t -expand yes -fill y" );
-		cmd( "pack $n.n -expand yes -fill y" );
+		cmd( "pack $n.n.t -expand yes -fill both" );
+		cmd( "pack $n.n -expand yes -fill both" );
 		
 		cmd( "label $n.l4 -text \"(double-click ID to\nchange to node)\"" );
 		cmd( "pack $n.l4 -pady 5" );

@@ -179,6 +179,8 @@ If you want to create a desktop link (icon) to run Lsd/LMM, you can use the scri
 
 ./add-shortcut-mac.sh
 
+If you use macOS 10.12 (Sierra) or newer, you MUST use the command above to remove LMM and LSD from the system quarantine (or manually remove LMM.app and LSD.app from the quarantine). Failing to do so will prevent the usage of LSD as a native Mac App (you can stil run lmmOSX from the terminal).
+
 Alternatively, you can run LMM from the terminal (usually not required). Please open a terminal in the chosen installation directory and execute:
 
 ./lmmOSX

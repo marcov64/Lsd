@@ -255,7 +255,7 @@ if ( choice )
 }
 
 s =  ( char * ) Tcl_GetVar( inter, "RootLsd", 0 );
-strcpy( rootLsd, s );
+strncpy( rootLsd, s, 499 );
 num = strlen( rootLsd );
 for ( i = 0; i < num; ++i )
 	if ( rootLsd[ i ] == '\\' )
@@ -812,20 +812,22 @@ if(argn>1)
      s=(char *)Tcl_GetVar(inter, "s",0);
      choice=0;
      if(s[0]!='\0')
-       {strcpy(str, s);
-        if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H") || !strcmp(str, ".hpp") || !strcmp(str, ".HPP") || !strcmp(str, ".Hpp"))
-          {sourcefile=1;
-			color(shigh, 0, 0);			// set color types (all text)
-          }
-        else
-          sourcefile=0;
-       }
-    }
+	 {
+		   strncpy( str, s, 999 );
+		   if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H") || !strcmp(str, ".hpp") || !strcmp(str, ".HPP") || !strcmp(str, ".Hpp"))
+		   {
+			   sourcefile=1;
+			   color(shigh, 0, 0);			// set color types (all text)
+		   }
+		   else
+			   sourcefile=0;
+	 }
+   }
    else
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" ); 
+	   cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File missing\" -detail \"File '$filetoload' not found.\"" ); 
 }
- else
-  choice= 33; 			// open model browser
+else
+	choice= 33; 			// open model browser
   
 cmd( "focus -force .f.t.t" );
 
@@ -1299,7 +1301,7 @@ if(choice==3)
 s = get_fun_name( str );
 if ( s == NULL || ! strcmp( s, "" ) )
 	goto end_gdb;
-strcpy( str, s );
+strncpy( str, s, 999 );
 s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
 if ( s != NULL && strcmp( s, "" ) )
 {
@@ -1564,7 +1566,7 @@ for(i=0; i<num; i++)
  {
   cmd( "if {[file isdirectory [lindex $dir %d] ] == 1} {set curdir [lindex $dir %i]} {set curdir ___}", i, i );
   s=(char *)Tcl_GetVar(inter, "curdir",0);
-  strcpy(str, s);
+  strncpy( str, s, 499 );
   if(strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
    {
     cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
@@ -1699,7 +1701,7 @@ cmd( "set s [file extension \"$filename\"]" );
 s=(char *)Tcl_GetVar(inter, "s",0);
 if(s[0]!='\0')
 {
-  strcpy(str, s);
+  strncpy( str, s, 499 );
   if(!strcmp(str, ".cpp") || !strcmp(str, ".c") || !strcmp(str, ".C") || !strcmp(str, ".CPP") || !strcmp(str, ".Cpp") || !strcmp(str, ".c++") || !strcmp(str, ".C++") || !strcmp(str, ".h") || !strcmp(str, ".H") || !strcmp(str, ".hpp") || !strcmp(str, ".Hpp") || !strcmp(str, ".h++") || !strcmp(str, ".H++"))
   {
 	cmd( ".f.t.t tag add bc \"1.0\"" );
@@ -3477,7 +3479,7 @@ for(i=0; i<num && choice!=3; i++)
  {
   cmd( "if {[file isdirectory [lindex $dir %d] ] == 1} {set curdir [lindex $dir %i]} {set curdir ___}", i, i );
   s=(char *)Tcl_GetVar(inter, "curdir",0);
-  strcpy(str, s);
+  strncpy( str, s, 499 );
   if(strcmp(str,"___") && strcmp(str, "gnu") && strcmp(str, "src") && strcmp(str, "Manual") )
    {
 
@@ -5212,7 +5214,7 @@ void signal_handler( int signum )
 		case SIGXFSZ:
 #endif
 		default:
-			strcpy( msg, strsignal( signum ) );
+			strncpy( msg, strsignal( signum ), 999 );
 			break;			
 	}
 	
