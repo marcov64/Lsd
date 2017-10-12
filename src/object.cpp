@@ -308,10 +308,6 @@ char *qsort_lab;
 char *qsort_lab_secondary;
 object *globalcur;
 
-#ifdef PARALLEL_MODE
-mutex error;
-#endif	
-
 
 /****************************************************
 UPDATE
@@ -353,149 +349,6 @@ void object::update(void)
 			for( cur = cb->head; cur != NULL; cur = cur->next )
 				cur->update( );
 } 
-
-
-/***********
-ERROR_HARD
-Procedure called when an unrecoverable error occurs. 
-Information about the state of the simulation when the error 
-occured is provided. Users can abort the program or analyse 
-the results collected up the latest time step available.
-*************/
-void error_hard( const char *logText, const char *boxTitle, const char *boxText )
-{
-	if ( quit == 2 )		// simulation already being stopped
-		return;
-		
-#ifdef PARALLEL_MODE
-	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( error );
-#endif	
-		
-#ifndef NO_WINDOW
-	if ( running )			// handle running events differently
-	{
-		plog( "\n\nError detected at time %d", "highlight", t );
-		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
-			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog == NULL ? "(none)" : stacklog->vs->label );
-		plog( "\n\nError message: %s", "", logText );
-		print_stack( );
-		cmd( "wm deiconify .log; raise .log; focus -force .log" );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
-	}
-	else
-	{
-		log_tcl_error( "ERROR", logText );
-		plog( "\n\nERROR: %s\n", "", logText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
-	}
-#endif
-
-	if( ! running )
-		return;
-
-	quit = 2;				// do not continue simulation
-
-#ifndef NO_WINDOW
-	uncover_browser( );
-	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
-
-	cmd( "set err 1" );
-
-	cmd( "newtop .cazzo Error" );
-
-	cmd( "frame .cazzo.t" );
-	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
-	cmd( "pack .cazzo.t.l -pady 10" );
-	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
-	cmd( "pack .cazzo.t.l1" );
-
-	cmd( "frame .cazzo.e" );
-	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
-
-	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
-	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\"" );
-	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
-	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
-
-	cmd( "pack .cazzo.e.l .cazzo.e.b" );
-
-	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
-
-	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
-
-	cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
-	cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
-	cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
-	cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
-
-	cmd( "showtop .cazzo centerS" );
-
-	choice=0;
-	while(choice==0)
-		Tcl_DoOneEvent(0);
-
-	cmd( "set choice $err" );
-	cmd( "destroytop .cazzo" );
-
-	if ( choice == 2 )
-	{
-		// do run( ) cleanup
-		unwind_stack( );
-		actual_steps = t;
-		running = 0;
-		close_sim( );
-		reset_end( root );
-		root->emptyturbo( );
-		set_buttons_log( false );
-		uncover_browser( );
-
-#ifdef PARALLEL_MODE
-		// stop multi-thread workers
-		delete [ ] workers;
-		workers = NULL;
-#endif	
-		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
-	}
-#else
-
-	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
-#endif
-
-	myexit( 13 );
-}
-
-
-/****************************
-PRINT_STACK
-Print the state of the stack in the log window. 
-This tells the user which variable is computed 
-because of other equations' request.
-*****************************/
-void print_stack( void )
-{
-	lsdstack *app;
-
-	if ( parallel_mode )
-	{
-		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
-		return;
-	}
-
-	if ( fast_mode )
-	{
-		plog( "\n\nRunning in fast mode, list of variables under computation not available\n(You may temporarily not use fast mode to get additional information)\n" );
-		return;
-	}
-
-	plog( "\n\nList of variables currently under computation" );
-	plog( "\n\nLevel\tVariable Label" );
-
-	for ( app = stacklog; app != NULL; app = app->prev )
-		plog( "\n%d\t%s", "", app->ns, app->label );
-
-	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
-}
 
 
 /****************************************************
@@ -2153,14 +2006,14 @@ object *object::turbosearch(char const *label, double tot, double num)
 	  break;
 	if(cb==NULL)
 	{
-	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nin TSEARCH_CNDS", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
+	   sprintf( msg, "failure in equation for '%s' when searching object '%s' \nusing turbo search", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 	   error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 	   return NULL;
 	} 
 
 	if(cb->mn==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with TSEARCH_CNDS, Turbosearch can be used only \nafter initializing the object with INI_TSEARCHS", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching \nfor '%s' with turbo search, this option can be used only \nafter initializing the object with INIT_TSEARCH", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return NULL;
 	} 
@@ -2191,7 +2044,7 @@ void object::initturbo(char const *label, double tot=0)
 	  break;
 	if(cb==NULL)
 	{
-		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize Turbosearch: the model does not contain \nany element '%s' in the expected position", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label, label ); 
+		sprintf( msg, "failure in equation for '%s' when searching '%s' \nto initialize turbo search: the model does not contain \nany element '%s' in the expected position", stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, label, label ); 
 		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
 		return;
 	} 

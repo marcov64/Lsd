@@ -181,6 +181,7 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 		destroytop $w
 	}
 	toplevel $w
+	wm withdraw $w
 	if { $par != "" } {
 		if { $par != "." } {
 			if { [ winfo viewable [ winfo toplevel $par ] ] } {

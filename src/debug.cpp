@@ -258,13 +258,17 @@ if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "1" ) )
 		show_tmp_vars( );
 
 // remove or update the network window
-cmd( "set existNet [ winfo exists .deb.net ]" );
-if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "1" ) )
+if ( r->node == NULL )
 {
-	if ( r->node == NULL )
-		cmd( "destroytop .deb.net" );
-	else
+	cmd( "destroytop .deb.net" );
+	cmd( ".deb.b.move.net configure -state disabled" );
+}
+else
+{
+	cmd( "set existNet [ winfo exists .deb.net ]" );
+	if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "1" ) )
 		show_neighbors( r );
+	cmd( ".deb.b.move.net configure -state normal" );
 }
 
 ch[0] = '\0';
@@ -1010,9 +1014,9 @@ return choice;
 /*******************************************
 DEB_SHOW
 ********************************************/
-void deb_show(object *r)
+void deb_show( object *r )
 {
-char ch[2*MAX_ELEM_LENGTH];
+char ch[ 2 * MAX_ELEM_LENGTH ];
 variable *ap_v;
 int count, i;
 object *ap_o;
@@ -1176,8 +1180,12 @@ void show_neighbors( object *r )
 		cmd( "newtop $n \"Network\" { destroytop .deb.net } .deb" );
 		
 		cmd( "frame $n.l1");
-		cmd( "label $n.l1.l" );
-		cmd( "label $n.l1.n -foreground red" );
+		cmd( "label $n.l1.l -text \"Node ID and name:\"" );
+		cmd( "frame $n.l1.n" );
+		cmd( "label $n.l1.n.id -foreground red" );
+		cmd( "label $n.l1.n.sep -text |" );
+		cmd( "label $n.l1.n.name -foreground red" );
+		cmd( "pack $n.l1.n.id $n.l1.n.sep $n.l1.n.name -side left" );
 		cmd( "pack $n.l1.l $n.l1.n" );
 		
 		cmd( "frame $n.l2");
@@ -1220,17 +1228,8 @@ void show_neighbors( object *r )
 		cmd( "$n.n.t delete 1.0 end" );
 	}
 	
-	if ( r->node->name == NULL )	// is node named?
-	{
-		cmd( "$n.l1.l configure -text \"Node ID:\"" );
-		cmd( "$n.l1.n configure -text \"%ld\"", r->node->id );
-	}
-	else
-	{
-		cmd( "$n.l1.l configure -text \"Node name:\"" );
-		cmd( "$n.l1.n configure -text \"%s\"", r->node->name );
-	}
-	
+	cmd( "$n.l1.n.id configure -text \"%ld\"", r->node->id );
+	cmd( "$n.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );
 	cmd( "$n.l2.n configure -text %ld", r->node->nLinks );
 	
 	int i = 1;
@@ -1263,28 +1262,28 @@ ATTACH_INSTANCE_NUMBER
 ********************************************/
 int depth;
 
-void attach_instance_number(char *ch, object *r)
+void attach_instance_number( char *ch, object *r )
 {
 	object *cur;
 	int i, j;
 
-	if(r==NULL)
+	if ( r == NULL )
 		return;
-	attach_instance_number(ch, r->up);
+	attach_instance_number( ch, r->up );
 
-	if(r->up!=NULL)
-		for(i=1,cur=r->up->search(r->label); cur!=NULL; cur=go_brother(cur) )
+	if ( r->up != NULL )
+		for ( i = 1, cur = r->up->search( r->label ); cur != NULL; cur = go_brother( cur ) )
 		{
-			if(cur==r)
-			j=i;
+			if ( cur == r )
+			j = i;
 			i++;
 		}
 
-	if(r->up==NULL)
+	if ( r->up == NULL )
 		sprintf( msg, "%d:%s (1/1) ", depth = 1, r->label );
 	else
 		sprintf( msg, " |  %d:%s (%d/%d) ", ++depth, r->label, j, i - 1 );
-	strcat(ch, msg);
+	strncat( ch, msg, 2 * MAX_ELEM_LENGTH - 1 - strlen( ch ) );
 }
 
 

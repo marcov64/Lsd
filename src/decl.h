@@ -101,6 +101,9 @@ Comments and bug reports to marco.valente@univaq.it
 #define ACCESSPERMS 0777 
 #endif
 
+// Choose directory/file separator
+#define foldersep( dir ) ( dir[0] == '\0' ? "" : "/" )
+
 // define the base pseudo random number generator
 #ifndef RND
 double ran1( long *idum_loc = NULL );
@@ -293,29 +296,30 @@ class object
 	object *turbosearch(char const *label, double tot, double num);
 
 	// set the network handling methods
-	netNode *add_node_net( long id, char const *nodeName, bool silent );
+	netNode *add_node_net( long id = -1, char const *nodeName = "", bool silent = false );
 	void delete_node_net( void );
 	void name_node_net( char const *nodeName );
 	void stats_net( char const *lab, double *r );
 	object *search_node_net( char const *lab, long id ); 
 	object *draw_node_net( char const *lab ); 
 	object *shuffle_nodes_net( char const *lab );
-	netLink *add_link_net( object *destPtr, double weight, double probTo );
+	netLink *add_link_net( object *destPtr, double weight = 0, double probTo = 1 );
 	void delete_link_net( netLink *ptr );
 	netLink *search_link_net( long id ); 
 	netLink *draw_link_net( void ); 
-	long read_file_net( char const *lab, char const *dir, char const *base_name, int serial, char const *ext );
-	long write_file_net( char const *lab, char const *dir, char const *base_name, int serial, bool append );
+	long read_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, char const *ext = "net" );
+	long write_file_net( char const *lab, char const *dir = "", char const *base_name = "net", int serial = 1, bool append = false );
 	long init_stub_net( char const *lab, const char* gen, long numNodes, long par1 = 0, double par2 = 0.0 );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_random_dir_net( char const *lab, long numNodes, long numLinks );
 	long init_random_undir_net( char const *lab, long numNodes, long numLinks );
 	long init_uniform_net( char const *lab, long numNodes, long outDeg );
+	long init_star_net( char const *lab, long numNodes );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_renyi_erdos_net( char const *lab, long numNodes, double linkProb );
 	long init_small_world_net( char const *lab, long numNodes, long outDeg, double rho );
 	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
-	long init_lattice_net( int nRow, int nCol, char const *lab, bool eightNeigbr );
+	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
 	void delete_net( char const *lab );
 };
 
@@ -430,6 +434,7 @@ FILE *search_data_ent(char *name, variable *v);
 FILE *search_data_str(char const *name, char const *init, char const *str);
 FILE *search_str(char const *name, char const *str);
 bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
+bool get_bool( const char *tcl_var, bool *var = NULL );
 bool is_finite( double x );						// standard library redefinitions to workaround gcc bug
 bool is_inf( double x );
 bool is_nan( double x );
@@ -443,18 +448,17 @@ char *clean_file(char *);
 char *clean_path(char *);
 char *upload_eqfile(void);
 description *search_description(char *lab);
-double exp(double c);
-double log(double v);
+double get_double( const char *tcl_var, double *var = NULL );
 double max(double a, double b);
 double min(double a, double b);
 double norm(double mean, double dev);
-double rnd_integer(double min, double max);
-double sqrt(double v);
+double uniform_int( double min, double max );
 int browse( object *r, int *choice);
 int check_label(char *l, object *r);
 int compute_copyfrom(object *c, int *choice);
 int contains (FILE *f, char *lab, int len);
 int deb(object *r, object *c, char const *lab, double *res);
+int get_int( const char *tcl_var, int *var = NULL );
 int is_equation_header(char *line, char *var);
 int load_configuration( object *, bool reload = false );
 int lsdmain(int argn, char **argv);
@@ -468,7 +472,9 @@ int sort_function_down_two( const void *a, const void *b );
 int sort_function_up( const void *a, const void *b );
 int sort_function_up_two( const void *a, const void *b );
 int sort_labels_down(const void *a, const void *b);
+long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
+object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
 object *create( object *r);
 object *go_brother(object *cur);
 object *operate( int *choice, object *r);
@@ -527,10 +533,6 @@ void fill_list_par(object *r, int flag_all);
 void fill_list_var(object *r, int flag_all, int flag_init);
 void find_lags(object *r);
 void find_using(object *r, variable *v, FILE *frep);
-void get_bool( const char *tcl_var, bool *var );
-void get_double( const char *tcl_var, double *var );
-void get_int( const char *tcl_var, int *var );
-void get_long( const char *tcl_var, long *var );
 void go_next(object **t);
 void handle_signals( void ( * handler )( int signum ) );
 void histograms(int *choice);
@@ -541,7 +543,7 @@ void init_random(int seed);
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem(object *r, int *num_v, int *num_c);
 void insert_labels_mem(object *r, int *num_v, int *num_c);
-void insert_object( const char *w, object *r );
+void insert_object( const char *w, object *r, bool netOnly = false );
 void insert_obj_num(object *root, char const *tag, char const *indent, int counter, int *i, int *value);
 void insert_store_mem(object *r, int *num_v);
 void kill_trailing_newline(char *s);

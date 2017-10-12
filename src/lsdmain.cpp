@@ -127,7 +127,7 @@ char msg[ TCL_BUFF_STR ];	// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
 char tcl_dir[ MAX_PATH_LENGTH ] = "";	// Tcl/Tk directory
 description *descr = NULL;	// model description structure
-int actual_steps=0;			// number of executed time steps
+int actual_steps = 0;		// number of executed time steps
 int choice;					// Tcl menu control variable (main window)
 int choice_g;               // Tcl menu control variable (structure window)
 int cur_plt;				// current graph plot number
@@ -136,7 +136,7 @@ int debug_flag = false;		// debug enable control (bool)
 int done_in;				// Tcl menu control variable (log window)
 int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
-int findexSens=0;			// index to sequential sensitivity configuration filenames
+int findexSens = 0;			// index to sequential sensitivity configuration filenames
 int macro;					// equations style (macros or C++) (bool)
 int max_threads = 1;		// suggested maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
@@ -144,17 +144,17 @@ int parallel_disable = false;// flag to control parallel mode
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
-int quit=0;					// simulation interruption mode (0=none)
+int quit = 0;				// simulation interruption mode (0=none)
 int series_saved;			// number of series saved
-int sim_num=1;				// simulation number running
+int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int stackinfo_flag=0;		// LSD stack control
+int stackinfo_flag = 0;		// LSD stack control
 int t;						// current time step
-int total_obj=0;			// total objects in model
-int total_var=0;			// total variables/parameters in model
+int total_obj = 0;			// total objects in model
+int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
-long nodesSerial = 0;		// network node's serial number global counter
+long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
@@ -525,16 +525,13 @@ Tcl_CreateCommand( inter, "set_c_var", Tcl_set_c_var, NULL, NULL );
 Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
 
 // set main window
+cmd( "wm withdraw ." );
 cmd( "wm title . \"LSD Browser\"" );
 cmd( "wm protocol . WM_DELETE_WINDOW { if [ string equal [ discard_change ] ok ] { exit } }" ); 
 cmd( ". configure -menu .m" );		// define here to avoid redimensining the window
 cmd( "icontop . lsd" );
 cmd( "sizetop .lsd" );
 cmd( "setglobkeys ." );				// set global keys for main window
-
-cmd( "label .l -text \"Starting LSD\"" );
-cmd( "pack .l" );
-cmd( "update" );
 
 create_logwindow( );
 cmd( "init_canvas_colors" );
@@ -547,8 +544,6 @@ strcpy( lsd_eq_file, "" );
 sprintf( name_rep, "report_%s.html", simul_name );
 
 grandTotal = true;				// not in parallel mode: use .tot headers
-
-cmd( "destroy .l" );
 #endif
 
 // create fast equation look-up map if required

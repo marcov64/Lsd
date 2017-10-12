@@ -68,6 +68,10 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 
+#ifdef PARALLEL_MODE
+mutex error;
+#endif	
+
 
 #ifndef NO_WINDOW
 
@@ -172,16 +176,159 @@ void cmd( const char *cm, ... )
 #endif
 
 
+/***********
+ERROR_HARD
+Procedure called when an unrecoverable error occurs. 
+Information about the state of the simulation when the error 
+occured is provided. Users can abort the program or analyse 
+the results collected up the latest time step available.
+*************/
+void error_hard( const char *logText, const char *boxTitle, const char *boxText )
+{
+	if ( quit == 2 )		// simulation already being stopped
+		return;
+		
+#ifdef PARALLEL_MODE
+	// prevent concurrent use by more than one thread
+	lock_guard < mutex > lock( error );
+#endif	
+		
+#ifndef NO_WINDOW
+	if ( running )			// handle running events differently
+	{
+		plog( "\n\nError detected at time %d", "highlight", t );
+		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
+			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog == NULL ? "(none)" : stacklog->vs->label );
+		plog( "\n\nError message: %s", "", logText );
+		print_stack( );
+		cmd( "wm deiconify .log; raise .log; focus -force .log" );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+	}
+	else
+	{
+		log_tcl_error( "ERROR", logText );
+		plog( "\n\nERROR: %s\n", "", logText );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
+	}
+#endif
+
+	if( ! running )
+		return;
+
+	quit = 2;				// do not continue simulation
+
+#ifndef NO_WINDOW
+	uncover_browser( );
+	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
+
+	cmd( "set err 1" );
+
+	cmd( "newtop .cazzo Error" );
+
+	cmd( "frame .cazzo.t" );
+	cmd( "label .cazzo.t.l -fg red -text \"An error occurred during the simulation\"" );
+	cmd( "pack .cazzo.t.l -pady 10" );
+	cmd( "label .cazzo.t.l1 -text \"Information about the error\nis reported in the log window.\nResults are available in the LSD browser.\"" );
+	cmd( "pack .cazzo.t.l1" );
+
+	cmd( "frame .cazzo.e" );
+	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
+
+	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
+	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\"" );
+	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
+	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
+
+	cmd( "pack .cazzo.e.l .cazzo.e.b" );
+
+	cmd( "pack .cazzo.t .cazzo.e -padx 5 -pady 5" );
+
+	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
+
+	cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
+	cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
+	cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
+	cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
+
+	cmd( "showtop .cazzo centerS" );
+
+	choice=0;
+	while(choice==0)
+		Tcl_DoOneEvent(0);
+
+	cmd( "set choice $err" );
+	cmd( "destroytop .cazzo" );
+
+	if ( choice == 2 )
+	{
+		// do run( ) cleanup
+		unwind_stack( );
+		actual_steps = t;
+		running = 0;
+		close_sim( );
+		reset_end( root );
+		root->emptyturbo( );
+		set_buttons_log( false );
+		uncover_browser( );
+
+#ifdef PARALLEL_MODE
+		// stop multi-thread workers
+		delete [ ] workers;
+		workers = NULL;
+#endif	
+		throw ( int ) 919293;			// force end of run() (in lsdmain.cpp)
+	}
+#else
+
+	fprintf( stderr, "\nError: %s\n(%s)\n", boxTitle, logText );
+#endif
+
+	myexit( 13 );
+}
+
+
+/****************************
+PRINT_STACK
+Print the state of the stack in the log window. 
+This tells the user which variable is computed 
+because of other equations' request.
+*****************************/
+void print_stack( void )
+{
+	lsdstack *app;
+
+	if ( parallel_mode )
+	{
+		plog( "\n\nRunning in parallel mode, list of variables under computation not available\n(You may disable parallel computation in menu 'Run', 'Simulation Settings')\n" );
+		return;
+	}
+
+	if ( fast_mode )
+	{
+		plog( "\n\nRunning in fast mode, list of variables under computation not available\n(You may temporarily not use fast mode to get additional information)\n" );
+		return;
+	}
+
+	plog( "\n\nList of variables currently under computation" );
+	plog( "\n\nLevel\tVariable Label" );
+
+	for ( app = stacklog; app != NULL; app = app->prev )
+		plog( "\n%d\t%s", "", app->ns, app->label );
+
+	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
+}
+
+
 /****************************************************
 GO_BROTHER
 ****************************************************/
-object *go_brother(object *c)
+object *go_brother( object *c )
 {
-if ( c == NULL )
-	return NULL;
-if ( c->next == NULL )
-	return NULL;
-return c->next;
+	if ( c == NULL )
+		return NULL;
+	if ( c->next == NULL )
+		return NULL;
+	return c->next;
 }
 
 
@@ -189,40 +336,40 @@ return c->next;
 SKIP_NEXT_OBJ
 This is the new version, after moving to the bridge-based representation
 ****************************************************/
-object *skip_next_obj(object *t, int *count)
+object *skip_next_obj( object *t, int *count )
 {
-char *lab;
-object *c;
-int i;
+	char *lab;
+	object *c;
+	int i;
 
-*count=0;
-if(t==NULL)
- return(NULL);
-for(c=t, i=0;c!=NULL; c=c->next, i++);
-*count=i;
+	*count=0;
+	if(t==NULL)
+		return(NULL);
+	for(c=t, i=0;c!=NULL; c=c->next, i++);
+	*count=i;
 
-return skip_next_obj(t);
-};
+	return skip_next_obj(t);
+}
 
-object *skip_next_obj(object *tr)
+object *skip_next_obj( object *tr )
 {
-bridge *cb;
-if(tr==NULL)
- return(NULL);
+	bridge *cb;
+	if(tr==NULL)
+	 return(NULL);
 
-if(tr->up==NULL)
- return(NULL);
-for(cb=tr->up->b; cb!=NULL; cb=cb->next)
- {
-  if(!strcmp(cb->blabel,tr->label))
-   {
-    if(cb->next==NULL)
-     return(NULL);
-    else
-     return(cb->next->head); 
-   }  
- }
- return( NULL );
+	if(tr->up==NULL)
+	 return(NULL);
+	for(cb=tr->up->b; cb!=NULL; cb=cb->next)
+	{
+	  if(!strcmp(cb->blabel,tr->label))
+	  {
+		if(cb->next==NULL)
+		 return(NULL);
+		else
+		 return(cb->next->head); 
+	  }  
+	}
+	return( NULL );
 }
 
 
@@ -231,13 +378,13 @@ MY_STRCMP
 ****************************************************/
 int my_strcmp(char *a, char *b)
 {
-int res;
-if(a==NULL && b==NULL)
- return 0;
+	int res;
+	if(a==NULL && b==NULL)
+		return 0;
 
-res=strcmp(a,b);
-return res;
-};
+	res=strcmp(a,b);
+	return res;
+}
 
 
 /****************************************************
@@ -245,11 +392,11 @@ GO_NEXT
 ****************************************************/
 void go_next(object **t)
 {
-if((*t)->next!=NULL)
-  *t=(*t)->next;
-else
-  *t=NULL;
-};
+	if((*t)->next!=NULL)
+		*t=(*t)->next;
+	else
+		*t=NULL;
+}
 
 
 
@@ -260,79 +407,113 @@ int dum=0;
 
 double norm(double mean, double dev)
 {
+	double gasdev, R, v1, v2, fac;
+	static double gset;
+	int boh=1;
+	if(dum==0)
+	{ 
+		do
+		{ 
+			v1=2.0*RND-1;
+			boh=1;
+			v2=2.0*RND-1;
+			R=v1*v1+v2*v2;
+		}
+		while(R>=1);
+		fac=log(R);
+		fac=fac/R;
+		fac=fac*(-2.0);
+		fac=sqrt(fac);
+		gset=v1*fac;
+		gasdev=v2*fac;
+		dum=1;
+	}
+	else
+	{
+		gasdev=gset;
+		dum=0;
+	}
+	gasdev=gasdev*dev+mean;
+	return gasdev;
+}
 
-double gasdev, R, v1, v2, fac;
-static double gset;
-int boh=1;
-if(dum==0)
-{ do
-  { v1=2.0*RND-1;
-    boh=1;
-    v2=2.0*RND-1;
-    R=v1*v1+v2*v2;
-  }
-  while(R>=1);
- fac=log(R);
- fac=fac/R;
- fac=fac*(-2.0);
- fac=sqrt(fac);
- gset=v1*fac;
- gasdev=v2*fac;
- dum=1;
+
+/****************************************************
+UNIFORM
+****************************************************/
+double uniform( double min, double max )
+{
+	if ( min > max )
+		return 0;
+	return ( min + RND * ( max - min ) );
 }
-else
-{gasdev=gset;
- dum=0;
-}
-gasdev=gasdev*dev+mean;
-return(gasdev);
+
+
+/****************************************************
+UNIFORM_INT
+****************************************************/
+double uniform_int( double min, double max )
+{
+	if ( min > max )
+		return 0;
+	return ( floor( min + RND * ( max + 1 - min ) ) );
 }
 
 
 /****************************************************
 DRAW
 ****************************************************/
-int draw(double p)
-{double dice;
-
-dice=RND;
-
-if(dice<p)
-  return(1);
-return(0);
+int draw( double p )
+{
+	double dice = RND;
+	if ( dice < p )
+		return 1;
+	return 0;
 }
+
+
+/****************************************************
+_ABS
+****************************************************/
+double _abs( double a )
+{
+	if( a > 0 )
+		return a;
+	else
+		return ( -1 * a );
+};
 
 
 /****************************************************
 ROUND
 ****************************************************/
-double round(double x)
+double round( double x )
 {
-if( (x-floor(x)) > (ceil(x)-x) )
- return ceil(x);
-return floor(x);
+	if ( ( x - floor( x ) ) > ( ceil( x ) - x ) )
+		return ceil( x );
+	return floor( x );
 }
 
 
 /****************************************************
 MAX
 ****************************************************/
-double max(double a, double b)
+double max( double a, double b )
 {
-if(a>b)
- return a;
-return(b);
+	if ( a > b )
+		return a;
+	return b;
 }
 
 
 /****************************************************
 MIN
 ****************************************************/
-double min(double a, double b)
+double min ( double a, double b )
 {
-if(a<b)
- return a;
-return(b);
+	if ( a < b )
+		return a;
+	return b;
 }
 
 
@@ -867,16 +1048,6 @@ result::~result( void )
 }
 
 
-double rnd_integer(double m, double x)
-{
-double r;
-
-r=m+RND*(x+1-m);
-
-return(floor(r));
-}
-
-
 double gammaln(double xx)
 {
 double x, y, tmp, ser;
@@ -906,7 +1077,6 @@ return -tmp+log(2.5066282746310005*ser/x);
 #define NDIV (1+(IM-1)/NTAB)
 #define EPS 1.2e-7
 #define RNMX (1.0-EPS)
-#define PI 3.141592654
 
 double PMRand_open(long *idum)
 {
@@ -1187,100 +1357,124 @@ double ran1( long *idum_loc )
 }
 
 
+/****************************************************
+GAMMA
+****************************************************/
 extern int quit;
 
-double gamdev(int ia, long *idum_loc)
+double gamdev( int ia, long *idum_loc = NULL )
 {
+	int j;
+	double am, e, s, v1, v2, x, y;
 
-int j;
-double am, e, s, v1, v2, x, y;
+	// Manage default (internal) number sequence
+	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
+	if( idum_loc == NULL )
+		idum_loc = & idum;
 
-// Manage default (internal) number sequence
-// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
-if( idum_loc == NULL )
-	idum_loc = & idum;
+	if(ia<1) 
+	{
+		sprintf( msg, "inconsistant state in gamdev");
+		error_hard( msg, "Internal error", "If error persists, please contact developers." );
+		quit=1;
+		return 0;
+	} 
+	if(ia<6)
+	{
+		x=1.0;
+		for(j=1; j<=ia; j++) x*=ran1(idum_loc);
+		x=-log(x);
+	}
+	else
+	{
+		do
+		{
+			do
+			{
+				do
+				{ 
+					v1=ran1(idum_loc);
+					v2=2*ran1(idum_loc)-1.0;
+				}
+				while(v1*v1+v2*v2>1.0);
+				y=v2/v1;
+				am=ia-1;
+				s=sqrt(2.0*am+1.0);
+				x=s*y+am;
+			}
+			while(x<=0);
+			e=(1+y*y)*exp(am*log(x/am)-s*y);
+		}
+		while(ran1(idum_loc)>e);
+	} 
+	return x;
+}
 
-if(ia<1) 
- {
-  sprintf( msg, "inconsistant state in gamdev");
-  error_hard( msg, "Internal error", "If error persists, please contact developers." );
-  quit=1;
-  return 0;
- } 
-if(ia<6)
- {
- x=1.0;
- for(j=1; j<=ia; j++) x*=ran1(idum_loc);
- x=-log(x);
- }
-else
- {
- do
-  {
-   do
-   {
-    do
-    { 
-    v1=ran1(idum_loc);
-    v2=2*ran1(idum_loc)-1.0;
-    }
-    while(v1*v1+v2*v2>1.0);
-   y=v2/v1;
-   am=ia-1;
-   s=sqrt(2.0*am+1.0);
-   x=s*y+am;
-   }
-   while(x<=0);
-  e=(1+y*y)*exp(am*log(x/am)-s*y);
- }
- while(ran1(idum_loc)>e);
-} 
-return x;
+double gamma( double m )
+{
+	return gamdev( ( int ) round( m ), & idum );
 }
 
 
-double poidev(double xm, long *idum_loc)
+/****************************************************
+POISSON
+****************************************************/
+double poidev( double xm, long *idum_loc = NULL )
 {
+	double gammaln(double xx);
+	static double sq,alxm,g,oldm=(-1.0);
+	double em,t,y;
 
-double gammaln(double xx);
-static double sq,alxm,g,oldm=(-1.0);
-double em,t,y;
+	// Manage default (internal) number sequence
+	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
+	if( idum_loc == NULL )
+		idum_loc = & idum;
 
-// Manage default (internal) number sequence
-// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
-if( idum_loc == NULL )
-	idum_loc = & idum;
-
-if (xm < 12.0) {
-  if (xm != oldm) {
-    oldm=xm;
-    g=exp(-xm);
-  }
-em = -1;
-t=1.0;
-do {
-  ++em;
-  t *= ran1(idum_loc);
- } while (t > g);
-} else {
-  if (xm != oldm) {
-    oldm=xm;
-    sq=sqrt(2.0*xm);
-    alxm=log(xm);
-    g=xm*alxm-gammaln(xm+1.0);
-  }
- do {
-   do {
-      y=tan(PI*ran1(idum_loc));
-      em=sq*y+xm;
-      
-   } while (em < 0.0);   
-   em=floor(em);
-   t=0.9*(1.0+y*y)*exp(em*alxm-gammaln(em+1.0)-g);
-   } while (ran1(idum_loc) > t);
- }
- return em;
+	if (xm < 12.0) 
+	{
+		if (xm != oldm) 
+		{
+			oldm=xm;
+			g=exp(-xm);
+		}
+		em=-1;
+		t=1.0;
+		do {
+			++em;
+			t *= ran1(idum_loc);
+		} 
+		while (t > g);
+	} 
+	else 
+	{
+		if (xm != oldm) 
+		{
+			oldm=xm;
+			sq=sqrt(2.0*xm);
+			alxm=log(xm);
+			g=xm*alxm-gammaln(xm+1.0);
+		}
+		do 
+		{
+			do 
+			{
+				y=tan(M_PI*ran1(idum_loc));
+				em=sq*y+xm;
+			} 
+			while (em < 0.0);   
+			em=floor(em);
+			t=0.9*(1.0+y*y)*exp(em*alxm-gammaln(em+1.0)-g);
+		} 
+		while (ran1(idum_loc) > t);
+	}
+	return em;
 }
+
+double poisson( double m )
+{
+	return poidev( m, & idum );
+}
+
 
 // ################### ADDITIONAL STATISTICAL C FUNCTIONS ################### //
 
@@ -2144,29 +2338,43 @@ else
 }
 
 
-void get_bool( const char *tcl_var, bool *var )
+bool get_bool( const char *tcl_var, bool *var )
 {
 	int intvar;
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", &intvar );
-	*var = intvar ? true : false;
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
+	if ( var != NULL )
+		*var = intvar ? true : false;
+	return ( intvar ? true : false );
 }
 
 
-void get_int( const char *tcl_var, int *var )
+int get_int( const char *tcl_var, int *var )
 {
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", var );
+	int intvar;
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%d", & intvar );
+	if ( var != NULL )
+		*var = intvar;
+	return intvar;
 }
 
 
-void get_long( const char *tcl_var, long *var )
+long get_long( const char *tcl_var, long *var )
 {
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%ld", var );
+	long longvar;
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%ld", & longvar );
+	if ( var != NULL )
+		*var = longvar;
+	return longvar;
 }
 
 
-void get_double( const char *tcl_var, double *var )
+double get_double( const char *tcl_var, double *var )
 {
-	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%lf", var );
+	double dblvar;
+	sscanf( ( char * ) Tcl_GetVar( inter, tcl_var, 0 ), "%lf", & dblvar );
+	if ( var != NULL )
+		*var = dblvar;
+	return dblvar;
 }
 #endif
 
@@ -2189,79 +2397,86 @@ Create a new run time lattice having:
 #ifndef NO_WINDOW
 
 double dimW, dimH;
+
 double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
 {
-object *cur;
-int hsize, vsize, hsizeMax, vsizeMax;
-double i, j, color;
+	object *cur;
+	int hsize, vsize, hsizeMax, vsizeMax;
+	double i, j, color;
 
-get_int( "hsizeLat", & hsize );			// 400
-get_int( "vsizeLat", & vsize );			// 400
-get_int( "hsizeLatMax", & hsizeMax );	// 600
-get_int( "vsizeLatMax", & vsizeMax );	// 600
+	get_int( "hsizeLat", & hsize );			// 400
+	get_int( "vsizeLat", & vsize );			// 400
+	get_int( "hsizeLatMax", & hsizeMax );	// 600
+	get_int( "vsizeLatMax", & vsizeMax );	// 600
 
-pixW = pixW > 0 ? pixW : hsize;
-pixH = pixH > 0 ? pixH : vsize;
-pixW = min( pixW, hsizeMax );
-pixH = min( pixH, vsizeMax );
+	pixW = pixW > 0 ? pixW : hsize;
+	pixH = pixH > 0 ? pixH : vsize;
+	pixW = min( pixW, hsizeMax );
+	pixH = min( pixH, vsizeMax );
 
-dimH=pixH/nrow;
-dimW=pixW/ncol;
-cmd( "destroytop .lat" );
-//create the window with the lattice, roughly 600 pixels as maximum dimension
-cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
+	dimH=pixH/nrow;
+	dimW=pixW/ncol;
+	cmd( "destroytop .lat" );
+	//create the window with the lattice, roughly 600 pixels as maximum dimension
+	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
-cmd( "set lat_update 1" );
-cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
-cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
-cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
+	cmd( "set lat_update 1" );
+	cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
+	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
+	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 
-char init_color_string[32];		// the final string to be used to define tk color to use
+	char init_color_string[32];		// the final string to be used to define tk color to use
 
-if ( init_color < -1 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
-	sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
-else
-	if ( init_color != -1 )
+	if ( init_color < -1 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
+		sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
+	else
+		if ( init_color != -1 )
+		{
+			sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
+			// create (white) pallete entry if invalid palette in init_color
+			cmd( "if { ! [info exist c%d] } { set c%d white }", init_color, init_color  );
+		}
+			
+	if(init_color==1001)
 	{
-		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
-		// create (white) pallete entry if invalid palette in init_color
-		cmd( "if { ! [info exist c%d] } { set c%d white }", init_color, init_color  );
+	cmd( "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW );
+
+	cmd( ".lat.c create rect 0 0 %d %d -fill white", (int)pixW, (int)pixH );
 	}
-		
-if(init_color==1001)
+	else
+	{
+	cmd( "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string );
+
+	cmd( ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string );
+	}
+
+	cmd( "pack .lat.c" );
+
+	cmd( "save .lat b { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
+
+	cmd( "set dimH %lf", dimH );
+	cmd( "set dimW %lf", dimW );
+
+	if(lattice_type==1)
+	  for(i=1; i<=nrow; i++)
+		for(j=1; j<=ncol; j++)
+		  cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
+
+	cmd( "showtop .lat centerS no no no" );
+	set_shortcuts_log( ".lat" );
+	return(0);
+}
+
+double init_lattice( char const lrow[], char const lcol[], int init_color, double nrow, double ncol, double pixW, double pixH )
 {
-cmd( "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW );
-
-cmd( ".lat.c create rect 0 0 %d %d -fill white", (int)pixW, (int)pixH );
-}
-else
-{
-cmd( "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string );
-
-cmd( ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string );
+	init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
 }
 
-cmd( "pack .lat.c" );
-
-cmd( "save .lat b { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
-
-cmd( "set dimH %lf", dimH );
-cmd( "set dimW %lf", dimW );
-
-if(lattice_type==1)
-  for(i=1; i<=nrow; i++)
-    for(j=1; j<=ncol; j++)
-      cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
-
-cmd( "showtop .lat centerS no no no" );
-set_shortcuts_log( ".lat" );
-return(0);
-}
 
 
 /*
 update_lattice.
-update the cell line.col to the color val (1 to 21 as set in analysis.cpp palette)
+update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
 negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice(double line, double col, double val)

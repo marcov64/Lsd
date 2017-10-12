@@ -3,6 +3,8 @@ trashbin/
 SyncToy*
 *.err
 *.o
+makefile
+makemessage.txt
 system_options.txt
 lmm_options.txt
 temp.html

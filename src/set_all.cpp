@@ -838,9 +838,9 @@ case 8:
        cv=cur->search_var(NULL, lab);
        cv->data_loaded='+';
        if(cv->param==0)
- 			  cv->val[lag]=rnd_integer(value1,value2);
+ 			  cv->val[lag]=uniform_int(value1,value2);
  			else
- 			  cv->val[0]=rnd_integer(value1,value2);
+ 			  cv->val[0]=uniform_int(value1,value2);
        }
       }
 
