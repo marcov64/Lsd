@@ -396,38 +396,37 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 
 /****************************************************
 OBJECT::REPLICATE
-
 ****************************************************/
-
 void object::replicate(int num, int propagate)
 {
-object *cur, *app, *cur1, *app1, *cur2;
-variable *cv;
-int i, usl;
-bridge *cb;
+	object *cur, *app, *cur1, *app1, *cur2;
+	variable *cv;
+	int i, usl;
+	bridge *cb;
 
-if(propagate==1)
-  cur=hyper_next(label);
-else
-  cur=NULL;
-if(cur!=NULL)
- cur->replicate(num, 1);
-skip_next_obj(this, &usl);
-for(cur=this, i=1; i<usl; cur=cur->next, i++);
+	if(propagate==1)
+		cur=hyper_next(label);
+	else
+		cur=NULL;
+	if(cur!=NULL)
+		cur->replicate(num, 1);
+	skip_next_obj(this, &usl);
+	for(cur=this, i=1; i<usl; cur=cur->next, i++);
 
-for(i=usl; i<num; i++)
- {app=cur->next;
-  cur->next=new object;
-  cur->next->init(up, label);
-  cur->next->to_compute=to_compute;
-  cur->next->next=app;
-  cur->to_compute=to_compute;
-  app=cur->next;
-  for(cv=v; cv!=NULL; cv=cv->next)
-	app->add_var_from_example(cv);
+	for(i=usl; i<num; i++)
+	{
+		app=cur->next;
+		cur->next=new object;
+		cur->next->init(up, label);
+		cur->next->to_compute=to_compute;
+		cur->next->next=app;
+		cur->to_compute=to_compute;
+		app=cur->next;
+		for(cv=v; cv!=NULL; cv=cv->next)
+			app->add_var_from_example(cv);
 
-  copy_descendant(this, app);
- }
+		copy_descendant(this, app);
+	}
 }
 
 
@@ -1159,13 +1158,43 @@ endLoad:
 }
 
 
+/*********************************
+SAVE_SINGLE
+*********************************/
+void save_single(variable *vcv)
+{
+	FILE *f;
+	int i;
+
+#ifdef PARALLEL_MODE
+	// prevent concurrent use by more than one thread
+	lock_guard < mutex > lock( vcv->parallel_comp );
+#endif	
+	set_lab_tit(vcv);
+	sprintf(msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
+	f=fopen(msg, "wt");  // use text mode for Windows better compatibility
+
+	fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
+
+	for(i=0; i<=t-1; i++)
+	 {
+	  if(i>=vcv->start && i <=vcv->end && !is_nan(vcv->data[i]))		// save NaN as n/a
+		fprintf(f,"%lf\t\n",vcv->data[i]);
+	  else
+		fprintf(f,"%s\t\n", nonavail);
+	  }
+	  
+	fclose(f); 
+}
+
+
 /*
 	Save current defined configuration (renaming if appropriate)
 	Returns: true: save ok, false: save failure
 */
 bool save_configuration( object *r, int findex )
 {
-	int indexDig = ( findex > 0 ) ? ( int ) floor( log( findex ) / log( 10 ) + 2 ) : 0;
+	int indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
 	object *cur;
 	description *cur_descr;
 	

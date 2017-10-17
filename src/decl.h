@@ -12,8 +12,10 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 // check compiler C++ standard support
-#if __cplusplus >= 201103L
+#ifndef CPP_DEFAULT
+#if __cplusplus >= 201103L 
 #define CPP11
+#endif
 #endif
 
 // standard libraries used
@@ -49,9 +51,11 @@ Comments and bug reports to marco.valente@univaq.it
 #endif
 
 // comment the next line to compile without libz
+#ifndef CPP_DEFAULT
 #define LIBZ 							
 #ifdef LIBZ
 #include <zlib.h>
+#endif
 #endif
 
 // LSD compilation options file
@@ -79,6 +83,7 @@ Comments and bug reports to marco.valente@univaq.it
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define ERR_LIM 10						// maximum number of repeated error messages
 #define SIG_DIG 10						// number of significant digits in data files
+#define CSV_SEP ","						// single char string with the .csv format separator
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal
@@ -252,7 +257,8 @@ class object
 	double whg_av(char const *lab, char const *lab2, int lag);
 	int init(object *_up, char const *_label);
 	void update(void);
-	object *hyper_next(char const *lab);
+	object *hyper_next( char const *lab );
+	object *hyper_next( void );
 	void add_var(char const *label, int lag, double *val, int save);
 	void add_obj(char const *label, int num, int propagate);
 	void insert_parent_obj_one(char const *lab);
@@ -377,12 +383,14 @@ class result
 	gzFile fz;					// compressed file pointer
 #endif
 	bool dozip;					// compressed file flag
+	bool docsv;					// comma separated .csv text format
+	bool firstCol;				// flag for first column in line
 
 	void title_recursive( object *r, int i );	// write file header (recursively)
 	void data_recursive( object *r, int i );	// save a single time step (recursively)
 
 public:
-	result( char const *fname, char const *fmode, bool dozip = false );	// constructor
+	result( char const *fname, char const *fmode, bool dozip = false, bool docsv = false );	// constructor
 	~result( void );							// destructor
 	void title( object *root, int flag );		// write file header
 	void data( object *root, int initstep, int endtstep = 0 );	// write data
@@ -681,6 +689,7 @@ extern int choice;			// Tcl menu control variable (main window)
 extern int choice_g;		// Tcl menu control variable (structure window)
 extern int cur_plt;			// current graph plot number
 extern int debug_flag;		// debug enable control (bool)
+extern int docsv;			// produce .csv text results files (bool)
 extern int dozip;			// compressed results file flag (bool)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
 extern int lattice_type;	// lattice window mode
@@ -694,6 +703,7 @@ extern int prof_aggr_time;	// show aggregate profiling times
 extern int prof_min_msecs;	// profile only variables taking more than X msecs.
 extern int prof_obs_only;	// profile only observed variables
 extern int quit;			// simulation interruption mode (0=none)
+extern int saveConf;		// save configuration on results saving (bool)
 extern int seed;			// pseudo random number generator seed in use
 extern int sim_num;			// simulation number running
 extern int stack;			// LSD stack call level

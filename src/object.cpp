@@ -364,16 +364,22 @@ object *object::hyper_next( char const *lab )
 	{
 		cur1 = cur->search( lab );
 		if ( cur1 != NULL )
-		break;
+			break;
 	}
 
 	if ( cur1 != NULL )
-	 return cur1;
+		return cur1;
 
 	if ( up != NULL )
-	 cur = up->hyper_next( lab );
+		cur = up->hyper_next( lab );
 
 	return cur;
+}
+
+// search object with same name as the current object
+object *object::hyper_next( void )
+{
+	return hyper_next( label );
 }
 
 
@@ -1000,10 +1006,10 @@ void object::write( char const *lab, double value, int time, int lag )
 				if ( wr_warn_cnt <= ERR_LIM )
 					plog( "\n\nWarning: while writing variable '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This would \nundermine the correct updating of variable '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
 				if ( wr_warn_cnt == ERR_LIM )
-					plog( "\nWarning: too many invalid writes, stop reporting...\n" );
+					plog( "\nWarning: too many invalid update times, stop reporting...\n" );
+				++wr_warn_cnt;
 				cv->val[ 0 ] = value;
 				cv->last_update = t - 1;
-				++wr_warn_cnt;
 			}
 			else
 			{	// allow for change of initial lagged values when starting simulation (t=1)
@@ -1219,7 +1225,17 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 				cv->last_update = t;
 			else
 				if ( t_update >= 0 )
+				{
+					if ( t_update < cv->last_update && t > 1 )
+					{
+						if ( wr_warn_cnt <= ERR_LIM )
+							plog( "\n\nWarning: while creating the object named '%s' in equation for '%s' \nthe time set for the last update (%d) is invalid in time t=%d. This may\nundermine the correct updating of variables in '%s', which will be\nrecalculated in the current period (%d)\n", "", lab, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label, time, t, lab, t );
+						if ( wr_warn_cnt == ERR_LIM )
+							plog( "\nWarning: too many invalid update times, stop reporting...\n" );
+						++wr_warn_cnt;
+					}
 					cv->last_update = t_update;
+				}
 		}
 		if(cv->save || cv->savei)
 		{

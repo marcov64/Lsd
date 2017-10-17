@@ -225,7 +225,7 @@ currObj = r;			// global pointer to C Tcl routines
 // main LSD window - avoids redrawing if not required
 if ( redrawRoot ) 
 {
-	cmd( "destroy .l" );
+	cmd( "destroy .t .l" );
 	cmd( "frame .l" );
 
 	cmd( "frame .l.v" );
@@ -2348,7 +2348,7 @@ if ( i == 0 )
 	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 	if( *choice == 2 )
 	{
-		*choice=0;
+		*choice = 0;
 		break;
 	}
 }
@@ -2359,19 +2359,27 @@ if ( search_parallel( root ) && ( when_debug > 0 || stackinfo_flag > 0 || prof_a
 	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'OK' to proceed and ignore debugging/profiling settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
 	if( *choice == 2 )
 	{
-		*choice=0;
+		*choice = 0;
 		break;
 	}
 	when_debug = stackinfo_flag = prof_aggr_time = 0;
 }
 
-Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "add_to_tot", (char *)&add_to_tot, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_BOOLEAN);
+Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "add_to_tot", ( char * ) & add_to_tot, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
 // Only ask to overwrite configuration if there are changes
 overwConf = unsaved_change( ) ? true : false;
+
+// avoid showing dialog if configuration already saved and nothing to save to disk
+if ( ! overwConf && sim_num == 1 )
+{
+	*choice = 1;
+	goto run;
+}
 
 // save the current object & cursor position for quick reload
 strcpy( lastObj, r->label );
@@ -2379,11 +2387,18 @@ cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set last
 cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
 cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
 
+cmd( "set firstFile \"%s_%d\"", simul_name, seed );
+cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
+cmd( "set totFile \"%s\"", simul_name );
+cmd( "set resExt %s", docsv ? "csv" : "res" );
+cmd( "set totExt %s", docsv ? "csv" : "tot" );
+cmd( "set zipExt %s", dozip ? ".gz" : "" );
+
 cmd( "set T .run" );
 cmd( "newtop $T \"Run Simulation\" { set choice 2 }" );
 
 cmd( "frame $T.f1" );
-cmd( "label $T.f1.l -text \"Model configuration:\"" );
+cmd( "label $T.f1.l -text \"Model configuration\"" );
 cmd( "label $T.f1.w -text \"%s\" -fg red", simul_name );
 cmd( "pack $T.f1.l $T.f1.w" );
 
@@ -2404,45 +2419,43 @@ if ( sim_num > 1 )
 	cmd( "pack $T.f2.t $T.f2.n" );
 
 	cmd( "frame $T.f3" );
-	cmd( "label $T.f3.l -text \"Results files:\"" );
+	cmd( "label $T.f3.l -text \"Results files\"" );
 	
 	cmd( "frame $T.f3.w" );
 	
 	cmd( "frame $T.f3.w.l1" );
 	cmd( "label $T.f3.w.l1.l -text \"from:\"" );
-	cmd( "label $T.f3.w.l1.w -fg red -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed );
+	cmd( "label $T.f3.w.l1.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
 	cmd( "pack $T.f3.w.l1.l $T.f3.w.l1.w -side left -padx 2" );
 	
 	cmd( "frame $T.f3.w.l2" );
 	cmd( "label $T.f3.w.l2.l -text \"to:\"" );
-	cmd( "label $T.f3.w.l2.w -fg red -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed + sim_num - 1 );
+	cmd( "label $T.f3.w.l2.w -fg red -text \"$lastFile.$resExt$zipExt\"" );
 	cmd( "pack $T.f3.w.l2.l $T.f3.w.l2.w -side left -padx 2" );
 	
 	cmd( "pack $T.f3.w.l1 $T.f3.w.l2" );
 
-	cmd( "checkbutton $T.f3.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "pack $T.f3.l $T.f3.w $T.f3.nores" );
+	cmd( "pack $T.f3.l $T.f3.w" );
 
 	cmd( "frame $T.f4" );
-	cmd( "label $T.f4.l -text \"Totals file (last steps):\"" );
-	cmd( "label $T.f4.w -fg red -text \"%s.tot\\[.gz\\]\"", simul_name );
-	cmd( "pack $T.f4.l $T.f4.w" );
+	cmd( "label $T.f4.l1 -text \"Totals file (last steps)\"" );
+	cmd( "label $T.f4.l2 -fg red -text \"$totFile.$totExt$zipExt\"" );
 	
-	cmd( "set choice [ file exists %s%s%s.tot%s ]", path, strlen( path ) > 0 ? "/" : "", simul_name, dozip ? ".gz" : ""  );
+	cmd( "set choice [ file exists \"%s%s$totFile.$totExt$zipExt\" ]", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "label $T.f4.l3 -text \"%s\"", *choice ? "(WARNING: totals file already exists)" : "" );
+	cmd( "pack $T.f4.l1 $T.f4.l2 $T.f4.l3" );
+
+	add_to_tot = ( *choice ) ? add_to_tot : false;
 
 	cmd( "frame $T.f5" );
-	cmd( "label $T.f5.l -text \"WARNING: totals file already exists\"" );
+	cmd( "checkbutton $T.f5.a -text \"Append to existing totals file\" -variable add_to_tot -state %s", *choice ? "normal" : "disabled" );
+	cmd( "checkbutton $T.f5.b -text \"Skip generating results files\" -variable no_res" );
+	cmd( "checkbutton $T.f5.c -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt .gz } { set zipExt \"\" }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $T.f5.d -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $T.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $T.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $T.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if [ file exists \"%s%s$totFile.$totExt$zipExt\" ] { $T.f4.l3 configure -text \"(WARNING: totals file already exists)\"; $T.f5.a configure -state normal } { $T.f4.l3 configure -text \"\"; $T.f5.a configure -state disabled } }", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $T.f5.e -text \"Update configuration file\" -variable overwConf" );
+	cmd( "pack $T.f5.a $T.f5.b $T.f5.c $T.f5.d %s -anchor w", overwConf ? "$T.f5.e" : "" );
 	
-	cmd( "frame $T.f5.c -relief groove -bd 2" );
-	cmd( "radiobutton $T.f5.c.b1 -text \"Overwrite existing totals file\" -variable add_to_tot -value 0 -anchor w" );
-	cmd( "radiobutton $T.f5.c.b2 -text \"Append to existing totals file\" -variable add_to_tot -value 1 -anchor w" );
-	cmd( "pack $T.f5.c.b1 $T.f5.c.b2" );
-	
-	cmd( "pack $T.f5.l $T.f5.c" );
-
-	cmd( "checkbutton $T.f6 -text \"Generate zipped files\" -variable dozip" );
-	
-	cmd( "pack $T.f1 $T.f2 $T.f3 $T.f3 $T.f4 %s $T.f6 -padx 5 -pady 5", *choice ? "$T.f5" : "" );
+	cmd( "pack $T.f1 $T.f2 $T.f3 $T.f3 $T.f4 $T.f5 -padx 5 -pady 5" );
 }
 else
 {
@@ -2460,15 +2473,19 @@ cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#run } { set ch
 
 cmd( "showtop $T" );
 
-*choice=0;
-while(*choice==0)
- Tcl_DoOneEvent(0);
+*choice = 0;
+while ( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
 
 cmd( "destroytop .run" );
-Tcl_UnlinkVar(inter, "no_res");
-Tcl_UnlinkVar(inter, "add_to_tot");
-Tcl_UnlinkVar(inter, "dozip");
-Tcl_UnlinkVar(inter, "overwConf");
+
+run:
+
+Tcl_UnlinkVar( inter, "no_res" );
+Tcl_UnlinkVar( inter, "add_to_tot" );
+Tcl_UnlinkVar( inter, "docsv" );
+Tcl_UnlinkVar( inter, "dozip" );
+Tcl_UnlinkVar( inter, "overwConf" );
 
 if ( *choice == 2 )
 {
@@ -2476,22 +2493,22 @@ if ( *choice == 2 )
 	break;
 }
 
-for(n=r; n->up!=NULL; n=n->up);
-blueprint->empty();			    // update blueprint to consider last changes
-set_blueprint(blueprint, n);
+for ( n = r; n->up != NULL; n = n->up );
+blueprint->empty( );			    // update blueprint to consider last changes
+set_blueprint( blueprint, n );
 
-if ( overwConf )				// save if needed
+if ( overwConf )					// save if needed
 	if ( ! save_configuration( r ) )
 	{
 		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
 		if( *choice == 2 )
 		{
-			*choice=0;
+			*choice = 0;
 			break;
 		}
 	}
 
-*choice=1; 
+*choice = 1; 
 
 return(n);
 
@@ -2632,7 +2649,7 @@ if ( ! struct_loaded )
 
 Tcl_LinkVar(inter, "done", (char *) &done, TCL_LINK_INT);
 
-if ( actual_steps > 0)
+if ( actual_steps > 0 )
 { 
 	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"Configuration is the final state of a simulation run\" -detail \"Press 'OK' to save it anyway or 'Cancel' to abort saving.\" ]; switch -- $answer { ok { set done 1 } cancel { set done 2 } } " );
 
@@ -2653,7 +2670,7 @@ if ( saveAs )			// only asks file name if instructed to or necessary
 {
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"[ pwd ]\" -filetypes { { { LSD model files } { .lsd } } } ]" );
 
-	cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $re s] - 1 ];if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
+	cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ];if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
 	if ( done == 2 )
 		goto save_end;
 
@@ -2851,9 +2868,9 @@ cmd( "checkbutton $T.f.aggr -text \"Show aggregated profiling times\" -variable 
 cmd( "checkbutton $T.f.npar -text \"Disable parallel computation\" -variable parallel_disable" );
 if ( ! search_parallel( root ) || max_threads < 2 )
 	cmd( "$T.f.npar configure -state disabled" );
-cmd( "pack $T.f.obs $T.f.aggr $T.f.npar -anchor e" );
+cmd( "pack $T.f.obs $T.f.aggr $T.f.npar -anchor w" );
 #else
-cmd( "pack $T.f.obs $T.f.aggr -anchor e" );
+cmd( "pack $T.f.obs $T.f.aggr -anchor w" );
 #endif
 
 cmd( "pack $T.f -padx 5 -pady 5" );
@@ -3320,7 +3337,10 @@ if(actual_steps==0)
 	break;
  }
 
-Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
+Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "saveConf", ( char * ) & saveConf, TCL_LINK_BOOLEAN );
+
 time_t rawtime;
 time( &rawtime );
 struct tm *timeinfo;
@@ -3328,20 +3348,23 @@ char ftime[80];
 timeinfo = localtime( &rawtime );
 strftime ( ftime, 80, "%Y%m%d-%H%M%S", timeinfo );
 
-cmd( "set lab \"result_%s_%s\"", simul_name, ftime  );
+cmd( "set lab \"result_%s_%s\"", simul_name, ftime );
   
 //Choose a name
 cmd( "newtop .n \"Save Results\" { set choice 2 }" );
 
 cmd( "frame .n.n" ); 
-cmd( "label .n.n.l -text \"Base name for results files\"" );
+cmd( "label .n.n.l -text \"Base name for file(s)\"" );
 cmd( "entry .n.n.e -width 30 -textvariable lab -justify center" );
 cmd( "pack .n.n.l .n.n.e" );
 
-cmd( "label .n.l -text \"(data saved will be stored in a '.res' file\nand the configuration that produced\nit will be copied to a new '.lsd' file)\"" );
-cmd( "checkbutton .n.dozip -text \"Generate zipped results file\" -variable dozip" );
+cmd( "frame .n.do" );
+cmd( "checkbutton .n.do.zip -text \"Generate zipped results file\" -variable dozip" );
+cmd( "checkbutton .n.do.csv -text \"Comma-separated text format (.csv)\" -variable docsv" );
+cmd( "checkbutton .n.do.conf -text \"Save associated configuration\" -variable saveConf" );
+cmd( "pack .n.do.zip .n.do.csv .n.do.conf -anchor w" );
 
-cmd( "pack .n.n .n.l .n.dozip -padx 5 -pady 5" );
+cmd( "pack .n.n .n.do -padx 5 -pady 5" );
 
 cmd( "okcancel .n b { set choice 1 } { set choice 2 }" );
 cmd( "bind .n <KeyPress-Return> {set choice 1}" );
@@ -3356,30 +3379,39 @@ while ( *choice == 0 )
 cmd( "if { [ string length lab ] == 0 } { set choice 2 }" );
 
 cmd( "destroytop .n" );
+
+Tcl_UnlinkVar( inter, "docsv" );
 Tcl_UnlinkVar( inter, "dozip" );
+Tcl_UnlinkVar( inter, "saveConf" );
 
 if ( *choice == 2 )
 	break;
 
-lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
-strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
-cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
-plog( "\nLSD result file: %s.res\nLSD data file: %s.lsd\nSaving data...", "", lab, lab );
 cmd( "wm deiconify .log; raise .log; focus .log" );
 
-if( strlen( path ) == 0 )
-	sprintf( msg, "%s.res", lab );
-else
-	sprintf( msg, "%s/%s.res", path, lab );
-	
-rf = new result( msg, "wt", dozip );	// create results file object
-for( n = r; n->up != NULL; n = n->up );	// get root object
-rf->title( n, 1 );						// write header
-rf->data( n, 0, actual_steps );			// write all data
-delete rf;								// close file and delete object
-plog(" Done\n" );
+lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
+strncpy( lab, lab1, MAX_PATH_LENGTH - 1 );
+if ( saveConf )
+{
+	plog( "\nLSD configuration file: %s.lsd", "", lab );
+	cmd( "file copy -force %s.lsd %s.lsd", simul_name, lab );
+}
 
-unsavedData = false;					// no unsaved simulation results
+plog( "\nLSD results file: %s.%s%s\nSaving data...", "", lab, docsv ? "csv" : "res", dozip ? ".gz" : "" );
+
+if( strlen( path ) == 0 )
+	sprintf( msg, "%s.%s", lab, docsv ? "csv" : "res" );
+else
+	sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
+	
+rf = new result( msg, "wt", dozip, docsv );	// create results file object
+for( n = r; n->up != NULL; n = n->up );		// get root object
+rf->title( n, 1 );							// write header
+rf->data( n, 0, actual_steps );				// write all data
+delete rf;									// close file and delete object
+plog( " Done\n" );
+
+unsavedData = false;						// no unsaved simulation results
 
 break;
 
@@ -4744,9 +4776,10 @@ case 68:
 		}
 	}
 
-	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar(inter, "natBat", (char *)&natBat, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "natBat", ( char * ) & natBat, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	cmd( "set cores %d", max_threads );
 	cmd( "set threads 1" );
 	
@@ -4777,7 +4810,8 @@ case 68:
 	cmd( "checkbutton .s.o.nores -text \"Skip generating results files\" -variable no_res" );
 	cmd( "checkbutton .s.o.n -text \"Native batch format\" -variable natBat" );
 	cmd( "checkbutton .s.o.dozip -text \"Generate zipped files\" -variable dozip" );
-	cmd( "pack .s.o.nores .s.o.n .s.o.dozip" );
+	cmd( "checkbutton .s.o.docsv -text \"Comma-separated text format (.csv)\" -variable docsv" );
+	cmd( "pack .s.o.nores .s.o.n .s.o.dozip .s.o.docsv -anchor w" );
 	
 	cmd( "pack .s.t .s.c .s.p .s.o -padx 5 -pady 5" );
 
@@ -4797,9 +4831,10 @@ case 68:
 	
 	cmd( "destroytop .s" );
 	
-	Tcl_UnlinkVar(inter, "natBat");
-	Tcl_UnlinkVar(inter, "no_res");
-	Tcl_UnlinkVar(inter, "dozip");
+	Tcl_UnlinkVar( inter, "natBat" );
+	Tcl_UnlinkVar( inter, "no_res" );
+	Tcl_UnlinkVar( inter, "docsv" );
+	Tcl_UnlinkVar( inter, "dozip" );
 
 	if ( *choice == 2 )
 		break;
@@ -4877,9 +4912,9 @@ case 68:
 		for(i=ffirst, j=1; j <= param; j++)	// allocates files by the number of cores
 		{
 			if(*choice == 1)				// Windows
-				fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, j );
+				fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, j );
 			else							// Unix
-				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, j );
+				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, j );
 			j <= sl ? i+=num+1 : i+=num;
 		}
 	}
@@ -4887,18 +4922,18 @@ case 68:
 		for(i=ffirst, j=1; i < fnext; i++, j++)
 			if( fSeq )
 				if(*choice == 1)			// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file, i );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, i );
 				else						// Unix
-					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file, i );
+					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, i );
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				if(*choice == 1)			// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", win_dir, out_file );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file );
 				else						// Unix
-					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s >%s/%s.log 2>&1 &\n", ch, num, out_dir, out_file, no_res ? "-r" : "", dozip ? "" : "-z", out_dir, out_file );
+					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s %s >%s/%s.log 2>&1 &\n", ch, num, out_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file );
 			}
 	
 	if ( fSeq )
@@ -4968,16 +5003,29 @@ case 69:
 		break;
 	}
 
-	Tcl_LinkVar(inter, "no_res", (char *)&no_res, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar(inter, "dozip", (char *)&dozip, TCL_LINK_BOOLEAN);
-	Tcl_LinkVar(inter, "overwConf", (char *)&overwConf, TCL_LINK_BOOLEAN);
+	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
+	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
+
+	// Only ask to overwrite configuration if there are changes
+	overwConf = unsaved_change( ) ? true : false;
+
+	add_to_tot = false;
 	
+	cmd( "set firstFile \"%s_%d\"", simul_name, seed );
+	cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
+	cmd( "set totFile \"%s\"", simul_name );
+	cmd( "set resExt %s", docsv ? "csv" : "res" );
+	cmd( "set totExt %s", docsv ? "csv" : "tot" );
+	cmd( "set zipExt %s", dozip ? ".gz" : "" );
+
 	// confirm overwriting current configuration
 	cmd( "set b .batch" );
 	cmd( "newtop $b \"Start Batch\" { set choice 2 }" );
 
 	cmd( "frame $b.f1" );
-	cmd( "label $b.f1.l -text \"Model configuration:\"" );
+	cmd( "label $b.f1.l -text \"Model configuration\"" );
 	cmd( "label $b.f1.w -text \"%s\" -fg red", simul_name );
 	cmd( "pack $b.f1.l $b.f1.w" );
 	
@@ -4995,71 +5043,59 @@ case 69:
 	cmd( "pack $b.f2.t $b.f2.n" );
 
 	cmd( "frame $b.f3" );
-	cmd( "label $b.f3.l -text \"Results file(s):\"" );
+	cmd( "label $b.f3.l -text \"Results file(s)\"" );
 	
-	if(sim_num>1)	// multiple runs case
+	if ( sim_num > 1 )	// multiple runs case
 	{
 		cmd( "frame $b.f3.w" );
 		
 		cmd( "frame $b.f3.w.l1" );
 		cmd( "label $b.f3.w.l1.l -text \"from:\"" );
-		cmd( "label $b.f3.w.l1.w -fg red -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed );
+		cmd( "label $b.f3.w.l1.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
 		cmd( "pack $b.f3.w.l1.l $b.f3.w.l1.w -side left -padx 2" );
 		
 		cmd( "frame $b.f3.w.l2" );
 		cmd( "label $b.f3.w.l2.l -text \"to:\"" );
-		cmd( "label $b.f3.w.l2.w -fg red -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed + sim_num - 1 );
+		cmd( "label $b.f3.w.l2.w -fg red -text \"$lastFile.$resExt$zipExt\"" );
 		cmd( "pack $b.f3.w.l2.l $b.f3.w.l2.w -side left -padx 2" );
 		
 		cmd( "pack $b.f3.w.l1 $b.f3.w.l2" );
 	}
-	else			// single run case
-		cmd( "label $b.f3.w -fg red -text \"%s_%d.res\\[.gz\\]\"", simul_name, seed );
+	else				// single run case
+		cmd( "label $b.f3.w -fg red -text \"$firstFile.$resExt$zipExt\"" );
 
-	cmd( "checkbutton $b.f3.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "pack $b.f3.l $b.f3.w $b.f3.nores" );
+	cmd( "pack $b.f3.l $b.f3.w" );
 
 	cmd( "frame $b.f4" );
-	cmd( "label $b.f4.l -text \"Totals file (last steps):\"" );
-	cmd( "label $b.f4.w -fg red -text \"%s_%d_%d.tot\\[.gz\\]\"", simul_name, seed, seed+sim_num-1 );
-	cmd( "pack $b.f4.l $b.f4.w" );
+	cmd( "label $b.f4.l1 -text \"Totals file (last steps)\"" );
+	cmd( "label $b.f4.l2 -fg red -text \"$totFile.$totExt$zipExt\"" );
 	
-	cmd( "label $b.f5 -text \"WARNING: existing files in destination\nfolder will be overwritten\"" );
+	cmd( "set choice [ expr [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] ]", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "label $b.f4.l3 -text \"\n\"", *choice ? "(WARNING: existing files in destination\nfolder will be overwritten)" : "" );
+	cmd( "pack $b.f4.l1 $b.f4.l2 $b.f4.l3" );
 	
-	cmd( "frame $b.f6" );
-	cmd( "checkbutton $b.f6.dozip -text \"Generate zipped files\" -variable dozip" );
-	// Only ask to overwrite configuration if there are changes
-	if ( unsaved_change() )
-	{
-		overwConf = true;
-		cmd( "checkbutton $b.f6.tosave -text \"Update configuration file\" -variable overwConf" );
-		cmd( "pack $b.f6.dozip $b.f6.tosave" );
-	}
-	else
-	{
-		overwConf = false;
-		cmd( "pack $b.f6.dozip" );
-	}
+	cmd( "frame $b.f5" );
+	cmd( "checkbutton $b.f5.nores -text \"Skip generating results files\" -variable no_res" );
+	cmd( "checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt .gz } { set zipExt \"\" }; $b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { $b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" } { $b.f4.l3 configure -text \"\n\" } }", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { $b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" } { $b.f4.l3 configure -text \"\n\" } }", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $b.f5.tosave -text \"Update configuration file\" -variable overwConf" );
+	cmd( "pack $b.f5.nores $b.f5.dozip $b.f5.docsv %s -anchor w", overwConf ? "$b.f5.tosave" : "" );
 	
-	cmd( "set choice [ expr [file exists  %s%s%s_%d.res%s] || [file exists %s%s%s_%d_%d.tot%s] ]", path, strlen( path ) > 0 ? "/" : "", simul_name, seed, dozip ? ".gz" : "", path, strlen( path ) > 0 ? "/" : "", simul_name, seed, seed + sim_num - 1, dozip ? ".gz" : ""  );
-	
-	if ( *choice )
-		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 $b.f6 -padx 5 -pady 5" );
-	else
-		cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f6 -padx 5 -pady 5" );
+	cmd( "pack $b.f1 $b.f2 $b.f3 $b.f4 $b.f5 -padx 5 -pady 5" );
 		
 	cmd( "okcancel $b b { set choice 1 } { set choice 2 }" );
 	
 	cmd( "showtop $b" );
 	
-	*choice=0;
-	while(*choice==0)
-		Tcl_DoOneEvent(0);
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 	
 	cmd( "destroytop .batch" );
-	Tcl_UnlinkVar(inter, "no_res");
-	Tcl_UnlinkVar(inter, "dozip");
-	Tcl_UnlinkVar(inter, "overwConf");
+	Tcl_UnlinkVar( inter, "no_res" );
+	Tcl_UnlinkVar( inter, "docsv" );
+	Tcl_UnlinkVar( inter, "dozip" );
+	Tcl_UnlinkVar( inter, "overwConf" );
 
 	if ( *choice == 2 )
 	{
@@ -5102,9 +5138,9 @@ case 69:
 		cmd( "cd $path" );
 
 	if(*choice == 1)							// Windows?
-		cmd( "exec %s -f %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", dozip ? "" : "-z", simul_name );
+		cmd( "exec %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 	else										// Unix
-		cmd( "exec %s -f %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", dozip ? "" : "-z", simul_name );
+		cmd( "exec %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name );
 	

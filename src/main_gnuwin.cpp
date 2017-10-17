@@ -60,9 +60,10 @@ int main( int argn, char **argv )
 // exit LSD finishing 
 void myexit( int v )
 {
+	fflush( stderr );
 #ifdef PARALLEL_MODE
-// stop multi-thread workers, if needed
-delete [ ] workers;
+	// stop multi-thread workers, if needed
+	delete [ ] workers;
 #endif
 
 #ifndef NO_WINDOW
@@ -130,8 +131,10 @@ void signal_handler( int signum )
 #endif
 #ifdef SIGWINCH
 		case SIGWINCH:
+#ifndef NO_WINDOW
 			cmd( "sizetop all" );	// readjust windows size/positions
 			cmd( "update idletasks" );
+#endif
 			return;
 #endif
 		case SIGSTL:

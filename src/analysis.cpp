@@ -6613,7 +6613,7 @@ if(typelab==4)
 typelab=1;
 cmd( "if { ! [ info exists labprefix ] } { set labprefix \"V\" }" );
 cmd( "if { ! [ info exists headprefix ] } { set headprefix 0 }" );
-cmd( "if { ! [ info exists delimiter ] } { set delimiter \",\" }" );
+cmd( "if { ! [ info exists delimiter ] } { set delimiter \"%s\" }", CSV_SEP );
 cmd( "if { ! [ info exists misval ] } { set misval \"%s\" }", nonavail );
 
 cmd( "newtop .da.lab \"Data Save Options\" { set choice 2 } .da" );

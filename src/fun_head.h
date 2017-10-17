@@ -576,6 +576,9 @@ else \
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
 #ifndef FAST_LOOKUP
 
+double poidev( double xm, long *idum_loc = NULL );
+int deb( object *r, object *c, char const *lab, double *res );
+void cmd( const char *cm, ... );
 #define UNIFORM( X, Y ) uniform( X, Y )
 #define rnd_integer( X, Y ) uniform_int( X, Y )
 #define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )

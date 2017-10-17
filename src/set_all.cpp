@@ -98,9 +98,10 @@ description *cd;
 sense *cs;
 
 if(original->up!=NULL)
- for(r=original->up; r->up!=NULL; r=r->up);//go for the root
+	for(r=original->up; r->up!=NULL; r=r->up);//go for the root
 else
-r=original; 
+	r=original; 
+
 r=r->search(original->label);//select the first instance
 cv=r->search_var(NULL, lab);
 if ( cv == NULL )

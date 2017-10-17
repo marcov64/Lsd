@@ -775,6 +775,8 @@ read.sens.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
   limits <- read.table( file, stringsAsFactors = FALSE )
   limits <- limits[ -2 : -3 ]
+  if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions that bring an extra column
+    limits <- limits[ -2 ]
   if( length( limits[ 1, ] ) > 3 ) {
     warning( "Too many (>2) sensitivity values for a single parameter, using the first two only!" )
     limits <- limits[ -4 : - length( limits[ 1, ] ) ]

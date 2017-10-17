@@ -176,6 +176,60 @@ void cmd( const char *cm, ... )
 #endif
 
 
+/*********************************
+PLOG
+The optional tag parameter has to correspond to the log window existing tags
+*********************************/
+#define NUM_TAGS 6
+const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "prof2" };
+
+void plog( char const *cm, char const *tag, ... )
+{
+	char buffer[ TCL_BUFF_STR ];
+	va_list argptr;
+	
+#ifdef PARALLEL_MODE
+	// abort if not running in main LSD thread
+	if ( this_thread::get_id( ) != main_thread )
+		return;
+#endif
+
+	va_start( argptr, tag );
+	int maxSz = TCL_BUFF_STR - 40 - strlen( tag );
+	int reqSz = vsnprintf( buffer, maxSz, cm, argptr );
+	va_end( argptr );
+	
+	if ( reqSz >= maxSz )
+		plog( "\nWarning: message truncated\n" );
+
+#ifdef NO_WINDOW 
+	printf( "%s", buffer );
+	fflush( stdout );
+#else
+	if ( ! tk_ok || ! log_ok )
+		return;
+	
+	bool ok = false;
+
+	for ( int i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			ok = true;
+	
+	if ( ok )
+	{
+		cmd( "set log_ok [ winfo exists .log ]" );
+		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
+		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", buffer, tag );
+		cmd( "if $log_ok { .log.text.text.internal see end }" );
+		cmd( "update idletasks" );
+	}
+	else
+		plog( "\nError: invalid tag, message ignored:\n%s\n", "", buffer );
+#endif 
+	message_logged = true;
+}
+
+
 /***********
 ERROR_HARD
 Procedure called when an unrecoverable error occurs. 
@@ -840,16 +894,19 @@ void collect_cemetery( object *o )
 	}
 }
 
-void empty_cemetery(void)
+void empty_cemetery( void )
 {
 	variable *cv, *cv1;
-	for(cv=cemetery; cv!=NULL; )
-	 {cv1=cv->next;
-	  cv->empty();
-	  delete cv;
-	  cv=cv1;
-	 }
-	cemetery=NULL;
+	
+	for ( cv = cemetery; cv !=NULL ; )
+	{
+		cv1 = cv->next;
+		cv->empty( );
+		delete cv;
+		cv = cv1;
+	}
+	
+	cemetery = NULL;
 }
 
 /*
@@ -859,17 +916,22 @@ void empty_cemetery(void)
 // saves data to file in the specified period
 void result::data( object *root, int initstep, int endtstep )
 {
-	endtstep = endtstep == 0 ? initstep : endtstep;	// adjust for 1 time step if needed
+	// don't include initialization (t=0) in .csv format
+	initstep = ( docsv && initstep < 1 ) ? 1 : initstep;
+	// adjust for 1 time step if needed
+	endtstep = ( endtstep == 0 ) ? initstep : endtstep;
 	
 	for ( int i = initstep; i <= endtstep; i++ )
 	{
+		firstCol = true;
+		
 		data_recursive( root, i );		// output one data line
 		
 		if ( dozip )				// and change line
 		{
-			#ifdef LIBZ
-				gzprintf( fz, "\n" );
-			#endif
+#ifdef LIBZ
+			gzprintf( fz, "\n" );
+#endif
 		}
 		else
 			fprintf( f, "\n" );
@@ -878,157 +940,246 @@ void result::data( object *root, int initstep, int endtstep )
 
 void result::data_recursive( object *r, int i )
 {
-object *cur;
-variable *cv;
-bridge *cb;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-int flag_save;
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->save == 1 )
+		{
+			if ( cv->start <= i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+					else
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+					else
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
+				}
+			}
+			else
+			{
+				if ( dozip )		// save NaN as n/a
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						gzprintf( fz, "%s\t", nonavail );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						fprintf( f, "%s\t", nonavail );
+				}
+			}
+			
+			firstCol = false;
+		}
+	}
+	 
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		cur = cb->head;
+		if ( cur->to_compute )
+			for( ; cur != NULL; cur = cur->next )
+				data_recursive( cur, i );
+	}
 
-for(cv=r->v; cv!=NULL; cv=cv->next)
- {
- if(cv->save==1)
-  {
-   if(cv->start <= i && cv->end >= i && !is_nan(cv->data[i]))		// save NaN as n/a
-		if ( dozip )
+	if ( r->up == NULL )
+	{
+		for( cv = cemetery; cv != NULL; cv = cv->next )
 		{
-			#ifdef LIBZ
-				gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[i] );
-			#endif
+			if ( cv->start <=i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+					else
+						gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[ i ] );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%.*G", firstCol ? "" : CSV_SEP, SIG_DIG, cv->data[ i ] );
+					else
+						fprintf( f, "%.*G\t", SIG_DIG, cv->data[ i ] );
+				}
+			}
+			else					// save NaN as n/a
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						gzprintf( fz, "%s\t", nonavail );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s", firstCol ? "" : CSV_SEP, nonavail );
+					else
+						fprintf(f, "%s\t", nonavail );
+				}
+			}
+						
+			firstCol = false;
 		}
-		else
-			fprintf( f, "%.*G\t", SIG_DIG, cv->data[i] );
-   else
-		if ( dozip )
-		{
-			#ifdef LIBZ
-				gzprintf( fz, "%s\t", nonavail );
-			#endif
-		}
-		else
-			fprintf( f, "%s\t", nonavail );
-  }
- }
- 
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
-  cur=cb->head;
-  if(cur->to_compute==1)
-  {
-  for(; cur!=NULL; cur=cur->next)
-	data_recursive( cur, i );
-  } 
- }
-
-if(r->up==NULL)
- {for(cv=cemetery; cv!=NULL; cv=cv->next)
-    if(cv->start<=i && cv->end>=i && !is_nan(cv->data[i]))		// save NaN as n/a
-		if ( dozip )
-		{
-			#ifdef LIBZ
-				gzprintf( fz, "%.*G\t", SIG_DIG, cv->data[i] );
-			#endif
-		}
-		else
-			fprintf( f, "%.*G\t", SIG_DIG, cv->data[i] );
-     else
-		if ( dozip )
-		{
-			#ifdef LIBZ
-				gzprintf( fz, "%s\t", nonavail );
-			#endif
-		}
-		else
-			fprintf(f, "%s\t", nonavail);
- }
+	}
 }
+
 
 // saves header to file
 void result::title( object *root, int flag )
 {
+	firstCol = true;
+	
 	title_recursive( root, flag );		// output header
 		
 	if ( dozip )						// and change line
 	{
-		#ifdef LIBZ
-			gzprintf( fz, "\n" );
-		#endif
+#ifdef LIBZ
+		gzprintf( fz, "\n" );
+#endif
 	}
 	else
 		fprintf( f, "\n" );
 }
 
+
 void result::title_recursive( object *r, int header )
 {
-object *cur;
-variable *cv;
+	bool single;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-bridge *cb;
-
-for(cv=r->v; cv!=NULL; cv=cv->next)
-  {
-  if(cv->save==1)
-   {set_lab_tit(cv);
-   if(header==1)
-		if ( dozip )
-		{
-			#ifdef LIBZ
-				gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-			#endif
-		}
-		else
-			fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-   else
-		if ( dozip )
-		{
-			#ifdef LIBZ
-				gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-			#endif
-		}
-		else
-			fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
-   }
- }
- 
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {
-  cur=cb->head;
-  if(cur->to_compute==1)
-  {
-  for(; cur!=NULL; cur=cur->next)
-    title_recursive( cur, header );
-  } 
- } 
-
-if(r->up==NULL)
- {for(cv=cemetery; cv!=NULL; cv=cv->next)
-	if ( dozip )
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-		#ifdef LIBZ
-			gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
-		#endif
+		if ( cv->save == 1 )
+		{
+			set_lab_tit( cv );
+			if ( ( ! strcmp( cv->lab_tit, "1" ) || ! strcmp( cv->lab_tit, "1_1" ) || ! strcmp( cv->lab_tit, "1_1_1" ) || ! strcmp( cv->lab_tit, "1_1_1_1" ) ) && cv->up->hyper_next( ) == NULL )
+				single = true;					// prevent adding suffix to single objects
+			else
+				single = false;
+			
+			if ( header )
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+				}
+			}
+			else
+			{
+				if ( dozip )
+				{
+#ifdef LIBZ
+					if ( docsv )
+						gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						gzprintf( fz, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
+#endif
+				}
+				else
+				{
+					if ( docsv )
+						fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+					else
+						fprintf( f, "%s %s (-1 -1)\t", cv->label, cv->lab_tit );
+				}
+			}
+			
+			firstCol = false;
+		}
 	}
-	else
-		fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
- }
+	 
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		cur = cb->head;
+		if ( cur->to_compute )
+		{
+			for( ; cur != NULL; cur = cur->next )
+			title_recursive( cur, header );
+		} 
+	} 
 
+	if ( r->up == NULL )
+	{
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
+		{
+			if ( dozip )
+			{
+#ifdef LIBZ
+				if ( docsv )
+					gzprintf( fz, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+				else
+					gzprintf( fz, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+#endif
+			}
+			else
+			{
+				if ( docsv )
+					fprintf( f, "%s%s%s%s", firstCol ? "" : CSV_SEP, cv->label, single ? "" : "_", single ? "" : cv->lab_tit );
+				else
+					fprintf( f, "%s %s (%d %d)\t", cv->label, cv->lab_tit, cv->start, cv->end );
+			}
+			
+			firstCol = false;
+		}
+	}
 }
 
+
 // open the appropriate file for saving the results (constructor)
-result::result( char const *fname, char const *fmode, bool dozip )
+result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
 {
-	#ifndef LIBZ
-		dozip = false;			// disable zip if libraries not available
-	#endif
+#ifndef LIBZ
+	dozip = false;				// disable zip if libraries not available
+#endif
+	this->docsv = docsv;
 	this->dozip = dozip;		// save local class flag
 	if ( dozip )
 	{
-		#ifdef LIBZ
+#ifdef LIBZ
 			char *fnamez = new char[ strlen( fname ) + 4 ];	// append .gz to the file name
 			strcpy( fnamez, fname );
 			strcat( fnamez, ".gz");
 			fz = gzopen( fnamez, fmode );
 			delete [] fnamez;
-		#endif
+#endif
 	}
 	else
 		f = fopen( fname, fmode );
@@ -1039,9 +1190,9 @@ result::~result( void )
 {
 	if ( dozip )
 	{
-		#ifdef LIBZ
-			gzclose( fz );
-		#endif
+#ifdef LIBZ
+		gzclose( fz );
+#endif
 	}
 	else
 		fclose( f );
