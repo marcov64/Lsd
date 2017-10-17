@@ -95,7 +95,7 @@ int strWindowOn = true;		// control the presentation of the model structure wind
 
 bool batch_sequential = false;	// no-window multi configuration job running
 bool fast;					// safe copy of fast_mode flag
-bool fast_mode = true;		// flag to hide LOG messages & runtime plot
+bool fast_mode;				// flag to hide LOG messages & runtime plot
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
@@ -659,11 +659,11 @@ prof.clear( );				// reset profiling times
 
 cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
 cmd( "wm deiconify .log; raise .log; focus .log" );
-set_fast( false );
 #else
 plog( "\nProcessing configuration file %s ...\n", "", struct_file );
-fast = fast_mode;
 #endif
+
+set_fast( false );			// should always start on OBSERVE and switch to FAST later
 
 for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
 {
@@ -1017,7 +1017,11 @@ void set_fast( bool on )
 	{
 		if ( stackinfo_flag > 0 || prof_aggr_time )
 		{
+#ifndef NO_WINDOW   
 			cmd( "tk_messageBox -parent .log -title Warning -icon warning -type ok -message \"Fast mode not available\" -detail \"Fast mode is not supported when stack profiling is activated.\nTo enable fast mode, please disable stack profiling using menu 'Run', option 'Imulation Settings...'.\"" );
+#else
+			fprintf( stderr, "\nFast mode is not supported.\n" );	
+#endif
 			return;
 		}
 		unwind_stack( );
