@@ -43,6 +43,9 @@ proc showmodel pippo {
 	lappend lrn
 	lappend lbn
 	lappend group
+	
+	# close compilation results, if open
+	destroytop .mm
 
 	set choiceSM 0
 
