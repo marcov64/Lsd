@@ -111,7 +111,11 @@ Tcl_LinkVar(inter, "res", (char *) &res, TCL_LINK_INT);
 Tcl_LinkVar(inter, "value1", (char *) &value1, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "value2", (char *) &value2, TCL_LINK_DOUBLE);
 
-value1 = cv->val[0];		// preload the existing value of the first object
+// preload the existing value of the first object
+if ( cv->param == 1 )
+	value1 = cv->val[ 0 ];
+else
+	value1 = cv->val [ lag ];
 
 // default values
 res=1;

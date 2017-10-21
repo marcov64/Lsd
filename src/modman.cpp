@@ -2222,17 +2222,19 @@ if ( choice == 25 )
 	cmd( "frame .a.label" );
 	cmd( "label .a.label.l -text \"Variable name\"" );
 	cmd( "entry .a.label.n -width 20 -textvariable v_label -justify center" );
+	cmd( "bind .a.label.n <Return> { focus .a.f.r1 }" );
 	cmd( "pack .a.label.l .a.label.n" );
 
 	cmd( "frame .a.f -relief groove -bd 2" );
 	cmd( "radiobutton .a.f.r1 -variable isfun -value 0 -text \"EQUATION: only one value computed at each time step\"" );
 	cmd( "radiobutton .a.f.r2 -variable isfun -value 1 -text \"FUNCTION: value recomputed at each request by other variables\"" );
+	cmd( "bind .a.f.r1 <Return> {focus .a.b.ok}" );
+	cmd( "bind .a.f.r2 <Return> {focus .a.b.ok}" );
 	cmd( "pack .a.f.r1 .a.f.r2 -anchor w " );
 
 	cmd( "pack .a.label .a.f -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp lsdfuncMacro.html#EQUATION } { set choice 2 }" );
-	cmd( "bind .a.label <Return> {focus .a.b.ok}" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.label.n selection range 0 end" );

@@ -15,7 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /*
-USED CASE 87
+USED CASE 90
 */
 
 /****************************************************
@@ -116,7 +116,7 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88 };
+int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -574,6 +574,7 @@ if ( redrawRoot )
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Load Sensitivity...\" -command {set choice 64} -underline 3" );
 		cmd( "$w add command -label \"Save Sensitivity...\" -command {set choice 65} -underline 6" );
+		cmd( "$w add command -label \"Export Limits...\" -command {set choice 90} -underline 1" );
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U" );
 		cmd( "$w add command -label \"Upload Equation File\" -command {set choice 51} -underline 0" );
@@ -1659,7 +1660,7 @@ cmd( "frame $T.b1" );
 
 cmd( "frame $T.b1.sav" );
 cmd( "checkbutton $T.b1.sav.n -text \"Save: save the series for analysis      \" -variable save -underline 0 -command { if $save { .chgelem.b1.sav.i configure -state normal } { set savei 0; .chgelem.b1.sav.i configure -state disabled } }" );
-cmd( "checkbutton $T.b1.sav.i -text \"Save in separate file\" -variable savei -underline 17" );
+cmd( "checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -underline 17" );
 cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
 cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
 
@@ -4582,52 +4583,126 @@ case 64:
 
 //Save a sensitivity analysis configuration
 case 65:
-
 	// check for existing sensitivity data loaded
-	if (rsense==NULL) 
+	if ( rsense == NULL ) 
 	{
 		sensitivity_undefined( );			// throw error
 		break;
 	}
+	
 	// default file name and path
 	cmd( "set res %s", simul_name );
 	cmd( "set path \"%s\"", path );
 
 	// open dialog box to get file name & folder
-	cmd( "set bah [tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]" );
-	cmd( "if {[string length $bah] > 0} {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
-	if(*choice==2)
+	*choice = 0;
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes { { { Sensitivity analysis files } { .sa } } } ]" );
+	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr [ string last .sa $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
+	if ( *choice == 2 )
 		break;
-
-	lab1=(char *)Tcl_GetVar(inter, "res",0);
-	lab2=(char *)Tcl_GetVar(inter, "path",0);
+	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+	
 	// form full name
-	if(sens_file!=NULL)
+	if ( sens_file != NULL )
 		delete sens_file;
-	sens_file=new char[strlen(lab2)+strlen(lab1)+7];
-	if(strlen(lab2)>0)
-		sprintf(sens_file,"%s/%s.sa",lab2,lab1);
-	else
-		sprintf(sens_file,"%s.sa",lab1);
+	sens_file = new char[ strlen( lab2 ) + strlen( lab1 ) + 7 ];
+	sprintf( sens_file,"%s%s%s.sa", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+
 	// write sensitivity file (text mode)
-	f=fopen(sens_file, "wt");  // use text mode for Windows better compatibility
-	if(f==NULL)
+	f = fopen( sens_file, "wt" );  // use text mode for Windows better compatibility
+	if ( f == NULL )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file not saved\" -detail \"Please check if the file name and path are valid.\"" );
 		break;
 	}
-	for(cs=rsense; cs!=NULL; cs=cs->next)
+	
+	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
-		if(cs->param==1)
+		if ( cs->param == 1 )
 			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );	
 		else
-			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag+1, cs->nvalues, cs->integer ? 'i' : 'f' );
-		for(i=0; i<cs->nvalues; i++)
-			fprintf(f," %g", cs->v[i]);
-		fprintf(f,"\n");
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
+		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
+			fprintf( f," %g", cs->v[i] );
+		fprintf( f,"\n" );
 	}
-	fclose(f);
+	fclose( f );
 	unsavedSense = false;			// nothing to save
+	break;
+
+
+//Export sensitivity configuration as a .csv file
+case 90:
+	// check for existing sensitivity data loaded
+	if ( rsense == NULL ) 
+	{
+		sensitivity_undefined( );			// throw error
+		break;
+	}
+	
+	// default file name
+	cmd( "set res %s", simul_name );
+
+	// open dialog box to get file name & folder
+	*choice = 0;
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated File\" -defaultextension \".csv\" -initialfile $res -initialdir [ pwd ]  -filetypes { { { Comma-separated files } { .csv } } } ]" );
+	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
+	if ( *choice == 2 )
+		break;
+	
+	// form full name
+	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+	sprintf( sens_file,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+
+	// write sensitivity file (text mode)
+	f = fopen( sens_file, "wt" );  // use text mode for Windows better compatibility
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity limits file not saved\" -detail \"Please check if the file name and path are valid.\"" );
+		break;
+	}
+	
+	// write .csv header
+	fprintf( f, "Element%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP );
+	
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+	{
+		// get current value (first object)
+		cv = r->search_var( NULL, cs->label );
+		
+		// get element description
+		cur_descr = search_description( cs->label );
+		if ( cur_descr != NULL && cur_descr->text != NULL && ( sl = strlen( cur_descr->text ) ) > 0 )
+		{
+			// select just the first description line
+			lab3 = new char[ sl + 1 ];
+			strcpy( lab3, cur_descr->text );
+			for ( i = 0; i < sl; ++i )
+				if ( lab3[ i ] == '\n' || lab3[ i ] == '\r' )
+				{
+					lab3[ i ] = '\0';
+					break;
+				}
+		}
+		else
+			lab3 = NULL;
+		
+		// find max and min values
+		double min = HUGE_VAL, max = - HUGE_VAL;
+		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
+			if ( cs->v[i] < min )
+				min = cs->v[i];
+			else
+				if ( cs->v[i] > max )
+					max = cs->v[i];
+
+		fprintf( f, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s%s\n", cs->label, CSV_SEP, cs->param == 1 ? "Parameter" : "Variable", CSV_SEP, cs->param == 1 ? 0 : cs->lag + 1, CSV_SEP, cs->integer ? "Integer" : "Real", CSV_SEP, cv != NULL ? cv->val[ cs->lag ] : NAN, CSV_SEP, min, CSV_SEP, max, CSV_SEP, lab3 != NULL ? lab3 : "" );	
+		
+		delete [ ] lab3;
+	}
+	fclose( f );
 	break;
 
 
