@@ -2559,14 +2559,14 @@ unsavedData = false;			// no unsaved simulation results
 // make sure there is a path set
 cmd( "set path \"%s\"", path );
 if ( strlen( path ) > 0 )
-	cmd( "cd $path" );
+	cmd( "cd \"$path\"" );
 
 if ( ! reload )
 {
 	strcpy( lastObj, "" );		// disable last object for quick reload
 	cmd( "set res %s", simul_name );
 
-	cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"[ pwd ]\" -initialfile \"$res.lsd\" -filetypes { { { LSD model files } { .lsd } } } ]" );
+	cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"$res.lsd\" -filetypes { { {LSD model file } {.lsd} } } ]" );
 	*choice = 0;
 	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 	if ( *choice == 2 )
@@ -2664,12 +2664,14 @@ if ( actual_steps > 0 )
  }
 
 done = 0;
-cmd( "set res %s", simul_name );
+cmd( "set res \"%s\"", simul_name );
 cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
 
 if ( saveAs )			// only asks file name if instructed to or necessary
 {
-	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"[ pwd ]\" -filetypes { { { LSD model files } { .lsd } } } ]" );
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } ]" );
 
 	cmd( "if { [ string length $bah ] > 0 } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ];if { $last > 0 } { set res [ string range $res 0 $last ] } } { set done 2 }" );
 	if ( done == 2 )
@@ -2998,7 +3000,7 @@ if ( ! struct_loaded )
 
 cmd( "set res %s", equation_name );
 
-cmd( "set res1 [file tail [tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir [pwd] -filetypes {{{LSD equation files} {.cpp}} {{All files} {*}} }]]" );
+cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", exec_path );
 cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 lab1=(char *)Tcl_GetVar(inter, "res1",0);
@@ -3492,8 +3494,9 @@ if(*choice == 0)
   cmd( "if {[string compare $answer ok] == 0} {set choice 0} {set choice 1}" );
  if(*choice == 1)
   break;
- cmd( "set fname [tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
- cmd( "if { $fname == \"\" || [ fn_spaces $fname . ] } {set choice 0} {set fname [file tail $fname]; set choice 1}" );
+
+ cmd( "set fname [ tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { { {HTML files} {.html} } { {All files} {*} } } ]", exec_path );
+ cmd( "if { $fname == \"\" || [ fn_spaces $fname . ] } { set choice 0 } { set fname [ file tail $fname ]; set choice 1 }" );
  if(*choice == 0)
   break;
 
@@ -3686,7 +3689,7 @@ if( !strcmp(eq_file, lsd_eq_file) )
  }
 
 cmd( "set res1 fun_%s.cpp", simul_name );
-cmd( "set bah [tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir [pwd] -filetypes {{{LSD equation files} {.cpp}} {{All files} {*}} }]" );
+cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Equation File\" -defaultextension \".cpp\" -initialfile $res1 -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ]", exec_path );
 
 cmd( "if {[string length $bah] > 0} { set choice 1; set res1 [file tail $bah]} {set choice 0}" );
 if ( *choice == 0 )
@@ -3740,7 +3743,12 @@ if ( ! struct_loaded )
 	break;
 }
 
-cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir [pwd] -filetypes { { {LSD configuration files} {.lsd} } } ]" );
+// make sure there is a path set
+cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
+cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
 cmd( "set res2 [ file tail $res1 ]" );
 cmd( "if [ fn_spaces $res1 . ] { set res1 \"\"; set res2 \"\" }" );
 
@@ -4478,11 +4486,13 @@ case 64:
 		findexSens=0;
 	}
 	// set default name and path to conf. file folder
-	cmd( "set res %s", simul_name );
+	cmd( "set res \"%s\"", simul_name );
 	cmd( "set path \"%s\"", path );
+	if ( strlen( path ) > 0 )
+		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
-	cmd( " set bah [tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes {{{Sensitivity analysis files} {.sa}}}]" );
+	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
 	if(*choice==2)
 		break;
@@ -4593,10 +4603,12 @@ case 65:
 	// default file name and path
 	cmd( "set res %s", simul_name );
 	cmd( "set path \"%s\"", path );
+	if ( strlen( path ) > 0 )
+		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
 	*choice = 0;
-	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir [pwd]  -filetypes { { { Sensitivity analysis files } { .sa } } } ]" );
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile $res -initialdir \"$path\" -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ]; set last [ expr [ string last .sa $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
@@ -4643,10 +4655,15 @@ case 90:
 	
 	// default file name
 	cmd( "set res %s", simul_name );
+	
+	// make sure there is a path set
+	cmd( "set path \"%s\"", path );
+	if ( strlen( path ) > 0 )
+		cmd( "cd \"$path\"" );
 
 	// open dialog box to get file name & folder
 	*choice = 0;
-	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated File\" -defaultextension \".csv\" -initialfile $res -initialdir [ pwd ]  -filetypes { { { Comma-separated files } { .csv } } } ]" );
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
@@ -4816,10 +4833,12 @@ case 68:
 		else
 			cmd( "set res \"\"" );
 		cmd( "set path \"%s\"", path );
+		if ( strlen( path ) > 0 )
+			cmd( "cd \"$path\"" );
 		// open dialog box to get file name & folder
 		if( fSeq )								// file sequence?
 		{
-			cmd( "set bah [tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{LSD model files} {.lsd}}} -multiple no]" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
 			cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}" );
 			if(*choice == 0)
 				break;
@@ -4841,7 +4860,7 @@ case 68:
 		}
 		else									// bunch of files?
 		{
-			cmd( "set bah [tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir [pwd]  -filetypes {{{LSD model files} {.lsd}}} -multiple yes]" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes]" );
 			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
 			if( *choice == 0 )
 				break;
@@ -5234,7 +5253,12 @@ if ( ! struct_loaded )
 
 cmd( "set bah \"%s\"", simul_name );
 
-cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"[ pwd ]\" -initialfile \"$bah.net\" -filetypes { { { Pajek network files } { .net } } { { All files } { .* } } } ]" );
+// make sure there is a path set
+cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
+cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 *choice = 0;
 cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
 if ( *choice == 2 )
@@ -5394,9 +5418,13 @@ if ( cur == NULL || cur->node == NULL )
 	break;
 }
 
-cmd( "set bah \"%s\"", simul_name );
+// make sure there is a path set
+cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
 
-cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"[ pwd ]\" -initialfile \"$bah.net\" -filetypes { { { Pajek network files } { .net } } } ]" );
+cmd( "set bah \"%s\"", simul_name );
+cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 *choice = 0;
 cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
 if ( *choice == 2 )

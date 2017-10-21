@@ -156,7 +156,7 @@ cmd( "pack .w.s.lab .w.s.e2" );
 
 cmd( "pack .w.f .w.l .w.g .w.s -padx 5 -pady 5" );
 
-cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { { HTML files } { .html } } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", exec_path );
+cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"Existing Report File\" -filetypes { { {HTML files} {.html} } } -initialdir \"%s\" ]; set choice 2 } { set choice 1 } { LsdHelp menumodel.html#createreport } { set choice 3 }", exec_path );
 
 cmd( "showtop .w topleftW" );
 
@@ -186,7 +186,7 @@ cmd( "destroytop .w" );
 
 while ( equation_name == NULL || ( ffun = fopen( equation_name, "r" ) ) == NULL )
 {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { { LSD Equation Files } { .cpp } } { { All Files } { * } } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name == NULL ? "" : equation_name );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name == NULL ? "" : equation_name );
 
 if ( *choice == 1 )
 {

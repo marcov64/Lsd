@@ -864,8 +864,13 @@ if(*choice==2)
   goto there;
  }
 
+// make sure there is a path set
+cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
 cmd( "set fn \"$b.eps\"" );
-cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { [string length $fn] == 0 } { set choice 2 }" );
+cmd( "set fn [ tk_getSaveFile -parent .da -title \"Save Plot File\" -defaultextension .eps -initialfile $fn -initialdir \"$path\" -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { [string length $fn] == 0 } { set choice 2 }" );
 
 if(*choice==2)
  {*choice=0;
@@ -1603,7 +1608,12 @@ if ( *choice == 1 )
 	const char extTot[] = ".tot";
 #endif 
  
-  cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir [pwd] -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", extRes, extTot );
+  // make sure there is a path set
+  cmd( "set path \"%s\"", path );
+  if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
+  cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", extRes, extTot );
   cmd( "if { ! [ fn_spaces $lab .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
   if(*choice==0 )
    {//no file selected
@@ -2043,7 +2053,13 @@ if(*choice == 0)
   cmd( "if {[string compare -nocase $answer \"ok\"] == 0} {set choice 1} {set choice 0}" );
  if(*choice == 0)
   goto there;
- cmd( "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir [pwd] -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
+
+ // make sure there is a path set
+ cmd( "set path \"%s\"", path );
+ if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
+ cmd( "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir \"$path\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
  cmd( "if { $fname == \"\" || [ fn_spaces $fname .da ] } { set choice 0 } { set choice 1 }" );
  if(*choice == 0)
   goto there;
@@ -6702,7 +6718,12 @@ else
 		ext = extResZip;
 }
 
-cmd( "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir [pwd] -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext );
+// make sure there is a path set
+cmd( "set path \"%s\"", path );
+if ( strlen( path ) > 0 )
+	cmd( "cd \"$path\"" );
+
+cmd( "set bah [tk_getSaveFile -parent .da -title \"Save Data File\" -initialdir \"$path\" -defaultextension \"%s\" -filetypes {{{%s} {%s}} {{All files} {*}} }]", ext, descr, ext );
 app=(char *)Tcl_GetVar(inter, "bah",0);
 strcpy(msg, app);
 

@@ -767,7 +767,7 @@ case 6:
 
 case 7:
   cmd( "set oldpath [pwd]" );
-  cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { { Text Files } { .txt } } { { All Files } { * } }} ]" );
+  cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
   l=(char *)Tcl_GetVar(inter, "filename",0);
   if(l!=(char *)NULL && strcmp(l, ""))
  { cmd( "cd [file dirname $filename]" );

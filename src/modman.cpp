@@ -925,7 +925,7 @@ goto loop;
 
 if(choice==4)
 {
- /*Save the file currently shown*/
+ /* Save the file currently shown */
 
 cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
 s=(char *)Tcl_GetVar(inter, "curfilename",0);
@@ -5122,7 +5122,7 @@ if ( choice == 48 )
 				set a [.l.t.text get 1.0 end]; \
 				set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			}; \
-			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir $modeldir -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
+			set fun_extra [ tk_getOpenFile -parent .l -title \"Select Additional Source Files\" -multiple yes -initialdir \"$modeldir\" -filetypes {{{C++ header files} {.h .hpp .h++}} {{C++ source files} {.c .cpp .c++}} {{All files} {*}} } ]; \
 			if { $fun_extra == \"\" } { \
 				return \
 			}; \

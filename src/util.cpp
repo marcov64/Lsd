@@ -2603,7 +2603,7 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 
 	cmd( "pack .lat.c" );
 
-	cmd( "save .lat b { set b \"%s.eps\"; set a [tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } }]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name );
+	cmd( "save .lat b { set b \"%s.eps\"; set a [ tk_getSaveFile -parent .lat -title \"Save Lattice Image File\" -defaultextension .eps -initialfile $b -initialdir \"%s\" -filetypes { { {Encapsulated Postscript files} {.eps} } { {All files} {*} } } ]; if { $a != \"\" } { .lat.c postscript -colormode color -file \"$a\" } }", simul_name, path );
 
 	cmd( "set dimH %lf", dimH );
 	cmd( "set dimW %lf", dimW );

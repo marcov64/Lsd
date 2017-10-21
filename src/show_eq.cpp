@@ -72,28 +72,27 @@ cmd( "switch %d { 0 { set parWnd . } 1 { set parWnd .chgelem } 2 { set parWnd .d
 
 start:
 fname = equation_name;
-if( (f=fopen(equation_name,"r"))==NULL)
- {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
-  cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\"  -initialdir [pwd] -filetypes { { { LSD Equation Files } { .cpp } } { { All Files } { * } } } ]; if [ fn_spaces $res . ] { set res \"\" } }" );
+if ( ( f = fopen( equation_name, "r" ) ) == NULL )
+{
+	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to retry.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
+	cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces $res . ] { set res \"\" } }", exec_path );
 
- if(*choice==1)
- {
- app=(char *)Tcl_GetVar(inter, "res",0);
- if ( app == NULL || ! strcmp( app, "" ) )
-	 return;
- strcpy(msg, app);
- if(strlen(msg)>0)
- {
- delete[] equation_name;
- equation_name=new char[strlen(msg)+1];
- strcpy(equation_name, msg);
- }
-
- }
-if(*choice==2)
- return;
-goto start;
+	if(*choice==1)
+	{
+		app=(char *)Tcl_GetVar(inter, "res",0);
+		if ( app == NULL || ! strcmp( app, "" ) )
+			return;
+		strcpy(msg, app);
+		if(strlen(msg)>0)
+		{
+			delete[] equation_name;
+			equation_name=new char[strlen(msg)+1];
+			strcpy(equation_name, msg);
+		}
+	}
+	if(*choice==2)
+		return;
+	goto start;
 }
 
 // search in all extra source files
