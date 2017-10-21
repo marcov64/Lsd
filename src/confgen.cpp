@@ -130,7 +130,7 @@ int lsdmain( int argn, char **argv )
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\n Specify a -f FILENAME.lsd to use as a base for the new configuration files.\n", struct_file );
+		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\n Specify a -f FILENAME.lsd to use as a base for the new configuration files.\n" );
 		myexit( 3 );
 	}
 	
@@ -197,7 +197,7 @@ int lsdmain( int argn, char **argv )
 	{
 		if ( ! change_configuration( root, i ) )
 		{
-			fprintf( stderr, "Invalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n", simul_name  );
+			fprintf( stderr, "Invalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n" );
 			myexit( 7 );
 		}
 	
