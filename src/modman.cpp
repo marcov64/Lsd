@@ -452,7 +452,7 @@ cmd( "$w add command -label \"Font...\" -command {set choice 59} -underline 8" )
 cmd( "$w add separator" );
 // add option to ajust syntax highlighting (word coloring)
 cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
-cmd( "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command {setwrap .f.t.t $wrap} -underline 1 -accelerator Ctrl+w " );
+cmd( "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
 cmd( "$w add command -label \"Tab Size...\" -command {set choice 67} -underline 7" );
 cmd( "$w add command -label \"Insert LSD Macro...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i" );
 
@@ -517,6 +517,7 @@ cmd( "button .bbar.find -image findImg -relief $bRlf -overrelief $ovBrlf -comman
 cmd( "button .bbar.replace -image replaceImg -relief $bRlf -overrelief $ovBrlf -command {set choice 21}" );
 cmd( "button .bbar.indent -image indentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 42}" );
 cmd( "button .bbar.deindent -image deindentImg -relief $bRlf -overrelief $ovBrlf -command {set choice 43}" );
+cmd( "button .bbar.wrap -image wrapImg -relief $bRlf -overrelief $ovBrlf -command { if { $wrap == 0 } { set wrap 1 } { set wrap 0 }; setwrap .f.t.t $wrap }" );
 cmd( "button .bbar.compile -image compileImg -relief $bRlf -overrelief $ovBrlf -command {set choice 6}" );
 cmd( "button .bbar.comprun -image comprunImg -relief $bRlf -overrelief $ovBrlf -command {set choice 2}" );
 cmd( "button .bbar.gdb -image gdbImg -relief $bRlf -overrelief $ovBrlf -command {set choice 13}" );
@@ -551,6 +552,8 @@ cmd( "bind .bbar.indent <Enter> {set ttip \"Indent selection\"}" );
 cmd( "bind .bbar.indent <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.deindent <Enter> {set ttip \"De-indent selection\"}" );
 cmd( "bind .bbar.deindent <Leave> {set ttip \"\"}" );
+cmd( "bind .bbar.wrap <Enter> {set ttip \"Wrap lines\"}" );
+cmd( "bind .bbar.wrap <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.compile <Enter> {set ttip \"Recompile model\"}" );
 cmd( "bind .bbar.compile <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.comprun <Enter> {set ttip \"Compile and run model...\"}" );
@@ -572,7 +575,7 @@ cmd( "bind .bbar.hide <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for LSD equations\"}" );
 cmd( "bind .bbar.help <Leave> {set ttip \"\"}" );
 
-cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
+cmd( "pack .bbar.open .bbar.save .bbar.undo .bbar.redo .bbar.cut .bbar.copy .bbar.paste .bbar.find .bbar.replace .bbar.indent .bbar.deindent .bbar.wrap .bbar.compile .bbar.comprun .bbar.gdb .bbar.info .bbar.descr .bbar.equation .bbar.extra .bbar.set .bbar.hide .bbar.help .bbar.tip -padx 3 -side left" );
 cmd( "pack .bbar -anchor w -fill x" );
 
 cmd( "frame .f -bd 2" );
@@ -652,7 +655,7 @@ cmd( "bind .f.t.t <ButtonPress> {savCurIni}" );
 cmd( "bind .f.t.t <ButtonRelease> {if {[.f.t.t edit modified]} {savCurFin; set choice 23}; updCurWnd}" );
 
 cmd( "bind .f.t.t <Control-l> {set choice 10}; bind .f.t.t <Control-L> {set choice 10}" );
-cmd( "bind .f.t.t <Control-w> {if {$wrap == 0} {set wrap 1} {set wrap 0}; setwrap .f.t.t $wrap}" );
+cmd( "bind .f.t.t <Control-w> { if { $wrap == 0 } { set wrap 1 } { set wrap 0 }; setwrap .f.t.t $wrap }" );
 
 cmd( "bind .f.t.t <Control-f> {set choice 11}; bind .f.t.t <Control-F> {set choice 11}" );
 cmd( "bind .f.t.t <F3> {set choice 12}" );
