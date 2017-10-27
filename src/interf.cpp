@@ -4682,7 +4682,7 @@ case 90:
 	}
 	
 	// write .csv header
-	fprintf( f, "Element%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP );
+	fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP );
 	
 	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
@@ -4715,7 +4715,7 @@ case 90:
 				if ( cs->v[i] > max )
 					max = cs->v[i];
 
-		fprintf( f, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s%s\n", cs->label, CSV_SEP, cs->param == 1 ? "Parameter" : "Variable", CSV_SEP, cs->param == 1 ? 0 : cs->lag + 1, CSV_SEP, cs->integer ? "Integer" : "Real", CSV_SEP, cv != NULL ? cv->val[ cs->lag ] : NAN, CSV_SEP, min, CSV_SEP, max, CSV_SEP, lab3 != NULL ? lab3 : "" );	
+		fprintf( f, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, CSV_SEP, cs->param == 1 ? "parameter" : "variable", CSV_SEP, cs->param == 1 ? 0 : cs->lag + 1, CSV_SEP, cs->integer ? "integer" : "real", CSV_SEP, cv != NULL ? cv->val[ cs->lag ] : NAN, CSV_SEP, min, CSV_SEP, max, CSV_SEP, lab3 != NULL ? lab3 : "" );	
 		
 		delete [ ] lab3;
 	}

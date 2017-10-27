@@ -357,6 +357,24 @@ bool change_configuration( object *root, int findex )
 	
 	for ( i = 0; i < num_vars; ++i )
 	{
+		// handle pseudo-parameters
+		if ( ! strcmp( vars[ i ], "_timeSteps_" ) )
+		{
+			max_step = max( 0, round( values[ i ][ findex - 1 ] ) );
+			continue;
+		}
+		if ( ! strcmp( vars[ i ], "_numRuns_" ) )
+		{
+			sim_num = max( 0, round( values[ i ][ findex - 1 ] ) );
+			continue;
+		}
+		if ( ! strcmp( vars[ i ], "_rndSeed_" ) )
+		{
+			seed = max( 0, round( values[ i ][ findex - 1 ] ) );
+			continue;
+		}
+		
+		// it's a regular parameter/variable
 		cv = root->search_var( NULL, vars[ i ] );	// get first instance
 		if ( cv == NULL )						
 		{
