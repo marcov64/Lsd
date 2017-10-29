@@ -82,6 +82,7 @@ Comments and bug reports to marco.valente@univaq.it
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation (sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
 #define ERR_LIM 10						// maximum number of repeated error messages
+#define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
 #define CSV_SEP ","						// single char string with the .csv format separator
 
@@ -603,7 +604,7 @@ void set_all(int *choice, object *original, char *lab, int lag);
 void set_blueprint(object *container, object *r);
 void set_buttons_log( bool on );
 void set_cs_data(int *choice);
-void set_fast( bool on );
+void set_fast( int level );
 void set_lab_tit(variable *var);
 void set_obj_number(object *r, int *choice);
 void set_shortcuts( const char *window );
@@ -650,7 +651,6 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global variables
 
-extern bool fast_mode;		// fast mode (log window)
 extern bool fast_lookup;	// flag for fast look-up mode
 extern bool ignore_eq_file;	// control of configuration files equation updating
 extern bool iniShowOnce;	// prevent repeating warning on # of columns
@@ -659,6 +659,7 @@ extern bool in_set_obj;		// in setting number of objects mode
 extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
 extern bool no_error;		// object search error control	
+extern bool on_bar;			// flag to indicate bar is being draw in log window
 extern bool parallel_mode;	// parallel mode (multithreading) status
 extern bool redrawRoot;		// control for redrawing root window (.)
 extern bool running;		// simulation is running
@@ -691,6 +692,7 @@ extern int cur_plt;			// current graph plot number
 extern int debug_flag;		// debug enable control (bool)
 extern int docsv;			// produce .csv text results files (bool)
 extern int dozip;			// compressed results file flag (bool)
+extern int fast_mode;		// fast mode (log window)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
 extern int lattice_type;	// lattice window mode
 extern int macro;			// equations style (macros or C++) (bool)

@@ -95,11 +95,11 @@ int strWindowOn = true;		// control the presentation of the model structure wind
 
 bool batch_sequential = false;	// no-window multi configuration job running
 bool fast;					// safe copy of fast_mode flag
-bool fast_mode;				// flag to hide LOG messages & runtime plot
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_window = false;		// no-window command line job
+bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
 bool redrawRoot;			// control for redrawing root window (.)
@@ -135,6 +135,7 @@ int cur_sim;				// current simulation run
 int debug_flag = false;		// debug enable control (bool)
 int docsv = false;			// produce .csv text results files (bool)
 int done_in;				// Tcl menu control variable (log window)
+int fast_mode;				// level of LOG messages & runtime plot
 int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
@@ -623,353 +624,410 @@ int lsdmain( int argn, char **argv )
 /*********************************
 RUN
 *********************************/
-void run(object *root)
+void run( object *root )
 {
-int i, j;
-bool batch_sequential_loop = false;
-char ch[MAX_PATH_LENGTH];
-FILE *f;
-result *rf;					// pointer for results files (may be zipped or not)
-double app=0;
-clock_t start, end;
+	int i, j, perc_done, last_done;
+	bool batch_sequential_loop = false;
+	char bar_done[ 2 * BAR_DONE_SIZE ];
+	FILE *f;
+	result *rf;					// pointer for results files (may be zipped or not)
+	clock_t start, end;
 
 #ifdef PARALLEL_MODE
-// check if there are parallel computing variables
-if ( parallel_disable || max_threads < 2 )
-	parallel_mode = parallel_ready = false;
-else
-{
-	parallel_mode = search_parallel( root );
-	parallel_ready = true;
-}
+	// check if there are parallel computing variables
+	if ( parallel_disable || max_threads < 2 )
+		parallel_mode = parallel_ready = false;
+	else
+	{
+		parallel_mode = search_parallel( root );
+		parallel_ready = true;
+	}
 
-// start multi-thread workers
-if ( parallel_mode )
-	workers = new worker[ max_threads ];
+	// start multi-thread workers
+	if ( parallel_mode )
+		workers = new worker[ max_threads ];
 #else
-if ( search_parallel( root ) )
-	plog( "\nWarning: parallel mode is not supported under current configuration\n" );
-parallel_mode = false;
+	if ( search_parallel( root ) )
+		plog( "\nWarning: parallel mode is not supported under current configuration\n" );
+	parallel_mode = false;
 #endif	
 
 #ifndef NO_WINDOW
-set_buttons_log( true );
+	set_buttons_log( true );
 
-prof.clear( );				// reset profiling times
+	prof.clear( );			// reset profiling times
 
-cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
-cmd( "wm deiconify .log; raise .log; focus .log" );
+	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
 #else
-plog( "\nProcessing configuration file %s ...\n", "", struct_file );
+	plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 #endif
 
-set_fast( false );			// should always start on OBSERVE and switch to FAST later
+	set_fast( 0 );			// should always start on OBSERVE and switch to FAST later
 
-for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
-{
-	cur_sim = i;	 	//Update the global variable holding information on the current run in the set of runs
-	empty_cemetery( ); 	//ensure that previous data are not erroneously mixed (sorry Nadia!)
+	for ( i = 1, quit = 0; i <= sim_num && quit != 2; ++i )
+	{
+		cur_sim = i;	 	// Update the global variable holding information on the current run in the set of runs
+		empty_cemetery( ); 	// ensure that previous data are not erroneously mixed (sorry Nadia!)
 
 #ifndef NO_WINDOW
-	prepare_plot( root, i );
+		prepare_plot( root, i );
 #endif
-
-	if ( parallel_mode )
-		plog( "\nSimulation %d running (up to %d cores)...", "", i, max_threads );
-	else
-		plog( "\nSimulation %d running...", "", i );
-
-	// if new batch configuration file, reload all
-	if ( batch_sequential_loop )
-	{
-		if ( load_configuration( root, false ) != 0 )
+		if ( fast_mode < 2 )
 		{
-#ifndef NO_WINDOW 
-			log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
-#else
-			fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );	
-#endif
-			myexit( 10 );
+			if ( parallel_mode )
+				plog( "\nSimulation %d running (up to %d cores)...", "", i, max_threads );
+			else
+				plog( "\nSimulation %d running...", "", i );
 		}
-		batch_sequential_loop = false;
-	}
-
-	// if just another run seed, reload just structure & parameters
-	if ( i > 1 )
-		if ( load_configuration( root, true ) != 0 )
+		
+		// if new batch configuration file, reload all
+		if ( batch_sequential_loop )
 		{
+			if ( load_configuration( root, false ) != 0 )
+			{
 #ifndef NO_WINDOW 
-			log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
+				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be loaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
-			fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
+				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );	
 #endif
-			myexit( 10 );
+				myexit( 10 );
+			}
+			batch_sequential_loop = false;
 		}
 
-	strcpy(ch, "");
-	series_saved=0;
-
-	print_title(root);
-	if ( no_more_memory )
-	{
+		// if just another run seed, reload just structure & parameters
+		if ( i > 1 )
+			if ( load_configuration( root, true ) != 0 )
+			{
 #ifndef NO_WINDOW 
-		log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
+				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Check if LSD still has WRITE access to the model directory.\nLSD will close now.\"" );
 #else
-		fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
+				fprintf( stderr, "\nFile '%s' not found or corrupted.\n", struct_file );
 #endif
-		myexit( 11 );
-	}
-	 
-	// reset trace stack
-	unwind_stack( );
+				myexit( 10 );
+			}
 
-	//new random routine' initialization
-	init_random(seed);
+		series_saved = 0;
 
-	seed++;
-	scroll = false;
-	pause_run = false;
-	running = true;
-	debug_flag = false;
-	use_nan = false;
-	done_in = 0;
-	actual_steps = 0;
-	wr_warn_cnt = 0;
-	start = clock();
-
-	for ( t = 1; quit == 0 && t <= max_step; ++t )
-	{
+		print_title( root );
+		if ( no_more_memory )
+		{
 #ifndef NO_WINDOW 
-		// restart runtime variables color cycle
-		cur_plt = 0;
-
-		// adjust "clock" backwards if simulation is paused
-		if ( pause_run )
-			t--;
-
-		if ( when_debug == t )
-		{
-			debug_flag = true;
-			cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
-		}
-
-		// only update if simulation not paused
-		if ( ! pause_run )
+			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
+			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Not enough memory\" -detail \"Too many series saved for the available memory. Memory insufficient for %d series over %d time steps. Reduce series to save and/or time steps.\nLSD will close now.\"", series_saved, max_step );
+#else
+			fprintf( stderr, "\nNot enough memory. Too many series saved for the memory available.\nMemory insufficient for %d series over %d time steps.\nReduce series to save and/or time steps.\n", series_saved, max_step );
 #endif
-			root->update();
+			myexit( 11 );
+		}
+		 
+		// reset trace stack
+		unwind_stack( );
 
-#ifndef NO_WINDOW
-		if ( ! fast_mode && ! cur_plt && ! pause_run )
-			plog( "\nSimulation %d step %d done", "", i, t );
-			
-		switch ( done_in )
+		//new random routine' initialization
+		init_random(seed);
+
+		seed++;
+		scroll = false;
+		pause_run = false;
+		running = true;
+		debug_flag = false;
+		use_nan = false;
+		done_in = 0;
+		actual_steps = 0;
+		perc_done = 0;
+		last_done = -1;
+		strcpy( bar_done, "" );
+		wr_warn_cnt = 0;
+		start = clock( );
+
+		for ( t = 1; quit == 0 && t <= max_step; ++t )
 		{
-			case 1:			// Stop button in Log window / s/S key in Runtime window
-				if ( pause_run )
-					cmd( "wm title .log \"$origLogTit\"" );
-				plog( "\nSimulation stopped at t = %d", "", t );
-				quit=2;
-			break;
-
-			case 2:			// Fast button in Log window / f/F key in Runtime window
-				set_fast( true );
-				debug_flag = false;
-				cmd( "set a [split [winfo children .] ]" );
-				cmd( "foreach i $a {if [string match .plt* $i] {wm withdraw $i}}" );
-				cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state disabled}", i, i );
-				cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state disabled}", i, i );
-				break;
-
-			case 3:			// Debug button in Log window / d/D key in Runtime window
-				if ( ! pause_run )
+			// update the percentage done bar, if needed
+			if ( perc_done != last_done )
+			{
+				if ( perc_done % 10 == 0 )
 				{
-					debug_flag=true;
-					cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
-				}
-				else			// if paused, just call the data browser
-				{
-					double useless = 0;
-					deb( root, NULL, "Paused by User", &useless );
-				}
-				break;
-
-			case 4:			// Observe button in Log window / o/O key in Runtime window
-				set_fast( false );
-				cmd( "set a [split [winfo children .] ]" );
-				cmd( "foreach i $a {if [string match .plt* $i] {wm deiconify $i; raise $i}}" );
-				cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.go conf -state normal}", i, i );
-				cmd( "if { [winfo exist .plt%d]} {.plt%d.c.yscale.shift conf -state normal}", i, i );
-				break;
-			 
-			// plot window DELETE_WINDOW button handler
-			case 5:
-				if ( pause_run )
-					cmd( "wm title .log \"$origLogTit\"" );
-				cmd( "destroytop .plt%d", i );
-				plog( "\nSimulation stopped at t = %d", "", t );
-				quit=2;
-				break;
-
-			// runtime plot events
-			case 7:  		// Center button
-				cmd( "set newpos [expr %lf - [expr 250 / %lf]]", (double)t/(double)max_step, (double)max_step );
-				cmd( "if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview moveto $newpos} {}", i );
-				break;
-
-			case 8: 		// Scroll checkbox
-				scroll = ! scroll;
-				break;
-
-			case 9: 		// Pause simulation
-				pause_run = ! pause_run;
-				if ( pause_run )
-				{
-					cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
-					plog( "\nSimulation paused at t = %d", "", t );
-					cmd( ".log.but.pause conf -text Resume" );
+					char new_perc[ 10 ];
+					sprintf( new_perc, "%d%%", perc_done );
+					strcat( bar_done, new_perc );
+					
+					// check if continuing existing bar or starting a new one
+					if ( fast_mode == 1 )
+					{
+						if ( on_bar )
+							plog( "%d%%", "bar", perc_done );
+						else
+						{
+							on_bar = true;
+							plog( "\n%s", "bar", bar_done );
+						}
+					}					
 				}
 				else
-				{
-					cmd( "wm title .log \"$origLogTit\"" );
-					plog( "\nSimulation resumed" );
-					cmd( ".log.but.pause conf -text Pause" );
-				}
+					if ( perc_done % ( 100 / ( BAR_DONE_SIZE - 33 ) ) == 0 )
+					{
+						strcat( bar_done, "." );
+						
+						// check if continuing existing bar or starting a new one
+						if ( fast_mode == 1 )
+						{
+							if ( on_bar )
+								plog( ".", "bar" );
+							else
+							{
+								on_bar = true;
+								plog( "\n%s", "bar", bar_done );
+							}
+						}						
+					}
+					
+				last_done = perc_done;
+			}
+			
+#ifndef NO_WINDOW 
+			// restart runtime variables color cycle
+			cur_plt = 0;
+
+			// adjust "clock" backwards if simulation is paused
+			if ( pause_run )
+				t--;
+
+			if ( when_debug == t )
+			{
+				debug_flag = true;
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+			}
+
+			// only update if simulation not paused
+			if ( ! pause_run )
+#endif
+				root->update( );
+
+			perc_done = ( 100 * t ) / max_step;
+			
+#ifndef NO_WINDOW
+			if ( fast_mode == 0 && ! cur_plt && ! pause_run )
+				plog( "\nSimulation %d step %d done (%d%%)", "", i, t, perc_done );
+				
+			switch ( done_in )
+			{
+				case 1:			// Stop button in Log window / s/S key in Runtime window
+					if ( pause_run )
+						cmd( "wm title .log \"$origLogTit\"" );
+					plog( "\nSimulation stopped at t = %d", "", t );
+					quit = 2;
 				break;
 
-			case 35:		// error exit
-				log_tcl_error( "Unexpected termination", "Please try again" );
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Unexpected termination\" -detail \"Please try again.\"" );
-				myexit( 12 );
-			break;
+				case 2:			// Fast button in Log window / f/F key in Runtime window
+					set_fast( 1 );
+					debug_flag = false;
+					cmd( "set a [ split [ winfo children . ] ]" );
+					cmd( "foreach i $a { if [ string match .plt* $i ] { wm withdraw $i } }" );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.go conf -state disabled }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.shift conf -state disabled }", i, i );
+					break;
 
-			default:
-			break;
-		}
+				case 3:			// Debug button in Log window / d/D key in Runtime window
+					if ( ! pause_run )
+					{
+						debug_flag=true;
+						cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb }" );
+					}
+					else			// if paused, just call the data browser
+					{
+						double useless = 0;
+						deb( root, NULL, "Paused by User", &useless );
+					}
+					break;
 
-		done_in = 0;
+				case 4:			// Observe button in Log window / o/O key in Runtime window
+					set_fast( 0 );
+					cmd( "set a [ split [ winfo children . ] ]" );
+					cmd( "foreach i $a { if [ string match .plt* $i ] { wm deiconify $i; raise $i } }" );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.go conf -state normal }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.shift conf -state normal }", i, i );
+					break;
+				 
+				// plot window DELETE_WINDOW button handler
+				case 5:
+					if ( pause_run )
+						cmd( "wm title .log \"$origLogTit\"" );
+					cmd( "destroytop .plt%d", i );
+					plog( "\nSimulation stopped at t = %d", "", t );
+					quit = 2;
+					break;
 
-		// perform scrolling if enabled
-		if ( ! pause_run && scroll )
-			cmd( "if { [winfo exist .plt%d]} {$activeplot.c.c.cn xview scroll 1 units} {}", i );
+				// runtime plot events
+				case 7:  		// Center button
+					cmd( "set newpos [ expr %lf - [ expr 250 / %lf ] ]", t / ( double )max_step, ( double ) max_step );
+					cmd( "if [ winfo exist .plt%d ] { $activeplot.c.c.cn xview moveto $newpos }", i );
+					break;
 
-		cmd( "update" );
-#endif
-	}//end of for t
+				case 8: 		// Scroll checkbox
+					scroll = ! scroll;
+					break;
 
-	actual_steps = t - 1;
-	unsavedData = true;			// flag unsaved simulation results
-	running = false;
-	end = clock();
+				case 9: 		// Pause simulation
+					pause_run = ! pause_run;
+					if ( pause_run )
+					{
+						cmd( "set origLogTit [ wm title .log ]; wm title .log \"$origLogTit (PAUSED)\"" );
+						plog( "\nSimulation paused at t = %d", "", t );
+						cmd( ".log.but.pause conf -text Resume" );
+					}
+					else
+					{
+						cmd( "wm title .log \"$origLogTit\"" );
+						plog( "\nSimulation resumed" );
+						cmd( ".log.but.pause conf -text Pause" );
+					}
+					break;
 
-	if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
-		quit=0;
+				case 35:		// error exit
+					log_tcl_error( "Unexpected termination", "Please try again" );
+					cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Unexpected termination\" -detail \"Please try again.\"" );
+					myexit( 12 );
+				break;
 
-	plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
-
-#ifndef NO_WINDOW 
-	cmd( "destroytop .deb" );
-	cmd( "update" );
-	// allow for run time plot window destruction
-	cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
-#endif
-
-	close_sim( );
-	reset_end( root );
-	root->emptyturbo( );
-
-	if ( sim_num > 1 || no_window ) //Save results for multiple simulation runs
-	{
-		// remove existing path, if any, from name in case of alternative output path
-		char *alt_name = clean_file( simul_name );
-
-		if ( ! no_res )
-		{
-			if ( ! batch_sequential )
-				sprintf( msg, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - 1, docsv ? "csv" : "res" );
-			else
-				sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
-
-			sprintf( ch, "Saving results in file %s%s... ", msg, dozip ? ".gz" : "" );
-			plog ( ch );
-
-			rf = new result( msg, "wt", dozip, docsv );		// create results file object
-			rf->title( root, 1 );							// write header
-			rf->data( root, 0, actual_steps );				// write all data
-			delete rf;										// close file and delete object
-
-			plog( "Done\n" );
-		}
-
-		if ( ! grandTotal || batch_sequential )			// generate partial total files?
-		{
-			if ( ! batch_sequential )
-			  sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
-			else
-			  sprintf( msg, "%s%s%s_%d_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
-		}
-		else											// generate single grand total file
-		{
-			sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
-		}
-
-		if ( i == sim_num )								// print only for last
-			plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
-
-		if ( i == 1 && grandTotal && ! add_to_tot )
-		{
-			rf = new result( msg, "wt", dozip, docsv );	// create results file object
-			rf->title( root, 0 );						// write header
-		}
-		else
-			rf = new result( msg, "a", dozip, docsv );	// add results object to existing file
-
-		rf->data( root, actual_steps );					// write current data data
-		delete rf;										// close file and delete object
-
-		if ( i == sim_num )								// print only for last
-			plog( "Done\n" );
-
-		if ( batch_sequential && i == sim_num)  		// last run of current batch file?
-		{
-			findex++;									// try next file
-			sprintf(msg, "%s_%d.lsd",simul_name,findex);
-			delete[] struct_file;
-			struct_file=new char[strlen(msg)+1];
-			strcpy(struct_file,msg);
-			f=fopen(struct_file, "r");			
-			if(f==NULL || (fend!=0 && findex>fend))  	// no more file to process
-			{
-				if(f!=NULL) 
-					fclose(f);
-				plog( "\nFinished processing %s.\n", "", simul_name );
+				default:
 				break;
 			}
-			plog( "\nProcessing configuration file %s ...\n", "", struct_file );
-			fclose(f);  								// process next file
-			struct_loaded = true;
-			i = 0;   									// force restarting run count
-			batch_sequential_loop = true;				// force reloading configuration
-		} 
-	}
-}
+
+			done_in = 0;
+
+			// perform scrolling if enabled
+			if ( ! pause_run && scroll )
+				cmd( "if [ winfo exist .plt%d ] { $activeplot.c.c.cn xview scroll 1 units }", i );
+
+			cmd( "update" );
+#endif
+		}	// end of for t
+
+		actual_steps = t - 1;
+		unsavedData = true;			// flag unsaved simulation results
+		running = false;
+		end = clock();
+
+		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
+			quit=0;
+		
+		if ( fast_mode == 1 && on_bar )
+			plog( "100%%", "bar" );
+		if ( fast_mode < 2 )
+			plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
 #ifndef NO_WINDOW 
-uncover_browser( );
-set_buttons_log( false );
-show_prof_aggr( );
-cmd( "wm deiconify .log; raise .log; focus .log" );
+		cmd( "destroytop .deb" );
+		cmd( "update" );
+		// allow for run time plot window destruction
+		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
+#endif
+
+		close_sim( );
+		reset_end( root );
+		root->emptyturbo( );
+
+		if ( sim_num > 1 || no_window )	// save results for multiple simulation runs
+		{
+			// remove existing path, if any, from name in case of alternative output path
+			char *alt_name = clean_file( simul_name );
+
+			if ( ! no_res )
+			{
+				if ( ! batch_sequential )
+					sprintf( msg, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - 1, docsv ? "csv" : "res" );
+				else
+					sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
+
+				if ( fast_mode < 2 )
+					plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+
+				rf = new result( msg, "wt", dozip, docsv );		// create results file object
+				rf->title( root, 1 );							// write header
+				rf->data( root, 0, actual_steps );				// write all data
+				delete rf;										// close file and delete object
+
+				if ( fast_mode < 2 )
+					plog( "Done\n" );
+			}
+
+			if ( ! grandTotal || batch_sequential )			// generate partial total files?
+			{
+				if ( ! batch_sequential )
+				  sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+				else
+				  sprintf( msg, "%s%s%s_%d_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+			}
+			else											// generate single grand total file
+			{
+				sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
+			}
+
+			if ( fast_mode < 2 && i == sim_num )			// print only for last
+				plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+
+			if ( i == 1 && grandTotal && ! add_to_tot )
+			{
+				rf = new result( msg, "wt", dozip, docsv );	// create results file object
+				rf->title( root, 0 );						// write header
+			}
+			else
+				rf = new result( msg, "a", dozip, docsv );	// add results object to existing file
+
+			rf->data( root, actual_steps );					// write current data data
+			delete rf;										// close file and delete object
+
+			if ( fast_mode < 2 && i == sim_num )			// print only for last
+				plog( "Done\n" );
+
+			if ( batch_sequential && i == sim_num)  		// last run of current batch file?
+			{
+				findex++;									// try next file
+				sprintf( msg, "%s_%d.lsd", simul_name, findex );
+				delete [ ] struct_file;
+				struct_file = new char[ strlen( msg ) + 1 ];
+				strcpy( struct_file, msg );
+				f = fopen( struct_file, "r" );			
+				if ( f == NULL || ( fend != 0 && findex > fend ) )// no more file to process
+				{
+					if ( f != NULL ) 
+						fclose( f );
+					if ( fast_mode < 2 )
+						plog( "\nFinished processing %s\n", "", simul_name );
+					break;
+				}
+				
+				if ( fast_mode < 2 )
+					plog( "\nProcessing configuration file %s ...\n", "", struct_file );
+				fclose( f );  								// process next file
+				struct_loaded = true;
+				i = 0;   									// force restarting run count
+				batch_sequential_loop = true;				// force reloading configuration
+			} 
+		}
+	}
+
+	if ( fast_mode == 2 )
+		plog( "\nSimulation %d finished\n", "", i - 1 );
+
+#ifndef NO_WINDOW 
+	uncover_browser( );
+	set_buttons_log( false );
+	show_prof_aggr( );
+	cmd( "wm deiconify .log; raise .log; focus .log" );
 #endif
 
 #ifdef PARALLEL_MODE
-// stop multi-thread workers
-delete [ ] workers;
-workers = NULL;
+	// stop multi-thread workers
+	delete [ ] workers;
+	workers = NULL;
 #endif	
 
-quit = 0;
+	quit = 0;
 }
 
 
@@ -1011,9 +1069,15 @@ int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *ar
 /*********************************
 SET_FAST
 *********************************/
-void set_fast( bool on )
+void set_fast( int level )
 {
-	if ( ! fast_mode && on )
+	if ( level > 2 )
+		level = 2;
+	if ( level < 0 )
+		level = 0;
+	
+	// remove the variables stack when switching to any fast mode
+	if ( fast_mode = 0 && level > 0 )
 	{
 		if ( stackinfo_flag > 0 || prof_aggr_time )
 		{
@@ -1025,11 +1089,9 @@ void set_fast( bool on )
 			return;
 		}
 		unwind_stack( );
-		fast = fast_mode = true;
 	}
 	
-	if ( fast_mode && ! on )
-		fast = fast_mode = false;
+	fast = fast_mode = level;
 }
 
 
@@ -1069,72 +1131,71 @@ void unwind_stack( void )
 /*********************************
 PRINT_TITLE
 *********************************/
-void print_title(object *root)
+void print_title( object *root )
 {
-object *c, *cur;
-variable *var;
-int num=0, multi, toquit;
-bridge *cb;
+	int toquit = quit;
+	object *cur;
+	variable *var;
+	bridge *cb;
 
-toquit=quit;
-//for each variable set the data saving support
-for ( var = root->v; var != NULL; var = var->next )
-{
-	var->last_update=0;
+	//for each variable set the data saving support
+	for ( var = root->v; var != NULL; var = var->next )
+	{ 
+		var->last_update = 0;
 
-	if ( ( var->save || var->savei ) && ! no_more_memory )
-	{
-     if(var->num_lag>0 || var->param==1)
-       var->start=0;
-     else
-       var->start=1;
-     var->end=max_step;
-	 
-     delete[] var->data;
-  
-     try 
-	 {
-      var->data=new double[max_step+1];
-     }
-     catch( bad_alloc& ) 
-	 {
-	 	set_lab_tit(var);
-        plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
-        var->save = var->savei = 0;
-        no_more_memory = true;
-	 	throw;
-     }
-   
-     series_saved++;
-     if(var->num_lag>0  || var->param==1)
-      var->data[0]=var->val[0];
-    }
-    else
-    {
-     if ( no_more_memory )
-      var->save = var->savei = 0;
-    }
-	
-	if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
-	{
-		plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
-#ifndef NO_WINDOW   
-		plog( "Use the Initial Values editor to set its values\n" );
-		if(var->param==1)
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
+		if ( ( var->save || var->savei ) && ! no_more_memory )
+		{
+			if ( var->num_lag > 0 || var->param == 1 )
+				var->start = 0;
+			else
+				var->start = 1;
+			var->end = max_step;
+
+			delete [ ] var->data;
+
+			try 
+			{
+				var->data = new double[ max_step + 1 ];
+			}
+			catch( bad_alloc& ) 
+			{
+				set_lab_tit( var );
+				plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
+				var->save = var->savei = 0;
+				no_more_memory = true;
+				throw;
+			}
+
+			++series_saved;
+			if ( var->num_lag > 0  || var->param == 1 )
+				var->data[ 0 ] = var->val[ 0 ];
+		}
 		else
-			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
+		{
+			if ( no_more_memory )
+				var->save = var->savei = 0;
+		}
+		
+		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
+		{
+			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
+#ifndef NO_WINDOW   
+			plog( "Use the Initial Values editor to set its values\n" );
+			if ( var->param == 1 )
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
+			else
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
 #endif
-		toquit=2;
+			toquit = 2;
+		}
 	}
-}
 
-for(cb=root->b; cb!=NULL; cb=cb->next)
-  for(cur=cb->head; cur!=NULL && quit!=2; cur=go_brother(cur))
-    print_title(cur);
+	for ( cb = root->b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
+			print_title( cur );
 
-if(quit!=2)
- quit=toquit;
+	if ( quit != 2 )
+		quit = toquit;
 }
 
 
@@ -1142,7 +1203,7 @@ if(quit!=2)
 CREATE_LOG_WINDOW
 *********************************/
 #ifndef NO_WINDOW
-void create_logwindow(void)
+void create_logwindow( void )
 {
 	if ( ! tk_ok )
 		myexit( 7 );
@@ -1199,26 +1260,26 @@ void create_logwindow(void)
 /*********************************
 RESET_END
 *********************************/
-void reset_end(object *r)
+void reset_end( object *r )
 {
 	object *cur;
 	variable *cv;
 	bridge *cb;
 
-	for(cv=r->v; cv!=NULL; cv=cv->next)
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{ 
-		if(cv->save)
-			cv->end=t-1;
-		if(cv->savei==1)
-			save_single(cv);
+		if ( cv->save )
+			cv->end = t - 1;
+		if ( cv->savei == 1 )
+			save_single( cv );
 	} 
 
-	for(cb=r->b; cb!=NULL; cb=cb->next)
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
-		cur=cb->head;
-		if(cur!=NULL && cur->to_compute==1)
-			for(; cur!=NULL;cur=go_brother(cur) )
-				reset_end(cur);
+		cur = cb->head;
+		if ( cur != NULL && cur->to_compute == 1 )
+			for ( ; cur != NULL; cur = go_brother( cur ) )
+				reset_end( cur );
 	}
 }
 
@@ -1403,12 +1464,12 @@ void results_alt_path( const char *altPath )
 CLEAN_FILE
 *********************************/
 // remove any path prefixes to filename, if present
-char *clean_file(char *filename)
+char *clean_file( char *filename )
 {
-	if(strchr(filename, '/') != NULL)
-		return strrchr(filename, '/') + 1;
-	if(strchr(filename, '\\') != NULL)
-		return strrchr(filename, '\\') + 1;
+	if( strchr( filename, '/' ) != NULL )
+		return strrchr( filename, '/' ) + 1;
+	if( strchr( filename, '\\' ) != NULL )
+		return strrchr( filename, '\\' ) + 1;
 	return filename;
 }
 
@@ -1417,23 +1478,23 @@ char *clean_file(char *filename)
 CLEAN_PATH
 *********************************/
 // remove cygwin path prefix, if present, and replace \ with /
-char *clean_path(char *filepath)
+char *clean_path( char *filepath )
 {
-	int i, len=strlen("/cygdrive/");
-	if(!strncmp(filepath, "/cygdrive/", len))
+	int i, len = strlen( "/cygdrive/" );
+	if ( ! strncmp( filepath, "/cygdrive/", len ) )
 	{
-		char *temp=new char[strlen(filepath) + 1];
-		temp[0]=toupper(filepath[len]);				// copy drive letter
-		temp[1]=':';								// insert ':'
-		strcpy(temp + 2, filepath + len + 1);		// copy removing prefix
-		strcpy(filepath, temp);
-		delete[] temp;
+		char *temp = new char[ strlen( filepath ) + 1 ];
+		temp[ 0 ] = toupper( filepath[ len ] );		// copy drive letter
+		temp[ 1 ] = ':';							// insert ':'
+		strcpy( temp + 2, filepath + len + 1 );		// copy removing prefix
+		strcpy( filepath, temp );
+		delete [ ] temp;
 	}
 	
-	len=strlen(filepath);
-	for(i=0; i<len; i++)
-		if(filepath[i]=='\\')	// replace \ with /
-			filepath[i]='/';
+	len = strlen( filepath );
+	for ( i = 0; i < len; ++i )
+		if ( filepath[ i ]=='\\' )					// replace \ with /
+			filepath[ i ]='/';
 			
 	return filepath;
 }

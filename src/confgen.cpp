@@ -40,7 +40,6 @@ double **values = NULL;		// array of configuration values
 object *root = NULL;		// LSD root object
 
 
-bool fast_mode = true;		// flag to hide LOG messages & runtime plot
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 bool message_logged = false;// new message posted in log window
 bool parallel_mode;			// parallel mode (multithreading) status
@@ -55,6 +54,7 @@ char msg[ TCL_BUFF_STR ];	// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";	// documentation report file name
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 int debug_flag = false;		// debug enable control (bool)
+int fast_mode = 1;			// flag to hide LOG messages & runtime plot
 int max_step = 100;			// default number of simulation runs
 int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.

@@ -299,9 +299,9 @@ double variable::cal( object *caller, int lag )
 	under_computation = true;
 
 #ifdef PARALLEL_MODE
-	if ( ! fast_mode && ! parallel_mode )
+	if ( fast_mode == 0 && ! parallel_mode )
 #else
-	if ( ! fast_mode )
+	if ( fast_mode == 0 )
 #endif	
 	{
 		// add the Variable to the stack
@@ -376,9 +376,9 @@ double variable::cal( object *caller, int lag )
 	last_update++;
 
 #ifdef PARALLEL_MODE
-	if ( ! fast_mode && ! parallel_mode )
+	if ( fast_mode == 0 && ! parallel_mode )
 #else
-	if ( ! fast_mode )
+	if ( fast_mode == 0 )
 #endif	
 	{
 #ifndef NO_WINDOW

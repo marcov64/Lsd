@@ -215,6 +215,15 @@ void plog( char const *cm, char const *tag, ... )
 		if ( ! strcmp( tag, tags[ i ] ) )
 			ok = true;
 	
+	// handle the "bar" pseudo tag
+	if ( ! strcmp( tag, "bar" ) )
+	{
+		strcmp( tag, "" );
+		ok = true;
+	}
+	else
+		on_bar = false;
+	
 	if ( ok )
 	{
 		cmd( "set log_ok [ winfo exists .log ]" );
@@ -357,7 +366,7 @@ void print_stack( void )
 		return;
 	}
 
-	if ( fast_mode )
+	if ( fast_mode > 0 )
 	{
 		plog( "\n\nRunning in fast mode, list of variables under computation not available\n(You may temporarily not use fast mode to get additional information)\n" );
 		return;

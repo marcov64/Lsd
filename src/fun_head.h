@@ -75,7 +75,7 @@ void init_random( int seed );							// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
-void set_fast( bool on );							// enable fast mode
+void set_fast( int level );								// enable fast mode
 
 double def_res = 0;										// default equation result
 
@@ -260,8 +260,9 @@ extern double i_values[];
 #define ABORT quit = 1;
 #define CURRENT ( var->val[ 0 ] )
 #define PARAMETER var->param = 1;
-#define FAST set_fast( true );
-#define OBSERVE set_fast( false );
+#define OBSERVE set_fast( 0 );
+#define FAST set_fast( 1 );
+#define FAST_FULL set_fast( 2 );
 #define USE_NAN use_nan = true;
 #define NO_NAN use_nan = false;
 #define DEFAULT_RESULT( X ) def_res = X;
@@ -275,16 +276,17 @@ extern double i_values[];
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
 
-// regular logging (disabled in fast mode)
+// regular logging (disabled in any fast mode)
 #define LOG( ... ) \
-	if ( ! fast ) \
+	if ( fast == 0 ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
 		plog( msg ); \
 	}
-// priority logging (show even in in fast mode)
+// priority logging (show also in fast mode 1)
 #define PLOG( ... ) \
+	if ( fast < 2 ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \

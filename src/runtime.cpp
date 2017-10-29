@@ -61,104 +61,108 @@ print  message string m in the Log screen. It is in LSDMAIN.CPP
 #include "decl.h"
 
 // better adjusts position for X11
-char intval[100];				// string buffer
+bool warn_fast;					// warning control
+char intval[ 100 ];				// string buffer
 char **tp;						// labels of variables to plot in runtime
 double ymin;
 double ymax;
 double *old_val;
 double plot_step;
-int shift=20;					// new window shift
+int shift = 20;					// new window shift
 variable **list_var;
 
 
 /**************************************
 PREPARE_PLOT
 **************************************/
-void prepare_plot(object *r, int id_sim)
+void prepare_plot( object *r, int id_sim )
 {
-	int i=0;
-	char lab[MAX_ELEM_LENGTH];
-
-	ymax=ymin=0;
-	strcpy(lab, "");
-	count(r, &i);
-	if(i==0)
+	int i = 0;
+	char lab[ MAX_ELEM_LENGTH ];
+	
+	ymax = ymin = 0;
+	strcpy( lab, "" );
+	count( r, &i );
+	if ( i == 0 )
 		return;
 	
-	tp=new char*[i];
-	list_var=new variable*[i];
-	old_val=new double[i];
-	i=0;
-	assign(r, &i, lab);
-	init_plot(i, id_sim);
+	tp = new char *[ i ];
+	list_var = new variable *[ i ];
+	old_val = new double [ i ];
+	i = 0;
+	assign( r, &i, lab );
+	init_plot( i, id_sim );
 }
 
 
 /**************************************
 COUNT
 **************************************/
-void count(object *r, int *i)
+void count( object *r, int *i )
 {
 	variable *a;
 	object *c;
 	bridge *cb;
 
-	for(a=r->v; a!=NULL; a=a->next)
-		if(a->plot==1)
-			*i=*i+1;
+	for ( a = r->v; a != NULL; a = a->next)
+		if ( a->plot == 1 )
+			*i = *i + 1;
 
-	for(cb=r->b; cb!=NULL; cb=cb->next)
-		for(c=cb->head; c!=NULL; c=c->next)
-			count(c, i);
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		for ( c = cb->head; c != NULL; c = c->next )
+			count( c, i );
 }
 
 
 /**************************************
 ASSIGN
 **************************************/
-void assign(object *r, int *i, char *lab)
+void assign( object *r, int *i, char *lab )
 {
 	variable *a;
 	object *c, *c1;
-	char cur_lab[MAX_ELEM_LENGTH];
+	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
 	bridge *cb;
 
-	for(a=r->v; a!=NULL; a=a->next)
-		if(a->plot==1)
+	for ( a = r->v; a != NULL; a = a->next )
+		if ( a->plot == 1 )
 		{
-			list_var[*i]=a; //assigns the address of a to the list to plot
-			sprintf(msg, "%s%s",a->label, lab);
-			tp[*i]=new char[strlen(msg)+1];
-			strcpy(tp[*i], msg);
-			*i=*i+1;
+			list_var[ *i ] = a; 	// assigns the address of a to the list to plot
+			sprintf( msg, "%s%s", a->label, lab );
+			tp[ *i ] = new char[ strlen( msg ) + 1 ];
+			strcpy( tp[ *i ], msg );
+			*i = *i + 1;
 		}
 
-	for(cb=r->b; cb!=NULL; cb=cb->next)
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
-		c=cb->head;
-		if(c->next!=NULL) //Multiple instances
-			for(j=1,c1=c ;c1!=NULL; c1=go_brother(c1), j++ )
+		c = cb->head;
+		if ( c->next != NULL ) 		// multiple instances
+			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )
 			{
-				sprintf(cur_lab, "%s_%d", lab, j);
-				assign(c1, i, cur_lab);
+				sprintf( cur_lab, "%s_%d", lab, j );
+				assign( c1, i, cur_lab );
 			}
-		else //Unique instance
-			assign(c, i, lab);
+		else 						// unique instance
+			assign( c, i, lab );
 	}
 }
+
 
 /**************************************
 INIT_PLOT
 **************************************/
-void init_plot(int num, int id_sim)
+void init_plot( int num, int id_sim )
 {
 	int i, j, k;
+	
+	warn_fast = false;				// one warning per plot window
 
-	if(max_step>500)
-		plot_step=1;
+	if ( max_step > 500 )
+		plot_step = 1;
 	else
-		plot_step=(500/max_step);
+		plot_step = ( 500 / max_step );
 
 	cmd( "set activeplot .plt%d", id_sim );
 
@@ -189,7 +193,7 @@ void init_plot(int num, int id_sim)
 	cmd( "pack $activeplot.c -anchor w -expand yes -fill both" );
 	cmd( "mouse_wheel $p" );
 
-	for(i=0; i<(int)((double)max_step*plot_step); i+=100)
+	for ( i = 0; i < ( int ) ( ( double ) max_step * plot_step ); i += 100 )
 	{
 		cmd( "$p create line %d 0 %d 310 -fill grey60", i, i );
 		cmd( "$p create text %d 310 -font {{MS Times New Roman} 10} -text %d -anchor nw", i, i/(int)plot_step );
@@ -214,23 +218,23 @@ void init_plot(int num, int id_sim)
 	for ( i = 0, j = 0, k = 0; i < ( num < 18 ? num : 18 ); ++i )
 	{
 		cmd( "$activeplot.fond create text %d %d -font {{MS Times New Roman} 10} -anchor nw -text %s -fill $c%d", 5 + j * 100, k * 16, tp[i], i  );
-		if(j<5)
-			j++;
+		if ( j < 5 )
+			++j;
 		else
 		{
-			k++;
-			j=0;
+			++k;
+			j = 0;
 		}
 	}
 	 
-	i=(id_sim)*shift;				// calculate window shift position
-	sprintf(intval,"%i",i);
-	Tcl_SetVar(inter, "shift", intval, 0);
+	i = id_sim * shift;				// calculate window shift position
+	sprintf( intval,"%i",i );
+	Tcl_SetVar( inter, "shift", intval, 0 );
 	cmd( "set posXrt [ expr [ winfo x . ] + [ winfo width . ] + 2 * $bordsize + $hmargin + $corrX + $shift ]" );
 	cmd( "set posYrt [ expr [ winfo y . ] + $corrY + $shift ]" );
 
 	cmd( "showtop  $activeplot xy no no no $posXrt $posYrt" );
-	if ( fast_mode )
+	if ( fast_mode > 0 )
 	{
 		cmd( "wm withdraw $activeplot" );
 		cmd( "$activeplot.c.yscale.go conf -state disabled" );
@@ -246,82 +250,88 @@ void init_plot(int num, int id_sim)
 /**************************************
 PLOT_RT
 **************************************/
-void plot_rt(variable *v)
+void plot_rt( variable *v )
 {
 	int y1, y2;
 	double dy, step, value;
+	
+
+	if ( fast_mode > 0 && ! warn_fast ) 
+	{
+		plog( "\nWarning: there are run time plot variables set in FAST mode" );
+		warn_fast = true;
+	}
 
 	// limit the number of run time plot variables
 	if ( cur_plt > 100 )
 		return;
 
-	if(ymax==ymin) //Very initial setting
+	if ( ymax == ymin ) 		// very initial setting
 	{ 
-		if(v->val[0]>0)
+		if ( v->val[ 0 ] > 0 )
 		{
-			ymax=v->val[0]*(1.001);
-			ymin=v->val[0];
+			ymax = v->val[ 0 ] * 1.001;
+			ymin = v->val[ 0 ];
 		}
 		else
 		{
-			ymax=v->val[0]*(0.009);
-			ymin=v->val[0];
+			ymax = v->val[ 0 ] * 0.009;
+			ymin = v->val[ 0 ];
 		}
 		
-		if(ymax==ymin) //It must be zero...
+		if ( ymax == ymin )		// it must be zero...
 		{
-			ymax=0.0001;
-//     		ymin=-0.001; // most of the times, if initial vars are zero means that they are supposed to grow
+			ymax = 0.0001;
+//     		ymin = -0.001; 		// most of the times, if initial vars are zero means that they are supposed to grow
 		}
 
 		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
 		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin );
-
+		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
 	}
 	
-	if(v->val[0]>=ymax)
+	if ( v->val[ 0 ] >= ymax )
 	{
-		if(v->val[0]>=0)
-			step=1.1;
+		if ( v->val[ 0 ] >= 0 )
+			step = 1.1;
 		else
-			step=0.9;
+			step = 0.9;
 	  
 		double scale = ( ymax - ymin ) / ( v->val[ 0 ] * step - ymin );
 		cmd( "$activeplot.c.c.cn scale punto 0 300 1 %lf", scale  < 0.01 ? 0.01 : scale  );
 		ymax=v->val[0]*step;
 		cmd( "$activeplot.c.yscale itemconf ymax -text %.4g", ymax );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin );
+		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
 	}
 
-	if(v->val[0]<=ymin)
+	if ( v->val[ 0 ] <= ymin )
 	{
-		if(v->val[0]>0)
-			step=0.9;
+		if ( v->val[ 0 ] > 0 )
+			step = 0.9;
 		else
-			step=1.1;
-		value=min(v->val[0]*step, ymin-(ymax-ymin)/300);
+			step = 1.1;
+		value = min( v->val[ 0 ] * step, ymin - ( ymax - ymin ) / 300 );
 
 		double scale = ( ymax - ymin ) / ( ymax - value );
 		cmd( "$activeplot.c.c.cn scale punto 0 0 1 %lf", scale < 0.01 ? 0.01 : scale  );
-		ymin=value;
+		ymin = value;
 		cmd( "$activeplot.c.yscale itemconf ymin -text %.4g", ymin );
-		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", (ymax-ymin)/2+ymin );
+		cmd( "$activeplot.c.yscale itemconf medy -text %.4g", ( ymax - ymin ) / 2 + ymin );
 	}
 
-	if(t==1)
+	if ( t == 1 )
 	{
-		old_val[cur_plt]=v->val[0];
-		cur_plt++;
+		old_val[ cur_plt ] = v->val[ 0 ];
+		++cur_plt;
 		return;
 	}
 
-	dy=(300-((v->val[0]-ymin)/(ymax-ymin))*300);
-	y1=(int)dy;
-	dy=(300-((old_val[cur_plt]-ymin)/(ymax-ymin))*300);
-	y2=(int)dy;
-	old_val[cur_plt]=v->val[0];
+	dy = ( 300 - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * 300 );
+	y1 = ( int ) dy;
+	dy = ( 300 -( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * 300 );
+	y2 = ( int ) dy;
+	old_val[ cur_plt ] = v->val[ 0 ];
 
-	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", (t-1)*(int)plot_step,y2, t*(int)(plot_step), y1, cur_plt );
-	cur_plt++;
+	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", ( t - 1 ) * ( int ) plot_step, y2, t * ( int ) plot_step, y1, cur_plt );
+	++cur_plt;
 }
