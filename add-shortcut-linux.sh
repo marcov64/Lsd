@@ -14,5 +14,11 @@ else
 	sed 's:$LSDROOT:'"$LSDROOT"':g' "$LSDROOT/$TARGET" > ~/Desktop/"$TARGET"
 	chmod +x ~/Desktop/"$TARGET"
 	chmod +x "$LSDROOT/$EXEC"
+	
+	# also add icon to user window manager configuration
+	if [ ! -d "~/.local/share/applications" ]; then
+		mkdir -p ~/.local/share/applications
+	fi
+	cp -f ~/Desktop/"$TARGET" ~/.local/share/applications
 fi
 

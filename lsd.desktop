@@ -2,6 +2,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
+Categories=Development;Simulation;IDE;
 Terminal=false
 Name=LMM
 Comment=Lsd Model Manager
