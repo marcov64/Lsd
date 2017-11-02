@@ -5473,96 +5473,34 @@ return r;
 
 
 /****************************************************
-CLEAN_DEBUG
-****************************************************/
-void clean_debug(object *n)
-{
-	variable *cv;
-	object *co;
-	bridge *cb;
-
-	for(cv=n->v; cv!=NULL; cv=cv->next)
-	 cv->debug='n';
-
-	for(cb=n->b; cb!=NULL; cb=cb->next)
-	for(co=cb->head; co!=NULL; co=co->next)
-	 clean_debug(co);
-}
-
-
-/****************************************************
-CLEAN_SAVE
-****************************************************/
-void clean_save(object *n)
-{
-	variable *cv;
-	object *co;
-	bridge *cb; 
-
-	for(cv=n->v; cv!=NULL; cv=cv->next)
-	{
-	 cv->save=0;
-	 cv->savei=0;
-	}
-	for(cb=n->b; cb!=NULL; cb=cb->next)
-	for(co=cb->head; co!=NULL; co=co->next)
-	 clean_save(co);
-}
-
-
-/****************************************************
 SHOW_SAVE
 ****************************************************/
-void show_save(object *n)
+void show_save( object *n )
 {
 	variable *cv;
 	object *co;
 	bridge *cb;
 
-	for(cv=n->v; cv!=NULL; cv=cv->next)
-	 {
-	  if ( cv->save == 1 || cv->savei == 1 )
-	  {
-	   if(cv->param==1)
-		sprintf(msg, "Object: %s \tParameter:\t", n->label);
-	   else
-		sprintf(msg, "Object: %s \tVariable :\t", n->label);
-	   if ( cv->savei == 1 )
-	   {
-		if ( cv->save == 1 )
-		   strcat( msg, " (memory and disk)" );
-		else
-		   strcat( msg, " (disk only)" );
-	   }
-	   plog( msg );
-	   plog( "%s\n", "highlight", cv->label );
-	   lcount++;
-	  }
-	 }
-
-	for(cb=n->b; cb!=NULL; cb=cb->next)
-	 {
-	 if(cb->head==NULL)
-	  co=blueprint->search(cb->blabel);
-	 else
-	  co=cb->head; 
-	 show_save(co);
-	 }
-}
-
-
-/****************************************************
-COUNT_SAVE
-****************************************************/
-void count_save( object *n, int *count )
-{
-	variable *cv;
-	object *co;
-	bridge *cb;
-
-	for ( cv = n->v; cv!=NULL; cv=cv->next )
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
 		if ( cv->save == 1 || cv->savei == 1 )
-			( *count )++;
+		{
+			if ( cv->param == 1 )
+				sprintf( msg, "Object: %s \tParameter:\t", n->label );
+			else
+				sprintf( msg, "Object: %s \tVariable :\t", n->label );
+			if ( cv->savei == 1 )
+			{
+				if ( cv->save == 1 )
+				   strcat( msg, " (memory and disk)" );
+				else
+				   strcat( msg, " (disk only)" );
+			}
+			plog( msg );
+			plog( "%s\n", "highlight", cv->label );
+			++lcount;
+		}
+	}
 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
 	{
@@ -5570,15 +5508,15 @@ void count_save( object *n, int *count )
 			co = blueprint->search( cb->blabel );
 		else
 			co = cb->head; 
-		count_save( co, count );
-	 }
+		show_save( co );
+	}
 }
 
 
 /****************************************************
 SHOW_OBSERVE
 ****************************************************/
-void show_observe(object *n)
+void show_observe( object *n )
 {
 	variable *cv;
 	object *co;
@@ -5586,36 +5524,36 @@ void show_observe(object *n)
 	int app;
 	bridge *cb;
 
-	for(cv=n->v; cv!=NULL; cv=cv->next)
-	 {
-	 cd=search_description(cv->label);
-	 if(cd!=NULL && cd->observe=='y')
-	  {
-	   if(cv->param==1)
-		plog( "Object: %s \tParameter:\t", "", n->label );
-	   else
-		plog( "Object: %s \tVariable :\t", "", n->label );
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd != NULL && cd->observe=='y' )
+		{
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", "", n->label );
+			else
+				plog( "Object: %s \tVariable :\t", "", n->label );
 
-	   plog( "%s (%lf)\n", "highlight", cv->label, cv->val[0] );
-	   lcount++;
-	  }
-	 }
+			plog( "%s (%lf)\n", "highlight", cv->label, cv->val[0] );
+			++lcount;
+		}
+	}
 
-	for(cb=n->b; cb!=NULL; cb=cb->next)
-	 {
-	 if(cb->head==NULL)
-	  co=blueprint->search(cb->blabel);
-	 else
-	  co=cb->head; 
-	 show_observe(co);
-	 }
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		show_observe( co );
+	}
 }
 
 
 /****************************************************
 SHOW_INITIAL
 ****************************************************/
-void show_initial(object *n)
+void show_initial( object *n )
 {
 	variable *cv, *cv1;
 	object *co;
@@ -5623,59 +5561,65 @@ void show_initial(object *n)
 	int i;
 	bridge *cb;
 
-	for(cv=n->v; cv!=NULL; cv=cv->next)
-	 {
-	 cd=search_description(cv->label);
-	 if(cd!=NULL && cd->initial=='y')
-	  {
-	   if(cv->param==1)
-		plog( "Object: %s \tParameter:\t", "", n->label);
-	   if(cv->param==0)
-		plog( "Object: %s \tVariable :\t", "", n->label);
-	   if(cv->param==2)
-		plog( "Object: %s \tFunction :\t", "", n->label);
-
-	   lcount++;
-	   plog( "%s \t", "highlight", cv->label );
-	 
-	   if(cd->init==NULL || strlen(cd->init)==0)
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd != NULL && cd->initial == 'y' )
 		{
-		for(co=n; co!=NULL; co=co->hyper_next(co->label))
-		 {
-		  cv1=co->search_var(NULL,cv->label);
-		  plog( " %g", "", cv1->val[0] );
-		 }
-		}
-	   else
-		{
-		 for(i=0; cd->init[i]!=0; i++)
-		  {
-			switch(cd->init[i])
+			if ( cv->param == 1 )
+				plog( "Object: %s \tParameter:\t", "", n->label );
+			if ( cv->param == 0 )
+				plog( "Object: %s \tVariable :\t", "", n->label );
+			if ( cv->param == 2 )
+				plog( "Object: %s \tFunction :\t", "", n->label );
+		
+			++lcount;
+			plog( "%s \t", "highlight", cv->label );
+			
+			if ( cd->init == NULL || strlen( cd->init ) == 0 )
 			{
-			case '[': plog("\\\[");
-					  break;
-			case ']': plog("]");
-					  break;
-			case '"': plog("\\\"");
-					  break;
-			case '{': plog("\{");
-					  break;
-			default: plog( "%c", "", cd->init[i] );
-					 break;          
+				for ( co = n; co != NULL; co = co->hyper_next( co->label ) )
+				{
+					cv1 = co->search_var( NULL, cv->label );
+					plog( " %g", "", cv1->val[ 0 ] );
+				}
 			}
-		  }
-		} 
-	   plog("\n");
-	  }
-	 }
+			else
+			{
+				for ( i = 0; cd->init[ i ] != 0; ++i )
+				{
+					switch( cd->init[ i ] )
+					{
+						case '[': 
+							plog( "\\\[" );
+							break;
+						case ']': 
+							plog( "]" );
+							break;
+						case '"': 
+							plog( "\\\"" );
+							break;
+						case '{': 
+							plog( "\{" );
+							break;
+						default: 
+							plog( "%c", "", cd->init[ i ] );
+							break;          
+					}
+				}
+			} 
+			plog("\n");
+		}
+	}
 
-	for(cb=n->b; cb!=NULL; cb=cb->next)
-	 {
-	 if(cb->head!=NULL)
-	  {co=cb->head; 
-	   show_initial(co);
-	  }
-	 } 
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head != NULL )
+		{
+			co = cb->head; 
+			show_initial( co );
+		}
+	} 
 }
 
 
@@ -5772,6 +5716,44 @@ void show_parallel( object *n )
 
 
 /****************************************************
+CLEAN_DEBUG
+****************************************************/
+void clean_debug( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		cv->debug = 'n';
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co != NULL; co = co->next )
+			clean_debug( co );
+}
+
+
+/****************************************************
+CLEAN_SAVE
+****************************************************/
+void clean_save( object *n )
+{
+	variable *cv;
+	object *co;
+	bridge *cb; 
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+	{
+		cv->save = 0;
+		cv->savei = 0;
+	}
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		for ( co = cb->head; co !=NULL; co = co->next )
+			clean_save( co );
+}
+
+
+/****************************************************
 CLEAN_PLOT
 ****************************************************/
 void clean_plot( object *n )
@@ -5810,7 +5792,7 @@ void clean_parallel( object *n )
 /****************************************************
 WIPE_OUT
 ****************************************************/
-void wipe_out(object *d)
+void wipe_out( object *d )
 {
 	object *cur;
 	variable *cv;

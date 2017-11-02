@@ -396,107 +396,133 @@ object *go_brother( object *c )
 
 
 /****************************************************
+GO_NEXT
+****************************************************/
+void go_next( object **t )
+{
+	if ( ( *t )->next != NULL )
+		*t = ( *t )->next;
+	else
+		*t = NULL;
+}
+
+
+/****************************************************
 SKIP_NEXT_OBJ
 This is the new version, after moving to the bridge-based representation
 ****************************************************/
 object *skip_next_obj( object *t, int *count )
 {
-	char *lab;
 	object *c;
 	int i;
 
-	*count=0;
-	if(t==NULL)
-		return(NULL);
-	for(c=t, i=0;c!=NULL; c=c->next, i++);
-	*count=i;
+	*count = 0;
+	if ( t == NULL )
+		return NULL;
+	
+	for ( c = t, i = 0; c != NULL; c = c->next, ++i );
+	*count = i;
 
-	return skip_next_obj(t);
+	return skip_next_obj( t );
 }
 
 object *skip_next_obj( object *tr )
 {
 	bridge *cb;
-	if(tr==NULL)
-	 return(NULL);
+	
+	if ( tr == NULL || tr->up == NULL )
+		return NULL;
 
-	if(tr->up==NULL)
-	 return(NULL);
-	for(cb=tr->up->b; cb!=NULL; cb=cb->next)
+	for ( cb = tr->up->b; cb != NULL; cb = cb->next )
 	{
-	  if(!strcmp(cb->blabel,tr->label))
-	  {
-		if(cb->next==NULL)
-		 return(NULL);
-		else
-		 return(cb->next->head); 
-	  }  
+		if ( ! strcmp( cb->blabel, tr->label ) )
+		{
+			if ( cb->next == NULL )
+				return NULL;
+			else
+				return cb->next->head; 
+		}  
 	}
-	return( NULL );
+	
+	return NULL;
 }
 
 
 /****************************************************
 MY_STRCMP
 ****************************************************/
-int my_strcmp(char *a, char *b)
+int my_strcmp( char *a, char *b )
 {
 	int res;
-	if(a==NULL && b==NULL)
+	if ( a == NULL && b == NULL )
 		return 0;
 
-	res=strcmp(a,b);
+	res = strcmp( a, b );
 	return res;
 }
 
 
 /****************************************************
-GO_NEXT
+COUNT_SAVE
 ****************************************************/
-void go_next(object **t)
+void count_save( object *n, int *count )
 {
-	if((*t)->next!=NULL)
-		*t=(*t)->next;
-	else
-		*t=NULL;
-}
+	variable *cv;
+	object *co;
+	bridge *cb;
 
+	for ( cv = n->v; cv!=NULL; cv=cv->next )
+		if ( cv->save == 1 || cv->savei == 1 )
+			( *count )++;
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		count_save( co, count );
+	}
+}
 
 
 /****************************************************
 NORM
 ***************************************************/
-int dum=0;
+int dum = 0;
 
-double norm(double mean, double dev)
+double norm( double mean, double dev )
 {
 	double gasdev, R, v1, v2, fac;
 	static double gset;
-	int boh=1;
-	if(dum==0)
+	int boh = 1;
+	
+	if ( dum == 0 )
 	{ 
 		do
 		{ 
-			v1=2.0*RND-1;
-			boh=1;
-			v2=2.0*RND-1;
-			R=v1*v1+v2*v2;
+			v1 = 2.0 * RND - 1;
+			boh = 1;
+			v2 = 2.0 * RND - 1;
+			R = v1 * v1 + v2 * v2;
 		}
-		while(R>=1);
-		fac=log(R);
-		fac=fac/R;
-		fac=fac*(-2.0);
-		fac=sqrt(fac);
-		gset=v1*fac;
-		gasdev=v2*fac;
-		dum=1;
+		while ( R >= 1 );
+		
+		fac = log( R );
+		fac = fac / R;
+		fac = fac * ( -2.0 );
+		fac = sqrt( fac );
+		gset = v1 * fac;
+		gasdev = v2 * fac;
+		dum = 1;
 	}
 	else
 	{
-		gasdev=gset;
-		dum=0;
+		gasdev = gset;
+		dum = 0;
 	}
-	gasdev=gasdev*dev+mean;
+	gasdev = gasdev * dev + mean;
+	
 	return gasdev;
 }
 

@@ -14,9 +14,9 @@ Comments and bug reports to marco.valente@univaq.it
 
 /****************************************************
 CONFGEN.CPP contains:
-- execute the lsd_config_gen command line utility.
+- execute the lsd_confgen command line utility.
 
-
+	Generates new configurations from a base one
 
 ****************************************************/
 
