@@ -1211,28 +1211,6 @@ Tcl_UnlinkVar( inter, "integerV" );
 
 
 /*
-Deallocate sensitivity analysis memory
-*/
-void empty_sensitivity(sense *cs)
-{
-	if(cs==NULL)			// prevent invalid calls (last variable)
-		return;
-	
-	if(cs->next!=NULL)		// recursively start from the end of the list
-		empty_sensitivity(cs->next);
-	else
-		NOLH_clear( );		// deallocate DoE (last object only)
-	
-	if(cs->v!=NULL)			// deallocate requested memory, if applicable
-		delete cs->v;
-	if(cs->label!=NULL)
-		delete cs->label;
-
-	delete cs;				// suicide
-}
-
-
-/*
 	Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
 	Include tables to up to 29 variables (Sanchez 2009, Cioppa and Lucas 2007).
 	Returns the number of samples (n) required for the calculated design and a pointer

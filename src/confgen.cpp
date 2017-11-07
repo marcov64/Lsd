@@ -38,6 +38,7 @@ int num_vars = 0;			// total variables/parameters to change
 int num_confs = 0;			// total configurations to produce
 double **values = NULL;		// array of configuration values
 object *root = NULL;		// LSD root object
+sense *rsense = NULL;		// LSD sensitivity analysis structure
 
 
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
@@ -130,14 +131,14 @@ int lsdmain( int argn, char **argv )
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\n Specify a -f FILENAME.lsd to use as a base for the new configuration files.\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Configuration Generator.\nSpecify a -f FILENAME.lsd to use as a base for the new configuration files.\n" );
 		myexit( 3 );
 	}
 	
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\n Specify an existing -f FILENAME.lsd base configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -f FILENAME.lsd base configuration file.\n", struct_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -154,7 +155,7 @@ int lsdmain( int argn, char **argv )
 	f = fopen( config_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\n Specify an existing -c CONFIG.csv to use as the new configuration values.\n", config_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Configuration Generator.\nSpecify an existing -c CONFIG.csv to use as the new configuration values.\n", config_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -182,14 +183,14 @@ int lsdmain( int argn, char **argv )
 	
 	if ( load_configuration( root, false ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\n Check if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
 	}
 
 	confs = load_confs_csv( config_file );
 	if ( confs == 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\n Specify a -c CONFIG.csv with a valid comma separated format.\n", config_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Configuration Generator.\nSpecify a -c CONFIG.csv with a valid comma separated format.\n", config_file );
 		myexit( 6 );
 	}
 	
@@ -197,13 +198,13 @@ int lsdmain( int argn, char **argv )
 	{
 		if ( ! change_configuration( root, i ) )
 		{
-			fprintf( stderr, "Invalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n" );
+			fprintf( stderr, "\nInvalid parameter or variable name.\nThis is LSD Configuration Generator.\nCheck if the spelling of the names of parameters and variables is exactly the\nsame as in the original configuration.\n" );
 			myexit( 7 );
 		}
 	
 		if ( ! save_configuration( root, ( confs == 1 ? 0 : i ) ) )
 		{
-			fprintf( stderr, "File '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", simul_name  );
+			fprintf( stderr, "\nFile '%s.lsd' cannot be saved.\nThis is LSD Configuration Generator.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", simul_name  );
 			myexit( 8 );
 		}
 	}
@@ -360,17 +361,17 @@ bool change_configuration( object *root, int findex )
 		// handle pseudo-parameters
 		if ( ! strcmp( vars[ i ], "_timeSteps_" ) )
 		{
-			max_step = max( 0, round( values[ i ][ findex - 1 ] ) );
+			max_step = ( int ) max( 0, round( values[ i ][ findex - 1 ] ) );
 			continue;
 		}
 		if ( ! strcmp( vars[ i ], "_numRuns_" ) )
 		{
-			sim_num = max( 0, round( values[ i ][ findex - 1 ] ) );
+			sim_num = ( int ) max( 0, round( values[ i ][ findex - 1 ] ) );
 			continue;
 		}
 		if ( ! strcmp( vars[ i ], "_rndSeed_" ) )
 		{
-			seed = max( 0, round( values[ i ][ findex - 1 ] ) );
+			seed = ( int ) max( 0, round( values[ i ][ findex - 1 ] ) );
 			continue;
 		}
 		

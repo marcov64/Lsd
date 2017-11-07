@@ -945,11 +945,12 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  }
 }
 
-/*
+/*****************************************************************************
+LOAD_CONFIGURATION
 	Load current defined configuration
 	If reload is true, just the structure and the parameters are retrieved
 	Returns: 0: load ok, 1,2,3,4,...: load failure
-*/
+******************************************************************************/
 int load_configuration( object *r, bool reload )
 {
 	int i, j = 0, load = 0;
@@ -1188,10 +1189,11 @@ void save_single(variable *vcv)
 }
 
 
-/*
+/*****************************************************************************
+SAVE_CONFIGURATION
 	Save current defined configuration (renaming if appropriate)
 	Returns: true: save ok, false: save failure
-*/
+******************************************************************************/
 bool save_configuration( object *r, int findex )
 {
 	int indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
@@ -1253,4 +1255,163 @@ bool save_configuration( object *r, int findex )
 #endif
 	
 	return true;
+}
+
+
+/*****************************************************************************
+LOAD_SENSITIVITY
+	Load defined sensitivity analysis configuration
+	Returns: 0: load ok, 1,2,3,4,...: load failure
+******************************************************************************/
+int load_sensitivity( object *r, FILE *f )
+{
+	int i;
+	char cc, lab[ MAX_ELEM_LENGTH ];
+	object *n;
+	variable *cv;
+	sense *cs;
+	
+	// read data from file (1 line per element, '#' indicate comment)
+	while ( ! feof( f ) )
+	{	// read element by element, skipping comments
+		fscanf( f, "%99s", lab );			// read string
+		while ( lab[ 0 ] == '#' )			// start of a comment
+		{
+			do								// jump to next line
+				cc = fgetc( f );
+			while ( ! feof( f ) && cc != '\n' );
+			fscanf( f, "%99s", lab );		// try again
+		}
+
+		if ( feof( f ) )					// ended too early?
+			break;
+
+		for ( n = r; n->up != NULL; n = n->up );// check if element exists
+		cv = n->search_var( n, lab );
+		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
+			goto error1;					// and not parameter or lagged variable
+		
+		// create memory allocation for new variable		
+		if ( rsense == NULL )				// allocate first element
+			rsense = cs = new sense;
+		else								// allocate next ones
+		{
+			cs->next = new sense;
+			cs = cs->next;
+		}
+		cs->v = NULL;						// initialize struct pointers
+		cs->next = NULL;
+
+		cs->label = new char[ strlen( lab ) + 1 ];  // save element name
+		strcpy( cs->label, lab );
+		
+		// get lags and # of values to test
+		if ( fscanf( f, "%d %d ", &cs->lag, &cs->nvalues ) < 2 )
+			goto error2;
+					
+		// get variable type (newer versions)
+		if ( fscanf( f, "%c ", &cc ) < 1 )
+			goto error3;
+
+		if ( cc == 'i' || cc == 'd' || cc == 'f' )
+		{
+			cs->integer = ( cc == 'i' ) ? true : false;
+			fscanf( f, ": " );	 			// remove separator
+		}
+		else
+			if ( cc == ':' )
+				cs->integer = false;
+			else
+				goto error4;				
+		
+		if ( cs->lag == 0 )					// adjust type and lag #
+			cs->param = 1;
+		else
+		{
+			cs->param = 0;
+			cs->lag = abs( cs->lag ) - 1;
+		}
+
+		cs->v = new double[ cs->nvalues ];	// get values
+		for ( i = 0; i < cs->nvalues; ++i )
+			if ( ! fscanf( f, "%lf", &cs->v[ i ] ) )
+				goto error5;
+			else
+				if ( cs->integer )
+					cs->v[ i ] = round( cs->v[ i ] );
+	}	
+
+	return 0;
+	
+	// error handling
+	error1:
+		i = 1;
+		goto error;
+	error2:
+		i = 2;
+		goto error;
+	error3:
+		i = 3;
+		goto error;
+	error4:
+		i = 4;
+		goto error;
+	error5:
+		i = 5;
+		goto error;
+		
+	error:
+	empty_sensitivity( rsense );		// discard read data
+	rsense = NULL;
+		
+	return i;
+}
+
+
+/*****************************************************************************
+EMPTY_SENSITIVITY
+	Deallocate sensitivity analysis memory
+******************************************************************************/
+void empty_sensitivity( sense *cs )
+{
+	if ( cs == NULL )		// prevent invalid calls (last variable)
+		return;
+	
+	if ( cs->next != NULL )	// recursively start from the end of the list
+		empty_sensitivity( cs->next );
+#ifndef NO_WINDOW
+	else
+		NOLH_clear( );		// deallocate DoE (last object only)
+#endif
+	if ( cs->v != NULL )	// deallocate requested memory, if applicable
+		delete cs->v;
+	if ( cs->label != NULL )
+		delete cs->label;
+
+	delete cs;				// suicide
+}
+
+
+/*****************************************************************************
+SAVE_SENSITIVITY
+	Save current sensitivity configuration
+	Returns: true: save ok, false: save failure
+******************************************************************************/
+bool save_sensitivity( FILE *f )
+{
+	int i;
+	sense *cs;
+
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+	{
+		if ( cs->param == 1 )
+			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );	
+		else
+			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
+		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
+			fprintf( f," %g", cs->v[i] );
+		fprintf( f,"\n" );
+	}
+	
+	return ! ferror( f );
 }

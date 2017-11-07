@@ -487,6 +487,101 @@ void count_save( object *n, int *count )
 
 
 /****************************************************
+GET_SAVED
+****************************************************/
+void get_saved( object *n, FILE *out, const char *sep )
+{
+	int i, sl;
+	char *lab;
+	variable *cv;
+	object *co;
+	bridge *cb;
+	description *cd;
+
+	for ( cv = n->v; cv != NULL; cv = cv->next )
+		if ( cv->save )
+		{
+			// get element description
+			cd = search_description( cv->label );
+			if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+			{
+				// select just the first description line
+				lab = new char[ sl + 1 ];
+				strcpy( lab, cd->text );
+				for ( i = 0; i < sl; ++i )
+					if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+					{
+						lab[ i ] = '\0';
+						break;
+					}
+			}
+			else
+				lab = NULL;
+		
+			fprintf( out, "%s%s%s%s%s%s%s\n", cv->label, sep, cv->param ? "parameter" : "variable", sep, n->label, sep, lab != NULL ? lab : "" );
+		}
+
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL )
+			co = blueprint->search( cb->blabel );
+		else
+			co = cb->head; 
+		get_saved( co, out, sep );
+	}
+}
+
+
+/****************************************************
+GET_SA_LIMITS
+****************************************************/
+void get_sa_limits( object *r, FILE *out, const char *sep )
+{
+	int i, sl;
+	char *lab;
+	variable *cv;
+	description *cd;
+	sense *cs;
+	
+	for ( cs = rsense; cs != NULL; cs = cs->next )
+	{
+		// get current value (first object)
+		cv = r->search_var( NULL, cs->label );
+		
+		// get element description
+		cd = search_description( cs->label );
+		if ( cd != NULL && cd->text != NULL && ( sl = strlen( cd->text ) ) > 0 )
+		{
+			// select just the first description line
+			lab = new char[ sl + 1 ];
+			strcpy( lab, cd->text );
+			for ( i = 0; i < sl; ++i )
+				if ( lab[ i ] == '\n' || lab[ i ] == '\r' )
+				{
+					lab[ i ] = '\0';
+					break;
+				}
+		}
+		else
+			lab = NULL;
+		
+		// find max and min values
+		double min = HUGE_VAL, max = - HUGE_VAL;
+		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
+			if ( cs->v[ i ] < min )
+				min = cs->v[i];
+			else
+				if ( cs->v[ i ] > max )
+					max = cs->v[ i ];
+
+		fprintf( out, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, sep, cs->param == 1 ? "parameter" : "variable", sep, cs->param == 1 ? 0 : cs->lag + 1, sep, cs->integer ? "integer" : "real", sep, cv != NULL ? cv->val[ cs->lag ] : NAN, sep, min, sep, max, sep, lab != NULL ? lab : "" );	
+		
+		delete [ ] lab;
+	}
+}
+
+
+/****************************************************
 NORM
 ***************************************************/
 int dum = 0;

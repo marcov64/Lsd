@@ -13,10 +13,10 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /****************************************************
-GETSAVED.CPP contains:
-- execute the lsd_getsaved command line utility.
+GETLIMITS.CPP contains:
+- execute the lsd_getlimits command line utility.
 
-	Lists all variables being saved in a configuration
+	Lists all initial values ranges and configuration
 
 ****************************************************/
 
@@ -30,6 +30,7 @@ GETSAVED.CPP contains:
 char *config_file = NULL;	// name of text configurations file
 char *out_file = NULL;		// output .csv file, if any
 char *path = NULL;			// path of current configuration
+char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 int findex = 1;				// current multi configuration job
@@ -86,9 +87,9 @@ int lsdmain( int argn, char **argv )
 
 	findex = 1;
 
-	if ( argn < 2 )
+	if ( argn < 3 )
 	{
-		fprintf( stderr, "\nThis is LSD Saved Variable Reader.\nIt reads a LSD configuration file (.lsd) and shows the variables/parameters\nbeing saved, optionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
+		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
 		myexit( 1 );
 	}
 	else
@@ -102,6 +103,13 @@ int lsdmain( int argn, char **argv )
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
+			// read -s parameter : sensitivity file name
+			if( argv[i][0] == '-' && argv[i][1] == 's' )
+			{
+				sens_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
+				strcpy( sens_file, argv[ 1 + i ] );
+				continue;
+			}
 			// read -o parameter : output file name
 			if( argv[i][0] == '-' && argv[i][1] == 'o' )
 			{
@@ -110,21 +118,21 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 
-			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Saved Variable Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[i][0], argv[i][1] );
+			fprintf( stderr, "\nOption '%c%c' not recognized.\nThis is LSD Initial Values Range Reader.\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n", argv[i][0], argv[i][1] );
 			myexit( 2 );
 		}
 	} 
 
 	if ( struct_file == NULL )
 	{
-		fprintf( stderr, "\nNo configuration file provided.\nThis is LSD Saved Variable Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n" );
+		fprintf( stderr, "\nNo original configuration file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -f FILENAME.lsd to use for reading the saved variables (if any).\n" );
 		myexit( 3 );
 	}
 	
 	f = fopen( struct_file, "r" );
 	if ( f == NULL )
 	{
-		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Saved Variable Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -f FILENAME.lsd configuration file.\n", struct_file );
 		myexit( 4 );
 	}
 	fclose( f );
@@ -145,37 +153,54 @@ int lsdmain( int argn, char **argv )
 	
 	if ( load_configuration( root, false ) != 0 )
 	{
-		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Saved Variable Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
 	}
-
-	count_save( root, & i );
-	if ( i == 0 )
+	
+	if ( sens_file == NULL )
 	{
-		printf( "\n(no variable being saved)\n" );
-		return 0;
+		fprintf( stderr, "\nNo sensitivity analysis file provided.\nThis is LSD Initial Values Range Reader.\nSpecify a -s FILENAME.sa to use for reading the values limits (if any).\n" );
+		myexit( 6 );
+	}
+	
+	// read sensitivity file
+	f = fopen( sens_file, "rt" );
+	if ( f == NULL )
+	{
+		fprintf( stderr, "\nFile '%s' not found.\nThis is LSD Initial Values Range Reader.\nSpecify an existing -s FILENAME.sa sensitivity analysis file.\n", sens_file );
+		myexit( 7 );
+	}
+	
+	if ( load_sensitivity( root, f ) != 0 )
+	{
+		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n", sens_file  );
+		fclose( f );
+		myexit( 8 );
 	}
 
+	fclose( f );
+	
 	if ( out_file != NULL && strlen( out_file ) != 0 )
 	{
 		f = fopen( out_file, "wt" );
 		if ( f == NULL )
 		{
-			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Saved Variable Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", out_file  );
-			myexit( 6 );
+			fprintf( stderr, "\nFile '%s' cannot be saved.\nThis is LSD Initial Values Range Reader.\nCheck if the drive or the file is set READ-ONLY, change file name or\nselect a drive with write permission and try again.\n", out_file  );
+			myexit( 9 );
 		}
 		
 		sep = new char [ strlen( CSV_SEP ) + 1 ];
 		strcpy( sep, CSV_SEP );
 		
 		// write .csv header
-		fprintf( f, "Name%sType%sObject%sDescription\n", sep, sep, sep );
-		get_saved( root, f, sep );
+		fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", sep, sep, sep, sep, sep, sep, sep );
+		get_sa_limits( root, f, sep );
 		fclose( f );
 	}	
 	else	// send to stdout
-		get_saved( root, stdout, "\t" );
+		get_sa_limits( root, stdout, "\t" );
 	
+	empty_sensitivity( rsense );
 	empty_cemetery( );
 	blueprint->empty( );
 	root->empty( );

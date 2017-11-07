@@ -15,7 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /*
-USED CASE 90
+USED CASE 91
 */
 
 /****************************************************
@@ -116,7 +116,7 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90 };
+int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -170,20 +170,20 @@ object *create( object *cr )
 	choice_g = choice = 0;
 
 	//Main Cycle ********************************
-	while(choice!=1)
+	while ( ! choice )
 	{
 		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change() ? "*" : " ", simul_name  );
 		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change() ? "*" : " ", simul_name  );
 
-		for(cur=cr; cur->up!=NULL; cur=cur->up);
+		for ( cur = cr; cur->up != NULL; cur = cur->up );
 
-		if(cur->v==NULL && cur->b==NULL)
+		if ( cur->v == NULL && cur->b == NULL )
 			struct_loaded = false;
 		else
 		{ 
 			struct_loaded = true;
-			show_graph(cr);
-			if(message_logged)
+			show_graph( cr );
+			if ( message_logged )
 			{
 				cmd( "wm deiconify .log; raise .log; focus .log; update idletasks" );
 				message_logged = false;
@@ -197,9 +197,9 @@ object *create( object *cr )
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
-			choice=browse(cr, &choice);
+			choice = browse( cr, &choice );
 
-		cr=operate(&choice, cr);
+		cr = operate( &choice, cr );
 	}
 
 	Tcl_UnlinkVar( inter, "strWindowOn" );
@@ -565,7 +565,7 @@ if ( redrawRoot )
 		cmd( "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Ctrl+S" );
 		cmd( "$w add command -label \"Save As...\" -command {set choice 73} -underline 5" );
 		cmd( "$w add command -label Unload -command {set choice 20} -underline 0 -accelerator Ctrl+E" );
-		cmd( "$w add command -label Compare... -command {set choice 82} -underline 0" );
+		cmd( "$w add command -label \"Compare...\" -command {set choice 82} -underline 0" );
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Save Results...\" -command {set choice 37}  -underline 2 -accelerator Ctrl+Z" );
 		cmd( "$w add separator" );
@@ -574,7 +574,9 @@ if ( redrawRoot )
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Load Sensitivity...\" -command {set choice 64} -underline 3" );
 		cmd( "$w add command -label \"Save Sensitivity...\" -command {set choice 65} -underline 6" );
-		cmd( "$w add command -label \"Export Limits...\" -command {set choice 90} -underline 1" );
+		cmd( "$w add separator" );
+		cmd( "$w add command -label \"Export Saved Elements...\" -command {set choice 91} -underline 1" );
+		cmd( "$w add command -label \"Export Sensitivity Limits...\" -command {set choice 90} -underline 2" );
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U" );
 		cmd( "$w add command -label \"Upload Equation File\" -command {set choice 51} -underline 0" );
@@ -4463,7 +4465,7 @@ else
 break;
 
 
-//Load a sensitivity analysis configuration
+// Load a sensitivity analysis configuration
 case 64:
 	
 	// check a model is already loaded
@@ -4473,17 +4475,17 @@ case 64:
 		break;
     } 
 	// check for existing sensitivity data loaded
-	if (rsense!=NULL) 
+	if ( rsense != NULL ) 
 	{
 		cmd( "set answer [tk_messageBox -parent . -type okcancel -icon warning -default ok -title Warning -message \"Sensitivity data already loaded\" -detail \"Press 'OK' if you want to discard the existing data before loading a new sensitivity configuration.\"]; switch -- $answer {ok {set choice 1} cancel {set choice 2}}" );
-		if(*choice == 2)
+		if ( *choice == 2 )
 			break;
 		
 		// empty sensitivity data
-		empty_sensitivity(rsense); 			// discard read data
-		rsense=NULL;
-		unsavedSense = false;				// nothing to save
-		findexSens=0;
+		empty_sensitivity( rsense ); 			// discard read data
+		rsense = NULL;
+		unsavedSense = false;					// nothing to save
+		findexSens = 0;
 	}
 	// set default name and path to conf. file folder
 	cmd( "set res \"%s\"", simul_name );
@@ -4494,104 +4496,37 @@ case 64:
 	// open dialog box to get file name & folder
 	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
 	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
-	if(*choice==2)
+	if ( *choice == 2 )
 		break;
-	lab1=(char *)Tcl_GetVar(inter, "res",0);
-	lab2=(char *)Tcl_GetVar(inter, "path",0);
+	
+	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+	
 	// form full name
-	if(sens_file!=NULL)
+	if ( sens_file != NULL )
 		delete sens_file;
-	sens_file=new char[strlen(lab1)+strlen(lab2)+7];
-	if(strlen(lab1)>0)
-		sprintf(sens_file,"%s/%s.sa",lab2,lab1);
+	sens_file = new char[ strlen( lab1 ) + strlen( lab2 ) + 7 ];
+	if ( strlen( lab1 ) > 0 )
+		sprintf( sens_file, "%s/%s.sa", lab2, lab1 );
 	else
-		sprintf(sens_file,"%s.sa",lab1);
+		sprintf( sens_file, "%s.sa", lab1 );
+	
 	// read sensitivity file (text mode)
-	f=fopen(sens_file, "rt");
-	if(f==NULL)
+	f = fopen( sens_file, "rt" );
+	if ( f == NULL )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity Analysis file not found\"" );
 		break;
 	}
-
-	// read data from file (1 line per element, '#' indicate comment)
-	while(!feof(f))
-	{	// read element by element, skipping comments
-		fscanf(f, "%99s", lab);				// read string
-		while(lab[0]=='#')					// start of a comment
-		{
-			do								// jump to next line
-				cc=fgetc(f);
-			while(!feof(f) && cc!='\n');
-			fscanf(f, "%99s", lab);			// try again
-		}
-
-		if(feof(f))							// ended too early?
-			break;
-
-		for(n=r; n->up!=NULL; n=n->up);		// check if element exists
-		cv=n->search_var(n,lab);
-		if(cv==NULL || (cv->param!=1 && cv->num_lag==0))
-			goto error64;					// and not parameter or lagged variable
-		// create memory allocation for new variable		
-		if (rsense==NULL)					// allocate first element
-			rsense=cs=new sense;
-		else								// allocate next ones
-		{
-			cs->next=new sense;
-			cs=cs->next;
-		}
-		cs->v=NULL;							// initialize struct pointers
-		cs->next=NULL;
-
-		cs->label=new char[strlen(lab)+1];  // save element name
-		strcpy(cs->label,lab);
-		// get lags and # of values to test
-		if ( fscanf( f, "%d %d ", &cs->lag, &cs->nvalues ) < 2 )
-			goto error64;
-		// get variable type (newer versions)
-		if ( fscanf( f, "%c ", &cc ) < 1 )
-			goto error64;
-		if ( cc == 'i' || cc == 'd' || cc == 'f' )
-		{
-			cs->integer = ( cc == 'i' ) ? true : false;
-			fscanf( f, ": " ); 			// remove separator
-		}
-		else
-			if ( cc == ':' )
-				cs->integer = false;
-			else
-				goto error64;				
-		
-		if(cs->lag==0)						// adjust type and lag #
-			cs->param=1;
-		else
-		{
-			cs->param=0;
-			cs->lag=abs(cs->lag)-1;
-		}
-
-		cs->v=new double[cs->nvalues];		// get values
-		for (i=0; i < cs->nvalues; i++)
-			if(!fscanf(f, "%lf", &cs->v[i]))
-				goto error64;
-			else
-				if ( cs->integer )
-					cs->v[ i ] = round( cs->v[ i ] );
-	}	
-	fclose(f);
-	break;
 	
-	// error handling
-	error64:
-		empty_sensitivity(rsense); 			// discard read data
-		rsense=NULL;
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\"" );
-		fclose(f);
-		break;
+	if ( load_sensitivity( r, f ) != 0 )
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity configuration.\"" );
+
+	fclose( f );
+	break;
 
 
-//Save a sensitivity analysis configuration
+// Save a sensitivity analysis configuration
 case 65:
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
@@ -4629,22 +4564,71 @@ case 65:
 		break;
 	}
 	
-	for ( cs = rsense; cs != NULL; cs = cs->next )
-	{
-		if ( cs->param == 1 )
-			fprintf( f, "%s 0 %d %c:", cs->label, cs->nvalues, cs->integer ? 'i' : 'f' );	
-		else
-			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
-		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
-			fprintf( f," %g", cs->v[i] );
-		fprintf( f,"\n" );
-	}
+	if ( ! save_sensitivity( f ) )
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY.\"" );
+
 	fclose( f );
 	unsavedSense = false;			// nothing to save
 	break;
 
+	
+// export saved elements details
+case 91:
+	if ( ! struct_loaded )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration to export\" -detail \"Please load or create a configuration before trying to export the details on the elements to save.\"" );
+		break;
+	}
 
-//Export sensitivity configuration as a .csv file
+	// warn about no variable being saved
+	for ( n = r; n->up != NULL; n = n->up );
+	i = 0;
+	count_save( n, &i );
+	if ( i == 0 )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"Please mark the variables and parameters to be saved before trying to export the details on the elements to save.\"" );
+		break;
+	}
+	
+	// default file name
+	cmd( "set res %s-saved", simul_name );
+	
+	// make sure there is a path set
+	cmd( "set path \"%s\"", path );
+	if ( strlen( path ) > 0 )
+		cmd( "cd \"$path\"" );
+
+	// open dialog box to get file name & folder
+	*choice = 0;
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Saved Elements Configuration as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
+	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
+	if ( *choice == 2 )
+		break;
+	
+	// form full name
+	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+	sprintf( lab,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+
+	// write export file (text mode)
+	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Saved elements configuration file not saved\" -detail \"Please check if the file name and path are valid.\"" );
+		break;
+	}
+	
+	strcpy( ch, CSV_SEP );
+	
+	// write .csv header & content
+	fprintf( f, "Name%sType%sObject%sDescription\n", ch, ch, ch );
+	get_saved( root, f, ch );
+	fclose( f );
+	
+	break;
+	
+
+// export sensitivity configuration as a .csv file
 case 90:
 	// check for existing sensitivity data loaded
 	if ( rsense == NULL ) 
@@ -4654,7 +4638,7 @@ case 90:
 	}
 	
 	// default file name
-	cmd( "set res %s", simul_name );
+	cmd( "set res %s-limits", simul_name );
 	
 	// make sure there is a path set
 	cmd( "set path \"%s\"", path );
@@ -4663,7 +4647,7 @@ case 90:
 
 	// open dialog box to get file name & folder
 	*choice = 0;
-	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
+	cmd( "set bah [ tk_getSaveFile -parent . -title \"Export Sensitivity Limits as Comma-separated Text File\" -defaultextension \".csv\" -initialfile $res -initialdir \"$path\" -filetypes { { {Comma-separated files} {.csv} } } ]" );
 	cmd( "if { [ string length $bah ] > 0 } { set path [ file dirname $bah ]; set res [ file tail $bah ] } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
@@ -4671,10 +4655,10 @@ case 90:
 	// form full name
 	lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
 	lab2 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-	sprintf( sens_file,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
+	sprintf( lab,"%s%s%s", lab2, strlen( lab2 ) > 0 ? "/" : "", lab1 );
 
-	// write sensitivity file (text mode)
-	f = fopen( sens_file, "wt" );  // use text mode for Windows better compatibility
+	// write export file (text mode)
+	f = fopen( lab, "wt" );  // use text mode for Windows better compatibility
 	if ( f == NULL )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity limits file not saved\" -detail \"Please check if the file name and path are valid.\"" );
@@ -4682,79 +4666,49 @@ case 90:
 	}
 	
 	// write .csv header
-	fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP, CSV_SEP );
+	strcpy( ch, CSV_SEP );
+	fprintf( f, "Name%sType%sLag%sFormat%sValue%sMinimum%sMaximum%sDescription\n", ch, ch, ch, ch, ch, ch, ch );
 	
-	for ( cs = rsense; cs != NULL; cs = cs->next )
-	{
-		// get current value (first object)
-		cv = r->search_var( NULL, cs->label );
-		
-		// get element description
-		cur_descr = search_description( cs->label );
-		if ( cur_descr != NULL && cur_descr->text != NULL && ( sl = strlen( cur_descr->text ) ) > 0 )
-		{
-			// select just the first description line
-			lab3 = new char[ sl + 1 ];
-			strcpy( lab3, cur_descr->text );
-			for ( i = 0; i < sl; ++i )
-				if ( lab3[ i ] == '\n' || lab3[ i ] == '\r' )
-				{
-					lab3[ i ] = '\0';
-					break;
-				}
-		}
-		else
-			lab3 = NULL;
-		
-		// find max and min values
-		double min = HUGE_VAL, max = - HUGE_VAL;
-		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
-			if ( cs->v[i] < min )
-				min = cs->v[i];
-			else
-				if ( cs->v[i] > max )
-					max = cs->v[i];
-
-		fprintf( f, "%s%s%s%s%d%s%s%s%g%s%g%s%g%s\"%s\"\n", cs->label, CSV_SEP, cs->param == 1 ? "parameter" : "variable", CSV_SEP, cs->param == 1 ? 0 : cs->lag + 1, CSV_SEP, cs->integer ? "integer" : "real", CSV_SEP, cv != NULL ? cv->val[ cs->lag ] : NAN, CSV_SEP, min, CSV_SEP, max, CSV_SEP, lab3 != NULL ? lab3 : "" );	
-		
-		delete [ ] lab3;
-	}
+	// write data
+	get_sa_limits( r, f, ch );
+	
 	fclose( f );
 	break;
 
 
-//Show sensitivity analysis configuration
+// Show sensitivity analysis configuration
 case 66:
-	*choice=50;
+	*choice = 50;
 
 	// check for existing sensitivity data loaded
-	if (rsense==NULL) 
+	if ( rsense == NULL ) 
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"There is no sensitivity data to show\"" );
 		break;
 	}
+	
 	// print data to log window
-	plog("\n\nVariables and parameters set for sensitivity analysis :\n");
-	for(cs=rsense; cs!=NULL; cs=cs->next)
+	plog( "\n\nVariables and parameters set for sensitivity analysis :\n" );
+	for ( cs = rsense; cs != NULL; cs = cs->next )
 	{
-		if(cs->param==1)
+		if ( cs->param == 1 )
 			plog( "Param: %s\\[%s\\]\t#%d:\t", "", cs->label, cs->integer ? "int" : "flt", cs->nvalues );
 		else
 			plog( "Var: %s(-%d)\\[%s\\]\t#%d:\t", "", cs->label, cs->lag+1, cs->integer ? "int" : "flt", cs->nvalues );
 
-		for(i=0; i<cs->nvalues; i++)
-			plog( "%g\t", "highlight", cs->v[i] );
+		for ( i = 0; i < cs->nvalues; ++i )
+			plog( "%g\t", "highlight", cs->v[ i ] );
 		plog( "\n" );
 	}
 	break;
 
 
-//Remove sensitivity analysis configuration
+// Remove sensitivity analysis configuration
 case 67:
-	*choice=0;
+	*choice = 0;
 
 	// check for existing sensitivity data loaded
-	if (rsense==NULL) 
+	if ( rsense == NULL ) 
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No sensitivity data to remove\"" );
 		break;
@@ -4764,11 +4718,11 @@ case 67:
 		break;
 
 	// empty sensitivity data
-	empty_sensitivity(rsense); 			// discard read data
+	empty_sensitivity( rsense ); 			// discard read data
 	plog( "\nSensitivity data removed.\n" );
-	rsense=NULL;
-	unsavedSense = false;				// nothing to save
-	findexSens=0;
+	rsense = NULL;
+	unsavedSense = false;					// nothing to save
+	findexSens = 0;
 	break;
 
 

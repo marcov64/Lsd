@@ -3,7 +3,7 @@
 CC=g++	
 TARGET=lsd_confgen
 EXT=
-SWITCH_CC=-DNO_WINDOW -DCPP_DEFAULT -Wno-unused-result -O3
+SWITCH_CC=-DNO_WINDOW -DCPP_DEFAULT -O3
 
 # For Unix systems, using OS native compiler and Tcl/Tk.
 LSDROOT=.
