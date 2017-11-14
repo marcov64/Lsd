@@ -2449,20 +2449,6 @@ cur->init=NULL;
 
 }
 
-void empty_descr(void)
-{
-description *cur, *cur1;
-for(cur1=descr; cur1!=NULL; cur1=cur)
-  {cur=cur1->next;
-  delete[] cur1->label;
-  delete[] cur1->type;
-  delete[] cur1->text;
-  delete cur1;
-  }
-descr=NULL;
-}
-
-
 #ifndef NO_WINDOW
 
 void change_descr_text(char *lab)
@@ -2830,72 +2816,75 @@ double save_lattice( const char *fname )
 #endif
 
 
-void kill_initial_newline(char *s)
+void kill_initial_newline( char *s )
 {
-char *d;
-int i, j;
-j=strlen(s);
+	char *d;
+	int i, j;
+	
+	j = strlen( s );
 
-d=new char[j+1];
+	d = new char[ j + 1 ];
 
-for(i=0; i<j; i++)
- {
-  if(s[i]!='\n')
-   {
-    break;
-   }
- }
+	for ( i = 0; i < j; ++i )
+		if ( s[ i ] != '\n' )
+			break;
 
-strcpy(d, s+i);
-strcpy(s,d);
-}
-void kill_trailing_newline(char *s)
-{
-int i, done=0;
-kill_initial_newline(s);
-
-while(done==0)
- { done=1;
-  for(i=0; s[i]!=(char)NULL; i++)
-   {
-    if(s[i]=='\n' && s[i+1]==(char)NULL)
-     {s[i]=(char)NULL;
-      done=0;
-     } 
-   }
- }
+	strcpy( d, s + i );
+	strcpy( s, d );
+	delete [ ] d;
 }
 
-void clean_spaces(char *s)
-{
-int i, j;
-char app[MAX_LINE_SIZE];
 
-app[ MAX_LINE_SIZE - 1 ] = '\0';
-for ( j = 0, i = 0; s[i] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
- {
- switch(s[i])
-  {
-  case ' ':
-  case '\t':
-   break;
-  default: 
-     app[j++]=s[i];
-     break;
-  }
- }   
-app[j]=(char)NULL;
-strcpy(s, app);
+void kill_trailing_newline( char *s )
+{
+	int i, done = 0;
+	
+	kill_initial_newline( s );
+
+	while ( done == 0 )
+	{ 
+		done = 1;
+		for ( i = 0; s[ i ] != '\0'; ++i )
+			if ( s[ i ] == '\n' && s[ i + 1 ] == '\0' )
+			{
+				s[ i ] = '\0';
+				done = 0;
+			} 
+	}
 }
 
-void save_eqfile(FILE *f)
+
+void clean_spaces( char *s )
 {
-if ( strlen( lsd_eq_file ) == 0 )
-	strcpy( lsd_eq_file, eq_file );
- 
-fprintf(f, "\nEQ_FILE\n");
-fprintf(f, "%s", lsd_eq_file);
-fprintf(f, "\nEND_EQ_FILE\n");
+	int i, j;
+	char app[ MAX_LINE_SIZE ];
+
+	app[ MAX_LINE_SIZE - 1 ] = '\0';
+	for ( j = 0, i = 0; s[i] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
+		switch ( s[ i ] )
+		{
+			case ' ':
+			case '\t':
+				break;
+				
+			default: 
+				app[ j++ ] = s[ i ];
+				break;
+		}
+		
+	app[ j ] = '\0';
+	strcpy( s, app );
+}
+
+
+void save_eqfile( FILE *f )
+{
+	if ( strlen( lsd_eq_file ) == 0 )
+		strcpy( lsd_eq_file, eq_file );
+	 
+	fprintf( f, "\nEQ_FILE\n" );
+	fprintf( f, "%s", lsd_eq_file );
+	fprintf( f, "\nEND_EQ_FILE\n" );
 }
 
 #ifndef NO_WINDOW

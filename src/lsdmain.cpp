@@ -605,9 +605,10 @@ int lsdmain( int argn, char **argv )
 
 #endif 
 
-	empty_cemetery();
-	blueprint->empty();
-	root->empty();
+	empty_description( );
+	empty_cemetery( );
+	blueprint->empty( );
+	root->empty( );
 	delete blueprint;
 	delete root;
 	delete stacklog;

@@ -2767,30 +2767,30 @@ cmd( "foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
 cmd( "destroytop .lat" );	// remove lattice
 cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );
 
-for(n=r; n->up!=NULL; n=n->up);
-n->empty();
-empty_cemetery();
-n->label = new char[strlen("Root")+1];
-strcpy(n->label, "Root");
-r=n;
-strcpy(lastObj,"");	// disable last object for quick reload
-actual_steps=0;
+for ( n = r; n->up != NULL; n = n->up );
+n->empty( );
+empty_cemetery( );
+n->label = new char[ strlen( "Root" ) + 1 ];
+strcpy( n->label, "Root" );
+r = n;
+strcpy( lastObj,"" );			// disable last object for quick reload
+actual_steps = 0;
 unsavedData = false;			// no unsaved simulation results
-empty_descr();
-empty_sensitivity(rsense); 	// discard sensitivity analysis data
-rsense=NULL;
+empty_description( );
+empty_sensitivity( rsense ); 	// discard sensitivity analysis data
+rsense = NULL;
 unsavedSense = false;			// nothing to save
-findexSens=0;
-nodesSerial=0;				// network node serial number global counter
-add_description("Root", "Object", "(no description available)");      
+findexSens = 0;
+nodesSerial = 0;				// network node serial number global counter
+add_description( "Root", "Object", "(no description available)" );      
 cmd( "unset -nocomplain ModElem" );
-delete [] path;
+delete [ ] path;
 path = new char[ strlen( exec_path ) + 1 ];
 strcpy( path, exec_path );
 cmd( "set path \"%s\"; cd \"$path\"", path );
-delete[] simul_name;
-simul_name=new char[strlen("Sim1")+1];
-strcpy(simul_name, "Sim1");
+delete [ ] simul_name;
+simul_name = new char[ strlen( "Sim1" ) + 1 ];
+strcpy( simul_name, "Sim1" );
 strcpy( lsd_eq_file, "" );
 sprintf( name_rep, "report_%s.html", simul_name );
 
