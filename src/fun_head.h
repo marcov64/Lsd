@@ -30,6 +30,7 @@ extern char *path;										// folder where the configuration is
 extern char *simul_name;								// configuration name being run (for saving networks)
 extern int cur_sim;
 extern int debug_flag;
+extern int fast_mode;
 extern int max_step;
 extern int quit;
 extern int ran_gen;										// pseudo-random number generator to use (1-5) )
@@ -278,7 +279,7 @@ extern double i_values[];
 
 // regular logging (disabled in any fast mode)
 #define LOG( ... ) \
-	if ( fast == 0 ) \
+	if ( ! fast ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
@@ -286,7 +287,7 @@ extern double i_values[];
 	}
 // priority logging (show also in fast mode 1)
 #define PLOG( ... ) \
-	if ( fast < 2 ) \
+	if ( fast_mode < 2 ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \

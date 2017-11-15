@@ -1078,7 +1078,7 @@ void set_fast( int level )
 		level = 0;
 	
 	// remove the variables stack when switching to any fast mode
-	if ( fast_mode = 0 && level > 0 )
+	if ( fast_mode == 0 && level > 0 )
 	{
 		if ( stackinfo_flag > 0 || prof_aggr_time )
 		{
@@ -1092,7 +1092,8 @@ void set_fast( int level )
 		unwind_stack( );
 	}
 	
-	fast = fast_mode = level;
+	fast_mode = level;
+	fast = ( level == 0 ) ? false : true;
 }
 
 
