@@ -1,2 +1,5 @@
-exportPattern("^[[:alpha:]]+")
-import(abind, utils, stats, parallel)
+exportPattern( "^[[:alpha:]]+" )
+#importFrom( stats, sd )
+#importFrom( utils, read.delim )
+#importFrom( abind, abind )
+#importFrom( parallel, detectCores, makeCluster, clusterExport, clusterEvalQ, parLapply, stopCluster )

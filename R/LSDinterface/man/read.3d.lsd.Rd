@@ -75,7 +75,7 @@ inst2Array21_70 <- read.3d.lsd(c("Sim1_1.res", "Sim1_2.res"), skip = 20, nrows =
 # Restore working directory
 setwd(currWD)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ interface }
+\keyword{ file }
+\keyword{ datasets }
+\keyword{ database }

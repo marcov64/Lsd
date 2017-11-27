@@ -8,7 +8,7 @@ This function reads the data series associated to a specific or all instances of
 }
 \usage{
 read.list.lsd(files, col.names = NULL, nrows = -1, skip = 0,
-              check.names = TRUE, instance = 0, pool = FALSE, 
+              check.names = TRUE, instance = 0, pool = FALSE,
 			  nnodes = 1)
 }
 \arguments{
@@ -77,7 +77,7 @@ inst4List21_70 <- read.list.lsd(c("Sim1_1.res", "Sim1_2.res"), skip = 20, nrows 
 #View(inst4List21_70[[ 1 ]])
 #View(inst4List21_70[[ 2 ]])
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ interface }
+\keyword{ file }
+\keyword{ datasets }
+\keyword{ database }

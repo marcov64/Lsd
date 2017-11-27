@@ -29,7 +29,5 @@ name.nice.lsd(c("_Var1.1_1..1.100.", "X_Var2.1_2_3..50.70."))
 
 name.nice.lsd(c("_Var1", "X_Var2"))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ attribute }
+\keyword{ misc }

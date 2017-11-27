@@ -30,7 +30,5 @@ name.var.lsd("label")
 
 name.var.lsd(c("label", "X_underlinelabel"))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ attribute }
+\keyword{ misc }

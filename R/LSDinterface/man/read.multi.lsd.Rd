@@ -62,7 +62,7 @@ varsList21_70 <- read.multi.lsd("Sim1_1.res", c("_A1p", "_growth1"), skip = 20, 
 # Restore working directory
 setwd(currWD)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ interface }
+\keyword{ file }
+\keyword{ datasets }
+\keyword{ database }

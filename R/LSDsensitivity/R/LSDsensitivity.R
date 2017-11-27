@@ -2,32 +2,7 @@
 #
 # ------------------- LSD tools for sensitivity analysis ---------------------
 #
-#	Required files:
-#		folder/basename_XX_YY.csv   		: DoE specification from LSD (1 file)
-#		folder/basename_ZZ.res[.gz]]	  : Results files from LSD (YY-XX+1 files)
-#		folder/basename.lsd				      : LSD configuration with default values
-#		folder/basename_sens.txt		    : factor sensitivity test ranges from LSD
-#
-# Output files:
-#   folder/basename_xx_YY_WWW.csv   : DoE response data file for chosen variable
-#
-# ATTENTION: directory names should have no "." character and file names should
-#            have just ONE "." character separating the above extensions
-#
 #*******************************************************************************
-
-require( LSDinterface, warn.conflicts = FALSE, quietly = TRUE )
-require( kSamples, warn.conflicts = FALSE, quietly = TRUE )
-require( abind, warn.conflicts = FALSE, quietly = TRUE )
-require( sensitivity, warn.conflicts = FALSE, quietly = TRUE )
-require( car, warn.conflicts = FALSE, quietly = TRUE )
-require( randtoolbox, warn.conflicts = FALSE, quietly = TRUE )
-require( parallel, warn.conflicts = FALSE, quietly = TRUE )
-require( rgenoud, warn.conflicts = FALSE, quietly = TRUE )
-require( DiceKriging, warn.conflicts = FALSE, quietly = TRUE )
-require( DiceOptim, warn.conflicts = FALSE, quietly = TRUE )
-require( DiceEval, warn.conflicts = FALSE, quietly = TRUE )
-
 
 # ==== Create random experiments ====
 
@@ -61,7 +36,7 @@ remove.outliers <- function( doe, resp, limit ) {
 
   # check for abnormal DoE sample averages
   m <- mean( resp$Mean )
-  d <- sd( resp$Mean ) * limit         # maximum deviation
+  d <- stats::sd( resp$Mean ) * limit         # maximum deviation
   outl <- which( resp$Mean > m + d | resp$Mean < m - d, arr.ind = TRUE )
   if( length( outl ) > 0 ) {
     doe <- doe[ - outl, ]
@@ -179,7 +154,7 @@ ww.test <- function( time.series, window.size ) {
   s2 <- ( ( mu - 1 ) * ( mu - 2 ) ) / ( zeros + ones - 1 )
   sigma = sqrt( s2 )
   z <- ( runs - mu ) / sigma
-  p_value <- pnorm( z )
+  p_value <- stats::pnorm( z )
 
   # one tail test!! only of runs are few!! see wald wolfowitz
   # the previous test took as p value the density of the normal with abs(z) -1
@@ -191,9 +166,9 @@ ww.test <- function( time.series, window.size ) {
 }
 
 
-# ==== Calculate stationarity and ergodicity estatistics table
+# ==== Calculate stationarity and ergodicity statistics table
 
-ergodicity.lsd <- function( data, vars, start.period = 0, signif = 0.05,
+ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
                             digits = 2, ad.method = "asymptotic" ) {
 
   stats <- c( "avg ADF", "rej ADF", "avg PP", "rej PP", "avg KPSS", "rej KPSS",
@@ -218,25 +193,25 @@ ergodicity.lsd <- function( data, vars, start.period = 0, signif = 0.05,
     for( n in 1 : nSize ) {
       series.list[[ n ]] <- series[ , n ]
       adf <- pp <- kpss <- bds <- NA
-      try( adf <- adf.test( series[ , n ] )$p.value, silent = TRUE )
+      try( adf <- tseries::adf.test( series[ , n ] )$p.value, silent = TRUE )
       if( is.finite( adf ) ) {
         nADF <- nADF + 1
         sumADF <- sumADF + adf
         if( adf < signif ) rejADF <- rejADF + 1
       }
-      try( pp <- PP.test( series[ , n ] )$p.value, silent = TRUE )
+      try( pp <- stats::PP.test( series[ , n ] )$p.value, silent = TRUE )
       if( is.finite( pp ) ) {
         nPP <- nPP + 1
         sumPP <- sumPP + pp
         if( pp < signif ) rejPP <- rejPP + 1
       }
-      try( kpss <- kpss.test( series[ , n ] )$p.value, silent = TRUE )
+      try( kpss <- tseries::kpss.test( series[ , n ] )$p.value, silent = TRUE )
       if( is.finite( kpss ) ) {
         nKPSS <- nKPSS + 1
         sumKPSS <- sumKPSS + kpss
         if( kpss < signif ) rejKPSS <- rejKPSS + 1
       }
-      try( bds <- mean( bds.test( series[ , n ] )$p.value, na.rm = TRUE ), silent = TRUE )
+      try( bds <- mean( tseries::bds.test( series[ , n ] )$p.value, na.rm = TRUE ), silent = TRUE )
       if( is.finite( bds ) ) {
         nBDS <- nBDS + 1
         sumBDS <- sumBDS + bds
@@ -245,7 +220,7 @@ ergodicity.lsd <- function( data, vars, start.period = 0, signif = 0.05,
       if( n < nSize )
         for( m in ( n + 1 ) : nSize ) {
           ks <- NA
-          try( ks <- ks.test( series[ , n ], series[ , m ] )$p.value, silent = TRUE )
+          try( ks <- stats::ks.test( series[ , n ], series[ , m ] )$p.value, silent = TRUE )
           if( is.finite( ks ) ) {
             nKS <- nKS + 1
             sumKS <- sumKS + ks
@@ -296,19 +271,19 @@ ergodicity.lsd <- function( data, vars, start.period = 0, signif = 0.05,
 # ==== Create 3D grid for plotting ====
 
 # Create a grid using data limits for top effect variables and defaults for others
-grid.3D <- function( data, SA, gridSz = 25 ) {
+grid.3D <- function( data, sa, gridSz = 25 ) {
 
 
   grid <- list( )
-  grid[[ 1 ]] <- seq( data$facLimLo[ SA$topEffect[ 1 ] ],
-                      data$facLimUp[ SA$topEffect[ 1 ] ], length = gridSz )
-  grid[[ 2 ]] <- seq( data$facLimLo[ SA$topEffect[ 2 ] ],
-                      data$facLimUp[ SA$topEffect[ 2 ] ], length = gridSz )
-  grid[[ 3 ]] <- seq( data$facLimLo[ SA$topEffect[ 3 ] ],
-                      data$facLimUp[ SA$topEffect[ 3 ] ], length = gridSz )
-  grid[[ 4 ]] <- as.numeric( c( data$facLimLo[ SA$topEffect[ 3 ] ],
-                                data$facDef[ SA$topEffect[ 3 ] ],
-                                data$facLimUp[ SA$topEffect[ 3 ] ] ) )
+  grid[[ 1 ]] <- seq( data$facLimLo[ sa$topEffect[ 1 ] ],
+                      data$facLimUp[ sa$topEffect[ 1 ] ], length = gridSz )
+  grid[[ 2 ]] <- seq( data$facLimLo[ sa$topEffect[ 2 ] ],
+                      data$facLimUp[ sa$topEffect[ 2 ] ], length = gridSz )
+  grid[[ 3 ]] <- seq( data$facLimLo[ sa$topEffect[ 3 ] ],
+                      data$facLimUp[ sa$topEffect[ 3 ] ], length = gridSz )
+  grid[[ 4 ]] <- as.numeric( c( data$facLimLo[ sa$topEffect[ 3 ] ],
+                                data$facDef[ sa$topEffect[ 3 ] ],
+                                data$facLimUp[ sa$topEffect[ 3 ] ] ) )
 
   return( grid )
 }
@@ -318,18 +293,18 @@ grid.3D <- function( data, SA, gridSz = 25 ) {
 
 # populates lists with the values for all factors to be ploted
 
-factor.lists <- function( data, SA, grid ) {
+factor.lists <- function( data, sa, grid ) {
   top <- list( )
   default <- center <- top[[ 1 ]] <- top[[ 2 ]] <- top[[ 3 ]] <- list( )
   for( i in 1 : length( colnames( data$doe ) ) ) {
     default[[ i ]] <- center[[ i ]] <- top[[ 1 ]][[ i ]] <- top[[ 2 ]][[ i ]] <-
       top [[ 3 ]][[ i ]] <- as.numeric( data$facDef[ i ] )
 
-    if( i == SA$topEffect[ 1 ] )
+    if( i == sa$topEffect[ 1 ] )
       center[[ i ]] <- top[[ 1 ]][[ i ]] <- grid[[ 1 ]]
-    if( i == SA$topEffect[ 2 ] )
+    if( i == sa$topEffect[ 2 ] )
       center[[ i ]] <- top[[ 2 ]][[ i ]] <- grid[[ 2 ]]
-    if( i == SA$topEffect[ 3 ] )
+    if( i == sa$topEffect[ 3 ] )
       top[[ 3 ]][[ i ]] <- grid[[ 3 ]]
   }
 
@@ -339,15 +314,12 @@ factor.lists <- function( data, SA, grid ) {
 
 # ==== Do sensitivity analysis of a fitted model ====
 
-sensitivity.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000,
-                             factor1 = 0, factor2 = 0, factor3 = 0 ) {
+sobol.decomposition.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) {
 
   if( class( model ) == "kriging-model" )
-    out <- kriging.sensitivity.lsd( data, model, krig.sa = krig.sa, sa.samp = sa.samp,
-			                        factor1 = factor1, factor2 = factor2, factor3 = factor3 )
+    out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
   else
-    out <- polynomial.sensitivity.lsd( data, model, sa.samp = sa.samp, factor1 = factor1,
-                                       factor2 = factor2, factor3 = factor3  )
+    out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
 
   return( out )
 }
@@ -356,13 +328,16 @@ sensitivity.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000,
 
 # predict model results given data
 
-predict.lsd <- function( data, model ) {
+model.pred.lsd <- function( data.point, model ) {
+
+  if( is.na( data.point[ 1 ] ) )
+    return( NULL )
 
   if( class( model ) == "kriging-model" ) {
-    out <- predict( model$selected, data, type = "UK" )
+    out <- DiceKriging::predict( model$selected, data.point, type = "UK" )
     out <- list( mean = out$mean, lower = out$lower95, upper = out$upper95 )
   } else {
-    out <- predict( model$selected, data, type = "response", interval = "confidence"  )
+    out <- stats::predict( model$selected, data.point, type = "response", interval = "confidence"  )
     out <- list( mean = out[ , "fit" ], lower = out[ , "lwr" ], upper = out[ , "upr" ] )
   }
   return( out )
@@ -371,28 +346,28 @@ predict.lsd <- function( data, model ) {
 
 # calculate the predicted responses for factors lists for plotting
 
-predicted.responses <- function( data, model, SA, grid, factors ) {
+predicted.responses <- function( data, model, sa, grid, factors ) {
 
   calib <- predFac <- list( )
 
   # get predicted values for default configuration
-  predDef <- predict.lsd( as.data.frame( structure( factors$default,
-                                                    .Names = colnames( data$doe ) ) ),
-                          model )
+  predDef <- model.pred.lsd( as.data.frame( structure( factors$default,
+                                                       .Names = colnames( data$doe ) ) ),
+                             model )
 
   # get predicted values for individual factors
   for( i in 1 : 3 )
-    predFac[[ i ]] <- predict.lsd( as.data.frame( structure( factors$top[[ i ]],
-                                                             .Names = colnames( data$doe ) ) ),
-                                   model )
+    predFac[[ i ]] <- model.pred.lsd( as.data.frame( structure( factors$top[[ i ]],
+                                                                .Names = colnames( data$doe ) ) ),
+                                      model )
 
   # get predicted values for all 3D configurations
   for( i in 1 : length( grid[[ 4 ]] ) ) {
     # calculate the 3D response surface for each point in the grid
-    factors$center[[ SA$topEffect[ 3 ] ]] <- grid[[ 4 ]][ i ]
-    calib[[ i ]] <- predict.lsd( expand.grid( structure( factors$center,
-                                                         .Names = colnames( data$doe ) ) ),
-                                 model )
+    factors$center[[ sa$topEffect[ 3 ] ]] <- grid[[ 4 ]][ i ]
+    calib[[ i ]] <- model.pred.lsd( expand.grid( structure( factors$center,
+                                                            .Names = colnames( data$doe ) ) ),
+                                    model )
   }
 
   return( list( calib = calib, factor = predFac, default = predDef ) )
@@ -401,17 +376,26 @@ predicted.responses <- function( data, model, SA, grid, factors ) {
 
 # ==== Compute meta-model response surface ====
 
-response.surface.lsd <- function( data, model, SA, gridSz = 25, defPos = 2 ) {
+response.surface.lsd <- function( data, model, sa, gridSz = 25, defPos = 2,
+                                  factor1 = 0, factor2 = 0, factor3 = 0 ) {
+
+  # check if use fixed or top factors
+  if( factor1 != 0 )
+    sa$topEffect[ 1 ] <- factor1
+  if( factor2 != 0 )
+    sa$topEffect[ 2 ] <- factor2
+  if( factor3 != 0 )
+    sa$topEffect[ 3 ] <- factor3
 
   # create drawing grid  with default ("center") values plus top factor full ranges
-  grid <- grid.3D( data, SA, gridSz = gridSz )
+  grid <- grid.3D( data, sa, gridSz = gridSz )
 
   # get the values for the factors for 3 different 3D plots
   # each plot uses a different value (min, default, max) for the third most important factor
-  factors <- factor.lists( data, SA, grid )
+  factors <- factor.lists( data, sa, grid )
 
   # get the predicted responses for each plot
-  response <- predicted.responses( data, model, SA, grid, factors )
+  response <- predicted.responses( data, model, sa, grid, factors )
   response[[ "grid" ]] <- grid
   response[[ "factors" ]] <- factors
 
@@ -428,9 +412,19 @@ response.surface.lsd <- function( data, model, SA, gridSz = 25, defPos = 2 ) {
 
 # ==== Optimize meta-model (minimize or maximize) ====
 
-optim.lsd <- function( model, lower.domain, upper.domain, starting.values = NULL,
-                       minimize = TRUE, pop.size = 1000, max.generations = 30,
-                       wait.generations = 10, precision = 1e-5 ) {
+model.optim.lsd <- function( model, data = NULL, lower.domain = NULL,
+                             upper.domain = NULL, starting.values = NULL,
+                             minimize = TRUE, pop.size = 1000, max.generations = 30,
+                             wait.generations = 10, precision = 1e-5 ) {
+
+  if( ! is.null( data ) && class( data ) == "lsd-doe" ) {
+	if( is.null( lower.domain ) )
+	  lower.domain <- data$facLimLo
+	if( is.null( upper.domain ) )
+	  upper.domain <- data$facLimUp
+	if( is.null( starting.values ) )
+	  starting.values <- data$facDef
+  }
 
   # check variables allowed to variate (lower != upper)
   varName <- varLo <- varUp <- varStart <- vector( )
@@ -465,35 +459,35 @@ optim.lsd <- function( model, lower.domain, upper.domain, starting.values = NULL
           X[ ii ] <- x[ jj ]
 
         X <- as.data.frame( t( X ) )
-        return ( as.numeric( predict.lsd( X, model )$mean ) )
+        return ( as.numeric( model.pred.lsd( X, model )$mean ) )
   }
 
   # enable multiprocessing (not working in Windows)
   if( Sys.info( )[[ "sysname" ]] == "Linux" ) {
-    cluster <- makeForkCluster( detectCores( ) / 2 )
-    setDefaultCluster( cluster )
+    cluster <- parallel::makeForkCluster( parallel::detectCores( ) / 2 )
+    parallel::setDefaultCluster( cluster )
   } else {
-    #cluster <- makePSOCKcluster( detectCores( ) / 2 )
-    #setDefaultCluster( cluster )
+    #cluster <- parallel::makePSOCKcluster( parallel::detectCores( ) / 2 )
+    #parallel::setDefaultCluster( cluster )
     cluster <- FALSE
   }
 
-  xStar <- try( genoud( fn = f, nvars = j, max = ! minimize,
-                        starting.values = varStart,
-                        Domains = cbind( varLo, varUp ),
-                        boundary.enforcement = 2, pop.size = pop.size,
-                        max.generations = max.generations,
-                        wait.generations =  wait.generations,
-                        solution.tolerance = precision,
-                        gradient.check = FALSE,
-                        P1 = 39, P2 = 40, P3 = 40, P4 = 40,
-                        P5 = 40, P6 = 40, P7 = 40, P8 = 40,
-                        cluster = cluster,
-                        print.level = 0 ),
+  xStar <- try( rgenoud::genoud( fn = f, nvars = j, max = ! minimize,
+                                 starting.values = varStart,
+                                 Domains = cbind( varLo, varUp ),
+                                 boundary.enforcement = 2, pop.size = pop.size,
+                                 max.generations = max.generations,
+                                 wait.generations =  wait.generations,
+                                 solution.tolerance = precision,
+                                 gradient.check = FALSE,
+                                 P1 = 39, P2 = 40, P3 = 40, P4 = 40,
+                                 P5 = 40, P6 = 40, P7 = 40, P8 = 40,
+                                 cluster = cluster,
+                                 print.level = 0 ),
                 silent = TRUE )
 
   # release multiprocessing cluster
-  try( stopCluster( cluster ), silent = TRUE )
+  try( parallel::stopCluster( cluster ), silent = TRUE )
 
   if( class( xStar ) == "try-error" ) return( t( rep( NA, length( lower.domain ) ) ) )
 
@@ -516,9 +510,16 @@ optim.lsd <- function( model, lower.domain, upper.domain, starting.values = NULL
 
 # ==== Compute meta-model minimum and maximum points for up to 2 factors ====
 
-max.min.lsd <- function( data, model, factor1 = 1, factor2 = 2, factor3 = 3,
-                         pop.size = 1000, max.generations = 30,
-                         wait.generations = 10, precision = 1e-5  ) {
+model.limits.lsd <- function( data, model, sa = NULL,
+                              factor1 = 1, factor2 = 2, factor3 = 3,
+                              pop.size = 1000, max.generations = 30,
+                              wait.generations = 10, precision = 1e-5  ) {
+
+  if( ! is.null( sa ) && ( class( sa ) == "kriging-sa" || class( sa ) == "polynomial-sa" ) ) {
+    factor1 <- sa$topEffect[ 1 ]
+    factor2 <- sa$topEffect[ 2 ]
+    factor3 <- sa$topEffect[ 3 ]
+  }
 
   vars <- names( data$facDef )
 
@@ -531,22 +532,24 @@ max.min.lsd <- function( data, model, factor1 = 1, factor2 = 2, factor3 = 3,
     lo[ i ] <- data$facLimLo[ i ]
     up[ i ] <- data$facLimUp[ i ]
 
-    min1[[ j ]] <- optim.lsd( model, lo, up, starting.values = data$facDef,
-                       minimize = TRUE, pop.size = pop.size,
-                       max.generations = max.generations,
-                       wait.generations = wait.generations )
+    min1[[ j ]] <- model.optim.lsd( model, lower.domain = lo, upper.domain = up,
+                                    starting.values = data$facDef,
+                                    minimize = TRUE, pop.size = pop.size,
+                                    max.generations = max.generations,
+                                    wait.generations = wait.generations )
     if( ! is.na( min1[[ j ]][ 1 ] ) )
-      minResp[ j ] <- predict.lsd( min1[[ j ]], model )$mean
+      minResp[ j ] <- model.pred.lsd( min1[[ j ]], model )$mean
     else
       minResp[ j ] <- NA
     labels[ ( 2 * j ) - 1 ] <- paste( vars[ i ], "min" )
 
-    max1[[ j ]] <- optim.lsd( model, lo, up, starting.values = data$facDef,
-                       minimize = FALSE, pop.size = pop.size,
-                       max.generations = max.generations,
-                       wait.generations = wait.generations )
+    max1[[ j ]] <- model.optim.lsd( model, lower.domain = lo, upper.domain = up,
+                                    starting.values = data$facDef,
+                                    minimize = FALSE, pop.size = pop.size,
+                                    max.generations = max.generations,
+                                    wait.generations = wait.generations )
     if( ! is.na( max1[[ j ]][ 1 ] ) )
-      maxResp[ j ] <- predict.lsd( max1[[ j ]], model )$mean
+      maxResp[ j ] <- model.pred.lsd( max1[[ j ]], model )$mean
     else
       maxResp[ j ] <- NA
     labels[ 2 * j ] <- paste( vars[ i ], "max" )
@@ -561,21 +564,23 @@ max.min.lsd <- function( data, model, factor1 = 1, factor2 = 2, factor3 = 3,
     up[ i ] <- data$facLimUp[ i ]
   }
 
-  min2 <- optim.lsd( model, lo, up, starting.values = data$facDef,
-                     minimize = TRUE, pop.size = pop.size,
-                     max.generations = max.generations,
-                     wait.generations = wait.generations )
+  min2 <- model.optim.lsd( model, lower.domain = lo, upper.domain = up,
+                           starting.values = data$facDef,
+                           minimize = TRUE, pop.size = pop.size,
+                           max.generations = max.generations,
+                           wait.generations = wait.generations )
   if( ! is.na( min2[ 1 ] ) )
-    min2Resp <- predict.lsd( min2, model )$mean
+    min2Resp <- model.pred.lsd( min2, model )$mean
   else
     min2Resp <- NA
 
-  max2 <- optim.lsd( model, lo, up, starting.values = data$facDef,
-                     minimize = FALSE, pop.size = pop.size,
-                     max.generations = max.generations,
-                     wait.generations = wait.generations )
+  max2 <- model.optim.lsd( model, lower.domain = lo, upper.domain = up,
+                           starting.values = data$facDef,
+                           minimize = FALSE, pop.size = pop.size,
+                           max.generations = max.generations,
+                           wait.generations = wait.generations )
   if( ! is.na( max2[ 1 ] ) )
-    max2Resp <- predict.lsd( max2, model )$mean
+    max2Resp <- model.pred.lsd( max2, model )$mean
   else
     max2Resp <- NA
   labels[ ( 2 * j ) - 1 ] <- paste0( vars[ factor1 ], "-", vars[ factor2 ], " min" )
@@ -599,7 +604,7 @@ max.min.lsd <- function( data, model, factor1 = 1, factor2 = 2, factor3 = 3,
 rmse.poly <- function( m, y, x ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = "response", se.fit = FALSE )
+  pred <- stats::predict( m, newdata = x, type = "response", se.fit = FALSE )
   return( sqrt( mean( ( y - pred ) ^ 2, na.rm = TRUE ) ) )
 }
 
@@ -607,7 +612,7 @@ rmse.poly <- function( m, y, x ) {
 mae.poly <- function( m, y, x ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = "response", se.fit = FALSE )
+  pred <- stats::predict( m, newdata = x, type = "response", se.fit = FALSE )
   return( mean( abs( y - pred ), na.rm = TRUE ) )
 }
 
@@ -615,8 +620,8 @@ mae.poly <- function( m, y, x ) {
 rma.poly <- function( m, y, x ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = "response", se.fit = FALSE )
-  return( max( abs( y - pred ) / sd( y, na.rm = TRUE ),
+  pred <- stats::predict( m, newdata = x, type = "response", se.fit = FALSE )
+  return( max( abs( y - pred ) / stats::sd( y, na.rm = TRUE ),
                na.rm = TRUE ) )
 }
 
@@ -625,7 +630,8 @@ rma.poly <- function( m, y, x ) {
 
 # Compute the Q2 coefficient for a kriging model m without noise
 Q2.kriging <- function ( m, type = "UK", trend.reestim = TRUE ) {
-  error <- ( m@y - leaveOneOut.km( m, type = type, trend.reestim = trend.reestim )$mean ) ^ 2
+  error <- ( m@y - DiceKriging::leaveOneOut.km( m, type = type,
+                                                trend.reestim = trend.reestim )$mean ) ^ 2
   deviation <- ( m@y - mean( m@y ) ) ^ 2
   return( min( max( 1 - sum( error ) / sum( deviation ), 0 ), 1 ) )
 }
@@ -634,7 +640,7 @@ Q2.kriging <- function ( m, type = "UK", trend.reestim = TRUE ) {
 rmse.kriging <- function( m, y, x, type = "UK" ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = type )$mean
+  pred <- DiceKriging::predict( m, newdata = x, type = type )$mean
   return( sqrt( mean( ( y - pred ) ^ 2, na.rm = TRUE ) ) )
 }
 
@@ -642,7 +648,7 @@ rmse.kriging <- function( m, y, x, type = "UK" ) {
 mae.kriging <- function( m, y, x, type = "UK" ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = type )$mean
+  pred <- DiceKriging::predict( m, newdata = x, type = type )$mean
   return( mean( abs( y - pred ), na.rm = TRUE ) )
 }
 
@@ -650,8 +656,8 @@ mae.kriging <- function( m, y, x, type = "UK" ) {
 rma.kriging <- function( m, y, x, type = "UK" ) {
   if( length( y ) != nrow( x ) )
     stop( "Vectors must have the same size" )
-  pred <- predict( m, newdata = x, type = type )$mean
-  return( max( abs( y - pred ) / sd( y, na.rm = TRUE ), na.rm = TRUE ) )
+  pred <- DiceKriging::predict( m, newdata = x, type = type )$mean
+  return( max( abs( y - pred ) / stats::sd( y, na.rm = TRUE ), na.rm = TRUE ) )
 }
 
 
@@ -687,8 +693,8 @@ fit.poly <- function( response, doe, resp.noise = NULL,
       if( j < ncol( doe ) )
         form <- paste( form, "+" )
     }
-    formulas[[ i, 1 ]] <- as.formula( form )
-    formulas[[ i, 2 ]] <- as.formula( paste( form, "+", inter ) )
+    formulas[[ i, 1 ]] <- stats::as.formula( form )
+    formulas[[ i, 2 ]] <- stats::as.formula( paste( form, "+", inter ) )
     form <- paste( form, "+" )
   }
 
@@ -698,16 +704,16 @@ fit.poly <- function( response, doe, resp.noise = NULL,
     weigths <- 1 / resp.noise
   }
   # fit bot using the normal and standardized vars
-  fit <- lm( formula = formulas[[ order, interaction + 1 ]],
-             data = doe, weights = weigths, na.action = na.exclude )
-  fit.std <- lm( formula = formulas[[ order, interaction + 1 ]],
-                 data = as.data.frame( scale( doe ) ), weights = weigths,
-                 na.action = na.exclude )
+  fit <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
+                    data = doe, weights = weigths, na.action = stats::na.exclude )
+  fit.std <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
+                        data = as.data.frame( scale( doe ) ), weights = weigths,
+                        na.action = stats::na.exclude )
 
   # calculate variance inflation factors
-  fit.uwgth <- lm( formula = formulas[[ order, interaction + 1 ]],
-                   data = doe, na.action = na.exclude )
-  inflat <- try( vif( fit.uwgth ), silent = TRUE )
+  fit.uwgth <- stats::lm( formula = formulas[[ order, interaction + 1 ]],
+                          data = doe, na.action = stats::na.exclude )
+  inflat <- try( car::vif( fit.uwgth ), silent = TRUE )
 
   fit <- list( model = fit, R2 = summary( fit )$adj.r.squared,
                vif = inflat, f = summary( fit )$fstatistic,
@@ -728,8 +734,8 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
   scaleFactor <- 0.5
 
   # Cross validation - don't use noise info because of Q2 doesn't support it
-  fit <- km( design = doe, response = response, formula = trend.func,
-             covtype = cov.func, control = list( trace = FALSE, print.level = 0 ) )
+  fit <- DiceKriging::km( design = doe, response = response, formula = trend.func,
+                          covtype = cov.func, control = list( trace = FALSE, print.level = 0 ) )
   Q2 <- Q2.kriging( fit )
 
   # External validation - reestimate the model using noise information
@@ -739,9 +745,10 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
   ok <- FALSE
   while( ! is.null( resp.noise ) && ! ok && trial < trials ) {
     ok <- TRUE
-    tryCatch( fit <- km( design = doe, response = response, formula = trend.func,
-                         covtype = cov.func, noise.var = resp.noise * ( scaleFactor ^ trial ),
-                         control = list( trace = FALSE, print.level = 0 ) ),
+    tryCatch( fit <- DiceKriging::km( design = doe, response = response,
+                                      formula = trend.func, covtype = cov.func,
+                                      noise.var = resp.noise * ( scaleFactor ^ trial ),
+                                      control = list( trace = FALSE, print.level = 0 ) ),
               error = function( ex ) {
                 warning( "Model search: Problem in function 'km', trying to scale down noise..." )
                 trial <<- trial + 1
@@ -760,7 +767,7 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
 
 # ==== Read LSD parameter limits file and check consistency and number order ====
 
-read.sens.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
   if( is.null( fileName ) ) {
     file <- paste0( folder, "/", baseName, ".sa" )
@@ -773,7 +780,7 @@ read.sens.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
   if( ! file.exists( file ) )
     stop( "Sensitivity file does not exist!" )
 
-  limits <- read.table( file, stringsAsFactors = FALSE )
+  limits <- utils::read.table( file, stringsAsFactors = FALSE )
   limits <- limits[ -2 : -3 ]
   if( ! is.numeric( limits[ 1, 2 ] ) )  # handle newer LSD versions that bring an extra column
     limits <- limits[ -2 ]
@@ -796,7 +803,7 @@ read.sens.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 # ==== Read LSD default parameter configuration from base .lsd file ====
 
-read.config.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
+read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
   if( is.null( fileName ) ) {
     file <- paste0( folder, "/", baseName, ".lsd" )
@@ -835,7 +842,7 @@ read.config.lsd <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
 
 # ==== Get LSD Design of Experiments (DoE) files names without the .csv extension ====
 
-files.doe.lsd <- function( folder, baseName ) {
+files.doe <- function( folder, baseName ) {
 
   doeFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+_[0-9]+.csv" ) )
 
@@ -851,7 +858,7 @@ files.doe.lsd <- function( folder, baseName ) {
 
 # ==== Read LSD Design of Experiments (DoE) size ====
 
-size.doe.lsd <- function( doeFile ) {
+size.doe <- function( doeFile ) {
 
   # Remove extension if present
   doeFile <- unlist( strsplit( doeFile, ".", fixed = TRUE ) )[ 1 ]
@@ -874,7 +881,7 @@ size.doe.lsd <- function( doeFile ) {
 
 # ==== Create DoE response file ====
 
-write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
+write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
                                 pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
                                 conf = 0.95, saveVars = c(  ), addVars = c(  ),
                                 eval.vars = NULL, eval.run = NULL, rm.temp = TRUE ) {
@@ -889,7 +896,7 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
-  newNameVar <- append( name.nice.lsd( saveVars ), addVars ) # new label set
+  newNameVar <- append( LSDinterface::name.nice.lsd( saveVars ), addVars ) # new label set
   nVar <- length( newNameVar )          # total number of variables
 
   # first check if extraction was interrupted and continue with partial files if appropriate
@@ -929,7 +936,7 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
       # Determine the DoE sample size (repetitions on the same DoE point)
       nSize  <- length( myFiles )
       # Get data set details from first file
-      dimData <- info.dimensions.lsd( myFiles[ 1 ] )
+      dimData <- LSDinterface::info.dimensions.lsd( myFiles[ 1 ] )
       nTsteps <- dimData$tSteps
       origNvar <- dimData$nVars
 
@@ -954,14 +961,16 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
         # Read data one file at a time to restrict memory usage
         for( j in 1 : nSize ) {
 
-          dataSet <- read.raw.lsd( myFiles[ j ], nrows = nKeep, skip = iniDrop )
+          dataSet <- LSDinterface::read.raw.lsd( myFiles[ j ], nrows = nKeep,
+                                                 skip = iniDrop )
 
           # Increase array size to allow for new variables
           oldNameVar <- colnames( dataSet )
-          dataSet <- abind( dataSet, array( as.numeric(NA),
-                                            dim = c( nTsteps, nVarNew ) ),
-                            along = 2, use.first.dimnames = TRUE )
-          colnames( dataSet ) <- append( name.var.lsd( oldNameVar ), addVars )
+          dataSet <- abind::abind( dataSet, array( as.numeric(NA),
+                                                   dim = c( nTsteps, nVarNew ) ),
+                                   along = 2, use.first.dimnames = TRUE )
+          colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
+                                         addVars )
 
           # Call function to fill new variables with data or reevaluate old ones
           if( ! is.null( eval.vars ) )
@@ -987,16 +996,17 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
           saveVars <- NULL
 
         # Read data from text files and format it as 4D array with labels
-        dataSet <- read.4d.lsd( myFiles, col.names = saveVars, nrows = nKeep, skip = iniDrop )
+        dataSet <- LSDinterface::read.4d.lsd( myFiles, col.names = saveVars,
+                                              nrows = nKeep, skip = iniDrop )
         nInsts <- dim( dataSet )[ 3 ]         # total number of instances
 
         # ------ Add new variables to data set ------
 
         # Increase array size to allow for new variables
-        dataSet <- abind( dataSet, array( as.numeric(NA),
-                                          dim = c( nTsteps, nVarNew,
-                                                   nInsts, nSize ) ),
-                          along = 2, use.first.dimnames = TRUE )
+        dataSet <- abind::abind( dataSet, array( as.numeric(NA),
+                                                 dim = c( nTsteps, nVarNew,
+                                                          nInsts, nSize ) ),
+                                 along = 2, use.first.dimnames = TRUE )
         dimnames( dataSet )[[ 2 ]] <- newNameVar
 
         # Call function to fill new variables with data or reevaluate old ones
@@ -1086,7 +1096,7 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
   colnames( tresp ) <- c( "Mean", "Variance" )
   respFile <- paste0( folder, "/", baseName, "_", iniExp, "_",
                       iniExp + nExp - 1, "_", outVar, ".csv" )
-  write.csv( tresp, respFile, row.names = FALSE )
+  utils::write.csv( tresp, respFile, row.names = FALSE )
 
   cat( "DoE response file saved:", respFile, "\n" )
   cat( " Doe points =", k, "\n" )
@@ -1101,7 +1111,7 @@ write.response.lsd <- function( folder, baseName, iniExp = 1, nExp = 1, outVar =
 
 # ==== Read and pre-process DoE and response files ====
 
-read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFiles = NULL,
+read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
                           confFile = NULL, limFile = NULL,
                           iniDrop = 0, nKeep = -1, saveVars = c(  ),
@@ -1112,8 +1122,8 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFiles = NULL,
   # ---- Process LSD result files ----
 
   # Get available DoE and response file names
-  files <- files.doe.lsd( folder, baseName )
-  if( is.null( doeFiles ) ) {
+  files <- files.doe( folder, baseName )
+  if( is.null( doeFile ) ) {
     if( length( files ) > does )
       warning( "Too many experiments (.csv) files, using first one(s) only!" )
     if( length( files ) < 1 )
@@ -1143,20 +1153,20 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFiles = NULL,
 
   # If response files don't exist, try to create them
   if( ! file.exists( respFile ) ) {
-    write.response.lsd( folder, baseName, outVar = outVar,
+    write.response( folder, baseName, outVar = outVar,
                         iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe.lsd( doeFile )[ 1 ],
-                        nExp = size.doe.lsd( doeFile )[ 2 ],
+                        iniExp = size.doe( doeFile )[ 1 ],
+                        nExp = size.doe( doeFile )[ 2 ],
                         addVars = addVars, eval.vars = eval.vars,
                         saveVars = saveVars )
   } else
     cat( "Using existing response file...\n\n" )
 
   if( does > 1 && ! file.exists( valRespFile ) ) {
-    write.response.lsd( folder, baseName, outVar = outVar,
+    write.response( folder, baseName, outVar = outVar,
                         iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe.lsd( validFile )[ 1 ],
-                        nExp = size.doe.lsd( validFile )[ 2 ],
+                        iniExp = size.doe( validFile )[ 1 ],
+                        nExp = size.doe( validFile )[ 2 ],
                         addVars = addVars, eval.vars = eval.vars,
                         saveVars = saveVars )
   } else
@@ -1164,27 +1174,27 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFiles = NULL,
       cat( "Using existing validation response file...\n\n" )
 
   # Read design of experiments definition & response
-  doe <- read.csv( doeFile )
-  resp <- read.csv( respFile )
+  doe <- utils::read.csv( doeFile )
+  resp <- utils::read.csv( respFile )
 
   # Read external validation experiments definition & response
   if( does > 1 ) {
-    valid <- read.csv( validFile )
-    valResp <- read.csv( valRespFile )
+    valid <- utils::read.csv( validFile )
+    valResp <- utils::read.csv( valRespFile )
   } else
     valid <- valResp <- NULL
 
   # Read LSD default parameter configuration from base .lsd file
   if( is.null( confFile ) ) {
-    config <- read.config.lsd( folder = folder, baseName = baseName )
+    config <- read.config( folder = folder, baseName = baseName )
   } else
-    config <- read.config.lsd( fileName = confFile )
+    config <- read.config( fileName = confFile )
 
   # Read LSD parameter limits file and join with default configuration
   if( is.null( limFile ) ) {
-    limits <- read.sens.lsd( folder = folder, baseName = baseName )
+    limits <- read.sens( folder = folder, baseName = baseName )
   } else
-    limits <- read.sens.lsd( fileName = limFile )
+    limits <- read.sens( fileName = limFile )
 
   limits$Def <- NA                          # add new column to param table
   for( i in 1 : nrow( limits ) ) {
@@ -1225,7 +1235,7 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFiles = NULL,
 
   doe <- list( doe = doe, resp = resp, valid = valid, valResp = valResp,
                facLim = facLim, facLimLo = facLimLo, facLimUp = facLimUp,
-               facDef = facDef )
+               facDef = facDef, saVarName = outVar )
   class( doe ) <- "lsd-doe"
 
   return( doe )
@@ -1450,8 +1460,7 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
 
 # ==== Perform Kriging sensitivity analysis ====
 
-kriging.sensitivity.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000,
-                                     factor1 = 0, factor2 = 0, factor3 = 0 ) {
+kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) {
 
   # ---- Sensitivity analysis for the kriging model ----
 
@@ -1462,15 +1471,17 @@ kriging.sensitivity.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 100
     X2 <- sobol.rnd.exp( sa.samp, colnames( data$doe ), lwr.bound = data$facLimLo,
                          upr.bound = data$facLimUp )
 
-    metamodel <- sobolGP( model = model$selected, type = "UK", X1 = X1, X2 = X2,
-                          MCmethod = "soboljensen", nboot = 100 )
+    metamodel <- sensitivity::sobolGP( model = model$selected, type = "UK", X1 = X1, X2 = X2,
+                                       MCmethod = "soboljensen", nboot = 100 )
     mainEffect <- function( x ) x$S$mean
     totEffect <- function( x ) x$T$mean
   } else {
-    kriging.mean <- function( point, model ) predict.km( model, point,
-                                                         type = "UK", se.compute = FALSE )$mean
-    metamodel <- fast99( model = kriging.mean, m = model$selected, n = sa.samp,
-                         factors = colnames( data$doe ), q.arg = data$facLim )
+    kriging.mean <- function( point, model ) DiceKriging::predict.km( model, point,
+                                                                      type = "UK",
+                                                                      se.compute = FALSE )$mean
+    metamodel <- sensitivity::fast99( model = kriging.mean, m = model$selected,
+                                      n = sa.samp, factors = colnames( data$doe ),
+                                      q.arg = data$facLim )
     mainEffect <- function( x ) x$D1 / x$V
     totEffect <- function( x ) 1 - x$Dt / x$V
   }
@@ -1490,18 +1501,10 @@ kriging.sensitivity.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 100
   cat( " Second:", colnames( data$doe )[ topEffect[ 2 ] ], "\n" )
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
-  # check if use fixed or top factors
-  if( factor1 != 0 )
-    topEffect[ 1 ] <- factor1
-  if( factor2 != 0 )
-    topEffect[ 2 ] <- factor2
-  if( factor3 != 0 )
-    topEffect[ 3 ] <- factor3
+  sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
+  class( sa ) <- "kriging-sa"
 
-  SA <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( SA ) <- "kriging-sa"
-
-  return( SA )
+  return( sa )
 }
 
 
@@ -1591,7 +1594,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
   m <- models[[ orderModel, interactModel ]]
   R2stat <- R2[ orderModel, interactModel ]
   fStat <- f[[ orderModel, interactModel ]]
-  fPval <- pf( fStat[ 1 ], fStat[ 2 ], fStat[ 3 ], lower.tail = FALSE )
+  fPval <- stats::pf( fStat[ 1 ], fStat[ 2 ], fStat[ 3 ], lower.tail = FALSE )
   coeff <- coeff[[ orderModel, interactModel ]]
   stdCoeff <- std.coeff[[ orderModel, interactModel ]]
   rmseStat <- rmse[ orderModel, interactModel ]
@@ -1705,14 +1708,13 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
 
 # ==== Perform polynomial sensitivity analysis ====
 
-polynomial.sensitivity.lsd <- function( data, model, sa.samp = 1000,
-                                        factor1 = 0, factor2 = 0,
-										factor3 = 0 ) {
+polynomial.sensitivity <- function( data, model, sa.samp = 1000 ) {
 
   # ------ Sensitivity analysis for best model ------
 
-  metamodel <- fast99( model = model$selected, n = sa.samp,
-                       factors = colnames( data$doe ), q.arg = data$facLim )
+  metamodel <- sensitivity::fast99( model = model$selected, n = sa.samp,
+                                    factors = colnames( data$doe ),
+                                    q.arg = data$facLim )
 
   mainEffect <- function( x ) x$D1 / x$V
   totEffect <- function( x ) 1 - x$Dt / x$V
@@ -1733,18 +1735,10 @@ polynomial.sensitivity.lsd <- function( data, model, sa.samp = 1000,
   cat( " Second:", colnames( data$doe )[ topEffect[ 2 ] ], "\n" )
   cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
 
-  # check if use fixed ot top factors
-  if( factor1 != 0 )
-    topEffect[ 1 ] <- factor1
-  if( factor2 != 0 )
-    topEffect[ 2 ] <- factor2
-  if( factor3 != 0 )
-    topEffect[ 3 ] <- factor3
+  sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
+  class( sa ) <- "polynomial-sa"
 
-  SA <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
-  class( SA ) <- "polynomial-sa"
-
-  return( SA )
+  return( sa )
 }
 
 
@@ -1759,121 +1753,27 @@ elementary.effects.lsd <- function( data, p = 4, jump = 2 ) {
     stop( "Invalid DoE size for Elementary Effects analysis" )
 
   # Create object of class "morris" to use standard sensitivity package
-  SA <- list( model = NULL, factors = colnames( data$doe ), samples = nrow( data$doe ),
+  sa <- list( model = NULL, factors = colnames( data$doe ), samples = nrow( data$doe ),
               r = nrow( data$doe ) / ( ncol( data$doe ) + 1 ),
               design = list( type = "oat", levels = p, grid.jump = jump ),
               binf = data$facLimLo, bsup = data$facLimUp, scale = TRUE,
               call = match.call( ) )
-  class( SA ) <- "morris"
+  class( sa ) <- "morris"
 
   # Scale all factors to the range [0,1]
-  Binf <- matrix( SA$binf, nrow = nrow( data$doe ), ncol = length( SA$binf ), byrow = TRUE )
-  Bsup <- matrix( SA$bsup, nrow = nrow( data$doe ), ncol = length( SA$bsup ), byrow = TRUE )
-  SA$X <- ( data$doe - Binf ) / ( Bsup - Binf )
-  SA$y <- data$resp$Mean
+  Binf <- matrix( sa$binf, nrow = nrow( data$doe ), ncol = length( sa$binf ), byrow = TRUE )
+  Bsup <- matrix( sa$bsup, nrow = nrow( data$doe ), ncol = length( sa$bsup ), byrow = TRUE )
+  sa$X <- ( data$doe - Binf ) / ( Bsup - Binf )
+  sa$y <- data$resp$Mean
   rm( Binf, Bsup )
 
   # Call elementary effects analysis from sensitivity package
-  SA$ee <- sensitivity:::ee.oat( SA$X, SA$y )
+  sa$ee <- sensitivity:::ee.oat( sa$X, sa$y )
 
   # add the standard error to the statistics
-  SA$table <- as.data.frame( print( SA ) )
-  SA$table$se <- SA$table$sigma / sqrt( SA$r )
-  SA$table$p.value <- pt( SA$table$mu.star / SA$table$se, df = SA$r - 1, lower.tail = FALSE )
+  sa$table <- as.data.frame( print( sa ) )
+  sa$table$se <- sa$table$sigma / sqrt( sa$r )
+  sa$table$p.value <- stats::pt( sa$table$mu.star / sa$table$se, df = sa$r - 1, lower.tail = FALSE )
 
-  return( SA )
-}
-
-
-########### SAMPLE CODE FOR ADDING A NEW VARIABLE TO LSD DATASET ###########
-
-# ---- 2D data array version (pool = TRUE) ----
-
-eval.vars <- function( data, vars ) {
-  tsteps <- nrow( data )
-  nvars <- ncol( data )
-
-  # ---- Compute values for new/existing variables ----
-  for( var in vars ) {
-
-    if( var %in% c( "var1", "var2" ) ) {   # Consider the log values of fast growing variables
-
-      data[ , var ] <- log( data[ , var ] )
-
-    } else if( var == "vu" ) {   # add the v/u (log detrended) variable to data set
-
-      require( mFilter, warn.conflicts = FALSE, quietly = TRUE )
-      if( ! exists( "smoothing" ) )
-        smoothing <- 1e5    # HP filter smoothing factor (lambda)
-
-      laborForce <- data[ , "LS" ]
-      uvGap <- 0
-
-      # Calculates (detrended) log unemployment and vacancies
-      u <- log( ( data[ , "U" ] + uvGap ) * laborForce + 1 )
-      u <- u - hpfilter( u, smoothing ) $ trend
-      v <- log( data[ , "V" ] * laborForce + 1 )
-      v <- v - hpfilter( v, smoothing ) $ trend
-
-      # Save the log ratio
-      data[ , var ] <- v - u
-
-    }
-  }
-  return( data )
-}
-
-# ---- 4D data frame version (when pool = FALSE) ----
-
-eval.vars <- function( data, vars ) {
-  tsteps <- length( data [ , 1, 1, 1 ] )
-  nvars <- length( data [ 1, , 1, 1 ] )
-  insts <- length( data [ 1, 1, , 1 ] )
-  samples <- length( data [ 1, 1, 1, ] )
-
-  # ---- Compute values for new variables, preventing infinite values ----
-  for( m in 1 : samples )               # for all MC samples (files)
-    for( j in 1 : insts )               # all instances
-      for( i in 1 : tsteps )            # all time steps
-        for( var in vars ) {            # and all variables
-
-          if( var == "ngrowth" ) {      # Example handling a new column
-            # Normalization of key variables using the period average size
-            mean <- mean( data[ i, "growth", , m ], na.rm = TRUE )
-            if( is.finite ( mean ) && mean != 0 )
-              data[ i, var, j, m ] <- data[ i,"growth", j, m ] / mean
-            else
-              data[ i, var, j, m ] <- NA
-          }
-        }
-  return( data )
-}
-
-
-########### SAMPLE CODE FOR LSD RUN EVALUATION ###########
-
-eval.run <- function( data, run = 1, varIdx = 1, conf = 0.95 ) {
-
-  if( ! exists( "fit_subbotin", mode = "function" ) )     # already loaded?
-    source( "StatFuncs.R" )
-
-  obs <- discards <- 0
-
-  # ------ Compute Subbotin fits for each run ------
-
-  bSubbo <- vector( "numeric" )
-  for( i in 1 : dim( data )[ 3 ] ) {
-    res <- fit_subbotin( data[[ run, varIdx, i ]] )
-    # remove non significant results at the selected confidence%
-    if( res[ 1 ] / res[ 4 ] < qt( ( 1 - conf ) / 2, length( data[[ run, varIdx, i ]] ),
-                                  lower.tail = FALSE ) ) {
-      discards <- discards + 1
-      bSubbo[ i ] <- NA
-    } else {
-      obs <- obs + 1
-      bSubbo[ i ] <- res[ 1 ]
-    }
-  }
-
-  return( list( mean( bSubbo, na.rm = TRUE ), var( bSubbo, na.rm = TRUE ), obs, discards ) )
+  return( sa )
 }

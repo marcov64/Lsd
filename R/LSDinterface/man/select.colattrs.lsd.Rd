@@ -71,7 +71,5 @@ a50 <- select.colattrs.lsd(bigTable, info, make.names("_A1p"), init.time = 1)
 # Restore working directory
 setwd(currWD)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ datasets }
+\keyword{ database }

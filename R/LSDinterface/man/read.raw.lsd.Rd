@@ -52,7 +52,7 @@ bigTable <- read.raw.lsd("Sim1_1.res")
 all21_70 <- read.raw.lsd("Sim1_2.res.gz", skip = 20, nrows = 50)
 #View(all21_70)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ interface }
+\keyword{ file }
+\keyword{ datasets }
+\keyword{ database }

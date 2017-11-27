@@ -37,7 +37,7 @@ info2 <- info.details.lsd("Sim1_2.res.gz")
 # Restore working directory
 setwd(currWD)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ attribute }
+\keyword{ file }
+
+

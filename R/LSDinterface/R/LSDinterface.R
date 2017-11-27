@@ -1,9 +1,5 @@
 ########### Functions to load LSD result files in R ############
 
-require( abind, warn.conflicts = FALSE, quietly = TRUE )
-require( parallel, warn.conflicts = FALSE, quietly = TRUE )
-
-
 # ==== Get the original LSD variable name from a R column name ====
 
 name.var.lsd <- function( r.name ){
@@ -68,7 +64,7 @@ name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ){
 info.dimensions.lsd <- function( file ){
 
   # read from disk
-  dataSet <- read.delim( file, na.strings = "NA" )
+  dataSet <- utils::read.delim( file, na.strings = "NA" )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
@@ -90,8 +86,8 @@ info.dimensions.lsd <- function( file ){
 info.names.lsd <- function( file ){
 
   # read from disk
-  dataSet <- read.delim( file, na.strings = "NA", nrows = 1,
-                         stringsAsFactors = FALSE )
+  dataSet <- utils::read.delim( file, na.strings = "NA", nrows = 1,
+                                stringsAsFactors = FALSE )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
@@ -111,9 +107,9 @@ info.names.lsd <- function( file ){
 info.init.lsd <- function( file ){
 
   # read from disk
-  dataSet <- as.matrix( read.delim( file, na.strings = "NA", nrows = 1,
-                                    colClasses = "numeric",
-                                    stringsAsFactors = FALSE ) )
+  dataSet <- as.matrix( utils::read.delim( file, na.strings = "NA", nrows = 1,
+                                           colClasses = "numeric",
+                                           stringsAsFactors = FALSE ) )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
@@ -135,8 +131,8 @@ info.init.lsd <- function( file ){
 info.details.lsd <- function( file ){
 
   # read from disk
-  dataSet <- read.delim( file, na.strings = "NA", nrows = 1,
-                         stringsAsFactors = FALSE )
+  dataSet <- utils::read.delim( file, na.strings = "NA", nrows = 1,
+                                stringsAsFactors = FALSE )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
@@ -255,7 +251,7 @@ info.stats.lsd <- function( array, rows = 1, cols = 2 ){
 
       # calculate the statistics
       avg[ i, j ] <- mean( elem, na.rm = TRUE )
-      sDev[ i, j ] <- sd( elem, na.rm = TRUE )
+      sDev[ i, j ] <- stats::sd( elem, na.rm = TRUE )
       if( is.finite( avg[ i, j ] ) ){
         M[ i, j ] <- max( elem, na.rm = TRUE )
         m[ i, j ] <- min( elem, na.rm = TRUE )
@@ -383,8 +379,9 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
 
 read.raw.lsd <- function( file, nrows = -1, skip = 0 ){
   # read from disk
-  dataSet <- as.matrix( read.delim( file, na.strings = "NA", colClasses = "numeric",
-                                    stringsAsFactors = FALSE ) )
+  dataSet <- as.matrix( utils::read.delim( file, na.strings = "NA",
+                                           colClasses = "numeric",
+                                           stringsAsFactors = FALSE ) )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
@@ -498,7 +495,7 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
   if( nnodes != 1 ) {
 
     if( nnodes == 0 )
-      nnodes <- detectCores( )
+      nnodes <- parallel::detectCores( )
 
     # find the maximum useful number of cores ( <= nnodes )
     i <- 1
@@ -507,18 +504,18 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
     nnodes <- ceiling( n / i )
 
     # initiate cluster for parallel loading
-    cl <- makeCluster( min( nnodes, n ) )
+    cl <- parallel::makeCluster( min( nnodes, n ) )
 
     # configure cluster: export required variables & packages
-    clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
-                   envir = environment( readFile ) )
-    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+    parallel::clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
+                             envir = environment( readFile ) )
+    invisible( parallel::clusterEvalQ( cl, library( LSDinterface ) ) )
 
     # read files in parallel
-    fileData <- parLapply( cl, files, readFile )
+    fileData <- parallel::parLapply( cl, files, readFile )
 
     # stop the cluster
-    stopCluster( cl )
+    parallel::stopCluster( cl )
 
   } else {
 
@@ -540,7 +537,8 @@ read.3d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
         stop( paste0( "File '", files[ i ], "' has incompatible dimensions!") )
 
       # 3D binding
-      dataArray <- abind( dataArray, fileData[[ i ]], along = 3, use.first.dimnames = TRUE )
+      dataArray <- abind::abind( dataArray, fileData[[ i ]], along = 3,
+                                 use.first.dimnames = TRUE )
     }
   }
 
@@ -581,7 +579,7 @@ read.list.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
   if( nnodes != 1 ) {
 
     if( nnodes == 0 )
-      nnodes <- detectCores( )
+      nnodes <- parallel::detectCores( )
 
     # find the maximum useful number of cores ( <= nnodes )
     i <- 1
@@ -590,18 +588,18 @@ read.list.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
     nnodes <- ceiling( n / i )
 
     # initiate cluster for parallel loading
-    cl <- makeCluster( min( nnodes, n ) )
+    cl <- parallel::makeCluster( min( nnodes, n ) )
 
     # configure cluster: export required variables & packages
-    clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
-                   envir = environment( readFile ) )
-    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+    parallel::clusterExport( cl, c( "nrows", "skip", "fixedLabels", "instance" ),
+                             envir = environment( readFile ) )
+    invisible( parallel::clusterEvalQ( cl, library( LSDinterface ) ) )
 
     # read files in parallel
-    subSet <- parLapply( cl, files, readFile )
+    subSet <- parallel::parLapply( cl, files, readFile )
 
     # stop the cluster
-    stopCluster( cl )
+    parallel::stopCluster( cl )
 
   } else {
 
@@ -677,7 +675,7 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
   if( nnodes != 1 ) {
 
     if( nnodes == 0 )
-      nnodes <- detectCores( )
+      nnodes <- parallel::detectCores( )
 
     # find the maximum useful number of cores ( <= nnodes )
     i <- 1
@@ -686,18 +684,18 @@ read.4d.lsd <- function( files, col.names = NULL, nrows = -1, skip = 0,
     nnodes <- ceiling( n / i )
 
     # initiate cluster for parallel loading
-    cl <- makeCluster( min( nnodes, n ) )
+    cl <- parallel::makeCluster( min( nnodes, n ) )
 
     # configure cluster: export required variables & packages
-    clusterExport( cl, c( "nrows", "skip" ),
-                   envir = environment( readFile ) )
-    invisible( clusterEvalQ( cl, library( LSDinterface ) ) )
+    parallel::clusterExport( cl, c( "nrows", "skip" ),
+                             envir = environment( readFile ) )
+    invisible( parallel::clusterEvalQ( cl, library( LSDinterface ) ) )
 
     # read files in parallel
-    dataSet <- parLapply( cl, files, readFile )
+    dataSet <- parallel::parLapply( cl, files, readFile )
 
     # stop the cluster
-    stopCluster( cl )
+    parallel::stopCluster( cl )
 
   } else {
 
