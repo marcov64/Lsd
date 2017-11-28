@@ -169,8 +169,8 @@ object *create( object *cr )
 
 	choice_g = choice = 0;
 
-	//Main Cycle ********************************
-	while ( ! choice )
+	// Main Cycle ********************************
+	while ( choice != 1 )
 	{
 		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change() ? "*" : " ", simul_name  );
 		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change() ? "*" : " ", simul_name  );
@@ -1347,7 +1347,7 @@ return r->up;
 case 6:
 
 cmd( "if $useCurrObj { set lab %s } { if [ info exists vname ] { set lab $vname } { set lab \"\" } }; set useCurrObj yes ", r->label  );
-lab1=(char *)Tcl_GetVar(inter, "lab",0);
+lab1 = (char *) Tcl_GetVar( inter, "lab",0 );
 
 if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 	break;
@@ -1372,12 +1372,11 @@ if ( ! strcmp( r->label, "Root" ) )	// cannot change Root
 	break;
 }
 
-cur_descr=search_description(lab_old);
-if(cur_descr==NULL)
+cur_descr = search_description( lab_old );
+if ( cur_descr == NULL )
 {
-   add_description(lab_old, "Object", "(no description available)");
-   plog( "\nWarning: description for '%s' not found. New one created.", "", lab_old );
-   cur_descr=search_description(lab_old);
+	add_description( lab_old, "Object", "(no description available)" );
+	cur_descr = search_description( lab_old );
 } 
   
 cmd( "set to_compute %d", r->to_compute );
@@ -1410,17 +1409,16 @@ cmd( "text $w.f.text -undo 1 -wrap word -width 60 -height 10 -relief sunken -ysc
 cmd( "pack $w.f.yscroll -side right -fill y" );
 cmd( "pack $w.f.int $w.f.text -anchor w -expand yes -fill both" );
 
-for(i=0; cur_descr->text[i]!=(char)NULL; i++)
-  if(cur_descr->text[i]!='[' && cur_descr->text[i]!=']' && cur_descr->text[i]!='{' && cur_descr->text[i]!='}' && cur_descr->text[i]!='\"' && cur_descr->text[i]!='\\')
-    cmd( "$w.f.text insert end \"%c\"", cur_descr->text[i] );
-  else
-    cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[i] );
+for ( i = 0; cur_descr->text[ i ] != ( char ) NULL; ++i )
+	if ( cur_descr->text[ i ] != '[' && cur_descr->text[ i ] != ']' && cur_descr->text[ i ] != '{' && cur_descr->text[ i ] != '}' && cur_descr->text[ i ] != '\"' && cur_descr->text[ i ] != '\\' )
+		cmd( "$w.f.text insert end \"%c\"", cur_descr->text[ i ] );
+	else
+		cmd( "$w.f.text insert end \"\\%c\"", cur_descr->text[ i ] );
 
 cmd( "$w.f.text delete \"end - 1 char\"" );
 cmd( "pack $w.f -fill x -expand yes" );
 
 cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
-
 
 cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
 cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
@@ -1430,9 +1428,11 @@ cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menumodel.html#ChangeObjName 
 
 cmd( "showtop $T topleftW" );
 
-*choice=0;
-while(*choice==0)
- Tcl_DoOneEvent(0);
+*choice = 0;
+while ( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
+
+redrawRoot = false;			// no browser redraw yet
 
 if ( *choice != 2 )
 {
@@ -1443,31 +1443,27 @@ if ( *choice != 2 )
 	cmd( "set text_description \"[.objprop.desc.f.text get 1.0 end]\"" );
 	change_descr_text(lab_old);
 	lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
-	add_description(lab, "Object", lab1);
+	add_description( lab, "Object", lab1 );
 
 	cmd( "set choice $to_compute" );
 
-	if(*choice!=r->to_compute)
+	if ( *choice != r->to_compute )
 	{
-	 cur=blueprint->search(r->label);
-	 if ( cur != NULL )
-	 	 cur->to_compute=*choice;
-	 for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
-	   cur->to_compute=*choice;
+		cur = blueprint->search( r->label );
+		if ( cur != NULL )
+			cur->to_compute = *choice;
+		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			cur->to_compute = *choice;
 	}   
 
-	//control for elements to save in objects to be not computed
-	if(*choice==0)
-	  control_tocompute(r, r->label);
-
-	here_endobjprop:
+	// control for elements to save in objects to be not computed
+	if ( *choice == 0 )
+		control_tocompute( r, r->label );
 
 	redrawRoot = true;			// force browser redraw
 }
 
 cmd( "destroytop .objprop" );
-
-redrawRoot = false;			// no browser redraw yet
 
 if ( done == 3  || done == 5 )
 {

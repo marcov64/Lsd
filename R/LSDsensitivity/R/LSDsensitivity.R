@@ -1768,7 +1768,7 @@ elementary.effects.lsd <- function( data, p = 4, jump = 2 ) {
   rm( Binf, Bsup )
 
   # Call elementary effects analysis from sensitivity package
-  sa$ee <- sensitivity:::ee.oat( sa$X, sa$y )
+  sa$ee <- ee.oat( sa$X, sa$y )
 
   # add the standard error to the statistics
   sa$table <- as.data.frame( print( sa ) )
