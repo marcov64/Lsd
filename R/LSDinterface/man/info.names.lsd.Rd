@@ -28,15 +28,15 @@ Not all names can be automatically reconverted to the original LSD names. The co
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
-info.names.lsd("Sim1_1.res")
+info.names.lsd( "Sim1_1.res" )
 
-info.names.lsd("Sim1_2.res.gz")
+info.names.lsd( "Sim1_2.res.gz" )
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ file }

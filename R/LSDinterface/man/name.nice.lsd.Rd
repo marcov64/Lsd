@@ -23,11 +23,11 @@ A character vector of with the same attributes as x (after possible coercion) an
 \code{\link{info.names.lsd}}
 }
 \examples{
-name.nice.lsd("X_Var1.1_1..1.100.")
+name.nice.lsd( "X_Var1.1_1..1.100." )
 
-name.nice.lsd(c("_Var1.1_1..1.100.", "X_Var2.1_2_3..50.70."))
+name.nice.lsd( c( "_Var1.1_1..1.100.", "X_Var2.1_2_3..50.70." ) )
 
-name.nice.lsd(c("_Var1", "X_Var2"))
+name.nice.lsd( c( "_Var1", "X_Var2" ) )
 }
 \keyword{ attribute }
 \keyword{ misc }

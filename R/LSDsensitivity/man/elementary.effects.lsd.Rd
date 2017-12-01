@@ -47,24 +47,31 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 \code{\link[sensitivity]{morris}} in \code{\link[sensitivity]{sensitivity-package}}
 }
 \examples{
-# typical call to load data from a LSD simulation baseline configuration named "Sim1.lsd" and to
-# perform the elementary effects analysis on the variable named "var1". There is just one set of
-# sampled data (DoE), created by LSD being read by this command, as elementary effects takes no
-# external validation DoE
+# Examples require the data files produced by LSD, please check the package
+# notes and LSD documentation on how to generate you simulation results files.
+# Please note that the full set of sensitivity analysis files must be available,
+# as detailed in the help page for the read.doe.lsd function.
 
-lsdVars <- c( "var1", "var2", "var3" )          # the definition of existing variables
+# Steps to use this function:
+# 1. define the variables you want to use in the analysis
+# 2. load data from a LSD simulation saved results using read.doe.lsd
+# 3. perform the elementary effects analysis applying elementary.effects.lsd
 
-#dataSet <- read.doe.lsd( ".",                  # data files relative folder
-#                         "Sim1",               # data files base name (same as .lsd file)
-#                         "var1",               # variable name to perform the sensitivity analysis
-#                         saveVars = lsdVars )  # LSD variables to keep in dataset
+\donttest{
+lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-#SA <- elementary.effects.lsd( dataSet,         # LSD experimental data set
-#                              p = 4,           # number of levels of the design (as set in LSD)
-#                              jump = 2 )       # number of jumps per level (as set in LSD)
+dataSet <- read.doe.lsd( ".",                  # data files relative folder
+                         "Sim1",               # data files base name (same as .lsd file)
+                         "var1",               # variable name to perform the sensitivity analysis
+                         saveVars = lsdVars )  # LSD variables to keep in dataset
 
-#print( SA )                                    # show analysis table
-#plot( SA )                                     # plot analysis chart
+SA <- elementary.effects.lsd( dataSet,         # LSD experimental data set
+                              p = 4,           # number of levels of the design (as set in LSD)
+                              jump = 2 )       # number of jumps per level (as set in LSD)
+
+print( SA )                                    # show analysis table
+plot( SA )                                     # plot analysis chart
+}
 }
 \keyword{ methods }
 \keyword{ models }

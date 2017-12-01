@@ -61,7 +61,6 @@ print  message string m in the Log screen. It is in LSDMAIN.CPP
 #include "decl.h"
 
 // better adjusts position for X11
-bool warn_fast;					// warning control
 char intval[ 100 ];				// string buffer
 char **tp;						// labels of variables to plot in runtime
 double ymin;
@@ -157,8 +156,6 @@ void init_plot( int num, int id_sim )
 {
 	int i, j, k;
 	
-	warn_fast = false;				// one warning per plot window
-
 	if ( max_step > 500 )
 		plot_step = 1;
 	else
@@ -255,13 +252,6 @@ void plot_rt( variable *v )
 	int y1, y2;
 	double dy, step, value;
 	
-
-	if ( fast_mode > 0 && ! warn_fast ) 
-	{
-		plog( "\nWarning: there are run time plot variables set in FAST mode" );
-		warn_fast = true;
-	}
-
 	// limit the number of run time plot variables
 	if ( cur_plt > 100 )
 		return;

@@ -4734,26 +4734,26 @@ case 68:
 
 	// check for existing NW executable
 	sprintf( ch, "%s/lsd_gnuNW", exec_path );			// form full executable name
-	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
-	if(*choice == 1)
-		strcat(ch, ".exe");								// add Windows ending
+	cmd( "if { $tcl_platform(platform) == \"windows\" } { set choice 1 } { set choice 0 }" );
+	if ( *choice == 1 )
+		strcat( ch, ".exe" );							// add Windows ending
 
-	if ((f=fopen(ch, "rb")) == NULL) 
+	if ( ( f = fopen( ch, "rb" ) ) == NULL ) 
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"" );
 		break;
 	}
-	fclose(f);
+	fclose( f );
 	
 	// check if serial sensitivity configuration was just created
-	*choice=0;
-	if(findexSens > 0)
-		cmd( "set answer [tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}" ); 
-	if(*choice == 2)
+	*choice = 0;
+	if ( findexSens > 0 )
+		cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Script/batch created\" -detail \"A sequential sensitivity set of configuration files was just created and can be used to create the script/batch.\n\nPress 'Yes' to confirm or 'No' to select a different set of files.\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+	if ( *choice == 2 )
 		break;
 	
 	// get configuration files to use
-	if(*choice == 1)							// use current configuration files
+	if ( *choice == 1 )							// use current configuration files
 	{
 		if ( strlen( path ) == 0 || strlen( simul_name ) == 0 )
 		{
@@ -4767,18 +4767,18 @@ case 68:
 		findexSens = 0;
 		strncpy( out_file, simul_name, MAX_PATH_LENGTH - 1 );
 		strncpy( out_dir, path, MAX_PATH_LENGTH - 1 );
-		Tcl_SetVar(inter, "res", simul_name, 0);
-		Tcl_SetVar(inter, "path", path, 0);
+		Tcl_SetVar( inter, "res", simul_name, 0 );
+		Tcl_SetVar( inter, "path", path, 0 );
 	}
 	else										// ask for first configuration file
 	{
-		cmd( "set answer [tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\"]; switch -- $answer {yes {set choice 1} no {set choice 0} cancel {set choice 2}}" ); 
-		if(*choice == 2)
+		cmd( "set answer [ tk_messageBox -parent . -type yesnocancel -icon question -default yes -title \"Create Batch\" -message \"Select sequence of configuration files?\" -detail \"Press 'Yes' to choose the first file of the continuous sequence (format: 'name_NNN.lsd') or 'No' to select a different set of files (use 'Ctrl' to pick multiple files).\" ]; switch -- $answer { yes { set choice 1 } no { set choice 0 } cancel { set choice 2 } }" ); 
+		if ( *choice == 2 )
 			break;
 		else
 			fSeq = *choice;
 		
-		if(strlen(simul_name) > 0)				// default name
+		if ( strlen( simul_name ) > 0 )				// default name
 			cmd( "set res \"%s_1.lsd\"", simul_name );
 		else
 			cmd( "set res \"\"" );
@@ -4786,32 +4786,33 @@ case 68:
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
 		// open dialog box to get file name & folder
-		if( fSeq )								// file sequence?
+		if ( fSeq )								// file sequence?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
-			cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set choice [expr [string range $res $numpos end]]; set res [string range $res 0 [expr $numpos - 2]]} {plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0} } {set choice 0}" );
-			if(*choice == 0)
+			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set choice [ expr [ string range $res $numpos end ] ]; set res [ string range $res 0 [ expr $numpos - 2 ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
+			if ( *choice == 0 )
 				break;
-			ffirst=*choice;
+			ffirst = *choice;
 			strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res", 0 ), MAX_PATH_LENGTH - 1 );
 			strncpy( out_dir, ( char * ) Tcl_GetVar( inter, "path", 0 ), MAX_PATH_LENGTH - 1 );
-			f=NULL;
+			f = NULL;
 			do									// search for all sequential files
 			{
 				if ( strlen( out_dir ) == 0 )			// default path
 					sprintf( lab, "%s_%d.lsd", out_file, ( *choice )++ );
 				else
-					sprintf(lab, "%s/%s_%d.lsd", out_dir, out_file, (*choice)++);
-				if(f != NULL) fclose(f);
-				f=fopen(lab, "r");
+					sprintf( lab, "%s/%s_%d.lsd", out_dir, out_file, (*choice)++ );
+				if ( f != NULL ) 
+					fclose( f );
+				f = fopen( lab, "r" );
 			}
-			while(f != NULL);
-			fnext=*choice - 1;
+			while ( f != NULL );
+			fnext = *choice - 1;
 		}
 		else									// bunch of files?
 		{
-			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes]" );
-			cmd( "set choice [llength $bah]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } {set res [lindex $bah 0]; set path [file dirname $res]; set res [file tail $res]; set last [expr [string last .lsd $res] - 1]; set res [string range $res 0 $last]; set numpos [expr [string last _ $res] + 1]; if {$numpos > 0} {set res [string range $res 0 [expr $numpos - 2]]}}" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
+			cmd( "set choice [ llength $bah ]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { set res [ lindex $bah 0 ]; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set res [ string range $res 0 [ expr $numpos - 2 ] ] } }" );
 			if( *choice == 0 )
 				break;
 			ffirst = 1;
@@ -4887,9 +4888,9 @@ case 68:
 	if ( param < 1 || param > 64 ) 
 		param = max_threads;
 	
-	get_int( "threads", & num );
-	if ( num < 1 || num > 64 ) 
-		num = max_threads;
+	get_int( "threads", & nature );
+	if ( nature < 1 || nature > 64 ) 
+		nature = max_threads;
 	
 	strncpy( out_bat, ( char * ) Tcl_GetVar( inter, "res2", 0 ), MAX_PATH_LENGTH - 1 );
 	
@@ -4906,7 +4907,7 @@ case 68:
 		else
 			sprintf( lab, "%s/%s.sh", out_dir, out_bat );
 		
-	f = fopen(lab, "wt");
+	f = fopen( lab, "wt" );
 	if ( *choice == 1 )						// Windows header
 	{
 		fprintf( f, "@echo off\nrem Batch generated by LSD\n" );
@@ -4956,9 +4957,9 @@ case 68:
 		for ( i = ffirst, j = 1; j <= param; ++j )	// allocates files by the number of cores
 		{
 			if ( *choice == 1 )				// Windows
-				fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, j );
+				fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s -s %d -e %d %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, nature, win_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, j );
 			else							// Unix
-				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, j );
+				fprintf( f, "%s -c %d -f %s/%s -s %d -e %d %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, nature, out_dir, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, j );
 			j <= sl ? i += num + 1 : i += num;
 		}
 	}
@@ -4966,18 +4967,18 @@ case 68:
 		for ( i = ffirst, j = 1; i < fnext; ++i, ++j )
 			if ( fSeq )
 				if ( *choice == 1 )			// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, num, win_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, i );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s_%d.lsd %s %s %s 1>%s\\%s_%d.log 2>&1\n", j, ch, nature, win_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file, i );
 				else						// Unix
-					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, num, out_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, i );
+					fprintf( f, "%s -c %d -f %s/%s_%d.lsd %s %s %s >%s/%s_%d.log 2>&1 &\n", ch, nature, out_dir, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file, i );
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
 				strncpy( out_file, ( char * ) Tcl_GetVar( inter, "res3", 0 ), MAX_PATH_LENGTH - 1 );
 				
 				if ( *choice == 1 )			// Windows
-					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s %s 1>%s\\%s.log 2>&1\n", j, ch, num, win_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file );
+					fprintf( f, "start \"LSD Process %d\" /B \"%s\" -c %d -f %s\\%s.lsd %s %s %s 1>%s\\%s.log 2>&1\n", j, ch, nature, win_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", win_dir, out_file );
 				else						// Unix
-					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s %s >%s/%s.log 2>&1 &\n", ch, num, out_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file );
+					fprintf( f, "%s -c %d -f %s/%s.lsd %s %s %s >%s/%s.log 2>&1 &\n", ch, nature, out_dir, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_dir, out_file );
 			}
 	
 	if ( fSeq )
@@ -4996,8 +4997,8 @@ case 68:
 	else
 		if ( *choice == 1 )					// Windows closing
 		{
-			fprintf(f, "echo %d log files being generated.\n", j - 1);
-			fclose(f);
+			fprintf( f, "echo %d log files being generated.\n", j - 1 );
+			fclose( f );
 		}
 		else								// Unix closing
 		{

@@ -69,22 +69,32 @@ See the note in \link[LSDsensitivity]{LSDsensitivity-package} for step-by-step i
 \code{\link[DiceKriging]{km}} in \code{\link[DiceKriging]{DiceKriging-package}}
 }
 \examples{
-# First there is call to load data from a LSD simulation. There are two sets of
-# sampled data (DoEs), one for model estimation and the other for out-of-sample
-# (external) validation. Next, a Kriging meta-model is fit to the read data.
+# Examples require the data files produced by LSD, please check the package
+# notes and LSD documentation on how to generate you simulation results files.
+# Please note that the full set of sensitivity analysis files must be available,
+# as detailed in the help page for the read.doe.lsd function.
 
-lsdVars <- c( "var1", "var2", "var3" )          # the definition of existing variables
+# Steps to use this function:
+# 1. define the variables you want to use in the analysis
+# 2. load data from a LSD simulation saved results using read.doe.lsd,
+#    preferrably using two sets of sampled data (DoEs), one for model
+#    estimation and the other for out-of-sample (external) validation
+# 3. fit a Kriging (or polynomial) meta-model using kriging.model.lsd
 
-#dataSet <- read.doe.lsd( ".",                  # data files relative folder
-#                         "Sim1",               # data files base name (same as .lsd file)
-#                         "var1",               # variable name to perform the sensitivity analysis
-#                         does = 2,             # number of experiments (data + external validation)
-#                         saveVars = lsdVars )  # LSD variables to keep in dataset
+\donttest{
+lsdVars <- c( "var1", "var2", "var3" )         # the definition of existing variables
 
-#model <- kriging.model.lsd( dataSet )          # estimate best Kriging meta-model
+dataSet <- read.doe.lsd( ".",                  # data files relative folder
+                         "Sim1",               # data files base name (same as .lsd file)
+                         "var1",               # variable name to perform the sensitivity analysis
+                         does = 2,             # number of experiments (data + external validation)
+                         saveVars = lsdVars )  # LSD variables to keep in dataset
 
-#print( model$comparison )                      # model comparison table
-#print( model$estimation.std )                  # model estimation (standardized) table
+model <- kriging.model.lsd( dataSet )          # estimate best Kriging meta-model
+
+print( model$comparison )                      # model comparison table
+print( model$estimation.std )                  # model estimation (standardized) table
+}
 }
 \keyword{ methods }
 \keyword{ models }

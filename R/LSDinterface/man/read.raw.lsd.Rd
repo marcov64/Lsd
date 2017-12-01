@@ -38,19 +38,22 @@ Variable names are never "cleaned", even for single instanced variables.
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # reads all instances of all variables
-bigTable <- read.raw.lsd("Sim1_1.res")
+bigTable <- read.raw.lsd( "Sim1_1.res" )
 
 # See matrix in the data viewer (require package 'utils')
-#View(bigTable)
+\donttest{View( bigTable )}
 
-## reads all instances of all variables, skipping the initial 20 time steps
-## and keeping up to 50 time steps (from t = 21 up to t = 70)
-all21_70 <- read.raw.lsd("Sim1_2.res.gz", skip = 20, nrows = 50)
-#View(all21_70)
+# reads all instances of all variables, skipping the initial 20 time steps
+# and keeping up to 50 time steps (from t = 21 up to t = 70)
+all21_70 <- read.raw.lsd( "Sim1_2.res.gz", skip = 20, nrows = 50 )
+\donttest{View( all21_70 )}
+
+# Restore working directory
+setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }

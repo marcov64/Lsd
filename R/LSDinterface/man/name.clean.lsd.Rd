@@ -23,9 +23,9 @@ A character vector of with the same attributes as x (after possible coercion) an
 \code{\link{info.names.lsd}}
 }
 \examples{
-name.clean.lsd("Var1.1_1..1.100.")
+name.clean.lsd( "Var1.1_1..1.100." )
 
-name.clean.lsd(c("Var1.1_1..1.100.", "Var2.1_2_3..50.70."))
+name.clean.lsd( c( "Var1.1_1..1.100.", "Var2.1_2_3..50.70." ) )
 }
 \keyword{ attribute }
 \keyword{ misc }

@@ -49,27 +49,28 @@ If only variable names selection is needed, \code{\link{select.colnames.lsd}} is
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # reads all instances of all variables
-bigTable <- read.raw.lsd("Sim1_1.res")
+bigTable <- read.raw.lsd( "Sim1_1.res" )
 
 # build the info table
-info <- info.details.lsd("Sim1_1.res")
+info <- info.details.lsd( "Sim1_1.res" )
 
 # read some instances of a set of variables named '_A1p' and '_growth1'
-abFirst2 <- select.colattrs.lsd(bigTable, info, c("_A1p", "_growth1"), posit = c("1_2", "1_5"))
+abFirst2 <- select.colattrs.lsd( bigTable, info, c( "_A1p", "_growth1" ),
+                                 posit = c( "1_2", "1_5" ) )
 
 # See matrix in the data viewer (require package 'utils')
-#View(abFirst2)
+\donttest{View( abFirst2 )}
 
 # reads instances of variable '_A1p' that start at time step t = 1
-a50 <- select.colattrs.lsd(bigTable, info, make.names("_A1p"), init.time = 1)
-#View(a50)
+a50 <- select.colattrs.lsd( bigTable, info, make.names( "_A1p" ), init.time = 1 )
+\donttest{View( a50 )}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ datasets }
 \keyword{ database }

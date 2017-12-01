@@ -29,15 +29,15 @@ Returns a character vector containing the valid variable names contained in the 
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
-name.check.lsd("Sim1_1.res")
+name.check.lsd( "Sim1_1.res" )
 
-name.check.lsd("Sim1_1.res", col.names = c("GDP", "_growth1"))
+name.check.lsd( "Sim1_1.res", col.names = c( "GDP", "_growth1" ) )
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ misc }

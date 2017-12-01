@@ -35,33 +35,33 @@ Returns a list containing four matrices, with the original size and naming of th
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # reads first instance of all variables from three MC files (3D array)
-inst1Array <- read.3d.lsd(c("Sim1_1.res", "Sim1_2.res", "Sim1_3.res"))
+inst1Array <- read.3d.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ) )
 
 # creates statistics data frames for the variables
-inst1Stats <- info.stats.lsd(inst1Array)
+inst1Stats <- info.stats.lsd( inst1Array )
 
 # See matrix in the data viewer (require package 'utils')
-#View(inst1Stats)
+\donttest{View( inst1Stats )}
 
 # organize the stats by variable (dim=2) and file (dim=3)
-inst1Stats2 <- info.stats.lsd(inst1Array, rows = 2, cols = 3)
-#View(inst1Stats2)
+inst1Stats2 <- info.stats.lsd( inst1Array, rows = 2, cols = 3 )
+\donttest{View( inst1Stats2 )}
 
 # the same but for all instance of all variables (from a 4D array)
-allArray <- read.4d.lsd(c("Sim1_1.res", "Sim1_2.res", "Sim1_3.res"))
-allStats <- info.stats.lsd(allArray)
-#View(allStats)
+allArray <- read.4d.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ) )
+allStats <- info.stats.lsd( allArray )
+\donttest{View( allStats )}
 
 # organize the stats by file (dim=4) and variable (dim=2)
-allStats2 <- info.stats.lsd(allArray, rows = 4, cols = 2)
-#View(allStats2)
+allStats2 <- info.stats.lsd( allArray, rows = 4, cols = 2 )
+\donttest{View( allStats2 )}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ file }

@@ -737,6 +737,7 @@ void run( object *root )
 		running = true;
 		debug_flag = false;
 		use_nan = false;
+		on_bar = false;
 		done_in = 0;
 		actual_steps = 0;
 		perc_done = 0;
@@ -1242,7 +1243,7 @@ void create_logwindow( void )
 	cmd( "button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
 	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 5 -pady 10 -side left" );
-	cmd( "pack $w -side right" );
+	cmd( "pack $w -padx 10 -side right" );
 
 	cmd( "showtop .log none 1 1 0" );
 	set_shortcuts_log( ".log" );

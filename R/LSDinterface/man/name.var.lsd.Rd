@@ -26,9 +26,9 @@ A character vector of with the same attributes as x (after possible coercion).
 \code{\link{info.names.lsd}}
 }
 \examples{
-name.var.lsd("label")
+name.var.lsd( "label" )
 
-name.var.lsd(c("label", "X_underlinelabel"))
+name.var.lsd( c( "label", "X_underlinelabel" ) )
 }
 \keyword{ attribute }
 \keyword{ misc }

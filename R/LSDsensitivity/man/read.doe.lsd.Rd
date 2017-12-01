@@ -130,30 +130,42 @@ LSD documentation is available at \url{http://labsimdev.org} and the latest bina
 \code{\link{polynomial.model.lsd}}
 }
 \examples{
-# typical call to load data from a LSD simulation baseline configuration named "Sim1.lsd" and to
-# perform the sensitivity analysis on the variable named "var1". There are two groups of sampled
-# data (DoEs) created by LSD being read by this command
+# Examples require the data files produced by LSD, please check the package
+# notes and LSD documentation on how to generate you simulation results files.
+# Please note that the full set of sensitivity analysis files must be available,
+# as detailed in the help page for the read.doe.lsd function.
 
+# Steps to use this function:
+# 1. define the variables you want to use in the analysis
+# 2. optionally, define special handling functions (see examples below)
+# 3. load data from a LSD simulation saved results using read.doe.lsd
+# 4. perform the elementary effects analysis applying elementary.effects.lsd
+
+\donttest{
 # the definition of existing, to take log and to be added variables
-
 lsdVars <- c( "var1", "var2", "var3" )
 logVars <- c( "var1", "var3" )
 newVars <- c( "var4" )
 
-#dataSet <- read.doe.lsd( ".",                  # data files relative folder
-#                         "Sim1",               # data files base name (same as .lsd file)
-#                         "var1",               # variable name to perform the sens. analysis
-#                         does = 2,             # # of experiments (data + external validation)
-#                         iniDrop = 0,          # initial time steps to drop (0=none)
-#                         nKeep = -1,           # number of time steps to keep (-1=all)
-#                         saveVars = lsdVars,   # LSD variables to keep in dataset
-#                         addVars = newVars,    # new variables to add to the LSD dataset
-#                         eval.vars = eval.vars,# function to evaluate/adjust/expand the dataset
-#                         eval.run = eval.run,  # function to evaluate the DoE point response
-#                         rm.temp = FALSE,      # remove temporary speedup files?
-#                         rm.outl = FALSE,      # remove outliers from dataset
-#                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
+# load data from a LSD simulation baseline configuration named "Sim1.lsd" to
+# perform sensitivity analysis on the variable named "var1"
+# there are two groups of sampled data (DoEs) created by LSD being read
+dataSet <- read.doe.lsd( ".",                  # data files relative folder
+                         "Sim1",               # data files base name (same as .lsd file)
+                         "var1",               # variable name to perform the sens. analysis
+                         does = 2,             # # of experiments (data + external validation)
+                         iniDrop = 0,          # initial time steps to drop (0=none)
+                         nKeep = -1,           # number of time steps to keep (-1=all)
+                         saveVars = lsdVars,   # LSD variables to keep in dataset
+                         addVars = newVars,    # new variables to add to the LSD dataset
+                         eval.vars = eval.vars,# function to evaluate/adjust/expand the dataset
+                         eval.run = eval.run,  # function to evaluate the DoE point response
+                         rm.temp = FALSE,      # remove temporary speedup files?
+                         rm.outl = FALSE,      # remove outliers from dataset
+                         lim.outl = 10 )       # limit non-outliers deviation (# of std. devs.)
 
+
+#### OPTIONAL HANDLING FUNCTION EXAMPLES ####
 
 # eval.vars( ) EXAMPLE 1
 # the definition of a function to take the log of the required variables () and
@@ -242,6 +254,7 @@ eval.run <- function( data, mcRun, varIdx, confInt ) {
 
   return( list( mean( bSubbo, na.rm = TRUE ),
                 var( bSubbo, na.rm = TRUE ), obs, discards ) )
+}
 }
 }
 \keyword{ interface }

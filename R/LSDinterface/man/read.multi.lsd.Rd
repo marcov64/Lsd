@@ -42,25 +42,30 @@ For extracting data from multiple similar files (like sensitivity analysis resul
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # Load a sample .res file into a simple matrix (all instances)
-macroList <- read.multi.lsd("Sim1_1.res")
+macroList <- read.multi.lsd( "Sim1_1.res" )
 
 # See matrix in the data viewer (require package 'utils')
-length(macroList)
-#View(macroList[[1]])
-#View(macroList[[8]])
+length( macroList )
+\donttest{
+View( macroList[[ 1 ]] )
+View( macroList[[ 8 ]] )
+}
 
 # reads first instance of 2 variables, skipping the initial 20 time steps
 # and keeping up to 50 time steps (from t = 21 up to t = 70)
-varsList21_70 <- read.multi.lsd("Sim1_1.res", c("_A1p", "_growth1"), skip = 20, nrows = 50)
-#View(varsList21_70[[1]])
-#View(varsList21_70[[2]])
+varsList21_70 <- read.multi.lsd( "Sim1_1.res", c( "_A1p", "_growth1" ),
+                                 skip = 20, nrows = 50 )
+\donttest{
+View( varsList21_70[[ 1 ]] )
+View( varsList21_70[[ 2 ]] )
+}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }

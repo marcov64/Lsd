@@ -49,31 +49,39 @@ If the selected files don't have the same columns available (names and instances
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # reads first instance of all variables from three files (one level each)
-inst1Array <- read.3d.lsd(c("Sim1_1.res", "Sim1_2.res", "Sim1_3.res"))
+inst1Array <- read.3d.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ) )
 
 # See parts of the 3D array in the data viewer (require package 'utils')
-#View(inst1Array[,,1])
-#View(inst1Array[,,2])
-#View(inst1Array[,,3])
+\donttest{
+View( inst1Array[ , , 1 ] )
+View( inst1Array[ , , 2 ] )
+View( inst1Array[ , , 3 ] )
+}
 
 # read first instance of a set of variables named '_A1p' and '_growth1'
-ab1Array <- read.3d.lsd(c("Sim1_1.res.gz", "Sim1_2.res.gz", "Sim1_3.res.gz"), c("_A1p", "_growth1"))
-#View(ab1Array[,,1])
-#View(ab1Array[,,2])
-#View(ab1Array[,,3])
+ab1Array <- read.3d.lsd( c( "Sim1_1.res.gz", "Sim1_2.res.gz", "Sim1_3.res.gz" ),
+                         c( "_A1p", "_growth1" ) )
+\donttest{
+View( ab1Array[ , , 1 ] )
+View( ab1Array[ , , 2 ] )
+View( ab1Array[ , , 3 ] )
+}
 
 # reads instance 2 of all variables, skipping the initial 20 time steps
 # and keeping up to 50 time steps (from t = 21 up to t = 70)
-inst2Array21_70 <- read.3d.lsd(c("Sim1_1.res", "Sim1_2.res"), skip = 20, nrows = 50, instance = 2)
-#View(inst2Array21_70[,,1])
-#View(inst2Array21_70[,,2])
+inst2Array21_70 <- read.3d.lsd( c( "Sim1_1.res", "Sim1_2.res" ),
+                                skip = 20, nrows = 50, instance = 2 )
+\donttest{
+View( inst2Array21_70[ , , 1 ] )
+View( inst2Array21_70[ , , 2 ] )
+}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }

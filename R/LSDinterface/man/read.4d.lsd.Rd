@@ -50,37 +50,46 @@ When 'pool = TRUE', the produced array is still 4-dimensional but the fourth dim
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
 # reads all instance of all variables from three files
-allArray <- read.4d.lsd(c("Sim1_1.res", "Sim1_2.res", "Sim1_3.res"))
+allArray <- read.4d.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ) )
 
 # See parts of the 4D array in the data viewer (require package 'utils')
-#View(allArray[,,1,1])   # first instance of first file (all vars and times)
-#View(allArray[,9,,2])   # all instances of ninth variable in second file (all t's)
-#View(allArray[50,8,,])  # all instances of all files of 8th variable for t=50
+\donttest{
+View( allArray[ , , 1, 1 ] )   # first instance of first file (all vars and times)
+View( allArray[ , 9, , 2 ] )   # all instances of ninth variable in second file (all t's)
+View( allArray[ 50, 8, , ] )   # all instances of all files of 8th variable for t=50
+}
 
 # the same, but pooling all files into a single one
-allArrayPool <- read.4d.lsd(c("Sim1_1.res", "Sim1_2.res", "Sim1_3.res"), pool = TRUE)
-#View(allArrayPool[,,1,1])   # first instance of first file (all vars and times)
-#View(allArrayPool[,9,,1])   # all instances of ninth variable in second file (all t's)
-#View(allArrayPool[50,8,,])  # all instances of all files of 8th variable for t=50
+allArrayPool <- read.4d.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ), pool = TRUE )
+\donttest{
+View( allArrayPool[ , , 1, 1 ] )   # first instance of first file (all vars and times)
+View( allArrayPool[ , 9, , 1 ] )   # all instances of ninth variable in second file (all t's)
+View( allArrayPool[ 50, 8, , ] )   # all instances of all files of 8th variable for t=50
+}
 
 # read instances of a set of variables named '_A1p' and '_growth1'
-abArray <- read.4d.lsd(c("Sim1_1.res.gz", "Sim1_2.res.gz", "Sim1_3.res.gz"), c("_A1p", "_growth1"))
-#View(abArray[,,1,2])   # first instances of second file (all vars and times)
-#View(abArray[,2,,3])   # all instances of second variable in third file (all t's)
-#View(abArray[50,1,,])  # all instances of all files of first variable for t=50
+abArray <- read.4d.lsd( c( "Sim1_1.res.gz", "Sim1_2.res.gz", "Sim1_3.res.gz" ),
+                        c( "_A1p", "_growth1" ) )
+\donttest{
+View( abArray[ , , 1, 2 ] )   # first instances of second file (all vars and times)
+View( abArray[ , 2, , 3 ] )   # all instances of second variable in third file (all t's)
+View( abArray[ 50, 1, , ] )   # all instances of all files of first variable for t=50
+}
 
 # reads all variables/variables, skipping the initial 20 time steps
 # and keeping up to 50 time steps (from t = 21 up to t = 70)
-allArray21_70 <- read.4d.lsd(c("Sim1_1.res", "Sim1_2.res"), skip = 20, nrows = 50)
-#View(allArray21_70[,9,,2])   # all instances of ninth variable in second file
-#View(allArray21_70[30,8,,])  # all instances of all files of 8th variable for t=50
+allArray21_70 <- read.4d.lsd( c( "Sim1_1.res", "Sim1_2.res" ), skip = 20, nrows = 50 )
+\donttest{
+View( allArray21_70[ , 9, , 2 ] )   # all instances of ninth variable in second file
+View( allArray21_70[ 30, 8, , ] )   # all instances of all files of 8th variable for t=50
+}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }

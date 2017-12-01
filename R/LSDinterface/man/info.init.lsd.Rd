@@ -29,17 +29,17 @@ Only variables automatically initialized automatically by LSD in t = 1 are inclu
 }
 \examples{
 # Save current work directory and change to the examples directory
-currWD <- getwd()
-setwd(system.file("extdata", package = "LSDinterface"))
+currWD <- getwd( )
+setwd( system.file( "extdata", package = "LSDinterface" ) )
 
-init1 <- info.init.lsd("Sim1_1.res")
-#View(init1)
+init1 <- info.init.lsd( "Sim1_1.res" )
+\donttest{View( init1 )}
 
-init2 <- info.init.lsd("Sim1_2.res.gz")
-#View(init2)
+init2 <- info.init.lsd( "Sim1_2.res.gz" )
+\donttest{View( init2 )}
 
 # Restore working directory
-setwd(currWD)
+setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ file }
