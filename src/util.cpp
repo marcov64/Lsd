@@ -186,7 +186,21 @@ const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "p
 void plog( char const *cm, char const *tag, ... )
 {
 	char buffer[ TCL_BUFF_STR ];
+	bool tag_ok = false;
 	va_list argptr;
+
+	for ( int i = 0; i < NUM_TAGS; ++i )
+		if ( ! strcmp( tag, tags[ i ] ) )
+			tag_ok = true;
+	
+	// handle the "bar" pseudo tag
+	if ( ! strcmp( tag, "bar" ) )
+	{
+		strcmp( tag, "" );
+		tag_ok = true;
+	}
+	else
+		on_bar = false;
 	
 #ifdef PARALLEL_MODE
 	// abort if not running in main LSD thread
@@ -209,22 +223,7 @@ void plog( char const *cm, char const *tag, ... )
 	if ( ! tk_ok || ! log_ok )
 		return;
 	
-	bool ok = false;
-
-	for ( int i = 0; i < NUM_TAGS; ++i )
-		if ( ! strcmp( tag, tags[ i ] ) )
-			ok = true;
-	
-	// handle the "bar" pseudo tag
-	if ( ! strcmp( tag, "bar" ) )
-	{
-		strcmp( tag, "" );
-		ok = true;
-	}
-	else
-		on_bar = false;
-	
-	if ( ok )
+	if ( tag_ok )
 	{
 		cmd( "set log_ok [ winfo exists .log ]" );
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
