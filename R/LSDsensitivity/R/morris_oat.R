@@ -3,13 +3,12 @@
 # Gilles Pujol 2006
 # Modified by Frank Weber (2016): support model functions
 # returning a matrix or a 3-dimensional array.
-# adapted by Marcelo C. Pereira (2017) to reuse just
-# the ee.oat function
+#
+# Adapted by Marcelo C. Pereira (2017) to reuse just
+# the ee.oat function and its print/plot methods
+# as CRAN does not accept linking unexported code
+#
 
-ind.rep <- function(i, p) {
-  # indices of the points of the ith trajectory in the DoE
-  (1 : (p + 1)) + (i - 1) * (p + 1)
-}
 
 ee.oat <- function(X, y) {
   # compute the elementary effects for a OAT design
