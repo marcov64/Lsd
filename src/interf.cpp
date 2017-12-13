@@ -14,7 +14,7 @@ Comments and bug reports to marco.valente@univaq.it
 
 
 /*
-USED CASE 73
+USED CASE 74
 */
 
 /****************************************************
@@ -175,6 +175,7 @@ void load_description( FILE *f);
 void autofill_descr(object *o);
 void read_eq_filename(char *s);
 void save_description(object *r, FILE *f);
+void tex_reportP(object *r, FILE *f);
 void tex_report(object *r, FILE *f);
 void tex_report_init(object *r, FILE *f);
 void tex_report_observe(object *r, FILE *f);
@@ -507,7 +508,8 @@ cmd(inter, "$w add command -label \"Compare Equation Files \" -command {set choi
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Generate Auto Descriptions \" -command {set choice 43} -underline 7");
 cmd(inter, "$w add command -label \"Create Model Report \" -command {set choice 36} -underline 7 -accelerator Ctrl+C");
-cmd(inter, "$w add command -label \"Generate LaTex report \" -command {set choice 57} -underline 9");
+cmd(inter, "$w add command -label \"Create LaTex report (longtable) \" -command {set choice 57} -underline 9");
+cmd(inter, "$w add command -label \"Create LaTex report (paragraph) \" -command {set choice 74} -underline 9");
 
 cmd(inter, "$w add separator");
 cmd(inter, "$w add command -label \"Find Element in Model\" -command {set choice 50} -underline 0 -accelerator Ctrl+F");
@@ -3814,7 +3816,7 @@ case 57:
 cmd(inter, "destroy .l .m");
 
 f=fopen("tex_report.tex", "wt");
-fprintf(f,"\\newcommand{\\lsd}[1] {\\textit{#1}}\n");
+fprintf(f,"\\newcommand{\\lsd}[1] {\\texttt{#1}}\n");
 tex_report_init(root,f);
 tex_report_observe(root, f);
 tex_report(root,f);
@@ -3822,6 +3824,23 @@ tex_report(root,f);
 fclose(f);
 *choice=0;
 break;
+
+    case 74:
+        cmd(inter, "destroy .l .m");
+        
+        f=fopen("tex_reportP.tex", "wt");
+        fprintf(f,"\\newcommand{\\lsd}[1] {\\texttt{#1}}\n\n");
+        fprintf(f,"\\newcommand{\\hr}[1]{\\hyperref[#1]{\\lsd{#1}}}\n");
+        fprintf(f,"\\newcommand{\\lrH}[1]{\\subsection{\\lsd{#1}}}\n");
+        fprintf(f,"\\newcommand{\\lrI}[1]{\\paragraph{\\lsd{#1}}}\n");
+        
+       // tex_report_init(root,f);
+       // tex_report_observe(root, f);
+        tex_reportP(root,f);
+        
+        fclose(f);
+        *choice=0;
+        break;
 
 case 58:
 cmd(inter, "destroy .m .l");

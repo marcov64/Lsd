@@ -321,7 +321,7 @@ cmd(inter, "wm iconify .");
 fprintf(frep, "<BR><I><A NAME=\"_DESCRIPTION_\">Automatically generated LSD report.</A></I><BR>");
 
 sprintf(msg, "<BR><CENTER><B><FONT SIZE=+2>Model: <U>%s</U></FONT></B></CENTER><BR>\n<BR>\n", app);
-fprintf(frep, "s", msg);
+fprintf(frep, "%s", msg);
 
 count=0;
 if(es1==1)
@@ -1562,7 +1562,7 @@ bridge *cb;
 if(r->up==NULL)
   fprintf(f, "\\section{List of all elements}\n");
 
-fprintf(f, "\\subsection{Object \\textbf{%s}}\n\n", r->label);
+fprintf(f, "\\subsection{Object \\textbf{%s}} \\label{%s}\n\n", r->label,r->label);
 cd=search_description(r->label);
 if(strcmp(cd->text, "(no description available )"))
  {
@@ -1573,7 +1573,7 @@ fprintf(f, "\\begin{longtable}{||p{3cm}|p{11cm}||}\n  \\hline\n  \\textbf{Label}
 for(cv=r->v; cv!=NULL; cv=cv->next)
  {
   cd=search_description(cv->label);
-  fprintf(f, "\\lsd{%s} &", cv->label);
+  fprintf(f, "\\lsd{%s} \\label{%s} &", cv->label, cv->label);
   if(cv->param==0)
    {
     fprintf(f, "\\textbf{Type: } Variable, %d lags \n \n ", cv->num_lag);
@@ -1693,4 +1693,71 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
  tex_report_init(cb->head, f);
 if(r->up==NULL)
  fprintf(f, "\\end{longtable}\n\n");
+}
+
+
+void tex_reportP(object *r, FILE *f)
+{
+variable *cv;
+description *cd;
+object *cur;
+int count;
+bridge *cb;
+
+//if(r->up==NULL)
+//  fprintf(f, "\\section{List of all elements}\n");
+
+fprintf(f, "\\lrH{%s} \\label{%s} \n", r->label, r->label);
+if(r->up!=NULL)
+  fprintf(f, "\\textbf{Contained in}: \\hr{%s}\n\n", r->up->label);
+
+if(r->b!=NULL)
+  fprintf(f, "\\textbf{Containing}: ");
+
+for(cb=r->b; cb!=NULL; cb=cb->next)
+  {
+   fprintf(f, "\\hr{%s}", cb->blabel);
+   if(cb->next==NULL)
+    fprintf(f, ".\n\n");
+   else
+    fprintf(f, ", "); 
+  }
+
+cd=search_description(r->label);
+if(strcmp(cd->text, "(no description available )"))
+ {
+ fprintf(f, "Description: %s\n", cd->text);
+ }
+
+//fprintf(f, "\\begin{longtable}{||p{3cm}|p{11cm}||}\n  \\hline\n  \\textbf{Label} & \\textbf{Description} \\\\  \\hline \\endhead \n");
+
+for(cv=r->v; cv!=NULL; cv=cv->next)
+ {
+  cd=search_description(cv->label);
+  fprintf(f, "\\lrI{%s} \\label{%s}", cv->label, cv->label);
+  if(cv->param==0)
+   {
+    fprintf(f, "(variable, %d lags). ", cv->num_lag);
+   } 
+  if(cv->param==2)
+   {
+    fprintf(f, "(function, %d lags). ", cv->num_lag);
+   } 
+  if(cv->param==1)
+   {
+    fprintf(f, "(parameter). ");
+   } 
+  fprintf(f, "%s.\n ", cd->text);
+//  if(cd->init!=NULL && strlen(cd->init)>0)
+//   fprintf(f, "\n \n \\textbf{Initial values:} %s \\\\ \\hline \n",cd->init);
+//  else
+//   fprintf(f, "\\\\ \\hline \n"); 
+ }
+//fprintf(f, "\\end{longtable}\n\n");
+
+//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur))
+for(cb=r->b; cb!=NULL; cb=cb->next)
+ tex_reportP(cb->head, f);
+  
+
 }
