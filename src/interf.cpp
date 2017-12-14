@@ -176,6 +176,7 @@ void autofill_descr(object *o);
 void read_eq_filename(char *s);
 void save_description(object *r, FILE *f);
 void tex_reportP(object *r, FILE *f);
+void tex_reportP_init(object *r, FILE *f);
 void tex_report(object *r, FILE *f);
 void tex_report_init(object *r, FILE *f);
 void tex_report_observe(object *r, FILE *f);
@@ -3829,14 +3830,15 @@ break;
         cmd(inter, "destroy .l .m");
         
         f=fopen("tex_reportP.tex", "wt");
+        
         fprintf(f,"\\newcommand{\\lsd}[1] {\\texttt{#1}}\n\n");
         fprintf(f,"\\newcommand{\\hr}[1]{\\hyperref[#1]{\\lsd{#1}}}\n");
         fprintf(f,"\\newcommand{\\lrH}[1]{\\subsection{\\lsd{#1}}}\n");
         fprintf(f,"\\newcommand{\\lrI}[1]{\\paragraph{\\lsd{#1}}}\n");
         
-       // tex_report_init(root,f);
        // tex_report_observe(root, f);
         tex_reportP(root,f);
+        tex_reportP_init(root,f);
         
         fclose(f);
         *choice=0;

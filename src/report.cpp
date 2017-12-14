@@ -1761,3 +1761,37 @@ for(cb=r->b; cb!=NULL; cb=cb->next)
   
 
 }
+
+void tex_reportP_init(object *r, FILE *f)
+{
+variable *cv;
+description *cd;
+object *cur;
+int count;
+bridge *cb;
+
+if(r->up==NULL)
+ {
+ fprintf(f, "\\section{Values relevants to initialize}\n");
+ }
+
+
+for(cv=r->v; cv!=NULL; cv=cv->next)
+ {
+  
+  cd=search_description(cv->label);
+  if(cd->initial=='y')
+  {
+  fprintf(f, "(object \\hr{%s}) \\hr{%s} \\newline \n",r->label, cv->label);
+  }
+ }
+
+
+
+//for(cur=r->son; cur!=NULL; cur=skip_next_obj(cur))
+for(cb=r->b; cb!=NULL; cb=cb->next)
+ tex_reportP_init(cb->head, f);
+//if(r->up==NULL)
+// fprintf(f, "\\end{longtable}\n\n");
+}
+
