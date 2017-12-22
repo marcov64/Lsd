@@ -33,12 +33,11 @@ The variable/column names must be valid R column names (e.g., names do not start
 \code{\link{make.names}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
 # reads all instances of all variables
-bigTable <- read.raw.lsd( "Sim1_1.res" )
+bigTable <- read.raw.lsd( paste0( path, "/", "Sim1_1.res" ) )
 
 # See matrix in the data viewer (require package 'utils')
 \donttest{View( bigTable )}
@@ -46,9 +45,6 @@ bigTable <- read.raw.lsd( "Sim1_1.res" )
 # extract all instances of a set of variables named '_A1p' and '_growth1'
 abTable <- select.colnames.lsd( bigTable, make.names( c( "_A1p", "_growth1" ) ) )
 \donttest{View( abTable )}
-
-# Restore working directory
-setwd( currWD )
 }
 \keyword{ datasets }
 \keyword{ database }

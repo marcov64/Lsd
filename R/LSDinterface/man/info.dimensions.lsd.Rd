@@ -31,15 +31,11 @@ Returns a list containing two integer values and a character vector describing t
 \code{\link{info.init.lsd}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-info.dimensions.lsd( "Sim1_1.res" )
-info.dimensions.lsd( "Sim1_2.res.gz" )
-
-# Restore working directory
-setwd( currWD )
+info.dimensions.lsd( paste0( path, "/", "Sim1_1.res" ) )
+info.dimensions.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
 }
 \keyword{ attribute }
 \keyword{ file }

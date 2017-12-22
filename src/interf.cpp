@@ -5075,6 +5075,7 @@ case 69:
 
 	add_to_tot = false;
 	
+	cmd( "set simNum %d", sim_num );
 	cmd( "set firstFile \"%s_%d\"", simul_name, seed );
 	cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
 	cmd( "set totFile \"%s\"", simul_name );
@@ -5138,8 +5139,43 @@ case 69:
 	
 	cmd( "frame $b.f5" );
 	cmd( "checkbutton $b.f5.nores -text \"Skip generating results files\" -variable no_res" );
-	cmd( "checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { if $dozip { set zipExt .gz } { set zipExt \"\" }; $b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { $b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" } { $b.f4.l3 configure -text \"\n\" } }", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
-	cmd( "checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { if $docsv { set resExt csv; set totExt csv } { set resExt res; set totExt tot }; $b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; $b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; $b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { $b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" } { $b.f4.l3 configure -text \"\n\" } }", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $b.f5.dozip -text \"Generate zipped files\" -variable dozip -command { \
+			if $dozip { \
+				set zipExt .gz \
+			} else { \
+				set zipExt \"\" \
+			}; \
+			if { $simNum > 1 } { \
+				$b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+			} else { \
+				$b.f3.w configure -text \"$firstFile.$resExt$zipExt\"; \
+			}; \
+			$b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+			if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+				$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+			} else { \
+				$b.f4.l3 configure -text \"\n\" \
+			} \
+		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
+	cmd( "checkbutton $b.f5.docsv -text \"Comma-separated text format (.csv)\" -variable docsv -command { \
+			if $docsv { set resExt csv; set totExt csv } { \
+				set resExt res; \
+				set totExt tot \
+			}; \
+			if { $simNum > 1 } { \
+				$b.f3.w.l1.w configure -text \"$firstFile.$resExt$zipExt\"; \
+				$b.f3.w.l2.w configure -text \"$lastFile.$resExt$zipExt\"; \
+			} else { \
+				$b.f3.w configure -text \"$firstFile.$resExt$zipExt\"; \
+			}; \
+			$b.f4.l2 configure -text \"$totFile.$totExt$zipExt\"; \
+			if { [ file exists \"%s%s$firstFile.$resExt$zipExt\" ] || [ file exists \"%s%s$totFile.$totExt$zipExt\" ] } { \
+				$b.f4.l3 configure -text \"(WARNING: existing files in destination\nfolder will be overwritten)\" \
+			} else { \
+				$b.f4.l3 configure -text \"\n\" \
+			} \
+		}", path, strlen( path ) > 0 ? "/" : "", path, strlen( path ) > 0 ? "/" : "" );
 	cmd( "checkbutton $b.f5.tosave -text \"Update configuration file\" -variable overwConf" );
 	cmd( "pack $b.f5.nores $b.f5.dozip $b.f5.docsv %s -anchor w", overwConf ? "$b.f5.tosave" : "" );
 	

@@ -28,18 +28,14 @@ Only variables automatically initialized automatically by LSD in t = 1 are inclu
 \code{\link{info.dimensions.lsd}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-init1 <- info.init.lsd( "Sim1_1.res" )
+init1 <- info.init.lsd( paste0( path, "/", "Sim1_1.res" ) )
 \donttest{View( init1 )}
 
-init2 <- info.init.lsd( "Sim1_2.res.gz" )
+init2 <- info.init.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
 \donttest{View( init2 )}
-
-# Restore working directory
-setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ file }

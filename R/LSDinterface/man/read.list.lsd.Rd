@@ -54,12 +54,14 @@ The returned matrices may be potentially very wide, in particular if variables a
 \code{\link{unique}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-# reads all instances of all variables from three files (one matrix each)
-tableList <- read.list.lsd( c( "Sim1_1.res", "Sim1_2.res", "Sim1_3.res" ) )
+# reads all instances of all variables from three files (one matrix each),
+# pasting the directory where the example files are (not required if in working dir)
+tableList <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res" ),
+                               paste0( path, "/", "Sim1_2.res" ),
+                               paste0( path, "/", "Sim1_3.res" ) ) )
 
 # See parts of the 3D array in the data viewer (require package 'utils')
 \donttest{
@@ -70,21 +72,20 @@ View( tableList[[ 3 ]] )
 
 # read all instances of a set of variables named '_A1p' and '_growth1'
 # and pool data
-abTable <- read.list.lsd( c( "Sim1_1.res.gz", "Sim1_2.res.gz" ),
+abTable <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res.gz" ),
+                             paste0( path, "/", "Sim1_2.res.gz" ) ),
                           c( "_A1p", "_growth1" ), pool = TRUE )
 \donttest{View( abTable )}
 
 # reads instance 4 of all variables, skipping the initial 20 time steps
 # and keeping up to 50 time steps (from t = 21 up to t = 70)
-inst4List21_70 <- read.list.lsd( c( "Sim1_1.res", "Sim1_2.res" ),
+inst4List21_70 <- read.list.lsd( c( paste0( path, "/", "Sim1_1.res" ),
+                                    paste0( path, "/", "Sim1_2.res" ) ),
                                  skip = 20, nrows = 50, instance = 4 )
 \donttest{
 View( inst4List21_70[[ 1 ]] )
 View( inst4List21_70[[ 2 ]] )
 }
-
-# Restore working directory
-setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }

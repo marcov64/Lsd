@@ -24,18 +24,14 @@ Returns a data frame containing detailed description (columns) of all variables 
 \code{\link{info.dimensions.lsd}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-info1 <- info.details.lsd( "Sim1_1.res" )
+info1 <- info.details.lsd( paste0( path, "/", "Sim1_1.res" ) )
 \donttest{View( info1 )}
 
-info2 <- info.details.lsd( "Sim1_2.res.gz" )
+info2 <- info.details.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
 \donttest{View( info2 )}
-
-# Restore working directory
-setwd( currWD )
 }
 \keyword{ attribute }
 \keyword{ file }

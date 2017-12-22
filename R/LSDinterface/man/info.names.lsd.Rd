@@ -27,16 +27,12 @@ Not all names can be automatically reconverted to the original LSD names. The co
 \code{\link{info.dimensions.lsd}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-info.names.lsd( "Sim1_1.res" )
+info.names.lsd( paste0( path, "/", "Sim1_1.res" ) )
 
-info.names.lsd( "Sim1_2.res.gz" )
-
-# Restore working directory
-setwd( currWD )
+info.names.lsd( paste0( path, "/", "Sim1_2.res.gz" ) )
 }
 \keyword{ attribute }
 \keyword{ file }

@@ -28,16 +28,13 @@ Returns a character vector containing the valid variable names contained in the 
 \code{\link{info.names.lsd}},
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
-name.check.lsd( "Sim1_1.res" )
+name.check.lsd( paste0( path, "/", "Sim1_1.res" ) )
 
-name.check.lsd( "Sim1_1.res", col.names = c( "GDP", "_growth1" ) )
-
-# Restore working directory
-setwd( currWD )
+name.check.lsd( paste0( path, "/", "Sim1_1.res" ),
+                col.names = c( "GDP", "_growth1" ) )
 }
 \keyword{ attribute }
 \keyword{ misc }

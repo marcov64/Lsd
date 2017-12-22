@@ -47,27 +47,25 @@ For multi-instanced variables, see \code{\link{read.multi.lsd}}. For extracting 
 \code{\link{read.raw.lsd}}
 }
 \examples{
-# Save current work directory and change to the examples directory
-currWD <- getwd( )
-setwd( system.file( "extdata", package = "LSDinterface" ) )
+# Get the examples directory
+path <- system.file( "extdata", package = "LSDinterface" )
 
 # Load a sample .res file into a simple matrix (first instances only)
-macroVar <- read.single.lsd( "Sim1_1.res" )
+macroVar <- read.single.lsd( paste0( path, "/", "Sim1_1.res" ) )
 
 # See matrix in the data viewer (require package 'utils')
 \donttest{View( macroVar )}
 
 # read second instance of a set of variables named '_A1p' and '_growth1'
-ag2Table <- read.single.lsd( "Sim1_2.res.gz", c( "_A1p", "_growth1" ), instance = 2 )
+ag2Table <- read.single.lsd( paste0( path, "/", "Sim1_2.res" ),
+                             c( "_A1p", "_growth1" ), instance = 2 )
 \donttest{View( ag2Table )}
 
 # reads first instance of all variables, skipping the initial 20 time steps
 # and keeping up to 50 time steps (from t = 21 up to t = 70)
-var21_70 <- read.single.lsd( "Sim1_1.res", skip = 20, nrows = 50 )
+var21_70 <- read.single.lsd( paste0( path, "/", "Sim1_1.res" ),
+                             skip = 20, nrows = 50 )
 \donttest{View( var21_70 )}
-
-# Restore working directory
-setwd( currWD )
 }
 \keyword{ interface }
 \keyword{ file }
