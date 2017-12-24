@@ -15,7 +15,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /*
-USED CASE 91
+USED CASE 92
 */
 
 /****************************************************
@@ -116,7 +116,7 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91 };
+int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -600,7 +600,8 @@ if ( redrawRoot )
 		cmd( "$w add separator" );
 		cmd( "$w add command -label \"Generate Descriptions\" -command {set choice 43} -underline 0" );
 		cmd( "$w add command -label \"Create Model Report...\" -command {set choice 36} -underline 7" );
-		cmd( "$w add command -label \"Create LaTex report\" -command {set choice 57} -underline 9" );
+		cmd( "$w add command -label \"Create LaTex Table\" -command {set choice 57} -underline 9" );
+		cmd( "$w add command -label \"Create LaTex References\" -command {set choice 92} -underline 13" );
 
 		cmd( "$w add separator" );
 		cmd( "$w add checkbutton -label \"Ignore Equation File Controls\" -variable ignore_eq_file -command {set choice 54} -underline 0" );
@@ -849,7 +850,7 @@ char *lab1, *lab2, *lab3, *lab4, lab[2*MAX_PATH_LENGTH], lab_old[2*MAX_PATH_LENG
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[10];
 long nLinks;
 double fake = 0;
-bool saveAs, delVar, renVar, reload;
+bool saveAs, delVar, renVar, reload, table;
 FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
@@ -866,7 +867,7 @@ else
 	redrawReq = false;
 }
 
-switch(*choice)
+switch( *choice )
 {
 //Add a Variable to the current or the pointed object (defined in tcl $vname)
 case 2:
@@ -3789,36 +3790,41 @@ plog( "\nLattice updating mode: %s\n", "", lattice_type == 0 ? "infrequent cells
 break; 
 
 
-//Generate Latex report
+// Generate Latex code
 case 57:
+case 92:
 
-if ( ! struct_loaded )
-{
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create a report.\"" );
-	break;
-}
+	table = ( *choice == 57 ) ? true : false;
+	
+	if ( ! struct_loaded )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No configuration loaded\" -detail \"Please load or create one before trying to create LaTex code.\"" );
+		break;
+	}
 
-sprintf( ch, "report_%s.tex", simul_name );
-cmd( "set choice [ file exists %s ]", ch );
-if ( *choice == 1 )
- {
-  cmd( "set answer [tk_messageBox -parent . -message \"Model report already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok]" );
-  cmd( "if {[string compare -nocase $answer ok] == 0} {set choice 0} {set choice 1}" );
-  if ( *choice == 1 )
-	  break;
- }
+	sprintf( ch, "%s_%s.tex", table ? "table" : "href", simul_name );
+	cmd( "set choice [ file exists %s ]", ch );
+	if ( *choice == 1 )
+	{
+		cmd( "set answer [ tk_messageBox -parent . -message \"File '%s' already exists\" -detail \"Please confirm overwriting it.\" -type okcancel -title Warning -icon warning -default ok ]", ch );
+		cmd( "if [ string equal $answer ok ] { set choice 0 } { set choice 1 }" );
+		if ( *choice == 1 )
+			break;
+	}
 
-cmd( "wm deiconify .log; raise .log; focus .log" );
-plog("\nWriting report. Please wait... ");
+	cmd( "wm deiconify .log; raise .log; focus .log" );
+	plog("\nWriting LaTex code. Please wait... ");
 
-f = fopen( ch, "wt" );
-tex_report_init(root,f);
-tex_report_observe(root, f);
-tex_report_struct(root,f);
-tex_report_initall(root,f);
-fclose(f);
+	f = fopen( ch, "wt" );
+	tex_report_head( f, table );
+	tex_report_struct( root, f, table );
+	tex_report_observe( root, f, table );
+	tex_report_init( root, f, table );
+	tex_report_initall( root, f, table );
+	tex_report_end( f );
+	fclose( f );
 
-plog( "Done\nReport saved in file: %s\n", "", ch );
+	plog( "Done\nLaTex code saved in file: %s\n", "", ch );
 
 break;
 

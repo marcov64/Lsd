@@ -2575,7 +2575,7 @@ for(cd=descr; cd!=NULL; cd=cd->next)
   
   app[j]='\0'; //close the string
   return_where_used(cd->label, str1); 
-  if ( ( append || ! var ) && strcmp( cd->text, "(no description available)" ) )
+  if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
 	sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
   else
   	sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );

@@ -57,6 +57,7 @@ int init;
 int lmenu;
 int obs;
 int pos;
+int tab_lines;
 
 
 /******************************
@@ -1016,7 +1017,7 @@ if(cur_descr==NULL)
    cur_descr=search_description(r->label);
 } 
 
-if(cur_descr !=NULL && cur_descr->text !=NULL && strcmp(cur_descr->text,"(no description available)") )
+if ( cur_descr != NULL && cur_descr->text != NULL && ! strstr( cur_descr->text, "(no description available)" ) )
  {
    fprintf(frep, "<i>Description:</i><BR>\n");
    for(i=0; cur_descr->text[i]!=(char)NULL; i++)
@@ -1084,7 +1085,7 @@ if(r->v!=NULL)
 
    fprintf(frep, "<td> ");
    bool desc_text = false;
-   if(cur_descr->text !=NULL && strlen(cur_descr->text)>0 && strcmp(cur_descr->text,"(no description available)") )
+   if ( cur_descr->text != NULL && strlen( cur_descr->text ) > 0 && ! strstr( cur_descr->text, "(no description available)" ) )
   {   
    for(i=0; cur_descr->text[i]!=(char)NULL; i++)
     {
@@ -1373,78 +1374,79 @@ SHOW_REP_OBSERVE
 ****************************************************/
 void show_rep_observe(FILE *f, object *n, int *begin)
 {
-variable *cv, *cv1;
-object *co;
-description *cd;
-int app, i;
-bridge *cb;
+	variable *cv, *cv1;
+	object *co;
+	description *cd;
+	int app, i;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
-{
- cd=search_description(cv->label);
- if(cd==NULL)
-  {if(cv->param==0)
-     add_description(cv->label, "Variable", "(no description available)");
-   if(cv->param==1)
-     add_description(cv->label, "Parameter", "(no description available)");  
-   if(cv->param==2)
-     add_description(cv->label, "Function", "(no description available)");  
-   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-   cd=search_description(cv->label);
-  } 
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	{
+		cd=search_description(cv->label);
+		if(cd==NULL)
+		{
+			if(cv->param==0)
+				add_description(cv->label, "Variable", "(no description available)");
+			if(cv->param==1)
+				add_description(cv->label, "Parameter", "(no description available)");  
+			if(cv->param==2)
+				add_description(cv->label, "Function", "(no description available)");  
+			plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
+			cd=search_description(cv->label);
+		} 
 
- if(cd->observe=='y')
- {
-  if(*begin==1)
-   {
-    *begin=0;
-	table = true;
-    fprintf(f,"<H3>Relevant elements to observe</H3>\n");
-	
-    fprintf(f, "<table BORDER>");
-    fprintf(f, "<tr>");
-    fprintf(f, "<td><center><i>Element</i></center></td>\n");
-    fprintf(f, "<td><center><i>Object</i></center></td>");
-    fprintf(f, "<td><center><i>Type</i></center></td>\n");
-    fprintf(f, "<td><center><i>Description</i></center></td>\n");    
-    fprintf(f, "</tr>");
-   }
-  fprintf(f, "<tr VALIGN=TOP>");
-  
-  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
-  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
-  if(cv->param==1)
-   fprintf( f, "<td>Parameter</td>" );
-  if(cv->param==0)
-   fprintf( f, "<td>Variable</td>" );
-  if(cv->param==2)
-   fprintf( f, "<td>Function</td>" );
-    
-  fprintf(f, "<td>"); 
-  if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
-  {   
-    for(i=0; cd->text[i]!=(char)NULL; i++)
-    {
-    switch(cd->text[i])
-     {
-      case '\n':
-         fprintf(f, "<br>\n");
-         break;
-      case '<':
-         fprintf(f, "&lt;");
-         break;
-      case '>':
-         fprintf(f, "&gt;");
-         break;
-      default:
-         fprintf(f, "%c", cd->text[i]);
-         break;
-     }
-    }
-  }
-  
-  fprintf(f, "</td></tr>\n");    
- }
+	if(cd->observe=='y')
+	{
+	 if(*begin==1)
+	  {
+		*begin=0;
+		table = true;
+		fprintf(f,"<H3>Relevant elements to observe</H3>\n");
+		
+		fprintf(f, "<table BORDER>");
+		fprintf(f, "<tr>");
+		fprintf(f, "<td><center><i>Element</i></center></td>\n");
+		fprintf(f, "<td><center><i>Object</i></center></td>");
+		fprintf(f, "<td><center><i>Type</i></center></td>\n");
+		fprintf(f, "<td><center><i>Description</i></center></td>\n");    
+		fprintf(f, "</tr>");
+	  }
+	 fprintf(f, "<tr VALIGN=TOP>");
+	 
+	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
+	 if(cv->param==1)
+	  fprintf( f, "<td>Parameter</td>" );
+	 if(cv->param==0)
+	  fprintf( f, "<td>Variable</td>" );
+	 if(cv->param==2)
+	  fprintf( f, "<td>Function</td>" );
+		
+	 fprintf(f, "<td>"); 
+	 if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+	 {   
+		for(i=0; cd->text[i]!=(char)NULL; i++)
+		{
+		switch(cd->text[i])
+		 {
+		  case '\n':
+			 fprintf(f, "<br>\n");
+			 break;
+		  case '<':
+			 fprintf(f, "&lt;");
+			 break;
+		  case '>':
+			 fprintf(f, "&gt;");
+			 break;
+		  default:
+			 fprintf(f, "%c", cd->text[i]);
+			 break;
+		 }
+		}
+	 }
+	 
+	 fprintf(f, "</td></tr>\n");    
+	}
 }
 
 for(cb=n->b; cb!=NULL; cb=cb->next)
@@ -1458,520 +1460,595 @@ if ( n->up == NULL && table )
 /****************************************************
  SHOW_REP_INITIAL
  ****************************************************/
-void show_rep_initial(FILE *f, object *n, int *begin)
+void show_rep_initial( FILE *f, object *n, int *begin )
 {
-variable *cv, *cv1;
-object *co;
-description *cd;
-int app, i;
-bridge *cb;
+	variable *cv, *cv1;
+	object *co;
+	description *cd;
+	int app, i;
+	bridge *cb;
 
-for(cv=n->v; cv!=NULL; cv=cv->next)
-{
- cd=search_description(cv->label);
- if(cd==NULL)
-  {if(cv->param==0)
-     add_description(cv->label, "Variable", "(no description available)");
-   if(cv->param==1)
-     add_description(cv->label, "Parameter", "(no description available)");  
-   if(cv->param==2)
-     add_description(cv->label, "Function", "(no description available)");  
-   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
-   cd=search_description(cv->label);
-  } 
+	for(cv=n->v; cv!=NULL; cv=cv->next)
+	{
+	 cd=search_description(cv->label);
+	 if(cd==NULL)
+	  {if(cv->param==0)
+		 add_description(cv->label, "Variable", "(no description available)");
+	   if(cv->param==1)
+		 add_description(cv->label, "Parameter", "(no description available)");  
+	   if(cv->param==2)
+		 add_description(cv->label, "Function", "(no description available)");  
+	   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
+	   cd=search_description(cv->label);
+	  } 
 
- if(cd->initial=='y')
- {
-  if(*begin==1)
-   {
-    *begin=0;
-	table = true;
-    fprintf(f,"<H3>Relevant elements to initialize</H3>\n");
-	
-    fprintf(f, "<table BORDER>");
-    fprintf(f, "<tr>");
-    fprintf(f, "<td><center><i>Element</i></center></td>\n");
-    fprintf(f, "<td><center><i>Object</i></center></td>");
-    fprintf(f, "<td><center><i>Type</i></center></td>\n");
-    fprintf(f, "<td><center><i>Description and initial values comments</i></center></td>\n");    
-    fprintf(f, "</tr>");
-   }
-  fprintf(f, "<tr VALIGN=TOP>");
-  
-  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
-  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
-  if(cv->param==1)
-   fprintf( f, "<td>Parameter</td>" );
-  if(cv->param==0)
-   fprintf( f, "<td>Variable</td>" );
-  if(cv->param==2)
-   fprintf( f, "<td>Function</td>" );
-    
-  fprintf(f, "<td>"); 
-  bool desc_text = false;
-  if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
-  {   
-    for(i=0; cd->text[i]!=(char)NULL; i++)
-    {
- 	 desc_text = true;
-     switch(cd->text[i])
-     {
-      case '\n':
-         fprintf(f, "<br>\n");
-		 desc_text = false;
-         break;
-      case '<':
-         fprintf(f, "&lt;");
-         break;
-      case '>':
-         fprintf(f, "&gt;");
-         break;
-      default:
-         fprintf(f, "%c", cd->text[i]);
-         break;
-     }
-    }
-  }
-	
-  if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
-  {
-    if ( desc_text )
-  	 fprintf(frep, "<br>\n");
-  
-    for(i=0; cd->init[i]!=(char)NULL; i++)
-    {
-     switch(cd->init[i])
-     {
-      case '\n':
-         fprintf(f, "<br>\n");
-         break;
-      case '<':
-         fprintf(f, "&lt;");
-         break;
-      case '>':
-         fprintf(f, "&gt;");
-         break;
-      default:
-         fprintf(f, "%c", cd->init[i]);
-         break;
-     }
-    }
-  }
-  
-  fprintf(f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label);
-  fprintf(f, "</td></tr>\n");    
- }
+	 if(cd->initial=='y')
+	 {
+	  if(*begin==1)
+	   {
+		*begin=0;
+		table = true;
+		fprintf(f,"<H3>Relevant elements to initialize</H3>\n");
+		
+		fprintf(f, "<table BORDER>");
+		fprintf(f, "<tr>");
+		fprintf(f, "<td><center><i>Element</i></center></td>\n");
+		fprintf(f, "<td><center><i>Object</i></center></td>");
+		fprintf(f, "<td><center><i>Type</i></center></td>\n");
+		fprintf(f, "<td><center><i>Description and initial values comments</i></center></td>\n");    
+		fprintf(f, "</tr>");
+	   }
+	  fprintf(f, "<tr VALIGN=TOP>");
+	  
+	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
+	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
+	  if(cv->param==1)
+	   fprintf( f, "<td>Parameter</td>" );
+	  if(cv->param==0)
+	   fprintf( f, "<td>Variable</td>" );
+	  if(cv->param==2)
+	   fprintf( f, "<td>Function</td>" );
+		
+	  fprintf(f, "<td>"); 
+	  bool desc_text = false;
+	  if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+	  {   
+		for(i=0; cd->text[i]!=(char)NULL; i++)
+		{
+		 desc_text = true;
+		 switch(cd->text[i])
+		 {
+		  case '\n':
+			 fprintf(f, "<br>\n");
+			 desc_text = false;
+			 break;
+		  case '<':
+			 fprintf(f, "&lt;");
+			 break;
+		  case '>':
+			 fprintf(f, "&gt;");
+			 break;
+		  default:
+			 fprintf(f, "%c", cd->text[i]);
+			 break;
+		 }
+		}
+	  }
+		
+	  if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+	  {
+		if ( desc_text )
+		 fprintf(frep, "<br>\n");
+	  
+		for(i=0; cd->init[i]!=(char)NULL; i++)
+		{
+		 switch(cd->init[i])
+		 {
+		  case '\n':
+			 fprintf(f, "<br>\n");
+			 break;
+		  case '<':
+			 fprintf(f, "&lt;");
+			 break;
+		  case '>':
+			 fprintf(f, "&gt;");
+			 break;
+		  default:
+			 fprintf(f, "%c", cd->init[i]);
+			 break;
+		 }
+		}
+	  }
+	  
+	  fprintf(f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label);
+	  fprintf(f, "</td></tr>\n");    
+	 }
+	}
+
+	for(cb=n->b; cb!=NULL; cb=cb->next)
+		show_rep_initial(f, cb->head, begin);
+
+	if ( n->up == NULL && table )
+		fprintf( f, "</table><BR>\n" );
 }
 
-for(cb=n->b; cb!=NULL; cb=cb->next)
-	show_rep_initial(f, cb->head, begin);
 
-if ( n->up == NULL && table )
-	fprintf( f, "</table><BR>\n" );
+/****************************************************
+ TEX_STRCPY
+ ****************************************************/
+void tex_strcpy( char *&s1, char* s2 )
+{
+	int i, j;
+	
+	// handle active underscores and other special chars in label references
+	for ( i = 0, j = 0; s2[ j ] != '\0'; ++j )
+		if ( s2[ j ] == '_' || s2[ j ] == '^' || s2[ j ] == '$' || s2[ j ] == '&' )
+			++i;
+		
+	if ( i > 0 )
+	{
+		delete [ ] s1;
+		s1 = new char[ 2 * strlen( s2 ) + 1 + i * 6 ];
+	}
+	
+	for ( i = 0, j = 0; s2[ j ] != '\0'; ++i, ++j )
+		switch ( s2[ j ] )
+		{
+			case '\n':
+			case '>':
+			case '<':
+			case '\\':
+			case '}':
+			case '{':
+			case '~':
+			case '%':
+			case '#':
+				--i;		// simply remove char
+				break;
+			case '_':
+			case '^':
+			case '$':
+			case '&':
+				memcpy( s1 + i, "\\string", 7 );
+				i += 7;
+			default:
+				s1[ i ] = s2[ j ]; 
+		}
+		
+	s1[ i ] = '\0';
 }
 
+
+/****************************************************
+ TEX_FPRINTF
+ ****************************************************/
+void tex_fprintf( FILE *f, char* text )
+{
+	bool newline = false;
+	
+	for ( int i = 0; text[ i ] != '\0'; ++i )
+		switch ( text[ i ] )
+		{
+			case '\n':
+				if ( ! newline )
+					fprintf( f, "\\newline " );
+				newline = true;
+				break;
+			case '>':
+				fprintf( f, "\\textgreater " ); 
+				newline = false;
+				break;
+			case '<':
+				fprintf( f, "\\textless " ); 
+				newline = false;
+				break;
+			case '\\':
+				fprintf( f, "/" ); 
+				newline = false;
+				break;
+			case '_':
+			case '^':
+			case '~':
+			case '}':
+			case '{':
+			case '%':
+			case '$':
+			case '#':
+			case '&':
+				fprintf( f, "\\" ); 
+			default:
+				fprintf( f, "%c", text[ i ] ); 
+				newline = false;
+		}
+}
+
+				
+/****************************************************
+ TEX_REPORT_HEAD
+ ****************************************************/
+void tex_report_head( FILE *f, bool table )
+{
+	fprintf( f, "\\documentclass{article}\n\n" );
+	fprintf( f, "\\usepackage[%s,left=%fcm,right=%fcm,top=%fcm,bottom=%fcm]{geometry}\n", TEX_PAPER, TEX_LEFT, TEX_RIGHT, TEX_TOP, TEX_BOTTOM );
+	
+	if ( table )
+	{
+		fprintf( f, "\\usepackage{color}\n" );
+		fprintf( f, "\\usepackage{longtable}\n" );
+		fprintf( f, "\\usepackage{tabu}\n\n" );
+		fprintf( f, "\\newcommand{\\lsd}[1] {\\texttt{\\color{blue}{\\detokenize{#1}}}}\n\n" );
+	}
+	else
+	{
+		fprintf( f, "\\usepackage[colorlinks=true,linkcolor=blue,pdfborder={0 0 0}]{hyperref}\n\n" );
+		fprintf( f, "\\newcommand{\\lsd}[1] {\\texttt{\\detokenize{#1}}}\n" );
+		fprintf( f, "\\newcommand{\\hr}[1] {\\hrf{#1}{#1}}\n" );
+		fprintf( f, "\\newcommand{\\hrf}[2] {\\hyperref[#1]{\\texttt{\\detokenize{#2}}}}\n" );
+	}
+	
+	fprintf( f, "\\setlength{\\parindent}{0cm}\n\n" );
+
+	fprintf( f, "\\title{Model: \\lsd{%s}}\n", simul_name );
+	fprintf( f, "\\author{Automatically generated LSD report}\n" );
+	fprintf( f, "\\date{}\n\n" );
+
+	fprintf( f, "\\begin{document}\n\n" );
+	fprintf( f, "\\maketitle\n\n" );
+}
+	  
 
 /****************************************************
  TEX_REPORT_STRUCT
  ****************************************************/
-void tex_report_struct(object *r, FILE *f)
+void tex_report_struct( object *r, FILE *f, bool table )
 {
-int i;
-variable *cv;
-description *cd;
-bridge *cb;
+	int i;
+	char *ol, *vl;
+	variable *cv;
+	description *cd;
+	bridge *cb;
 
-if(r->up==NULL)
-  fprintf(f, "\\section{Model Structure}\n\n");
+	if ( r->up == NULL )
+		fprintf(f, "\\section{Model Structure}\n\n");
 
-fprintf(f, "\\subsection{Object: \\lsd{%s}}\n\n", r->label);
-
-if ( r->up != NULL )
-{
-  fprintf( f,"\\emph{Contained in:} " );
-  ancestors( r, f, false );
-  fprintf( f,"\n\n" );
-}
-
-if ( r->b != NULL )
-{
-  fprintf( f,"\\emph{Containing:} \\lsd{%s}", r->b->blabel );
-  for ( cb = r->b->next; cb != NULL; cb = cb->next )
-	fprintf( f, ",  \\lsd{%s}", cb->blabel );
-  fprintf( f, "\n\n");
-}
-
-cd=search_description(r->label);
-if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
-  fprintf(f, "\\emph{Description:}\n\n\\detokenize{%s}\n\n", cd->text);
-
-if ( r->v != NULL )
-  fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
-
-for(cv=r->v; cv!=NULL; cv=cv->next)
-{
-  cd=search_description(cv->label);
-  fprintf( f, "  \\lsd{%s} & ", cv->label );
-  if(cv->param==0 )
-    fprintf( f, "Variable & " );
-  if(cv->param==1)
-    fprintf( f, "Parameter & " );
-  if(cv->param==2)
-    fprintf( f, "Function & " );
-  if ( cv->param == 1 || cv->num_lag == 0 )
-    fprintf( f, "& " );
-  else
-    fprintf( f, "%d & ", cv->num_lag );
-
-  bool desc_text = false;
-  if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
-  {
-    desc_text = true;
-    for ( i = 0; cd->text[ i ] != '\0'; ++i )
+	ol = new char[ 2 * strlen( r->label ) + 1 ];
+	tex_strcpy( ol, r->label );
+	fprintf( f, "\\subsection{Object: \\lsd{%s}} \\label{%s}\n\n", r->label, ol );
+	delete [ ] ol;
+	
+	if ( r->up != NULL )
 	{
-      switch ( cd->text[ i ] )
-      {
-       case '\n':
-		  fprintf( f, "\\newline " ); 
-          break;
-       case '>':
-		  fprintf( f, "\\textgreater " ); 
-          break;
-       case '<':
-		  fprintf( f, "\\textless " ); 
-          break;
-       case '\\':
-		  fprintf( f, "/" ); 
-          break;
- 	   case '_':
- 	   case '^':
- 	   case '~':
- 	   case '}':
- 	   case '{':
- 	   case '%':
- 	   case '$':
- 	   case '#':
- 	   case '&':
-		  fprintf( f, "\\" ); 
-       default:
-		  fprintf( f, "%c", cd->text[ i ] ); 
-      }
+		fprintf( f,"\\emph{Contained in:} " );
+		ancestors( r, f, false );
+		fprintf( f,"\n\n" );
 	}
-  }
-  
-  if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
-  {
-    if ( desc_text )
-  	  fprintf( f, "\\newline " );
-    for ( i = 0; cd->init[ i ] != '\0'; ++i )
+
+	if ( r->b != NULL )
 	{
-      switch ( cd->init[ i ] )
-      {
-       case '\n':
-		  fprintf( f, "\\newline " ); 
-          break;
-       case '>':
-		  fprintf( f, "\\textgreater " ); 
-          break;
-       case '<':
-		  fprintf( f, "\\textless " ); 
-          break;
-       case '\\':
-		  fprintf( f, "/" ); 
-          break;
- 	   case '_':
- 	   case '^':
- 	   case '~':
- 	   case '}':
- 	   case '{':
- 	   case '%':
- 	   case '$':
- 	   case '#':
- 	   case '&':
-		  fprintf( f, "\\" ); 
-       default:
-		  fprintf( f, "%c", cd->init[ i ] ); 
-      }
+		fprintf( f,"\\emph{Containing:} \\lsd{%s}", r->b->blabel );
+		for ( cb = r->b->next; cb != NULL; cb = cb->next )
+			fprintf( f, ",  \\lsd{%s}", cb->blabel );
+		fprintf( f, "\n\n" );
 	}
-  }
-  
-  fprintf(f, "\\\\ \n  \\hline \n"); 
-}
 
-if ( r->v != NULL )
-  fprintf(f, "\\end{longtabu}\n\n");
+	cd = search_description( r->label );
+	if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+		fprintf( f, "\\emph{Description:}\n\n\\detokenize{%s}\n\n", cd->text );
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-  tex_report_struct(cb->head, f);
-}
-
-
-/****************************************************
- TEX_REPORT_INITALL
- ****************************************************/
-void tex_report_initall(object *r, FILE *f)
-{
-int i, j;
-object *cur;
-variable *cv, *cv1;
-description *cd;
-bridge *cb;
-
-if ( r->up == NULL )
-{
-  fprintf(f, "\\section{Initial values}\n\n");
-  fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
-}
-
-for (cv=r->v; cv!=NULL; cv=cv->next)
-{
-  if ( cv->param == 1 )
-  {
-    fprintf( f, "  \\lsd{%s} & \\lsd{%s} & & %g", r->label, cv->label, cv->val[ 0 ] );
-      for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+	if ( r->v != NULL )
 	{
-      cv1 = cur->search_var( cur, cv->label );
-      fprintf( f, ", %g", cv1->val[ 0 ]);
+		if ( ! table )
+			fprintf( f,"\\emph{Contained elements:}\n\n" );	
+		else
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Type} & \\textbf{Lags} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
-	if ( j == MAX_INIT && cur != NULL )
-	  fprintf( f, ", ..." );
-		  
-    fprintf( f, " \\\\ \n  \\hline \n" );
-  }
-  else
-  {
-    for ( i = 0; i < cv->num_lag; ++i )
+
+	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
-      fprintf( f, "  \\lsd{%s} & \\lsd{%s} & %d & %g", r->label, cv->label, i + 1, cv->val[ i ] );
-      for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
-      {
-        cv1 = cur->search_var( cur, cv->label );
-        fprintf( f, ", %g", cv1->val[ i ]);
-      }
-	  if ( j == MAX_INIT && cur != NULL )
-		fprintf( f, ", ..." );
-		  
-      fprintf( f, " \\\\ \n  \\hline \n" );
+		vl = new char[ 2 * strlen( cv->label ) + 1 ];
+		tex_strcpy( vl, cv->label );
+		fprintf( f, "  \\lsd{%s} \\label{%s}", cv->label , vl );
+		delete [ ] vl;
+		
+		if ( ! table )
+		{
+			if ( cv->param == 0 )
+				fprintf( f, " (variable" );
+			if ( cv->param == 1 )
+				fprintf( f, " (parameter" );
+			if ( cv->param == 2 )
+				fprintf( f, " (function" );
+			if ( cv->param == 1 || cv->num_lag == 0 )
+				fprintf( f, ")" );
+			else
+				fprintf( f, ", %d lag%s)", cv->num_lag, cv->num_lag == 1 ? "" : "s" );
+		}
+		else
+		{
+			if ( cv->param == 0 )
+				fprintf( f, " & Variable & " );
+			if ( cv->param == 1 )
+				fprintf( f, " & Parameter & " );
+			if ( cv->param == 2 )
+				fprintf( f, " & Function & " );
+			if ( cv->param == 1 || cv->num_lag == 0 )
+				fprintf( f, "& " );
+			else
+				fprintf( f, "%d & ", cv->num_lag );
+		}
+		
+		bool desc_text = false;
+		cd = search_description( cv->label );
+		if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+		{
+			if ( ! table )
+				fprintf( f, ": " );
+			desc_text = true;
+			tex_fprintf( f, cd->text );
+		}
+	  
+		if ( table && ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+		{
+			if ( desc_text )
+				fprintf( f, "\\newline " );
+			tex_fprintf( f, cd->init );
+		}
+
+		if ( ! table )
+			fprintf(f, "\\newline \n"); 
+		else
+			fprintf(f, "\\\\ \n  \\hline \n"); 
 	}
-  }
-}
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-  tex_report_initall( cb->head, f );
+	if ( r->v != NULL )
+	{
+		if ( table )
+			fprintf(f, "\\end{longtabu}\n\n");
+		else
+			fprintf( f, "\n" );
+	}
 
-if ( r->up == NULL )
-{
-  fprintf(f, "\\end{longtabu}\n\n");
-  fprintf(f,"\\end{document}\n");
-}
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		tex_report_struct( cb->head, f, table );
 }
 
 
 /****************************************************
  TEX_REPORT_OBSERVE
  ****************************************************/
-void tex_report_observe(object *r, FILE *f)
+void tex_report_observe( object *r, FILE *f, bool table )
 {
-int i, count = 0;
-variable *cv;
-description *cd;
-bridge *cb;
+	int i;
+	char *ol, *vl;
+	variable *cv;
+	description *cd;
+	bridge *cb;
 
-if(r->up==NULL)
-{
-  fprintf( f, "\\section{Relevant elements to observe}\n\n" );
-  fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
-}
-
-for(cv=r->v; cv!=NULL; cv=cv->next)
-{
-  cd=search_description(cv->label);
-  if(cd->observe=='y')
-  {
-    fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, r->label );
-    if(cv->param==0)
-      fprintf( f, "Variable & " );
-    if(cv->param==1)
-      fprintf( f, "Parameter & " );
-    if(cv->param==2)
-      fprintf( f, "Function & " );
-    if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
+	if ( r->up == NULL )
 	{
-      for ( i = 0; cd->text[ i ] != '\0'; ++i )
-  	  {
-        switch ( cd->text[ i ] )
-        {
-         case '\n':
-  		    fprintf( f, "\\newline " ); 
-            break;
-         case '>':
-  		    fprintf( f, "\\textgreater " ); 
-            break;
-         case '<':
-  		    fprintf( f, "\\textless " ); 
-            break;
-         case '\\':
-  		    fprintf( f, "/" ); 
-            break;
-   	     case '_':
-   	     case '^':
-   	     case '~':
-   	     case '}':
-   	     case '{':
-   	     case '%':
-   	     case '$':
-   	     case '#':
-   	     case '&':
-  		    fprintf( f, "\\" ); 
-         default:
-  		    fprintf( f, "%c", cd->text[ i ] ); 
-        }
-  	  }
+		fprintf( f, "\\section{Relevant elements to observe}\n\n" );
+		tab_lines = 0;
+		if ( table )
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
 	}
-    ++count;
-    fprintf(f, "\\\\ \n  \\hline \n"); 
-  } 
-}
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-  tex_report_observe(cb->head, f);
+	ol = new char[ 2 * strlen( r->label ) + 1 ];
+	tex_strcpy( ol, r->label );
+			
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd->observe == 'y' )
+		{
+			vl = new char[ 2 * strlen( cv->label ) + 1 ];
+			tex_strcpy( vl, cv->label );
+			
+			if ( ! table )
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, r->label );
+			else
+			{
+				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, r->label );
+				if ( cv->param == 0 )
+					fprintf( f, "Variable & " );
+				if ( cv->param == 1 )
+					fprintf( f, "Parameter & " );
+				if ( cv->param == 2 )
+					fprintf( f, "Function & " );
+				if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+					tex_fprintf( f, cd->text );
+				fprintf( f, "\\\\ \n  \\hline \n" ); 
+			} 
+			
+			++tab_lines;
+		
+			delete [ ] vl;
+		}
+	}
 
-if(r->up==NULL)
-{
-  if ( count == 0 )
-	fprintf(f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n");
-  fprintf(f, "\\end{longtabu}\n\n");
-}
+	delete [ ] ol;
+			
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		tex_report_observe( cb->head, f, table );
+
+	if ( r->up == NULL )
+	{
+		if ( table )
+		{
+			if ( tab_lines == 0 )
+				fprintf( f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n" );
+			fprintf( f, "\\end{longtabu}\n\n" );
+		}
+		else
+			if ( tab_lines == 0 )
+				fprintf( f, "(none selected) \\newline \n" );
+			else
+				fprintf( f, "\n" );
+	}
 }
 
 
 /****************************************************
  TEX_REPORT_INIT
  ****************************************************/
-void tex_report_init(object *r, FILE *f)
+void tex_report_init( object *r, FILE *f, bool table )
 {
-int i, count = 0;
-variable *cv;
-description *cd;
-bridge *cb;
+	int i;
+	char *ol, *vl;
+	variable *cv;
+	description *cd;
+	bridge *cb;
 
-if(r->up==NULL)
-{
-  fprintf( f,"\\documentclass{article}\n\n" );
-  fprintf( f,"\\usepackage[%s,left=%fcm,right=%fcm,top=%fcm,bottom=%fcm]{geometry}\n", TEX_PAPER, TEX_LEFT, TEX_RIGHT, TEX_TOP, TEX_BOTTOM );
-  fprintf( f,"\\usepackage{color}\n" );
-  fprintf( f,"\\usepackage{longtable}\n" );
-  fprintf( f,"\\usepackage{tabu}\n\n" );
-  fprintf( f,"\\newcommand{\\lsd}[1] {\\texttt{\\color{blue}{\\detokenize{#1}}}}\n" );
-  fprintf( f,"\\setlength{\\parindent}{0cm}\n\n" );
-  
-  fprintf( f,"\\title{Model: \\emph{%s}}\n", simul_name );
-  fprintf( f,"\\author{Automatically generated LSD report}\n" );
-  fprintf( f,"\\date{}\n\n" );
-  
-  fprintf( f,"\\begin{document}\n\n" );
-  fprintf( f,"\\maketitle\n\n" );
-  
-  fprintf( f, "\\section{Relevant elements to initialize}\n\n" );
-  fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+	if ( r->up == NULL )
+	{
+		fprintf( f, "\\section{Relevant elements to initialize}\n\n" );
+		tab_lines = 0;
+		if ( table )
+			fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Element} & \\textbf{Object} & \\textbf{Type} & \\textbf{Description and initial values comments} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+	}
+
+	ol = new char[ 2 * strlen( r->label ) + 1 ];
+	tex_strcpy( ol, r->label );
+			
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		cd = search_description( cv->label );
+		if ( cd->initial == 'y' )
+		{
+			vl = new char[ 2 * strlen( cv->label ) + 1 ];
+			tex_strcpy( vl, cv->label );
+			
+			if ( ! table )
+				fprintf( f, "\\hrf{%s}{%s} (object \\hrf{%s}{%s}) \\newline \n", vl, cv->label, ol, r->label );
+			else
+			{
+				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, r->label );
+				if ( cv->param == 0 )
+					fprintf( f, "Variable & " );
+				if ( cv->param == 1 )
+					fprintf( f, "Parameter & " );
+				if ( cv->param == 2 )
+					fprintf( f, "Function & " );
+		  
+				bool desc_text = false;
+				if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
+				{
+					desc_text = true;
+					tex_fprintf( f, cd->text );
+				}
+				
+				if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
+				{
+					if ( desc_text )
+						fprintf( f, "\\newline " );
+					tex_fprintf( f, cd->init );
+				}
+				fprintf( f, "\\\\ \n  \\hline \n" ); 
+			}
+		
+			++tab_lines;
+			
+			delete [ ] vl;
+		} 
+	}
+
+	delete [ ] ol;
+			
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		tex_report_init( cb->head, f, table );
+
+	if ( r->up == NULL )
+	{
+		if ( table )
+		{
+			if ( tab_lines == 0 )
+				fprintf( f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n" );
+			fprintf( f, "\\end{longtabu}\n\n" );
+		}
+		else
+			if ( tab_lines == 0 )
+				fprintf( f, "(none selected) \\newline \n" );
+			else
+				fprintf( f, "\n" );
+	}
 }
 
-for(cv=r->v; cv!=NULL; cv=cv->next)
+
+/****************************************************
+ TEX_REPORT_INITALL
+ ****************************************************/
+void tex_report_initall( object *r, FILE *f, bool table )
 {
-  cd=search_description(cv->label);
-  if(cd->initial=='y')
-  {
-    fprintf( f, "  \\lsd{%s} & \\lsd{%s} & ", cv->label, r->label );
-    if(cv->param==0)
-      fprintf( f, "Variable & " );
-    if(cv->param==1)
-      fprintf( f, "Parameter & " );
-    if(cv->param==2)
-      fprintf( f, "Function & " );
-  
-    bool desc_text = false;
-    if ( cd->text != NULL && strlen( cd->text ) > 0 && strcmp( cd->text, "(no description available)" ) )
-    {
-      desc_text = true;
-      for ( i = 0; cd->text[ i ] != '\0'; ++i )
-  	  {
-        switch ( cd->text[ i ] )
-        {
-         case '\n':
-  		    fprintf( f, "\\newline " ); 
-            break;
-         case '>':
-  		    fprintf( f, "\\textgreater " ); 
-            break;
-         case '<':
-  		    fprintf( f, "\\textless " ); 
-            break;
-         case '\\':
-  		    fprintf( f, "/" ); 
-            break;
-   	     case '_':
-   	     case '^':
-   	     case '~':
-   	     case '}':
-   	     case '{':
-   	     case '%':
-   	     case '$':
-   	     case '#':
-   	     case '&':
-  		    fprintf( f, "\\" ); 
-         default:
-  		    fprintf( f, "%c", cd->text[ i ] ); 
-        }
-  	  }
-    }
-    
-    if ( ( cv->param == 1 || cv->num_lag > 0 ) && cd->init != NULL && strlen( cd->init ) > 0 )
-    {
-      if ( desc_text )
-    	  fprintf( f, "\\newline " );
-      for ( i = 0; cd->init[ i ] != '\0'; ++i )
-  	  {
-        switch ( cd->init[ i ] )
-        {
-         case '\n':
-  		    fprintf( f, "\\newline " ); 
-            break;
-         case '>':
-  		    fprintf( f, "\\textgreater " ); 
-            break;
-         case '<':
-  		    fprintf( f, "\\textless " ); 
-            break;
-         case '\\':
-  		    fprintf( f, "/" ); 
-            break;
-   	     case '_':
-   	     case '^':
-   	     case '~':
-   	     case '}':
-   	     case '{':
-   	     case '%':
-   	     case '$':
-   	     case '#':
-   	     case '&':
-  		    fprintf( f, "\\" ); 
-         default:
-  		    fprintf( f, "%c", cd->init[ i ] ); 
-        }
-  	  }
-    }
-    ++count;
-    fprintf(f, "\\\\ \n  \\hline \n"); 
-  } 
+	int i, j;
+	char *ol, *vl;
+	object *cur;
+	variable *cv, *cv1;
+	description *cd;
+	bridge *cb;
+
+	if ( ! table )
+		return;
+
+	if ( r->up == NULL )
+	{
+		fprintf( f, "\\section{Initial values}\n\n" );
+		fprintf( f, "\\begin{longtabu} to \\textwidth {|l|l|l|X|}\n  \\hline\n  \\textbf{Object} & \\textbf{Element} & \\textbf{Lag} & \\textbf{Initial values (by instance)} \\\\ \n  \\hline \\endhead\n  \\multicolumn{4}{r}{\\textit{Continued on next page...}} \\\\ \n  \\endfoot\n  \\endlastfoot\n" );
+	}
+
+	ol = new char[ 2 * strlen( r->label ) + 1 ];
+	tex_strcpy( ol, r->label );
+			
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		vl = new char[ 2 * strlen( cv->label ) + 1 ];
+		tex_strcpy( vl, cv->label );
+		
+		if ( cv->param == 1 )
+		{
+			fprintf( f, "  \\lsd{%s} & \\lsd{%s} & & %g", ol, vl, cv->val[ 0 ] );
+			for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+			{
+				cv1 = cur->search_var( cur, cv->label );
+				fprintf( f, ", %g", cv1->val[ 0 ]);
+			}
+			if ( j == MAX_INIT && cur != NULL )
+				fprintf( f, ", ..." );
+			  
+			fprintf( f, " \\\\ \n  \\hline \n" );
+		}
+		else
+		{
+			for ( i = 0; i < cv->num_lag; ++i )
+			{
+				fprintf( f, "  \\lsd{%s} & \\lsd{%s} & %d & %g", ol, vl, i + 1, cv->val[ i ] );
+				for ( j = 1, cur = r->hyper_next( r->label ); cur != NULL && j < MAX_INIT; cur = cur->hyper_next( cur->label ), ++j )
+				{
+					cv1 = cur->search_var( cur, cv->label );
+					fprintf( f, ", %g", cv1->val[ i ]);
+				}
+				if ( j == MAX_INIT && cur != NULL )
+					fprintf( f, ", ..." );
+				  
+				fprintf( f, " \\\\ \n  \\hline \n" );
+			}
+		}
+		
+		delete [ ] vl;
+	}
+
+	delete [ ] ol;
+			
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		tex_report_initall( cb->head, f, table );
+
+	if ( r->up == NULL )
+		fprintf( f, "\\end{longtabu}\n\n" );
 }
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
-  tex_report_init(cb->head, f);
 
-if(r->up==NULL)
+/****************************************************
+ TEX_REPORT_END
+ ****************************************************/
+void tex_report_end( FILE *f )
 {
-  if ( count == 0 )
-	fprintf(f, "  \\multicolumn{4}{|c|}{(none selected)} \\\\ \n  \\hline \n");
-  fprintf(f, "\\end{longtabu}\n\n");
-}
+	fprintf( f, "\\end{document}\n" );
 }
