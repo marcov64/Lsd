@@ -25,7 +25,7 @@ Run the simulation model whose root is r. Running is not only the actual
 simulation run, but also the initialization of result files. Of course, it has
 also to manage the messages from user and from the model at run time.
 
-- void print_title(object *root);
+- bool alloc_save_mem( object *root );
 Prepare variables to store saved data.
 
 - Tcl_Interp *InterpInitWin(char *tcl_dir);
@@ -147,7 +147,7 @@ int prof_aggr_time = false;	// show aggregate profiling times
 int prof_min_msecs = 0;		// profile only variables taking more than X msecs.
 int prof_obs_only = false;	// profile only observed variables
 int quit = 0;				// simulation interruption mode (0=none)
-int series_saved;			// number of series saved
+int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
 int stackinfo_flag = 0;		// LSD stack control
@@ -580,8 +580,6 @@ int lsdmain( int argn, char **argv )
 	while( 1 )
 	{
 		root = create( root );
-		no_more_memory = false;
-		series_saved = 0;
 		
 		try 
 		{
@@ -713,8 +711,7 @@ void run( object *root )
 
 		series_saved = 0;
 
-		print_title( root );
-		if ( no_more_memory )
+		if ( ! alloc_save_mem( root ) )
 		{
 #ifndef NO_WINDOW 
 			log_tcl_error( "Memory allocation", "Not enough memory, too many series saved for the memory available" );
@@ -932,61 +929,68 @@ void run( object *root )
 		close_sim( );
 		reset_end( root );
 		root->emptyturbo( );
-
-		if ( sim_num > 1 || no_window )	// save results for multiple simulation runs
+		
+		if ( sim_num > 1 || no_window )
 		{
-			// remove existing path, if any, from name in case of alternative output path
-			char *alt_name = clean_file( simul_name );
+			// save results for multiple simulation runs, if any
+			if ( series_saved > 0 )
+			{	// remove existing path, if any, from name in case of alternative output path
+				char *alt_name = clean_file( simul_name );
 
-			if ( ! no_res )
-			{
-				if ( ! batch_sequential )
-					sprintf( msg, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - 1, docsv ? "csv" : "res" );
+				if ( ! no_res )
+				{
+					if ( ! batch_sequential )
+						sprintf( msg, "%s%s%s_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - 1, docsv ? "csv" : "res" );
+					else
+						sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
+
+					if ( fast_mode < 2 )
+						plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+
+					rf = new result( msg, "wt", dozip, docsv );	// create results file object
+					rf->title( root, 1 );						// write header
+					rf->data( root, 0, actual_steps );			// write all data
+					delete rf;									// close file and delete object
+
+					if ( fast_mode < 2 )
+						plog( "Done\n" );
+				}
+
+				if ( ! grandTotal || batch_sequential )		// generate partial total files?
+				{
+					if ( ! batch_sequential )
+					  sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+					else
+					  sprintf( msg, "%s%s%s_%d_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
+				}
+				else										// generate single grand total file
+				{
+					sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
+				}
+
+				if ( fast_mode < 2 && i == sim_num )		// print only for last
+					plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+
+				if ( i == 1 && grandTotal && ! add_to_tot )
+				{
+					rf = new result( msg, "wt", dozip, docsv );	// create results file object
+					rf->title( root, 0 );					// write header
+				}
 				else
-					sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - 1, docsv ? "csv" : "res" );
+					rf = new result( msg, "a", dozip, docsv );	// add results object to existing file
 
-				if ( fast_mode < 2 )
-					plog( "Saving results in file %s%s... ", "", msg, dozip ? ".gz" : "" );
+				rf->data( root, actual_steps );				// write current data data
+				delete rf;									// close file and delete object
 
-				rf = new result( msg, "wt", dozip, docsv );		// create results file object
-				rf->title( root, 1 );							// write header
-				rf->data( root, 0, actual_steps );				// write all data
-				delete rf;										// close file and delete object
-
-				if ( fast_mode < 2 )
+				if ( fast_mode < 2 && i == sim_num )		// print only for last
 					plog( "Done\n" );
 			}
-
-			if ( ! grandTotal || batch_sequential )			// generate partial total files?
-			{
-				if ( ! batch_sequential )
-				  sprintf( msg, "%s%s%s_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
-				else
-				  sprintf( msg, "%s%s%s_%d_%d_%d.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, findex, seed - i, seed - 1 + sim_num - i, docsv ? "csv" : "tot" );
-			}
-			else											// generate single grand total file
-			{
-				sprintf( msg, "%s%s%s.%s", save_alt_path ? alt_path : path, strlen( save_alt_path ? alt_path : path ) > 0 ? "/" : "", save_alt_path ? alt_name : simul_name, docsv ? "csv" : "tot" );
-			}
-
-			if ( fast_mode < 2 && i == sim_num )			// print only for last
-				plog( "\nSaving totals in file %s%s... ", "", msg, dozip ? ".gz" : "" );
-
-			if ( i == 1 && grandTotal && ! add_to_tot )
-			{
-				rf = new result( msg, "wt", dozip, docsv );	// create results file object
-				rf->title( root, 0 );						// write header
-			}
 			else
-				rf = new result( msg, "a", dozip, docsv );	// add results object to existing file
+				if ( fast_mode < 2 )
+					plog( "Nothing to save: no element selected\n" );
 
-			rf->data( root, actual_steps );					// write current data data
-			delete rf;										// close file and delete object
-
-			if ( fast_mode < 2 && i == sim_num )			// print only for last
-				plog( "Done\n" );
-
-			if ( batch_sequential && i == sim_num)  		// last run of current batch file?
+				
+			if ( batch_sequential && i == sim_num )  		// last run of current batch file?
 			{
 				findex++;									// try next file
 				sprintf( msg, "%s_%d.lsd", simul_name, findex );
@@ -1132,9 +1136,9 @@ void unwind_stack( void )
 
 
 /*********************************
-PRINT_TITLE
+ALLOC_SAVE_MEM
 *********************************/
-void print_title( object *root )
+bool alloc_save_mem( object *root )
 {
 	int toquit = quit;
 	object *cur;
@@ -1166,7 +1170,6 @@ void print_title( object *root )
 				plog( "\nNot enough memory.\nData for %s and subsequent series will not be saved.\n", "", var->lab_tit );
 				var->save = var->savei = 0;
 				no_more_memory = true;
-				throw;
 			}
 
 			++series_saved;
@@ -1195,10 +1198,12 @@ void print_title( object *root )
 
 	for ( cb = root->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
-			print_title( cur );
+			alloc_save_mem( cur );
 
 	if ( quit != 2 )
 		quit = toquit;
+	
+	return ( ! no_more_memory );
 }
 
 

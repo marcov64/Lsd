@@ -2339,11 +2339,11 @@ if ( ! struct_loaded )
 	break;
 }
 
-// warn about no variable being saved
+// warn about no variable/parameter being saved
 for ( n = r; n->up != NULL; n = n->up );
-i = 0;
-count_save( n, &i );
-if ( i == 0 )
+series_saved = 0;
+count_save( n, &series_saved );
+if ( series_saved == 0 )
 {
 	cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon warning -title Warning -message \"No variable or parameter marked to be saved\" -detail \"If you proceed, there will be no data to be analyzed after the simulation is run. If this is not the intended behavior, please mark the variables and parameters to be saved before running the simulation.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } " );
 	if( *choice == 2 )

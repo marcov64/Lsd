@@ -7162,7 +7162,7 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 	step = hsize / ( double ) ( endCase - iniCase );
 	if ( avgSmpl && ! avgSmplMsg && step < 1 )
 	{
-		cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default no -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default yes -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
 		cmd( "switch $answer { yes { set avgSmpl 0 } no { } }" );
 		avgSmplMsg = true;
 	}

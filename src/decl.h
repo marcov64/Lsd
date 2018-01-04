@@ -441,6 +441,7 @@ FILE *create_frames(char *t);
 FILE *search_data_ent(char *name, variable *v);
 FILE *search_data_str(char const *name, char const *init, char const *str);
 FILE *search_str(char const *name, char const *str);
+bool alloc_save_mem( object *root );
 bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
 bool get_bool( const char *tcl_var, bool *var = NULL );
 bool is_finite( double x );						// standard library redefinitions to workaround gcc bug
@@ -577,7 +578,6 @@ void plot_rt(variable *var);
 void plot_tseries(int *choice);
 void prepare_plot(object *r, int id_sim);
 void print_stack(void);
-void print_title(object *root);
 void put_line(int x1, int y1, int x2, int y2);
 void put_node(int x1, int y1, int x2, int y2, char *str);
 void put_text(char *str, char *num, int x, int y, char *str2);
@@ -710,10 +710,11 @@ extern int prof_obs_only;	// profile only observed variables
 extern int quit;			// simulation interruption mode (0=none)
 extern int saveConf;		// save configuration on results saving (bool)
 extern int seed;			// pseudo random number generator seed in use
+extern int series_saved;	// number of series saved
 extern int sim_num;			// simulation number running
 extern int stack;			// LSD stack call level
 extern int stackinfo_flag; 	// LSD stack control
-extern int strWindowOn;	// control the presentation of the model structure window (bool)
+extern int strWindowOn;		// control the presentation of the model structure window (bool)
 extern int t;               // current time step
 extern int total_obj;		// total objects in model
 extern int total_var;       // total variables/parameters in model
