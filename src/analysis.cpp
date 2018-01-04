@@ -96,6 +96,7 @@ Exit function, which is customized on the operative system.
 #define HISTOGR	4
 #define HISTOCS	5
 
+bool avgSmplMsg;
 char filename[ MAX_PATH_LENGTH ];
 double maxy, maxy2;
 double miny, miny2;
@@ -103,6 +104,7 @@ double point_size;
 int allblack;
 int autom = true;
 int autom_x = true;
+int avgSmpl;
 int *cdata;
 int cur_plot;
 int dir;
@@ -132,37 +134,69 @@ store *vs = NULL;
 /***************************************************
 ANALYSIS
 ****************************************************/
-void analysis(int *choice)
+void analysis( int *choice )
 {
-*choice=0;
-while( *choice == 0 )
-	read_data( choice ); 	//Cases and Variables
+	*choice = 0;
+	while( *choice == 0 )
+		read_data( choice ); 	//Cases and Variables
 
-*choice=0;
+	*choice = 0;
 }
 
 
 /***************************************************
 READ_DATA
 ****************************************************/
-void read_data(int *choice)
+void read_data( int *choice )
 {
 FILE *f;
 int rot, i, h, j, k, l, m, n, p, q, r;
 store *app_store;
 char *app, *app1, *app2, dirname[MAX_PATH_LENGTH], str1[MAX_ELEM_LENGTH], str2[MAX_ELEM_LENGTH], str3[MAX_ELEM_LENGTH];
-double *datum, compvalue=0;
-
-cur_plot=0;
-file_counter=0;
-*choice=0;
-
-cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
-
-Tcl_LinkVar(inter, "cur_plot", (char *) &cur_plot, TCL_LINK_INT);
-Tcl_LinkVar(inter, "nv", (char *) &nv, TCL_LINK_INT);
+double *datum, compvalue = 0;
 
 cover_browser( "Analysis of Results...", "Analysis of Results window is open", "Please exit Analysis of Results\nbefore using the LSD Browser." );
+
+Tcl_LinkVar( inter, "cur_plot", ( char * ) &cur_plot, TCL_LINK_INT );
+Tcl_LinkVar( inter, "nv", ( char * ) &nv, TCL_LINK_INT );
+Tcl_LinkVar( inter, "avgSmpl", ( char * ) &avgSmpl, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "auto", ( char * ) &autom, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "auto_x", ( char * ) &autom_x, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "minc", ( char * ) &min_c, TCL_LINK_INT );
+Tcl_LinkVar( inter, "maxc", ( char * ) &max_c, TCL_LINK_INT );
+Tcl_LinkVar( inter, "miny", ( char * ) &miny, TCL_LINK_DOUBLE );
+Tcl_LinkVar( inter, "maxy", ( char * ) &maxy, TCL_LINK_DOUBLE );
+Tcl_LinkVar( inter, "logs", ( char * ) &logs, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "allblack", ( char * ) &allblack, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "grid", ( char * ) &grid, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "point_size", ( char * ) &point_size, TCL_LINK_DOUBLE );
+Tcl_LinkVar( inter, "tc", ( char * ) &time_cross, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "line_point", (char * ) &line_point, TCL_LINK_INT );
+Tcl_LinkVar( inter, "xy", ( char * ) &xy, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "pdigits", ( char * ) &pdigits, TCL_LINK_INT );
+Tcl_LinkVar( inter, "watch", ( char * ) &watch, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "gnu", ( char * ) &gnu, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "num_y2", ( char * ) &num_y2, TCL_LINK_INT );
+
+*choice = 0;
+avgSmplMsg = false;
+cur_plot = 0;
+file_counter = 0;
+num_var = 0;
+max_c = min_c = num_c = 1;
+miny = maxy = 0;
+time_cross = xy = false;
+gnu = false;
+
+cmd( "set y2 0" );
+cmd( "set allblack $grayscaleP" );
+cmd( "set grid $gridP" );
+cmd( "set point_size $pointsizeP" );
+cmd( "set line_point $linemodeP" );
+cmd( "set pdigits $pdigitsP" );
+cmd( "set avgSmpl $avgSmplP" );
+
+cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
 
 cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
 
@@ -185,6 +219,7 @@ cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 cmd( "$w add command -label \"Colors...\" -command {set choice 21} -underline 0" );
 cmd( "$w add command -label \"Plot Parameters...\" -command {set choice 22} -underline 0" );
 cmd( "$w add command -label \"Lattice Parameters...\" -command {set choice 44} -underline 0" );
+cmd( "$w add checkbutton -label \"Average Y Values\" -variable avgSmpl -underline 8" );
 
 cmd( "set w .da.m.help" );
 cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
@@ -269,6 +304,13 @@ cmd( "pack $f.in $f.out $f.sort $f.sortdesc $f.sortend $f.unsort $f.search $f.ad
 cmd( "pack .da.vars.lb .da.vars.b .da.vars.ch .da.vars.pl -side left  -expand true -fill y" );
 cmd( "pack .da.vars -expand true -fill y" );
 
+// add time series in memory
+if ( actual_steps > 0 )
+{
+	insert_data_mem( root, &num_var, &num_c );
+	max_c = num_c;
+}
+
 cmd( "frame .da.com" );
 cmd( "label .da.com.nvar -text \"Series = %d\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ]", num_var  );
 cmd( "label .da.com.ncas -text \"Cases = %d\" -width [ expr ( $daCwid + 2 * int( $pad / 2 - 0.5 ) ) / 2 ]", num_c  );
@@ -277,41 +319,6 @@ cmd( "label .da.com.selec -text \"Series = [ .da.vars.ch.v size ]\" -width [ exp
 cmd( "label .da.com.plot -text \"Plots = [ .da.vars.pl.v size ]\" -width [ expr $daCwid + $pad ]" );
 cmd( "pack .da.com.nvar .da.com.ncas .da.com.pad .da.com.selec .da.com.plot -side left" );
 cmd( "pack .da.com" );
-
-num_c = 1;
-num_var = 0;
-if(actual_steps>0)
-  insert_data_mem(root, &num_var, &num_c);
-
-Tcl_LinkVar(inter, "auto", (char *) &autom, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "auto_x", (char *) &autom_x, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "minc", (char *) &min_c, TCL_LINK_INT);
-Tcl_LinkVar(inter, "maxc", (char *) &max_c, TCL_LINK_INT);
-Tcl_LinkVar(inter, "miny", (char *) &miny, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "maxy", (char *) &maxy, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "logs", (char *) &logs, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "allblack", (char *) &allblack, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "grid", (char *) &grid, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "point_size", (char *) &point_size, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "tc", (char *) &time_cross, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "line_point", (char *) &line_point, TCL_LINK_INT);
-Tcl_LinkVar(inter, "xy", (char *) &xy, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "pdigits", (char *) &pdigits, TCL_LINK_INT);
-Tcl_LinkVar(inter, "watch", (char *) &watch, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "gnu", (char *) &gnu, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "num_y2", (char *) &num_y2, TCL_LINK_INT);
-
-min_c = 1;
-max_c = num_c;
-miny = maxy = 0;
-time_cross = xy = false;
-gnu = false;
-cmd( "set y2 0" );
-cmd( "set allblack $grayscaleP" );
-cmd( "set grid $gridP" );
-cmd( "set point_size $pointsizeP" );
-cmd( "set line_point $linemodeP" );
-cmd( "set pdigits $pdigitsP" );
 
 cmd( "frame .da.f" );
 cmd( "frame .da.f.h" );
@@ -477,7 +484,7 @@ cmd( "proc add_plot { plot name } { \
 Tcl_SetVar( inter, "running", running ? "1" : "0", 0 );
 cmd( "if $running { showtop .da overM 0 1 } { showtop .da overM 0 1 0 }" );
 
-if(num_var==0)
+if ( num_var == 0 )
   cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
 
 // make a copy to allow insertion of new temporary variables
@@ -574,25 +581,26 @@ vs = NULL;
 cmd( "destroytop .da" );
 uncover_browser( );
 	
-Tcl_UnlinkVar(inter, "auto");
-Tcl_UnlinkVar(inter, "auto_x");
-Tcl_UnlinkVar(inter, "minc");
-Tcl_UnlinkVar(inter, "maxc");
-Tcl_UnlinkVar(inter, "miny");
-Tcl_UnlinkVar(inter, "maxy");
-Tcl_UnlinkVar(inter, "logs");
-Tcl_UnlinkVar(inter, "allblack");
-Tcl_UnlinkVar(inter, "grid");
-Tcl_UnlinkVar(inter,"point_size");
-Tcl_UnlinkVar(inter,"tc");
-Tcl_UnlinkVar(inter,"line_point");
-Tcl_UnlinkVar(inter,"xy");
-Tcl_UnlinkVar(inter, "pdigits");
-Tcl_UnlinkVar(inter, "watch");
-Tcl_UnlinkVar(inter, "gnu");
-Tcl_UnlinkVar(inter, "num_y2");
-Tcl_UnlinkVar(inter, "cur_plot");
-Tcl_UnlinkVar(inter, "nv");
+Tcl_UnlinkVar( inter, "auto" );
+Tcl_UnlinkVar( inter, "auto_x" );
+Tcl_UnlinkVar( inter, "minc" );
+Tcl_UnlinkVar( inter, "maxc" );
+Tcl_UnlinkVar( inter, "miny" );
+Tcl_UnlinkVar( inter, "maxy" );
+Tcl_UnlinkVar( inter, "logs" );
+Tcl_UnlinkVar( inter, "allblack" );
+Tcl_UnlinkVar( inter, "grid" );
+Tcl_UnlinkVar( inter,"point_size" );
+Tcl_UnlinkVar( inter,"tc" );
+Tcl_UnlinkVar( inter,"line_point" );
+Tcl_UnlinkVar( inter,"xy" );
+Tcl_UnlinkVar( inter, "pdigits" );
+Tcl_UnlinkVar( inter, "watch" );
+Tcl_UnlinkVar( inter, "gnu" );
+Tcl_UnlinkVar( inter, "num_y2" );
+Tcl_UnlinkVar( inter, "cur_plot" );
+Tcl_UnlinkVar( inter, "nv" );
+Tcl_UnlinkVar( inter, "avgSmpl" );
 
 cmd( "catch { set a [ glob -nocomplain plotxy_* ] }" ); //remove directories
 cmd( "foreach b $a { catch { file delete -force $b } }" );
@@ -3058,51 +3066,50 @@ return res;
 /***************************************************
 INSERT_DATA_MEM
 ****************************************************/
-void insert_data_mem(object *r, int *num_v, int *num_c)
+void insert_data_mem( object *r, int *num_v, int *num_c )
 {
-	insert_labels_mem(r,num_v, num_c);
-	vs=new store[*num_v];
-	*num_v=0;
-	insert_store_mem(r, num_v);
+	insert_labels_mem( r, num_v, num_c );
+	vs = new store[ *num_v ];
+	*num_v = 0;
+	insert_store_mem( r, num_v );
 }
 
 
 /***************************************************
 INSERT_LABELS_MEM
 ****************************************************/
-void insert_labels_mem(object *r, int *num_v, int *num_c)
+void insert_labels_mem( object *r, int *num_v, int *num_c )
 {
-object *cur;
-variable *cv;
-bridge *cb;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-for(cv=r->v; cv!=NULL; cv=cv->next)
-   if(cv->save)
-    {
-     set_lab_tit(cv);
-     cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
-     if(cv->end>*num_c)
-       *num_c=cv->end;
-     *num_v+=1;
-    }
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+		if ( cv->save )
+			{
+				set_lab_tit( cv );
+				cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+				if ( cv->end > *num_c )
+					*num_c = cv->end;
+				*num_v += 1;
+			}
 
-for(cb=r->b; cb!=NULL; cb=cb->next)
- {cur=cb->head;
- if(cur!=NULL && cur->to_compute==1)
-   {
-   for(cur=cb->head; cur!=NULL; cur=cur->next)
-     insert_labels_mem(cur, num_v, num_c);
-   }  
- }
- 
-if(r->up==NULL)
- for(cv=cemetery; cv!=NULL; cv=cv->next)
-  {  
-	 cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
-     if(cv->end>*num_c)
-       *num_c=cv->end;
-     *num_v+=1;
-  }
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	{
+		cur = cb->head;
+		if (cur != NULL && cur->to_compute == 1 )
+			for ( cur = cb->head; cur != NULL; cur = cur->next )
+				insert_labels_mem( cur, num_v, num_c );
+	}
+	 
+	if( r->up == NULL )
+		for( cv = cemetery; cv != NULL; cv = cv->next )
+		{  
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d\"", cv->label, cv->lab_tit, cv->start, cv->end, *num_v );
+			if ( cv->end > *num_c )
+				*num_c = cv->end;
+			*num_v += 1;
+		}
 }
 
 
@@ -7143,20 +7150,22 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 			return;					// invalid type, do nothing
 	}
 	
-	// create the window and the canvas
-	plot_canvas( type, nv, start, end, str, tag, choice );
-	
 	// get graphical configuration from Tk (file defaults.tcl)
 	get_int( "hsizeP", & hsize );			// 600
 	get_int( "vsizeP", & vsize );			// 300
-	get_int( "hcanvasP", & hcanvas );
-	get_int( "vcanvasP", & vcanvas );
 	get_int( "tbordsizeP", & tbordsize );	// 5
-	get_int( "hbordsizeP", & hbordsize );
-	get_int( "lheightP", & lheight );		// 15
 
 	// select gray scale or color range				
 	color = allblack ? 1001 : 0;
+	
+	// alert once about plotting over more timesteps than plow window pixels
+	step = hsize / ( double ) ( endCase - iniCase );
+	if ( avgSmpl && ! avgSmplMsg && step < 1 )
+	{
+		cmd( "set answer [ tk_messageBox -parent .da -title Warning -icon warning -type yesno -default no -message \"Disable Y values averaging?\" -detail \"The number of time steps to plot is larger than the physical plot width. To compute the Y values, LSD averages data from multiple time steps.\n\nPress 'Yes' to disable Y values averaging or 'No' otherwise\n(this configuration can be also changed in menu 'Options').\"]" );
+		cmd( "switch $answer { yes { set avgSmpl 0 } no { } }" );
+		avgSmplMsg = true;
+	}
 
 	// create data structure to hold image to be presented
 	y = new double[ nLine ];		// cross section consolidated "intra" step average value
@@ -7171,9 +7180,17 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 			pdataY[ k ][ i ] = -1;	// mark all as non plot
 	}
 	
+	// create the window and the canvas
+	plot_canvas( type, nv, start, end, str, tag, choice );
+	
+	// get graphical configuration real canvas
+	get_int( "hcanvasP", & hcanvas );
+	get_int( "vcanvasP", & vcanvas );
+	get_int( "hbordsizeP", & hbordsize );
+	get_int( "lheightP", & lheight );
+
 	// calculate screen plot values for all series
 	x1 = hbordsize - 1;
-	step = hsize / ( double ) ( endCase - iniCase );
 	for ( h = 0, j = 0, i = iniCase; i <= endCase; ++i )
 	{
 		// move the x-axis pointer in discrete steps
@@ -7231,9 +7248,14 @@ void plot( int type, int nv, double **data, int *start, int *end, char **str, ch
 				if ( tOk )
 				{
 					y[ k ] += yVal;
+
 					if ( xnext )
-					{	// average "intra" steps
-						y[ k ] /= h;		
+					{	
+						if ( avgSmpl )					// average "intra" steps ?
+							y[ k ] /= h;
+						else
+							y[ k ] = yVal;
+							
 						// constrain to canvas virtual limits
 						y[ k ] = min( max( y[ k ], cminy ), cmaxy );
 						// scale to the canvas physical y range
