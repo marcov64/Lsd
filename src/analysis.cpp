@@ -6027,497 +6027,507 @@ delete[] tag;
 /***************************************************
 CREATE_SERIES
 ****************************************************/
-void create_series(int *choice)
+void create_series( int *choice )
 {
-int i, j, k, *start, *end, idseries, flt;
-double nmax, nmin, nmean, nvar, nn, thflt, confi;
-double step;
-bool first;
-char *lapp, **str, **tag;
-store *app;
+	int i, j, k, *start, *end, idseries, flt;
+	double nmax, nmin, nmean, nvar, nn, thflt, confi;
+	double step;
+	bool first;
+	char *lapp, **str, **tag;
+	store *app;
 
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	return;
-}
-
-double **data;
-
-if(logs)
-  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
-
-Tcl_LinkVar(inter, "thflt", (char *) &thflt, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "confi", (char *) &confi, TCL_LINK_DOUBLE);
-
-thflt=0;
-confi=1.96;
-cmd( "set flt 0" );
-cmd( "set bido 1" );
-cmd( "set bidi 1" );
-cmd( "set vtag 1" );
-
-cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
-
-cmd( "frame .da.s.o" );
-cmd( "label .da.s.o.l -text \"Aggregation mode\"" );
-
-cmd( "frame .da.s.o.r -relief groove -bd 2" );
-cmd( "radiobutton .da.s.o.r.m -text \"Calculate over series (same # of cases)\" -variable bido -value 1" );
-cmd( "radiobutton .da.s.o.r.f -text \"Calculate over cases (# cases = # of series)\" -variable bido -value 2" );
-cmd( "pack .da.s.o.r.m .da.s.o.r.f -anchor w" );
-
-cmd( "pack .da.s.o.l .da.s.o.r" );
-
-cmd( "frame .da.s.f" );
-cmd( "label .da.s.f.l -text \"Filtering\"" );
-
-cmd( "frame .da.s.f.r -relief groove -bd 2" );
-cmd( "radiobutton .da.s.f.r.n -text \"Use all values\" -variable flt -value 0 -command { .da.s.f.t.th configure -state disabled }" );
-cmd( "radiobutton .da.s.f.r.s -text \"Ignore small values\" -variable flt -value 1 -command { .da.s.f.t.th configure -state normal }" );
-cmd( "radiobutton .da.s.f.r.b -text \"Ignore large values\" -variable flt -value 2 -command { .da.s.f.t.th configure -state normal }" );
-cmd( "pack .da.s.f.r.n .da.s.f.r.s .da.s.f.r.b  -anchor w" );
-
-cmd( "frame .da.s.f.t" );
-cmd( "label .da.s.f.t.l -text \"Threshold\"" );
-cmd( "entry .da.s.f.t.th -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invcmd { bell } -justify center -state disabled" );
-cmd( "write_disabled .da.s.f.th $thflt" ); 
-cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx 2" );
-
-cmd( "pack .da.s.f.l .da.s.f.r .da.s.f.t" );
-
-cmd( "frame .da.s.i" );
-cmd( "label .da.s.i.l -text \"Type of series\"" );
-
-cmd( "frame .da.s.i.r -relief groove -bd 2" );
-cmd( "radiobutton .da.s.i.r.m -text \"Average\" -variable bidi -command {set headname \"Avg\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 1 -command { .da.s.i.r.ci.p configure -state disabled }" );
-cmd( "radiobutton .da.s.i.r.z -text \"Sum\" -variable bidi -command {set headname \"Sum\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 5 -command { .da.s.i.r.ci.p configure -state disabled }" );
-cmd( "radiobutton .da.s.i.r.f -text \"Maximum\" -variable bidi -command {set headname \"Max\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 2 -command { .da.s.i.r.ci.p configure -state disabled }" );
-cmd( "radiobutton .da.s.i.r.t -text \"Minimum\" -variable bidi -command {set headname \"Min\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 3 -command { .da.s.i.r.ci.p configure -state disabled }" );
-cmd( "radiobutton .da.s.i.r.c -text \"Variance\" -variable bidi -command {set headname \"Var\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 4 -command { .da.s.i.r.ci.p configure -state disabled }" );
-
-cmd( "frame .da.s.i.ci" );
-cmd( "radiobutton .da.s.i.r.ci.c -text \"Std. Dev.\" -variable bidi -command {set headname \"CI\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 6 -command { .da.s.i.r.ci.p configure -state normal }" );
-cmd( "label .da.s.i.r.ci.x -text \u00D7" );
-cmd( "entry .da.s.i.r.ci.p -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
-cmd( ".da.s.i.r.ci.p insert 0 $confi" ); 
-cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.ci.r.p -side left" );
-
-cmd( "radiobutton .da.s.i.n -text \"Count\" -variable bidi -command {set headname \"Num\"; set vname $headname$basename; .da.s.nv selection range 0 end} -value 7 -command { .da.s.i.r.ci.p configure -state disabled }" );
-cmd( "pack .da.s.i.l .da.s.i.m .da.s.i.z .da.s.i.f .da.s.i.t .da.s.i.c .da.s.i.ci .da.s.i.n -anchor w" );
-
-cmd( "set a [.da.vars.ch.v get 0]" );
-cmd( "set basename [lindex [split $a] 0]" );
-cmd( "set headname \"Avg\"" );
-cmd( "set vname $headname$basename" );
-
-cmd( "frame .da.s.n" );
-cmd( "label .da.s.n.lnv -text \"New series label\"" );
-cmd( "entry .da.s.n.nv -width 30 -textvariable vname -justify center" );
-cmd( "pack .da.s.n.lnv .da.s.n.nv" );
-
-cmd( "frame .da.s.t" );
-cmd( "label .da.s.t.tnv -text \"New series tag\"" );
-cmd( "entry .da.s.t.tv -width 20 -textvariable vtag -justify center" );
-cmd( "pack .da.s.t.tnv .da.s.t.tv" );
-
-cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
-
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { set choice 2 }" );
-
-cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
-
-cmd( "showtop .da.s" );
-cmd( "focus .da.s.n.nv" );
-cmd( ".da.s.n.nv selection range 0 end" );
- 
-*choice=0;
-while(*choice==0)
-	Tcl_DoOneEvent(0);
-
-cmd( "set thflt [ .da.s.f.th get ]" ); 
-cmd( "set confi [ .da.s.i.ci.p get ]" ); 
-Tcl_UnlinkVar(inter,"thflt");
-Tcl_UnlinkVar(inter,"confi");
-cmd( "destroytop .da.s" );
-
-if(*choice==2)
- {*choice=0;
-  return;
- }
-
-data=new double *[nv];
-start=new int[nv];
-end=new int[nv];
-str=new char *[nv];
-tag=new char *[nv];
-
- app=new store[1+ num_var];
- for(i=0; i<num_var; i++)
-  {app[i]=vs[i];
-   strcpy(app[i].label, vs[i].label);
-   strcpy(app[i].tag, vs[i].tag);
-  } 
- delete[] vs;
- vs=app;
-
-if(autom_x)
- {min_c=1;
-  max_c=num_c;
- }
-
-for(i=0; i<nv; i++)
- {str[i]=new char[MAX_ELEM_LENGTH];
-  tag[i]=new char[MAX_ELEM_LENGTH];
-  data[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  lapp=(char *)Tcl_GetVar(inter, "res",0);
-  strcpy(msg,lapp);
-  sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
-  {
-    data[ i ] = vs[ idseries ].data;
-    if(data[i]==NULL)
-      plog("\nError: invalid data\n");
-  }
- }
-
-if(autom_x||min_c>=max_c)
-{
-
-for(i=0; i<nv; i++)
- {if(i==0)
-   min_c=max_c=start[i];
-  if(start[i]<min_c)
-   min_c=start[i];
-  if(end[i]>max_c)
-   max_c=end[i]>num_c?num_c:end[i];
- }
-}
-
-cmd( "set choice $flt" );
-flt=*choice;
-
-cmd( "set choice $bido" );
-
-if(*choice==1)
-{//compute over series
-vs[num_var].data = new double[max_c+2];
-lapp=(char *)Tcl_GetVar(inter, "vname",0);
-strcpy(msg,lapp);
-strcpy(vs[num_var].label, msg);
-vs[num_var].end=max_c;
-vs[num_var].start=min_c;
-lapp=(char *)Tcl_GetVar(inter, "vtag",0);
-strcpy(msg,lapp);
-strcpy(vs[num_var].tag, msg);
-vs[num_var].rank=num_var;
-
-cmd( "set choice $bidi" );
-
-for(i=min_c; i<=max_c; i++)
- {nmean=nn=nvar=0;
-  first=true;
-  for(j=0; j<nv; j++)
-   {
-    if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))		// ignore NaNs
-    {
-    nmean+=data[j][i];
-    nvar+=data[j][i]*data[j][i];
-    nn++;
-    if(first)
+	if ( nv == 0 )
 	{
-     nmin=nmax=data[j][i];
-	 first=false;
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		return;
 	}
-    else
-     {
-     if(nmin>data[j][i])
-      nmin=data[j][i];
-     if(nmax<data[j][i])
-      nmax=data[j][i];
-      
-     } 
-    }
-   }
 
-   if(nn==0)	// not a single valid value?
-   {
-		nn=nmean=nvar=nmin=nmax=NAN;
-   }
-   else
-   {
-		nmean/=nn;
-		nvar/=nn;
-		nvar-=nmean*nmean;
-   }
-   
-if(*choice==1)
- vs[num_var].data[i]=nmean;
-if(*choice==5)
- vs[num_var].data[i]=nmean*nn;
- 
-if(*choice==2)
- vs[num_var].data[i]=nmax;
-if(*choice==3)
- vs[num_var].data[i]=nmin;
-if(*choice==4)
- vs[num_var].data[i]=nvar;
-if(*choice==7)
- vs[num_var].data[i]=nn;
-if(*choice==6)
- vs[num_var].data[i]=sqrt(nvar)*confi;
+	double **data;
 
+	if ( logs )
+		cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
- }
-cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, min_c, max_c, num_var ); 
+	Tcl_LinkVar( inter, "thflt", ( char * ) &thflt, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( inter, "confi", ( char * ) &confi, TCL_LINK_DOUBLE );
 
-cmd( "lappend DaModElem %s", vs[num_var].label  );
-} 
-else
-{
-//compute over cases
-vs[num_var].data = new double[nv];
-lapp=(char *)Tcl_GetVar(inter, "vname",0);
-strcpy(msg,lapp);
-strcpy(vs[num_var].label, msg);
-vs[num_var].end=nv-1;
-vs[num_var].start=0;
-lapp=(char *)Tcl_GetVar(inter, "vtag",0);
-strcpy(msg,lapp);
-strcpy(vs[num_var].tag, msg);
-vs[num_var].rank=num_var;
+	thflt = 0;
+	confi = 1.96;
+	cmd( "set flt 0" );
+	cmd( "set bido 1" );
+	cmd( "set bidi 1" );
+	cmd( "set vtag 1" );
 
-cmd( "set choice $bidi" );
+	cmd( "newtop .da.s \"New Series Options\" { set choice 2 } .da" );
 
-for(j=0; j<nv; j++)
- {nmean=nn=nvar=0;
-  first=true;
-  for(i=min_c; i<=max_c; i++)
-   {
-    if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
-    {
-    nmean+=data[j][i];
-    nvar+=data[j][i]*data[j][i];
-    nn++;
-    if(first)
+	cmd( "frame .da.s.o" );
+	cmd( "label .da.s.o.l -text \"Aggregation mode\"" );
+
+	cmd( "frame .da.s.o.r -relief groove -bd 2" );
+	cmd( "radiobutton .da.s.o.r.m -text \"Calculate over series (same # of cases)\" -variable bido -value 1" );
+	cmd( "radiobutton .da.s.o.r.f -text \"Calculate over cases (# cases = # of series)\" -variable bido -value 2" );
+	cmd( "pack .da.s.o.r.m .da.s.o.r.f -anchor w" );
+
+	cmd( "pack .da.s.o.l .da.s.o.r" );
+
+	cmd( "frame .da.s.f" );
+	cmd( "label .da.s.f.l -text \"Filtering\"" );
+
+	cmd( "frame .da.s.f.r -relief groove -bd 2" );
+	cmd( "radiobutton .da.s.f.r.n -text \"Use all values\" -variable flt -value 0 -command { .da.s.f.t.th configure -state disabled }" );
+	cmd( "radiobutton .da.s.f.r.s -text \"Ignore small values\" -variable flt -value 1 -command { .da.s.f.t.th configure -state normal }" );
+	cmd( "radiobutton .da.s.f.r.b -text \"Ignore large values\" -variable flt -value 2 -command { .da.s.f.t.th configure -state normal }" );
+	cmd( "pack .da.s.f.r.n .da.s.f.r.s .da.s.f.r.b  -anchor w" );
+
+	cmd( "frame .da.s.f.t" );
+	cmd( "label .da.s.f.t.l -text \"Threshold\"" );
+	cmd( "entry .da.s.f.t.th -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "write_disabled .da.s.f.t.th $thflt" ); 
+	cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx 2" );
+
+	cmd( "pack .da.s.f.l .da.s.f.r .da.s.f.t" );
+
+	cmd( "frame .da.s.i" );
+	cmd( "label .da.s.i.l -text \"Type of series\"" );
+
+	cmd( "frame .da.s.i.r -relief groove -bd 2" );
+	cmd( "radiobutton .da.s.i.r.m -text \"Average\" -variable bidi -value 1 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Avg\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.z -text \"Sum\" -variable bidi -value 5 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Sum\"; set vname $headname$basename; .da.s.n.nv selection range 0 end  }" );
+	cmd( "radiobutton .da.s.i.r.n -text \"Count\" -variable bidi -value 7 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Num\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Max\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Min\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Var\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+
+	cmd( "frame .da.s.i.r.ci" );
+	cmd( "radiobutton .da.s.i.r.ci.c -text \"Std. Dev.\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"CI\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "label .da.s.i.r.ci.x -text \u00D7" );
+	cmd( "entry .da.s.i.r.ci.p -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
+	cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p -side left" );
+
+	cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.ci -anchor w" );
+	cmd( "pack .da.s.i.l .da.s.i.r" );
+
+	cmd( "set a [ .da.vars.ch.v get 0 ]" );
+	cmd( "set basename [ lindex [ split $a ] 0 ]" );
+	cmd( "set headname \"Avg\"" );
+	cmd( "set vname $headname$basename" );
+
+	cmd( "frame .da.s.n" );
+	cmd( "label .da.s.n.lnv -text \"New series label\"" );
+	cmd( "entry .da.s.n.nv -width 30 -textvariable vname -justify center" );
+	cmd( "pack .da.s.n.lnv .da.s.n.nv" );
+
+	cmd( "frame .da.s.t" );
+	cmd( "label .da.s.t.tnv -text \"New series tag\"" );
+	cmd( "entry .da.s.t.tv -width 20 -textvariable vtag -justify center" );
+	cmd( "pack .da.s.t.tnv .da.s.t.tv" );
+
+	cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
+
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { set choice 2 }" );
+
+	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.n.nv" );
+	cmd( ".da.s.n.nv selection range 0 end" );
+	 
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set thflt [ .da.s.f.t.th get ]" ); 
+	cmd( "set confi [ .da.s.i.r.ci.p get ]" ); 
+	cmd( "destroytop .da.s" );
+
+	Tcl_UnlinkVar( inter, "thflt" );
+	Tcl_UnlinkVar( inter, "confi" );
+
+	if ( *choice == 2 )
 	{
-     nmin=nmax=data[j][i];
-	 first=false;
+		*choice=0;
+		return;
 	}
-    else
-     {
-     if(nmin>data[j][i])
-      nmin=data[j][i];
-     if(nmax<data[j][i])
-      nmax=data[j][i];
-      
-     } 
-    }
-   }
 
-   if(nn==0)	// not a single valid value?
-   {
-		nn=nmean=nvar=nmin=nmax=NAN;
-   }
-   else
-   {
-		nmean/=nn;
-		nvar/=nn;
-		nvar-=nmean*nmean;
-   }
-      
-if(*choice==1)
- vs[num_var].data[j]=nmean;
-if(*choice==5)
- vs[num_var].data[j]=nmean*nn;
-if(*choice==2)
- vs[num_var].data[j]=nmax;
-if(*choice==3)
- vs[num_var].data[j]=nmin;
-if(*choice==4)
- vs[num_var].data[j]=nvar;
-if(*choice==7)
- vs[num_var].data[j]=nn;
-if(*choice==6)
- vs[num_var].data[j]=sqrt(nvar)*confi;
+	data=new double *[nv];
+	start=new int[nv];
+	end=new int[nv];
+	str=new char *[nv];
+	tag=new char *[nv];
 
- }
+	app=new store[1+ num_var];
+	for(i=0; i<num_var; i++)
+	{
+		app[i]=vs[i];
+		strcpy(app[i].label, vs[i].label);
+		strcpy(app[i].tag, vs[i].tag);
+	} 
 
-cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, 0, nv-1, num_var ); 
+	delete[] vs;
+	vs=app;
 
-cmd( "lappend DaModElem %s", vs[num_var].label  );
-}
-cmd( ".da.vars.lb.v see end" );
-num_var++; 
+	if(autom_x)
+	{
+		min_c=1;
+		max_c=num_c;
+	}
 
-delete[] start;
-delete[] end;
-delete[] data;
-for(i=0; i<nv; i++)
- {
- delete[] str[i];
- delete[] tag[i];
- }
-delete[] str;
-delete[] tag; 
-}
+	for(i=0; i<nv; i++)
+	{
+		str[i]=new char[MAX_ELEM_LENGTH];
+		tag[i]=new char[MAX_ELEM_LENGTH];
+		data[ i ] = NULL;
 
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		lapp=(char *)Tcl_GetVar(inter, "res",0);
+		strcpy(msg,lapp);
+		sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
+		if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
+		{
+			data[ i ] = vs[ idseries ].data;
+			if(data[i]==NULL)
+				plog("\nError: invalid data\n");
+		}
+	}
 
-void create_maverag(int *choice)
-{
-int i, j, h, *start, *end, flt, idseries;
-double xapp;
-double step;
+	if(autom_x||min_c>=max_c)
+	for(i=0; i<nv; i++)
+	{
+		if(i==0)
+			min_c=max_c=start[i];
+		if(start[i]<min_c)
+			min_c=start[i];
+		if(end[i]>max_c)
+			max_c=end[i]>num_c?num_c:end[i];
+	}
 
-char *lapp, **str, **tag;
-store *app;
+	cmd( "set choice $flt" );
+	flt=*choice;
 
-if ( nv == 0 )
-{
-	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
-	return;
-}
+	cmd( "set choice $bido" );
 
-double **data;
+	if(*choice==1)
+	{	//compute over series
+		vs[num_var].data = new double[max_c+2];
+		lapp=(char *)Tcl_GetVar(inter, "vname",0);
+		strcpy(msg,lapp);
+		strcpy(vs[num_var].label, msg);
+		vs[num_var].end=max_c;
+		vs[num_var].start=min_c;
+		lapp=(char *)Tcl_GetVar(inter, "vtag",0);
+		strcpy(msg,lapp);
+		strcpy(vs[num_var].tag, msg);
+		vs[num_var].rank=num_var;
 
-if(logs)
-  cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
+		cmd( "set choice $bidi" );
 
-cmd( "newtop .da.s \"Moving Average Options\" { set choice 2 } .da" );
+		for(i=min_c; i<=max_c; i++)
+		{
+			nmean=nn=nvar=0;
+			first=true;
+			for(j=0; j<nv; j++)
+			{
+				if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ))		// ignore NaNs
+				{
+					nmean+=data[j][i];
+					nvar+=data[j][i]*data[j][i];
+					nn++;
+					if(first)
+					{
+						nmin=nmax=data[j][i];
+						first=false;
+					}
+					else
+					{
+						if(nmin>data[j][i])
+							nmin=data[j][i];
+						if(nmax<data[j][i])
+							nmax=data[j][i];
+					} 
+				}
+			}
 
-cmd( "frame .da.s.o" );
-cmd( "label .da.s.o.l -text \"Number of (odd) periods\"" );
-cmd( "set bido 10" );
-cmd( "entry .da.s.o.th -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invcmd { bell } -justify center" );
-cmd( ".da.s.o.th insert 0 $bido" ); 
-cmd( "pack .da.s.o.l .da.s.o.th" );
+			if(nn==0)	// not a single valid value?
+				nn=nmean=nvar=nmin=nmax=NAN;
+			else
+			{
+				nmean/=nn;
+				nvar/=nn;
+				nvar-=nmean*nmean;
+			}
+		   
+			if(*choice==1)
+				vs[num_var].data[i]=nmean;
+			if(*choice==5)
+				vs[num_var].data[i]=nmean*nn;
+			if(*choice==2)
+				vs[num_var].data[i]=nmax;
+			if(*choice==3)
+				vs[num_var].data[i]=nmin;
+			if(*choice==4)
+				vs[num_var].data[i]=nvar;
+			if(*choice==7)
+				vs[num_var].data[i]=nn;
+			if(*choice==6)
+				vs[num_var].data[i]=sqrt(nvar)*confi;
+		}
+		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, min_c, max_c, num_var ); 
 
-cmd( "pack .da.s.o -padx 5 -pady 5" );
-
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#create_maverag } { set choice 2 }" );
-
-cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
-cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
-
-cmd( "showtop .da.s" );
-cmd( "focus .da.s.o.th" );
-cmd( ".da.s.o.th selection range 0 end" );
-
-*choice=0;
-  while(*choice==0)
-	Tcl_DoOneEvent(0);
-
-cmd( "set bido [ .da.s.o.th get ]" ); 
-cmd( "destroytop .da.s" );
-
-if(*choice==2)
- {*choice=0;
-  return;
- }
-
-data=new double *[nv];
-start=new int[nv];
-end=new int[nv];
-str=new char *[nv];
-tag=new char *[nv];
-
- app=new store[nv + num_var];
- for(i=0; i<num_var; i++)
-  {app[i]=vs[i];
-   strcpy(app[i].label, vs[i].label);
-   strcpy(app[i].tag, vs[i].tag);
-  } 
- delete[] vs;
- vs=app;
-
-if(autom_x)
- {min_c=1;
-  max_c=num_c;
- }
-
-cmd( "set choice $bido" );
-flt=*choice;
-if((flt%2)==0)
- flt++;
-
-if(flt<2)
-  {*choice=0;
-  return;
- }
-
-
-for(i=0; i<nv; i++)
- {str[i]=new char[MAX_ELEM_LENGTH];
-  tag[i]=new char[MAX_ELEM_LENGTH];
-  data[ i ] = NULL;
-
-  cmd( "set res [.da.vars.ch.v get %d]", i );
-  lapp=(char *)Tcl_GetVar(inter, "res",0);
-  strcpy(msg,lapp);
-  sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
-  
-  sprintf(msg, "MA%d_%s", flt, str[i]);
-  strcpy(vs[num_var+i].label, msg);
-  strcpy(vs[num_var+i].tag,tag[i]);
-  vs[num_var+i].start=start[i];
-  vs[num_var+i].end=end[i];
-  vs[num_var+i].rank=num_var+i;
-  vs[num_var+i].data = new double[max_c+2];
-  if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
-   {
-   data[ i ] = vs[ idseries ].data;
-   if(data[i]==NULL)
-     plog("\nError: invalid data\n");
-
-   xapp=0;
-
-   for(h=0, j=start[i]; j<start[i]+flt;j++)
-	   if(is_finite(data[i][j]))		// not a NaN?
-	   {
-		   xapp+=data[i][j];
-		   h++;
-	   }
-	if(h==0)	// no observation?
-		xapp=NAN;
+		cmd( "lappend DaModElem %s", vs[num_var].label  );
+	} 
 	else
-		xapp/=(double)h;
-	
-   for(j=start[i]; j<start[i]+(flt-1)/2; j++)
-     vs[num_var+i].data[j]=xapp;
+	{
+		//compute over cases
+		vs[num_var].data = new double[nv];
+		lapp=(char *)Tcl_GetVar(inter, "vname",0);
+		strcpy(msg,lapp);
+		strcpy(vs[num_var].label, msg);
+		vs[num_var].end=nv-1;
+		vs[num_var].start=0;
+		lapp=(char *)Tcl_GetVar(inter, "vtag",0);
+		strcpy(msg,lapp);
+		strcpy(vs[num_var].tag, msg);
+		vs[num_var].rank=num_var;
 
-   for(   ; j<end[i]-(flt-1)/2; j++)
-    {
-	 if(is_finite(data[i][j-(flt-1)/2]) && is_finite(data[i][j+(flt-1)/2]))
-		xapp=xapp-data[i][j-(flt-1)/2]/(double)flt+data[i][j+(flt-1)/2]/(double)flt;
-	 else
-		xapp=NAN;
-     vs[num_var+i].data[j]=xapp;
-    }
-   for(   ; j<end[i]; j++)
-     vs[num_var+i].data[j]=xapp;     
-   }
-  cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var+i].label, vs[num_var+i].tag, vs[num_var+i].start, vs[num_var+i].end, num_var+i ); 
-  
-  cmd( "lappend DaModElem %s", vs[num_var+i].label );
- }
+		cmd( "set choice $bidi" );
 
-cmd( ".da.vars.lb.v see end" );
-num_var+=nv; 
+		for(j=0; j<nv; j++)
+		{
+			nmean=nn=nvar=0;
+			first=true;
+			for(i=min_c; i<=max_c; i++)
+			{
+				if(i>=start[j] && i<=end[j] && is_finite(data[j][i]) && (flt==0 || (flt==1 && data[j][i]>thflt) || (flt==2 && data[j][i]<thflt) ) )
+				{
+					nmean+=data[j][i];
+					nvar+=data[j][i]*data[j][i];
+					nn++;
+					if(first)
+					{
+						nmin=nmax=data[j][i];
+						first=false;
+					}
+					else
+					{
+						if(nmin>data[j][i])
+							nmin=data[j][i];
+						if(nmax<data[j][i])
+							nmax=data[j][i];
+					} 
+				}
+		   }
 
-delete[] start;
-delete[] end;
-delete[] data;
-for(i=0; i<nv; i++)
- {
- delete[] str[i];
- delete[] tag[i];
- }
-delete[] str;
-delete[] tag; 
+		   if(nn==0)	// not a single valid value?
+				nn=nmean=nvar=nmin=nmax=NAN;
+		   else
+		   {
+				nmean/=nn;
+				nvar/=nn;
+				nvar-=nmean*nmean;
+		   }
+			  
+			if(*choice==1)
+				vs[num_var].data[j]=nmean;
+			if(*choice==5)
+				vs[num_var].data[j]=nmean*nn;
+			if(*choice==2)
+				vs[num_var].data[j]=nmax;
+			if(*choice==3)
+				vs[num_var].data[j]=nmin;
+			if(*choice==4)
+				vs[num_var].data[j]=nvar;
+			if(*choice==7)
+				vs[num_var].data[j]=nn;
+			if(*choice==6)
+				vs[num_var].data[j]=sqrt(nvar)*confi;
+		 }
+
+		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var].label, vs[num_var].tag, 0, nv-1, num_var ); 
+
+		cmd( "lappend DaModElem %s", vs[num_var].label  );
+	}
+	cmd( ".da.vars.lb.v see end" );
+	num_var++; 
+
+	delete[] start;
+	delete[] end;
+	delete[] data;
+	for(i=0; i<nv; i++)
+	{
+		delete[] str[i];
+		delete[] tag[i];
+	}
+	delete[] str;
+	delete[] tag; 
 }
+
+
+/***************************************************
+CREATE_MAVERAG
+****************************************************/
+void create_maverag( int *choice )
+{
+	int i, j, h, *start, *end, flt, idseries;
+	double xapp;
+	double step;
+
+	char *lapp, **str, **tag;
+	store *app;
+
+	if ( nv == 0 )
+	{
+		cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"No series selected\" -detail \"Place one or more series in the Series Selected listbox.\"" );
+		return;
+	}
+
+	double **data;
+
+	if ( logs )
+		cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
+
+	cmd( "newtop .da.s \"Moving Average Options\" { set choice 2 } .da" );
+
+	cmd( "frame .da.s.o" );
+	cmd( "label .da.s.o.l -text \"Number of (odd) periods\"" );
+	cmd( "set bido 10" );
+	cmd( "entry .da.s.o.th -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invcmd { bell } -justify center" );
+	cmd( ".da.s.o.th insert 0 $bido" ); 
+	cmd( "pack .da.s.o.l .da.s.o.th" );
+
+	cmd( "pack .da.s.o -padx 5 -pady 5" );
+
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#create_maverag } { set choice 2 }" );
+
+	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
+	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
+
+	cmd( "showtop .da.s" );
+	cmd( "focus .da.s.o.th" );
+	cmd( ".da.s.o.th selection range 0 end" );
+
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "set bido [ .da.s.o.th get ]" ); 
+	cmd( "destroytop .da.s" );
+
+	if(*choice==2)
+	{
+		 *choice=0;
+		return;
+	}
+
+	data=new double *[nv];
+	start=new int[nv];
+	end=new int[nv];
+	str=new char *[nv];
+	tag=new char *[nv];
+
+	app=new store[nv + num_var];
+	for(i=0; i<num_var; i++)
+	{
+		app[i]=vs[i];
+		strcpy(app[i].label, vs[i].label);
+		strcpy(app[i].tag, vs[i].tag);
+	} 
+	
+	delete[] vs;
+	vs=app;
+
+	if(autom_x)
+	{
+		min_c=1;
+		max_c=num_c;
+	}
+
+	cmd( "set choice $bido" );
+	flt=*choice;
+	if((flt%2)==0)
+		flt++;
+
+	if(flt<2)
+	{
+		*choice=0;
+		return;
+	}
+
+	for(i=0; i<nv; i++)
+	{
+		str[i]=new char[MAX_ELEM_LENGTH];
+		tag[i]=new char[MAX_ELEM_LENGTH];
+		data[ i ] = NULL;
+
+		cmd( "set res [.da.vars.ch.v get %d]", i );
+		lapp=(char *)Tcl_GetVar(inter, "res",0);
+		strcpy(msg,lapp);
+		sscanf(msg, "%s %s (%d - %d) # %d", str[i], tag[i], &start[i], &end[i], &idseries);
+
+		sprintf(msg, "MA%d_%s", flt, str[i]);
+		strcpy(vs[num_var+i].label, msg);
+		strcpy(vs[num_var+i].tag,tag[i]);
+		vs[num_var+i].start=start[i];
+		vs[num_var+i].end=end[i];
+		vs[num_var+i].rank=num_var+i;
+		vs[num_var+i].data = new double[max_c+2];
+		
+		if(autom_x ||(start[i]<=max_c && end[i]>=min_c))
+		{
+			data[ i ] = vs[ idseries ].data;
+			if(data[i]==NULL)
+				plog("\nError: invalid data\n");
+
+			xapp=0;
+
+			for(h=0, j=start[i]; j<start[i]+flt;j++)
+				if(is_finite(data[i][j]))		// not a NaN?
+				{
+					xapp+=data[i][j];
+					h++;
+				}
+				
+			if(h==0)	// no observation?
+				xapp=NAN;
+			else
+				xapp/=(double)h;
+
+			for(j=start[i]; j<start[i]+(flt-1)/2; j++)
+				vs[num_var+i].data[j]=xapp;
+
+			for( ; j<end[i]-(flt-1)/2; j++)
+			{
+				if(is_finite(data[i][j-(flt-1)/2]) && is_finite(data[i][j+(flt-1)/2]))
+					xapp=xapp-data[i][j-(flt-1)/2]/(double)flt+data[i][j+(flt-1)/2]/(double)flt;
+				else
+					xapp=NAN;
+				
+				vs[num_var+i].data[j]=xapp;
+			}
+			
+			for( ; j<end[i]; j++)
+				vs[num_var+i].data[j]=xapp;     
+		}
+		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[num_var+i].label, vs[num_var+i].tag, vs[num_var+i].start, vs[num_var+i].end, num_var+i ); 
+
+		cmd( "lappend DaModElem %s", vs[num_var+i].label );
+	}
+
+	cmd( ".da.vars.lb.v see end" );
+	num_var+=nv; 
+
+	delete[] start;
+	delete[] end;
+	delete[] data;
+	for(i=0; i<nv; i++)
+	{
+		delete[] str[i];
+		delete[] tag[i];
+	}
+	delete[] str;
+	delete[] tag; 
+}
+
 
 /************************
  SAVE_DATAzip
