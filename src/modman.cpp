@@ -355,6 +355,8 @@ cmd( "set choice 0" );
 cmd( "set recolor \"\"" );
 cmd( "set docase 0" );
 cmd( "set dirsearch \"-forwards\"" );
+cmd( "set lfind [ list ]");
+cmd( "set lfindsize 0" );
 cmd( "set endsearch end" );
 cmd( "set currentpos \"\"" );
 cmd( "set currentdoc \"\"" );
@@ -836,8 +838,6 @@ else
   
 cmd( "wm deiconify .; focus -force .f.t.t; update" );
 
-cmd( "set lfindcounter -1" );
-
 loop:
 
 // update file save status in titlebar
@@ -1162,95 +1162,273 @@ if ( choice == 10 )
 	goto loop;
 }
 
-if(choice==11)
+
+/* Find a text pattern in the text */
+
+if ( choice == 11 )
 {
-/* Find a text pattern in the text*/
-cmd( "if [ winfo exists .find ] { set choice 0; focus .find. e}" );
-if ( choice == 0 )
+	cmd( "if [ winfo exists .find ] { set choice 0; focus .find. e}" );
+	if ( choice == 0 )
+		goto loop;
+
+	cmd( "set docase 0" );
+	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set curcounter $lfindsize" );
+	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
+
+	cmd( "newtop .find \"Find\" { .find.b.can invoke }" );
+
+	cmd( "frame .find.l" );
+	cmd( "label .find.l.l -text \"Text to find\"" );
+	cmd( "entry .find.l.e -width 25 -textvariable textsearch -justify center" );
+	cmd( "pack .find.l.l .find.l.e" );
+
+	cmd( "frame .find.r -relief groove -bd 2" );
+	cmd( "radiobutton .find.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
+	cmd( "radiobutton .find.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
+	cmd( "pack .find.r.r2 .find.r.r1 -side left -padx 5" );
+
+	cmd( "checkbutton .find.c -text \"Case sensitive\" -variable docase" );
+
+	cmd( "pack .find.l .find.r .find.c -padx 5 -pady 5" );
+
+	cmd( "Xcancel .find b Find { \
+			if { $textsearch != \"\" } { \
+				incr lfindsize; \
+				set curcounter [ expr $lfindsize - 1 ]; \
+				lappend lfind \"$textsearch\"; \
+				.f.t.t tag remove sel 1.0 end; \
+				set cur [ .f.t.t index insert ]; \
+				if { $docase } { \
+					set cur [ .f.t.t search -count length $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				} else { \
+					set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				}; \
+				if { [ string length $cur ] > 0 } { \
+					.f.t.t tag add sel $cur \"$cur + $length char\"; \
+					if { [ string compare $endsearch end ] != 0 } { \
+						set length 0 \
+					}; \
+					.f.t.t mark set insert \"$cur + $length char\" ; \
+					update; \
+					.f.t.t see $cur; \
+					destroytop .find \
+				} else { \
+					.find.l.e selection range 0 end; \
+					bell \
+				} \
+			} { \
+				bell \
+			} \
+		} { destroytop .find }" );
+
+	cmd( "bind .find.l.e <Up> { \
+			if { $lfindsize > 0 && $curcounter > 0 } { \
+				incr curcounter -1; \
+				set textsearch \"[ lindex $lfind $curcounter ]\"; \
+				.find.l.e selection range 0 end \
+			} \
+		}" );
+	cmd( "bind .find.l.e <Down> { \
+			if { $lfindsize > 0 && $curcounter < [ expr $lfindsize - 1 ] } { \
+				incr curcounter; \
+				set textsearch \"[ lindex $lfind $curcounter ]\"; \
+				.find.l.e selection range 0 end \
+			} \
+		}" );
+	cmd( "bind .find <KeyPress-Return> { .find.b.ok invoke }" );
+
+	cmd( "showtop .find" );
+	cmd( ".find.l.e selection range 0 end" );
+	cmd( "focus .find.l.e" );
+
+	choice = 0;
 	goto loop;
-
-cmd( "set docase 0" );
-cmd( "set dirsearch \"-forwards\"" );
-cmd( "set curcounter $lfindcounter" );
-cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
-
-cmd( "newtop .find \"Find\" { .find.b.can invoke }" );
-
-cmd( "frame .find.l" );
-cmd( "label .find.l.l -text \"Text to find\"" );
-cmd( "entry .find.l.e -width 25 -textvariable textsearch -justify center" );
-cmd( "pack .find.l.l .find.l.e" );
-
-cmd( "frame .find.r -relief groove -bd 2" );
-cmd( "radiobutton .find.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
-cmd( "radiobutton .find.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command {set endsearch end}" );
-cmd( "pack .find.r.r2 .find.r.r1 -side left -padx 5" );
-
-cmd( "checkbutton .find.c -text \"Case sensitive\" -variable docase" );
-
-cmd( "pack .find.l .find.r .find.c -padx 5 -pady 5" );
-
-cmd( "Xcancel .find b Find { \
-		incr lfindcounter; \
-		set curcounter $lfindcounter; \
-		lappend lfind \"$textsearch\"; \
-		if { $docase == 1 } { \
-			set case \"-exact\" \
-		} else { \
-			set case \"-nocase\" \
-		}; \
-		.f.t.t tag remove sel 1.0 end; \
-		set cur [.f.t.t index insert]; \
-		set cur [.f.t.t search $dirsearch -count length $case -- \"$textsearch\" $cur $endsearch]; \
-		if { [ string length $cur ] > 0 } { \
-			.f.t.t tag add sel $cur \"$cur + $length char\"; \
-			if { [ string compare $endsearch end ] != 0 } { \
-				set length 0 \
-			}; \
-			.f.t.t mark set insert \"$cur + $length char\" ; \
-			update; .f.t.t see $cur; \
-			destroytop .find \
-		} else { \
-			.find.l.e selection range 0 end; \
-			bell \
-		} \
-	} { \
-		destroytop .find \
-	}" );
-
-cmd( "bind .find.l.e <Up> {if { $curcounter >= 0} {incr curcounter -1; set textsearch \"[lindex $lfind $curcounter]\"; .find.l.e selection range 0 end;} {}}" );
-cmd( "bind .find.l.e <Down> {if { $curcounter <= $lfindcounter} {incr curcounter; set textsearch \"[lindex $lfind $curcounter]\"; .find.l.e selection range 0 end;} {}}" );
-cmd( "bind .find <KeyPress-Return> { .find.b.ok invoke }" );
-
-cmd( "showtop .find" );
-cmd( ".find.l.e selection range 0 end" );
-cmd( "focus .find.l.e" );
-
-choice=0;
-goto loop;
 }
 
-if(choice==12)
-{
+
 /* Search again the same pattern in the text*/
 
-cmd( "if { $textsearch != \"\" } { \
-		.f.t.t tag remove sel 1.0 end; \
-		set cur [.f.t.t index insert]; \
-		set cur [.f.t.t search -count length $dirsearch $case -- $textsearch $cur $endsearch]; \
-		if { [string length $cur] > 0 } { \
-			.f.t.t tag add sel $cur \"$cur + $length char\"; \
-			if { [string compare $endsearch end] !=0 } { \
-				set length 0 \
-			}; \
-			.f.t.t mark set insert \"$cur + $length char\"; \
-			update; .f.t.t see $cur; destroytop .l \
-		} else { \
-			bell \
-		} \
-	}" );
-choice=0;
-goto loop;
+if ( choice == 12 )
+{
+	cmd( "if { $textsearch != \"\" } { \
+			.f.t.t tag remove sel 1.0 end; \
+			set cur [ .f.t.t index insert ]; \
+				if { $docase } { \
+					set cur [ .f.t.t search -count length $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				} else { \
+					set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				}; \
+				if { [ string length $cur ] > 0 } { \
+				.f.t.t tag add sel $cur \"$cur + $length char\"; \
+				if { [ string compare $endsearch end ] != 0 } { \
+					set length 0 \
+				}; \
+				.f.t.t mark set insert \"$cur + $length char\"; \
+				update; \
+				.f.t.t see $cur \
+			} else { \
+				bell \
+			} \
+		}" );
+		
+	choice = 0;
+	goto loop;
+}
+
+
+/* Find and replace a text pattern in the text*/
+
+if ( choice == 21 )
+{
+	cmd( "if [ winfo exists .l ] { set choice 0; focus .l.e }" );
+	if ( choice == 0 )
+		goto loop;
+
+	cmd( "set docase 1" );
+	cmd( "set dirsearch \"-forwards\"" );
+	cmd( "set curcounter $lfindsize" );
+	cmd( "set cur \"\"" );
+	cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
+
+	cmd( "newtop .l \"Replace\" { .l.b2.can invoke }" );
+
+	cmd( "frame .l.l" );
+	cmd( "label .l.l.l -text \"Text to find\"" );
+	cmd( "entry .l.l.e -width 25 -textvariable textsearch -justify center" );
+	cmd( "pack .l.l.l .l.l.e" );
+
+	cmd( "frame .l.p" );
+	cmd( "label .l.p.l -text \"Text to replace\"" );
+	cmd( "entry .l.p.e -width 25 -textvariable textrepl -justify center" );
+	cmd( "pack .l.p.l .l.p.e" );
+
+	cmd( "frame .l.r -relief groove -bd 2" );
+	cmd( "radiobutton .l.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command { set endsearch 1.0 }" );
+	cmd( "radiobutton .l.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command { set endsearch end }" );
+	cmd( "pack .l.r.r2 .l.r.r1 -side left -padx 5" );
+
+	cmd( "checkbutton .l.c -text \"Case sensitive\" -variable docase" );
+
+	cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
+
+	cmd( "frame .l.b1" );
+	cmd( "button .l.b1.repl -width $butWid -state disabled -text Replace -command { \
+			if { [ string length $cur ] > 0 } { \
+				.f.t.t delete $cur \"$cur + $length char\"; \
+				.f.t.t insert $cur \"$textrepl\"; \
+				if { [ string compare $endsearch end ] != 0 } { \
+					.f.t.t mark set insert $cur \
+				}; \
+				.l.b2.ok invoke \
+			} \
+		}" );
+	cmd( "button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command { set choice 4 }" );
+	cmd( "pack .l.b1.repl .l.b1.all -padx 10 -side left" );
+
+	cmd( "pack .l.b1 -anchor e" );
+
+	cmd( "Xcancel .l b2 Find { \
+			if { $textsearch != \"\" } { \
+				incr lfindsize; \
+				set curcounter [ expr $lfindsize - 1 ]; \
+				lappend lfind \"$textsearch\"; \
+				.f.t.t tag remove found 1.0 end; \
+				.f.t.t tag remove sel 1.0 end; \
+				set cur [ .f.t.t index insert ]; \
+				if { $docase } { \
+					set cur [ .f.t.t search -count length $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				} else { \
+					set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+				}; \
+				if { [ string length $cur ] > 0 } { \
+					.f.t.t tag add found $cur \"$cur + $length char\"; \
+					if { [ string compare $endsearch end ] == 0 } { \
+						.f.t.t mark set insert \"$cur + $length char\" \
+					} else { \
+						.f.t.t mark set insert $cur \
+					}; \
+					update; \
+					.f.t.t see $cur; \
+					.l.b1.repl conf -state normal; \
+					.l.b1.all conf -state normal \
+				} else { \
+					.l.b1.all conf -state disabled; \
+					.l.b1.repl conf -state disabled \
+				} \
+			} { \
+				bell \
+			} \
+		} { \
+			focus -force .f.t.t; \
+			set choice 5 \
+		}" );
+		
+	cmd( "bind .l.l.e <Up> { \
+			if { $lfindsize > 0 && $curcounter > 0 } { \
+				incr curcounter -1; \
+				set textsearch \"[ lindex $lfind $curcounter ]\"; \
+				.l.l.e selection range 0 end \
+			} \
+		}" );
+	cmd( "bind .l.l.e <Down> { \
+			if { $lfindsize > 0 && $curcounter < [ expr $lfindsize - 1 ] } { \
+				incr curcounter; \
+				set textsearch \"[ lindex $lfind $curcounter ]\"; \
+				.l.l.e selection range 0 end \
+			} \
+		}" );
+	cmd( "bind .l <KeyPress-Return> {.l.b2.ok invoke}" );
+
+	cmd( "showtop .l" );
+	cmd( ".l.l.e selection range 0 end" );
+	cmd( "focus .l.l.e" );
+	cmd( ".f.t.t tag conf found -background red -foreground white" );
+
+	choice = 0;
+	
+	here:
+	while ( choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	if ( choice == 3 )
+	{
+		choice = 0;
+		goto here;
+	}
+
+	while ( choice == 4 )
+	{ 
+		cmd( "if { [ string length $cur ] > 0 } { \
+			.f.t.t delete $cur \"$cur + $length char\"; \
+			.f.t.t see $cur; \
+			.f.t.t insert $cur \"$textrepl\"; \
+			if { [ string compare $endsearch end ] == 0 } { \
+				set cur [ .f.t.t index \"$cur+$length char\" ] \
+			} \
+		} { \
+			set choice 0 \
+		}" );
+		
+		if ( choice != 0 )  
+			cmd( "if { $docase } { \
+						set cur [ .f.t.t search -count length $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+					} else { \
+						set cur [ .f.t.t search -count length -nocase $dirsearch -- \"$textsearch\" $cur $endsearch ] \
+					}" );
+		
+		cmd( "raise .l" );
+		cmd( "focus .l" );
+		Tcl_DoOneEvent( 0 );  
+		goto here;
+	}
+
+	cmd( "destroytop .l" );
+
+	cmd( ".f.t.t tag remove found 1.0 end" );
+	color( shigh, 0, 0 );				// reevaluate colors
+	choice = 0;
+	goto loop;
 }
 
 
@@ -1883,113 +2061,6 @@ color(shigh, prevLin, nextLin);
 }
 goto loop;
 
-}
-
-if(choice==21)
-{
-/* Find and replace a text pattern in the text*/
-cmd( "if [ winfo exists .l ] { set choice 0; focus .l.e }" );
-if ( choice == 0 )
-	goto loop;
-
-cmd( "set docase 1" );
-cmd( "set dirsearch \"-forwards\"" );
-cmd( "set cur \"\"" );
-cmd( "if { ! [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { set textsearch [ .f.t.t get sel.first sel.last ] } { set textsearch \"\" }" );
-
-cmd( "newtop .l \"Replace\" { .l.b2.can invoke }" );
-
-cmd( "frame .l.l" );
-cmd( "label .l.l.l -text \"Text to find\"" );
-cmd( "entry .l.l.e -width 25 -textvariable textsearch -justify center" );
-cmd( "pack .l.l.l .l.l.e" );
-
-cmd( "frame .l.p" );
-cmd( "label .l.p.l -text \"Text to replace\"" );
-cmd( "entry .l.p.e -width 25 -textvariable textrepl -justify center" );
-cmd( "pack .l.p.l .l.p.e" );
-
-cmd( "frame .l.r -relief groove -bd 2" );
-cmd( "radiobutton .l.r.r2 -text \"Up\" -variable dirsearch -value \"-backwards\" -command {set endsearch 1.0}" );
-cmd( "radiobutton .l.r.r1 -text \"Down\" -variable dirsearch -value \"-forwards\" -command {set endsearch end}" );
-cmd( "pack .l.r.r2 .l.r.r1 -side left -padx 5" );
-
-cmd( "checkbutton .l.c -text \"Case sensitive\" -variable docase" );
-
-cmd( "pack .l.l .l.p .l.r .l.c -padx 5 -pady 5" );
-
-cmd( "frame .l.b1" );
-cmd( "button .l.b1.repl -width $butWid -state disabled -text Replace -command {if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {} {.f.t.t mark set insert $cur}; .l.b2.ok invoke} {}}" );
-cmd( "button .l.b1.all -width $butWid -state disabled -text \"Repl. All\" -command {set choice 4}" );
-cmd( "pack .l.b1.repl .l.b1.all -padx 10 -side left" );
-
-cmd( "pack .l.b1 -anchor e" );
-
-cmd( "Xcancel .l b2 Find { \
-		if { [string length \"$textsearch\"] != 0 } { \
-			.f.t.t tag remove found 1.0 end; \
-			if { $docase == 1 } { \
-				set case \"-exact\" \
-			} else { \
-				set case -nocase \
-			}; \
-			.f.t.t tag remove sel 1.0 end; \
-			set cur [.f.t.t index insert]; \
-			set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]; \
-			if { [string length $cur] > 0 } { \
-				.f.t.t tag add found $cur \"$cur + $length char\"; \
-				if { [string compare $endsearch end] == 0 } { \
-					.f.t.t mark set insert \"$cur + $length char\" \
-				} else { \
-					.f.t.t mark set insert $cur \
-				}; \
-				update; \
-				.f.t.t see $cur; \
-				.l.b1.repl conf -state normal; \
-				.l.b1.all conf -state normal \
-			} else { \
-				.l.b1.all conf -state disabled; \
-				.l.b1.repl conf -state disabled \
-			} \
-		} \
-	} { \
-		focus -force .f.t.t; \
-		set choice 5 \
-	}" );
-cmd( "bind .l <KeyPress-Return> {.l.b2.ok invoke}" );
-
-cmd( "showtop .l" );
-cmd( ".l.l.e selection range 0 end" );
-cmd( "focus .l.l.e" );
-cmd( ".f.t.t tag conf found -background red -foreground white" );
-
-choice=0;
-here:
-while(choice==0)
- Tcl_DoOneEvent(0);
-
-if(choice==3)
-  {choice=0;
-   goto here;
-  }
-
-while(choice==4)
- { 
-  cmd( "if {[string length $cur] > 0} {.f.t.t delete $cur \"$cur + $length char\"; .f.t.t see $cur; .f.t.t insert $cur \"$textrepl\"; if {[string compare $endsearch end]==0} {set cur [.f.t.t index \"$cur+$length char\"]} {}} {set choice 0}" );
-if(choice!=0)  
-  cmd( "set cur [.f.t.t search $dirsearch -count length $case -- $textsearch $cur $endsearch]" ); 
-  cmd( "raise .l" );
-  cmd( "focus .l" );
-  Tcl_DoOneEvent(0);  
-  goto here;
- }
-
-cmd( "destroytop .l" );
-
-cmd( ".f.t.t tag remove found 1.0 end" );
-color(shigh, 0, 0);				// reevaluate colors
-choice=0;
-goto loop;
 }
 
 
