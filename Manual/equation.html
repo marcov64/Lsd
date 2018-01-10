@@ -17,11 +17,11 @@ Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
 C++ code used to compute the Variables of the model. This code is copied
 from the equation file for presentation purposes but does not affect the
 actual simulation behaviour. To change the model's equation it is necessary
-to recompile the model (see the <a href="LMM_help.html">LMM Manual</a>).
-For help on the Lsd equation language see the <a href="lsdfunc.html">Lsd
+to recompile the model (see the <a href="LMM.html">LMM Manual</a>).
+For help on the Lsd equation language see the <a href="LSD_functions.html">Lsd
 function</a> manual.
 <br>A window reporting the equation for a Variable is can be created double-clicking
-on the Variable's label (in the <a href="Browser.html">main Browser</a>
+on the Variable's label (in the <a href="browser.html">main Browser</a>
 when the simulation is not running, from the <a href="debug.html">Debugger</a>
 window during a simulation run, or from the Analysis of Result window clicking
 with the right button of the mouse) and using the button <b>Equation</b>.
@@ -32,7 +32,7 @@ for the XYZ model).
 <br>&nbsp;
 <br>
 <center>
-<p><img SRC="Image49.gif" height=489 width=670></center>
+<p><img SRC="show_eq.png" height=489 width=670></center>
 
 <p>The window reports the C++ code using different colors:
 <ul>
@@ -60,7 +60,7 @@ Lsd Equations' Language Hints</h3>
 The code for the equations in Lsd is written in C++, though, in most cases,
 the actual code is very simple to write, implying few elementary operations.
 Moreover, Lsd offers model writers a set of functions that facilitate the
-task of writing equations (see the <a href="lsdfunc.html">Lsd function</a>
+task of writing equations (see the <a href="LSD_functions.html">Lsd function</a>
 section). Yet, model writers can include in the equation code any legal
 C++ statement.
 <br>&nbsp;
@@ -113,7 +113,7 @@ the values contained in the same Object.
 is necessary to use. Typically, model writers will use the function <font face="Arial">cal("Label",
 lag)</font> providing the value of Variable (or Parameter) with name <font face="Arial">Label</font>
 and with lag <font face="Arial">lag</font> (where the lag is always 0 for
-Parameters). See more on available <a href="lsdfunc.html">Lsd functions</a>.
+Parameters). See more on available <a href="LSD_functions.html">Lsd functions</a>.
 <br>&nbsp;
 <h4>
 Caller's Object: <u><font face="Arial">c-></font></u></h4>

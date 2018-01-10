@@ -665,8 +665,8 @@ if ( redrawRoot )
 		cmd( "set w .m.help" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Help -menu $w -underline 0" );
-		cmd( "$w add command -label \"Help on Browser\" -command {LsdHelp Browser.html} -underline 0" );
-		cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp QuickHelp.html} -underline 0" );
+		cmd( "$w add command -label \"Help on Browser\" -command {LsdHelp browser.html} -underline 0" );
+		cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp quick_help.html} -underline 0" );
 		cmd( "$w add separator" );
 		cmd( "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}" );
 		cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
@@ -812,7 +812,7 @@ if ( actual_steps > 0 )
 
 		cmd( "pack $T.l1 $T.l2 $T.f -ipadx 5 -padx 5 -pady 5" );
 
-		cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp QuickHelp.html#problem } { set choice 2 }" );
+		cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp quick_help.html#problem } { set choice 2 }" );
 		cmd( "bind $T <Return> {set choice 1}" );
 
 		cmd( "showtop $T centerS" );
@@ -3223,7 +3223,7 @@ cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
 cmd( "pack $T.l $T.e $T.cp -pady 5 -padx 5" );
 
-cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp mdataobjn.html#this } { set choice 2 }" );
+cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp menudata_objn.html#this } { set choice 2 }" );
 cmd( "bind $T.e.e.ent <KeyPress-Return> {set choice 1}" );
 
 cmd( "showtop $T" );
@@ -3421,7 +3421,7 @@ break;
 //help on lsd
 case 41:
 
-cmd( "LsdHelp QuickHelp.html" );
+cmd( "LsdHelp quick_help.html" );
 
 break;
 
@@ -3569,7 +3569,7 @@ cmd( "entry .a.v_num2 -width 20 -textvariable temp_var -justify center" );
 cmd( "bind .a.v_num2 <Return> { set choice 1 }" );
 cmd( "pack .a.l2 .a.v_num2 -padx 5" );
 
-cmd( "okXhelpcancel .a f Default { set temp_var mozilla } { set choice 1 } { LsdHelp lsdfuncMacro.html#V } { set choice 2 }" );
+cmd( "okXhelpcancel .a f Default { set temp_var mozilla } { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 cmd( "showtop .a" );
 cmd( "focus .a.v_num2" );

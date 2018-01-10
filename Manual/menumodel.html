@@ -13,7 +13,7 @@
 <body link="#0000ff" vlink="#800080">
 <center><font size="-1"><a href="TOC.html">HyperManual</a> <a
  href="windows.html">Lsd
-Windows</a> <a href="Browser.html">Main Browser</a> <a
+Windows</a> <a href="browser.html">Main Browser</a> <a
  href="FAQs.html">Lsd
 FAQ's</a></font></center>
 <p><b><u><font size="+1">Menu "Model"</font></u></b>
@@ -31,7 +31,7 @@ specific values) or
 general simulation settings).
 </p>
 <center>
-<p><img src="menumodel.jpg" style="width: 408px; height: 512px;"
+<p><img src="menumodel.png" style="width: 408px; height: 512px;"
  title="" alt="" align="left" hspace="50"></p>
 </center>
 <b><i><font face="Arial, helvetica">Other Menus of the Browser:</font></i></b>
@@ -134,7 +134,7 @@ defined in the model structure there exists an equation in the model
 equation.
 The equations are stored in an equation file that can be accessed and
 modified
-through LMM asking for the <a href="LMM_help.html#eqution">Equation
+through LMM asking for the <a href="LMM.html#eqution">Equation
 file</a>
 in menu Model.
 <p>The number of lags for a Variable indicate how many past values for
@@ -149,7 +149,7 @@ having
 <b>Var1</b>must
 contain 2 initial values to be used at time t=1 and t=2 for use in the
 equation where its past values are requested (see <a
- href="mdatainit.html">Init.
+ href="menudata_init.html">Init.
 Values</a> for setting the initial values).
 </p>
 <p>In case of errors (e.g. when modeller specifies 0 lag for a Variable
@@ -159,7 +159,7 @@ an error message during the first attempt to run a simulation. It is
 possible
 to edit the name of a Variable, remove the Variable, or change its
 lags,
-by accessing the <a href="Browser.html#variables">properties of the
+by accessing the <a href="browser.html#variables">properties of the
 Variable</a>
 clicking on its label in the main Browser.
 </p>
@@ -177,7 +177,7 @@ change
 value during a simulation unless some equation in a model (attached to
 a Variable) does not overwrite its value (for example, see the Lsd
 function
-<a href="lsdfunc.html#write">write</a>).
+<a href="LSD_functions.html#write">write</a>).
 <br>
 <br>
 <hr width="100%"><a name="AddAFun"></a><font size="-1"><a
@@ -218,7 +218,7 @@ The new Object type is inserted with a single instance in all the
 instances
 of the parent Object. To change the number of instances for the newly
 created
-Objects use the <a href="mdataobjn.html">menu Data.</a>
+Objects use the <a href="menudata_objn.html">menu Data.</a>
 <br>
 &nbsp;
 </p>
@@ -263,13 +263,13 @@ IMPORTANT: the code contained in the equation files is used by the
 Lsd interfaces for presentation purposes only. Changing such a code
 does
 not modify the models equations, since this requires the re-compilation
-of the code (see <a href="LMM_help.html#Lsd_LMM">LMM introduction</a>).
+of the code (see <a href="LMM.html#Lsd_LMM">LMM introduction</a>).
 The code used to express the equations in Lsd is C++ for the
 computational
 operations (algebrical, logical, cycles etc.). In the equations a set
 of
 Lsd functions are used to retrieve the information about model's value
-(see <a href="lsdfunc.html">Lsd Equation Language</a>)<br>
+(see <a href="LSD_functions.html">Lsd Equation Language</a>)<br>
 <br>
 <hr width="100%"><br>
 <a name="IgEqCntrl"></a><font size="-1"><a href="menumodel.html#top">(Menu
@@ -330,7 +330,7 @@ including
 also the very code of the model equations. It is very useful because,
 for
 example, specifies which elements are used in an equation, and in which
-equations an element it used. See the <a href="QuickHelp.html#report">Lsd
+equations an element it used. See the <a href="quick_help.html#report">Lsd
 Quick Help</a> page on its content, or better try to build one and test
 the automatic linking.
 <br>
@@ -339,7 +339,7 @@ needs only to choose among few options. The following window sets the
 available
 options:
 <center>
-<p><img src="imageF0O.JPG" height="340" width="443"></p>
+<p><img src="report_gen.png" height="340" width="443"></p>
 </center>
 <p><br>
 </p>
@@ -390,8 +390,8 @@ Object,
 Variable or Parameter in the model, called Description. This text is
 used
 when the user clicks on the model element (see help on the main <a
- href="Browser.html">Browser</a>)
-and in the <a href="QuickHelp.html#report">model report</a>. Model
+ href="browser.html">Browser</a>)
+and in the <a href="quick_help.html#report">model report</a>. Model
 writers
 are free to include any comment to the description of the item. The
 documentation
@@ -409,7 +409,7 @@ of the Variable equation's code.
 generate
 the automatic documentation as a base for a complete documentation of
 the
-model, before creating the <a href="QuickHelp.html#report">model report</a>.
+model, before creating the <a href="quick_help.html#report">model report</a>.
 </p>
 <p>It is possible to generate the automatic documentation for all the
 elements
@@ -420,7 +420,7 @@ Parameters are not affected.
 </p>
 <p>Note that it is possible to generate the automatic description for a
 single item in its option window (see, for example, the help page for <a
- href="Browser.html#variables">Variables
+ href="browser.html#variables">Variables
 or Parameters</a>)
 </p>
 <p></p>
@@ -430,7 +430,7 @@ or Parameters</a>)
 Find an element of the model<br>
 </b>shortcut:<b> Control-f<br>
 <br>
-<img src="finelement.jpg" title="" alt=""
+<img src="findelement.png" title="" alt=""
  style="width: 512px; height: 158px;"><br>
 <br>
 </b>This window permits to find a variable or a parametet in the model.
@@ -569,7 +569,7 @@ the
 equations are computed, the system automatically tries to satisfy the
 requests
 written in the equations code. Therefore, the modeller must use one of
-the <a href="lsdfunc.html">Lsd functions</a> to implement the desired
+the <a href="LSD_functions.html">Lsd functions</a> to implement the desired
 computation
 (i.e. choose the correct copy of y for each copy of x). These functions
 are implemented in such a way to write in extremely simple ways the
@@ -629,7 +629,7 @@ Note that a line like this: <br>
   <tt>v[0] = p-&gt;cal("Quantity",0);</tt> <br>
 will always return only the value of Quantity contained the very first
 copy of Firm descending from Market (see the description of <a
- href="lsdfunc.html#cal">Lsd
+ href="LSD_functions.html#cal">Lsd
 function cal(...)</a>. <li>any time a copy of x is computed it needs
 to use a (potentially)
 different

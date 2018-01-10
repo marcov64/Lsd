@@ -161,7 +161,7 @@ cmd( "checkbutton .ini.st.aw -text \"Automatic width\" -variable autoWidth -comm
 cmd( "pack .ini.st.err .ini.st.pad .ini.st.aw -side left" );
 cmd( "pack .ini.st -anchor e -padx 10 -pady 5" );
 
-cmd( "donehelp .ini boh { set choice 1 } { LsdHelp mdatainit.html }" );
+cmd( "donehelp .ini boh { set choice 1 } { LsdHelp menudata_init.html }" );
 
 cmd( "$w configure -state disabled" );
 

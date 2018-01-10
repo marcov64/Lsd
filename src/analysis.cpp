@@ -995,7 +995,7 @@ cmd( "pack .da.a.c.v.c .da.a.c.v.t -ipady 10" );
 cmd( "pack .da.a.c.o .da.a.c.v -anchor w -side left -ipadx 5" );
 cmd( "pack .da.a.tit .da.a.q .da.a.c -expand yes -fill x -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp mdatares.html#batch_sel } { set choice 2 }" );
+cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 cmd( "showtop .da.a topleftW 0 0" );
 cmd( "focus .da.a.q.f1.c" );
 
@@ -1216,7 +1216,7 @@ cmd( "checkbutton .da.a.s.b -text \"Only mark items\" -variable selOnly" );
 cmd( "pack .da.a.s.b" );
 cmd( "pack .da.a.tit .da.a.q .da.a.c .da.a.s -expand yes -fill x -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp mdatares.html#batch_sel } { set choice 2 }" );
+cmd( "okhelpcancel .da.a b { set choice 1 } { LsdHelp menudata_res.html#batch_sel } { set choice 2 }" );
 cmd( "showtop .da.a topleftW 0 0" );
 cmd( "focus .da.a.q.f1.c" );
 
@@ -1570,7 +1570,7 @@ if ( nv > 0 )
 	cmd( "pack .da.s.i.c .da.s.i.a .da.s.i.f -anchor w" );
 
 	cmd( "pack .da.s.l .da.s.i -expand yes -fill x -pady 5 -padx 5" );
-	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#add_series } { set choice 2 }" );
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#add_series } { set choice 2 }" );
 	cmd( "showtop .da.s" );
 
 	*choice = 0;
@@ -1707,7 +1707,7 @@ cmd( ".da.a.o.t insert end \"$gpooptions\"" );
 cmd( "pack .da.a.o.l .da.a.o.t" );
 
 cmd( "pack .da.a.l .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
-cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp mdatares.html#gpoptions } { set choice 2 }" );
+cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 cmd( "showtop .da.a" );
 
@@ -2045,7 +2045,7 @@ goto there;
 
 //help on Analysis of Result
 case 41:
-cmd( "LsdHelp mdatares.html" );
+cmd( "LsdHelp menudata_res.html" );
 *choice=0;
 goto there;
 
@@ -2943,7 +2943,7 @@ cmd( "bind $p.u.i.e.e <Control-t> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e
 cmd( "bind $p.u.i.e.e <Control-s> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-S> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 cmd( "bind $p.u.i.e.e <Control-z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-Z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }" );
 
-cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; .da.s.u.i.lb.lb.lb see end; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp mdatares.html#crosssection } { set choice 2 }" );
+cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; .da.s.u.i.lb.lb.lb see end; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp menudata_res.html#crosssection } { set choice 2 }" );
 
 cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
 cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
@@ -3830,7 +3830,7 @@ if(nv>2)
  
  cmd( "if { $ndim == 2 } { .da.s.d.o.a configure -state disabled; .da.s.d.o.c configure -state disabled; .da.s.d.o.b configure -state disabled; .da.s.o.g configure -state disabled; .da.s.o.p configure -state disabled; set box 0; set gridd 0; set pm3d 0 } { .da.s.d.o.a configure -state normal; .da.s.d.o.c configure -state normal; .da.s.d.o.b configure -state normal; .da.s.o.g configure -state normal; .da.s.o.p configure -state normal }" );
 
- cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#3dTime } { set choice 2 }" );
+ cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dTime } { set choice 2 }" );
 
  cmd( "showtop .da.s" );
 
@@ -4401,7 +4401,7 @@ cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
 
 cmd( "pack .da.s.i .da.s.d .da.s.o .da.s.v -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#3dCrossSection } { set choice 2 }" );
+cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#3dCrossSection } { set choice 2 }" );
 
 cmd( "bind .da.s.v.e <KeyRelease> {set blength [expr $nnvar / ($numv + $ndim-1)]; .da.s.v.n conf -text \"Block length: $blength\"}" );
 cmd( "set nnvar %d", nv );
@@ -4759,7 +4759,7 @@ cmd( "if { ! [ info exists dia ] } { set dia 0 }" );
 cmd( "checkbutton .da.s.arrow -text \"Plot 45\u00B0 diagonal\" -variable dia" );
 cmd( "pack .da.s.i .da.s.arrow -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#plot } { set choice 2 }" );
+cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#plot } { set choice 2 }" );
 
 cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
@@ -5233,7 +5233,7 @@ else
 	cmd( "focus .da.s.i.e; .da.s.i.e selection range 0 end" );
 }
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#lattice } { set choice 2 }" );
+cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#lattice } { set choice 2 }" );
 
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 	
@@ -5618,7 +5618,7 @@ cmd( "set stat 0" );
 cmd( "checkbutton .da.s.st -text \"Print statistics in Log window\" -variable stat" );
 cmd( "pack .da.s.i .da.s.norm .da.s.st -pady 5" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { set choice 2 }" );
+cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#seq_xy } { set choice 2 }" );
 
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
 
@@ -5859,7 +5859,7 @@ cmd( "set stat 0" );
 cmd( "checkbutton .da.s.st -text \"Print statistics in Log window\" -variable stat" );
 cmd( "pack .da.s.t .da.s.i .da.s.norm .da.s.st -pady 5" );
 
-cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { set choice 2 }" );
+cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#seq_xy } { set choice 2 }" );
 
 cmd( "bind .da.s.t.e <Return> {focus .da.s.i.e; .da.s.i.e selection range 0 end}" );
 cmd( "bind .da.s.i.e <KeyPress-Return> {set choice 1}" );
@@ -6124,7 +6124,7 @@ void create_series( int *choice )
 
 	cmd( "pack .da.s.o .da.s.f .da.s.i .da.s.n .da.s.t -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#seq_xy } { set choice 2 }" );
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#seq_xy } { set choice 2 }" );
 
 	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
@@ -6397,7 +6397,7 @@ void create_maverag( int *choice )
 
 	cmd( "pack .da.s.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp mdatares.html#create_maverag } { set choice 2 }" );
+	cmd( "okhelpcancel .da.s b { set choice 1 } { LsdHelp menudata_res.html#create_maverag } { set choice 2 }" );
 
 	cmd( "bind .da.s <KeyPress-Return> {set choice 1}" );
 	cmd( "bind .da.s <KeyPress-Escape> {set choice 2}" );
@@ -6623,7 +6623,7 @@ cmd( "pack .da.lab.f .da.lab.dozip -padx 5 -pady 5" );
 cmd( "pack .da.lab.f -padx 5 -pady 5" );
 #endif
 
-cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp mdatares.html#save } { set choice 2 }" );
+cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
 
 cmd( "bind .da.lab <Return> {.da.lab.ok invoke}" );
 cmd( "bind .da.lab <Escape> {.da.lab.esc invoke}" );
@@ -6698,7 +6698,7 @@ cmd( "pack .da.lab.gen.miss .da.lab.gen.mis_val" );
 
 cmd( "pack .da.lab.fr .da.lab.gp .da.lab.f .da.lab.n .da.lab.d .da.lab.c .da.lab.e .da.lab.gen -padx 5 -pady 5" );
 
-cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp mdatares.html#save } { set choice 2 }" );
+cmd( "okhelpcancel .da.lab b { set choice 1 } { LsdHelp menudata_res.html#save } { set choice 2 }" );
 
 cmd( "showtop .da.lab" );
 

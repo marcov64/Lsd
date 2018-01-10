@@ -1244,7 +1244,7 @@ void create_logwindow( void )
 	cmd( "button $w.speed -width $butWid -text Fast -command {set_c_var done_in 2} -underline 0 -state disabled" );
 	cmd( "button $w.obs -width $butWid -text Observe -command {set_c_var done_in 4} -underline 0 -state disabled" );
 	cmd( "button $w.deb -width $butWid -text Debug -command {set_c_var done_in 3} -underline 0 -state disabled" );
-	cmd( "button $w.help -width $butWid -text Help -command {LsdHelp Log.html} -underline 0" );
+	cmd( "button $w.help -width $butWid -text Help -command {LsdHelp log.html} -underline 0" );
 	cmd( "button $w.copy -width $butWid -text Copy -command {tk_textCopy .log.text.text} -underline 0" );
 
 	cmd( "pack $w.stop $w.pause $w.speed $w.obs $w.deb $w.copy $w.help -padx 5 -pady 10 -side left" );

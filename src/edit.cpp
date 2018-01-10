@@ -131,7 +131,7 @@ void set_obj_number( object *r, int *choice )
 		cmd( "pack .ini.f.tmd .ini.f.emd .ini.f.mn .ini.f.pl -side left" );
 	
 		cmd( "pack .ini.f -anchor e -padx 10 -pady 5" );
-		cmd( "donehelp .ini fb { set choice 1; set result -1 } { LsdHelp mdataobjn.html }" );
+		cmd( "donehelp .ini fb { set choice 1; set result -1 } { LsdHelp menudata_objn.html }" );
 	  
 		cmd( "$t configure -state disabled" );
 		cmd( "bind .ini <minus> { .ini.f.mn invoke }" );
@@ -358,7 +358,7 @@ int compute_copyfrom( object *c, int *choice )
 
 	cmd( "pack $cc.l $cc.f $cc.r -pady 5 -padx 5" );
 
-	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp mdataobjn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
+	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
 
 	cmd( "showtop $cc" );
 
@@ -502,7 +502,7 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	   
 	cmd( "pack $n.l $n.e $n.cp $n.ef -pady 5 -padx 5" );
 
-	cmd( "okhelpcancel $n b { set conf 1; set choice 1 } { LsdHelp mdataobjn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
+	cmd( "okhelpcancel $n b { set conf 1; set choice 1 } { LsdHelp menudata_objn.html#modifyNumberObj } { set conf 1; set choice 2 }" );
 	cmd( "bind $n.e.e <KeyPress-Return> { set conf 1; set choice 1 }" );
 
 	cmd( "showtop $n" );
@@ -653,7 +653,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 	cmd( "pack $d.b.last $d.b.choose -padx 10 -side left" );
 	cmd( "pack $d.b" );
 
-	cmd( "helpcancel $d b2 { LsdHelp mdataobjn.html#pick_remove } { set choice 3 }" );
+	cmd( "helpcancel $d b2 { LsdHelp menudata_objn.html#pick_remove } { set choice 3 }" );
 
 	cmd( "showtop $d" );
 
@@ -693,7 +693,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
 		cmd( "pack $d.l $d.t -padx 5 -pady 5" );
 
-		cmd( "okhelpcancel $d b { set choice 1 } { LsdHelp mdataobjn.html#pick_remove } { set choice 2 }" );
+		cmd( "okhelpcancel $d b { set choice 1 } { LsdHelp menudata_objn.html#pick_remove } { set choice 2 }" );
 		cmd( "bind $d.t.e <KeyPress-Return> { set choice 1 }" );
 
 		cmd( "showtop $d" );

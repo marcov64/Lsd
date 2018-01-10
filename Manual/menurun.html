@@ -13,7 +13,7 @@
 <body link="#0000ff" vlink="#800080">
 <center><font size="-1"><a href="TOC.html">HyperManual</a> <a
  href="windows.html">Lsd
-Windows</a> <a href="Browser.html">Main Browser</a> <a
+Windows</a> <a href="browser.html">Main Browser</a> <a
  href="FAQs.html">Lsd
 FAQ's</a></font></center>
 <p><b><u><font size="+1">Menu "Run"</font></u></b>
@@ -32,7 +32,7 @@ saving options to all the elements of the model.
 <br>
 </p>
 <center>
-<p><img src="menurun.jpg" alt="" style="height: 512px; width: 408px;"
+<p><img src="menurun.png" alt="" style="height: 512px; width: 408px;"
  align="left" hspace="50"></p>
 <table style="text-align: left; width: 50%;" border="1" cellpadding="2"
  cellspacing="2">
@@ -139,13 +139,13 @@ runs.
 In the first case the simulation runs in memory only. After the
 exercise
 the data are stored in memory so that users can access them by means of
-the <a href="mdatares.html">Analysis of Result</a> module (menu <b>Data</b>).
+the <a href="menudata_res.html">Analysis of Result</a> module (menu <b>Data</b>).
 If a new simulation is run, the results from the previous simulation
 are
 cancelled and replaced with the new values. Remember that after a
 simulation
 only the time series of Variables marked to be saved can be observed in
-the results (see the <a href="Browser.html#variables">Variable list</a>
+the results (see the <a href="browser.html#variables">Variable list</a>
 in the main Browser for info on how to mark a Variable to be saved).
 Result
 data stored in memory can be written on file for later use using the
@@ -167,7 +167,7 @@ very
 last time step of each simulation.
 </p>
 <center>
-<p><img src="summary_run.jpg" height="354" width="337"></p>
+<p><img src="summary_run.png" height="354" width="337"></p>
 </center>
 <p>On the summary window, clicking on <b><font face="Arial, helvetica">Ok</font></b>
 the simulation will start, while clicking on <b><font
@@ -185,7 +185,7 @@ Shortcut:<b><font face="Arial, helvetica"> control+m.</font></b>
 <p>Set the main simulation options using the following interface
 </p>
 <center>
-<p><img src="simsetting.jpg" title="" alt=""
+<p><img src="simsetting.png" title="" alt=""
  style="width: 257px; height: 252px;"></p>
 </center>
 <p>It is possible to determine:
@@ -202,7 +202,7 @@ using entry <b>Save Result</b> in <a href="menudata.html">menu Data</a>).
 <br>
 If more than one simulation run is chosen, then the results for each
 run are saved automatically in a file (to be used with the Lsd <a
- href="mdatares.html">Analysis
+ href="menudata_res.html">Analysis
 of Results</a> module, from <a href="menudata.html">menu Data</a>)
 whose
 name is composed by the configuration name and by the number of the
@@ -215,7 +215,7 @@ seeds
 for generating random numbers. Besides the results for each simulation,
 in case of multiple runs Lsd generates also a summary result file with
 the name of the configuration and the extension .tot. This result file
-can be open with the <a href="mdatares.html">Analysis of Result</a>
+can be open with the <a href="menudata_res.html">Analysis of Result</a>
 module
 (from <a href="menudata.html">menu Data</a>), and contains the values
 saved
@@ -226,7 +226,7 @@ runs.
 </p>
 <p>Note that if the the user requests multiple simulation runs, and
 there
-are series set to be shown in <a href="Runtime.html">Run Time Plots</a>,
+are series set to be shown in <a href="runtime.html">Run Time Plots</a>,
 then there will be as many plots as simulation runs, possibly crowding
 the screen with hundreds of windows. In this case, either <a
  href="#remplot">remove
@@ -259,7 +259,7 @@ equations
 such that the simulation can stop even before (for example, if certain
 conditions are satisfied). Moreover, model users can stop the
 simulation
-runs using the button <b>Stop </b>in the <a href="Log.html">Log
+runs using the button <b>Stop </b>in the <a href="log.html">Log
 window
 </a>during
 a simulation.
@@ -271,7 +271,7 @@ simulation
 run reaches this time step, it is interrupted at the end of the
 computation
 of a Variable marked to be debugged. See <a
- href="Browser.html#variables">here</a>
+ href="browser.html#variables">here</a>
 on how to mark Variables to be debugged, and <a href="debug.html">here</a>
 for help on the Lsd debugger.
 <br>
@@ -281,7 +281,7 @@ for help on the Lsd debugger.
  face="Arial, helvetica">:</font></b> During a simulation the system
 determines automatically the order in which variables must be computed.
 If you want to control the exact order, you can request the system to
-print in the <a href="Log.html">Log window </a>one line for each
+print in the <a href="log.html">Log window </a>one line for each
 variable computed. In general, a variable requested by the system to be
 computed cannot complete its equation because requires the value of
 another variable that still needs to be updated. In this case, the
@@ -320,7 +320,7 @@ Save Flags"</b>
 <p>Remove from any variable in the model every save option possibly
 existing.
 If the simulation is run after having used this option, no data will be
-saved during the simulation run for <a href="mdatares.html">Analysis
+saved during the simulation run for <a href="menudata_res.html">Analysis
 of
 Result</a> module.
 <br>
@@ -334,18 +334,18 @@ Plot Flags"</b>
 possibly
 existing. If the simulation is run after having used this option the
 system
-will not create the <a href="Runtime.html">run time plot</a>.
+will not create the <a href="runtime.html">run time plot</a>.
 <br>
 </p>
 <hr width="100%">
 <p><a name="showsave"></a><font size="-1"><a href="#top">(Menu Run)</a></font><b>"Show
 elements saved"</b>
 </p>
-<p>Prints in the <a href="Log.html">Log window</a> the list of the
+<p>Prints in the <a href="log.html">Log window</a> the list of the
 Variables and Parameters whose
 values will be saved during a simulation for the <a
- href="mdatares.html">Analysis of Results</a> after a simulation run.
-These are the elements with the <a href="Browser.html#variables">option</a>
+ href="menudata_res.html">Analysis of Results</a> after a simulation run.
+These are the elements with the <a href="browser.html#variables">option</a>
 <span style="font-weight: bold;">Save</span> set on.<br>
 </p>
 <hr width="100%">
@@ -353,10 +353,10 @@ These are the elements with the <a href="Browser.html#variables">option</a>
 Run)</a></font><b>"Show
 elements to observe"</b>
 </p>
-<p>Prints in the <a href="Log.html">Log window</a>
+<p>Prints in the <a href="log.html">Log window</a>
 the list of the Variables and Parameters whose
 values can be worth to observe. These are the elements with the <a
- href="Browser.html#variables">option</a> <span
+ href="browser.html#variables">option</a> <span
  style="font-weight: bold;">Observe</span> set on. The modeller
 indicates with this option that this element contains relevant results,
 although not all of them may be possible to actually save.<br>
@@ -366,10 +366,10 @@ although not all of them may be possible to actually save.<br>
 Run)</a></font><b>"Show
 elements to initialize"</b>
 </p>
-Prints in the <a href="Log.html">Log window</a>
+Prints in the <a href="log.html">Log window</a>
 the list of the Variables and Parameters whose
 values need to be initialized. These are the elements with the <a
- href="Browser.html#variables">option</a> <span
+ href="browser.html#variables">option</a> <span
  style="font-weight: bold;">Initialize</span>
 set on. The modeller indicates with this option that these elements
 affect the results. In many models, in fact, there are parameters or
@@ -378,7 +378,7 @@ lagged variables that are not necessary to initialize.<br>
 <p><a name="remrtplot"></a><font size="-1"><a href="#top">(Menu Run)</a></font><b>"Remove
 Runtime Plots"</b>
 <br>
-Removes all the <a href="Runtime.html">run time plot</a>'s possibly
+Removes all the <a href="runtime.html">run time plot</a>'s possibly
 created during previous simulation runs.
 <br>
 &nbsp;

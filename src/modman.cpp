@@ -485,23 +485,23 @@ cmd( "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline
 cmd( "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
 
 cmd( "menu $w.macro -tearoff 0" );
-cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \"Use LSD C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp lsdfunc.html}; set choice 69}" );
+cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp LSD_macros.html}; set choice 68}" );
+cmd( "$w.macro add radio -label \"Use LSD C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}; set choice 69}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
-cmd( "$w add command -label \"Help on LMM\" -underline 4 -command {LsdHelp \"LMM_help.html\"}" );
+cmd( "$w add command -label \"Help on LMM\" -underline 4 -command {LsdHelp \"LMM.html\"}" );
 if( macro )
-  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp lsdfuncMacro.html}" );
+  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp LSD_macros.html}" );
 else
-  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp lsdfunc.html}" ); 
+  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}" ); 
 
 cmd( "$w add separator" );
-//cmd( "$w add command -label \"Tutorial 1 - LMM First users\" -underline 6 -command {LsdHelp Tutorial1.html}" );
-//cmd( "$w add command -label \"Tutorial 2 - Using LSD Models\" -underline 0 -command {LsdHelp ModelUsing.html}" );
-//cmd( "$w add command -label \"Tutorial 3 - Writing LSD Models\" -underline 6 -command {LsdHelp ModelWriting.html}" );
-cmd( "$w add command -label \"LSD Documentation\" -command {LsdHelp Lsd_Documentation.html}" );
+//cmd( "$w add command -label \"Tutorial 1 - LMM First users\" -underline 6 -command {LsdHelp tutorial.html}" );
+//cmd( "$w add command -label \"Tutorial 2 - Using LSD Models\" -underline 0 -command {LsdHelp model_using.html}" );
+//cmd( "$w add command -label \"Tutorial 3 - Writing LSD Models\" -underline 6 -command {LsdHelp model_writing.html}" );
+cmd( "$w add command -label \"LSD Documentation\" -command {LsdHelp LSD_documentation.html}" );
 cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
 
 
@@ -529,7 +529,7 @@ cmd( "button .bbar.equation -image equationImg -relief $bRlf -overrelief $ovBrlf
 cmd( "button .bbar.extra -image extraImg -relief $bRlf -overrelief $ovBrlf -command {set choice 70}" );
 cmd( "button .bbar.set -image setImg -relief $bRlf -overrelief $ovBrlf -command {set choice 48}" );
 cmd( "button .bbar.hide -image hideImg -relief $bRlf -overrelief $ovBrlf -command {set autoHide [ expr ! $autoHide ]}" );
-cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command {LsdHelp lsdfuncMacro.html}" );
+cmd( "button .bbar.help -image helpImg -relief $bRlf -overrelief $ovBrlf -command {LsdHelp LSD_macros.html}" );
 cmd( "label .bbar.tip -textvariable ttip -font {Arial 8} -fg gray -width 30 -anchor w" );
 
 cmd( "bind .bbar.open <Enter> {set ttip \"Browse models...\"}" );
@@ -2094,7 +2094,7 @@ if ( choice == 28 && macro )
 	cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.net .a.r.math -anchor w" );
 	cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM_help.html#LsdScript } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#LsdScript } { set choice 2 }" );
 
 	cmd( "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}" );
 	cmd( "bind .a <KeyPress-v> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-V> {.a.r.cal invoke; set choice 1}" );
@@ -2162,7 +2162,7 @@ if ( choice == 28 && ! macro )
 	cmd( "pack .a.r.equ .a.r.cal .a.r.for .a.r.sum .a.r.incr .a.r.mult .a.r.sear .a.r.scnd .a.r.lqs .a.r.rndo .a.r.wri .a.r.addo .a.r.delo .a.r.math -anchor w" );
 	cmd( "pack .a.tit .a.r -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM_help.html#LsdScript } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#LsdScript } { set choice 2 }" );
 
 	cmd( "bind .a <KeyPress-e> {.a.r.equ invoke; set choice 1}; bind .a <KeyPress-E> {.a.r.equ invoke; set choice 1}" );
 	cmd( "bind .a <KeyPress-c> {.a.r.cal invoke; set choice 1}; bind .a <KeyPress-C> {.a.r.cal invoke; set choice 1}" );
@@ -2250,7 +2250,7 @@ if ( choice == 51 )
 
 	cmd( "pack .a.e .a.f -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp lsdfuncMacro.html#Math } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Math } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.e.e.e1.e" );
@@ -2300,7 +2300,7 @@ if ( choice == 25 )
 
 	cmd( "pack .a.label .a.f -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp lsdfuncMacro.html#EQUATION } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#EQUATION } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.label.n selection range 0 end" );
@@ -2404,7 +2404,7 @@ if ( choice == 26 )
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#V } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#V } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v.e" );
@@ -2485,7 +2485,7 @@ if ( choice == 27 )
 
 	cmd( "pack .a.o .a.c .a.p -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#CYCLE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.o.e" );
@@ -2590,7 +2590,7 @@ if ( choice == 40 )
 
 	cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#INCR } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#INCR } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v.e" );
@@ -2674,7 +2674,7 @@ if ( choice == 45 )
 
 	cmd( "pack .a.v .a.n .a.a .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#MULT } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#MULT } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v.e" );
@@ -2758,7 +2758,7 @@ if ( choice == 29 )
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#WRITE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#WRITE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v.e" );
@@ -2844,7 +2844,7 @@ if ( choice == 30 )
 
 	cmd( "pack .a.d .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SEARCH_CND } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SEARCH_CND } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -2924,7 +2924,7 @@ if ( choice == 31 )
 
 	cmd( "pack .a.d .a.n .a.s .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SORT } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SORT } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3017,7 +3017,7 @@ if ( choice == 52 )
 
 	cmd( "pack .a.d .a.n .a.x .a.v .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#ADDOBJ } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#ADDOBJ } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3089,7 +3089,7 @@ if ( choice == 53 )
 
 	cmd( "pack .a.d -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#DELETE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#DELETE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3175,7 +3175,7 @@ if ( choice == 54 )
 
 	cmd( "pack .a.d .a.v .a.n .a.l .a.t .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#RNDDRAW } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#RNDDRAW } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3263,7 +3263,7 @@ if ( choice == 55 )
 
 	cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { lsdfuncMacro.html#SEARCH } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LSD_macros.html#SEARCH } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3335,7 +3335,7 @@ if ( choice == 56 )
 
 	cmd( "pack .a.v .a.n .a.l .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SUM } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SUM } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.v.e" );
@@ -3415,7 +3415,7 @@ if ( choice == 72 )
 
 	cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp lsdfuncMacro.html#Networks } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Networks } { set choice 2 }" );
 
 	cmd( "bind .a <KeyPress-i> {.a.f.r1  invoke; set choice 1}; bind .a <KeyPress-I> {.a.f.r1  invoke; set choice 1}" );
 	cmd( "bind .a <KeyPress-l> {.a.f.r2  invoke; set choice 1}; bind .a <KeyPress-L> {.a.f.r2  invoke; set choice 1}" );
@@ -3509,7 +3509,7 @@ if ( choice == 73 )
 
 	cmd( "pack .a.d .a.x .a.p1 .a.p2 .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#INIT_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#INIT_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3578,7 +3578,7 @@ if ( choice == 74 )
 
 	cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#LOAD_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#LOAD_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3638,7 +3638,7 @@ if ( choice == 75 )
 
 	cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SAVE_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SAVE_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3698,7 +3698,7 @@ if ( choice == 76 )
 
 	cmd( "pack .a.d .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SNAP_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SNAP_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -3778,7 +3778,7 @@ if ( choice == 77 )
 
 	cmd( "pack .a.c .a.d .a.i .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#ADDNODE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#ADDNODE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -3862,7 +3862,7 @@ if ( choice == 78 )
 
 	cmd( "pack .a.c .a.v .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#V_NODEID } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#V_NODEID } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -3963,7 +3963,7 @@ if ( choice == 79 )
 
 	cmd( "pack .a.c .a.v .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#WRITE_NODEID } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#WRITE_NODEID } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -4036,7 +4036,7 @@ if ( choice == 80 )
 
 	cmd( "pack .a.c .a.p -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#CYCLE_LINK } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#CYCLE_LINK } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.c.e" );
@@ -4142,7 +4142,7 @@ if ( choice == 81 )
 
 	cmd( "pack .a.c .a.d .a.v .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { lsdfuncMacro.html#SEARCH_NODE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LSD_macros.html#SEARCH_NODE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -4222,7 +4222,7 @@ if ( choice == 82 )
 
 	cmd( "pack .a.c .a.d .a.v -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#LINKTO } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#LINKTO } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.d.e" );
@@ -4282,7 +4282,7 @@ if ( choice == 83 )
 
 	cmd( "pack .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#SHUFFLE_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#SHUFFLE_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.n.e" );
@@ -4355,7 +4355,7 @@ if ( choice == 84 )
 
 	cmd( "pack .a.c .a.d .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#RNDDRAW_NODE } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#RNDDRAW_NODE } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -4437,7 +4437,7 @@ if ( choice == 85 )
 
 	cmd( "pack .a.c .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#DELETE_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#DELETE_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -4523,7 +4523,7 @@ if ( choice == 86 )
 
 	cmd( "pack .a.c .a.n .a.o -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp lsdfuncMacro.html#STAT_NET } { set choice 2 }" );
+	cmd( "okhelpcancel .a f { set choice 1 } { LsdHelp LSD_macros.html#STAT_NET } { set choice 2 }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.c.b.e invoke" );
@@ -4712,7 +4712,7 @@ if ( choice == 41 )
 
 	cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
 
-	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM_help.html#copy } { set choice 2 }" );
+	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LMM.html#copy } { set choice 2 }" );
 	cmd( "bind .a.mname.e <Return> {focus .a.mver.e; .a.mver.e selection range 0 end}" );
 	cmd( "bind .a.mver.e <Return> {focus .a.mdir.e; .a.mdir.e selection range 0 end}" );
 	cmd( "bind .a.mdir.e <Return> {focus .a.b.ok}" );
@@ -5075,7 +5075,7 @@ if ( choice == 47 )
 	cmd( "pack .l.t.text .l.t.d" );
 	cmd( "pack .l.t" );
 
-	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM_help.html#compilation_options } { set choice 2 }" );
+	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 	cmd( "showtop .l" );
 	cmd( "focus .l.t.text" );
@@ -5242,7 +5242,7 @@ if ( choice == 48 )
 	cmd( "pack .l.t.text .l.t.d" );
 	cmd( "pack .l.t" );
 
-	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM_help.html#compilation_options } { set choice 2 }" );
+	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 	cmd( "showtop .l" );
 	cmd( "focus .l.t.text" );
@@ -5457,7 +5457,7 @@ if ( choice == 60 )
 
 	cmd( "frame .a.f1" );
 	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
-	cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM_help.html#SystemOpt}" );
+	cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM.html#SystemOpt}" );
 	cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 	cmd( "pack .a.f1 -anchor e" );
 

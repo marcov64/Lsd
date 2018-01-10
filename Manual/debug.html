@@ -15,7 +15,7 @@
 Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font><a name="top"></a>
 <p><b><font size="+2">Lsd Debugger</font></b></p>
 </center>
-<p><img src="debugger.jpg" align="left" height="477" hspace="15"
+<p><img src="debugger.png" align="left" height="477" hspace="15"
  width="522">
 <br>
 &nbsp;
@@ -77,7 +77,7 @@ be set using the <a href="#until">button Until</a> in the <a
 window</a>. The <b>Debug Mode</b> is also activated when clicking on
 the
 <b>Debug</b>
-button of the <a href="Log.html">Log window</a> during a simulation
+button of the <a href="log.html">Log window</a> during a simulation
 run.
 In the first case, the very first step of the simulation will be run in
 Debug Mode, while in the second case this happens only at the time step
@@ -87,7 +87,7 @@ Mode when, during a debugging session, the user click on <a href="#run">button
 Run</a> to continue a simulation (or Quit to abort a simulation).
 <p>A Variable is marked to be debugged before a simulation using a the
 main
-<a href="Browser.html">Lsd Browser</a>, by double-clicking on the
+<a href="browser.html">Lsd Browser</a>, by double-clicking on the
 Variable in the <b>Variables</b> list. In this case, the option chosen
 is set for all the copies of that Variable (i.e. all the Variables
 contained
@@ -126,26 +126,26 @@ to be interrupted. The <a href="#top">Debugger window</a> is composed
 by:
 <ul>
   <li>the <a href="#help">Help</a> menu;</li>
-  <li>a <a href="#title">title</a> row:&nbsp;<img src="tit_debug.jpg"
+  <li>a <a href="#title">title</a> row:&nbsp;<img src="tit_debug.png"
  align="middle" height="29" width="380"></li>
 </ul>
 <ul>
   <li>a <a href="#simulation">simulation control buttons</a> row
-:&nbsp;<img src="contr_debugger.jpg" align="middle" height="37"
+:&nbsp;<img src="contr_debugger.png" align="middle" height="37"
  width="484"></li>
 </ul>
 <ul>
   <li>a set of <a href="#browse">model browsing buttons</a> :&nbsp;<img
- src="browse_debugger.jpg" height="35" width="372"></li>
+ src="browse_debugger.png" height="35" width="372"></li>
   <li>the <a href="#name">type and instance number</a> of the Object
 shown
-:&nbsp;<img src="inst_debugger.jpg" align="middle" height="53"
+:&nbsp;<img src="inst_debugger.png" align="middle" height="53"
  width="190"><b>NEW</b>:
 Change the number of Objects</li>
 </ul>
 <ul>
   <li> <a href="#content">content of the shown Object</a>,&nbsp;<img
- src="linedebugger.jpg" align="middle" height="64" width="251"><b>NEW:</b>
+ src="linedebugger.png" align="middle" height="64" width="251"><b>NEW:</b>
 Set all values in the model for the selected item</li>
   <br>
 from which it is possible to check and edit the numerical values of
@@ -176,7 +176,7 @@ simulation
 to be interrupted, its just computed value (that can be modified) and
 the
 current time step of the simulation.
-<center><img src="tit_debug.jpg" height="29" width="380"></center>
+<center><img src="tit_debug.png" height="29" width="380"></center>
 <p>This line is not present in the <a href="menudata.html">Data Browse
 </a>window,
 replaced by the button to exit the Data Browsing session.
@@ -277,7 +277,7 @@ Control buttons)</a>
 <br>
 Shortcut: a
 <br>
-Open the <a href="mdatares.html">Analysis of Result </a>module,
+Open the <a href="menudata_res.html">Analysis of Result </a>module,
 permitting
 users to analyse every series produced by the simulation up to the
 previous
@@ -290,10 +290,10 @@ ancestors</font></i></b>
 <br>
 These labels tell the name of the Object shown and its position in
 the model structure.
-<p><img src="inst_debugger.jpg" align="left" height="53" width="190"></p>
+<p><img src="inst_debugger.png" align="left" height="53" width="190"></p>
 <p>This <a href="#top">Debugger window</a> works similarly to the Lsd
 main
-<a href="Browser.html">Browser</a>
+<a href="browser.html">Browser</a>
 in showing the Object content, but consider one single copy of an
 Object
 instead of an Object type as in the Browser.
@@ -312,7 +312,7 @@ All values for the Parameters and Variables in the Objects created will
 be copied from an example instance of the Object. The user can select
 which
 example instance to use. See the <a
- href="mdataobjn.html#modifyNumberObj">manual
+ href="menudata_objn.html#modifyNumberObj">manual
 page to edit </a>the number of Objects in the model.
 </p>
 <p></p>
@@ -325,7 +325,7 @@ then
 move the Debugger to show any other Object (this may be relevant for
 understanding
 the actual working of Lsd equations; see the help page on <a
- href="lsdfunc.html#objeq">using
+ href="LSD_functions.html#objeq">using
 Objects&nbsp; in Lsd equations)</a>.
 <p>A set of buttons is used to browse through the model. Note the the
 model
@@ -403,7 +403,7 @@ strategy:
 - explore the ancestor; explore the "siblings" of the ancestor etc.
 <br>
 See Lsd function <b><font face="Arial, helvetica">search_var(&#8230;)</font></b>
-in the Modellers Manual or the function <a href="lsdfunc.html#cal">cal(...)</a>
+in the Modellers Manual or the function <a href="LSD_functions.html#cal">cal(...)</a>
 for further details.
 </p>
 <p></p>
@@ -413,7 +413,7 @@ for further details.
 In the <a href="#top">Debugger window </a>a two-column list shows the
 Variables and Parameters contained in the Object shown.
 <center>
-<p><img src="linedebugger.jpg" height="64" width="251"></p>
+<p><img src="linedebugger.png" height="64" width="251"></p>
 </center>
 In each column, a line shows:
 <ul>
@@ -446,14 +446,14 @@ the model.This possibility can be used both before running a simulation
 and at any one time during a simulation run. The time tag LastUpdate of
 the Variables will not be affected by this change. See the manual for
 the
-<a href="mdatainit.html#setall">Set
+<a href="menudata_init.html#setall">Set
 All function</a> for further details.
 <p>Double-clicking on the labels it is possible to observe and edit the
 value(s) of the Variable (one value, in case of Parameters, and all
 lagged
 values for Variables). The window is as shown below:
 </p>
-<center><img src="variab_debug.jpg" align="left" hspace="20"></center>
+<center><img src="variab_debug.png" align="left" hspace="20"></center>
 The window shows one entry for each lagged value (in case of Variables
 also used with lagged values) or one single entry for Parameters. The
 entry
@@ -515,7 +515,7 @@ appropriate button after having double-clicked on the Variable of
 interest.
 It appears as follows:
 <center>
-<p><img src="Image30.gif" height="168" width="201"></p>
+<p><img src="cond_break.png" height="168" width="201"></p>
 </center>
 <p><br>
 <br>
@@ -803,14 +803,14 @@ here</a> on how to find out the Variable whose equation caused an
 unexpected
 crash. The second suggestion is to use the C++ debugger (Gnu debugger,
 <i>gdb</i>).
-See the <a href="LMM_help.html#debug">instruction for using the gdb
+See the <a href="LMM.html#debug">instruction for using the gdb
 debugger</a>.
 </p>
 <p></p>
 <hr width="100%"><br>
 <a name="crash"></a><b><i><font size="+1">Simulation hard crash</font></i></b>
 <br>
-<div style="text-align: center;"><img alt="" src="crash.jpg"
+<div style="text-align: center;"><img alt="" src="crash.png"
  style="border: 0px solid ; width: 475px; height: 292px;"><br>
 </div>
 <br>
@@ -829,12 +829,12 @@ following options:<br>
 </p>
 <ul>
   <li> <b>Return the Lsd Browser</b>: the model program ends the
-simulation and returns to the <a href="Browser.html">main browser</a>
+simulation and returns to the <a href="browser.html">main browser</a>
 as in a succesful of simulation run. Use this option if you don't need
 to change the model equations' code, but just to add an element or
 modify the labels. Here the user can re-load the configuration and fix
 the error (see below on the hint).</li>
-  <li> <b>Analysis of Results</b>: <a href="mdata_analres.html">analyse
+  <li> <b>Analysis of Results</b>: <a href="menudata.html">analyse
 the series</a> of the data saved up to the time step
 before the one during which the crash occurred. Of course, this option
 is sensible only if the crash occurred after time step 1. Exiting from
@@ -872,11 +872,11 @@ Manager</a>).<br>
 the
 occurrences of the variable in the equations' code and in the model
 configuration. This may entail either to change the equations' file (
-using <a href="LMM_help.html">LMM</a>&nbsp; to edit the mispelled text
+using <a href="LMM.html">LMM</a>&nbsp; to edit the mispelled text
 in the equations code and re-compiling the model program) or <a
- href="Browser.html#change_nature">changing the spelling</a> of the
-label in the <a href="Browser.html#variables">option window</a> for
-the element in the <a href="Browser.html">model browser</a>. <br>
+ href="browser.html#change_nature">changing the spelling</a> of the
+label in the <a href="browser.html#variables">option window</a> for
+the element in the <a href="browser.html">model browser</a>. <br>
 <br>
 &nbsp;
 </body>

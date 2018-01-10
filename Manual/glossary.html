@@ -96,7 +96,7 @@ with the correct number of lags (and the same Label).
 to have any value at the beginning of the simulation, since its values
 are always computed at each time step. But, in case it has lagged values,
 users need to assign numerical values that will be used during the earliest
-time step of the simulation as lagged values. See how to <a href="mdatainit.html">set
+time step of the simulation as lagged values. See how to <a href="menudata_init.html">set
 initial values</a>.
 <p><a NAME="equations"></a><b><i><font face="Arial, helvetica">Equations</font></i></b>
 <p>The values for Variables are computed at each time step using a piece
@@ -121,7 +121,7 @@ is like X<sub>t</sub>=f(Y<sub>t-1</sub>), then the system may compute X
 before Y, because the Variable Y had store its value of the previous time
 step. Using the Lsd functions to overwrite existing value must be used
 with extreme care because it destroys this automatic updating order control.
-See the <a href="lsdfunc.html">Lsd functions</a> for further details.
+See the <a href="LSD_functions.html">Lsd functions</a> for further details.
 <p><a NAME="parameters"></a><b><font face="Arial, helvetica"><font size=+1>Parameters</font></font></b>
 <p>A Parameter is an element of Objects that is assigned a numerical value
 and is not changed by the system during the simulation time step. Therefore,
@@ -129,7 +129,7 @@ it is basically a Variable without equation (and no lags, of course) with
 attached a numerical value.
 <p>In order to run a simulation, it is necessary that each Parameter (i.e.
 each Parameter contained in each instance of Objects) is assigned a numerical
-value before a simulation is run. See how to <a href="mdatainit.html">set
+value before a simulation is run. See how to <a href="menudata_init.html">set
 initial values</a>.
 <p>Though the system does not computes explicitly new values for Parameters
 during a simulation run, the equations for Variables can overwrite the
@@ -206,7 +206,7 @@ In this way, the simulation program resulting is as fast as a pure C++
 program, though it is extremely flexible because every value of the model
 can be easily changed. On the other hand, in order to change even slightly
 the equations of a model, it is necessary to recompile the whole system
-( see the <a href="LMM_help.html">LMM manual </a>on how to accomplish this).
+( see the <a href="LMM.html">LMM manual </a>on how to accomplish this).
 <p>The information on the structure of the model and on the initial values
 used for the simulations is contained in text based files (by default with
 the extension "lsd"). <a href="nw82_lsd.html">See one of these files</a>.

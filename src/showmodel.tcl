@@ -109,7 +109,7 @@ proc showmodel pippo {
 		menu $m -tearoff 0 -relief groove -bd 2
 		.l.m add cascade -label Help -menu $m -underline 0
 		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
-			LsdHelp LMM_help.html#select 
+			LsdHelp LMM.html#select 
 		}
 		$m add separator
 		$m add command -label "About LSD..." -underline 0 -command { 
