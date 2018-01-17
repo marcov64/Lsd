@@ -1,22 +1,165 @@
-<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
+
 <head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=iso-8859-1">
-  <meta name="Generator" content="Microsoft Word 97">
-  <meta name="Template"
- content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
-  <meta name="GENERATOR"
- content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
-  <title>menumodel</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>Menu Model</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body link="#0000ff" vlink="#800080">
-<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
- href="windows.html">Lsd
-Windows</a> <a href="browser.html">Main Browser</a> <a
- href="FAQs.html">Lsd
-FAQ's</a></font></center>
-<p><b><u><font size="+1">Menu "Model"</font></u></b>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<p><b><u><font size="+1">Menu Model</font></u></b>
 </p>
 <p>This menu is used by the model's author to create or modify a model
 structure
@@ -31,7 +174,7 @@ specific values) or
 general simulation settings).
 </p>
 <center>
-<p><img src="menumodel.png" style="width: 408px; height: 512px;"
+<p><img src="image/menumodel.png" style="width: 408px; height: 512px;"
  title="" alt="" align="left" hspace="50"></p>
 </center>
 <b><i><font face="Arial, helvetica">Other Menus of the Browser:</font></i></b>
@@ -89,9 +232,19 @@ each model element a description text .</li>
   <br>
   <br>
 </ul>
-<hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
-<a name="ChangeObjName"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Change
+<a name="ChangeObjName"></a><b>Change
 Object Name</b>
 <br>
 Changes the label of the Object currently shown in the main Browser
@@ -112,8 +265,18 @@ that
 Variables in these Objects may still be computed if they are requested
 by other equations. However, their data cannot be saved.
 <p></p>
-<hr width="100%"><br>
-<a name="AddAVar"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Add
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="AddAVar"></a><b>Add
 a Variable.</b>
 <br>
 Shortcut: <b><font face="Arial, helvetica">control+v</font></b>
@@ -124,12 +287,12 @@ The Variable label cannot contain string-terminating characters, that
 is,
 it can use: letters, digits and usual characters (underscores, dashes
 etc.).
-Lsd is case sensitive, therefore Price and PRICE are different.
+LSD is case sensitive, therefore Price and PRICE are different.
 <br>
 Any instance of the Object currently pointed to by the Browser will
 contain a copy of the newly created Variable.
 <br>
-For a simulation model to run it is necessary that for any Lsd Variable
+For a simulation model to run it is necessary that for any LSD Variable
 defined in the model structure there exists an equation in the model
 equation.
 The equations are stored in an equation file that can be accessed and
@@ -152,7 +315,7 @@ equation where its past values are requested (see <a
  href="menudata_init.html">Init.
 Values</a> for setting the initial values).
 </p>
-<p>In case of errors (e.g. when modeller specifies 0 lag for a Variable
+<p>In case of errors (e.g. when modeler specifies 0 lag for a Variable
 that is requested by another equation with one lag), the system will
 issue
 an error message during the first attempt to run a simulation. It is
@@ -164,8 +327,18 @@ Variable</a>
 clicking on its label in the main Browser.
 </p>
 <p></p>
-<hr width="100%"><br>
-<a name="AddAPar"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Add
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="AddAPar"></a><b>Add
 a Parameter</b>
 <br>
 Shortcut: <b><font face="Arial, helvetica">control+p</font></b>
@@ -175,13 +348,23 @@ Browser.
 The Parameter is like a Variable without an equation: it does never
 change
 value during a simulation unless some equation in a model (attached to
-a Variable) does not overwrite its value (for example, see the Lsd
+a Variable) does not overwrite its value (for example, see the LSD
 function
 <a href="LSD_functions.html#write">write</a>).
 <br>
 <br>
-<hr width="100%"><a name="AddAFun"></a><font size="-1"><a
- href="menumodel.html#top">(Menu Model)</a></font><b>Add
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="AddAFun"></a><b>Add
 a Function</b><br>
 Shortcut: <b><font face="Arial, helvetica">control+n</font></b><br>
 Insert a new Function. Functions are identical to Variable, in that
@@ -198,8 +381,18 @@ initial values for the first time steps of the simulation). It is not
 possible to save values of functions, since there is no (or not a
 single) value for each time step.<br>
 <br>
-<hr width="100%">
-<p><a name="AddADesc"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Add
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p><a name="AddADesc"></a><b>Add
 a Descendant</b>
 <br>
 Shortcut: control+d
@@ -208,7 +401,7 @@ This command inserts a new Object type descending from the one
 currently
 pointed by the Browser.
 <br>
-Lsd is case sensitive and does not accept spaces or other
+LSD is case sensitive and does not accept spaces or other
 string-terminating
 characters for entities labels. Moreover, the label must be unique,
 that
@@ -223,15 +416,25 @@ Objects use the <a href="menudata_objn.html">menu Data.</a>
 &nbsp;
 </p>
 <p></p>
-<hr width="100%"><br>
-<a name="InsertAParent"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Insert
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="InsertAParent"></a><b>Insert
 a New Parent</b>
 <br>
 Insert a new Object as a parent of the currently pointed by the
 Browser.
 Each instance of the currently pointed Object will be moved as
 descendant
-of the new, otherwise empty, Object. The same rules for Lsd labels
+of the new, otherwise empty, Object. The same rules for LSD labels
 apply:
 case sensitiveness and no string-terminating characters.
 <p>Note the difference with Add a Descendant: in the latter case, the
@@ -243,8 +446,18 @@ shown Object and its previous parent. Of course, this command cannot be
 used in Root, since this must be the top Object of any model.
 </p>
 <p></p>
-<hr width="100%"><br>
-<a name="setequation"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Equation
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="setequation"></a><b>Equation
 File</b>
 <br>
 Shortcut: control+u
@@ -255,71 +468,117 @@ recognize
 the equation file automatically (it reads the filename from the
 makefile
 when the first model structure is created, and then it is stored in the
-configuration file). However, in some cases the modeller may want to
+configuration file). However, in some cases the modeler may want to
 modify
 it.
 <br>
 IMPORTANT: the code contained in the equation files is used by the
-Lsd interfaces for presentation purposes only. Changing such a code
+LSD interfaces for presentation purposes only. Changing such a code
 does
 not modify the models equations, since this requires the re-compilation
 of the code (see <a href="LMM.html#Lsd_LMM">LMM introduction</a>).
-The code used to express the equations in Lsd is C++ for the
+The code used to express the equations in LSD is C++ for the
 computational
 operations (algebrical, logical, cycles etc.). In the equations a set
 of
-Lsd functions are used to retrieve the information about model's value
-(see <a href="LSD_functions.html">Lsd Equation Language</a>)<br>
+LSD functions are used to retrieve the information about model's value
+(see <a href="LSD_functions.html">LSD Equation Language</a>)<br>
 <br>
-<hr width="100%"><br>
-<a name="IgEqCntrl"></a><font size="-1"><a href="menumodel.html#top">(Menu
-Model)</a></font><b> Ignore equation file controls&nbsp;&nbsp;&nbsp; <br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="IgEqCntrl"></a><b> Ignore equation file controls&nbsp;&nbsp;&nbsp; <br>
 </b><br>
 <span style="font-weight: bold; font-style: italic;">Warning</span><br>
 This option and the other concerning the equation files do not affect
 the behaviour of the model, but are used only to properly track changes
 to a model during its construction. They are used to keep aligned the
-development of the code and that of the Lsd configurations. Users of
+development of the code and that of the LSD configurations. Users of
 existing model or developer of relatively simple models can ignore
 these functionalities. They become useful when developing large models
 with many different implementations tested at different times. In
 practice, they permit to generate models with many different
 differences without needing to open many folders in LMM.<br>
 <br>
-The configuration of Lsd (i.e. names of the objects, variabls, etc.)
+The configuration of LSD (i.e. names of the objects, variabls, etc.)
 needs to be compatible with the code of the equations. When this option
 is checked off, the browser compares the current equations (used in the
-Lsd model program) with those used to generate the configuration. If
+LSD model program) with those used to generate the configuration. If
 there is a difference, a warning message appears.<br>
-<hr width="100%"><br>
-<a name="UpEq"></a><font size="-1"><a href="menumodel.html#top">(Menu
-Model)</a></font><b> Upload Equation
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="UpEq"></a><b> Upload Equation
 File</b>
 <br>
-Load into the configuration the equation files used to generate the Lsd
+Load into the configuration the equation files used to generate the LSD
 model program.<br>
-(See <a href="#IgEqCntrl">warning on equation files</a> in the Lsd
+(See <a href="#IgEqCntrl">warning on equation files</a> in the LSD
 configurations).<br>
-<hr width="100%"><br>
-<a name="OfEq"></a><font size="-1"><a href="menumodel.html#top">(Menu
-Model)</a></font><b> Offload Equation
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="OfEq"></a><b> Offload Equation
 File</b>
 <br>
 Generate an equation file containing the equations stored in the model
 configuration.<br>
 (See <a href="menumodel.html#IgEqCntrl">warning on equation files</a>
-in the Lsd configurations).<br>
-<hr width="100%"><br>
-<a name="CmpEq"></a><font size="-1"><a href="menumodel.html#top">(Menu
-Model)</a></font><b> Compare Equation
+in the LSD configurations).<br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="CmpEq"></a><b> Compare Equation
 File</b>s<br>
-Compare the files for equations used to generate the Lsd model program
-and that stored in the Lsd model configuration.<br>
+Compare the files for equations used to generate the LSD model program
+and that stored in the LSD model configuration.<br>
 (See <a href="menumodel.html#IgEqCntrl">warning on equation files</a>
-in the Lsd configurations).<br>
+in the LSD configurations).<br>
 <p></p>
-<hr width="100%"><br>
-<a name="createreport"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Create
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<a name="createreport"></a><b>Create
 the report</b>
 <br>
 The report is the most efficient way to present the model structure,
@@ -330,7 +589,7 @@ including
 also the very code of the model equations. It is very useful because,
 for
 example, specifies which elements are used in an equation, and in which
-equations an element it used. See the <a href="quick_help.html#report">Lsd
+equations an element it used. See the <a href="LSD_quickhelp.html#report">LSD
 Quick Help</a> page on its content, or better try to build one and test
 the automatic linking.
 <br>
@@ -339,7 +598,7 @@ needs only to choose among few options. The following window sets the
 available
 options:
 <center>
-<p><img src="report_gen.png" height="340" width="443"></p>
+<p><img src="image/report_gen.png" height="340" width="443"></p>
 </center>
 <p><br>
 </p>
@@ -374,15 +633,25 @@ this
 case,
 the report will not be opened when the user calls it from the model
 Help
-of Lsd Model Browser.</li>
+of LSD Model Browser.</li>
 </ul>
-<hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
-<a name="auto_docu"></a><font size="-1"><a href="#top">(Menu Model)</a></font><b>Generate
+<a name="auto_docu"></a><b>Generate
 Automatic Documentation</b>
 <br>
 This option should be used with care, since it replaces any current
-documentation present in the model. Only modeller should use it when
+documentation present in the model. Only modeler should use it when
 upgrading
 a model.
 <p>The documentation of a model element is a text associated with any
@@ -391,7 +660,7 @@ Variable or Parameter in the model, called Description. This text is
 used
 when the user clicks on the model element (see help on the main <a
  href="browser.html">Browser</a>)
-and in the <a href="quick_help.html#report">model report</a>. Model
+and in the <a href="LSD_quickhelp.html#report">model report</a>. Model
 writers
 are free to include any comment to the description of the item. The
 documentation
@@ -409,7 +678,7 @@ of the Variable equation's code.
 generate
 the automatic documentation as a base for a complete documentation of
 the
-model, before creating the <a href="quick_help.html#report">model report</a>.
+model, before creating the <a href="LSD_quickhelp.html#report">model report</a>.
 </p>
 <p>It is possible to generate the automatic documentation for all the
 elements
@@ -425,12 +694,22 @@ or Parameters</a>)
 </p>
 <p></p>
 <br>
-<hr style="width: 100%; height: 2px;"><font size="-1"><a name="find"></a><a
- href="menumodel.html#top">(Menu Model)</a></font><b>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<b>
 Find an element of the model<br>
 </b>shortcut:<b> Control-f<br>
 <br>
-<img src="findelement.png" title="" alt=""
+<img src="image/findelement.png" title="" alt=""
  style="width: 512px; height: 158px;"><br>
 <br>
 </b>This window permits to find a variable or a parametet in the model.
@@ -441,13 +720,23 @@ Notice that the window above is endowed with autocompletion: while you
 type the entry proposes the first element with the described initial
 letters.<br>
 <b></b>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <a name="hint"></a><b>Hints on Model Structure Building</b>
 <br>
 The model structure is the collection of Objects containing Variables,
 Parameters and other Objects forming the backbone of the model. Given
 the
-Variables and Parameters the modeller decides to use in a model, the
+Variables and Parameters the modeler decides to use in a model, the
 problem
 is to create the Object structure to contain them. This section gives
 some
@@ -458,25 +747,25 @@ configuration
 (only Objects can be multiplied in many copies, each containing the
 same
 Variables, Parameters and descending Objects). The structure determines
-also the results produce by the use of the Lsd functions in the
+also the results produce by the use of the LSD functions in the
 equations.
 <p>In the following it is assumed that the reader is already familiar
 with
-the basics of Lsd equation writing. In fact, generally the model
+the basics of LSD equation writing. In fact, generally the model
 structure
 is quite obvious for simple models, with few equations, while the
 decision
 on how to implement the structure can become a complex task only for
 relatively
-complex models. Therefore, we assume that a modeller has written the
+complex models. Therefore, we assume that a modeler has written the
 (tentative)
 code for few equations, and now is deciding how to implement the model
 structure. Note that, depending on the structure, it is possible that
 the
 equations will need to be modified. In case of doubts, the best way to
-ensure that an equation is computed exactly as expected, the modeller
+ensure that an equation is computed exactly as expected, the modeler
 will
-use the <a href="debug.html">Lsd debugger</a>, which shows exactly
+use the <a href="debug.html">LSD debugger</a>, which shows exactly
 what
 an equation does during a simulation run.
 </p>
@@ -487,7 +776,7 @@ we will consider only two Variables (it applies also to Parameters,
 where
 the equations are not involved). Suppose that we have written two
 equations
-for Variables x and y. There are two basic questions that the modeller
+for Variables x and y. There are two basic questions that the modeler
 must answer when building the structure:
 </p>
 <ol>
@@ -500,7 +789,7 @@ should these Objects be related hierarchically or not? In other words,
 should one Object contain the other, or "parallel" in the model
 structure?</li>
 </ol>
-To answer the first question the modeller needs to consider the case of
+To answer the first question the modeler needs to consider the case of
 a configuration where there are many copies of the Variables x and y.
 If
 the two Variables are placed in the same Object, then they must will
@@ -523,10 +812,10 @@ in many copies. And that any copy of an Object must be exactly the same
 Objects),
 although the numbers may differ (e.g. values of Parameters, number of
 copies
-of descendants). The modeller decides the model structure once and for
+of descendants). The modeler decides the model structure once and for
 all, but when the model is released to users, they can (and will)
 change
-the number of copies. Therefore, the modeller must ensure that the
+the number of copies. Therefore, the modeler must ensure that the
 model
 structure provides the necessary constraints such that the model's
 consistency
@@ -551,16 +840,16 @@ this
 is not relevant.
 <br>
 However, the definitive decision must come from the understanding of
-the use of the model structure by the Lsd simulation manager, i.e. how
+the use of the model structure by the LSD simulation manager, i.e. how
 the model structure affects the computation of the model equations. For
 simplicity, let's assume that the equation for a Variable in X, say x,
 needs to use the an element contained in Y, suppose the Variable y: x =
 f(y). If this is not the case, the decision does not, of course, change
-the way Lsd computes the equations. Otherwise, the structure is
+the way LSD computes the equations. Otherwise, the structure is
 decisive
 to determine which copy of y is used when computing the equation for
 one
-copy of x. This is due to the fact that in Lsd the model writer does
+copy of x. This is due to the fact that in LSD the model writer does
 not
 specify where to get the values required, but only their label, much
 like
@@ -568,8 +857,8 @@ difference equation notation. During a simulation, at the very moment
 the
 equations are computed, the system automatically tries to satisfy the
 requests
-written in the equations code. Therefore, the modeller must use one of
-the <a href="LSD_functions.html">Lsd functions</a> to implement the desired
+written in the equations code. Therefore, the modeler must use one of
+the <a href="LSD_functions.html">LSD functions</a> to implement the desired
 computation
 (i.e. choose the correct copy of y for each copy of x). These functions
 are implemented in such a way to write in extremely simple ways the
@@ -604,7 +893,7 @@ copies of Objects Market and of Objects Firm, but any group of Objects
 Firm will always use the value same copy of Price. That is, each Market
 (one or more copies) will have many copies of Object Firm as
 descendants.
-In this case, the modeller can use in the equation for Profit the line:</li>
+In this case, the modeler can use in the equation for Profit the line:</li>
   <br>
   <tt>v[0] = p-&gt;cal("Price",0);</tt> <br>
 and the system will automatically ensure that any copy of Profit (x)
@@ -618,7 +907,7 @@ case X must be defined as container of Y. For example, this may be the
 case where Variable Price (x) contained in Market (X) is computed from
 a demand function over the sum of the values of Variable Quantity (y)
 contained
-in Firm (Y). In this case, the modeller can use in the equation for
+in Firm (Y). In this case, the modeler can use in the equation for
 Price
 the line:</li>
   <br>
@@ -629,12 +918,12 @@ Note that a line like this: <br>
   <tt>v[0] = p-&gt;cal("Quantity",0);</tt> <br>
 will always return only the value of Quantity contained the very first
 copy of Firm descending from Market (see the description of <a
- href="LSD_functions.html#cal">Lsd
+ href="LSD_functions.html#cal">LSD
 function cal(...)</a>. <li>any time a copy of x is computed it needs
 to use a (potentially)
 different
 copy of y. In this case, Objects X and Y must be placed as descendants
-from a common Object, say Z. Note that the modeller must provide an
+from a common Object, say Z. Note that the modeler must provide an
 explicit
 equation to determine which copy x must use any time is computed. As
 example
@@ -674,5 +963,19 @@ contain the lines: <br>
   <tt>cur=p-&gt;draw_rnd("Seller", "ms",0);</tt> <br>
   <tt>res=cur-&gt;cal("IdSeller",0);</tt>
 </ul>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
 </body>
+
 </html>

@@ -656,7 +656,7 @@ void run( object *root )
 
 	prof.clear( );			// reset profiling times
 
-	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run time information\n'Debug' :  triggers the debugger at flagged variables" );
+	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  stops the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables" );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
 #else
 	plog( "\nProcessing configuration file %s ...\n", "", struct_file );
@@ -922,7 +922,7 @@ void run( object *root )
 #ifndef NO_WINDOW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		// allow for run time plot window destruction
+		// allow for run-time plot window destruction
 		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
 #endif
 

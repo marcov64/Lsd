@@ -1,627 +1,997 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
+
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Author" content="Marco Valente">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
-   <title>Lsd Use Tutorial</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Basic Usage</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ -->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body>
 
-<center>
-<h1>
-<font size=-1><a href="TOC.html">Lsd main Manual</a></font></h1></center>
-
-<center>
-<h1>
-Using a Lsd Model</h1></center>
-
-<h2>
-Introduction</h2>
-The best way to learn to use a Lsd model is, like any software, to try
-and err. In the following is presented a tutorial listing the main steps
-in using a Lsd model, as guideline to start using Lsd models. The goal
-of a simulation exercise is to obtain interesting results <i>and</i> understand
-why they have been produced. Therefore it is not sufficient to obtain fancy
-graphs, but it is also necessary to get into the code of the model, and
-understand its functioning. After this tutorial you should be able to fully
-exploit an existing model, and to explore the Lsd interfaces even in the
-parts not explicitly covered here. Refer to the <a href="TOC.html">main
-Lsd manual</a> for a complete description of the Lsd interfaces.
-<p>To run a simulation exercise with Lsd it is used:
-<ul>
-<li>
-a <b>Lsd model program</b>. This is a program mixing the C++ code implementing
-equations for a model and the general Lsd code. The modeller has created
-the code for the equations, and users cannot modify it by running the model
-program.</li>
-
-<li>
-a <b>model configuration</b>. This is the definition of the model prepared
-by the modeller. It contains the description in terms of entities (Objects),
-Variables and Parameters. The configuration contains also all the necessary
-information used to run a simulation: the number of Objects, the initial
-values for Parameters, the number of time steps, etc. Users can easily
-modify each of these values to test different configurations.</li>
-</ul>
-Using Lsd entails the access to several windows, and sometime the one to
-use is hidden behind other ones. It is strongly advised to make use of
-the icon bar to access the window needed.
-<p>The table below consists of three columns:
-<ul>
-<li>
-<b>Operation</b>, summary of the operation to perform;</li>
-
-<li>
-<b>Progr. </b>indicates the software to use: <a href="LMM.html" TARGET="newwindow">LMM</a>
-(Lsd Model Manager, which is supposed to be running before starting this
-tutorial); <a href="browser.html" TARGET="newwindow">Lsd</a>; Netsc. (Netscape,
-or any web browser);</li>
-
-<li>
-<b>Menu choices and Comments</b> The beginning of this cell contains always
-the operation to perform (the menu choices are written in bold), and then
-follow comments and explanations.</li>
-</ul>
-To use the tutorial you should run LMM, from the main manu Start of windows,
-or from clicking on its icon. Unix users need to locate the directory where
-it is installed and run <tt><font size=+1>./lmm</font></tt>.
-<p>Now you can follow the steps indicated below. Using the program indicated
-in the <b>Instr.</b> column follow the instruction at the top of any cell
-in the right column. The text in bold indicates either a relevant window
-or a menu and the menu entry to choose: <b>menu/menu_entry</b>. Many windows
-will pop up during this exercise, partly from the program used, part from
-new Netscape windows if you click on a link. Use the icon bar of your screen
-to retrive the program you want to access.
-<br>&nbsp;
-<table BORDER WIDTH="100%" >
-<tr VALIGN=TOP>
-<td><b>Operation</b></td>
-
-<td><b>Progr.&nbsp;</b></td>
-
-<td><b>Menu choices and Comments</b></td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l1"></a>Run the Lsd model program</td>
-
-<td>LMM</td>
-
-<td>
-<ol>
-<li>
-<b>Model/Select</b></li>
-
-<li>
-<b>Model/Run</b></li>
-</ol>
-Choose the model you want to explore using menu <b>Model/Select Model</b>,
-and then run the corresponding Lsd model program. LMM automatically starts
-the Lsd model program for you (ensuring that it has been properly compiled).
-If LMM cannot run the model, for example because the compilation fails,
-a log window informs you with the reasons of the failures. See the <a href="LMM.html#run">help
-page</a> on possible problems.
-<br>When Lsd starts, it shows two windows, <b>Browser</b> and <b>Log</b>.
-The model interfaces are initially empty, since no configuration is loaded.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l2"></a>Load a configuration file</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>File/Load</b></li>
-</ul>
-Choose one of the proposed files with extension ".lsd". A model configuration
-contains the model description, the initial data, and everything it is
-required to run a simulation. The modeller has prepared at least one configuration,
-and more can be created with the Lsd interfaces.
-<br>The <b>Lsd Browser </b>now shows the Object Root as containing some
-elements. A graphical representation of the model is shown in a new window.
-The Browser is thought as a control center to issue commands to the Lsd
-model program, and as the inspector for one Object type. The Browser is
-always pointed on an Object, and lists its Variables and the contained
-Objects.
-<p>IMPORTANT: Close the windows using their buttons or keyboards shortcuts.
-Killing a window closes the whole Lsd model program.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l3"></a>Give a first look to the model</td>
-
-<td>Lsd&nbsp;</td>
-
-<td>
-<ul>
-<li>
-See the structure of the model</li>
-
-<li>
-<b>Help/Model Help</b></li>
-
-<li>
-<b>Help/Model Report</b></li>
-</ul>
-Although you may already run a simulation, spend some time to look at how
-Lsd represents a model.&nbsp;
-<br>The "scheleton" of the model are Objects, elements containing Parameters,
-Variables, or other Objects. Therefore, a model is represented by a hierarchy
-of Objects, whose "top" element is conventionally called Root. Root is
-the only Object that is always present in a model with a single instance,
-while the other Objects can be multiplied in as many instances as desired.
-Actually, the number of instances for each Object type is a parameter stored
-in the configuration file. Users can change these values, as we will see
-later.
-<p>Variables and Parameters are labels attached with numbers. The obvious
-difference is that Variables can change values at each time step using
-a specific equation, while Parameters don't have an equation (although
-an equation for a Variable can overwrite the value of a Parameter). The
-goal of Objects in Lsd models is to contain Variables: multiplying the
-number of Objects, also all the Variables and the Parameters contained
-in that Object type are multiplied. This is similar to using vectors, but
-it is more efficient, and permits to easily create hierarchies. See the
-<a href="FAQs.html" TARGET="newwindows">Lsd
-FAQ's</a> for more details.
-<p>It is possible to explore the model with the <b>Browser </b>(square
-window on the top left part of the screen), which shows one single Object's
-content. This is shown with some headers and two list boxes: <b>Variables</b>
-(and Parameters) and the <b>Descendants</b>, Objects contained in that
-type of Object. Variables are indicated with a integer number (the lagged
-values used in the model for that Variable), and Parameters are indicated
-with the letter "P". Variables labels can also be double-clicked to set
-their options and see their documentation (see below).
-<br>The Browser can be moved from one Object to another double-clicking
-on the descendants of an Object (to go "down") or on the name of the Object's
-"parent" (to go "up"). You can also use the arrows to move along Objects
-and Variables.&nbsp;
-<p>Another representation of the model is shown (on the right of the Browser)
-in a symbolic format. It shows the hierarchy of the Objects and indicates
-also the number of copies, or instances, for each Object type. Moving the
-mouse pointer over the symbol for one Objects makes appear a small window
-listing the Variables and Parameters contained in the Object. It is possible
-to click on the symbol of an Object in the graphical representation of
-the model to move there with the Browser.
-<p>Besides showing the content of an Object, the main Browser is the interface
-of the Lsd model program. From its manus it is possible to change the configuration,
-run a simulation launch the analysis of results, etc.&nbsp;
-<br>&nbsp;
-<p>The structure of a model and the exact role of each item (Object, Variable
-or Parameter) depends not only from its own content, but also from its
-relation with the rest of the model. To better grasp this aspect Lsd models
-offer the Model Reports. These may&nbsp;
-<br>The most detailed information on the model is contained in two documents
-prepared by the modellers: the <b>model help</b> and the <b>model report</b>.
-These are two HTML documents that appear in your system web browser (e.g.
-Netscape), when selecting their command in the menu <b>Help</b> of the
-<b>Browser</b>.&nbsp;
-<p>The <b>model report </b>is the most useful documentation of the model.
-It contains all the information presented in such a way to provide very
-quickly any information requested. Its links permit to see:
-<ul>
-<li>
-each Object with its content;</li>
-
-<li>
-where each element is used (e.g the Variables using a Parameter)</li>
-
-<li>
-which elements are used (e.g. which Parameters are used in a Variable's
-equation</li>
-</ul>
-For each Variable is also reported the actual C++ code used for the Variable,
-where the model elements in the code are links to their own section in
-the model report. For non expert programmers the code is provided with
-a brief description (represented as comment).
-<p>Spend some time to "play" with the links of the model report, to see
-how they show the model content. Do not try, at least for complex models,
-to read systematically the document and to understand the whole model structure.
-Just start from one component, look at its equations, or the equations
-that use it, and continue along creating your own path through the model
-structure.&nbsp;
-<br>The <b>model help</b> contains the list of the model element, possibly
-with a verbal descriptions prepared by the modeller. The <b>model report</b>
-contains the actual code used for the equations and other relevant information
-on the model structure. The two documents contain links to each other bringing
-at your attention all the relevant information for each element of the
-model.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td>Model Report</td>
-
-<td>Lsd</td>
-
-<td>The structure of a model and the exact role of each item (Object, Variable
-or Parameter) depends not only from its own content, but also from its
-relation with the rest of the model. To better grasp this aspect Lsd models
-offer the Model Reports. These standard HTML documents that can be opened
-using the menu <b>Help/Model Report</b>.&nbsp;
-<p>(It is possible that for some model configuration the Model Report is
-not available, which is indicated by an error message appearing when trying
-to open it. In this case you can create the report with two commands. Choose
-the command in menu <b>Mode/Generate Automatic Description</b> and after
-that the command in menu <b>Model/Create Report</b>, accepting the default
-options.)
-<p>The reports are extremely useful to understand how the model works.
-They contain an introductory section with a verbal description of the model
-and three sections reporting:
-<ul>
-<li>
-<b>Summary</b>: list of all Objects, Variables and Parameters indicating
-where they are used (that is, in which equation their label appear), and
-possibly a verbal description of their functioning.</li>
-
-<li>
-<b>Initial Values</b>: list of all Objects, Variables and Parameters reporting
-the initial values used at the start of the simulation (Variables never
-used with a lag do not appear here since they don't have initial values).</li>
-
-<li>
-<b>Details</b>: list of all Objects, Variables and Parameters reporting
-the actual code for Variables' equations, items used, and other information.</li>
-</ul>
-Each item in each section contains links to their location in the other
-sections, so that the report can be easily browsed to understand the working
-of a model even without a full understanding of the actual code used in
-the equations. Test the report trying to understand some part of the model.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l4"></a>Run a simulation</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>Run/Run</b></li>
-
-<li>
-Observe the Run Time Plot</li>
-</ul>
-Run a simulation exercise accepting all the default initialization defined
-by the modeller. Before running the symulation, the system issues a confirmation
-message listing the options used for the simulation.
-<br>A simulation run consist in several time steps, during each of which
-all the Variables of the models are updated, using their equations to compute
-the new values.&nbsp;
-<br>During the simulation run some Variables may be plotted in a self-scaling
-window called <b>Run Time Plot</b>, if the configuration is set for this.
-If no Variable is set to be plotted during the simulation (the so-called
-Run Time Plot), the <b>Log </b>window prints a line for each time step
-completed. More series are saved in the memory for later analysis (but
-not all data produced by the model at every time step are saved by default).&nbsp;
-<br>During a simulation it is possible to use the buttons in the Log window:
-<ul>
-<li>
-<b>Stop</b>: abort the simulation</li>
-
-<li>
-<b>Fast</b>: make run the simulation faster not issuing any message, if
-possible (to accellerate the simulation minimize the Run Time Plot window,
-if exists)</li>
-
-<li>
-<b>Observe</b>: run the simulation in normal (message issuing) mode, if
-requested by the configuration.</li>
-
-<li>
-<b>Debug</b>: interrupt the simulation when an equation marked to be debugged
-is computed. The simulation run may be resumed after that.</li>
-
-<li>
-<b>Help</b>: help on the Log window</li>
-</ul>
-</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l5"></a>Analyse the results</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>Data/Analysis of Results</b></li>
-</ul>
-The <b>Run Time Plot</b> may have given you some intuition of the simulation
-results. However, the modeller is likely to have set more data to be saved,
-besides the ones shown at run time. In fact, Lsd models allow to choose
-the Variables and Parameters values to be saved for later analysis.
-<p>This command makes available the data stored in memory after a simulation
-run, or previously saved on a file (when requested choose <b>Simulation</b>
-for using the data from the latest exercise, or <b>File</b> to get data
-from a file). It permits to observe in detail the series of the simulation.
-<p>The overall structure of this module is to list the elements available
-for analysis on the left box. Some of these must be selected and moved
-to the central box for elaboration, activated with the buttons in the lower
-part of the window. The right box contains the list of the graphs produced.
-Try to explore the data available (see <a href="menudata_res.html" TARGET="newwindow">here
-for the manual</a> on this topic).
-<p>There is a large number of possible options to produce time series,
-cross-section or XY scatter plot graphs. Moreover, users can produce statistics
-on the data available and save data files in a variety of formats. It is
-also possible to launch gnuplot, a package for function and data-plotting
-(Lsd distribution for Windows contains also Gnuplot for Windows, while
-Unix users are expected to already have it).
-<p>See carefully the <a href="menudata_res.html" TARGET="newwindow">manual</a>
-for this module to fully exploit its functionalities.
-<br>&nbsp;</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l6"></a>Interpret the results</td>
-
-<td>Lsd
-<br>and
-<br>Netsc.</td>
-
-<td>
-<ul>
-<li>
-plot graphs and statistics of the simulation data (See <a href="menudata_res.html" TARGET="newwindow">here
-for the manual</a>)</li>
-
-<li>
-use <b>Model Report</b> to make sense of the series' meaning</li>
-</ul>
-Search in the documentation the elements of interest and look at their
-functioning in the model to understand the reasons for ther results obtained.
-In fact, in the section Summary of the report it is either contained the
-verbal description of the Variable computation or, in case of a Parameter,
-it is at least indicated the Variable(s) that may have changed its values.
-<br>When finished, exit the Analysis of Result module with the menu <b>Exit</b>.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l7"></a>Reload the configuration</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>File/Reload</b></li>
-</ul>
-Reset the model to contain again the values for beginning a simulation.
-<br>After a simulation exercise Lsd contains in memory the values computed
-at the last time step. The system prevents the use of these values as the
-starting values of a new simulation run, and therefore a new configuration
-must be loaded.
-<br>Note that it is possible to save the model status as new configuration,
-which can be loaded to continue a simulation exercise.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l8"></a>Edit the number of instances&nbsp;
-<br>for the Objects</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>Data/Set Number of Objects/All types of Objects</b></li>
-</ul>
-Modify the number of Objects.&nbsp;
-<br>One obvious request to test a simulation model is to modify the number
-of Objects (and therefore the number of Variables, Parameters and other
-Objects they contain).
-<br>With this interface it is possible to modify any group of Objects,
-always maintaining the same model structure (i.e. the new Objects at higher
-level in the hierarchy will contain the same type of descending Objects
-at lower levels. But there will be, by default, only one instance of such
-descending Objects). See the <a href="menudata_objn.html" TARGET="newwindow">Lsd
-help on this</a>.&nbsp;
-<p>When finished, click on Exit to the return to the Browser.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l9"></a>Edit the initial values</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-Browse the model</li>
-
-<li>
-<b>Data/Init. Values</b></li>
-</ul>
-Change the initial values used to start a simulation.&nbsp;
-<br>When starting a simulation Lsd needs to know the values to assign to
-the Parameters. Moreover, the models usually contain Variables used with
-past values, that must be inserted for use in the very first steps of the
-simulation. This command allows users to modify such values, for one Object
-type. Note that the hierarchical structure of the Lsd models forces to
-use multi-digit indexing to identify the Object instance containing a given
-Parameter or lagged Variable value.
-<br>The initialization of values is requested also for the Objects created
-when modifying the number of Objects. They are assigned a default value
-(copied from the very first instance of that type of Object in the model),
-but usually the user may want to modify this.
-<br>Although the data may be inserted manually, when there are very many
-values it is convenient to use the <b>Set All</b> button to set all the
-initial values for a single line.
-<br>See the <a href="menudata_init.html" TARGET="newwindow">Lsd manual on this</a>.&nbsp;
-<p>When finished, click on Ok to return to the Browser.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l10"></a>Edit the simulation settings</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>Run/Sim. Settings</b></li>
-</ul>
-Choose the number of time step per simulation, the seed for the random
-generator, and number of simulation exercises to be run in a sequence (each
-with the same initialization values and different random generator seed).
-See the <a href="menurun.html#simsetting" TARGET="newwindow">Lsd manual
-on this</a>.
-<br>Note that running more than a simulation exercise cause the system
-to save the data in files.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l11"></a>Edit the choices on which
-<br>series to save, to plot
-<br>at run time, or to debug</td>
-
-<td>Lsd&nbsp;</td>
-
-<td>
-<ul>
-<li>
-Browse the model</li>
-
-<li>
-double-click on the Variable of interest</li>
-</ul>
-For each Variables and Parameters it is possible to decide whether:
-<ul>
-<li>
-it must be included in the data saved for analysis after a simulation (<b>To
-Save</b>)</li>
-
-<li>
-it must appear in the Run Time Plot, to observe its values during the simulation
-run (<b>Run Time Plot</b>)</li>
-
-<li>
-it should cause the simulation to be interrupted immediately after its
-equation has been computed (<b>Debug)</b>. Only for Variables</li>
-</ul>
-This options are passed in the configuration file, but it is possible to
-change them (saving too many data makes the simulation slower).
-<br>See the <a href="browser.html#variables" TARGET="newwindow">Lsd manual
-on this</a>.
-<br>These choices can also be changed individually for each element, or
-can be set&nbsp; off for the whole model using <b>Remove ...</b> in menu
-<b>Run</b>.
-<br>&nbsp;</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l12"></a>Save the configuration</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>File/Save</b></li>
-</ul>
-A modified configuration should be saved with a different name from the
-configuration loaded before the changes since, when running a simulation,
-the system overwrites the original configuration loaded with the new options.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td><a NAME="l13"></a>Run the newly configured model</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-<b>Run/Run</b></li>
-</ul>
-It is possible that an attempt to run a modified model does not succeed.
-The system prevents running model configurations not adapt, issuing messages
-to fix the errors (some message can be printed in the Log window, that
-may be hiddeen behind the graphical representation). Typical errors are:
-<ul>
-<li>
-model already run. The configuration is derived from the last step of a
-simulation exercise, and not from a "fresh" configuration file. Load a
-new configuration, makes the changes as indicated above, save the configuration
-with a new name, and finally run the newly configured model.</li>
-
-<li>
-data non initialized. If the number of Objects is increased, then the newly
-created instances contain Parameters and lagged Variables that must be
-initialized before they can be used for a simulation run. Move the Browser
-to point to the Object indicated in the error message (in the Log window)
-and choose <b>Data/Init. Values</b>.</li>
-</ul>
-It is also possible some configurations are initialized with non-consistent
-values, causing, for example, divisions by zero during the computation
-of some equation. The simulation results are, in these cases, erratic,
-and may even cause sudden crashes of Lsd. To avoid this keep always a copy
-of a working configuration, and try few changes per time.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td>Test other aspects of Lsd</td>
-
-<td>Lsd</td>
-
-<td>
-<ul>
-<li>
-Any menu, any entry</li>
-</ul>
-Explore any menu entry of the Browser (see the <a href="browser.html" TARGET="newwindow">help
-on the Browser</a>). As general advice:
-<ul>
-<li>
-the menu <b>Model</b> modifies the structure of the model, and should be
-used only by modellers since it likely entails modifications of the equations'
-code;</li>
-
-<li>
-remember that when running a simulation the configuration is written on
-file, overwriting the last configuration loaded with the same name;</li>
-
-<li>
-keep open the Lsd help pages, explaining in detail the effects of any operation</li>
-</ul>
-</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td>Open another model</td>
-
-<td>LMM</td>
-
-<td>
-<ol>
-<li>
-<b>Model/Select</b></li>
-
-<li>
-<b>Model/Run</b></li>
-</ol>
-After closing the current model, try another model and follow the same
-instructions to appreciate the differences (and the common interfaces)
-between two Lsd models.</td>
-</tr>
-
-<tr VALIGN=TOP>
-<td>Create your own model</td>
-
-<td>LMM</td>
-
-<td>As you have seen, using an existing model permit to modify every <i>numerical</i>
-aspect of the simulation, but you are constrained to keep the model structure
-(Objects, Variables and Parameters) and the equations unchanged. This is
-because the structure influences the way the equations compute their values
-for the Variables. And the equations are implemented as compiled code within
-the Lsd model program. Follow the <a href="model_writing.html">tutorial
-3 </a>to learn to create a new Lsd model.</td>
-</tr>
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<p class=MsoTitle>Using an existing LSD Model</p>
+
+<p class=MsoNormal>This is a tutorial presenting the main steps to start using
+LSD models for practical purposes. The goal of a simulation exercise is to
+obtain interesting results and understand why they have been produced.
+Therefore it is not sufficient to obtain fancy plots, but it is also necessary
+to get into the code of the model, and understand how it is functioning. </p>
+
+<p class=MsoNormal>After all, the best way to learn how to use a LSD model is,
+like any software, by trial and error. This tutorial should enable you to fully
+exploit an existing model, and to explore the LSD interface even in the parts
+not explicitly covered here. </p>
+
+<h2>Prerequisites</h2>
+
+<p class=MsoNormal>To run a simulation exercise with LSD it is necessary: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>If not already done, please first install LSD following the instructions
+in the <a href="LMM.html#install" target=newindow>manual</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>A <a href="LSD_faqs.html#model">LSD model program</a>. This is a program
+implementing the <a href="LSD_faqs.html#equation">Equations</a> for a given model
+and the LSD internal code. The modeler has created the <a
+href="LSD_faqs.html#equationfile">code for the Equations</a>, and users typically
+do not modify it if the just want to <a href="LSD_faqs.html#simulationrun">run
+the simulation model</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>A matched <a href="LSD_faqs.html#modelsetting">model configuration</a>.
+This is (at least one of) the configuration for the model prepared by the modeler.
+It contains details of the model in terms of the <a
+href="LSD_faqs.html#modelstructure">model structure</a> (the <a
+href="LSD_faqs.html#object">Objects</a> tree) and the initial data required by <a
+href="LSD_faqs.html#variable">Variables</a> and <a
+href="LSD_faqs.html#parameter">Parameters</a>. The configuration contains also
+all the remaining information necessary to <a href="LSD_faqs.html#simulationrun">run
+a simulation</a>: the number of time steps, etc. Users can easily modify each
+of these values to test different configurations.</p>
+
+<h2>The tutorial</h2>
+
+<p class=MsoNormal>The table below contains the detailed steps used in this
+tutorial. It consists of three columns: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><b>Operation:</b> a summary of the operations to perform in each step.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><b>Window:</b> indicates the target window to be used in the step: the
+many <a href="LSD_windows.html">LSD windows</a>, the web browser, or the
+operating system (Windows, Linux or macOS).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><b>Instructions:</b> This cell contains the commands to perform (menu
+choices, mouse actions etc.) followed by an explanation on the operation
+performed.</p>
+
+<p class=MsoNormal><b>WARNING:</b> Using LSD entails the access to several
+windows opened at the same time and sometimes the one to be used is hidden just
+behind the others. It is strongly advised to the user to make use of the computer
+taskbar to switch among LSD windows. </p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=7 cellpadding=0 width="100%"
+ style='width:100.0%'>
+ <tr>
+  <td valign=top style='background:#BFBFBF;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b>Operation</b></p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#BFBFBF;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b>Window</b></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#BFBFBF;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b>Instructions</b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Open LMM</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Operating system</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Double-click LSD (LMM) icon in the desktop.</p>
+  <p class=MsoNormal>The LSD (LMM) icons should have been created during the
+  LSD <a href="LMM.html#install" target=newindow>installation</a>. If the icon
+  was deleted (or otherwise is not available), you may (re)create it following
+  the instructions contained in Readme.txt for your operating system (Windows,
+  Linux or macOS).</p>
+  <p class=MsoNormal>Alternatively, you may also invoke <a
+  href="LSD_windows.html#lmm" target=newwindow>LMM</a> from the file explorer
+  program by double-clicking the appropriate file in the LSD installation
+  directory (Windows: <span class=Cdigo>run.bat</span> or <span class=Cdigo>run64.bat</span>,
+  Linux: <span class=Cdigo>lmm</span> or <span class=Cdigo>lmm32</span>, macOS:
+  <span class=Cdigo>lmm[.app] </span>or <span class=Cdigo>lmmOSX</span>) or
+  running it from a command prompt or terminal window.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l1></a>Run the LSD model program for the selected
+  model</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#lmm" target=newwindow>LMM</a><br>
+  and<br>
+  <a href="LSD_windows.html#modelbrowser">LSD Model Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Select menu option <span class=Cdigo>File&gt;Browse Models</span>
+  (or click on the yellow folder icon). The <a
+  href="LSD_windows.html#modelbrowser">LSD Model Browser</a> window will reopen
+  listing all the models available in the computer. Models are organized in a
+  tree of groups, like directory/folders in the file system, and navigation is
+  done using the usual file browser commands. The user may have to navigate into
+  the groups until the desired model is listed.</p>
+  <p class=MsoNormal>When the desired model is highlighted (single click or
+  arrow keys), selected it with a double click or pressing <span class=Cdigo>Enter</span>.
+  <a href="LSD_windows.html#lmm" target=newwindow>LMM</a> will load the model
+  and present the full model description, if any, or the model <a
+  href="LSD_faqs.html#equation">Equations</a>’ code otherwise. </p>
+  <p class=MsoNormal>Create the <a href="LSD_faqs.html#model">LSD model program</a>
+  for the model using the command <span class=Cdigo>Model&gt;Compile and Run
+  Model </span>(or click on the second yellow lightning icon, the one with the
+  green arrow). <a href="LSD_windows.html#lmm" target=newwindow>LMM</a>
+  automatically <a href="LSD_faqs.html#compiler">(re) compiles</a> all the
+  required LSD modules including the <a href="LSD_faqs.html#equationfile">equation
+  file</a>. If no errors are found, the <a href="LSD_windows.html#browser">LSD
+  Browser</a> for the model is launched. Failure to compile is more frequently
+  associated with errors in the model’s code but sometimes is due to a wrong
+  LSD configuration (to be sure, reset your system configurations using the
+  command <span class=Cdigo>Model&gt;System Options</span>, and clicking on the
+  button <span class=Cdigo>Default XXX</span> appropriate to your computer
+  type).</p>
+  <p class=MsoNormal>When the <a href="LSD_faqs.html#model">LSD model program</a>
+  is launched, it opens two windows, the <a href="LSD_windows.html#browser">LSD
+  Browser</a> and the <a href="LSD_windows.html#log">LSD Log</a>. However, the <a
+  href="LSD_faqs.html#modelsetting">model configuration</a> is initially empty,
+  once no configuration is loaded yet.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l2></a>Load a model configuration file</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Use the menu command <span class=Cdigo>File&gt;Load </span>(or
+  click on the yellow folder icon) and choose one of the proposed configuration
+  files. </p>
+  <p class=MsoNormal>A complete <a href="LSD_faqs.html#modelsetting">model
+  configuration</a> contains the model description, the initial data, and
+  (supposedly) everything else required for <a
+  href="LSD_faqs.html#simulationrun">running the simulation</a> model. The
+  modeler (should) have prepared at least one configuration, and more can be
+  created with the <a href="LSD_windows.html#browser">LSD Browser</a>.</p>
+  <p class=MsoNormal>The <a href="LSD_windows.html#browser">LSD Browser</a> now
+  shows the <a href="LSD_faqs.html#object">Object</a> named <span class=Cdigo>Root</span>
+  as containing some elements. A graphical representation of the model is shown
+  in a <a href="LSD_windows.html#modelstructure">LSD Model Structure</a> window.
+  The <a href="LSD_windows.html#browser">LSD Browser</a> is thought as a
+  control center to issue commands to LSD and to inspect the <a
+  href="LSD_faqs.html#modelsetting">model configuration</a> details, like an <a
+  href="LSD_faqs.html#object">Object</a> properties. The <a
+  href="LSD_windows.html#browser">LSD Browser</a> is always pointed to an
+  (current) Object, as indicated in the information bar, and lists its
+  contained <a href="LSD_faqs.html#variable">Variables</a>, <a
+  href="LSD_faqs.html#parameter">Parameters</a> and descending (son) <a
+  href="LSD_faqs.html#object">Objects</a>. </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l3></a>Take a first look at the model</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a> <br>
+  and<br>
+  <a href="LSD_windows.html#modelstructure">LSD Model Structure</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Although you may already run the simulation, spend some
+  time to look at how LSD represents the model.&nbsp; </p>
+  <p class=MsoNormal>Check the graphical representation of the <a
+  href="LSD_faqs.html#modelstructure">model structure</a> on the <a
+  href="LSD_windows.html#modelstructure">LSD Model Structure</a> window.
+  Hovering over the <a href="LSD_faqs.html#object">Object</a> you can uncover
+  the list of contained <a href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a>. The numbers below the Object
+  types indicate the respective <a href="LSD_faqs.html#object">number of
+  instances</a>. The context menu (right click) of each Object allows directly
+  changing its properties. It is still possible to click on any Object to move
+  the current <a href="LSD_windows.html#browser">LSD Browser</a> Object there. </p>
+  <p class=MsoNormal>The “skeleton” of the model is made of <a
+  href="LSD_faqs.html#object">Objects</a>, elements containing <a
+  href="LSD_faqs.html#variable">Variables</a>, <a href="LSD_faqs.html#parameter">Parameters</a>,
+  or other (descending) Objects. Therefore, a model is represented by a (inverted
+  tree) <a href="LSD_faqs.html#modelstructure">hierarchy of Objects</a> whose “top”
+  element is conventionally called <span class=Cdigo>Root</span>. <span
+  class=Cdigo>Root</span> is the only Object that is always present in a model
+  with a single instance (no copies), while all other Objects can be multiplied
+  in as many instances as desired. Users can change these values, as we will
+  see later. </p>
+  <p class=MsoNormal><a href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a> are names (labels) attached to (real)
+  numerical values. The key difference is that a Variable in principle changes its
+  value at each <a href="LSD_faqs.html#simulationrun">time step</a> using a
+  specific <a href="LSD_faqs.html#equation">Equation</a>, while a Parameter do not
+  have an Equation and typically has a constant value (although an Equation for
+  a Variable can change the value of a Parameter during the <a
+  href="LSD_faqs.html#simulationrun">simulation run</a>). The purpose of <a
+  href="LSD_faqs.html#object">Objects</a> in a LSD model is to contain and
+  organize its Variables and Parameters. Multiplying the number of <a
+  href="LSD_faqs.html#object">instances of an Object type</a>, also multiply
+  the instances of the contained Variables, Parameters and son Objects. This is
+  similar to using vectors and matrices in conventional programing, but <a
+  href="LSD_faqs.html#modelstructure">far more efficient</a> in most applications.
+  </p>
+  <p class=MsoNormal>It is possible to explore the model with the <a
+  href="LSD_windows.html#browser">LSD Browser</a>, which shows one single <a
+  href="LSD_faqs.html#object">Object's</a> content at a time. There is a bar
+  presenting the current Object and its parent and two list boxes: the <a
+  href="LSD_faqs.html#modelstructure">descending (son) Objects</a>, at the
+  left, and the <a href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a>, at the right. Variables (<span
+  class=Cdigo>var.</span>) are indicated with a number (<span class=Cdigo>lag=x</span>)
+  of lagged values (used in the model for computations involving this Variable)
+  and Parameters (<span class=Cdigo>par.</span>). Any element in the Browser can
+  be double clicked to set their options and see their documentation (see
+  below). The context menu (right click) for each element is also available for
+  quick changing most settings. The current Object in the Browser can be changed
+  to another one by double-clicking the desired (son) descendant (to go down in
+  the <a href="LSD_faqs.html#modelstructure">hierarchy tree</a>) or on the name
+  of its parent (to go up). You can also use the arrow keys, <span class=Cdigo>Enter</span>
+  and <span class=Cdigo>Backspace</span> (as in a file browser) to move along
+  Objects, Variables and Parameters.&nbsp; </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Generate and analyze the model report</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a> <br>
+  and<br>
+  Web browser</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Now, select option <span class=Cdigo>Model&gt;Create Model
+  Report</span> to generate a detailed <a href="LSD_faqs.html#modelreport">report
+  about the model</a>. Accept the default options in the Report Generation
+  window and click in <span class=Cdigo>OK</span>. The produced report should
+  be automatically presented in your web browser. At any time the model report
+  can be retrieved again using the menu option <span class=Cdigo>Help&gt;Model
+  Report</span>.</p>
+  <p class=MsoNormal>The exact role of each element (<a
+  href="LSD_faqs.html#object">Object</a>, <a href="LSD_faqs.html#variable">Variable</a>
+  or <a href="LSD_faqs.html#parameter">Parameter</a>) in the model depends not
+  only on its own content but also on its relation with the rest of <a
+  href="LSD_faqs.html#modelstructure">structure of the model</a>. To grasp this
+  aspect of a LSD model, one valuable tool is the <a
+  href="LSD_faqs.html#modelreport">model report</a>. It is a standard HTML
+  document that can be loaded in any web browser (e.g., Chrome).&nbsp;The model
+  report is a hyperlinked document containing the entire model information in a
+  convenient format. The hyperlinks permit to see: </p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>a textual description of the model, with and indication of the
+  key elements to observe and configure (if provided by the modeler);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>the <a href="LSD_faqs.html#modelstructure">hierarchy tree</a>
+  of Objects;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>details on each <a href="LSD_faqs.html#object">Object</a> and
+  its content;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>details on each <a href="LSD_faqs.html#parameter">Parameter</a>
+  and <a href="LSD_faqs.html#variable">lagged Variable</a> initial values;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>where each element is used (e.g., the Variables using a specific
+  Parameter);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>which elements are used to calculate each Variable (e.g., the Parameters
+  used in a Variable's <a href="LSD_faqs.html#equation">Equation</a>);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>the Equation code for each Variable, with links to the used
+  elements.</p>
+  <p class=MsoNormal>Spend some time to play with the links on the <a
+  href="LSD_faqs.html#modelreport">model report</a>, to see how they uncover
+  the <a href="LSD_faqs.html#modelstructure">model structure</a> and content.
+  Do not try, at least for complex models, to read systematically the document
+  and to understand the whole model structure. Just start from one component,
+  look at its equations, or the equations that use it, and continue along
+  creating your own path through the model structure.&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l4></a>Run the simulation</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a><br>
+  and<br>
+  <a href="LSD_windows.html#log">LSD Log</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Select menu command <span class=Cdigo>Run&gt;Run</span>
+  (or click on the blue triangle/play icon) to <a
+  href="LSD_faqs.html#simulationrun">run the simulation</a>. If there are no
+  unsaved changes, the simulation will start and show either the <a
+  href="LSD_windows.html#runtime">LSD Run-time Plot</a> window presenting some
+  of the time series being produced, or just print messages in the <a
+  href="LSD_windows.html#log">LSD Log</a> window, or both.</p>
+  <p class=MsoNormal>This will run the simulation using all the configuration
+  settings defined by the modeler (as we just browsed the model without
+  changing anything). Before running the simulation, the system may issue a
+  confirmation message, telling how the results data will be handled and/or
+  confirming the saving of any unsaved change in the <a
+  href="LSD_faqs.html#modelsetting">model configuration</a>.</p>
+  <p class=MsoNormal>A <a href="LSD_faqs.html#simulationrun">simulation run
+  consists in several time steps</a>, during each of which all the <a
+  href="LSD_faqs.html#variable">Variables</a> of the model are updated, using
+  the associated <a href="LSD_faqs.html#equation">Equations</a> to compute the
+  new values.&nbsp;During the simulation run, some Variables time series may be
+  plotted in the LSD Runt-time Plot window, if they are configured so. If no
+  Variable is set to be plot during the simulation run, the Log window may
+  still print information about the ongoing status. </p>
+  <p class=MsoNormal>During a <a href="LSD_faqs.html#simulationrun">simulation
+  run</a> it is possible to use the buttons in the <a
+  href="LSD_windows.html#log">LSD Log</a> window to control the process: </p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Stop: abort the simulation run (press ‘<span class=Cdigo>S</span>’
+  as a shortcut);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Pause/Resume: allow the temporary suspension and resume of an
+  ongoing simulation run (shortcut is ‘<span class=Cdigo>P</span>’ or ‘<span
+  class=Cdigo>R</span>’), the <a href="LSD_windows.html#debugger">LSD Debugger</a>
+  being available during the pause period;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Fast: hides the Run-time Plot window and set Log verbosity to a
+  minimum to speed-up simulation run (same as the ‘<span class=Cdigo>F</span>’
+  key);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Observe: show the Run-time Plot windows and enable more
+  verbosity in the Log window (same as ‘<span class=Cdigo>O</span>’);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Debug: interrupt the simulation run, if not already paused,
+  when an equation marked to be debugged is computed (the simulation run may be
+  resumed) (same as ‘<span class=Cdigo>D</span>’);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Copy: copy the selected text in the Log window to the clipboard
+  (same as ‘<span class=Cdigo>C</span>’ or <span class=Cdigo>Ctrl+C</span>);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>Help: help on the Log window (same as ‘<span class=Cdigo>H</span>’).</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l5></a>Analyze the simulation run results</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a><br>
+  and<br>
+  <a href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> </p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>After the simulation is finished or aborted, select the
+  menu option <span class=Cdigo>Data&gt;Analysis of Results</span> (or click in
+  the plot icon) in the <a href="LSD_windows.html#browser">LSD Browser</a>.
+  This command presents the list of all the time series stored in memory after
+  the last <a href="LSD_faqs.html#simulationrun">simulation run</a> in the <a
+  href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> window.
+  Previously saved data files, from older simulation runs, can also be loaded
+  in memory for analysis using the <span class=Cdigo>Add…</span> button.</p>
+  <p class=MsoNormal>The run-time plot may have given you some intuition about
+  the simulation results. However, the modeler is likely to have set more data
+  to be saved, besides the time series shown during run time. In fact, LSD
+  models allow choosing the <a href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a> values to be saved for later
+  analysis (by default, none is saved). </p>
+  <p class=MsoNormal>The overall structure of the <a
+  href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> window
+  is composed by the list box, on the left, of the elements with available time
+  series for analysis. Some (or all) of these must be selected by double
+  clicking the desired series, using the vertical button bar or using the
+  context (right click) menu. Once one (or more) series are selected, it is
+  shown in the central list box and is ready for further elaboration. Using the
+  buttons in the lower part of the window, the user can create plots, produce
+  statistics and export on the selected series. The right box contains the list
+  of the plots already produced in the current session. For instance, select
+  one of the available series (double click) and click on the <span
+  class=Cdigo>Plot</span> button to generate a time series plot of all the <a
+  href="LSD_faqs.html#simulationrun">simulation run time steps</a>. Next, click
+  on <span class=Cdigo>Statistics</span> to see some descriptive statistics
+  about the series printed in the <a href="LSD_windows.html#log">LSD Log</a>
+  window. </p>
+  <p class=MsoNormal>You may try to further explore the data available (see the
+  <a href="menudata_res.html" target=newwindow>manual</a> on this topic for
+  details). There are a large number of possible options to produce time series
+  and cross-section plots, XY scatterplots, histograms, and more. Moreover,
+  users can save selected data to files in a variety of formats. It is also
+  possible to launch Gnuplot, a package for advanced function and data-plotting.
+  </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l6></a>Interpret the simulation run results</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#analysisofresults">LSD Analysis
+  of Results</a><br>
+  and<br>
+  Web browser</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Plot graphs and statistics of the simulation data and use
+  the <a href="LSD_faqs.html#modelreport">model report</a> to make sense of the
+  time series meaning. Search in the documentation the elements of interest and
+  look at their functioning in the model to understand the reasons for the obtained
+  results. </p>
+  <p class=MsoNormal>When finished, close the <a
+  href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> window
+  using the <span class=Cdigo>Exit&gt;Qui and Return to Browser</span> menu
+  entry or simply click on the X in the title bar. If you have produce any
+  plot, a confirmation dialog informing that unsaved plots will be lost, will
+  show up.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l7></a>Reload the model configuration</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Back on the <a href="LSD_windows.html#browser">LSD Browser</a>,
+  select <span class=Cdigo>File&gt;Reload</span> in the menu (or click on the
+  green recycle icon). This will reset the <a href="LSD_faqs.html#modelsetting">model
+  configuration</a> to the values for beginning a <a
+  href="LSD_faqs.html#simulationrun">simulation run</a> again or for editing
+  the configuration.</p>
+  <p class=MsoNormal>After a <a href="LSD_faqs.html#simulationrun">simulation
+  run</a>, LSD contains in memory the values for all elements as computed at
+  the last simulated time step. To prevent mistakes, LSD prevents the immediate
+  use of these final values as the starting values for a new simulation run.
+  So, to run the simulation again or to modify its configuration a <a
+  href="LSD_faqs.html#modelsetting">configuration file</a> must be (re) loaded.
+  </p>
+  <p class=MsoNormal>Note that, if you really want to continue the simulation
+  from where it stopped, it is possible to save the current configuration
+  status as a new configuration, which can, in turn, be loaded to continue the
+  simulation exercise. However, this is not a common simulation situation, so
+  be careful.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l8></a>Modify the number of instances&nbsp;of an
+  Object</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a><br>
+  or<br>
+  <a href="LSD_windows.html#modelstructure">LSD Model Structure</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>In the <a href="LSD_windows.html#browser">LSD Browser</a>,
+  make the <a href="LSD_faqs.html#object">Object</a> you desire to modify the
+  current one and then select <span class=Cdigo>Data&gt;Number of Objects</span>
+  in the menu (or click the white on green plus icon). Alternatively, in the <a
+  href="LSD_windows.html#modelstructure">LSD Model Structure</a>, right click directly
+  on the target Object and select <span class=Cdigo>Number of Objects</span> in
+  the context menu.</p>
+  <p class=MsoNormal>After selection this command, a new window opens,
+  prompting you about the details on the desired change. Update the <span
+  class=Cdigo>Number of instances</span> field to the new number of instances desired
+  for the selected <a href="LSD_faqs.html#object">Object</a>. A number larger
+  than the current one means increasing the number of instances (and you may
+  choose from which of the existing instances the new ones should be copied).
+  Conversely, a smaller than the current value means deleting some of the
+  existing instances (and LSD will give the opportunity to choose which ones
+  should be removed).</p>
+  <p class=MsoNormal>One obvious request to test a simulation model is to
+  modify the number of <a href="LSD_faqs.html#object">Objects</a> and,
+  therefore, the number of <a href="LSD_faqs.html#variable">Variables</a>, <a
+  href="LSD_faqs.html#parameter">Parameters</a> and other Objects they contain.
+  Using the interface described above it is possible to modify any group of
+  Objects, yet always maintaining the same <a
+  href="LSD_faqs.html#modelstructure">model structure</a>. That is, any new
+  Objects at higher level in the hierarchy will still contain the same type(s)
+  of descending Objects at the lower levels. For details, please see the <a
+  href="menudata_objn.html" target=newwindow>LSD help</a>.&nbsp; </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l9></a>Edit the initial values of Parameters and
+  lagged Variables</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a><br>
+  or<br>
+  <a href="LSD_windows.html#modelstructure">LSD Model Structure</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>In the <a href="LSD_windows.html#browser">LSD Browser</a>,
+  make the <a href="LSD_faqs.html#object">Object</a> which contains the <a
+  href="LSD_faqs.html#parameter">Parameter</a> or <a
+  href="LSD_faqs.html#variable">Variable</a> you want to edit the current and
+  then select <span class=Cdigo>Data&gt;Initial Values</span> in the menu (or
+  click the spreadsheet with a pencil icon). Alternatively, in the <a
+  href="LSD_windows.html#modelstructure">LSD Model Structure</a>, right click directly
+  on the target Object and select <span class=Cdigo>Initial Values</span> in
+  the context menu.</p>
+  <p class=MsoNormal>When choosing the above command, <a
+  href="LSD_windows.html#initialvalues">LSD Initial Values Editor</a> window
+  opens and you may edit the initial values for all <a
+  href="LSD_faqs.html#parameter">Parameters</a> and <a
+  href="LSD_faqs.html#variable">Variables</a>, used to start the simulation, contained
+  in the current <a href="LSD_faqs.html#object">Object</a>.&nbsp;When starting
+  a simulation LSD needs to know the values to assign to the Parameters and to
+  the Variables used with lagged values. Note that the hierarchical structure
+  of the LSD models requires the usage of indexing to identify the Object
+  instance containing the elements requiring initial values, so the first
+  (brother) Object is number 1, the second, 2 and so on. This way the user can
+  set different initial values for the same Parameter or lagged Variable across
+  different (brother) Objects.</p>
+  <p class=MsoNormal>The initialization of values is necessary also for the <a
+  href="LSD_faqs.html#object">Object</a> instances created when increasing their
+  number (see above). The new instances are assigned a default value (copied
+  from the selected existing instance), but usually the user must confirm this
+  choice (just opening the <a href="LSD_windows.html#initialvalues">LSD Initial
+  Values Editor</a> and clicking the <span class=Cdigo>Done</span> button). Although
+  the data may be inserted manually for each Object instance (up to 100), when
+  there are many instances it is convenient to use the <span class=Cdigo>Set
+  All</span> button to set all the initial values at once. See the <a
+  href="menudata_init.html" target=newwindow>LSD manual</a> for more details.&nbsp;
+  </p>
+  <p class=MsoNormal>When finished, click on <span class=Cdigo>Done</span> to
+  return to the <a href="LSD_windows.html#browser">LSD Browser</a>.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Choose which Variables (and Parameters) to save data
+  series, to plot at run time, or to debug</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a>&nbsp;</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>In the <a href="LSD_windows.html#browser">LSD Browser</a>,
+  make the <a href="LSD_faqs.html#object">Object</a> which contains the <a
+  href="LSD_faqs.html#variable">Variable</a> (or <a
+  href="LSD_faqs.html#parameter">Parameter</a>) the current Object and then double
+  click the desired element. This will open the Change Element dialog window,
+  from where you can edit or modify any property of a Variable or Parameter.</p>
+  <p class=MsoNormal>For the chosen <a href="LSD_faqs.html#variable">Variable</a>
+  or <a href="LSD_faqs.html#parameter">Parameter</a> it is possible to decide
+  whether: </p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>it is be included in the data saved for analysis (mark the <span
+  class=Cdigo>Save</span> checkbox);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>it appears in the run-time plot (mark the <span class=Cdigo>Run-time
+  plot</span> checkbox);</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>it triggers the <a href="LSD_windows.html#debugger">LSD
+  Debugger</a>, interrupting the <a href="LSD_faqs.html#simulationrun">simulation
+  run</a> immediately after its computation (mark the <span class=Cdigo>Debug</span>
+  checkbox).</p>
+  <p class=MsoNormal>See the <a href="browser.html#variables" target=newwindow>LSD
+  manual</a> for details on these and the remaining element configuration
+  options.</p>
+  <p class=MsoNormal>These choices can also be changed quickly by means of the
+  context menu by right clicking on its name on the <a
+  href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a> list box in the <a
+  href="LSD_windows.html#browser">LSD Browser</a>. </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l10></a>Edit the simulation settings</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Use the menu option <span class=Cdigo>Run&gt;Simulation</span>
+  Settings (or the wrench icon) to adjust the remaining simulation settings.</p>
+  <p class=MsoNormal>In the Simulation Settings dialog window you may choose
+  the number of time steps per simulation, the seed for the pseudorandom number
+  generator, and number of simulation exercises to be run in a sequence.
+  Sequential <a href="LSD_faqs.html#simulationrun">simulation runs</a> use the
+  same <a href="LSD_faqs.html#modelsetting">model configuration</a> except for
+  a different random generator seed (increased by 1 each turn). Running more
+  than one sequential simulation runs cause LSD to automatically save the
+  results data to files.</p>
+  <p class=MsoNormal>See the <a href="menurun.html#simsetting"
+  target=newwindow>LSD manual</a> for more information on these and some
+  further advanced simulation settings available. </p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l11></a><a name=l12></a>Save the modified model configuration</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>The menu option <span class=Cdigo>File&gt;Save</span> saves
+  the current <a href="LSD_faqs.html#modelsetting">model configuration</a> in
+  memory to a file, overwriting the last loaded configuration file (with the <span
+  class=Cdigo>.lsd</span> extension), if any, or under the default name <span
+  class=Cdigo>Sim1.lsd</span> otherwise.</p>
+  <p class=MsoNormal>If you want to preserve the original configuration file
+  (which is frequently the case), the modified configuration may be saved using
+  the option <span class=Cdigo>File&gt;Save As</span>, which allows the user to
+  type a new file name or overwrite an arbitrary existing file. To preserve the
+  existing configuration file, it is important to use the <span class=Cdigo>File&gt;Save
+  As</span> command <b>before</b> trying to run the new unsaved configuration.
+  Otherwise, LSD will prompt to automatically overwrite the originally loaded
+  configuration file.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a name=l13></a>Run the modified model configuration</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>After (optionally) saving the modified <a
+  href="LSD_faqs.html#modelsetting">model configuration</a> under a new name,
+  you can use the command <span class=Cdigo>Run&gt;Run</span> (or click on the
+  blue triangle/play icon) to <a href="LSD_faqs.html#simulationrun">run the
+  simulation</a> again.</p>
+  <p class=MsoNormal>It is possible that an attempt to run a modified model
+  does not succeed. LSD may prevent running incomplete or inadequate <a
+  href="LSD_faqs.html#modelsetting">model configurations</a>. In these cases,
+  messages indicating the problem and the possible fixes are printed in the <a
+  href="LSD_windows.html#log">LSD Log</a> window. Typical errors are: </p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span
+  style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span><b>Model already run.</b> The <a
+  href="LSD_faqs.html#modelsetting">model configuration</a> in memory is the
+  last step of a <a href="LSD_faqs.html#simulationrun">simulation run</a>, and
+  not from a “fresh” configuration file. Load the original configuration file,
+  make the changes indicated above, save the configuration under a new name,
+  and, finally, run the newly configured model.</p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span
+  style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span><b>Data not initialized.</b> If the number of <a
+  href="LSD_faqs.html#object">Object</a> instances is increased, the newly
+  created instances contain <a href="LSD_faqs.html#parameter">Parameters</a> and/or
+  lagged <a href="LSD_faqs.html#variable">Variables</a> that must be
+  initialized (or confirmed) before they can be used for a <a
+  href="LSD_faqs.html#simulationrun">simulation run</a>. Move the <a
+  href="LSD_windows.html#browser">LSD Browser</a> to point to the Object
+  indicated in the error message (in the <a href="LSD_windows.html#log">LSD Log</a>
+  window) and choose <span class=Cdigo>Data&gt;Initial Values</span>.</p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span
+  style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span><b>Inconsistent initial values.</b> Inadequate values were chosen
+  for <a href="LSD_faqs.html#parameter">Parameters</a> or lagged <a
+  href="LSD_faqs.html#variable">Variables</a> initialization. These may be causing,
+  for example, divisions by zero during the computation of some <a
+  href="LSD_faqs.html#equation">Equation</a>. The simulation results may be erratic
+  in these cases, according to the random generator seed used, for instance,
+  and may even cause sudden crashes of LSD. Revert to the unmodified original <a
+  href="LSD_faqs.html#modelsetting">configuration file</a> and try the changes
+  again with different values.</p>
+  <p class=MsoNormal>For a more complete overview of the possible errors and
+  their fixes, please check the <a href="LSD_quickhelp.html">quick help</a>.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Test other aspects of LSD</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><a href="LSD_windows.html">Any LSD window</a></p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Explore any menu entry of the <a
+  href="LSD_windows.html#browser">LSD Browser</a>. As general advice: </p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>the menu <span class=Cdigo>Model</span> modifies the structure
+  of the model, and should be used only by modelers since it likely entails required
+  modifications of the <a href="LSD_faqs.html#equation">Equations</a>' code;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>remember that when running a simulation the configuration is
+  written on file, overwriting the last configuration loaded with the same
+  name;</p>
+  <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+  Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span></span>keep the <a href="LSD_documentation.html">LSD help pages</a> open,
+  helping to understand in detail the effects of any operation.</p>
+  <p class=MsoNormal>All other <a href="LSD_windows.html">LSD windows</a> are
+  also open for experimentation. Just be careful when overwriting <a
+  href="LSD_faqs.html#modelsetting">configuration files</a>: everything else
+  can be easily recovered by quitting LSD and restarting it.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Try another model</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>LMM</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Select menu option <span class=Cdigo>File&gt;Browse Models</span>
+  (or click on the yellow folder icon) to pick another model.</p>
+  <p class=MsoNormal>Create the <a href="LSD_faqs.html#model">LSD model program</a>
+  for the model using the command <span class=Cdigo>Model&gt;Compile and Run
+  Model </span>(or click on the second yellow lightning icon, the one with the
+  green arrow).</p>
+  <p class=MsoNormal>Use the menu command <span class=Cdigo>File&gt;Load </span>(or
+  click on the yellow folder icon) and choose one of the proposed <a
+  href="LSD_faqs.html#modelsetting">configuration file</a>. </p>
+  <p class=MsoNormal>Select menu command <span class=Cdigo>Run&gt;Run</span>
+  (or click on the blue triangle/play icon) to <a
+  href="LSD_faqs.html#simulationrun">run the simulation</a>. </p>
+  <p class=MsoNormal>Follow the instructions above to understand the
+  differences (and the common stuff) between two LSD models.</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Create your own model</p>
+  </td>
+  <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>LMM</p>
+  </td>
+  <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
+  5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>As you have seen, using an existing model permit to modify
+  every <i>numerical</i> aspect of the simulation. However, you are still
+  constrained to keep the same <a href="LSD_faqs.html#modelstructure">model
+  structure</a> (<a href="LSD_faqs.html#object">Objects</a>, <a
+  href="LSD_faqs.html#variable">Variables</a> and <a
+  href="LSD_faqs.html#parameter">Parameters</a>) and <a
+  href="LSD_faqs.html#equation">Equations</a>. This is because the structure
+  influences the way the Equations compute their values for the Variables. </p>
+  <p class=MsoNormal>Follow to the <a href="model_writing.html">last tutorial</a>
+  to learn how to create a new LSD model.</p>
+  </td>
+ </tr>
 </table>
 
-<br>&nbsp;
+</div>
+
+<p style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+
+</div>
+
 </body>
+
 </html>

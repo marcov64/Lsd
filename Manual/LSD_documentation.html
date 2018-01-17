@@ -1,43 +1,264 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+
 <head>
-  <meta http-equiv="content-type"
- content="text/html; charset=ISO-8859-1">
-  <title>Lsd Documentation</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Documentation</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ -->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body>
-<h1>Lsd Documentation</h1>
-<br>
-Learning the use of a computer lanaguage is always a difficult task,
-and the best way is always to practice with exercises and studying
-existing examples. Lsd is no exception. The following documentation is
-thought for users without any prior knowledge of programming. <br>
-<br>
-<ul>
-  <li>Slides of the <span style="font-weight: bold;">Lsd course</span>.
-As a first piece of documentation read the slides for a <a
- href="LSD_course.html">course on Lsd</a>. <br>
-  </li>
-  <li><span style="font-weight: bold;">Lsd Manual</span>. This document
-is a long paper describing how to build a model and listing all the Lsd
-functions. It should be handy to have it printed while coding models.
-This document may be slightly outdated. The on-line Help pages are the
-correct ones in case of differences. Open the <a href="Manual.pdf">Lsd
-Manual</a>.</li>
-  <li><span style="font-weight: bold;">Examples</span>. The
-distribution includes several example models. A relatively simple model
-containing most of the functions available in Lsd is the <span
- style="font-weight: bold;">Social Diffusion</span> model, located in
-the group <span style="font-weight: bold;">Example Models/Literature</span>.
-Understanding the code for the equations of this model will allow to
-implement almost any equation you have in mind.</li>
-  <li><span style="font-weight: bold;">Lsd Help pages</span>. Each Lsd
-and LMM windows is endowed with a corresponding help page describing
-its use. The help pages be browsed to have a quick look at what Lsd can
-do. The initial point can be the <a href="TOC.html">table of contents</a>
-of the Lsd Browser.</li>
-</ul>
-<br>
-<br>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<p class=MsoTitle>LSD Documentation</p>
+
+<p class=MsoNormal>Learning the use of a computer language is always a
+difficult task, and the best way is always to practice with exercises and
+studying existing examples. LSD is no exception. The following documentation is
+thought for users without any prior knowledge of programming. </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD manual</b>. All LSD modules are endowed with help pages
+describing their use. The help pages can also be browsed to have a quick look
+at what LSD can do. See the manual <span class=MsoHyperlink><a
+href="LSD_manual.html">table of contents</a></span>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD quick help</b>. Have a simpler question about anything in
+LSD? Please check the <a href="LSD_quickhelp.html">quick help guide</a> first.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD windows visual guide</b>. If you are in doubt about a
+specific LSD window, you have a <a href="LSD_windows.html">visual guide</a> to
+quickly accessing its help page.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD glossary</b>. Learn the details about the terms used in
+LSD models in the <a href="LSD_glossary.html">glossary page</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD FAQ’s</b>. In the <a href="LSD_faqs.html">frequently asked
+questions page</a> you may find direct answers to some of your questions about
+LSD.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD language documentation</b>. Both the more convenient <a
+href="LSD_macros.html">LSD macro language</a> and the now deprecated technical <a
+href="LSD_functions.html">LSD function language</a> are fully documented.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD tutorials</b>. There are step-by-step tutorials for new
+LSD users willing to have a <a href="LMM_primer.html">hands-on introduction</a>
+to LSD, the <a href="model_using.html">use of existing models</a> and the <a
+href="model_writing.html">creation of new models</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD course</b>. As a complementary learning tool, please check
+the slides for a <span class=MsoHyperlink><a href="LSD_course.html">course on
+LSD</a></span>. </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:32.2pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD examples</b>. The distribution includes several example
+models. A relatively simple model containing most of the functions available in
+LSD is the <span class=Cdigo>Social Diffusion</span> group of models, located
+in the group <span class=Cdigo>Example Models/Literature Models</span>.
+Understanding the code for the equations of this model will allow implementing
+almost any equation you may have in mind.</p>
+
+<p class=MsoListParagraph style='margin-left:32.2pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>LSD new features</b>. If you are not new to LSD, please check <a
+href="LSD_whatsnew.html">what is new</a> in the last versions of LSD.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+</div>
+
 </body>
+
 </html>

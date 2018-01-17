@@ -666,7 +666,7 @@ if ( redrawRoot )
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Help -menu $w -underline 0" );
 		cmd( "$w add command -label \"Help on Browser\" -command {LsdHelp browser.html} -underline 0" );
-		cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp quick_help.html} -underline 0" );
+		cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp LSD_quickhelp.html} -underline 0" );
 		cmd( "$w add separator" );
 		cmd( "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}" );
 		cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
@@ -812,7 +812,7 @@ if ( actual_steps > 0 )
 
 		cmd( "pack $T.l1 $T.l2 $T.f -ipadx 5 -padx 5 -pady 5" );
 
-		cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp quick_help.html#problem } { set choice 2 }" );
+		cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp LSD_quickhelp.html#problem } { set choice 2 }" );
 		cmd( "bind $T <Return> {set choice 1}" );
 
 		cmd( "showtop $T centerS" );
@@ -1663,7 +1663,7 @@ cmd( "checkbutton $T.b1.sav.i -text \"Save in separate files\" -variable savei -
 cmd( "if { ! $save } { set savei 0; .chgelem.b1.sav.i configure -state disabled }" );
 cmd( "pack $T.b1.sav.n $T.b1.sav.i -side left -anchor w" );
 
-cmd( "checkbutton $T.b1.plt -text \"Run time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
+cmd( "checkbutton $T.b1.plt -text \"Run-time plot: observe the series during the simulation execution\" -variable plot -underline 9" );
 cmd( "checkbutton $T.b1.deb -text \"Debug: allow interruption after this equation/function\" -variable debug -underline 0" );
 cmd( "checkbutton $T.b1.par -text \"Parallel: allow multi-object parallel updating for this equation\" -variable parallel -underline 0" );
 
@@ -3137,7 +3137,7 @@ break;
 //Remove all the plot flags
 case 31:
 
-cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
+cmd( "set answer [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Remove plot flags?\" -detail \"Confirm the removal of all run-time plot information. No data will be plotted during run time.\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 
 if(*choice==1)
 {
@@ -3421,7 +3421,7 @@ break;
 //help on lsd
 case 41:
 
-cmd( "LsdHelp quick_help.html" );
+cmd( "LsdHelp LSD_quickhelp.html" );
 
 break;
 
@@ -6175,7 +6175,7 @@ bool unsaved_change( bool val )
 		{
 			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ]  );
 		}
-		// handle (possibly multiple) run time plot windows
+		// handle (possibly multiple) run-time plot windows
 		cmd( "set a [ split [ winfo children . ] ]" );
 		cmd( "foreach i $a { if [ string match .plt* $i ] { wm title $i \"%s[ string range [ wm title $i ] 1 end ]\" } }", chgMark  );
 	}

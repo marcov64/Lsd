@@ -1,0 +1,533 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Manual</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ -->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
+</head>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<p class=MsoTitle>LSD Manual</p>
+
+<p>The manual is composed of a collection of web pages explaining all aspects
+of LSD. </p>
+
+<h1>Table of contents </h1>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="#_Introduction">Introduction</a></span>
+to what is LSD and <span class=MsoHyperlink><a href="#_Why_LSD?">why should I
+use it</a></span>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><a href="#_Installation_of_LSD">Installation</a> of LSD in any computer.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="LMM.html">LSD Model Manager (LMM)</a></span>,
+the program used to develop and manage LSD models.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="browser.html">LSD Browser</a></span>,
+the control center of LSD to run, edit or create model configurations:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'><span lang=FR>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=FR>Menu </span><span class=Cdigo><a href="menufile.html"><span lang=FR
+style='color:gray;text-decoration:none'>File</span></a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'><span lang=FR>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=FR>Menu </span><span class=Cdigo><a href="menumodel.html"><span lang=FR
+style='color:gray;text-decoration:none'>Model</span></a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'><span lang=FR>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=FR>Menu </span><span class=Cdigo><a href="menudata.html"><span lang=FR
+style='color:gray;text-decoration:none'>Data</span></a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'><span lang=FR>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=FR>Menu </span><span class=Cdigo><a href="menurun.html"><span lang=FR
+style='color:gray;text-decoration:none'>Run</span></a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'><span lang=FR>e.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span><span
+lang=FR>Menu </span><span class=Cdigo><a href="menuhelp.html"><span lang=FR
+style='color:gray;text-decoration:none'>Help</span></a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><a href="menudata_res.html">LSD Analysis of Results</a> module, used to
+analyze and export simulation data.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="debug.html">LSD debugger</a></span>, a
+tool to observe and change the model state during the simulation runs.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><a href="LSD_whatsnew.html">LSD new features</a> and change log, showing
+what is new in the latest LSD updates.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.95pt;text-indent:-18.75pt'>8.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Other useful documents:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>a.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><a href="LSD_quickhelp.html">Quick help</a> reference, with brief
+definitions, how to’s, and fixes to common problems.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>b.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="LSD_windows.html">Windows visual guide</a></span>&nbsp;to
+the main windows used by LSD for quick reference and help.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>c.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><a href="LSD_glossary.html">Model glossary</a> with definitions for the terms
+related to LSD model elements.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>d.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="LSD_faqs.html">FAQ’s</a></span> (frequently
+asked questions) about LSD.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>e.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Guide to the <a href="LSD_macros.html">LSD macro language</a> used to
+write the models.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>f.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Reference to the (deprecated) <span class=MsoHyperlink><a
+href="LSD_functions.html">LSD function language</a></span> for dealing with old
+models.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:49.65pt;text-indent:-18.0pt'>g.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Tutorials on the use of LSD for newcomers: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-72.0pt'><span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>i.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="LMM_primer.html">LSD hands-on
+introduction</a></span></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:72.0pt;text-indent:-72.0pt'><span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>ii.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="model_using.html">Using an existing
+LSD model</a></span></p>
+
+<p class=MsoListParagraph style='margin-left:72.0pt;text-indent:-72.0pt'><span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>iii.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=MsoHyperlink><a href="model_writing.html">Writing a new LSD
+model</a></span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Introduction"></a><span class=Ttulo1Char>Introduction </span></h1>
+
+<p>LSD (Laboratory for Simulation Development) is a powerful language and
+platform for the creation and execution of simulation models. LSD has been
+conceived and developed in order to automatically manage all the technical
+elements required to run a simulation program. Yet, the modeler still enjoys
+great freedom to implement whatever computational model she desires, since the
+LSD core is, technically speaking, a pure C++ API (application programmer
+interface). This way, LSD provides the benefits of C++ (flexibility, speed,
+reliability, portability) while retaining the simplicity and productivity of an
+integrated development environment (IDE). </p>
+
+<p>A LSD model is composed by its computational content, the equations, and by
+the model configuration. A developing environment (LSD Model Manager, LMM)
+permits to write the equations of the model in an easy way, expressing them
+like standard difference equations using a simplified macro language (a more
+advanced C++ interface is also available). Using LMM the equations are compiled
+and automatically embedded in a standalone native program, together with the
+required LSD libraries. The resulting LSD model program allows the definition
+of the model configuration and the running of the simulation using an easy-to-use
+graphical user interface (GUI). This way, the entire model development cycle
+can be managed from the LSD’s GUI, from the equation design and coding to the
+definition of the parameter and initial values and the presentation of the
+results. </p>
+
+<p>Modelers and users of LSD models need to concentrate exclusively on the
+model, avoiding dealing with technical aspects of programming not related to
+the actual model. For example, a simple menu command in LMM creates a new
+model, and another compiles the equations, checks for errors and runs the LSD
+program. LSD models are endowed with advanced controls, catching errors
+whenever they occur and providing information on how to fix them. </p>
+
+<p>Users of existing LSD models can load pre-packaged configurations of the
+model (e.g., initial values, number of steps) and reproduce the simulation, as
+suggested by the model author, without requiring any programming knowledge. New
+configurations are created with extremely simple and intuitive interfaces, so
+that even non-technical users can make use of simulation models. </p>
+
+<p>LSD is particularly suited to implement agent-based models, given its
+embedded multi-layered, object-oriented nature. However, at its very core, LSD
+is nothing else than a pure, high-efficiency C++ parallel scheduling engine.
+However, with the added layer of graphical interfaces, any computational
+structure can be implemented in LSD with ease. </p>
+
+<p>A model is composed by chunks of basic, macro-driven C++ code representing
+the (normally simple) difference equations of the model. Modelers define the
+equations of the model and the initial required data using simple and intuitive
+graphical interfaces. At the run time LSD automatically arranges the pieces of
+code in the correct sequence and collects the results, signaling possible
+inconsistencies.</p>
+
+<p>A crucial characteristic of a LSD model is their inherently modularity. You
+can (and should) implement one piece (equation) at a time, test it, and then
+extend the model with a new part. LSD also automatically provides all the
+documentation concerning the model (e.g., which equation uses which parameter),
+so that even very complex models can be easily reviewed without one getting
+lost in the middle of messy code. </p>
+
+<p>LSD appeals to novel programmers because it facilitates a gradual, trial-and-error
+learning process to modelling, signaling errors and suggesting solutions.
+However, LSD is also useful for experienced programmers because the language
+does not pose any limitation to the models it can implement while the platform
+significantly facilitates the management of complex models. </p>
+
+<p>An extensive documentation covers every aspect of LSD, with tutorials,
+explanations of the interfaces and hints on (macro) programming. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=why></a><a name="_Why_LSD?"></a><span class=Ttulo1Char>Why LSD?</span></h1>
+
+<p class=MsoNormal>A LSD model is simple to write, to use and it is as fast and
+capable as any (well-designed) pure C++ program. LSD logical organization
+differentiates between the model computational content and its numerical
+configuration values. The former is a subject for modelers, who are requested a
+minimum of computer-programming skills. The latter can be accessed and modified
+by any user, given the simple interfaces and the automatic documentation
+functions provided by LSD. </p>
+
+<p>One key advantage of LSD is that it significantly reduces the amount of code
+modelers are requested to write and test for producing an operating model. When
+the model is ready, users of the model have a huge set of interfaces available
+for dealing with the model (e.g., running simulations, changing initial data,
+observing the results, etc.). These interfaces are created without any
+intervention from the modeler and permit the thorough exploration of a model
+even by users with scarce computer experience. </p>
+
+<p>A very important aspect of LSD is that it provides a complete documentation
+set for each model, including a “playground” web interface. This is important
+for the modeler, since he can easily control the effects of a modification even
+in large and complex models. But this is even more important for the users of
+the model, since the supplied tools provide a complete and informative way to
+understand the very functioning of the model. </p>
+
+<p>Although LSD offers several tools to facilitate the writing, testing and
+usage of simulation models, it does not limit at all the scope of the models that
+can be implemented. In fact, all LSD does is to wrap C++ code with “smart”
+interfaces and libraries. Therefore, expert users can still include in a LSD
+model whatever C++ code and libraries they like. This ensures that LSD models
+are extremely fast to run, as any (well-designed) C++ model, while offering a
+much faster development cycle and milder learning curve steepness. </p>
+
+<p>The cost of directly using C++ in developing simulation models is the
+requirement of quite advanced tools, substantial programming experience and,
+most of all, a lot of time. By using the LSD integrated development
+environment, modelers can create models by writing only the code required for
+the equations of the model, which usually represent a modest share of the
+required programming for a full-blown C++ simulation program.</p>
+
+<p>Another important feature of LSD is favoring gradual model development,
+limiting the scope for errors. The typical cycle to build a LSD model is the
+following: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>create a model with one (or a few) variable(s) while keeping the all the
+rest constant (parameters);</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>write the equation(s) for the initial variable(s);</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>test the model results and fix the errors;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>transform one parameter into a variable (or add a new variable);</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>write the equation code for the new variable;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>go back to item 3 until all the required variables/equations are
+defined.</p>
+
+<p>This approach is possible in LSD because it is extremely easy to modify a
+model adding extra elements (or changing existing ones). This is not typically
+the case for pure code written by less-experienced programmers. Moreover, the
+LSD interface provides many powerful ways to explore the operation of the model
+(e.g., step by step running, conditional breaks, debugging, modification of
+values during the simulation, etc.). </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=install></a><a name="_Installation_of_LSD"></a>Installation of LSD </h1>
+
+<p>LSD is available to the three desktop computer platforms: Windows, Linux and
+macOS. Any relatively recent configuration is supported. The LSD IDE does not
+have any special requirement in terms of memory or CPU capabilities. However,
+large models may require substantial amounts of memory and may demand fast
+and/or multiple-core CPUs to be processed in reasonable time.</p>
+
+<p>LSD is distributed as a single compressed (zip) file which can be installed
+in any platform. It contains binaries and code compatible with the three
+supported platforms. Installation is done by simply decompressing the full
+directory structure contained in the zip file into the user’s home folder (<span
+class=Cdigo>~/</span>) in Linux and macOS or the root folder of any hard disk
+(e.g., <span class=Cdigo>C:\</span>) in Windows.</p>
+
+<p>The standard installation of LSD includes: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>the LMM executable;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>the LSD source code;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>several LSD example models;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>the manuals for LSD;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>platform-specific utilities;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>basic pre-requisite software (Windows 32-bit only).</p>
+
+<p>Detailed installation instructions for each platform are available in the <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="../Readme.txt">Readme.txt</a></span></span> file contained in the zip
+file, please refer to it after decompressing LSD directory structure in the
+appropriate location. Also, there are some common software pre-requisites for
+the installation of LSD in all platforms (except for the basic operation in
+Windows 32-bit mode). The details are available in the <span
+class=MsoHyperlink><span style='font-family:"Courier New"'><a
+href="../Readme.txt">Readme.txt</a></span></span> file, please check them
+before trying to use LSD.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

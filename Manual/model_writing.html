@@ -1,23 +1,173 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
+
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Author" content="Marco Valente">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
-   <title>Lsd Modelling - Overview</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Overview</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
 
 <center>
 <h1>
-Writing a Lsd Model</h1></center>
+Writing a LSD Model</h1></center>
 This help page offers a step-by -step tutorial to create a simple model.
-If not already done, users are invited to read the <a href="tutorial.html">tutorial
-1</a> for an introduction to Lsd and <a href="model_using.html">tutorial
-2</a> on using Lsd models before reading this tutorial.
+If not already done, users are invited to read the <a href="LMM_primer.html">LMM Primer</a> for an introduction to LSD and <a href="model_using.html">tutorial
+2</a> on using LSD models before reading this tutorial.
 <h2>
 Introduction</h2>
-A Lsd model is composed by:
+A LSD model is composed by:
 <ul>
 <li>
 <b>Model equations</b>: chunks of very simple programming language code
@@ -38,7 +188,7 @@ contain also information on the number of time steps, which data must be
 saved etc.</li>
 </ul>
 Practically, this means to create a computer program that includes a lot
-of technical code (the Lsd system code) and the code specific for the model,
+of technical code (the LSD system code) and the code specific for the model,
 the equations. This program is then used for creating the model structure
 and determining the initial values, which are stored in text files called
 model configurations. At this point, the model users (as opposed to model
@@ -46,10 +196,10 @@ writer) can run the model program, load a configuration, run simulations,
 look at the results, change configurations etc.
 <br>The create a model means therefore to write the code for the equations
 and create the model structure; every other operation required to generate
-a simulation model is performed automatically by either the Lsd model manager
-(LMM) or by the Lsd interfaces, automatically generated with each model
+a simulation model is performed automatically by either the LSD model manager
+(LMM) or by the LSD interfaces, automatically generated with each model
 program.
-<p>This tutorial lists the steps to be followed to create a Lsd model in
+<p>This tutorial lists the steps to be followed to create a LSD model in
 general. Click on the step number for detailed instructions to create an
 example model.
 <br>&nbsp;
@@ -98,18 +248,18 @@ build a model but with no equations' code contained in the equation file
 <td>Fill the equation file with equations associated with Variables' labels.&nbsp;
 <br>Each equation is inserted independently, much like systems of difference
 equations. The programming knowledge required is limited to the logical/mathematical
-operations represented in the equation. See the help on <a href="LSD_macros.html">Lsd
+operations represented in the equation. See the help on <a href="LSD_macros.html">LSD
 equation coding</a>.</td>
 </tr>
 
 <tr VALIGN=TOP>
 <td><a href="#t4">4</a></td>
 
-<td><a NAME="l4"></a>Try to run the Lsd model program</td>
+<td><a NAME="l4"></a>Try to run the LSD model program</td>
 
 <td>LMM</td>
 
-<td>Generate the Lsd model program, or, if errors occur, list the coding
+<td>Generate the LSD model program, or, if errors occur, list the coding
 errors&nbsp; (<a href="LMM.html#make" TARGET="newwindow">see LMM help</a>).
 <br>LMM attempts to create a model program by compiling the equation file.
 In case of syntactical errors in the equations' code LMM provides their
@@ -123,7 +273,7 @@ list and location in the equation file.</td>
 
 <td>LMM</td>
 
-<td>Generate the Lsd model program (<a href="LMM.html#make" TARGET="newwindow">see
+<td>Generate the LSD model program (<a href="LMM.html#make" TARGET="newwindow">see
 LMM help</a>).
 <br>Using the list of errors provided after a failed compilation it is
 possible to quickly fix the errors in the equations code. Note that errors
@@ -135,13 +285,13 @@ location of the error.</td>
 <tr VALIGN=TOP>
 <td><a href="#t6">6</a></td>
 
-<td><a NAME="l6"></a>Run the Lsd model</td>
+<td><a NAME="l6"></a>Run the LSD model</td>
 
 <td>LMM</td>
 
-<td>Access Lsd interfaces (<a href="LMM.html#make" TARGET="newwindow">see
+<td>Access LSD interfaces (<a href="LMM.html#make" TARGET="newwindow">see
 LMM help</a>)
-<br>LMM launches the Lsd model program. This contains, besides the equations'
+<br>LMM launches the LSD model program. This contains, besides the equations'
 code used during a simulation run, all the interfaces to deal with a model.</td>
 </tr>
 
@@ -150,11 +300,11 @@ code used during a simulation run, all the interfaces to deal with a model.</td>
 
 <td><a NAME="l7"></a>Define model structure (Objects, Variables, Parameters)</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
 <td>Generate a configuration (<a href="menumodel.html" TARGET="newwindow">see
-Lsd help</a>).
-<br>To define a model structure the modeller needs only to type in the
+LSD help</a>).
+<br>To define a model structure the modeler needs only to type in the
 labels of the model elements. For a discussion on how to <a href="menumodel.html#hint">design
 a model structure see here</a>.</td>
 </tr>
@@ -164,11 +314,11 @@ a model structure see here</a>.</td>
 
 <td><a NAME="l8"></a>Insert number of Objects and initial values</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
 <td>Generate a configuration (<a href="menudata.html" TARGET="newwindow">see
-Lsd help</a>).
-<br>Given the definition of the model structure the Lsd interfaces generate
+LSD help</a>).
+<br>Given the definition of the model structure the LSD interfaces generate
 suited windows to insert the numerical values required to start a simulation.</td>
 </tr>
 
@@ -177,11 +327,11 @@ suited windows to insert the numerical values required to start a simulation.</t
 
 <td><a NAME="l9"></a>Define general simulation settings</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
-<td>Generate a configuration (<a href="menurun.html#simsetting">see Lsd
+<td>Generate a configuration (<a href="menurun.html#simsetting">see LSD
 help</a>).
-<br>Although provided by default, the modeller may want to determine the
+<br>Although provided by default, the modeler may want to determine the
 number of time steps per simulation run, the values to be saved, the series
 to be shown during the run, and other technical settings.</td>
 </tr>
@@ -191,17 +341,17 @@ to be shown during the run, and other technical settings.</td>
 
 <td><a NAME="l10"></a>Run simulation</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
 <td>Produce results, or logical errors.
 <br>A simulation run produces the series for the data saved, but there
-may be "logical" errors, that is, legal C++ and Lsd code that cannot be
+may be "logical" errors, that is, legal C++ and LSD code that cannot be
 executed given the state of the model in that moment. Examples of these
 errors are dead-locks (two equations requesting reciprocally to be computed
 before the other), or missing elements of the model (usually due to differences
-in spelling between the equation code and structure labels). Lsd captures
-these errors issuing suited messages (<a href="quick_help.html#problem">see
-Lsd help</a>).</td>
+in spelling between the equation code and structure labels). LSD captures
+these errors issuing suited messages (<a href="LSD_quickhelp.html#problem">see
+LSD help</a>).</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -209,13 +359,13 @@ Lsd help</a>).</td>
 
 <td><a NAME="l11"></a>Fix logical errors</td>
 
-<td>Lsd&nbsp;</td>
+<td>LSD&nbsp;</td>
 
 <td>Find offending code in the equations.
-<br>In most cases the error messages issued by Lsd allow to quickly find
+<br>In most cases the error messages issued by LSD allow to quickly find
 the line in the equation's code that caused them, since the fatal errors
-issue messages in which the offending equation is reported <a href="quick_help.html#problem">(see
-Lsd help</a>).</td>
+issue messages in which the offending equation is reported <a href="LSD_quickhelp.html#problem">(see
+LSD help</a>).</td>
 </tr>
 
 <tr VALIGN=TOP>
@@ -223,9 +373,9 @@ Lsd help</a>).</td>
 
 <td><a NAME="l12"></a>Analyse the Simulation Results</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
-<td>Observe the data produced by a simulation (see <a href="menudata_res.html">Lsd
+<td>Observe the data produced by a simulation (see <a href="menudata_res.html">LSD
 help</a>).
 <br>The data saved during a simulation are loaded in the Analysis of Result
 module to produce plots, statistics, export data etc.</td>
@@ -236,7 +386,7 @@ module to produce plots, statistics, export data etc.</td>
 
 <td><a NAME="l13"></a>Test different configurations</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
 <td>Produce different configurations.
 <br>Generally starting from a fresh configuration (not one obtained after
@@ -252,7 +402,7 @@ settings</a>).</td>
 
 <td><a NAME="l14"></a>Create the model report</td>
 
-<td>Lsd</td>
+<td>LSD</td>
 
 <td>Create a HTML file reporting the model structure and the interdependencies
 between model elements.
@@ -267,22 +417,32 @@ useful to understand the actual computations of a model.</td>
 <td><a NAME="l15"></a>Extend the model</td>
 
 <td>LMM and
-<br>Lsd</td>
+<br>LSD</td>
 
 <td>Add new elements to the model, adding also the equations for the new
 Variables. Each time a new equation is involved the model need to be re-compiled.
-<br>See the <a href="LSD_macros.html">Lsd equation manual </a>for more
-detailed on the Lsd coding language.</td>
+<br>See the <a href="LSD_macros.html">LSD equation manual </a>for more
+detailed on the LSD coding language.</td>
 </tr>
 </table>
 
-<p>The model you have created can be distributed to any Lsd user by just
+<p>The model you have created can be distributed to any LSD user by just
 sending the directory where the model is contained. The user will have
 all the code and the documentation to repeat your simulation, understand
 them and possibly extending the model.
 <br>&nbsp;
 <p>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t1"></a>1 - Design a model</h3>
 The design of a model must start with the most simple strucure, to be gradually
@@ -322,28 +482,42 @@ The data common to every firm (<b>a</b>, <b>TotalSales</b> and <b>AverageQuality
 will instead be placed in a single Object (say <b>Market</b>) containing
 the <b>Firm</b> Objects.
 <br><a href="#l1">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t2"></a>2 - Create a new model</h3>
-Start LMM (in Window from menu Start/Programs/Lsd/LMM). In&nbsp; LMM choose
+Start LMM (in Window from menu Start/Programs/LSD/LMM). In&nbsp; LMM choose
 menu <b>Model/New Model</b>. Type a name (e.g. "mymodel"), a version number
 and a directory where to locate the model. The obvious requirement is that
 there is no another model with the same name and version number, or the
 directory is already used.
 <br>You are now shown the equation file for a new model called "mymodel".
 The equation file is endowed with all the technical requirements for the
-equation file to be included in Lsd model program. You need to fill in
+equation file to be included in LSD model program. You need to fill in
 the equations for your model (in between the two lines MODELBEGIN and MODELEND.
 <br>From now on, all the operations in LMM contained in menu <b>Model</b>
 (e.g. run, debug, show the equation file etc.) will be referred to this
 model.
 <br><a href="#l2">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t3"></a>3 - Insert equations</h3>
@@ -352,9 +526,9 @@ program how each Variable should produce a new value at each time step.
 You can copy the code for the equations presented here (<tt>the lineS with
 these fonts)</tt> or type it manually. Don't bother for the colors, which
 do not have any influence on the actual working of the code. Consider that
-LMM offers guided shortcuts to insert the most frequently used Lsd functions.
-The list of Lsd functions that you can insert in your equation file is
-activated from menu <b>Model/Insert Lsd Script</b> (Control+i). See the
+LMM offers guided shortcuts to insert the most frequently used LSD functions.
+The list of LSD functions that you can insert in your equation file is
+activated from menu <b>Model/Insert LSD Script</b> (Control+i). See the
 <a href="LMM.html#LsdScript">LMM manual on this</a>.
 <p>Let's use this structure to write the type in the equation the code
 for the Variable Sales (you can select the following text for the equations,
@@ -381,7 +555,7 @@ without any use for the working of the equation, but helpful for documentation
 report).
 <br>The next 4 lines in the equation collect the data necessary to compute
 the value of Sales. The v[0], v[1], etc. are temporary C++ variables used
-to store intermediate results during computation. The Lsd function V("label")
+to store intermediate results during computation. The LSD function V("label")
 simply returns the value of the item "label") in the model. The VL("label",
 lag) function is the same as V("label"), but request the past value of
 "label", with 'lag' lags.
@@ -472,31 +646,45 @@ the Objects named Firm. The cycle repeat the commands between the '{' and
 '}' for all the Object Firm in the mdoel. In each cycle we make three operations:
 collect the value of Sales and Quality for the firm contained in the pointer,&nbsp;
 add their product to v[1].
-<br>Note that we use the Lsd function VS(pointer, "label"). This function
+<br>Note that we use the LSD function VS(pointer, "label"). This function
 asks specifically the value of "label" to the Object 'pointer', instead
 of generally search one copy of "label" in the model.
 <p>Now you have inserted the equations for your model. For more information
-on the Lsd equations' language see the <a href="LSD_functions.html" TARGET="newwindow">Lsd
+on the LSD equations' language see the <a href="LSD_functions.html" TARGET="newwindow">LSD
 help on this</a>).
 <p><a href="#l3">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t4"></a>4 - Create the Model program</h3>
 Save the equation file (menu <b>File/Save</b>). Now you need to create
-a model program including the general Lsd system code and the model specific
+a model program including the general LSD system code and the model specific
 equation file. LMM will do all of this automatically: select the item <b>Run
 </b>in
 menu <b>Model</b>. Now the system compiles the new model program, with
-two possible output: either the Lsd model program starts (showing the Lsd
+two possible output: either the LSD model program starts (showing the LSD
 Browser), or the compilation fails. In this second case you are shown the
 error messages issued by the compiler (see next paragraph).
 <br><a href="#l4">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t5"></a>5 - Fix the compilation errors</h3>
@@ -510,29 +698,36 @@ error was found (<a href="LMM.html#run">help on compilation errors</a>).
 The LMM editor permits to reach a specific line of the equation file using
 the item <b>Goto Line </b>in menu <b>Edit</b>.
 <br><a href="#l5">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
-<a NAME="t6"></a>6 - Access the Lsd interfaces</h3>
-If the compilation succeeds the Lsd program shows its interface:
+<a NAME="t6"></a>6 - Access the LSD interfaces</h3>
+If the compilation succeeds the LSD program shows its interface:
 <center>
-<p><img SRC="emptybrowser.png" height=333 width=335></center>
+<p><img src="image/emptybrowser.png" height=333 width=335></center>
 
-<p>When the Lsd model starts it is empty. That is, there is no configuration
+<p>When the LSD model starts it is empty. That is, there is no configuration
 loaded in the model program, although the program contains the equations'
 code embedded in its C++ core. The interface is composed by the <b>Browser</b>,
 which shows one Object (the Object shown is indicated in red along "<b>Object's
-label</b>"). The Lsd Browser shows two list boxes, for the set of Variables,
+label</b>"). The LSD Browser shows two list boxes, for the set of Variables,
 on the left, and for the Objects descending from the currently shown one,
 on the left. Currently, the Browser shows the Object <b>Root</b>, included
-by default in any Lsd model, which contains no Variables and no descending
+by default in any LSD model, which contains no Variables and no descending
 Objects.
-<br>The Lsd model program starts also a new window, called <b>Log</b>.
+<br>The LSD model program starts also a new window, called <b>Log</b>.
 This will contain messages from the system, when necessary. For the moment
 you can ignore it.
-<br>The Browser contains several menus. Modellers are interested only in
+<br>The Browser contains several menus. Modelers are interested only in
 the menu <b>Model </b>to determine the model structure, while the other
 menus are used to manage different aspects of the simulation that also
 users may be interested in changing (like initial values, number of time
@@ -540,9 +735,16 @@ steps, etc.). The structure of the model and the initializations are saved
 in configurations files (extension .lsd) that can be loaded to run directly
 a simulation run.
 <p><a href="#l6">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t7"></a>7 - Define the model structure</h3>
@@ -560,7 +762,7 @@ Choose the item <b>Add Descending Obj.</b> in menu <b>Model </b>to add
 an Object to <b>Root</b>. Type the label <b>Market </b>and press <b>Ok</b>
 (you may add a description, but for the moment leaves the box empty). Now
 the Browser shows <b>Market </b>in the list of descendants. Notice that
-a new window has appeared, titled Lsd Model Structure. This is a graphical
+a new window has appeared, titled LSD Model Structure. This is a graphical
 representation of the model (ignoring <b>Root</b>).</li>
 
 <li>
@@ -591,7 +793,7 @@ Control that the Browser appears as below (the order of Variables and Parameters
 does not matter):</li>
 </ul>
 
-<center><img SRC="market_defined.png" height=342 width=335></center>
+<center><img src="image/market_defined.png" height=342 width=335></center>
 
 <ul>
 <li>
@@ -615,7 +817,7 @@ Create now the Object <b>Firm</b>, as descending from <b>Market </b>(choose
 item <b>Add Descending Obj.</b> in menu <b>Model </b>and type <b>Firm</b>).
 The Browser will list <b>Firm </b>as descending from <b>Market</b>. Double-click
 on <b>Firm </b>moving the Browser to show this Object. Notice that the
-Lsd Model Structure window has been updated showing <b>Market </b>as containing
+LSD Model Structure window has been updated showing <b>Market </b>as containing
 <b>Firm</b>.</li>
 
 <li>
@@ -632,9 +834,16 @@ Now the model structure is complete. It may still contain few mistakes:
 these will be corrected later, when the simulation manager will issue errors.
 Save the configuration from menu <b>File/Save</b>.
 <br><a href="#l7">return to the tutorial list</a>
-<h3>
 
-<hr WIDTH="100%"></h3>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
 <h3>
 <a NAME="t8"></a>8 - Insert initial values and the number of Objects</h3>
@@ -647,7 +856,7 @@ of Objects placed in the model, which are, by default, only one Object.
 <br>Choose item <b>Set Number of Objects </b>in menu <b>Data </b>(option
 <b>All
 Object Number</b>). This window shows the whole hierarchy of Objects, up
-to the hierarchical level indicated (see the <a href="menudata_objn.html">Lsd
+to the hierarchical level indicated (see the <a href="menudata_objn.html">LSD
 help on this </a>for details on this window). Click on the text <tt>(click
 here to see descendants)</tt> to increase the hierarchichal level shown,
 so to see also the Object <b>Firm</b>. Click on the number shown on the
@@ -672,7 +881,7 @@ the different instances of Objects on the columns and the Parameters or
 lagged Variables on the lines. You can manually type in each cell a number
 (pressing Return on your keyboard to move to the next cell), or use the
 <b>Set
-All </b>button to set the whole values for a line (see the <a href="menudata_init.html">Lsd
+All </b>button to set the whole values for a line (see the <a href="menudata_init.html">LSD
 manual on this</a>). For the Objects <b>Firm </b>we need to set the lagged
 values of <b>Sales </b>and the level of <b>Quality</b>. Set the same value
 for
@@ -698,12 +907,22 @@ Parameter <b>a </b>and 1.5 for <b>AverageQuality
 </b>with lag 1.
 <br><a href="#l8">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t9"></a>9 - General Simulation Settings</h3>
 The model is now potentially ready to run a simulation, since it contains
 the equations, the model structure and the initial values. However, by
-default Lsd models do not save the data produced during a simulation, so
+default LSD models do not save the data produced during a simulation, so
 you need to specify the data series you want to observe (this information
 is stored in the configuration file, so you do not need to specify the
 series to be saved any time). Let's save the series for <b>AverageQuality
@@ -715,7 +934,7 @@ and <b>Sales </b>in <b>Firm</b>. To select a Variable to be saved double-click
 on its label contained in the list of Variables in the Browser (when this
 shows the Object containing the Variable of interest, of course). This
 shows a window with the label of the Variable and several items (see the
-<a href="browser.html#variables">Lsd
+<a href="browser.html#variables">LSD
 manual on this topic</a>). Check on the option "<b>To Save</b>". Concerning
 the Variable <b>Sales
 </b>in Firm, check on also the option "<b>Run Time
@@ -733,7 +952,7 @@ or it can be set on from the very beginning of the simulation run).
 <br>When starting with no model loaded, the time steps for a simulation
 run are set to 100. To change this choose item <b>Sim.Setting </b>in menu
 <b>Run</b>.
-This will show a window with several options (see the <a href="menurun.html#simsetting">Lsd
+This will show a window with several options (see the <a href="menurun.html#simsetting">LSD
 manual on this topic</a>). In the cell labelled <b>Simulation Steps</b>
 type 2000.
 <br>Now the configuration to run a simulation is complete. Save the configuration
@@ -741,7 +960,17 @@ choosing item <b>Save</b> in menu <b>File</b>, and typing a name for the
 configuration, for example <b>trial1</b>.
 <br><a href="#l9">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t10"></a>10 - Run the simulation</h3>
 To run a simulation you just need to choose the item <b>Run</b> in menu
@@ -749,7 +978,7 @@ To run a simulation you just need to choose the item <b>Run</b> in menu
 This will show a summary message; choosing <b>Ok</b> confirms to run the
 simulation.
 <p>If there are errors the simulation is interrupted immediately, or the
-Lsd error manager issue few messages offering the modeller with several
+LSD error manager issue few messages offering the modeler with several
 possibilities to investigate the error (see <a href="#t11">Fix logical
 errors </a>below). If the simulation runs smoothly, you will see a new
 window, the <b>Run Time Plot</b>, showing the series of the data set with
@@ -776,13 +1005,13 @@ and allowing to explore the status of the model.</li>
 </ul>
 After a simulation run the model remains with the status of the last time
 step of the simulation. That is, every Variable has the values resulting
-from the last time its equation have been computed. Lsd prevents to run
+from the last time its equation have been computed. LSD prevents to run
 immediately new simulation exercise with such values as initial values.
 This, in fact, would overwrite the configuration file used to run the original
 simulation. However, the after-simulation configuration can be saved (possibly
 with a different name). And therefore this new configuration can be loaded
 and run, like any configuration.
-<p>Although it is not strictly necessary for writing Lsd models, it may
+<p>Although it is not strictly necessary for writing LSD models, it may
 be interesting to know what happens when a simulation is run. The operations
 of a simulation run are:
 <ol>
@@ -816,35 +1045,45 @@ the computation for an equation in an upper position of the model (say
 requires other Variables to be computed first (<b>Sales</b> in <b>Firm
 </b>in the example). But the flow of updating described above is such that
 the equation for <b>AverageQuality</b> begins to be computed <i>before
-</i><b>Sales</b> are updated. Lsd records every value for a Variable along
+</i><b>Sales</b> are updated. LSD records every value for a Variable along
 with the time step in which it was computed. Therefore it knows that <b>Sales</b>
 need to be updated before completing the equation for <b>AverageQuality</b>,
 and automatically computes the equation for each Variable <b>Sales</b>
 before completing <b>AverageQuality</b>.
 <p>When a lower Variable already computed is reached by the standard simulation
-cycle, or it is requested again by another Variable, Lsd does not re-compute
+cycle, or it is requested again by another Variable, LSD does not re-compute
 it, but uses the value already computed the first time in that time step.
-<br>Modellers can also decide to use Variables that, instead having an
+<br>Modelers can also decide to use Variables that, instead having an
 equation assigned, has a function. This is identical to an equation, but
 includes also few lines such that the value of the Variable is recomputed
 as many times as it is requested, even many times during a time step.
 <p><a href="#l10">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t11"></a>11 - Fix logical errors</h3>
 During the compilation it is possible to discover errors in the model code
 (i.e. the equations) due to illegal C++. But only during a simulation it
 is possible identify errors due to the design of the model. If there is
-an error Lsd writes a message in the Log windows. Typical errors are:
+an error LSD writes a message in the Log windows. Typical errors are:
 <h4>
 Data not loaded</h4>
-Lsd found that some initial values (for Parameters or lagged Variables)
+LSD found that some initial values (for Parameters or lagged Variables)
 have not been defined by the user. The error message is:
 <p><tt><font size=+1>Data for XXX in Object YYY not loaded</font></tt>
 <p>This happen either when a Parameter or lagged Variable is inserted,
 or when the number of Objects is increased, but the user did not set any
-initial value for it. In both cases Lsd assign a default value that must
+initial value for it. In both cases LSD assign a default value that must
 be, at least, confirmed before being able to run a simulation.
 <br>To fix the error re-load the configuration (menu <b>File/Re-Load</b>).
 Move the Browser to show the Object YYY containing the un-initialized elements.
@@ -860,7 +1099,7 @@ occurred. There are two possible types of errors. If the error is:
 <p><tt><font size=+1>Equation for XXX not found</font></tt>
 <p>it means that the Variable defined in the model configuration does not
 correspond to any equation block in the equation file. This error is also
-caused if you defined a Variable instead of a Parameter (to Lsd, it is
+caused if you defined a Variable instead of a Parameter (to LSD, it is
 a Variable without equation). For example, if you defined <b>a</b> as a
 Variable it appears as
 <br>a (0)
@@ -877,10 +1116,10 @@ ZZZ</font></tt>
 for ZZZ was not found. You likely mispelled XXX in the equation's code.
 <p><a NAME="correct_label"></a>To correct the error you need either to
 change the equations code, or to change the label of the element in the
-model structure. In any case, close the Lsd model program (choosing <b>Abort</b>
+model structure. In any case, close the LSD model program (choosing <b>Abort</b>
 if the error message is of the second type). You can change the equations'
 code, if necessary, using LMM. Save the equations' file (menu <b>File/Save</b>)
-and run the Lsd model program (menu <b>Model/Run</b>). When the Lsd model
+and run the LSD model program (menu <b>Model/Run</b>). When the LSD model
 program starts, load the configuration (menu <b>File/Load</b>) and choose
 the configuration file that caused the error. Now the model is defined
 exactly as when you started the simulation, but with the fixed equation
@@ -926,13 +1165,23 @@ ones</tt>
 <br><tt>3 Sales</tt>
 <br><tt>2 TotalSales</tt>
 <br><tt>1 AverageQuality</tt>
-<br><tt>0 Lsd Simulation Manager</tt>
+<br><tt>0 LSD Simulation Manager</tt>
 <p>The lines highlighted show the two Variables involved in the dead-lock.
 <br>To fix the error set one call with a lag, according to the logic you
 want to use in the model.
 <p><a href="#l11">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t12"></a>12 - Analyse the Simulation Results</h3>
 After a simulation users can use the module for analyse the simulation
@@ -958,11 +1207,21 @@ is made by the values of all the Variables listed in the middle box at
 a given time). The plots generated are listed in the right box (<b>Graphs</b>),
 and can be brought in the foreground by clicking on them. To raise the
 main window, frequently hidden behind a stack of plot windows, double click
-on any of such windows. See the <a href="menudata_res.html">Lsd manual </a>on
+on any of such windows. See the <a href="menudata_res.html">LSD manual </a>on
 the detail use of this module.
 <br><a href="#l12">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t13"></a>13 - Test different configurations</h3>
 Exit from the Analysis of Result module (menu <b>Exit</b>). Re-load the
@@ -974,23 +1233,33 @@ the simulation settings etc. For a detailed account on these aspects see
 the <a href="model_using.html" TARGET="newwindow">tutorial 2</a>.
 <br><a href="#l13">return to the tutorial list</a>
 <br>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t14"></a>14 - Create Model Report</h3>
 Understanding the functioning of a model means to know the elements of
 the model (Objects, Variables and Parameters) and how they relate to each
 other. This means to know the structure of the model and all the connections
 between them like, for example, in which equation(s) a Parameter is used.
-This is of importance both to the modeller and to the user. For the modeller
+This is of importance both to the modeler and to the user. For the modeler
 it is the crucial information for modifying a model; for model users it
 is the best way to understand how a model is implemented. If a model report
 exists, it will always be available to the model users for documentation
 (from the menu <b>Help/Model Report)</b>. The model report is a HTML file
 (readable with any web browser) created automatically by the system at
-request of the modeller.
+request of the modeler.
 <p>To create the report it is necessary to tell the system the equation
 file name, menu <b>Model</b> item <b>Equation File</b>, and indicating
-the filename suggested in the resulting window. Lsd model programs permit
+the filename suggested in the resulting window. LSD model programs permit
 to add to each item a textual description, that appear in their option
 window and are used in the model report. However, it is also possible to
 request the system to automatically induce some of the relevant information.
@@ -998,28 +1267,38 @@ To do this, use the command in menu <b>Model / Generate Automatic Documentation<
 After this, click on a Parameter or a Variable to see the results.
 <p>Then choose the item
 <b>Create Model Report</b> in menu <b>Model</b>
-and the system pops up a window where the modeller can choose the options
+and the system pops up a window where the modeler can choose the options
 concerning the report. Confirming the creation of the report makes the
 system create the report's file (or overwrite the existing file). After
 the creation the report is shown. It is always possible to access the report
 from its indication in the menu <b>Help </b>(obviously, only if available).
 <br><a href="#l14">return to the tutorial list</a>
 <p>
-<hr WIDTH="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h3>
 <a NAME="t15"></a>15 - Extend the model</h3>
 A crucial rule in developing simulation models is to proceed gradually
-incrementing the elements of a model. Lsd allows a very easy extension
+incrementing the elements of a model. LSD allows a very easy extension
 of an existing model. As exercise, let's add a Variable to compute the
 market shares of firms.
 <br>For this we need to add an equation to the equation file, and to add
 the relative Variable in the model.
-<p>Close the Lsd model program and return to LMM, open the equation file
+<p>Close the LSD model program and return to LMM, open the equation file
 for the model (menu <b>Model/Show Equation</b>), and place the cursor in
-a legal position for a Lsd equation (within the lines MODELBEGIN and MODELEND
+a legal position for a LSD equation (within the lines MODELBEGIN and MODELEND
 and outside the block for an existing equation).
 <p>Press the keys Ctrl+Shift+e to insert an equation (or use the normal
-way through the menu <b>Model/Insert Lsd Scripts</b>), for the Variable
+way through the menu <b>Model/Insert LSD Scripts</b>), for the Variable
 "ms".
 <p>The block for the equation is:
 <p><tt>EQUATION("ms")</tt>
@@ -1035,9 +1314,9 @@ way through the menu <b>Model/Insert Lsd Scripts</b>), for the Variable
 The whole equation should be like:
 <p>Save the equation file (menu <b>File/Save</b>, or press Ctrl+s), and
 run the model, menu <b>Run/Run</b>. The system automatically acknowledges
-that the file is changed, and therefore recompiles the whole Lsd model
+that the file is changed, and therefore recompiles the whole LSD model
 program.
-<p>When the Lsd Browser window appears, open one of the configuration files
+<p>When the LSD Browser window appears, open one of the configuration files
 (<b>menu File/Load</b>). Note that you may run the model as before since
 the new code does not interfere with the previous equations.
 <p>Move the Browser to point to the Object <b>Firm </b>(double-click on
@@ -1051,6 +1330,19 @@ data saved during the simulation runs.
 <p>Now you can run a simulation and observe the results
 <br><a href="#l16">return to the tutorial list</a>
 <br>&nbsp;
-<br>&nbsp;
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
 </body>
+
 </html>

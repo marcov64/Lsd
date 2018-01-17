@@ -1,17 +1,165 @@
-<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html;
-      charset=ISO-8859-1">
-    <meta name="Generator" content="Microsoft Word 97">
-    <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT
-      OFFICE\OFFICE\html.dot">
-    <meta name="GENERATOR" content="Mozilla/4.5 [it] (WinNT; I)
-      [Netscape]">
-    <title>LMM Manual</title>
-  </head>
-  <body link="#0000ff" vlink="#800080">
-    <center><b><font size="+2">Lsd Model Manager - LMM</font></b>&nbsp;<br>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LMM Manual</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
+</head>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+    <center><b><font size="+2">LSD Model Manager - LMM</font></b>&nbsp;<br>
       <b><br>
         <br>
       </b>
@@ -20,11 +168,11 @@
         <tbody>
           <tr>
             <td style="width: 650px;"><img style="width: 631px; height:
-                581px;" alt="" src="lmm_main.png"></td>
+                581px;" alt="" src="image/lmm_main.png"></td>
             <td style="vertical-align: top;"><b><font size="+1">&nbsp;Topics</font></b>
               <ul>
                 <li> <a href="LMM.html#introduction">Introduction</a></li>
-                <li><a href="LMM.html#Lsd_LMM">Lsd and LMM</a></li>
+                <li><a href="LMM.html#Lsd_LMM">LSD and LMM</a></li>
                 <li> <a href="LMM.html#install">LMM Installation</a></li>
                 <li><a href="LMM.html#editor">LMM Editor window</a></li>
                 <li> <b>LMM Menus</b>:</li>
@@ -34,12 +182,12 @@
                   <li> <a href="LMM.html#model">Model</a></li>
                   <li> <a href="LMM.html#help">Help</a></li>
                 </ul>
-                <li> <b>Help on Lsd model writing</b></li>
+                <li> <b>Help on LSD model writing</b></li>
                 <ul>
-                  <li> <a href="LMM.html#modelcreation">Lsd model
+                  <li> <a href="LMM.html#modelcreation">LSD model
                       creation</a></li>
-                  <li> <a href="LSD_functions.html">Lsd functions</a></li>
-                  <li> <a href="debug.html">Lsd debugging</a></li>
+                  <li> <a href="LSD_functions.html">LSD functions</a></li>
+                  <li> <a href="debug.html">LSD debugging</a></li>
                 </ul>
               </ul>
             </td>
@@ -49,25 +197,35 @@
       <b><br>
       </b></center>
     &nbsp;
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <a name="introduction"></a><b><i><font face="Arial">Introduction</font></i></b>
     <br>
-    Lsd Models Manager (LMM) is an integrated environment used to
+    LSD Models Manager (LMM) is an integrated environment used to
     generate,
-    modify and access one or more Lsd models. It consists of a normal
+    modify and access one or more LSD models. It consists of a normal
     text
     editor (particularly suited for dealing with C++ source code), plus
     a
     series
-    of commands to manage Lsd model programs. If LMM is loaded with a
+    of commands to manage LSD model programs. If LMM is loaded with a
     model,
-    then its Lsd-related functionalities apply to that model. Otherwise,
+    then its LSD-related functionalities apply to that model. Otherwise,
     with
     no model loaded, LMM is just a simple editor.
     <br>
     Starting LMM you are shown a window with three options:
     <br>
-    Both LMM and Lsd are extensively documented by help pages in
+    Both LMM and LSD are extensively documented by help pages in
     HTML
     format.
     <a href="#top">This
@@ -76,20 +234,30 @@
     entries,
     and each section is referred to in the buttons <b>Help</b> in any
     interfaces.
-    For help on the use of a Lsd model refer to the <a href="TOC.html">Lsd
+    For help on the use of a LSD model refer to the <a href="LSD_manual.html">LSD
       manual</a>, or look at the <a href="#hintro">Help on Help </a>section.
     <br>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <br>
     <a name="install"></a><b><i><font face="Arial">LMM Installation</font></i></b>
-    <p>The code for the Lsd system is identical under any platform,
+    <p>The code for the LSD system is identical under any platform,
       since
       it uses the same C++ compiler and libraries. Consequently, all the
-      distributions of Lsd can be used on any system.&nbsp;</p>
+      distributions of LSD can be used on any system.&nbsp;</p>
     <p>The
       installation consists unpacking the files and run LMM. Once this
       is
-      successfully done, LMM is used to generate run and generate Lsd
+      successfully done, LMM is used to generate run and generate LSD
       models.</p>
     <p>There
       are three different packaging facilitating the installation
@@ -106,14 +274,14 @@
         This will create a directory structure formed by one root
         directory,
         called
-        LsdX.Y for Lsd version X.Y, and several subdirectories. Then run
+        LsdX.Y for LSD version X.Y, and several subdirectories. Then run
         the
         batch
-        program <big><tt>run.bat</tt> </big>in the Lsd root
+        program <big><tt>run.bat</tt> </big>in the LSD root
         directory.&nbsp;</li>
     </ul>
     <ul>
-      <li> <b>Unix Systems</b>: LMM and the Lsd programs require a GNU
+      <li> <b>Unix Systems</b>: LMM and the LSD programs require a GNU
         C++
         compiler
         (any version) and the Tcl/Tk libraries, the most recent version
@@ -126,7 +294,7 @@
       <br>
       <font face="Courier New,Courier">&gt; tar xsf lsdXYunix.tgz</font>
       <br>
-      This creates a directory called Lsd and several subdirectories
+      This creates a directory called LSD and several subdirectories
       descending
       from the one in which you have copied your distribution file. Move
       in
@@ -172,11 +340,11 @@
             <td>System source code. This directory and its content
               should
               never be
-              removed. Updates of Lsd will need to be placed here</td>
+              removed. Updates of LSD will need to be placed here</td>
           </tr>
           <tr>
             <td><b>LsdX.Y\Manual</b></td>
-            <td>Manual pages for using Lsd and LMM</td>
+            <td>Manual pages for using LSD and LMM</td>
           </tr>
           <tr>
             <td valign="top"><b>LsdX.Y\gnu </b>(Windows distribution
@@ -191,7 +359,7 @@
               (ditributed
               under the GNU General Public License). See www.mingw.org.
               <br>
-              Under Unix environment LMM compiles the Lsd model programs
+              Under Unix environment LMM compiles the LSD model programs
               exploiting
               the GNU gcc compiler and the Tcl/Tk libraries, normally
               installed
@@ -225,7 +393,17 @@
       &nbsp;
     </p>
     <p></p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="editor"></a><b><i><font face="Arial">The LMM editor</font></i></b>
       <br>
       The LMM window is formed by a header bar and by a text editor. The
@@ -239,7 +417,7 @@
       position
       of the cursor.
     </p>
-    <p><img src="lmm_statusbar.png" height="22" width="662"></p>
+    <p><img src="image/lmm_statusbar.png" height="22" width="662"></p>
     <p>The editor applies the usual rules for browsing text, selecting,
       deleting
       etc. Note that the most frequently used editing functions have
@@ -296,7 +474,7 @@
       the previous one (asking whether to save it, in case it is
       changed).
       Note
-      that it is not necessary to open the files required by Lsd models
+      that it is not necessary to open the files required by LSD models
       since
       these can be accessed directly using the menu items in <a
         href="#model">menu
@@ -335,7 +513,17 @@
       for the
       operative system used.
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="edit"></a><b><i><u><font face="Arial,Helvetica">Menu
               Edit</font></u></i></b>
       <br>
@@ -344,7 +532,7 @@
       Besides the usual copy/paste operation, it offers several
       facilities
       targeted
-      to operate on C++ source code, and Lsd equations in particular:
+      to operate on C++ source code, and LSD equations in particular:
     </p>
     <ul>
       <li> <a href="#goto">Goto line</a>; <a href="#search">Find</a>;
@@ -354,7 +542,7 @@
       <li> <a href="#insertopengr">Insert {</a>; <a
           href="#insertclosegr">Insert
           }</a>; <a href="#LsdScript">Insert
-          Lsd Scripts</a>;</li>
+          LSD Scripts</a>;</li>
       <li> <a href="#wrap">Wrap/Unwrap</a>; <a href="#lfont">Larger
           Font</a>; <a href="#sfont">Smaller
           Font</a>; <a href="#changefont">Change Fonts</a>; <a
@@ -522,15 +710,15 @@
       and specially its shortcuts, saves from a lot of laborious work.
     </p>
     <p><a name="LsdScript"></a><a href="#edit">(menu Edit)</a> <b>Insert
-Lsd
+LSD
 Script
         (Shortcur: Ctrl+i)</b>:
       <br>
-      Insert in the insertion cursor point a frequently used Lsd script
+      Insert in the insertion cursor point a frequently used LSD script
       (the
-      equation style between C++ or Lsd macros depends on the <a
+      equation style between C++ or LSD macros depends on the <a
         href="#select_macro">option</a>
-      chosen). This function is merely implemented to allow modellers to
+      chosen). This function is merely implemented to allow modelers to
       quickly
       include frequently used code, minimizing the number of typing
       mistakes.
@@ -541,8 +729,8 @@ Script
       The item activates a window listing the scripts currently
       available
       for automatic insertion (see the help page on <a
-        href="LSD_macros.html">Lsd
-        functions</a> for the complete set of Lsd functions available).
+        href="LSD_macros.html">LSD
+        functions</a> for the complete set of LSD functions available).
       When a
       choice is made, an interface requesting the values necessary for
       the
@@ -550,7 +738,7 @@ Script
       appears. The interfaces contain already a default value for each
       item
       to
-      insert, and modellers can move from one item to the next just
+      insert, and modelers can move from one item to the next just
       pressing
       <b>Return</b>
       (the usual key <b>Escape</b> aborts the process at any moment).
@@ -564,7 +752,17 @@ Script
       insert
       a V(...) function is activated.
     </p>
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <a name="wrap"></a><a href="#edit">(menu Edit)</a> <b>Wrap Text/No
       Wrap </b>(shortcut Ctrl+'w'):
     <br>
@@ -578,31 +776,81 @@ Script
     wrapping
     the text. The wrapping does not affect the saved file, but only the
     appearence.
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="lfont"></a><a href="#edit">(menu Edit)</a> <b>Larger
         Font</b>
       (shortcut Ctrl+'+'): Increase the fonts used in the editor.
       <br>
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="sfont"></a><a href="#edit">(menu Edit)</a> <b>Smaller
         Font</b>
       (shortcut Ctrl+'-'): Decrease the fonts used in the editor.
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="changefont"></a><a href="#edit">(menu Edit)</a> <b>Change
         Font</b>:
       Set the fonts to use in the editor.
       &nbsp;
     </p>
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <a name="indent"></a><a href="#edit">(menu Edit)</a> <b>Indent and
       Deindent Selection</b> (shortcut Ctrl+'&gt;' and Ctrl+'&lt;'): Add
     or
     remove
     spaces in the beginning of the selected line(s)
     <br>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <br>
     <a name="tkdiff"></a><a href="#edit">(menu Edit)</a> <b>TkDiff</b>
     a WYSWYG interface for "diff" based on Tk, written by John M. Klassa
@@ -612,20 +860,41 @@ Script
     equations' code differences in two versions of the same model.
     <br>
     <br>
-    <hr width="100%"><a name="compmod"></a> <a
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+	<a name="compmod"></a> <a
       href="LMM.html#edit">(menu Edit)</a> <span
       style="font-weight: bold;">Compare models</span>.
     This interface allows to run TkDiff using selecting automatically
     the
     equation files of two model. The interface shows the complete list
     of
-    the models present in the Lsd distribution. Users need to select one
+    the models present in the LSD distribution. Users need to select one
     model and then click on the "Insertt" button on the right hand of
     the
     windows. TkDiff will show the differences between the equation files
     of
     the two models.
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <br>
     &nbsp;
     <p><a name="model"></a><b><i><font face="Arial">Menu Model</font></i></b>
@@ -659,7 +928,17 @@ Script
       <li><a href="#nowindow">Generate NO WINDOW makefile</a><br>
       </li>
     </ul>
-    <hr style="width: 100%; height: 2px;">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><br>
       <a name="switch_macro"></a><a href="#model">(menu Model)</a> <b>Equation
 Coding
@@ -667,11 +946,11 @@ Coding
       <br>
       Allows to choose between the traditional C++ form for expressing
       the
-      code in the Lsd equations, or to use the simpler <a
+      code in the LSD equations, or to use the simpler <a
         href="#lsd_macro">macro
         language</a>. Depending on which coding style is used, LMM will
       provide
-      the corresponding <a href="#LsdScript">Lsd script</a> to be
+      the corresponding <a href="#LsdScript">LSD script</a> to be
       inserted
       in
       the equations, and will mutate the <a href="#helpeq">Help page on
@@ -681,19 +960,29 @@ Coding
       <br>
       Note that users can blend the two languages in the same models,
       expressing
-      some part of the code in C++ and others in the Lsd macro.
+      some part of the code in C++ and others in the LSD macro.
       <br>
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="select_macro"></a><a href="#model">(menu Model)</a> <b>Equation
 Codying
         Style</b>
       <br>
-      Tell LMM to use pure C++ codying style or the simpler Lsd macro
+      Tell LMM to use pure C++ codying style or the simpler LSD macro
       codying
       style.
       <br>
-      Lsd models implement the Variables' equations in C++, which are
+      LSD models implement the Variables' equations in C++, which are
       stored
       as blocks of code in the model equations file. Besides writing the
       equations
@@ -706,18 +995,28 @@ Codying
       be confusing.
       <br>
       Depending on this option, LMM will insert the <a
-        href="#LsdScript">Lsd
-        scripts</a> in the chosen style. Also the <a href="#helpeq">Lsd
+        href="#LsdScript">LSD
+        scripts</a> in the chosen style. Also the <a href="#helpeq">LSD
         equation
         help</a> menu item will be selected according to this option.
       <br>
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="select"></a><a href="#model">(menu Model)</a> <b>Browse
         Models</b>
       <br>
       This functionality allows to manage the models available on your
-      Lsd
+      LSD
       installation. The models are organized each in one directory, and
       these
       directories are organized in "groups" containing related models.
@@ -728,13 +1027,13 @@ Codying
       system
       will automatically refer to the files concerning the chosen model.
       <br>
-      Modellers developing new model programs can use the other
+      Modelers developing new model programs can use the other
       functionalities
       to organize properly the set of models in suitable groups (e.g.
       move a
       finished model from the "Work" group to the "PaperXXX" group).
     </p>
-    <p>Using the "Lsd Models" browser windows it is possible to:
+    <p>Using the "LSD Models" browser windows it is possible to:
     </p>
     <ul>
       <li>select one of the existing models;</li>
@@ -763,22 +1062,32 @@ Codying
     current
     operation.
     <br>
-    <hr width="100%">
-    <p><a name="run"></a><a href="#model">(menu Model)</a> <b>Run Lsd
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+    <p><a name="run"></a><a href="#model">(menu Model)</a> <b>Run LSD
         Model</b>
       <br>
-      Compile, if necessary, and run the Lsd model program.
+      Compile, if necessary, and run the LSD model program.
       <br>
-      The system checks that all the files necessary for the Lsd model
+      The system checks that all the files necessary for the LSD model
       program
-      have been compiled, and then run the resulting Lsd model program
-      (see <a href="TOC.html">here
-        the manual </a>for the Lsd model program interfaces).
+      have been compiled, and then run the resulting LSD model program
+      (see <a href="LSD_manual.html">here
+        the manual </a>for the LSD model program interfaces).
       <br>
       Three possible outputs are possible from this command:
     </p>
     <ul>
-      <li>the Lsd model program (successful compilation);</li>
+      <li>the LSD model program (successful compilation);</li>
       <li>an error message appears (failed compilation);</li>
       <li>a warning message (possibly failed compilation)</li>
     </ul>
@@ -786,22 +1095,22 @@ Codying
     the
     messages from the compilation process. The warning message is issued
     when
-    the compilation did issue messages, but a copy of the Lsd model
+    the compilation did issue messages, but a copy of the LSD model
     program
     exists. This may happen in radically different cases:
     <br>
     1) the compilation problems did not prevent a successful creation of
-    the Lsd model program, which is therefore updated with the latest
+    the LSD model program, which is therefore updated with the latest
     equations'
     code;
     <br>
-    2) the compilation failed, but an old copy of the Lsd model program
+    2) the compilation failed, but an old copy of the LSD model program
     (with old equations) exists. In this case, the copy does not contain
     the
     latest (faulty) equations' code. This happens when a previous
     version
     of
-    the Lsd model program had been successfully compiled (and is still
+    the LSD model program had been successfully compiled (and is still
     present
     on the disk).
     <p>The compilation messages indicate which of the two cases you are
@@ -929,14 +1238,14 @@ menu
       help
       on this topic).
     </p>
-    <p>The system allows to run many copies of the same Lsd model
+    <p>The system allows to run many copies of the same LSD model
       program.
       However they must all share the same equation file. This is
       because it
       is not possible to replace the files of programs currently
       running.
       Therefore,
-      if you are using a Lsd model program for a simulation run, and
+      if you are using a LSD model program for a simulation run, and
       then try
       to recompile it with a modified equation file, the system may give
       a
@@ -947,11 +1256,21 @@ menu
           lsd_gnu.exe:
           Permission denied</font></b>
     </p>
-    <p>In this case, either close the running Lsd model program, or
+    <p>In this case, either close the running LSD model program, or
       re-compile.
     </p>
     <p></p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="debug"></a><a href="#model">(menu Model)</a> <b>Debug</b>
       <br>
       Use the <i>gdb</i> debugger to follow the simulation
@@ -970,7 +1289,7 @@ menu
     </p>
     <p>Note that the <i>gdb</i> is a C++ debugger, which, therefore,
       knows
-      nothing of Lsd equations, Objects etc., but their technical
+      nothing of LSD equations, Objects etc., but their technical
       representation.
       <i>gdb</i>
       permits, for example, to investigate line by line the execution of
@@ -979,26 +1298,26 @@ menu
       However, this means that one has also to follow line-by-line a lot
       of
       non-interesting
-      technical code. Lsd programmers may find much more useful the Lsd
+      technical code. LSD programmers may find much more useful the LSD
       Debugger:
       it permits to follow a simulation by individual equations. When
       one
       Variable,
-      marked to be debugged, is computed, the Lsd debugger interrupts
+      marked to be debugged, is computed, the LSD debugger interrupts
       the
       simulation,
       shows the value produced in the equation, the values of v[n]
       temporary
       values, the whole models' values, etc., permitting to understand,
       most
-      of times, the cause of an error. See the <a href="debug.html">Lsd
+      of times, the cause of an error. See the <a href="debug.html">LSD
         Debugger
         help page</a>. However, the <i>gdb</i> debugger is still useful
       in
       case
       of very hard problems.
     </p>
-    <p>The Lsd model program in the debugger runs as usual (slightly
+    <p>The LSD model program in the debugger runs as usual (slightly
       slower,
       if anything) but the user can interrupt the program at any point,
       check
@@ -1009,7 +1328,7 @@ menu
       misbehaviours
       or errors in the program.
     </p>
-    <p>In case of a Lsd model program, it is usually useful to focus on
+    <p>In case of a LSD model program, it is usually useful to focus on
       one
       equation and see the behaviour of the program while executing that
       code.
@@ -1107,7 +1426,17 @@ menu
       useful, way to discover new functionalities).
       <br>
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="eqution"></a><a href="#model">(menu Model)</a> <b>Show
         Equation</b>
     </p>
@@ -1115,8 +1444,8 @@ menu
       containing
       the equations for the selected model. The equation file is a
       normal C++
-      source file, that LMM uses to create a Lsd model program. The
-      modeller
+      source file, that LMM uses to create a LSD model program. The
+      modeler
       writes in this file the code for the equations in separated
       blocks,
       whose
@@ -1130,7 +1459,7 @@ menu
       or a <a href="#lsd_macro">macro language</a>, much simpler
       especially
       for
-      novel modellers.
+      novel modelers.
       <br>
       The equation file shown in LMM should be used only for editing a
       model
@@ -1143,31 +1472,41 @@ menu
       variables
       blocks and their actual order of execution during a simulation
       run. To
-      browse a model's code Lsd model programs offers to far better
+      browse a model's code LSD model programs offers to far better
       alternatives.
-      Lsd model programs contains several facilities to browse the model
+      LSD model programs contains several facilities to browse the model
       structure
       (i.e. Object, Variables and Parameters) and equations (see, for
       example,
       the
       <a href="browser.html#variables">equations windows</a>). Moreover,
-      the Lsd models produce HTML documents ( <a
+      the LSD models produce HTML documents ( <a
         href="menufile.html#report">Model
-        Report</a>), accessible directly from the Help menu of the Lsd
+        Report</a>), accessible directly from the Help menu of the LSD
       model
       programs,
       that list all the elements of the model including the equations'
       code.
     </p>
     <p></p>
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <a name="makef"></a><a href="#model">(menu Model)</a> <b>Show
       Makefile</b>
     <br>
     This item shows the content of the "makefile". This is a simple text
     file that contains the commands necessary to build a model program
     using
-    the Lsd source code (both the general system code and the model
+    the LSD source code (both the general system code and the model
     specific
     equation' code) with the compiler.
     <br>
@@ -1178,7 +1517,7 @@ menu
         makefile_base.txt</font></tt>.
     The first is peculiar to one model, while the others are common to
     all
-    models (located in the Lsd root).
+    models (located in the LSD root).
     <br>
     Any time the makefile is required (e.g. to compile a model before
     running
@@ -1189,7 +1528,17 @@ menu
       href="#compilation_options">System
       and Model Compilation Options</a>.
     <br>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="compilresult"></a><a href="#model">(menu Model)</a> <b>Show
 Compilation
         Results</b>
@@ -1206,16 +1555,36 @@ Compilation
       compilation errors).
       <br>
     </p>
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="description"></a><a href="#model">(menu Model)</a> <b>Show
         Description</b>
       <br>
       Shows the description of the model, a verbal summary of the model
       content
-      and aims prepared as presentation of the modeller.
+      and aims prepared as presentation of the modeler.
     </p>
     <p></p>
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <a name="modelinfo"></a><a href="#model">(menu Model)</a> <b>Model
       Info</b>
     <br>
@@ -1230,7 +1599,17 @@ Compilation
     - the date of the latest modification of the equations;
     <br>
     - the directory containig the model files.
-    <hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
     <p><a name="compilation_options"></a><a href="#model">(menu Model)</a><b>System
       </b>and<b>
         Model Compilation Options</b>
@@ -1243,7 +1622,7 @@ Compilation
       user's
       preferences.
       <br>
-      Creating a Lsd model program requires, besides the code, the exact
+      Creating a LSD model program requires, besides the code, the exact
       name and location of several system files. This information is not
       perfectly
       standard, particularly comparing Windows and Unix environment.
@@ -1257,12 +1636,12 @@ Compilation
       applied by
       the buttons for the Windows and Linux OS's . However, in the
       following
-      I list the details of how Lsd model programs are created
+      I list the details of how LSD model programs are created
       (non-expert
       users
       can ignore this).
     </p>
-    <p>Lsd is compiled with a standard C++ GNU compiler. It is assumed
+    <p>LSD is compiled with a standard C++ GNU compiler. It is assumed
       that
       most Unix system have already installed this. The Windows version
       comes
@@ -1285,11 +1664,11 @@ Compilation
       <br>
       - System-wide settings, valid for all the models (stored in the
       file
-      system_options.txt in the Lsd root directory)
+      system_options.txt in the LSD root directory)
       <br>
       - The body of a makefile used by all models (stored in the file
       makefile_base.txt
-      in the Lsd root directory)
+      in the LSD root directory)
     </p>
     <p>When a makefile must be created (e.g creating a new model or
       changing
@@ -1316,7 +1695,7 @@ Compilation
           <tr>
             <td>TARGET=</td>
             <td>lsd_gnu</td>
-            <td>The name of the Lsd model program (Windows version
+            <td>The name of the LSD model program (Windows version
               attach the
               .exe
               extension automatically).</td>
@@ -1407,7 +1786,7 @@ Compilation
             <td>LSDROOT</td>
             <td>C:/Lsd5.1</td>
             <td>/home/myusername/Lsd51</td>
-            <td>This is the root of the Lsd system directory</td>
+            <td>This is the root of the LSD system directory</td>
           </tr>
           <tr valign="top">
             <td>DUMMY=</td>
@@ -1463,11 +1842,11 @@ Compilation
             <td>SRC=</td>
             <td>src</td>
             <td>src</td>
-            <td>Directory containing the Lsd source code. You will
+            <td>Directory containing the LSD source code. You will
               probably&nbsp; never
               need to use this option. It serves in order to test
               different versions
-              of Lsd. In this latter case, insert here the directory you
+              of LSD. In this latter case, insert here the directory you
               want to use
               to compile a new model</td>
           </tr>
@@ -1518,7 +1897,18 @@ Compilation
       </table>
     </p>
     <p></p>
-    <hr width="100%"><a name="nowindow"></a><span style="font-weight:
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+	<a name="nowindow"></a><span style="font-weight:
       bold;">Generate
       NO WINDOW makefile</span><br>
     This option generates a packaged version of the LSD model, including
@@ -1570,7 +1960,7 @@ Compilation
         version
         does not link to the TclTk libraries. <br>
       </li>
-      <li>the resulting exectuable file requires a Lsd configuration
+      <li>the resulting exectuable file requires a LSD configuration
         file
         describing the model and its initializations and options. <br>
       </li>
@@ -1629,19 +2019,30 @@ Compilation
     new run, saving the results, and so on.<br>
     <br>
     <br>
-    <hr style="width: 100%; height: 2px;">&nbsp;
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+&nbsp;
     <p><a name="help"></a><b><i><font face="Arial">Menu Help</font></i></b>
     </p>
-    <p>The Help menu contains five entry points to the Lsd manual pages
+    <p>The Help menu contains five entry points to the LSD manual pages
       (see
-      the <a href="#hintro">Introduction to Lsd help manual</a> on
-      using Lsd
+      the <a href="#hintro">Introduction to LSD help manual</a> on
+      using LSD
       manual):
     </p>
     <ul>
       <li> <a href="#hlmm">Help on LMM</a></li>
-      <li> <a href="#helpeq">Help on Macros for Lsd equations</a></li>
-      <li><a href="LSD_documentation.html">Lsd Documentation</a></li>
+      <li> <a href="#helpeq">Help on Macros for LSD equations</a></li>
+      <li><a href="LSD_documentation.html">LSD Documentation</a></li>
     </ul>
     <br>
     <a name="hintro"></a><b>Help on Help</b>
@@ -1649,7 +2050,7 @@ Compilation
     The <a href="#help">menu Help</a> in LMM, as well as the <a
       href="menuhelp.html">menu
       Help
-    </a>in the Lsd model programs, provides access to an extensive set
+    </a>in the LSD model programs, provides access to an extensive set
     of help pages, covering every aspect of model writing and using. The
     help
     pages are necessary to fully exploit this language, and therefore
@@ -1658,7 +2059,7 @@ Compilation
     speaking,
     help pages are structured as a hypertextual document where each
     window
-    or function related to Lsd is devoted a section, so to answer the
+    or function related to LSD is devoted a section, so to answer the
     questions
     "What does this mean?" or "How do I use this?". Of course, each
     section
@@ -1670,7 +2071,7 @@ Compilation
         the
         system, run
         an existing model program, or create a new one.</li>
-      <li> <a href="TOC.html">Help on Lsd interfaces</a>. How to
+      <li> <a href="LSD_manual.html">Help on LSD interfaces</a>. How to
         exploit
         an
         existing
@@ -1680,7 +2081,7 @@ Compilation
         etc.</li>
       <li>Model specific documentation (model report). This document is
         accessible
-        from the menu Help of each Lsd model program and indicates what
+        from the menu Help of each LSD model program and indicates what
         a given
         Object, Variable or Parameter represents, in which part of the
         model is
@@ -1689,7 +2090,7 @@ Compilation
         is
         partially created automatically fetching the necessary
         information from
-        the structure of the model, and then allowing modellers to add
+        the structure of the model, and then allowing modelers to add
         free
         comments
         for any element of the model.</li>
@@ -1703,7 +2104,7 @@ Compilation
       users
       are supposed to keep open in a Netscape (or any web browser like
       Internet
-      Explorer) while working with Lsd. The manual pages are endowed
+      Explorer) while working with LSD. The manual pages are endowed
       with
       links
       that permit to "jump" to related topics. Usually, using the "back"
@@ -1717,7 +2118,7 @@ Compilation
     </p>
     <p>The manual contains at least one page for each operation. For LMM
       and
-      Lsd the help pages are organized according to the menus where the
+      LSD the help pages are organized according to the menus where the
       commands
       are placed. Each help page begins with the picture of the
       interface,
@@ -1726,8 +2127,8 @@ Compilation
         href="menudata.html">help
         on menu Data</a>, and then use the button "back" to return
       here). Any
-      Lsd
-      help page has a link to the <a href="TOC.html">Table of Contents</a>
+      LSD
+      help page has a link to the <a href="LSD_manual.html">Table of Contents</a>
       listing
       the whole content of the manual, and also links to other
       potentially
@@ -1736,22 +2137,33 @@ Compilation
     </p>
     <p>For the very early users the best way is to follow the three
       tutorials
-      listed in the LMM help menu. For a manual page on a Lsd interface,
+      listed in the LMM help menu. For a manual page on a LSD interface,
       the
-      usual starting page for using Lsd is the <a href="TOC.html">Table
+      usual starting page for using LSD is the <a href="LSD_manual.html">Table
         of
         Contents</a>,
-      offering links to the main Lsd windows and other useful topics. A
+      offering links to the main LSD windows and other useful topics. A
       short
       list of help on frequently used operations is contained in the <a
-        href="quick_help.html">Quick
+        href="LSD_quickhelp.html">Quick
         Help </a>page.
     </p>
     <p></p>
-    <hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+	<br>
     &nbsp;
-    <h3><a name="mac"></a>Using Lsd on Mac OS X &lt; 10.4</h3>
-    Matthieu Farcot managed to install Lsd on a Mac OS X and kindly
+    <h3><a name="mac"></a>Using LSD on Mac OS X &lt; 10.4</h3>
+    Matthieu Farcot managed to install LSD on a Mac OS X and kindly
     offers
     these guidelines.
     <p>As LSD was designed to work on UNIX, why couldn&#8217;t we use it under
@@ -2065,5 +2477,19 @@ the
       <br>
       &nbsp;
     </p>
-  </body>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+</body>
+
 </html>

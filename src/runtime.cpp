@@ -12,7 +12,7 @@ Comments and bug reports to marco.valente@univaq.it
 ****************************************************/
 
 /****************************************************
-RUN_TIME.CPP contains initialization and management of run time plotting
+RUN_TIME.CPP contains initialization and management of run-time plotting
 
 
 The functions contained here are:
@@ -167,7 +167,7 @@ void init_plot( int num, int id_sim )
 
 	cmd( "newtop $activeplot \"\" { set_c_var done_in 5 } \"\"" );
 	cmd( "wm transient $activeplot ." );
-	cmd( "wm title $activeplot \"%s%s(%d) - LSD Run Time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
+	cmd( "wm title $activeplot \"%s%s(%d) - LSD Run-time Plot\"", unsaved_change() ? "*" : " ", simul_name, id_sim  );
 
 	cmd( "bind $activeplot <s> { set_c_var done_in 1 }; bind $activeplot <S> { set_c_var done_in 1 }" );
 	cmd( "bind $activeplot <f> { set_c_var done_in 2 }; bind $activeplot <F> { set_c_var done_in 2 }" );
@@ -252,7 +252,7 @@ void plot_rt( variable *v )
 	int y1, y2;
 	double dy, step, value;
 	
-	// limit the number of run time plot variables
+	// limit the number of run-time plot variables
 	if ( cur_plt > 100 )
 		return;
 

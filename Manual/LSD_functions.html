@@ -1,1139 +1,1786 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
+
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Generator" content="Microsoft Word 97">
-   <meta name="Template" content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
-   <meta name="GENERATOR" content="Mozilla/4.7 [en] (WinNT; I) [Netscape]">
-   <meta name="Author" content="Marco Valente">
-   <title>Lsd Equations Functions</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Functions</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ -->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body link="#0000FF" vlink="#800080">
 
-<center><font size=-1><a href="TOC.html">HyperManual</a> <a href="windows.html">Lsd
-Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font>
-<p><b><font size=+2>Lsd Equations' Language</font></b></center>
+<body lang=EN-US link=blue vlink=purple>
 
-<p>Equations are elaborations of present and past values of elements in
-the model used to produce a numerical value to be assigned to a variable.
-Modellers write the equations for Lsd models as chunks of C++ code, whose
-use is described here. See
-<a href="#equation">here for an introduction
-to Lsd equations coding</a>. Alternatively, users can also use a simplified
-macro language (see <a href="LSD_macros.html">here for the macro language
-manual</a>). An equation can contain any legal C++ code and can exploit&nbsp;
-a set of Lsd specific functions to access the model. These functions can:
-return numerical values, return Objects (entities of the model), modify
-model values, modify the structure of the model. The functions are operated
-by Objects, some of these available directly in the equations, while other
-can be requested and selected with the Lsd functions.
-<br>&nbsp;
-<table BORDER WIDTH="100%" >
-<tr>
-<td><b>Return values</b></td>
+<div class=WordSection1>
 
-<td><b>Return Objects</b></td>
+<p class=MsoTitle>&nbsp;</p>
 
-<td><b>Modify Values</b></td>
+<p class=MsoTitle>LSD Function-based Equations</p>
 
-<td><b>Edit Model Structure</b></td>
+<p class=MsoNormal>Equations are elaborations of present and past values of
+elements in the model used to produce a numerical value to be assigned to a
+variable. Modelers write the Equations for LSD models as chunks of C++ code,
+whose use is described here. See <a href="#equation">here for an introduction
+to LSD Equations coding</a>. Usually users are encouraged to use the simplified
+LSD macro language for creating new models and explore the latest LSD features
+(see <a href="LSD_macros.html">here for the macro language manual</a>). </p>
 
-<td><b>Model Elements</b></td>
-</tr>
+<p class=MsoNormal>An Equation can contain any legal C++ code and can
+exploit&nbsp;a set of LSD specific functions to access the model. These
+functions can: return numerical values, return Objects (entities of the model),
+modify model values, and modify the structure of the model. The functions are
+operated by Objects, some of these available directly in the Equations, while
+other can be requested and selected with the LSD functions. </p>
 
-<tr>
-<td><a href="#cal">cal</a></td>
-
-<td><a href="#add_an_object">add_an_object</a></td>
-
-<td><a href="#write">write</a></td>
-
-<td><a href="#add_an_object">add_an_object</a></td>
-
-<td><a href="#lastupdate">lastupdate</a></td>
-</tr>
-
-<tr>
-<td><a href="#stat">stat</a></td>
-
-<td><a href="#draw_rnd">draw_rnd</a></td>
-
-<td><a href="#increment">increment</a></td>
-
-<td><a href="#delete_obj">delete_obj</a></td>
-
-<td><a href="#v">v[n]</a></td>
-</tr>
-
-<tr>
-<td><a href="#sum">sum</a></td>
-
-<td><a href="#go_brother">go_brother</a></td>
-
-<td><a href="#multiply">multiply</a></td>
-
-<td><a href="#lsdqsort">lsdqsort</a></td>
-
-<td><a href="#objeq">Objects in equations</a></td>
-</tr>
-
-<tr>
-<td><a href="#whg_av">whg_av</a></td>
-
-<td><a href="#search_var_cond">search_var_cond</a></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#p">p-></a></td>
-</tr>
-
-<tr>
-<td><a href="#overall_max">overall_max</a></td>
-
-<td><a href="#search">search</a></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#c">c-></a></td>
-</tr>
-
-<tr>
-<td><a href="#increment">increment</a></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#cur1">cur, cur1, cur2...</a></td>
-</tr>
-
-<tr>
-<td><a href="#multiply">multiply</a></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#up">up->, next->, etc.</a></td>
-</tr>
-
-<tr>
-<td><a href="#rnd">Random and math functions</a></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#objmodelspecific">model specific objects</a></td>
-</tr>
-
-<tr>
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#advanced">Advanced tricks</a></td>
-</tr>
-
-<tr>
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td><a href="#basicc">Basic C++ tricks</a></td>
-</tr>
+<table class=MsoNormalTable border=0 cellpadding=0 width="100%"
+ style='width:100.0%'>
+ <tr>
+  <td width="19%" style='width:19.06%;border:none;border-bottom:solid #BFBFBF 1.0pt;
+  padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal align=center style='margin:0cm;margin-bottom:.0001pt;
+  text-align:center'><b>Return values</b></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal align=center style='margin:0cm;margin-bottom:.0001pt;
+  text-align:center'><b>Return Objects</b></p>
+  </td>
+  <td width="15%" style='width:15.66%;border:none;border-bottom:solid #BFBFBF 1.0pt;
+  padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal align=center style='margin:0cm;margin-bottom:.0001pt;
+  text-align:center'><b>Modify Values</b></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal align=center style='margin:0cm;margin-bottom:.0001pt;
+  text-align:center'><b>Edit Model Structure</b></p>
+  </td>
+  <td width="21%" style='width:21.92%;border:none;border-bottom:solid #BFBFBF 1.0pt;
+  padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal align=center style='margin:0cm;margin-bottom:.0001pt;
+  text-align:center'><b>Model Elements</b></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#cal"><span style='color:gray;text-decoration:none'>cal</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#add_an_object"><span style='color:gray;text-decoration:
+  none'>add_an_object</span></a></span></p>
+  </td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#write"><span style='color:gray;text-decoration:none'>write</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#add_an_object"><span style='color:gray;text-decoration:
+  none'>add_an_object</span></a></span></p>
+  </td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#lastupdate"><span style='color:gray;text-decoration:
+  none'>lastupdate</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#stat"><span style='color:gray;text-decoration:none'>stat</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#draw_rnd"><span style='color:gray;text-decoration:none'>draw_rnd</span></a></span></p>
+  </td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#increment"><span style='color:gray;text-decoration:
+  none'>increment</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#delete_obj"><span style='color:gray;text-decoration:
+  none'>delete_obj</span></a></span></p>
+  </td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#v"><span style='color:gray;text-decoration:none'>v[n]</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#sum"><span style='color:gray;text-decoration:none'>sum</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#go_brother"><span style='color:gray;text-decoration:
+  none'>go_brother</span></a></span></p>
+  </td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#multiply"><span style='color:gray;text-decoration:none'>multiply</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#lsdqsort"><span style='color:gray;text-decoration:none'>lsdqsort</span></a></span></p>
+  </td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a href="#objeq">Objects
+  in Equations</a></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#whg_av"><span style='color:gray;text-decoration:none'>whg_av</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#search_var_cond"><span style='color:gray;text-decoration:
+  none'>search_var_cond</span></a></span></p>
+  </td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#p"><span style='color:gray;text-decoration:none'>p-&gt;</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#overall_max"><span style='color:gray;text-decoration:
+  none'>overall_max</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#search"><span style='color:gray;text-decoration:none'>search</span></a></span></p>
+  </td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#c"><span style='color:gray;text-decoration:none'>c-&gt;</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#increment"><span style='color:gray;text-decoration:
+  none'>increment</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#cur1"><span style='color:gray;text-decoration:none'>cur,
+  cur1, cur2...</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><span
+  class=Cdigo><a href="#multiply"><span style='color:gray;text-decoration:none'>multiply</span></a></span></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a href="#up"><span
+  class=Cdigo><span style='text-decoration:none'>up-&gt;, next-&gt;</span></span>,
+  etc.</a></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a href="#rnd">Random
+  and math functions</a></p>
+  </td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a
+  href="#objmodelspecific">model specific objects</a></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a
+  href="#advanced">Advanced tricks</a></p>
+  </td>
+ </tr>
+ <tr>
+  <td width="19%" style='width:19.06%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="15%" style='width:15.66%;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="20%" style='width:20.92%;background:#F2F2F2;padding:.75pt .75pt .75pt .75pt'></td>
+  <td width="21%" style='width:21.92%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a href="#basicc">Basic
+  C++ tricks</a></p>
+  </td>
+ </tr>
 </table>
 
-<p><a NAME="equation"></a><b>Lsd Equations</b>
-<br>FOR NEW USERS: To write Lsd equations it is also available a macro
-language which simplifies the equations' coding. If you are not locked
-in C++ you may prefer to learn this language (the two languages are perfectly
-equivalent, and a model may even contain equations in both expressions).
-See <a href="LSD_macros.html">here</a> the equations references for the
-macro language.
-<p>The Lsd equations are written as pieces of C++ code, to be included
-in a specific C++ source file. Model writers must compile such file and
-link it to the rest of C++ source code. Each model has one specific equation
-file, containing the equations for that model.
-<br>Each equation must be thought of as a difference equation, written
-independenlty from one another, and computed at the generic time t:
-<ul>
-<li>
-X<sub>t</sub> =<font size=+1> <i>f</i></font>(Y<sub>t-lag</sub>, Z<sub>t-lag</sub>,
-...)</li>
-</ul>
-The values used in the equations can indifferently be Parameters or Variables,
-stored in any Object in the model. For Variables' values the user must
-specify the time lag to consider (for Parameters this field is ignored).
-<p>The functional expression can be any legal C++ code, including the Lsd
-specific functions. By default the equation for a Variable is compute once
-and only once at every time step. But, as many Lsd automatic mechanism,
-modellers can overrule such default and force an equation to be computed
-many times during the same time step (see <a href="#lastupdate">lastupdate</a>)
-<p>The equations are represented as independent blocks of code with the
-following structure (the order of the blocks in the file is not relevant):
-<p><font face="Courier New,Courier"><font size=-1>if(!strcmp(label, "X")
-)</font></font>
-<br><font face="Courier New,Courier"><font size=-1>{</font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>//This
-code is executed only by variable X</font></font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>//place
-here any legal C++ code or Lsd function</font></font></font>
-<br>&nbsp;
-<br>&nbsp;
-<p><font face="Courier New,Courier"><font size=-1>res = 1 ; <font color="#009900">//value
-used for the Variable (now X is always equal to 1)</font></font></font>
-<br><font face="Courier New,Courier"><font size=-1>goto end;</font></font>
-<br><font face="Courier New,Courier"><font size=-1>}</font></font>
-<p><font face="Courier New,Courier"><font size=-1>if(!strcmp(label, "Y")
-)</font></font>
-<br><font face="Courier New,Courier"><font size=-1>{</font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>//This
-code is executed only by variable Y</font></font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>//place
-here any legal C++ code or Lsd function</font></font></font>
-<br>&nbsp;
-<br>&nbsp;
-<p><font face="Courier New,Courier"><font size=-1>res = 2 ; <font color="#009900">//value
-used for the Variable (Y i always equal to 2)</font></font></font>
-<br><font face="Courier New,Courier"><font size=-1>goto end;</font></font>
-<br><font face="Courier New,Courier"><font size=-1>}</font></font>
-<p>For example, in order to have Variable X computed as the sum of Y and
-Z the corresponding code is:
-<p><font face="Courier New,Courier"><font size=-1>if(!strcmp(label, "X")
-)</font></font>
-<br><font face="Courier New,Courier"><font size=-1>{</font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>/*****</font></font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>This
-equation is the Lsd equivalent of:</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>X[t]=Y[t]+Z[t]</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>*****/</font></font></font>
-<p><font face="Courier New,Courier"><font size=-1>res = p->cal("Y",0) +
-p->cal("Z",0);</font></font>
-<br><font face="Courier New,Courier"><font size=-1>goto end;</font></font>
-<br><font face="Courier New,Courier"><font size=-1>}</font></font>
-<p>The command <font face="Courier New,Courier"><font size=-1>cal("Y",0)</font></font>
-is a Lsd function, that is described <a href="#cal">here </a>in detail&nbsp;
-(it just returns the value of Y with 0 lag, or at time t).
-<br>Normally, the intermediate operations are assigned to temporary C++
-variables, called v[0], v[1], v[2] etc.,&nbsp;&nbsp; so to semplify the
-reading, like:
-<p><font face="Courier New,Courier"><font size=-1>if(!strcmp(label, "X")
-)</font></font>
-<br><font face="Courier New,Courier"><font size=-1>{</font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>/*****</font></font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>This
-equation is the Lsd equivalent of:</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>X[t]=Y[t]+Z[t]</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>*****/</font></font></font>
-<br><font face="Courier New,Courier"><font size=-1>v[0]=p->cal("Y",0);</font></font>
-<br><font face="Courier New,Courier"><font size=-1>v[1]=p->cal("Z",0);</font></font>
-<p><font face="Courier New,Courier"><font size=-1>res = v[0] + v[1];</font></font>
-<br><font face="Courier New,Courier"><font size=-1>goto end;</font></font>
-<br><font face="Courier New,Courier"><font size=-1>}</font></font>
-<p>Therefore, writing the equations for Lsd models is reduced to implement
-some C++ code for each Variable independently. The modeller must just write
-the equations keeping in mind that many copies of the same Variable will
-make use of the same code. To differentiate between the different copies
-of the Variables the code uses the Objects referred to the Variable, much
-like the indexes are used in models using vectors.
-<p><a NAME="objeq"></a><b>Objects in the equations' code</b>
-<br>Most Lsd functions are operated by an Object, in the case above (and
-almost always) by <font face="Courier New,Courier">p-></font>. The reason
-why (most of ) Lsd functions are operated by Objects is that the same equation
-code is, in general, used by many copies of the Variable it refers to.
-For example, consider a model with an Object Firm containing Variables
-Profit, Price and Quantity, and the equation for Profit is (neglecting
-the temporal index):
-<ul>
-<li>
-Profit = Price x Quantity</li>
-</ul>
-In general the model may have many copies of Object Firm, and each Variable
-Profit will need to use the values of Quantity and Price referring to the
-same instance of Object Firm. Lsd takes care automatically of identifying
-the correct values in the code of the equation, using the Object the Lsd
-function is attached to. In particular,
-<ul>
-<li>
-p-> is the same Object containing the Variable whose equation is computed</li>
+<p class=MsoNormal><a name=equation></a><b>FOR NEW MODELS:</b> The preferred
+way too write LSD Equations for new models is using the <a
+href="LSD_macros.html">LSD macro language</a> which simplifies the Equations'
+coding and offer new capabilities for modelers. If you are not locked-in older
+model versions you may prefer to learn the macro language. For the basic
+functions, the two ways for writing LSD Equations are equivalent. A model may
+even contain Equations in both formats if the basic command subset is used.</p>
 
-<li>
-c-> is the Object that requested the computation of the equation</li>
+<p class=MsoNormal><b>WARNING:</b> In case of the usage of pure or mixed old-style
+function-based Equations, the modeler should include only ‘<span class=Cdigo>#include
+fun_head.h</span>’ (instead of ‘<span class=Cdigo>#include fun_head_fast.h</span>’)
+in the <a href="LSD_faqs.html#equationfile">equation file</a>. Failure to do so
+will trigger compilation errors.</p>
 
-<li>
-cur, cur1, cur2, etc. are C++ temporary "pointers", which can store addresses
-of Objects obtained by other Lsd functions.</li>
-</ul>
-<a NAME="p"></a><b>Parent Object: <font face="Courier New">p-></font></b>
-<br>The Object most used to fetch values in an equation is the Object containing
-the Variable to which the equation refers to. Using this Object, if there
-are many instances of its type, each equation for its Variables will use
-the values contained in the same Object. In the code the Object is referred
-to using "p->" (for "parent of the Variable") followed by the type of function
-that is necessary to use. Typically, model writers will use the function
-<font face="Courier New">cal("Label",
-lag)</font> providing the value of Variable (or Parameter) with name Label
-and with lag lag (where the lag is always 0 for Parameters). See more on
-<a href="#cal">cal(...)</a>.
-<p><a NAME="c"></a><b>Caller Object: <font face="Courier New">c-></font></b>
-<br>Another frequently used Object is called <font face="Courier New">c-></font>,
-for caller. If a Variable requests the value of another Variable, the latter's
-equation can necessitate to use the Object containing the "caller" Variable,
-and for this its equation can use <font face="Courier New">c-></font>.
-Note that if a Variable is not requested by another Variable (but it is
-simply computed because of its normal updating), the value of <font face="Courier New,Courier">c->
-</font>is
-NULL: any Lsd function operated by a NULL Object will cause an error.
-<p><a NAME="cur1"></a><b>Temporary Object's pointers:<font face="Courier New,Courier">
-cur, cur1, cur2, ...</font></b>
-<br>These elements are pointers to Objects, used to store temporary required
-Object (like&nbsp; <a href="#v">v[n]</a> is used to stored temporay numerical
-values). Typically, the user applies to p->, or c-> a Lsd function returning
-Objects, assigning the result to cur. Then uses cur to apply a function
-returning values, or modifying values. See any example of the <a href="#top">Lsd
-function </a>returning Objects.
-<p>Most Lsd functions (like, for example, <a href="#cal">cal(...)</a> )
-do not require the Object to which they attached to be able to satisfy
-the function required, but try to make "smart" inductions. In the example
-above, imagine that Price is not a Variable contained in Firm, but defined
-in the Object Market, placed, in the model structure, "up" to the Object
-Firm, that is containing Firms. The equation code like:
-<p><font face="Courier New,Courier"><font size=-1>if(!strcmp(label, "Profit")
-)</font></font>
-<br><font face="Courier New,Courier"><font size=-1>{</font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>/*****</font></font></font>
-<br><font face="Courier New,Courier"><font color="#009900"><font size=-1>This
-equation is the Lsd equivalent of:</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>Profit[t]
-= Price[t] x Quantity[t]</font></font></font>
-<p><font face="Courier New,Courier"><font color="#009900"><font size=-1>*****/</font></font></font>
-<br><font face="Courier New,Courier"><font size=-1>v[0]=p->cal("Price",0);</font></font>
-<br><font face="Courier New,Courier"><font size=-1>v[1]=p->cal("Quantity",0);</font></font>
-<p><font face="Courier New,Courier"><font size=-1>res = v[0] * v[1];</font></font>
-<br><font face="Courier New,Courier"><font size=-1>goto end;</font></font>
-<br><font face="Courier New,Courier"><font size=-1>}</font></font>
-<p>keeps on working in the same way both in the case Price is in Firm,
-or Market. In fact, for the Lsd function <a href="#cal">cal(...)</a> starts
-searching the Variable Price in p->. But, if it is not found there, then
-keeps on searching in other Objects of the model.
-<p><a NAME="up"></a><b>object elements: <tt><font size=+1>up->, next->,
-son-></font></tt></b>
-<br>The information in this paragraph is not necessarily relevant for writing
-Lsd models. But it explains the technical implementation of a Lsd model
-that can be used to optimize a model's code.
-<br>Every Object (for example, p->, c-> etc.) is related to its neighbours
-in the model hierarchy. Every Object can therefore bring to its neighbours
-using the links to them. The links are determined with the following components
-of each Object:
-<ul>
-<li>
-<tt><font size=+1>object->up-></font></tt> is the Object containing the
-Object <tt><font size=+1>object</font></tt>. The top&nbsp; Object in the
-model hierarchy, <b>Root</b>, has the field <tt><font size=+1>up </font></tt>set
-to NULL.</li>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
-<li>
-<tt><font size=+1>object->next-></font></tt> is the Object copy following
-the Object <tt><font size=+1>object</font></tt> in the list of descendants
-from the parent of <tt><font size=+1>object</font></tt>. Note that <tt><font size=+1>object->next-></font></tt>
-can be of different type from <font size=+1><tt>object</tt>. </font>All
-the Object in the chain next will have the same Object up, since all of
-them descend from the same parent Object. The last Object in the chain
-has teh field next equal to NULL.</li>
+<p><span class=Ttulo1Char>LSD Equations </span></p>
 
-<li>
-<tt><font size=+1>object->son-></font></tt> is the first copy of the set
-of Objects descending fom the Object <tt><font size=+1>object</font></tt>.
-The lowest Object in the hierarchy have the field son set to NULL.</li>
-</ul>
-In other terms, every Object can bring to another Object using the appropriate
-pattern along the <tt><font size=+1>up-></font></tt>, <tt><font size=+1>next-></font></tt>
-and <tt><font size=+1>son-></font></tt> fields. For example, the Object:
-<br><tt><font size=+1>object->son->next->up</font></tt>
-<br>is nothing else that the very same initial <tt><font size=+1>object</font></tt>
-(assuming it has at least two descending Objects).
-<br>The best way to remember the object's components is to keep in mind
-a geometrical representation of Objects:
-<p><tt>&nbsp;up</tt>
-<br><tt>&nbsp;/\</tt>
-<br><tt>&nbsp;||</tt>
-<br><tt>&nbsp;--------</tt>
-<br><tt>|object | => next</tt>
-<br><tt>&nbsp;--------</tt>
-<br><tt>&nbsp;||</tt>
-<br><tt>&nbsp;\/</tt>
-<br><tt>&nbsp;son</tt>
-<p>The fields above are proper Objects, and therefore can be used to run
-Lsd functions. For example, consider a model where you have 100,000 Objects
-Firm descending from a single Object Market. If a Variable in Firm uses
-a Parameter in Marke, say Price, you can write the line
-<br><font face="Courier New,Courier"><font size=-1>v[0]=p->cal("Price",0);</font></font>
-<br>but it will take a lot of time to work out. In fact, the function <b>cal(...)
-</b>will
-search in Firm for a Variable or Parameter Price. If it does not find it,
-it will look if it can be found after the set of Firm, descending from
-the same Object. Which means to skip through 100,000 objects, for the first
-firm, 99,000 for the second and so on. Instead, using the line:
-<p><font face="Courier New,Courier"><font size=-1>v[0]=p->up->cal("Price",0);</font></font>
-<p>returns directly the desired value, since the first Object searched
-is <tt><font size=+1>p->up</font></tt>, which is Market. Note that the
-modeller must be sure that objects fields use exists. If, in the example
-above, the equation is placed in Root, no <tt><font size=+1>up-></font></tt>
-Object exists, and the simulation will issue an error.
-<p><a NAME="objmodelspecific"></a><b>Model specific objects</b>
-<br>The Object pointers saw above (p->, c->, cur-> etc.) are all "local"
-Objects, in the sense that they represent a different content depending
-on the Variable in whose equation they are used. That is, they refer to
-Objects that, depending on the Variable whose equation is computed, change
-their content when the Variable computed changes: p-> refers to the Object
-copy whose Variable is computed; c-> to the Object that caused the Variable
-to be computed; cur-> and the others are assigned within the equations
-code.
-<br>However, the modeller can create and use "global" Object pointers,
-that is Object that never change the content throughout a simulation run.
-This is mainly done for optimization purposes, when a very large model
-(many Objects) contain Variables that refer frequently to one specific
-Object copy. The use of global Object should be avoided by unexperienced
-modellers, because it risks to create error difficult to be captured.
-<br>To use a global Object, declare the Object outside the scope of the
-equation function, on the top of the equation file before the line:
-<p><tt>double variable::fun(object *caller)</tt>
-<p>the declaration line must be something like:
-<p><tt>object *market;</tt>
-<p>where the name of the Object ("market" in the example) must not be one
-of the existing Objects (p, c, cur etc). The Object must be assigned with
-one of the Lsd equation functions returning Objects within an equations
-code. For example, there may be a Variable called <b>init</b> making such
-assignements. For example, it may be:
-<p><tt>if(!strcmp(label, "Init") )</tt>
-<br><tt>{</tt>
-<br><tt><font color="#009900">/*</font></tt>
-<br><tt><font color="#009900">Technical initialization function. It is
-computed only once and then it is</font></tt>
-<br><tt><font color="#009900">transformed in a parameter and never computed
-again.</font></tt>
-<p><tt><font color="#009900">Sets the global pointer 'market' pointing
-to the Object Market, so</font></tt>
-<br><tt><font color="#009900">to speed up the access to this object</font></tt>
-<p><tt><font color="#009900">*/</font></tt>
-<p><tt>market=p->search("Market"); <font color="#009900">//assign the C++
-object pointer "market" to point to the Lsd Object Market</font></tt>
-<br><tt>param=1; <font color="#009900">//optional; transform "Init" in
-a parameter so to not compute again this equation.</font></tt>
-<br><tt>res=1;</tt>
-<br><tt>goto end;</tt>
-<br><tt>}</tt>
-<p>The Variable <b>Init</b> must be computed for sure before <b>market</b>
-is used in any other equation. This can be ensured placing <b>Init </b>in
-the Object <b>Root</b>, since the simulation step starts always the computation
-from the Variables contained in the top of the model structure.
-<br>With the setting described above, the modeller can use "market" as
-any other Object, knowing that it refers always to the Lsd Object Market.
-For example, the equation for a Variable placed anywhere in the model may
-use the line:
-<p><tt>v[0] = market->cal("Price",0);</tt>
-<p>and be sure that the value of Variable Price is returned quickly. Note
-that also the conventional line
-<p><tt>v[0] = p->cal("Price",0);</tt>
-<p>would work. But it would cost a lot of time in case the Variable whose
-equation containing the line for Price is placed very "far" from Market.
-<br>Modellers using global Objects should be careful when assigning configurations
-with many copies. If, for example, the model configuration uses many copies
-of Objects Market, any use of the global object <tt><font size=+1>market
-</font></tt>would
-refer only to the very first copy.
-<br>
-<hr WIDTH="100%">
-<p><a NAME="cal"></a><b><font face="Courier New">object->cal("Var", lag),
-or</font></b>
-<br><b><font face="Courier New">object->cal(caller, "Var", lag)</font></b>
-<p>This is the most used Lsd function. It provides the value of the Variable
-whose label is <font face="Courier New">Var</font> with the lag <font face="Courier New">lag</font>,
-expressed as an integer value. The second form of the Lsd function is rarely
-used. It tells to the equation computing "Var" that the object that requested
-its value is caller, instead of the default system passing the actual Object
-that requested "Var".
-<p>In case the model contains many instances of Variables with the same
-label <font face="Courier New">Var</font> (that is, many instances of Object
+<p class=MsoNormal>The LSD Equations are written as pieces of C++ code, to be
+included in a specific C++ source file. Model writers must compile such file
+and link it to the rest of C++ source code. Each model has one specific equation
+file, containing the Equations for that model. </p>
+
+<p class=MsoNormal>Each Equation must be thought of as a difference equation,
+written independently from one another, and computed at the generic time t: </p>
+
+<p class=MsoNormal style='margin-left:18.0pt'><span lang=DE>X<sub>t</sub> =</span><span
+lang=DE style='font-size:13.5pt'> <i>f</i></span><span lang=DE>(Y<sub>t-lag</sub>,
+Z<sub>t-lag</sub>, ...)</span></p>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>The values used in
+the Equations can indifferently be Parameters or Variables, stored in any
+Object in the model. For Variables' values the user must specify the time lag
+to consider (for Parameters this field is ignored). </p>
+
+<p>The functional expression can be any legal C++ code, including the LSD
+specific functions. By default the Equation for a Variable is compute once and
+only once at every time step. But, as many LSD automatic mechanism, modelers
+can overrule such default and force an Equation to be computed many times
+during the same time step (see <span class=Cdigo><a href="#lastupdate"><span
+style='color:gray;text-decoration:none'>lastupdate</span></a></span>) </p>
+
+<p>The Equations are represented as independent blocks of code with the
+following structure (the order of the blocks in the file is not relevant): </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;X&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>//This code is executed
+only by variable X <br>
+//place here any legal C++ code or LSD function <br>
+</span>&nbsp; <br>
+res = 1 ; //value used for the Variable (now X is always equal to 1) <br>
+goto end; <br>
+} </span></p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Y&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>//This code is executed
+only by variable Y <br>
+//place here any legal C++ code or LSD function <br>
+</span><br>
+res = 2 ; //value used for the Variable (Y i always equal to 2) <br>
+goto end; <br>
+} </span></p>
+
+<p>For example, in order to have Variable X computed as the sum of Y and Z the
+corresponding code is: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;X&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***** <br>
+This equation is the LSD equivalent of: </span></span></p>
+
+<p><span class=Cdigo><span lang=FR style='color:#00B050'>X[t]=Y[t]+Z[t] </span></span></p>
+
+<p><span class=Cdigo><span lang=FR style='color:#00B050'>*****/ </span></span></p>
+
+<p><span class=Cdigo><span lang=FR>res = p-&gt;cal(&quot;Y&quot;,0) +
+p-&gt;cal(&quot;Z&quot;,0); <br>
+goto end; <br>
+} </span></span></p>
+
+<p class=MsoNormal>The command <span class=Cdigo>cal(&quot;Y&quot;,0)</span> is
+a LSD function, that is described <a href="#cal">here </a>in detail&nbsp; (it
+just returns the value of Y with 0 lag, or at time t). Normally, the
+intermediate operations are assigned to temporary C++ variables, called <span
+class=Cdigo>v[0], v[1], v[2]</span>, etc., so to simplify the reading, like: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;X&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***** <br>
+This equation is the LSD equivalent of: </span></span></p>
+
+<p><span class=Cdigo><span lang=FR style='color:#00B050'>X[t]=Y[t]+Z[t] </span></span></p>
+
+<p><span class=Cdigo><span lang=FR style='color:#00B050'>*****/ <br>
+</span></span><span class=Cdigo><span lang=FR>v[0]=p-&gt;cal(&quot;Y&quot;,0); <br>
+v[1]=p-&gt;cal(&quot;Z&quot;,0); </span></span></p>
+
+<p><span class=Cdigo>res = v[0] + v[1]; <br>
+goto end; <br>
+} </span></p>
+
+<p class=MsoNormal>Therefore, writing the Equations for LSD models is reduced
+to implement some C++ code for each Variable independently. The modeler must
+just write the Equations keeping in mind that many copies of the same Variable
+will make use of the same code. To differentiate between the different copies
+of the Variables the code uses the Objects referred to the Variable, much like
+the indexes are used in models using vectors. </p>
+
+<h2><a name=objeq></a><span class=Ttulo1Char><span style='color:windowtext'>Objects
+in the Equations' code </span></span></h2>
+
+<p class=MsoNormal>Most LSD functions are operated by an Object, in the case
+above (and almost always) by <span class=Cdigo>p-&gt;</span>. The reason why
+(most of ) LSD functions are operated by Objects is that the same Equation code
+is, in general, used by many copies of the Variable it refers to. For example,
+consider a model with an Object Firm containing Variables Profit, Price and
+Quantity, and the Equation for Profit is (neglecting the temporal index): </p>
+
+<p class=MsoNormal style='margin-left:18.0pt'>Profit = Price x Quantity</p>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>In general the
+model may have many copies of Object Firm, and each Variable Profit will need
+to use the values of Quantity and Price referring to the same instance of
+Object Firm. LSD takes care automatically of identifying the correct values in
+the code of the Equation, using the Object the LSD function is attached to. In
+particular, </p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>p-&gt;</span> is the same Object containing the
+Variable whose Equation is computed;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>c-&gt;</span> is the Object that requested the
+computation of the Equation;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>cur</span>, <span class=Cdigo>cur1</span>, <span
+class=Cdigo>cur2</span>, etc. are C++ temporary &quot;pointers&quot;, which can
+store addresses of Objects obtained by other LSD functions.</p>
+
+<h2><a name=p></a><span class=Ttulo1Char><span style='color:windowtext'>Parent
+Object: </span></span><span class=Cdigo>p-&gt;</span><span class=Ttulo1Char><span
+style='color:windowtext'> </span></span></h2>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>The Object most
+used to fetch values in an Equation is the Object containing the Variable to
+which the Equation refers to. Using this Object, if there are many instances of
+its type, each Equation for its Variables will use the values contained in the
+same Object. In the code the Object is referred to using <span class=Cdigo>p-&gt;</span>
+(for &quot;parent of the Variable&quot;) followed by the type of function that
+is necessary to use. Typically, model writers will use the function <span
+class=Cdigo>cal(&quot;Label&quot;, lag)</span> providing the value of Variable
+(or Parameter) with name Label and with lag lag (where the lag is always 0 for
+Parameters). See more on <span class=Cdigo><a href="#cal"><span
+style='color:gray;text-decoration:none'>cal(...)</span></a></span>. </p>
+
+<p><a name=c></a><span class=Ttulo2Char>Caller Object: </span><span
+class=Cdigo><b>c-&gt;</b></span><span class=Ttulo2Char> </span></p>
+
+<p class=MsoNormal>Another frequently used Object is called <span class=Cdigo>c-&gt;</span>,
+for caller. If a Variable requests the value of another Variable, the latter's Equation
+can necessitate to use the Object containing the &quot;caller&quot; Variable,
+and for this its Equation can use <span class=Cdigo>c-&gt;</span>. Note that if
+a Variable is not requested by another Variable (but it is simply computed
+because of its normal updating), the value of <span class=Cdigo>c-&gt;</span><span
+style='font-family:"Courier New"'> </span>is <span class=Cdigo>NULL</span>: any
+LSD function operated by a <span class=Cdigo>NULL</span> Object will cause an
+error. </p>
+
+<p><a name=cur1></a><span class=Ttulo2Char>Temporary Object's pointers: </span><span
+class=Cdigo><b>cur</b></span><span class=Ttulo2Char>, </span><span class=Cdigo><b>cur1</b></span><span
+class=Ttulo2Char>, </span><span class=Cdigo><b>cur2</b></span><span
+class=Ttulo2Char>, ... </span></p>
+
+<p class=MsoNormal>These elements are pointers to Objects, used to store
+temporary required Object (like&nbsp; <a href="#v">v[n]</a> is used to stored temporary
+numerical values). Typically, the user applies to <span class=Cdigo>p-&gt;</span>,
+or <span class=Cdigo>c-&gt;</span> a LSD function returning Objects, assigning
+the result to cur. Then, use cur to apply a function returning values, or modifying
+values. See any example of a <a href="#top">LSD function</a> returning Objects.
+</p>
+
+<p class=MsoNormal>Most LSD functions (like, for example, <span class=Cdigo><a
+href="#cal"><span style='color:gray;text-decoration:none'>cal(...)</span></a></span>
+) do not require the Object to which they attached to be able to satisfy the
+function required, but try to make &quot;smart&quot; inductions. In the example
+above, imagine that Price is not a Variable contained in Firm, but defined in
+the Object Market, placed, in the model structure, &quot;up&quot; to the Object
+Firm, that is containing Firms. The Equation code like: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Profit&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***** <br>
+This equation is the LSD equivalent of: </span></span></p>
+
+<p><span class=Cdigo><span lang=FR style='color:#00B050'>Profit[t] = Price[t] x
+Quantity[t] </span></span></p>
+
+<p><span class=Cdigo><span style='color:#00B050'>*****/ </span><br>
+v[0]=p-&gt;cal(&quot;Price&quot;,0); <br>
+v[1]=p-&gt;cal(&quot;Quantity&quot;,0); </span></p>
+
+<p><span class=Cdigo>res = v[0] * v[1]; <br>
+goto end; <br>
+} </span></p>
+
+<p class=MsoNormal>keeps on working in the same way both in the case Price is
+in Firm, or Market. In fact, for the LSD function <span class=Cdigo><a
+href="#cal"><span style='color:gray;text-decoration:none'>cal(...)</span></a></span>
+starts searching the Variable Price in <span class=Cdigo>p-&gt;</span>. But, if
+it is not found there, then keeps on searching in other Objects of the model. </p>
+
+<p><a name=up></a><span class=Ttulo2Char>Object elements: </span><span
+class=Cdigo><b>up-&gt;</b></span><span class=Ttulo2Char>, </span><span
+class=Cdigo><b>next-&gt;</b></span><span class=Ttulo2Char> </span></p>
+
+<p class=MsoNormal>The information in this paragraph is not necessarily
+relevant for writing LSD models. But it explains the technical implementation
+of a LSD model that can be used to optimize a model's code.</p>
+
+<p class=MsoNormal>Every Object (for example, <span class=Cdigo>p-&gt;</span>, <span
+class=Cdigo>c-&gt;</span> etc.) is related to its neighbors in the model
+hierarchy. Every Object can therefore bring to its neighbors using the links to
+them. The links are determined with the following components of each Object: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>object-&gt;up-&gt;</span> is the Object
+containing the Object <span class=Cdigo>object</span>. The top&nbsp;Object in
+the model hierarchy, <span class=Cdigo>Root</span>, has the field <span
+class=Cdigo>up </span>set to <span class=Cdigo>NULL</span>.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>object-&gt;next-&gt;</span> is the Object copy
+following the Object <span class=Cdigo>object</span> in the list of descendants
+from the parent of <span class=Cdigo>object</span>. Note that <span
+class=Cdigo>object-&gt;next-&gt;</span> can be of different type from <span
+class=Cdigo>object</span><span style='font-size:13.5pt'>. </span>All the Object
+instances in the chain <span class=Cdigo>next</span> will have the same Object <span
+class=Cdigo>up</span>, since all of them descend from the same parent Object.
+The last Object in the chain has the field next equal to <span class=Cdigo>NULL</span>.</p>
+
+<p class=MsoNormal>In other terms, every Object can bring to another Object
+using the appropriate pattern along the <span class=Cdigo>up-&gt;</span> and <span
+class=Cdigo>next-&gt;</span> fields.</p>
+
+<p class=MsoNormal>The best way to remember the object's components is to keep
+in mind a geometrical representation of Objects: </p>
+
+<p><span class=Cdigo>&nbsp;up <br>
+&nbsp;/\ <br>
+&nbsp;|| <br>
+&nbsp;-------- <br>
+|object | =&gt; next <br>
+&nbsp;-------- <br>
+&nbsp;|| <br>
+&nbsp;\/ <br>
+&nbsp;son </span></p>
+
+<p class=MsoNormal>The fields above are proper Objects, and therefore can be
+used to run LSD functions. For example, consider a model where you have 100,000
+Objects Firm descending from a single Object Market. If a Variable in Firm uses
+a Parameter in Market, say Price, you can write the line </p>
+
+<p><span class=Cdigo>v[0]=p-&gt;cal(&quot;Price&quot;,0); </span></p>
+
+<p class=MsoNormal>but it will take a lot of time to work out. In fact, the
+function <span class=Cdigo>cal(...)</span><b> </b>will search in Firm for a
+Variable or Parameter Price. If it does not find it, it will look if it can be
+found after the set of Firm, descending from the same Object. Which means to
+skip through 100,000 objects, for the first firm, 99,000 for the second and so
+on. Instead, using the line: </p>
+
+<p><span class=Cdigo>v[0]=p-&gt;up-&gt;cal(&quot;Price&quot;,0); </span></p>
+
+<p class=MsoNormal>returns directly the desired value, since the first Object
+searched is <span class=Cdigo>p-&gt;up</span>, which is Market. Note that the
+modeler must be sure that objects fields use exists. If, in the example above,
+the Equation is placed in <span class=Cdigo>Root</span>, no <span class=Cdigo>up-&gt;</span>
+Object exists, and the simulation will issue an error. </p>
+
+<p><a name=objmodelspecific></a><span class=Ttulo2Char>Model specific objects </span></p>
+
+<p>The Object pointers saw above (<span class=Cdigo>p-&gt;</span>, <span
+class=Cdigo>c-&gt;</span>, <span class=Cdigo>cur-&gt;</span> etc.) are all
+&quot;local&quot; Objects, in the sense that they represent a different content
+depending on the Variable in whose Equation they are used. That is, they refer
+to Objects that, depending on the Variable whose Equation is computed, change
+their content when the Variable computed changes: <span class=Cdigo>p-&gt;</span>
+refers to the Object copy whose Variable is computed; <span class=Cdigo>c-&gt;</span>
+to the Object that caused the Variable to be computed; <span class=Cdigo>cur-&gt;</span>
+and the others are assigned within the Equations code. </p>
+
+<p>However, the modeler can create and use a “global” Object pointer, that is, an
+Object that never change the content throughout a simulation run. This is
+mainly done for optimization purposes, when a very large model (many Objects)
+contains Variables that refer frequently to one specific Object copy. The use
+of global Object should be avoided by unexperienced modelers, because it risks creating
+errors difficult to be captured. <br>
+To use a global Object, declare the Object outside the scope of the Equation
+function, on the top of the Equation file before the line: </p>
+
+<p class=MsoNormal><span class=Cdigo>double variable::fun(object *caller) </span></p>
+
+<p class=MsoNormal>the declaration line must be something like: </p>
+
+<p class=MsoNormal><span class=Cdigo>object *market; </span></p>
+
+<p>where the name of the Object (&quot;market&quot; in the example) must not be
+one of the existing Objects (<span class=Cdigo>p</span>, <span class=Cdigo>c</span>,
+<span class=Cdigo>cur</span> etc.). The Object must be assigned with one of the
+LSD Equation functions returning Objects within an Equations code. For example,
+there may be a Variable called <span class=Cdigo>init</span> making such assignment.
+For example, it may be: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Init&quot;) ) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/* <br>
+Technical initialization function. It is computed only once and then it is <br>
+transformed in a parameter and never computed again. </span></span></p>
+
+<p><span class=Cdigo><span style='color:#00B050'>Sets the global pointer
+'market' pointing to the Object Market, so <br>
+to speed up the access to this object </span></span></p>
+
+<p><span class=Cdigo><span style='color:#00B050'>*/ </span></span></p>
+
+<p><span class=Cdigo>market=p-&gt;search(&quot;Market&quot;); </span><span
+class=Cdigo><span style='color:#00B050'>//assign the C++ object pointer
+&quot;market&quot; to point to the LSD Object Market </span><br>
+param=1; </span><span class=Cdigo><span style='color:#00B050'>//optional;
+transform &quot;Init&quot; in a parameter so to not compute again this
+equation. </span><br>
+res=1; <br>
+goto end; <br>
+} </span></p>
+
+<p class=MsoNormal>The Variable <span class=Cdigo>Init</span> must be computed
+for sure before <span class=Cdigo>market</span> is used in any other Equation.
+This can be ensured placing <span class=Cdigo>Init</span><b> </b>in the Object <span
+class=Cdigo>Root</span>, since the simulation step starts always the
+computation from the Variables contained in the top of the model structure.
+With the setting described above, the modeler can use <span class=Cdigo>market</span>
+as any other Object, knowing that it refers always to the LSD Object Market.
+For example, the Equation for a Variable placed anywhere in the model may use
+the line: </p>
+
+<p><span class=Cdigo>v[0] = market-&gt;cal(&quot;Price&quot;,0); </span></p>
+
+<p>and be sure that the value of Variable Price is returned quickly. Note that
+also the conventional line </p>
+
+<p><span class=Cdigo>v[0] = p-&gt;cal(&quot;Price&quot;,0); </span></p>
+
+<p>would work too. But it would cost a lot of time in case the Variable whose Equation
+containing the line for Price is placed very &quot;far&quot; from Market.
+Modelers using global Objects should be careful when assigning configurations
+with many copies. If, for example, the model configuration uses many copies of
+Objects Market, any use of the global object <span class=Cdigo>market</span><tt><span
+style='font-size:13.5pt'> </span></tt>would refer only to the very first copy. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=cal></a><span class=Cdigo>object-&gt;cal(&quot;Var&quot;, lag)</span>,
+or <span class=Cdigo><br>
+object-&gt;cal(caller, &quot;Var&quot;, lag) </span></h1>
+
+<p class=MsoNormal>This is the most used LSD function. It provides the value of
+the Variable whose label is <span class=Cdigo>Var</span> with the lag <span
+class=Cdigo>lag</span>, expressed as an integer value. The second form of the
+LSD function is rarely used. It tells to the Equation computing <span
+class=Cdigo>Var</span> that the object that requested its value is caller,
+instead of the default system passing the actual Object that requested <span
+class=Cdigo>Var</span>. </p>
+
+<p class=MsoNormal>In case the model contains many instances of Variables with
+the same label <span class=Cdigo>Var</span> (that is, many instances of Object
 containing this Variable), the function returns the value of the instance
-"closer" to the Object <font face="Courier New">object</font>. By closer,
-it is meant the first instance found by searching the model using the following
-strategy:
-<p>1) Search in the Object <font face="Courier New">object </font>(the
-one specified in the function call);
-<br>2) Search in the Object(s) descending from <font face="Courier New">object</font>;
-<br>3) Search in the parent Object of <font face="Courier New">object</font>;
-<p>In each Object explored, the same strategy is applied recursively, so
-that every Object in the model is visited, if necessary. So, for example,
-if there is only one instance of Variable <font face="Courier New">Var
-</font>in
-the model, this can be found whatever Object is used to start the search.
-<p>It is clear that, in the general case where many Variables <font face="Courier New">Var
-</font>exist
-in the model (that is, there are many instances of the Object containing
-such Variable), it is crucial to choose properly the Object from which
-the search has to start. In fact, this determines which instance's value
-is returned.
-<p>The Object normally used to apply a Lsd function is the same Object
-containing the Variable whose equation is computed. This Object is referred
-to by the name <font face="Courier New">p</font>, which is a pointer. So,
-for example, consider the equation for the Varible Q (quantity), to be
-computed as the product between the Variable K (capital) and the Variable
-A (productivity), both with lagged values. Consider also that the Variable
-Q is contained in an Object containing also the Variables K and A to be
-used in the equation.
-<p>The code will be as follows:
-<p><font face="Courier New"><font size=-1>if(!strcmp(label, "Q"))</font></font>
-<br><font face="Courier New"><font size=-1>{</font></font>
-<br><font face="Courier New"><font size=-1>v[0]=p->cal("K", 1); //Store
-in v[0] the value of K, with lag 1</font></font>
-<br><font face="Courier New"><font size=-1>v[1]=p->cal("A", 1); //Store
-in v[1] the value of A, with lag 1</font></font>
-<br><font face="Courier New"><font size=-1>res=(v[0]*v[1]); //Assign the
-result</font></font>
-<br><font face="Courier New"><font size=-1>goto end; //Declare terminated
-the equation</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
-<p>The values returned by the two calls to the function <font face="Courier New">cal()</font>
-are stored in two temporary variables, <font face="Courier New">v[0]</font>
-and <font face="Courier New">v[1]</font>. The modellers can use as many
-temporary variables as necessary.
-<br>Besides the Object p, by default the function for the equations has
-also another Object that can be used to activate a function. In fact, the
-computation of the equations for the Variables can be activated because
-of two reasons:
-<p>1) The system automatically requests the updated value for each Variable
-at each step of the simulation, and
-<br>2) The value can be requested by the equation of another Variable.
-<p>The second case is due to the fact that the system cannot know in advance
-the exact order it should update the Variables. In order to avoid that
-the value of a Variable is used in an equation before its own equation
-(that is, if the requested value is the most recent one), each Variable
-stores the number of the time step it has been lastly updated. If, say,
-the equation for a Variable X requests the most updated value of a Variable
-Y, but this has not been computed yet, the system stops the execution of
-the equation for X, computes the equation for Y, and then continues the
-remaining code of the equation for X, using the just computed value for
-Y. In technical terms, the procedure for the equation for X is said to
-be placed on the stack, while the equation for Y is computed. Of course,
-the equation for Y can trigger the equation for another Variable Z etc.
-The equation for a Variable is never computed twice in the same time step,
-by default. In fact, in our example, when the system will try to compute
-the most updated value of Y as part of the normal updating procedure, it
-will find that its last computation corresponds to the current time step,
-and will skip its equation.
-<br>This system allows modellers to determine the priority of computations
-for the equations by simply setting appropriately the lag notation in the
-equations. But it allows also to discriminate the behaviour of an equation
-according to the position of the Variable which requested the computation.
-For example, consider the equation for the innovation via imitation A_IM
-in the Nelson and Winter example model. It has been placed apart (that
-is, not as part of Object Firm) because it makes a computation common to
-every firm but does not provide a value that is worth on its own to be
-stored in Firm. Therefore, there is one single Variable A_IM which needs
-to be computed more than once every time (i.e. once for every Firm) and
-that needs to read the Variables of the instance of Firm that requested
-its computation.
-<p>The equation is the following:
-<p><font face="Courier New"><font size=-1>if(!strcmp(label, "A_IM"))</font></font>
-<br><font face="Courier New"><font size=-1>{</font></font>
-<br><font face="Courier New"><font size=-1>last_update--;</font></font>
-<p><font face="Courier New"><font color="#009900"><font size=-1>/*************************************************</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>The line
-above forces the equation to be computed any time it is requested.</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>Without
-this line, the equation would be computed only once for each time step,
-thus providing the same value to every firm requesting it.</font></font></font>
-<p><font face="Courier New"><font color="#009900"><font size=-1>**************************************************/</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>/**************************</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>The value
-of the system variable "c" corresponds to the Object that requested value
-for this Variable.</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>If "c"
-is NULL, it means that actually it is not a Firm</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>requesting
-its value, but the system, and hence the equation is not relevant.</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>**************************/</font></font></font>
-<br>&nbsp;
-<p><font face="Courier New"><font size=-1>if(c==NULL)</font></font>
-<br><font face="Courier New"><font size=-1>{res=0;</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;goto end;</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>/*******************************</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>"c" is
-used to activate the "cal" function, so the values K and RIM</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>are the
-ones of the calling Object, Firms in this case.</font></font></font>
-<br><font face="Courier New"><font color="#009900"><font size=-1>*********************************/</font></font></font>
-<p><font face="Courier New"><font size=-1>v[0]=c->cal("K", 0);</font></font>
-<br><font face="Courier New"><font size=-1>v[1]=c->cal("RIM", 0);</font></font>
-<br><font face="Courier New"><font size=-1>v[2]=c->cal("A_MAX", 1);</font></font>
-<br><font face="Courier New"><font size=-1>if(RND&lt;v[0]*v[1]*1.25)</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;res=v[2];</font></font>
-<br><font face="Courier New"><font size=-1>else</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;res=0;</font></font>
-<p><font face="Courier New"><font size=-1>goto end;</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
-<p>As you have seen, the function <font face="Courier New">cal()</font>
-is called by the Object <font face="Courier New">c</font> rather than the
-Object <font face="Courier New">p</font>. In fact, the Object that contains
-<font face="Courier New">A_IM
-</font>does
-not have any relation with the Objects containing Firm's. Therefore, an
-erroneous call like
-<p><font face="Courier New"><font size=-1>p->cal("K",0);</font></font>
-<p>in the equation for <font face="Courier New">A_IM</font> would return
-always the same instance of <font face="Courier New">K</font>, notably
-the one contained in the first instance of Object Firm descending from
-Market. Which is not what the modeller wants. The Object <font face="Courier New">c</font>
-instead reports the Object which originated the computation for <font face="Courier New">A_IM</font>,
-that is, the instance of Firm which is computing its instance of Variable
-<font face="Courier New">A</font>
-necessitating the value for <font face="Courier New">A_IM</font>.
-<p>It is crucial to use the proper Object to activate the function. In
-the large majority of cases <font face="Courier New">p </font>is the right
-choice. A good rule of thumb to solve the dubious cases is to use the Object
-<font face="Courier New">c</font>
-only if:
-<p>1) the equation you are writing is supposed to be computed more than
-once during each time step (which needs to be explicitly stated by using
-the line with <font face="Courier New">last_update--</font>), and
-<p>2) the Variable value needs to be used by other Variables that are not
-hierarchically related with the Object containing the Variable.
-<p>Apart the two Objects <font face="Courier New">p</font> and <font face="Courier New">c</font>,
-the modeller can use any other Object in the model, but it is necessary
-to manually find the Object.
-<br>In order to find a specific instance of an Object, it is necessary
-to know the value of a Variable contained in the Object that needs to be
-used. See, for example, the functions <font face="Courier New"><a href="#search_var_cond">search_var_cond()</a>,
-<a href="#go_brother">go_brother()</a>,
-<a href="#search">search()</a></font>
-and in general the Lsd functions returning Objects.
-<p>The second form of the Lsd function:
-<br><b><font face="Courier New">object->cal(caller, "Var", lag)</font></b>
-<br>is identical to the previous one, but it gives more flexibility. It
-says to the Object <font face="Courier New,Courier">object </font>to search
-for the element <font face="Courier New,Courier">Var</font>. If <font face="Courier New,Courier">Var</font>
-is an equation computed because of this very call, then the "caller" object
-appearing to <font face="Courier New,Courier">Var</font> is <font face="Courier New,Courier">caller</font>
-instead of <font face="Courier New,Courier">object</font>.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="sum"></a><b><font face="Courier New">object->sum("Var", lag)</font></b>
-<p>This function searches, with the same strategy described above, an instance
-of the Variable <font face="Courier New">Var</font>. Then, it keeps on
-summing up all the values of Variables <font face="Courier New">Var</font>
-(with the lag <font face="Courier New">lag</font>) found in the set of
-Objects contiguous to the one found. Normally, it should be used to sum
-up the values of descending Objects. For example, if Q_TOT is contained
-in an Object Market, from which descend a set of Objects Firm containing
-Variables Q, its equation can be:
-<p><font face="Courier New"><font size=-1>if(!strcmp(label, "Q_TOT"))</font></font>
-<br><font face="Courier New"><font size=-1>{</font></font>
-<br><font face="Courier New"><font size=-1>res=p->sum("Q", 0);</font></font>
-<br><font face="Courier New"><font size=-1>goto end;</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
-<p>Note that, if your model contains many Objects Market, this equation
-will sum up only the Q's contained in the set of descendants of Market,
-and not all the Q's existing in the model.
+&quot;closer&quot; to the Object <span class=Cdigo>object</span>. By closer, it
+is meant the first instance found by searching the model using the following
+strategy: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the Object <span class=Cdigo>object</span><span
+style='font-family:"Courier New"'> </span>(the one specified in the function
+call); </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the Object(s) descending from <span class=Cdigo>object</span>;
+</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the parent Object of <span class=Cdigo>object</span>.</p>
+
+<p class=MsoNormal>In each Object explored, the same strategy is applied
+recursively, so that every Object in the model is visited, if necessary. So,
+for example, if there is only one instance of Variable <span class=Cdigo>Var</span><span
+style='font-family:"Courier New"'> </span>in the model, this can be found
+whatever Object is used to start the search. </p>
+
+<p class=MsoNormal>It is clear that, in the general case, where many Variables <span
+class=Cdigo>Var</span><span style='font-family:"Courier New"'> </span>exist in
+the model (that is, there are many instances of the Object containing such
+Variable), it is crucial to choose properly the Object from which the search
+has to start. In fact, this determines which instance's value is returned. </p>
+
+<p class=MsoNormal>The Object normally used to apply a LSD function is the same
+Object containing the Variable whose Equation is computed. This Object is
+referred to by the name <span class=Cdigo>p</span>, which is a pointer. So, for
+example, consider the Equation for the Variable Q (quantity), to be computed as
+the product between the Variable K (capital) and the Variable A (productivity),
+both with lagged values. Consider also that the Variable Q is contained in an
+Object containing also the Variables K and A to be used in the Equation. </p>
+
+<p class=MsoNormal>The code will be as follows: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Q&quot;)) <br>
+{ <br>
+v[0]=p-&gt;cal(&quot;K&quot;, 1); </span><span class=Cdigo><span
+style='color:#00B050'>//Store in v[0] the value of K, with lag 1 </span><br>
+v[1]=p-&gt;cal(&quot;A&quot;, 1); </span><span class=Cdigo><span
+style='color:#00B050'>//Store in v[1] the value of A, with lag 1 </span><br>
+res=(v[0]*v[1]);   </span><span class=Cdigo><span style='color:#00B050'>//Assign
+the result </span><br>
+goto end;          </span><span class=Cdigo><span style='color:#00B050'>//Declare
+terminated the equation </span><br>
+} </span></p>
+
+<p class=MsoNormal>The values returned by the two calls to the function <span
+class=Cdigo>cal()</span> are stored in two temporary variables, <span
+class=Cdigo>v[0]</span> and <span class=Cdigo>v[1]</span>. The modelers can use
+as many temporary variables as necessary (from 0 to 999). </p>
+
+<p class=MsoNormal>Besides the Object <span class=Cdigo>p</span>, by default
+the function for the Equations has also another Object that can be used to
+activate a function. In fact, the computation of the Equations for the
+Variables can be activated because of two reasons: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>The system automatically requests the updated value for each Variable at
+each step of the simulation, and </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>The value can be requested by the Equation of another Variable. </p>
+
+<p class=MsoNormal>The second case is due to the fact that the system cannot
+know in advance the exact order it should update the Variables. In order to
+avoid that, the value of a Variable is used in an Equation before its own Equation
+(that is, if the requested value is the most recent one), each Variable stores
+the number of the time step it has been lastly updated. If, say, the Equation
+for a Variable X requests the most updated value of a Variable Y, but this has
+not been computed yet, the system stops the execution of the Equation for X,
+computes the Equation for Y, and then continues the remaining code of the Equation
+for X, using the just computed value for Y. In technical terms, the procedure
+for the Equation for X is said to be placed on the stack, while the Equation
+for Y is computed. Of course, the Equation for Y can trigger the Equation for other
+Variable Z etc.</p>
+
+<p class=MsoNormal>The Equation for a Variable is never computed twice in the
+same time step, by default. In fact, in our example, when the system will try
+to compute the most updated value of Y as part of the normal updating
+procedure, it will find that its last computation corresponds to the current
+time step, and will skip its Equation. This system allows modelers to determine
+the priority of computations for the Equations by simply setting appropriately
+the lag notation in the Equations. But it allows also discriminating the behavior
+of an Equation according to the position of the Variable which requested the
+computation. </p>
+
+<p class=MsoNormal>For example, consider the Equation for the innovation via
+imitation <span class=Cdigo>A_IM</span> in the Nelson and Winter example model.
+It has been placed apart (that is, not as part of Object <span class=Cdigo>Firm</span>)
+because it makes a computation common to every firm but does not provide a
+value that is worth on its own to be stored in <span class=Cdigo>Firm</span>.
+Therefore, there is one single Variable <span class=Cdigo>A_IM</span> which
+needs to be computed more than once every time (i.e., once for every <span
+class=Cdigo>Firm</span>) and that needs to read the Variables of the instance
+of <span class=Cdigo>Firm</span> that requested its computation. </p>
+
+<p class=MsoNormal>The Equation is the following: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;A_IM&quot;)) <br>
+{ <br>
+last_update--; </span></p>
+
+<p><span class=Cdigo><span style='color:#00B050'>/*************************************************
 <br>
-<hr WIDTH="100%">
-<br>&nbsp;
-<p><a NAME="overall_max"></a><b><font face="Courier New">object->overall_max("Var",
-lag)</font></b>
-<p>Same as <font face="Courier New"><a href="#sum">object->sum()</a></font>,
-but returns the maximum value instead of the sum.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="whg_av"></a><b><font face="Courier New">object->whg_av("Var1",
-"Var2", lag)</font></b>
-<p>Same as <font face="Courier New"><a href="#sum">object->sum()</a></font>,
-but returns the sum of the products between the values of Var1 times Var2.
-Of course, both Variables need to be contained in the same type of Objects.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="stat"></a><b><font face="Courier New">object->stat("Var", vector)</font></b>
-<p>This function does not return a value as the ones above, but stores
-a set of values in the vector <font face="Courier New">vector</font>. It
-works as the function <font face="Courier New">sum</font>, and the like,
-but computes a set of descriptive statistics. Namely, it places in <font face="Courier New">vector</font>
-the following values:
-<p>vector[0]=number of elements;
-<br>vector[1]=average of Var
-<br>vector[2]=variance of Var
-<br>vector[3]=maximum values
-<br>vector[4]=mininimu values
-<p>It is used with lines like:
-<p><font face="Courier New"><font size=-1>p->stat("Q", v);</font></font>
-<br>&nbsp;
-<p>so that the temporary variables <font face="Courier New">v[0], v[1],
-</font>etc.
-contain the statistics above described.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="search_var_cond"></a><b><font face="Courier New">object->search_var_cond("Var",
-value, lag)</font></b>
-<p>This method is used to find an Object in the model that contains the
-Variable <font face="Courier New">Var</font> with value <font face="Courier New">value</font>
-(considered the lag <font face="Courier New">lag</font>). Basically, it
-uses the same strategy to explore the model as described in function <font face="Courier New"><a href="#cal">cal()</a></font>
-above. Only, it does not stop to the first instance encountered, but continues
-until the searched Variable is not found with the desired value. When an
-Object that satisfies the condition is found, it is returned to the calling
-equation, and can be used to activate other Lsd functions, like <font face="Courier New"><a href="#cal">cal(...)</a></font>.
-<p>The function is used to identify a particular Object, which is neither<font face="Courier New"><a href="#p">p</a></font>
-nor <font face="Courier New"><a href="#c">c</a></font>. For example, suppose
-you want to extract randomly a Firm, and make some computation on its Variables.
-After you have drawn randomly a number (say an integer between 1 and the
-maximum number of Firm in the model, stored in the temporary variable <font face="Courier New">v[0]</font>),
-you can use a line like the following:
-<br>&nbsp;
-<p><font face="Courier New"><font size=-1>cur=p->search_var_cond("IdFirm",
-v[0], 0);</font></font>
-<p><font face="Courier New">Cur</font> is a temporary variable used to
-store the address of Objects. The line above returns in cur the Object
-whose Variable <font face="Courier New">IdFirm</font> has the value stored
-in <font face="Courier New">v[0]</font>. Now you can use lines like:
-<p><font face="Courier New"><font size=-1>v[1]=cur-cal("Q",0);</font></font>
-<br><font face="Courier New"><font size=-1>v[2]=cur-cal("K",0);</font></font>
-<p>to obtain information from this Object. This method allows to overcome
-the default system in Lsd, which would return the values of Variables which
-have a special relation with the Object containing the Variable whose equation
-is computed (same Object, "nearby" Object, calling Object).
-<p>Note that the temporary variable to store the Object <font face="Courier New">cur</font>
-may or may not be present in the file containing the code for the equation
-of your model. You can always add new temporary variables, when needed,
-given that this is a normal file for a C++ function. To declare that you
-want to use a temporary variable to store Object (actually, Objects' addresses),
-you need to add lines like:
-<br>&nbsp;
-<br>&nbsp;
-<p><font face="Courier New"><font size=-1>object *cur;</font></font>
-<br><font face="Courier New"><font size=-1>object *cur1;</font></font>
-<p>at the very beginning of the function <font face="Courier New">variable::fun</font>,
-that is, before the actual list of Variables' equations' blocks.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="lsdqsort"></a><b><font face="Courier New">object->lsdqsort("Obj_Label",
-"Var", "Direction")</font></b>
-<br>This function sorts (with the quick sort method) a set of Objects labeled
-<font face="Courier New">Obj_Label</font>
-according to the values of Variable
-<font face="Courier New">Var</font>.
-The field <font face="Courier New">Direction</font> must be either "UP"
-or "DOWN". It returns an error in case the Variable
-<font face="Courier New">Var</font>,
-though defined in the model, is not contained in the Object <font face="Courier New">Obj_Label</font>.
-In case there are many sets of Objects with label <font face="Courier New">Obj_Label</font>,
-the function sorts only the first set encountered by exploring the model
-with the usual strategy (see <a href="#cal">cal(...)</a> )starting from
-<font face="Courier New">object</font>.
-<br>Example:
-<br><font face="Courier New">p->lsdqsort("Firm","Q", "DOWN");</font>
-<br>if the line is used in an equation contained in an Object from which
-descend many Object labelled Firm, it sorts these descendants according
-to decreasing values of their Variable Q.
-<br>The function is also available for ranking on two dimensions:
-<br><font face="Courier New">p->lsdqsort("AnObject","X", "Y", "UP");</font>
-<br>In this second case the Objects are sorted according to their increasing
-values of X. If two or more Objects have identical values on X, then the
-Variable or Parameter Y is used to sort them.
-<p>
-<hr WIDTH="100%">
-<br><a NAME="add_an_object"></a><b><font face="Courier New">object->add_an_object("Obj_Label")</font></b>
-<br><b><font face="Courier New">object->add_an_object("Obj_Label", example)</font></b>
-<br>These functions adds a descendent to the Object <font face="Courier New">object</font>.
-The new descendant is of type <font face="Courier New">Obj_Label</font>,
+The line above forces the equation to be computed any time it is requested. <br>
+Without this line, the equation would be computed only once for each time step,
+thus providing the same value to every firm requesting it. </span></span></p>
+
+<p><span class=Cdigo><span style='color:#00B050'>**************************************************/
+<br>
+/************************** <br>
+The value of the system variable &quot;c&quot; corresponds to the Object that
+requested value for this Variable. <br>
+If &quot;c&quot; is NULL, it means that actually it is not a Firm <br>
+requesting its value, but the system, and hence the equation is not relevant. <br>
+**************************/ <br>
+</span><br>
+if(c==NULL) <br>
+{res=0; <br>
+&nbsp;goto end; <br>
+} <br>
+<br>
+</span><span class=Cdigo><span style='color:#00B050'>/*******************************
+<br>
+&quot;c&quot; is used to activate the &quot;cal&quot; function, so the values K
+and RIM <br>
+are the ones of the calling Object, Firms in this case. <br>
+*********************************/ <br>
+</span>v[0]=c-&gt;cal(&quot;K&quot;, 0); <br>
+v[1]=c-&gt;cal(&quot;RIM&quot;, 0); <br>
+v[2]=c-&gt;cal(&quot;A_MAX&quot;, 1); <br>
+if(RND&lt;v[0]*v[1]*1.25) <br>
+&nbsp;res=v[2]; <br>
+else <br>
+&nbsp;res=0; </span></p>
+
+<p><span class=Cdigo>goto end; <br>
+} </span></p>
+
+<p>As you have seen, the function <span class=Cdigo>cal()</span>is called by
+the Object <span class=Cdigo>c</span> rather than the Object <span class=Cdigo>p</span>.
+In fact, the Object that contains <span class=Cdigo>A_IM</span><span
+style='font-family:"Courier New"'> </span>does not have any relation with the
+Objects containing <span class=Cdigo>Firm</span>'s. Therefore, erroneous calls
+like </p>
+
+<p class=MsoNormal><span class=Cdigo>p-&gt;cal(&quot;K&quot;,0); </span></p>
+
+<p class=MsoNormal>in the Equation for <span class=Cdigo>A_IM</span> would
+return always the same instance of <span class=Cdigo>K</span>, notably the one
+contained in the first instance of Object <span class=Cdigo>Firm</span>
+descending from <span class=Cdigo>Market</span>, which is not what the modeler
+wants. The Object <span class=Cdigo>c</span> instead reports the Object which
+originated the computation for <span class=Cdigo>A_IM</span>, that is, the
+instance of Firm which is computing its instance of Variable <span class=Cdigo>A</span>
+necessitating the value for <span class=Cdigo>A_IM</span>. </p>
+
+<p class=MsoNormal>It is crucial to use the proper Object to activate the
+function. In the large majority of cases <span class=Cdigo>p</span><span
+style='font-family:"Courier New"'> </span>is the right choice. A good rule of thumb
+to solve the dubious cases is to use the Object <span class=Cdigo>c</span> only
+if: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>the Equation you are writing is supposed to be computed more than once
+during each time step (which needs to be explicitly stated by using the line
+with <span class=Cdigo>last_update--</span>), and </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>the Variable value needs to be used by other Variables that are not
+hierarchically related with the Object containing the Variable. </p>
+
+<p class=MsoNormal>Apart the two Objects <span class=Cdigo>p</span> and <span
+class=Cdigo>c</span>, the modeler can use any other Object in the model, but it
+is necessary to manually find the Object. In order to find a specific instance
+of an Object, it is necessary to know the value of a Variable contained in the
+Object that needs to be used. See, for example, the functions <span
+class=Cdigo><a href="#search_var_cond"><span style='color:gray;text-decoration:
+none'>search_var_cond()</span></a></span>, <span class=Cdigo><a
+href="#go_brother"><span style='color:gray;text-decoration:none'>go_brother()</span></a></span>,
+<span class=Cdigo><a href="#search"><span style='color:gray;text-decoration:
+none'>search()</span></a></span> and, in general, the LSD functions returning
+Objects. </p>
+
+<p class=MsoNormal>The second form of the LSD function: </p>
+
+<p><span class=Cdigo>object-&gt;cal(caller, &quot;Var&quot;, lag) </span></p>
+
+<p class=MsoNormal>is identical to the previous one, but it gives you more
+flexibility. It says to the Object <span class=Cdigo>object</span><span
+style='font-family:"Courier New"'> </span>to search for the element <span
+class=Cdigo>Var</span>. If <span class=Cdigo>Var</span> is an Equation computed
+because of this very call, then the &quot;caller&quot; object appearing to <span
+class=Cdigo>Var</span> is <span class=Cdigo>caller</span> instead of <span
+class=Cdigo>object</span>. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=sum></a><span class=Cdigo>object-&gt;sum(&quot;Var&quot;, lag) </span></h1>
+
+<p class=MsoNormal>This function searches, with the same strategy described
+above, an instance of the Variable <span class=Cdigo>Var</span>. Then, it keeps
+on summing up all the values of Variables <span class=Cdigo>Var</span> (with
+the lag <span class=Cdigo>lag</span>) found in the set of Objects contiguous to
+the one found. Normally, it should be used to sum up the values of descending
+Objects. For example, if <span class=Cdigo>Q_TOT</span> is contained in an
+Object <span class=Cdigo>Market</span>, from which descend a set of Objects <span
+class=Cdigo>Firm</span> containing Variables <span class=Cdigo>Q</span>, its Equation
+can be: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Q_TOT&quot;)) <br>
+{ <br>
+res=p-&gt;sum(&quot;Q&quot;, 0); <br>
+goto end; <br>
+} </span></p>
+
+<p class=MsoNormal>Note that, if your model contains many Objects <span
+class=Cdigo>Market</span>, this Equation will sum up only the <span
+class=Cdigo>Q</span>'s contained in the set of descendants of <span
+class=Cdigo>Market</span>, and not all the <span class=Cdigo>Q</span>'s
+existing in the model. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="overall_max"></a><span class=Cdigo>object-&gt;overall_max(&quot;Var&quot;,
+lag) </span></h1>
+
+<p class=MsoNormal>Same as <span class=Cdigo><a href="#sum"><span
+style='color:gray;text-decoration:none'>object-&gt;sum()</span></a></span>, but
+returns the maximum value instead of the sum. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="whg_av"></a><span class=Cdigo>object-&gt;whg_av(&quot;Var1&quot;,
+&quot;Var2&quot;, lag) </span></h1>
+
+<p class=MsoNormal>Same as <span class=Cdigo><a href="#sum"><span
+style='color:gray;text-decoration:none'>object-&gt;sum()</span></a></span>, but
+returns the sum of the products between the values of <span class=Cdigo>Var1</span>
+times <span class=Cdigo>Var2</span>. Of course, both Variables need to be contained
+in the same type of Object. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=stat></a><span class=Cdigo>object-&gt;stat(&quot;Var&quot;, vector)
+</span></h1>
+
+<p class=MsoNormal>This function does not return a value as the ones above, but
+stores a set of values in the vector <span class=Cdigo>vector</span>. It works
+as the function <span class=Cdigo>sum</span>, and the like, but computes a set
+of descriptive statistics. Namely, it places in <span class=Cdigo>vector</span>
+the following values: </p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vector[0] = number of elements</p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vector[1] = average of <span class=Cdigo>Var</span> </p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vector[2] = variance of <span class=Cdigo>Var</span> </p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vector[3] = maximum values </p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vector[4] = minimum values </p>
+
+<p class=MsoNormal>It is used with lines like: </p>
+
+<p><span class=Cdigo>p-&gt;stat(&quot;Q&quot;, v); </span></p>
+
+<p class=MsoNormal>so that the temporary variables <span class=Cdigo>v[0]</span>,
+<span class=Cdigo>v[1]</span>, etc. contain the statistics above described. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="search_var_cond"></a><span class=Cdigo>object-&gt;search_var_cond(&quot;Var&quot;,
+value, lag) </span></h1>
+
+<p class=MsoNormal>This method is used to find an Object in the model that
+contains the Variable <span class=Cdigo>Var</span> with value <span
+class=Cdigo>value</span> (considered the lag <span class=Cdigo>lag</span>).
+Basically, it uses the same strategy to explore the model as described in
+function <span class=Cdigo><a href="#cal"><span style='color:gray;text-decoration:
+none'>cal()</span></a></span> above. Only, it does not stop at the first
+instance encountered, but continues until the searched Variable is not found
+with the desired value. When an Object that satisfies the condition is found,
+it is returned to the calling Equation, and can be used to activate other LSD
+functions, like <span class=Cdigo><a href="#cal"><span style='color:gray;
+text-decoration:none'>cal(...)</span></a></span>. </p>
+
+<p class=MsoNormal>The function is used to identify a particular Object, which
+is neither <span class=Cdigo><a href="#p"><span style='color:gray;text-decoration:
+none'>p</span></a></span> nor <span class=Cdigo><a href="#c"><span
+style='color:gray;text-decoration:none'>c</span></a></span>. For example,
+suppose you want to extract randomly a Firm, and make some computation on its
+Variables. After you have drawn randomly a number (say an integer between 1 and
+the maximum number of Firm in the model, stored in the temporary variable <span
+class=Cdigo>v[0]</span>), you can use a line like the following: </p>
+
+<p class=MsoNormal><span class=Cdigo>cur=p-&gt;search_var_cond(&quot;IdFirm&quot;,
+v[0], 0); </span></p>
+
+<p class=MsoNormal><span class=Cdigo>Cur</span> is a temporary variable used to
+store the address of Objects. The line above returns in <span class=Cdigo>cur</span>
+the Object whose Variable <span class=Cdigo>IdFirm</span> has the value stored
+in <span class=Cdigo>v[0]</span>. Now you can use lines like: </p>
+
+<p><span class=Cdigo>v[1]=cur-cal(&quot;Q&quot;,0); <br>
+v[2]=cur-cal(&quot;K&quot;,0); </span></p>
+
+<p class=MsoNormal>to obtain information from this Object. This method allows
+to overcome the default system in LSD, which would return the values of
+Variables which have a special relation with the Object containing the Variable
+whose Equation is computed (same Object, &quot;nearby&quot; Object, calling
+Object). </p>
+
+<p class=MsoNormal>Note that the temporary variable to store the Object cur may
+or may not be present in the file containing the code for the Equation of your
+model. You can always add new temporary variables, when needed, given that this
+is a normal file for a C++ function. To declare that you want to use a
+temporary variable to store Object (actually, Objects' addresses), you need to
+add lines like: </p>
+
+<p class=MsoNormal><span class=Cdigo>object *cur; <br>
+object *cur1; </span></p>
+
+<p class=MsoNormal>at the very beginning of the function <span class=Cdigo>variable::fun</span>,
+that is, before the actual list of Variables' Equations' blocks. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=lsdqsort></a><span class=Cdigo>object-&gt;lsdqsort(&quot;Obj_Label&quot;,
+&quot;Var&quot;, &quot;Direction&quot;) </span></h1>
+
+<p class=MsoNormal>This function sorts (with the quick sort method) a set of
+Objects labeled <span class=Cdigo>Obj_Label</span> according to the values of
+Variable <span class=Cdigo>Var</span>. The field Direction must be either
+&quot;<span class=Cdigo>UP</span>&quot; or &quot;<span class=Cdigo>DOWN</span>&quot;.
+It returns an error in case the Variable <span class=Cdigo>Var</span>, though
+defined in the model, is not contained in the Object <span class=Cdigo>Obj_Label</span>.
+In case there are many sets of Objects with label <span class=Cdigo>Obj_Label</span>,
+the function sorts only the first set encountered by exploring the model with
+the usual strategy (see <span class=Cdigo><a href="#cal"><span
+style='color:gray;text-decoration:none'>cal(...)</span></a></span>) starting
+from object. </p>
+
+<p class=MsoNormal>Example: </p>
+
+<p class=MsoNormal><span class=Cdigo>p-&gt;lsdqsort(&quot;Firm&quot;,&quot;Q&quot;,
+&quot;DOWN&quot;); </span></p>
+
+<p class=MsoNormal>if the line is used in an Equation contained in an Object
+from which descend many Object labelled <span class=Cdigo>Firm</span>, it sorts
+these descendants according to decreasing values of their Variable <span
+class=Cdigo>Q</span>. </p>
+
+<p class=MsoNormal>The function is also available for ranking on two
+dimensions: </p>
+
+<p class=MsoNormal><span class=Cdigo>p-&gt;lsdqsort(&quot;AnObject&quot;,&quot;X&quot;,
+&quot;Y&quot;, &quot;UP&quot;); </span></p>
+
+<p class=MsoNormal>In this second case the Objects are sorted according to
+their increasing values of <span class=Cdigo>X</span>. If two or more Objects
+have identical values on <span class=Cdigo>X</span>, then the Variable or
+Parameter <span class=Cdigo>Y</span> is used to sort them. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="add_an_object"></a><span class=Cdigo>object-&gt;add_an_object(&quot;Obj_Label&quot;)
+<br>
+object-&gt;add_an_object(&quot;Obj_Label&quot;, example) </span></h1>
+
+<p class=MsoNormal>These functions add a descendent to the Object <span
+class=Cdigo>object</span>. The new descendant is of type <span class=Cdigo>Obj_Label</span>,
 and is returned by the function. The first type initializes the new Object
 (that is, sets the values for its Parameters and Variables, including the
-lagged values) according to the values defined in the initialization file
-for the model. In case there are many Objects of type <font face="Courier New">Obj_Label</font>,
-the function considers the data for the very first Object in the data file
-for the model. The Variables are defined as if they were already updated
-in the current time step. In the second case, the function uses the <font face="Courier New,Courier">example</font>
-Object to initialize the newly created Object.
-<br>In case the new Object is defined as having descendants, the function
-builds the whole structure of its descendants. For each descendant type,
-the function creates one single instance, and initializes their values
-in the same way from the data file.
-<br>The function returns the address of the newly created Object, so that
-the modeller can add in the equation a customized initialization. See the
-function <font face="Courier New"><a href="#write">write</a></font> for
-changing the values of Variables (without using the equation) and of Parameters.
-<p>For example, you can have an equation for a Variable in the Object Market
-that contains the following lines:
-<p><font face="Courier New"><font size=-1>cur=p->add_an_object("Firm");</font></font>
-<br><font face="Courier New"><font size=-1>cur->write("DateBirth",(double)t,0);</font></font>
-<p>The lines above create a new Object Firm, which has the same initial
-data as the first Object in the model file. Then it modifies the Parameter
-DateBirth (not present in the actual example model), storing there the
-current time step. Note that the C++ variable t, expressing the time step
-of the simulation, is an integer Variable, and therefore needs to be explicitly
-declared as double (that is, double precision floating point variable in
-C++), because all the numerical values in Lsd are real numbers.
-<br>If, instead, you want to create new Firms from the equation of an Object
-which is not Market, from which the new Firm has to descend, then you need
-to use the following two lines:
-<p><font face="Courier New"><font size=-1>cur=p->search ("Market");</font></font>
-<br><font face="Courier New"><font size=-1>cur=cur->add_an_object("Firm");</font></font>
-<p>The use of the second type of function allows to initialize the values
-of the new Object equal to some example Object. For example, if you want
-to add a new Object in the Market identical to the highest productivity
-one you may write:
-<p><font face="Courier New"><font size=-1>v[0]=p->cal("A_MAX",0);</font></font>
-<br><font face="Courier New"><font size=-1>cur=p->search_var_cond("A",
-v[0], 0);</font></font>
-<br><font face="Courier New"><font size=-1>cur=p->add_an_object("Firm",
-cur);</font></font>
-<p>The first line obtains the value of the highest productivity among the
-existing Firms. Then, the function <font face="Courier New"><a href="#search_var_cond">search_var_cond(...)</a></font>
+lagged values) according to the values defined in the initialization file for
+the model. In case there are many Objects of type <span class=Cdigo>Obj_Label</span>,
+the function considers the data for the very first Object in the data file for
+the model. The Variables are defined as if they were already updated in the
+current time step. In the second case, the function uses the <span class=Cdigo>example</span>
+Object to initialize the newly created Object.</p>
+
+<p class=MsoNormal>In case the new Object is defined as having descendants, the
+function builds the whole structure of its descendants. For each descendant
+type, the function creates one single instance, and initializes their values in
+the same way from the data file.</p>
+
+<p class=MsoNormal>The function returns the address of the newly created
+Object, so that the modeler can add in the Equation a customized
+initialization. See the function <span class=Cdigo><a href="#write"><span
+style='color:gray;text-decoration:none'>write(…)</span></a></span> for changing
+the values of Variables (without using the Equation) and of Parameters. </p>
+
+<p class=MsoNormal>For example, you can have an Equation for a Variable in the
+Object <span class=Cdigo>Market</span> that contains the following lines: </p>
+
+<p class=MsoNormal><span class=Cdigo>cur=p-&gt;add_an_object(&quot;Firm&quot;);
+<br>
+cur-&gt;write(&quot;DateBirth&quot;,(double)t,0); </span></p>
+
+<p class=MsoNormal>The lines above create a new Object <span class=Cdigo>Firm</span>,
+which has the same initial data as the first Object in the model file. Then it
+modifies the Parameter <span class=Cdigo>DateBirth</span> (not present in the
+actual example model), storing there the current time step. Note that the C++
+variable <span class=Cdigo>t</span>, expressing the time step of the
+simulation, is an integer Variable, and therefore needs to be explicitly converted
+to double (that is, double precision floating point variable in C++), because
+all the numerical values in LSD are real numbers. </p>
+
+<p class=MsoNormal>If, instead, you want to create new firms from the Equation
+of an Object which is not <span class=Cdigo>Market</span>, from which the new firm
+has to descend, then you need to use the following two lines: </p>
+
+<p class=MsoNormal><span class=Cdigo>cur=p-&gt;search (&quot;Market&quot;); <br>
+cur=cur-&gt;add_an_object(&quot;Firm&quot;); </span></p>
+
+<p class=MsoNormal>The use of the second type of function allows initializing
+the values of the new Object equal to some example Object. For example, if you
+want to add a new Object in the Market identical to the highest productivity
+one you may write: </p>
+
+<p class=MsoNormal><span class=Cdigo>v[0]=p-&gt;cal(&quot;A_MAX&quot;,0); <br>
+cur=p-&gt;search_var_cond(&quot;A&quot;, v[0], 0); <br>
+cur=p-&gt;add_an_object(&quot;Firm&quot;, cur); </span></p>
+
+<p class=MsoNormal>The first line obtains the value of the highest productivity
+among the existing firms. Then, the function <span class=Cdigo><a
+href="#search_var_cond"><span style='color:gray;text-decoration:none'>search_var_cond(…)</span></a></span>
 returns the Object that has the same productivity as the maximum one. This
-Object is used as example for the creation of the new Firm. Note that the
-same temporary variable <font face="Courier New">cur</font> is used, firstly,
-to store the most productive Firm and then, both as example Object and
-as the new Object. This may seem strange to whom is not accustomed to C++,
-but it is perfectly safe. In fact, the content of the temporary variable
-cur has already been used when the function returns the newly created Object.
-<p>If the added Object is set to save its values, these are available for
-post-simulation Analysis of Result. The data concerning the periods before
-its introduction are filled with missing values.
-<p><i>Warning:</i>
-<br>The newly created Object must be added to a parent Object (that is,
-<font face="Courier New,Courier">object-></font>)
-which is already defined as having <font face="Courier New">Obj_Label</font>
-type of descendants.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="delete_obj"></a><b><font face="Courier New">object->delete_obj()</font></b>
-<br>This function deletes the Object <font face="Courier New">object</font>
+Object is used as example for the creation of the new Firm. Note that the same
+temporary variable <span class=Cdigo>cur</span> is used, firstly, to store the
+most productive Firm and then, both as example Object and as the new Object.
+This may seem strange to who is not accustomed to C++, but it is perfectly
+safe. In fact, the content of the temporary variable cur has already been used
+when the function returns the newly created Object. </p>
+
+<p class=MsoNormal>If the added Object is set to save its values, these are
+available for post-simulation Analysis of Result. The data concerning the
+periods before its introduction are filled with missing values. </p>
+
+<p class=MsoNormal><b>Warning:</b> The newly created Object must be added to a
+parent Object (that is, <span class=Cdigo>object-&gt;</span>) which is already
+defined as having <span class=Cdigo>Obj_Label</span> type of descendants. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="delete_obj"></a><span class=Cdigo>object-&gt;delete_obj() </span></h1>
+
+<p class=MsoNormal>This function deletes the Object <span class=Cdigo>object</span>
 from the model, removing it from the model and freeing the memory it was
-allocated for it. While its use is very simple, it should be used with
-care to avoid the elimination of data structure used in other parts of
-the model. For example, an equation must never use a line like the following:
-<p><font face="Courier New"><font size=-1>p->delete_obj(); //Serious error
-!!!</font></font>
-<p>In fact, eliminating the Object <font face="Courier New">p</font>, the
-function deletes also the Variable whose equation is being executed, resulting
-in unpredictable errors.
-<br>Normally, its use should be done as follows:
-<p><font face="Courier New"><font size=-1>for(cur=p->search("Firm"); cur!=NULL;
-)</font></font>
-<br><font face="Courier New"><font size=-1>{</font></font>
-<br><font face="Courier New"><font size=-1>v[0]=cur->cal("ToDie", 0);</font></font>
-<br><font face="Courier New"><font size=-1>cur1=go_brother(cur);</font></font>
-<br><font face="Courier New"><font size=-1>if(v[0]==1)</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;cur->delete_obj();</font></font>
-<br><font face="Courier New"><font size=-1>cur=cur1;</font></font>
-<p><font face="Courier New"><font size=-1>}</font></font>
-<p>The cycle above scans all Object labelled Firms and delete all the instances
-whose Variable <font face="Courier New">ToDie</font> is set to 1. It starts
-by assigning to the temporary Object <font face="Courier New,Courier">cur</font>
-the first element of type Firm, which is supposed to descend from the Object
-containing the Variable under computation. The cycle controls that the
-value of the Variable <font face="Courier New">ToDie</font>: if this is
-set to 1, then the Object is deleted. Note that the subsequent element
-of <font face="Courier New,Courier">cur</font> is stored in another temporary
-Object because, if <font face="Courier New,Courier">cur</font> is deleted,
-it cannot any longer provide the information on the following element of
-the list of descendants.
-<p>The data stored in the deleted Objects are always available for analysis
-at the end of the simulation, filling with missing values the periods after
-the deletion.
+allocated for it. While its use is very simple, it should be used with care to
+avoid the elimination of data structure used in other parts of the model. For
+example, an Equation must never use a line like the following: </p>
+
+<p class=MsoNormal><span class=Cdigo>p-&gt;delete_obj(); </span><span
+class=Cdigo><span style='color:#00B050'>//Serious error !!! </span></span></p>
+
+<p class=MsoNormal>In fact, eliminating the Object <span class=Cdigo>p</span>,
+the function deletes also the Variable whose Equation is being executed,
+resulting in unpredictable errors. </p>
+
+<p class=MsoNormal>Normally, its use should be done as follows: </p>
+
+<p class=MsoNormal><span class=Cdigo>for(cur=p-&gt;search(&quot;Firm&quot;);
+cur!=NULL; ) <br>
+{ <br>
+v[0]=cur-&gt;cal(&quot;ToDie&quot;, 0); <br>
+cur1=go_brother(cur); <br>
+if(v[0]==1) <br>
+&nbsp;cur-&gt;delete_obj(); <br>
+cur=cur1; <br>
+} </span></p>
+
+<p class=MsoNormal>The cycle above scans all Object labelled Firms and delete
+all the instances whose Variable <span class=Cdigo>ToDie</span> is set to 1. It
+starts by assigning to the temporary Object <span class=Cdigo>cur</span> the
+first element of type <span class=Cdigo>Firm</span>, which is supposed to
+descend from the Object containing the Variable under computation. The cycle
+controls that the value of the Variable <span class=Cdigo>ToDie</span>: if this
+is set to 1, then the Object is deleted. Note that the subsequent element of <span
+class=Cdigo>cur</span> is stored in another temporary Object because, if <span
+class=Cdigo>cur</span> is deleted, it cannot any longer provide the information
+on the following element of the list of descendants. </p>
+
+<p class=MsoNormal>The data stored in the deleted Objects are always available
+for analysis at the end of the simulation, filling with missing values the
+periods after the deletion. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=write></a><span class=Cdigo>object-&gt;write(&quot;Var&quot;,
+new_value, time) </span></h1>
+
+<p class=MsoNormal>This function writes the value <span class=Cdigo>new_value</span>
+in the Variable <span class=Cdigo>Var</span> and sets the time of last update
+at <span class=Cdigo>time</span>. That is, after to function is executed, the
+Variable <span class=Cdigo>Var</span> will result as if its last computation
+had been executed at time <span class=Cdigo>time</span>, and the result of the Equation
+were <span class=Cdigo>new_value</span>. If the label <span class=Cdigo>Var</span>
+corresponds to a Parameter, the field time is ignored. The Variable must be
+contained in the Object <span class=Cdigo>object</span>, otherwise the
+functions returns an error and stops the simulation. </p>
+
+<p class=MsoNormal>This function can be very useful to implement complex
+situations, but it should be used with extreme care because it disrupts the
+automatic system of controls for the execution of the Equations. If the
+function concerns a Parameter, the field <span class=Cdigo>time</span><span
+style='font-family:"Courier New"'> </span>is ignored. The most frequent use of <span
+class=Cdigo>write</span> concerns the initialization of newly added Objects. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=search></a><span class=Cdigo>object-&gt;search(&quot;Obj_Label&quot;)
+</span></h1>
+
+<p>This function explores one single branch of the model searching for the
+first instance of the Object <span class=Cdigo>Obj_Label</span><span
+style='font-family:"Courier New"'>.</span> That is, it searches only within the
+descendants of <span class=Cdigo>object</span> and their descendants.
+Therefore, the search is not exhaustive all over the model, unless it is
+started from the <span class=Cdigo>Root</span> of the model. It returns the
+address of the found Object or <span class=Cdigo>NULL</span> if no Object is
+found. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="go_brother"></a><span class=Cdigo>go_brother(object) </span></h1>
+
+<p class=MsoNormal>This function is not defined as a member of class object. It
+considers the type of the object <span class=Cdigo>object</span> passed as
+parameter and returns the following element in the list whose object is part
+of, only if this following element is of the same type of object. It returns <span
+class=Cdigo>NULL</span> in case a different object follows object or in case
+object is the last of the list. </p>
+
+<p class=MsoNormal>This function is very useful when the Equation has to treat
+sequentially a set of object of the same type. This same function is used, for
+example, to implement the function <span class=Cdigo>sum(…)</span> described
+above. The function <span class=Cdigo>sum</span> could in fact be written in an
+Equation as follows:</p>
+
+<p class=MsoNormal><span class=Cdigo>for(v[0]=0,
+cur=p-&gt;search(&quot;Obj&quot;); cur!=NULL; cur=go_brother(cur) ) <br>
+v[0]=v[0]+cur-&gt;cal(&quot;VarToSum&quot;,0); </span></p>
+
+<p class=MsoNormal>where <span class=Cdigo>Obj</span> is the name of the Object
+containing the Variables to be summarized.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=v></a><span class=Cdigo>v[n]</span></h1>
+
+<p class=MsoNormal>The standard way to express an Equation is to collect a set
+of data from the model and then to elaborate them to provide the desired value.
+Since the LSD function to collect data may be quite long, it is good practice
+to store values to be used in a numerical vector: </p>
+
+<p class=MsoNormal><span class=Cdigo>if(!strcmp(label, &quot;PROF&quot;)) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***************************
 <br>
-<hr WIDTH="100%">
-<p><a NAME="write"></a><b><font face="Courier New">object->write("Var",
-new_value, time)</font></b>
-<p>This function writes the value <font face="Courier New">new_value</font>
-in the Variable <font face="Courier New">Var</font> and sets the time of
-last update at <font face="Courier New">time</font>. That is, after to
-function is executed, the Variable <font face="Courier New">Var</font>
-will result as if its last computation had been executed at time <font face="Courier New">time</font>,
-and the result of the equation were <font face="Courier New">new_value</font>.
-If the label <font face="Courier New">Var</font> corresponds to a Parameter,
-the field time is ignored. The Variable must be contained in the Object
-<font face="Courier New">object</font>,
-otherwise the functions returns an error and stops the simulation.
-<br>This function can be very useful to implement complex situations, but
-it should be used with extreme care because it disrupts the automatic system
-of controls for the execution of the equations. If the function concerns
-a Parameter, the field <font face="Courier New,Courier">time </font>is
-ignored. The most frequent use of <font face="Courier New,Courier">write</font>
-concerns the initialization of newly added Objects.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="search"></a><b><font face="Courier New">object->search("Obj_Label")</font></b>
-<br>This function explores one single branch of the model searching for
-the first instance of the Object <font face="Courier New">Obj_Label.</font>
-That is, it searches only within the descendants of <font face="Courier New">object</font>
-and their descendants. Therefore, the search is not exhaustive over all
-the
-model, unless it is started from the <font face="Courier New">Root</font>
-of the model. It returns the address of the found Object or NULL if no
-Object is found.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="go_brother"></a><b><font face="Courier New">go_brother(object)</font></b>
-<br>This function is not defined as a member of class object. It considers
-the type of the object <font face="Courier New">object</font> passed as
-parameter and returns the following element in the list whose object is
-part of, only if this following element is of the same type of object.
-It returns NULL in case a different object follows object or in case object
-is the last of the list.
-<p>This function is very useful when the equation has to treat sequentially
-a set of object of the same type. This same function is used, for example,
-to implement the function sum() described above. The function sum could
-in fact be written in an equation as follows:
-<br>&nbsp;
-<p><font face="Courier New"><font size=-1>for(v[0]=0, cur=p->search("Obj");
-cur!=NULL; cur=go_brother(cur) )</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;v[0]=v[0]+cur->cal("VarToSum",0);</font></font>
-<p>where <font face="Courier New">Obj</font> is the name of the Object
-containing the Variables to be summarized.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="v"></a><b><font face="Courier New,Courier">v[n]</font></b>
-<br>The standard way to express an equation is to collect a set of data
-from the model and then to elaborate them to provide the desired value.
-Since the Lsd function to collect data may be quite long, it is good practice
-to store values to be used in a numerical vector:
-<p><tt>if(!strcmp(label, "PROF"))</tt>
-<br><tt>{</tt>
-<br><tt>/***************************</tt>
-<p><tt>The equation computes the profit rate:</tt>
-<br><tt>PROF(t) = P(t) * A(t-1) -C -RIM - RIN*Inn</tt>
-<p><tt>profits per unit of capital are equal current price times lagged
-productivity</tt>
-<br><tt>minus the cost for research (innovative firms spend for both type</tt>
-<br><tt>of research) and fixed costs.</tt>
-<p><tt>***************************/</tt>
-<br><tt>&nbsp;&nbsp; v[0]=p->cal("Price", 0);</tt>
-<br><tt>&nbsp;&nbsp; v[1]=p->cal("A", 1);</tt>
-<br><tt>&nbsp;&nbsp; v[2]=p->cal("RIM", 0);</tt>
-<br><tt>&nbsp;&nbsp; v[3]=p->cal("RIN", 0);</tt>
-<br><tt>&nbsp;&nbsp; v[4]=p->cal("Inn",0);</tt>
-<br><tt>&nbsp;&nbsp; v[5]=p->cal("C",0);</tt>
-<p><tt>&nbsp; res=(v[0]*v[1] - v[5] - v[2] - v[3]*v[4]);</tt>
-<br><tt>&nbsp; goto end;</tt>
-<br><tt>}</tt>
-<p>The values of <font face="Courier New,Courier">v[n]</font> are reset
-for each equation, and therefore cannot be used to transfer information
-from one equation to another.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="increment"></a><b><font face="Courier New,Courier">object->increment("VarLabel",
-value)</font></b>
-<br>This function works only if <font face="Courier New,Courier">VarLabel</font>
-is contained in <font face="Courier New,Courier">object-</font>>, otherwise
-produces an error. It adds to the current value of <font face="Courier New,Courier">VarLabel</font>
-the value of <font face="Courier New,Courier">value</font>. The function
-returns the new value after the increment. This function should be used
-only with Parameters, for the same reasons explained in the functions <a href="#write">write.</a>
-<p>
-<hr WIDTH="100%">
-<p><a NAME="multiply"></a><b><font face="Courier New,Courier">object->multiply("VarLabel",
-value)</font></b>
-<br>This function works only if <font face="Courier New,Courier">VarLabel</font>
-is contained in <font face="Courier New,Courier">object-</font>>, otherwise
-produces an error. It multiplies the current value of <font face="Courier New,Courier">VarLabel</font>
-times the value of <font face="Courier New,Courier">value</font>. The function
-returns the new value after the product.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="lastupdate"></a><b><font face="Courier New,Courier">lastupdate</font></b>
-<br>This is a field of Variable. It contains the simulation date of the
-latest time the Variable has executed its equation to update its value.
-Normally modellers should not fiddle with this value, since they risk to
-disrupt the automatic scheduling system implemented in Lsd. However, there
-is one case when this is necessary. In fact, by default in Lsd a Variable
-computes its value (and therefore executes its equation code) only once
-at each time step. But in some cases the modeller needs to have one equation
-repeated many times during the same time step. This is the case, for example,
-when a Variable provides some particular random value. In this case it
-is likely that the Variable value is requested many times during the same
-time step. And in each case the equation code must draw a different value.
-The example below shows the equation for a Variable that returns a uniform
-random function. Suppose that the model contains an Object with the two
-Parameters <font face="Courier New,Courier">UpperLimit </font>and <font face="Courier New,Courier">LowerLimit</font>,
-besides a Variable that requests the value for the Uniform:
-<br><tt>if(!strcmp(label, "Uniform"))</tt>
-<br><tt>{</tt>
-<br><tt>/***************************</tt>
-<br><tt>Return a Uniform value</tt>
-<p><tt>***************************/</tt>
-<br><tt>last_update--;//repeat the computation any time is requested</tt>
-<br><tt>if(c==NULL)//Avoids to be computed when the system activates the
-equation</tt>
-<br><tt>{</tt>
-<br><tt>&nbsp;res=-1;</tt>
-<br><tt>&nbsp;goto end;</tt>
-<br><tt>}</tt>
-<br><tt>v[0]=c->cal("UpperLimit", 0);</tt>
-<br><tt>v[1]=c->cal("LowerLimit", 0);</tt>
-<p><tt>res=v[0]+RND*(v[1] - v[0]);</tt>
-<br><tt>goto end;</tt>
-<br><tt>}</tt>
-<p>Note that the equation returns default value when it is not requested
-by any other Variable, that is, when the Object <font face="Courier New,Courier">c-></font>
-is NULL.
-<p>
-<hr WIDTH="100%">
-<p><a NAME="rnd"></a><b><font face="Courier New,Courier">Math and other
-functions</font></b>
-<br>Besides the Lsd specific function modellers can use one of the following
-random and mathematical functions. Of course, it is always possible to
-declare new functions or link to the Lsd model any C++ library.
-<ul>
-<li>
-<b><font face="Courier New,Courier">abs(a)</font></b>: return the absolute
-value of a;</li>
+The equation computes the profit rate: <br>
+PROF(t) = P(t) * A(t-1) -C -RIM - RIN*Inn <br>
+profits per unit of capital are equal current price times lagged productivity <br>
+minus the cost for research (innovative firms spend for both type <br>
+of research) and fixed costs. <br>
+***************************/ </span></span></p>
 
-<li>
-<b><font face="Courier New,Courier">min(a,b)</font></b>: return the minimum
-between a and b;</li>
+<p class=MsoNormal><span class=Cdigo>v[0]=p-&gt;cal(&quot;Price&quot;, 0); <br>
+v[1]=p-&gt;cal(&quot;A&quot;, 1); <br>
+v[2]=p-&gt;cal(&quot;RIM&quot;, 0); <br>
+v[3]=p-&gt;cal(&quot;RIN&quot;, 0); <br>
+v[4]=p-&gt;cal(&quot;Inn&quot;,0); <br>
+v[5]=p-&gt;cal(&quot;C&quot;,0); </span></p>
 
-<li>
-<b><font face="Courier New,Courier">max(a,b)</font></b>: return the maximum
-between a and b;</li>
+<p class=MsoNormal><span class=Cdigo>res=(v[0]*v[1] - v[5] - v[2] - v[3]*v[4]);
+<br>
+goto end; <br>
+} </span></p>
 
-<li>
-<b><font face="Courier New,Courier">round(a)</font></b>: return the integer
-closest to the real value <font face="Courier New,Courier">a</font>;</li>
+<p class=MsoNormal>The values of <span class=Cdigo>v[n]</span> are reset for
+each Equation, and therefore cannot be used to transfer information from one Equation
+to another. </p>
 
-<li>
-<b><font face="Courier New,Courier">exp(a)</font></b>: return the exponential
-of a;</li>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
-<li>
-<b><font face="Courier New,Courier">log(a)</font></b>: return the natural
-log of a;</li>
+<h1><a name=increment></a><span class=Cdigo>object-&gt;increment(&quot;VarLabel&quot;,
+value) </span></h1>
 
-<li>
-<b><font face="Courier New,Courier">sqrt(a)</font></b>: return the square
-root of a;</li>
+<p class=MsoNormal>This function works only if <span class=Cdigo>VarLabel</span>
+is contained in <span class=Cdigo>object-&gt;</span>, otherwise produces an
+error. It adds to the current value of <span class=Cdigo>VarLabel</span> the
+value of <span class=Cdigo>value</span>. The function returns the new value
+after the increment. This function should be used only with Parameters, for the
+same reasons explained in the functions <span class=Cdigo><a href="#write"><span
+style='color:gray;text-decoration:none'>write(…)</span></a></span>. </p>
 
-<li>
-<b><font face="Courier New,Courier">pow(a,b)</font></b>: return the power
-b of a;</li>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
-<li>
-<b><font face="Courier New,Courier">RND: </font></b>This function (is actualy
-a macro) produces a random uniform value in the interval [0,1].</li>
+<h1><a name=multiply></a><span class=Cdigo>object-&gt;multiply(&quot;VarLabel&quot;,
+value) </span></h1>
 
-<li>
-<b><font face="Courier New,Courier">rnd_integer(min, max)</font></b>: return
-a random integer value in the interval [min, max] with uniform probability</li>
+<p class=MsoNormal>This function works only if <span class=Cdigo>VarLabel</span>
+is contained in <span class=Cdigo>object-&gt;</span>, otherwise produces an
+error. It multiplies the current value of <span class=Cdigo>VarLabel</span>
+times the value of <span class=Cdigo>value</span>. The function returns the new
+value after the product. </p>
 
-<li>
-<b><font face="Courier New,Courier">norm(mean,dev)</font></b>: return a
-random value drawn from a normal random function with mean <font face="Courier New,Courier">mean</font>
-and deviation <font face="Courier New,Courier">dev</font>;</li>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
-<li>
-<b><font face="Courier New,Courier">poisson(mean)</font></b>: return a
-draw from a poisson random function with mean <font face="Courier New,Courier">mean</font>;</li>
+<h1><a name=lastupdate></a><span class=Cdigo>lastupdate </span></h1>
 
-<li>
-<b><font face="Courier New,Courier">gamma(mean)</font></b>: return a draw
-from a gamma random function with mean <font face="Courier New,Courier">mean</font>;</li>
-</ul>
+<p>This is a field of Variable. It contains the simulation data about the
+latest time the Variable has executed its Equation to update its value.
+Normally modelers should not fiddle with this value, since they risk disrupting
+the automatic scheduling system implemented in LSD. However, there is one case
+when this is necessary. In fact, by default in LSD a Variable computes its
+value (and therefore executes its Equation code) only once at each time step. </p>
 
-<hr WIDTH="100%">
-<p><a NAME="draw_rnd"></a><b><font face="Courier New,Courier">object->draw_rnd("ObjLabel",
-"VarLabel", lag)</font></b>
-<br><b><font face="Courier New,Courier">object->draw_rnd("ObjLabel", "VarLabel",
-lag, total)</font></b>
-<br>This function searches for a group of Objects <font face="Courier New,Courier">ObjLabel</font>,
-then computes the values of <font face="Courier New,Courier">VarLabel</font>
+<p>But in some cases the modeler needs to have one Equation repeated many times
+during the same time step. This is the case, for example, when a Variable
+provides some particular random value. In this case it is likely that the
+Variable value is requested many times during the same time step. And in each
+case the Equation code must draw a different value. The example below shows the
+Equation for a Variable that returns a uniform random function. Suppose that
+the model contains an Object with the two Parameters <span class=Cdigo>UpperLimit</span><span
+style='font-family:"Courier New"'> </span>and <span class=Cdigo>LowerLimit</span>,
+besides a Variable that requests the value for the Uniform: </p>
+
+<p><span class=Cdigo>if(!strcmp(label, &quot;Uniform&quot;)) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***************************
+<br>
+Return a Uniform value <br>
+***************************/ <br>
+</span>last_update--; </span><span class=Cdigo><span style='color:#00B050'>//repeat
+the computation any time is requested </span><br>
+if(c==NULL)   </span><span class=Cdigo><span style='color:#00B050'>//Avoids to
+be computed when the system activates the equation </span><br>
+{ <br>
+  res=-1; <br>
+  goto end; <br>
+} <br>
+v[0]=c-&gt;cal(&quot;UpperLimit&quot;, 0); <br>
+v[1]=c-&gt;cal(&quot;LowerLimit&quot;, 0); <br>
+res=v[0]+RND*(v[1] - v[0]); <br>
+goto end; <br>
+} </span></p>
+
+<p class=MsoNormal>Note that the Equation returns default value when it is not
+requested by any other Variable, that is, when the Object <span class=Cdigo>c-&gt;</span>
+is <span class=Cdigo>NULL</span>. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=rnd></a>Math and other functions </h1>
+
+<p class=MsoNormal>Besides the LSD specific function modelers can use one of
+the following random and mathematical functions. Of course, it is always
+possible to declare new functions or link to the LSD model any C++ library. </p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>abs(a)</span>: return the absolute value of a;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>min(a,b)</span>: return the minimum between a
+and b;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>max(a,b)</span>: return the maximum between a
+and b;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>round(a)</span>: return the integer closest to
+the real value <span style='font-family:"Courier New"'>a</span>;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>exp(a)</span>: return the exponential of a;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>log(a)</span>: return the natural log of a;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>sqrt(a)</span>: return the square root of a;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>pow(a,b)</span>: return the power b of a;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>RND</span><b><span style='font-family:"Courier New"'>:
+</span></b>This function (is actualy a macro) produces a random uniform value
+in the interval [0,1].</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>rnd_integer(min, max)</span>: return a random
+integer value in the interval [<span class=Cdigo>min</span>, <span class=Cdigo>max</span>]
+with uniform probability</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>norm(mean,dev)</span>: return a random value
+drawn from a normal random function with mean <span class=Cdigo>mean</span> and
+deviation <span class=Cdigo>dev</span>;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>poisson(mean)</span>: return a draw from a
+poisson random function with mean <span class=Cdigo>mean</span>;</p>
+
+<p class=MsoListParagraph style='margin-left:54.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>gamma(mean)</span>: return a draw from a gamma
+random function with mean <span class=Cdigo>mean</span> and order 1.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="draw_rnd"></a><span class=Cdigo>object-&gt;draw_rnd(&quot;ObjLabel&quot;,
+&quot;VarLabel&quot;, lag) <br>
+object-&gt;draw_rnd(&quot;ObjLabel&quot;, &quot;VarLabel&quot;, lag, total) </span></h1>
+
+<p class=MsoNormal>This function searches for a group of Objects <span
+class=Cdigo>ObjLabel</span>, then computes the values of <span class=Cdigo>VarLabel</span>
 for each of them. It returns the address of one of the Objects of the group
-chosen randomly with probability linearly dependent on the value of <font face="Courier New,Courier">VarLabel</font>.
-The version of the function with total assumes that the latter value is
-equal to the sum of all VarLabel in the group, and is faster.
-<br>The following example c an equation for a Variable stored in an Object
-that contains a group of descending Objects Firm. The code assigns to the
-Parameter Prob in each Firm the square of their market shares and then
-draws randomly one of them, returning its identification number.
-<br>&nbsp;
-<p><tt>if(!strcmp(label, "DrawAFirm"))</tt>
-<br><tt>{</tt>
-<br><tt>/***************************</tt>
-<br><tt>Return the Id of a Firm chosen randomly with probability</tt>
-<br><tt>equal to the square of the market shares.</tt>
-<p><tt>***************************/</tt>
-<br><font face="Courier New"><font size=-1>for(cur=p->search("Firm"); cur!=NULL;
-cur=go_brother(cur);)</font></font>
-<br><font face="Courier New"><font size=-1>{</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;v[0]=cur->cal("ms", 0);</font></font>
-<br><font face="Courier New"><font size=-1>&nbsp;cur->write("Prob",v[0]*v[0],0);</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
-<p><font face="Courier New"><font size=-1>cur=p->draw_rnd("Firm","Prob",0);</font></font>
-<br><font face="Courier New"><font size=-1>res=cur->cal("IdFirm",0);</font></font>
-<br><font face="Courier New"><font size=-1>goto end;</font></font>
-<br><font face="Courier New"><font size=-1>}</font></font>
+chosen randomly with probability linearly dependent on the value of <span
+class=Cdigo>VarLabel</span>. The version of the function with total assumes
+that the latter value is equal to the sum of all <span class=Cdigo>VarLabel</span>
+in the group, and is faster.</p>
+
+<p class=MsoNormal>The following example is an Equation for a Variable stored
+in an Object that contains a group of descending Objects <span class=Cdigo>Firm</span>.
+The code assigns to the Parameter <span class=Cdigo>Prob</span> in each <span
+class=Cdigo>Firm</span> the square of their market shares and then draws
+randomly one of them, returning its identification number.</p>
+
+<p class=MsoNormal><span class=Cdigo>if(!strcmp(label, &quot;DrawAFirm&quot;)) <br>
+{ <br>
+</span><span class=Cdigo><span style='color:#00B050'>/***************************
 <br>
-<hr WIDTH="100%">
-<br>&nbsp;
-<p><a NAME="advanced"></a><b><font size=+1>Advanced Lsd coding</font></b>
-<br><b>close_sim()</b>
-<br>At the end of each simulation run modellers can execute some specific
-code. Typically, this is used to free some memory allocated during the
-simualation run. At the end of the file for the equation is located the
-function close_sim() where such code can be placed. By default this function
-does nothing.
-<p><b>global variable 't'</b>
-<br>This variable indicates the current time step of the simulation. Note
-that this is an integer variable, so that to assign its value to one of
-the Lsd function, requiring real numbers, it is necessary to use a cast.
-For example:
-<br><tt>v[9]=(double)t;</tt>
-<p>
-<hr WIDTH="100%">
-<p><a NAME="basicc"></a><b><font size=+1>Basic C++ structures</font></b>
-<br>Any C++ expression can be embedded in a Lsd equations. In the following
-are listed the most frequently used.
-<p><b><font face="Courier New,Courier">if (CONDITION) { commands1 } else
-{ command2 }</font></b>
-<br>This is the basic conditional statement. CONDITION can be: >, &lt;,
-== (equal), != (different). commands1 and commands2 can be any set of commands,
-with the first executed only of CONDITION is true and commands2 executed
-only if it is false. If there is only one line of commands, the brackets
-can be avoided.
-<p><b><font face="Courier New,Courier">for(commands_init; CONDITION; commands_end}
-{commands }</font></b>
-<br>Execute cyclically commands until <tt>CONDITION</tt> is true. Before
-the beginning of the cycle <tt>commands_init</tt> are executed. At the
-end of every cycle <tt>commands_end</tt> are executed. When the program
-encounters this line the program executes the following steps:
-<ol>
-<li>
-execute <tt>commands_init</tt></li>
+Return the Id of a Firm chosen randomly with probability <br>
+equal to the square of the market shares. <br>
+***************************/ <br>
+</span>for(cur=p-&gt;search(&quot;Firm&quot;); cur!=NULL; cur=go_brother(cur);)
+<br>
+{ <br>
+&nbsp;v[0]=cur-&gt;cal(&quot;ms&quot;, 0); <br>
+&nbsp;cur-&gt;write(&quot;Prob&quot;,v[0]*v[0],0); <br>
+} <br>
+cur=p-&gt;draw_rnd(&quot;Firm&quot;,&quot;Prob&quot;,0); <br>
+res=cur-&gt;cal(&quot;IdFirm&quot;,0); <br>
+goto end; <br>
+} </span></p>
 
-<li>
-if <tt>CONDITION</tt> is true execute <tt>commands</tt>, otherwise end
-the cycle and continue the program after <tt>commands</tt></li>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
 
-<li>
-execute <tt>commands_end</tt></li>
+<h1><a name=advanced></a>Advanced LSD coding </h1>
 
-<br>return to 2.</ol>
+<h2><span class=Cdigo>close_sim() </span></h2>
+
+<p class=MsoNormal>At the end of each simulation run modelers can execute some
+specific code. Typically, this is used to free some memory allocated during the
+simulation run. At the end of the file for the Equation is located the function
+<span class=Cdigo>close_sim()</span> where such code can be placed. By default
+this function does nothing. </p>
+
+<p><b>Global variable </b><span class=Cdigo><b>t</b></span> </p>
+
+<p class=MsoNormal>This variable indicates the current time step of the
+simulation. Note that this is an integer variable, so that to assign its value
+to one of the LSD function, requiring real numbers, it may be necessary to use
+a cast. For example: </p>
+
+<p class=MsoNormal><span class=Cdigo>v[9]=(double)t; </span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=basicc></a>Basic C++ structures </h1>
+
+<p>Any C++ expression can be embedded in a LSD Equations. In the following are
+listed the most frequently used. </p>
+
+<h2><span class=Cdigo>if (CONDITION) { commands1 } else { command2 } </span></h2>
+
+<p>This is the basic conditional statement. <span class=Cdigo>CONDITION</span> can
+be: <span class=Cdigo>&gt;</span>, <span class=Cdigo>&lt;</span>, <span
+class=Cdigo>==</span> (equal), <span class=Cdigo>!=</span> (different). <span
+class=Cdigo>commands1</span> and <span class=Cdigo>commands2</span> can be any
+set of commands, with the first executed only if <span class=Cdigo>CONDITION</span>
+is true and <span class=Cdigo>commands2</span> executed only if it is false. If
+there is only one line of commands, the brackets can be avoided. </p>
+
+<h2><span class=Cdigo>for(commands_init; CONDITION; commands_end} {commands } </span></h2>
+
+<p>Execute cyclically commands until <span class=Cdigo>CONDITION</span> is
+true. Before the beginning of the cycle <span class=Cdigo>commands_init</span> are
+executed. At the end of every cycle <span class=Cdigo>commands_end</span> are
+executed. When the program encounters this line the program executes the
+following steps: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>execute <span class=Cdigo>commands_init</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>if <span class=Cdigo>CONDITION</span> is true execute <span class=Cdigo>commands</span>,
+otherwise end the cycle and continue the program after <span class=Cdigo>commands</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><tt><span
+style='font-family:"Arial","sans-serif"'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span></tt>execute <span class=Cdigo>commands_end</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'>4)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>return to step 2.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+
+</div>
 
 </body>
+
 </html>

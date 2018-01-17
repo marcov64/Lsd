@@ -1,21 +1,168 @@
-<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
+
 <head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=iso-8859-1">
-  <meta name="Author" content="Marco Valente">
-  <meta name="GENERATOR"
- content="Mozilla/4.5 [it] (WinNT; I) [Netscape]">
-  <title>Lsd Debugging Utility</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 14 (filtered)">
+<title>LSD Debugger</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+h1
+	{mso-style-link:"Título 1 Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:14.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+h2
+	{mso-style-link:"Título 2 Char";
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Título 3 Char";
+	margin-top:36.0pt;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-link:"Título Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	text-align:center;
+	font-size:18.0pt;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+tt
+	{font-family:"Courier New";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Texto de balão Char";
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+span.Ttulo1Char
+	{mso-style-name:"Título 1 Char";
+	mso-style-link:"Título 1";
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.Ttulo2Char
+	{mso-style-name:"Título 2 Char";
+	mso-style-link:"Título 2";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.Ttulo3Char
+	{mso-style-name:"Título 3 Char";
+	mso-style-link:"Título 3";
+	font-family:"Arial","sans-serif";
+	font-weight:bold;}
+span.TtuloChar
+	{mso-style-name:"Título Char";
+	mso-style-link:Título;
+	font-family:"Arial","sans-serif";
+	color:#254061;
+	font-weight:bold;}
+span.TextodebaloChar
+	{mso-style-name:"Texto de balão Char";
+	mso-style-link:"Texto de balão";
+	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-right:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Arial","sans-serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0cm;
+	margin-left:0cm;
+	font-size:10.0pt;
+	font-family:"Arial","sans-serif";}
+span.Cdigo
+	{mso-style-name:Código;
+	font-family:"Courier New";
+	color:gray;}
+.MsoChpDefault
+	{font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+<link rel=icon href="image/lsd.png">
+<meta name=Author content="LSD - Laboratory for Simulation Development">
+
+<iframe name=navbar src=navbar.html scrolling=no style='position:fixed;
+ border-bottom-style:none;border-left-style:none;border-right-style:none;
+ border-top-style:none;height:55px;left:0in;overflow:hidden;right:0in;
+ top:0in;width:100%'>
+</iframe>
+
 </head>
-<body alink="#ff0000" bgcolor="#ffffff" link="#0000ee" text="#000000"
- vlink="#551a8b">
-<center><font size="-1"><a href="TOC.html">HyperManual</a> <a
- href="windows.html">Lsd
-Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font><a name="top"></a>
-<p><b><font size="+2">Lsd Debugger</font></b></p>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=WordSection1>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<center>
+<p><b><font size="+2">LSD Debugger</font></b></p>
 </center>
-<p><img src="debugger.png" align="left" height="477" hspace="15"
+<p><img src="image/debugger.png" align="left" height="477" hspace="15"
  width="522">
 <br>
 &nbsp;
@@ -24,40 +171,22 @@ Windows</a> <a href="FAQs.html">Lsd FAQ's</a></font><a name="top"></a>
   <li> <a href="#operate">How to operate the Debugger</a></li>
   <li> <a href="#activate">How to activate the Debugger</a></li>
   <li> <a href="#comments">Comments on using the debugger</a></li>
-  <li> <a href="#simman">Lsd Simulation Manager</a></li>
+  <li> <a href="#simman">LSD Simulation Manager</a></li>
 </ul>
 <br>
 &nbsp;
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<br>
-&nbsp;
-<p></p>
-<hr width="100%"><br>
 <a name="activate"></a><b>How to activate the Debugger</b>
 <p>The Debugger starts when two conditions are met:
 </p>
@@ -87,7 +216,7 @@ Mode when, during a debugging session, the user click on <a href="#run">button
 Run</a> to continue a simulation (or Quit to abort a simulation).
 <p>A Variable is marked to be debugged before a simulation using a the
 main
-<a href="browser.html">Lsd Browser</a>, by double-clicking on the
+<a href="browser.html">LSD Browser</a>, by double-clicking on the
 Variable in the <b>Variables</b> list. In this case, the option chosen
 is set for all the copies of that Variable (i.e. all the Variables
 contained
@@ -116,7 +245,18 @@ mark
 for debugging on the Variable having a conditional break.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="operate"></a><b>How to operate the Debugger Window</b>
 <br>
 The window shows the content of a single copy of an Object, that is
@@ -126,26 +266,26 @@ to be interrupted. The <a href="#top">Debugger window</a> is composed
 by:
 <ul>
   <li>the <a href="#help">Help</a> menu;</li>
-  <li>a <a href="#title">title</a> row:&nbsp;<img src="tit_debug.png"
+  <li>a <a href="#title">title</a> row:&nbsp;<img src="image/tit_debug.png"
  align="middle" height="29" width="380"></li>
 </ul>
 <ul>
   <li>a <a href="#simulation">simulation control buttons</a> row
-:&nbsp;<img src="contr_debugger.png" align="middle" height="37"
+:&nbsp;<img src="image/contr_debugger.png" align="middle" height="37"
  width="484"></li>
 </ul>
 <ul>
   <li>a set of <a href="#browse">model browsing buttons</a> :&nbsp;<img
- src="browse_debugger.png" height="35" width="372"></li>
+ src="image/browse_debugger.png" height="35" width="372"></li>
   <li>the <a href="#name">type and instance number</a> of the Object
 shown
-:&nbsp;<img src="inst_debugger.png" align="middle" height="53"
+:&nbsp;<img src="image/inst_debugger.png" align="middle" height="53"
  width="190"><b>NEW</b>:
 Change the number of Objects</li>
 </ul>
 <ul>
   <li> <a href="#content">content of the shown Object</a>,&nbsp;<img
- src="linedebugger.png" align="middle" height="64" width="251"><b>NEW:</b>
+ src="image/linedebugger.png" align="middle" height="64" width="251"><b>NEW:</b>
 Set all values in the model for the selected item</li>
   <br>
 from which it is possible to check and edit the numerical values of
@@ -154,7 +294,18 @@ simulation breaks</a>
 </ul>
 <p><br>
 </p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="help"></a><b>menu Help</b>
 <br>
 This menu permits to access this Help page, and the model specific
@@ -167,7 +318,17 @@ code used to compute the equation for the Variable that caused the
 simulation
 to be interrupted.
 <br>
-<hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
 <a name="title"></a><b><font size="+1">Title</font></b>
 <br>
@@ -176,13 +337,24 @@ simulation
 to be interrupted, its just computed value (that can be modified) and
 the
 current time step of the simulation.
-<center><img src="tit_debug.png" height="29" width="380"></center>
+<center><img src="image/tit_debug.png" height="29" width="380"></center>
 <p>This line is not present in the <a href="menudata.html">Data Browse
 </a>window,
 replaced by the button to exit the Data Browsing session.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="simulation"></a><b><i><font size="+1">Simulation Control
 Buttons</font></i></b>
 <br>
@@ -196,7 +368,7 @@ Control buttons)</a>
 <br>
 Set on and off the option to issue information on the stack, useful
 to determine the actual order of execution of the equations. See <a
- href="#simman">Lsd
+ href="#simman">LSD
 simulation manager</a>.
 </p>
 <p><a name="printstack"></a><b>Print Stack</b> <a href="#browse">(in
@@ -284,14 +456,25 @@ previous
 time step.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="name"></a><b><i><font size="+1">Object type and list of
 ancestors</font></i></b>
 <br>
 These labels tell the name of the Object shown and its position in
 the model structure.
-<p><img src="inst_debugger.png" align="left" height="53" width="190"></p>
-<p>This <a href="#top">Debugger window</a> works similarly to the Lsd
+<p><img src="image/inst_debugger.png" align="left" height="53" width="190"></p>
+<p>This <a href="#top">Debugger window</a> works similarly to the LSD
 main
 <a href="browser.html">Browser</a>
 in showing the Object content, but consider one single copy of an
@@ -316,7 +499,18 @@ example instance to use. See the <a
 page to edit </a>the number of Objects in the model.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="browse"></a><b><i><font size="+1">Model Browsing Buttons</font></i></b>
 <br>
 The <a href="#top">Debugger window</a> starts by showing the content
@@ -324,15 +518,15 @@ of the Object whose Variable caused the simulation to stop. Users can
 then
 move the Debugger to show any other Object (this may be relevant for
 understanding
-the actual working of Lsd equations; see the help page on <a
+the actual working of LSD equations; see the help page on <a
  href="LSD_functions.html#objeq">using
-Objects&nbsp; in Lsd equations)</a>.
+Objects&nbsp; in LSD equations)</a>.
 <p>A set of buttons is used to browse through the model. Note the the
 model
 is shown "physically", and therefore user can explore each individual
 instance
 for each Object, and not only one representative element as in the main
-Lsd Model Browser.
+LSD Model Browser.
 </p>
 <p><b>Up</b> <a href="#browse">(in Debugger browsing buttons)</a>
 <br>
@@ -391,7 +585,7 @@ element in a group of Object). If more than one Object type contains
 the
 requested variable with the requested value, the system shows the
 "closest"
-one. In Lsd, the distance among Objects is computed according to the
+one. In LSD, the distance among Objects is computed according to the
 number
 of Objects necessary to pass through using the following research
 strategy:
@@ -402,18 +596,29 @@ strategy:
 <br>
 - explore the ancestor; explore the "siblings" of the ancestor etc.
 <br>
-See Lsd function <b><font face="Arial, helvetica">search_var(&#8230;)</font></b>
-in the Modellers Manual or the function <a href="LSD_functions.html#cal">cal(...)</a>
+See LSD function <b><font face="Arial, helvetica">search_var(&#8230;)</font></b>
+in the Modelers Manual or the function <a href="LSD_functions.html#cal">cal(...)</a>
 for further details.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="content"></a><b><i><font size="+1">Object Content</font></i></b>
 <br>
 In the <a href="#top">Debugger window </a>a two-column list shows the
 Variables and Parameters contained in the Object shown.
 <center>
-<p><img src="linedebugger.png" height="64" width="251"></p>
+<p><img src="image/linedebugger.png" height="64" width="251"></p>
 </center>
 In each column, a line shows:
 <ul>
@@ -453,7 +658,7 @@ value(s) of the Variable (one value, in case of Parameters, and all
 lagged
 values for Variables). The window is as shown below:
 </p>
-<center><img src="variab_debug.png" align="left" hspace="20"></center>
+<center><img src="image/variab_debug.png" align="left" hspace="20"></center>
 The window shows one entry for each lagged value (in case of Variables
 also used with lagged values) or one single entry for Parameters. The
 entry
@@ -497,7 +702,17 @@ breaks</a>).</li>
 shows this
 manual page.</li>
 </ul>
-<hr width="100%">
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
 <a name="cond"></a><b>Set Conditional Breaks</b>
 <br>
@@ -506,8 +721,8 @@ running in Debug Mode and for Variables not marked to be debugged), by
 setting conditional breaks. That is, users can interrupt the simulation
 in case the value resulting from an equation is equal to, lesser than
 or
-greater than a determined value. Lsd does not allow to save conditional
-breaks in the Lsd model files, and therefore it is possible to set them
+greater than a determined value. LSD does not allow to save conditional
+breaks in the LSD model files, and therefore it is possible to set them
 only during a Debugging session.
 <br>
 The window for setting conditional breaks is reached by pressing the
@@ -515,7 +730,7 @@ appropriate button after having double-clicked on the Variable of
 interest.
 It appears as follows:
 <center>
-<p><img src="cond_break.png" height="168" width="201"></p>
+<p><img src="image/cond_break.png" height="168" width="201"></p>
 </center>
 <p><br>
 <br>
@@ -539,18 +754,29 @@ is
 shown in the Debugger window.
 </p>
 <p></p>
-<hr width="100%"><br>
-<a name="simman"></a><b><i><font size="+1">Lsd Simulation Manager</font></i></b>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
 <br>
-In order to use the Lsd debugging utilities it is crucial to understand
-how a simulation is run in Lsd. When a simulation is started, the model
-loaded in Lsd is passed to the Lsd simulation manager.
+<a name="simman"></a><b><i><font size="+1">LSD Simulation Manager</font></i></b>
+<br>
+In order to use the LSD debugging utilities it is crucial to understand
+how a simulation is run in LSD. When a simulation is started, the model
+loaded in LSD is passed to the LSD simulation manager.
 <br>
 When the simulation starts, a global C++ variable is initialized to
 1; this variable is the current time step counter, and at each step it
 is increased of one unit.
 <br>
-The Lsd simulation manager follows a simple cycle for each time step
+The LSD simulation manager follows a simple cycle for each time step
 and for each Object in the model:
 <ol>
   <li>Take the one Object;</li>
@@ -567,7 +793,7 @@ recursively,
 for each of its descendant, their own descendants and so on. Note that
 the equation for one Variable can be computed under two circumstances:
 <ul>
-  <li>The Lsd simulation manager requests its value during the normal
+  <li>The LSD simulation manager requests its value during the normal
 updting
 cycle, or</li>
   <li>Another Variable has requested its updated value before of the
@@ -604,7 +830,7 @@ chain of equations reciprocal activations can hinder the possibility to
 immediately see the source of the error.
 <br>
 Model writers can make use of the stack info provided, on request,
-by the Lsd simulation manager. At some cost of speed, when the
+by the LSD simulation manager. At some cost of speed, when the
 requested value for the stack is higher than one (it can be set either
 in the <a href="menurun.html#simsetting">Simulation
 Setting</a> before starting a simulation run, or in the debugger's
@@ -663,7 +889,7 @@ by the Simulation Manager)</li>
 When a simulation is running with the Stack Info option on the above
 lines
 are compiled just after each equation execution. Therefore, it provides
-the exact scheduling used by the Lsd Simulation Manager to compute the
+the exact scheduling used by the LSD Simulation Manager to compute the
 model. This information is frequently used along with the data from the
 current stack. For example, suppose you choose to control when the
 equation
@@ -724,7 +950,7 @@ ones</tt>
 <br>
 <tt>1 Action</tt>
 <br>
-<tt>0 Lsd Simulation Manager</tt>
+<tt>0 LSD Simulation Manager</tt>
 </p>
 <p>Let's see how to interpret this data. We see that the Variable
 ResetNum
@@ -744,13 +970,24 @@ Choose,
 which, in turn, is triggered by Action.
 </p>
 <p></p>
-<hr width="100%"><br>
-<a name="comments"></a><b>Comments on using the Lsd debugger</b>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
+<a name="comments"></a><b>Comments on using the LSD debugger</b>
 <br>
 The debugger is used for finding errors and for understanding the
 actual
 sequence of computations executed in a simulation run. In fact, the
-modeller
+modeler
 writes the equations independently from one another, and the system
 determines
 at run time (i.e. at the very moment of execution of a simulation)
@@ -779,7 +1016,7 @@ the values of the temporary <a href="#v">v[...]</a> variables used in
 the
 equations code.
 <br>
-The modeller can control the equations that started to be computed,
+The modeler can control the equations that started to be computed,
 but could not be completed, at the moment the current Variable was
 finished
 to be computed. That is, they can print in the Log window the status of
@@ -792,9 +1029,9 @@ The user can continue the simulation (or abort it) with different
 options
 using the <a href="#simulation">Simulation Controlling</a> buttons.
 <br>
-See the notes on the <a href="#simman">Lsd Simulation Manager </a>for
+See the notes on the <a href="#simman">LSD Simulation Manager </a>for
 further information on this topic.
-<p>For very serious problems, where the usual Lsd debugging cannot help
+<p>For very serious problems, where the usual LSD debugging cannot help
 to find the problem there are two suggestions. The first concern only
 the
 identification of the Variable that caused an error. See the <a
@@ -807,17 +1044,28 @@ See the <a href="LMM.html#debug">instruction for using the gdb
 debugger</a>.
 </p>
 <p></p>
-<hr width="100%"><br>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<br>
 <a name="crash"></a><b><i><font size="+1">Simulation hard crash</font></i></b>
 <br>
-<div style="text-align: center;"><img alt="" src="crash.png"
+<div style="text-align: center;"><img alt="" src="image/crash.png"
  style="border: 0px solid ; width: 475px; height: 292px;"><br>
 </div>
 <br>
 It is
 possible that during a simulation an error occurs, preventing the
 simulation
-to continue. Most of these errors are captured by the Lsd simulation
+to continue. Most of these errors are captured by the LSD simulation
 manager
 before they crash the whole program. Messages communicate what kind of
 error occurred providing hints on how to fix it.
@@ -828,7 +1076,7 @@ Read the message to understand what happened and under which conditions.</p>
 following options:<br>
 </p>
 <ul>
-  <li> <b>Return the Lsd Browser</b>: the model program ends the
+  <li> <b>Return the LSD Browser</b>: the model program ends the
 simulation and returns to the <a href="browser.html">main browser</a>
 as in a succesful of simulation run. Use this option if you don't need
 to change the model equations' code, but just to add an element or
@@ -846,10 +1094,10 @@ browser</a> as in a debugging session. Use this option analyse the
 state of the model when the error occurred. Exiting from the data
 browser will return to this list of options.<br>
   </li>
-  <li><span style="font-weight: bold;">Quit Lsd program</span>: close
-the Lsd model program altogether. This is necessary if the error must
+  <li><span style="font-weight: bold;">Quit LSD program</span>: close
+the LSD model program altogether. This is necessary if the error must
 be fixed by modifying the code of the equations. In this case, the
-equations need to be re-compiled in a new Lsd model program, and it is
+equations need to be re-compiled in a new LSD model program, and it is
 necessary to close existing ones.<br>
   </li>
 </ul>
@@ -865,7 +1113,7 @@ system will issue this message:<br>
 Search for 'PrOFit' failed during the equation of variable Investement</tt>
 <p>Moreover, the system will indicate the time step at which the error
 occurred, and the list equations currently under computation (see <a
- href="debug.html#simman">Lsd Simulation
+ href="debug.html#simman">LSD Simulation
 Manager</a>).<br>
 </p>
 &lt;&gt;To fix this error you need to have the same spelling for all
@@ -877,7 +1125,19 @@ in the equations code and re-compiling the model program) or <a
  href="browser.html#change_nature">changing the spelling</a> of the
 label in the <a href="browser.html#variables">option window</a> for
 the element in the <a href="browser.html">model browser</a>. <br>
-<br>
-&nbsp;
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
 </body>
+
 </html>

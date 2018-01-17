@@ -455,7 +455,9 @@ proc resizetop { w sizeX { sizeY 0 } } {
 		wm minsize $w $newMinX $newMinY
 	}
 	if { $sizeX != [ winfo width $w ] || $sizeY != [ winfo height $w ] } {
-		wm geom $w ${sizeX}x${sizeY} 
+		if { $sizeX > 0 && $sizeY > 0 } {
+			wm geom $w ${sizeX}x${sizeY} 
+		}
 	}
 	update
 
