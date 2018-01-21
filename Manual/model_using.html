@@ -179,8 +179,6 @@ like any software, by trial and error. This tutorial should enable you to fully
 exploit an existing model, and to explore the LSD interface even in the parts
 not explicitly covered here. </p>
 
-<h2>Prerequisites</h2>
-
 <p class=MsoNormal>To run a simulation exercise with LSD it is necessary: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -209,8 +207,6 @@ href="LSD_faqs.html#parameter">Parameters</a>. The configuration contains also
 all the remaining information necessary to <a href="LSD_faqs.html#simulationrun">run
 a simulation</a>: the number of time steps, etc. Users can easily modify each
 of these values to test different configurations.</p>
-
-<h2>The tutorial</h2>
 
 <p class=MsoNormal>The table below contains the detailed steps used in this
 tutorial. It consists of three columns: </p>
@@ -294,8 +290,8 @@ taskbar to switch among LSD windows. </p>
   href="LSD_windows.html#modelbrowser">LSD Model Browser</a> window will reopen
   listing all the models available in the computer. Models are organized in a
   tree of groups, like directory/folders in the file system, and navigation is
-  done using the usual file browser commands. The user may have to navigate into
-  the groups until the desired model is listed.</p>
+  done using the usual file browser commands. The user may have to navigate
+  into the groups until the desired model is listed.</p>
   <p class=MsoNormal>When the desired model is highlighted (single click or
   arrow keys), selected it with a double click or pressing <span class=Cdigo>Enter</span>.
   <a href="LSD_windows.html#lmm" target=newwindow>LMM</a> will load the model
@@ -400,8 +396,8 @@ taskbar to switch among LSD windows. </p>
   href="LSD_faqs.html#object">instances of an Object type</a>, also multiply
   the instances of the contained Variables, Parameters and son Objects. This is
   similar to using vectors and matrices in conventional programing, but <a
-  href="LSD_faqs.html#modelstructure">far more efficient</a> in most applications.
-  </p>
+  href="LSD_faqs.html#modelstructure">far more efficient</a> in most
+  applications. </p>
   <p class=MsoNormal>It is possible to explore the model with the <a
   href="LSD_windows.html#browser">LSD Browser</a>, which shows one single <a
   href="LSD_faqs.html#object">Object's</a> content at a time. There is a bar
@@ -587,9 +583,9 @@ taskbar to switch among LSD windows. </p>
   context (right click) menu. Once one (or more) series are selected, it is
   shown in the central list box and is ready for further elaboration. Using the
   buttons in the lower part of the window, the user can create plots, produce
-  statistics and export on the selected series. The right box contains the list
-  of the plots already produced in the current session. For instance, select
-  one of the available series (double click) and click on the <span
+  statistics on and export the selected series. The right box contains the list
+  of the plots already produced in the current session, for quick reload. For
+  instance, select one of the available series (double click) and click on the <span
   class=Cdigo>Plot</span> button to generate a time series plot of all the <a
   href="LSD_faqs.html#simulationrun">simulation run time steps</a>. Next, click
   on <span class=Cdigo>Statistics</span> to see some descriptive statistics
@@ -600,7 +596,7 @@ taskbar to switch among LSD windows. </p>
   details). There are a large number of possible options to produce time series
   and cross-section plots, XY scatterplots, histograms, and more. Moreover,
   users can save selected data to files in a variety of formats. It is also
-  possible to launch Gnuplot, a package for advanced function and data-plotting.
+  possible to launch Gnuplot, a package for advanced function and data plotting.
   </p>
   </td>
  </tr>
@@ -675,18 +671,18 @@ taskbar to switch among LSD windows. </p>
   make the <a href="LSD_faqs.html#object">Object</a> you desire to modify the
   current one and then select <span class=Cdigo>Data&gt;Number of Objects</span>
   in the menu (or click the white on green plus icon). Alternatively, in the <a
-  href="LSD_windows.html#modelstructure">LSD Model Structure</a>, right click directly
-  on the target Object and select <span class=Cdigo>Number of Objects</span> in
-  the context menu.</p>
+  href="LSD_windows.html#modelstructure">LSD Model Structure</a>, right click
+  directly on the target Object and select <span class=Cdigo>Number of Objects</span>
+  in the context menu.</p>
   <p class=MsoNormal>After selection this command, a new window opens,
   prompting you about the details on the desired change. Update the <span
-  class=Cdigo>Number of instances</span> field to the new number of instances desired
-  for the selected <a href="LSD_faqs.html#object">Object</a>. A number larger
-  than the current one means increasing the number of instances (and you may
-  choose from which of the existing instances the new ones should be copied).
-  Conversely, a smaller than the current value means deleting some of the
-  existing instances (and LSD will give the opportunity to choose which ones
-  should be removed).</p>
+  class=Cdigo>Number of instances</span> field to the new number of instances
+  desired for the selected <a href="LSD_faqs.html#object">Object</a>. A number
+  larger than the current one means increasing the number of instances (and you
+  may choose from which of the existing instances the new ones should be
+  copied). Conversely, a smaller than the current value means deleting some of
+  the existing instances (and LSD will give the opportunity to choose which
+  ones should be removed).</p>
   <p class=MsoNormal>One obvious request to test a simulation model is to
   modify the number of <a href="LSD_faqs.html#object">Objects</a> and,
   therefore, the number of <a href="LSD_faqs.html#variable">Variables</a>, <a
@@ -701,7 +697,7 @@ taskbar to switch among LSD windows. </p>
  </tr>
  <tr>
   <td valign=top style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal><a name=l9></a>Edit the initial values of Parameters and
+  <p class=MsoNormal><a name=l9></a>Define the initial values of Parameters and
   lagged Variables</p>
   </td>
   <td width="11%" valign=top style='width:11.02%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
@@ -723,26 +719,26 @@ taskbar to switch among LSD windows. </p>
   href="LSD_windows.html#initialvalues">LSD Initial Values Editor</a> window
   opens and you may edit the initial values for all <a
   href="LSD_faqs.html#parameter">Parameters</a> and <a
-  href="LSD_faqs.html#variable">Variables</a>, used to start the simulation, contained
-  in the current <a href="LSD_faqs.html#object">Object</a>.&nbsp;When starting
-  a simulation LSD needs to know the values to assign to the Parameters and to
-  the Variables used with lagged values. Note that the hierarchical structure
-  of the LSD models requires the usage of indexing to identify the Object
-  instance containing the elements requiring initial values, so the first
-  (brother) Object is number 1, the second, 2 and so on. This way the user can
-  set different initial values for the same Parameter or lagged Variable across
-  different (brother) Objects.</p>
+  href="LSD_faqs.html#variable">Variables</a>, used to start the simulation,
+  contained in the current <a href="LSD_faqs.html#object">Object</a>.&nbsp;When
+  starting a simulation LSD needs to know the values to assign to the
+  Parameters and to the Variables used with lagged values. Note that the
+  hierarchical structure of the LSD models requires the usage of indexing to
+  identify the Object instance containing the elements requiring initial
+  values, so the first (brother) Object is number 1, the second, 2 and so on.
+  This way the user can set different initial values for the same Parameter or
+  lagged Variable across different (brother) Object instances.</p>
   <p class=MsoNormal>The initialization of values is necessary also for the <a
   href="LSD_faqs.html#object">Object</a> instances created when increasing their
   number (see above). The new instances are assigned a default value (copied
   from the selected existing instance), but usually the user must confirm this
   choice (just opening the <a href="LSD_windows.html#initialvalues">LSD Initial
-  Values Editor</a> and clicking the <span class=Cdigo>Done</span> button). Although
-  the data may be inserted manually for each Object instance (up to 100), when
-  there are many instances it is convenient to use the <span class=Cdigo>Set
-  All</span> button to set all the initial values at once. See the <a
-  href="menudata_init.html" target=newwindow>LSD manual</a> for more details.&nbsp;
-  </p>
+  Values Editor</a> and clicking the <span class=Cdigo>Done</span> button).
+  Although the data may be inserted manually for each Object instance (up to
+  100), when there are many instances it is convenient to use the <span
+  class=Cdigo>Set All</span> button to set all the initial values at once. See
+  the <a href="menudata_init.html" target=newwindow>LSD manual</a> for more
+  details.&nbsp; </p>
   <p class=MsoNormal>When finished, click on <span class=Cdigo>Done</span> to
   return to the <a href="LSD_windows.html#browser">LSD Browser</a>.</p>
   </td>
@@ -750,7 +746,7 @@ taskbar to switch among LSD windows. </p>
  <tr>
   <td valign=top style='background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal>Choose which Variables (and Parameters) to save data
-  series, to plot at run time, or to debug</p>
+  series, to plot at run-time, or to debug</p>
   </td>
   <td width="11%" valign=top style='width:11.02%;background:#F2F2F2;padding:
   5.65pt 5.65pt 5.65pt 5.65pt'>
@@ -758,12 +754,12 @@ taskbar to switch among LSD windows. </p>
   </td>
   <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
   5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal>In the <a href="LSD_windows.html#browser">LSD Browser</a>,
-  make the <a href="LSD_faqs.html#object">Object</a> which contains the <a
-  href="LSD_faqs.html#variable">Variable</a> (or <a
-  href="LSD_faqs.html#parameter">Parameter</a>) the current Object and then double
-  click the desired element. This will open the Change Element dialog window,
-  from where you can edit or modify any property of a Variable or Parameter.</p>
+  <p class=MsoNormal>Make the <a href="LSD_faqs.html#object">Object</a> which
+  contains the <a href="LSD_faqs.html#variable">Variable</a> (or <a
+  href="LSD_faqs.html#parameter">Parameter</a>) the current Object and then
+  double click the desired element. This will open the Change Element dialog
+  window, from where you can edit or modify any property of a Variable or
+  Parameter.</p>
   <p class=MsoNormal>For the chosen <a href="LSD_faqs.html#variable">Variable</a>
   or <a href="LSD_faqs.html#parameter">Parameter</a> it is possible to decide
   whether: </p>
@@ -799,8 +795,9 @@ taskbar to switch among LSD windows. </p>
   <p class=MsoNormal><a href="LSD_windows.html#browser">LSD Browser</a></p>
   </td>
   <td width="59%" valign=top style='width:59.34%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal>Use the menu option <span class=Cdigo>Run&gt;Simulation</span>
-  Settings (or the wrench icon) to adjust the remaining simulation settings.</p>
+  <p class=MsoNormal>Use the menu option <span class=Cdigo>Run&gt;Simulation
+  Settings</span> (or click the wrench icon) to adjust the remaining simulation
+  settings.</p>
   <p class=MsoNormal>In the Simulation Settings dialog window you may choose
   the number of time steps per simulation, the seed for the pseudorandom number
   generator, and number of simulation exercises to be run in a sequence.
@@ -824,9 +821,10 @@ taskbar to switch among LSD windows. </p>
   </td>
   <td width="59%" valign=top style='width:59.34%;background:#F2F2F2;padding:
   5.65pt 5.65pt 5.65pt 5.65pt'>
-  <p class=MsoNormal>The menu option <span class=Cdigo>File&gt;Save</span> saves
-  the current <a href="LSD_faqs.html#modelsetting">model configuration</a> in
-  memory to a file, overwriting the last loaded configuration file (with the <span
+  <p class=MsoNormal>The menu option <span class=Cdigo>File&gt;Save</span> (or
+  click the blue floppy disk icon) saves the current <a
+  href="LSD_faqs.html#modelsetting">model configuration</a> in memory to a
+  file, overwriting the last loaded configuration file (with the <span
   class=Cdigo>.lsd</span> extension), if any, or under the default name <span
   class=Cdigo>Sim1.lsd</span> otherwise.</p>
   <p class=MsoNormal>If you want to preserve the original configuration file
@@ -881,8 +879,8 @@ taskbar to switch among LSD windows. </p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
   margin-bottom:6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span
   style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  </span></span><b>Inconsistent initial values.</b> Inadequate values were chosen
-  for <a href="LSD_faqs.html#parameter">Parameters</a> or lagged <a
+  </span></span><b>Inconsistent initial values.</b> Inadequate values were
+  chosen for <a href="LSD_faqs.html#parameter">Parameters</a> or lagged <a
   href="LSD_faqs.html#variable">Variables</a> initialization. These may be causing,
   for example, divisions by zero during the computation of some <a
   href="LSD_faqs.html#equation">Equation</a>. The simulation results may be erratic
@@ -918,8 +916,8 @@ taskbar to switch among LSD windows. </p>
   name;</p>
   <p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
   Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  </span></span>keep the <a href="LSD_documentation.html">LSD help pages</a> open,
-  helping to understand in detail the effects of any operation.</p>
+  </span></span>keep the <a href="LSD_documentation.html">LSD help pages</a>
+  open, helping to understand in detail the effects of any operation.</p>
   <p class=MsoNormal>All other <a href="LSD_windows.html">LSD windows</a> are
   also open for experimentation. Just be careful when overwriting <a
   href="LSD_faqs.html#modelsetting">configuration files</a>: everything else

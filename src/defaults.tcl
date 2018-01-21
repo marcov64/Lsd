@@ -1,20 +1,17 @@
-# ****************************************************
-# ****************************************************
-# LSD 7.0 - August 2015
-# written by Marco Valente
-# Universita' dell'Aquila
-# 
-# Copyright Marco Valente
-# LSD is distributed according to the GNU Public License
-# 
-# Comments and bug reports to marco.valente@univaq.it
-# ****************************************************
-# ****************************************************
-
-# ****************************************************
-# Default values for the Tk windowing system. 
+#*************************************************************
 #
-# ****************************************************
+#	LSD 7.0 - January 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente
+#	LSD is distributed under the GNU General Public License
+#	
+#*************************************************************
+
+#****************************************************
+# Default values for the Tk windowing system. 
+#****************************************************
 
 package require Tk
 

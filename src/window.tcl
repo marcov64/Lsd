@@ -1,18 +1,15 @@
-# ****************************************************
-# ****************************************************
-# LSD 7.0 - August 2015
-# written by Marco Valente
-# Universita' dell'Aquila
-# 
-# Copyright Marco Valente
-# LSD is distributed according to the GNU Public License
-# 
-# Comments and bug reports to marco.valente@univaq.it
-# ****************************************************
-# ****************************************************
+#*************************************************************
+#
+#	LSD 7.0 - January 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente
+#	LSD is distributed under the GNU General Public License
+#	
+#*************************************************************
 
-
-# ****************************************************
+#****************************************************
 # Procedures to adjust window positioning & startup code. 
 #
 #	Types of window positioning:
@@ -28,7 +25,7 @@
 #	overM: over the main window (same top-left position)
 #	current: keep current position
 #
-# ****************************************************
+#****************************************************
 
 package require Tk 8.5
 

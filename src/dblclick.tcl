@@ -1,16 +1,3 @@
-# ****************************************************
-# ****************************************************
-# LSD 7.0 - August 2015
-# written by Marco Valente
-# Universita' dell'Aquila
-# 
-# Copyright Marco Valente
-# LSD is distributed according to the GNU Public License
-# 
-# Comments and bug reports to marco.valente@univaq.it
-# ****************************************************
-# ****************************************************
-
 #
 # package doubleclick
 #

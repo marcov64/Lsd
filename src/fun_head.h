@@ -1,23 +1,19 @@
-/***************************************************
-****************************************************
-LSD 7.0 - August 2015
-written by Marco Valente
-Universita' dell'Aquila
+/*************************************************************
 
-Copyright Marco Valente
-LSD is distributed according to the GNU Public License
+	LSD 7.0 - January 2018
+	written by Marco Valente, Universita' dell'Aquila
+	and by Marcelo Pereira, University of Campinas
 
-Comments and bug reports to marco.valente@univaq.it
-****************************************************
-****************************************************/
+	Copyright Marco Valente
+	LSD is distributed under the GNU General Public License
+	
+ *************************************************************/
 
 /***************************************************
-****************************************************
 FUN_HEAD.CPP
 
-This file contains all the declarations and macros available in a model's equation file.
-
-****************************************************
+This file contains all the declarations and macros 
+available in a model's equation file.
 ****************************************************/
 
 #define FUN												// comment this line to access internal LSD functions

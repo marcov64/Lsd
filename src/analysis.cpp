@@ -1,15 +1,13 @@
-/***************************************************
-****************************************************
-LSD 7.0 - August 2015
-written by Marco Valente
-Universita' dell'Aquila
+/*************************************************************
 
-Copyright Marco Valente
-LSD is distributed according to the GNU Public License
+	LSD 7.0 - January 2018
+	written by Marco Valente, Universita' dell'Aquila
+	and by Marcelo Pereira, University of Campinas
 
-Comments and bug reports to marco.valente@univaq.it
-****************************************************
-****************************************************/
+	Copyright Marco Valente
+	LSD is distributed under the GNU General Public License
+	
+ *************************************************************/
 
 /* 
 Reached case 44
@@ -5661,6 +5659,13 @@ for(i=first; i<=last; i++)
 if ( cases == 0 )
 {
 	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no valid data for the chosen time step cases.\"" );
+	*choice=2;
+	goto end;
+}
+
+if ( mx - mn <= 0 )
+{
+	cmd( "tk_messageBox -parent .da -type ok -title Error -icon error -message \"Invalid data\" -detail \"The selected series has no data variation for the chosen time step cases.\"" );
 	*choice=2;
 	goto end;
 }

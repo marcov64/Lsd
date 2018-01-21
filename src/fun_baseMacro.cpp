@@ -1,5 +1,7 @@
 #include "fun_head_fast.h"
 
+// insert your equations between MODELBEGIN and MODELEND
+
 MODELBEGIN
 
 
@@ -14,12 +16,10 @@ MODELBEGIN
 
 MODELEND
 
+// do not add Equations in this area
 
-
-
-void close_sim(void)
+// close simulation special commands
+void close_sim( void )
 {
 
 }
-
-

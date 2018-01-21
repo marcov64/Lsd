@@ -1,28 +1,13 @@
 /***************************************************
-****************************************************
-LSD 7.0 - August 2015
-written by Marco Valente
-Universita' dell'Aquila
 
-Copyright Marco Valente
-LSD is distributed according to the GNU Public License
+Example for an equation file. Users should include 
+in this header a brief description of the model.
 
-Comments and bug reports to marco.valente@univaq.it
-****************************************************
-****************************************************/
-
-
-/***************************************************
-
-Example for an equation file. Users should include in this header a
-brief description of the model.
-
-Include the equations in the space indicated below, after the line:
+Include the equations in the space indicated below, 
+after the line:
 
 Place here your equations
 
-
-****************************************************
 ****************************************************/
 
 #include "fun_head.h"

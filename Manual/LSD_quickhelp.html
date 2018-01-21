@@ -369,23 +369,14 @@ fix the problem and run the simulation again.</p>
 <h2><a name="_What_is_a"></a><a name="info_lsd"></a>What is a LSD model
 program? </h2>
 
-<p class=MsoNormal>A LSD model program is an executable compiled file with all
-the <a href="LSD_faqs.html#equation">Equations</a> defined in the <a
-href="LSD_faqs.html#equationfile">equation file</a> (usually written using <a
-href="#_What_is_LMM?">LMM</a>) and LSD code. The LSD model program is usually
-executed using LMM but can be directly invoked if necessary (the setting of
-environment variables may be necessary in this case).</p>
-
-<p class=MsoNormal>The LSD model program has the same interface for all models,
-but the embedded Equations are different. Any LSD model program can create new
-or edit existing <a href="#_What_is_a_1">configurations</a> and <a
-href="#info_analysis">analyze results files</a>. An LSD model program can
-execute <a href="#_What_is_a">simulation runs</a> only when a proper model
-configuration, containing the Variables matching the Equations in the equation
-file, is loaded. </p>
+<p class=MsoNormal>A LSD model program is the executable compiled file,
+including all the <a href="LSD_faqs.html#equation">Equations</a> code. The LSD
+model program is usually executed using <a href="#_What_is_LMM?">LMM</a>. The
+LSD model program can create new or edit existing <a href="#_What_is_a_1">configurations</a>
+and <a href="#info_analysis">analyze results files</a>. </p>
 
 <p class=MsoNormal><a name="info_config"></a>For further details, please check
-the <a href="LSD_faqs.html#model">FAQ</a>.</p>
+the <a href="LSD_faqs.html#modelprogram">FAQ</a>.</p>
 
 <h2><a name="_What_is_a_1"></a>What is a model configuration? </h2>
 
@@ -966,7 +957,7 @@ understand the problem, if needed.</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Quit the <a href="#_What_is_a">LSD model program</a> and go back
-to <a href="#_What_is_LMM?">LMM</a>: if you understands what is the problem,
+to <a href="#_What_is_LMM?">LMM</a>: if you understand what the problem is,
 change the offending Equation’s code to prevent it and rerun the simulation.</p>
 
 <h2>Everything disappeared (all LSD windows simply closed)</h2>
@@ -1002,8 +993,8 @@ href="LSD_macros.html">macros</a> may help identifying the culprit).</p>
  </tr>
 </table>
 
-<h1><a name="err_search"></a><a name="_Errors_and_fixes"></a>Errors and possible
-fixes </h1>
+<h1><a name="err_search"></a><a name="_Errors_and_fixes"></a><a name=errors></a>Errors
+and possible fixes </h1>
 
 <h2><a name="_Compiler_errors"></a>Compiler errors</h2>
 
@@ -1051,7 +1042,24 @@ block character (an opening parenthesis, bracket or curly bracket) is matched
 by a following closing block character (exactly a closing opening parenthesis,
 bracket or curly bracket, respectively) before the end of the equation file.</p>
 
-<h2><a name="_Error_in_equation"></a><a name="err_trying"></a><a name=errors></a><a
+<h2>The simulation cannot start: initial data not available</h2>
+
+<p class=MsoNormal>LSD found that some <a href="#_What_are_initial">initial
+values</a> (for <a href="#_What_are_a_1">Parameters</a> or <a
+href="#_What_are_a_1">lagged Variables</a>) have not been defined by the user. This
+may happen because a new Parameter or lagged Variable was inserted, but not
+initialized, or when the number of Object instances is increased, but no
+initial values for its contained Parameters and lagged Variables were
+explicitly set. In both cases LSD does assign default values to the new
+elements but those must be, at least, explicitly confirmed by the modeler. </p>
+
+<p class=MsoNormal>To fix the error reload the <a href="#_What_is_a_1">model configuration</a>,
+move the Browser to show the Object containing the uninitialized elements, and
+choose menu item <span class=Cdigo>Data&gt;Initial Values</span>. Edit the
+appropriate fields and click <span class=Cdigo>Done</span>. This process must
+to be performed even if all the default values are to be accepted. </p>
+
+<h2><a name="_Error_in_equation"></a><a name="err_trying"></a><a
 name="err_justrun"></a><a name="err_notinit"></a><a name="_The_simulation_does"></a><a
 name="err_eqnotfound"></a><a name="_The_simulation_have"></a>The simulation is
 interrupted: equation not found </h2>
@@ -1108,6 +1116,48 @@ the element in the <a href="#_What_is_a_1">model configuration</a>. Or, possibly
 you forgot to include the element in the model configuration. To fix this error,
 please review the equation’s code in or the <a href="#_Change_an_element">change/add
 the element</a> in the model configuration. </p>
+
+<p class=MsoNormal>To correct the error you need either to change the <a
+href="#_What_is_an_1">Equations</a> code, or to change the name of the element
+in the <a href="#_What_is_a_1">model structure</a>. In the first case, close
+the <a href="#_What_is_a">LSD model program</a>, edit the equation file using <a
+href="#_What_is_LMM?">LMM</a> and add or fix the name of the missing Equation.
+Save the <a href="LSD_faqs.html#equationfile">equation file</a> and compile and
+run the the same model configuration file (which caused the error before). In
+the second case, simply reload the problematic configuration and edit the model
+configuration causing the problem to correct the name or add the missing
+element. After the changes, try to run the simulation again with the fixed
+model configuration. </p>
+
+<h2>The simulation is interrupted: lag error</h2>
+
+<p class=MsoNormal>This error causes a message telling that a <a
+href="#_What_are_a_1">Variable</a> value was requested in an <a
+href="#_What_is_an_1">Equation</a> with a <a href="#_What_are_initial">lag
+number</a> larger than the maximum lag defined in the model configuration. It
+may be an error in the Equations' code, requesting the wrong lagged value, or
+in the model configuration, defining an insufficient maximum lag number. In the
+first case, edit the equation file using <a href="#_What_is_LMM?">LMM</a> and
+add or fix the wrong Equation. In the second case, follow <a
+href="#correct_label">instructions</a> on how to modify the maximum number of
+lags.</p>
+
+<h2>The simulation is interrupted: deadlock error</h2>
+
+<p class=MsoNormal>This kind of error occurs if an <a href="#_What_is_an_1">Equation</a>
+for <a href="#_What_are_a_1">Variable</a> X requires the value of another
+Variable Y whose Equation, in turn, requires the computation of Variable X. This
+is a kind of “egg or chicken” problem that cannot be solved without adjusting
+one (or both) of the Equations for X and Y. The conventional solution is to
+have (just) one of the two Variables using the lagged value (<i>t</i> – 1) of
+the other. </p>
+
+<p class=MsoNormal>Notice that the error message in the <a
+href="LSD_windows.html#log">Log window</a> shows the two Variables involved in
+the deadlock. Close the <a href="#_What_is_a">LSD model program</a>, edit the equation
+file using <a href="#_What_is_LMM?">LMM</a> and modify the Equation for the chosen
+Variable. You may have also to follow the <a href="#correct_label">instructions</a>
+on how to modify the maximum number of lags for the other Variable.</p>
 
 <h2><a name="err_invalid"></a><a name="_Invalid_values_produced"></a>Invalid
 values produced</h2>
@@ -1170,10 +1220,10 @@ you may insert use <span class=Cdigo>INTERACT(...)</span> to inspect the model.
 For example: </p>
 
 <p><span class=Cdigo>EQUATION(&quot;Price&quot;) <br>
-/* <br>
+</span><span class=Cdigo><span style='color:#00B050'>/* <br>
 Compute the price as the inverse of Q <br>
 */ <br>
-v[0] = V( &quot;Q&quot; ); <br>
+</span>v[0] = V( &quot;Q&quot; ); <br>
 if ( t == 32 ) <br>
 &nbsp; INTERACT( &quot;Value of Q&quot;, v[0] ); <br>
 v[1] = 1 / v[0]; <br>
