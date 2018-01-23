@@ -117,12 +117,19 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	cmd( "set w .deb.m.help" );
 	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 	cmd( ".deb.m add cascade -label Help -menu $w -underline 0" );
-	cmd( "$w add command -label \"Help on LSD Debugger\" -command {LsdHelp debug.html} -underline 0" );
+	cmd( "$w add command -label \"Help on Debugger\" -underline 0 -accelerator F1 -command { LsdHelp debug.html }" );
+	cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
+	cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 	cmd( "$w add separator" );
-	cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
+	cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdHelp LMM_primer.html }" );
+	cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
+	cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 	cmd( "$w add separator" );
-	cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent .deb -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_ ); 
+	cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 44 }" );
+	cmd( "$w add separator" );
+	cmd( "$w add command -label \"About LSD...\" -underline 0 -command { tk_messageBox -parent .deb -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" }", _LSD_VERSION_, _LSD_DATE_ ); 
 	cmd( ".deb configure -menu .deb.m" );
+	cmd( "bind .deb <F1> { .deb.m.help invoke 0; break }" );
 }
 
 // avoid redrawing the buttons if they already exist

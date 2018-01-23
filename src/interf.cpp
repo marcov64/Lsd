@@ -663,17 +663,22 @@ if ( redrawRoot )
 		cmd( "set w .m.help" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Help -menu $w -underline 0" );
-		cmd( "$w add command -label \"Help on Browser\" -command {LsdHelp browser.html} -underline 0" );
-		cmd( "$w add command -label \"LSD Quick Help\" -command {LsdHelp LSD_quickhelp.html} -underline 0" );
+		cmd( "$w add command -label \"Help on Browser\" -underline 0 -accelerator F1 -command { LsdHelp browser.html }" );
+		cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
+		cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 		cmd( "$w add separator" );
-		cmd( "if {$tcl_platform(platform) == \"unix\"} {$w add command -label \"Set Browser\" -command { set choice 48} -underline 0} {}" );
-		cmd( "$w add command -label \"Model Report\" -command {set choice 44} -underline 0" );
+		cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdHelp LMM_primer.html }" );
+		cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
+		cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
+		cmd( "if { $tcl_platform(platform) == \"unix\" } { $w add command -label \"Set Browser\" -command { set choice 48 } -underline 0 }" );
+		cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 44 }" );
+		cmd( "$w add separator" );
+		cmd( "$w add command -label \"About LSD...\" -underline 0 -command { tk_messageBox -parent . -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" }", _LSD_VERSION_, _LSD_DATE_  );
 
 		// set shortcuts on open windows
-		set_shortcuts( "." );
-		set_shortcuts( ".log" );
+		set_shortcuts( ".", "browser.html" );
+		set_shortcuts( ".log", "log.html" );
 
 		// Button bar
 		cmd( "destroy .bbar" );
@@ -5866,8 +5871,9 @@ int check_label(char *l, object *r)
 SET_SHORTCUTS
 Define keyboard shortcuts to menu items
 ****************************************************/
-void set_shortcuts( const char *window )
+void set_shortcuts( const char *window, const char *help )
 {
+	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
 	cmd( "bind %s <Control-l> {set choice 17}; bind %s <Control-L> {set choice 17}", window, window  );
 	cmd( "bind %s <Control-s> {set choice 18}; bind %s <Control-S> {set choice 18}", window, window  );
 	cmd( "bind %s <Control-e> {set choice 20}; bind %s <Control-E> {set choice 20}", window, window  );

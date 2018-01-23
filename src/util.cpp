@@ -2726,7 +2726,7 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 		  cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
 
 	cmd( "showtop .lat centerS no no no" );
-	set_shortcuts_log( ".lat" );
+	set_shortcuts_log( ".lat", "lattice.html" );
 	return(0);
 }
 

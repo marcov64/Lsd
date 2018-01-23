@@ -604,6 +604,7 @@ proc okhelpcancel { w fr comOk comHelp comCancel } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.ok $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
@@ -616,6 +617,7 @@ proc okhelp { w fr comOk comHelp } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.ok $w.$fr.help -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
@@ -640,6 +642,7 @@ proc helpcancel { w fr comHelp comCancel } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
@@ -707,6 +710,7 @@ proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.ok $w.$fr.x $w.$fr.help $w.$fr.can -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
@@ -737,6 +741,7 @@ proc XYokhelpcancel { w fr nameX nameY comX comY comOk comHelp comCancel } {
 	bind $w.$fr.r2.help <KeyPress-Return> "$w.$fr.r2.help invoke"
 	bind $w.$fr.r2.can <KeyPress-Return> "$w.$fr.r2.can invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.r2.can invoke"
+	bind $w <F1> "$w.$fr.r2.help invoke"
 	pack $w.$fr.r1.x $w.$fr.r1.y -padx 10 -side left
 	pack $w.$fr.r2.ok $w.$fr.r2.help $w.$fr.r2.can -padx 10 -side left
 	pack $w.$fr.r1 -anchor w
@@ -752,6 +757,7 @@ proc donehelp { w fr comDone comHelp } {
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.ok $w.$fr.help -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
@@ -776,6 +782,7 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
+	bind $w <F1> "$w.$fr.help invoke"
 	pack $w.$fr.com $w.$fr.help $w.$fr.ok -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }

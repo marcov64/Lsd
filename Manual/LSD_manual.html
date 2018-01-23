@@ -514,15 +514,149 @@ class=MsoHyperlink><span style='font-family:"Courier New"'><a
 href="../Readme.txt">Readme.txt</a></span></span> file, please check them
 before trying to use LSD.</p>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+<p>LSD installation is composed of a main LSD directory (for instance, at <span
+class=Cdigo>C:\Lsd-X.Y</span> in Windows or <span class=Cdigo>~/Lsd-X.Y</span> in
+Linux/macOS, <span class=Cdigo>X</span> and <span class=Cdigo>Y</span>
+representing the major and minor version numbers) and several subdirectories.
+The table below details the main contents of each one.</p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=7 cellpadding=0 width="100%"
+ style='width:100.0%;margin-left:-.4pt'>
  <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;background:#BFBFBF;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><b>Directory</b></p>
+  </td>
+  <td width="51%" style='width:51.82%;background:#BFBFBF;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><b>Content</b></p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>LMM program and LSD command line utilities for all systems,
+  and other support files (Readme.txt, installation scripts, LMM make files, Windows
+  launch batches).</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/src</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>LSD source code and build files. This directory and its
+  content should never be removed. Changes to LSD code should be done only by
+  experienced C++ and Tcl/Tk programmers.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/R</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>R libraries and source code for the LSD-specific packages.
+  The libraries are also available in CRAN (the standard R repository) and do
+  not have to be loaded from here.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/gnu</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Used by Windows configurations only. It contains an old
+  (but small) version of the C++ compiler, linker, libraries, headers, and other
+  files required to LSD compilation under Windows 32-bits. It also includes
+  some utilities, like diff and Gnuplot, used by all versions of Windows
+  configurations.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>LsdX.Y/gnu64</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Used by Windows 64-bit configurations only. It contains the
+  Tcl/Tk libraries and headers required to LSD compilation under Windows 64-bit.
+  It also includes some Windows 64-bit utilities, like make and GDB.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/LMM.app</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Used by macOS only. It maps in macOS as the LMM program.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/Manual</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>Manual pages for using LSD and LMM plus several additional
+  document files (see <span class=Cdigo>LSD_documentation.html</span> for the
+  full list).</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/Example</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;background:#F2F2F2;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>A set of example LSD models. Each model is contained in a subdirectory,
+  located in a subdirectory tree organized according to groups of related
+  models.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="0%"><p class='MsoNormal'>&nbsp;</td>
+  <td width="23%" style='width:23.96%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal><span class=Cdigo><b>Lsd-X.Y/Work</b></span></p>
+  </td>
+  <td width="51%" style='width:51.82%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
+  <p class=MsoNormal>The default user working directory. New models and groups
+  created by the user are located in (home) subdirectories located here.</p>
+  </td>
+  <td style='border:none;padding:0cm 0cm 0cm 0cm' width="19%"><p class='MsoNormal'>&nbsp;</td>
+ </tr>
+ <tr>
+  <td width="98%" colspan=4 style='width:98.22%;background:#D9D9D9;padding:
+  2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
   style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
   </td>
  </tr>
+ <tr height=0>
+  <td width=12 style='border:none'></td>
+  <td width=181 style='border:none'></td>
+  <td width=382 style='border:none'></td>
+  <td width=173 style='border:none'></td>
+ </tr>
 </table>
+
+</div>
 
 <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
 

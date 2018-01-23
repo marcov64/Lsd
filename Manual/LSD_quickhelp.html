@@ -1040,7 +1040,27 @@ class=Cdigo><b>[ ]</b></span><b>’, ‘</b><span class=Cdigo><b>{ }</b></span><b>’
 pairs</b>: LSD (and <a href="LSD_faqs.html#c">C++</a>) demands that any open
 block character (an opening parenthesis, bracket or curly bracket) is matched
 by a following closing block character (exactly a closing opening parenthesis,
-bracket or curly bracket, respectively) before the end of the equation file.</p>
+bracket or curly bracket, respectively) before the end of the equation file. If
+everything seems correct at the lines indicated in the error message, test the curly
+brackets and parentheses of the equation file (starting from the very first
+one) using the command <span class=Cdigo>Match{}</span> or <span class=Cdigo>Match()</span>
+in LMM menu <span class=Cdigo>Edit</span><b> </b>(see <a href="#match">here</a>
+for help): each open bracket or parenthesis must match with a closing one. If
+no match is found, then there is the problem.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Unavailable libraries</b>: LSD requires certain code header
+and library files to be installed in known locations in the computer. If the
+compiler cannot find those files during the compilation, errors like <span
+class=Cdigo>cannot open XXXX: No such file or directory</span> may be
+presented. This normally signals that the required files are not installed (see
+<a href="../Readme.txt">Readme.txt</a> for the precise requirements on each
+operating system) or LSD is not configured properly. In the last situation,
+please select <span class=Cdigo>Model&gt;System Options</span> in <a
+href="#_What_is_LMM?">LMM</a> and make sure you select the correct default
+configuration for your operating system.</p>
 
 <h2>The simulation cannot start: initial data not available</h2>
 

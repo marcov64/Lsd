@@ -133,6 +133,7 @@ void set_obj_number( object *r, int *choice )
 		cmd( "$t configure -state disabled" );
 		cmd( "bind .ini <minus> { .ini.f.mn invoke }" );
 		cmd( "bind .ini <plus> { .ini.f.pl invoke }" );
+		cmd( "bind .ini <F1> { LsdHelp menudata_objn.html }" );
 
 		if(strlen(lab_view)>0)
 			cmd( "$t see $toview" );

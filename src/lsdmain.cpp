@@ -1248,7 +1248,7 @@ void create_logwindow( void )
 	cmd( "pack $w -padx 10 -side right" );
 
 	cmd( "showtop .log none 1 1 0" );
-	set_shortcuts_log( ".log" );
+	set_shortcuts_log( ".log", "log.html" );
 
 	// replace text widget default insert, delete and replace bindings, preventing the user to change it
 	cmd( "rename .log.text.text .log.text.text.internal" );
@@ -1293,8 +1293,9 @@ void reset_end( object *r )
 SET_SHORTCUTS_LOG
 *********************************/
 #ifndef NO_WINDOW
-void set_shortcuts_log( const char *window )
+void set_shortcuts_log( const char *window, const char *help )
 {
+	cmd( "bind %s <F1> { LsdHelp %s }", window, help  );
 	cmd( "bind %s <KeyPress-s> {.log.but.stop invoke}; bind %s <KeyPress-S> {.log.but.stop invoke}", window, window );
 	cmd( "bind %s <KeyPress-p> {.log.but.pause invoke}; bind %s <KeyPress-P> {.log.but.pause invoke}", window, window );
 	cmd( "bind %s <KeyPress-r> {.log.but.pause invoke}; bind %s <KeyPress-R> {.log.but.pause invoke}", window, window );
@@ -1346,7 +1347,7 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
 	cmd( "pack .t -fill both -expand yes" );
 	cmd( "focus .t");
-	set_shortcuts_log( ".t" );
+	set_shortcuts_log( ".t", "runtime.html" );
 	
 	cmd( "update" );
 	

@@ -85,22 +85,22 @@ proc showmodel pippo {
 		menu $m -tearoff 0 -relief groove -bd 2
 		.l.m add cascade -label Edit -menu $m -underline 0
 		$m add command -label "Edit Name/Description..." -underline 0 -accelerator Ctrl+E -command {
-			edit [.l.l.l curselection] 
+			medit [.l.l.l curselection] 
 		}
 		$m add command -label "Copy" -underline 0 -accelerator Ctrl+C -command {
-			copy [.l.l.l curselection] 
+			mcopy [.l.l.l curselection] 
 		}
 		if { $memory == 0 } {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -state disabled -command {
-				paste [.l.l.l curselection] 
+				mpaste [.l.l.l curselection] 
 			} 
 		} else {
 			$m add command -label "Paste" -underline 0 -accelerator Ctrl+V -command {
-				paste [.l.l.l curselection] 
+				mpaste [.l.l.l curselection] 
 			} 
 		}
 		$m add command -label "Delete..." -underline 0 -accelerator Delete -command {
-			delete [.l.l.l curselection] 
+			mdelete [.l.l.l curselection] 
 		}
 
 		set m .l.m.help 
@@ -108,6 +108,9 @@ proc showmodel pippo {
 		.l.m add cascade -label Help -menu $m -underline 0
 		$m add command -label "Help" -underline 0 -accelerator F1 -command { 
 			LsdHelp modelbrowser.html 
+		}
+		$m add command -label "LSD Documentation" -underline 4 -command { 
+			LsdHelp LSD_documentation.html 
 		}
 		$m add separator
 		$m add command -label "About LSD..." -underline 0 -command { 
@@ -335,7 +338,7 @@ proc showmodel pippo {
 #################################
 # copy a model position for future pastes
 ################################
-proc copy i {
+proc mcopy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
 	
 	if { [lindex $group $i] == 1  } {
@@ -355,7 +358,7 @@ proc copy i {
 #################################
 # Remove a model/group, placing it in a trashbin
 ################################
-proc delete i {
+proc mdelete i {
 	global lrn ldn lmn group RootLsd memory
 
 	set memory 0
@@ -399,7 +402,7 @@ proc delete i {
 #################################
 # Edit the model/group name and description
 ################################
-proc edit i {
+proc medit i {
 	global lrn ldn lmn group lmd result memory fonttype small_character
 
 	set memory 0
@@ -472,7 +475,7 @@ proc edit i {
 #################################
 # Paste a previously copied model/group
 ################################
-proc paste i {
+proc mpaste i {
 	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM fonttype small_character
 
 	set pastedir [lindex $lrn $i]

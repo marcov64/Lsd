@@ -238,7 +238,7 @@ void init_plot( int num, int id_sim )
 
 	cmd( "wm deiconify .log; raise .log; focus .log" );
 
-	set_shortcuts_log( "$activeplot" );
+	set_shortcuts_log( "$activeplot", "runtime.html" );
 }
 
 

@@ -440,8 +440,8 @@ cmd( "$w add command -label \"Match \\\( \\)\" -command {set choice 32} -acceler
 cmd( "$w add command -label \"Insert \\\{\" -command {.f.t.t insert insert \\\{} -accelerator Ctrl+\\\(" );
 cmd( "$w add command -label \"Insert \\}\" -command {.f.t.t insert insert \\}} -accelerator Ctrl+\\)" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"Indent Selection\" -command {set choice 42} -accelerator Ctrl+>" );
-cmd( "$w add command -label \"De-indent Selection\" -command {set choice 43} -accelerator Ctrl+<" );
+cmd( "$w add command -label \"Indent\" -command {set choice 42} -accelerator Ctrl+>" );
+cmd( "$w add command -label \"De-indent\" -command {set choice 43} -accelerator Ctrl+<" );
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Larger Font\" -command {incr dim_character 1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'+'" );
 cmd( "$w add command -label \"Smaller Font\" -command {incr dim_character -1; set a [list \"$fonttype\" $dim_character]; .f.t.t conf -font \"$a\"; settab .f.t.t $tabsize \"$a\"} -accelerator Ctrl+'-'" );
@@ -449,7 +449,7 @@ cmd( "$w add command -label \"Font...\" -command {set choice 59} -underline 8" )
 cmd( "$w add separator" );
 // add option to ajust syntax highlighting (word coloring)
 cmd( "$w add cascade -label \"Syntax Highlighting\" -menu $w.color -underline 0" );
-cmd( "$w add check -label \"Wrap/Unwrap Text\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
+cmd( "$w add check -label \"Wrap/Unwrap\" -variable wrap -command { setwrap .f.t.t $wrap } -underline 1 -accelerator Ctrl+w " );
 cmd( "$w add command -label \"Tab Size...\" -command {set choice 67} -underline 7" );
 cmd( "$w add command -label \"Insert LSD Macro...\" -command {set choice 28} -underline 0 -accelerator Ctrl+i" );
 
@@ -461,8 +461,8 @@ cmd( "$w.color add radio -label \" None\" -variable shigh -value 0 -command {set
 cmd( "set w .m.model" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Model -menu $w -underline 0" );
-cmd( "$w add command -label \"Compile and Run Model...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r" );	// entryconfig 0
-cmd( "$w add command -label \"Recompile Model\" -state disabled -underline 0 -command {set choice 6} -accelerator Ctrl+p" );	// entryconfig 1
+cmd( "$w add command -label \"Compile and Run...\" -state disabled -underline 0 -command {set choice 2} -accelerator Ctrl+r" );	// entryconfig 0
+cmd( "$w add command -label \"Recompile\" -state disabled -underline 0 -command {set choice 6} -accelerator Ctrl+p" );	// entryconfig 1
 cmd( "$w add command -label \"[ string toupper $DbgExe ] Debugger\" -state disabled -underline 0 -command {set choice 13} -accelerator Ctrl+g" );	// entryconfig 2
 cmd( "$w add command -label \"Create 'No Window' Version\" -underline 8 -state disabled -command {set choice 62}" );	// entryconfig 3
 cmd( "$w add command -label \"Model Info...\" -underline 6 -state disabled -command {set choice 44}" );	// entryconfig 4
@@ -470,34 +470,35 @@ cmd( "$w add separator" );	// entryconfig 5
 cmd( "$w add command -label \"Show Description\" -underline 5 -state disabled -command {set choice 5} -accelerator Ctrl+d" );	// entryconfig 6
 cmd( "$w add command -label \"Show Equations\" -state disabled -underline 5 -command {set choice 8} -accelerator Ctrl+e" );	// entryconfig 7
 cmd( "$w add command -label \"Show Extra Files...\" -state disabled -underline 6 -command {set choice 70} -accelerator Ctrl+j" );	// entryconfig 8
-cmd( "$w add command -label \"Show Makefile\" -state disabled -underline 7 -command { set choice 3}" );	// entryconfig 9
-cmd( "$w add command -label \"Show Compilation Results\" -underline 6 -state disabled -command {set choice 7}" );	// entryconfig 10
+cmd( "$w add command -label \"Show Make File\" -state disabled -underline 7 -command { set choice 3}" );	// entryconfig 9
+cmd( "$w add command -label \"Show Compilation Errors\" -underline 6 -state disabled -command {set choice 7}" );	// entryconfig 10
 cmd( "$w add separator" );	// entryconfig 11
 cmd( "$w add command -label \"Model Options...\" -underline 4 -state disabled -command {set choice 48}" );	// entryconfig 12
 cmd( "$w add command -label \"System Options...\" -underline 0 -command {set choice 47}" );	// entryconfig 13
 cmd( "$w add separator" );	// entryconfig 14
-cmd( "$w add check -label \"Auto Hide LMM on Run\" -variable autoHide -underline 0" );	// entryconfig 15
-cmd( "$w add cascade -label \"Equations' Coding Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
+cmd( "$w add check -label \"Auto-hide LMM\" -variable autoHide -underline 0" );	// entryconfig 15
+cmd( "$w add cascade -label \"Equation Code Style\" -underline 1 -menu $w.macro" );	// entryconfig 16
 
 cmd( "menu $w.macro -tearoff 0" );
 cmd( "$w.macro add radio -label \"Use LSD Macros\" -variable macro -value 1 -command {.m.help entryconf 1 -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp LSD_macros.html}; set choice 68}" );
-cmd( "$w.macro add radio -label \"Use LSD C++\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}; set choice 69}" );
+cmd( "$w.macro add radio -label \"Use LSD C++ functions\" -variable macro -value 0 -command {.m.help entryconf 1 -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}; set choice 69}" );
 
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
-cmd( "$w add command -label \"Help on LMM\" -underline 4 -command {LsdHelp \"LMM.html\"}" );
+cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -command { LsdHelp \"LMM.html\" }" );
 if( macro )
-  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 6 -command {LsdHelp LSD_macros.html}" );
+  cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
 else
-  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command {LsdHelp LSD_functions.html}" ); 
+  cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }" ); 
 
+cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 cmd( "$w add separator" );
-//cmd( "$w add command -label \"Tutorial 1 - LMM First users\" -underline 6 -command {LsdHelp tutorial.html}" );
-//cmd( "$w add command -label \"Tutorial 2 - Using LSD Models\" -underline 0 -command {LsdHelp model_using.html}" );
-//cmd( "$w add command -label \"Tutorial 3 - Writing LSD Models\" -underline 6 -command {LsdHelp model_writing.html}" );
-cmd( "$w add command -label \"LSD Documentation\" -command {LsdHelp LSD_documentation.html}" );
-cmd( "$w add command -label \"About LMM...\" -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  );
+cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdHelp LMM_primer.html }" );
+cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
+cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
+cmd( "$w add separator" );
+cmd( "$w add command -label \"About LMM...\" -underline 0 -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" }", _LSD_VERSION_, _LSD_DATE_  );
 
 
 // Button bar
@@ -567,7 +568,7 @@ cmd( "bind .bbar.extra <Enter> {set ttip \"Show extra files...\"}" );
 cmd( "bind .bbar.extra <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.set <Enter> {set ttip \"Model compilation options...\"}" );
 cmd( "bind .bbar.set <Leave> {set ttip \"\"}" );
-cmd( "bind .bbar.hide <Enter> {if $autoHide {set ttip \"Not hide LMM on run\"} {set ttip \"Hide LMM on run\"}}" );
+cmd( "bind .bbar.hide <Enter> {if $autoHide {set ttip \"Not auto-hide LMM\"} {set ttip \"Auto-hide LMM\"}}" );
 cmd( "bind .bbar.hide <Leave> {set ttip \"\"}" );
 cmd( "bind .bbar.help <Enter> {set ttip \"Help on macros for LSD equations\"}" );
 cmd( "bind .bbar.help <Leave> {set ttip \"\"}" );
@@ -638,6 +639,7 @@ cmd( "pack .f.t.vs -side right -fill y" );
 cmd( "pack .f.t.t -expand yes -fill both" );
 cmd( "pack .f.t.hs -fill x" );
 
+cmd( "bind . <F1> { .m.help invoke 0; break }" );
 cmd( "bind . <Control-n> {tk_menuSetFocus .m.file}; bind . <Control-N> {tk_menuSetFocus .m.file}" );
 
 // procedures to save cursor environment before and after changes in text window for syntax coloring
@@ -661,7 +663,7 @@ cmd( "bind .f.t.t <Control-a> { set choice 4 }" );
 cmd( "bind .f.t.t <Control-r> {set choice 2}; bind .f.t.t <Control-R> {set choice 2}" );
 cmd( "bind .f.t.t <Control-e> {set choice 8}" );
 cmd( "bind .f.t.t <Control-j> {set choice 70}" );
-cmd( "bind .f.t.t <Control-KeyRelease-o> {if {$tk_strictMotif == 0} {set a [.f.t.t index insert]; .f.t.t delete \"$a lineend\"} {}; set choice 15; break}" );
+cmd( "bind .f.t.t <Control-KeyRelease-o> { if { $tk_strictMotif == 0 } { set a [ .f.t.t index insert ]; .f.t.t delete \"$a lineend\"} {}; if { $showFileCmds == 1 } { set choice 15 }; break }" );
 cmd( "bind .f.t.t <Control-q> {set choice 1}; bind .f.t.t <Control-Q> {set choice 1}" );
 cmd( "bind .f.t.t <Control-p> {set choice 6; break}; bind .f.t.t <Control-P> {set choice 6; break}" );
 cmd( "bind .f.t.t <Control-u> {set choice 32}" );
@@ -671,7 +673,7 @@ cmd( "bind .f.t.t <Control-d> {set choice 5; break}" );
 cmd( "bind .f.t.t <Control-b> {set choice 33; break}; bind .f.t.t <Control-B> {set choice 33; break}" );
 cmd( "bind .f.t.t <Control-minus> {incr dim_character -2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
 cmd( "bind .f.t.t <Control-plus> {incr dim_character 2; set a [ list \"$fonttype\" $dim_character ]; .f.t.t conf -font \"$a\"}" );
-cmd( "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\\{}" );
+cmd( "bind .f.t.t <Control-parenleft> {.f.t.t insert insert \\{}" );
 cmd( "bind .f.t.t <Control-parenright> {.f.t.t insert insert \\}}" );
 cmd( "bind .f.t.t <Control-greater> {set choice 42}" );
 cmd( "bind .f.t.t <Control-less> {set choice 43}" );
@@ -1937,23 +1939,26 @@ if ( choice == 15 || choice == 71 )
 }
 
 
-if(choice == 16)
-{
 /*insert automatic tabs */
-cmd( "set in [.f.t.t index insert]" );
-cmd( "scan $in %%d.%%d line col" );
-cmd( "set line [expr $line -1]" );
-cmd( "set s [.f.t.t get $line.0 $line.end]" );
-s=(char *)Tcl_GetVar(inter, "s",0);
-for(i=0; s[i]==' '; i++)
-  str[i]=' ';
-if(i>0)
-{str[i]=(char)NULL;
- cmd( ".f.t.t insert insert \"%s\"", str );
-}
-choice=0;
-goto loop;
-
+if ( choice == 16 )
+{
+	cmd( "set in [.f.t.t index insert]" );
+	cmd( "scan $in %%d.%%d line col" );
+	cmd( "set line [ expr $line - 1 ]" );
+	cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
+	
+	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
+	for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
+	  str[ i ] = s[ i ];
+  
+	if ( i > 0 )
+	{
+		str[ i ] = '\0';
+		cmd( ".f.t.t insert insert \"%s\"", str );
+	}
+	
+	choice = 0;
+	goto loop;
 }
 
 if(choice==17)
@@ -4911,7 +4916,7 @@ if ( choice == 44 )
 	cmd( "pack .a.mver.l .a.mver.e" );
 
 	cmd( "frame .a.mdir" );
-	cmd( "label .a.mdir.l -text \"Model subdirectory\"" );
+	cmd( "label .a.mdir.l -text \"Model home subdirectory\"" );
 	cmd( "entry .a.mdir.e -width 35 -state disabled -textvariable complete_dir -justify center" );
 	cmd( "pack .a.mdir.l .a.mdir.e" );
 
@@ -5237,7 +5242,7 @@ if ( choice == 48 )
 	cmd( "pack .l.t.text .l.t.d" );
 	cmd( "pack .l.t" );
 
-	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
+	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#model_options } { set choice 2 }" );
 
 	cmd( "showtop .l" );
 	cmd( "focus .l.t.text" );
@@ -5441,7 +5446,7 @@ if ( choice == 60 )
 
 	cmd( "frame .a.num8" );
 	cmd( "checkbutton .a.num8.v_num8 -variable temp_var8 -text \"Wrap text\"" );
-	cmd( "checkbutton .a.num8.v_num10 -variable temp_var10 -text \"Auto hide on run\"" );
+	cmd( "checkbutton .a.num8.v_num10 -variable temp_var10 -text \"Auto-hide on run\"" );
 	cmd( "checkbutton .a.num8.v_num11 -variable temp_var11 -text \"Show text file commands\"" );
 	cmd( "pack .a.num8.v_num8 .a.num8.v_num10 .a.num8.v_num11" );
 	cmd( "bind .a.num8.v_num8 <Return> { focus .a.num8.v_num10 }" );
@@ -5796,7 +5801,7 @@ if ( choice == 87 )
 			s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
 			if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
 			{
-				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then 'Recompile Model'.\"" );
+				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then 'Recompile'.\"" );
 				goto loop;
 			}
 

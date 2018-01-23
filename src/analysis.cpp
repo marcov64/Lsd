@@ -222,12 +222,20 @@ cmd( "$w add checkbutton -label \"Average Y Values\" -variable avgSmpl -underlin
 cmd( "set w .da.m.help" );
 cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 cmd( ".da.m add cascade -label Help -menu $w -underline 0" );
-cmd( "$w add command -label \"Help on Analysis of Result\" -command {set choice 41} -underline 0" );
-cmd( "$w add command -label \"Model Report\" -command {set choice 43} -underline 0" );
+cmd( "$w add command -label \"Help on Analysis of Results\" -underline 0 -accelerator F1 -command { set choice 41 }" );
+cmd( "$w add command -label \"LSD Quick Help\" -underline 4 -command { LsdHelp LSD_quickhelp.html }" );
+cmd( "$w add command -label \"LSD Documentation\" -underline 4 -command { LsdHelp LSD_documentation.html }" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"About LSD...\" -command { tk_messageBox -parent .da -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" } -underline 0", _LSD_VERSION_, _LSD_DATE_  ); 
+cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdHelp LMM_primer.html }" );
+cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
+cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
+cmd( "$w add separator" );
+cmd( "$w add command -label \"Model Report\" -underline 0 -command { set choice 43 }" );
+cmd( "$w add separator" );
+cmd( "$w add command -label \"About LSD...\" -underline 0 -command { tk_messageBox -parent .da -type ok -icon info -title \"About LSD\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" }", _LSD_VERSION_, _LSD_DATE_  ); 
 
 cmd( ".da configure -menu .da.m" );
+cmd( "bind .da <F1> { .da.m.help invoke 0; break }" );
 
 // adjust horizontal text space usage
 cmd( "if { $tcl_platform(os) == \"Windows NT\" } { set pad -3 } { if { $tcl_platform(os) == \"Darwin\" } { set pad 1 } { set pad 2 } }" );

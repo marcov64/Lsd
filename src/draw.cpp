@@ -139,7 +139,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "strExist", 0 ), "0" ) )		// build window only
 
 	cmd( "showtop $g current yes yes no 0 0 b" );
 
-	set_shortcuts( "$g" );
+	set_shortcuts( "$g", "graphrep.html" );
 }
 else	// or just update canvas
 {

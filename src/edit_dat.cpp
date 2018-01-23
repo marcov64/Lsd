@@ -166,6 +166,7 @@ if(set_focus==1)
   cmd( "focus $initial_focus; $initial_focus selection range 0 end" );
 
 cmd( "bind .ini <KeyPress-Escape> {set choice 1}" );
+cmd( "bind .ini <F1> { LsdHelp menudata_init.html }" );
 
 // show overflow warning just once per configuration but always indicate
 if ( colOvflw )
