@@ -8,6 +8,15 @@
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Helvetica;
+	panose-1:2 11 6 4 2 2 2 2 2 4;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -139,7 +148,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,356 +169,275 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-    <p><a name="initvalues"></a><b><font size="+1"><u>Menu Data</u> -
-        </font>Initial Values</b>
-    </p>
-    <center>
-      <p><img src="image/init_data.png" height="493" width="593"></p>
-    </center>
-    <p>This entry allows to determine the initial values to be used
-      during
-      the initial time step of the simulation. These values are inserted
-      for
-      a single Object type, and for all its instances. To set the
-      initial
-      number
-      of instance of Objects see <a href="menudata_objn.html">Object Number</a>
-      in
-      <a href="menudata.html">menu
-        Data</a>(or click on the label of the Object in the above window
-      in the
-      upper left corner).
-      <br>
-      The data required to be initalized are the Parameters and the
-      Variables
-      used with lagged values (to be used in the early time steps of the
-      simulation),
-      therefore Variables used with no lags do not appear in the initial
-      data
-      window. Users can set only the initial values for Parameters and
-      lagged
-      Variables concerning the Object type shown in the Browser when
-      this
-      menu
-      entry is invoked (see the <a href="browser.html">Browser</a> help
-      page
-      to move through the model). Variables that are used with one, two,
-      or
-      more
-      lagged values will appear once for each lag, because it is
-      necessary to
-      have initial values for each of the lags.
-    </p>
-    <p>The window is formatted as a spreadsheet: each line refers to one
-      type
-      of initial value (Parameter or one Variable lag) and each column
-      refers
-      to one instance of the Object containing that element. For
-      example, in
-      the window above it is highlighted the initial value for Parameter
-      <b>ms</b>
-      contained in an Object of type <b>Seller</b>. The exact Object
-      instance
-      to which the Parameters and Variables refer to is indicated with
-      an <a href="#lsdcode">automatic
-        code</a> (2-2 in the example) referred to on the columns'
-      headers. In
-      the
-      following it is indicated how to identify the Object instance to
-      which
-      each cell refers to and the different ways to insert data.
-    </p>
-    <h3><a name="lsdcode"></a>LSD Automatic Coding</h3>
-    In LSD, Objects are assigned a unique label and can be replicated in
-    as
-    many instances as desired.&nbsp; Therefore, there will be many
-    replica
-    of Objects with the same label (and containing instances of
-    Parameters
-    and Variables with identical labels). This creates the problem of
-    referring
-    to one particular instance when this is necessary, typically for
-    inserting
-    initial values and for analysing the results. Since the any instance
-    is
-    virtually equal to every other instance of the same type, the only
-    way
-    to differentiate them is their relative position in the model.
-    <br>
-    A model in LSD is structured as a hierarchy: on top is placed Object
-    <b>Root</b>,
-    which usually is left empty. Root can contain sets of descending
-    Objects,
-    which in turn may contain Objects, and so on. The automatic code
-    assigns
-    an integer number to an Object for each "ancestor". For example,
-    consider
-    a model with Objects <b>Market</b>, containing Objects <b>Supply
-    </b>and
-    <b>Demand</b>,
-    the first of which contains <b>Producer</b>. The code identifying
-    an
-    instance
-    of Object <b>Producer</b> will contain three groups of numbers: the
-    first
-    refers to <b>Market</b>, the second to <b>Supply</b>, and the last
-    to
-    <b>Producer</b>.
-    <br>
-    &nbsp;
-    <h3><a name="insert_manual"></a><b>Inserting data manually</b></h3>
-    Users can insert values manually by moving through the cells (by
-    default
-    the system moves horizontally when the key <b>Return</b> is
-    pressed).
-    The
-    window shown above is limited to show 100 instances. If the model
-    contains
-    more instances for some type of Objects, the it is necessary to use
-    the
-    <a href="#setall">Set
-      All</a> button, located in the beginning of the lines. Users can
-    also
-    initialize
-    data using the interface showing one single Object instance (see <a
-      href="menudata_brow.html">Data
-      Browse</a> in menu <b><font face="Arial, helvetica">Data</font></b>
-    for
-    doing this in the general case).
-    <br>
-    &nbsp;
-    <h3><a name="setall"></a><b>SET ALL : Inserting data automatically</b></h3>
-    <center>
-      <p><img src="image/setall.png" title="" alt="set all window"
-          align="right"></p>
-    </center>
-    A simulation model needs initial values to start a simulation run.
-    Initial values must be assigned to Parameters and lagged Variables,
-    that is Variables used with a lag. In this latter case the user must
-    assign an initial&nbsp; value to be uses in the first steps of the
-    simulation. A
-    given element to initialize (Parameter or lagged Variable) must be
-    given one numerical value for each copy contained in the model, that
-    is, for each copy of the Object containig the element.<br>
-    <br>
-    Users can insert initial value one-by-one with a suitable interface
-    (see <a href="file:///C:/Lsd5.5/Manual/menudata_brow.html">Data
-      Browse</a> in menu <a href="menudata.html">Data</a>). However, in
-    most
-    cases there are many copies of the element to initialize, and the
-    initialization follows a specific function. For example, the user
-    may
-    want all the initial values in the 1000 copies of a Parameter set to
-    the same value. In this cases, LSD offers the "Set All"
-    functionality,
-    which allows to set all elements specifying an initialization
-    function.<br>
-    <br>
-    The user needs to specify the following options:<br>
-    <ul>
-      <li><span style="font-weight: bold;">Initialization function</span>
-        to use for the initialization. For example, identical values for
-        all
-        the elements (option <span style="font-weight: bold;">Equal to</span>)<br>
-      </li>
-      <li>The <span style="font-weight: bold;">data values</span> used
-        in
-        the initialization funtion. Depending on the function chosen
-        these
-        values can vary. In the example of <span style="font-weight:
-          bold;">Equal
-          to</span> the value is the number to assign to all the
-        elements.</li>
-      <li>The <span style="font-weight: bold;">frequency</span> of the
-        initialization. Considering the series of all elements to
-        initialize
-        (from the first Object to the last), the user can choose to
-        apply the
-        initialization function to every element or to "jump" regularly
-        some
-        elements.</li>
-      <li>The <span style="font-weight: bold;">extention </span>of the
-        initialization. The user can choose to apply the initialization
-        funtion
-        to all elements in the model, or only to a sub-group, specifying
-        the
-        first and last element part of the group.</li>
-    </ul>
-    <center>
-    </center>
-    Below you find the detailed description of the available options.<br>
-    <center>
-    </center>
-    <h2>Initialization function</h2>
-    <p>- <b><font face="Arial, helvetica">Equal To</font></b>: the
-      inserted
-      Value is assigned to every instance the element in the model;<br>
-    </p>
-    <p>- <span style="font-weight: bold; font-family:
-        helvetica,arial,sans-serif;">Range</span>:
-      the data values used concern the Minimum and Maximum. The system
-      counts
-      the number of elements to initialize, then assigns increasing
-      values so
-      that the very first element is set to Minimum, the last one to
-      Maximum,
-      and the intermediate values to equally increasing values. For
-      example,
-      if the model contains 100 elements, Miminum=1 and Maximum=100,
-      then the
-      sequence of elements will be set to: 1 2 3 4 ...<br>
-    </p>
-    <p>- <b><font face="Arial, helvetica">Increasing</font></b>: the
-      values
-      of the elements are set to increasing values beginning from <b>Start
-      </b>and
-      adding <span style="font-weight: bold;">Step</span> to each
-      element.
-      For example, if Start=12 and Step=0.5, then the elements will be
-      initialized with the following values: 12 12.5 13 13.5 etc.<br>
-    </p>
-    <p>- <b><font face="Arial, helvetica">Increasing (Groups)</font></b>:
-      the
-      same as Increasing, but the sequence of initial values is re-set
-      to the
-      Start value when a group of continguous objects is finfished and
-      another group begins. For example, consider a model made of an
-      Object
-      Market containing a set of objects Firm. Suppose the model
-      contains
-      many Market's, and therefore many groups of objects Firm's.
-      Initializing a parameter in Firm with Increasing (Group), setting
-      Start=1 and Step=1, the initial values for the Firm's in the first
-      Market will be set to 1 2 3 etc.&nbsp; When the initialization
-      function
-      reaches the first object Firm contained in the second Market, the
-      sequence begins with 1 2 3 again.<br>
-    </p>
-    <p>- <b><font face="Arial, helvetica">Random (Uniform)</font></b>:
-      a
-      random
-      value is assigned to element to initialize. The random numbers are
-      drawn from a
-      uniform distribution whose minimum value is the first value (<b>Min</b>)
-      and the maximum is the second value (<b>Max)</b>.
-    </p>
-    <p>- <b><font face="Arial, helvetica">Random Integer (Uniform)</font></b>:
-      a random integer value is assigned to element t initialize. The
-      random
-      integer
-      values are drawn from a uniform distribution whose minimum value
-      is the
-      first value (<b>Min</b>) and the maximum is the second value (<b>Max)</b>.
-    </p>
-    <p>- <b><font face="Arial, helvetica">Random (Normal)</font></b>: a
-      random integer value is assigned to element t initialize. The
-      random
-      values are drawn from a normal distribution whose mean
-      is
-      the first value (<b>Mean</b>) and the standard deviation is the
-      second
-      (<b>Std Dev</b>)
-    </p>
-    <p>- <b><font face="Arial, helvetica">File</font></b>: insert data
-      from
-      a file. The file must be a text file formed by a single column
-      containing
-      an initial label. The label is ignored and the file must contain
-      as
-      many
-      lines as instances of the Objects to be initialize.<br>
-    </p>
-    - <b><font face="Arial, helvetica">Sensitivity Analysis</font></b>:
-    identify the element as one of those to be used to generate
-    configurations to perform sensitivity analysis. The value in the
-    first field (<span style="font-weight: bold;">Number of Values</span>)
-    indicates how many different values must be considered for the
-    element. Upon confirmation a new text window asks for the list of
-    values to consider. The user must type in this new window all the
-    values separated by spaces, commas, newline etc.. It is also
-    possible to simply paste in the values previously copied from other
-    applications (e.g. Excel).<br>
-    <center>
-    </center>
-    <h2>Random generator settings</h2>
-    <h2><small style="font-weight: normal;"><small>When
-          using one of the random initialization functions the user can
-          specify a
-          specific seed, in order to be able to replicate exactly the
-          same random
-          initialization if needed. Such setting does not affect the
-          random
-          values during a simulation run, unless the initialization is
-          performed
-          during a run.</small></small><br>
-    </h2>
-    <h2>Numerical data for initialization<br>
-    </h2>
-    <p>These two entries allow users to insert the parameters for the
-      initialization function chosen, The labels of the entries vary
-      depending on the function chosen.<br>
-    </p>
-    <h2></h2>
-    <h2>Frequency<br>
-    </h2>
-    <p>The initialization functions are applied to the sequence of
-      elements
-      as they appear in the model. By default the function is used for
-      every
-      element encountered. The user can also choose to apply the
-      function
-      skipping a specified number of objects. For example, if one sets
-      to
-      apply the function every 2 objects, then the function will set the
-      first element, skip the second, set the third an so on. In case of
-      the
-      box for "Fill in" is checked, the "Increasing" initialization
-      function
-      will fill also the intermediate elements with the latest values.
-      For
-      example, suppose to initialize an element with the "Increasing"
-      initialization function, setting Start = 1 and Step=1. If you have
-      the
-      frequency every 2 objects and Fill in not checked, then you will
-      get
-      the series 1 0 2 0 3 0 4 0 etc. (supposing the element was set to
-      0 for
-      all objects). If, with the same function and setting, you put Fill
-      in
-      checked, then you will get the series 1 1 2 2 3 3 4 4 etc.<br>
-      &nbsp;<br>
-    </p>
-    <h2>Extension of initialization</h2>
-    The "Apply to every object" option applies the initialization
-    function
-    to the whole sets of elements in the model, that is over all the
-    objects containing the element. Alternatively, the user can choose
-    to
-    apply the initialization only to a restricted set of object. The
-    group
-    of objects on which to apply the initialization must be indicated
-    with
-    the ordinal number of the first and last object on which to apply
-    the
-    initialization. For example, suppose the model contains 10 objects
-    Market each containing 20 objects Firm. In order to initialize a
-    Parameter in Firm, limiting to the copies of Firm in the second
-    Market,
-    the user needs to insert From=21 and To=40.&nbsp; Clicking on the
-    entries with the right button of the mouse the user can insert the
-    ordinal number of the objects by indicating the ordinal numbers of
-    parent's. See <a href="menudata_objn.html#SelectionInstance">here </a>for
-details
-    on this last option.<br>
-    <h2>Update description<br>
-    </h2>
-    <p>This option checked on causes the system to add a verbal
-      description
-      of the initialization to the description of the element. This
-      description will appear in the description of the element in the
-      browser and in the model report.<br>
-    </p>
-    <br>
+<p class=MsoTitle>LSD Initial Values Editor</p>
+
+<p class=MsoNormal align=center style='text-align:center'><a name=initvalues></a><img
+width=481 height=379 src="image/init_data.png"></p>
+
+<p class=MsoNormal>The LSD Initial Values Editor allows the entry and the
+modification of initial values in a <a href="LSD_faqs.html#modelsetting">LSD model
+configuration</a>. </p>
+
+<p class=MsoNormal>These values are inserted for a single Object type, and for
+all its instances. To set the initial number of instance of Objects see <a
+href="menudata_objn.html">Object Number</a> in <a href="menudata.html">menu
+Data</a>(or click on the label of the Object in the above window in the upper
+left corner). </p>
+
+<p class=MsoNormal>The data required to be initialized are the Parameters and
+the Variables used with lagged values (to be used in the early time steps of
+the simulation), therefore Variables used with no lags do not appear in the
+initial data window. Users can set only the initial values for Parameters and
+lagged Variables concerning the Object type shown in the Browser when this menu
+entry is invoked (see the <a href="browser.html">Browser</a> help page to move
+through the model). Variables that are used with one, two, or more lagged
+values will appear once for each lag, because it is necessary to have initial values
+for each of the lags. </p>
+
+<p class=MsoNormal>The window is formatted as a spreadsheet: each line refers
+to one type of initial value (Parameter or one Variable lag) and each column
+refers to one instance of the Object containing that element. For example, in
+the window above it is highlighted the initial value for Parameter <span
+class=Cdigo>ms</span> contained in an Object of type <span class=Cdigo>Seller</span>.
+The exact Object instance to which the Parameters and Variables refer to is
+indicated with an <a href="#lsdcode">automatic code</a> (2-2 in the example)
+referred to on the columns' headers. In the following it is indicated how to
+identify the Object instance to which each cell refers to and the different
+ways to insert data. </p>
+
+<h2><a name=lsdcode></a>LSD Automatic Coding</h2>
+
+<p class=MsoNormal>In LSD, Objects are assigned a unique label and can be replicated
+in as many instances as desired. Therefore, there will be many replicas of
+Objects with the same label (and containing instances of Parameters and
+Variables with identical labels). This creates the problem of referring to one
+particular instance when this is necessary, typically for inserting initial
+values and for analyzing the results. Since the any instance is virtually equal
+to every other instance of the same type, the only way to differentiate them is
+their relative position in the model. </p>
+
+<p class=MsoNormal>A model in LSD is structured as a hierarchy: on top is
+placed Object <span class=Cdigo>Root</span>, which usually is left empty. <span
+class=Cdigo>Root</span> can contain sets of descending Objects, which in turn
+may contain Objects, and so on. The automatic code assigns an integer number to
+an Object for each &quot;ancestor&quot;. For example, consider a model with
+Objects <span class=Cdigo>Market</span>, containing Objects <span class=Cdigo>Supply</span><b>
+</b>and <span class=Cdigo>Demand</span>, the first of which contains <span
+class=Cdigo>Producer</span>. The code identifying an instance of Object <span
+class=Cdigo>Producer</span> will contain three groups of numbers: the first
+refers to <span class=Cdigo>Market</span>, the second to <span class=Cdigo>Supply</span>,
+and the last to <span class=Cdigo>Producer</span>.</p>
+
+<h2><a name="insert_manual"></a>Inserting data manually</h2>
+
+<p class=MsoNormal>Users can insert values manually by moving through the cells
+(by default the system moves horizontally when the key <span class=Cdigo>Return</span>
+is pressed). The window shown above is limited to show 100 instances. If the
+model contains more instances for some type of Objects, it is necessary to use
+the <span class=Cdigo><a href="#setall"><span style='color:gray;text-decoration:
+none'>Set All</span></a></span> button, located in the beginning of the lines.
+Users can also initialize data using the interface showing one single Object
+instance (see the command <span class=Cdigo><a href="menudata_brow.html"><span
+style='color:gray;text-decoration:none'>Data&gt;Data Browse</span></a></span>
+in the <a href="browser.html">LSD Browser</a> for doing this in the general
+case). </p>
+
+<h2><a name=setall></a><span class=Cdigo>Set All</span>: Inserting data
+automatically</h2>
+
+<p class=MsoNormal>A simulation model needs initial values to start a
+simulation run. Initial values must be assigned to Parameters and lagged
+Variables, that is, Variables used with a lag. In this latter case the user
+must assign an initial value to be uses in the first steps of the simulation. A
+given element to initialize (Parameter or lagged Variable) must be given one
+numerical value for each copy contained in the model, that is, for each copy of
+the Object containing the element.</p>
+
+<p class=MsoNormal>Users can insert initial value one-by-one with a suitable
+interface (see <span class=Cdigo><a href="menudata_brow.html"><span
+style='color:gray;text-decoration:none'>Data&gt;Data Browse</span></a></span>
+in the <a href="browser.html">LSD Browser</a>). However, in most cases there
+are many copies of the element to initialize, and the initialization follows a
+specific pattern. For example, the user may want all the initial values in the
+1000 copies of a Parameter set to the same value. In these cases, LSD offers
+the <span class=Cdigo>Set All</span> button option, which allows setting all
+elements specifying an initialization method.</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0
+width=359 height=419 src="image/setall.png" alt="set all window"></p>
+
+<p class=MsoNormal>The Set All Objects Initialization window has the following
+options:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The <b>initialization</b> <b>data </b>values to be used by the chosen
+initialization method. Depending on the method, these values have different
+meaning. In the example of the <span class=Cdigo>Equal to</span> method, there
+is just a single value to assign to all elements.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Initialization method</b> to use for the initialization. For
+example, identical values for all the elements (option <span class=Cdigo>Equal
+to</span>).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The <b>Object selection </b>to apply the initialization.
+Considering all instances to initialize (from the first to the last Object
+instance), the user can choose Object grouping patterns to restrict the
+application of the initialization method to a subset of the existing instances.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Control the (pseudo) <b>random number generator</b>, to ensure
+the replicability of the initialization using random methods.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Auto-<b>update initialization comments</b> of the changed
+elements, to be used in the <a href="LSD_faqs.html#modeldocumentation">model
+documentation</a>.</p>
+
+<h3>Initialization methods</h3>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Equal to</b>: the inserted Value is assigned to every instance
+the element in the model.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span style='font-family:"Helvetica","sans-serif"'>Range</span></b>:
+the data values used concern the <span class=Cdigo>Minimum</span> and <span
+class=Cdigo>Maximum</span>. The system counts the number of elements to
+initialize, then assigns increasing values so that the very first element is
+set to <span class=Cdigo>Minimum</span>, the last one to <span class=Cdigo>Maximum</span>,
+and the intermediate values to equally increasing values. For example, if the
+model contains 100 elements, <span class=Cdigo>Minimum</span> = 1 and <span
+class=Cdigo>Maximum</span> = 100, then the sequence of elements will be set to:
+1 2 3 4 ...</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Increasing</b>: the values of the elements are set to
+increasing values beginning from <span class=Cdigo>Start</span><b> </b>and
+adding <span class=Cdigo>Step</span> to each element. For example, if <span
+class=Cdigo>Start</span> = 12 and <span class=Cdigo>Step</span> = 0.5, then the
+elements will be initialized with the following values: 12 12.5 13 13.5 etc.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Increasing (groups)</b>: the same as Increasing, but the
+sequence of initial values is reset to the <span class=Cdigo>Start</span> value
+when a group of contiguous objects is finished and another group begins. For
+example, consider a model made of an Object <span class=Cdigo>Market</span>
+containing a set of objects <span class=Cdigo>Firm</span>. Suppose the model
+contains many <span class=Cdigo>Market</span>'s, and therefore many groups of
+objects <span class=Cdigo>Firm</span>'s. Initializing a parameter in <span
+class=Cdigo>Firm</span> with Increasing (group), setting <span class=Cdigo>Start</span>
+= 1 and <span class=Cdigo>Step</span> = 1, the initial values for the <span
+class=Cdigo>Firm</span>'s in the first <span class=Cdigo>Market</span> will be
+set to 1 2 3 etc. When the initialization function reaches the first object <span
+class=Cdigo>Firm</span> contained in the second <span class=Cdigo>Market</span>,
+the sequence begins with 1 2 3 again.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Random (uniform)</b>: a random value is assigned to element to
+initialize. The random numbers are drawn from a uniform distribution whose
+minimum value is the first value (<span class=Cdigo>Minimum</span>) and the
+maximum is the second value (<span class=Cdigo>Maximum</span><b>)</b>. </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Random Integer (uniform)</b>: a random integer value is
+assigned to element to initialize. The random integer values are drawn from a
+uniform distribution whose minimum value is the first value (<span class=Cdigo>Minimum</span>)
+and the maximum is the second value (<span class=Cdigo>Maximum</span><b>)</b>. </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Random (Normal)</b>: a random integer value is assigned to
+element to initialize. The random values are drawn from a normal distribution
+whose mean is the first value (<span class=Cdigo>Mean</span>) and the standard
+deviation is the second (<span class=Cdigo>Std. Deviation</span>).</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+12.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Import from data file</b>: insert data from a file. The file
+must be a text file formed by a single column containing an initial label. The
+label is ignored and the file must contain as many lines as the instances of
+the Objects to be initialized.</p>
+
+<h3>Apply every</h3>
+
+<p class=MsoNormal>The initialization functions are applied to the sequence of
+elements as they appear in the model. By default the function is used for every
+element encountered. The user can also choose to apply the function skipping a
+specified number of objects. For example, if one sets to apply the function
+every 2 objects, then the function will set the first element, skip the second,
+set the third an so on. </p>
+
+<p class=MsoNormal>In case of the checkbox for <span class=Cdigo>Fill in</span>
+is checked, the <span class=Cdigo>Increasing</span> initialization function
+will fill also the intermediate elements with the latest values. For example,
+suppose to initialize an element with the<span class=Cdigo> Increasing</span>
+initialization function, setting <span class=Cdigo>Start</span> = 1 and <span
+class=Cdigo>Step</span> = 1. If you have the frequency every 2 objects and <span
+class=Cdigo>Fill in</span> not checked, then you will get the series 1 0 2 0 3
+0 4 0 etc. (supposing the element was set to 0 for all objects). If, with the
+same function and setting, you mark <span class=Cdigo>Fill in</span>, then you
+will get the series 1 1 2 2 3 3 4 4 etc.</p>
+
+<h3>Apply to</h3>
+
+<p class=MsoNormal>The <span class=Cdigo>Apply to all objects</span> option
+applies the initialization function to the whole sets of elements in the model,
+that is, over all the object instances containing the element. </p>
+
+<p class=MsoNormal>Alternatively, the user can choose to <span class=Cdigo>Apply
+to a group of objects</span> only. The group of Objects on which to apply the
+initialization must be indicated with the ordinal number of the first and last Object
+on which to apply the initialization. For example, suppose the model contains
+10 objects <span class=Cdigo>Market</span> each containing 20 objects <span
+class=Cdigo>Firm</span>. In order to initialize a Parameter in <span
+class=Cdigo>Firm</span>, limiting to the instances of <span class=Cdigo>Firm</span>
+in the second <span class=Cdigo>Market</span>, the user needs to insert <span
+class=Cdigo>From</span> = 21 and <span class=Cdigo>to</span> = 40. Clicking on
+the entries with the right button of the mouse the user can insert the ordinal
+number of the objects by indicating the ordinal numbers of parent’s. See <a
+href="menudata_objn.html#SelectionInstance">here</a> for details on this last
+option.</p>
+
+<h3>Random number generator</h3>
+
+<p class=MsoNormal>When using one of the random initialization methods, the
+user can <span class=Cdigo>Reset the generator</span> a specific <span
+class=Cdigo>Seed</span>, in order to be able to replicate exactly the same
+random initialization, if needed. Such setting does not affect the random
+values during a <a href="LSD_faqs.html#simulationrun">simulation run</a>,
+unless the initialization is performed during the run.</p>
+
+<h3>Update description</h3>
+
+<p class=MsoNormal>If this option is checked, LSD adds a textual description about
+the applied initialization to the description of the element. This description
+will appear in the <a href="LSD_faqs.html#modelreport">model report</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -519,6 +448,8 @@ details
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

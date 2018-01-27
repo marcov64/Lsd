@@ -8,6 +8,12 @@
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -139,7 +145,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,47 +166,56 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<p><b><u><font size="+1">Menu File</font></u></b>
-</p>
-<p>This menu deals with the configuration files to load, save or
-discard.
-</p>
-<center>
-<p><img src="image/menufile.png" style="height: 512px; width: 408px;"
- align="left" title="" alt="" hspace="50"></p>
-</center>
-<b><i><font face="Arial, helvetica">Other Menus of the Browser:</font></i></b>
-<br>
-<a href="menumodel.html">Menu Model</a>
-<br>
-<a href="menudata.html">Menu Data</a>
-<br>
-<a href="menurun.html">Menu Run</a>
-<br>
-<a href="menuhelp.html">Menu Help</a>
-<p><b><i><font face="Arial, helvetica">Menu "File" Entries:</font></i></b>
-</p>
-<ul>
-  <li><a href="#load">Load</a></li>
-  <li><a href="#reload">Re-load</a></li>
-  <li><a href="#save">Save</a></li>
-  <li><a href="#empty">Empty</a></li>
-  <li><a href="#quit">Quit</a></li>
-</ul>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<p class=MsoTitle>LSD Browser – Menu File </p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="69%"
+ style='width:69.48%'>
+ <tr>
+  <td width=343 style='width:257.1pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=325
+  height=444 src="image/menufile.png"></p>
+  </td>
+  <td width=206 valign=top style='width:154.85pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Model_configuration_files">Model configuration files</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Save_Results">Save Results</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Network_files">Network files</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>4.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Sensitivity_files">Sensitivity files</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Export_data_files">Export data files</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>6.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Equation_file_operations">Equation file operations</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>7.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Quit_the_Browser">Quit</a></p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal>This menu deals with operations involving files. It is
+organized in groups, according to the type of the file(s) involved. All file
+operations work, by default, from the <a href="LSD_faqs.html#modelhome">LSD
+model home directory</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -211,25 +227,137 @@ discard.
  </tr>
 </table>
 
-&nbsp;
-<p><a name="load"></a><b>
-Load</b>
-<br>
-Shortcut: <b><font face="Arial, helvetica">control+l</font></b>
-<br>
-Cause the system to load a previously saved configuration ( by default,
-files with extensions "lsd").
-<br>
-A configuration contains all the information necessary to run a
-simulation,
-but the equations whose computational content is embedded in the LSD
-model
-program (see the <a href="LSD_faqs.html#modelsetting">FAQ on configuration</a>).
-<br>
-The configuration file name, after the loading, appears in the header
-of the Browser window.
+<h1><a name="_Model_configuration_files"></a>Model configuration files</h1>
+
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#modelsetting">LSD
+model configuration files</a>:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Load">Load</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Reload">Reload</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Save">Save</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Save_As">Save As</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Unload">Unload</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Compare">Compare</a></p>
+
+<h2><a name=load></a><a name="_Load"></a>Load </h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+L</span> or click
+the yellow folder icon on the tool bar.</p>
+
+<p class=MsoNormal>Load a previously saved model configuration file (<span
+class=Cdigo>.lsd</span> extension). If there are unsaved changes to the
+currently loaded configuration, the user must confirm the operation or save the
+current configuration before trying to reload a new one.</p>
+
+<p class=MsoNormal>The currently loaded configuration file name shows in the
+title bar of all open <a href="LSD_faqs.html#modelprogram">LSD model program</a>
+windows.</p>
+
+<h2><a name=reload></a><a name="_Reload"></a>Reload </h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+W</span> or click
+the green recycle icon on the tool bar.</p>
+
+<p class=MsoNormal>Reload the current model configuration file. If there are
+unsaved changes to the currently loaded configuration, the user must confirm
+the operation or save the current configuration before trying to reload it
+again.</p>
+
+<p class=MsoNormal>This command is normally used after a <a
+href="LSD_faqs.html#simulationrun">simulation run</a> and before running the
+same configuration again. This is handful because LSD does not allow running a
+simulation immediately after finishing another one. </p>
+
+<h2><a name=save></a><a name="_Save"></a>Save </h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+S</span> or click
+the blue floppy disk icon on the tool bar.</p>
+
+<p class=MsoNormal>Save the current model configuration to the last used
+configuration file (<span class=Cdigo>.lsd</span> extension). If no
+configuration file name was set, the default is <span class=Cdigo>Sim1.lsd</span>.
 </p>
-<p></p>
+
+<p class=MsoNormal>In general, users do not need to manually save a
+configuration since it can be automatically saved just before running a
+simulation, using the same file name of the configuration file previously
+loaded, except if the user chooses otherwise. However, the <span class=Cdigo>Save</span>
+command is still useful when doing larger changes in the model configuration,
+to prevent losing the modifications in case of closing the LSD Browser before
+running the simulation.</p>
+
+<h2><a name="_Save_As"></a>Save As</h2>
+
+<p class=MsoNormal>Save the current model configuration to the file and the
+location specified by the user (<span class=Cdigo>.lsd</span> extension). If no
+configuration file name was set before, the default is <span class=Cdigo>Sim1.lsd</span>.
+If the user wants to save the configuration to a new file, it must explicitly
+type the new name.</p>
+
+<p class=MsoNormal>This command is frequently used to create a copy of an
+existing configuration before experimenting with some changes. Note that the
+configuration files do not have to be stored in the <a
+href="LSD_faqs.html#modelhome">model home directory</a>. In fact, they can be
+stored anywhere in the file system, including in subdirectories of the home
+directory. This is useful because LSD automatically saves <a
+href="LSD_faqs.html#results">simulation run results data</a> to the same location
+where the configuration file is, allowing the easy organization of the results
+of different model configurations.</p>
+
+<p class=MsoNormal>Another situation in which this command may be used is after
+a simulation run. As in this case the model configuration contains the values
+obtained during the very last time step of the simulation, LSD does not allow
+to launch a simulation right away or to overwrite the existing configuration
+with the loaded data. However, users can save the last step configuration with
+a different name and then load it as a new configuration, virtually “extending”
+a simulation time span beyond the time steps originally planned. </p>
+
+<h2><a name=empty></a><a name="_Unload"></a>Unload </h2>
+
+<p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+E</span>.</p>
+
+<p class=MsoNormal>Remove the model configuration currently loaded, restoring the
+initial LSD Browser state. If there are unsaved changes to the currently loaded
+configuration, the user must confirm the operation or save the current
+configuration before trying to unload it. </p>
+
+<p class=MsoNormal>This command may be useful when one wants to (re) create the
+model configuration from the scratch.</p>
+
+<h2><a name="_Compare"></a>Compare</h2>
+
+<p class=MsoNormal>Compare the currently loaded model configuration file with
+any other LSD model configuration file (<span class=Cdigo>.lsd</span>
+extension). After the user supplies the file to compare with, the text-file
+comparison utility (TkDiff) is launched with both files loaded. Differences
+between the configuration files are shown in color. Please refer to the TkDiff
+help pages for details.</p>
+
+<p class=MsoNormal>Please note that model configuration files<i> should not </i>be
+directly edited, at the risk of corrupting them.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -241,23 +369,26 @@ of the Browser window.
  </tr>
 </table>
 
-<br>
-<a name="reload"></a><b>Re-Load</b>
-<br>
-Shortcut: <b><font face="Arial, helvetica">control+w</font></b>
-<p>This command cause the system to re-load the current configuration.
-It is normally used after a simulation run before running another
-simulation
-exercise, possibly changing some parameterization.
-<br>
-This command is frequently used because LSD does not allow to run a
-simulation immediatly after another. This is because the LSD model
-program
-stores in memory the model configuration resulting at the end of the
-simulation,
-which normally is not suited to start a new simulation.
-</p>
-<p></p>
+<h1><a name="_Results_files"></a><a name="_Save_Results"></a><a
+name=saveresults></a>Save Results</h1>
+
+<p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+Z</span>.</p>
+
+<p class=MsoNormal>Saves the all the data of a previous <a
+href="LSD_faqs.html#simulationrun">simulation run</a>, if any. A results file
+base name is requested (a default name is proposed). The extension is
+automatically provided according to the compressed file checkbox (<span
+class=Cdigo>.res.gz</span> or <span class=Cdigo>.res</span>). Saved results
+files can be later loaded in the <a href="menudata_res.html">Analysis of Result</a>
+module.</p>
+
+<p class=MsoNormal>There is an option to save the data as plain comma-separated
+values (CSV) format, for easy usage in other applications (this is not required
+or recommended for R). </p>
+
+<p class=MsoNormal>User has also the option to save a copy of the model
+configuration used in the simulation under the same name as the results
+(important for future reproducibility of the results).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -269,40 +400,37 @@ which normally is not suited to start a new simulation.
  </tr>
 </table>
 
-<br>
-<a name="save"></a><br>
-<b>Save</b>
-<br>
-<b>Shortcut: <font face="Arial, helvetica">control+s</font></b>
-<p>Save the current configuration in a LSD model file. In general,
-users
-do not need to save a configuration since it is automatically saved
-just
-before running a simulation, using the same file name of the
-configuration
-file previously loaded. Therefore, after a simulation run the
-configuration
-file is updated with the changes possibly made before running the
-simulation.
-<br>
-Therefore, this command is used in case one wants to run a simulation
-with different initializations from the lastly loaded configuration.
-<br>
-There is also another case in which this command is used. After a
-simulation
-run a LSD model program contains, as configuration, the values obtained
-during the very last time step of the simulation. LSD does not allow to
-launch a simulation with such configuration (it would overwrite the
-configuration
-file from which the original simulation was obtained). However, users
-can
-sabe the last step configuration with a different name, and then load
-it
-as a new configuration, being therefore able to virtually "extend" a
-simulation
-beyond the time steps originally planned.
-</p>
-<p></p>
+<h1><a name="_Network_files"></a>Network files</h1>
+
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#network">LSD
+network files</a>:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Load_Network">Load Network</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Save_Network">Save Network</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Unload_Network">Unload Network</a></p>
+
+<h2><a name="_Load_Network"></a>Load Network</h2>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h2><a name="_Save_Network"></a>Save Network</h2>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h2><a name="_Unload_Network"></a>Unload Network</h2>
+
+<p class=MsoNormal>&nbsp;</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -314,13 +442,34 @@ beyond the time steps originally planned.
  </tr>
 </table>
 
-<p><a name="empty"></a><b>Empty</b>
-<br>
-<b>Shortcut <font face="Arial, helvetica">control+e</font></b>
-<br>
-Empty the system from the configuration currently loaded.
-<br>
-</p>
+<h1><a name="_Sensitivity_files"></a>Sensitivity files</h1>
+
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#sa">LSD
+sensitivity analysis files</a>:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Load_Sensitivity">Load Sensitivity</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Save_Sensitivity">Save Sensitivity</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Unload_Sensitivity">Unload Sensitivity</a></p>
+
+<h2><a name="_Load_Sensitivity"></a>Load Sensitivity</h2>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h2><a name="_Save_Sensitivity"></a>Save Sensitivity</h2>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h2><a name="_Unload_Sensitivity"></a>Unload Sensitivity</h2>
+
+<p class=MsoNormal>&nbsp;</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -332,14 +481,27 @@ Empty the system from the configuration currently loaded.
  </tr>
 </table>
 
-<p><a name="quit"></a><b>Quit</b>
-</p>
-<p><b>Shortcuts: control+Q</b>
-<br>
-Exit LSD.
-<br>
-&nbsp;
-</p>
+<h1><a name="_Export_data_files"></a>Export data files</h1>
+
+<p class=MsoNormal>Operations involving exporting LSD <a
+href="LSD_faqs.html#modelsetting">model configuration</a> and <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> data:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Export_Saved_Elements">Export Saved Elements</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Export_Sensitivity_Limits">Export Sensitivity Limits</a></p>
+
+<h2><a name="_Export_Saved_Elements"></a>Export Saved Elements</h2>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h2><a name="_Export_Sensitivity_Limits"></a>Export Sensitivity Limits</h2>
+
+<p class=MsoNormal>&nbsp;</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -350,6 +512,102 @@ Exit LSD.
   </td>
  </tr>
 </table>
+
+<h1><a name="_Equation_file_operations"></a>Equation file operations</h1>
+
+<p class=MsoNormal>Operations involving <a href="LSD_faqs.html#equationfile">LSD
+equation file</a>:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Set_Equation_File">Set Equation File</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Upload_Equation_File">Upload Equation File</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Offload_Equation_File">Offload Equation File</a></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Compare_Equation_Files">Compare Equation Files</a></p>
+
+<h2><a name="_Set_Equation_File"></a>Set Equation File</h2>
+
+<p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+U</span>.</p>
+
+<p class=MsoNormal>Assign an <a href="LSD_faqs.html#equationfile">equation file</a>
+to the model. In general LSD should be able to identify the equation file
+automatically. However, in some cases the modeler may want to modify the file
+associated to it.</p>
+
+<h2><a name="_Upload_Equation_File"></a>Upload Equation File</h2>
+
+<p class=MsoNormal>Store into the <a href="LSD_faqs.html#modelsetting">model configuration
+file</a> a snapshot of the current <a href="LSD_faqs.html#equationfile">equation
+file</a> used to generate the <a href="LSD_faqs.html#modelprogram">LSD model
+program</a>. This command does not support multi-file equation sources.</p>
+
+<p class=MsoNormal>Please note that the equation file is stored into the
+configuration for documentation and backup purposes only. These <a
+href="LSD_faqs.html#equation">Equations </a><i>are not</i> used for the
+creation of the LSD model program.</p>
+
+<h2><a name="_Offload_Equation_File"></a>Offload Equation File</h2>
+
+<p class=MsoNormal>Generate an <a href="LSD_faqs.html#equationfile">equation
+file</a> from the copy stored in the <a href="LSD_faqs.html#modelsetting">model
+configuration file</a>.</p>
+
+<p class=MsoNormal>Please note that the equation file stored in the model
+configuration file is likely an <i>older version</i> than the current one. Use
+this option to restore a known-good equation file. It is advisable to restore
+the equation file under a different name, to avoid overwriting the current one.</p>
+
+<h2><a name="_Compare_Equation_Files"></a>Compare Equation Files</h2>
+
+<p class=MsoNormal>Compare the current <a href="LSD_faqs.html#equationfile">equation
+file</a> (used to generate the <a href="LSD_faqs.html#modelprogram">LSD model
+program</a>) with the snapshot stored in the <a
+href="LSD_faqs.html#modelsetting">model configuration file</a>, if any, using
+TkDiff text-file comparison utility.</p>
+
+<p class=MsoNormal>This command is useful to track the changes made to the
+equation file since the last snapshot with the <span class=Cdigo>File&gt;Upload
+Equation File</span> command (<a href="#_Upload_Equation_File">above</a>).</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_Quit_the_Browser"></a><a name="_Quit"></a>Quit</h1>
+
+<p class=MsoNormal><a name=quit></a><i>Shortcuts</i>: <span class=Cdigo>Ctrl+Q</span>
+or click the X on the title bar.</p>
+
+<p>Exit the LSD model program, closing all LSD windows. If there are unsaved
+model configurations or simulation results, a dialog window will confirm before
+quitting.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

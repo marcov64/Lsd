@@ -8,9 +8,6 @@
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:Helvetica;
-	panose-1:2 11 6 4 2 2 2 2 2 4;}
-@font-face
 	{font-family:Wingdings;
 	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
@@ -169,66 +166,42 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<p><b><u><span style='font-size:13.5pt'>Menu &quot;Data&quot;</span></u></b> <br>
-This menu deals with all the numerical aspects of the model, either by setting
-the values required to start a simulation, or by dealing with the values
-resulting from a simulation run. </p>
+<p class=MsoTitle>LSD Browser – Menu Data</p>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=401
-height=547 src="image/setobj.png" align=left hspace=50><b><i>Other Menus of the
-Browser:</i></b> <br>
-<a href="menufile.html">Menu File</a> <br>
-<a href="menumodel.html">Menu Model</a> <br>
-<a href="menurun.html">Menu Run</a> <br>
-<a href="menuhelp.html">Menu Help</a> </p>
+<div align=center>
 
-<p><b><i>Menu &quot;Data&quot; Entries:</i></b> </p>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="69%"
+ style='width:69.48%'>
+ <tr>
+  <td width=328 style='width:246.25pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=390
+  height=444 src="image/setobj.png"></p>
+  </td>
+  <td width=198 valign=top style='width:148.75pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:53.85pt;text-indent:-18.0pt'>1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Model_numerical_configuration">Model numerical configuration</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:53.85pt;text-indent:-18.0pt'>2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Sensitivity_analysis">Sensitivity Analysis</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:53.85pt;text-indent:-18.0pt'>3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Results_evaluation">Results evaluation</a></p>
+  </td>
+ </tr>
+</table>
 
-<ul type=disc>
- <li class=MsoNormal>Set the number of Objects for:</li>
- <ul type=circle>
-  <ul type=square>
-   <ul type=square>
-    <ul type=square>
-     <ul type=square>
-      <ul type=square>
-       <ul type=square>
-        <ul type=square>
-         <li class=MsoNormal><a href="menudata_objn.html">all types of Objects</a></li>
-         <li class=MsoNormal><a href="menudata_objn.html#this">only the type
-             shown in the Browser</a></li>
-        </ul>
-       </ul>
-      </ul>
-     </ul>
-    </ul>
-   </ul>
-  </ul>
- </ul>
- <li class=MsoNormal><a href="menudata_init.html">Set the initial values</a>
-     for the Object type showed in the Browser</li>
- <li class=MsoNormal><a href="menudata_sa.html">Sensitivity Analysis</a></li>
- <li class=MsoNormal><a href="menudata_res.html">Analyze the simulation results</a>
-     analyse the result from current or saved results<a href="menudata_res.html">.<br>
-     </a></li>
- <li class=MsoNormal><a href="#saveres">Save Results</a>, saves the results on
-     file</li>
- <li class=MsoNormal><a href="menudata_brow.html">Data Browse</a>, observe the
-     individual instances of the models</li>
-</ul>
+</div>
 
-<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:12.0pt;
-margin-left:0cm'><br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-</p>
+<p class=MsoNormal>This menu offer tools to deal with all the numerical aspects
+of the model, either by setting the <a href="LSD_faqs.html#modelsetting">values
+required to start a simulation</a>, or by evaluating the <a
+href="LSD_faqs.html#results">results from a simulation run</a>. The commands
+are organized in three thematic groups: model numerical configuration,
+sensitivity analysis and results evaluation.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -240,20 +213,62 @@ margin-left:0cm'><br>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:12.0pt;
-margin-left:0cm'><a name=SetNObj></a><b><i><span style='font-size:13.5pt;
-font-family:"Helvetica","sans-serif"'>Set number of Objects</span></i></b><br>
-This option allows the user to change the number of objects in the model. This
-operation can be quite complicated for models with complex structures, and LSD
-offers two options:<br>
-1. <a href="menudata_objn.html">Set all types of objects</a>. This options
-shows every single grouping of objects, allowing to decide their number.
-However, for large models, this option can be slow and inefficient.<br>
-2. <a href="menudata_objn.html#this">Set only this type of objects</a>. This
-option allows quickly to decide the number of objects of the type shown by the
-browser. All groups of objects of this type will be set at the same number.<br>
-<br>
-See the links above for further details on the two options.</p>
+<h1><a name="_Model_numerical_configuration"></a>Model numerical configuration</h1>
+
+<p class=MsoNormal>Operations involving the <a href="LSD_faqs.html#modelsetting">numerical
+values</a> required to configure the model:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Initial_Values">Initial Values</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Number_of_Objects">Number of Objects</a></p>
+
+<h2><a name="_Initial_Values"></a>Initial Values</h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+I</span> or click the
+spreadsheet with a pencil icon on the tool bar or use the right-click context
+menu in the <a href="LSD_windows.html#modelstructure">LSD Model Structure</a>.</p>
+
+<p class=MsoNormal>Set the <a href="LSD_faqs.html#initialsetting">initial
+values</a> for <a href="LSD_faqs.html#parameter">Parameters </a>and <a
+href="LSD_faqs.html#variable">lagged Variables</a> contained in the current
+selected <a href="LSD_faqs.html#object">Object</a>. This command opens the <a
+href="LSD_windows.html#initialvalues">LSD Initial Values Editor</a>, a
+spreadsheet-like window offering an interface to define the value of each
+element of every Object instance separately or jointly (using the <span
+class=Cdigo>Set All</span> button).</p>
+
+<p class=MsoNormal>Parameters and lagged Variables initial values can be also
+set using the right-click context menu, directly over the desired element. This
+can be more convenient when changing just a few elements among many.</p>
+
+<p class=MsoNormal>Please check this window <a href="menudata_init.html">manual
+page</a> for details on its operation.</p>
+
+<h2><a name="_Number_of_Objects"></a>Number of Objects</h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+O</span> or click
+the green plus icon on the tool bar or use the right-click context menu.</p>
+
+<p class=MsoNormal>Modify the <a href="LSD_faqs.html#object">number of
+instances of any Object</a> in the model. This command opens the <a
+href="LSD_windows.html#objectnumber">LSD Object Number Editor</a>, which shows
+all groups of Objects in the model, organized by the hierarchical levels. Use
+the <span class=Cdigo>Show level</span> buttons to hide or uncover the desired
+levels. </p>
+
+<p class=MsoNormal>When this operation is performed using the right-click
+context menu, directly over a specific Object, the user has direct-access to
+modify the number of instances of just this element. This can be more efficient
+to make changes in large models.</p>
+
+<p class=MsoNormal>Please check this window <a href="menudata_objn.html">manual
+page</a> for details on its operation.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -265,18 +280,16 @@ See the links above for further details on the two options.</p>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a name=saveres></a><b><i>Save
-Results</i></b> </p>
+<h1><a name="_Sensitivity_analysis"></a>Sensitivity Analysis</h1>
 
-<p>Shortcut: Ctrl+z </p>
+<p class=MsoNormal>Create sets of <a href="LSD_faqs.html#modelsetting">model
+configurations</a> for performing <a href="LSD_faqs.html#sa">sensitivity
+analysis</a> using different parameter-space sampling techniques or designs of
+experiments (DoE).</p>
 
-<p>Saves the results of the latest simulation run. This entry creates a LSD
-result file and a LSD model file with the same name (and extensions .res and
-.lsd respectively) containing the results of the simulation to be used with the
-module <a href="menudata_res.html">Analysis of Result</a> and the model
-configuration that produced those results. These files permit a user to load
-the saved configuration obtaining exactly the results contained in the result
-file, even if (pseudo) random functions are used.</p>
+<p class=MsoNormal>Please check the sensitivity analysis <a
+href="menudata_sa.html">manual page</a> for details on the available sampling
+options.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -288,8 +301,62 @@ file, even if (pseudo) random functions are used.</p>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:12.0pt;
-margin-left:0cm'><a name=sensanal></a>&nbsp;</p>
+<h1><a name="_Results_evaluation"></a>Results evaluation</h1>
+
+<p class=MsoNormal>Operations involving the evaluation of the <a
+href="LSD_faqs.html#results">results from a simulation run</a>:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Analysis_of_Results">Analysis of Results</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#_Data_Browse">Data Browse</a></p>
+
+<h2><a name="_Analysis_of_Results"></a>Analysis of Results</h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+A</span> or click
+the color chart icon on the tool bar.</p>
+
+<p class=MsoNormal>Analyze the result from current or saved simulation run
+results. This command opens the <a href="menudata_res.html">LSD Analysis of
+Results module</a>, which presents the list of all the time series stored in
+memory after the last <a href="LSD_faqs.html#simulationrun">simulation run</a>.
+Previously saved data files, from older simulation runs, can also be loaded in
+memory for analysis using the <span class=Cdigo>Add…</span> button.</p>
+
+<p class=MsoNormal>Please refer to this module <a href="menudata_res.html">manual
+page</a> for further details.</p>
+
+<h2><a name="_Data_Browse"></a>Data Browse</h2>
+
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+B</span> or click
+the multi-item window icon on the tool bar.</p>
+
+<p class=MsoNormal>Observe the individual Object instances of the model and the
+values associated with its elements (<a href="LSD_faqs.html#parameter">Parameters
+</a>and <a href="LSD_faqs.html#variable">Variables</a>). This command opens the
+<a href="menudata_brow.html">LSD Data Browser</a>, which allows the navigation
+through the <a href="LSD_faqs.html#modelstructure">structure of the Objects</a>
+in the model as well into each <a href="LSD_faqs.html#object">Object instance</a>.</p>
+
+<p class=MsoNormal>Please refer to this window <a href="menudata_brow.html">manual
+page</a> for further details.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><a name=sensanal></a>&nbsp;</p>
 
 </div>
 

@@ -109,10 +109,10 @@ Tcl_LinkVar(inter, "value1", (char *) &value1, TCL_LINK_DOUBLE);
 Tcl_LinkVar(inter, "value2", (char *) &value2, TCL_LINK_DOUBLE);
 
 // preload the existing value of the first object
-if ( cv->param == 1 )
-	value1 = cv->val[ 0 ];
-else
+if ( cv->param == 0 )
 	value1 = cv->val [ lag ];
+else
+	value1 = cv->val[ 0 ];
 
 // default values
 res=1;
@@ -132,18 +132,18 @@ cmd( "frame .sa.head" );
 cmd( "label .sa.head.lg -text \"Set initial values for every copy of\"" );
 
 cmd( "frame .sa.head.l" );
-if ( cv->param == 1 )
+if ( cv->param != 1 )
 {
-  cmd( "label .sa.head.l.c -text \"Parameter: \"" );
+  if ( cv->param == 2 )
+	cmd( "label .sa.head.l.c -text \"Function: \"" );
+  else
+	cmd( "label .sa.head.l.c -text \"Parameter: \"" );
   cmd( "label .sa.head.l.n -text \"%s\" -fg red", lab  );
   cmd( "pack .sa.head.l.c .sa.head.l.n -side left" );
 }
 else
 {
-  if ( cv->param == 2 )
-	cmd( "label .sa.head.l.c -text \"Function: \"" );
-  else
-    cmd( "label .sa.head.l.c -text \"Variable: \"" );
+  cmd( "label .sa.head.l.c -text \"Variable: \"" );
   cmd( "label .sa.head.l.n1 -text \"%s  \" -fg red", lab );
   cmd( "label .sa.head.l.n2 -text \"\\[  lag \"" );
   cmd( "label .sa.head.l.n3 -text \"%d\" -fg red", t - cv->last_update + lag + 1  );
@@ -933,10 +933,10 @@ for(i=0; i<s->nvalues; i++)
    for (cs=rsense; cs!=NULL; cs=cs->next) 
    {
     cvar=cur->search_var(cur, cs->label);
-	if(cs->param==1)				// handle lags > 0
-	  cvar->val[0]=cs->v[cs->i];
-	else
+	if(cs->param==0)				// handle lags > 0
       cvar->val[cs->lag]=cs->v[cs->i];
+	else
+	  cvar->val[0]=cs->v[cs->i];
    }
    cur=cur->hyper_next(cur->label);
   }

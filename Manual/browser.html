@@ -3,11 +3,17 @@
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 14 (filtered)">
-<title>LSD Browser</title>
+<title>Browser</title>
 <style>
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -139,7 +145,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,63 +166,391 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<center>
-<p><b><font size="+2">LSD Main Browser</font></b></p>
-</center>
-<p>The main browser is used at the same time for two purposes: showing
-the content of one Object type (referred to "the Object pointed by the
-Browser") and serving as control center for all activities of LSD
-before
-and after a simulation run. The Object shown can be edited (e.g. add
-new
-Variable, change its number if instances, set its initial data). The
-uppermost
-part of the main Browser is made of a menu bar that allow to make the
-actions,
-on either the whole model (e.g. run the simulation) or change the
-Object
-pointed by the browser.<br>
-<br>
+<p class=MsoTitle>LSD Main Browser</p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="71%"
+ style='width:71.96%'>
+ <tr>
+  <td width=386 style='width:289.75pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=322
+  height=522 src="image/browser.png" align=left hspace=30></p>
+  </td>
+  <td width=242 valign=top style='width:181.4pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_The_Browser_window">The Browser window</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>a.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Editing_elements">Editing elements</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>b.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Change_the_properties">Change the properties of the element</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>c.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Move_the_element">Move the element to another Object</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>d.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Delete_the_element">Delete the element from the model</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="menufile.html">Menu File</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="menumodel.html">Menu Model</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>4.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="menudata.html">Menu Data</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="menurun.html">Menu Run</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>6.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="menuhelp.html">Menu Help</a> </p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal>The main LSD Browser has two purposes: to show the contents
+of one <a href="LSD_faqs.html#object">Object type</a> (referred as “the Object
+pointed by the Browser”) and to serve as the control center for all LSD
+activities before and after a <a href="LSD_faqs.html#simulationrun">simulation
+run</a>. The Object shown can be edited (e.g., add a new Variable, change its
+number of instances, set the initial data).</p>
+
+<p class=MsoNormal>The LSD Browser is one window of the current <a
+href="LSD_faqs.html#modelprogram">LSD model program</a>. The LSD Browser window
+is automatically open by <a href="LMM.html">LMM</a> after a successful <a
+href="LSD_faqs.html#compiler">compilation</a> of the current <a
+href="LSD_faqs.html#model">LSD model</a>. Directly launching the LSD model
+program is also possible but may require setting up the system environment previously
+(according to the computer configuration).</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name="_The_Browser_window"></a>The Browser window</h1>
+
+<p class=MsoNormal>The Browser window is formed by five elements: (1) the menu
+bar, (2) a shortcut tool bar, (3) the current Object information bar, (4) the
+descending Objects list box, and (5) the Variables and Parameters list box. </p>
+
+<p class=MsoNormal>The menu bar contains all commands available in the Browser
+and is divided in five submenus (<a href="menufile.html">File</a>, <a
+href="menumodel.html">Model</a>, <a href="menudata.html">Data</a>, <a
+href="menurun.html">Run</a>, <a href="menuhelp.html">Help</a>). Each submenu in
+the menu bar is described in details in the next sections. </p>
+
+<p class=MsoNormal>The tool bar offers shortcuts to the most frequently used
+commands, making their access simpler. The icons in each shortcut icon
+represent the respective command. A single mouse click on the shortcut executes
+the associated command. Hovering with the mouse over the icons shows the command
+name on the right part of the tool bar.</p>
+
+<p class=MsoNormal>The Browser has three main information areas, described
+below:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#chobjname">Current Object information bar</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#descendants">Descending Objects list box</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="#variables">Variables and Parameters list box</a></p>
+
+<h2><a name=chobjname></a>Current Object information bar</h2>
+
+<p class=MsoNormal>The red label indicates the name of the Object pointed to by
+the Browser. Any operation specific to an Object will concern all the instances
+in the model of this type of Object. <br>
+Clicking on the red label is a shortcut to entry &quot;<a
+href="menumodel.html#ChangeObjName">Change Object Name</a>&quot; in menu <a
+href="menumodel.html">Model</a>. </p>
+
+<p class=MsoNormal><a name=goup></a>The red label reports the name of the
+Object from which the currently shown Object descends. The label can be clicked
+to move the Browser to point to that Object, that is &quot;up&quot; in the
+hierarchy.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h2><a name=variables></a>Descending Objects list box</h2>
+
+<p class=MsoNormal>Listbox containing the list of descendants from the Object
+shown in the Browser. The names of the descendants can be double-clicked and
+the Browser will move to show that descendant. A model in LSD is composed by a
+hierarchical structure of Objects: the whole model has a unique root, whose
+label is Root. Any Object can have any number of descendants, both intended in
+terms of different types of descendants and different numbers of instances for
+each Object type. The main Browser considers only Object types, without
+specifying the actual number of instances of each type. Therefore, browsing the
+model using the main Browser can be done by clicking on the descendants' names
+to go down the hierarchy and clicking on the label of the parent Object to go
+up the hierarchy.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h2>Variables and Parameters list box</h2>
+
+<p class=MsoNormal>The listbox Variable contains all the Variables and the
+Parameters in the Object pointed by the <a href="browser.html">Browser</a>. The
+order in which the Variables and Parameters are listed depends on the order in
+which they have been inserted in the model, and it has no relevance for the
+simulation actual order of computation during a time step (for this see the <a
+href="debug.html#simman">LSD Simulation Manager</a> help page). </p>
+
+<p class=MsoNormal>After the label of the Variables and Parameters there is a
+code between parentheses: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>(par.)</span> means that the label corresponds
+to a Parameter;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>(var. lag=X)</span>, where <span class=Cdigo>X</span>
+is a non-negative integer, means that the label corresponds to a Variable. If n
+equals zero, it means that the Variable is never used in the model with lagged
+values. Positive <b>n</b>'s mean that the corresponding Variable is used with a
+maximum lag equal to n.</p>
+
+<h3><a name="_Editing_elements"></a>Editing elements</h3>
+
+<p class=MsoNormal>Double-clicking on one element in the Variables and
+Parameters list opens the Change Element window (below).</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0
+width=361 height=497 src="image/variable_options.png"></p>
+
+<p class=MsoNormal>The top part of the window indicates the label of the
+Variable or Parameter and the Object where it is contained. <a
+href="#change_nature">Double-click on the name</a> of the Variable or Parameter
+to change it in another type of element (e.g., change the label, or turn a
+variable into a parameter).</p>
+
+<p class=MsoNormal>Below the title there are three options (two for
+Parameters): </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The field <span class=Cdigo>Save</span> checked on means that the
+value of the Variable or Parameter must be saved in the result file for <a
+href="menudata_res.html">post-simulation analysis</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The field <span class=Cdigo>Run-time Plot</span> means that the
+value of the Variable or Parameter must be plotted during the simulation run on
+the <a href="runtime.html">Run Time Plot</a>. Note that this does not cause the
+automatic saving of the values in the result file for post-simulation analysis.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The field <span class=Cdigo>Debug</span> (only for Variables)
+checked on means that the computation of any instance of the Variable causes
+the debugger to stop the simulation and show the state of the model (see <a
+href="debug.html">LSD Debugger</a>). The simulation will be interrupted
+immediately after the computation of the Variable.</p>
+
+<p class=MsoNormal>The following buttons indicates to continue saving the
+options (<span class=Cdigo>OK</span>), to continue without saving the modified
+options (<span class=Cdigo>Cancel</span>) and the <span class=Cdigo>Help</span>
+button for this page. </p>
+
+<p class=MsoNormal>The parts below refer to the documentation of the Variable
+or Parameter. The &quot;Description&quot; is a text that the modeler can edit
+to indicate the meaning of the item. </p>
+
+<p class=MsoNormal>The following two options, <span class=Cdigo>Observed</span>
+and <span class=Cdigo>Initialized</span> are used in the documentation of the
+model. If checked, the model will include this item in the list of elements
+containing relevant results and in the list of initializations. These lists are
+issued from the <a href="menurun.html">menu Run</a> and placed in the header of
+the model report.</p>
+
+<p class=MsoNormal>The four buttons below the Description (three for
+Parameters) have the following effects: </p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>View code</b></span>: show in a new window
+the actual code used to compute the Variable (not present for Parameters). See
+the manual page on the LSD equations (<a href="LSD_functions.html">C++ codying
+style</a> or the new <a href="LSD_macros.html">LSD Macro codying style</a>)</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Auto Descr.</b></span>: ask the system to
+provide automatic documentation for the Variable, which will replace any text
+possibly present. If the item is a Variable the system scans the equation's
+code looking for a commented part in the beginning of the equation. If found,
+this comment is copied in the Description. Moreover, both for Variables and for
+Parameters, the system also reports in which other equations the item is used.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Using Element</b></span>: clicking this
+button creates a list of Variables whose equation makes use the element.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Elements Used</b></span>: clicking on this
+item creates a new window with the list of items used in the equation for the
+element.</p>
+
+<p class=MsoNormal>The last part of the window contains place to store comments
+on the initialization of the item (of course, it is present only for items with
+initial values: Parameters and lagged Variables). This comment is automatically
+filled when the user makes use of the <a href="menudata_init.html#setall">Set
+All</a> function in the <a href="menudata_init.html">Initial Values</a> window.
 </p>
-<center>
-<p><img src="image/browser.png" style="height: 512px; width: 408px;"
- align="left" title="" alt="" hspace="30"></p>
-</center>
-<b><i><font face="Arial, helvetica">
-<br>
-Menus of the Browser:</font></i></b>
-<br>
-<a href="menufile.html">Menu File</a>
-<br>
-<a href="menumodel.html">Menu Model</a>
-<br>
-<a href="menudata.html">Menu Data</a>
-<br>
-<a href="menurun.html">Menu Run</a>
-<br>
-<a href="menuhelp.html">Menu Help</a>
-<p><b><i><font face="Arial, helvetica">Browser commands:</font></i></b>
-</p>
-<ul>
-  <li> <a href="#chobjname">Object Label</a></li>
-  <li> <a href="#goup">Parent Object</a></li>
-  <li> <a href="#variables">Variables list</a></li>
-  <li> <a href="#descendants">Descendants list</a></li>
+
+<p class=MsoNormal>The description part and the comments on the initial values
+are used in the model report in the cell concerning the item. </p>
+
+<h3><a name="change_nature"></a><a name="_Change_the_properties"></a>Change the
+properties of the element </h3>
+
+<p class=MsoNormal><i>WARNING: </i>changing the properties of an element or its
+location in the Objects' structure can severely compromise the model. Use this
+option only to fix errors.</p>
+
+<p class=MsoNormal>After having inserted a Variable or a Parameter it is
+possible to change the properties of the element by changing its label,
+transforming a Parameter in a Variable, a Variable in a Parameter, moving it to
+another Object or changing the maximum number of lags for a variable. If the
+model is running fine, the only reason for such a change is when the equations
+are changed, for example when you want to transform a Parameter in a Variable. </p>
+
+<p class=MsoNormal>To change the nature of an element you need to:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>use the <a href="browser.html">LSD Browser</a> to show the object
+containing the element you want to change;</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>2)<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>on the element
+entry in the list of Variables and Parameters, you may OR double-click to <a
+href="#variables">show the options </a>for the element and click the button <span
+class=Cdigo>Properties</span> OR right-click on the element and choose <span
+class=Cdigo>Properties</span> in the pop-up context menu;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>use the Properties dialog window (below) to edit the element properties
+as required.</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0
+width=283 height=245 src="image/change_nature.png"></p>
+
+<p class=MsoNormal>The available operations are:</p>
+
+<ul type=disc>
+ <li class=MsoNormal><b>Name</b>: edit the label of the element. To delete the
+     element altogether assign an empty label, that is, delete all character in
+     this box</li>
+ <li class=MsoNormal><b>Lags</b>: change the maximum number of lagged values to
+     be used in the computation of Equations (applicable only for Variables).</li>
+ <li class=MsoNormal><b>Type</b>: the type of the element among:</li>
+ <ul type=circle>
+  <li class=MsoNormal><b>Variable</b>: turn the element into a variable.</li>
+  <li class=MsoNormal><b>Parameter</b>: turn the element into a parameter.</li>
+  <li class=MsoNormal><b>Function</b>: turn the element into a function.</li>
+ </ul>
 </ul>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<p></p>
-<br>
-<br>
+
+<h3><a name="_Move_the_element"></a>Move the element to another Object</h3>
+
+<p class=MsoNormal>To change the Object in which an element is contained you
+need to:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>1)<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>use the <a
+href="browser.html">LSD Browser</a> to show the object containing the element
+you want to move;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>on the element entry in the list of Variables and Parameters, you may OR
+double-click to <a href="#variables">show the options </a>for the element and
+click the button <span class=Cdigo>Move</span> OR right-click on the element
+and choose <span class=Cdigo>Move</span> in the pop-up context menu;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>in the Move dialog window, select the Object to which the element should
+be moved to.</p>
+
+<h3><a name="_Delete_the_element"></a>Delete the element from the model</h3>
+
+<p class=MsoNormal>To change the Object in which an element is contained you
+need to:</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>1)<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>use the <a
+href="browser.html">LSD Browser</a> to show the object containing the element
+you want to delete;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>on the element entry in the list of Variables and Parameters, you may OR
+double-click to <a href="#variables">show the options </a>for the element and
+click the button <span class=Cdigo>Delete</span> OR right-click on the element
+and choose <span class=Cdigo>Delete</span> in the pop-up context menu;</p>
+
+<p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'>3)<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>in the Confirmation
+dialog window, choose <span class=Cdigo>Yes</span> to confirm the deletion.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -227,285 +562,8 @@ Menus of the Browser:</font></i></b>
  </tr>
 </table>
 
-<p><a name="chobjname"></a>
-"<b><font face="Arial, helvetica">Object:</font></b>"
-<br>
-The red label indicates the name of the Object pointed to by the
-Browser.
-Any operation specific to an Object will concern all the instances in
-the
-model of this type of Object.
-<br>
-Clicking on the red label is a shortcut to entry "<a
- href="menumodel.html#ChangeObjName">Change
-Object Name</a>" in menu <a href="menumodel.html">Model</a>.
-<br>
-</p>
-
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
-
-<br>
-&nbsp;
-<p><a name="goup"></a>"<b><font face="Arial, helvetica">Parent Object:</font></b>"
-<br>
-The red label reports the name of the Object from which the currently
-shown Object descends. The label can be clicked to move the Browser to
-point to that Object, that is "up" in the hierarchy.
-<br>
-</p>
-
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
-
-<p><a name="variables"></a><b><font
- face="Arial,Helvetica">Listbox
-"Variables"</font></b>
-<br>
-The listbox <b>Variable</b> contains all the Variables and the
-Parameters
-in the Object pointed by the <a href="browser.html">Browser</a>. The
-order
-in which the Variables and Parameters are listed depends on the order
-in
-which they have been inserted in the model, and it has no relevance for
-the simulation actual order of computation during a time step (for this
-see the <a href="debug.html#simman">LSD Simulation Manager</a> help
-page).
-<br>
-After the label of the Variables and Parameters there is a code between
-parenthesis:
-</p>
-<ul>
-  <li>(P) means that the label corresponds to a Parameter;</li>
-  <li>(n), where n is a non-negative integer, means that the label
-corresponds
-to a Variable. If n equals zero, it means that the Variable is never
-used
-in the model with lagged values. Positive <b>n</b>'s mean that the
-corresponding
-Variable is used with a maximum lag equal to n.</li>
-</ul>
-Double-clicking on one element in the list causes a window like the
-following
-to appear:
-<center>
-<p><img src="image/variable_options.png" style="height: 588px; width: 502px;"
- title="" alt="" align="left" hspace="40"></p>
-</center>
-<p>The top part of the window indicates the label of the Variable or
-Parameter
-and the Object where it is contained. <a href="#change_nature">Double-click
-on the name</a> of the Variable
-or Parameter to change it in another type of element (e.g. change the
-label, or turn a variable in a parameter).<br>
-Below the title there are three options (two for Parameters):
-</p>
-<ul>
-  <li>The field <b><font face="Arial, helvetica">Debug</font></b>
-(only for
-Variables)
-checked on means that the computation of any instance of the Variable
-causes
-the debugger to stop the simulation and show the state of the model
-(see <a href="debug.html">LSD
-Debugger</a>). The simulation will be interrupted immediately after the
-computation of the Variable.</li>
-  <li>The field <b><font face="Arial, helvetica">Save</font></b>
-checked on
-means
-that the value of the Variable or Parameter must be saved in the result
-file for <a href="menudata_res.html">post-simulation analysis</a>.</li>
-  <li>The field <b><font face="Arial, helvetica">Run Time Plot</font></b>
-means
-that the value of the Variable or Parameter must be plotted during the
-simulation run on the <a href="runtime.html">Run Time Plot</a>. Note
-that
-this does not cause the automatic saving of the values in the result
-file
-for post-simulation analysis.</li>
-</ul>
-The following buttons indicates to continue saving the options (<b>Continue</b>),
-to continue without saving the modified options (<b>Cancel</b>) and the
-help button for this page.
-<br>
-The parts below refer to the documentation of the Variable or
-Parameter.
-The "Description" is a text that the modeler can edit to indicate the
-meaning of the item. <br>
-<br>
-The following two options, <span style="font-weight: bold;">Observe</span>
-and <span style="font-weight: bold;">Initialize</span> are used in the
-documentation of the model. I checked, the model will include this item
-in the list of elements containing relevant results and in the list of
-initializations. These lists are issued from the <a href="menurun.html">menu
-Run</a> and placed in the header of the model report.<br>
-<br>
-The four buttons below the Description (three for
-Parameters) have the following effects:
-<ul>
-  <li> <b>See code</b>: show in a new window the actual code used to
-compute the
-Variable (not present for Parameters). See the manual page on the LSD
-equations
-(<a href="LSD_functions.html">C++ codying style</a> or the new <a
- href="LSD_macros.html">LSD
-Macro codying style</a>)</li>
-  <li> <b>Auto Docum.</b>: ask the system to provide automatic
-documentation for
-the Variable, which will replace any text possibly present. If the item
-is a Variable the system scans the equation's code looking for a
-commented
-part in the beginning of the equation. If found, this comment is copied
-in the Description. Moreover, both for Variables and for Parameters,
-the
-system also reports in which other equations the item is used.</li>
-  <li> <b>Vars using 'XXX'</b>: clicking this button creates a list of
-Variables
-whose equation makes use the item XXX</li>
-  <li> <b>Vars./Pars. used in 'XXX'</b>: clicking on this item creates
-a
-new window
-with the list of items used in the equation for XXX.</li>
-</ul>
-The last part of the window contains place to store comments on the
-initialization
-of the item (of course, it is present only for items with initial
-values:
-Parameters and lagged Variables). This comment is automatically filled
-when the user makes use of the <a href="menudata_init.html#setall">Set All</a>
-function in the <a href="menudata_init.html">Initial Values</a> window.
-<p>The description part and the comments on the initial values are used
-in the model report in the cell concerning the item.
-<br>
-</p>
-
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
-
-<p><a name="change_nature"></a><b><font
- face="Arial,Helvetica">Change
-Labels, lags and nature of an element</font></b>
-<br>
-</p>
-<p><span style="font-style: italic;"><span style="font-weight: bold;">WARNING:
-Changing the nature of an element or its location in the objects'
-structure can severely compromise the model. Use this option only to
-fix errors.<br>
-<br>
-</span></span>After having inserted a Variable or a Parameter it is
-possible to
-change
-the nature of the element by changing its label, transforming a
-Parameter
-in a Variable, a Variable in a Parameter, moving it to another Object
-or changing the number of lags
-for a variable. Generally, these operations are required only in order
-to fix spelling errors. If the model runs, the only reason for such a
-change
-is when the equations are changed, for example when you want to
-transform
-a Parameter in a Variable.
-</p>
-<p>To change the nature of an element you need to:&nbsp;&nbsp;
-<br>
-</p>
-<ol>
-  <li>use the <a href="browser.html">Browser</a> to show the object
-containing
-the element you want to change;</li>
-  <li>Double-click on the element entry in the list of Variables to <a
- href="#variables">show
-the options </a>for the element;</li>
-  <li>Use the following window to edit the element as required.</li>
-</ol>
-<img src="image/change_nature.png" style="height: 193px; width: 333px;"
- title="" alt="">
-<br>
-<br>
-The available operations are the follwing:<br>
-<ul>
-  <li><span style="font-weight: bold;">Change label</span>: edit the
-label of the element. To delete the element altogether assign an empty
-label, that is, delete all character in this box</li>
-  <li><span style="font-weight: bold;">Move to another object</span>:
-remove the element from the current object to be placed in another one.
-Click on the button showing the original Object containing the element,
-and a list of objects in the model will appear.&nbsp;</li>
-  <li><span style="font-weight: bold;">Variable</span>: turns the
-element in a variable. Use this option to modify the number of lags
-defined for the variable, too.</li>
-  <li><span style="font-weight: bold;">Parameter</span>: turn the
-element in a parameter.</li>
-  <li><span style="font-weight: bold;">Funtion</span>: turn the element
-in a function.<br>
-  </li>
-</ul>
-<br>
-
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
-
-<p><a name="descendants"></a><b><font face="Arial,Helvetica">Listbox
-"Descendants"</font></b>
-<br>
-Listbox containing the list of descendants from the Object shown in
-the Browser. The names of the descendants can be double-clicked and the
-Browser will move to show that descendant. A model in LSD is composed
-by
-a hierarchical structure of Objects: the whole model has a unique root,
-whose label is Root. Any Object can have any number of descendants,
-both
-intended in terms of different types of descendants and different
-numbers
-of instances for each Object type. The main Browser considers only
-Object
-types, without specifying the actual number of instances of each type.
-Therefore, browsing the model using the main Browser can be done by
-clicking
-on the descendants' names to go down the hierarchy and clicking on the
-label of the parent Object to go up the hierarchy.
-<br>
-&nbsp;
-</p>
-
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a
+name=descendants></a>&nbsp;</p>
 
 </div>
 

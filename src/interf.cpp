@@ -13,7 +13,7 @@
  *************************************************************/
 
 /*
-USED CASE 92
+USED CASE 93
 */
 
 /****************************************************
@@ -114,11 +114,11 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92 };
+int badChoices[] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[] = { 20, 55, 74, 75, 76, 77, 78, 79, 83 };
+int redoChoices[] = { 20, 33, 55, 74, 75, 76, 77, 78, 79, 83 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -248,7 +248,7 @@ if ( redrawRoot )
 			if ( ap_v->param == 0 )
 				cmd( ".l.v.c.var_name insert end \"%s (var. lag=%d%s)\"",ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
 			if ( ap_v->param == 2 )
-				cmd( " .l.v.c.var_name insert end \"%s (fun. lag=%d%s)\"", ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+				cmd( " .l.v.c.var_name insert end \"%s (fun.%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
 
 			if ( ap_v->param == 0 && ap_v->num_lag == 0 )
 				cmd( ".l.v.c.var_name itemconf $app -fg blue" );
@@ -558,108 +558,135 @@ if ( redrawRoot )
 		cmd( "set w .m.file" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label File -menu $w -underline 0" );
-		cmd( "$w add command -label \"Load...\" -command {set choice 17} -underline 0 -accelerator Ctrl+L" );
-		cmd( "$w add command -label Reload -command {set choice 38} -underline 0 -accelerator Ctrl+W" );
-		cmd( "$w add command -label Save -command {set choice 18} -underline 0 -accelerator Ctrl+S" );
-		cmd( "$w add command -label \"Save As...\" -command {set choice 73} -underline 5" );
-		cmd( "$w add command -label Unload -command {set choice 20} -underline 0 -accelerator Ctrl+E" );
-		cmd( "$w add command -label \"Compare...\" -command {set choice 82} -underline 0" );
+		cmd( "$w add command -label \"Load...\" -underline 0 -accelerator Ctrl+L -command { set choice 17 }" );
+		cmd( "$w add command -label Reload -underline 0 -accelerator Ctrl+W -command { set choice 38 }" );
+		cmd( "$w add command -label Save -underline 0 -accelerator Ctrl+S -command { set choice 18 }" );
+		cmd( "$w add command -label \"Save As...\" -underline 5 -command { set choice 73 }" );
+		cmd( "$w add command -label Unload -underline 0 -accelerator Ctrl+E -command { set choice 20 }" );
+		cmd( "$w add command -label \"Compare...\" -underline 0 -command { set choice 82 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Save Results...\" -command {set choice 37}  -underline 2 -accelerator Ctrl+Z" );
+		
+		cmd( "$w add command -label \"Save Results...\" -underline 2 -accelerator Ctrl+Z -command { set choice 37 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Load Network...\" -command {set choice 88} -underline 5" );
-		cmd( "$w add command -label \"Save Network...\" -command {set choice 89} -underline 8" );
+		
+		cmd( "$w add command -label \"Load Network...\" -underline 5 -command { set choice 88 }" );
+		cmd( "$w add command -label \"Save Network...\" -underline 8 -command { set choice 89 }" );
+		cmd( "$w add command -label \"Unload Network\" -underline 3 -command { set choice 93 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Load Sensitivity...\" -command {set choice 64} -underline 3" );
-		cmd( "$w add command -label \"Save Sensitivity...\" -command {set choice 65} -underline 6" );
+		
+		cmd( "$w add command -label \"Load Sensitivity...\" -underline 3 -command { set choice 64 }" );
+		cmd( "$w add command -label \"Save Sensitivity...\" -underline 6 -command { set choice 65 }" );
+		cmd( "$w add command -label \"Unload Sensitivity\" -underline 11 -command { set choice 67 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Export Saved Elements...\" -command {set choice 91} -underline 1" );
-		cmd( "$w add command -label \"Export Sensitivity Limits...\" -command {set choice 90} -underline 2" );
+		
+		cmd( "$w add command -label \"Export Saved Elements...\" -underline 1 -command { set choice 91 }" );
+		cmd( "$w add command -label \"Export Sensitivity Limits...\" -underline 2 -command { set choice 90 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Set Equation File...\" -command {set choice 28} -underline 2 -accelerator Ctrl+U" );
-		cmd( "$w add command -label \"Upload Equation File\" -command {set choice 51} -underline 0" );
-		cmd( "$w add command -label \"Offload Equation File...\" -command {set choice 52} -underline 1" );
-		cmd( "$w add command -label \"Compare Equation Files...\" -command {set choice 53} -underline 2" );
+		
+		cmd( "$w add command -label \"Set Equation File...\" -underline 2 -accelerator Ctrl+U -command { set choice 28 }" );
+		cmd( "$w add command -label \"Upload Equation File\" -command { set choice 51 }" );
+		cmd( "$w add command -label \"Offload Equation File...\" -underline 1 -command { set choice 52 }" );
+		cmd( "$w add command -label \"Compare Equation Files...\" -underline 2 -command { set choice 53 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label Quit -command {set choice 11} -underline 0 -accelerator Ctrl+Q" );
+		
+		cmd( "$w add command -label Quit -underline 0 -accelerator Ctrl+Q -command { set choice 11 }" );
 
 		cmd( "set w .m.model" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Model -menu $w -underline 0" );
-		cmd( "$w add command -label \"Add Variable...\" -command {set param 0; set choice 2} -underline 4 -accelerator Ctrl+V" );
-		cmd( "$w add command -label \"Add Parameter...\" -command {set param 1; set choice 2} -underline 4 -accelerator Ctrl+P" );
-		cmd( "$w add command -label \"Add Function...\" -command {set param 2; set choice 2} -underline 5 -accelerator Ctrl+N" );
-		cmd( "$w add command -label \"Add Descending Object...\" -command {set choice 3} -underline 4 -accelerator Ctrl+D" );
-		cmd( "$w add command -label \"Insert New Parent...\" -command {set choice 32} -underline 9" );
+		cmd( "$w add command -label \"Add Variable...\" -underline 4 -accelerator Ctrl+V -command { set param 0; set choice 2 }" );
+		cmd( "$w add command -label \"Add Parameter...\" -underline 4 -accelerator Ctrl+P -command { set param 1; set choice 2 }" );
+		cmd( "$w add command -label \"Add Function...\" -underline 5 -accelerator Ctrl+N -command { set param 2; set choice 2 }" );
+		cmd( "$w add command -label \"Add Descending Object...\" -underline 4 -accelerator Ctrl+D -command { set choice 3 }" );
+		cmd( "$w add command -label \"Add Parent Object...\" -underline 5 -command { set choice 32 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Change Element...\" -command { set choice 7 } -underline 0" );
-		cmd( "$w add command -label \"Change Object...\" -command {set choice 6} -underline 7" );
-		cmd( "$w add command -label \"Change Number...\" -command {set choice 33} -underline 7" );
+		
+		cmd( "$w add command -label \"Change Element...\" -underline 0 -command { set choice 7 }" );
+		cmd( "$w add command -label \"Change Object...\" -underline 7 -command { set choice 6 }" );
+		
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Generate Descriptions\" -command {set choice 43} -underline 0" );
-		cmd( "$w add command -label \"Create Model Report...\" -command {set choice 36} -underline 7" );
-		cmd( "$w add command -label \"Create LaTex Table\" -command {set choice 57} -underline 9" );
-		cmd( "$w add command -label \"Create LaTex References\" -command {set choice 92} -underline 13" );
+		
+		cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
 
 		cmd( "$w add separator" );
-		cmd( "$w add checkbutton -label \"Ignore Equation File Controls\" -variable ignore_eq_file -command {set choice 54} -underline 0" );
-		cmd( "$w add checkbutton -label \"Enable Structure Window\" -variable strWindowOn -command {set choice 70} -underline 7 -accelerator Ctrl+Tab" );
-		cmd( "$w add command -label \"Find Element...\" -command {set choice 50} -underline 0 -accelerator Ctrl+F" );
+		
+		cmd( "$w add command -label \"Create Model Report...\" -underline 7 -command { set choice 36 }" );
+		cmd( "$w add command -label \"Create LaTex Table\" -underline 9 -command { set choice 57 }" );
+		cmd( "$w add command -label \"Create LaTex References\" -underline 13 -command { set choice 92 }" );
+		cmd( "$w add command -label \"Import Descriptions\" -underline 0 -command { set choice 43 }" );
+
+		cmd( "$w add separator" );
+		
+		cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 7 -accelerator Ctrl+Tab -variable strWindowOn -command { set choice 70 }" );
+		cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );
 
 		cmd( "set w .m.data" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Data -menu $w -underline 0" );
 		cmd( "$w add command -label \"Initial Values...\" -command {set choice 21} -underline 0 -accelerator Ctrl+I" );
 		cmd( "$w add command -label \"Numbers of Objects....\" -command {set choice 19} -accelerator Ctrl+O -underline 0" );
+		
 		cmd( "$w add separator" );
+		
 		cmd( "$w add cascade -label \"Sensitivity Analysis\" -underline 0 -menu $w.setsens" );
 
 		cmd( "$w add separator" );
 
-		cmd( "$w add command -label \"Show Sensitivity Data\" -command {set choice 66} -underline 1" );
-		cmd( "$w add command -label \"Remove Sensitivity Data\" -command {set choice 67} -underline 0" );
-
-		cmd( "$w add separator" );
-
-		cmd( "$w add command -label \"Analysis of Results...\" -command {set choice 26} -underline 0 -accelerator Ctrl+A" );
-		cmd( "$w add command -label \"Data Browse...\" -command {set choice 34} -underline 5 -accelerator Ctrl+B" );
+		cmd( "$w add command -label \"Analysis of Results...\" -command { set choice 26 } -underline 0 -accelerator Ctrl+A" );
+		cmd( "$w add command -label \"Data Browse...\" -command { set choice 34 } -underline 5 -accelerator Ctrl+B" );
 
 		cmd( "set w .m.data.setsens" );
 		cmd( "menu $w -tearoff 0" );
-		cmd( "$w add command -label \"Full (online)\" -command {set choice 62} -underline 0" );
-		cmd( "$w add command -label \"Full (batch)\" -command {set choice 63} -underline 6" );
-		cmd( "$w add command -label \"MC Point Sampling (batch)...\" -command {set choice 71} -underline 0" );
-		cmd( "$w add command -label \"MC Range Sampling (batch)...\" -command {set choice 80} -underline 3" );
-		cmd( "$w add command -label \"EE Sampling (batch)...\" -command {set choice 81} -underline 0" );
-		cmd( "$w add command -label \"NOLH Sampling (batch)...\" -command {set choice 72} -underline 0" );
+		cmd( "$w add command -label \"Full (online)\" -underline 0 -command { set choice 62 }" );
+		cmd( "$w add command -label \"Full (batch)\" -underline 6 -command { set choice 63 }" );
+		cmd( "$w add command -label \"MC Point Sampling (batch)...\" -underline 0 -command { set choice 71 }" );
+		cmd( "$w add command -label \"MC Range Sampling (batch)...\" -underline 3 -command { set choice 80 }" );
+		cmd( "$w add command -label \"EE Sampling (batch)...\" -underline 0 -command { set choice 81 }" );
+		cmd( "$w add command -label \"NOLH Sampling (batch)...\" -underline 0 -command { set choice 72 }" );
 
 		cmd( "set w .m.run" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Run -menu $w -underline 0" );
-		cmd( "$w add command -label Run -command {set choice 1} -underline 0 -accelerator Ctrl+R" );
-		cmd( "$w add command -label \"Start 'No Window' Batch...\" -command {set choice 69} -underline 0" );
-		cmd( "$w add command -label \"Create/Run Parallel Batch...\" -command {set choice 68} -underline 11" );
+		cmd( "$w add command -label Run -underline 0 -accelerator Ctrl+R -command { set choice 1 }" );
+		cmd( "$w add command -label \"Start 'No Window' Batch...\" -underline 0 -command { set choice 69 }" );
+		cmd( "$w add command -label \"Create/Start Parallel Batch...\" -underline 11 -command { set choice 68 }" );
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Simulation Settings...\" -command {set choice 22} -underline 2 -accelerator Ctrl+M" );
-		cmd( "$w add checkbutton -label \"Frequent Lattice Updating\" -variable lattype -command {set choice 56} -underline 2" );
+		cmd( "$w add command -label \"Simulation Settings...\" -underline 2 -accelerator Ctrl+M -command { set choice 22 }" );
+		cmd( "$w add checkbutton -label \"Frequent Lattice Updating\" -underline 2 -variable lattype -command { set choice 56 }" );
 
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Show Elements to Initialize\" -command {set choice 49} -underline 17" );
-		cmd( "$w add command -label \"Show Elements to Observe\" -command {set choice 42} -underline 17" );
-		cmd( "$w add command -label \"Show Elements to Save\" -command {set choice 39} -underline 1" );
-		cmd( "$w add command -label \"Show Elements to Plot\" -command {set choice 84} -underline 2" );
-		cmd( "$w add command -label \"Show Elements to Debug\" -command {set choice 85} -underline 17" );
-		cmd( "$w add command -label \"Show Elements to Parallelize\" -command {set choice 86} -underline 3" );
+		
+		cmd( "$w add cascade -label \"Show Elements to\" -underline 17 -menu $w.show" );
+		cmd( "$w add cascade -label \"Remove Flags to\" -underline 15 -menu $w.rem" );
 
 		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Remove Save Flags\" -command {set choice 30} -underline 15 -accelerator Ctrl+G" );
-		cmd( "$w add command -label \"Remove Plot Flags\" -command {set choice 31} -underline 4" );
-		cmd( "$w add command -label \"Remove Debug Flags\" -command {set choice 27} -underline 13 -accelerator Ctrl+F" );
-		cmd( "$w add command -label \"Remove Parallel Flags\" -command {set choice 87}" );
+		
+		cmd( "$w add command -label \"Close Run-time Plots\" -command { set choice 40 } -underline 0" );
 
-		cmd( "$w add separator" );
-		cmd( "$w add command -label \"Close Runtime Plots\" -command {set choice 40} -underline 0" );
-
+		cmd( "set w .m.run.show" );
+		cmd( "menu $w -tearoff 0" );
+		cmd( "$w add command -label Save -underline 0 -command { set choice 39 }" );
+		cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 84 }" );
+		cmd( "$w add command -label Debug -underline 0 -command { set choice 85 }" );
+		cmd( "$w add command -label Initialize -underline 0 -command { set choice 49 }" );
+		cmd( "$w add command -label Observe -underline 0 -command { set choice 42 }" );
+		cmd( "$w add command -label Parallelize -underline 0 -command { set choice 86 }" );
+		cmd( "$w add command -label \"Sensitivity Analysis\" -underline 1 -command { set choice 66 }" );
+		
+		cmd( "set w .m.run.rem" );
+		cmd( "menu $w -tearoff 0" );
+		cmd( "$w add command -label Save -underline 0 -accelerator Ctrl+G -command { set choice 30 }" );
+		cmd( "$w add command -label \"Run-time Plot\" -underline 0 -command { set choice 31 }" );
+		cmd( "$w add command -label Debug -underline 0 -accelerator Ctrl+F -command { set choice 27 }" );
+		cmd( "$w add command -label Parallelize -underline 0 -command { set choice 87 }" );
+		
 		cmd( "set w .m.help" );
 		cmd( "menu $w -tearoff 0" );
 		cmd( ".m add cascade -label Help -menu $w -underline 0" );
@@ -930,12 +957,8 @@ cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
 cmd( "frame $T.f" );
 cmd( "label $T.f.lab_ent -text \"Function name\"" );
-cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
-cmd( "label $T.f.sp -width 5" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
-cmd( "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}" );
-cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
+cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 }
 
 if(param==1)
@@ -948,7 +971,6 @@ cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 cmd( "frame $T.f" );
 cmd( "label $T.f.lab_ent -text \"Parameter name\"" );
 cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-
 cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
 }
 
@@ -965,7 +987,7 @@ cmd( "pack $w.f.lab $w.f.text -expand yes -fill both" );
 cmd( "pack $w.f" );
 
 cmd( "pack $T.l $T.f $T.d -pady 5" );
-if(param==0)
+if( param == 0 )
 	cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAVar } { set done 2 }" );
 else
 	if ( param == 1 )
@@ -978,13 +1000,13 @@ cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
 
 here_newelem:
 
-if ( param != 1 )
+if ( param == 0 )
 	cmd( "write_any .addelem.f.ent_num $num" ); 
 
 while(done==0)
  Tcl_DoOneEvent(0);
 
-if ( param != 1 )
+if ( param == 0 )
 	cmd( "set num [ .addelem.f.ent_num get ]" ); 
 
 if(done==1)
@@ -1013,37 +1035,38 @@ if ( done == 2 )
 
  if(done==0)
  {
- cmd( "set text_description [.addelem.d.f.text get 1.0 end]" );
- cmd( "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}" );
- lab1=(char *)Tcl_GetVar(inter, "text_description", 0);
- if(param==1)
-  add_description(lab, "Parameter", lab1);
- if(param==0)
-  add_description(lab, "Variable", lab1);
- if(param==2)
-  add_description(lab, "Function", lab1);
-
- for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
-  { cur->add_empty_var(lab);
-	cv=cur->search_var(NULL, lab);
-	if(param==1)
-	 num=0;
-	cv->val=new double[num+1];
-	cv->save=0;
-	cv->param=param;
-	cv->num_lag=num;
-	cv->debug='n';
-	if((param==0 || param==2) && num==0)
-	  cv->data_loaded='+';
-	else
-	  cv->data_loaded='-';
-
-	for(i=0; i<num+1; i++)
-	 cv->val[i]=0;
- 
-	justAddedVar=true;		// flag variable just added (for acquiring focus)
-  }
-  unsaved_change( true );	// signal unsaved change
+   cmd( "set text_description [.addelem.d.f.text get 1.0 end]" );
+   cmd( "if { $text_description==\"\\n\"} {set text_description \"(no description available)\"} {}" );
+   lab1=(char *)Tcl_GetVar(inter, "text_description", 0);
+   if(param==1)
+    add_description(lab, "Parameter", lab1);
+   if(param==0)
+    add_description(lab, "Variable", lab1);
+   if(param==2)
+    add_description(lab, "Function", lab1);
+  
+   for(cur=r; cur!=NULL; cur=cur->hyper_next(cur->label))
+   { 
+  	cur->add_empty_var( lab );
+  	cv = cur->search_var( NULL, lab );
+  	if ( param != 0 )
+  		num = 0;
+  	cv->val = new double[ num + 1 ];
+  	cv->save = 0;
+  	cv->param = param;
+  	cv->num_lag = num;
+  	cv->debug = 'n';
+  	if ( ( param == 0 && num == 0 ) || param == 2 )
+  		cv->data_loaded = '+';
+  	else
+  		cv->data_loaded = '-';
+  
+  	for ( i = 0; i < num + 1; ++i )
+  		cv->val[ i ] = 0;
+   
+  	justAddedVar = true;	// flag variable just added (for acquiring focus)
+   }
+   unsaved_change( true );	// signal unsaved change
  }
  }
 
@@ -1395,9 +1418,10 @@ cmd( "label $T.h.ent_var -fg red -text $lab" );
 cmd( "pack $T.h.lab_ent $T.h.ent_var -side left -padx 2" );
 
 cmd( "frame $T.b0" );
-cmd( "button $T.b0.prop -width $butWid -text Rename -command {set choice 5} -underline 0" );
-cmd( "button $T.b0.del -width $butWid -text Delete -command {set choice 3} -underline 0" );
-cmd( "pack $T.b0.prop $T.b0.del -padx 10 -side left" );
+cmd( "button $T.b0.prop -width $butWid -text Rename -command { set choice 83 } -underline 0" );
+cmd( "button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
+cmd( "button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
+cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx 10 -side left" );
 
 cmd( "frame $T.b1" );
 cmd( "checkbutton $T.b1.com -text \"Compute: force the computation of the variables in this object\" -variable to_compute -underline 0" );
@@ -1425,6 +1449,7 @@ cmd( "pack $w.f -fill x -expand yes" );
 cmd( "pack $T.h $T.b0 $T.b1 $w -pady 5" );
 
 cmd( "bind $T <Control-r> \"$T.b0.prop invoke\"; bind $T <Control-R> \"$T.b0.prop invoke\"" );
+cmd( "bind $T <Control-n> \"$T.b0.num invoke\"; bind $T <Control-N> \"$T.b0.num invoke\"" );
 cmd( "bind $T <Control-d> \"$T.b0.del invoke\"; bind $T <Control-D> \"$T.b0.del invoke\"" );
 cmd( "bind $T <Control-c> \"$T.b1.com invoke\"; bind $T <Control-C> \"$T.b1.com invoke\"" );
 
@@ -1437,11 +1462,11 @@ while ( *choice == 0 )
 	Tcl_DoOneEvent( 0 );
 
 redrawRoot = false;			// no browser redraw yet
+done = *choice;
 
 if ( *choice != 2 )
 {
 	unsaved_change( true );		// signal unsaved change
-	done = *choice;
 
 	// save description changes
 	cmd( "set text_description \"[.objprop.desc.f.text get 1.0 end]\"" );
@@ -1469,10 +1494,11 @@ if ( *choice != 2 )
 
 cmd( "destroytop .objprop" );
 
-if ( done == 3  || done == 5 )
+// dispatch chosen option
+if ( done > 2 )
 {
 	cmd( "set vname $lab" );
-	*choice = ( done == 3 ) ? 74 : 83;
+	*choice = done;
 	return r;
 }
 
@@ -1935,7 +1961,7 @@ else
 
 	cv = r->search_var( NULL, lab_old );
 	cmd( "set nature %d", cv->param );
-	cmd( "if { $nature != 1 } { set numlag %d } { set numlag 0 }", cv->num_lag );
+	cmd( "if { $nature == 0 } { set numlag %d } { set numlag 0 }", cv->num_lag );
 
 	cmd( "set T .prop" );
 	cmd( "newtop $T \"Properties\" { set choice 2 }" );
@@ -1952,7 +1978,7 @@ else
 	cmd( "label $T.n.l -text \"Lags\"" );
 	cmd( "entry $T.n.lag -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.n.lag insert 0 $numlag" ); 
-	cmd( "if { $nature == 1 } { $T.n.lag configure -state disabled }" );
+	cmd( "if { $nature != 0 } { $T.n.lag configure -state disabled }" );
 	cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx 2" );
 
 	cmd( "frame $T.v" );
@@ -1961,7 +1987,7 @@ else
 	cmd( "frame $T.v.o -bd 2 -relief groove" );
 	cmd( "radiobutton $T.v.o.var -text Variable -variable nature -value 0 -underline 0 -command { $T.n.lag configure -state normal }" );
 	cmd( "radiobutton $T.v.o.par -text Parameter -variable nature -value 1 -underline 0 -command { $T.n.lag configure -state disabled }" );
-	cmd( "radiobutton $T.v.o.fun -text Function -variable nature -value 2 -underline 0 -command { $T.n.lag configure -state normal }" );
+	cmd( "radiobutton $T.v.o.fun -text Function -variable nature -value 2 -underline 0 -command { $T.n.lag configure -state disabled }" );
 	cmd( "pack  $T.v.o.var $T.v.o.par $T.v.o.fun -anchor w" );
 	
 	cmd( "pack $T.v.l $T.v.o" );
@@ -1985,7 +2011,7 @@ else
 while(*choice==0)
 	Tcl_DoOneEvent(0);
 
-cmd( "if [ winfo exists .prop ] { if { $nature != 1 } { set numlag [ .prop.n.lag get ] }; destroytop .prop }" );
+cmd( "if [ winfo exists .prop ] { if { $nature == 0 } { set numlag [ .prop.n.lag get ] }; destroytop .prop }" );
 
 if(*choice==2)
 	goto here_endprop;
@@ -5348,7 +5374,7 @@ if ( *choice == 2 )
 
 lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
 
-plog( "\n\nLoading network on object '%s' from file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+plog( "\nLoading network on object '%s' from file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
 cur = root->search( lab4 );
 if ( cur != NULL && cur->up != NULL )
@@ -5425,7 +5451,7 @@ if ( *choice == 2 )
 
 lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
 cur = root->search( lab4 );
-if ( cur == NULL || cur->node == NULL )
+if ( cur == NULL || cur->node == NULL || cur->up == NULL )
 {
 	cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
 	break;
@@ -5449,24 +5475,83 @@ lab3 = ( char * ) Tcl_GetVar( inter, "netExt", 0 );
 if ( strlen( lab2 ) == 0 )
 	break;
 
-plog( "\n\nSaving network on object '%s' to file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
+plog( "\nSaving network on object '%s' to file %s%s%s%s%s...\n", "", lab4, lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 
-if ( cur != NULL && cur->up != NULL )
+nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
+if ( nLinks == 0 )
 {
-	nLinks = cur->up->write_file_net( lab4, lab1, lab2, -1 );
-	if ( nLinks == 0 )
-	{
-		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
-		plog( "Error: No network links saved\n" );
-	}
-	else
-		plog( " %ld network links saved\n", "", nLinks );
-}
-else
-{
-	cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select a valid object for retrieving the network's nodes.\"" );
+	cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid file or object\" -detail \"Please check the chosen directory/file for WRITE access and make sure you select a valid object for retrieving the network's nodes.\"" );
 	plog( "Error: No network links saved\n" );
 }
+else
+	plog( " %ld network links saved\n", "", nLinks );
+
+break;
+
+
+// unload network
+case 93:
+
+if ( ! struct_loaded )
+	break;
+
+if ( ! discard_change( ) )	// check for unsaved configuration changes
+	break;
+
+cmd( "set TT .objs" );
+cmd( "newtop $TT \"Unload Network\" { set choice 2 }" );
+
+cmd( "frame $TT.v" );
+cmd( "label $TT.v.l -text \"Object containing\nthe network nodes\"" );
+
+cmd( "frame $TT.v.t" );
+cmd( "scrollbar $TT.v.t.v_scroll -command \"$TT.v.t.lb yview\"" );
+cmd( "listbox $TT.v.t.lb -width 25 -selectmode single -yscroll \"$TT.v.t.v_scroll set\"" );
+cmd( "pack $TT.v.t.lb $TT.v.t.v_scroll -side left -fill y" );
+cmd( "mouse_wheel $TT.v.t.lb" );
+
+insert_object( "$TT.v.t.lb", root, true );
+cmd( "set numNets [ $TT.v.t.lb size ]" );
+if ( get_int( "numNets" ) == 0 )
+{
+	cmd( "destroytop .objs" );
+	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"No network object found\" -detail \"Please make sure there are objects set as network nodes before unloading the network structure.\"" );
+	break;
+}
+
+cmd( "pack $TT.v.l $TT.v.t" );
+
+cmd( "pack $TT.v -padx 5 -pady 5" );
+
+cmd( "okcancel $TT b { set choice 1 } { set choice 2 }" );	// insert ok button
+cmd( "bind $TT.v.t.lb <Double-1> { set choice 1 }" );
+
+cmd( "showtop $TT" );
+
+cmd( "$TT.v.t.lb selection set 0" );
+cmd( "focus $TT.v.t.lb" );
+
+*choice = 0;
+while ( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
+
+cmd( "set nodeObj [ .objs.v.t.lb get [ .objs.v.t.lb curselection ] ]" );
+cmd( "destroytop .objs" );
+
+if ( *choice == 2 )
+	break;
+
+lab4 = ( char * ) Tcl_GetVar( inter, "nodeObj", 0 );
+cur = root->search( lab4 );
+if ( cur == NULL || cur->node == NULL || cur->up == NULL )
+{
+	cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid object\" -detail \"Please make sure you select an object which is already a node of an existing network.\"" );
+	break;
+}
+
+plog( "\nRemoving network on object '%s'\n", "", lab4 );
+
+cur->up->delete_net( lab4 );
 
 break;
 

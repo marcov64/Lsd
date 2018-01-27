@@ -139,7 +139,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,27 +160,29 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<p><br>
-<p><b><font size=+1><u>Menu Data</u> - </font>Data Browser</b>
+<p class=MsoTitle>LSD Data Browser</p>
 
-<p>Since the main LSD Browser shows the model by means of Object types
-it does not distinguish among individual instances of each Object. The
-windows to initialize the model (both initial values of variables and number
-of entities) are rather heavy, and are inconvenient to use be on huge models
-(with, say, more than few dozens of instances for some Object type). In
-some cases, modelers may be interested in observing each individual instance
-even in huge models. The Data Browser allows to explore the model by visiting
-each individual instance of Object in the model and edit individually the
-initial data there contained. Its main windows is as follows:
-<center>
-<p><img src="image/data_browse.png" height=483 width=604></center>
+<p class=MsoNormal align=center style='text-align:center'><img width=497
+height=329 src="image/data_browse.png"></p>
 
-<p><br>
-<br>
-<p>The window is derived from the window used for debugging purposes during
-a simulation run (without the functionalities to deal with the simulation
-run). See the <a href="debug.html">manual on LSD Debugge</a>r for information
-on the functionalities of the Data Browser.
+<p class=MsoNormal>The LSD Data Browser allows exploring the model by inspecting
+each <a href="LSD_faqs.html#object">individual instance of any Object</a> in
+the <a href="LSD_windows.html#modelstructure">LSD model structure</a> and also editing
+the associated <a href="LSD_faqs.html#modelsetting">initial data</a>. This is
+different from the perspectives offered by the main <a
+href="LSD_windows.html#browser">LSD Browser</a> and the <a
+href="LSD_windows.html#modelstructure">LSD Model Structure</a>, which present
+the model structure by means of <a href="LSD_faqs.html#object">Object types</a>.
+Therefore, these windows do not distinguish among individual instances of each
+Object, as the Data Browser does. This is an important tools because in many
+situations the user may be interested in observing each individual Object instance
+and its content. </p>
+
+<p class=MsoNormal>The LSD Data Browser window is derived from the <a
+href="LSD_windows.html#debugger">LSD Debugger</a> window but does not have the options
+to deal with <a href="LSD_faqs.html#simulationrun">simulation runs</a>. Please
+refer to the <a href="debug.html">manual pages</a> on the LSD Debugger for the functionalities
+of the LSD Data Browser. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -190,6 +193,8 @@ on the functionalities of the Data Browser.
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

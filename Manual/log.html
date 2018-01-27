@@ -3,11 +3,17 @@
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 14 (filtered)">
-<title>Log Window</title>
+<title>Log</title>
 <style>
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -139,7 +145,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,85 +166,83 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<center><br><b><font size=+2>Log Window</font></b></center>
+<p class=MsoTitle>LSD Log</p>
 
-<p>This window is a note pad where the system writes down <a href="#Messages">messages</a>
-(that users can edit, copy and paste somewhere else). Moreover, during
-a simulation run the Log window is active, allowing users <a href="#buttons">to
-control</a> the simulation flow.
-<center>
-<p><img src="image/log.png" height=471 width=593></center>
+<p align=center style='text-align:center'><img width=533 height=423
+src="image/log.png"></p>
 
-<p><br>
-<br>
-<p>
+<p class=MsoNormal>The LSD Log window presents LSD messages to the user (e.g.,
+errors, simulation run information, statistics about data). Moreover, during a <a
+href="LSD_faqs.html#simulationrun">simulation run</a>, the Log window allows
+users to control the simulation flow, activate the <a href="debug.html">LSD Debugger</a>
+or abort the simulation. </p>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
+<p class=MsoNormal><a name=Messages></a><a name=buttons></a>Users can select
+the desired text by dragging over with the mouse. The selected text can be
+copied to the system clipboard by clicking on the button <span class=Cdigo>Copy</span>
+or pressing <span class=Cdigo>Ctrl+C</span>. The copied data can be pasted in
+any other program, as usual.</p>
 
-<br><a NAME="Messages"></a><b><font face="Arial, helvetica"><font size=+1>Messages</font></font></b>
-<br>If the model configuration does not specify a Variable to be plotted
-in a <a href="runtime.html">Run Time Plot</a>, then the Log window will
-write down a single line for each time step terminated (see the example
-above for the top half window). The lines specify also the number of the
-simulation exercises to execute, starting from 0, in case multiple simulation
-asks have been requested (see <a href="menurun.html#simsetting">Simulation
-Settings</a>). These messages can be suppressed and reinstated with the
-buttons <b>Fast</b> and <b>Observe</b> respectively.
-<br>Users can ask further information reported in the Log window, concerning
-the state of the <a href="debug.html#stackinfo">stack</a>, that is the
-single Variable's computations (see the middle of the example window above).
-This gives information on each single equation computed, the time, and
-whether is was a normal updating or the computation requested by another
-equation.
-<br>Other messages concern the descriptive statistics produced during a
-<a href="menudata_res.html">Analysis of Result</a> session (see the last line
-in the example above).
-<br>In general, any error issues a message with details in the Log window.
-<br>
+<h2>Simulation control buttons </h2>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
- <tr>
-  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
-  </td>
- </tr>
-</table>
+<p class=MsoNormal>While a simulation is running, users can use the buttons in the
+log window to control the simulation flow:</p>
 
-<p><a NAME="buttons"></a><b><font face="Arial, helvetica"><font size=+1>Simulation
-Control Buttons</font></font></b>
-<br>While a simulation is running, users can press one of the buttons in
-the lowest bar of the window to modify the simulation flow.
-<p><b><font face="Arial, helvetica">Stop</font></b>
-<br>Quit the simulation. Simulation data for the&nbsp; result analysis
-are saved up to the last step fully computed. In case users decided to
-run multiple simulation exercises the remaining simulation runs are not
-executed.
-<p><b><font face="Arial, helvetica">Fast</font></b>
-<br>Increase the speed of simulation preventing the system from writing
-messages. In fact, for simple models (with few Variables) spend most of
-simulation time just writing down the step number computed.
-<br>To further increase the simulation speed, minimize (but not destroy!)
-the <a href="runtime.html">Run Time Plot</a> window, if exists.
-<p><b><font face="Arial, helvetica">Observe</font></b>
-<br>Return the system to print the messages on the status of the simulation
-in case <b>Fast</b> has been previously used.
-<p><b><font face="Arial, helvetica">Debug</font></b>
-<br>Change the simulation in Debug Mode. This means that when a <a href="browser.html#variables">Variable
-set to be debugged</a> finishes its equation the system interrupts the
-simulation and start the <a href="debug.html">Debugger</a>, allowing a
-through check of the status of the model. The button has no effect if no
-Variable is checked to be debugged.
-<br>&nbsp;
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Stop</b></span>: (<i>shortcut</i> <span
+class=Cdigo>S</span>) Abort the simulation. Simulation data is saved up to the
+last fully computed time step. In case multiple simulation runs are going on,
+the remaining simulation runs are not executed.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Pause</b></span> / <span class=Cdigo><b>Resume</b></span>:
+(<i>shortcut</i> <span class=Cdigo>P</span> / <span class=Cdigo>R</span>) allow
+the temporary suspension and resume of an ongoing simulation run, the <a
+href="LSD_windows.html#debugger">LSD Debugger</a> being available during the
+pause period.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Fast</b></span>: (<i>shortcut</i> <span
+class=Cdigo>F</span>) Increase the speed of the simulation run by preventing
+the system from writing non-critical messages, disabling some debug mechanisms
+and collapsing the <a href="LSD_windows.html#runtimeplot">Run Time Plot window</a>.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Observe</b></span>: (<i>shortcut</i> <span
+class=Cdigo>O</span>) Reinstate the printing of all simulation run messages,
+the full debug capabilities and reopen the <a
+href="LSD_windows.html#runtimeplot">Run Time Plot window</a> in case <span
+class=Cdigo>Fast</span> has been previously used. </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Debug</b></span>: (<i>shortcut</i> <span
+class=Cdigo>D</span>) Change the simulation run to debug mode. This means that,
+when a <a href="LSD_faqs.html#variable">Variable</a> previously set to be
+debugged finishes its Equation computation, LSD interrupts the simulation and opens
+the <a href="LSD_windows.html#debugger">LSD Debugger</a>. The button has no
+effect, while the simulation is running, if no Variable is marked to be
+debugged. However, if the simulation is paused, the debugger can be invoked, even
+if no Variable was previously marked, and the last Variable computed will be
+shown.</p>
+
+<p class=MsoNormal>If the <a href="LSD_faqs.html#modelsetting">model
+configuration</a> does not specify <a href="LSD_faqs.html#variable">Variables</a>
+to be plotted in the <a href="LSD_windows.html#runtimeplot">LSD Run-time Plot</a>,
+then the Log window will print an information line for each completed time step,
+indicating also the number of the simulation repetition, in case multiple runs
+have been requested (see <a href="menurun.html#simsetting">Simulation Settings</a>).
+These messages can be suppressed and reinstated with the buttons <span
+class=Cdigo>Fast</span> and <span class=Cdigo>Observe</span>, respectively. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -248,6 +253,8 @@ Variable is checked to be debugged.
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
 
 </div>
 

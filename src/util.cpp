@@ -294,8 +294,8 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	cmd( "label .cazzo.e.l -text \"Choose one option to continue\"" );
 
 	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
-	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD browser to edit the model configuration\"" );
-	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD browser to edit the model equations' code in LMM\"" );
+	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
+	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
 	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );
@@ -2734,7 +2734,6 @@ double init_lattice( char const lrow[], char const lcol[], int init_color, doubl
 {
 	init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
 }
-
 
 
 /*

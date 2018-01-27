@@ -111,9 +111,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "existMenu", 0 ), "0" ) ||
 	cmd( ".deb.m add cascade -label Exit -menu $w -underline 0" );
 	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 	if ( mode == 3 )
-		cmd( "$w add command -label \"Quit and resume simulation\" -command { set choice 7 } -underline 0 -accelerator Esc" );
+		cmd( "$w add command -label \"Quit and Resume Simulation\" -command { set choice 7 } -underline 0 -accelerator Esc" );
 	else
-		cmd( "$w add command -label \"Quit and return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc" );
+		cmd( "$w add command -label \"Quit and Return to Browser\" -command { set choice 7 } -underline 0 -accelerator Esc" );
 	cmd( "set w .deb.m.help" );
 	cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
 	cmd( ".deb.m add cascade -label Help -menu $w -underline 0" );

@@ -362,7 +362,7 @@ name for the detailed instructions at each step. </p>
   define its relative position in the inverted tree hierarchy and type in the
   names and lags (if any) of the model elements (Objects, Variables,
   Parameters). For a discussion on how to design the model structure, <a
-  href="menumodel.html#hint">see here</a>.</p>
+  href="#hint">see here</a>.</p>
   </td>
  </tr>
  <tr>
@@ -1652,6 +1652,199 @@ way, the values of the market shares will be saved during the simulation run. </
 be automatically saved, under the same file name. Open the <a
 href="LSD_windows.html#analysisofresults">LSD Analysis of Results</a> window
 and observe the results for <span class=Cdigo>ms</span>.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=hint></a><a name="_Hints_on_Model"></a><a name=hints></a>Hints on
+Model Structure Building </h1>
+
+<p class=MsoNormal>The model structure is the collection of Objects containing
+Variables, Parameters and other Objects forming the backbone of the model.
+Given the Variables and Parameters the modeler decides to use in a model, the
+problem is to create the Object structure to contain them. This section gives
+some hints on how to decide in which Objects Variables and Parameters should be
+placed in the model. The structure determines how many copies of the Variables
+and Parameters a user will be able to define in a configuration (only Objects
+can be multiplied in many instances, each containing the same Variables,
+Parameters and descending Objects). The structure determines also the results
+produce by the use of the LSD macros in the Equations. </p>
+
+<p class=MsoNormal>In the following it is assumed that the reader is already
+familiar with the basics of LSD equation writing. In fact, generally the model
+structure is quite obvious for simple models, with few equations, while the
+decision on how to implement the structure can become a complex task only for
+relatively complex models. Therefore, we assume that a modeler has written the
+(tentative) code for few equations, and now is deciding how to implement the
+model structure. Note that, depending on the structure, it is possible that the
+Equations will need to be modified. In case of doubts, the best way to ensure
+that an Equation is computed exactly as expected, the modeler will use the <a
+href="debug.html">LSD Debugger</a>, which shows exactly what an Equation does
+during a simulation run. </p>
+
+<p class=MsoNormal>The discussion on the model structure is basically a
+discussion on where Variables and Parameters should be placed. To simplify the
+explanation, we will consider only two Variables (it applies also to Parameters,
+where the Equations are not involved). Suppose that we have written two Equations
+for Variables x and y. There are two basic questions that the modeler must
+answer when building the structure: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Should I place Variable x and Variable y in the same Object or in
+different Objects?</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Given that x and y must be in different Objects (say, X and Y,
+respectively), should these Objects be hierarchically-related or not? In other
+words, should one Object contain the other, or be “parallel” in the model structure?</p>
+
+<p class=MsoNormal>To answer the first question the modeler needs to consider
+the case of a configuration where there are many instances (copies) of the
+Variables x and y. If the two Variables are placed in the same Object, then
+they must always replicate in the model in the same number. That is, there will
+be as many copies of x's as y's. If this makes sense, given the meaning of x
+and y, then almost certainly placing x and y in the same Object is the correct
+answer. Instead, if the reality represented in the model can be implemented
+with different numbers of copies of x and y, then they would necessarily be
+placed in different Objects.</p>
+
+<p class=MsoNormal>The second question is trickier, and this is due to the fact
+that each Object type in a model structure can be replicated in a configuration
+in many instances. As any copy of an Object must be exactly the same (that is,
+with the same type of Variables, Parameters and descending Objects), although
+the numbers may differ (e.g., values of Parameters, number of instances of
+descendants). The modeler decides the model structure once and for all, but
+when the model is released to the users, they can (and will) change the number
+of instances. Therefore, the modeler must ensure that the model structure
+provides the necessary constraints such that the model’s consistency is kept
+whatever numerical configuration is decided by users. So, placing X as
+descending from Y, means that every copy of Y will contain at least one copy of
+X, and possibly many. Instead, placing them “parallel” in the hierarchy, e.g.,
+both descending from the same Object, allows defining model configurations with
+as many copies of Y and X as desired, with no constraints. </p>
+
+<p class=MsoNormal>Therefore, a first criterion that can be used to decide
+whether to place X as descendant of Y, place Y as descendant of X, or just keep
+them parallel, is to see if, in the model interpretation, it makes more sense
+that X must always have more copies of Y, or Y have more copies of X, or if
+this is not relevant. However, the definitive decision must come from the understanding
+of the use of the model structure by LSD, i.e., how the model structure affects
+the computation of the model Equations. </p>
+
+<p class=MsoNormal>For simplicity, let's assume that the equation for a
+Variable in X, say x, needs to use an element contained in Y, suppose the
+Variable y, so that x = f(y). If this is not the case, the decision does not
+change the way LSD computes the equations. Otherwise, the structure is decisive
+in determining which copy of y is used when computing the Equation for one particular
+instance of an Object containing x. This is due to the fact that in LSD the
+modeler does not specify from where to get the required values, but only their name,
+much like in the traditional difference equation notation. </p>
+
+<p class=MsoNormal>During a simulation, at the moment Equations are computed, LSD
+tries to satisfy the requests defined in the Equations’ code. Therefore, the
+modeler must use the adequate <a href="LSD_macros.html">LSD macro</a> to
+implement the desired computation (i.e., choose the correct instance of the
+Object containing y for each computation of x in different Object copies). LSD
+macros are implemented in such a way to allow coding in a simple way the most usual
+operations, even when these may involve operational complexity. </p>
+
+<p class=MsoNormal>Let's now see how the desired value for a Variable (y) is
+retrieved in different ways within an equation for another Variable (x),
+depending on the model structure. As said, we need to consider that a model
+configuration can have many instances of the respective container Objects (X
+and Y), and therefore also many instances of the Variables x and y. The same Equation
+code for x is used for the updating of all the copies of x. This way, we may
+have three cases, depending on the relation between Objects X and Y in the
+model structure: </p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal style='margin-top:0cm;margin-bottom:12.0pt'>Many instances
+     of x need to have their values computed using the value of a single copy
+     of y. In this case, the Object X must be placed as descendant of Y (Y is a
+     higher-level Object that contains Object X). This is, for example, the
+     case where x is the Variable named <span class=Cdigo>Profit</span> (x) contained
+     in the Object labelled <span class=Cdigo>Firm</span> (X) computed using
+     the Variable <span class=Cdigo>Price</span> (y) contained in Object <span
+     class=Cdigo>Market</span> (Y). There may be many instances of Objects <span
+     class=Cdigo>Market</span> and of Objects <span class=Cdigo>Firm</span>,
+     but any group of brother Objects <span class=Cdigo>Firm</span> will always
+     be contained in a single <span class=Cdigo>Market</span> instance and so use
+     the value from the same instance of <span class=Cdigo>Price</span>. That
+     is, each <span class=Cdigo>Market</span> (one or more instances) may have
+     many copies of <span class=Cdigo>Firm</span> as descendants (sons). In
+     this case, the modeler can use in the Equation for <span class=Cdigo>Profit</span>:<br>
+     <span class=Cdigo><br>
+     v[0] = V( &quot;Price&quot; );<br>
+     <br>
+     </span>and LSD will ensure that any instance of <span class=Cdigo>Profit</span>
+     will execute its Equation using the value of <span class=Cdigo>Price</span>
+     taken from the copy of <span class=Cdigo>Market</span> that contains the instance
+     of <span class=Cdigo>Firm</span> whose Equation for <span class=Cdigo>Profit</span>
+     is under computation.</li>
+ <li class=MsoNormal style='margin-top:0cm;margin-bottom:12.0pt'>Each instance
+     of x needs to use many instances of y, but always the same set. In this
+     case, X must be defined as container of Y. For example, this may be the
+     case where Variable <span class=Cdigo>Price</span> (x) contained in <span
+     class=Cdigo>Market</span> (X) is computed from a demand function over the
+     sum of the values of Variable <span class=Cdigo>Quantity</span> (y)
+     contained in <span class=Cdigo>Firm</span> (Y). In this case, the modeler
+     can use in the following equation for Price:<br>
+     <span class=Cdigo><br>
+     v[0] = SUM( &quot;Quantity&quot; );<br>
+     <br>
+     </span>and LSD will ensure that any instance of <span class=Cdigo>Price</span>
+     will use the values for <span class=Cdigo>Quantity</span> taken from the
+     same group of Object <span class=Cdigo>Firm</span> instances. Note that a
+     line like: <br>
+     <span class=Cdigo><br>
+     v[0] = V( &quot;Quantity&quot; );<br>
+     <br>
+     </span>will always return just the value of <span class=Cdigo>Quantity</span>
+     contained the very first instance of Object <span class=Cdigo>Firm</span>
+     descending from <span class=Cdigo>Market</span>.</li>
+</ul>
+
+<p class=MsoNormal>Any time an instance of x is computed it needs to use a
+(potentially) different instance of y. In this case, Objects X and Y must be
+placed as descendants from a common parent Object, say Z. Note that the modeler
+must provide an Equation with explicit code to determine which instance of x
+must be used during the computation. As an example, consider the Object <span
+class=Cdigo>Consumer</span> (X) containing the Variable <span class=Cdigo>Money</span>
+(x) which needs to use the Variable <span class=Cdigo>Price</span> (y)
+contained in Object <span class=Cdigo>Seller</span> (Y). There are many instances
+of both Object <span class=Cdigo>Consumer</span> and Object <span class=Cdigo>Seller</span>.
+A <span class=Cdigo>Consumer</span> instance can choose any one copy of <span
+class=Cdigo>Seller</span> to trade. Assume, yet, that Object <span class=Cdigo>Seller</span>
+has a Parameter providing a unique identification number for each Seller
+instance. The model structure should, then, be such that the Object <span
+class=Cdigo>Market</span> (Z) contains a Variable <span class=Cdigo>Choose</span>
+and both Objects <span class=Cdigo>Consumer</span> and <span class=Cdigo>Seller</span>,
+each potentially replicated in many instances. The equation for Money would be
+like:<br>
+<span class=Cdigo><br>
+v[0] = V( &quot;Choose&quot; ); </span><span class=Cdigo><span
+style='color:#00B050'>//ask Choose in Z to choose a seller</span> <br>
+cur = SEARCH( &quot;IdSeller&quot;, v[0] ); </span><span class=Cdigo><span
+style='color:#00B050'>//find the Seller with the given IdSeller</span> <br>
+v[1] = VS( cur, &quot;Price&quot; ); </span><span class=Cdigo><span
+style='color:#00B050'>//take the Price of the chosen Seller</span> <br>
+<br>
+</span>The first line asks Variable <span class=Cdigo>Choose</span> to compute
+the identification number of the selected <span class=Cdigo>Seller</span> (for
+example, a random choice proportional to the sellers’ market share). The second
+line request LSD to find the instance of Object <span class=Cdigo>Seller</span>
+with the chosen identification number (in <span class=Cdigo>v[0]</span>).
+Finally, the third line uses the pointer to the found instance of <span
+class=Cdigo>Seller</span> to obtain the desired value for <span class=Cdigo>Price</span>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

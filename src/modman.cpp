@@ -398,7 +398,7 @@ cmd( "menu .m -tearoff 0" );
 cmd( "set w .m.file" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label File -menu $w -underline 0" );
-cmd( "$w add command -label \"New Model...\" -underline 0 -command { set choice 14}" );	// entryconfig 0
+cmd( "$w add command -label \"New Model/Group...\" -underline 0 -command { set choice 14}" );	// entryconfig 0
 cmd( "$w add command -label \"Browse Models...\" -underline 0 -command {set choice 33} -accelerator Ctrl+b" );	// entryconfig 1
 cmd( "$w add command -label \"Save Model\" -underline 0 -state disabled -command { if {[string length \"$filename\"] > 0} {if { [file exist \"$dirname/$filename\"] == 1} {catch {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}}; set f [open \"$dirname/$filename\" w];puts -nonewline $f [.f.t.t get 0.0 end]; close $f; set before [.f.t.t get 0.0 end]; set choice 999} } -underline 0 -accelerator Ctrl+s" );	// entryconfig 2
 cmd( "$w add command -label \"Save Model As...\" -state disabled -underline 0 -command { set choice 41} -underline 11 -accelerator Ctrl+a" );	// entryconfig 3
@@ -428,7 +428,7 @@ cmd( "$w add separator" );	// entryconfig 2
 cmd( "$w add command -label Cut -command { savCurIni; tk_textCut .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 1 -accelerator Ctrl+x" );	// entryconfig 3
 cmd( "$w add command -label Copy -command { tk_textCopy .f.t.t } -underline 0 -accelerator Ctrl+c" );	// entryconfig 4
 cmd( "$w add command -label Paste -command { savCurIni; tk_textPaste .f.t.t; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -underline 0 -accelerator Ctrl+v" );	// entryconfig 5
-cmd( "$w add command -label Erase -command { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { .f.t.t delete insert } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -accelerator Del" );	// entryconfig 6
+cmd( "$w add command -label Delete -command { savCurIni; if { [ string equal [ .f.t.t tag ranges sel ] \"\" ] } { .f.t.t delete insert } { .f.t.t delete sel.first sel.last }; if { [ .f.t.t edit modified ] } { savCurFin; set choice 23 }; updCurWnd } -accelerator Del" );	// entryconfig 6
 cmd( "$w add separator" );
 cmd( "$w add command -label \"Find...\" -command {set choice 11} -underline 0 -accelerator Ctrl+f" );
 cmd( "$w add command -label \"Find Again\" -command {set choice 12} -underline 5 -accelerator F3" );
@@ -486,7 +486,7 @@ cmd( "$w.macro add radio -label \"Use LSD C++ functions\" -variable macro -value
 cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
-cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -command { LsdHelp \"LMM.html\" }" );
+cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -command { LsdHelp LMM.html }" );
 if( macro )
   cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
 else
@@ -740,7 +740,7 @@ if ( ! macro )
 else
 {
 	cmd( "menu .v.i -tearoff 0" );
-	cmd( ".v.i add command -label \"EQUATION/FUNCTION\" -command {set choice 25} -accelerator Ctrl+E" );
+	cmd( ".v.i add command -label \"EQUATION\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"V(...)\" -command {set choice 26} -accelerator Ctrl+V" );
 	cmd( ".v.i add command -label \"CYCLE(...)\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"SUM(...)\" -command {set choice 56} -accelerator Ctrl+U" );
@@ -2075,7 +2075,7 @@ if ( choice == 28 && macro )
 	cmd( "label .a.tit -text \"Available LSD macros\"" );
 
 	cmd( "frame .a.r -bd 2 -relief groove" );
-	cmd( "radiobutton .a.r.equ -text \"EQUATION/FUNCTION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
+	cmd( "radiobutton .a.r.equ -text \"EQUATION - insert a new LSD equation\" -underline 0 -variable res -value 25" );
 	cmd( "radiobutton .a.r.cal -text \"V(...) - request the value of a variable\" -underline 0 -variable res -value 26" );
 	cmd( "radiobutton .a.r.for -text \"CYCLE - insert a cycle over a group of objects\" -underline 0 -variable res -value 27" );
 	cmd( "radiobutton .a.r.sum -text \"SUM - compute the sum of a variable over a set of objects\" -underline 1 -variable res -value 56" );
@@ -2286,9 +2286,8 @@ if ( choice == 25 )
 	cmd( "newtop .a \"Insert Equation\" { set choice 2 }" );
 
 	cmd( "frame .a.label" );
-	cmd( "label .a.label.l -text \"Variable name\"" );
+	cmd( "label .a.label.l -text \"Variable/function name\"" );
 	cmd( "entry .a.label.n -width 20 -textvariable v_label -justify center" );
-	cmd( "bind .a.label.n <Return> { focus .a.f.r1 }" );
 	cmd( "pack .a.label.l .a.label.n" );
 
 	cmd( "frame .a.f -relief groove -bd 2" );
@@ -2298,7 +2297,16 @@ if ( choice == 25 )
 	cmd( "bind .a.f.r2 <Return> {focus .a.b.ok}" );
 	cmd( "pack .a.f.r1 .a.f.r2 -anchor w " );
 
-	cmd( "pack .a.label .a.f -padx 5 -pady 5" );
+	if ( macro )
+	{
+		cmd( "bind .a.label.n <Return> { focus .a.b.ok }" );
+		cmd( "pack .a.label -padx 5 -pady 5" );
+	}
+	else
+	{
+		cmd( "bind .a.label.n <Return> { focus .a.f.r1 }" );
+		cmd( "pack .a.label .a.f -padx 5 -pady 5" );
+	}
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#EQUATION } { set choice 2 }" );
 
@@ -2325,11 +2333,7 @@ if ( choice == 25 )
 
 	if ( macro )
 	{
-		if(choice!=3)
-		  cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
-		else
-		  cmd( ".f.t.t insert insert \"FUNCTION(\\\"$v_label\\\")\\n\"" );
-
+		cmd( ".f.t.t insert insert \"EQUATION(\\\"$v_label\\\")\\n\"" );
 		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\\n\"" );
 		cmd( ".f.t.t insert insert \"RESULT( )\\n\"" );
 		cmd( ".f.t.t mark set insert \"$a + 2 line\"" );
@@ -2340,15 +2344,15 @@ if ( choice == 25 )
 		cmd( ".f.t.t insert insert \"if(!strcmp(label,\\\"$v_label\\\"))\\n\"" );
 		cmd( ".f.t.t insert insert \"{\\n\"" );
 		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\"" );
-		if(choice==3)
-		 {
-			 cmd( ".f.t.t insert insert \"last_update--;//repeat the computation any time is requested\\n\"" );
-			 cmd( ".f.t.t insert insert \"if(c==NULL)//Avoids to be computed when the system activates the equation\\n\"" );
-			 cmd( ".f.t.t insert insert \"{\\n\"" );
-			 cmd( ".f.t.t insert insert \"res=-1;\\n\"" );
-			 cmd( ".f.t.t insert insert \"goto end;\\n\"" );
-			 cmd( ".f.t.t insert insert \"}\\n\"" );
-		 }
+		if ( choice == 3 )
+		{
+			cmd( ".f.t.t insert insert \"last_update--;//repeat the computation any time is requested\\n\"" );
+			cmd( ".f.t.t insert insert \"if(c==NULL)//Avoids to be computed when the system activates the equation\\n\"" );
+			cmd( ".f.t.t insert insert \"{\\n\"" );
+			cmd( ".f.t.t insert insert \"res=-1;\\n\"" );
+			cmd( ".f.t.t insert insert \"goto end;\\n\"" );
+			cmd( ".f.t.t insert insert \"}\\n\"" );
+		}
 		cmd( ".f.t.t insert insert \"\\n\"" );
 		cmd( ".f.t.t insert insert \"res=;\\n\"" );
 		cmd( ".f.t.t insert insert \"goto end;\\n}\\n\"" );

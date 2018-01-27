@@ -8,12 +8,6 @@
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -145,8 +139,7 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
- /* List Definitions */
- -->
+-->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -166,51 +159,56 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<p><b><u><span style='font-size:13.5pt'>Menu Data</span></u></b> <b>Sensitivity
-Analysis</b> </p>
+<p class=MsoTitle>LSD Sensitivity Analysis</p>
 
-<p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:12.0pt;
-margin-left:0cm'><b><i><span style='font-size:13.5pt'>Sensitivity Analysis</span></i></b><br>
-Sensitivity analysis allows the user to generate one or model configuration(s)
-with many copies of the current model each with a different combination of
-elements' values. This is typically done to test the behaviour of the model for
-many different parameters' values. For example, suppose your model includes
-parameter A and parameter B (each of them is represented with only one copy in
-the model). <br>
-If you want to test the model with all combinations of A assuming values {1; 3;
-5; 7} and of B assuming the values {2; 4}, then you need to generate 8 (4x2)
-different combinations and assign to each a combination of the two parameters. <br>
-When the number of parameters involved in the sensitivity analysis is large
-and/or the number of values for each element is large, then the assigment of
-the values can be difficult. LSD can automatically generate all the
-configurations each containing one combination of the specified parameters.<br>
-The first step consists in defining the elements (parameters, lagged variables
-or lagged functions) to be involved by using the appropriate <a
-href="menudata_init.html#setall">Set All</a> function from the menu <a
-href="menudata_init.html">Initial Data</a>. When all elements have been
+<p class=MsoNormal>Sensitivity analysis allows the user to generate one or
+model configuration(s) with many copies of the current model each with a
+different combination of elements' values. This is typically done to test the
+behaviour of the model for many different parameters' values. For example,
+suppose your model includes parameter A and parameter B (each of them is
+represented with only one copy in the model). </p>
+
+<p class=MsoNormal>If you want to test the model with all combinations of A
+assuming values {1; 3; 5; 7} and of B assuming the values {2; 4}, then you need
+to generate 8 (4x2) different combinations and assign to each a combination of
+the two parameters. </p>
+
+<p class=MsoNormal>When the number of parameters involved in the sensitivity
+analysis is large and/or the number of values for each element is large, then
+the assigment of the values can be difficult. LSD can automatically generate
+all the configurations each containing one combination of the specified
+parameters.</p>
+
+<p class=MsoNormal>The first step consists in defining the elements
+(parameters, lagged variables or lagged functions) to be involved by using the
+appropriate <a href="menudata_init.html#setall">Set All</a> function from the
+menu <a href="menudata_init.html">Initial Data</a>. When all elements have been
 indicated and their values inserted the user can choose between two types of
 configurations to be simulated in parallel or sequentially. Note that the user
 can mix the two systems: firstly indicating a sub-set of the elements to
 include in the sensitivity analysis and use them to generate a single
 configuration (parallel). Then indicating the remaining set of elements to
-perform sequential sensitivity analysis<br>
-<br>
-<b>Parallel</b><br>
-In parallel sensitivity analysis the system generates a single configuration
-containing as many copies as necessary. In the example above the system would
-generate 8 different copies of the object containing the parameters A and B,
-each copy including a different combination of their values. <br>
-<br>
-<b>Sequential</b><br>
-When the number of copies required to perform the sensitivity analysis is too
-large for a single simulation run it is possible to generate many separate
-configurations, each independently stored in separate files, that can be run
-using the sequential option in the <a href="LMM.html#nowindow">NO WINDOW</a>
-version of LSD model programs.<br>
-<br>
-Notice that the LSD model program uses the information inserted by users for
-the sensitivity analysis but does not store them, so uploading a new
-configuration all the information is lost.</p>
+perform sequential sensitivity analysis</p>
+
+<h2>Parallel</h2>
+
+<p class=MsoNormal>In parallel sensitivity analysis the system generates a
+single configuration containing as many copies as necessary. In the example
+above the system would generate 8 different copies of the object containing the
+parameters A and B, each copy including a different combination of their values.
+</p>
+
+<h2>Sequential</h2>
+
+<p class=MsoNormal>When the number of copies required to perform the
+sensitivity analysis is too large for a single simulation run it is possible to
+generate many separate configurations, each independently stored in separate
+files, that can be run using the sequential option in the <a
+href="LMM.html#nowindow">NO WINDOW</a> version of LSD model programs.</p>
+
+<p class=MsoNormal>Notice that the LSD model program uses the information
+inserted by users for the sensitivity analysis but does not store them, so
+uploading a new configuration all the information is lost.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -222,7 +220,7 @@ configuration all the information is lost.</p>
  </tr>
 </table>
 
-<p>&nbsp;</p>
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

@@ -59,7 +59,7 @@ proc showmodel pippo {
 		set m .l.m.file 
 		menu $m -tearoff 0
 		.l.m add cascade -label File -menu $m -underline 0
-		$m add command -label "Select Model" -underline 0 -accelerator Enter -command {
+		$m add command -label "Select Model/Group" -underline 0 -accelerator Enter -command {
 			set result [.l.l.l curselection]
 			if { [lindex $group $result] == 1 } { 
 				set modelgroup "[lindex $lmn $result]"
@@ -509,7 +509,7 @@ proc mpaste i {
 	pack .l.p.v.l  .l.p.v.v
 
 	frame .l.p.d
-	label .l.p.d.l -text "New (non-existing) subdirectory name"
+	label .l.p.d.l -text "New (non-existing) home directory name"
 	entry .l.p.d.d -width 35 -justify center
 	.l.p.d.d insert 0 "[file tail $copydir]"
 	pack .l.p.d.l  .l.p.d.d

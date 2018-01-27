@@ -158,12 +158,11 @@ cmd( "okXhelpcancel .w b Search { set res [ tk_getSaveFile -parent .w -title \"E
 
 cmd( "showtop .w topleftW" );
 
-*choice=0;
-
 here_create_report:
 
-while(*choice==0)
- Tcl_DoOneEvent(0);
+*choice = 0;
+while( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
 
 if ( *choice == 3 )
 {
@@ -174,12 +173,11 @@ if ( *choice == 3 )
 if ( *choice == 2 )
 { 
 	app = ( char * ) Tcl_GetVar( inter, "res", 0 );
+	if ( app == NULL || strlen( app ) == 0 )
+		goto here_create_report;
 	strcpy( name_rep, app );
 }
 	
-if ( strlen( name_rep ) == 0 )
-	goto here_create_report;
-
 cmd( "destroytop .w" );
 
 while ( equation_name == NULL || ( ffun = fopen( equation_name, "r" ) ) == NULL )

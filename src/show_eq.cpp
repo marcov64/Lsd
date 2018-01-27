@@ -215,6 +215,8 @@ cmd( "bind .eq_%s <F3> { \
 		} \
 	}", lab, lab );
 
+cmd( "bind .eq_%s <F1> { LsdHelp equation.html }" );
+
 cmd( ".eq_%s.f.text tag conf vars -foreground blue4", lab );
 cmd( ".eq_%s.f.text tag conf comment_line -foreground green4", lab );
 cmd( ".eq_%s.f.text tag conf temp_var -foreground red4", lab );

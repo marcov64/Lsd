@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 14 (filtered)">
-<title>Runtime Plot</title>
+<title>Run-time Plot</title>
 <style>
 <!--
  /* Font Definitions */
@@ -139,7 +139,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,74 +160,77 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<center>
-<p><b><font size="+2">Runtime Plot</font></b></p>
-</center>
-<p>The Runtime Plot is a window created automatically during the
-simulation
-run to show the dynamic graph of a selected group of Variables or
-Parameters.
-Users need to specify which ones they want to appear on the Runtime
-Plot
-by <a href="browser.html#variables">selecting the Run Time option flag</a>
-from the <a href="browser.html">main Browser</a>.
-<br>
-&nbsp;
-</p>
-<p><br>
-<img src="image/runtime.png" style="height: 461px; width: 590px;" title=""
- alt=""></p>
-<center></center>
-<p>The window for the Runtime Plot is automatically defined with the X
-dimensions containing the <a href="menurun.html#simsetting">number of
-steps</a>
-of the simulation, while the Y dimension depends on the maximum and the
-minimum values plotted. Note that the Y re-scaling "overshoots"
-slightly
-the max and min values to anticipate future values, so to reduce the
-number
-of re-scaling operations that slow down the simulation.
-</p>
-<p>Users should select carefully which series are shown in the Run Time
-Plot. The rules are:
-</p>
-<ol>
-  <li>
-do never use series contained in Objects that can be created or
-destroyed
-during a simulation;</li>
-  <li>
-use only one, or few, series assuming values in the same range, to
-avoid
-the automatic scaling "flattening" the variability of the seris.</li>
-</ol>
-<p><br>
-If the <span style="font-weight: bold;">scroll</span> option is
-checked on the window automatically scrolls at each time step. Clicking
-on the button <b>Center</b> the window scrolls
-to show the current time step at about the beginning of the visible
-portion.
-</p>
-<p>The plot of the Runtime series can slow down the simulation.
-Minimizing
-this window increases sensibly the speed of the simulation program.
-</p>
-<p>To avoid the Runtime Plot to appear, chose the entry <a
- href="menurun.html#remplot">Remove
-Plot Flags</a> in Menu <b>Run</b>. In particular, this is a good
-option
-in case of multiple simulation runs (see in <a
- href="menurun.html#simsetting">Simulation
-Settings</a> in Menu <b>Run</b>), since this will create tens, or
-hundreds
-of windows. If the users has been already flooded with Runtime Plots,
-then
-the option <a href="menurun.html#remrtplot">Remove Runtime Plots</a>
-in
-Menu <b>Run</b> will automatically destroy all these windows.
-<br>
-&nbsp;
-</p>
+<p class=MsoTitle>LSD Run-time Plot</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img width=475
+height=364 src="image/runtime.png"></p>
+
+<p class=MsoNormal>The LSD Run-time Plot window is automatically created during
+the <a href="LSD_faqs.html#simulationrun">simulation run</a> to show the
+dynamic plotting of the time series of selected <a href="LSD_faqs.html#variable">Variables</a>
+(or even <a href="LSD_faqs.html#parameter">Parameters</a>). Users must mark the
+Variables to be plotted by <a href="browser.html#variables">selecting the Run-time
+Plot option</a> using the <a href="browser.html">LSD Browser</a>. If no Variable
+(or Parameter) is marked, the Run-time Plot window is not created during the
+simulation run.</p>
+
+<p class=MsoNormal>The run-time plot area is automatically sized according to
+the <a href="LSD_faqs.html#simulationrun">number of steps</a> set for the
+simulation (horizontal dimension) and to maximum and the minimum values of the plotted
+Variables (vertical dimension). Note that the <i>y</i>-axis dynamic rescaling slightly
+overshoots the maximum and minimum values to mitigate excessive rescaling
+operations.</p>
+
+<p class=MsoNormal>Users should select carefully which Variables’ time series to
+shown during the run-time:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Do <i>never</i> select series contained in Objects that can be created
+or destroyed during a simulation;</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Do select series which values are around the same range of values, to
+avoid the “plot-flattening” because of rescaling.</p>
+
+<p class=MsoNormal>The Run-time plot is optimized for simulation runs lasting
+up to 500 time steps. For longer periods, the user may have to use the
+horizontal scroll bar to see the values being produced in the more recent time
+steps. However, this can be also managed automatically (see <a
+href="#_Run-time_plot_controls">below</a>).</p>
+
+<h2><a name="_Run-time_plot_controls"></a>Run-time plot controls</h2>
+
+<p class=MsoNormal>Marking the <span class=Cdigo>Scroll</span> checkbox enables
+the automatic scrolling of series lasting longer than 500 time steps. In this
+case, if <span class=Cdigo>Scroll</span> is marked, the plot area scrolls at
+each time step. </p>
+
+<p class=MsoNormal>The button <span class=Cdigo>Center</span> centers the plot
+area on the current simulation run time step. It is useful only for simulations
+lasting more than 500 time steps.</p>
+
+<h2>Performance considerations</h2>
+
+<p class=MsoNormal>The plot of the Runtime series can slow down the simulation
+run, in particular when many Variables are being plotted. Just minimizing this
+window increases the speed of the simulation program. It is also automatically
+minimized when the <span class=Cdigo>Fast</span> button is used in the <a
+href="log.html">LSD Log</a>.</p>
+
+<p class=MsoNormal>To avoid the Runtime Plot to be used, simply remove the <a
+href="browser.html#variables">Run-time Plot option</a> from all the selected
+Variables or use the command <span class=Cdigo>Run&gt;Remove Plot Flags</span> in
+the <a href="menurun.html#remplot">LSD Browser menus</a>. This is particularly
+recommended in the case of multiple simulation runs (set by the <a
+href="menurun.html#simsetting">Simulation Settings</a> in the LSD Browser), once
+this may potentially create tens or hundreds of new windows (the Run-time Plot
+window is <i>not</i> reused across runs). If the computer desktop has been
+already “flooded” by Run-time Plot windows, the option <span class=Cdigo><a
+href="menurun.html#remrtplot"><span style='color:gray;text-decoration:none'>Run&gt;Close
+Run-time Plots</span></a></span> in the LSD Browser menus may be used to
+destroy all such windows.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -237,6 +241,8 @@ Menu <b>Run</b> will automatically destroy all these windows.
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
 
 </div>
 

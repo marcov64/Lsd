@@ -1062,6 +1062,63 @@ please select <span class=Cdigo>Model&gt;System Options</span> in <a
 href="#_What_is_LMM?">LMM</a> and make sure you select the correct default
 configuration for your operating system.</p>
 
+<h2>Simulation run errors </h2>
+
+<p class=MsoNormal>It is possible that during a <a href="#_What_are_a">simulation
+run</a> an error occurs, preventing the simulation to continue. Most of these
+errors are captured by LSD before they crash the whole program. The messages in
+the Error dialog windows and in the <a href="LSD_windows.html#log">LSD Log
+window</a> communicate what kind of error occurred and usually provide hints on
+how to fix it. Read the messages carefully to understand what happened and
+under which conditions, and try to apply the proposed fixes.</p>
+
+<p class=MsoNormal>After a simulation run is stopped by an error, the user has
+two options:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Return to LSD Browser</b>: stop the simulation and return to
+the <a href="#_What_is_an">LSD Browser</a> as in a successful simulation run,
+so it is possible to browse and analyze the model data at the moment of the
+crash. Use this option if you don't need (yet) to change the model <a
+href="#_What_is_an_1">Equations</a>' code, but maybe just add an element or
+modify some names. In this case, the user can reload the <a href="#_What_is_a_1">model
+configuration</a> and fix the error.</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Quit LSD program</b>: close the <a href="#_What_is_a">LSD
+model program</a>. This is necessary if the error must be fixed by modifying
+the code in the <a href="LSD_faqs.html#equationfile">equation file</a>. In this
+case, the equation file needs to be <a href="LSD_faqs.html#compiler">recompiled</a>
+in a new LSD model program and it is recommended to close the one still open.</p>
+
+<p class=MsoNormal>HINT: by far, the most frequent error consists in a mismatch
+between the names in the <a href="#_What_is_a_1">model configuration</a> and
+the names used in the <a href="LSD_faqs.html#equationfile">equation file</a>.
+For example, suppose you have a model configuration containing a <a
+href="#_What_are_a_1">Variable</a> <span class=Cdigo>Profit</span>, but in the
+code for an Equation, say <span class=Cdigo>Investment</span>, you have typed <span
+class=Cdigo>PrOFit</span>. When the faulty Equation is computed, the <a
+href="LSD_windows.html#log">LSD Log window</a> will issue the message:</p>
+
+<p class=MsoNormal><span class=Cdigo>Search for 'PrOFit' failed during the
+equation of variable 'Investement' </span></p>
+
+<p class=MsoNormal>Moreover, the Log window will indicate the time step at
+which the error occurred, and the list equations currently under computation (for
+technical details, see <a href="debug.html#simman">LSD Simulation Manager</a>).
+To fix this error you need to use the same spelling for all the occurrences of each
+Variable in the Equations' code and in the model configuration. This may entail
+either to change the equation file (using <a href="#_What_is_LMM?">LMM</a>&nbsp;
+to edit the misspelled text in the equations code and <a
+href="LSD_faqs.html#compiler">recompiling</a> the <a href="#_What_is_a">LSD
+model program</a>) or <a href="browser.html#change_nature">modifying the name</a>
+of the Variable using the in the <a href="browser.html#variables">option window</a>
+for the element in the <a href="#_What_is_an">LSD Browser</a>. </p>
+
 <h2>The simulation cannot start: initial data not available</h2>
 
 <p class=MsoNormal>LSD found that some <a href="#_What_are_initial">initial

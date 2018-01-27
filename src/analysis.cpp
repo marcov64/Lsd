@@ -203,7 +203,7 @@ cmd( "menu .da.m -tearoff 0 -relief groove -bd 2" );
 cmd( "set w .da.m.exit" );
 cmd( ".da.m add cascade -label Exit -menu $w -underline 0" );
 cmd( "menu $w -tearoff 0 -relief groove -bd 2" );
-cmd( "$w add command -label \"Quit and return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc" );
+cmd( "$w add command -label \"Quit and Return to Browser\" -command {set choice 2} -underline 0 -accelerator Esc" );
 
 cmd( "set w .da.m.gp" );
 cmd( ".da.m add cascade -label Gnuplot -menu $w -underline 0" );

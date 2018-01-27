@@ -240,7 +240,7 @@ instance?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>18.<span style='font:7.0pt "Times New Roman"'>
-</span><a href="#_What_is_a_3">What is a Variable and a lagged Variable?</a></p>
+</span><a href="#_What_is_a_3">What are a Variable and a lagged Variable?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>19.<span style='font:7.0pt "Times New Roman"'>
@@ -294,15 +294,20 @@ and what can I do with that?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>31.<span style='font:7.0pt "Times New Roman"'>
+</span><a href="#modeldocumentation">How do I document the elements of a LSD
+model?</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>32.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_What_documentation_does">What documentation does exist on
 LSD?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>32.<span style='font:7.0pt "Times New Roman"'>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>33.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_What_is_the_1">What is the LSD XXX window?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>33.<span style='font:7.0pt "Times New Roman"'>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>34.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_Who_did_write">Who wrote LSD, and why?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -945,8 +950,8 @@ file, is loaded.</p>
  </tr>
 </table>
 
-<h1><a name="_What_is_an_1"></a><a name="_How_do_I"></a>How do I name my
-model’s elements? </h1>
+<h1><a name="_What_is_an_1"></a><a name="_How_do_I"></a><a name=name></a>How do
+I name my model’s elements? </h1>
 
 <p>The names of (or the labels for) <a href="#_What_is_an_2">Objects</a>, <a
 href="#_What_is_a_4">Parameters</a> and <a href="#_What_is_a_3">Variables</a>
@@ -1041,7 +1046,7 @@ rules</a> and are case sensitive.</p>
  </tr>
 </table>
 
-<h1><a name="_What_is_a_3"></a><a name=variable></a>What is a Variable and a
+<h1><a name="_What_is_a_3"></a><a name=variable></a>What are a Variable and a
 lagged Variable? </h1>
 
 <p class=MsoNormal>A Variable is the key element of a LSD model that
@@ -1119,8 +1124,8 @@ rules</a> and are case sensitive.</p>
 href="#_What_is_an">Equation</a> (not associated with a <a href="#_What_is_a_3">Variable</a>)
 to perform a certain computation. Technically, a Function is a label connected
 to a piece of code (in an Equation). In most of the LSD documentation Functions
-are not explicitly introduced. However, in almost any situation a Variable may
-be applied, also does a Function.</p>
+are not explicitly introduced. However, in many situations a Variable may be
+applied, also does a Function.</p>
 
 <p class=MsoNormal>Differently from a Variable, the Equation computing a
 Function is never automatically executed by LSD. Rather, the code of a Function
@@ -1128,7 +1133,7 @@ is executed only, and every time it is explicitly invoked. If it is invoked
 multiple times during the same <a href="#_What_is_a_1">time step</a>, the code
 of the associated Equation is run the corresponding number of times,
 potentially producing different values for the same Function instance during
-the same time step.</p>
+the same time step. Also, a Function does not have lagged values.</p>
 
 <p class=MsoNormal>Function names are subject to <a href="#_What_is_an_1">certain
 rules</a> and are case sensitive.</p>
@@ -1328,7 +1333,7 @@ href="#_What_is_a_2">Equations' code</a>. </p>
  </tr>
 </table>
 
-<h1><a name="_What_is_a_8"></a>What is a LSD network?</h1>
+<h1><a name="_What_is_a_8"></a><a name=network></a>What is a LSD network?</h1>
 
 <p class=MsoNormal>In LSD a network is a structure composed by nodes
 interconnected by links. The nodes of a network must <a href="#_What_is_an_2">instances
@@ -1524,8 +1529,8 @@ to be used for explanation purposes or as appendices to scientific publications<
  </tr>
 </table>
 
-<h1><a name="_What_are_the"></a><a name=analysis></a>What are the results of a
-LSD simulation run, and what can I do with that? </h1>
+<h1><a name="_What_are_the"></a><a name=analysis></a><a name=results></a>What
+are the results of a LSD simulation run, and what can I do with that? </h1>
 
 <p class=MsoNormal>As a matter of principle, LSD is based on the assumptions
 that simulation models do not serve (only) to produce data series, but to
@@ -1606,7 +1611,8 @@ the documentation included with them.</p>
  </tr>
 </table>
 
-<h1><a name="_What_is_sensitivity"></a>What is sensitivity analysis?</h1>
+<h1><a name="_What_is_sensitivity"></a><a name=sa></a>What is sensitivity
+analysis?</h1>
 
 <p class=MsoNormal>In a broader sense, the sensitivity analysis (SA) evaluate
 how uncertainty in the results of a <a href="#_What_is_a_1">simulation run</a>
@@ -1695,6 +1701,40 @@ Equation, read the description of the Parameter, see the list of other
 equations where the Parameter is used, see all the Variables and Parameters
 contained in the same Object, etc. All these operations are executed by
 clicking on the links in the report file.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=modeldocumentation></a>How do I document the elements of a LSD
+model?</h1>
+
+<p class=MsoNormal>The documentation of the elements of a <a href="#_What_is_a">LSD
+model</a> is composed by text section associated with any <a
+href="LSD_faqs.html#object">Object</a>, <a href="LSD_faqs.html#variable">Variable</a>,
+<a href="LSD_faqs.html#parameter">Parameter</a> and <a
+href="LSD_faqs.html#function">Function</a> in the model (including the model
+itself). These text sections are called <span class=Cdigo>Description</span> in
+the LSD windows dealing with the model documentation. These sections of text are
+presented (and can be edited) whenever the user edits the respective element in
+the <a href="#_What_is_a_6">model configuration</a>. The content of the description
+sections are also used to produce the <a href="#modelreport">model reports</a>.
+They are not used during the <a href="#_What_is_a_1">simulation run</a> or affect
+whatsoever the simulation numerical operation.</p>
+
+<p class=MsoNormal>Model writers are free to include any comment in the
+description sections. The documentation for an element can be automatically
+appended by the list of <a href="#_What_is_an">Equations</a> using it, and by the
+list of other elements used by its own Equation. This way, one is immediately
+aware where the item affects or is affected by the <a href="#_What_is_the">model
+structure</a>. See the <a href="menumodel.html">documentation </a>on the LSD
+Browser for details.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

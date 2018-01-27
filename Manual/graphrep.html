@@ -8,6 +8,12 @@
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -139,7 +145,8 @@ span.Cdigo
 	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
 div.WordSection1
 	{page:WordSection1;}
--->
+ /* List Definitions */
+ -->
 </style>
 
 <link rel=icon href="image/lsd.png">
@@ -159,43 +166,66 @@ div.WordSection1
 
 <p class=MsoTitle>&nbsp;</p>
 
-<p><map NAME="browser"><area SHAPE=RECT COORDS="6,25,35,49" HREF="menufile.html" ALT="Menu File"><area SHAPE=RECT COORDS="38,25,83,49" HREF="menumodel.html" ALT="Menu Model"><area SHAPE=RECT COORDS="87,25,105,41" HREF="menudata.html" ALT="Menu Data"><area SHAPE=RECT COORDS="107,25,143,41" HREF="menurun.html" ALT="Menu Run"><area SHAPE=RECT COORDS="164,49,206,65" HREF="#chobjname" ALT="Change Object Name"><area SHAPE=RECT COORDS="179,76,210,94" HREF="#goup" ALT="Move Browser to the Parent Object"><area SHAPE=RECT COORDS="8,134,156,332" HREF="#variables" ALT="Edit Variables"><area SHAPE=RECT COORDS="189,131,335,332" HREF="#descendants" ALT="Move Browser to Descending Objects"></map>
-<center>
-<p><a NAME="graphrep"></a><b><font size=+1>Graphical Model Representation</font></b></center>
+<p class=MsoTitle><a name=graphrep></a>LSD Model Structure</p>
 
-<p>Once a model is loaded, its structure is shown with a graphical representation,
-as in the figure below:
-<br>&nbsp;
-<p><br>
-<center>
-<p><img src="image/model_struct.png" height=408 width=578></center>
+<p class=MsoNormal align=center style='text-align:center'><img width=482
+height=347 src="image/model_struct.png"></p>
 
-<p><br>
-<br>
-<p>The graphical representation (which can be incomplete for very large
-models) provides a sketch of the basic structure of the model and can be
-used to quickly browse through the model, since the symbols can be clicked.
-The up-most Object Root is not shown in the window (because normally it
-shouldn't contain any element), which begins showing the Objects of the
-model from the descendants of Root. Each Object is represented by its label
-and by a circle connected with a line to its parent Object. Below each
-Object symbol are reported the number of instances currently contained
-in the model for that Object. In case there are multiple instances of its
-parent Object, there is one number for each group of descendants from each
-instance of the parent Object (if there are very many groups, the system
-shows only the initial ones).
-<p>Moving the mouse pointer over an Object symbol a window will show the
-content of the Object, in terms of Parameters (labels followed by <b><font face="Arial, helvetica">(P)</font></b>)
-and Variables (labels followed by <b><font face="Arial, helvetica">(n)</font></b>,
-where <b><font face="Arial, helvetica">n</font></b> is the maximum number
-of lags, see <b><font face="Arial, helvetica"><a href="browser.html#variables">Variables</a></font></b>).
-<p>The window can also be used move quickly the browser to show the content
-of one Object type, by double-clicking on its symbol.
-<br>The window offers also another shortcut: clicking on one Object symbol
-with the right button of the mouse the system will show the initial values
-for that Objects (equivalent to the entry <a href="menudata_init.html">Initial
-Values</a> in Menu Data when the main Browser is showing that Object type).
-<br>&nbsp;
+<p class=MsoNormal>The LSD Model Structure window presents an interactive
+graphical representation of the <a href="LSD_faqs.html#model">LSD model</a> <a
+href="LSD_faqs.html#modelstructure">hierarchical structure of Objects</a>. It
+is automatically opened whenever a <a href="LSD_faqs.html#modelsetting">model
+configuration</a> is loaded in the <a href="LSD_windows.html#browser">LSD
+Browser</a>. The model structure can be used to quickly browse through the
+model, since the <a href="LSD_faqs.html#object">Object</a> symbols can be (left-
+and right-) clicked.</p>
+
+<p class=MsoNormal>Each <a href="LSD_faqs.html#object">Object type</a> in the
+model is represented by its name in red and a white circle connected with a
+line to its parent Object. Below each Object circle symbol are reported the
+number of <a href="LSD_faqs.html#object">instances</a> currently existing in
+the model for that Object. In case there are multiple instances of its parent
+Object, there is one number for each group of descendants from each instance of
+the parent Object. If there are too many groups to present, LSD shows only the
+initial ones. </p>
+
+<p class=MsoNormal>The top-most <span class=Cdigo>Root</span> Object is not
+shown in the <a href="LSD_faqs.html#modelstructure">model structure</a>, as it
+should not contain any element most of the times. All direct descendants (sons)
+of the <span class=Cdigo>Root</span> Object are shown at the top of the
+structure. In the level below, are the descendants of the sons of Root (its
+grandsons), as well all other Objects descending from them and so on. Very
+large model structures (too wide or too deep) may show incomplete in the default
+view of the window. To uncover the hidden Objects, the user may use the scroll
+bars to pan around the model structure or increase (or maximize) the size of
+the LSD Model Structure.</p>
+
+<h2>Interacting with the model structure</h2>
+
+<p class=MsoNormal>Hovering with the mouse over an Object symbol briefly shows the
+list of elements contained in it:</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="LSD_faqs.html#parameter">Parameter</a> names are
+followed by <span class=Cdigo>(par.)</span> </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="LSD_faqs.html#variable">Variable</a> names are followed by
+<span class=Cdigo>(var. lag=X)</span>, where <span class=Cdigo>X</span> is the
+maximum number of <a href="LSD_faqs.html#variable">lags</a> used. </p>
+
+<p class=MsoNormal>The LSD Model Structure can be used to change the <a
+href="LSD_windows.html#browser">LSD Browser</a> current Object by (left-) clicking
+on its symbol.</p>
+
+<p class=MsoNormal>It is also possible to access the Object context menu by
+right-clicking its symbol. From the pop-up menu the user can perform several
+actions on the selected Object: add a new parent, rename, change the number of instances,
+delete, add elements, edit initial values and browse elements.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -206,6 +236,8 @@ Values</a> in Menu Data when the main Browser is showing that Object type).
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
 
 </div>
 
