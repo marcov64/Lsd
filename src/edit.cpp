@@ -506,7 +506,7 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	cmd( "showtop $n" );
 
 	j = 1;
-	*choice=0;
+	*choice = 0;
 	 
 	here_objec_num:
 
@@ -520,34 +520,34 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 		j = 0;
 	}
 
-	while(*choice==0)
-		Tcl_DoOneEvent(0);
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 		  
 	cmd( "set num [ .numobj.e.e get ]" ); 
 	cmd( "set cfrom [ .numobj.cp.e get ]" ); 
 
-	k=*choice;
+	k = *choice;
 
 	cmd( "set choice $conf" );
-	if(*choice==0)
+	if ( *choice == 0 )
 		goto here_objec_num;
 	else
 		*choice=k;  
 
-	if(*choice==3)
+	if ( *choice == 3 )
 	{
-		*choice=0;
-		k=compute_copyfrom(c, choice);
+		*choice = 0;
+		k = compute_copyfrom( c, choice );
 		if(k>0)
 			cmd( "set cfrom %d", k );
 		cmd( "set conf 0" );
-		*choice=0;
+		*choice = 0;
 		goto here_objec_num;
 	} 
 
 	cmd( "destroytop $n" );  
 			 
-	if(*choice==2)
+	if ( *choice == 2 )
 		return;
 
 	cmd( "set choice $cfrom" );  
@@ -563,6 +563,8 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 
 	cmd( "set choice $num" );
 	chg_obj_num( &c, *choice, affect, pippo, choice, cfrom );
+
+	redrawRoot = true;			// update list boxes
 
 	delete [ ] pippo;
 }

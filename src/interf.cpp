@@ -213,7 +213,8 @@ BROWSE
 ****************************************************/
 int browse( object *r, int *choice )
 {
-char ch[TCL_BUFF_STR];
+char ch[ TCL_BUFF_STR ];
+int num;
 variable *ap_v;
 object *ap_o;
 bridge *cb;
@@ -243,23 +244,37 @@ if ( redrawRoot )
 		cmd( "set app 0" );
 		for ( ap_v = r->v; ap_v != NULL; ap_v = ap_v->next )
 		{
-			if ( ap_v->param == 1 )
-				cmd( ".l.v.c.var_name insert end \"%s (par.%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+			// add elements to the listbox 
 			if ( ap_v->param == 0 )
-				cmd( ".l.v.c.var_name insert end \"%s (var. lag=%d%s)\"",ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
-			if ( ap_v->param == 2 )
-				cmd( " .l.v.c.var_name insert end \"%s (fun.%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
-
-			if ( ap_v->param == 0 && ap_v->num_lag == 0 )
-				cmd( ".l.v.c.var_name itemconf $app -fg blue" );
-			if ( ap_v->param == 0 && ap_v->num_lag > 0 )
-				cmd( ".l.v.c.var_name itemconf $app -fg purple" );
+			{
+				if ( ap_v->num_lag == 0 )
+				{
+					cmd( ".l.v.c.var_name insert end \"%s (V%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+					cmd( ".l.v.c.var_name itemconf $app -fg blue" );
+				}
+				else
+				{
+					cmd( ".l.v.c.var_name insert end \"%s (V_%d%s)\"", ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+					cmd( ".l.v.c.var_name itemconf $app -fg purple" );
+				}
+			}
+			
 			if ( ap_v->param == 1 )
-				cmd( ".l.v.c.var_name itemconf $app -fg black" );
-			if ( ap_v->param == 2 && ap_v->num_lag == 0 )
-				cmd( ".l.v.c.var_name itemconf $app -fg firebrick" );
-			if ( ap_v->param == 2 && ap_v->num_lag > 0 )
-				cmd( ".l.v.c.var_name itemconf $app -fg tomato" );
+				cmd( ".l.v.c.var_name insert end \"%s (P%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+			
+			if ( ap_v->param == 2 )
+			{
+				if ( ap_v->num_lag == 0 )
+				{
+					cmd( " .l.v.c.var_name insert end \"%s (F%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+					cmd( ".l.v.c.var_name itemconf $app -fg firebrick" );
+				}
+				else
+				{
+					cmd( ".l.v.c.var_name insert end \"%s (F_%d%s)\"", ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+					cmd( ".l.v.c.var_name itemconf $app -fg tomato" );
+				}
+			}
 
 			cmd( "incr app" );
 
@@ -416,7 +431,8 @@ if ( redrawRoot )
 		cmd( "set app 0" );
 		for ( cb = r->b; cb != NULL; cb = cb->next )
 		{
-			cmd( ".l.s.c.son_name insert end %s", cb->blabel );
+			skip_next_obj( cb->head, &num );
+			cmd( ".l.s.c.son_name insert end \"%s (#%d)\"", cb->blabel, num );
 			cmd( ".l.s.c.son_name itemconf $app -fg red" );
 			cmd( "incr app" );
 		}
@@ -3215,14 +3231,14 @@ if ( lab1 != NULL && ! strcmp( lab1, "no" ) )
 else
 	cur2 = NULL;
 
-if(r->up==NULL)
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
-  goto here_endinst;
- }
+if ( r->up == NULL )
+{
+	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Cannot create copies of 'Root' object\" -detail \"Consider, if necessary, to add a new parent object here: all the elements will be moved in the newly created object, which can be multiplied in many copies.\"" );
+	goto here_endinst;
+}
 
-skip_next_obj(r, &num);
-Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
+skip_next_obj( r, &num );
+Tcl_LinkVar( inter, "num", (char *) &num, TCL_LINK_INT );
 
 cmd( "set cfrom 1" );
 
@@ -3258,7 +3274,7 @@ cmd( "bind $T.e.e.ent <KeyPress-Return> {set choice 1}" );
 cmd( "showtop $T" );
 
 i = 1;
-*choice=0;
+*choice = 0;
 
 here_objec_num:
 
@@ -3272,13 +3288,13 @@ if ( i == 1 )
 	i = 0;
 }
 
-while(*choice==0)
-  Tcl_DoOneEvent(0);
+while ( *choice == 0 )
+	Tcl_DoOneEvent( 0 );
 
 cmd( "set num [ .numinst.e.e.ent get ]" ); 
 cmd( "set cfrom [ .numinst.cp.e get ]" ); 
 
-if(*choice==3)
+if ( *choice == 3 )
 {
 	*choice=0;
 	k=compute_copyfrom(r, choice);
@@ -3302,6 +3318,7 @@ for(i=0, cur=r->up;cur!=NULL; i++, cur=cur->up);
 chg_obj_num(&r, num, i, NULL, choice, k);
 
 unsaved_change( true );		// signal unsaved change
+redrawRoot = true;			// update list boxes
 
 here_endinst:
 if ( cur2 != NULL )			// restore original current object

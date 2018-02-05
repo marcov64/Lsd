@@ -176,13 +176,19 @@ if(t->v==NULL)
  cmd( "append list_%s \"(no elements)\"", t->label );
 
 for(cv=t->v; cv!=NULL; cv=cv->next)
-{sprintf(ch,"append list_%s \"%s", t->label,cv->label);
- if(cv->param==1)
-  sprintf(str," (P%s)\n\"", ( cv->save || cv->savei ) ? "+" : "" );
- else
-  sprintf( str, " (%d%s)\n\"", cv->num_lag, ( cv->save || cv->savei ) ? "+" : "" );
- strcat(ch, str);
-  cmd( ch );
+{
+	sprintf( ch,"append list_%s \"%s", t->label, cv->label );
+	if ( cv->param == 1 )
+		sprintf( str," (P%s)\n\"", ( cv->save || cv->savei ) ? "+" : "" );
+	else
+	{
+		if ( cv->num_lag == 0 )
+			sprintf( str, " (%s%s)\n\"", ( cv->param == 0 ) ? "V" : "F", ( cv->save || cv->savei ) ? "+" : "" );
+		else
+			sprintf( str, " (%s_%d%s)\n\"", ( cv->param == 0 ) ? "V" : "F", cv->num_lag, ( cv->save || cv->savei ) ? "+" : "" );
+	}
+	strcat( ch, str );
+	cmd( ch );
 }
 
 // drawn only if it is not the root
