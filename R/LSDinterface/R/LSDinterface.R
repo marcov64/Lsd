@@ -64,16 +64,10 @@ name.check.lsd <- function( file, col.names = NULL, check.names = TRUE ){
 info.dimensions.lsd <- function( file ){
 
   # read from disk
-  dataSet <- utils::read.delim( file, na.strings = "NA" )
-
-  if( nrow( dataSet ) == 0 )            # invalid file?
-    stop( paste0( "File '", file, "' is invalid!") )
-
-  if( all( is.na( dataSet[ , ncol( dataSet ) ]) ) )  # remove empty last column
-    dataSet <- dataSet[ , - ncol( dataSet )]
+  dataSet <- read.raw.lsd( file )
 
   # caclulate statistics
-  tSteps <- nrow( dataSet ) - 1
+  tSteps <- nrow( dataSet )
   nVars <- ncol( dataSet )
   varNames <- name.clean.lsd( colnames( dataSet ) )
 
@@ -85,18 +79,16 @@ info.dimensions.lsd <- function( file ){
 
 info.names.lsd <- function( file ){
 
-  # read from disk
-  dataSet <- utils::read.delim( file, na.strings = "NA", nrows = 1,
-                                stringsAsFactors = FALSE )
+  # read header line (labels) from disk
+  header <- scan( file, what = character( ), sep = "\t", quote = NULL,
+                  nlines = 1, quiet = TRUE )
+  header <- header[ 1 : ( length( header ) - 1 ) ]  # remove last tab
 
-  if( nrow( dataSet ) == 0 )            # invalid file?
+  if( length( header ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
 
-  if( all( is.na( dataSet[ , ncol( dataSet ) ]) ) )  # remove empty last column
-    dataSet <- dataSet[ , - ncol( dataSet )]
-
   # extract labels and remove duplicates
-  lsd.name <- unique( name.var.lsd( colnames( dataSet ) ) )
+  lsd.name <- unique( name.var.lsd( make.names( header ) ) )
 
   return( lsd.name )
 }
@@ -107,20 +99,7 @@ info.names.lsd <- function( file ){
 info.init.lsd <- function( file ){
 
   # read from disk
-  dataSet <- as.matrix( utils::read.delim( file, na.strings = "NA", nrows = 1,
-                                           colClasses = "numeric",
-                                           stringsAsFactors = FALSE ) )
-
-  if( nrow( dataSet ) == 0 )            # invalid file?
-    stop( paste0( "File '", file, "' is invalid!") )
-
-  # remove empty last column
-  if( all( is.na( dataSet[ , ncol( dataSet ) ] ) ) )
-    dataSet <- as.matrix( t( dataSet[ , - ncol( dataSet ) ] ) )
-
-  # reformat labels
-  colnames( dataSet ) <- name.clean.lsd( colnames( dataSet ) )
-  rownames( dataSet ) <- "0"
+  dataSet <- read.raw.lsd( file, nrows = 0 )
 
   return( dataSet )
 }
@@ -131,18 +110,7 @@ info.init.lsd <- function( file ){
 info.details.lsd <- function( file ){
 
   # read from disk
-  dataSet <- utils::read.delim( file, na.strings = "NA", nrows = 1,
-                                stringsAsFactors = FALSE )
-
-  if( nrow( dataSet ) == 0 )            # invalid file?
-    stop( paste0( "File '", file, "' is invalid!") )
-
-  # remove empty last column
-  if( all( is.na( dataSet[ , ncol( dataSet ) ]) ) )
-    dataSet <- dataSet[ , - ncol( dataSet )]
-
-  # reformat column labels
-  colnames( dataSet ) <- name.clean.lsd( colnames( dataSet ) )
+  dataSet <- read.raw.lsd( file, nrows = 0 )
 
   # get the most "deep" object position
   maxPosit <- 1
@@ -378,31 +346,41 @@ select.colattrs.lsd <- function( dataSet, info, col.names = NA, posit = NULL,
 # ==== Read LSD results file and clean variables names ====
 
 read.raw.lsd <- function( file, nrows = -1, skip = 0 ){
-  # read from disk
-  dataSet <- as.matrix( utils::read.delim( file, na.strings = "NA",
-                                           colClasses = "numeric",
-                                           stringsAsFactors = FALSE ) )
+
+  # read header line (labels) from disk
+  header <- scan( file, what = character( ), sep = "\t", quote = NULL,
+                  nlines = 1, quiet = TRUE )
+  header <- header[ 1 : ( length( header ) - 1 ) ]  # remove last tab
+  header <- make.names( header )
+
+  if( length( header ) == 0 )            # invalid file?
+    stop( paste0( "File '", file, "' is invalid!") )
+
+  # try to calculate data size
+  if ( nrows > 0 ) {
+    n <- length( header ) * ( nrows - skip )
+  } else {
+    if ( nrows < 0 ) {
+      n <- -1
+    } else {                            # nrows = 0 : get initial values
+      n <- length( header )
+      skip <- -1
+    }
+  }
+
+  # read data from disk
+  dataSet <- matrix( scan( file, what = numeric( ), n = n, quote = NULL,
+                           skip = skip + 2, na.strings = "NA", quiet = TRUE ),
+                     ncol = length( header ), byrow = TRUE )
 
   if( nrow( dataSet ) == 0 )            # invalid file?
     stop( paste0( "File '", file, "' is invalid!") )
 
-  # remove unwanted rows and columns (artifacts)
-  dataSet <- dataSet[ -1, ]             # remove first data row (initial conditions)
-  if( all( is.na( dataSet[ , ncol( dataSet ) ]) ) )  # remove empty last column
-    dataSet <- dataSet[ , - ncol( dataSet )]
-
-  # remove rows to discard (user)
-  if( skip > 0 )                        # there are rows to skip?
-    dataSet <- dataSet[ - c( 1 : skip ), ]
-  if( nrows >= 0 && nrow( dataSet ) >= nrows) # there are rows to remove?
-    dataSet <- dataSet[ c( 0 : nrows ), ]
-
   # adjust rown labels
-  if( nrow( dataSet ) > 0 )             #any row to label?
-    rownames( dataSet ) <- c( ( 1 + skip ) : ( nrow( dataSet ) + skip ) )
+  rownames( dataSet ) <- c( ( 1 + skip ) : ( nrow( dataSet ) + skip ) )
 
   # reformat column labels
-  colnames( dataSet ) <- name.clean.lsd( colnames( dataSet ) )
+  colnames( dataSet ) <- name.clean.lsd( header )
 
   return( dataSet )
 }

@@ -329,7 +329,7 @@ int lsdmain( int argn, char **argv )
 			log_tcl_error( "Command line parameters", "Invalid option, available options: -i TCL_DIRECTORY / -f MODEL_NAME / -c MAX_CORES" );
 			myexit( 1 );
 		}
-		if(argv[i][1]=='f')
+		if ( argv[i][1] == 'f' )
 		{
 			delete[] simul_name;
 			simul_name = new char[ strlen( argv[ i + 1 ] ) + 3 ];

@@ -143,7 +143,7 @@ int main( int argn, char **argv )
 int ModManMain( int argn, char **argv )
 {
 int i, num, sourcefile, macro = 1;
-char *s, str[MAX_LINE_SIZE+2*MAX_PATH_LENGTH], str1[2*MAX_PATH_LENGTH], str2[2*MAX_PATH_LENGTH];
+char *s, str[ MAX_LINE_SIZE + 2 * MAX_PATH_LENGTH ], str1[ 2 * MAX_PATH_LENGTH ], str2[ 2 * MAX_PATH_LENGTH ];
 FILE *f;
 
 // initialize the tcl interpreter
@@ -580,7 +580,7 @@ cmd( "frame .f -bd 2" );
 cmd( "frame .f.t" );
 cmd( "scrollbar .f.t.vs -command \".f.t.t yview\"" );
 cmd( "scrollbar .f.t.hs -orient horiz -command \".f.t.t xview\"" );
-cmd( "text .f.t.t -undo 1 -height 2 -autoseparators 1 -bg #fefefe -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
+cmd( "text .f.t.t -undo 1 -height 2 -autoseparators 1 -yscroll \".f.t.vs set\" -xscroll \".f.t.hs set\"" );
 cmd( "set a [.f.t.t conf -font]" );
 cmd( "set b [lindex $a 3]" );
 cmd( "if {$dim_character == 0} {set dim_character [lindex $b 1]}" );

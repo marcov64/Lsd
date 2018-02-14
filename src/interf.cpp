@@ -892,8 +892,8 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r)
 {
-char *lab1, *lab2, *lab3, *lab4, lab[2*MAX_PATH_LENGTH], lab_old[2*MAX_PATH_LENGTH], ch[2*MAX_PATH_LENGTH], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ], observe, initial, cc;
-int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[10];
+char observe, initial, cc, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
+int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
 bool saveAs, delVar, renVar, reload, table;
@@ -904,6 +904,7 @@ variable *cur_v, *cv, *app;
 result *rf;					// pointer for results files (may be zipped or not)
 sense *cs;
 description *cur_descr;
+struct stat stExe, stMod;
 
 if ( ! redrawReq )
 	redrawRoot = false;		// assume no browser redraw
@@ -4797,6 +4798,20 @@ case 68:
 	}
 	fclose( f );
 	
+	// check if NW executable file is older than running executable file
+	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
+
+	// get OS info for files
+	if ( stat( ch, &stExe ) == 0 && stat( lab_old, &stMod ) == 0 )
+	{
+		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+		{
+			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			if ( *choice == 2 )
+				break;
+		}
+	}
+	
 	// check if serial sensitivity configuration was just created
 	*choice = 0;
 	if ( findexSens > 0 )
@@ -5030,7 +5045,7 @@ case 68:
 			if ( *choice == 1 || *choice == 4 )	// Windows
 				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
 			else								// Unix
-				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
+				fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
 			j <= sl ? i += num + 1 : i += num;
 		}
 	}
@@ -5040,7 +5055,7 @@ case 68:
 				if ( *choice == 1 || *choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
+					fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
@@ -5049,7 +5064,7 @@ case 68:
 				if ( *choice == 1 || *choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s.log\" 2>&1\r\n", j, nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
 				else								// Unix
-					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s.log 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
+					fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s.log 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
 			}
 	
 	if ( fSeq )
@@ -5117,6 +5132,33 @@ case 69:
 		break;
 	}
 
+	// check for existing NW executable
+	sprintf( lab, "%s/lsd_gnuNW", exec_path );			// form full executable name
+	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
+	if ( *choice == 1 )
+		strcat( lab, ".exe" );							// add Windows ending
+
+	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
+		break;
+	}
+	fclose( f );
+	
+	// check if NW executable file is older than running executable file
+	sprintf( lab_old, "%s/%s", exec_path, exec_file );	// form full exec name
+
+	// get OS info for files
+	if ( stat( lab, &stExe ) == 0 && stat( lab_old, &stMod ) == 0 )
+	{
+		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+		{
+			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing No Window executable file is older than the current version of the current executable.\n\nPress 'OK' to continue anyway or 'Cancel' to abort. Please recompile the model using the option 'Model'/'Generate 'No Window' Version' in LMM menu.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			if ( *choice == 2 )
+				break;
+		}
+	}
+	
 	Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "docsv", ( char * ) & docsv, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
@@ -5268,19 +5310,6 @@ case 69:
 			}
 		}
 
-	// check for existing NW executable
-	sprintf( lab, "%s/lsd_gnuNW", exec_path );			// form full executable name
-	cmd( "if {$tcl_platform(platform) == \"windows\"} {set choice 1} {set choice 0}" );
-	if ( *choice == 1 )
-		strcat( lab, ".exe" );							// add Windows ending
-
-	if ( ( f = fopen( lab, "rb" ) ) == NULL ) 
-	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Executable file 'lsd_gnuNW' not found\" -detail \"Please create the required executable file using the option 'Model'/'Generate 'No Window' Version' in LMM.\"" );
-		break;
-	}
-	fclose( f );
-	
 	// start the job
 	cmd( "set oldpath [pwd]" );
 	cmd( "set path \"%s\"", path );
@@ -5290,7 +5319,7 @@ case 69:
 	if( *choice == 1 )							// Windows?
 		cmd( "exec %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 	else										// Unix
-		cmd( "exec %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
+		cmd( "exec nice %s -f %s %s %s %s >& %s.log  &", lab, struct_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", simul_name );
 
 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Start 'No Window' Batch\" -message \"Script/batch started\" -detail \"The current configuration was started as a 'No Window' background job. The results files are being created in the folder:\\n\\n$path\\n\\nCheck the '%s.log' file to see the results or use the command 'tail  -F  %s.log' in a shell/command prompt to follow simulation execution.\"", simul_name, simul_name );
 	
