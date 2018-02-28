@@ -235,6 +235,7 @@ extern double i_values[];
 			};
 	
 #define RESULT( X ) \
+			; \
 			res = X; \
 			DEBUG_CODE \
 			return res; \

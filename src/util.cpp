@@ -2653,19 +2653,25 @@ Create a new run time lattice having:
 - lvar= label of variable or parameter from which to read the color of the cell
 - p= pointer of the object containing the initial color of the cell (if flag==-1)
 - init_color= indicate the type of initialization. 
-  If init_color==-1, the function uses the lvar values reading the coordinates in each lrow and lcol to initialize the lattice. (not implemented yet)
-  If init_color < -1, the (positive) RGB equivalent to init_color is used.
+  If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 */
 #ifndef NO_WINDOW
 
 double dimW, dimH;
 
-double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
+double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
 {
 	object *cur;
 	int hsize, vsize, hsizeMax, vsizeMax;
 	double i, j, color;
+
+	// ignore invalid values
+	if ( nrow < 0 || ncol < 0 || nrow > INT_MAX || ncol > INT_MAX )
+	{
+		plog( "\nError: invalid lattice initialization values, ignoring.\n");
+		return 0;
+	}
 
 	get_int( "hsizeLat", & hsize );			// 400
 	get_int( "vsizeLat", & vsize );			// 400
@@ -2677,40 +2683,39 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 	pixW = min( pixW, hsizeMax );
 	pixH = min( pixH, vsizeMax );
 
-	dimH=pixH/nrow;
-	dimW=pixW/ncol;
+	dimH = pixH / nrow;
+	dimW = pixW / ncol;
 	cmd( "destroytop .lat" );
-	//create the window with the lattice, roughly 600 pixels as maximum dimension
+	// create the window with the lattice, roughly 600 pixels as maximum dimension
 	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
 	cmd( "set lat_update 1" );
-	cmd( "bind .lat <Button-1> {if {$lat_update == 1} {set lat_update 0} {set lat_update 1} }" );
+	cmd( "bind .lat <Button-1> { if { $lat_update == 1 } { set lat_update 0 } { set lat_update 1 } }" );
 	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
 	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 
-	char init_color_string[32];		// the final string to be used to define tk color to use
+	char init_color_string[ 32 ];		// the final string to be used to define tk color to use
 
-	if ( init_color < -1 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
+	if ( init_color < 0 && ( - init_color ) <= 0xffffff )		// RGB mode selected?
 		sprintf( init_color_string, "#%06x", - init_color );	// yes: just use the positive RGB value
 	else
-		if ( init_color != -1 )
-		{
-			sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
-			// create (white) pallete entry if invalid palette in init_color
-			cmd( "if { ! [info exist c%d] } { set c%d white }", init_color, init_color  );
-		}
-			
-	if(init_color==1001)
 	{
-	cmd( "canvas .lat.c -height %d -width %d -bg white", (int)pixH, (int)pixW );
+		sprintf( init_color_string, "$c%d", init_color );		// no: use the positive RGB value
+		// create (white) pallete entry if invalid palette in init_color
+		cmd( "if { ! [ info exist c%d ] } { set c%d white }", init_color, init_color  );
+	}
+			
+	if ( init_color == 1001 )
+	{
+		cmd( "canvas .lat.c -height %d -width %d -bg white", ( unsigned int ) pixH, ( unsigned int ) pixW );
 
-	cmd( ".lat.c create rect 0 0 %d %d -fill white", (int)pixW, (int)pixH );
+		cmd( ".lat.c create rect 0 0 %d %d -fill white", ( unsigned int ) pixW, ( unsigned int ) pixH );
 	}
 	else
 	{
-	cmd( "canvas .lat.c -height %d -width %d -bg %s", (int)pixH, (int)pixW,init_color_string );
+		cmd( "canvas .lat.c -height %d -width %d -bg %s", ( unsigned int ) pixH, ( unsigned int ) pixW, init_color_string );
 
-	cmd( ".lat.c create rect 0 0 %d %d -fill %s", (int)pixW, (int)pixH,init_color_string );
+		cmd( ".lat.c create rect 0 0 %d %d -fill %s", ( unsigned int ) pixW, ( unsigned int ) pixH, init_color_string );
 	}
 
 	cmd( "pack .lat.c" );
@@ -2720,14 +2725,14 @@ double init_lattice(double pixW, double pixH, double nrow, double ncol, char con
 	cmd( "set dimH %lf", dimH );
 	cmd( "set dimW %lf", dimW );
 
-	if(lattice_type==1)
-	  for(i=1; i<=nrow; i++)
-		for(j=1; j<=ncol; j++)
-		  cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", (int)i,(int)j, (int)((j-1)*dimW), (int)((i - 1)*dimH), (int)((j-1)*dimW), (int)((i)*dimH), (int)((j)*dimW), (int)((i )*dimH), (int)((j)*dimW), (int)((i - 1)*dimH), init_color_string );
+	if ( lattice_type == 1 )
+	  for ( i = 1; i <= nrow; ++i )
+		for ( j = 1; j <= ncol; ++j )
+		  cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), init_color_string );
 
 	cmd( "showtop .lat centerS no no no" );
 	set_shortcuts_log( ".lat", "lattice.html" );
-	return(0);
+	return 0;
 }
 
 double init_lattice( char const lrow[], char const lcol[], int init_color, double nrow, double ncol, double pixW, double pixH )
@@ -2741,34 +2746,41 @@ update_lattice.
 update the cell line.col to the color val (1 to 21 as set in default.tcl palette)
 negative values of val prompt for the use of the (positive) RGB equivalent
 */
-double update_lattice(double line, double col, double val)
+double update_lattice( double line, double col, double val )
 {
+	// ignore invalid values
+	if ( line < 0 || col < 0 || line > INT_MAX || col > INT_MAX || fabs( val ) > INT_MAX )
+	{
+		plog( "\nError: invalid lattice update values, ignoring.\n");
+		return 0;
+	}
+	
 	// avoid operation if canvas was closed
 	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
 	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
 	if ( latcanv[ 0 ] == '0' )
 		return 0;
 	
-	char val_string[32];		// the final string to be used to define tk color to use
+	char val_string[ 32 ];		// the final string to be used to define tk color to use
 	
-	if ( val < 0 && ( - val ) <= 0xffffff )			// RGB mode selected?
-		sprintf( val_string, "#%06lx", - ( unsigned long ) val );	// yes: just use the positive RGB value
+	if ( val < 0 && ( - ( int )  val ) <= 0xffffff )	// RGB mode selected?
+		sprintf( val_string, "#%06lx", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
-		sprintf( val_string, "$c%.0lf", val );		// no: use the positive RGB value
+		sprintf( val_string, "$c%d", ( unsigned int ) val );		// no: use the positive RGB value
 		// create (white) pallete entry if invalid palette in val
-		cmd( "if { ! [info exist c%.0lf] } { set c%.0lf white }", val, val  );
+		cmd( "if { ! [ info exist c%d ] } { set c%d white }", ( unsigned int ) val, ( unsigned int ) val  );
 	}
 		
-	if(lattice_type==1)
+	if ( lattice_type == 1 )
 	{
-		cmd( ".lat.c itemconfigure c%d_%d -fill %s", (int)line, (int)col, val_string );
+		cmd( ".lat.c itemconfigure c%d_%d -fill %s", ( unsigned int ) line, ( unsigned int ) col, val_string );
 		return 0;
 	}
 
-	cmd( "set tempc [.lat.c find withtag c%d_%d] ", (int)line, (int)col );
-	cmd( "if { $tempc != \"\" } { .lat.c itemconfigure c%d_%d -fill %s }", (int)line, (int)col, val_string );
-	cmd( "if { $tempc == \"\" } { .lat.c addtag c%d_%d withtag [ .lat.c create poly %d %d %d %d %d %d %d %d -fill %s ] }", (int)line, (int)col, (int)((col-1)*dimW), (int)((line - 1)*dimH), (int)((col-1)*dimW), (int)((line)*dimH), (int)((col)*dimW), (int)((line )*dimH), (int)((col)*dimW), (int)((line - 1)*dimH), val_string );
+	cmd( "set tempc [ .lat.c find withtag c%d_%d ] ", ( unsigned int ) line, ( unsigned int ) col );
+	cmd( "if { $tempc != \"\" } { .lat.c itemconfigure c%d_%d -fill %s }", ( unsigned int ) line, ( unsigned int ) col, val_string );
+	cmd( "if { $tempc == \"\" } { .lat.c addtag c%d_%d withtag [ .lat.c create poly %d %d %d %d %d %d %d %d -fill %s ] }", ( unsigned int ) line, ( unsigned int ) col, ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line ) * dimH ), ( unsigned int ) ( col * dimW ), ( unsigned int ) ( line * dimH ), ( unsigned int ) ( col *dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), val_string );
 
 	cmd( "if { $lat_update == 1 } { update }" );
 	return 0;  
@@ -2793,12 +2805,12 @@ double save_lattice( const char *fname )
 
 #else
 
-double init_lattice(double pixW, double pixH, double nrow, double ncol, char const lrow[], char const lcol[], char const lvar[], object *p, int init_color)
+double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
 {
 	return 0;
 }
 
-double update_lattice(double line, double col, double val)
+double update_lattice( double line, double col, double val )
 {
 	return 0;
 }

@@ -848,8 +848,7 @@
 	{font-family:LuzSans-Book;
 	panose-1:2 0 6 3 4 0 0 2 0 3;}
 @font-face
-	{font-family:Code;
-	panose-1:0 0 0 0 0 0 0 0 0 0;}
+	{font-family:Code;}
 @font-face
 	{font-family:DengXian;
 	panose-1:3 0 5 9 0 0 0 0 0 0;}
@@ -893,6 +892,18 @@
 @font-face
 	{font-family:Kalinga;
 	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Prime Sans Bold";
+	panose-1:2 11 8 6 3 8 4 2 2 4;}
+@font-face
+	{font-family:"Prime Sans";
+	panose-1:2 11 5 2 0 0 0 0 0 1;}
+@font-face
+	{font-family:"\@Prime Sans";
+	panose-1:2 11 5 2 0 0 0 0 0 1;}
+@font-face
+	{font-family:"Prime Sans Mono";
+	panose-1:2 11 6 9 3 8 4 2 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin-right:0cm;
@@ -1488,7 +1499,8 @@ and <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">
   href="#_SHUFFLE_NET(_&quot;node_Lab&quot;_),">SHUFFLE_NET</a></span></p>
   </td>
   <td width="21%" style='width:21.22%;background:#F2F2F2;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
-  <p class=MsoNormal><a href="#_Model_specific_objects_1">Model specific objects/data</a></p>
+  <p class=MsoNormal><a href="#_Model_specific_objects_1">Model specific
+  objects/data</a></p>
   </td>
  </tr>
  <tr>
@@ -1694,10 +1706,10 @@ a different copy (or instance) of the Variable, under the same names. The
 Equations' code always refers to an Object. For example, suppose an Object
 named <i>Firm</i> contains a Variable called <i>Q</i> that depends on another
 Variable, named <i>K</i>. If there are many copies of the Object <i>Firm</i>,
-each instance of the Equation for <i>Q</i>, that require <i>K</i> for its
-computation, will refer to its own copy of <i>K</i> (a particular value), that
-is, the copy of <i>K</i> contained in the same Object as the copy of <i>Q</i>
-currently under computation. </p>
+each instance of the Equation for <i>Q</i>, that require <i>K</i> for its computation,
+will refer to its own copy of <i>K</i> (a particular value), that is, the copy
+of <i>K</i> contained in the same Object as the copy of <i>Q</i> currently
+under computation. </p>
 
 <p>The Equations' code for all the Variables is usually located in a single
 file. The order in which the Equations appear in the file is irrelevant, since
@@ -1927,22 +1939,22 @@ instance of Object <i>Firm</i>. LSD takes care automatically of identifying the
 correct values in the code of the Equation, using the Object the LSD Variable
 is attached to as the reference. In particular:</p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> refers to
-the Object containing the Variable whose Equation is being computed</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
+refers to the Object containing the Variable whose Equation is being computed</p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo><a href="#_Caller_Object:_c">c</a></span> refers to
-the Object that requested the computation of the Variable</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><a href="#_Caller_Object:_c">c</a></span>
+refers to the Object that requested the computation of the Variable</p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur<span
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur<span
 style='font-family:"Arial","sans-serif"'>, </span>cur1<span style='font-family:
 "Arial","sans-serif"'>, </span>cur2</a></span> etc. are temporary pointers,
 which can store the current addresses of Objects obtained from other LSD Macros</p>
@@ -1959,9 +1971,9 @@ specifying it. </p>
 <h2><a name="_Caller_Object:_c"></a><span class=Ttulo2Char>Caller Object: </span><span
 class=Cdigo>c</span><span class=Ttulo2Char> </span></h2>
 
-<p>In most cases, Equations computing some Variable's values are executed
-because other Equations needed those values. The pointer <span class=Cdigo>c</span>
-in an Equation points to the Object that caused that Equation to be computed (“<span
+<p>In most cases, Equations computing some Variable's values are executed because
+other Equations needed those values. The pointer <span class=Cdigo>c</span> in
+an Equation points to the Object that caused that Equation to be computed (“<span
 class=Cdigo>c</span>” reads for “caller” for the computation of the Variable),
 if any. If an Equation is computed only because LSD requested so, because no
 other Equation triggered the computation, then <span class=Cdigo>c</span> is
@@ -1991,10 +2003,10 @@ an operand. See the <a href="#ex_obj">examples</a> of LSD Macros returning
 Objects.</p>
 
 <p>For example, when creating a new Object, one wants to initialize its
-Parameters. This is done by storing the new Object “address” in a temporary pointer
-and applying the LSD required Macros on it. For example, the following lines
-within an Equation create a new Object of type <i>Firm</i> and set to 0 its
-Variable <i>K</i> (see details in the description of the LSD Macros listed
+Parameters. This is done by storing the new Object “address” in a temporary
+pointer and applying the LSD required Macros on it. For example, the following
+lines within an Equation create a new Object of type <i>Firm</i> and set to 0
+its Variable <i>K</i> (see details in the description of the LSD Macros listed
 below). </p>
 
 <p><span class=Cdigo>... <br>
@@ -2017,45 +2029,45 @@ its relatives in the model hierarchy tree. Every Object can therefore connect
 to its direct relatives using the links to them. The linking pointers can then
 be constructed, using C++ syntax, using the following components: </p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span>The top&nbsp;Object in the model hierarchy is <span class=Cdigo>root</span>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The top&nbsp;Object in the model hierarchy is <span class=Cdigo>root</span>
 which has no <span class=Cdigo>up</span> or <span class=Cdigo>next</span>
 relatives</p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo>p-&gt;up</span> is the Object containing the Object
-(or the parent to) in which the current Variable is being calculated;
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>p-&gt;up</span> is the Object containing the
+Object (or the parent to) in which the current Variable is being calculated;
 relatedly, <span class=Cdigo>c-&gt;up</span> and <span class=Cdigo>cur-&gt;up</span>
 points to the parent of the caller Object and of the object pointed by <span
 class=Cdigo>cur</span></p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo>p-&gt;up-&gt;up</span>, <span class=Cdigo>c-&gt;up-&gt;up</span>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>p-&gt;up-&gt;up</span>, <span class=Cdigo>c-&gt;up-&gt;up</span>
 and <span class=Cdigo>cur-&gt;up-&gt;up</span> points to the grandparents of
 the Objects <span class=Cdigo>p</span>, <span class=Cdigo>c</span> and <span
 class=Cdigo>cur</span>, and so on</p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span class=Cdigo>p-&gt;next</span> is the Object instance immediately
-following the current Object (or a brother to) in the list of descendants from
-its parent <span class=Cdigo>p-&gt;up</span>; all the Objects in the
-brotherhood chain share the same parent Object and the last Object in the chain
-has <span class=Cdigo>p-&gt;next</span> equal to <span class=Cdigo>NULL</span></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo>p-&gt;next</span> is the Object instance
+immediately following the current Object (or a brother to) in the list of
+descendants from its parent <span class=Cdigo>p-&gt;up</span>; all the Objects
+in the brotherhood chain share the same parent Object and the last Object in
+the chain has <span class=Cdigo>p-&gt;next</span> equal to <span class=Cdigo>NULL</span></p>
 
-<p class=MsoNormal style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-size:10.0pt;font-family:Symbol'>·</span><span style='font-size:
-7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span>Similarly, <span class=Cdigo>c-&gt;next</span> and <span class=Cdigo>cur-&gt;next</span>
-are brothers of <span class=Cdigo>c</span> and <span class=Cdigo>cur</span>,
-respectively</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Similarly, <span class=Cdigo>c-&gt;next</span> and <span
+class=Cdigo>cur-&gt;next</span> are brothers of <span class=Cdigo>c</span> and <span
+class=Cdigo>cur</span>, respectively</p>
 
 <p class=MsoNormal>Any upper level or “younger” brother Objects in the model
 hierarchy tree can be reached by arbitrary combinations of <span class=Cdigo>up</span>
@@ -2114,20 +2126,21 @@ descending from it, as in the representation below:</p>
 /\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 /\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /\&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\<br>
-&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . .
-.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . .
-.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-. . .<br>
 &nbsp;&nbsp;&nbsp;&nbsp;
-||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ||<br>
+||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . .
+.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; . . .&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+. . .<br>
+&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+||<br>
 &nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+&nbsp; <br>
 &nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Worker 1 |
 =&gt; | Worker 1 | =&gt; . . . =&gt; | Worker 1000 |<br>
-&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;+----------+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;+----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+ <br>
 &nbsp;+----------+&nbsp;&nbsp;&nbsp; +----------+&nbsp;&nbsp;&nbsp;
@@ -2169,10 +2182,10 @@ error and stop. </p>
 Link's pointers: <span class=Cdigo>curl</span>, <span class=Cdigo>curl1</span>,
 <span class=Cdigo>curl2</span>, <span class=Cdigo>…</span> </h2>
 
-<p>Similarly to pointers to Objects, these elements are generic pointers to
-Links connecting Nodes (represented by LSD Objects) within a network, if any.
-They are used to temporary store the addresses of required network Links for
-LSD Macros requiring or returning Links as operands or as results. See the <a
+<p>Similarly to pointers to Objects, these elements are generic pointers to Links
+connecting Nodes (represented by LSD Objects) within a network, if any. They
+are used to temporary store the addresses of required network Links for LSD
+Macros requiring or returning Links as operands or as results. See the <a
 href="#ex_obj">examples</a> of LSD Macros returning Links. </p>
 
 <h2><a name="_Model_specific_objects_1"></a>Model specific objects and other
@@ -2331,9 +2344,9 @@ applied to the lag and to the Object specified.</p>
 can always use two Objects that are available to the modeler. One is <span
 class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, which indicates the
 Object containing the Variable under computation. The other is <span
-class=Cdigo><a href="#_Caller_Object:_c">c</a></span> which refers to the Object
-containing the Variable that triggered the computation of the Variable under
-computation.</p>
+class=Cdigo><a href="#_Caller_Object:_c">c</a></span> which refers to the
+Object containing the Variable that triggered the computation of the Variable
+under computation.</p>
 
 <div align=center>
 
@@ -2360,9 +2373,9 @@ class=Ttulo2Char> </span>&quot;<i>Lab</i>&quot;,<span class=Ttulo2Char> </span><
 
 <p>These are the most used LSD Macros. They return the value of the Variable or
 Parameter with label <tt><i><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Lab</span></i></tt>.
-The forms <span class=Cdigo>VL(…)</span> and <span class=Cdigo>VLS(…)</span>
-permit to specify a <i>lag</i>, so that the values returned concern the value
-of <tt><i><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Lab</span></i></tt>
+The forms <span class=Cdigo>VL(…)</span> and <span class=Cdigo>VLS(…)</span> permit
+to specify a <i>lag</i>, so that the values returned concern the value of <tt><i><span
+style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Lab</span></i></tt>
 with <tt><i><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>lag</span></i></tt>
 lags. The forms <span class=Cdigo>VS(…)</span> and <span class=Cdigo>VLS(…)</span>
 specify in which specific Object the Parameter or Variable must be searched
@@ -2378,12 +2391,20 @@ the value of the instance &quot;closer&quot; to the Object where the search
 start from. By closer, it is meant the first instance found by searching the
 model using the following strategy: </p>
 
-<p>1) Search in the Object’s Variables and Parameters (the one specified in the
-Macro call)<br>
-2) Search in the Object descending Objects (progressively to the lowest level
-in the hierarchical tree)<br>
-3) Search in the Object parent Object (gradually up to the <span class=Cdigo><a
-href="#up">root</a></span> level)</p>
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+53.85pt;text-indent:-17.85pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the Object’s Variables and Parameters (the one specified in
+the Macro call)</p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+53.85pt;text-indent:-17.85pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the Object descending Objects (progressively to the lowest
+level in the hierarchical tree</p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+53.85pt;text-indent:-17.85pt'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Search in the Object parent Object (gradually up to the <span
+class=Cdigo><a href="#up">root</a></span> level)</p>
 
 <p>In each Object explored, the same strategy is applied recursively, so that
 every Object in the model is visited, if necessary. So, for example, if there
@@ -2526,8 +2547,8 @@ WHTAVEL( &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, <i>lag </i>),
 WHTAVELS( <i>obj</i>, &quot;<i>Lab1</i>&quot;, &quot;<i>Lab2</i>&quot;, <i>lag </i>)
 </h1>
 
-<p>Same as <span class=Cdigo><a href="#SUM">SUM(…)</a></span>, but, instead of the
-sum, these Macros compute the weighted average of the Variable named <i>Lab1</i>
+<p>Same as <span class=Cdigo><a href="#SUM">SUM(…)</a></span>, but, instead of
+the sum, these Macros compute the weighted average of the Variable named <i>Lab1</i>
 among the descendants of the current Object (<span class=Cdigo><a
 href="#_Parent_Object:_p">p</a></span>) or <i>obj</i>, using the Variable <i>Lab2</i>
 as the weight, that is, the sum of the products between the values of <i>Lab1</i>
@@ -2558,10 +2579,10 @@ must be contained in the same Object. </p>
 <p>These Macros works as the Macro <span class=Cdigo><a href="#SUM">SUM(…)</a></span>,
 but, instead of the sum, they compute a set of descriptive statistics of the
 Variable named <i>Lab</i> among the descendants of the current Object (<span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span>) or <i>obj</i>. These
-Macros do not return a value as the ones above, but store a set of values in
-the temporary storage <a href="#_Temporary_numeric_storage:">v[…]</a>. Namely,
-it places in <span class=Cdigo>v[…]</span> the following values: </p>
+class=Cdigo><a href="#_Parent_Object:_p">p</a></span>) or <i>obj</i>. These Macros
+do not return a value as the ones above, but store a set of values in the
+temporary storage <a href="#_Temporary_numeric_storage:">v[…]</a>. Namely, it
+places in <span class=Cdigo>v[…]</span> the following values: </p>
 
 <p><span class=Cdigo>v[0]</span> : number of instances/copies; <br>
 <span class=Cdigo>v[1]</span> : average of <i>Lab</i> <br>
@@ -2635,9 +2656,9 @@ given value and that the user permitted to. </p>
 
 <p>Beware that such a Macro used in a model requires the user to interact with
 it. See <span class=Cdigo><a href="#_LOG(_&quot;Comment&quot;_)">LOG(…)</a></span>
-and <span class=Cdigo><a href="#_SLEEP(_msecs_)">SLEEP(…)</a></span> for an alternative
-to show information to the user without fully stopping the simulation or
-requiring effective user interaction.</p>
+and <span class=Cdigo><a href="#_SLEEP(_msecs_)">SLEEP(…)</a></span> for an
+alternative to show information to the user without fully stopping the
+simulation or requiring effective user interaction.</p>
 
 <div align=center>
 
@@ -2712,8 +2733,8 @@ SEARCH_CNDL( &quot;<i>Lab</i>&quot;, <i>value</i>, <i>lag </i>), SEARCH_CNDLS( <
 
 <p>These Macros are used to find an Object in the model that contains the
 Variable named <i>Lab</i> with the specific numeric value <i>value</i>. The
-search can optionally consider <i>obj</i> as the starting point for the search
-(instead of the current Object under calculation, <span class=Cdigo><a
+search can optionally consider <i>obj</i> as the starting point for the search (instead
+of the current Object under calculation, <span class=Cdigo><a
 href="#_Parent_Object:_p">p</a></span>) and the specific lag <i>lag</i> if
 different from current time step. </p>
 
@@ -2767,13 +2788,13 @@ RNDDRAWL( &quot;<i>obj_Lab</i>&quot;, &quot;<i>Lab</i>&quot;, <i>lag </i>),
 RNDDRAWLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, &quot;<i>Lab</i>&quot;, <i>lag
 </i>) </h1>
 
-<p>These Macros search for a group of Objects named <i>obj_Lab</i> and returns
-a pointer to one of them, randomly chosen with probability proportional to the values
-of the Variable labeled <i>Lab</i> in the same Object. The Macros can
+<p>These Macros search for a group of Objects named <i>obj_Lab</i> and returns a
+pointer to one of them, randomly chosen with probability proportional to the
+values of the Variable labeled <i>Lab</i> in the same Object. The Macros can
 optionally consider <i>obj</i> as the starting point for the search (instead of
 the current Object under calculation, <span class=Cdigo><a
-href="#_Parent_Object:_p">p</a></span>) and the specific lag <i>lag</i> if different
-from current time step. </p>
+href="#_Parent_Object:_p">p</a></span>) and the specific lag <i>lag</i> if
+different from current time step. </p>
 
 <h2>Example </h2>
 
@@ -2872,11 +2893,11 @@ RNDDRAW_TOTL( &quot;<i>obj_Lab</i>&quot;, &quot;<i>Lab</i>&quot;, <i>lag</i>, <i
 class=Cdigo><a href="#_RNDDRAW(_&quot;obj_Lab&quot;,_&quot;Lab&quot;">RNDDRAW(…)</a></span>
 as the modeler explicitly provide the (correct) sum of all the weights, that
 is, the sum of the Variable named <i>Lab</i> among all Objects with label <i>obj_Lab</i>.
-Unpredictable drawing behavior is expected if <i>total</i> is not equal to the sum
-of all pertinent weights. The Macros can optionally consider <i>obj</i> as the
-starting point for the search (instead of the current Object under calculation,
-<span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>) and the specific
-lag <i>lag</i> if different from current time step.</p>
+Unpredictable drawing behavior is expected if <i>total</i> is not equal to the
+sum of all pertinent weights. The Macros can optionally consider <i>obj</i> as
+the starting point for the search (instead of the current Object under
+calculation, <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>) and
+the specific lag <i>lag</i> if different from current time step.</p>
 
 <div align=center>
 
@@ -3014,9 +3035,9 @@ or from the specified Object <tt><i><span style='font-size:10.0pt;font-family:
 "Arial","sans-serif"'>obj</span></i></tt><tt><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif"'>_<i>from</i></span></tt><tt><span
 style='font-size:13.5pt;font-family:"Arial","sans-serif"'>,</span></tt>
-assigning cyclically the pointer <i>cur</i> specified to the address of each
-target Object. Nested <span class=Cdigo>CYCLE(…)</span>’s can be used, provided
-that the pointers (<span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>,
+assigning cyclically the pointer <i>cur</i> specified to the address of each target
+Object. Nested <span class=Cdigo>CYCLE(…)</span>’s can be used, provided that
+the pointers (<span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>,
 <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur1</a></span>, <span
 class=Cdigo><a href="#_Temporary_Object's_pointers:">cur2</a></span>,…) differ
 for the different levels.</p>
@@ -3045,12 +3066,12 @@ the cumulated profits</span> </span></p>
 <p>The <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>
 pointer cycles through all Objects named <i>Market</i> (supposing there is more
 than one). In turn, for each <i>Market</i> the pointer <span class=Cdigo><a
-href="#_Temporary_Object's_pointers:">cur1</a></span> cycles through each Object
-labelled <i>Firm</i> that is contained in this specific <i>Market</i>. For each
-<i>Firm</i>, <span class=Cdigo><a href="#_CURRENT">v[1]</a></span> receives the
-value of the Variable named <i>Profit</i> related to that particular <i>Firm</i>,
-which is subsequently accumulated in <span class=Cdigo><a href="#_CURRENT">v[0]</a></span>.
-</p>
+href="#_Temporary_Object's_pointers:">cur1</a></span> cycles through each
+Object labelled <i>Firm</i> that is contained in this specific <i>Market</i>.
+For each <i>Firm</i>, <span class=Cdigo><a href="#_CURRENT">v[1]</a></span>
+receives the value of the Variable named <i>Profit</i> related to that
+particular <i>Firm</i>, which is subsequently accumulated in <span class=Cdigo><a
+href="#_CURRENT">v[0]</a></span>. </p>
 
 <p class=MsoNormal>See also the example for <span class=Cdigo><a
 href="#_RNDDRAW(_&quot;obj_Lab&quot;,_&quot;Lab&quot;_">RNDDRAW(…)</a></span>.</p>
@@ -3125,43 +3146,44 @@ firm, contained in cur</span> <br>
 &quot;<i>obj_Lab</i>&quot; ), ADDOBJS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot; )<br>
 ADDOBJL( &quot;<i>obj_Lab</i>&quot;, <i>t_upd</i> ), ADDOBJLS( <i>obj</i>,
 &quot;<i>obj_Lab</i>&quot;, <i>t_upd</i> )<br>
-<a name=ADDNOBJ></a>ADDNOBJ( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
-), ADDNOBJS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
-)<br>
-ADDNOBJL( &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex ), ADDNOBJLS( <i>obj</i>,
-&quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex )</h1>
+<a name=ADDNOBJ></a>ADDNOBJ( &quot;<i>obj_Lab</i>&quot;, <i>num </i>),
+ADDNOBJS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i> )<br>
+ADDNOBJL( &quot;<i>obj_Lab</i>&quot;, <i>num </i>), ADDNOBJLS( <i>obj</i>,
+&quot;<i>obj_Lab</i>&quot;, <i>num</i> )</h1>
 
-<p class=MsoNormal>These Macros add a new descendent Object named <i>obj_Lab</i>
-to the Object <i>obj</i>, or to <a href="#p"><span class=Cdigo><span
-style='color:blue'>p</span></span></a> if <i>obj</i> is not specified. <span
-class=Cdigo>ADDOBJ(…)</span> returns a pointer to the newly created Object.
-More than one Object can be created at once if their number <i>num</i> is
-informed in <span class=Cdigo>ADDNOBJ(…)</span> forms. In this case, a pointer
-is returned only to the first created Object. The additional ones can be easily
-reached by using the <span class=Cdigo><a href="#_Object’s_relatives:_up,">next</a></span>
-construct over the first Object (<span class=Cdigo>cur-&gt;next</span>, <span
-class=Cdigo>cur-&gt;next-&gt;next</span> etc.).</p>
+<p class=MsoNormal>These Macros add one (or more) new instance(s) to the Object
+named <i>obj_Lab</i> descending from <i>obj</i>, or to <a href="#p"><span
+class=Cdigo><span style='color:blue'>p</span></span></a> if <i>obj</i> is not
+specified. <span class=Cdigo>ADDOBJ(…)</span> returns a pointer to the newly
+created Object. More than one Object instance can be created at once if their
+number <i>num</i> is informed in the <span class=Cdigo>ADDNOBJ(…)</span> formats.
+In this case, a pointer is returned only to the first created Object instance.
+The additional instances can be easily reached by using the <span class=Cdigo><a
+href="#_Object’s_relatives:_up,">next</a></span> construct over the first instance
+(i.e., by using <span class=Cdigo>cur-&gt;next</span>, <span class=Cdigo>cur-&gt;next-&gt;next</span>
+etc.).</p>
 
 <p class=MsoNormal>The <span class=Cdigo>ADDOBJ(…)</span> versions initializes
-the newly created Object(s), that is, sets the values for its Parameters and
-lagged Variables, according to the values defined in the model configuration
-(and modified by the simulation until the current time step).</p>
+the newly created Object instance(s), that is, sets the values for its
+Parameters and lagged Variables, according to the values defined in the model
+configuration (and modified by the simulation until the current time step.</p>
 
 <p class=MsoNoSpacing>The Macros without the “<span class=Cdigo>L</span>”
-suffix set the new object(s) as modified by the simulation during the current
-time step, that is, its (their) Variables are going to be updated only in the
-next step. Instead, the Macros with the “<span class=Cdigo>L</span>” suffix
-allow for the definition of the time of last update <i>t_upd</i> for all of the
-Object’s Variables, if <i>t_upd</i> is positive or zero. If <i>t_upd</i> is
-negative, the effective time of last update from each Variable of the original
-copied Object (or current time, if the Variable was never updated).</p>
+suffix set the new Object instance(s) as modified by the simulation during the
+current time step, that is, its (their) Variables are going to be updated only
+in the next time step. Instead, the Macros with the “<span class=Cdigo>L</span>”
+suffix allow for the definition of the time of the last update <i>t_upd</i> for
+all of the Object’s Variables, if <i>t_upd</i> is positive or zero. If <i>t_upd</i>
+is negative, the effective time of last update from each Variable of the
+original copied Object instance (or current time, if the Variable was never
+updated).</p>
 
-<p class=MsoNormal>In case the original Object was defined as having descendants
-(of any level), the Macros builds the whole structure of descendants also under
-the new Object(s). As the Macros return the address of the newly created
-Object(s), the modeler can easily add in the creation Equation some customized
-initialization code. See Macro family <span class=Cdigo><a
-href="#_WRITE(&quot;Lab&quot;,_new_value),_WRITEL(&quot;La">WRITE(…)</a></span>
+<p class=MsoNormal>In case the original Object named <i>obj_Lab</i> was defined
+as having descendants (at any level), the Macros builds the whole structure of
+descendants also under the new Object instance(s). As the Macros return the
+address of the newly created Object(s), the modeler can easily add in the
+creation Equation some customized initialization code. See Macro family <span
+class=Cdigo><a href="#_WRITE(&quot;Lab&quot;,_new_value),_WRITEL(&quot;La">WRITE(…)</a></span>
 for details on changing the initial values of Variables (including lagged
 values) and Parameters. </p>
 
@@ -3222,12 +3244,12 @@ ADDNOBJ_EXLS( <i>obj</i>, &quot;<i>obj_Lab</i>&quot;, <i>num</i>, <i>obj</i>_ex
 versions of <span class=Cdigo><a href="#_ADDOBJ(_&quot;obj_Lab&quot;_),">ADDOBJ(…)</a></span>
 Macro which use the specific modeler supplied example <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj_ex</i> to
-initialize the newly created Object(s),<b> </b>generating one or <i>num</i> new
-objects, each one a clone of Object <i>obj_ex</i>. In this case, a pointer is
-returned only to the first created Object. The additional ones can be easily
+initialize the newly created Object instance(s),<b> </b>generating one or <i>num</i>
+new instances, each one a clone of <i>obj_ex</i>. A pointer is returned only to
+the first created Object instance. The additional instances can be easily
 reached by using the <span class=Cdigo><a href="#_Object’s_relatives:_up,">next</a></span>
-construct over the first Object (<span class=Cdigo>cur-&gt;next</span>, <span
-class=Cdigo>cur-&gt;next-&gt;next</span> etc.).</p>
+construct over the first Object (i.e., by using <span class=Cdigo>cur-&gt;next</span>,
+<span class=Cdigo>cur-&gt;next-&gt;next</span> etc.).</p>
 
 <p class=MsoNormal>Please check more details about the new Object(s) creation,
 including initialization, in <span class=Cdigo><a href="#_ADDOBJ(_&quot;obj_Lab&quot;_),">ADDOBJ(…)</a></span>.</p>
@@ -3249,11 +3271,11 @@ cur = ADDOBJ_EX( &quot;Firm&quot;, cur ); <br>
 <p>The first line retrieves the address of the first <i>Firm</i> in the
 brotherhood chain. The second line finds the value of the highest productivity
 among the existing <i>Firm’</i>s. Then, the Macro <span class=Cdigo><a
-href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span> returns a pointer
-to the first Object that has the maximum productivity. Finally, this Object is
-used as an example for the creation of the new <i>Firm</i>. Note that the same
-temporary pointer <span class=Cdigo><a href="#cur1">cur</a></span> is used (1)
-to store the address to the first <i>Firm</i>, (2) the pointer to most
+href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span> returns a
+pointer to the first Object that has the maximum productivity. Finally, this
+Object is used as an example for the creation of the new <i>Firm</i>. Note that
+the same temporary pointer <span class=Cdigo><a href="#cur1">cur</a></span> is
+used (1) to store the address to the first <i>Firm</i>, (2) the pointer to most
 productive <i>Firm</i> and then, (3) the new Object. This may seem strange to
 who is not accustomed to C++, but it is perfectly safe. In fact, the content of
 the temporary pointer <span class=Cdigo><a href="#cur1">cur</a></span> has
@@ -3284,8 +3306,8 @@ including all descending Objects if any, and freeing the allocated memory. </p>
 used with care to avoid the elimination of data structures still used in other
 parts of the model, including any descending Object. The data produced by the
 Object until deletion (and marked for saving) will be still available for the
-Analysis of Results. Missing values (“NA”) fill data for the periods after the
-deletion. </p>
+Analysis of Results. Missing values (“NA”) fill data for the periods after the deletion.
+</p>
 
 <div align=center>
 
@@ -3378,10 +3400,9 @@ set the physical window size as <i>width</i> × <i>height</i> pixels, set to 600
 explicitly defined (see the available colors in <span class=Cdigo><a
 href="#_WRITE_LAT(_row,_col">WRITE_LAT(…)</a></span>).</p>
 
-<p class=MsoNormal><span class=Cdigo>INIT_LAT(…)</span> requires the
-definition, at least, of labels to name the vertical (<i>row_Lab</i>) and
-horizontal (<i>col_Lab</i>) axis. This Macro must be used only once in each
-simulation run. </p>
+<p class=MsoNormal><span class=Cdigo>INIT_LAT(…)</span> requires the definition,
+at least, of labels to name the vertical (<i>row_Lab</i>) and horizontal (<i>col_Lab</i>)
+axis. This Macro must be used only once in each simulation run. </p>
 
 <div style='margin-top:5.0pt;margin-bottom:5.0pt'>
 
@@ -3408,8 +3429,8 @@ WRITE_LAT( <i>row</i>, <i>col</i>, <i>color</i> ) </h1>
 
 <p class=MsoNormal>These Macros write to one cell in the lattice, modifying its
 color. The change is applied to the lattice cell in line <i>row</i> and column <i>col</i>
-to the color value defined by <i>color</i>. If <i>color</i> is not specified, it
-is set to black (1). </p>
+to the color value defined by <i>color</i>. If <i>color</i> is not specified,
+it is set to black (1). </p>
 
 <p class=MsoNormal>Some possible values for <i>color</i> (many more are
 possible) are:</p>
@@ -3463,12 +3484,12 @@ explicitly called once, if not the command is ignored.</p>
 <h1><a name="_SAVE_LAT(_&quot;filename&quot;_)"></a><a name="SAVE_LAT"></a>SAVE_LAT(
 &quot;<i>filename</i>&quot; ) </h1>
 
-<p class=MsoNormal>This Macro saves a graphical snapshot of the lattice to the disk
-as an .eps (encapsulated PostScript) file, in the LSD model directory, named as
-“<i>filename</i>.eps”. If <i>filename</i> is not provided, the default name is
-“lattice.eps”. The <i>filename</i> may contain a path if saving to a particular
-directory is required. If no directory is included in <i>filename</i>, the file
-is saved to the current LSD model configuration directory.</p>
+<p class=MsoNormal>This Macro saves a graphical snapshot of the lattice to the
+disk as an .eps (encapsulated PostScript) file, in the LSD model directory,
+named as “<i>filename</i>.eps”. If <i>filename</i> is not provided, the default
+name is “lattice.eps”. The <i>filename</i> may contain a path if saving to a
+particular directory is required. If no directory is included in <i>filename</i>,
+the file is saved to the current LSD model configuration directory.</p>
 
 <p class=MsoNormal>Before <span class=Cdigo>SAVE_LAT(…)</span> is used, <span
 class=Cdigo><a href="#_WRITE_LAT(_row,_col,">INIT_LAT(…)</a></span> has to be
@@ -3527,9 +3548,9 @@ or after the simulation, using the Macro families <span class=Cdigo><a
 href="#_LOAD_NET(_&quot;node_Lab&quot;,_&quot;filename&quot;">LOAD_NET(…)</a></span>,
 <span class=Cdigo><a href="#_LOAD_NET(_&quot;node_Lab&quot;,_&quot;filename&quot;">SAVE_NET(…)</a></span>
 and <span class=Cdigo><a href="#_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename&quot;">SNAP_NET(…)</a></span>
-or the menu options of LSD Browser. It is highly recommended to use Pajek (or other
-network analysis software) together with LSD Networks to be able to visualize
-them and generate the required network metrics, for instance. </p>
+or the menu options of LSD Browser. It is highly recommended to use Pajek (or
+other network analysis software) together with LSD Networks to be able to
+visualize them and generate the required network metrics, for instance. </p>
 
 <div align=center>
 
@@ -3601,11 +3622,11 @@ set by <span class=Cdigo><a href="#_WRITE_LINK(_link,_weigth_1">WRITE_LINK(…)</a
 ), STAT_NETS( <i>obj</i>, &quot;<i>node_Lab</i>&quot; )<br>
 <a name="STAT_NODE"></a>STAT_NODE( ), STAT_NODES( <i>node_obj</i> )</span></h1>
 
-<p class=MsoNormal>The <span class=Cdigo>STAT_NET(…)</span> Macros provides
-statistics of a Network composed by the Objects labelled <i>node_Lab</i>,
-descending from the Object pointed by <i>obj</i> or the current Object <span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise. The results
-are stored in the <a href="#_CURRENT">temporary storage</a> as follows: </p>
+<p class=MsoNormal>The <span class=Cdigo>STAT_NET(…)</span> Macros provides statistics
+of a Network composed by the Objects labelled <i>node_Lab</i>, descending from
+the Object pointed by <i>obj</i> or the current Object <span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span> otherwise. The results are stored in the
+<a href="#_CURRENT">temporary storage</a> as follows: </p>
 
 <p class=MsoNormal style='margin-left:14.2pt'><span class=Cdigo>v[0]</span>:
 number of Nodes<br>
@@ -3680,20 +3701,20 @@ destination.</p>
 </span><a name="RNDDRAW_LINK"></a>RNDDRAW_LINK( ), RNDDRAW_LINKS( <i>node_obj </i>)</h1>
 
 <p class=MsoNormal>The <span class=Cdigo>RNDDRAW_NODE(…)</span> Macros random
-draw one Node from a Network composed by the Objects labelled <i>node_Lab</i>, descending
-from the Object pointed by <i>obj</i> or the current Object <span class=Cdigo><a
-href="#_Parent_Object:_p">p</a></span> otherwise. All Nodes have the same
-drawing probability by default but the individual Node probability may be reset
-using <span class=Cdigo><a href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_NODE(…)</a></span>.
+draw one Node from a Network composed by the Objects labelled <i>node_Lab</i>,
+descending from the Object pointed by <i>obj</i> or the current Object <span
+class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise. All Nodes have
+the same drawing probability by default but the individual Node probability may
+be reset using <span class=Cdigo><a href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_NODE(…)</a></span>.
 The Macros return an <a href="#_Temporary_Object's_pointers:">Object pointer</a>
 to the drawn Node or <span class=Cdigo>NULL</span> if no Node exists.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>RNDDRAW_LINK(…)</span> Macros random
 draw one outgoing Link from a Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
-the current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-otherwise. All Links have the same drawing probability by default but the
-individual outgoing Link probability may be reset using <span class=Cdigo><a
+the current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise.
+All Links have the same drawing probability by default but the individual
+outgoing Link probability may be reset using <span class=Cdigo><a
 href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_LINK(…)</a></span>. The Macros
 return a <a href="#_Model_specific_objects">Link pointer</a> to the drawn Link
 or <span class=Cdigo>NULL</span> if no link exists.</p>
@@ -3728,8 +3749,8 @@ to add up to 1.</p>
 <p class=MsoNormal>The <span class=Cdigo>DRAWPROB_LINK(…)</span> Macros reset
 to <i>prob</i> the random draw probability of the Link indicated by the <a
 href="#_Model_specific_objects">Link pointer</a> <i>link</i>. When a random
-draw is performed, the probability values attributed to each Link are always
-rescaled to add up to 1.</p>
+draw is performed, the probability values attributed to each Link are always rescaled
+to add up to 1.</p>
 
 <div align=center>
 
@@ -3777,9 +3798,9 @@ WRITE_NODENAMES( <i>node_obj</i>, &quot;<i>name</i>&quot; )</h1>
 null-terminated character array) of the Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
 the current Node <span class=Cdigo>p</span> otherwise, to <i>id</i> or <i>name</i>,
-respectively. <i>name</i> can be set to <span class=Cdigo>&quot;&quot;</span>
-(null string). <i>id</i> must be provided but it is not required to be unique
-in the Network. If the selected Object is not a Node, the Macros do nothing.</p>
+respectively. <i>name</i> can be set to <span class=Cdigo>&quot;&quot;</span> (null
+string). <i>id</i> must be provided but it is not required to be unique in the
+Network. If the selected Object is not a Node, the Macros do nothing.</p>
 
 <p>Please note that the Node name is not related to the name (label) of the
 Object hosting the Node.</p>
@@ -3893,9 +3914,9 @@ name="LOAD_NET"></a>LOAD_NET<a name="_SAVE_NET()"></a>( &quot;<i>node_Lab</i>&qu
 ), SAVE_NETS( <i>obj</i>, &quot;<i>node_Lab</i>&quot;, &quot;<i>filename</i>&quot;
 )</h1>
 
-<p class=MsoNormal>The <span class=Cdigo>LOAD_NET(…)</span> Macros read a network
-in Pajek format from file named “filename_xx.net” (where xx is the current
-pseudorandom number generator seed, see <span class=Cdigo><a
+<p class=MsoNormal>The <span class=Cdigo>LOAD_NET(…)</span> Macros read a
+network in Pajek format from file named “filename_xx.net” (where xx is the
+current pseudorandom number generator seed, see <span class=Cdigo><a
 href="#_RND_SETSEED(_seed_)">RND_SEED</a></span>) using as Nodes the Objects
 with label <i>node_Lab</i> that are descendants from current Object <span
 class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or from Object <i>obj</i>,
@@ -3924,8 +3945,8 @@ Carlo analysis.</p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a
-  name="_SNAP_NET()"></a><a name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  name="_SNAP_NET(_&quot;node_Lab&quot;,_&quot;filename"></a><a
+  name="_SNAP_NET()"></a><span style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
   </td>
  </tr>
 </table>
@@ -4076,9 +4097,9 @@ lang=FR>SHUFFLE_NET( &quot;<i>node_Lab</i>&quot; ), SHUFFLE_NETS( <i>obj</i>,
 &quot;<i>node_Lab</i>&quot; )</span></h1>
 
 <p>These Macros shuffle the Nodes of a Network composed by the Objects labelled
-<i>node_Lab</i>, descending from the Object pointed by <i>obj</i> or the current
-Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise,
-using the Fischer-Yates shuffling algorithm.</p>
+<i>node_Lab</i>, descending from the Object pointed by <i>obj</i> or the
+current Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
+otherwise, using the Fischer-Yates shuffling algorithm.</p>
 
 <p>Shuffling reassigns Node IDs but does not change original node's serial
 numbers or the network structure.</p>
@@ -4130,10 +4151,9 @@ v[2];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
 </span><span class=Cdigo><span style='color:#00B050'>// accumulate income</span><br>
 }</span></p>
 
-<p><span class=Cdigo>V[3] =
-STAT_NODE;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-class=Cdigo><span style='color:#00B050'>// get current node total outgoing
-links</span><br>
+<p><span class=Cdigo>V[3] = STAT_NODE;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span class=Cdigo><span style='color:#00B050'>// get current node total
+outgoing links</span><br>
 v[4] = v[1] /
 v[3];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span><span class=Cdigo><span style='color:#00B050'>// calculate the average
@@ -4160,165 +4180,178 @@ income</span><br>
 <p>Besides the LSD specific Macros modelers can use one of the following
 mathematical and statistical functions. </p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>abs( <i>a </i>)</b>:
-the absolute value of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>abs( <i>a </i>)</b>: the absolute value of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>min( <i>a</i>,
-<i>b </i>)</b>: the minimum between <i>a</i> and <i>b</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>min( <i>a</i>, <i>b </i>)</b>: the minimum between <i>a</i>
+and <i>b</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>max( <i>a</i>,
-<i>b</i> )</b>: the maximum between <i>a</i> and <i>b</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>max( <i>a</i>, <i>b</i> )</b>: the maximum between <i>a</i>
+and <i>b</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>round( <i>a</i>
-)</b>: the integer closest to the real value <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>round( <i>a</i> )</b>: the integer closest to the real value <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>sqrt( <i>a</i>
-), cbrt( <i>a</i> )</b>: the square or cubic root of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>sqrt( <i>a</i> ), cbrt( <i>a</i> )</b>: the square or cubic
+root of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>pow( <i>a</i>,
-<i>b</i> )</b>: the power b of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>pow( <i>a</i>, <i>b</i> )</b>: the power b of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>exp( <i>a</i>
-)</b>: the exponential of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>exp( <i>a</i> )</b>: the exponential of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>log( <i>a</i>
-), log10( <i>a</i> )</b>: the natural or base 10 log of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>log( <i>a</i> ), log10( <i>a</i> )</b>: the natural or base 10
+log of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>fact( <i>a</i>
-)</b>: the factorial of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>fact( <i>a</i> )</b>: the factorial of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>tgamma( <i>a</i>
-), lgamma( <i>a</i> )</b>: the gamma or the log-gamma function of <i>a</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>tgamma( <i>a</i> ), lgamma( <i>a</i> )</b>: the gamma or the
+log-gamma function of <i>a</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>sin( <i>a</i>
-), cos( <i>a</i> ), tan( <i>a</i> ), asin( <i>b</i> ), acos( <i>b</i> ), atan( <i>b</i>
-)</b>: the trigonometric functions (<i>a</i> in radians)</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>sin( <i>a</i> ), cos( <i>a</i> ), tan( <i>a</i> ), asin( <i>b</i>
+), acos( <i>b</i> ), atan( <i>b</i> )</b>: the trigonometric functions (<i>a</i>
+in radians)</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>pi</b>: the
-number &#960;</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>pi</b>: the number &#960;</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>is_finite( <i>a</i>
-), is_inf( <i>a</i> ), is_nan( <i>a</i> )</b>: logical tests to check <i>a</i>
-for being finite, infinite or NaN (return 0 if false)</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>is_finite( <i>a</i> ), is_inf( <i>a</i> ), is_nan( <i>a</i> )</b>:
+logical tests to check <i>a</i> for being finite, infinite or NaN (return 0 if
+false)</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>uniform( <i>min</i>,
-<i>max</i> ): </b>a random uniform value in the interval [<i>min</i>, <i>max</i>]</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>uniform( <i>min</i>, <i>max</i> ): </b>a random uniform value
+in the interval [<i>min</i>, <i>max</i>]</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>uniform_int(
-<i>min</i>, <i>max</i> )</b>: a random integer value in the interval [<i>min</i>,
-<i>max</i>] with uniform probability</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>uniform_int( <i>min</i>, <i>max</i> )</b>: a random integer
+value in the interval [<i>min</i>, <i>max</i>] with uniform probability</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>norm( <i>mean</i>,
-<i>dev</i> )</b>: a random value drawn from a normal distribution with mean <i>mean</i>
-and deviation <i>dev</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>norm( <i>mean</i>, <i>dev</i> )</b>: a random value drawn from
+a normal distribution with mean <i>mean</i> and deviation <i>dev</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>lnorm( <i>mean</i>,
-<i>dev</i> )</b>: a random value drawn from a lognormal distribution with mean <i>mean</i>
-and deviation <i>dev</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>lnorm( <i>mean</i>, <i>dev</i> )</b>: a random value drawn
+from a lognormal distribution with mean <i>mean</i> and deviation <i>dev</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>poisson( <i>mean</i>
-)</b>: a random draw from a Poisson distribution with mean <i>mean</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson
+distribution with mean <i>mean</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>gamma( <i>mean</i>
-)</b>: a random draw from a gamma distribution with mean <i>mean </i>(<i>&#946;
-</i>= 1)</p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>gamma( <i>mean</i> )</b>: a random draw from a gamma
+distribution with mean <i>mean </i>(<i>&#946; </i>= 1)</p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>beta( <i>alpha</i>,
-<i>beta</i> ):</b> a random draw from a beta distribution with parameters <i>alpha</i>
-and <i>beta</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>beta( <i>alpha</i>, <i>beta</i> ):</b> a random draw from a
+beta distribution with parameters <i>alpha</i> and <i>beta</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>alapl( <i>med</i>,
-<i>alpha1</i>, <i>alpha2</i> )</b>: a random draw from an asymmetric Laplace
-distribution with parameters <i>alpha1</i> and <i>alpha2</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>alapl( <i>med</i>, <i>alpha1</i>, <i>alpha2</i> )</b>: a random
+draw from an asymmetric Laplace distribution with parameters <i>alpha1</i> and <i>alpha2</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>unifcdf( <i>min</i>,
-<i>max</i>, <i>x</i> )</b>: the uniform cumulative distribution in the interval
-[<i>min</i>, <i>max</i>] from minus infinity to <i>x</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>unifcdf( <i>min</i>, <i>max</i>, <i>x</i> )</b>: the uniform
+cumulative distribution in the interval [<i>min</i>, <i>max</i>] from minus
+infinity to <i>x</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>normcdf( <i>mean</i>,
-<i>dev</i>, <i>x</i> )</b>: the normal cumulative distribution with mean <i>mean</i>
-and deviation <i>dev</i> from minus infinity to <i>x</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>normcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the normal
+cumulative distribution with mean <i>mean</i> and deviation <i>dev</i> from
+minus infinity to <i>x</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>lnormcdf( <i>mean</i>,
-<i>dev</i>, <i>x</i> )</b>: the lognormal cumulative distribution with mean <i>mean</i>
-and deviation <i>dev</i> from minus infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>poissoncdf(
-<i>mean</i>, <i>x</i> )</b>: the Poisson cumulative distribution with mean <i>mean</i>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the
+lognormal cumulative distribution with mean <i>mean</i> and deviation <i>dev</i>
 from minus infinity to <i>x</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>gammacdf( <i>mean</i>,
-<i>x</i> )</b>: the gamma cumulative distribution with mean <i>mean</i> from minus
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>poissoncdf( <i>mean</i>, <i>x</i> )</b>: the Poisson
+cumulative distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>gammacdf( <i>mean</i>, <i>x</i> )</b>: the gamma cumulative
+distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>betacdf( <i>alpha</i>, <i>beta</i>, <i>x</i> ):</b> the beta
+cumulative distribution with parameters <i>alpha</i> and <i>beta</i> from minus
 infinity to <i>x</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>betacdf( <i>alpha</i>,
-<i>beta</i>, <i>x</i> ):</b> the beta cumulative distribution with parameters <i>alpha</i>
-and <i>beta</i> from minus infinity to <i>x</i></p>
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>alaplcdf( <i>med</i>, <i>alpha1</i>, <i>alpha2</i>, <i>x</i> )</b>:
+the cumulative asymmetric Laplace distribution with parameters <i>alpha1</i>
+and <i>alpha2</i> from minus infinity to <i>x</i></p>
 
-<p class=MsoListParagraph style='margin-left:1.0cm;text-indent:-14.15pt'><span
-style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
-"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>alaplcdf( <i>med</i>,
-<i>alpha1</i>, <i>alpha2</i>, <i>x</i> )</b>: the cumulative asymmetric Laplace
-distribution with parameters <i>alpha1</i> and <i>alpha2</i> from minus
-infinity to <i>x</i></p>
-
-<p class=MsoNormal>Other C++14 functions defined in <b>&lt;cmath&gt;</b> are
-also available. Of course, it is always possible to declare new functions or
-link any C++ library to the LSD model.</p>
+<p class=MsoNormal>Other C++14 functions defined in <b>&lt;cmath&gt;</b> are also
+available. Of course, it is always possible to declare new functions or link
+any C++ library to the LSD model.</p>
 
 <div align=center>
 
@@ -4414,8 +4447,8 @@ name=DEBUG></a><tt><span style='font-size:10.0pt;font-family:"Arial","sans-serif
 )</span></tt></h2>
 
 <p>Placing the Macro <span class=Cdigo>DEBUG</span> before the first Equation's
-code (but after <span class=Cdigo><a href="#MODELBEGIN">MODELBEGIN</a></span>) the
-simulation run will write a file called &quot;log.log&quot; where all the
+code (but after <span class=Cdigo><a href="#MODELBEGIN">MODELBEGIN</a></span>)
+the simulation run will write a file called &quot;log.log&quot; where all the
 Variables' Equations computed are listed with some relevant information. Of
 course, this slows down sensibly the simulation, but it may be useful to find
 errors, since the last Variable computed before a crash will be the likely
@@ -4444,8 +4477,8 @@ example, if an Equation file begins with the code: </p>
 … </span></p>
 
 <p>then we will find in the<tt><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>
-</span></tt><span class=Cdigo>log.txt</span> file all the variables in their respective
-computation order from time step 20 to the end of the simulation.</p>
+</span></tt><span class=Cdigo>log.txt</span> file all the variables in their
+respective computation order from time step 20 to the end of the simulation.</p>
 
 <h2><a name="DEFAULT_RESULT"></a><a name="_DEFAULT_RESULT(_value_)"></a>DEFAULT_RESULT(
 <i>value</i> )</h2>
@@ -4467,12 +4500,12 @@ as the computed value for the current time step. </p>
 FAST_FULL<br>
 OBSERVE</h2>
 
-<p>These Macros dynamically change the simulation execution mode, as if the modeler
-had clicked on the respective buttons of LSD Log window while a simulation is
-running. <span class=Cdigo>OBSERVE</span> mode is the default when one
-simulation starts to run and it creates a run-time plot window (if there is at
-least one Variable set to show during run time) and show extra (verbose)
-information in LSD Log window during the run. <span class=Cdigo>FAST</span>
+<p>These Macros dynamically change the simulation execution mode, as if the
+modeler had clicked on the respective buttons of LSD Log window while a
+simulation is running. <span class=Cdigo>OBSERVE</span> mode is the default
+when one simulation starts to run and it creates a run-time plot window (if
+there is at least one Variable set to show during run time) and show extra
+(verbose) information in LSD Log window during the run. <span class=Cdigo>FAST</span>
 mode prevents the update of the run-time plot window (and hide it) as well
 discards the presentation of most of the non-critical information in LSD Log
 window (or log file), effectively speeding up the simulation execution. <span
@@ -4540,12 +4573,12 @@ very first time step, and does not need to be computed during a simulation run.
 name=RECALC></a>RECALC( &quot;<i>Lab</i>&quot; ), RECALCS( <i>obj</i>, &quot;<i>Lab</i>&quot;
 )</h2>
 
-<p>Mark the Variable named <i>Lab</i> contained in the Object currently under computation
-as not calculated in the current time, forcing recalculation if it has been
-already calculated. If the Variable has not been calculated yet or if <i>Lab</i>
+<p>Mark the Variable named <i>Lab</i> contained in the Object currently under
+computation as not calculated in the current time, forcing recalculation if it
+has been already calculated. If the Variable has not been calculated yet or if <i>Lab</i>
 is a Parameter, <span class=Cdigo>RECALC(…)</span> does nothing. If <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
-supplied, Variable labelled <i>Lab</i> is supposed to be located in it.</p>
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is supplied,
+Variable labelled <i>Lab</i> is supposed to be located in it.</p>
 
 <h2><a name="_RND_GENERATOR(_type_)"></a><a name="RND_GENERATOR"></a>RND_GENERATOR(
 <i>type</i> )</h2>
@@ -4661,16 +4694,16 @@ name="_V_EXT(_class,_ext"></a><a name="_P_EXT(_class_),"></a><a
 name="_V_EXT(_class,_var"></a><a name="_DELETE_EXT(_class_),"></a><a
 name=ADDEXT></a>ADDEXT( <i>class</i> ), ADDEXTS( <i>obj</i>, <i>class </i>)</h2>
 
-<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to
-the current LSD Object under computation, allocating memory space for it. If an
-<a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
+<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to the
+current LSD Object under computation, allocating memory space for it. If an <a
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
 supplied, the data extension is added to this specific Object. The data
 extension can be from a simple scalar variable to a fully defined C++ object
 like a <span class=Cdigo>class</span> or a <span class=Cdigo>struct</span>.
 Data extension allocation is automatically handled by LSD, being destroyed when
-the host Object is deleted. Each LSD Object instance can have a single data
-extension; adding an extension when one already exists automatically destroys
-the previous one.</p>
+the host Object is deleted (C++ object constructor and destructor are called
+accordingly). Each LSD Object instance can have a single data extension; adding
+an extension when one already exists automatically destroys the previous one.</p>
 
 <p>Data extensions allow adding to LSD Objects unrestricted data storage
 capabilities, beyond the usual sets of Variables and Parameters. Indeed, data
@@ -4710,12 +4743,12 @@ style='color:#00B050'>// define an initially zero-length vector</span><br>
 <p><span class=Cdigo>MODELBEGIN<br>
 …</span></p>
 
-<p>In this case, our data extension is a C++ class named <i>ext_fin</i> which contains
-two elements, an integer variable (<i>num_params</i>) and a C++ dynamic integer
-vector named <i>tech_params</i> (defined in C++ standard library<b> </b><span
-class=Cdigo>&lt;vector&gt;</span>). Next, we add this extension to all <i>Firm</i>
-LSD Objects by means of a LSD startup-type Variable and reset the variable
-holding the size of the vector, run just once:</p>
+<p>In this case, our data extension is a C++ class named <i>ext_fin</i> which
+contains two elements, an integer variable (<i>num_params</i>) and a C++
+dynamic integer vector named <i>tech_params</i> (defined in C++ standard
+library<b> </b><span class=Cdigo>&lt;vector&gt;</span>). Next, we add this
+extension to all <i>Firm</i> LSD Objects by means of a LSD startup-type Variable
+and reset the variable holding the size of the vector, run just once:</p>
 
 <p><span class=Cdigo>EQUATION( &quot;Init&quot; )<br>
 /*</span><span class=Cdigo><span style='color:#00B050'><br>
@@ -4783,9 +4816,9 @@ vector</span></span><span class=Cdigo><span style='color:windowtext'> <br>
 an extension of type <i>class</i> (a <span class=Cdigo>class</span> or a <span
 class=Cdigo>struct</span>, in this case) hosted in the current Object <span
 class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or in the Object pointed
-by <i>obj</i>. Modeler has to supply <i>iter</i> , an existing iterator-type variable
-to the C++ object <i>c_obj</i>. The iterator <i>iter</i> is updated according
-the cycle moves over the elements of object <i>c_obj</i>. </p>
+by <i>obj</i>. Modeler has to supply <i>iter</i> , an existing iterator-type
+variable to the C++ object <i>c_obj</i>. The iterator <i>iter</i> is updated
+according the cycle moves over the elements of object <i>c_obj</i>. </p>
 
 <p>If the target LSD Object has no data extension set previously by <span
 class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>,
@@ -4793,8 +4826,8 @@ class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</
 
 <p>As an example, the code below builds on the example provided in <span
 class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>
-and copies the values in the <i>Firm</i>’s <i>tech_params</i> vector, defined
-in the <i>Firm</i> data extension of type <i>ext_firm</i> (a C++ <span
+and copies the values in the <i>Firm</i>’s <i>tech_params</i> vector, defined in
+the <i>Firm</i> data extension of type <i>ext_firm</i> (a C++ <span
 class=Cdigo>class</span>), to LSD temporary storage <span class=Cdigo><u><span
 style='color:blue'><a href="#_CURRENT">v[…]</a></span></u></span>:</p>
 
@@ -4891,15 +4924,15 @@ class=Cdigo>struct</span>, or the named <i>var</i> does not exist inside it or
 has a type incompatible, a compiler error message is thrown.</p>
 
 <p>See <span class=Cdigo><u><span style='color:blue'><a
-href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span> for more details on C++
-data extensions and an example. </p>
+href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span> for more details on
+C++ data extensions and an example. </p>
 
 <h2><a name="_WRITE_EXT(_class,_ext,"></a><a name="_WRITE_EXT(_class,_var,"></a><a
 name="WRITE_EXT"></a>WRITE_EXT( <i>class</i>, <i>var</i>, <i>value</i> ),
 V_EXTS( <i>obj</i>, <i>class</i>, <i>var</i>, <i>value</i> ) </h2>
 
-<p>Write <i>value</i> to the contents of a C++ variable named <i>var</i>
-contained within an extension of type <i>class</i> (a C++ <span class=Cdigo>class</span>
+<p>Write <i>value</i> to the contents of a C++ variable named <i>var</i> contained
+within an extension of type <i>class</i> (a C++ <span class=Cdigo>class</span>
 or <span class=Cdigo>struct</span>) from the current Object <span class=Cdigo><a
 href="#_Parent_Object:_p">p</a></span>, or from the Object pointed by <i>obj</i>.
 <i>value </i>must have the same C++ type as the target <i>var</i>. </p>
@@ -5126,17 +5159,17 @@ on both sides of the assignment:</p>
 
 <p class=MsoNormal><span class=Cdigo>a = a + 32;</span></p>
 
-<p class=MsoNormal>The above line assigns <i>a</i> with its previous value increased
-of 32. Therefore, if <i>a</i> has the value of, say, 5, after the above line it
-is assigned the value of 37.</p>
+<p class=MsoNormal>The above line assigns <i>a</i> with its previous value
+increased of 32. Therefore, if <i>a</i> has the value of, say, 5, after the
+above line it is assigned the value of 37.</p>
 
 <p class=MsoNormal>These commands incrementing the value of a variable are so
 common that they have also a short way to express them. For example, the
 command <span class=Cdigo>a = a + 32;</span> can be expressed also with the
 command<span class=Cdigo> a += 32;</span><span class=Cdigo><span
-style='font-family:"Arial","sans-serif";color:windowtext'>,</span></span>
-saving the expression of a in the left part of the assignment. This short
-expression can even be used for the other arithmetical operations:</p>
+style='font-family:"Arial","sans-serif";color:windowtext'>,</span></span> saving
+the expression of a in the left part of the assignment. This short expression
+can even be used for the other arithmetical operations:</p>
 
 <p class=MsoNormal><span class=Cdigo>a = a + 32;</span><span class=Cdigo><span
 style='font-family:"Arial","sans-serif"'> </span></span><span class=Cdigo><span

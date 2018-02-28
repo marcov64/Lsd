@@ -5783,12 +5783,25 @@ if ( choice == 87 )
 			set errfil \"\" \
 		}" );
 
-	cmd( "if { $errfil == \"\" } { set choice 0 } { set choice 1 }" );
+	cmd( "if { $errfil == \"\" } { \
+				set choice 0 \
+			} { \
+				if [ string equal -nocase [ file tail \"$errfil\" ] \"fun_head.h\" ] { \
+					tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Error in LSD macro expansion\" -detail \"Please check the offending file and line in the description following the error message.\"; \
+					set choice 0 \
+				} else { \
+					set choice 1 \
+				} \
+			}" );
 	if ( choice == 0 )
 		goto loop;				// insufficient data to show error
 	
 	// check if file is already loaded
-	cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] { set choice 1 } { set choice 0 }" );
+	cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] } { \
+				set choice 1 \
+			} { \
+				set choice 0 \
+			}" );
 	if ( choice == 0 )
 	{	
 		// check if main equation file is not the current file
