@@ -59,13 +59,17 @@ float hpan0mac = 0.23;			// Mac
 float hpan0win = 0.35;			// initial horizontal scroll % - Windows
 int h0 = 255;					// initial horizontal position
 int hcvsz = 1920;				// horizontal canvas size
-int range_type=90;
-int step=10;
-int step_level=15;
+int range_init = 150;			// horizontal initial width
+int range_incr = 20;			// horizontal width increase step
+int step_level = 20;			// vertical step
 int v0 = 10;					// initial vertical position
 int vcvsz = 1080;				// vertical canvas size
 int n_size = 4;					// node size (diameter)
 int v_margin = 4;				// labels margins to nodes
+
+int level_max;
+int range_type;
+int sons_last;
 
 
 /****************************************************
@@ -163,17 +167,12 @@ DRAW_OBJ
 void draw_obj( object *blk, object *t, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, num, step_type, begin, x, count, num_groups;
+	int i, j, step_type, begin, count, num_groups;
 	object *cur, *cur1;
 	variable *cv;
 	bridge *cb;
 
-	for ( i = 0, cur = t; cur != NULL; ++i, cur = go_brother( cur ) );
-	num = i;
-	begin = center - step * ( num - 1 ) / 2;
-	x = center;
-	
-	//writing to appear on the left of the window
+	// element list to appear on the left of the window
 	cmd( "set list_%s \"\"", t->label );
 
 	if ( t->v == NULL )
@@ -216,31 +215,52 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 		}
 		
 		if ( t->up->up != NULL )
-			put_line( from, level - step_level + v_margin + n_size / 2, x, level + n_size / 2 );
-		put_node( x - n_size / 2, level + v_margin - n_size / 2, x + n_size / 2, level + v_margin + n_size / 2, t->label );
-		put_text( ch, ch1, x, level, t->label );
+			put_line( from, level - step_level + v_margin + n_size / 2, center, level + n_size / 2 );
+		put_node( center - n_size / 2, level + v_margin - n_size / 2, center + n_size / 2, level + v_margin + n_size / 2, t->label );
+		put_text( ch, ch1, center, level, t->label );
 	}
 
+	// count the number of son object types
 	for ( i = 0, cb = t->b; cb != NULL; ++i, cb = cb->next );
 	
-	if ( range_type >= 15 ) //Here is changed. Placed a limit
-		range_type -= 15;
+	// find current tree depth
+	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
 	
-	if ( i <= 1 )
-		begin = center + range_type / 2;
+	// root? adjust tree begin
+	if ( t->up == NULL )		
+	{
+		level_max = 0;
+		sons_last = 1;
+		level -= step_level;
+		range_type = range_init;
+		
+		// adjust horizontal range of object types for odd numbers (positive only)
+		if ( range_type >= range_incr && i % 2 != 0 ) 
+			range_type -= range_incr;
+	}
+	else
+		if ( i > 0 && j > level_max )	// just entered new populated lower level?
+		{
+			range_type /= ( sons_last > 0 ) ? sons_last : 1;
+			sons_last = i;
+			level_max = j;			
+		}
+	
+	if ( i <= 1 )					// single object type son?
+	{
+		begin = center;				// adjust to print below parent
+		step_type = 0;
+	}
 	else
 	{
+		begin = center - range_type / 2;
 		step_type = range_type / ( i - 1 );
-		begin = center;
 	}
 
-	if ( t->up == NULL )
-		level -= step_level;
-	for ( i = begin - range_type / 2, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
+	// draw sons
+	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
 			draw_obj( blk, cb->head, level + step_level, i, center );
-
-	range_type += 15;
 }
 
 

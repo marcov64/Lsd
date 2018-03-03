@@ -653,7 +653,7 @@ void run( object *root )
 
 	prof.clear( );			// reset profiling times
 
-	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact during execution:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables" );
+	cover_browser( "Running...", "The simulation is being executed", "Use the LSD Log window buttons to interact:\n\n'Stop' :  aborts the simulation\n'Pause' / 'Resume' :  pauses and resumes the simulation\n'Fast' :  accelerates the simulation by hiding information\n'Observe' :  presents more run-time information\n'Debug' :  triggers the debugger at flagged variables" );
 	cmd( "wm deiconify .log; raise .log; focus .log" );
 #else
 	plog( "\nProcessing configuration file %s ...\n", "", struct_file );
@@ -1345,7 +1345,7 @@ void cover_browser( const char *text1, const char *text2, const char *text3 )
 	cmd( "label .t.l3 -fg red -text \"\nInteraction with the LSD Browser is now disabled\"" );
 	cmd( "label .t.l4 -justify left -text \"\n%s\"", text3  );
 	cmd( "pack .t.l1 .t.l2 .t.l3 .t.l4 -expand yes -fill y" );
-	cmd( "pack .t -fill both -expand yes" );
+	cmd( "pack .t -fill both -expand yes -padx 10 -pady 10" );
 	cmd( "focus .t");
 	set_shortcuts_log( ".t", "runtime.html" );
 	

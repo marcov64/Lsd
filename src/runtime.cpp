@@ -185,7 +185,7 @@ void init_plot( int num, int id_sim )
 	
 	// controls
 	cmd( "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
-	cmd( "button $activeplot.c.yscale.go -width 7 -text Center -command {set_c_var done_in 7}" );
+	cmd( "button $activeplot.c.yscale.go -text Center -command {set_c_var done_in 7}" );
 
 	cmd( "$activeplot.c.yscale create window %d %d -window $activeplot.c.yscale.shift", s_width / 2, t_margin + height / 4 );
 	cmd( "$activeplot.c.yscale create window %d %d -window $activeplot.c.yscale.go", s_width / 2, t_margin + 3 * height / 4 );
