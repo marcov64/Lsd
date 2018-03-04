@@ -198,7 +198,7 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 
 	// drawn node only if it is not the root
 	if ( t->up != NULL )
-	{ 	// computes numerosity of groups of this type
+	{ 	// computes number of groups of this type
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
@@ -248,30 +248,36 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 				level_factor[ 0 ] = 0.3;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
-				level_factor[ 3 ] = 0.7;
+				level_factor[ 3 ] = 0.3;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
+				level_factor[ 1 ] = 0.6;
+				level_factor[ 2 ] = 0.3;
+				level_factor[ 3 ] = 0.2;
 				break;
 			case 3:
 				level_factor[ 0 ] = 0.8;
+				level_factor[ 1 ] = 0.8;
+				level_factor[ 2 ] = 0.2;
+				level_factor[ 3 ] = 0.1;
 				break;
 			case 4:
-				level_factor[ 0 ] = 1;
+				level_factor[ 0 ] = 1.0;
+				level_factor[ 1 ] = 0.95;
+				level_factor[ 2 ] = 0.2;
+				level_factor[ 3 ] = 0.1;
 				break;
 			default:
 				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
 		}
 		
 		range_type = level_factor[ 0 ] * range_init;
-		// adjust horizontal range of object types for odd numbers (positive only)
-//		if ( range_type >= range_incr && i % 2 != 0 ) 
-//			range_type -= range_incr;
 	}
 	else
 	{
 		// reduce object type width at each level
-		range_type = level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1;
+		range_type = abs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 );
 	}
 	
 	if ( i <= 1 )					// single object type son?
