@@ -823,8 +823,8 @@ void run( object *root )
 					debug_flag = false;
 					cmd( "set a [ split [ winfo children . ] ]" );
 					cmd( "foreach i $a { if [ string match .plt* $i ] { wm withdraw $i } }" );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.go conf -state disabled }", i, i );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.shift conf -state disabled }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.go conf -state disabled }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.shift conf -state disabled }", i, i );
 					break;
 
 				case 3:			// Debug button in Log window / d/D key in Runtime window
@@ -844,8 +844,8 @@ void run( object *root )
 					set_fast( 0 );
 					cmd( "set a [ split [ winfo children . ] ]" );
 					cmd( "foreach i $a { if [ string match .plt* $i ] { wm deiconify $i; raise $i } }" );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.go conf -state normal }", i, i );
-					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.c.yscale.shift conf -state normal }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.go conf -state normal }", i, i );
+					cmd( "if { [ winfo exists .plt%d ] } { .plt%d.fond.shift conf -state normal }", i, i );
 					break;
 				 
 				// plot window DELETE_WINDOW button handler
@@ -859,8 +859,10 @@ void run( object *root )
 
 				// runtime plot events
 				case 7:  		// Center button
-					cmd( "set newpos [ expr %lf - [ expr 250 / %lf ] ]", t / ( double )max_step, ( double ) max_step );
-					cmd( "if [ winfo exist .plt%d ] { $activeplot.c.c.cn xview moveto $newpos }", i );
+					cmd( "if { [ winfo exist .plt%d ] && %d > $halfCanvas } { \
+							set newpos [ expr %lf - [ expr  $halfCanvas / %lf ] ]; \
+							$activeplot.c.c.cn xview moveto $newpos \
+						}", i, t, t / ( double ) max_step, ( double ) max_step );
 					break;
 
 				case 8: 		// Scroll checkbox
@@ -920,7 +922,7 @@ void run( object *root )
 		cmd( "destroytop .deb" );
 		cmd( "update" );
 		// allow for run-time plot window destruction
-		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.c.yscale.go conf -state disabled; .plt%d.c.yscale.shift conf -state disabled }", i, i, i, i  );
+		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", i, i, i, i  );
 #endif
 
 		close_sim( );

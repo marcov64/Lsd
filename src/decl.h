@@ -79,6 +79,7 @@
 #define MAX_CORES 0						// maximum number of cores to use (0=auto)
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation (sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
+#define MAX_LEVEL 10					// maximum number of object levels (for plotting only)
 #define ERR_LIM 10						// maximum number of repeated error messages
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files

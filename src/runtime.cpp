@@ -60,13 +60,17 @@ print  message string m in the Log screen. It is in LSDMAIN.CPP
 
 int width = 500;				// runtime plot area dimensions
 int height = 300;
+int b_height = 48;
 int s_width = 75;
 int h_margin = 8;
 int t_margin = 3;
 int b_margin = 30;
-int h_ticks = 4;
+int h_ticks = 5;
 int v_ticks = 2;
 int tick = 5;
+int lab_lin = 5;				// labels per line
+int lin_lab = 3;				// lines of label
+int lin_height = 18;
 
 char intval[ 100 ];				// string buffer
 char **tp;						// labels of variables to plot in runtime
@@ -161,7 +165,7 @@ INIT_PLOT
 **************************************/
 void init_plot( int num, int id_sim )
 {
-	int i, j, k, l, t;
+	int i, j, k, l;
 	
 	plot_step = ( max_step > width ) ? 1 : plot_step = width / ( double ) max_step;
 	cmd( "set scrollB 0" );
@@ -183,15 +187,8 @@ void init_plot( int num, int id_sim )
 	cmd( "$activeplot.c.yscale create text %d %d -anchor e -justify right -text \"\" -tag medy", s_width, t_margin + height / 2 );
 	cmd( "$activeplot.c.yscale create text %d %d -anchor e -justify right -text \"\" -tag ymin", s_width, t_margin + height );
 	
-	// controls
-	cmd( "checkbutton $activeplot.c.yscale.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
-	cmd( "button $activeplot.c.yscale.go -text Center -command {set_c_var done_in 7}" );
-
-	cmd( "$activeplot.c.yscale create window %d %d -window $activeplot.c.yscale.shift", s_width / 2, t_margin + height / 4 );
-	cmd( "$activeplot.c.yscale create window %d %d -window $activeplot.c.yscale.go", s_width / 2, t_margin + 3 * height / 4 );
-	
 	cmd( "pack $activeplot.c.yscale -side left -anchor nw" );
-
+	
 	// main canvas
 	cmd( "frame $activeplot.c.c  " );
 	cmd( "set p $activeplot.c.c.cn" );
@@ -220,12 +217,22 @@ void init_plot( int num, int id_sim )
 	cmd( "$p xview moveto 0" );
 	cmd( "mouse_wheel $p" );
 	
+	// bottom part
+	cmd( "canvas $activeplot.fond -width %d -height %d", s_width + width + 2 * h_margin, b_height );
+
+	// controls
+	cmd( "checkbutton $activeplot.fond.shift -text Scroll -variable scrollB -command { set_c_var done_in 8 }" );	
+	cmd( "if { $tcl_platform(platform) == \"windows\" } { set goWid 7 } { set goWid 5 }" );
+	cmd( "button $activeplot.fond.go -width $goWid -text Center -command { set halfCanvas %d; set_c_var done_in 7 }", width / 2 );
+
+	cmd( "$activeplot.fond create window %d %d -window $activeplot.fond.shift", s_width / 2, b_height / 4 - 5 );
+	cmd( "$activeplot.fond create window %d %d -window $activeplot.fond.go", s_width / 2, 3 * b_height / 4 );
+	
 	// labels
-	cmd( "canvas $activeplot.fond -height 48" );
-	for ( i = 0, j = 0, k = 0; i < ( num < 18 ? num : 18 ); ++i )
+	for ( i = 0, j = 0, k = 0; i < ( num < lin_lab * lab_lin ? num : lin_lab * lab_lin ); ++i )
 	{
-		cmd( "$activeplot.fond create text %d %d -anchor nw -text %s -fill $c%d", 5 + j * 100, k * 18, tp[i], i  );
-		if ( j < 5 )
+		cmd( "$activeplot.fond create text %d %d -anchor nw -text %s -fill $c%d", s_width + t_margin + j * width / lab_lin + 5, k * lin_height, tp[ i ], i  );
+		if ( j < lab_lin - 1 )
 			++j;
 		else
 		{
@@ -247,8 +254,8 @@ void init_plot( int num, int id_sim )
 	if ( fast_mode > 0 )
 	{
 		cmd( "wm withdraw $activeplot" );
-		cmd( "$activeplot.c.yscale.go conf -state disabled" );
-		cmd( "$activeplot.c.yscale.shift conf -state disabled" );
+		cmd( "$activeplot.fond.go conf -state disabled" );
+		cmd( "$activeplot.fond.shift conf -state disabled" );
 	}
 
 	cmd( "wm deiconify .log; raise .log; focus .log" );

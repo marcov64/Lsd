@@ -54,22 +54,23 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 #include "decl.h"
 
-float hpan0lin = 0.35;			// Linux
-float hpan0mac = 0.23;			// Mac
-float hpan0win = 0.35;			// initial horizontal scroll % - Windows
-int h0 = 255;					// initial horizontal position
-int hcvsz = 1920;				// horizontal canvas size
-int range_init = 150;			// horizontal initial width
+float hpan0lin = 0.276;			// Linux
+float hpan0mac = 0.345;			// Mac
+float hpan0win = 0.276;			// initial horizontal scroll % - Windows
+float range_fact = 0.3;			// horizontal width exponential factor
+int hcvsz = 1280;				// horizontal canvas size
+int vcvsz = 800;				// vertical canvas size
+int h0 = 170;					// initial horizontal position
+int v0 = 10;					// initial vertical position
+int range_init = 150;			// horizontal initial width (4 root sons)
 int range_incr = 20;			// horizontal width increase step
 int step_level = 20;			// vertical step
-int v0 = 10;					// initial vertical position
-int vcvsz = 1080;				// vertical canvas size
 int n_size = 4;					// node size (diameter)
 int v_margin = 4;				// labels margins to nodes
 
-int level_max;
+float level_factor[ MAX_LEVEL ];
+int range;
 int range_type;
-int sons_last;
 
 
 /****************************************************
@@ -153,7 +154,7 @@ void show_graph( object *t)
 	else	// or just update canvas
 	{
 		cmd( "$g.f.c delete all" );
-		draw_obj(t, top, v0, h0, 0);
+		draw_obj( t, top, v0, h0, 0 );
 	}
 
 	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
@@ -167,7 +168,7 @@ DRAW_OBJ
 void draw_obj( object *blk, object *t, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
-	int i, j, step_type, begin, count, num_groups;
+	int i, j, k, step_type, begin, count, num_groups;
 	object *cur, *cur1;
 	variable *cv;
 	bridge *cb;
@@ -226,25 +227,52 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 	// find current tree depth
 	for ( j = 0, cur = t; cur->up != NULL; ++j, cur = cur->up );
 	
+	// limit the maximum depth of plot
+	if ( j >= MAX_LEVEL )
+		return;
+	
 	// root? adjust tree begin
-	if ( t->up == NULL )		
+	if ( j == 0 )		
 	{
-		level_max = 0;
-		sons_last = 1;
 		level -= step_level;
-		range_type = range_init;
 		
+		// set the default horizontal scale factor per level
+		for ( k = 0; k < MAX_LEVEL; ++ k )
+			level_factor[ k ] = 1.0;
+
+		// pick hand set scale factors
+		switch( i )
+		{
+			case 0:
+			case 1:
+				level_factor[ 0 ] = 0.3;
+				level_factor[ 1 ] = 0.3;
+				level_factor[ 2 ] = 0.7;
+				level_factor[ 3 ] = 0.9;
+				break;
+			case 2:
+				level_factor[ 0 ] = 0.5;
+				break;
+			case 3:
+				level_factor[ 0 ] = 0.8;
+				break;
+			case 4:
+				level_factor[ 0 ] = 1;
+				break;
+			default:
+				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
+		}
+		
+		range_type = level_factor[ 0 ] * range_init;
 		// adjust horizontal range of object types for odd numbers (positive only)
-		if ( range_type >= range_incr && i % 2 != 0 ) 
-			range_type -= range_incr;
+//		if ( range_type >= range_incr && i % 2 != 0 ) 
+//			range_type -= range_incr;
 	}
 	else
-		if ( i > 0 && j > level_max )	// just entered new populated lower level?
-		{
-			range_type /= ( sons_last > 0 ) ? sons_last : 1;
-			sons_last = i;
-			level_max = j;			
-		}
+	{
+		// reduce object type width at each level
+		range_type = level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1;
+	}
 	
 	if ( i <= 1 )					// single object type son?
 	{
