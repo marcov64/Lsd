@@ -55,7 +55,7 @@ Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 #include "decl.h"
 
 float hpan0lin = 0.276;			// Linux
-float hpan0mac = 0.345;			// Mac
+float hpan0mac = 0.151;			// Mac
 float hpan0win = 0.276;			// initial horizontal scroll % - Windows
 float range_fact = 0.3;			// horizontal width exponential factor
 int hcvsz = 1280;				// horizontal canvas size
@@ -246,9 +246,9 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 			case 0:
 			case 1:
 				level_factor[ 0 ] = 0.3;
-				level_factor[ 1 ] = 0.3;
-				level_factor[ 2 ] = 0.7;
-				level_factor[ 3 ] = 0.9;
+				level_factor[ 1 ] = 0.1;
+				level_factor[ 2 ] = 0.5;
+				level_factor[ 3 ] = 0.7;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;

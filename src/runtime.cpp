@@ -231,7 +231,7 @@ void init_plot( int num, int id_sim )
 	// labels
 	for ( i = 0, j = 0, k = 0; i < ( num < lin_lab * lab_lin ? num : lin_lab * lab_lin ); ++i )
 	{
-		cmd( "$activeplot.fond create text %d %d -anchor nw -text %s -fill $c%d", s_width + t_margin + j * width / lab_lin + 5, k * lin_height, tp[ i ], i  );
+		cmd( "$activeplot.fond create text %d %d -anchor nw -text %s -fill $c%d", s_width + t_margin + j * width / lab_lin, k * lin_height, tp[ i ], i  );
 		if ( j < lab_lin - 1 )
 			++j;
 		else
