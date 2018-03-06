@@ -321,7 +321,7 @@ double variable::cal( object *caller, int lag )
 		}
 
 #ifndef NO_WINDOW
-		if ( stackinfo_flag >= stack && ( ! prof_obs_only || observe ) )
+		if ( stack_info >= stack && ( ! prof_obs_only || observe ) )
 			start_profile[ stack - 1 ] = start = clock( );
 		else
 			if ( prof_aggr_time )
@@ -394,7 +394,7 @@ double variable::cal( object *caller, int lag )
 			}
 		}
 
-		if ( stackinfo_flag >= stack && ( ! prof_obs_only || observe ) )
+		if ( stack_info >= stack && ( ! prof_obs_only || observe ) )
 		{
 			end_profile[ stack - 1 ] = prof_aggr_time ? end : clock( );
 

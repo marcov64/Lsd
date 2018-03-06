@@ -57,6 +57,8 @@ double max( double a, double b );
 double min( double a, double b );
 double norm( double mean, double dev );
 double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
+double pareto( double mu, double alpha );
+double paretocdf( double mu, double alpha, double x );
 double poisson( double m );
 double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
 double round( double r );

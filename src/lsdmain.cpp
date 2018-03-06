@@ -147,7 +147,7 @@ int quit = 0;				// simulation interruption mode (0=none)
 int series_saved = 0;		// number of series saved
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int stackinfo_flag = 0;		// LSD stack control
+int stack_info = 0;			// LSD stack control
 int t;						// current time step
 int total_obj = 0;			// total objects in model
 int total_var = 0;			// total variables/parameters in model
@@ -1084,10 +1084,10 @@ void set_fast( int level )
 	// remove the variables stack when switching to any fast mode
 	if ( fast_mode == 0 && level > 0 )
 	{
-		if ( stackinfo_flag > 0 || prof_aggr_time )
+		if ( stack_info > 0 || prof_aggr_time )
 		{
 #ifndef NO_WINDOW   
-			cmd( "tk_messageBox -parent .log -title Warning -icon warning -type ok -message \"Fast mode not available\" -detail \"Fast mode is not supported when stack profiling is activated.\nTo enable fast mode, please disable stack profiling using menu 'Run', option 'Imulation Settings...'.\"" );
+			cmd( "tk_messageBox -parent .log -title Warning -icon warning -type ok -message \"Fast mode not available\" -detail \"Fast mode is not supported when stack profiling is activated.\nTo enable fast mode, please disable stack profiling using menu 'Run', option 'Simulation Settings'.\"" );
 #else
 			fprintf( stderr, "\nFast mode is not supported.\n" );	
 #endif
@@ -1409,7 +1409,7 @@ void show_prof_aggr( void )
 	variable *cv;
 	map < string, profile >::iterator it2;
 	
-	plog( "\nProfiling aggregated results" );
+	plog( "\nProfiling aggregated results:\n" );
 	plog( "\nObject\tElement\tTime (msec.)\tComputation count", "prof2" );
 	
 	for ( it2 = prof.begin(); it2 != prof.end(); ++it2 )

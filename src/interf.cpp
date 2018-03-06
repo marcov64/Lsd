@@ -2400,15 +2400,15 @@ if ( series_saved == 0 )
 }
 
 // warn missing debugger
-if ( search_parallel( root ) && ( when_debug > 0 || stackinfo_flag > 0 || prof_aggr_time ) )
+if ( search_parallel( root ) && ( when_debug > 0 || stack_info > 0 || prof_aggr_time ) )
 {
-	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\nTo enable debugging/profiling, please remove all parallel processing flags using menu 'Run', option 'Remove Parallel Flags'.\n\nPress 'OK' to proceed and ignore debugging/profiling settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { yes { set choice 1 } cancel { set choice 2 } }" );
+	cmd( "set answer [ tk_messageBox -parent . -title Warning -icon warning -type okcancel -default ok -message \"Debugger/profiler not available\" -detail \"Debugging in parallel mode is not supported, including stack profiling.\n\nPress 'OK' to proceed and disable parallel processing settings or 'Cancel' to return to LSD Browser.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }" );
 	if( *choice == 2 )
 	{
 		*choice = 0;
 		break;
 	}
-	when_debug = stackinfo_flag = prof_aggr_time = 0;
+	parallel_disable = true;
 }
 
 Tcl_LinkVar( inter, "no_res", ( char * ) & no_res, TCL_LINK_BOOLEAN );
@@ -2852,7 +2852,7 @@ temp[1] = sim_num;
 temp[2] = seed; 
 temp[3] = max_step; 
 temp[4] = when_debug;
-temp[5] = stackinfo_flag;
+temp[5] = stack_info;
 temp[6] = prof_min_msecs;
 temp[7] = prof_obs_only;
 temp[8] = parallel_disable;
@@ -2860,7 +2860,7 @@ temp[8] = parallel_disable;
 Tcl_LinkVar( inter, "sim_num", (char *) &sim_num, TCL_LINK_INT );
 Tcl_LinkVar( inter, "seed", (char *) &seed, TCL_LINK_INT );
 Tcl_LinkVar( inter, "max_step", (char *) &max_step, TCL_LINK_INT );
-Tcl_LinkVar( inter, "stack_info", (char *) &stackinfo_flag, TCL_LINK_INT );
+Tcl_LinkVar( inter, "stack_info", (char *) &stack_info, TCL_LINK_INT );
 Tcl_LinkVar( inter, "prof_min_msecs", (char *) &prof_min_msecs, TCL_LINK_INT );
 Tcl_LinkVar( inter, "prof_obs_only", (char *) &prof_obs_only, TCL_LINK_BOOLEAN );
 Tcl_LinkVar( inter, "prof_aggr_time", (char *) &prof_aggr_time, TCL_LINK_BOOLEAN );
@@ -2953,7 +2953,7 @@ if ( *choice == 2 )	// Escape - revert previous values
 	seed = temp[2];
 	max_step = temp[3];
 	when_debug = temp[4];
-	stackinfo_flag = temp[5];
+	stack_info = temp[5];
 	prof_min_msecs = temp[6];
 	prof_obs_only = temp[7];
 	parallel_disable = temp[8];

@@ -1357,34 +1357,37 @@ return -tmp+log(2.5066282746310005*ser/x);
 
 double PMRand_open(long *idum)
 {
+	int j;
+	long k;
+	static long iy=0;
+	static long iv[NTAB];
 
-int j;
-long k;
-static long iy=0;
-static long iv[NTAB];
+	double temp;
 
-double temp;
-
-if (*idum <= 0 || !iy) {
-if (-(*idum) < 1) *idum=1;
-else *idum = -(*idum);
-for (j=NTAB+7;j>=0;j--) {
-   k=(*idum)/IQ;
-   *idum=IA*(*idum-k*IQ)-IR*k;
-   if (*idum < 0) *idum += IM;
-   if (j < NTAB) iv[j] = *idum;
-  }
-  iy=iv[0];
-  
-}
-k=(*idum)/IQ;
-*idum=IA*(*idum-k*IQ)-IR*k;
-if (*idum < 0) *idum += IM;
-j=iy/NDIV;
-iy=iv[j];
-iv[j] = *idum;
-if ((temp=AM*iy) > RNMX) return RNMX;
-else return temp;
+	if (*idum <= 0 || !iy) 
+	{
+		if (-(*idum) < 1) *idum=1;
+		else *idum = -(*idum);
+		for (j=NTAB+7;j>=0;j--) 
+		{
+		   k=(*idum)/IQ;
+		   *idum=IA*(*idum-k*IQ)-IR*k;
+		   if (*idum < 0) *idum += IM;
+		   if (j < NTAB) iv[j] = *idum;
+		}
+		iy=iv[0];
+	}
+	k=(*idum)/IQ;
+	*idum=IA*(*idum-k*IQ)-IR*k;
+	if (*idum < 0) 
+		*idum += IM;
+	j=iy/NDIV;
+	iy=iv[j];
+	iv[j] = *idum;
+	if ((temp=AM*iy) > RNMX) 
+		return RNMX;
+	else 
+		return temp;
 }
    
 
@@ -1605,7 +1608,6 @@ void init_random( int seed )
 
 
 // Call the preset pseudo-random number generator
-
 double ran1( long *idum_loc )
 {
 	// Manage default (internal) number sequence
@@ -1753,6 +1755,21 @@ double poisson( double m )
 }
 
 
+/****************************************************
+PARETO
+****************************************************/
+double pareto( double mu, double alpha )
+{
+	if ( mu <= 0 || alpha <= 0 )
+	{
+		plog( "\nWarning: bad mu, alpha in function: pareto" );
+		return 0.0;
+	}
+
+	return mu / pow( 1 - mt4( ), 1 / alpha );
+}
+
+
 // ################### ADDITIONAL STATISTICAL C FUNCTIONS ################### //
 
 /*
@@ -1883,6 +1900,25 @@ double poissoncdf( double lambda, double k )
 		sum += pow( lambda, i ) / fact( i );
 	
 	return exp( -lambda ) * sum;
+}
+
+
+/*
+ * Pareto cumulative distribution function
+ */
+
+double paretocdf( double mu, double alpha, double x )
+{
+	if ( mu <= 0 || alpha <= 0 )
+	{
+		plog( "\nWarning: bad mu, alpha in function: paretocdf" );
+		return 0.0;
+	}
+	
+	if ( x < mu )
+		return 0.0;
+	else
+		return 1.0 - pow( mu / x, alpha );
 }
 
 

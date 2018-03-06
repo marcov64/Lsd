@@ -712,7 +712,7 @@ extern int seed;			// pseudo random number generator seed in use
 extern int series_saved;	// number of series saved
 extern int sim_num;			// simulation number running
 extern int stack;			// LSD stack call level
-extern int stackinfo_flag; 	// LSD stack control
+extern int stack_info; 		// LSD stack control
 extern int strWindowOn;		// control the presentation of the model structure window (bool)
 extern int t;               // current time step
 extern int total_obj;		// total objects in model

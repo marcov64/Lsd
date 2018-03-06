@@ -750,29 +750,28 @@ SUM
 Compute the sum of Variables or Parameters lab with lag lag.
 The sum is computed over the elements in a single branch of the model
 ****************************************************/
-double object::sum(char const *lab, int lag)
+double object::sum( char const *lab, int lag )
 {
 	double tot;
 	object *cur;
 	variable *cur_v;
-	int done;
 
-	cur_v=search_var(this, lab);
-	if(cur_v==NULL)
-	{sprintf(msg, "variable '%s' not found trying to sum it up", lab);
-	 error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-	 return -1;
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found trying to sum it up", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
 	}
 
-	cur=(object *)(cur_v->up);
-	if(cur->up!=NULL)
-	 cur=(cur->up)->search(cur->label);
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
 
-	for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
-	  tot+=cur->cal(this, lab, lag);
+	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
+		tot += cur->cal( this, lab, lag );
 
-
-	return(tot);
+	return tot;
 }
 
 
@@ -780,27 +779,29 @@ double object::sum(char const *lab, int lag)
 OVERALL_MAX
 Compute the maximum of lab, considering only the Objects in a single branch of the model.
 ****************************************************/
-double object::overall_max(char const *lab, int lag)
+double object::overall_max( char const *lab, int lag )
 {
 	double tot, temp;
 	object *cur;
 	variable *cur_v;
-	int done;
 
-	cur_v=search_var(this, lab);
-	if(cur_v==NULL)
-	 {sprintf(msg, "variable '%s' not found in overall_max", lab);
-	  error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-	  return -1;
-	 }
-	cur=cur_v->up;
-	if(cur->up!=NULL)
-	 cur=(cur->up)->search(cur->label);
-	for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
-	  if(tot<(temp=cur->cal(this, lab, lag)))
-		 tot=temp;
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in overall_max", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
+	}
+	
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
+	
+	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
+		if ( tot < ( temp = cur->cal( this, lab, lag ) ) )
+			tot = temp;
 
-	return(tot);
+	return tot;
 }
 
 
@@ -808,39 +809,40 @@ double object::overall_max(char const *lab, int lag)
 WHG_AV
 Compute the weighted average of lab (lab2 are the weights)
 ****************************************************/
-double object::whg_av(char const *lab, char const *lab2, int lag)
+double object::whg_av( char const *lab, char const *lab2, int lag )
 {
 	double tot, c1, c2;
 	object *cur;
 	variable *cur_v;
-	int done;
 
-	cur_v=search_var(this, lab);
-
-	if(cur_v==NULL)
-	{sprintf(msg, "variable '%s' not found in wgh_aver", lab);
-	 error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-	 return -1;
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in wgh_aver", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
 	}
-	cur_v=search_var(this, lab2);
-	if(cur_v==NULL)
-	{sprintf(msg, "variable '%s' not found in wgh_aver", lab2);
-	 error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
-	 return -1;
+	
+	cur_v = search_var( this, lab2 );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in wgh_aver", lab2 );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
+	}
 
-	 }
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
 
-	cur=(object *)(cur_v->up);
-	if(cur->up!=NULL)
-	 cur=(cur->up)->search(cur->label);
+	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
+	{
+		c1 = cur->cal( this, lab, lag );
+		c2 = cur->cal( this, lab2, lag );
+		tot += c1 * c2;
+	}
 
-	for(tot=0, done=0; cur!=NULL; cur=go_brother(cur), done=0)
-	  {c1=cur->cal(this, lab, lag);
-		c2=cur->cal(this, lab2, lag);
-		tot+=c1*c2;
-	  }
-
-	return(tot);
+	return tot;
 }
 
 

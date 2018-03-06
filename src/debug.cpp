@@ -165,7 +165,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	
 	if ( mode == 1 )
 	{
-		cmd( "set stack_flag %d", stackinfo_flag );
+		cmd( "set stack_flag %d", stack_info );
 		cmd( "button .deb.b.act.run -width $butWid -text Run -command {set choice 2} -underline 0" );
 		cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16} -underline 3" );
 		cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
@@ -320,7 +320,7 @@ if ( mode == 1 )
 	cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 	i = choice;
 	cmd( "set choice $stack_flag" );
-	stackinfo_flag = choice;
+	stack_info = choice;
 	choice = i;
 } 
 

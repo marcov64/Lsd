@@ -132,7 +132,7 @@ cmd( "frame .sa.head" );
 cmd( "label .sa.head.lg -text \"Set initial values for every copy of\"" );
 
 cmd( "frame .sa.head.l" );
-if ( cv->param != 1 )
+if ( cv->param != 0 )
 {
   if ( cv->param == 2 )
 	cmd( "label .sa.head.l.c -text \"Function: \"" );
