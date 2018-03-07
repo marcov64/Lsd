@@ -247,16 +247,20 @@ class object
 	netNode *node;		// pointer to network node data structure
 	void *cext;			// pointer to a C++ object extension to the LSD object
 
-	double cal(object *caller,  char const *l, int lag);
-	double cal( char const *l, int lag);
+	double cal( object *caller,  char const *l, int lag );
+	double cal( char const *l, int lag );
 	void recal( char const *l );
-	variable *search_var(object *caller,char const *label);
-	object *search_var_cond(char const *lab, double value, int lag);
-	double overall_max(char const *lab, int lag);
-	double sum(char const *lab, int lag);
-	double whg_av(char const *lab, char const *lab2, int lag);
-	int init(object *_up, char const *_label);
-	void update(void);
+	variable *search_var( object *caller,char const *label );
+	object *search_var_cond( char const *lab, double value, int lag );
+	double overall_max( char const *lab, int lag );
+	double overall_min( char const *lab, int lag );
+	double sum( char const *lab, int lag );
+	double stat( char const *lab, double *v = NULL );
+	double av( char const *lab, int lag );
+	double whg_av( char const *lab, char const *lab2, int lag );
+	double sd( char const *lab, int lag );
+	int init( object *_up, char const *_label );
+	void update( void );
 	object *hyper_next( char const *lab );
 	object *hyper_next( void );
 	void add_var(char const *label, int lag, double *val, int save);
@@ -279,7 +283,6 @@ class object
 	void lsdqsort(char const *obj, char const *var1, char const *var2, char const *direction);
 	void empty(void);
 	void delete_obj(void);
-	void stat(char const *lab, double *v);
 	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
 	object *add_n_objects2(char const *lab, int n, object *ex);
 	object *add_n_objects2( char const *lab, int n, int t_update );

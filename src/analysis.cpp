@@ -3487,9 +3487,9 @@ for(i=0; i<nv; i++)
  }
 
 if(logs)
- cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log)\n\" tabel" );
+ cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics (in log):\n\n\" tabel" );
 else
- cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics\n\" tabel" );
+ cmd( ".log.text.text.internal insert end \"\n\nTime series descriptive statistics:\n\n\" tabel" );
 
 sprintf(str1, "%d Cases", max_c-min_c+1);
 sprintf(longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1);
@@ -3639,9 +3639,9 @@ for(i=0; i<nv; i++)
  }
 
 if(logs)
- cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log)\n\" tabel" );
+ cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics (in log):\n\n\" tabel" );
 else
- cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics\n\" tabel" );
+ cmd( ".log.text.text.internal insert end \"\n\nCross-section descriptive statistics:\n\n\" tabel" );
 
 sprintf(str1, "%d Variables",nv);
 sprintf(longmsg, "%-20s\tAverage\tStd.Dev.\tVar.\tMin.\tMax.\n", str1);

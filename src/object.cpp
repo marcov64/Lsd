@@ -797,11 +797,74 @@ double object::overall_max( char const *lab, int lag )
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 	
-	for ( tot = 0; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = DBL_MIN; cur != NULL; cur = go_brother( cur ) )
 		if ( tot < ( temp = cur->cal( this, lab, lag ) ) )
 			tot = temp;
 
 	return tot;
+}
+
+
+/****************************************************
+OVERALL_MIN
+Compute the minimum of lab, considering only the Objects in a single branch of the model.
+****************************************************/
+double object::overall_min( char const *lab, int lag )
+{
+	double tot, temp;
+	object *cur;
+	variable *cur_v;
+
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in overall_max", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
+	}
+	
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
+	
+	for ( tot = DBL_MAX; cur != NULL; cur = go_brother( cur ) )
+		if ( tot > ( temp = cur->cal( this, lab, lag ) ) )
+			tot = temp;
+
+	return tot;
+}
+
+
+/****************************************************
+AV
+Compute the average of lab
+****************************************************/
+double object::av( char const *lab, int lag )
+{
+	int n;
+	double tot;
+	object *cur;
+	variable *cur_v;
+
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in wgh_aver", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
+	}
+	
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
+
+	for ( n = 0, tot = 0; cur != NULL; cur = go_brother( cur ), ++n )
+		tot += cur->cal( this, lab, lag );
+
+	if ( n > 0 )
+		return tot / n;
+	else
+		return 0;
 }
 
 
@@ -843,6 +906,42 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 	}
 
 	return tot;
+}
+
+
+/****************************************************
+SD
+Compute the (population) standard deviation of lab
+****************************************************/
+double object::sd( char const *lab, int lag )
+{
+	int n;
+	double x, tot, tot2;
+	object *cur;
+	variable *cur_v;
+
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
+	{
+		sprintf( msg, "variable '%s' not found in wgh_aver", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
+	}
+	
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur = ( cur->up )->search( cur->label );
+
+	for ( n = 0, tot = 0; cur != NULL; cur = go_brother( cur ), ++n )
+	{
+		tot += x = cur->cal( this, lab, lag );
+		tot2 += x * x;
+	}
+
+	if ( n > 0 )
+		return sqrt( tot2 / n - pow( tot / n, 2 ) );
+	else
+		return 0;
 }
 
 
@@ -1294,7 +1393,8 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 /****************************************************
 STAT
 Compute some basic statistics of a group of Variables or Paramters with lab lab
-and storing the results in a vector of double
+and storing the results in a vector of double.
+Return the number of element instances counted (same as r[0]).
 
 r[0]=num;
 r[1]=average
@@ -1303,45 +1403,57 @@ r[3]=max
 r[4]=min
 
 ****************************************************/
-void object::stat(char const *lab, double *r)
+double object::stat( char const *lab, double *r )
 {
+	double r_temp[ 5 ];
 	object *cur;
 	variable *cur_v;
 
-	cur_v=search_var(this, lab);
-	if(cur_v==NULL)
-	 { r[0]=r[1]=r[2]=r[3]=r[4]=0;
-	   quit=0;
-	   return;
-	 }
-	cur=cur_v->up;
-
-	if(cur->up!=NULL)
-	 cur_v=(cur->up)->search_var(cur->up, lab);
-	cur=cur_v->up;
-
-	if(cur!=NULL)
+	if ( r == NULL )
+		r = r_temp;
+	
+	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
+	
+	cur_v = search_var( this, lab );
+	if ( cur_v == NULL )
 	{
-	r[3]=r[4]=cur->cal(lab, 0);
-	for( r[2]=0, r[0]=0, r[1]=0; cur!=NULL; cur=go_brother(cur))
-	{r[0]=r[0]+1;
-	 r[5]=cur->cal(lab, 0);
-	 r[1]=r[1]+r[5];
-	 r[2]=r[2]+r[5]*r[5];
-	 if(r[5]>r[3])
-	  r[3]=r[5];
-	 if(r[5]<r[4])
-	  r[4]=r[5];
+		sprintf( msg, "variable '%s' not found in wgh_aver", lab );
+		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation." );
+		return -1;
 	}
-	if(r[0]>0)
-	 {r[1]=r[1]/r[0];
-	  r[2]=r[2]/r[0]-r[1]*r[1];
-	 }
+	
+	cur = cur_v->up;
+	if ( cur->up != NULL )
+		cur_v = ( cur->up )->search_var( cur->up, lab );
 	else
-	 r[1]=r[2]=0;
+		return 0;
+		
+	cur = cur_v->up;
+	if ( cur != NULL )
+	{
+		r[ 3 ] = r[ 4 ] = cur->cal( lab, 0 );
+		for ( r[ 2 ] = 0, r[ 0 ] = 0, r[ 1 ] = 0; cur != NULL; cur = go_brother( cur ) )
+		{
+			++r[ 0 ];
+			r[ 5 ] = cur->cal( lab, 0 );
+			r[ 1 ] += r[ 5 ];
+			r[ 2 ] += r[ 5 ] * r[ 5 ];
+			if ( r[ 5 ] > r[ 3 ] )
+				r[ 3 ] = r[ 5 ];
+			if ( r[ 5 ] < r[ 4 ] )
+				r[ 4 ] = r[ 5 ];
+		}
+		
+		if ( r[ 0 ] > 0 )
+		{
+			r[ 1 ] /= r[ 0 ];
+			r[ 2 ] = r[ 2 ] / r[ 0 ] - r[ 1 ] * r[ 1 ];
+		}
+		else
+			r[ 1 ] = r[ 2 ] = 0;
 	}
-	else
-	 r[0]=r[1]=r[2]=r[3]=r[4]=0;
+	
+	return r[ 0 ];								// return the number of instances
 }
 
 

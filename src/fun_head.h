@@ -308,13 +308,33 @@ extern double i_values[];
 #define SUMS( X, Y ) X->sum( ( char * ) Y, 0 )
 #define SUMLS( X, Y, Z ) X->sum( ( char * ) Y, Z )
 
-#define STAT( X ) p->stat( ( char * ) X, v)
-#define STATS( O, X ) O->stat( ( char * ) X, v)
+#define STAT( X ) p->stat( ( char * ) X, v )
+#define STATS( O, X ) O->stat( ( char * ) X, v )
 
-#define WHTAVE( X,W ) p->whg_av( ( char * ) W, ( char * ) X, 0 )
-#define WHTAVEL( X,W, Y ) p->whg_av( ( char * ) W, ( char * ) X, Y )
-#define WHTAVES( X,W, Y ) X->whg_av( ( char * ) W, ( char * ) Y, 0 )
-#define WHTAVELS( X,W, Y, Z ) X->whg_av( ( char * ) W, ( char * ) Y, Z )
+#define MAX( X ) p->overall_max( ( char * ) X, 0 )
+#define MAXL( X, Y ) p->overall_max( ( char * ) X, Y )
+#define MAXS( X, Y ) X->overall_max( ( char * ) X, 0 )
+#define MAXLS( O, X, Y ) O->overall_max( ( char * ) X, Y )
+
+#define MIN( X ) p->overall_min( ( char * ) X, 0 )
+#define MINL( X, Y ) p->overall_min( ( char * ) X, Y )
+#define MINS( X, Y ) X->overall_min( ( char * ) X, 0 )
+#define MINLS( O, X, Y ) O->overall_min( ( char * ) X, Y )
+
+#define AVE( X ) p->av( ( char * ) X, 0 )
+#define AVEL( X, Y ) p->av( ( char * ) X, Y )
+#define AVES( X, Y ) X->av( ( char * ) Y, 0 )
+#define AVELS( X, Y, Z ) X->av( ( char * ) Y, Z )
+
+#define WHTAVE( X, W ) p->whg_av( ( char * ) W, ( char * ) X, 0 )
+#define WHTAVEL( X, W, Y ) p->whg_av( ( char * ) W, ( char * ) X, Y )
+#define WHTAVES( X, W, Y ) X->whg_av( ( char * ) W, ( char * ) Y, 0 )
+#define WHTAVELS( X, W, Y, Z ) X->whg_av( ( char * ) W, ( char * ) Y, Z )
+
+#define SD( X ) p->sd( ( char * ) X, 0 )
+#define SDL( X, Y ) p->sd( ( char * ) X, Y )
+#define SDS( X, Y ) X->sd( ( char * ) Y, 0 )
+#define SDLS( X, Y, Z ) X->sd( ( char * ) Y, Z )
 
 #define INCRS(Q, X, Y ) Q->increment( ( char * ) X, Y )
 #define INCR( X, Y ) p->increment( ( char * ) X, Y )
@@ -343,11 +363,6 @@ extern double i_values[];
 #define CYCLE3_SAFES( C, O, L ) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLE_SAFES" ), \
 								 cyccur3 = go_brother( O ); O != NULL; O = cyccur3, \
 								 cyccur3 != NULL ? cyccur3 = go_brother( cyccur3 ) : cyccur3 = cyccur3 )
-
-#define MAX( X ) p->overall_max( ( char * ) X, 0 )
-#define MAXL( X, Y ) p->overall_max( ( char * ) X, Y )
-#define MAXS( X, Y ) X->overall_max( ( char * ) X, 0 )
-#define MAXLS( O, X, Y ) O->overall_max( ( char * ) X, Y )
 
 #define WRITE( X, Y ) p->write( ( char * ) X, Y, t )
 #define WRITEL( X, Y, Z ) p->write( ( char * ) X, Y, Z )
