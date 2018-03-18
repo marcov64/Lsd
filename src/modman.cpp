@@ -10,12 +10,13 @@
  *************************************************************/
 
 /*****
-used up to 87 options included
+used up to 87 options
 *******/
 
 /*****************************************************
-This program is a front end for dealing with LSD models code (running, compiling, editing, debugging 
-LSD model programs). See the manual for help on its use (really needed?)
+
+This program is a front end for dealing with LSD models code (running, compiling, editing, 
+debugging LSD model programs). See the manual for help on its use.
 
 IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to 
 a programming environment for LSD model programs.
@@ -25,23 +26,29 @@ This file can be compiled with the command line:
 
 make -f <makefile>
 
-There are several makefiles in LSD root directory appropriate to different environments (Windows, Mac & Linux) and configurations (32 or 64-bit)
+There are several makefiles in LSD root directory appropriate to different environments 
+(Windows, Mac & Linux) and configurations (32 or 64-bit).
 
-LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick is required because under Windows there are troubles launchins external package from a "first instance" of a program.
+LMM starts in a quite weird way. If there is no parameter in the call used to start it, the only 
+operation it does is to ... run a copy of itself followed by the parameter "kickstart". This trick 
+is required because under Windows there are troubles launching external package from a "first 
+instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu and src as model directories, where it expect to find certain files. At any given moment a model name is stored, together with its directory and the file shown. Any command is executed in a condition like this:
+LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, R and src as model 
+directories, where it expect to find certain files. At any given moment a model name is stored, 
+together with its directory and the file shown. 
+
+Any internal command is executed in a condition like this:
+
 if(choice==x)
  do_this_and_that
 
-and returned to the main cycle.
-
-After each block the flow returns to "loop" where the main Tcl_DoOneEvent loop
-sits.
+and returned to the main cycle. After each block the flow returns to "loop" where the main 
+Tcl_DoOneEvent loop sits.
 
 The widget of importance are:
 - .f.t.t is the main text editor
 - .f.m is the frame containing the upper buttons, models list and help window
-
 
 *****************************************************/
 
@@ -942,174 +949,154 @@ if(s!=NULL && strcmp(s, ""))
  goto loop;
 }
 
-if(choice==5 || choice==50)
+
+if ( choice == 5 || choice == 50 )
 {
- /*Load the description file*/
-s=(char *)Tcl_GetVar(inter, "modelname",0);
+	/*Load the description file*/
+	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-if(s==NULL || !strcmp(s, ""))
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-  choice=0;
-  goto loop;
- }
-
-  cmd( "set filename description.txt" );
-  
-  cmd( ".f.t.t delete 0.0 end" );
-  cmd( "set choice 0; if { [ file exists \"$modeldir/$filename\" ] } { set choice 1; if { [ file size \"$modeldir/$filename\" ] <= 2 } { set choice 0; file delete \"$modeldir/$filename\" } }" );
- if(choice==1)
-  {cmd( "set file [open \"$modeldir/description.txt\" r]" );
-   cmd( ".f.t.t insert end [read -nonewline $file]" );
-   cmd( "close $file" );
-   cmd( "set before [.f.t.t get 1.0 end]" );
-  }
-  else		// if no description, ask if the user wants to create it or not
-  {
-	cmd( "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('description.txt') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
-	cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
-	if ( choice == 2 )
+	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( " set filename \"\" " );
-		cmd( "set before [.f.t.t get 0.0 end]" );
-		choice = 8;		// load equations file
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		choice = 0;
 		goto loop;
 	}
-	cmd( ".f.t.t insert end \"Model $modelname (ver. $version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
-  }
 
-  cmd( ".f.t.t edit reset" );
-  sourcefile=0;
-  cmd( ".f.t.t mark set insert 1.0" );
-  cmd( "focus -force .f.t.t" );
+	cmd( "set dirname \"$modeldir\"" );
+	cmd( "set filename description.txt" );
+	  
+	cmd( ".f.t.t delete 0.0 end" );
+	cmd( "set choice 0; if { [ file exists \"$dirname/$filename\" ] } { set choice 1; if { [ file size \"$dirname/$filename\" ] <= 2 } { set choice 0; file delete \"$dirname/$filename\" } }" );
+	if ( choice == 1 )
+	{
+		cmd( "set file [open \"$dirname/description.txt\" r]" );
+		cmd( ".f.t.t insert end [read -nonewline $file]" );
+		cmd( "close $file" );
+		cmd( "set before [.f.t.t get 1.0 end]" );
+	}
+	else		// if no description, ask if the user wants to create it or not
+	{
+		cmd( "set answer [ tk_messageBox -parent . -type yesno -default no -icon question -title \"Create Description\" -message \"Create a description file?\" -detail \"There is no valid description file ('description.txt') set for the model\n\nDo you want to create a description file now?\n\nPress 'No' to just show the equations file.\" ]" );
+		cmd( " if [ string equal $answer yes ] { set choice 1 } { set choice 2 } " );
+		if ( choice == 2 )
+		{
+			cmd( " set filename \"\" " );
+			cmd( "set before [.f.t.t get 0.0 end]" );
+			choice = 8;		// load equations file
+			goto loop;
+		}
+		cmd( ".f.t.t insert end \"Model $modelname (ver. $version)\n\n(Enter the Model description text here)\n\n(PRESS CTRL+E TO EDIT EQUATIONS)\n\"" );
+	}
 
-  cmd( ".f.hea.file.dat conf -text \"$filename\"" );
-  
-  cmd( "catch [unset -nocomplain ud]" );
-  cmd( "catch [unset -nocomplain udi]" );
-  cmd( "catch [unset -nocomplain rd]" );
-  cmd( "catch [unset -nocomplain rdi]" );
-  cmd( "lappend ud [.f.t.t get 0.0 end]" );
-  cmd( "lappend udi [.f.t.t index insert]" );
-  
-  if(choice==50)
-    choice=46; //go to create makefile, after the model selection
-  else
-    choice=0;  //just relax
-  goto loop;
+	cmd( ".f.t.t edit reset" );
+	sourcefile = 0;
+	cmd( ".f.t.t mark set insert 1.0" );
+	cmd( "focus -force .f.t.t" );
+
+	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	  
+	cmd( "unset -nocomplain ud" );
+	cmd( "unset -nocomplain udi" );
+	cmd( "unset -nocomplain rd" );
+	cmd( "unset -nocomplain rdi" );
+	cmd( "lappend ud [.f.t.t get 0.0 end]" );
+	cmd( "lappend udi [.f.t.t index insert]" );
+	  
+	if ( choice == 50 )
+		choice = 46; 			// go to create makefile, after the model selection
+	else
+		choice = 0;  			// just relax
+	
+	goto loop;
 }
  
-if(choice==7)
- {
- /*Show compilation result*/
+ 
+if ( choice == 7 )
+{
+	/*Show compilation result*/
 
-s=(char *)Tcl_GetVar(inter, "modelname",0);
-if(s==NULL || !strcmp(s, ""))
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-  choice=0;
-  goto loop;
- }
+	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	if ( s == NULL || ! strcmp( s, "" ) )
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		choice = 0;
+		goto loop;
+	}
 
-create_compresult_window();
-choice=0;
-goto loop;
+	create_compresult_window( );
+	choice = 0;
+	goto loop;
+}
 
-  cmd( "if [file exists \"$modeldir/makemessage.txt\"]==1 {set choice 1} {set choice 0}" );
- if(choice==1)
-  {
-    
-    create_compresult_window();
-    
-cmd( "catch [unset -nocomplain ud]" );
-cmd( "catch [unset -nocomplain udi]" );
-cmd( "catch [unset -nocomplain rd]" );
-cmd( "catch [unset -nocomplain rdi]" );
-cmd( "lappend ud [.f.t.t get 0.0 end]" );
-cmd( "lappend udi [.f.t.t index insert]" );
-
-  }
-  else
-  {
-
-   cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No compilation results\"" );
-  choice=0;
-  goto loop;
-
-  }
-
-  choice=0;
-  goto loop;
- }
 
 if ( choice == 8 )
 {
-/* Insert in the text window the main equation file */
+	/* Insert in the text window the main equation file */
 
-cmd( ".f.t.t delete 1.0 end" );
-s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	cmd( ".f.t.t delete 1.0 end" );
+	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-if ( s == NULL || ! strcmp( s, "" ) )
-{
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-	choice = 0;
-	goto loop;
-}
- 
-s = get_fun_name( str );
-if ( s == NULL || ! strcmp( s, "" ) )
-{
-	cmd( "set filename \"\"" );
-	cmd( "set dirname \"\"" );
-	cmd( "set before [.f.t.t get 1.0 end]" );  
-	cmd( "update" );
-	choice = 0;
-	goto loop;
-}
-else
-	cmd( "set filename \"%s\"", s );
- 
-cmd( "focus -force .f.t.t" );
-cmd( "set dirname $modeldir" );
-cmd( "set file [open \"$modeldir/$filename\" r]" );
-cmd( ".f.t.t insert end [read -nonewline $file]" );
-cmd( "close $file" );
-cmd( ".f.t.t edit reset" );
-cmd( ".f.t.t tag remove sel 1.0 end" ); 
+	if ( s == NULL || ! strcmp( s, "" ) )
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		choice = 0;
+		goto loop;
+	}
+	 
+	s = get_fun_name( str );
+	if ( s == NULL || ! strcmp( s, "" ) )
+	{
+		cmd( "set filename \"\"" );
+		cmd( "set dirname \"\"" );
+		cmd( "set before [.f.t.t get 1.0 end]" );  
+		cmd( "update" );
+		choice = 0;
+		goto loop;
+	}
+	else
+		cmd( "set filename \"%s\"", s );
+	
+	cmd( "set dirname \"$modeldir\"" );
+	cmd( "set file [open \"$dirname/$filename\" r]" );
+	cmd( ".f.t.t insert end [read -nonewline $file]" );
+	cmd( "close $file" );
+	cmd( ".f.t.t edit reset" );
+	cmd( ".f.t.t tag remove sel 1.0 end" ); 
+	cmd( "focus -force .f.t.t" );
 
-// handle the opening of files from the compilation error window
-cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer $errlin ] } { \
-		.f.t.t tag add sel $errlin.0 $errlin.end; \
-		if { [ info exists errcol ] && $errcol != \"\" && [ string is integer $errcol ] } { \
-			.f.t.t see $errlin.$errcol; \
-			.f.t.t mark set insert $errlin.$errcol \
+	// handle the opening of files from the compilation error window
+	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer $errlin ] } { \
+			.f.t.t tag add sel $errlin.0 $errlin.end; \
+			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer $errcol ] } { \
+				.f.t.t see $errlin.$errcol; \
+				.f.t.t mark set insert $errlin.$errcol \
+			} else { \
+				.f.t.t see $errlin.0; \
+				.f.t.t mark set insert $errlin.0 \
+			} \
 		} else { \
-			.f.t.t see $errlin.0; \
-			.f.t.t mark set insert $errlin.0 \
-		} \
-	} else { \
-		.f.t.t mark set insert 1.0 \
-	}" );
+			.f.t.t mark set insert 1.0 \
+		}" );
 
-cmd( "set before [.f.t.t get 1.0 end]" );
-cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	cmd( "set before [.f.t.t get 1.0 end]" );
+	cmd( ".f.hea.file.dat conf -text \"$filename\"" );
 
-cmd( ".f.t.t tag add bc \"1.0\"" );
-cmd( ".f.t.t tag add fc \"1.0\"" );
+	cmd( ".f.t.t tag add bc \"1.0\"" );
+	cmd( ".f.t.t tag add fc \"1.0\"" );
 
-sourcefile=1;
-cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
-color(shigh, 0, 0);			// set color types (all text)
-  
-cmd( "catch [unset -nocomplain ud]" );
-cmd( "catch [unset -nocomplain udi]" );
-cmd( "catch [unset -nocomplain rd]" );
-cmd( "catch [unset -nocomplain rdi]" );
-cmd( "lappend ud [.f.t.t get 0.0 end]" );
-cmd( "lappend udi [.f.t.t index insert]" );
+	sourcefile=1;
+	cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
+	color(shigh, 0, 0);			// set color types (all text)
+	  
+	cmd( "catch [unset -nocomplain ud]" );
+	cmd( "catch [unset -nocomplain udi]" );
+	cmd( "catch [unset -nocomplain rd]" );
+	cmd( "catch [unset -nocomplain rdi]" );
+	cmd( "lappend ud [.f.t.t get 0.0 end]" );
+	cmd( "lappend udi [.f.t.t index insert]" );
 
-choice=0;
-goto loop;
+	choice=0;
+	goto loop;
 }
 
 

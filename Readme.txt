@@ -126,11 +126,19 @@ Please note that you need a FULLY installed Cygwin64 to use LSD 64-bit. Just cop
 Linux Installation
 ******************
 
-To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.5/8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. In Debian or Ubuntu, you can use "sudo apt-get install zlib1g-dev tcl8.6-dev tk8.6-dev" to make sure you have the correct libraries.
+To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics). 
 
-Please check your configuration has at least g++ 4.9 installed (you may check it by issuing the command "g++ -v" in terminal). In Debian or Ubuntu you may use "sudo apt-get install g++", if necessary. Ubuntu minimum supported version is 15.04 (older versions can be updated to use g++ 4.9 but this is not the default configuration).
+In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
-Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics). In Debian or Ubuntu, use "sudo apt-get install gdb gnuplot" to install both. 
+sudo apt-get install build-essential gdb gnuplot zlib1g-dev tcl8.6-dev tk8.6-dev
+
+In Fedora or CentOS, the equivalent command is:
+
+sudo yum install gcc-c++ make gdb gnuplot zlib-devel tcl tk tcl-devel tk-devel
+
+Please check your configuration has at least g++ version 4.9 installed (you may check it by issuing the command "g++ -v" in terminal). Ubuntu minimum supported version is 15.04 (older versions can be updated to use g++ 4.9 but this is not the default configuration). If only g++ version 4.8 is available, it is usually possible to use it if the user change the "-std=gnu++14" directive to "-std=gnu++11" in the GLOBAL_CC parameter in LMM menu "Model>System Options". 
+
+Also check if Tcl/Tk version 8.6 is present (use the command "echo 'puts $tcl_version;exit 0' | tclsh" to get the installed version). If a different version is present, but at least version 8.5, the user must change the TCL_VERSION parameter in LMM menu "Model>System Options" to the appropriate value.
 
 To unpack the LSD distribution file, e.g., Lsd-7.0.tar.gz, simply copy it to the chosen directory (in most cases  "~/", the user home directory, is the best option) and unpack using your file manager. This will create the whole directory structure. Alternatively, to unpack the distribution file using the terminal can be done using ( for ".tar.gz" extension files only):
 

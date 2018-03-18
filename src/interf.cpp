@@ -634,7 +634,7 @@ if ( redrawRoot )
 		cmd( "$w add separator" );
 		
 		cmd( "$w add command -label \"Create Model Report...\" -underline 7 -command { set choice 36 }" );
-		cmd( "$w add command -label \"Create LaTex Table\" -underline 9 -command { set choice 57 }" );
+		cmd( "$w add command -label \"Create LaTex Tables\" -underline 9 -command { set choice 57 }" );
 		cmd( "$w add command -label \"Create LaTex References\" -underline 13 -command { set choice 92 }" );
 		cmd( "$w add command -label \"Import Descriptions\" -underline 0 -command { set choice 43 }" );
 
@@ -3849,7 +3849,7 @@ case 92:
 		break;
 	}
 
-	sprintf( ch, "%s_%s.tex", table ? "table" : "href", simul_name );
+	sprintf( ch, "%s%s%s_%s.tex", strlen( path ) > 0 ? path : "", strlen( path ) > 0 ? "/" : "", table ? "table" : "href", simul_name );
 	cmd( "set choice [ file exists %s ]", ch );
 	if ( *choice == 1 )
 	{

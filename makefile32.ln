@@ -4,10 +4,16 @@ CC=g++
 TARGET=lmm32
 EXT=
 SWITCH_CC=-Wno-unused-result -m32 -O3
+DEFAULT_TCL_VERSION=8.6
+
+# Check Tcl/Tk version
+TCL_VERSION=$(shell echo 'puts $$tcl_version;exit 0' | tclsh)
+ifeq ("$(TCL_VERSION)","")
+TCL_VERSION=$(DEFAULT_TCL_VERSION)
+endif
 
 # For Unix systems, using OS native compiler and Tcl/Tk.
 LSDROOT=.
-TCL_VERSION=8.6
 PATH_TCL_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the file tcl.h
 PATH_TK_HEADER=/usr/include/tcl$(TCL_VERSION) #path to the tk.h
 PATH_TCL_LIB=/usr/lib #path to the file libtclXXX.a
