@@ -319,8 +319,6 @@ int lsdmain( int argn, char **argv )
 #endif	
 
 #else 
-	read_eq_filename( equation_name );
-			
 	for ( i = 1; argv[ i ] != NULL; i++ )
 	{
 		if ( argv[ i ][ 0 ] != '-' || ( argv[ i ][ 1 ] != 'f' && argv[ i ][ 1 ] != 'i' && argv[ i ][ 1 ] != 'c' ) )
@@ -549,10 +547,12 @@ int lsdmain( int argn, char **argv )
 	create_logwindow( );
 	cmd( "init_canvas_colors" );
 
+	read_eq_filename( equation_name );
+			
 	struct_file = new char[ strlen( simul_name ) + 5 ];
 	sprintf( struct_file, "%s.lsd", simul_name );
 
-	eq_file = upload_eqfile();
+	eq_file = upload_eqfile( );
 	strcpy( lsd_eq_file, "" );
 	sprintf( name_rep, "report_%s.html", simul_name );
 

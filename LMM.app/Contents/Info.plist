@@ -47,7 +47,7 @@
 	<string>6.0</string>
 	<key>CFBundleLocalizations</key>
 	<array>
-		<string>en</string><string>en_gb</string>
+		<string>en</string><string>en_us</string>
 	</array>
 	<key>CFBundleName</key>
 	<string>LMM</string>
@@ -60,7 +60,7 @@
 	<key>CFBundleVersion</key>
 	<string>7.0</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.5.0</string>
+	<string>10.9.0</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHighResolutionCapable</key>

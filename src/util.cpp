@@ -2771,7 +2771,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 double init_lattice( char const lrow[ ], char const lcol[ ], int init_color, double nrow, double ncol, double pixW, double pixH )
 {
-	init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
+	return init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
 }
 
 
@@ -2798,7 +2798,7 @@ double update_lattice( double line, double col, double val )
 	char val_string[ 32 ];		// the final string to be used to define tk color to use
 	
 	if ( val < 0 && ( - ( int )  val ) <= 0xffffff )	// RGB mode selected?
-		sprintf( val_string, "#%06lx", - ( int ) val );	// yes: just use the positive RGB value
+		sprintf( val_string, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
 	else
 	{
 		sprintf( val_string, "$c%d", ( unsigned int ) val );		// no: use the positive RGB value

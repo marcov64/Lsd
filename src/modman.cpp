@@ -6378,7 +6378,7 @@ bool compile_run( bool run, bool nw )
 					cmd( "catch { exec ./%s & } result", str + 7 );
 					break;
 				case 2:	// mac package
-					cmd( "catch { exec open ./%s.app & } result", str + 7 );
+					cmd( "catch { exec open -F -n ./%s.app & } result", str + 7 );
 					break;
 				case 3:	// win2k, XP, 7, 8, 10...
 					cmd( "catch { exec %s.exe & } result", str + 7 );

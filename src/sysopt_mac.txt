@@ -2,12 +2,12 @@ SRC=src
 EXT=
 
 # Libraries options
-PATH_TCLTK_FRMWRK=$(LSDROOT)/LMM.app/Contents/Frameworks
+PATH_TCLTK_FRMWRK=./$(TARGET).app/Contents/Frameworks
 PATH_TCL_HEADER=Tcl.framework/Headers
 PATH_TK_HEADER=Tk.framework/Headers
 PATH_HEADER=.
-PATH_TCL_LIB=.
-PATH_TK_LIB=.
+PATH_TCL_LIB=
+PATH_TK_LIB=
 PATH_LIB=.
 TCL_LIB=-framework Tcl
 TK_LIB=-framework Tk
@@ -15,5 +15,5 @@ LIBS=-lz -lpthread
 
 # Compiler options
 CC=g++
-GLOBAL_CC=-march=native -std=gnu++14
+GLOBAL_CC=-DMAC_PKG -march=native -std=gnu++14
 SSWITCH_CC=-fnon-call-exceptions -O3

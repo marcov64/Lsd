@@ -181,9 +181,9 @@ if ( *choice == 2 )
 	
 cmd( "destroytop .w" );
 
-while ( equation_name == NULL || ( ffun = fopen( equation_name, "r" ) ) == NULL )
+while ( strlen( equation_name ) == 0 || ( ffun = fopen( equation_name, "r" ) ) == NULL )
 {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name == NULL ? "" : equation_name );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
 
 if ( *choice == 1 )
 {

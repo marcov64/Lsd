@@ -8,28 +8,21 @@ TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
 INCLUDE=-I$(PATH_TCLTK_FRMWRK)/$(PATH_TCL_HEADER) \
 	-I$(PATH_TCLTK_FRMWRK)/$(PATH_TK_HEADER) -I$(PATH_HEADER) -I$(LSDROOT)/$(SRC)
 
-$(TARGET_PKG): $(FUN).o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)file.o $(SRC_DIR)util.o $(SRC_DIR)object.o \
-$(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o \
-$(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o $(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o $(SRC_DIR)lsdmain.o \
-$(SRC_DIR)report.o $(SRC_DIR)nets.o $(TARGET).app/Contents/Info.plist
-	rm -f $(TARGET)
+$(TARGET_PKG): $(TARGET).app/Contents/Info.plist $(FUN).o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)file.o \
+$(SRC_DIR)util.o $(SRC_DIR)object.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o $(SRC_DIR)draw.o \
+$(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o $(SRC_DIR)set_all.o \
+$(SRC_DIR)analysis.o $(SRC_DIR)show_eq.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) $(FUN).o $(SRC_DIR)file.o $(SRC_DIR)main_gnuwin.o $(SRC_DIR)util.o \
 	$(SRC_DIR)draw.o $(SRC_DIR)object.o $(SRC_DIR)set_all.o $(SRC_DIR)variab.o $(SRC_DIR)interf.o \
 	$(SRC_DIR)show_eq.o $(SRC_DIR)runtime.o $(SRC_DIR)debug.o $(SRC_DIR)edit.o $(SRC_DIR)edit_dat.o \
 	$(SRC_DIR)analysis.o $(SRC_DIR)lsdmain.o $(SRC_DIR)report.o $(SRC_DIR)nets.o \
-	$(SWITCH_CC_LNK) -F$(PATH_TCLTK_FRMWRK) -L$(PATH_TCL_LIB) $(TCL_LIB) -L$(PATH_TK_LIB) \
-	$(TK_LIB) -L$(PATH_LIB) $(LIBS) -o $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's|^[^/]*\(@[^(]*Tcl\) .*$$|\1|p'` \
-	$(PATH_TCLTK_FRMWRK)/Tcl.framework/Tcl $(TARGET_PKG)
-	install_name_tool -change `otool -L $(TARGET_PKG) | sed -n 's|^[^/]*\(@[^(]*Tk\) .*$$|\1|p'` \
-	$(PATH_TCLTK_FRMWRK)/Tk.framework/Tk $(TARGET_PKG)
+	$(SWITCH_CC_LNK) -F$(PATH_TCLTK_FRMWRK) $(TCL_LIB) $(TK_LIB) $(LIBS) -o $(TARGET_PKG)
 	touch -c -f $(TARGET).app
 	
-$(TARGET).app/Contents/Info.plist: $(SRC_DIR)icons/lsd.icns
+$(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist
 	rm -f -R LSD-APP-DUMMY $(TARGET).app
 	cp -R $(SRC_DIR)LSD.app LSD-APP-DUMMY
 	mv LSD-APP-DUMMY $(TARGET).app
-	cp $(SRC_DIR)icons/lsd.icns $(TARGET).app/Contents/Resources/lsd.icns
 	sed -e 's/LSD/$(TARGET)/g' -i '' $(TARGET).app/Contents/Info.plist
 
 $(SRC_DIR)file.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
@@ -87,4 +80,4 @@ $(FUN).o: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h $(SRC_DIR
 	$(CC) $(GLOBAL_CC) $(SWITCH_CC) -c $(FUN).cpp $(INCLUDE)
 	
 clean:
-	rm $(SRC_DIR)*.o $(FUN).o $(TARGET_PKG)
+	rm -f -R $(SRC_DIR)*.o $(FUN).o $(TARGET).app

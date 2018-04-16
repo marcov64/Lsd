@@ -5381,7 +5381,7 @@ case 88:
 	// try to read the object name from network file (in first comment line)
 	snprintf( lab, MAX_PATH_LENGTH, "%s%s%s%s%s", lab1, foldersep( lab1 ), lab2, strlen( lab3 ) == 0 ? "" : ".", lab3 );
 	strcpy( lab_old, "(none)" );			// no object name yet
-	if ( f = fopen( lab, "r" ) )
+	if ( ( f = fopen( lab, "r" ) ) )
 	{
 		fgets( ch, MAX_PATH_LENGTH, f );	// get first line
 		sscanf( ch, "%% %99s", lab_old );	// get first string after the comment char
