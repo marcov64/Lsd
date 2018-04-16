@@ -19,7 +19,7 @@ done by LSD objects.
 The most important task of variables is to return their value when requested.
 It is done by comparing the global time of the simulation with the time
 the variable was most recently updated. If the value requested (considering the
-lag) is already available, that is returned. Otherwise, the variable shifts
+lag ) is already available, that is returned. Otherwise, the variable shifts
 its lagged values, and calls its equation to compute the new value.
 All fields and functions in variables are public, so that users may override
 the default mechanism.
@@ -37,7 +37,7 @@ are organized as a linked chain, and can be reached only  via their fields
 next
 
 - double *val;
-vector of numerical values. val[0] is the most recent value computed by the
+vector of numerical values. val[ 0 ] is the most recent value computed by the
 equation, that is, computed at time last_update. val[1] is the value computed
 at time last_update - 1; val[2] at time last_update - 2 and so on.
 
@@ -71,7 +71,7 @@ contain the global time when it was lastly computed the equation for the variabl
 
 - int param;
 Flag set to 1, in case the variable is considered a parameter. In case it is,
-when requested the value it is always returned its field val[0].
+when requested the value it is always returned its field val[ 0 ].
 
 - char data_loaded;
 flag indicatibe whether the variable has been initiliazed with numerical values
@@ -91,7 +91,7 @@ The methods of the (C++) object variable are:
 - int init(object *_up, char *_label, int _num_lag, double *val, int _save);
 perform the initialization.
 
-- double cal(object *caller, int lag);
+- double cal(object *caller, int lag );
 it is its main function. Return the numerical value
 
        val[last_update+lag-t]
@@ -110,7 +110,7 @@ at the present time step, the method shifts its lagged values and calls the meth
 fun
 that perform the equation computation.
 
-- void empty(void);
+- void empty( void ) ;
 It is used to free all the memory assigned to the variable. Used by
 object::delete_obj to cancel an object.
 
@@ -123,7 +123,7 @@ is a code for the different models.
 It is a method common to all the variables and stores the code for the equations.
 Each equation needs to be defined as a block like:
 
-if(!strcmp(label, "LabelOfTheVariable"))
+if (!strcmp(label, "LabelOfTheVariable"))
 {
 ... here any code
 res=avalue;
@@ -133,7 +133,7 @@ goto end;
 The method is common to all the variables, so that the blocks ensure that
 only their piece of code is actually executed. Any code legal in C++ is allowed,
 including the methods and function provided with LSD.
-The value assigned to "res" is assigned as val[0] to the variable.
+The value assigned to "res" is assigned as val[ 0 ] to the variable.
 The final line goto end; ensures that the equation has been computed.
 See file FUNXXX.CPP for more information on this
 
@@ -142,7 +142,7 @@ Functions used here from other files are:
 - void plog(char *m);
 LSDMAIN.CPP print  message string m in the Log screen.
 
-- int deb(object *r, object *c, char *lab, double *res);
+- int deb(object *r, object *c, char *lab, double *res, bool interact);
 DEBUG.CPP
 activate the debugger.
 
@@ -150,7 +150,7 @@ activate the debugger.
 
 #include "decl.h"
 
-clock_t start_profile[100], end_profile[100];
+clock_t start_profile[ 100 ], end_profile[ 100 ];
 
 #ifdef PARALLEL_MODE
 // semaphore to enable just a single parallel call at a time
@@ -167,7 +167,7 @@ mutex crash_lock;
 /****************************************************
 INIT
 ****************************************************/
-int variable::init(object *_up, char const *_label, int _num_lag, double *v, int _save)
+int variable::init( object *_up, char const *_label, int _num_lag, double *v, int _save )
 {
 	int i;
 
@@ -178,34 +178,35 @@ int variable::init(object *_up, char const *_label, int _num_lag, double *v, int
 	
 	total_var++;
 
-	up=_up;
-	label=NULL;
-	i=strlen(_label)+1;
-	label=new char[i];
-	strcpy(label, _label);
+	up =_up;
+	label = NULL;
+	i = strlen(_label)+1;
+	label = new char[ i ];
+	strcpy( label, _label );
 	param = 0;
-	num_lag=_num_lag;
+	num_lag =_num_lag;
 	if ( num_lag >= 0 )
 	{
 		val = new double[ num_lag + 1 ];
-		for( i = 0; i < num_lag + 1; i++ )
+		for ( i = 0; i < num_lag + 1; i++ )
 			val[ i ] = v[ i ];
 	}
 	else
 		val = NULL;
-	next=NULL;
-	last_update=0;
-	save=_save;
+	
+	next = NULL;
+	last_update = 0;
+	save =_save;
 	savei = false;
 	under_computation = false;
-	deb_cond=0;
-	deb_cnd_val=0;
-	data_loaded='-';
+	deb_cond = 0;
+	deb_cnd_val = 0;
+	data_loaded = '-';
 	plot = false;
 	parallel = false;
 	observe = false;
-	data=NULL;
-	lab_tit=NULL;
+	data = NULL;
+	lab_tit = NULL;
 
 	return 0;
 }
@@ -366,11 +367,11 @@ double variable::cal( object *caller, int lag )
 	}
 	user_exception = false;
 
-	for ( i = 0; i < num_lag; ++i ) 	//scale down the past values
+	for ( i = 0; i < num_lag; ++i ) 	// scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
 	val[ 0 ] = app;
 
-	last_update++;
+	last_update = t;
 
 #ifdef PARALLEL_MODE
 	if ( fast_mode == 0 && ! parallel_mode )
@@ -416,23 +417,23 @@ double variable::cal( object *caller, int lag )
 		}
 
 		if ( debug_flag && when_debug >= t && debug == 'd' && deb_cond == 0 )
-			deb( ( object * ) up, caller, label, &val[ 0 ] );
+			deb( ( object * ) up, caller, label, &val[ 0 ], true );
 		else
-			switch( deb_cond )
+			switch ( deb_cond )
 			{
 				case 0: 
 					break;
 				case 1: 
-					if ( val[0] == deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[0] );
+					if ( val[ 0 ] == deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[ 0 ], true );
 					break;
 				case 2: 
-					if( val[0] > deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[0] );
+					if ( val[ 0 ] > deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[ 0 ], true );
 					break;
 				case 3: 
-					if( val[0] < deb_cnd_val )
-						deb( ( object * ) up, caller, label, &val[0] );
+					if ( val[ 0 ] < deb_cnd_val )
+						deb( ( object * ) up, caller, label, &val[ 0 ], true );
 					break;
 				default:
 					sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
@@ -493,7 +494,7 @@ void worker::cal_worker( void )
 		
 		free = true;
 	
-		while( running )
+		while ( running )
 		{
 			// wait for variable calculation message
 			unique_lock< mutex > lock_worker( lock );
@@ -519,7 +520,7 @@ void worker::cal_worker( void )
 
 				var->under_computation = true;
 
-				//Compute the Variable's equation
+				// compute the Variable's equation
 				user_excpt = true;			// allow distinguishing among internal & user exceptions
 				try 						// do it while catching exceptions to avoid obscure aborts
 				{
@@ -535,12 +536,12 @@ void worker::cal_worker( void )
 				}
 				user_excpt = false;
 
-				//scale down the past values
+				// scale down the past values
 				for ( i = 0; i < var->num_lag; ++i )
 					var->val[ var->num_lag - i ] = var->val[ var->num_lag - i - 1 ];
 				var->val[ 0 ] = app;
 
-				var->last_update++;
+				var->last_update = t;
 				var->under_computation = false;
 			}
 			
@@ -801,7 +802,7 @@ void parallel_update( variable *v, object* p, object *caller )
 				{
 					unique_lock< mutex > lock_update( update_lock );
 					worker_ready = false;
-					if ( ! update.wait_for( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ ]{ return ! worker_ready; } ) )
+					if ( ! update.wait_for ( lock_update, chrono::milliseconds( MAX_TIMEOUT ), [ ]{ return ! worker_ready; } ) )
 						{
 							worker_ready = true;
 							plog( "\nWarning: workers timeout (%d millisecs.), continuing...", "", MAX_TIMEOUT );
@@ -875,7 +876,7 @@ void parallel_update( variable *v, object* p, object *caller )
 /****************************************************
 EMPTY
 ****************************************************/
-void variable::empty(void)
+void variable::empty( void ) 
 {
 #ifdef PARALLEL_MODE
 	// prevent concurrent use by more than one thread
@@ -891,8 +892,8 @@ void variable::empty(void)
 
 	total_var--;
 	
-	delete[] label;
-	delete[] data;
-	delete[] lab_tit;
-	delete[] val;
+	delete [ ] label;
+	delete [ ] data;
+	delete [ ] lab_tit;
+	delete [ ] val;
 }

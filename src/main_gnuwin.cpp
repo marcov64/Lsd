@@ -112,7 +112,7 @@ void signal_handler( int signum )
 	char msg2[ MAX_LINE_SIZE ], msg3[ MAX_LINE_SIZE ];
 	double useless = -1;
 	
-	switch(signum)
+	switch (signum )
 	{
 #ifdef SIGQUIT
 		case SIGQUIT:

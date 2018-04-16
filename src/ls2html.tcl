@@ -11,6 +11,24 @@
 
 # Collection of procedures to manage HTML and other external files
 
+
+# Show LSD About dialog box
+proc LsdAbout { ver dat { parWnd "." } } {
+	global tcl_platform
+
+	set tit "About LSD"
+	set plat [ string totitle $tcl_platform(platform) ];
+	set mach $tcl_platform(machine)
+	set os $tcl_platform(os)
+	set osV $tcl_platform(osVersion)
+	set tclV [ info patch ]
+	set copyr "written by Marco Valente, Universita' dell'Aquila\nand by Marcelo Pereira, University of Campinas\n\nCopyright Marco Valente\nLSD is distributed under the GNU General Public License"
+	
+	tk_messageBox -parent $parWnd -type ok -icon info -title $tit -message "Version $ver ($dat)" -detail "Platform: $plat ($mach)\nOS: $os ($osV)\nTcl/Tk: $tclV\n\n$copyr"
+}
+
+
+
 # Remove existing LSD temporary files
 proc LsdExit { } {
 	global RootLsd

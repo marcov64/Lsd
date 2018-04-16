@@ -145,7 +145,7 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 	if ( origNode->node == NULL )		// origin is not yet a node?
 	{
 		origNode->node = new netNode( );// create node data structure
-		if( origNode->node == NULL )
+		if ( origNode->node == NULL )
 		{
 			sprintf( msg, "out of memory when creating net node" );
 			error_hard( msg, "Out of memory" );
@@ -155,7 +155,7 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 	if ( destNode->node == NULL )		// destination is not yet a node?
 	{
 		destNode->node = new netNode( );// create node data structure
-		if( destNode->node == NULL )
+		if ( destNode->node == NULL )
 		{
 			sprintf( msg, "out of memory when creating net node" );
 			error_hard( msg, "Out of memory" );
@@ -222,7 +222,7 @@ netLink *object::add_link_net( object *destPtr, double weight, double probTo )
 	if ( this->up != destPtr->up || strcmp( this->label, destPtr->label ) )
 		return NULL;					// different parent or object type?
 	cur = new netLink( this, destPtr, weight, probTo );
-	if( cur == NULL )
+	if ( cur == NULL )
 	{
 		sprintf( msg, "out of memory when creating net link" );
 		error_hard( msg, "Out of memory" );
@@ -330,7 +330,7 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 	if ( strcmp( nodeName, "" ) )	// name assigned?
 	{
 		name = new char[ strlen( nodeName ) + 1 ];
-		if( name == NULL )
+		if ( name == NULL )
 		{
 			sprintf( msg, "out of memory when creating net node name" );
 			error_hard( msg, "Out of memory" );
@@ -363,7 +363,7 @@ netNode::~netNode( void )
 	Add netNode data structure to LSD object
 */
 
-netNode *object::add_node_net( long id, char const nodeName[], 
+netNode *object::add_node_net( long id, char const nodeName[ ], 
 							   bool silent )
 {
 	long serNumOld = -1;
@@ -378,7 +378,7 @@ netNode *object::add_node_net( long id, char const nodeName[],
 	}
 	
 	node = new netNode( id, nodeName );
-	if( node == NULL )
+	if ( node == NULL )
 	{
 		sprintf( msg, "out of memory when creating net node" );
 		error_hard( msg, "Out of memory" );
@@ -423,7 +423,7 @@ void object::name_node_net( char const *nodeName )
 	if ( strcmp( nodeName, "" ) )	// name assigned?
 	{
 		node->name = new char[ strlen( nodeName ) + 1 ];
-		if( node->name == NULL )
+		if ( node->name == NULL )
 		{
 			sprintf( msg, "out of memory when creating net node name" );
 			error_hard( msg, "Out of memory" );
@@ -458,17 +458,17 @@ object *object::search_node_net( char const *lab, long destId )
 
 /*
 	Returns some basic statistics about the directed network.
-	r[0]: number of nodes
-	r[1]: number of links (arcs)
-	r[2]: average out-degree
-	r[3]: minimum out-degree
-	r[4]: maximum out-degree
-	r[5]: density (including loops)
+	r[ 0 ]: number of nodes
+	r[ 1 ]: number of links (arcs)
+	r[ 2 ]: average out-degree
+	r[ 3 ]: minimum out-degree
+	r[ 4 ]: maximum out-degree
+	r[ 5 ]: density (including loops)
 */
 
 void object::stats_net( char const *lab, double *r )
 {
-	r[0] = r[1] = r[2] = r[3] = r[4] = r[5] = 0;
+	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = r[ 5 ] = 0;
 	
 	object *cur = search( lab );
 
@@ -479,20 +479,20 @@ void object::stats_net( char const *lab, double *r )
 		if ( cur->node != NULL )					// valid node?
 		{
 			double nLinks = (double) cur->node->nLinks;
-			if ( r[0] == 0. )						// first node? 
-				r[3] = nLinks;						// update minimum
+			if ( r[ 0 ] == 0. )						// first node? 
+				r[ 3 ] = nLinks;						// update minimum
 			else
-				r[3] = r[3] < nLinks ? r[3] : nLinks;
+				r[ 3 ] = r[ 3 ] < nLinks ? r[ 3 ] : nLinks;
 			
-			r[0]++;
-			r[1] += nLinks;
-			r[4] = r[4] > nLinks ? r[4] : nLinks;
+			r[ 0 ]++;
+			r[ 1 ] += nLinks;
+			r[ 4 ] = r[ 4 ] > nLinks ? r[ 4 ] : nLinks;
 		}
 		
-	if ( r[0] > 0. )
+	if ( r[ 0 ] > 0. )
 	{
-		r[2] = r[1] / r[0];
-		r[5] = r[1] / ( r[0] * ( r[0] - 1 ) );
+		r[ 2 ] = r[ 1 ] / r[ 0 ];
+		r[ 5 ] = r[ 1 ] / ( r[ 0 ] * ( r[ 0 ] - 1 ) );
 	}
 }
 
@@ -715,7 +715,7 @@ long object::init_star_net( char const *lab, long numNodes )
 
 	cur1 = search( lab );				// save hub
 	
-	for( cur2 = go_brother( cur1 ), links = 0; cur2 != NULL; 
+	for ( cur2 = go_brother( cur1 ), links = 0; cur2 != NULL; 
 		 cur2 = go_brother( cur2 ) )	// create the strokes
 	{
 		cur1->add_link_net( cur2 );		// arc from hub to spoke
@@ -872,7 +872,7 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 		for ( link = 1; link <= outDeg; link++ )
 		{															// run through all node's links
 			newNode = 0;
-			while( ! newNode || tryNode == idNode )					// while no new link found
+			while ( ! newNode || tryNode == idNode )					// while no new link found
 			{
 				tryNode = (long) uniform_int( 1, numNodes );		// draw link (other node ID)
 				if ( cur->search_link_net( tryNode ) )				// link already exists?
@@ -983,9 +983,9 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 			{
 				if ( lowNeigh == idNode )							// same target as original node
 					lowNeigh++;     								// go up
-				if( lowNeigh < 1 )									// too low target node ID
+				if ( lowNeigh < 1 )									// too low target node ID
 					lowNeigh += numNodes;							// big jump up
-				if( lowNeigh > numNodes )							// too high target node ID
+				if ( lowNeigh > numNodes )							// too high target node ID
 					lowNeigh -= numNodes;							// big jump down
 			}
 		
@@ -1054,7 +1054,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 				cur->delete_link_net( cur->search_link_net ( tryNode ) );
 																	// and the link from this object
 				newNode = idNode;									// look for a new node to create a link
-				while( newNode == idNode )
+				while ( newNode == idNode )
 					newNode = (long) uniform_int( 1, numNodes );	// draw a random int different from this agent
 				cur1 = turbosearch( lab, 0, newNode );				// and get new linking node object
 		
@@ -1164,7 +1164,7 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 	for ( cur = firstNode, cur1 = go_brother( cur ); cur != NULL; 
 		  cur = cur1, cur1 != NULL ? cur1 = go_brother( cur1 ) : cur1 = cur1 )
 																	// then safely remove isolated nodes
-		if( cur->node->nLinks == 0 )								// no links?
+		if ( cur->node->nLinks == 0 )								// no links?
 			cur->delete_obj( );										// remove node
 
 	for ( idNode = 1, cur = firstNode; cur != NULL; idNode++, cur = go_brother( cur ) )
@@ -1301,8 +1301,8 @@ void get_line( char *lBuffer, FILE *fPtr )
 		strupr( lBuffer );									// to uppercase
 }
 
-long object::read_file_net( char const *lab, char const dir[], char const base_name[], 
-							int serial, char const ext[] )
+long object::read_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
+							int serial, char const ext[ ] )
 {
 	long idNode, numNodes, countNodes, numLinks, startNode, endNode;
 	int rd;
@@ -1442,13 +1442,13 @@ long object::read_file_net( char const *lab, char const dir[], char const base_n
 	Write directed network in Pajek text file format.
 */
 
-long object::write_file_net( char const *lab, char const dir[], char const base_name[], 
+long object::write_file_net( char const *lab, char const dir[ ], char const base_name[ ], 
 							 int serial, bool append )
 {
 	int tCur = ( t > max_step ) ? max_step : t;				// effective current time
 	long numNodes, numLinks = 0;
 	double weight;
-	char *c, mode[2], fileName[2*MAX_PATH_LENGTH], name[MAX_PATH_LENGTH], actIntv[64];
+	char *c, mode[ 2 ], fileName[2*MAX_PATH_LENGTH], name[MAX_PATH_LENGTH], actIntv[64];
 	object *firstNode, *cur;
 	netLink *cur1;
 	FILE *pajekFile;
@@ -1482,7 +1482,7 @@ long object::write_file_net( char const *lab, char const dir[], char const base_
 	{
 		strcpy( name, base_name );
 		while ( ( c = strchr( name, ' ' ) ) != NULL )
-			c[0] = '_';										// replace space by underscore
+			c[ 0 ] = '_';										// replace space by underscore
 		
 		fprintf( pajekFile, "\n*Network %s_%d_%d\n", base_name, serial, tCur );	// name network
 	}

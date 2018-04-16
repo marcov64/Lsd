@@ -40,7 +40,7 @@ together with its directory and the file shown.
 
 Any internal command is executed in a condition like this:
 
-if(choice==x)
+if (choice==x)
  do_this_and_that
 
 and returned to the main cycle. After each block the flow returns to "loop" where the main 
@@ -85,7 +85,7 @@ bool compile_run( bool run, bool nw = false );
 bool discard_change( void );	// ask before discarding unsaved changes
 char *get_fun_name( char *str, bool nw = false );
 int ModManMain( int argn, char **argv );
-int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[] );// Tcl entry point
+int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[ ] );// Tcl entry point
 void check_option_files( bool sys = false );
 void cmd( const char *cm, ... );
 void color( int hiLev, long iniLin, long finLin );
@@ -104,7 +104,7 @@ char rootLsd[ MAX_PATH_LENGTH ];
 int choice;
 int shigh;						// syntax highlighting state (0, 1 or 2)
 int tosave = false;				// modified file flag
-int v_counter = 0; 				//counter of the v[i] variables inserted in the equations
+int v_counter = 0; 				//counter of the v[ i ] variables inserted in the equations
 
 
 /*************************************
@@ -171,7 +171,7 @@ Tcl_LinkVar( inter, "choice", ( char * ) &choice, TCL_LINK_INT );
 
 // test Tcl interpreter
 cmd( "set choice 1234567890" );
-Tcl_UpdateLinkedVar(inter, "choice" );
+Tcl_UpdateLinkedVar( inter, "choice" );
 if ( choice != 1234567890 )
 {
 	log_tcl_error( "Test Tcl", "Tcl failed, check the Tcl/Tk installation and configuration or reinstall LSD" );
@@ -207,14 +207,14 @@ if ( choice )
 // try to open text file if name is provided in the command line
 if ( argn > 1 )
 {
-	for ( i = 0; argv[1][i] != '\0'; ++i )
+	for ( i = 0; argv[ 1 ][ i ] != '\0'; ++i )
 	{
-		if ( argv[1][i] == '\\' )
-			msg[i] = '/';
+		if ( argv[ 1 ][ i ] == '\\' )
+			msg[ i ] = '/';
 		else
-			msg[i] = argv[1][i];
+			msg[ i ] = argv[ 1 ][ i ];
 	}
-	msg[i] = '\0';
+	msg[ i ] = '\0';
 	cmd( "set filetoload \"%s\"", msg );
 	cmd( "if { ! [ file pathtype \"$filetoload\" ] == \"absolute\" } { set filetoload \"[pwd]/$filetoload\" }" );
 }
@@ -383,10 +383,10 @@ if ( choice != 0 )
 // create a Tcl command that calls the C discard_change function before killing LMM
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
-Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
-Tcl_LinkVar(inter, "tosave", (char *) &tosave, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "macro", (char *) &macro, TCL_LINK_BOOLEAN);
-Tcl_LinkVar(inter, "shigh", (char *) &shigh, TCL_LINK_INT);
+Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
+Tcl_LinkVar( inter, "macro", ( char * ) &macro, TCL_LINK_BOOLEAN);
+Tcl_LinkVar( inter, "shigh", ( char * ) &shigh, TCL_LINK_INT );
 cmd( "set shigh $shigh_temp" );	// restore correct value
 
 // set main window
@@ -494,7 +494,7 @@ cmd( "set w .m.help" );
 cmd( "menu $w -tearoff 0" );
 cmd( ".m add cascade -label Help -menu $w -underline 0" );
 cmd( "$w add command -label \"Help on LMM\" -underline 0 -accelerator F1 -command { LsdHelp LMM.html }" );
-if( macro )
+if ( macro )
   cmd( "$w add command -label \"Help on Macros for LSD Equations\" -underline 8 -command { LsdHelp LSD_macros.html }" );
 else
   cmd( "$w add command -label \"Help on C++ for LSD Equations\" -underline 8 -command { LsdHelp LSD_functions.html }" ); 
@@ -505,7 +505,7 @@ cmd( "$w add command -label \"LMM Primer Tutorial\" -underline 4 -command { LsdH
 cmd( "$w add command -label \"Using LSD Models Tutorial\" -underline 0 -command { LsdHelp model_using.html }" );
 cmd( "$w add command -label \"Writing LSD Models Tutorial\" -underline 0 -command { LsdHelp model_writing.html }" );
 cmd( "$w add separator" );
-cmd( "$w add command -label \"About LMM...\" -underline 0 -command { tk_messageBox -parent . -type ok -icon info -title \"About LMM\" -message \"Version %s (%s)\" -detail \"Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]\" }", _LSD_VERSION_, _LSD_DATE_  );
+cmd( "$w add command -label \"About LSD...\" -underline 0 -command { LsdAbout {%s} {%s} }", _LSD_VERSION_, _LSD_DATE_  );
 
 
 // Button bar
@@ -731,7 +731,7 @@ if ( ! macro )
 	cmd( "menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"LSD equation/function\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( ".v.i add command -label \"for ( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
 	cmd( ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
 	cmd( ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
@@ -848,7 +848,7 @@ loop:
 cmd( "update_title_bar" );
 
 // main command loop
-while( ! choice )
+while ( ! choice )
 {
 	try
 	{
@@ -891,14 +891,14 @@ if ( choice == 2 || choice == 6 )
 }
 
 
-if(choice==3)
+if (choice==3)
  {
   /*Insert in the text window the makefile of the selected model*/
 
 cmd( ".f.t.t delete 0.0 end" );
-s=(char *)Tcl_GetVar(inter, "modelname",0);
+s=( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-if(s==NULL || !strcmp(s, ""))
+if (s==NULL || !strcmp( s, "" ))
  {
   cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
   choice=0;
@@ -909,7 +909,7 @@ cmd( "cd \"$modeldir\"" );
 make_makefile( ); 
 cmd( "cd \"$RootLsd\"" );
 cmd( "if { [file exists \"$modeldir/makefile\"]==1} {set choice 1} {set choice 0}" );
-if(choice==1)
+if (choice == 1 )
  {
   cmd( "set file [open \"$modeldir/makefile\" r]" );
   cmd( ".f.t.t insert end [read -nonewline $file]" );
@@ -927,14 +927,14 @@ goto loop;
 }
 
 
-if(choice==4)
+if (choice==4)
 {
  /* Save the file currently shown */
 
 cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
-s=(char *)Tcl_GetVar(inter, "curfilename",0);
+s=( char * ) Tcl_GetVar( inter, "curfilename", 0 );
 
-if(s!=NULL && strcmp(s, ""))
+if (s!=NULL && strcmp( s, "" ))
  {
   cmd( "if { [file exist \"$dirname/$filename\"] == 1} {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}" );
   cmd( "set file [open \"$curfilename\" w]" );
@@ -1086,7 +1086,7 @@ if ( choice == 8 )
 
 	sourcefile=1;
 	cmd( "savCurIni; savCurFin; updCurWnd" );	// save data for recolor
-	color(shigh, 0, 0);			// set color types (all text)
+	color(shigh, 0, 0 );			// set color types (all text)
 	  
 	cmd( "catch [unset -nocomplain ud]" );
 	cmd( "catch [unset -nocomplain udi]" );
@@ -1416,12 +1416,12 @@ if ( choice == 21 )
 }
 
 
-if(choice==13 || choice==58)
+if (choice==13 || choice==58)
 {
  /*Run the model in the gdb debugger */
-s=(char *)Tcl_GetVar(inter, "modelname",0);
+s=( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-if(s==NULL || !strcmp(s, ""))
+if (s==NULL || !strcmp( s, "" ))
  {
   cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
   choice=0;
@@ -1430,7 +1430,7 @@ if(s==NULL || !strcmp(s, ""))
   
 cmd( "cd \"$modeldir\"" );
 
-if(choice==58)
+if (choice==58)
  {
  cmd( "scan $vmenuInsert %%d.%%d line col" );
  cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
@@ -1443,16 +1443,16 @@ else
 
 make_makefile( );  
 cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
-s=(char *)Tcl_GetVar(inter, "fapp",0);
-f=fopen(s, "r");
-if(f==NULL)
+s=( char * ) Tcl_GetVar( inter, "fapp", 0 );
+f = fopen( s, "r");
+if ( f == NULL )
  {
   cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
   goto end_gdb;
  }
 fscanf(f, "%999s", str);
-while(strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
-if(strncmp(str, "TARGET=", 7)!=0)
+while (strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
+if (strncmp(str, "TARGET=", 7) != 0 )
  {
   cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
   goto end_gdb;
@@ -1461,11 +1461,11 @@ if(strncmp(str, "TARGET=", 7)!=0)
 strcpy(str1, str+7);
 
 cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-if(choice==1)
+if (choice == 1 )
  {//Unix
   sprintf( msg, "catch { exec $DbgTerm -e $DbgExe $cmdbreak %s & } result", str1 );
  }
-if(choice==2)
+if (choice==2)
  {//Mac
 #ifdef MAC_PKG
   sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s.app\\\"\" & } result", str1 );
@@ -1473,7 +1473,7 @@ if(choice==2)
   sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s\\\"\" & } result", str1 );
 #endif
  }
-if(choice==3)
+if (choice==3)
  {//Windows 2000, XP, 7, 8, 10...
   strcat( str1, ".exe" );
   sprintf( msg, "catch { exec $DbgTerm /c $DbgExe $cmdbreak %s & } result", str1 );
@@ -1521,7 +1521,7 @@ goto loop;
 }
 
 
-if(choice==14)
+if (choice==14)
 {
 /* Create a new model/group */
 
@@ -1575,20 +1575,20 @@ cmd( "bind .a <Down> {.a.f.r2 invoke}" );
 cmd( "showtop .a" );
 
 choice=0;
-while(choice==0)
- Tcl_DoOneEvent(0);
+while (choice == 0 )
+ Tcl_DoOneEvent( 0 );
 
 cmd( "destroytop .a" );
 
 //operation cancelled
-if(choice==2)
+if (choice==2)
  {
   choice=0;
   goto loop;
  }
 
 cmd( "set choice $temp" );
-if(choice==2)
+if (choice==2)
 {
 cmd( "set mname \"New group\"" );
 cmd( "set mdir \"newgroup\"" );
@@ -1630,20 +1630,20 @@ here_newgroup:
 
 choice=0;
 
-while(choice==0)
- Tcl_DoOneEvent(0);
+while (choice == 0 )
+ Tcl_DoOneEvent( 0 );
 
 cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
 
 //operation cancelled
-if(choice==2)
+if (choice==2)
  {cmd( "destroytop .a" );
   choice=0;
   goto loop;
  }
 
 cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if(choice==-1)
+if (choice==-1)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1651,7 +1651,7 @@ if(choice==-1)
  } 
 //control for existing directory
 cmd( "if {[file exists \"$groupdir/$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if(choice==3)
+if (choice==3)
 {
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1714,19 +1714,19 @@ loop_copy_new:
 
 choice=0;
 
-while(choice==0)
- Tcl_DoOneEvent(0);
+while (choice == 0 )
+ Tcl_DoOneEvent( 0 );
 
 cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
 //operation cancelled
-if(choice==2)
+if (choice==2)
  {cmd( "destroytop .a" );
   choice=0;
   goto loop;
  }
 
 cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if(choice==-1)
+if (choice==-1)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1735,7 +1735,7 @@ if(choice==-1)
 
 //control for existing directory
 cmd( "if {[file exists \"$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if(choice==3)
+if (choice==3)
  {
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1746,16 +1746,16 @@ if(choice==3)
 cmd( "set dir [glob -nocomplain *]" );
 cmd( "set num [llength $dir]" );
 strcpy(str, " ");
-for(i=0; i<num; i++)
+for ( i = 0; i<num; ++i )
  {
   cmd( "if {[file isdirectory [lindex $dir %d] ] == 1} {set curdir [lindex $dir %i]} {set curdir ___}", i, i );
-  s=(char *)Tcl_GetVar(inter, "curdir",0);
+  s=( char * ) Tcl_GetVar( inter, "curdir", 0 );
   strncpy( str, s, 499 );
-  if(strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
+  if (strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
    {
     cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
     cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
-    if(choice==1)
+    if (choice == 1 )
     {
       cmd( "set f [open \"$curdir/modelinfo.txt\" r]" );
       cmd( "set cname [gets $f]; set cver [gets $f];" );
@@ -1771,21 +1771,21 @@ for(i=0; i<num; i++)
    }
  }
  
-if(choice==3)
+if (choice==3)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"" );
   cmd( ".a.mname.e selection range 0 end" );
   cmd( "focus .a.mname.e" );
   goto loop_copy_new;
  } 
  
-if(choice==4)
+if (choice==4)
  {
  choice=0;
  cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
-  s=(char *)Tcl_GetVar(inter, "answer",0);
+  s=( char * ) Tcl_GetVar( inter, "answer", 0 );
 
   cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
-  if(choice==0)
+  if (choice == 0 )
    {cmd( "destroytop .a" );
     goto loop;
    } 
@@ -1805,7 +1805,7 @@ cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
 
 cmd( "file mkdir \"$dirname\"" );
 
-if( macro )
+if ( macro )
  cmd( "set fun_base \"fun_baseMacro.cpp\"" );
 else 
  cmd( "set fun_base \"fun_baseC.cpp\"" );
@@ -1901,7 +1901,7 @@ if ( choice == 15 || choice == 71 )
 	if ( s[0] != '\0' )
 	{
 	  strncpy( str, s, 499 );
-	  if( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || !strcmp( str, ".H++" ) )
+	  if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || !strcmp( str, ".H++" ) )
 	  {
 		cmd( ".f.t.t tag add bc \"1.0\"" );
 		cmd( ".f.t.t tag add fc \"1.0\"" );
@@ -1948,29 +1948,29 @@ if ( choice == 16 )
 	goto loop;
 }
 
-if(choice==17)
+if (choice==17)
 {
 /* find matching parenthesis */
 
 cmd( "set sym [.f.t.t get insert]" );
 cmd( "if {[string compare $sym \"\\{\"]!=0} {if {[string compare $sym \"\\}\"]!=0} {set choice 0} {set num -1; set direction -backwards; set fsign +; set sign \"\"; set terminal \"1.0\"}} {set num 1; set direction -forwards; set fsign -; set sign +; set terminal end}" );
 
-if(choice==0)
+if (choice == 0 )
  goto loop;
 cmd( "set cur [.f.t.t index insert]" );
 cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
 if (num>0)
   cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
-while(num!=0 && choice!=0)
+while (num!=0 && choice != 0 )
 {
  cmd( "set a [.f.t.t search $direction \"\\{\" $cur $terminal]" );
  cmd( "if {$a==\"\"} {set a [.f.t.t index $terminal]}" );
  cmd( "set b [.f.t.t search $direction \"\\}\" $cur $terminal]" );
  cmd( "if {$b==\"\"} {set b [.f.t.t index $terminal]}" );
  cmd( "if {$a==$b} {set choice 0}" );
- if(choice==0)
+ if (choice == 0 )
   goto loop;
- if(num>0)
+ if (num>0)
    cmd( "if {[.f.t.t compare $a < $b]} {set num [expr $num + 1]; set cur [.f.t.t index \"$a+1char\"]} {set num [expr $num - 1]; set cur [.f.t.t index \"$b+1char\"]}" );
  else
    cmd( "if {[.f.t.t compare $a > $b]} {set num [expr $num + 1]; set cur [.f.t.t index $a]} {set num [expr $num - 1]; set cur [.f.t.t index $b]}" );
@@ -1987,10 +1987,10 @@ goto loop;
 }
 
 
-if(choice==23)
+if (choice==23)
 { //reset colors after a sign for coloring
 
-if(sourcefile==0)
+if (sourcefile == 0 )
  {choice=0;
   goto loop;
  }
@@ -1998,7 +1998,7 @@ else
 {	
   choice=0;
   // text window not ready?
-  if(Tcl_GetVar(inter,"curPosIni",0) == NULL || Tcl_GetVar(inter,"curPosFin",0) == NULL)			
+  if (Tcl_GetVar( inter,"curPosIni",0) == NULL || Tcl_GetVar( inter,"curPosFin",0) == NULL)			
 	  goto loop;
   // check if inside or close to multi-line comment and enlarge region appropriately
   cmd( "if { [ lsearch -exact [ .f.t.t tag names $curPosIni ] comment1 ] != -1 } { \
@@ -2020,12 +2020,12 @@ else
 			} \
 		}" );
   // find the range of lines to reeval the coloring
-  char *curPosIni=(char*)Tcl_GetVar(inter,"curPosIni",0); // position before insertion
-  char *curPosFin=(char*)Tcl_GetVar(inter,"curPosFin",0); // position after insertion
-  char *curSelIni=(char*)Tcl_GetVar(inter,"curSelIni",0); // selection before insertion
-  char *curSelFin=(char*)Tcl_GetVar(inter,"curSelFin",0); // selection after insertion
+  char *curPosIni=( char* ) Tcl_GetVar( inter,"curPosIni", 0 ); // position before insertion
+  char *curPosFin=( char* ) Tcl_GetVar( inter,"curPosFin", 0 ); // position after insertion
+  char *curSelIni=( char* ) Tcl_GetVar( inter,"curSelIni", 0 ); // selection before insertion
+  char *curSelFin=( char* ) Tcl_GetVar( inter,"curSelFin", 0 ); // selection after insertion
   // collect all selection positions, before and after change
-  float curPos[6];
+  float curPos[ 6 ];
   int nVal = 0;
   i = sscanf(curPosIni, "%f", &curPos[nVal]);
   nVal += i < 0 ? 0 : i;
@@ -2038,10 +2038,10 @@ else
   // find previous and next lines to select (worst case scenario)
   long prevLin = (long)floor(curPos[0]);
   long nextLin = (long)floor(curPos[0]) + 1;
-  for(i = 1; i < nVal; i++)
+  for (i = 1; i < nVal; ++i )
   {
-	  if(curPos[i] < prevLin) prevLin = (long)floor(curPos[i]);
-	  if(curPos[i] + 1 > nextLin) nextLin = (long)floor(curPos[i]) + 1;
+	  if (curPos[ i ] < prevLin) prevLin = (long)floor(curPos[ i ]);
+	  if (curPos[ i ] + 1 > nextLin) nextLin = (long)floor(curPos[ i ]) + 1;
   }
   
 color(shigh, prevLin, nextLin);
@@ -2171,7 +2171,7 @@ if ( choice == 28 && ! macro )
 	cmd( "focus .a.r.cal" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2277,23 +2277,8 @@ if ( choice == 25 )
 	cmd( "entry .a.label.n -width 20 -textvariable v_label -justify center" );
 	cmd( "pack .a.label.l .a.label.n" );
 
-	cmd( "frame .a.f -relief groove -bd 2" );
-	cmd( "radiobutton .a.f.r1 -variable isfun -value 0 -text \"EQUATION: only one value computed at each time step\"" );
-	cmd( "radiobutton .a.f.r2 -variable isfun -value 1 -text \"FUNCTION: value recomputed at each request by other variables\"" );
-	cmd( "bind .a.f.r1 <Return> {focus .a.b.ok}" );
-	cmd( "bind .a.f.r2 <Return> {focus .a.b.ok}" );
-	cmd( "pack .a.f.r1 .a.f.r2 -anchor w " );
-
-	if ( macro )
-	{
-		cmd( "bind .a.label.n <Return> { focus .a.b.ok }" );
-		cmd( "pack .a.label -padx 5 -pady 5" );
-	}
-	else
-	{
-		cmd( "bind .a.label.n <Return> { focus .a.f.r1 }" );
-		cmd( "pack .a.label .a.f -padx 5 -pady 5" );
-	}
+	cmd( "bind .a.label.n <Return> { focus .a.b.ok }" );
+	cmd( "pack .a.label -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#EQUATION } { set choice 2 }" );
 
@@ -2302,7 +2287,7 @@ if ( choice == 25 )
 	cmd( "focus .a.label.n" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2312,8 +2297,6 @@ if ( choice == 25 )
 		choice = 0;
 		goto loop;
 	}
-
-	cmd( "if {$isfun == 1} {set choice 3}" );
 
 	cmd( "savCurIni" );	// save data for recolor
 	cmd( "set a [.f.t.t index insert]" );
@@ -2328,18 +2311,9 @@ if ( choice == 25 )
 	}
 	else
 	{
-		cmd( ".f.t.t insert insert \"if(!strcmp(label,\\\"$v_label\\\"))\\n\"" );
+		cmd( ".f.t.t insert insert \"if (!strcmp(label,\\\"$v_label\\\"))\\n\"" );
 		cmd( ".f.t.t insert insert \"{\\n\"" );
 		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\"" );
-		if ( choice == 3 )
-		{
-			cmd( ".f.t.t insert insert \"last_update--;//repeat the computation any time is requested\\n\"" );
-			cmd( ".f.t.t insert insert \"if(c==NULL)//Avoids to be computed when the system activates the equation\\n\"" );
-			cmd( ".f.t.t insert insert \"{\\n\"" );
-			cmd( ".f.t.t insert insert \"res=-1;\\n\"" );
-			cmd( ".f.t.t insert insert \"goto end;\\n\"" );
-			cmd( ".f.t.t insert insert \"}\\n\"" );
-		}
 		cmd( ".f.t.t insert insert \"\\n\"" );
 		cmd( ".f.t.t insert insert \"res=;\\n\"" );
 		cmd( ".f.t.t insert insert \"goto end;\\n}\\n\"" );
@@ -2347,11 +2321,11 @@ if ( choice == 25 )
 		cmd( ".f.t.t tag add sel insert \"insert + 7 char\"" );	
 	}
 
-	v_counter=0;
+	v_counter = 0;
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;					// do syntax coloring
 	goto loop;
 }
 
@@ -2402,7 +2376,7 @@ if ( choice == 26 )
 	cmd( ".a.v.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2433,18 +2407,18 @@ if ( choice == 26 )
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
 
 	cmd( "if {$v_num==\"\"} { set num -1} {set num $v_num}" );
-	if(num!=-1)
+	if (num!=-1)
 	 v_counter=++num;
  
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
 
-// insert a cycle for(cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
+// insert a cycle for (cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
 if ( choice == 27 )
 {
 	cmd( "set v_label \"\"" );
@@ -2483,7 +2457,7 @@ if ( choice == 27 )
 	cmd( ".a.o.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2506,11 +2480,11 @@ if ( choice == 27 )
 		cmd( "set line [ expr $line -1 ]" );
 		cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
 		s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-		for ( i = 0; s[i] == ' ' || s[i] == '\t'; ++i )
-			str[i] = s[i];
+		for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
+			str[ i ] = s[ i ];
 		if ( i > 0 )
 		{
-			str[i] = '\0';
+			str[ i ] = '\0';
 			cmd( ".f.t.t insert insert \"%s\"", str );
 			cmd( ".f.t.t insert insert \"{\\n\"" );
 			cmd( ".f.t.t insert insert \"%s\\t\"", str );
@@ -2530,14 +2504,14 @@ if ( choice == 27 )
 	}
 	else
 	{
-		cmd( ".f.t.t insert insert \"for($v_obj = $v_par->search(\\\"$v_label\\\"); $v_obj != NULL; $v_obj = go_brother($v_obj))\\n\"" );
+		cmd( ".f.t.t insert insert \"for ($v_obj = $v_par->search(\\\"$v_label\\\"); $v_obj != NULL; $v_obj = go_brother($v_obj))\\n\"" );
 		cmd( ".f.t.t insert insert \"{\\n\\t\\n}\\n\"" );
 		cmd( ".f.t.t mark set insert \"$a + 2 line + 2 char\"" );
 	}
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -2588,7 +2562,7 @@ if ( choice == 40 )
 	cmd( ".a.v.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2615,13 +2589,13 @@ if ( choice == 40 )
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
 
 	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
-	if(num!=-1)
+	if (num!=-1)
 	 v_counter=++num;
 
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -2672,7 +2646,7 @@ if ( choice == 45 )
 	cmd( ".a.v.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2699,13 +2673,13 @@ if ( choice == 45 )
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
 
 	cmd( "if {$v_num==\"\" } {set num -1} {set num $v_num}" );
-	if(num!=-1)
+	if (num!=-1)
 	 v_counter=++num;
 
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -2756,7 +2730,7 @@ if ( choice == 29 )
 	cmd( ".a.v.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2784,7 +2758,7 @@ if ( choice == 29 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -2842,7 +2816,7 @@ if ( choice == 30 )
 	cmd( ".a.d.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2870,7 +2844,7 @@ if ( choice == 30 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -2922,7 +2896,7 @@ if ( choice == 31 )
 	cmd( ".a.d.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -2949,7 +2923,7 @@ if ( choice == 31 )
 	}
 	else
 	{
-		if(choice==1)
+		if (choice == 1 )
 		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"UP\\\");\\n\"" );
 		else
 		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"DOWN\\\");\\n\"" );
@@ -2957,7 +2931,7 @@ if ( choice == 31 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -3015,7 +2989,7 @@ if ( choice == 52 )
 	cmd( ".a.d.e selection range 0 end" );
 	 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -3034,7 +3008,7 @@ if ( choice == 52 )
 		cmd( "if { $numobj == \"1\"} {set choice 1} {set choice 0}" );
 		cmd( "if {$v_obj0 != \"\"} {.f.t.t insert insert \"$v_obj0 = \"}" );
 
-		if(choice ==1)
+		if (choice  == 1 )
 		{
 		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\\n\"}" );
 		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\\n\"}" );
@@ -3057,7 +3031,7 @@ if ( choice == 52 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -3087,7 +3061,7 @@ if ( choice == 53 )
 	cmd( ".a.d.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -3108,7 +3082,7 @@ if ( choice == 53 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -3173,7 +3147,7 @@ if ( choice == 54 )
 	cmd( ".a.d.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -3190,7 +3164,7 @@ if ( choice == 54 )
 
 	if ( macro )
 	{
-		if(choice==1)
+		if (choice == 1 )
 		 {
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\\n\"}" );  
@@ -3209,7 +3183,7 @@ if ( choice == 54 )
 	}
 	else
 	{
-		if(choice==1)
+		if (choice == 1 )
 		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
 		else
 		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
@@ -3217,7 +3191,7 @@ if ( choice == 54 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -3261,7 +3235,7 @@ if ( choice == 55 )
 	cmd( ".a.d.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -3282,7 +3256,7 @@ if ( choice == 55 )
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
-	choice=23;	// do syntax coloring
+	choice = 23;	// do syntax coloring
 	goto loop;
 }
 
@@ -3333,7 +3307,7 @@ if ( choice == 56 )
 	cmd( ".a.v.e selection range 0 end" );
 
 	choice = 0;
-	while( choice == 0 )
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
@@ -4056,11 +4030,11 @@ if ( choice == 80 )
 	cmd( "set line [ expr $line -1 ]" );
 	cmd( "set s [ .f.t.t get $line.0 $line.end ]" );
 	s = ( char * ) Tcl_GetVar( inter, "s", 0 );
-	for ( i = 0; s[i] == ' ' || s[i] == '\t'; ++i )
-		str[i] = s[i];
+	for ( i = 0; s[ i ] == ' ' || s[ i ] == '\t'; ++i )
+		str[ i ] = s[ i ];
 	if ( i > 0 )
 	{
-		str[i] = '\0';
+		str[ i ] = '\0';
 		cmd( ".f.t.t insert insert \"%s\"", str );
 		cmd( ".f.t.t insert insert \"{\\n\"" );
 		cmd( ".f.t.t insert insert \"%s\\t\"", str );
@@ -4753,11 +4727,11 @@ if ( choice == 41 )
 		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
 		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
 		strncpy( str, s, 499 );
-		if( strcmp( str, "___" ) && strcmp( str, "gnu" ) && strcmp( str, "gnu64" ) && strcmp( str, "src" ) && strcmp( str, "LMM.app" ) && strcmp( str, "R" ) && strcmp( str, "Manual" ) )
+		if ( strcmp( str, "___" ) && strcmp( str, "gnu" ) && strcmp( str, "gnu64" ) && strcmp( str, "src" ) && strcmp( str, "LMM.app" ) && strcmp( str, "R" ) && strcmp( str, "Manual" ) )
 		{
 			cmd( "set ex [ file exists \"$curdir/modelinfo.txt\" ]" );
 			cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
-			if(choice==1)
+			if (choice == 1 )
 			{
 				cmd( "set f [ open \"$curdir/modelinfo.txt\" r ]" );
 				cmd( "set cname [ gets $f ]; set cver [ gets $f ];" );
@@ -5648,7 +5622,7 @@ if ( choice == 69 )
 	cmd( "menu .v.i -tearoff 0" );
 	cmd( ".v.i add command -label \"LSD equation/function\" -command {set choice 25} -accelerator Ctrl+E" );
 	cmd( ".v.i add command -label \"cal(...)\" -command {set choice 26} -accelerator Ctrl+V" );
-	cmd( ".v.i add command -label \"for( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
+	cmd( ".v.i add command -label \"for ( ; ; )\" -command {set choice 27} -accelerator Ctrl+C" );
 	cmd( ".v.i add command -label \"sum(...)\" -command {set choice 56} -accelerator Ctrl+U" );
 	cmd( ".v.i add command -label \"increment(...)\" -command {set choice 40} -accelerator Ctrl+I" );
 	cmd( ".v.i add command -label \"multiply(...)\" -command {set choice 45} -accelerator Ctrl+M" );
@@ -5881,11 +5855,11 @@ if ( choice != 1 )
 	goto loop;
 }
 
-Tcl_UnlinkVar(inter, "choice");
-Tcl_UnlinkVar(inter, "num");
-Tcl_UnlinkVar(inter, "tosave");
-Tcl_UnlinkVar(inter, "macro");
-Tcl_UnlinkVar(inter, "shigh");
+Tcl_UnlinkVar( inter, "choice");
+Tcl_UnlinkVar( inter, "num");
+Tcl_UnlinkVar( inter, "tosave");
+Tcl_UnlinkVar( inter, "macro");
+Tcl_UnlinkVar( inter, "shigh");
 
 cmd( "LsdExit" );
 
@@ -5936,7 +5910,7 @@ void cmd( const char *cm, ... )
 	{
 		int code = Tcl_Eval( inter, buffer );
 
-		if( code != TCL_OK )
+		if ( code != TCL_OK )
 		{
 			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
 			if ( tk_ok )
@@ -5957,7 +5931,7 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char ftime[ 80 ];
 
-	if( strlen( rootLsd ) > 0 )
+	if ( strlen( rootLsd ) > 0 )
 		sprintf( fname, "%s/LMM.err", rootLsd );
 	else
 		sprintf( fname, "LMM.err" );
@@ -5994,9 +5968,9 @@ struct hit
 	char previous, next;
 };
 // color types (0-n) to Tk tags mapping
-const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword"};
+const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdmacro", "ctype", "ckword"};
 // regular expressions identifying colored text types
- const char *cRegex[] = {
+ const char *cRegex[ ] = {
 	"/\[*].*\[*]/",		// each item define one different color
 	"//.*",
 	"^(\\s)*#\[^/]*",
@@ -6008,16 +5982,16 @@ const char *cTypes[] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdma
 };
 
 // count words in a string (used by color)
-int strwrds(char string[])
+int strwrds(char string[ ])
 {
 	int i = 0, words = 0;
 	char lastC = '\0';
-	if(string == NULL) return 0;
-	while(isspace(string[i])) i++;
-	if(string[i] == '\0') return 0;
-	for( ; string[i] != '\0'; lastC = string[i++])
-		if(isspace(string[i]) && ! isspace(lastC)) words++;
-	if(isspace(lastC)) return words;
+	if (string == NULL) return 0;
+	while (isspace(string[ i ])) i++;
+	if (string[ i ] == '\0') return 0;
+	for ( ; string[ i ] != '\0'; lastC = string[i++])
+		if (isspace(string[ i ]) && ! isspace(lastC)) words++;
+	if (isspace(lastC)) return words;
 	else return words + 1;
 }
 
@@ -6025,11 +5999,11 @@ int strwrds(char string[])
 #define ITEM_COUNT( ptrArray )  ( sizeof( ptrArray ) / sizeof( ptrArray[0] ) )
 int map_color(int hiLev)
 {
-	if(hiLev == 0)
+	if (hiLev == 0)
 		return 0;
-	if(hiLev == 1)
+	if (hiLev == 1)
 		return 4;
-	if(ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex))
+	if (ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex))
 		return ITEM_COUNT(cRegex);
 	return ITEM_COUNT(cTypes);
 }
@@ -6037,12 +6011,12 @@ int map_color(int hiLev)
 // compare function for qsort to compare different color hits (used by color)
 int comphit(const void *p1, const void *p2)
 {
-	if(((hit*)p1)->iniLin < ((hit*)p2)->iniLin) return -1;
-	if(((hit*)p1)->iniLin > ((hit*)p2)->iniLin) return 1;
-	if(((hit*)p1)->iniCol < ((hit*)p2)->iniCol) return -1;
-	if(((hit*)p1)->iniCol > ((hit*)p2)->iniCol) return 1;
-	if(((hit*)p1)->type < ((hit*)p2)->type) return -1;
-	if(((hit*)p1)->type > ((hit*)p2)->type) return 1;
+	if (((hit*)p1)->iniLin < ((hit*)p2)->iniLin) return -1;
+	if (((hit*)p1)->iniLin > ((hit*)p2)->iniLin) return 1;
+	if (((hit*)p1)->iniCol < ((hit*)p2)->iniCol) return -1;
+	if (((hit*)p1)->iniCol > ((hit*)p2)->iniCol) return 1;
+	if (((hit*)p1)->type < ((hit*)p2)->type) return -1;
+	if (((hit*)p1)->type > ((hit*)p2)->type) return 1;
 	return 0;
 }
 
@@ -6057,93 +6031,93 @@ struct hit *hits;
 
 // prepare parameters
 maxColor = map_color(hiLev);	// convert option to # of color types
-if(finLin == 0)			// convert code 0 for end of text
+if (finLin == 0)			// convert code 0 for end of text
 	sprintf(finStr, "end");
 else
 	sprintf(finStr, "%ld.end", finLin);
 
 // remove color tags
-for(i = 0; i < TOT_COLOR; i++)
+for (i = 0; i < TOT_COLOR; ++i )
 {
-	cmd( ".f.t.t tag remove %s %ld.0 %s", cTypes[i], iniLin == 0 ? 1 : iniLin, finStr );
+	cmd( ".f.t.t tag remove %s %ld.0 %s", cTypes[ i ], iniLin == 0 ? 1 : iniLin, finStr );
 }
 
 // find & copy all occurrence types to arrays of C strings
-for(i = 0; i < maxColor; i++)
+for (i = 0; i < maxColor; ++i )
 {
 	// locate all occurrences of each color group
-	Tcl_UnsetVar(inter, "ccount", 0);
-	if(!strcmp(cTypes[i], "comment1"))	// multi line search element?
-		cmd( "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[i], iniLin == 0 ? 1 : iniLin, finStr);
+	Tcl_UnsetVar( inter, "ccount", 0 );
+	if (!strcmp(cTypes[ i ], "comment1"))	// multi line search element?
+		cmd( "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr);
 	else
-		cmd( "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[i], iniLin == 0 ? 1 : iniLin, finStr );
+		cmd( "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
 
 	// check number of ocurrences
-	pcount = (char*)Tcl_GetVar(inter, "ccount", 0);
-	size[i] = strwrds(pcount);
-	if(size[i] == 0)				// nothing to do?
+	pcount = ( char* ) Tcl_GetVar( inter, "ccount", 0 );
+	size[ i ] = strwrds(pcount);
+	if (size[ i ] == 0)				// nothing to do?
 		continue;
-	tsize += size[i];
+	tsize += size[ i ];
 
 	// do intermediate store in C memory
-	count[i] = (char*)calloc(strlen(pcount) + 1, sizeof(char));
-	strcpy(count[i], pcount);
-	ppos = (char*)Tcl_GetVar(inter, "pos", 0);
-	pos[i] = (char*)calloc(strlen(ppos) + 1, sizeof(char));
-	strcpy(pos[i], ppos); 
+	count[ i ] = ( char* ) calloc(strlen(pcount) + 1, sizeof( char ));
+	strcpy(count[ i ], pcount);
+	ppos = ( char* ) Tcl_GetVar( inter, "pos", 0 );
+	pos[ i ] = ( char* ) calloc(strlen(ppos) + 1, sizeof( char ));
+	strcpy(pos[ i ], ppos); 
 }
-if(tsize == 0)
+if (tsize == 0)
 	return;							// nothing to do
 
 // organize all occurrences in a single array of C numbers (struct hit)
 hits = (hit*)calloc(tsize, sizeof(hit));
-for(i = 0, k = 0; i < maxColor; i++)
+for (i = 0, k = 0; i < maxColor; ++i )
 {
-	if(size[i] == 0)				// nothing to do?
+	if (size[ i ] == 0)				// nothing to do?
 		continue;
-	pcount = (char*)count[i] - 1;
-	ppos = (char*)pos[i] - 1;
-	for(j = 0; j < size[i] && k < tsize; j++, k++)
+	pcount = ( char* ) count[ i ] - 1;
+	ppos = ( char* ) pos[ i ] - 1;
+	for (j = 0; j < size[ i ] && k < tsize; j++, ++k )
 	{
 		hits[k].type = i;
 		s = strtok(pcount + 1, " \t");
 		hits[k].count = atoi(s);
 		pcount = s + strlen(s);
 		s = strtok(ppos + 1, " \t");
-		sscanf(strtok(s, " \t"), "%ld.%ld", &hits[k].iniLin, &hits[k].iniCol);
+		sscanf(strtok( s, " \t"), "%ld.%ld", &hits[k].iniLin, &hits[k].iniCol);
 		ppos = s + strlen(s);
 	}
-	free(count[i]);
-	free(pos[i]);
+	free(count[ i ]);
+	free(pos[ i ]);
 }
 
 // Sort the single list for processing
 qsort((void *)hits, tsize, sizeof(hit), comphit);
 
 // process each occurrence, if applicable
-Tcl_LinkVar(inter, "lin", (char*)&newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
-Tcl_LinkVar(inter, "col", (char*)&newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
-Tcl_LinkVar(inter, "cnt", (char*)&newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY);
-for(k = 0; k < tsize; k++)
+Tcl_LinkVar( inter, "lin", ( char* ) &newLin, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
+Tcl_LinkVar( inter, "col", ( char* ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY);
+Tcl_LinkVar( inter, "cnt", ( char* ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY);
+for (k = 0; k < tsize; ++k )
 	// skip occurrences inside other occurrence
-	if(hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol))
+	if (hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol))
 	{
 		newLin = hits[k].iniLin;
 		newCol = hits[k].iniCol;
 		newCnt = hits[k].count;
 		cmd( "set end [.f.t.t index \"$lin.$col + $cnt char\"]" );
 		// treats each type of color case properly
-		if(hits[k].type < 4)			// non token?
+		if (hits[k].type < 4)			// non token?
 			cmd( ".f.t.t tag add %s $lin.$col $end", cTypes[hits[k].type]);
 		else							// token - should not be inside another word
 			cmd( "if {[regexp {\\w} [.f.t.t get \"$lin.$col - 1 any chars\"]]==0 && [regexp {\\w} [.f.t.t get $end]]==0} {.f.t.t tag add %s $lin.$col $end}", cTypes[hits[k].type] );
 		// next search position
-		ppos = (char*)Tcl_GetVar(inter, "end", 0);
+		ppos = ( char* ) Tcl_GetVar( inter, "end", 0 );
 		sscanf(ppos, "%ld.%ld", &curLin, &curCol);
 	}
-Tcl_UnlinkVar(inter, "lin");
-Tcl_UnlinkVar(inter, "col");
-Tcl_UnlinkVar(inter, "cnt");
+Tcl_UnlinkVar( inter, "lin");
+Tcl_UnlinkVar( inter, "col");
+Tcl_UnlinkVar( inter, "cnt");
 free(hits);
 }
 
@@ -6612,7 +6586,7 @@ bool discard_change( void )
 TCL_DISCARD_CHANGE
 Entry point function for access from the Tcl interpreter
 ****************************************************/
-int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[] )
+int Tcl_discard_change( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] )
 {
 	if ( discard_change( ) == 1 )
 		Tcl_SetResult( inter, ( char * ) "ok", TCL_VOLATILE );
@@ -6658,7 +6632,7 @@ void signal_handler( int signum )
 {
 	char msg2[ MAX_LINE_SIZE ];
 
-	switch( signum )
+	switch ( signum )
 	{
 #ifdef SIGQUIT
 		case SIGQUIT:

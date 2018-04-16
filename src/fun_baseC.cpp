@@ -75,7 +75,7 @@ if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
 if ( debug_flag )
  {
  for ( i = 0; i < 1000; i++ )
-  i_values[i] = v[i];
+  i_values[ i ] = v[ i ];
  }
 return res;
 }

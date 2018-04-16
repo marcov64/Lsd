@@ -64,9 +64,10 @@ void link_data(object *root, char *lab);
 
 bool hid_level;
 bool in_set_obj = false;		// avoid recursive usage (confusing and tk windows are not ready)
-char lab_view[MAX_ELEM_LENGTH];
-char tag_view[MAX_ELEM_LENGTH];
+char lab_view[ MAX_ELEM_LENGTH ];
+char tag_view[ MAX_ELEM_LENGTH ];
 int level;
+int lowest_level;
 int max_depth;
 
 
@@ -76,25 +77,25 @@ SET_OBJ_NUMBER
 
 void set_obj_number( object *r, int *choice )
 {
-	char ch[2*MAX_ELEM_LENGTH], *l;
+	char ch[ 2 * MAX_ELEM_LENGTH ], *l;
 	int i, num, res, count, done;
 	object *cur, *first;
-	Tcl_LinkVar(inter, "val", (char *) &count, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "i", (char *) &i, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "num", (char *) &num, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "result", (char *) &res, TCL_LINK_INT);
-	Tcl_LinkVar(inter, "max_depth", (char *) &max_depth, TCL_LINK_INT);
+	Tcl_LinkVar( inter, "val", ( char * ) &count, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "i", ( char * ) &i, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "result", ( char * ) &res, TCL_LINK_INT );
+	Tcl_LinkVar( inter, "max_depth", ( char * ) &max_depth, TCL_LINK_INT );
 
 	cmd( "set ini .ini" );
 	cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeN $vsizeN } { resizetop .ini $hsizeN $vsizeN }" );
 
 	in_set_obj = true;
-	strcpy(lab_view,"");
-	strcpy(tag_view,"");
-	level=1;
-	max_depth=1;
+	strcpy( lab_view, "" );
+	strcpy( tag_view, "" );
+	level = lowest_level = 1;
+	max_depth = 0;							// start with all levels open
 	
-	while( *choice == 0 )
+	while ( *choice == 0 )
 	{
 		// reset title and destroy command because may be coming from edit_data
 		cmd( "settop .ini \"%s%s - LSD Object Number Editor\" { set choice 1; set result -1 }", unsaved_change() ? "*" : " ", simul_name );
@@ -111,6 +112,11 @@ void set_obj_number( object *r, int *choice )
 		i = 0;
 		hid_level = false;
 		insert_obj_num( r,  ch, "", 1, &i, &count );
+		if ( max_depth < 1 )
+		{
+			hid_level = false;
+			max_depth = lowest_level - 1;	// start with all levels open
+		}
 
 		cmd( "pack $b.scroll -side right -fill y" );
 		cmd( "pack $b.scrollh -side bottom -fill x" );  
@@ -135,13 +141,13 @@ void set_obj_number( object *r, int *choice )
 		cmd( "bind .ini <plus> { .ini.f.pl invoke }" );
 		cmd( "bind .ini <F1> { LsdHelp menudata_objn.html }" );
 
-		if(strlen(lab_view)>0)
-			cmd( "$t see $toview" );
+		if ( strlen( lab_view ) > 0 )
+			cmd( "if { [ info exists toview ] && [ winfo exists $toview ] } { $t see $toview }" );
 
 		noredraw:
 
 		// editor command loop
-		while( ! *choice )
+		while ( ! *choice )
 		{
 			try
 			{
@@ -163,49 +169,49 @@ void set_obj_number( object *r, int *choice )
 			goto noredraw;
 		}
 
-		if(*choice==2)
+		if ( *choice == 2 )
 		{
-			i=0;
-			done=0;
-			edit_str(r, ch, 1, &i, res, &num, choice, &done);
-			*choice=2;
+			i = 0;
+			done = 0;
+			edit_str( r, ch, 1, &i, res, &num, choice, &done );
+			*choice = 2;
 		}
 
 		cmd( "destroy $b .ini.msglab .ini.f .ini.fb" );
 
-		strcpy(ch, "");
-		i=0;
-		done=0;
-		switch( *choice )
+		strcpy( ch, "" );
+		i = 0;
+		done = 0;
+		switch ( *choice )
 		{
 			case 1: 
 				break;
 				
 			case 2: 
 			case 4: 
-				*choice=0;
+				*choice = 0;
 				break;
 				  
 			case 3: 
-				l=(char *)Tcl_GetVar(inter, "obj_name",0);
-				strcpy(ch, l);
-				edit_data(r, choice,ch);
-				*choice=0;
+				l = ( char * ) Tcl_GetVar( inter, "obj_name", 0 );
+				strcpy( ch, l );
+				edit_data( r, choice, ch );
+				*choice = 0;
 				break;
 				
 			default: 
-				plog("\nChoice not recognized");
-				*choice=0;
+				plog( "\nChoice not recognized" );
+				*choice = 0;
 		}
 	}
 
 	in_set_obj = false;
 
-	Tcl_UnlinkVar(inter, "i");
-	Tcl_UnlinkVar(inter, "val");
-	Tcl_UnlinkVar(inter, "result");
-	Tcl_UnlinkVar(inter, "num");
-	Tcl_UnlinkVar(inter, "max_depth");
+	Tcl_UnlinkVar( inter, "i" );
+	Tcl_UnlinkVar( inter, "val" );
+	Tcl_UnlinkVar( inter, "result" );
+	Tcl_UnlinkVar( inter, "num" );
+	Tcl_UnlinkVar( inter, "max_depth" );
 
 	cmd( "unset result num choice val i" );
 }
@@ -236,6 +242,7 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 
 		// just update if already exists
 		cmd( "set val [ winfo exists $t.val$i ]" );
+		
 		if ( *value )
 		{
 			*value = num;
@@ -262,8 +269,8 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 			cmd( "$t window create end -window $t.tag$i" );
 			cmd( "$t window create end -window $t.val$i" );
 			
-			if(strlen(lab_view)>0)
-				if(!strcmp(lab_view, c->label) && !strcmp(tag_view, tag) )
+			if ( strlen( lab_view ) > 0 )
+				if ( ! strcmp( lab_view, c->label ) && ! strcmp( tag_view, tag ) )
 					cmd( "set toview \"$t.val$i\"" );
 
 			if ( level >= max_depth && c->b != NULL )
@@ -284,16 +291,21 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 			multi = 1;
 		else
 			multi = 0;
-		if ( level < max_depth )
+		
+		if ( max_depth < 1 || level < max_depth )
 		{
-			for ( cur = c; cur != NULL; counter++, cur=go_brother( cur ) )
+			for ( cur = c; cur != NULL; ++counter, cur=go_brother( cur ) )
 			{
+				++level;
+				lowest_level = level > lowest_level ? level : lowest_level;
+				
 				if ( strlen( tag ) != 0 )
 					sprintf( ch, "%d - %s %s", counter, ( c->up )->label,  tag );
 				else
 					sprintf( ch, "%d", counter );
-				++level;
-				insert_obj_num( cur, ch,indent, counter, i, value );
+				
+				insert_obj_num( cur, ch, indent, counter, i, value );
+				
 				--level;
 			}
 		}
@@ -308,7 +320,7 @@ COMPUTE_COPYFROM
 int compute_copyfrom( object *c, int *choice )
 {
 	object *cur, *cur1, *cur2, *cur3;
-	int i,j, k,h, res;
+	int i, j, k, h, res;
 
 	if ( c->up == NULL )
 	{
@@ -327,21 +339,21 @@ int compute_copyfrom( object *c, int *choice )
 
 	cmd( "frame $cc.f" );
 
-	for(j=1, cur=c; cur->up!=NULL; cur=cur->up, j++) 
+	for ( j = 1, cur = c; cur->up != NULL; cur = cur->up, ++j ) 
 	{
 		cmd( "frame $cc.f.f%d", j );
 		cmd( "label $cc.f.f%d.l -text \"Instance number of '%s'\"", j, cur->label );
 		cmd( "entry $cc.f.f%d.e -width 5 -textvariable num%d -justify center", j, j );
 		cmd( "pack $cc.f.f%d.l $cc.f.f%d.e -side left -padx 2", j, j );
 
-		for(i=1, cur1=cur->up->search(cur->label); cur1!=cur; cur1=cur1->next, i++);
+		for ( i = 1, cur1 = cur->up->search( cur->label ); cur1 != cur; cur1 = cur1->next, ++i );
 
 		cmd( "set num%d %d", j, i );
 	}
 	  
 	cmd( "focus $cc.f.f%d.e; $cc.f.f%d.e selection range 0 end", j - 1, j - 1 );
 
-	for(j--, cur=c; cur->up!=NULL; cur=cur->up, j--)
+	for ( --j, cur = c; cur->up != NULL; cur = cur->up, --j )
 	{//pack in inverse order
 		cmd( "pack $cc.f.f%d", j );
 		cmd( "bind $cc.f.f%d.e <Return> { focus .compcopy.f.f%d.e; .compcopy.f.f%d.e selection range 0 end}", j, j - 1, j - 1 );
@@ -350,49 +362,51 @@ int compute_copyfrom( object *c, int *choice )
 	cmd( "bind $cc.f.f1.e <Return> \"focus $cc.b.com\"" );
 
 	cmd( "frame $cc.r" );
-	cmd( "label $cc.r.l -text \"Effective instance number:\"" );
+	cmd( "label $cc.r.l -text \"Global instance number:\"" );
 	cmd( "label $cc.r.res -fg red -text %d", i );
 	cmd( "pack $cc.r.l $cc.r.res -side left -padx 2" );
 
 	cmd( "pack $cc.l $cc.f $cc.r -pady 5 -padx 5" );
 
-	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#SelectionInstance } { set cconf 1; set choice 1 }" );
+	cmd( "comphelpdone $cc b { set cconf 1; set choice 2 } { LsdHelp menudata_objn.html#compute } { set cconf 1; set choice 1 }" );
 
 	cmd( "showtop $cc" );
 
-	res=i;
+	res = i;
 
 	here_ccompute:
-	for(cur=c->up; cur->up!=NULL; cur=cur->up); //cur is root
-	cur=cur->search(c->label); //find the first
+	
+	for ( cur = c->up; cur->up != NULL; cur = cur->up ); //cur is root
+	cur = cur->search( c->label ); //find the first
 
-	for(i=0, k=0; k==0 && cur!=NULL ; cur3=cur, cur=cur->hyper_next(c->label), i++)
+	for ( i = 0, k = 0; k == 0 && cur != NULL ; cur3 = cur, cur = cur->hyper_next( c->label ), ++i )
 	{
-		k=1;
-		for(j=1, cur1=cur; cur1->up!=NULL; cur1=cur1->up, j++)
+		k = 1;
+		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
 		{
 			cmd( "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
 			if ( *choice < 0 )
 				break;
 
-			for(h=1, cur2=cur1->up->search(cur1->label); cur2!=cur1; cur2=cur2->next, h++);   
-			if(cur2->next==NULL && *choice>h)
-				*choice=h;
-			if(h<*choice)
+			for ( h = 1, cur2 = cur1->up->search( cur1->label ); cur2 != cur1; cur2 = cur2->next, ++h );   
+			if ( cur2->next == NULL && *choice > h )
+				*choice = h;
+			if ( h < *choice )
 			{
-				k=0;
+				k = 0;
 				break;
 			}
 		}
 	}
 
-	res=i;
-	//reset possibly erroneous values
-	for(j=1, cur2=cur3; cur2->up!=NULL; cur2=cur2->up, j++) 
+	res = i;
+	
+	// reset possibly erroneous values
+	for ( j = 1, cur2 = cur3; cur2->up != NULL; cur2 = cur2->up, ++j ) 
 	{
-		for(i=1, cur1=cur2->up->search(cur2->label); cur1!=cur2; cur1=cur1->next, i++);
+		for ( i = 1, cur1 = cur2->up->search( cur2->label ); cur1 != cur2; cur1 = cur1->next, ++i );
 
-		cmd( "set num%d %d", j,i );
+		cmd( "set num%d %d", j, i );
 	}
 
 	cmd( "$cc.r.res configure -text %d", res ); 
@@ -401,18 +415,18 @@ int compute_copyfrom( object *c, int *choice )
 
 	cmd( "set ccfrom 0" );
 
-	*choice=0;
-	while(*choice==0)
-		Tcl_DoOneEvent(0);
+	*choice = 0;
+	while ( *choice == 0 )
+		Tcl_DoOneEvent( 0 );
 
-	i=*choice;
+	i = *choice;
 	cmd( "set choice $cconf" );
-	if(*choice==0)
+	if ( *choice == 0 )
 		goto here_cfrom;
 	else
-		*choice=i;  
+		*choice = i;  
 
-	if(*choice==2)
+	if ( *choice == 2 )
 		goto here_ccompute;
 
 	cmd( "destroytop $cc" );
@@ -429,10 +443,10 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	object *cur, *first;
 	int cfrom, j, max_level, affect, k, *pippo, num;
 
-	for(num=0, cur=c->up->search(c->label);cur!=NULL; cur=go_brother(cur),num++ );
+	for ( num = 0, cur = c->up->search( c->label ); cur != NULL; cur = go_brother( cur ), ++num );
 
-	strcpy(lab_view, c->label);
-	strcpy(tag_view, tag);
+	strcpy( lab_view, c->label );
+	strcpy( tag_view, tag );
 
 	cmd( "set conf 0" );
 	cmd( "set num %d", num );
@@ -471,19 +485,19 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 
 	cmd( "frame $n.ef.g -relief groove -bd 2" );
 	
-	for(j=1, cur=c->up; cur->up!=NULL; cur=cur->up, j++)
+	for ( j = 1, cur = c->up; cur->up != NULL; cur = cur->up, j++ )
 	{
-		if(j==1)
+		if ( j == 1 )
 		{
-			first=cur->up->search(cur->label);
-			for(k=1; first!=cur; first=go_brother(first), k++);
+			first = cur->up->search( cur->label );
+			for ( k = 1; first != cur; first = go_brother( first ), ++k );
 			cmd( "set affect 1.%d", k );
 			cmd( "radiobutton $n.ef.g.r1 -text \"This group of '%s' contained in '%s' #%d\" -variable affect -value 1.%d", c->label, cur->label, k, k );
 		}
 		else
 		{
-			first=cur->up->search(cur->label);
-			for(k=1; first!=cur; first=go_brother(first), k++);
+			first = cur->up->search( cur->label );
+			for ( k = 1; first != cur; first = go_brother( first ), ++k );
 			cmd( "radiobutton $n.ef.g.r%d -text \"All groups of '%s' contained in '%s' #%d\" -variable affect -value %d.%d", j, c->label, cur->label, k, j, k );
 		}
 		cmd( "pack $n.ef.g.r%d -anchor w", j );
@@ -538,7 +552,7 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 	{
 		*choice = 0;
 		k = compute_copyfrom( c, choice );
-		if(k>0)
+		if ( k > 0 )
 			cmd( "set cfrom %d", k );
 		cmd( "set conf 0" );
 		*choice = 0;
@@ -576,42 +590,42 @@ EDIT_STR
 
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done )
 {
-	char ch[2*MAX_ELEM_LENGTH];
+	char ch[ 2 * MAX_ELEM_LENGTH ];
 	object *c, *cur, *first;
 	variable *var;
-	int multi=0, cazzo, param, cfrom, j, affect, k;
+	int multi = 0, cazzo, param, cfrom, j, affect, k;
 	bridge *cb;
 
-	param=0;
-	strcpy(ch, tag);
-	for(cb=root->b, counter=1; cb!=NULL && *done==0;cb=cb->next, counter=1)
+	param = 0;
+	strcpy( ch, tag );
+	for ( cb = root->b, counter = 1; cb != NULL && *done == 0; cb = cb->next, counter = 1 )
 	{ 
-		c=cb->head; 
+		c = cb->head; 
 		*i += 1;
-		if(*i==res)
+		if ( *i == res )
 		{
-			entry_new_objnum(c, choice, tag);
-			*done=1;
+			entry_new_objnum( c, choice, tag );
+			*done = 1;
 		}
 
-		if( go_brother(c)!=NULL)
-			multi=1;
+		if ( go_brother( c ) != NULL )
+			multi = 1;
 		else
-			multi=0;
+			multi = 0;
 		
-		for(cur=c; cur!=NULL && *done==0; counter++, cur=go_brother(cur))
+		for ( cur = c; cur != NULL && *done == 0; ++counter, cur = go_brother( cur ) )
 		{
-			if(multi==1 || multi==0)
-				if(strlen(tag)!=0)
-					sprintf(ch, "%s-%d",tag, counter);
+			if ( multi == 1 || multi == 0 )
+				if ( strlen( tag ) != 0 )
+					sprintf( ch, "%s-%d", tag, counter );
 				else
-					sprintf(ch, "%d",counter);
+					sprintf( ch, "%d", counter );
 			else
-				sprintf(ch, "%s",tag);
-			if(level < max_depth)
+				sprintf( ch, "%s", tag );
+			if ( level < max_depth )
 			{
 				level++;
-				edit_str(cur, ch, counter, i, res, num, choice, done);
+				edit_str( cur, ch, counter, i, res, num, choice, done );
 				level--;
 			} 
 		}
@@ -663,7 +677,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 
 	cmd( "destroytop $d" );
 	
-	if( *choice == 3 )
+	if ( *choice == 3 )
 		return;
 
 	if ( *choice == 1 )
@@ -749,19 +763,20 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 CHECK_PIPPO
 ****************************************************/
 
-int check_pippo( object *c, object *pivot, int level, int pippo[] )
+int check_pippo( object *c, object *pivot, int level, int pippo[ ] )
 {
 	int res = 1, i, j;
 	object *cur, *cur1;
 
-	for(cur=c->up, i=1; i<=level && res==1; i++, cur=cur->up)
+	for ( cur = c->up, i = 1; i <= level && res == 1; ++i, cur = cur->up )
 	{
-		if(pippo[i]!=-1 && cur->up!=NULL)//don't check if it is in Root or if there is no constraint
+		// don't check if it is in Root or if there is no constraint
+		if ( pippo[ i ] != -1 && cur->up != NULL )	
 		{
-			cur1=cur->up->search(cur->label);
-			for(j=1; cur1!=cur; cur1=cur1->next,j++);//find the id of cur
-			if(j!=pippo[i])
-				res=0;
+			cur1 = cur->up->search( cur->label );
+			for ( j = 1; cur1 != cur; cur1 = cur1->next, ++j );	// find the id of cur
+			if ( j != pippo[ i ] )
+				res = 0;
 		}
 	}
 	
@@ -773,68 +788,72 @@ int check_pippo( object *c, object *pivot, int level, int pippo[] )
 CHG_OBJ_NUM
 ****************************************************/
 
-void chg_obj_num( object **c, int value, int level, int pippo[], int *choice, int cfrom )
+void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, int cfrom )
 {
 	object *cur, *cur1, *last, *app, *first, *pivot;
 	int cazzo, i;
 
-	for(cur=*c; cur->up!=NULL; cur=cur->up); //goto root
-	//select the object example
-	for(first=cur->search((*c)->label), i=1; i<cfrom && first!=NULL; first=first->hyper_next(first->label), i++);
-	if(first==NULL)
+	for ( cur = *c; cur->up != NULL; cur = cur->up); //goto root
+	
+	// select the object example
+	for ( first = cur->search( ( *c )->label), i = 1; i < cfrom && first != NULL; first = first->hyper_next( first->label ), ++i );
+	if ( first == NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, (*c)->label );
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Object instance not found\" -detail \"Instance %d of object '%s' not found.\"", cfrom, ( *c )->label );
 		return;
 	}
 	 
-	//select the pivot 
-	for(i=0,pivot=*c; i<level; i++)
-		pivot=pivot->up;
-	//select the first object of the type to change under pivot
-	cur=pivot->search((*c)->label);
+	// select the pivot 
+	for ( i = 0, pivot = *c; i < level; ++i )
+		pivot = pivot->up;
+	
+	// select the first object of the type to change under pivot
+	cur = pivot->search( ( *c )->label );
 	  
-	for( ;cur!=NULL; )
-	{//as long as necessary
-		if(pippo==NULL || check_pippo(cur, pivot, level, pippo)==1)
+	while ( cur != NULL )
+	{	// as long as necessary
+		if ( pippo == NULL || check_pippo( cur, pivot, level, pippo ) == 1 )
 		{
-			skip_next_obj(cur,&cazzo); //count the existing objects
-			if(cazzo<=value)             
-			{//add objects
+			skip_next_obj( cur, &cazzo ); 	// count the existing objects
+			
+			if ( cazzo <= value )             
+				// add objects
 				cur->up->add_n_objects2(first->label,value-cazzo,first); //add the necessary num of objects
-			}
 			else
-			{ //remove objects
-				if(level==1) //you have the option to choose the items to be removed, only if you operate on one group
+			{ 	// remove objects
+				if ( level == 1 ) 	// you have the option to choose the items to be removed, only if you operate on one group
 				{
-					eliminate_obj(&cur, cazzo, value, choice);
-					*c=cur;
+					eliminate_obj( &cur, cazzo, value, choice );
+					*c = cur;
 				} 
 				else
-				{// remove automatically the excess of objects
-					for(i=1, cur1=cur; i<value; i++,cur1=cur1->next);
-					for( ; go_brother(cur1)!=NULL; )
+				{	// remove automatically the excess of objects
+					for ( i = 1, cur1 = cur; i < value; ++i, cur1 = cur1->next );
+					while ( go_brother( cur1 ) != NULL )
 					{ 
-						app=cur1->next->next;
-						cur1->next->empty();
+						app = cur1->next->next;
+						cur1->next->empty( );
 						delete cur1->next;
-						cur1->next=app;
+						cur1->next = app;
 					}
 				}
 			}
-		}//end check_pippo
+		}// end check_pippo
 		
-		for(cur1=cur;cur1!=NULL; cur1=go_brother(cur1) )
-			last=cur1 ; //skip the just updated group of objects
+		for ( cur1 = cur; cur1 != NULL; cur1 = go_brother( cur1 ) )
+			last = cur1 ; 	// skip the just updated group of objects
 		
-		cur=last->hyper_next(cur->label); //first copy of the object to change after the just adjusted bunch
+		cur = last->hyper_next( cur->label );	// first copy of the object to change after the just adjusted bunch
 
-		if(level>0 && cur!=NULL)
-		{//search the next pivot
-			for(cur1=cur->up, i=1; i<level; i++, cur1=cur1->up); //hopefully, cur1 is of type pivot
-			if(cur1!=pivot)//a new set of objects to change has been found, but descends from another pivot
-				cur=NULL;
+		if ( level > 0 && cur != NULL )
+		{	//search the next pivot
+			for ( cur1 = cur->up, i = 1; i < level; ++i, cur1 = cur1->up );	// hopefully, cur1 is of type pivot
+			
+			// a new set of objects to change has been found, but descends from another pivo
+			if ( cur1 != pivot )
+				cur = NULL;
 		}
 		else
-			cur=NULL;
+			cur = NULL;
 	}
 }

@@ -170,40 +170,52 @@ div.WordSection1
 
 <div align=center>
 
-<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="84%"
- style='width:84.04%'>
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="93%"
+ style='width:93.94%'>
  <tr>
-  <td width=532 style='width:399.0pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
-  <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><img width=497
-  height=377 src="image/debugger.png" align=left hspace=15></p>
+  <td width=532 style='width:399.05pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <p class=MsoNormal><img width=663 height=503 src="image/debugger.png"
+  align=left hspace=15></p>
   </td>
-  <td width=232 valign=top style='width:174.0pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
+  <td width=246 valign=top style='width:184.8pt;padding:1.5pt 1.5pt 1.5pt 1.5pt'>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>1.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
-  href="#_Activating_the_Debugger">Activating the Debugger</a></p>
+  href="#_The_debugging_process">The debugging process</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>2.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
-  href="LMM.html#editor">The Debugger window</a></p>
+  href="#activate">Activating debug mode</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>a.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_The_Debugger_window">The main window</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt'>a.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Model_browsing_buttons">Model browsing buttons</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt'>b.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
+  href="#_Object_content">Object content</a></p>
+  <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt'>c.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
   href="#_Observe_and_edit">Observe and edit element values</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:72.0pt;text-indent:-18.0pt'>b.<span
+  margin-bottom:12.0pt;margin-left:57.75pt;text-indent:-18.0pt'>d.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
   href="#_Set_Conditional_Breaks">Set Conditional Breaks</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>4.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
-  href="LMM.html#file">Menu Exit</a></p>
+  href="#_Menu_Exit">Menu Exit</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>4.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>5.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
   href="menuhelp.html">Menu Help</a></p>
   <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;
-  margin-bottom:12.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span
+  margin-bottom:12.0pt;margin-left:35.85pt;text-indent:-18.0pt'>6.<span
   style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span><a
   href="#_The_LSD_Simulation">LSD simulation run details</a></p>
   </td>
@@ -212,153 +224,184 @@ div.WordSection1
 
 </div>
 
-<p class=MsoNormal>The debugger is used for finding errors and for
-understanding the actual sequence of computations executed in a simulation run.
-In fact, the modeler writes the equations independently from one another, and
-the system determines at run time (i.e. at the very moment of execution of a
-simulation) which equation needs to be computed first. </p>
+<p class=MsoNormal>The LSD Debugger can help finding errors in the <a
+href="LSD_faqs.html#equation">Equations</a> code and for understanding
+the actual sequence of computations executed in a <a
+href="LSD_faqs.html#simulationrun">simulation run</a>, as well the
+associated numerical values at each time step.</p>
 
-<p class=MsoNormal>The normal procedure is to set one or few Variables marked
-to be debugged before a simulation run. Then, during the simulation run, the
-user presses the button <span class=Cdigo>Debug</span> in the <a
-href="LSD_windows.html#log">LSD Log window</a>. The simulation will be
-interrupted showing the <a href="#top">Debugger window</a> referring to the
-Object of the Variable marked to be debugged. At this point, the user can
-browse through the model's Objects using the <a href="#browse">browsing buttons</a>.
-Comparing the values of the Variables and Parameters in these Objects and the
-equations code (that can be read in the <a href="menuhelp.html#modelreport">Model
-Report</a> accessible from the Help menu) it is possible to check that the
-value returned by the equations is the expected one. This work is facilitated
-by checking the values of the temporary <span class=Cdigo><a href="#v"><span
-style='color:gray;text-decoration:none'>v[…]</span></a></span> variables used
-in the equations code. </p>
-
-<p class=MsoNormal>The modeler can control the equations that started to be
-computed, but could not be completed, at the moment the current Variable was
-finished to be computed. That is, they can print in the Log window the status
-of the Stack. The user can modify the values of the models by double-clicking
-on their labels in the <a href="#content">Debugger window's content</a>. The
-user can continue the simulation (or abort it) with different options using the
-<a href="#simulation">Simulation Controlling</a> buttons. See the notes on the <a
-href="#simman">LSD Simulation Manager </a>for further information on this
-topic. </p>
-
-<p class=MsoNormal>For very serious problems, where the usual LSD debugging
-cannot help to find the problem there are two suggestions. The first, concerns
-only the identification of the Variable that caused an error. See the <a
-href="#crash">instruction here</a> on how to find out the Variable whose
-equation caused an unexpected crash. The second suggestion is to use the
-GDB/LLDB debuggers, see the <a href="LMM.html#debug">instruction for using the
-GDB/LLDB debuggers</a>.</p>
+<p class=MsoNormal>The information below is also applicable for the <a
+href="menudata_brow.html">Data Browser</a> window, when applicable.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1><a name=activate></a><a name="_Activating_the_Debugger"></a>Activating the
-Debugger</h1>
+<h1><a name="_The_debugging_process"></a>The debugging process</h1>
 
-<p class=MsoNormal>The Debugger starts when two conditions are met: </p>
+<p class=MsoNormal>The first step to start the debugging procedure is to set
+one or more <a href="LSD_faqs.html#variable">Variables</a> for
+debugging before a <a href="LSD_faqs.html#simulationrun">simulation run</a>
+(see <a href="browser.html#changeelement">here</a> how). Next, still
+before running the simulation, use the option <span class=Cdigo>Run&gt;Settings</span>
+to define the time step the debugging will start (see <a
+href="menurun.html#simsetting">here</a>), or, alternatively, during the
+simulation run, press the button <span class=Cdigo>Debug</span> in the <a
+href="LSD_windows.html#log">LSD Log window</a> to define when to start
+tracking the selected Variables. Last, <a href="menurun.html#run">start</a>
+the simulation run using menu <span class=Cdigo>Run&gt;Run</span>. </p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the simulation enters in the Debug Mode</p>
+<p class=MsoNormal>After finishing the computation of any of the marked
+Variables, the simulation is interrupted, the <a href="#operate">Debugger
+window</a> is opened, and the contents of the <a
+href="LSD_faqs.html#object">Object</a> <a
+href="LSD_faqs.html#object">instance</a> containing the computed
+Variable is presented. At this point, the user can browse through the model's
+Objects using the <a href="#browse">browsing buttons</a>. Analyzing the values
+of the Variables and <a href="LSD_faqs.html#parameter">Parameters</a>
+it is possible to check if the value returned by the <a
+href="LSD_faqs.html#equation">Equation</a> is the expected one. The
+user can also refer to the values of the temporary variables <span class=Cdigo><a
+href="#v"><span style='color:gray;text-decoration:none'>v[…]</span></a></span>
+just computed by the current Equation’s code. </p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>a Variable marked to be debugged is just computed, and</p>
+<p class=MsoNormal>The modeler can still control the Variables that started to
+be computed but could not be completed yet (at the moment the current Variable
+was computed). The current list of Variables under computation is available in
+the LSD stack. The user can modify the values of the Variables and Parameters
+by double clicking on their names in the <a href="#content">Debugger window</a>.
+Finally, the user can continue the simulation (or abort it) with different
+options using the <a href="#simulation">simulation control</a> buttons. </p>
 
-<p class=MsoNormal>To enter the Debug Mode users can set a positive value in
-the appropriate entry in the <a href="menurun.html#simsetting">Simulation
-Settings</a> (menu <a href="menurun.html">Run</a>) before launching a
-simulation. New values for the time step when activating the Debug Mode can
-also be set using the <a href="#until">button Until</a> in the <a href="#top">debugger
-window</a>. The Debug Mode is also activated when clicking on the <span
-class=Cdigo>Debug</span> button of the <a href="log.html">Log window</a> during
-a simulation run. In the first case, the very first step of the simulation will
-be run in Debug Mode, while in the second case this happens only at the time
-step in which the button was pressed. Of course, the simulation exit the Debug
-Mode when, during a debugging session, the user click on <a href="#run">button
-Run</a> to continue a simulation (or Quit to abort a simulation). </p>
-
-<p class=MsoNormal>A Variable is marked to be debugged before a simulation
-using the main <a href="browser.html">LSD Browser</a>, by double-clicking on
-the Variable in the Variables and Parameters list. In this case, the option
-chosen is set for all the copies of that Variable (i.e. all the Variables
-contained the copies of that Object type). The option is also saved in the
-configuration file, so that subsequent configurations will maintain this option.
-Note that having too many Variables to be debugged is not, in general, a good
-choice. </p>
-
-<p class=MsoNormal>Users can also set a Variable to be debugged from the <a
-href="#content">Debug window</a>, double-clicking on the Variable of interest.
-In this case, only the copy clicked will be affected by the option chosen,
-while other copies of the same Variable will not change this option. </p>
-
-<p class=MsoNormal>The Debugger can also be activated when a <a href="#crash">serious
-error </a>forces to abort the simulation. </p>
-
-<p class=MsoNormal>Finally, the debugger is activated when a <a href="#cond">conditional
-break </a>is met, independently if from Debug Mode or from the mark for
-debugging on a Variable having a conditional break. </p>
+<p class=MsoNormal>Two suggestions for serious problems where the LSD Debugger
+cannot help: (1) focus on the identification of the Variable(s) that caused the
+problem (see <a href="#_LSD_simulation_run">here</a> on how to find the
+Variable causing a complicate crash), and (2) learn how to use the GDB/LLDB
+debuggers (see <a href="LMM.html#debug">here</a> for details), two more
+advanced debugging tools (LLDB is for macOS only).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1><a name=operate></a>The Debugger window</h1>
+<h1><a name=activate></a><a name="_Activating_the_Debugger"></a>Activating
+debug mode</h1>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>The window shows
-the content of a single copy of an Object, that is, the Object whose Variable
-has been just computed and that caused the simulation to be interrupted. The <a
-href="#top">Debugger window</a> is composed by: </p>
+<p class=MsoNormal>The Debugger starts when two conditions are simultaneously
+met: </p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The simulation starts debug mode (because of the simulation settings
+or the user pressed the <span class=Cdigo>Debug</span> button)</p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>A <a href="LSD_faqs.html#variable">Variable</a> <a
+href="browser.html#changeelement">marked for debugging</a> finish
+computing</p>
+
+<p class=MsoNormal>To enter debug mode users can set a positive value in the
+appropriate entry in the <a href="menurun.html#simsetting">simulation
+settings</a> (menu <span class=Cdigo>Run&gt;Simulation Settings</span>) before
+launching a <a href="LSD_faqs.html#simulationrun">simulation run</a>.
+New values for the time step when activating the debug mode can also be set
+using the <span class=Cdigo><a href="#until"><span style='color:gray;
+text-decoration:none'>Until</span></a></span> button. During a simulation run,
+debug mode can be also activated clicking on the <span class=Cdigo>Debug</span>
+button in <a href="log.html">Log window</a>. When the user clicks on
+button <span class=Cdigo><a href="#run"><span style='color:gray;text-decoration:
+none'>Run</span></a></span>, to continue an interrupted simulation, or <a
+href="#_Menu_Exit">exits</a> the Debugger, to abort the simulation, LSD leaves
+debug mode. </p>
+
+<p class=MsoNormal>A Variable is marked for debugging before a simulation run
+by using the main <a href="browser.html">LSD Browser</a> to <a
+href="browser.html#changeelement">change its properties</a>. In this
+case, the debug setting is set for all the <a
+href="LSD_faqs.html#object">instances</a> of the Variable. The setting
+is also saved to the <a href="LSD_faqs.html#modelsetting">configuration
+file</a>. Users can also set a Variable to be debugged from within the Debugger
+(see <a href="#_Observe_and_edit">here</a> how). In this situation, the user
+has the option to selected only a specific instance of the Variable to
+interrupt the simulation (other instances of the same Variable will not trigger
+the Debugger). Finally, the Debugger is also activated when a <a href="#cond">conditional
+break</a> is met, as explained below. </p>
+
+<p class=MsoNormal>In any case, irrespective to the above conditions, the
+Debugger can also be automatically activated by LSD when a <a href="#crash">serious
+error</a> forces it to abort the simulation. </p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<h1><a name=operate></a><a name="_The_Debugger_window"></a><a
+name="_The_Debugger/Data_Browser"></a>The Debugger/Data Browser window</h1>
+
+<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>The <a href="#top">Debugger</a>
+and the <a href="menudata_brow.html">Data Browser</a> windows show the
+content of a single <a href="LSD_faqs.html#object">instance</a> of an <a
+href="LSD_faqs.html#object">Object</a>, that is, the Object whose <a
+href="LSD_faqs.html#variable">Variable</a> has been just computed or
+selected. The window is composed by: </p>
 
 <ul type=disc>
- <li class=MsoNormal>a <a href="#title">title</a> row:</li>
+ <li class=MsoNormal>A <a href="#title">title</a> row (not available in the
+     Data Browser):</li>
 </ul>
 
 <p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=289
 height=25 src="image/tit_debug.png"></p>
 
 <ul type=disc>
- <li class=MsoNormal>a <a href="#simulation">simulation control buttons</a> row
-     :</li>
-</ul>
-
-<p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=633
-height=36 src="image/contr_debugger.png"></p>
-
-<ul type=disc>
- <li class=MsoNormal>a set of <a href="#browse">model browsing buttons</a> :</li>
-</ul>
-
-<p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=591
-height=34 src="image/browse_debugger.png"></p>
-
-<ul type=disc>
- <li class=MsoNormal>the <a href="#name">type and instance number</a> of the
-     Object shown :</li>
+ <li class=MsoNormal>The <a href="#name">type and instance number</a> of the
+     shown Object:</li>
 </ul>
 
 <p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=304
 height=19 src="image/inst_debugger.png"></p>
 
 <ul type=disc>
- <li class=MsoNormal><a href="#content">content of the shown Object</a>: </li>
+ <li class=MsoNormal>The <a href="#browse">model browsing buttons</a>:</li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=591
+height=34 src="image/browse_debugger.png"></p>
+
+<ul type=disc>
+ <li class=MsoNormal>The <a href="#simulation">simulation control buttons</a>
+     (not available in the Data Browser):</li>
+</ul>
+
+<p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=633
+height=36 src="image/contr_debugger.png"></p>
+
+<ul type=disc>
+ <li class=MsoNormal>The <a href="#content">content</a> of the shown Object: </li>
 </ul>
 
 <p class=MsoNormal style='margin-left:36.0pt'><img border=0 width=319
@@ -366,306 +409,354 @@ height=57 src="image/linedebugger.png"></p>
 
 <h2><a name=title></a>Title row</h2>
 
-<p class=MsoNormal>The first row shows the label of the Variable that causes
-the simulation to be interrupted, its just computed value (that can be
-modified) and the current time step of the simulation. </p>
+<p class=MsoNormal>The row shows the name of the <a
+href="LSD_faqs.html#variable">Variable</a> which interrupted the <a
+href="LSD_faqs.html#simulationrun">simulation run</a>, the current time
+step, and the just computed Variable value. This value can be modified by the
+user before the simulation continues.</p>
 
-<p class=MsoNormal>This line is not present in the <a href="menudata.html">Data
-Browse </a>window, replaced by the button to exit the Data Browsing session. </p>
+<p class=MsoNormal>This line is not present in the <a
+href="menudata_brow.html">Data Browser</a> window.</p>
 
-<h2><a name=simulation></a>Simulation Control Buttons </h2>
+<h2><a name=simulation></a><a name="_Simulation_control_buttons"></a><a
+name=name></a>Object name, instance number and list of ancestors </h2>
+
+<p class=MsoNormal>The row presents the name of the <a
+href="LSD_faqs.html#object">Object</a> <a
+href="LSD_faqs.html#object">instance</a> containing the <a
+href="LSD_faqs.html#variable">Variable</a>, the names and indexes of
+this Object’s ancestors in the <a href="LSD_faqs.html#modelstructure">model
+structure</a>. The indexes list pairs report the instance number (position in
+the group) and the total number of instances of the container Object in the
+current branch of the model. </p>
+
+<p class=MsoNormal>Clicking on any part of the list of Object names allows the
+user to modify the number instances of the current Object type. It is possible
+to change this number both before running a simulation (in Data Browser) and
+during a simulation (in Debugger). See <a
+href="menudata_objn.html#modifyNumberObj">here</a> for details on how
+to modify the number of Object instances in the model. </p>
+
+<p class=MsoNormal><a name="_Model_browsing_buttons"></a>The <a href="#top">Debugger</a>
+and the <a href="menudata_brow.html">Data Browser</a> windows work
+similarly to the LSD main <a href="browser.html">Browser</a> in showing
+the Object content, but consider one single instance of an Object instead of an
+<a href="LSD_faqs.html#object">Object type</a> as in the Browser. </p>
+
+<h2><a name=browse></a>Model browsing buttons </h2>
+
+<p class=MsoNormal>The <a href="#top">Debugger</a> and the <a
+href="menudata_brow.html">Data Browser</a> windows start by showing the
+content of the <a href="LSD_faqs.html#object">Object</a> whose <a
+href="LSD_faqs.html#variable">Variable</a> caused the <a
+href="LSD_faqs.html#simulationrun">simulation run</a> to stop
+(Debugger) or was selected by the user (Data Browser). Users can then move from
+the current Object to show any other Object. A set of buttons is used to browse
+through the <a href="LSD_faqs.html#modelstructure">model structure</a>.
+The user can explore each individual instance of each Object. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Up</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>U</span>) move to the parent of the current Object. No action if
+the Root (the upmost Object) is the current one. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Down</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>D</span>) move to the first instance of the first Object descending
+from the current one. No action if the Object does not have descendants. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Previous</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>P</span>) move to the (brother) Object instance preceding the
+current one, if any, or to the Object type preceding the current Object, if
+exists. Note that the “previous” instance must be of the same Object type or
+under the same parent. No action if there is no preceding Object.</p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Next</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>N</span>) move to the (brother) Object instance following the
+current one, if any, or to the Object type following the current Object, if
+exists. Note that the “next” instance must be of the same Object type or under
+the same parent. No action if there is no following Object. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Next Type</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>T</span>) move to the first instance of the (brother) Object type
+following the current Object type, under the same parent. No action if there is
+no following Object type. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Last</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>L</span>) move to the last instance of the current Object type. </p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><a name=find></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Find</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>F</span>) find a Variable given its name and, optionally, a
+numerical value reference. If a numerical reference is desired, the user may
+select a condition based on it. The window moves to show the Object containing
+the searched Variable and value condition, if any. If more than one Object type
+contains the requested Variable with the given value, the system shows the
+closest one.</p>
+
+<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Network</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>W</span>) presents the <a href="LSD_faqs.html#network">LSD
+network</a> links connecting the current Object to its neighbors in the
+network, if any. This button is disabled if the Object is not configured as
+network node.</p>
+
+<h2><a name="_Object_content"></a>Simulation control buttons </h2>
 
 <p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>These buttons
-control the flow of the simulation after the debugging session. Naturally, they
-are not present in the <a href="menudata.html">Data Browsing </a>window. </p>
+control the flow of the <a href="LSD_faqs.html#simulationrun">simulation
+run</a> during the debugging session. They are not present in the <a
+href="menudata_brow.html">Data Browser</a> window.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><a name=stackinfo></a><a name=printstack></a><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+36.0pt;text-indent:-18.0pt'><a name=run></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Run</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>R</span>) Continues the simulation exiting the Debug Mode, and
-therefore the simulation is not interrupted until button Debug is pressed, a
-conditional break is met, or the simulation is terminated. Note that the <a
-href="#stackinfo">Stack Info </a>option remains in the setting chosen by the
-user. </p>
+class=Cdigo>R</span>) continues the simulation closing the <a href="#operate">Debugger</a>
+window and leaving <a href="#activate">debug mode</a>. Therefore, the
+simulation is no longer interrupted until a <a href="#cond">conditional break</a>
+is met, or buttons <span class=Cdigo>Debug</span>, <span class=Cdigo>Pause</span>
+or <span class=Cdigo>Stop</span> are pressed in the <a href="log.html">Log</a>
+window.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+36.0pt;text-indent:-18.0pt'><a name=until></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Until</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>I</span>) Ask for a time step and continue the simulation in normal
-mode until that time step, when the Debug Mode is re-activated, causing for the
-simulation to be interrupted at the first Variable to be debugged encountered. </p>
+class=Cdigo>I</span>) ask for a time step and normally continue the simulation
+until there, when debug mode is reactivated, causing for the simulation to be
+interrupted at the first <a href="LSD_faqs.html#variable">Variable</a>
+to be debugged. </p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+36.0pt;text-indent:-18.0pt'><a name=step></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Step</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>S</span>) Continues the simulation (remaining in Debug Mode) until
+class=Cdigo>S</span>) continues the simulation, remaining in debug mode, until
 another Variable to be debugged is updated, either in the same or in a
 subsequent time step. </p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Analysis</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>A</span>) Open the <a href="menudata_res.html">Analysis of Result </a>module,
-permitting users to analyze every series produced by the simulation up to the
-previous time step. </p>
+class=Cdigo>A</span>) open the <a href="menudata_res.html">Analysis of
+Result </a>module, permitting users to analyze every saved time series up to
+the previous time step. </p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><a name=v></a><span style='font-family:Symbol'>·<span
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>v[…]</b></span>: Show the set of
-intermediate values used in the equation. These values may be used to
-re-construct the internal computation of the Variable just executed, using the
-code for the Variable available from the Model Report in menu Help. These
-values are available only if the simulation is running in Debug Mode (see help
-on <a href="#activate">How to activate the debugger</a>). Therefore, may not be
-reliable in case the Debugger was activated because of a conditional break. </p>
+</span></span><span class=Cdigo><b>Caller</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>C</span>) move the Debugger window to the <a
+href="LSD_faqs.html#object">Object</a> containing the Variable which
+requested the computation of the current Variable. If the Variable computation
+was not triggered by any Equation (LSD demanded its update), this button does
+nothing.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><a name=step></a><a name=until></a><a name=run></a><a
-name=quit></a><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Print Stack</b></span>: Prints the state of
-the stack, showing which Variables are currently under computation. That is,
-the set of Variables whose computation started but is still not completed
-because other Variables needed to be computed first. </p>
-
-<h2><a name=analysis></a><a name=name></a>Object type and list of ancestors </h2>
-
-<p class=MsoNormal>These labels tell the name of the Object shown and its
-position in the model structure. </p>
-
-<p class=MsoNormal>This <a href="#top">Debugger window</a> works similarly to
-the LSD main <a href="browser.html">Browser</a> in showing the Object content,
-but consider one single copy of an Object instead of an Object type as in the
-Browser. </p>
-
-<p class=MsoNormal>The list report the instance number both for the Object
-currently shown (the last in the list) and for the ancestors. The second number
-is the whole number of instances in that branch of the model. </p>
-
-<p class=MsoNormal>Clicking on the label <b>Object Instance</b> the user can
-modify the number of Objects of the type currently shown. It is possible to
-change this number both before running a simulation and during a simulation.
-All values for the Parameters and Variables in the Objects created will be
-copied from an example instance of the Object. The user can select which
-example instance to use. See the <a href="menudata_objn.html#modifyNumberObj">manual
-page to edit </a>the number of Objects in the model. </p>
-
-<h2><a name=browse></a>Model Browsing Buttons </h2>
-
-<p class=MsoNormal>The <a href="#top">Debugger window</a> starts by showing the
-content of the Object whose Variable caused the simulation to stop. Users can
-then move the Debugger to show any other Object (this may be relevant for
-understanding the actual working of LSD equations; see the help page on <a
-href="LSD_functions.html#objeq">using Objects in LSD equations)</a>. </p>
-
-<p class=MsoNormal>A set of buttons is used to browse through the model. Note
-the model is shown “physically”, and therefore user can explore each individual
-instance for each Object, and not only one representative element as in the
-main LSD Model Browser. </p>
+36.0pt;text-indent:-18.0pt'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Hook</b></span>: (<i>shortcut</i>: <span
+class=Cdigo>H</span>) move the Debugger window to the Object pointed by the <a
+href="LSD_macros.html#hook">hook pointer</a> of the current Object. If
+the hook pointer was not set, this button does nothing.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Up</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>U</span>) Move to the parent Object of the currently shown one. No
-action if the Root (upmost Object) is shown. </p>
+36.0pt;text-indent:-18.0pt'><a name=v></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>v[…]</b></span>: show the set of
+intermediate values used in the Variable’s <a
+href="LSD_faqs.html#equation">Equation</a>. These temporary values may
+be used to re-construct the internal computation of the Variable just executed.
+Please note that only the temporary variables effectively used in the Equation
+have meaningful values, all others show useless data. These values may not be
+reliable in case the Debugger was activated because of a conditional break.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Down</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>D</span>) Move to the first Object descending from the currently
-shown one. No action if the Object does not have descendants. </p>
+36.0pt;text-indent:-18.0pt'><a name=printstack></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Stack</b></span>: shows in the Log window
+the state of the LSD simulation stack, presenting which Variables are currently
+under computation. That is, the set of Variables whose computation started but
+is still not completed because other Variables needed to be computed first. See
+the <a href="#simman">example</a> on how to use this data.</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Next</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>N</span>) Move to the Object following the currently shown one, if
-exists. Note that the &quot;next&quot; Object can be either an Object of the
-same type or one of different type. No action if there is no other Object after
-the one showed. </p>
+36.0pt;text-indent:-18.0pt'><a name=stackinfo></a><span style='font-size:10.0pt;
+font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Stack level</b></span>: define the maximum
+LSD simulation stack level in the computation log to be presented in the Log
+window during the debugging session. The default (<span class=Cdigo>0</span>)
+disables showing the stack. Please note that this option significantly reduces
+the simulation speed, as it prints one line for each Variable being updated up
+to that level, in particular when deep stack levels are configured. More
+information is available <a href="#simman">below</a>.</p>
 
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Next Type</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>T</span>) Move to the Object following the Objects of the same type
-as the currently shown one. Can be useful if, for example, the browser is
-showing the first of thousands of instances of the same type, and user wants to
-observe the next type after this set. No action if there are no other type of
-Object following. </p>
+<h2><a name=analysis></a>Object content </h2>
 
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Last</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>L</span>) Move to the last copy of the same Object type as the
-currently shown one. </p>
+<p class=MsoNormal>In the <a href="#top">Debugger</a> and the <a
+href="menudata_brow.html">Data Browser</a> windows, a two-column list
+shows the <a href="LSD_faqs.html#variable">Variables</a> and <a
+href="LSD_faqs.html#parameter">Parameters</a> contained in the <a
+href="LSD_faqs.html#object">Object</a> shown. In each column, a line
+shows: </p>
 
-<p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
-35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span class=Cdigo><b>Find</b></span>: (<i>shortcut</i>: <span
-class=Cdigo>F</span>) A window requests the name of one variable and one
-numerical value. The Debugger moves to show the Object containing the indicated
-variable with the indicated value. This allows, for example, to observe
-instances of Object that are &quot;far away&quot; in the model (say, the 1000<sup>th</sup>
-element in a group of Object). If more than one Object type contains the
-requested variable with the requested value, the system shows the
-&quot;closest&quot; one. In LSD, the distance among Objects is computed
-according to the number of Objects necessary to pass through using the
-following research strategy (See LSD function search_var(…) in the Modelers
-Manual or the function <a href="LSD_functions.html#cal">cal(...)</a> for
-further details.): </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Name of the Variable or Parameter.</p>
 
-<p style='margin-left:72.0pt;text-indent:-18.0pt'><span style='font-family:
-"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span>starting
-from one Object explore the descendants; </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Current value (for Variables, it is the lastly computed value).</p>
 
-<p style='margin-left:72.0pt;text-indent:-18.0pt'><span style='font-family:
-"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span>explore
-the &quot;siblings&quot; (i.e. descendants from the same ancestor); </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Last update (not used for parameters): the simulation time step
+during which the Variable has most recently computed its <a
+href="LSD_faqs.html#equation">Equation</a>. Comparing the value of last
+update for a Variable with the current time it is possible to know whether the
+Variable will still be computed during the current step or if it has already
+been updated.</p>
 
-<p style='margin-left:72.0pt;text-indent:-18.0pt'><span style='font-family:
-"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span>explore
-the ancestor; explore the &quot;siblings&quot; of the ancestor etc. </p>
+<p class=MsoNormal>Clicking with the right button on the element name activates
+the <span class=Cdigo><a href="menudata_init.html#setall">Set All<span
+style='font-family:"Arial","sans-serif"'> command</span></a></span>. The <span
+class=Cdigo>Set All</span> command recognizes the <a
+href="LSD_faqs.html#object">instance</a> of the Object currently
+selected, and allows the change of a single branch in the <a
+href="LSD_faqs.html#modelstructure">model structure</a>. This can be
+used before running a simulation or at any one time during a <a
+href="LSD_faqs.html#simulationrun">simulation run</a>. The last update
+time of the Variables will not be affected by this change. See the <span
+class=Cdigo><a href="menudata_init.html#setall">Set All<span
+style='font-family:"Arial","sans-serif"'> command</span></a></span> for further
+details. </p>
 
-<h2><a name=content></a>Object Content </h2>
+<h2><a name="_Observe_and_edit"></a><a name=content></a>Observe and edit
+element values</h2>
 
-<p class=MsoNormal>In the <a href="#top">Debugger window </a>a two-column list
-shows the Variables and Parameters contained in the Object shown. In each
-column, a line shows: </p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>Name of the Variable or Parameter;</p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>Current value (for Variables, it is the lastly computed value);</p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>Last update. This field is not used for parameters. For Variables
-it reports the simulation time step during which the Variable has most recently
-computed its equation, and therefore obtained its most update value. Comparing
-the value of Lastupdate for a Variable with the current time step of the
-simulation it is possible to know whether the Variable will be computed during
-the current simulation step or if it has already happened.</p>
-
-<p class=MsoNormal>Clicking with the right button of the mouse on the label it
-is possible to activate the button <span class=Cdigo>Set All</span>. for the
-selected item. The user will be able to modify the values for all the
-Parameters or Variables selected in the model, using the automatic
-initialization. Note that the <span class=Cdigo>Set All</span> function
-recognize the instance of the Object currently occupied, and therefore will be
-easy to change the values of only one a branch in the model. This possibility
-can be used both before running a simulation and at any one time during a
-simulation run. The time tag Last Update of the Variables will not be affected
-by this change. See the manual for the <a href="menudata_init.html#setall">Set
-All function</a> for further details. </p>
-
-<h3><a name="_Observe_and_edit"></a>Observe and edit element values</h3>
-
-<p class=MsoNormal>Double-clicking on the labels it is possible to observe and
-edit the value(s) of the Element (one value, in case of Parameters, and all
-lagged values for Variables). The window is as shown below: </p>
+<p class=MsoNormal>Double-clicking on the element name allows the observation
+and editing of the value(s) of the element.</p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
 width=228 height=229 src="image/variab_debug.png"></p>
 
-<p class=MsoNormal>The window shows one entry for each lagged value (in case of
-Variables also used with lagged values) or one single entry for Parameters. The
-entry shows the current value and users can edit it. Pressins on the buttons <span
-class=Cdigo>Set All</span><b> </b>it is possible to change all, or some, of the
-values for the corresponding Variable or Parameter in the model. Beware that
-the change ignores the actual time of last computation for each element. </p>
+<p class=MsoNormal>The Status window (above) shows one entry for each lagged
+value in case of <a href="LSD_faqs.html#variable">lagged Variables</a>
+or one single entry for non-lagged <a href="LSD_faqs.html#variable">Variables</a>
+and <a href="LSD_faqs.html#parameter">Parameters</a>. The entries show
+the current values and the user can modify them. Clicking on the <span
+class=Cdigo><a href="menudata_init.html#setall">Set All</a></span>
+buttons allows the change of all, or some, of the values for the same element
+contained in other <a href="LSD_faqs.html#object">Object instances</a>
+in the model (see <a href="menudata_init.html#setall">here</a> for
+details). Beware that the changes ignore the actual time of last computation
+for each element. </p>
 
 <p class=MsoNormal>The other elements of the window are: </p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The checkboxes <span class=Cdigo>Debug</span> allows setting the
-shown Variable to be debugged. That is, next time the variable is computed and
-the debug is requested the simulation will be interrupted.</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Debug</b></span> / <span class=Cdigo><b>Debug
+all instances</b></span>: marking one of the checkboxes sets the Variable to be
+debugged. That is, next time the Variable is computed the simulation will be
+interrupted. The user may request the Debugger to stop just for this specific
+instance or for any instance of the Variable.</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The button <span class=Cdigo>Equation</span> shows the code for
-the equation in a new window.</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Equation</b></span>: shows the code for the
+Variable’s <a href="LSD_faqs.html#equation">Equation</a> in a new
+window.</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The button <span class=Cdigo>Set Break</span><b> </b>allows to
-define conditional breaks for the simulation, according to particular values of
-the Variable shown (see help on <a href="#cond">conditional breaks</a>).</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Set Break</b></span>:<b> </b>define
+conditional breaks for the <a href="LSD_faqs.html#simulationrun">simulation
+run</a>, according to particular values of the Variable (see <a href="#cond">below</a>).</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The button <span class=Cdigo>Update</span> forces the variable to
-be updated. Note that this command may produce no result if the variable has
-been already updated in the current time step (if the <i>current time</i>
-equals the <i>time of last computation</i>).</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Update</b></span>: forces the variable to be
+updated. It produces no result if the variable has been already updated in the
+current time step.</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The button <span class=Cdigo>Done</span> returns to the main
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span class=Cdigo><b>Done</b></span>: returns to the main
 Debugger window.</p>
 
-<h3><a name=cond></a><a name="_Set_Conditional_Breaks"></a><span
-class=Ttulo3Char>Set Conditional Breaks </span></h3>
+<h2><a name=cond></a><a name="_Set_Conditional_Breaks"></a><span
+class=Ttulo3Char>Set conditional breaks </span></h2>
 
-<p class=MsoNormal>It is possible to interrupt the simulation (even when the it
-is not running in Debug Mode and for Variables not marked to be debugged), by
-setting conditional breaks. That is, users can interrupt the simulation in case
-the value resulting from an equation is equal to, lesser than or greater than a
-determined value. LSD does not allow saving conditional breaks in the LSD model
-files, and therefore it is possible to set them only during a Debugging
-session. </p>
+<p class=MsoNormal>Using conditional breaks <a
+href="LSD_faqs.html#variable">Variables</a> can be marked for
+interrupting the <a href="LSD_faqs.html#simulationrun">simulation run</a>
+only if they have a specific value attributed to them. A conditional break can
+be set only during a debugging session, when the simulation was interrupted at
+least once by the computation of a Variable with the (unconditional) <a
+href="browser.html#changeelement">debug attribute</a> set. After that,
+however, it is possible to add conditional debug breaks even for Variables not
+marked for debugging. The user can set conditional breaks in case the
+Variable’s result from its <a href="LSD_faqs.html#equation">Equation</a>
+is equal to, lesser than or greater than a given value. Conditional breaks last
+only during the current debugging session. </p>
 
-<p class=MsoNormal>The window for setting conditional breaks is reached by
-pressing the appropriate button after having double-clicked on the Variable of
-interest. It appears as follows: </p>
+<p class=MsoNormal>To set a conditional break, in the <a
+href="#_The_Debugger/Data_Browser">Debugger</a> window double click on the name
+of the desired Variable and press the <span class=Cdigo>Set Break</span> button
+in the <a href="#_Observe_and_edit">Element Status</a> dialog box.</p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
-width=150 height=232 src="image/cond_break.png"></p>
+width=227 height=232 src="image/cond_break.png"></p>
 
-<p class=MsoNormal>Users are requested to insert a numerical value and to
-determine under what conditions the simulation has to stop. Three conditions
-are available: lesser ten, larger than or equal to the inserted value. The
-second line shows the condition currently used. Only one conditional break can
-be defined for each Variable, but more Variable can be assigned conditional
-breaks (though conditions cannot refer to each other). </p>
+<p class=MsoNormal>On the Conditional Break dialog (above), the user first
+choses which condition should interrupt the simulation run and, if required,
+sets a numerical value associated to the selected condition. Four conditions
+are available: (1) None, to set a dynamic <i>unconditional</i> break, (2) “=”,
+to interrupt if the Variable computation result is exactly equal to the chosen
+value, (3) “&gt;”, to interrupt if result is larger than the value, or (4)
+“&lt;”, to break if result is less than the set value. Only one conditional
+break can be defined for each Variable. Several Variables can have assigned
+conditional breaks at once. </p>
 
-<p class=MsoNormal>In order to satisfy a conditional break it is not necessary
-that the simulation is run in Debug Mode. When a conditional break is
-satisfied, the simulation is interrupted and the Object containing that
-Variable is shown in the Debugger window. </p>
+<p class=MsoNormal>When a conditional break condition is satisfied for any
+Variable, the simulation is interrupted and the Object containing that Variable
+is shown in the Debugger window. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1>Menu Exit</h1>
+<h1><a name="_Menu_Exit"></a><a name=quit></a>Menu Exit</h1>
 
 <p class=MsoNormal>This menu has the single entry <span class=Cdigo>Quit and
 Resume Simulation</span>. As a shortcut, the user may click on the X in the LSD
@@ -674,244 +765,254 @@ Debugger title bar or press the key <span class=Cdigo>Esc</span>.</p>
 <p class=MsoNormal>If a simulation is running, executing <span class=Cdigo>Quit
 and Resume Simulation</span> does not abort the simulation. If aborting the
 simulation is required, simply press <span class=Cdigo>Stop</span> in the <a
-href="LSD_windows.html#log">LSD Log window</a> <i>after</i> resuming the
-simulation.</p>
+href="LSD_windows.html#log">LSD Log window</a> <i>after</i> resuming
+the simulation.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1><a name=simman></a><a name="_The_LSD_Simulation"></a>LSD simulation run
-details </h1>
+<h1><a name=simman></a><a name="_The_LSD_Simulation"></a><a
+name="_LSD_simulation_run"></a><a name=crash></a>LSD simulation run details </h1>
 
 <p class=MsoNormal>In order to use the LSD Debugger it is crucial to understand
 how a simulation is run in LSD. When a simulation is started, the model loaded
 in LSD is passed to the simulation manager. When the manager starts, the time
 step is initialized to 1 and at each step it is increased by one unit. </p>
 
-<p class=MsoNormal>The simulation manager follows a simple cycle for each time
-step and for each Object in the model: </p>
+<p class=MsoNormal>The LSD simulation manager follows a simple cycle for each
+time step and for each Object in the model: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>Take the one Object;</p>
+</span>Take an Object with non-computed Variable(s)</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>take one Variable (no Parameter);</p>
+</span>Take one non-computed Variable from the current Object</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>execute the associated equation;</p>
+</span>Execute the associated Equation</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>if the equation requests the updated (zero lag) value of any other
-Variable, and this has not been computed yet, execute its equation;</p>
+</span>If the Equation requests the updated (lag zero) value of any other
+Variable, and this has not been computed yet, execute its Equation</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>take another Variable of the same Object and go to 3</p>
-
-<p class=MsoNormal>This cycle is performed firstly for the Root of the model,
-and, recursively, for each of its descendant, their own descendants and so on.
-Note that the equation for one Variable can be computed under two
-circumstances: </p>
+</span>If there are any non-computed Variable in the current Object, go to 2</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the simulation manager requests its value during the normal updating
-cycle, or</p>
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>If there is any Object with non-computed Variable(s), go to 1</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>another Variable has requested its updated value before of the
-standard updating cycle has reached it.</p>
+6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>7.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span>Increment the time step and go to 1</p>
 
-<p class=MsoNormal>In the second case the equation that caused the Variable to
-be updated is interrupted until the other equation is completed. That is, the
-first equation's computation is placed &quot;on the stack&quot; and is resumed
-only when the second equation is completed. Of course, the second equation can
-itself trigger the computation of still other equations, and therefore it can
-be placed again on the stack (second level) until the values it requests are
-obtained. </p>
+<p class=MsoNormal>This cycle starts with the <span class=Cdigo>Root</span>
+Object, and proceeds, recursively, for each of its descendant, their own
+descendants and so on. Note that the Equation for a Variable can be computed under
+three circumstances: </p>
 
-<p class=MsoNormal>It is a common error to write models' equations that create
-a dead-lock. That is, in the simplest case, you have two equations like: </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The LSD simulation manager requests its value because it was not
+yet updated (except if the update flag is not set for the Object containing the
+Variable)</p>
 
-<p class=MsoNormal><i>X</i> = F(<i>Y</i>) </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Another Variable has requested its updated value</p>
 
-<p class=MsoNormal>and </p>
+<p class=MsoNormal>In the second case, the Equation that caused the Variable to
+be updated is interrupted until the other Equation is completed. That is, the
+first Equation's computation is placed “on the stack” and is resumed only when
+the second Equation is completed. Of course, the second Equation can itself
+trigger the computation of another Equations, and, therefore, it can be placed
+on the stack too (second level) while the Variables it requested are computed. </p>
 
-<p class=MsoNormal><i>Y</i> = G(<i>X</i>) </p>
+<p class=MsoNormal>It is a common mistake to write Equations that create a
+dead-lock. As when, in the simplest case, you have two equations like: </p>
+
+<p class=MsoNormal><i>X</i> = F(<i>Y</i>)    and    <i>Y</i> = G(<i>X</i>) </p>
 
 <p class=MsoNormal>Of course, it is necessary that either F(.) or G(.) use a
-lagged value, otherwise the set of the two equations is not computable. </p>
+lagged value, otherwise the set of two equations is not computable (a kind of
+“egg-and-chicken” problem). Similar errors are common even in mildly complex
+models, when a long chain of equations reciprocal computations can hinder the
+source of the error. </p>
 
-<p class=MsoNormal>Similar errors are easy even in slightly complex models,
-when a long chain of equations reciprocal activations can hinder the
-possibility to immediately see the source of the error. </p>
+<p class=MsoNormal>Model writers can make use of the stack log provided, on request,
+by LSD. At a significant cost to speed, when the value set for the stack log
+level is higher than zero, LSD profiles the simulation execution. The stack log
+level can be set either in the <a href="menurun.html#simsetting">simulation
+settings</a>, before starting a simulation run, or in the <a
+href="#_Object_content">Debugger</a> window, during a debugging session. When
+the profiling log is active, the simulation manager prints out in the <a
+href="log.html">Log</a> window one line for each equation computed up
+to the selected stack level. That is, </p>
 
-<p class=MsoNormal>Model writers can make use of the stack info provided, on
-request, by the LSD simulation manager. At some cost of speed, when the
-requested value for the stack is higher than one (it can be set either in the <a
-href="menurun.html#simsetting">Simulation Settings</a> before starting a
-simulation run, or in the debugger's window during a Debugging session), the
-simulation manager prints out in the Log window one line for each equation just
-computed. When this option is on the simulation manager issues the stack level
-at which the equation is computed. That is, </p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Stack level 1 means that the equation has been computed because
+of simulation manager request (end of cycle updating);</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>stack level 1 means that the equation has been computed because
-of the system request (normal updating cycle);</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Stack level 2 means that the equation has been computed as
+consequence of a request made by an equation computed at stack level 1;</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>stack 2 means that the equation has been computed as consequence
-of a request made by an equation computed at stack 1;</p>
-
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>...</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>stack n means that the equation has been computed as consequence
-of a request made by an equation computed at stack n-1;</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Stack level <i>n</i> means that the equation has been computed as
+consequence of a request made by an equation computed at stack level <i>n</i> -
+1;</p>
 
-<p class=MsoNormal>The line concerning an equation is like: </p>
+<p class=MsoNormal>The profiler log issues one line per processed Equation,
+like this: </p>
 
-<p class=MsoNormal><span class=Cdigo>VarLabel (4) =
-3.14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 18, stack = 6, caller =
-ObjLabel, triggering var. = VarTwo </span></p>
+<p class=MsoNormal><span class=Cdigo>VarLabel (4) =</span><span class=Cdigo><span
+style='color:red'>3.14&nbsp; </span>t=</span><span class=Cdigo><span
+style='color:red'>18</span>  msecs=</span><span class=Cdigo><span
+style='color:red'>1</span>  stack=</span><span class=Cdigo><span
+style='color:red'>6</span>  caller=ObjLabel  trigger=VarTwo </span></p>
 
-<p class=MsoNormal>meaning that: </p>
+<p class=MsoNormal>It means that: </p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the Variable <span class=Cdigo>VarLabel</span> has just being
-computed;</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Variable <span class=Cdigo>VarLabel</span> has just being
+computed</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>it is contained in the fourth Object in the group of Objects of
-the same type;</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>It is contained in the fourth instance of the container Object
+type</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the result of the equation is 3.14</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The result of the Equation computation is <span class=Cdigo>3.14</span></p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>it is the time step 18 of the simulation;</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>It was computed in time step <span class=Cdigo>18</span></p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>it is computed at stack 6 (because requested by another Variable,
-which, in turn, was computed at stack 5);</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>It was computed at stack level 6 (because requested by another
+Variable, which, in turn, was computed at stack 5)</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the Object that requested its value if of type <span class=Cdigo>ObjLabel</span>
-(this field reports <span class=Cdigo>SYSTEM</span> in case the Variable is
-computed because requested by the Simulation Manager)</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The Object containing the Variable which requested its value if
+of type <span class=Cdigo>ObjLabel</span> (this field reports <span
+class=Cdigo>SYSTEM</span> if the Variable was computed by the simulation
+manager)</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>the Variable in whose equation it was requested is <span
-class=Cdigo>VarTwo</span> (this field is not present in case the Variable is
-computed because requested by the Simulation Manager)</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The Variable in whose equation it was requested is <span
+class=Cdigo>VarTwo</span> (this field is not present if the Variable was
+computed by the simulation manager)</p>
 
-<p class=MsoNormal>When a simulation is running with the Stack Info option on
-the above lines are compiled just after each equation execution. Therefore, it
-provides the exact scheduling used by the LSD Simulation Manager to compute the
-model. This information is frequently used along with the data from the current
-stack. For example, suppose you choose to control when the equation for
-Variable <span class=Cdigo>ExpChoose</span> is computed. You run the simulation
-with the options for Stack Info and for Debug Mode on. You also set the
-Variable <span class=Cdigo>ExpChoose</span> with the option Debug on. The
-simulation will run (rather slowly) printing a lot of lines for each equation
-computed. When the equation for <span class=Cdigo>ExpChoose</span> is computed
-the Debugger will automatically interrupt the simulation. After that you press
-the button Print Stack in the debugger. The Log window will show the following
-information: </p>
+<p class=MsoNormal>The profiler log provides the exact scheduling used by the
+simulation manager to compute the model. This information is frequently used
+along the data from the current stack status. For example, suppose you choose
+to control when the Equation for Variable <span class=Cdigo>ExpChoose</span> is
+computed. You first set the Variable <span class=Cdigo>ExpChoose</span> with
+the debug flag on (see <a href="browser.html#changeelement">here</a>
+how). You also configure the simulation with the options for debugging from
+step <span class=Cdigo>20</span> and profiling the stack up to level <span
+class=Cdigo>5</span> (see <a href="menurun.html#simsetting">here</a>
+how). The simulation will run (rather slowly) printing a line for each Equation
+computed. When the Equation for <span class=Cdigo>ExpChoose</span> finishes
+computing at time step 20, the Debugger will automatically interrupt the
+simulation. After that you press the button <span class=Cdigo>Stack</span> in
+the Debugger, the Log window may show the following information: </p>
 
-<p class=MsoNormal><span class=Cdigo>DevLearn (10) =
-0.05&nbsp;&nbsp;&nbsp;&nbsp; t = 19, stack = 1, caller = SYSTEM <br>
-ChUsed (10) = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 19,
-stack = 1, caller = SYSTEM <br>
-MSNiche (10) = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 19, stack
-= 2, caller = TGCh, triggering var. = TechStats <br>
-TechStats (10) = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 19, stack = 1,
-caller = SYSTEM <br>
-ResetNum (1) = 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 20, stack
-= 1, caller = SYSTEM <br>
-Learning (5) = 0.0298&nbsp;&nbsp;&nbsp; t = 20, stack = 2, caller = Agent,
-triggering var. = Action <br>
-IssuerId (1) = 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 20, stack
-= 2, caller = Demand, triggering var. = Action <br>
-ExpChoose (1) = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t = 20, stack = 4,
-caller = Group, triggering var. = SetARank </span></p>
+<p class=MsoNormal><span class=Cdigo>DevLearn  (10) =</span><span class=Cdigo><span
+style='color:red'>0.05&nbsp;&nbsp;&nbsp;&nbsp;</span>t=</span><span
+class=Cdigo><span style='color:red'>19 </span> stack=</span><span class=Cdigo><span
+style='color:red'>1 </span> caller=SYSTEM <br>
+ChUsed    (10) =</span><span class=Cdigo><span style='color:red'>0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span><span
+class=Cdigo><span style='color:red'>19</span>  stack=</span><span class=Cdigo><span
+style='color:red'>1</span>  caller=SYSTEM <br>
+MSNiche   (10) =</span><span class=Cdigo><span style='color:red'>1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span><span
+class=Cdigo><span style='color:red'>19</span>  stack=</span><span class=Cdigo><span
+style='color:red'>2 </span> caller=TGCh    trigger=TechStats <br>
+TechStats (10) =</span><span class=Cdigo><span style='color:red'>1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+t=</span><span class=Cdigo><span style='color:red'>19</span>  stack=</span><span
+class=Cdigo><span style='color:red'>1 </span> caller=SYSTEM <br>
+ResetNum  (1)  =</span><span class=Cdigo><span style='color:red'>0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span><span
+class=Cdigo><span style='color:red'>20</span>  stack=</span><span class=Cdigo><span
+style='color:red'>1 </span> caller=SYSTEM <br>
+Learning  (5)  =</span><span class=Cdigo><span style='color:red'>0.0298&nbsp;&nbsp;</span>t=</span><span
+class=Cdigo><span style='color:red'>20</span>  stack=</span><span class=Cdigo><span
+style='color:red'>2 </span> caller=Agent   trigger=Action <br>
+IssuerId  (1)  =</span><span class=Cdigo><span style='color:red'>5</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span><span
+class=Cdigo><span style='color:red'>20</span>  stack=</span><span class=Cdigo><span
+style='color:red'>2 </span> caller=Demand  trigger=Action <br>
+ExpChoose (1)  =</span><span class=Cdigo><span style='color:red'>1</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t=</span><span
+class=Cdigo><span style='color:red'>20</span>  stack=</span><span class=Cdigo><span
+style='color:red'>4 </span> caller=Group   trigger=SetARank </span></p>
+
+<p class=MsoNormal><span class=Cdigo>&nbsp;</span></p>
 
 <p class=MsoNormal><span class=Cdigo>List of Variables currently under
-computation. <br>
-(the first-level Variable is computed by the simulation manager, <br>
+computation</span></p>
+
+<p class=MsoNormal><span class=Cdigo>Level           Variable Label <br>
+4               ExpChoose <br>
+3               SetARank <br>
+2               Choose <br>
+1               Action <br>
+0               LSD Simulation Manager </span></p>
+
+<p class=MsoNormal><span class=Cdigo>(the first-level variable is computed by
+the simulation manager, <br>
 while possible other Variables are triggered by the lower level ones <br>
 because necessary for completing their computation) </span></p>
 
-<p class=MsoNormal><span class=Cdigo>Level Variable Label <br>
-4 ExpChoose <br>
-3 SetARank <br>
-2 Choose <br>
-1 Action <br>
-0 LSD Simulation Manager </span></p>
-
-<p class=MsoNormal>Let's see how to interpret this data. We see that the
-Variable <span class=Cdigo>ResetNum</span> is the first to be completed at time
-20. Then we have two Variables computed because requested by the equation for <span
+<p class=MsoNormal>Let's see how to interpret this data. Variable <span
+class=Cdigo>ResetNum</span> is the first to be completed at time 20. Then we
+have two Variables computed because requested by the Equation for <span
 class=Cdigo>Action</span> (<span class=Cdigo>Learning</span> and <span
 class=Cdigo>IssuerId</span>). Both are computed at stack 2 (indicating that <span
 class=Cdigo>Action</span> is computed at stack 1, because requested by the
 simulation manager). Finally, we have our <span class=Cdigo>ExpChoose</span>
 equation, which is completed at stack 4, because requested by <span
-class=Cdigo>SetARank</span>, which must therefore be computed at stack 3. The
-information on the stack in the end of the printing confirm the indirect
-information: <span class=Cdigo>ExpChoose</span> is computed because requested
-by <span class=Cdigo>SetARank</span>, which is triggered by <span class=Cdigo>Choose</span>,
-which, in turn, is triggered by <span class=Cdigo>Action</span>. </p>
+class=Cdigo>SetARank</span>, which must therefore have been computed at stack
+3. The information about the stack status confirms our conclusion: <span
+class=Cdigo>ExpChoose</span> is computed because requested by <span
+class=Cdigo>SetARank</span>, which was triggered by <span class=Cdigo>Choose</span>,
+which, in turn, was triggered by <span class=Cdigo>Action</span>. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'><a name=crash></a><a
-name="_Handling_simulation_crashes"></a>&nbsp;</p>
+<p class=MsoNormal><a name="_Handling_simulation_crashes"></a>&nbsp;</p>
 
 </div>
 

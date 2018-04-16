@@ -674,25 +674,6 @@ proc Xcancel { w fr nameX comX comCancel } {
 	pack $w.$fr -side right 
 }
 
-proc okXcancel { w fr nameX comX comOk comCancel } {
-	global butWid
-	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
-	if { [ string length "$nameX" ] > $butWid } { 
-		set Xwid [ string length "$nameX" ] 
-	} else {
-		set Xwid $butWid 
-	}
-	button $w.$fr.ok -width $butWid -text OK -command $comOk
-	button $w.$fr.x -width $Xwid -text $nameX -command $comX
-	button $w.$fr.can -width $butWid -text Cancel -command $comCancel
-	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
-	bind $w.$fr.x <KeyPress-Return> "$w.$fr.x invoke"
-	bind $w.$fr.can <KeyPress-Return> "$w.$fr.can invoke"
-	bind $w <KeyPress-Escape> "$w.$fr.can invoke"
-	pack $w.$fr.ok $w.$fr.x $w.$fr.can -padx 10 -pady 10 -side left
-	pack $w.$fr -side right 
-}
-
 proc okXhelpcancel { w fr nameX comX comOk comHelp comCancel } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
@@ -787,15 +768,18 @@ proc comphelpdone { w fr comComp comHelp comDone } {
 	pack $w.$fr -side right 
 }
 
-proc finddone { w fr comFind comDone } {
+proc findhelpdone { w fr comFind comHelp comDone } {
 	global butWid
 	if { ! [ winfo exists $w.$fr ] } { frame $w.$fr }
 	button $w.$fr.search -width $butWid -text Find -command $comFind
+	button $w.$fr.help -width $butWid -text Help -command $comHelp
 	button $w.$fr.ok -width $butWid -text Done -command $comDone
 	bind $w.$fr.search <KeyPress-Return> "$w.$fr.search invoke"
+	bind $w.$fr.help <KeyPress-Return> "$w.$fr.help invoke"
 	bind $w.$fr.ok <KeyPress-Return> "$w.$fr.ok invoke"
 	bind $w <KeyPress-Escape> "$w.$fr.ok invoke"
-	pack $w.$fr.search $w.$fr.ok -padx 10 -pady 10 -side left
+	bind $w <F1> "$w.$fr.help invoke"
+	pack $w.$fr.search $w.$fr.help $w.$fr.ok -padx 10 -pady 10 -side left
 	pack $w.$fr -side right 
 }
 
@@ -1060,12 +1044,13 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 		set xi [ lindex $x $i ]
 		set yi [ lindex $y $i ]
 		if { $xi >= 0 && $yi >= 0 } {
-			if { $width < 1 } {
-				# small point
-				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
-					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
-					-width 0 -outline white -tags $tagsdots
-			} elseif { $width < 2.0 } {
+			if { $width == 1 } {
+				# +
+				$c create line [ expr $xi + 2 ] $yi [ expr $xi - 3 ] $yi \
+					-width 1 -fill $fill -tags $tagsdots
+				$c create line $xi [ expr $yi + 2 ] $xi [ expr $yi - 3 ] \
+					-width 1 -fill $fill -tags $tagsdots
+			} elseif { $width == 2 } {
 				# x
 				$c create line [ expr $xi + 2 ] [ expr $yi + 2 ] \
 					[ expr $xi - 3 ] [ expr $yi - 3 ] \
@@ -1073,12 +1058,11 @@ proc plot_points { c x y { tagsdots "" } { fill c0 } { width 1 } } {
 				$c create line [ expr $xi + 2 ] [ expr $yi - 2 ] \
 					[ expr $xi - 3 ] [ expr $yi + 3 ] \
 					-width 1 -fill $fill -tags $tagsdots
-			} elseif { $width < 3.0 } {
-				# +
-				$c create line [ expr $xi + 2 ] $yi [ expr $xi - 3 ] $yi \
-					-width 1 -fill $fill -tags $tagsdots
-				$c create line $xi [ expr $yi + 2 ] $xi [ expr $yi - 3 ] \
-					-width 1 -fill $fill -tags $tagsdots
+			} elseif { $width < 1 } {
+				# small point
+				$c create oval [ expr $xi - 1 ] [ expr $yi - 1 ] \
+					[ expr $xi + 1 ] [ expr $yi + 1 ] -fill $fill \
+					-width 0 -outline white -tags $tagsdots
 			} else {
 				# filled circle
 				$c create oval [ expr $xi - $width / 2 ] [ expr $yi - $width / 2 ] \

@@ -134,7 +134,7 @@ void show_graph( object *t)
 		cmd( "$g.f.c.v add separator" );
 		cmd( "$g.f.c.v add command -label Change -command { set choice 6 }" );
 		cmd( "$g.f.c.v add command -label Rename -command { set choice 83 }" );
-		cmd( "$g.f.c.v add command -label \"Number of Objects\" -command { set choice 33 }" );
+		cmd( "$g.f.c.v add command -label Number -command { set choice 33 }" );
 		cmd( "$g.f.c.v add command -label Delete -command { set choice 74 }" );
 		cmd( "$g.f.c.v add separator" );
 		cmd( "$g.f.c.v add cascade -label Add -menu $g.f.c.v.a" );
@@ -241,7 +241,7 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 			level_factor[ k ] = 1.0;
 
 		// pick hand set scale factors
-		switch( i )
+		switch ( i )
 		{
 			case 0:
 			case 1:

@@ -8,12 +8,6 @@
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -181,8 +175,8 @@ of the different elements) and of data (number of element instances/copies and
 initial values). </p>
 
 <p class=MsoNormal>The structure of the model is defined by the modeler (see
-menu <span class=Cdigo><a href="menumodel.html"><span style='color:gray;
-text-decoration:none'>Model</span></a></span>) and cannot be changed (in
+menu <span class=Cdigo><a href="menumodel.html"><span style='color:
+gray;text-decoration:none'>Model</span></a></span>) and cannot be changed (in
 general) without modifying also the <a href="#_Equations">Equations</a> of the
 model, which requires a (minimal) programming expertise. Instead, once a model
 is built and a structure defined, the data of a model can be modified by any
@@ -197,7 +191,8 @@ none'>Run</span></a></span>). </p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><a name=obj></a><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -206,21 +201,20 @@ none'>Run</span></a></span>). </p>
 
 <p class=MsoNormal>It is the basic entity of a LSD model. It represents an
 entity of the virtual reality simulated in the model. It is composed by: a <a
-href="#_Label">label</a>, <a href="#_Flag_for_Computations">flags for computation
-options</a>, some (or even none) <a href="#_Variables">Variables</a>, some (or
-even none) <a href="#_Parameters">Parameters</a>, and <a href="#objstr">ancestor
+href="#_Label">label</a>, <a href="#_Flag_for_Computations">flags for
+computation options</a>, some (or even none) <a href="#_Variables">Variables</a>,
+some (or even none) <a href="#_Parameters">Parameters</a>, and <a href="#objstr">ancestor
 and descendant Objects</a>. </p>
 
-<p class=MsoNormal>An Object is defined when the model is built and its
-definition cannot change during a simulation run. A specific configuration of a
-model can implement as many copies, or instances, of a specific Object type,
-and this number can also vary during a simulation run. Each instance of an
-Object replicates exactly the same structure of any other instance of the same
-Object type, but, of course, may assign different numerical values to the
-elements it contains (i.e., <a href="#_Variables">Variables</a> and <a
-href="#_Parameters">Parameters</a>). The descendants, as well, must share the
-same structure for each instance of an Object type, though their number (of
-instances) can vary.</p>
+<p class=MsoNormal>An Object is defined when the model is built and its definition
+cannot change during a simulation run. A specific configuration of a model can
+implement as many copies, or instances, of a specific Object type, and this
+number can also vary during a simulation run. Each instance of an Object
+replicates exactly the same structure of any other instance of the same Object
+type, but, of course, may assign different numerical values to the elements it
+contains (i.e., <a href="#_Variables">Variables</a> and <a href="#_Parameters">Parameters</a>).
+The descendants, as well, must share the same structure for each instance of an
+Object type, though their number (of instances) can vary.</p>
 
 <p class=MsoNormal>See more details about Objects in the <a
 href="LSD_faqs.html#object">FAQ</a>.</p>
@@ -236,24 +230,25 @@ symbols, like spaces (‘<span class=Cdigo> </span>’), slashes (‘<span
 class=Cdigo>/</span>’ and ‘<span class=Cdigo>\</span>’), tabs, end-of-string or
 other special characters. In LSD, labels are case sensitive. </p>
 
-<h2><a name=flagcomp></a><a name="_Flag_for_Computations"></a>Object flags for computation
-options</h2>
+<h2><a name=flagcomp></a><a name="_Flag_for_Computations"></a>Object flags for
+computation options</h2>
 
 <p class=MsoNormal>Normally, these options can be ignored, since they are
-useful only to increase the speed of the <a href="LSD_faqs.html#simulationrun">simulation
-runs</a> under certain circumstances. For huge models, it can be the case that
-some Objects are used only for storing data. If there are very many instances
-of these Objects it is possible to force the simulation to ignore them during
-the simulation time step, so that they are not (uselessly) explored for
-updating Variables. It is safe to leave the default option (on).<a
-name=variables></a></p>
+useful only to increase the speed of the <a
+href="LSD_faqs.html#simulationrun">simulation runs</a> under certain
+circumstances. For huge models, it can be the case that some Objects are used
+only for storing data. If there are very many instances of these Objects it is
+possible to force the simulation to ignore them during the simulation time
+step, so that they are not (uselessly) explored for updating Variables. It is
+safe to leave the default option (on).<a name=variables></a></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -272,18 +267,19 @@ also involve lagged values (from time <i>t</i> = <i>t</i> – <i>h</i>, <i>h</i>
 the <a href="#_Lags">number of lags</a> and the <a href="#equations">associated
 Equation</a>. See more details in the <a href="LSD_faqs.html#variable">FAQ</a>.</p>
 
-<p class=MsoNormal>Since LSD is based on the object-oriented programing (OOP) paradigm,
-it is not recommended (or natively supported) the use of vectors and matrices
-of Variables. In order to use many instances of a given Variable (or Parameter),
-similarly to elements of a vector/matrix in the traditional paradigm, in OOP it
-is required the creation of several instances of the <a href="#_Object">Object
-type</a> containing the Variable or Parameter of interest. Note that this means
-the whole content of the Object (all its elements) will be replicated in many
-instances. If the modeler finds out that part of the replicated Object is
-useless for the model (or demand too much memory), this may indicate that the <a
-href="LSD_faqs.html#modelstructure">model structure</a> can be better designed
-and the model more likely needs to be revised (e.g., splitting the data two
-different Object types). </p>
+<p class=MsoNormal>Since LSD is based on the object-oriented programing (OOP)
+paradigm, it is not recommended (or natively supported) the use of vectors and
+matrices of Variables. In order to use many instances of a given Variable (or
+Parameter), similarly to elements of a vector/matrix in the traditional
+paradigm, in OOP it is required the creation of several instances of the <a
+href="#_Object">Object type</a> containing the Variable or Parameter of
+interest. Note that this means the whole content of the Object (all its
+elements) will be replicated in many instances. If the modeler finds out that
+part of the replicated Object is useless for the model (or demand too much
+memory), this may indicate that the <a
+href="LSD_faqs.html#modelstructure">model structure</a> can be better
+designed and the model more likely needs to be revised (e.g., splitting the
+data two different Object types). </p>
 
 <h2><a name=varlab></a><a name="_Variable_label"></a>Variable label </h2>
 
@@ -309,15 +305,16 @@ are required.</p>
 <p class=MsoNormal>If a Variable is defined as having no (zero) lags, it does
 not need any initial value set at the beginning of the simulation, since its
 value can be computed at the beginning of the <a
-href="LSD_faqs.html#simulationrun">simulation run</a> (<i>t</i> = 1). However,
-in case a Variable has lagged values used in any Equation in the model, users
-need to assign numerical initial values to it. Initial values are used during
-the initial time steps of the simulation run while the lagged values cannot be
-computed yet (e.g., the value at <i>t</i> = 0 during time <i>t</i> = 1). </p>
+href="LSD_faqs.html#simulationrun">simulation run</a> (<i>t</i> = 1).
+However, in case a Variable has lagged values used in any Equation in the
+model, users need to assign numerical initial values to it. Initial values are
+used during the initial time steps of the simulation run while the lagged
+values cannot be computed yet (e.g., the value at <i>t</i> = 0 during time <i>t</i>
+= 1). </p>
 
-<p class=MsoNormal>See also how to <a href="menudata_init.html">set initial
-values</a> and the <a href="LSD_faqs.html#simulationrun">FAQ</a> about the
-management of time in a simulation run. </p>
+<p class=MsoNormal>See also how to <a href="menudata_init.html">set
+initial values</a> and the <a href="LSD_faqs.html#simulationrun">FAQ</a>
+about the management of time in a simulation run. </p>
 
 <h2><a name=equations></a><a name="_Equations"></a><a
 name="_Variable_associated_Equation"></a><a name="_Equation_associated_to"></a>Equation
@@ -325,45 +322,47 @@ associated to a Variable</h2>
 
 <p class=MsoNormal>The values for Variables are computed at each time step
 using the associated Equation code. The code of all the Equations in a model is
-contained in an <a href="LSD_faqs.html#equationfile">equation file</a>, which is
-compiled by <a href="LSD_faqs.html#lmm">LMM</a> in order to obtain a <a
-href="LSD_faqs.html#model">LSD model program</a>. </p>
+contained in an <a href="LSD_faqs.html#equationfile">equation file</a>,
+which is compiled by <a href="LSD_faqs.html#lmm">LMM</a> in order to
+obtain a <a href="LSD_faqs.html#model">LSD model program</a>. </p>
 
 <p class=MsoNormal>The code for an Equation can be any legal <a
 href="LSD_faqs.html#c">C++</a> piece of code plus the LSD defined <a
-href="LSD_macros.html">macros</a> or <a href="LSD_functions.html">functions</a>.
-Note that the Equations can also be used to perform other tasks besides
-providing the (required) numerical values to Variables. For example, they can
-create or destroy Objects, sort sets of Object instances, overwrite previously
-computed values of Variables or modify the values of <a href="#_Parameters">Parameters</a>.
-Since it is regular C++ code, an Equation can also be used to access external
-packages and libraries. </p>
+href="LSD_macros.html">macros</a> or <a
+href="LSD_functions.html">functions</a>. Note that the Equations can
+also be used to perform other tasks besides providing the (required) numerical
+values to Variables. For example, they can create or destroy Objects, sort sets
+of Object instances, overwrite previously computed values of Variables or
+modify the values of <a href="#_Parameters">Parameters</a>. Since it is regular
+C++ code, an Equation can also be used to access external packages and
+libraries. </p>
 
 <p class=MsoNormal>The code for an Equation must be written as the computations
 to be executed during a generic time step. During a <a
-href="LSD_faqs.html#simulationrun">simulation run</a>, LSD takes care of
-updating the different Variables in order to respect the <a
-href="LSD_faqs.html#scheduling">precedence order</a> implied by the set of
-difference equations used to define the Equations' code. That is, to compute
+href="LSD_faqs.html#simulationrun">simulation run</a>, LSD takes care
+of updating the different Variables in order to respect the <a
+href="LSD_faqs.html#scheduling">precedence order</a> implied by the set
+of difference equations used to define the Equations' code. That is, to compute
 the equation <i>x<sub>t</sub></i> = f(<i>y<sub>t</sub></i>), the system will
 automatically compute the equation for <i>y</i> before the equation for <i>x</i>,
 because the updated value of <i>y </i>is necessary for calculating <i>x</i>.
 If, instead, the equation is like <i>x<sub>t</sub></i><sub> </sub>= f(<i>y<sub>t
 </sub></i><sub>-1</sub>), then the system may compute <i>x</i> before <i>y</i>,
 because Variable <i>y</i> has its value for the previous time step already
-stored. Warning: <a href="LSD_macros.html">LSD macros</a> to overwrite the automatically-calculated
-values must be used with extreme care because they may inhibit the automatic
-updating order control. </p>
+stored. Warning: <a href="LSD_macros.html">LSD macros</a> to overwrite
+the automatically-calculated values must be used with extreme care because they
+may inhibit the automatic updating order control. </p>
 
-<p class=MsoNormal>See the <a href="LSD_faqs.html#equation">FAQ</a> for further
-details. <a name=parameters></a></p>
+<p class=MsoNormal>See the <a href="LSD_faqs.html#equation">FAQ</a> for
+further details. <a name=parameters></a></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
@@ -372,50 +371,54 @@ details. <a name=parameters></a></p>
 
 <p class=MsoNormal>A Parameter is one of the elements of an <a href="#_Object">Object</a>.
 It must have a numerical (real) value assigned and it is not modified by LSD
-during the <a href="LSD_faqs.html#simulationrun">simulation run</a>. Therefore,
-a Parameter is basically a special kind of Variable without an Equation or lags
-with a (more likely) constant numerical value attached. It also requires a
-naming label (same restrictions to the <a href="#_Variable_label">naming of
-Variables</a> apply).</p>
+during the <a href="LSD_faqs.html#simulationrun">simulation run</a>.
+Therefore, a Parameter is basically a special kind of Variable without an
+Equation or lags with a (more likely) constant numerical value attached. It
+also requires a naming label (same restrictions to the <a
+href="#_Variable_label">naming of Variables</a> apply).</p>
 
 <p class=MsoNormal>Though LSD does not explicitly compute new values for
 Parameters during a simulation run, the Equation’s code for any Variable can
 overwrite the value of a Parameter at any time step. </p>
 
 <p class=MsoNormal>In order to run a simulation, it is necessary that each
-Parameter (contained in every instance of all Objects) have a numerical value assigned
-before the simulation is run. See also how to <a href="menudata_init.html">set
-initial values</a>. </p>
+Parameter (contained in every instance of all Objects) have a numerical value
+assigned before the simulation is run. See also how to <a
+href="menudata_init.html">set initial values</a>. </p>
 
-<p class=MsoNormal>See more details in the <a href="LSD_faqs.html#parameter">FAQ</a>.</p>
+<p class=MsoNormal>See more details in the <a
+href="LSD_faqs.html#parameter">FAQ</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1><a name="_Ancestor_and_Descendants"></a>Ancestor and descendants </h1>
+<h1><a name="_Ancestor_and_Descendants"></a><a name=objstr></a>Ancestor and
+descendants </h1>
 
 <p class=MsoNormal>A model in LSD can be considered as a collection of <a
 href="#_Object">Objects</a> organized in a <a
-href="LSD_faqs.html#modelstructure">hierarchical inverted tree structure</a>.
-That is, each Object has one and only one parent/ancestor (from which it directly
-descends) and, possibly, a set of son/descendant (brother) Objects. The structure
-of the model must be designed on the basis of the meaning attributed by the
-modeler to the Objects. In general, an Object is defined as a descendant of
-another Object if it can be interpreted as a component of its parent Object. </p>
+href="LSD_faqs.html#modelstructure">hierarchical inverted tree
+structure</a>. That is, each Object has one and only one parent/ancestor (from
+which it directly descends) and, possibly, a set of son/descendant (brother)
+Objects. The structure of the model must be designed on the basis of the
+meaning attributed by the modeler to the Objects. In general, an Object is
+defined as a descendant of another Object if it can be interpreted as a
+component of its parent Object. </p>
 
 <p class=MsoNormal>Technically, the hierarchy tree is used by LSD at run time
 to allow the <a href="#_Equation_associated_to">Equation</a> for a <a
-href="#_Variables">Variable</a> contained in an Object to easily find the values
-of other Variables and <a href="#_Parameters">Parameters</a> contained in the
-same or different Objects. For example, consider a model that contains many
-instances of an Object named <span class=Cdigo>Market</span>, from each of
+href="#_Variables">Variable</a> contained in an Object to easily find the
+values of other Variables and <a href="#_Parameters">Parameters</a> contained
+in the same or different Objects. For example, consider a model that contains
+many instances of an Object named <span class=Cdigo>Market</span>, from each of
 which descends many Object instances of type <span class=Cdigo>Firm</span>. If Equations
 for Variables contained in <span class=Cdigo>Firm</span> needs to retrieve
 values in <span class=Cdigo>Market</span>, each son <span class=Cdigo>Firm</span>
@@ -447,8 +450,8 @@ were created.</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-size:10.0pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>If one son Object contains the requested element, the value for the
-first one found (first instance) is returned.</p>
+</span></span>If one son Object contains the requested element, the value for
+the first one found (first instance) is returned.</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-size:10.0pt'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -496,81 +499,88 @@ class=Cdigo>Firm</span>'s to choose the <span class=Cdigo>Market</span> on
 which they operate. Therefore, <span class=Cdigo>Firm</span> will not be any
 longer a “component” of <span class=Cdigo>Market</span>, so each time <span
 class=Cdigo>Price</span> is used in the Equations an algorithm to decide which <span
-class=Cdigo>Market</span> instance to refer to must be created. In this situation,
-a better model structure could be having the set of <span class=Cdigo>Firm</span>
-Object instances defined as “parallel” to the set of <span class=Cdigo>Market</span>
-Objects. </p>
+class=Cdigo>Market</span> instance to refer to must be created. In this
+situation, a better model structure could be having the set of <span
+class=Cdigo>Firm</span> Object instances defined as “parallel” to the set of <span
+class=Cdigo>Market</span> Objects. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<h1><a name="_Models'_Technical_Representation"></a>Models' split representation
-</h1>
+<h1><a name="_Models'_Technical_Representation"></a>Models' split
+representation </h1>
 
 <p class=MsoNormal>A LSD model is split in two distinct parts: the Equations'
-code (in the <a href="LSD_faqs.html#equationfile">equation file</a>) and the
-model structure and data (in the <a href="LSD_faqs.html#modelsetting">model
-configuration file</a>). The Equations are expressed as <a
-href="LSD_faqs.html#c">C++</a> code which is <a href="LSD_faqs.html#compiler">compiled</a>
-by <a href="LSD_faqs.html#lmm">LMM</a> to produce the <a
-href="LSD_faqs.html#model">LSD model program</a>. The model structure and the
-associated data are instead loaded dynamically from a <a
-href="LSD_faqs.html#modelsetting">model configuration</a> (many may coexist).&nbsp;</p>
+code (in the <a href="LSD_faqs.html#equationfile">equation file</a>)
+and the model structure and data (in the <a
+href="LSD_faqs.html#modelsetting">model configuration file</a>). The
+Equations are expressed as <a href="LSD_faqs.html#c">C++</a> code which
+is <a href="LSD_faqs.html#compiler">compiled</a> by <a
+href="LSD_faqs.html#lmm">LMM</a> to produce the <a
+href="LSD_faqs.html#model">LSD model program</a>. The model structure
+and the associated data are instead loaded dynamically from a <a
+href="LSD_faqs.html#modelsetting">model configuration</a> (many may
+coexist).&nbsp;</p>
 
 <p class=MsoNormal>Under this split arrangement, the resulting simulation
 program is as fast as any (well designed) regular C++ program. However,
-differently from most traditional simulation programs, the model configuration becomes
-extremely flexible because every value (and many different setups) of the model
-can be easily changed (and maintained). Still, as in any compiled coding approach,
-in order to change even slightly the Equations of a model, the recompilation of
-the changed parts is required before the simulation can run again. To keep the
-process simple, LMM becomes most of this process transparent to the modeler. </p>
+differently from most traditional simulation programs, the model configuration
+becomes extremely flexible because every value (and many different setups) of
+the model can be easily changed (and maintained). Still, as in any compiled
+coding approach, in order to change even slightly the Equations of a model, the
+recompilation of the changed parts is required before the simulation can run
+again. To keep the process simple, LMM becomes most of this process transparent
+to the modeler. </p>
 
 <p class=MsoNormal>The information on the structure of the model and on the
 initial values used for the simulations is kept together in the configuration
-file(s) (<span class=Cdigo>.lsd</span> extension). These files should never be edited
-manually, as they are created and used automatically by LSD. See more details in
-the <a href="LSD_faqs.html#modelsetting">FAQ</a>. </p>
+file(s) (<span class=Cdigo>.lsd</span> extension). These files should never be
+edited manually, as they are created and used automatically by LSD. See more
+details in the <a href="LSD_faqs.html#modelsetting">FAQ</a>. </p>
 
-<p class=MsoNormal>When the <a href="LSD_windows.html#browser">LSD Browser</a>
-loads a configuration file, it recreates in the computer memory the structure
-of the corresponding model. The in-memory structure includes all the required initial
-values for the corresponding elements as well the other needed simulation
-settings. When running the simulation, each Variable in every Object instance
-of the model is connected to the piece of code corresponding to its Equation.
-In other words, each LSD model program is executable software which contains
-the code of the Equations for a given set of Variables. It can load any LSD model
-configuration associated to that particular model, but not a configuration from
-a different model which contains other Variables or Parameters. Note that the Equations’
-code embedded in a LSD model program may contain code for computing variables not
-used in a particular model configuration (this “extra” code will simply be
-never used). Still, it is not possible to run a LSD model program using a
-Variable whose Equation’s code was not included when the program was compiled. </p>
+<p class=MsoNormal>When the <a href="LSD_windows.html#browser">LSD
+Browser</a> loads a configuration file, it recreates in the computer memory the
+structure of the corresponding model. The in-memory structure includes all the
+required initial values for the corresponding elements as well the other needed
+simulation settings. When running the simulation, each Variable in every Object
+instance of the model is connected to the piece of code corresponding to its
+Equation. In other words, each LSD model program is executable software which
+contains the code of the Equations for a given set of Variables. It can load
+any LSD model configuration associated to that particular model, but not a
+configuration from a different model which contains other Variables or
+Parameters. Note that the Equations’ code embedded in a LSD model program may
+contain code for computing variables not used in a particular model
+configuration (this “extra” code will simply be never used). Still, it is not
+possible to run a LSD model program using a Variable whose Equation’s code was
+not included when the program was compiled. </p>
 
-<p class=MsoNormal>The split arrangement allows, for all LSD simulation programs,
-containing any set of Equations (even no Equation at all), to load and edit the
-structure of any model (but not to run it). Only when the simulation is
-actually run, the possible inconsistency among the Variables in the model
-configuration and the Equations in the model program will issue an error. </p>
+<p class=MsoNormal>The split arrangement allows, for all LSD simulation
+programs, containing any set of Equations (even no Equation at all), to load
+and edit the structure of any model (but not to run it). Only when the
+simulation is actually run, the possible inconsistency among the Variables in
+the model configuration and the Equations in the model program will issue an
+error. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

@@ -113,9 +113,7 @@ proc showmodel pippo {
 			LsdHelp LSD_documentation.html 
 		}
 		$m add separator
-		$m add command -label "About LSD..." -underline 0 -command { 
-			tk_messageBox -parent .l -type ok -icon info -title "About LSD" -message "Version $_LSD_VERSION_ ($_LSD_DATE_)" -detail "Platform: [ string totitle $tcl_platform(platform) ] ($tcl_platform(machine))\nOS: $tcl_platform(os) ($tcl_platform(osVersion))\nTcl/Tk: [ info patch ]" 
-			}
+		$m add command -label "About LSD..." -underline 0 -command { LsdAbout $_LSD_VERSION_ $_LSD_DATE_ .l }
 
 		.l configure -menu .l.m
 

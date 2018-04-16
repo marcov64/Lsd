@@ -166,31 +166,32 @@ div.WordSection1
 height=364 src="image/runtime.png"></p>
 
 <p class=MsoNormal>The LSD Run-time Plot window is automatically created during
-the <a href="LSD_faqs.html#simulationrun">simulation run</a> to show the
-dynamic plotting of the time series of selected <a href="LSD_faqs.html#variable">Variables</a>
-(or even <a href="LSD_faqs.html#parameter">Parameters</a>). Users must mark the
-Variables to be plotted by <a href="browser.html#variables">selecting the Run-time
-Plot option</a> using the <a href="browser.html">LSD Browser</a>. If no Variable
-(or Parameter) is marked, the Run-time Plot window is not created during the
-simulation run.</p>
+the <a href="LSD_faqs.html#simulationrun">simulation run</a> to show
+the dynamic plotting of the time series of selected <a
+href="LSD_faqs.html#variable">Variables</a> (or even <a
+href="LSD_faqs.html#parameter">Parameters</a>). Users must mark the
+Variables to be plotted by <a href="browser.html#variables">selecting
+the Run-time Plot option</a> using the <a href="browser.html">LSD
+Browser</a>. If no Variable (or Parameter) is marked, the Run-time Plot window
+is not created during the simulation run.</p>
 
 <p class=MsoNormal>The run-time plot area is automatically sized according to
-the <a href="LSD_faqs.html#simulationrun">number of steps</a> set for the
-simulation (horizontal dimension) and to maximum and the minimum values of the plotted
-Variables (vertical dimension). Note that the <i>y</i>-axis dynamic rescaling slightly
-overshoots the maximum and minimum values to mitigate excessive rescaling
-operations.</p>
+the <a href="LSD_faqs.html#simulationrun">number of steps</a> set for
+the simulation (horizontal dimension) and to maximum and the minimum values of
+the plotted Variables (vertical dimension). Note that the <i>y</i>-axis dynamic
+rescaling slightly overshoots the maximum and minimum values to mitigate
+excessive rescaling operations.</p>
 
-<p class=MsoNormal>Users should select carefully which Variables’ time series to
-shown during the run-time:</p>
+<p class=MsoNormal>Users should select carefully which Variables’ time series
+to shown during the run-time:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span>Do <i>never</i> select series contained in Objects that can be created
 or destroyed during a simulation;</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span>Do select series which values are around the same range of values, to
 avoid the “plot-flattening” because of rescaling.</p>
 
@@ -220,29 +221,30 @@ minimized when the <span class=Cdigo>Fast</span> button is used in the <a
 href="log.html">LSD Log</a>.</p>
 
 <p class=MsoNormal>To avoid the Runtime Plot to be used, simply remove the <a
-href="browser.html#variables">Run-time Plot option</a> from all the selected
-Variables or use the command <span class=Cdigo>Run&gt;Remove Plot Flags</span> in
-the <a href="menurun.html#remplot">LSD Browser menus</a>. This is particularly
-recommended in the case of multiple simulation runs (set by the <a
-href="menurun.html#simsetting">Simulation Settings</a> in the LSD Browser), once
-this may potentially create tens or hundreds of new windows (the Run-time Plot
-window is <i>not</i> reused across runs). If the computer desktop has been
-already “flooded” by Run-time Plot windows, the option <span class=Cdigo><a
-href="menurun.html#remrtplot"><span style='color:gray;text-decoration:none'>Run&gt;Close
-Run-time Plots</span></a></span> in the LSD Browser menus may be used to
-destroy all such windows.</p>
+href="browser.html#variables">Run-time Plot option</a> from all the
+selected Variables or use the command <span class=Cdigo>Run&gt;Remove Plot
+Flags</span> in the <a href="menurun.html#remplot">LSD Browser menus</a>.
+This is particularly recommended in the case of multiple simulation runs (set
+by the <a href="menurun.html#simsetting">Simulation Settings</a> in the
+LSD Browser) once this may potentially create tens or hundreds of new windows
+(the Run-time Plot window is <i>not</i> reused across runs). If the computer
+desktop has been already “flooded” by Run-time Plot windows, the option <span
+class=Cdigo><a href="menurun.html#remrtplot"><span style='color:gray;
+text-decoration:none'>Run&gt;Close Run-time Plots</span></a></span> in the LSD
+Browser menus may be used to destroy all such windows.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

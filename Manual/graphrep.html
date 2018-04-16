@@ -172,67 +172,70 @@ div.WordSection1
 height=347 src="image/model_struct.png"></p>
 
 <p class=MsoNormal>The LSD Model Structure window presents an interactive
-graphical representation of the <a href="LSD_faqs.html#model">LSD model</a> <a
-href="LSD_faqs.html#modelstructure">hierarchical structure of Objects</a>. It
-is automatically opened whenever a <a href="LSD_faqs.html#modelsetting">model
-configuration</a> is loaded in the <a href="LSD_windows.html#browser">LSD
-Browser</a>. The model structure can be used to quickly browse through the
-model, since the <a href="LSD_faqs.html#object">Object</a> symbols can be (left-
-and right-) clicked.</p>
+graphical representation of the <a href="LSD_faqs.html#model">LSD model</a>
+<a href="LSD_faqs.html#modelstructure">hierarchical structure of
+Objects</a>. It is automatically opened whenever a <a
+href="LSD_faqs.html#modelsetting">model configuration</a> is loaded in
+the <a href="LSD_windows.html#browser">LSD Browser</a>. The model
+structure can be used to quickly browse through the model, since the <a
+href="LSD_faqs.html#object">Object</a> symbols can be (left- and
+right-) clicked.</p>
 
-<p class=MsoNormal>Each <a href="LSD_faqs.html#object">Object type</a> in the
-model is represented by its name in red and a white circle connected with a
-line to its parent Object. Below each Object circle symbol are reported the
-number of <a href="LSD_faqs.html#object">instances</a> currently existing in
-the model for that Object. In case there are multiple instances of its parent
-Object, there is one number for each group of descendants from each instance of
-the parent Object. If there are too many groups to present, LSD shows only the
-initial ones. </p>
+<p class=MsoNormal>Each <a href="LSD_faqs.html#object">Object type</a>
+in the model is represented by its name in red and a white circle connected
+with a line to its parent Object. Below each Object circle symbol are reported
+the number of <a href="LSD_faqs.html#object">instances</a> currently
+existing in the model for that Object. In case there are multiple instances of
+its parent Object, there is one number for each group of descendants from each
+instance of the parent Object. If there are too many groups to present, LSD
+shows only the initial ones. </p>
 
 <p class=MsoNormal>The top-most <span class=Cdigo>Root</span> Object is not
-shown in the <a href="LSD_faqs.html#modelstructure">model structure</a>, as it
-should not contain any element most of the times. All direct descendants (sons)
-of the <span class=Cdigo>Root</span> Object are shown at the top of the
+shown in the <a href="LSD_faqs.html#modelstructure">model structure</a>,
+as it should not contain any element most of the times. All direct descendants
+(sons) of the <span class=Cdigo>Root</span> Object are shown at the top of the
 structure. In the level below, are the descendants of the sons of Root (its
 grandsons), as well all other Objects descending from them and so on. Very
-large model structures (too wide or too deep) may show incomplete in the default
-view of the window. To uncover the hidden Objects, the user may use the scroll
-bars to pan around the model structure or increase (or maximize) the size of
-the LSD Model Structure.</p>
+large model structures (too wide or too deep) may show incomplete in the
+default view of the window. To uncover the hidden Objects, the user may use the
+scroll bars to pan around the model structure or increase (or maximize) the
+size of the LSD Model Structure.</p>
 
 <h2>Interacting with the model structure</h2>
 
-<p class=MsoNormal>Hovering with the mouse over an Object symbol briefly shows the
-list of elements contained in it:</p>
+<p class=MsoNormal>Hovering with the mouse over an Object symbol briefly shows
+the list of elements contained in it:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><a href="LSD_faqs.html#parameter">Parameter</a> names are
-followed by <span class=Cdigo>(par.)</span> </p>
+followed by <span class=Cdigo>(P)</span> </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><a href="LSD_faqs.html#variable">Variable</a> names are followed by
-<span class=Cdigo>(var. lag=X)</span>, where <span class=Cdigo>X</span> is the
-maximum number of <a href="LSD_faqs.html#variable">lags</a> used. </p>
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="LSD_faqs.html#variable">Variable</a> names are
+followed by <span class=Cdigo>(V)</span> or <span class=Cdigo>(V_X)</span>,
+where <span class=Cdigo>X</span> is the maximum number of <a
+href="LSD_faqs.html#variable">lags</a> used. </p>
 
 <p class=MsoNormal>The LSD Model Structure can be used to change the <a
-href="LSD_windows.html#browser">LSD Browser</a> current Object by (left-) clicking
-on its symbol.</p>
+href="LSD_windows.html#browser">LSD Browser</a> current Object by
+(left-) clicking on its symbol.</p>
 
 <p class=MsoNormal>It is also possible to access the Object context menu by
 right-clicking its symbol. From the pop-up menu the user can perform several
-actions on the selected Object: add a new parent, rename, change the number of instances,
-delete, add elements, edit initial values and browse elements.</p>
+actions on the selected Object: add a new parent, rename, change the number of
+instances, delete, add elements, edit initial values and browse elements.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>

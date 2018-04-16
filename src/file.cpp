@@ -24,7 +24,7 @@ This method is called first time by the browser in INTERF.CPP by the root of the
 model.
 Calls the save_struct for all the descendant type.
 
-- void object::save_param(FILE *f)
+- void object::save_param(FILE *f )
 Save the numerical values for the object (one digit
 for each group of object of this type) and the initial values for variables.
 It save also option information, that is whether to save, plot or debug the
@@ -33,7 +33,7 @@ It calls the save_param for all the descendant type.
 It is called in the browser, INTERF.CPP, immediately after save_struct, by the
 root of the model.
 
-- void object::load_struct(FILE *f)
+- void object::load_struct(FILE *f )
 Initialize a model by creating  one as defined
 in the data file. The model, after this stage, has only one instance for each
 object type and variables and parameters are simply labels.
@@ -143,7 +143,7 @@ void object::save_struct(FILE *f, char const *tab)
 	int count=0, i, j;
 	char tab1[30];
 
-	if(up==NULL)
+	if (up == NULL )
 	  {
 	  
 	  fprintf(f, "\t\n");
@@ -153,13 +153,13 @@ void object::save_struct(FILE *f, char const *tab)
 
 	fprintf(f, "%sLabel %s\n%s{\n",tab1, label, tab1);
 	strcat(tab1, "\t");
-	if(b!=NULL)
+	if (b != NULL )
 	  cb1=b->next;
 
-	for(cb=b; cb!=NULL;cb=cb->next )
+	for (cb=b; cb!=NULL;cb=cb->next )
 	 {
 	 fprintf(f,"%sSon: %s\n",tab1,cb->blabel);
-	 if(cb->head==NULL)
+	 if (cb->head == NULL )
 	  {
 	   o=blueprint->search(cb->blabel);
 	  }
@@ -171,12 +171,12 @@ void object::save_struct(FILE *f, char const *tab)
 	 
 	 }
 
-	for(var=v; var!=NULL; var=var->next)
-	 {if(var->param==0)
+	for (var=v; var!=NULL; var=var->next)
+	 {if (var->param == 0 )
 	   fprintf(f,"%sVar: %s\n",tab1, var->label);
-	  if(var->param==1)
+	  if (var->param == 1 )
 		fprintf(f,"%sParam: %s\n",tab1, var->label);
-	  if(var->param==2)
+	  if (var->param==2)
 		fprintf(f,"%sFunc: %s\n",tab1, var->label);
 		
 	 }   
@@ -190,7 +190,7 @@ void object::save_struct(FILE *f, char const *tab)
 /****************************************************
 OBJECT::SAVE_PARAM
 ****************************************************/
-void object::save_param(FILE *f)
+void object::save_param(FILE *f )
 {
 	int i, count;
 	object *cur;
@@ -201,29 +201,29 @@ void object::save_param(FILE *f)
 
 	count=0;
 	fprintf(f, "\nObject: %s", label);
-	if(to_compute==1)
+	if (to_compute == 1 )
 	  fprintf(f, " C");
 	else
 	  fprintf(f, " N");
 
-	for(cur=this;cur!=NULL; )
+	for (cur=this;cur!=NULL; )
 	 {skip_next_obj(cur, &count);
 	  fprintf(f, "\t%d", count);  
-	  for( ;go_brother(cur)!=NULL; cur=cur->next);
+	  for ( ;go_brother(cur)!=NULL; cur=cur->next);
 
 	  cur=cur->hyper_next(cur->label);
 	 }
 	fprintf(f, "\n");
 
-	for(cv=v; cv!=NULL; cv=cv->next)
+	for (cv=v; cv!=NULL; cv=cv->next)
 	{
 	  //search for unloaded data
 	  ch='+';
-	  if(cv->param==1 || cv->num_lag>0)
+	  if (cv->param==1 || cv->num_lag>0)
 	  {
-	  for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
+	  for (cur=this; cur!=NULL; cur=cur->hyper_next(label))
 		{cv1=cur->search_var(NULL, cv->label);
-		 if(cv1->data_loaded=='-')
+		 if (cv1->data_loaded=='-')
 		  {ch='-';
 		   break;
 		  }
@@ -241,28 +241,28 @@ void object::save_param(FILE *f)
 	 ch2 = cv->plot ? 'p' : 'n';
 	 ch2 = cv->parallel ? toupper( ch2 ) : ch2;
 	 
-	 if(cv->param==0)
+	 if (cv->param == 0 )
 		fprintf( f, "Var: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
-	 if(cv->param==1)
+	 if (cv->param == 1 )
 		fprintf( f, "Param: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
-	 if(cv->param==2)
+	 if (cv->param==2)
 		fprintf( f, "Func: %s %d %c %c %c %c", cv->label, cv->num_lag, ch1, ch, cv->debug, ch2 );
 
-	 for(cur=this; cur!=NULL; cur=cur->hyper_next(label))
+	 for (cur=this; cur!=NULL; cur=cur->hyper_next(label))
 	   {cv1=cur->search_var(NULL, cv->label);
-		if(cv1->param==1)
-		  {if(cv1->data_loaded=='+')
-			fprintf(f, "\t%g", cv1->val[0]);
+		if (cv1->param == 1 )
+		  {if (cv1->data_loaded=='+')
+			fprintf(f, "\t%g", cv1->val[ 0 ]);
 		   else
 			fprintf(f, "\t%c", '0');
 		   }
 		 else
 		  {
-		  for(i=0; i<cv->num_lag; i++)
+		  for ( i = 0; i<cv->num_lag; ++i )
 			  {
 
-			 if(cv1->data_loaded=='+')
-			  fprintf(f, "\t%g", cv1->val[i]);
+			 if (cv1->data_loaded=='+')
+			  fprintf(f, "\t%g", cv1->val[ i ]);
 			 else
 				 fprintf(f, "\t%c", '0');
 			}  
@@ -270,7 +270,7 @@ void object::save_param(FILE *f)
 	   }
 	 fprintf(f, "\n");
 	}
-	for(cb=b; cb!=NULL; cb=cb->next)
+	for (cb=b; cb!=NULL; cb=cb->next)
 	{
 	  cur=cb->head;
 	  cur->save_param(f);
@@ -281,7 +281,7 @@ void object::save_param(FILE *f)
 /****************************************************
 OBJECT::LOAD_PARAM
 ****************************************************/
-bool object::load_param(char *file_name, int repl, FILE *f)
+bool object::load_param(char *file_name, int repl, FILE *f )
 {
 	char str[MAX_ELEM_LENGTH], ch, ch1, ch2;
 	int num, i;
@@ -290,7 +290,7 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 	double app;
 	bridge *cb;
 
-	if(f==NULL)
+	if ( f == NULL )
 	 f=search_data_str(file_name, "DATA", label); 
 	else
 	 {
@@ -298,35 +298,35 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 	  fscanf(f, " %99s", str); //skip the 'label'  
 	 } 
 
-	if(f==NULL)
+	if ( f == NULL )
 		return false;
 
-	if(fscanf(f, " %c", &ch)!=1)
+	if (fscanf(f, " %c", &ch)!=1)
 		 return false;
-	if(ch=='C')
+	if (ch=='C')
 	 to_compute=1;
 	else
 	 to_compute=0;
 
-	for(cur=this;cur!=NULL; )
+	for (cur=this;cur!=NULL; )
 	{
-	  if(fscanf(f, "\t%d", &num)!=1)
+	  if (fscanf(f, "\t%d", &num ) != 1 )
 		 return false;
 	  cur->to_compute=to_compute;
-	  cur->replicate(num, 0);
+	  cur->replicate(num, 0 );
 
-	  for( ;go_brother(cur)!=NULL; cur=cur->next);
+	  for ( ;go_brother(cur)!=NULL; cur=cur->next);
 	  cur=cur->hyper_next(cur->label);
 	}
 
-	for(cv=v; cv!=NULL; cv=cv->next)
+	for (cv=v; cv!=NULL; cv=cv->next)
 	{
 	  fscanf(f, "%99s ", str); //skip the 'Element: '
 	  fscanf(f, "%99s ", str); //skip the 'label'
-	  if(f==NULL)
+	  if ( f == NULL )
 		 return false;
 
-	  if(fscanf(f, "%d %c %c %c %c", &(cv->num_lag), &ch1, &ch, &(cv->debug), &ch2   )!=5)
+	  if (fscanf(f, "%d %c %c %c %c", &(cv->num_lag ), &ch1, &ch, &(cv->debug), &ch2   )!=5)
 		 return false;
 
 	  cv->save = ( tolower( ch1 ) == 's' ) ? true : false;
@@ -335,7 +335,7 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 	  cv->plot = ( tolower( ch2 ) == 'p' ) ? true : false;
 	  cv->parallel = ( ch2 == 'P' || ch2 == 'N' ) ? true : false;
 
-	  for(cur=this; cur!=NULL; repl==1?cur=cur->hyper_next(label):cur=NULL)
+	  for (cur=this; cur!=NULL; repl==1?cur=cur->hyper_next(label):cur=NULL)
 	  {
 		 cv1=cur->search_var(NULL, cv->label);
 		 cv1->val=new double[cv->num_lag+1];
@@ -347,28 +347,28 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 		 cv1->param=cv->param;
 		 cv1->debug=cv->debug;
 		 cv1->data_loaded=ch;
-		 if(cv1->param==1)
+		 if (cv1->param == 1 )
 		 {
-			if(fscanf(f, "%lf", &app )!=1)
+			if (fscanf(f, "%lf", &app ) != 1 )
 				return false;
 			else
-				cv1->val[0]=app;
+				cv1->val[ 0 ]=app;
 		 }
 		 else
 		 {
-			for(i=0; i<cv->num_lag; i++)
+			for ( i = 0; i<cv->num_lag; ++i )
 			{
 			  if ( ( num = fscanf(f, "\t%lf", &app ) ) != 1 )
 				  return false;
 				else // Places values shifted one position, since they are "time 0" values
-				  cv1->val[i]=app;
+				  cv1->val[ i ]=app;
 			}
 			cv1->val[cv->num_lag]=0;
 		 }
 	  }
 	}
 
-	for(cb=b; cb!=NULL; cb=cb->next)
+	for (cb=b; cb!=NULL; cb=cb->next)
 	 {
 	  cur=cb->head;
 	  if ( ! cur->load_param( file_name, repl, f ) )
@@ -376,7 +376,7 @@ bool object::load_param(char *file_name, int repl, FILE *f)
 	  num=0;
 	 }
 
-	if(up==NULL)	//this is the root, and therefore the end of the loading
+	if (up == NULL )	//this is the root, and therefore the end of the loading
 	  set_blueprint(blueprint, this);
 	 
 	return true;
@@ -393,16 +393,16 @@ void object::replicate(int num, int propagate)
 	int i, usl;
 	bridge *cb;
 
-	if(propagate==1)
+	if (propagate == 1 )
 		cur=hyper_next(label);
 	else
 		cur=NULL;
-	if(cur!=NULL)
+	if (cur != NULL )
 		cur->replicate(num, 1);
 	skip_next_obj(this, &usl);
-	for(cur=this, i=1; i<usl; cur=cur->next, i++);
+	for (cur=this, i=1; i<usl; cur=cur->next, ++i );
 
-	for(i=usl; i<num; i++)
+	for (i=usl; i<num; ++i )
 	{
 		app=cur->next;
 		cur->next=new object;
@@ -411,7 +411,7 @@ void object::replicate(int num, int propagate)
 		cur->next->next=app;
 		cur->to_compute=to_compute;
 		app=cur->next;
-		for(cv=v; cv!=NULL; cv=cv->next)
+		for (cv=v; cv!=NULL; cv=cv->next)
 			app->add_var_from_example(cv);
 
 		copy_descendant(this, app);
@@ -429,7 +429,7 @@ void copy_descendant(object *from, object *to)
 	variable *cv;
 	int count;
 
-	if(from->b==NULL)
+	if (from->b == NULL )
 	 {to->b=NULL;
 	  return;
 	 }
@@ -441,7 +441,7 @@ void copy_descendant(object *from, object *to)
 
 	to->b->head=new object;
 	(to->b->head)->init(to, (from->b->head)->label);
-	for(cv=(from->b->head)->v; cv!=NULL; cv=cv->next)
+	for (cv=(from->b->head)->v; cv!=NULL; cv=cv->next)
 	  (to->b->head)->add_var_from_example(cv);
 	to->b->head->to_compute=from->b->head->to_compute;
 
@@ -449,8 +449,8 @@ void copy_descendant(object *from, object *to)
 	to->b->next=NULL;
 	cb=to->b;
 
-	//for(cur=skip_next_obj(from->son, &count), app=to->son; cur!=NULL; cur=skip_next_obj(cur, &count), app=app->next)
-	for(cb1=from->b->next; cb1!=NULL; cb1=cb1->next)
+	//for (cur=skip_next_obj(from->son, &count), app=to->son; cur!=NULL; cur=skip_next_obj(cur, &count), app=app->next)
+	for (cb1=from->b->next; cb1!=NULL; cb1=cb1->next)
 	  { 
 		cb->next=new bridge;
 		cb=cb->next;
@@ -464,7 +464,7 @@ void copy_descendant(object *from, object *to)
 		  cb->head->init(to, cb1->head->label);
 		  cb->head->next=NULL;
 		cb->head->to_compute=cb1->head->to_compute;
-		 for(cv=cb1->head->v; cv!=NULL; cv=cv->next)
+		 for (cv=cb1->head->v; cv!=NULL; cv=cv->next)
 		  cb->head->add_var_from_example(cv);
 		 copy_descendant(cb1->head, cb->head);
 	  }
@@ -474,16 +474,16 @@ void copy_descendant(object *from, object *to)
 /****************************************************
 OBJECT::LOAD_STRUCT
 ****************************************************/
-bool object::load_struct(FILE *f)
+bool object::load_struct( FILE *f )
 {
-	char ch[MAX_ELEM_LENGTH];
+	char ch[ MAX_ELEM_LENGTH ];
 	int len, i = 0;
 	object *cur;
 	bridge *cb;
 	variable *cv;
 
 	fscanf(f,"%99s",ch);
-	while( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
+	while ( strcmp( ch, "Label" ) && ++i < MAX_FILE_TRY )
 	 fscanf(f,"%99s",ch);
 
 	if ( i >= MAX_FILE_TRY )
@@ -491,35 +491,35 @@ bool object::load_struct(FILE *f)
 
 	fscanf(f,"%99s",ch);
 	len=strlen(ch);
-	if(label==NULL)
+	if (label == NULL )
 	  {label=new char[len+1];
 		strcpy(label, ch);
 	  }
 
 	i = 0;
 	fscanf(f, "%*[{\r\t\n]%99s", ch);
-	while( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
+	while ( strcmp( ch, "}" ) && ++i < MAX_FILE_TRY )
 	{
-	 if(!strcmp(ch, "Son:"))
+	 if (!strcmp( ch, "Son:"))
 	   { fscanf(f, "%*[ ]%99s", ch);
-		 add_obj(ch, 1, 0);
-	   for(cb=b; strcmp(cb->blabel, ch); cb=cb->next);
+		 add_obj( ch, 1, 0 );
+	   for (cb=b; strcmp(cb->blabel, ch); cb=cb->next);
 	   cur=cb->head;
 	   if ( ! cur->load_struct( f ) )
 		   return false;
 	   }
-	 if(!strcmp(ch, "Var:"))
+	 if (!strcmp( ch, "Var:"))
 	   { fscanf(f, "%*[ ]%99s", ch);
 		 add_empty_var(ch);
 		 cmd( "lappend ModElem %s",ch );
 	   }
-	  if(!strcmp(ch, "Param:"))
+	  if (!strcmp( ch, "Param:"))
 		{ fscanf(f, "%*[ ]%99s", ch);
 		 cv=add_empty_var(ch);
 		 cv->param=1;
 		 cmd( "lappend ModElem %s",ch );
 		}
-	  if(!strcmp(ch, "Func:"))
+	  if (!strcmp( ch, "Func:"))
 		{ fscanf(f, "%*[ ]%99s", ch);
 		 cv=add_empty_var(ch);
 		 cv->param=2;
@@ -547,25 +547,25 @@ bool load_description( char *msg, FILE *f )
 	int done, i, j;
 
 	label[ MAX_ELEM_LENGTH - 1 ] = '\0';
-	if(strncmp(msg, "Object", 6)==0)
+	if (strncmp( msg, "Object", 6) == 0 )
 	{
 	  strcpy(type, "Object");
 	  strncpy(label, msg+7, MAX_ELEM_LENGTH-1);
 	} 
 	else
-		if(strncmp(msg, "Variable", 8)==0)
+		if (strncmp( msg, "Variable", 8) == 0 )
 		{
 			strcpy(type, "Variable");
 			strncpy(label, msg+9, MAX_ELEM_LENGTH-1);
 		} 
 		else
-			if(strncmp(msg, "Parameter", 9)==0)
+			if (strncmp( msg, "Parameter", 9) == 0 )
 			{
 				strcpy(type, "Parameter");
 				strncpy(label, msg+10, MAX_ELEM_LENGTH-1);
 			} 
 			else
-				if(strncmp(msg, "Function", 6)==0)
+				if (strncmp( msg, "Function", 6) == 0 )
 				{
 					strcpy(type, "Function");
 					strncpy(label, msg+9, MAX_ELEM_LENGTH-1);
@@ -588,8 +588,8 @@ bool load_description( char *msg, FILE *f )
 	app->type = new char[ strlen( type ) + 1 ];
 	strcpy( app->type, type );
 
-	strcpy(str1, "");
-	fgets(str, MAX_LINE_SIZE, f);//skip the first newline character
+	strcpy(str1, "" );
+	fgets(str, MAX_LINE_SIZE, f );//skip the first newline character
 	for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) &&  strncmp( str, "_INIT_", 6 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 		strcat(str1, str);
 
@@ -603,7 +603,7 @@ bool load_description( char *msg, FILE *f )
 
 	if ( ! strncmp( str, "_INIT_", 6 ) )
 	{
-		strcpy(str1, "");
+		strcpy(str1, "" );
 		for ( j = 0 ; fgets( str, MAX_LINE_SIZE, f ) != NULL && strncmp( str, "END_DESCRIPTION", 15 ) && strlen( str1 ) < 9*MAX_LINE_SIZE && j < MAX_FILE_TRY ; ++j )
 			strcat(str1, str);
 
@@ -616,8 +616,8 @@ bool load_description( char *msg, FILE *f )
 	}
 	else
 	{
-		app->init=new char[1];
-		strcpy(app->init,"");
+		app->init=new char[ 1 ];
+		strcpy(app->init, "" );
 	}
 	app->initial='n';
 	app->observe='n';  
@@ -648,7 +648,7 @@ void empty_description( void )
 /*****************************************************************************
 SAVE_DESCRIPTION
 ******************************************************************************/
-void save_description(object *r, FILE *f)
+void save_description(object *r, FILE *f )
 {
 	object *cur;
 	variable *cv;
@@ -656,44 +656,44 @@ void save_description(object *r, FILE *f)
 	bridge *cb;
 
 	cd=search_description(r->label);
-	if(cd==NULL)
+	if (cd == NULL )
 	  {
 	   add_description(r->label, "Object", "(no description available)");
 	   plog( "\nWarning: description for '%s' not found. New one created.", "", r->label );
 	   cd=search_description(r->label);
 	  } 
 
-	if(cd->init==NULL)     
+	if (cd->init == NULL )     
 	  fprintf(f, "%s_%s\n%s\nEND_DESCRIPTION\n\n",cd->type,cd->label,cd->text);
 	else
 	  fprintf(f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n",cd->type,cd->label,cd->text, cd->init);
 
-	for(cv=r->v; cv!=NULL; cv=cv->next)
+	for (cv=r->v; cv!=NULL; cv=cv->next)
 	 {
 	  cd=search_description(cv->label);
-	  if(cd==NULL)
-	  {if(cv->param==0)
+	  if (cd == NULL )
+	  {if (cv->param == 0 )
 		 add_description(cv->label, "Variable", "(no description available)");
-	   if(cv->param==1)
+	   if (cv->param == 1 )
 		 add_description(cv->label, "Parameter", "(no description available)");  
-	   if(cv->param==2)
+	   if (cv->param==2)
 		 add_description(cv->label, "Function", "(no description available)");  
 	   add_description(cv->label, "Object", "(no description available)");
 	   plog( "\nWarning: description for '%s' not found. New one created.", "", cv->label );
 	   cd=search_description(cv->label);
 	  } 
 
-	  if(cd->init==NULL)     
+	  if (cd->init == NULL )     
 		fprintf(f, "%s_%s\n%s\nEND_DESCRIPTION\n\n",cd->type,cd->label,cd->text);
 	  else
 		fprintf(f, "%s_%s\n%s\n_INIT_\n%s\nEND_DESCRIPTION\n\n",cd->type,cd->label,cd->text, cd->init);
 	   
 	 }
 
-	for(cb=r->b; cb!=NULL; cb=cb->next)
+	for (cb=r->b; cb!=NULL; cb=cb->next)
 	 {
 	  cur=cb->head;
-	  save_description(cur, f);
+	  save_description(cur, f );
 	 }
 }
 
@@ -739,10 +739,11 @@ LOAD_CONFIGURATION
 int load_configuration( object *r, bool reload )
 {
 	int i, j = 0, load = 0;
-	char msg[ MAX_LINE_SIZE ];
+	char msg[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
 	object *cur;
 	variable *cur_var, *cur_var1;
 	description *cur_descr;
+	FILE *f, *g;
 	
 	for ( cur = r; cur->up != NULL; cur = cur->up );
 	r = cur;
@@ -758,7 +759,7 @@ int load_configuration( object *r, bool reload )
 
 	if ( ! struct_loaded )
 	{
-		delete [] struct_file;
+		delete [ ] struct_file;
 		if ( strlen( path ) > 0 )
 		{
 			struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
@@ -771,8 +772,8 @@ int load_configuration( object *r, bool reload )
 		}
 	}
 	
-	FILE * f = fopen( struct_file, "rt" );
-	if( f == NULL )
+	f = fopen( struct_file, "rt" );
+	if ( f == NULL )
 		return 1;
 
 	struct_loaded = r->load_struct( f );
@@ -829,10 +830,15 @@ int load_configuration( object *r, bool reload )
 		msg[ strlen( msg ) - 1 ] = '\0';
     if ( msg[ strlen( msg ) - 1 ] == '\r' )
 		msg[ strlen( msg ) - 1 ] = '\0';
-  
-	delete [] equation_name;
-	equation_name = new char[ strlen( msg ) ];
-	strcpy( equation_name, msg + 1 );
+
+	// use the current equation name only if the file exists
+	snprintf( full_name, 2 * MAX_PATH_LENGTH - 1, "%s/%s", exec_path, msg + 1 );
+	g = fopen( full_name, "r" );
+	if ( g != NULL )
+	{
+		fclose( g );
+		strncpy( equation_name, msg + 1, MAX_PATH_LENGTH - 1 );
+	}
 	
 	fscanf( f, "%999s", msg );					//should be MODELREPORT
 	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%499s", name_rep ) ) )
@@ -856,7 +862,7 @@ int load_configuration( object *r, bool reload )
 			i = 0;
 	}
 	
-	if( i == 0 || j >= MAX_FILE_TRY )
+	if ( i == 0 || j >= MAX_FILE_TRY )
 	{
 		load = 10;
 		goto endLoad;
@@ -881,7 +887,7 @@ int load_configuration( object *r, bool reload )
 		fscanf( f, "%999s", msg );
 	}
 	
-	if( j >= MAX_FILE_TRY )
+	if ( j >= MAX_FILE_TRY )
 	{
 		load = 11;
 		goto endLoad;
@@ -903,7 +909,7 @@ int load_configuration( object *r, bool reload )
 		fscanf( f, "%999s", msg );
 	}
 	
-	if( j >= MAX_FILE_TRY )
+	if ( j >= MAX_FILE_TRY )
 	{
 		load = 13;
 		goto endLoad;
@@ -926,7 +932,7 @@ int load_configuration( object *r, bool reload )
     if ( lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] == '\r' )
 		lsd_eq_file[ strlen( lsd_eq_file ) - 1 ] = '\0';
 	
-	if( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
+	if ( ! ignore_eq_file && strcmp( lsd_eq_file, eq_file ) )
 	{
 		plog( "\nWarning: the configuration file has been previously run with different equations\nfrom those used to create the LSD model program.\nChanges may affect the simulation results. You can offload the original\nequations in a new equation file and compare differences using TkDiff in LMM\n(menu File)." );
 	}  
@@ -957,20 +963,20 @@ void save_single(variable *vcv)
 	lock_guard < mutex > lock( vcv->parallel_comp );
 #endif	
 	set_lab_tit(vcv);
-	sprintf(msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
-	f=fopen(msg, "wt");  // use text mode for Windows better compatibility
+	sprintf( msg, "%s_%s-%d_%d_seed-%d.res", vcv->label, vcv->lab_tit, vcv->start,vcv->end,seed-1);
+	f = fopen( msg, "wt");  // use text mode for Windows better compatibility
 
 	fprintf(f, "%s %s (%d %d)\t\n",vcv->label, vcv->lab_tit, vcv->start, vcv->end);
 
-	for(i=0; i<=t-1; i++)
+	for ( i = 0; i<=t-1; ++i )
 	 {
-	  if(i>=vcv->start && i <=vcv->end && !is_nan(vcv->data[i]))		// save NaN as n/a
-		fprintf(f,"%lf\t\n",vcv->data[i]);
+	  if (i>=vcv->start && i <=vcv->end && !is_nan(vcv->data[ i ]))		// save NaN as n/a
+		fprintf(f,"%lf\t\n",vcv->data[ i ]);
 	  else
 		fprintf(f,"%s\t\n", nonavail);
 	  }
 	  
-	fclose(f); 
+	fclose( f ); 
 }
 
 
@@ -985,7 +991,7 @@ bool save_configuration( object *r, int findex )
 	object *cur;
 	description *cur_descr;
 	
-	delete [] struct_file;
+	delete [ ] struct_file;
 	
 	if ( strlen( path ) > 0 )
 	{
@@ -1026,7 +1032,7 @@ bool save_configuration( object *r, int findex )
 	
 	fprintf( f, "\nDOCUINITIAL\n" );
 	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
-		if( cur_descr->initial == 'y' )     
+		if ( cur_descr->initial == 'y' )     
 			fprintf( f, "%s\n", cur_descr->label );
 	fprintf( f, "\nEND_DOCUINITIAL\n\n" );
 	
@@ -1194,7 +1200,7 @@ bool save_sensitivity( FILE *f )
 		else
 			fprintf( f, "%s -%d %d %c:", cs->label, cs->lag + 1, cs->nvalues, cs->integer ? 'i' : 'f' );
 		for ( i = 0; cs->v != NULL && i < cs->nvalues; ++i )
-			fprintf( f," %g", cs->v[i] );
+			fprintf( f," %g", cs->v[ i ] );
 		fprintf( f,"\n" );
 	}
 	

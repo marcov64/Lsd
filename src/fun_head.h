@@ -46,10 +46,10 @@ double betacdf( double alpha, double beta, double x );	// beta cumulative distri
 double betacf( double a, double b, double x );			// beta distribution function
 double fact( double x );								// Factorial function
 double gamma( double m );
-double init_lattice( char const lrow[] = "x", char const lcol[] = "y", int init_color = -0xffffff, 
+double init_lattice( char const lrow[ ] = "x", char const lcol[ ] = "y", int init_color = -0xffffff, 
 					 double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
 double init_lattice( double pixW = 0, double pixH = 0, double nrow = 100, double ncol = 100, 
-					 char const lrow[] = "x", char const lcol[] = "y", char const lvar[] = "", 
+					 char const lrow[ ] = "x", char const lcol[ ] = "y", char const lvar[ ] = "", 
 					 object *p = NULL, int init_color = -0xffffff );
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
@@ -82,7 +82,7 @@ double def_res = 0;										// default equation result
 #include <tk.h>
 
 extern Tcl_Interp *inter;
-extern double i_values[];
+extern double i_values[ ];
 
 #define DEBUG_CODE \
 	if ( debug_flag ) \
@@ -157,15 +157,6 @@ extern double i_values[];
 #define EQUATION( X ) \
 	if ( ! strcmp( label, X ) ) { 
 
-#define FUNCTION( X ) \
-	if ( ! strcmp( label, X ) ) { \
-	last_update--; \
-	if ( caller == NULL ) \
-	{ \
-		res = val[0]; \
-		goto end; \
-	};
-
 #define RESULT( X ) \
 		res = X; \
 		goto end; \
@@ -224,18 +215,6 @@ extern double i_values[];
 		{ \
 			EQ_BEGIN
 		
-#define FUNCTION( X ) \
-	{ string( X ), [ ]( object *caller, variable *var ) \
-		{ \
-			EQ_BEGIN \
-			var->last_update--; \
-			if ( caller == NULL ) \
-			{ \
-				res = var->val[0]; \
-				DEBUG_CODE \
-				return res; \
-			};
-	
 #define RESULT( X ) \
 			; \
 			res = X; \
@@ -467,11 +446,11 @@ extern double i_values[];
 
 // delete a network using as nodes object label X, located inside object O
 #define DELETE_NET( X ) ( p->delete_net( ( char * ) X )
-#define DELETE_NETS( O, X ) if( O!=NULL) O->delete_net( ( char * ) X );
+#define DELETE_NETS( O, X ) if ( O != NULL ) O->delete_net( ( char * ) X );
 
 // get statistics of network based on object X, contained in O
 #define STAT_NET( X ) p->stats_net( ( char * ) X, v );
-#define STAT_NETS( O, X ) if( O!=NULL)O->stats_net( ( char * ) X, v );
+#define STAT_NETS( O, X ) if ( O != NULL )O->stats_net( ( char * ) X, v );
 
 // add a network node to object O, defininig id=X and name=Y
 #define ADDNODE( X, Y ) ( p->add_node_net( X, Y, false ) )
@@ -479,7 +458,7 @@ extern double i_values[];
 
 // shuffle the nodes of a network composed by objects with label X, contained in O
 #define SHUFFLE_NET( X ) p->shuffle_nodes_net( ( char * ) X );
-#define SHUFFLE_NETS( O, X ) if( O!=NULL)O->shuffle_nodes_net( ( char * ) X );
+#define SHUFFLE_NETS( O, X ) if ( O != NULL )O->shuffle_nodes_net( ( char * ) X );
 
 // random draw one node from a network composed by objects with label X, contained in O
 #define RNDDRAW_NODE( X ) ( p->draw_node_net( ( char * ) X ) )
@@ -495,7 +474,7 @@ extern double i_values[];
 
 // delete the node pointed by O
 #define DELETE_NODE p->delete_node_net( );
-#define DELETE_NODES( O ) if( O!=NULL)O->delete_node_net( );
+#define DELETE_NODES( O ) if ( O != NULL )O->delete_node_net( );
 
 // get the id of the node object O
 #define V_NODEID ( p->node==NULL?0.:(double)p->node->id)
@@ -506,12 +485,12 @@ extern double i_values[];
 #define V_NODENAMES( O ) ( O==NULL?"":O->node==NULL?"":O->node->name==NULL?"":O->node->name)
 
 // set the id of the node object O
-#define WRITE_NODEID( X ) if( p->node!=NULL)p->node->id=(double)X;
-#define WRITE_NODEIDS( O, X ) if( O!=NULL )if( O->node!=NULL)O->node->id=(double)X;
+#define WRITE_NODEID( X ) if ( p->node != NULL )p->node->id=(double)X;
+#define WRITE_NODEIDS( O, X ) if ( O!=NULL )if ( O->node != NULL )O->node->id=(double)X;
 
 // set the name of the node object O to X
 #define WRITE_NODENAME( X ) p->name_node_net( ( char * ) X);
-#define WRITE_NODENAMES( O, X ) if( O!=NULL)O->name_node_net( ( char * ) X );
+#define WRITE_NODENAMES( O, X ) if ( O != NULL )O->name_node_net( ( char * ) X );
 
 // get the number of outgoing links from object O
 #define STAT_NODE p->node==NULL?v[0]=0.:v[0]=(double)p->node->nLinks;
@@ -525,7 +504,7 @@ extern double i_values[];
 #define ADDLINKWS( O, X, Y ) ( O==NULL?NULL:O->add_link_net( X, Y, 1 ) )
 
 // delete the link pointed by O
-#define DELETE_LINK( O ) if( O!=NULL)O->ptrFrom->delete_link_net( O );
+#define DELETE_LINK( O ) if ( O != NULL )O->ptrFrom->delete_link_net( O );
 
 // search outgoing links from object O for first occurrence of id=X
 #define SEARCH_LINK( X ) ( p->search_link_net( ( long ) X ) )
@@ -548,7 +527,7 @@ extern double i_values[];
 #define V_LINK( O ) ( O==NULL?0.:O->weight )
 
 // set the weight of link pointed by O to X
-#define WRITE_LINK( O, X ) if( O!=NULL )O->weight=X;
+#define WRITE_LINK( O, X ) if ( O!=NULL )O->weight=X;
 
 // cycle through set of links of object C, using link pointer O
 #define CYCLE_LINK( O ) if ( p->node == NULL ) \
@@ -594,8 +573,9 @@ else \
 #ifndef FAST_LOOKUP
 
 double poidev( double xm, long *idum_loc = NULL );
-int deb( object *r, object *c, char const *lab, double *res );
+int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 void cmd( const char *cm, ... );
+#define FUNCTION( X ) EQUATION( X )
 #define UNIFORM( X, Y ) uniform( X, Y )
 #define rnd_integer( X, Y ) uniform_int( X, Y )
 #define VL_CHEAT( X, Y, C ) V_CHEATL( X, Y, C )

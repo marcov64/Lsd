@@ -14,6 +14,9 @@
 	{font-family:Wingdings;
 	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
+	{font-family:Cambria;
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
@@ -107,6 +110,13 @@ span.Ttulo3Char
 	mso-style-link:"Título 3";
 	font-family:"Arial","sans-serif";
 	font-weight:bold;}
+span.Ttulo4Char
+	{mso-style-name:"Título 4 Char";
+	mso-style-link:"Título 4";
+	font-family:"Cambria","serif";
+	color:#4F81BD;
+	font-weight:bold;
+	font-style:italic;}
 span.TtuloChar
 	{mso-style-name:"Título Char";
 	mso-style-link:Título;
@@ -145,13 +155,6 @@ span.Cdigo
 	{mso-style-name:Código;
 	font-family:"Courier New";
 	color:gray;}
-span.Ttulo4Char
-	{mso-style-name:"Título 4 Char";
-	mso-style-link:"Título 4";
-	font-family:"Cambria","serif";
-	color:#4F81BD;
-	font-weight:bold;
-	font-style:italic;}
 .MsoChpDefault
 	{font-size:10.0pt;}
 @page WordSection1
@@ -186,50 +189,50 @@ div.WordSection1
 height=349 src="image/show_eq.png"></p>
 
 <p class=MsoNormal>The Equation Code window is created to show the <a
-href="LSD_faqs.html#equation">Equation’s</a> code used to compute the selected <a
-href="LSD_faqs.html#variable">Variable</a> of the <a href="LSD_faqs.html#model">LSD
-model</a>. The code presented is taken from the <a
-href="LSD_faqs.html#equationfile">equation file</a> for presentation purposes
-only. Modification to the code is not supported (use <a
+href="LSD_faqs.html#equation">Equation’s</a> code used to compute the
+selected <a href="LSD_faqs.html#variable">Variable</a> of the <a
+href="LSD_faqs.html#model">LSD model</a>. The code presented is taken
+from the <a href="LSD_faqs.html#equationfile">equation file</a> for
+presentation purposes only. Modification to the code is not supported (use <a
 href="LSD_windows.html#lmm">LMM</a> for this). </p>
 
-<p class=MsoNormal>The window presents the code using syntax color highlighting:
-</p>
+<p class=MsoNormal>The window presents the code using syntax color
+highlighting: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Green</b>: comments (text not to be executed)</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Blue</b>: elements names and strings in general</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=ES style='font-family:
-Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=ES>Red</span></b><span lang=ES>: temporary
-variables (</span><span class=Cdigo><span lang=ES>v[0]</span></span><span
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span lang=ES style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><span lang=ES>Red</span></b><span lang=ES>:</span> temporary<span
+lang=ES> variables (</span><span class=Cdigo><span lang=ES>v[0]</span></span><span
 lang=ES>, </span><span class=Cdigo><span lang=ES>v[1]</span></span><span
 lang=ES>, etc.)</span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=ES style='font-family:
-Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b><span lang=ES>Black</span></b><span lang=ES>: remaining code
-elements</span></p>
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Black</b>: remaining code elements</p>
 
-<p class=MsoNormal>The button <span class=Cdigo>Find</span> allows searching text
-in the current window. </p>
+<p class=MsoNormal>The button <span class=Cdigo>Find</span> allows searching
+text in the current window. </p>
 
 <p class=MsoNormal>To close the window, click on the button <span class=Cdigo>Done</span>.
 </p>
 
 <p class=MsoNormal>In order to have the equation code properly presented, the <a
-href="LSD_faqs.html#equationfile">equation file</a> name must be properly set
-in the <a href="LSD_faqs.html#modelsetting">model configuration</a>. Otherwise,
-LSD will request the user to select the correct equation file.</p>
+href="LSD_faqs.html#equationfile">equation file</a> name must be
+properly set in the <a href="LSD_faqs.html#modelsetting">model
+configuration</a>. Otherwise, LSD will request the user to select the correct
+equation file.</p>
 
 <p class=MsoNormal>For details on the LSD macro language, please check the <a
 href="LSD_macros.html">reference</a>.</p>
@@ -239,12 +242,13 @@ href="LSD_macros.html">reference</a>.</p>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 

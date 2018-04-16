@@ -48,7 +48,7 @@ values
 
 Functions used here from other files are:
 
-- void set_all(int *choice, object *r, char *lab, int lag);
+- void set_all(int *choice, object *r, char *lab, int lag );
 SET_ALL.CPP It contains the routine called from the edit_dat file for setting all the
 values of a variable with a function, instead of inserting manually.
 
@@ -100,7 +100,7 @@ int i, counter, lag;
 
 cmd( "if {$tcl_platform(os) == \"Darwin\"} {set cwidth 9; set cbd 2 } {set cwidth 8; set cbd 2}" );
 
-Tcl_LinkVar(inter, "lag", (char *) &lag, TCL_LINK_INT);
+Tcl_LinkVar( inter, "lag", ( char * ) &lag, TCL_LINK_INT );
 
 cmd( "if { ! [ info exists autoWidth ] } { set autoWidth 1 }" );
 cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 $hsizeI $vsizeI } { if { ! $autoWidth } { resizetop $hsizeI $vsizeI } }" );
@@ -108,8 +108,8 @@ cmd( "if { ! [ winfo exists .ini ] } { newtop .ini; showtop .ini topleftW 1 1 1 
 cmd( "set position 1.0" );
 in_edit_data = true;
 
-*choice=0;
-while(*choice==0)
+*choice = 0;
+while ( *choice == 0 )
 {
 // reset title and destroy command because may be coming from set_obj_number
 cmd( "settop .ini \"%s%s - LSD Initial Values Editor\" { set choice 1 }", unsaved_change() ? "*" : " ", simul_name  );
@@ -122,7 +122,7 @@ cmd( "scrollbar .ini.b.ys -command \".ini.b.tx yview\"" );
 cmd( "scrollbar .ini.b.xs -command \".ini.b.tx xview\" -orient horizontal" );
 cmd( "text $w -yscrollcommand \".ini.b.ys set\" -xscrollcommand \".ini.b.xs set\" -wrap none" );
 cmd( ".ini.b.tx conf -cursor arrow" );
-strncpy(ch1, obj_name, MAX_ELEM_LENGTH - 1 );
+strncpy( ch1, obj_name, MAX_ELEM_LENGTH - 1 );
 ch1[ MAX_ELEM_LENGTH - 1 ] = '\0';
 cmd( "label $w.tit_empty -width 32 -relief raised -text \"Object: %-17s \" -borderwidth 4", ch1 );
 cmd( "bind $w.tit_empty <Button-1> {set choice 4}" );
@@ -131,8 +131,8 @@ if ( ! in_set_obj )				// show only if not already recursing
 cmd( "bind $w.tit_empty <Leave> {set msg \"\"}" );
 cmd( "$w window create end -window $w.tit_empty" );
 
-strcpy(ch, "");
-i=0;
+strcpy( ch, "" );
+i = 0;
 counter=1;
 colOvflw = false;
 search_title(root, ch, &i, obj_name, &counter);
@@ -162,7 +162,7 @@ cmd( "donehelp .ini boh { set choice 1 } { LsdHelp menudata_init.html }" );
 
 cmd( "$w configure -state disabled" );
 
-if(set_focus==1)
+if (set_focus == 1 )
   cmd( "focus $initial_focus; $initial_focus selection range 0 end" );
 
 cmd( "bind .ini <KeyPress-Escape> {set choice 1}" );
@@ -184,7 +184,7 @@ noredraw:
 cmd( "if $autoWidth { resizetop .ini [ expr ( 40 + %d * ( $cwidth + 1 ) ) * [ font measure TkTextFont -displayof .ini 0 ] ] }", counter  );
 
 // editor main command loop
-while( ! *choice )
+while ( ! *choice )
 {
 	try
 	{
@@ -209,34 +209,34 @@ if ( *choice == 5 || ( *choice == 4 && in_set_obj ) )		// avoid recursion
 
 //clean up
 
-strcpy(ch, "");
-i=0;
+strcpy( ch, "" );
+i = 0;
 clean_cell(root, ch, obj_name);
 cmd( "destroy .ini.b .ini.boh .ini.msg .ini.st" );
 
 
-if(*choice==2)
+if ( *choice == 2 )
  {
-  l=(char *)Tcl_GetVar(inter, "var-S-A",0);
-  strcpy(ch, l);
+  l=( char * ) Tcl_GetVar( inter, "var-S-A", 0 );
+  strcpy( ch, l);
   *choice = 2;		// set data editor window parent
-  set_all(choice,first, ch, lag);
+  set_all(choice,first, ch, lag );
   cmd( "bind .ini <KeyPress-Return> {}" );
-  *choice=0;
+  *choice = 0;
 
 
  }
-if(*choice==4)
- { *choice=0;
+if (*choice==4)
+ { *choice = 0;
    set_obj_number(root, choice);
-   *choice=0;
+   *choice = 0;
  }
 
 }
 
 in_edit_data = false;
 
-Tcl_UnlinkVar(inter, "lag");
+Tcl_UnlinkVar( inter, "lag");
 }
 
 /****************************************************
@@ -254,23 +254,23 @@ bridge *cb;
 
 set_title(root, lab, tag, incr);
 
-for(cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
+for (cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
  {  
  c=cb->head;
  *i=*i+1;
- if( c->next!=NULL)
+ if ( c->next != NULL )
     multi=1;
   else
-    multi=0;
-  for(cur=c; cur!=NULL; counter++, cur=go_brother(cur))
+    multi = 0;
+  for (cur=c; cur!=NULL; counter++, cur=go_brother(cur))
    {
-   if(multi==1)
-      if(strlen(tag)!=0)
-        sprintf(ch, "%s-%d",tag, counter);
+   if (multi == 1 )
+      if (strlen(tag) != 0 )
+        sprintf( ch, "%s-%d",tag, counter);
       else
-        sprintf(ch, "%d",counter);
+        sprintf( ch, "%d",counter);
    else
-		sprintf(ch, "%s",tag);
+		sprintf( ch, "%s",tag);
  
 	if ( *incr <= MAX_COLS )
 	 search_title(cur, ch, i, lab, incr);
@@ -291,22 +291,22 @@ int j;
 variable *cv;
 char ch1[MAX_ELEM_LENGTH], ch2[MAX_ELEM_LENGTH];
 
-if(!strcmp(c->label, lab))
+if (!strcmp(c->label, lab))
 {
   ch1[MAX_ELEM_LENGTH - 1]='\0';
-  strncpy(ch1, c->label, MAX_ELEM_LENGTH - 1);
-  if(strlen(tag)!=0)
-  {  strncpy(ch2, tag, MAX_ELEM_LENGTH - 1);
+  strncpy( ch1, c->label, MAX_ELEM_LENGTH - 1);
+  if (strlen(tag) != 0 )
+  {  strncpy( ch2, tag, MAX_ELEM_LENGTH - 1);
      ch2[MAX_ELEM_LENGTH - 1]='\0';
   }
 else
- strcpy(ch2, "  ");
+ strcpy( ch2, "  ");
 
 cmd( "set %d_titheader \"%s\"", *incr ,ch2 );
 
 cmd( "entry $w.c%d_tit -width $cwidth -bd $cbd -relief raised -justify center -textvariable \"%d_titheader\" -state readonly", *incr ,*incr );
 cmd( "$w window create end -window $w.c%d_tit", *incr );
-if(strlen(tag)==0)
+if (strlen(tag) == 0 )
   cmd( "set tag_%d \" \"", *incr );
 else
   cmd( "set tag_%d %s", *incr, tag );
@@ -332,18 +332,18 @@ cur=root->search(lab);
 for ( i = 1; i <= MAX_COLS && cur != NULL; cur = cur->hyper_next( lab ), ++i )
 {
 
-for(cv=cur->v; cv!=NULL; cv=cv->next)
- {if(cv->param==1)
-    { sprintf(ch1,"p%s_%d", cv->label,i);
+for (cv=cur->v; cv!=NULL; cv=cv->next)
+ {if (cv->param == 1 )
+    { sprintf( ch1,"p%s_%d", cv->label,i);
 	  cmd( "set %s [ $w.c%d_v%sp get ]", ch1, i, cv->label  );
-      Tcl_UnlinkVar(inter, ch1);
+      Tcl_UnlinkVar( inter, ch1);
     }
   else
-    { for(j=0; j<cv->num_lag; j++)
+    { for ( j = 0; j<cv->num_lag; ++j )
       {
-      sprintf(ch1,"v%s_%d_%d", cv->label,i, j);
+      sprintf( ch1,"v%s_%d_%d", cv->label,i, j);
 	  cmd( "set %s [ $w.c%d_v%s_%d get ]", ch1, i, cv->label, j  );
-      Tcl_UnlinkVar(inter, ch1);
+      Tcl_UnlinkVar( inter, ch1);
        }
     }
   }
@@ -364,11 +364,11 @@ char previous[MAX_ELEM_LENGTH+20], ch1[MAX_ELEM_LENGTH];
 variable *cv, *cv1;
 
 cur1=root->search(lab);
-strcpy(previous, "");
-for(cv1=cur1->v, j=0; cv1!=NULL;  )
+strcpy(previous, "" );
+for (cv1=cur1->v, j = 0; cv1!=NULL;  )
  {
- if(cv1->param==1)
-    { strncpy(ch1, cv1->label, MAX_ELEM_LENGTH - 1);
+ if (cv1->param == 1 )
+    { strncpy( ch1, cv1->label, MAX_ELEM_LENGTH - 1);
       ch1[MAX_ELEM_LENGTH - 1]=0;
       cmd( "label $w.tit_t%s -anchor w -width 25 -text \"Par: %-25s\" -borderwidth 4", cv1->label, ch1 );
       cmd( "$w window create end -window $w.tit_t%s", cv1->label );
@@ -380,9 +380,9 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
     }
   else
     { 
-     if(j<cv1->num_lag)
+     if (j<cv1->num_lag )
      {
-       strncpy(ch1, cv1->label, MAX_ELEM_LENGTH - 1);
+       strncpy( ch1, cv1->label, MAX_ELEM_LENGTH - 1);
        ch1[MAX_ELEM_LENGTH - 1]=0;
        cmd( "label $w.tit_t%s_%d -anchor w -width 25 -text \"Var: %-20s (-%d)\" -borderwidth 4", cv1->label,j, ch1, j+1 );
 		 cmd( "$w window create end -window $w.tit_t%s_%d", cv1->label, j );
@@ -398,18 +398,18 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
  {
   cv=cur->search_var(cur, cv1->label);
   cv->data_loaded='+';
-  if(cv->param==1)
-    { sprintf(ch1,"p%s_%d", cv->label,i);
-      Tcl_LinkVar(inter, ch1, (char *) &(cv->val[0]), TCL_LINK_DOUBLE);
+  if (cv->param == 1 )
+    { sprintf( ch1,"p%s_%d", cv->label,i);
+      Tcl_LinkVar( inter, ch1, ( char * ) &(cv->val[ 0 ]), TCL_LINK_DOUBLE );
       cmd( "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i  );
       cmd( "$w.c%d_v%sp insert 0 $p%s_%d", i, cv->label, cv->label, i );
-      if(set_focus==0)
+      if (set_focus == 0 )
        {
        cmd( "set initial_focus $w.c%d_v%sp", i, cv->label );
        set_focus=1;
        }
       cmd( "$w window create end -window $w.c%d_v%sp", i, cv->label );
-      if(strlen(previous)!=0)
+      if (strlen(previous) != 0 )
        {cmd( "bind %s <KeyPress-Return> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label );
         cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%sp; $w.c%d_v%sp selection range 0 end; $w see $w.c%d_v%sp}", previous, i, cv->label, i, cv->label, i, cv->label );
         cmd( "bind $w.c%d_v%sp <KeyPress-Up> {focus %s; %s selection range 0 end; $w see %s}", i, cv->label, previous, previous, previous );
@@ -420,20 +420,20 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
       sprintf(previous, "$w.c%d_v%sp", i, cv->label);
     }
   else
-    { if(j<cv->num_lag)
+    { if (j<cv->num_lag )
       {
-      sprintf(ch1,"v%s_%d_%d", cv->label,i, j);
-      Tcl_LinkVar(inter, ch1, (char *) &(cv->val[j]), TCL_LINK_DOUBLE);
+      sprintf( ch1,"v%s_%d_%d", cv->label,i, j);
+      Tcl_LinkVar( inter, ch1, ( char * ) &(cv->val[ j ]), TCL_LINK_DOUBLE );
       cmd( "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j  );
       cmd( "$w.c%d_v%s_%d insert 0 $v%s_%d_%d", i, cv->label, j, cv->label, i, j );
-      if(set_focus==0)
+      if (set_focus == 0 )
        {
        cmd( "set initial_focus $w.c%d_v%s_%d", i, cv->label,j );
        set_focus=1;
        }
 
       cmd( "$w window create end -window $w.c%d_v%s_%d", i, cv->label, j );
-      if(strlen(previous)!=0)
+      if (strlen(previous) != 0 )
        {cmd( "bind %s <KeyPress-Return> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j );
         cmd( "bind %s <KeyPress-Down> {focus $w.c%d_v%s_%d; $w.c%d_v%s_%d selection range 0 end; $w see  $w.c%d_v%s_%d}", previous, i, cv->label, j, i, cv->label, j, i, cv->label, j );
         cmd( "bind  $w.c%d_v%s_%d <KeyPress-Up> {focus %s; %s selection range 0 end; $w see  %s}", i, cv->label, j, previous, previous, previous );
@@ -451,19 +451,19 @@ for(cv1=cur1->v, j=0; cv1!=NULL;  )
 	  colOvflw = true;
 
   //set flag of data loaded also to not shown pars.
-  for( ;cur!=NULL; cur=cur->hyper_next(lab) )
+  for ( ;cur!=NULL; cur=cur->hyper_next(lab) )
      {
         cv=cur->search_var(cur, cv1->label);
         cv->data_loaded='+';
 
      }
- if(cv1->param==1 || cv1->num_lag>0)
+ if (cv1->param==1 || cv1->num_lag>0)
    cmd( "$w insert end \\n" );
- if(cv1->param==0 && j+1<cv1->num_lag)
+ if (cv1->param==0 && j+1<cv1->num_lag )
    j++;
  else
    {cv1=cv1->next;
-    j=0;
+    j = 0;
    }
 }
 }

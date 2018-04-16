@@ -121,7 +121,7 @@ void cmd( const char *cm, ... )
 	{
 		int code = Tcl_Eval( inter, buffer );
 
-		if( code != TCL_OK )
+		if ( code != TCL_OK )
 			log_tcl_error( cm, Tcl_GetStringResult( inter ) );
 	}
 }
@@ -138,7 +138,7 @@ void log_tcl_error( const char *cm, const char *message )
 	struct tm *timeinfo;
 	char ftime[ 80 ];
 
-	if( strlen( exec_path ) > 0 )
+	if ( strlen( exec_path ) > 0 )
 		sprintf( fname, "%s/LSD.err", exec_path );
 	else
 		sprintf( fname, "LSD.err" );
@@ -271,7 +271,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	}
 #endif
 
-	if( ! running )
+	if ( ! running )
 		return;
 
 	quit = 2;				// do not continue simulation
@@ -312,8 +312,8 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	cmd( "showtop .cazzo centerS" );
 
 	choice=0;
-	while(choice==0)
-		Tcl_DoOneEvent(0);
+	while (choice == 0 )
+		Tcl_DoOneEvent( 0 );
 
 	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
@@ -565,7 +565,7 @@ void get_sa_limits( object *r, FILE *out, const char *sep )
 		double min = HUGE_VAL, max = - HUGE_VAL;
 		for ( i = 0; cs->v != NULL &&  i < cs->nvalues; ++i )
 			if ( cs->v[ i ] < min )
-				min = cs->v[i];
+				min = cs->v[ i ];
 			else
 				if ( cs->v[ i ] > max )
 					max = cs->v[ i ];
@@ -657,7 +657,7 @@ _ABS
 ****************************************************/
 double _abs( double a )
 {
-	if( a > 0 )
+	if ( a > 0 )
 		return a;
 	else
 		return ( -1 * a );
@@ -765,15 +765,15 @@ FILE *search_str(char const *name, char const *str)
 FILE *f;
 char got[MAX_LINE_SIZE];
 
-f=fopen(name, "r");
-if(f==NULL)
+f = fopen(name, "r");
+if ( f == NULL )
  {return(NULL);
  }
 
 fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 if ( ! strcmp( got, str ) )
@@ -790,16 +790,16 @@ FILE *search_str_nospaces(char *name, char *str)
 FILE *f;
 char got[MAX_LINE_SIZE];
 
-f=fopen(name, "r");
-if(f==NULL)
+f = fopen(name, "r");
+if ( f == NULL )
  {return(NULL);
  }
 
-fgets(got, MAX_LINE_SIZE, f);
+fgets(got, MAX_LINE_SIZE, f );
 clean_spaces(got);
 for ( int i = 0; strncmp( got, str, strlen( str ) ) && i < MAX_FILE_TRY; ++i )
 {
-if(fgets(got, MAX_LINE_SIZE, f)==NULL)
+if (fgets(got, MAX_LINE_SIZE, f ) == NULL )
  return(NULL);
 clean_spaces(got); 
 }
@@ -818,15 +818,15 @@ FILE *search_data_str(char const *name, char const *init, char const *str)
 FILE *f;
 char got[MAX_LINE_SIZE];
 
-f=fopen(name, "r");
-if(f==NULL)
+f = fopen(name, "r");
+if ( f == NULL )
  {return(NULL);
  }
 
 fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, init ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -835,7 +835,7 @@ if ( strcmp( got, init ) )
 
 for ( int i = 0; strcmp( got, str ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -856,15 +856,15 @@ char temp[MAX_LINE_SIZE];
 char temp1[MAX_LINE_SIZE];
 char typ[20];
 
-f=fopen(name, "r");
-if(f==NULL)
+f = fopen(name, "r");
+if ( f == NULL )
  {return(NULL);
  }
 
 fscanf(f, "%999s", got);
 for ( int i = 0; strcmp( got, "DATA" ) && i < MAX_FILE_TRY; ++i )
 {
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -878,7 +878,7 @@ fscanf(f, "%999s", got);
 for ( int i = 0; ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 }
 
@@ -886,10 +886,10 @@ if ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) )
 	return NULL;
 
 //hopefully, we are at the beginning of the vars in the correct object
-if(v->param==1)
+if (v->param == 1 )
  strcpy(typ,"Param:");
 else
- if(v->param==2)
+ if (v->param==2)
   strcpy(typ,"Func:");
  else
   strcpy(typ,"Var:");
@@ -900,7 +900,7 @@ fscanf(f, "%999s", got);
 for ( int i = 0; ( strcmp( got, v->label ) || strcmp( temp1, typ ) ) && i < MAX_FILE_TRY; ++i )
 {
 strcpy(temp1, got);
-if(fscanf(f, "%999s", got)==EOF)
+if (fscanf(f, "%999s", got)==EOF)
  return(NULL);
 
 }
@@ -918,17 +918,17 @@ object *cur;
 bridge *cb;
 int i;
 
-if(o->up==NULL)
+if (o->up == NULL )
   return;
 
 set_counter(o->up);  
 
-for(cb=o->up->b; strcmp(cb->blabel,o->label); cb=cb->next);
+for (cb=o->up->b; strcmp(cb->blabel,o->label); cb=cb->next);
 
-if(cb->counter_updated==true)
+if (cb->counter_updated==true)
   return;
 
-for(cur=cb->head,i=1; cur!=NULL; cur=cur->next,i++)
+for (cur=cb->head,i=1; cur!=NULL; cur=cur->next, ++i )
 	if ( cur->lstCntUpd < t )		// don't update more than once per period
 	{								// to avoid deletions to change counters
 		cur->acounter = i;
@@ -950,21 +950,21 @@ object *cur, *ceil, *cur1;
 bridge *cb;
 char app[20*MAX_ELEM_LENGTH], app1[20*MAX_ELEM_LENGTH];
 bool first=true;
-if(var->up->up==NULL)
+if (var->up->up == NULL )
   {
    //this is the Root of the model
-   if(var->lab_tit!=NULL)
+   if (var->lab_tit != NULL )
      return; //already done in the past
    var->lab_tit=new char[strlen("R")+1];
    strcpy(var->lab_tit,"R");
    return;
   }
 
-for(cur=var->up; cur->up!=NULL; cur=cur->up)
+for (cur=var->up; cur->up!=NULL; cur=cur->up)
  {
   //found the bridge containing the variable
   set_counter(cur);
-  if(first==false)
+  if (first==false)
    sprintf(app1, "%d_%s",cur->acounter,app);
   else
    {
@@ -974,8 +974,8 @@ for(cur=var->up; cur->up!=NULL; cur=cur->up)
    strcpy(app,app1);
   } 
 
-if(var->lab_tit!=NULL)
-  delete[] var->lab_tit;
+if (var->lab_tit != NULL )
+  delete [ ] var->lab_tit;
 var->lab_tit=new char[strlen(app)+1];
 strcpy(var->lab_tit,app);  
 }
@@ -988,14 +988,14 @@ void add_cemetery(variable *v)
 {
 	variable *cv;
 	
-	if(v->savei==true)
+	if (v->savei==true)
 	  save_single(v);
-	if(cemetery==NULL)
+	if (cemetery == NULL )
 	 {cemetery=v;
 	  v->next=NULL;
 	 }
 	else
-	 {for(cv=cemetery; cv->next!=NULL; cv=cv->next);
+	 {for (cv=cemetery; cv->next!=NULL; cv=cv->next);
 	  cv->next=v;
 	  v->next=NULL;
 	 }
@@ -1121,13 +1121,13 @@ void result::data_recursive( object *r, int i )
 	{
 		cur = cb->head;
 		if ( cur->to_compute )
-			for( ; cur != NULL; cur = cur->next )
+			for ( ; cur != NULL; cur = cur->next )
 				data_recursive( cur, i );
 	}
 
 	if ( r->up == NULL )
 	{
-		for( cv = cemetery; cv != NULL; cv = cv->next )
+		for ( cv = cemetery; cv != NULL; cv = cv->next )
 		{
 			if ( cv->start <=i && cv->end >= i && ! is_nan( cv->data[ i ] ) )
 			{
@@ -1257,7 +1257,7 @@ void result::title_recursive( object *r, int header )
 		cur = cb->head;
 		if ( cur->to_compute )
 		{
-			for( ; cur != NULL; cur = cur->next )
+			for ( ; cur != NULL; cur = cur->next )
 			title_recursive( cur, header );
 		} 
 	} 
@@ -1304,7 +1304,7 @@ result::result( char const *fname, char const *fmode, bool dozip, bool docsv )
 			strcpy( fnamez, fname );
 			strcat( fnamez, ".gz");
 			fz = gzopen( fnamez, fmode );
-			delete [] fnamez;
+			delete [ ] fnamez;
 #endif
 	}
 	else
@@ -1328,13 +1328,13 @@ result::~result( void )
 double gammaln(double xx)
 {
 double x, y, tmp, ser;
-static double cof[6]={76.18009172947146,-86.50532032941677, 24.01409824083091,-1.231739572450155, 0.1208650973866179e-2,-0.5395239384953e-5};
+static double cof[ 6 ]={76.18009172947146,-86.50532032941677, 24.01409824083091,-1.231739572450155, 0.1208650973866179e-2,-0.5395239384953e-5};
 int j;
 y=x=xx;
 tmp=x+5.5;
 tmp -= (x+0.5)*log(tmp);
 ser=1.000000000190015;
-for(j=0;j<=5;j++) ser += cof[j]/++y;
+for ( j = 0;j<=5; ++j ) ser += cof[ j ]/++y;
 return -tmp+log(2.5066282746310005*ser/x);
 
 }
@@ -1373,17 +1373,17 @@ double PMRand_open(long *idum)
 		   k=(*idum)/IQ;
 		   *idum=IA*(*idum-k*IQ)-IR*k;
 		   if (*idum < 0) *idum += IM;
-		   if (j < NTAB) iv[j] = *idum;
+		   if (j < NTAB) iv[ j ] = *idum;
 		}
-		iy=iv[0];
+		iy=iv[ 0 ];
 	}
 	k=(*idum)/IQ;
 	*idum=IA*(*idum-k*IQ)-IR*k;
 	if (*idum < 0) 
 		*idum += IM;
 	j=iy/NDIV;
-	iy=iv[j];
-	iv[j] = *idum;
+	iy=iv[ j ];
+	iv[ j ] = *idum;
 	if ((temp=AM*iy) > RNMX) 
 		return RNMX;
 	else 
@@ -1540,21 +1540,21 @@ bool MTRand_int32::init = false;
 
 void MTRand_int32::gen_state() { // generate new state vector
   for (int i = 0; i < (n - m); ++i)
-    state[i] = state[i + m] ^ twiddle(state[i], state[i + 1]);
+    state[ i ] = state[i + m] ^ twiddle(state[ i ], state[i + 1]);
   for (int i = n - m; i < (n - 1); ++i)
-    state[i] = state[i + m - n] ^ twiddle(state[i], state[i + 1]);
-  state[n - 1] = state[m - 1] ^ twiddle(state[n - 1], state[0]);
+    state[ i ] = state[i + m - n] ^ twiddle(state[ i ], state[i + 1]);
+  state[n - 1] = state[m - 1] ^ twiddle(state[n - 1], state[ 0 ]);
   p = 0; // reset position
 }
 
 void MTRand_int32::seed(unsigned long s) {  // init by 32 bit seed
-  state[0] = s & 0xFFFFFFFFUL; // for > 32 bit machines
+  state[ 0 ] = s & 0xFFFFFFFFUL; // for > 32 bit machines
   for (int i = 1; i < n; ++i) {
-    state[i] = 1812433253UL * (state[i - 1] ^ (state[i - 1] >> 30)) + i;
+    state[ i ] = 1812433253UL * (state[i - 1] ^ (state[i - 1] >> 30)) + i;
 // see Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier
 // in the previous versions, MSBs of the seed affect only MSBs of the array state
 // 2002/01/09 modified by Makoto Matsumoto
-    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
+    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
   }
   p = n; // force gen_state() to be called for next random number
 }
@@ -1563,18 +1563,18 @@ void MTRand_int32::seed(const unsigned long* array, int size) { // init by array
   seed(19650218UL);
   int i = 1, j = 0;
   for (int k = ((n > size) ? n : size); k; --k) {
-    state[i] = (state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1664525UL))
-      + array[j] + j; // non linear
-    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
+    state[ i ] = (state[ i ] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1664525UL))
+      + array[ j ] + j; // non linear
+    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
     ++j; j %= size;
-    if ((++i) == n) { state[0] = state[n - 1]; i = 1; }
+    if ((++i) == n) { state[ 0 ] = state[n - 1]; i = 1; }
   }
   for (int k = n - 1; k; --k) {
-    state[i] = (state[i] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1566083941UL)) - i;
-    state[i] &= 0xFFFFFFFFUL; // for > 32 bit machines
-    if ((++i) == n) { state[0] = state[n - 1]; i = 1; }
+    state[ i ] = (state[ i ] ^ ((state[i - 1] ^ (state[i - 1] >> 30)) * 1566083941UL)) - i;
+    state[ i ] &= 0xFFFFFFFFUL; // for > 32 bit machines
+    if ((++i) == n) { state[ 0 ] = state[n - 1]; i = 1; }
   }
-  state[0] = 0x80000000UL; // MSB is 1; assuring non-zero initial array
+  state[ 0 ] = 0x80000000UL; // MSB is 1; assuring non-zero initial array
   p = n; // force gen_state() to be called for next random number
 }
 
@@ -1612,10 +1612,10 @@ double ran1( long *idum_loc )
 {
 	// Manage default (internal) number sequence
 	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
-	if( idum_loc == NULL )
+	if ( idum_loc == NULL )
 		idum_loc = & idum;
 
-	switch( ran_gen )
+	switch ( ran_gen )
 	{
 		case 2:
 			return mt2( );			// in (0,1)
@@ -1648,20 +1648,20 @@ double gamdev( int ia, long *idum_loc = NULL )
 
 	// Manage default (internal) number sequence
 	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
-	if( idum_loc == NULL )
+	if ( idum_loc == NULL )
 		idum_loc = & idum;
 
-	if(ia<1) 
+	if (ia<1) 
 	{
 		sprintf( msg, "inconsistant state in gamdev");
 		error_hard( msg, "Internal error", "If error persists, please contact developers." );
 		quit=1;
 		return 0;
 	} 
-	if(ia<6)
+	if (ia<6)
 	{
 		x=1.0;
-		for(j=1; j<=ia; j++) x*=ran1(idum_loc);
+		for (j=1; j<=ia; ++j ) x*=ran1(idum_loc);
 		x=-log(x);
 	}
 	else
@@ -1675,16 +1675,16 @@ double gamdev( int ia, long *idum_loc = NULL )
 					v1=ran1(idum_loc);
 					v2=2*ran1(idum_loc)-1.0;
 				}
-				while(v1*v1+v2*v2>1.0);
+				while (v1*v1+v2*v2>1.0);
 				y=v2/v1;
 				am=ia-1;
 				s=sqrt(2.0*am+1.0);
 				x=s*y+am;
 			}
-			while(x<=0);
+			while (x<=0);
 			e=(1+y*y)*exp(am*log(x/am)-s*y);
 		}
-		while(ran1(idum_loc)>e);
+		while (ran1(idum_loc)>e);
 	} 
 	return x;
 }
@@ -1706,7 +1706,7 @@ double poidev( double xm, long *idum_loc = NULL )
 
 	// Manage default (internal) number sequence
 	// WORKS ONLY FOR NON-DEFAULT PARK-MILER generator
-	if( idum_loc == NULL )
+	if ( idum_loc == NULL )
 		idum_loc = & idum;
 
 	if (xm < 12.0) 
@@ -1801,7 +1801,7 @@ double alapl( double mu, double alpha1, double alpha2 )
 	}
 
 	double draw = RND;
-	if( draw < ( alpha1 / ( alpha1 + alpha2 ) ) )
+	if ( draw < ( alpha1 / ( alpha1 + alpha2 ) ) )
 		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
 	else 
 		return mu - alpha2 * log( ( 1 - draw ) * ( 1 + alpha1 / alpha2 ) );
@@ -1984,7 +1984,7 @@ double alaplcdf( double mu, double alpha1, double alpha2, double x )
 
 double betacf( double a, double b, double x )
 {
-	void nrerror(char error_text[]);
+	void nrerror(char error_text[ ]);
 	int m, m2;
 	double aa, c, d, del, h, qab, qam, qap;
 
@@ -2098,7 +2098,7 @@ int store(struct s *c, int x3, int x4);
 int store(struct s *c, int x4);
 void free_storage(struct s *c);
 
-int shrink_gnufile(void)
+int shrink_gnufile( void ) 
 {
 d.son=NULL;
 d.next=NULL;
@@ -2110,8 +2110,8 @@ int x1, x2, x3, x4, count=1;
 
 FILE *f, *f1;
 int i, j, h=0;
-f=fopen("plot.file", "r");
-if(f==NULL)
+f = fopen("plot.file", "r");
+if ( f == NULL )
 {
 	sprintf( msg, "could not open plot file" );
 	error_hard( msg, "Internal error", "If error persists, please contact developers." );
@@ -2119,18 +2119,18 @@ if(f==NULL)
 }
 
 f1=fopen("plot_clean.file", "w");
-if(f==NULL)
+if ( f == NULL )
 {
 	sprintf( msg, "could not open clean plot file" );
 	error_hard( msg, "Internal error", "If error persists, please contact developers." );
 	myexit(15);
 }
 
-while(fgets(str, 2*MAX_ELEM_LENGTH, f)!=NULL)
- {if(h++==1)
+while (fgets(str, 2*MAX_ELEM_LENGTH, f ) != NULL )
+ {if (h++ == 1 )
    fprintf(f1, "set font \"{$::fontP}\"\n");
  sscanf(str, "%s %s", str1, str2);
- if(!strcmp(str1, "$can") && !strcmp(str2, "create") )
+ if (!strcmp(str1, "$can") && !strcmp(str2, "create") )
    {
    i=strcspn(str, "[");
    j=strcspn(str, "]");
@@ -2161,20 +2161,20 @@ while(fgets(str, 2*MAX_ELEM_LENGTH, f)!=NULL)
    strncpy(str4, str+i, j-i+1);
    str4[j-i+1]='\0';
    sscanf(str4,"[expr $cmy * %d /1000]", &x4);
-   if(store(x1, x2, x3, x4)==1)   //if new data are stored, then add it to the cleaned file
+   if (store(x1, x2, x3, x4) == 1 )   //if new data are stored, then add it to the cleaned file
      fprintf(f1, "%s", str);
    }
   else
    fprintf(f1, "%s", str);
 
  }
-fclose(f);
+fclose( f );
 fclose(f1);
 
 
-if(d.next!=NULL)
+if (d.next != NULL )
  free_storage(d.next);
-if(d.son!=NULL)
+if (d.son != NULL )
  free_storage(d.son);
 
 return 0;
@@ -2186,8 +2186,8 @@ int store(int x1, int x2, int x3, int x4)
 	int flag=0, res;
 	struct s *app, *prev;
 
-	for(app=&d; app!=NULL; app=app->next)
-	 {if(app->x==x1)
+	for (app=&d; app!=NULL; app=app->next)
+	 {if (app->x==x1)
 	   { res=store(app->son,x2, x3, x4);
 		 return res;
 		 break;
@@ -2195,7 +2195,7 @@ int store(int x1, int x2, int x3, int x4)
 	  else
 	   prev=app;
 	 }
-	if(app==NULL)
+	if (app == NULL )
 	 {prev->next=new struct s;
 	  app=prev->next;
 	  app->x=x1;
@@ -2228,8 +2228,8 @@ int store(struct s *c, int x2, int x3, int x4)
 	int flag=0, res;
 	struct s *app, *prev;
 
-	for(app=c; app!=NULL; app=app->next)
-	 {if(app->x==x2)
+	for (app=c; app!=NULL; app=app->next)
+	 {if (app->x==x2)
 	   { res=store(app->son, x3, x4);
 		 return res;
 		 break;
@@ -2237,7 +2237,7 @@ int store(struct s *c, int x2, int x3, int x4)
 	  else
 	   prev=app;
 	 }
-	if(app==NULL)
+	if (app == NULL )
 	 {prev->next=new struct s;
 	  app=prev->next;
 	  app->x=x2;
@@ -2267,8 +2267,8 @@ int store(struct s *c, int x3, int x4)
 	int flag=0, res;
 	struct s *app, *prev;
 
-	for(app=c; app!=NULL; app=app->next)
-	 {if(app->x==x3)
+	for (app=c; app!=NULL; app=app->next)
+	 {if (app->x==x3)
 	   { res=store(app->son, x4);
 		 return res;
 		 break;
@@ -2276,7 +2276,7 @@ int store(struct s *c, int x3, int x4)
 	  else
 	   prev=app;
 	 }
-	if(app==NULL)
+	if (app == NULL )
 	 {prev->next=new struct s;
 	  app=prev->next;
 	  app->x=x3;
@@ -2302,15 +2302,15 @@ int store(struct s *c, int x4)
 	int flag=0, res;
 	struct s *app, *prev;
 
-	for(app=c; app!=NULL; app=app->next)
-	 {if(app->x==x4)
+	for (app=c; app!=NULL; app=app->next)
+	 {if (app->x==x4)
 	   { return 0;
 		 break;
 	   }
 	  else
 	   prev=app; 
 	 }
-	if(app==NULL)
+	if (app == NULL )
 	 {prev->next=new struct s;
 	  app=prev->next;
 	  app->x=x4;
@@ -2331,9 +2331,9 @@ void free_storage(struct s *c)
 {
 struct s *app, *n, *down;
 
-if(c->next!=NULL)
+if (c->next != NULL )
  free_storage(c->next);
-if(c->son!=NULL)
+if (c->son != NULL )
  free_storage(c->son);
 
 delete c;
@@ -2345,9 +2345,9 @@ description *search_description(char *lab)
 {
 description *cur;
 
-for(cur=descr; cur!=NULL; cur=cur->next)
+for (cur=descr; cur!=NULL; cur=cur->next)
  {
-  if(!strcmp(cur->label,lab) )
+  if (!strcmp(cur->label,lab) )
    return cur;
  }
 return NULL;
@@ -2368,23 +2368,23 @@ int i;
 bridge *cb;
 
 cur=search_description(o->label);
-if(cur==NULL)
+if (cur == NULL )
  add_description(o->label, "Object", "(no description available)");
 
-for(cv=o->v; cv!=NULL; cv=cv->next)
+for (cv=o->v; cv!=NULL; cv=cv->next)
  {
   cur=search_description(cv->label);
-  if(cur==NULL)
+  if (cur == NULL )
    {i=cv->param;
-   if(i==1)
+   if (i == 1 )
     add_description(cv->label, "Parameter", "(no description available)");
-   if(i==0)
+   if (i == 0 )
     add_description(cv->label, "Variable", "(no description available)");
-   if(i==2)
+   if (i==2)
     add_description(cv->label, "Function", "(no description available)");
    } 
  } 
-for(cb=o->b; cb!=NULL; cb=cb->next)
+for (cb=o->b; cb!=NULL; cb=cb->next)
   autofill_descr(cb->head);
 }
 
@@ -2393,52 +2393,52 @@ void change_descr_lab(char const *lab_old, char const *lab, char const *type, ch
 {
 description *cur, *cur1;
 
-for(cur=descr; cur!=NULL; cur=cur->next)
+for (cur=descr; cur!=NULL; cur=cur->next)
  {
-  if(!strcmp(cur->label, lab_old) )
+  if (!strcmp(cur->label, lab_old) )
    {
 
-   if(!strcmp(lab,"") && !strcmp(type,"") && !strcmp(text,"") && !strcmp(init,"") )
+   if (!strcmp(lab, "" ) && !strcmp(type, "" ) && !strcmp(text, "" ) && !strcmp(init, "" ) )
     {
-     delete[] cur->label;
-     delete[] cur->type;
-     delete[] cur->text;
-     if(cur->init!=NULL)
-      delete[] cur->init;
+     delete [ ] cur->label;
+     delete [ ] cur->type;
+     delete [ ] cur->text;
+     if (cur->init != NULL )
+      delete [ ] cur->init;
       
-    if(cur==descr)
+    if (cur==descr)
      {descr=cur->next;	
       delete cur;
      }
     else
-     {for(cur1=descr; cur1->next!=cur; cur1=cur1->next);
+     {for (cur1=descr; cur1->next!=cur; cur1=cur1->next);
       cur1->next=cur->next;
       delete cur;
      } 
      
     }
-   if(strcmp(lab,"") )
+   if (strcmp(lab, "" ) )
     {
-     delete[] cur->label;
+     delete [ ] cur->label;
      cur->label=new char[strlen(lab)+1];
      strcpy(cur->label, lab);
     } 
-   if(strcmp(type,"") )
+   if (strcmp(type, "" ) )
     {
-     delete[] cur->type;
+     delete [ ] cur->type;
      cur->type=new char[strlen(type)+1];
      strcpy(cur->type, type);
     }
-   if(strcmp(text,"") )
+   if (strcmp(text, "" ) )
     {
-     delete[] cur->text;
+     delete [ ] cur->text;
      cur->text=new char[strlen(text)+1];
      strcpy(cur->text, text);
     } 
-   if(strcmp(init,"") )
+   if (strcmp(init, "" ) )
     {
-     if(cur->init!=NULL)
-       delete[] cur->init;
+     if (cur->init != NULL )
+       delete [ ] cur->init;
      cur->init=new char[strlen(init)+1];
      strcpy(cur->init, init);
     } 
@@ -2453,10 +2453,10 @@ void add_description(char const *lab, char const *type, char const *text)
 {
 description *cur;
 
-if(descr==NULL)
+if (descr == NULL )
  cur=descr=new description;
 else
-{ for(cur=descr; cur->next!=NULL; cur=cur->next);
+{ for (cur=descr; cur->next!=NULL; cur=cur->next);
   
   cur->next=new description;
   cur=cur->next;
@@ -2468,7 +2468,7 @@ cur->label=new char[strlen(lab)+1];
 strcpy(cur->label, lab);
 cur->type=new char[strlen(type)+1];
 strcpy(cur->type, type);
-if(text!=NULL && strlen(text)!=0)
+if (text!=NULL && strlen(text) != 0 )
  {cur->text=new char[strlen(text)+1]; 
   strcpy(cur->text, text);
  }
@@ -2488,12 +2488,12 @@ void change_descr_text(char *lab)
 description *cur, *cur1;
 char *lab1;
 
-for(cur=descr; cur!=NULL; cur=cur->next)
+for (cur=descr; cur!=NULL; cur=cur->next)
  {
-  if(!strcmp(cur->label, lab) )
+  if (!strcmp(cur->label, lab) )
    {
-     delete[] cur->text;
-     lab1=(char *)Tcl_GetVar(inter, "text_description",0);
+     delete [ ] cur->text;
+     lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
      cur->text = new char[strlen(lab1)+1];
      strcpy(cur->text, lab1);
      return;
@@ -2508,15 +2508,15 @@ void change_init_text(char *lab)
 description *cur, *cur1;
 char *lab1;
 
-for(cur=descr; cur!=NULL; cur=cur->next)
+for (cur=descr; cur!=NULL; cur=cur->next)
  {
-  if(!strcmp(cur->label, lab) )
+  if (!strcmp(cur->label, lab) )
    {
-     lab1=(char *)Tcl_GetVar(inter, "text_description",0);
-     if(strlen(lab1)>0)
+     lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
+     if (strlen(lab1)>0)
       {
-      if(cur->init!=NULL)
-        delete[] cur->init;
+      if (cur->init != NULL )
+        delete [ ] cur->init;
       cur->init = new char[strlen(lab1)+1];
       strcpy(cur->init, lab1);
       }
@@ -2532,44 +2532,44 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 FILE *f;
 description *cd;
 char str1[MAX_LINE_SIZE], app[10*MAX_LINE_SIZE];
-int i, j=0, done;
+int i, j = 0, done;
 bool var;
 
-for(cd=descr; cd!=NULL; cd=cd->next)
+for (cd=descr; cd!=NULL; cd=cd->next)
 {
  app[ 0 ] = '\0';
- if( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
+ if ( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
  { 
   //for each description
-  if( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
+  if ( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
   { //if it is a Variable
     var = true;
-    sprintf(msg, "EQUATION(\"%s\")", cd->label); //search its equation
+    sprintf( msg, "EQUATION(\"%s\")", cd->label); //search its equation
     f=search_str_nospaces(equation_name, msg);
-    if(f==NULL)
-     {sprintf(msg, "FUNCTION(\"%s\")", cd->label);
+    if ( f == NULL )
+     {sprintf( msg, "FUNCTION(\"%s\")", cd->label);
       f=search_str_nospaces(equation_name, msg);
      }
-    if(f==NULL)
-     {sprintf(msg, "if(!strcmp(label,\"%s\"))", cd->label);
+    if ( f == NULL )
+     {sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label);
       f=search_str_nospaces(equation_name, msg);
      }
-    if(f!=NULL)
+    if (f != NULL )
     {
      done=-1;
-     j=0;
-     while(done!=1)
+     j = 0;
+     while (done != 1 )
      {
-      fgets(str1, MAX_LINE_SIZE, f);
+      fgets(str1, MAX_LINE_SIZE, f );
       for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
       {
-       if(done==-1) //no comment found yet
+       if (done==-1) //no comment found yet
         {
-         if(isalpha(str1[i])!=0) //no comment exists
+         if (isalpha(str1[ i ]) != 0 ) //no comment exists
           done=1;
 		  
-         if(str1[i]=='/' && str1[i+1]=='*')
-          { done=0; //beginning of a multiline comment
+         if (str1[ i ]=='/' && str1[ i + 1 ]=='*')
+          { done = 0; //beginning of a multiline comment
            i+=2;
 		   // discard initial empty line
 		   while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
@@ -2579,21 +2579,21 @@ for(cd=descr; cd!=NULL; cd=cd->next)
 		   if ( str1[ i ] == '\0')
 				break;
           } 
-         if(str1[i]=='/' && str1[i+1]=='/')
+         if (str1[ i ]=='/' && str1[ i + 1 ]=='/')
           { done=2; //beginning of a single line comment
            i+=2;
           } 
         }
 		
-        if(done==0 ) //we are in a comment
-         if(str1[i]=='*' && str1[i+1]=='/')
+        if (done==0 ) //we are in a comment
+         if (str1[ i ]=='*' && str1[ i + 1 ]=='/')
           done=1;
 
-        if(done==0 || done ==2)
-         if(str1[i]!='\r')
-           app[j++]=str1[i];
+        if (done==0 || done ==2)
+         if (str1[ i ]!='\r')
+           app[j++]=str1[ i ];
 
-        if(done==2 && str1[i]=='\n')
+        if (done==2 && str1[ i ]=='\n')
          done=-1; 
 	 
 	    if ( j >= 10 * MAX_LINE_SIZE )
@@ -2601,39 +2601,39 @@ for(cd=descr; cd!=NULL; cd=cd->next)
       }
      }
      strcat(app, "\n");
-    } //end of the if(found equation)
-  } //end of the if(cd==Variable)
+    } //end of the if (found equation)
+  } //end of the if (cd==Variable)
   else
     var = false;
   
-  app[j]='\0'; //close the string
+  app[ j ]='\0'; //close the string
   return_where_used(cd->label, str1); 
   if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
 	sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
   else
   	sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
-  delete[] cd->text;
+  delete [ ] cd->text;
   cd->text= new char[strlen(msg)+1];
   strcpy(cd->text, msg);
  } //end of the label to document
-}//end of the for(desc)
+}//end of the for (desc)
 }
 
 
-void return_where_used(char *lab, char s[]) 
+void return_where_used( char *lab, char s[ ] ) 
 {
-int choice;
-char *r; 
+	int choice;
+	char *r; 
 
-scan_used_lab(lab, &choice);
-cmd( "set l [join [$list.l.l get 0 end] \", \"]" );
-cmd( "destroytop $list" ); 
-r=(char *)Tcl_GetVar(inter, "l",0);
-if ( r != NULL )
-	strcpy(s, r);
-else
-	strcpy( s, "" );
+	scan_used_lab( lab, &choice );
+	cmd( "set l [join [ $list.l.l get 0 end ] \", \"]" );
+	cmd( "destroytop $list" ); 
+	r = ( char * ) Tcl_GetVar( inter, "l", 0 );
+	if ( r != NULL )
+		strcpy( s, r);
+	else
+		strcpy( s, "" );
 }
 
 
@@ -2725,8 +2725,7 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
 	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
-	cmd( "set lat_update 1" );
-	cmd( "bind .lat <Button-1> { if { $lat_update == 1 } { set lat_update 0 } { set lat_update 1 } }" );
+	cmd( "bind .lat <Button-1> { if { $lattype == 1 } { set lattype 0 } { set lattype 1 } }" );
 	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
 	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 
@@ -2761,17 +2760,16 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	cmd( "set dimH %lf", dimH );
 	cmd( "set dimW %lf", dimW );
 
-	if ( lattice_type == 1 )
-	  for ( i = 1; i <= nrow; ++i )
+	for ( i = 1; i <= nrow; ++i )
 		for ( j = 1; j <= ncol; ++j )
-		  cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), init_color_string );
+			cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), init_color_string );
 
 	cmd( "showtop .lat centerS no no no" );
 	set_shortcuts_log( ".lat", "lattice.html" );
 	return 0;
 }
 
-double init_lattice( char const lrow[], char const lcol[], int init_color, double nrow, double ncol, double pixW, double pixH )
+double init_lattice( char const lrow[ ], char const lcol[ ], int init_color, double nrow, double ncol, double pixW, double pixH )
 {
 	init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
 }
@@ -2818,7 +2816,6 @@ double update_lattice( double line, double col, double val )
 	cmd( "if { $tempc != \"\" } { .lat.c itemconfigure c%d_%d -fill %s }", ( unsigned int ) line, ( unsigned int ) col, val_string );
 	cmd( "if { $tempc == \"\" } { .lat.c addtag c%d_%d withtag [ .lat.c create poly %d %d %d %d %d %d %d %d -fill %s ] }", ( unsigned int ) line, ( unsigned int ) col, ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line ) * dimH ), ( unsigned int ) ( col * dimW ), ( unsigned int ) ( line * dimH ), ( unsigned int ) ( col *dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), val_string );
 
-	cmd( "if { $lat_update == 1 } { update }" );
 	return 0;  
 }
 
@@ -2903,7 +2900,7 @@ void clean_spaces( char *s )
 	char app[ MAX_LINE_SIZE ];
 
 	app[ MAX_LINE_SIZE - 1 ] = '\0';
-	for ( j = 0, i = 0; s[i] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
+	for ( j = 0, i = 0; s[ i ] != '\0' && i < MAX_LINE_SIZE - 1; ++i )
 		switch ( s[ i ] )
 		{
 			case ' ':
@@ -2932,85 +2929,90 @@ void save_eqfile( FILE *f )
 
 #ifndef NO_WINDOW
 
-void read_eq_filename(char *s)
+void read_eq_filename( char *s )
 {
-FILE *f;
-char lab[MAX_PATH_LENGTH];
+	char lab[ MAX_PATH_LENGTH ];
+	FILE *f;
 
-f=fopen("model_options.txt", "r");
-if(f==NULL)
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
-  return;
- }
-fscanf(f, "%499s", lab);
-for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
-fclose(f);
-if(strncmp(lab, "FUN=", 4)!=0)
- {
-  cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
-  return;
- }
+	sprintf( lab, "%s/model_options.txt", exec_path );
+	f = fopen( lab, "r" );
+	
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File 'model_options.txt' not found\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		return;
+	}
+	
+	fscanf( f, "%499s", lab );
+	for ( int i = 0; strncmp( lab, "FUN=", 4 ) && fscanf( f, "%499s", lab ) != EOF && i < MAX_FILE_TRY; ++i );    
+	fclose( f );
+	if ( strncmp( lab, "FUN=", 4 ) != 0 )
+	{
+		cmd( "tk_messageBox -parent . -type ok -title -title Error -icon error -message \"File 'model_options.txt' corrupted\" -detail \"Cannot upload the equation file.\nYou may have to recreate your model configuration.\"" );
+		return;
+	}
 
-strcpy(s, lab+4);
-strcat(s, ".cpp");
+	strcpy( s, lab + 4 );
+	strcat( s, ".cpp" );
 
-return;
-    
+	return;
 }
 
-int compare_eqfile(void)
-{
-FILE *f;
-char *s, lab[MAX_PATH_LENGTH+1];
-int i = MAX_FILE_SIZE;
 
-read_eq_filename(lab);
-f=fopen(lab, "r");
-s = new char[ i + 1 ];
-while( fgets(msg, MAX_LINE_SIZE, f) != NULL )
+int compare_eqfile( void )
 {
-	i -= strlen( msg );
-	if ( i < 0 )
-		break;
-	strcat(s, msg);
+	char *s, lab[ MAX_PATH_LENGTH + 1 ];
+	int i = MAX_FILE_SIZE;
+	FILE *f;
+
+	read_eq_filename( lab );
+	f = fopen( lab, "r" );
+	s = new char[ i + 1 ];
+	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
+	{
+		i -= strlen( msg );
+		if ( i < 0 )
+			break;
+		strcat( s, msg );
+	}
+	fclose( f );  
+	
+	if ( strcmp( s, lsd_eq_file ) == 0 )
+		i = 0;
+	else
+		i = 1;
+	delete [ ] s;
+
+	return i;
 }
-fclose(f);  
-if(strcmp(s,lsd_eq_file)==0)
- i=0;
-else
- i=1;
-delete[] s;
 
-return i;
-}
 
-char *upload_eqfile(void)
+char *upload_eqfile( void )
 {
-//load into the string eq_file the equation file
-char s[MAX_PATH_LENGTH+1], *eq;
-int i, sz = 0;
-FILE *f;
+	//load into the string eq_file the equation file
+	char s[ MAX_PATH_LENGTH+1 ], *eq;
+	int i, sz = 0;
+	FILE *f;
 
-Tcl_LinkVar(inter, "eqfiledim", (char *) &i, TCL_LINK_INT);
+	Tcl_LinkVar( inter, "eqfiledim", ( char * ) &i, TCL_LINK_INT );
 
-read_eq_filename(s);
-cmd( "set eqfiledim [file size %s]", s );
+	read_eq_filename( s );
+	cmd( "set eqfiledim [ file size %s ]", s );
 
-Tcl_UnlinkVar(inter, "eqfiledim");
+	Tcl_UnlinkVar( inter, "eqfiledim" );
 
-eq=new char[i+1];
-eq[0]=(char)NULL;
-f=fopen(s, "r");
-while( fgets(msg, MAX_LINE_SIZE, f)!=NULL)
-{
-	i -= strlen( msg );
-	if ( i < 0 )
-		break;
-	strcat( eq, msg );
-}
-fclose(f);
-return eq;
+	eq = new char[ i + 1 ];
+	eq[ 0 ] = '\0';
+	f = fopen( s, "r");
+	while ( fgets( msg, MAX_LINE_SIZE, f ) != NULL )
+	{
+		i -= strlen( msg );
+		if ( i < 0 )
+			break;
+		strcat( eq, msg );
+	}
+	fclose( f );
+	return eq;
 }
 
 #endif

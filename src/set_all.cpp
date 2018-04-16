@@ -16,7 +16,7 @@ values of a variable with a function, instead of inserting manually.
 
 The functions contained in this file are:
 
--void set_all(int *choice, object *r, char *lab, int lag)
+-void set_all(int *choice, object *r, char *lab, int lag )
 it allows 5 options to set all values. It uses one value entered by the user
 in this window and, for some option, the first value for this variable in the
 model. That is, the value for this variable contained in the first object of this
@@ -68,7 +68,7 @@ did not issue an error message.
 UTIL.CPP returns a random number drawn from a normal with mean mean and standard deviation\
 dev.
 
-- double rnd(void);
+- double rnd( void ) ;
 UTIL.CPP return the uniform value. Now is only implemented using the internal
 random generator, but it can be (and should...) linked with a serious random
 generator.
@@ -82,7 +82,7 @@ SET_ALL
 
 ****************************************************/
 
-void set_all(int *choice, object *original, char *lab, int lag)
+void set_all(int *choice, object *original, char *lab, int lag )
 {
 char *l, ch[MAX_ELEM_LENGTH];
 int res, i, kappa, cases_from=1, cases_to=0, to_all, update_description, fill=0;
@@ -94,8 +94,8 @@ FILE *f;
 description *cd; 
 sense *cs;
 
-if(original->up!=NULL)
-	for(r=original->up; r->up!=NULL; r=r->up);//go for the root
+if (original->up != NULL )
+	for (r=original->up; r->up!=NULL; r=r->up);//go for the root
 else
 	r=original; 
 
@@ -104,9 +104,9 @@ cv=r->search_var(NULL, lab);
 if ( cv == NULL )
 	return;
 
-Tcl_LinkVar(inter, "res", (char *) &res, TCL_LINK_INT);
-Tcl_LinkVar(inter, "value1", (char *) &value1, TCL_LINK_DOUBLE);
-Tcl_LinkVar(inter, "value2", (char *) &value2, TCL_LINK_DOUBLE);
+Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
+Tcl_LinkVar( inter, "value1", ( char * ) &value1, TCL_LINK_DOUBLE );
+Tcl_LinkVar( inter, "value2", ( char * ) &value2, TCL_LINK_DOUBLE );
 
 // preload the existing value of the first object
 if ( cv->param == 0 )
@@ -115,8 +115,8 @@ else
 	value1 = cv->val[ 0 ];
 
 // default values
-res=1;
-value2=0;
+res = 1;
+value2 = 0;
 cmd( "set value 1" ); 	// method
 cmd( "set to_all 1" );
 cmd( "set step_in 1" );
@@ -172,12 +172,12 @@ cmd( "frame .sa.m.f1.val.i -relief groove -bd 2" );
 
 
 cmd( "frame .sa.m.f1.val.i.l1" );
-cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Value 1\"" );
+cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
 cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
 
 cmd( "frame .sa.m.f1.val.i.l2" );
-cmd( "label .sa.m.f1.val.i.l2.l2 -text \"Value 2\"" );
+cmd( "label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
 cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
 
@@ -219,7 +219,7 @@ cmd( "bind .sa.m.f1.rd.i.r8 <Up> {focus .sa.m.f1.rd.i.r3; .sa.m.f1.rd.i.r3 invok
 cmd( "bind .sa.m.f1.rd.i.r8 <Down> {focus .sa.m.f1.rd.i.r5; .sa.m.f1.rd.i.r5 invoke}" );
 cmd( "bind .sa.m.f1.rd.i.r8 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
 
-cmd( "radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. Deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
+cmd( "radiobutton .sa.m.f1.rd.i.r5 -text \"Random (normal)\" -variable res -value 5 -command {.sa.m.f1.val.i.l1.l1 conf -text \"Mean\"; .sa.m.f1.val.i.l1.e1 conf -state normal; .sa.m.f1.val.i.l2.l2 conf -text \"Std. deviation\"; .sa.m.f1.val.i.l2.e2 conf -state normal }" );
 cmd( "bind .sa.m.f1.rd.i.r5 <Up> {focus .sa.m.f1.rd.i.r8; .sa.m.f1.rd.i.r8 invoke}" );
 cmd( "bind .sa.m.f1.rd.i.r5 <Down> {focus .sa.m.f1.rd.i.r7; .sa.m.f1.rd.i.r7 invoke}" );
 cmd( "bind .sa.m.f1.rd.i.r5 <Return> { .sa.m.f1.val.i.l1.e1 selection range 0 end; focus .sa.m.f1.val.i.l1.e1}" );
@@ -238,7 +238,7 @@ cmd( "pack .sa.m.f1.val .sa.m.f1.rd -expand yes -fill x  -padx 5 -pady 5" );
 cmd( "frame .sa.m.f2" );
 
 cmd( "frame .sa.m.f2.s" );
-cmd( "label .sa.m.f2.s.tit -text \"Object selection\"" );
+cmd( "label .sa.m.f2.s.tit -text \"Object instances selection\"" );
 
 cmd( "frame .sa.m.f2.s.i -relief groove -bd 2" );
 
@@ -247,7 +247,7 @@ cmd( "frame .sa.m.f2.s.i.l" );
 cmd( "frame .sa.m.f2.s.i.l.a" );
 cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
 cmd( "entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
-cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"object(s)\"" );
+cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance(s)\"" );
 cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
 cmd( "checkbutton .sa.m.f2.s.i.l.f -text \"Fill-in\" -variable fill" );
@@ -255,8 +255,8 @@ cmd( "pack  .sa.m.f2.s.i.l.a .sa.m.f2.s.i.l.f -padx 5 -side left" );
 cmd( "pack  .sa.m.f2.s.i.l -pady 2" );
 
 cmd( "frame .sa.m.f2.s.i.sel -relief groove -bd 2" );
-cmd( "radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all objects\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
-cmd( "radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a group of objects\" -variable to_all -value 2 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
+cmd( "radiobutton .sa.m.f2.s.i.sel.all -text \"Apply to all instances\" -variable to_all -value 1 -command { .sa.m.f2.s.i.sel2.c.to conf -state disabled; .sa.m.f2.s.i.sel2.c.from conf -state disabled; bind .sa.m.f2.s.i.sel2.c.from <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> { }; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { } }" );
+cmd( "radiobutton .sa.m.f2.s.i.sel.sel -text \"Apply to a range of instances\" -variable to_all -value 2 -command { .sa.m.f2.s.i.sel2.c.to conf -state normal; .sa.m.f2.s.i.sel2.c.from conf -state normal; bind .sa.m.f2.s.i.sel2.c.from <Button-3> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-3> { set choice 10 }; bind .sa.m.f2.s.i.sel2.c.from <Button-2> {set choice 9}; bind .sa.m.f2.s.i.sel2.c.to <Button-2> { set choice 10 } }" );
 cmd( "pack .sa.m.f2.s.i.sel.all .sa.m.f2.s.i.sel.sel -anchor w" );
 cmd( "pack .sa.m.f2.s.i.sel -pady 2" );
 
@@ -334,17 +334,17 @@ if ( selFocus )
 }
 
 *choice = 0;
-while(*choice==0)
-  Tcl_DoOneEvent(0);
+while ( *choice == 0 )
+  Tcl_DoOneEvent( 0 );
 
-if(*choice==9)
+if (*choice==9)
 {//search instance from
  i=compute_copyfrom(original, choice);
  cmd( "set cases_from %d", i );
  goto here_setall;
 }
 
-if(*choice==10)
+if (*choice==10)
 {
  //search instance to
  i=compute_copyfrom(original, choice);
@@ -362,10 +362,10 @@ cmd( "set rnd_seed [ .sa.m.f2.rnd.i.le.s.e1 get ]" );
 
 cmd( "destroytop .sa" );
 
-if( (*choice==1 && res!=0) || *choice==9 || *choice==10)
+if ( (*choice==1 && res != 0 ) || *choice==9 || *choice==10)
 {
 cmd( "set choice $use_seed" );
-if(*choice==1)
+if ( *choice == 1 )
  {
   cmd( "set choice $rnd_seed" );
   init_random(*choice);
@@ -379,7 +379,7 @@ cases_to=*choice;
 cmd( "set choice $update_d" );
 update_description=*choice;
 
-switch(res)
+switch (res)
 {
 //Equal 
 case 1:
@@ -387,44 +387,44 @@ case 1:
      fill=*choice;
      cmd( "set choice $step_in" );
       
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
        {
         cv=cur->search_var(NULL, lab);
   			cv->data_loaded='+';
-  			if(cv->param==0)
+  			if (cv->param == 0 )
   			  cv->val[lag]=value1;
   			else
-  			  cv->val[0]=value1;
+  			  cv->val[ 0 ]=value1;
        }
 		  }
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
     
-      if(to_all==1)
-        {sprintf(msg, "All %d instances equal to %g.", i-1, value1);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances equal to %g.", i-1, value1);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d equal to %g.",cd->init, cases_from, cases_to, value1);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d equal to %g.",cd->init, cases_from, cases_to, value1);
          else
-           sprintf(msg, "Instances from %d to %d equal to %g.", cases_from, cases_to, value1);  
+           sprintf( msg, "Instances from %d to %d equal to %g.", cases_from, cases_to, value1);  
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
@@ -437,9 +437,9 @@ case 9:
      fill=*choice;
      cmd( "set choice $step_in" );
      counter=-1;
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (((i-cases_from)%(*choice) == 0 )))
        {
          //here the counter
          counter++;
@@ -447,47 +447,47 @@ case 9:
 		  }
      value=(value2-value1)/counter;
      counter=0; 
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
        {
         cv=cur->search_var(NULL, lab);
   			cv->data_loaded='+';
-  			if(cv->param==0)
+  			if (cv->param == 0 )
   			  cv->val[lag]=value1+value*counter;
   			else
-  			  cv->val[0]=value1+value*counter;
+  			  cv->val[ 0 ]=value1+value*counter;
        }
-      if(i>=cases_from && ((i-cases_from+1)% (*choice))==0)
+      if (i>=cases_from && ((i-cases_from+1)% (*choice)) == 0 )
         counter++; 
 
 		  }
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set ranging from %g to %g (i.e. increments of %g).", i-1, value1, value2, value);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set ranging from %g to %g (i.e. increments of %g).", i-1, value1, value2, value);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d ranging from %g to %g (i.e. increments of %g).",cd->init, cases_from, cases_to, value1, value2, value);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d ranging from %g to %g (i.e. increments of %g).",cd->init, cases_from, cases_to, value1, value2, value);
          else
-           sprintf(msg, "Instances from %d to %d ranging from %g to %g (i.e. increments of %g).", cases_from, cases_to, value1, value2, value);  
+           sprintf( msg, "Instances from %d to %d ranging from %g to %g (i.e. increments of %g).", cases_from, cases_to, value1, value2, value);  
          change_descr_lab(lab, "", "", "", msg);
         }  
        } 
@@ -502,46 +502,46 @@ case 2: //increasing
      fill=*choice;
      cmd( "set choice $step_in" );
      
-      for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+      for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
         {
-        if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+        if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
         {
          cv=cur->search_var(NULL, lab);
          cv->data_loaded='+';
-         if(cv->param==0)
+         if (cv->param == 0 )
            cv->val[lag]=value1 +step*value2;
          else
-           cv->val[0]=value1 +step*value2;
+           cv->val[ 0 ]=value1 +step*value2;
         }
-        if(i>=cases_from && ((i-cases_from+1)% (*choice))==0)
+        if (i>=cases_from && ((i-cases_from+1)% (*choice)) == 0 )
           step+=1;
         }
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i-1, value1, value2, *choice);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances increasing from %g with steps %g. The value is increased every %d instances.", i-1, value1, value2, *choice);
          change_descr_lab(lab, "", "", "", msg);
         }
       else
         {
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.",cd->init, cases_from, cases_to, value1, value2, *choice);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.",cd->init, cases_from, cases_to, value1, value2, *choice);
          else
-           sprintf(msg, "Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.", cases_from, cases_to, value1, value2, *choice);            
+           sprintf( msg, "Instances from %d to %d increasing from %g with steps %g. The value is increased every %d instances.", cases_from, cases_to, value1, value2, *choice);            
          change_descr_lab(lab, "", "", "", msg);
         }  
         }
@@ -550,49 +550,49 @@ case 2: //increasing
 		
 case 4: 
 		cv=r->search_var(NULL, lab);
-		  for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+		  for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
         {
-      if(to_all==1 || (cases_from<=i && cases_to>=i))
+      if (to_all==1 || (cases_from<=i && cases_to>=i))
       {
         cv=cur->search_var(NULL, lab);
         cv->data_loaded='+';
-        if(cv->param==0)
+        if (cv->param == 0 )
            cv->val[lag]=value1 +step*value2;
 		   	else
-           cv->val[0]=value1 +step*value2;
-        if(cur->next!=cur->hyper_next(r->label))
+           cv->val[ 0 ]=value1 +step*value2;
+        if (cur->next!=cur->hyper_next(r->label))
           step=-1;
         step+=1;
 
         }
        } 
 
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances increasing from %g with steps %g re-starting for each group of objects.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.",cd->init, cases_from, cases_to, value1, value2);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cases_from, cases_to, value1, value2);
+           sprintf( msg, "Instances from %d to %d increasing from %g with steps %g re-starting for each group of objects.", cases_from, cases_to, value1, value2);
            
          change_descr_lab(lab, "", "", "", msg);        
         }  
@@ -606,46 +606,46 @@ case 3:
      fill=*choice;
      cmd( "set choice $step_in" );
       
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
        {
        cv=cur->search_var(NULL, lab);
        cv->data_loaded='+';
-       if(cv->param==0)
+       if (cv->param == 0 )
  			  cv->val[lag]=value1+RND*(value2-value1);
  			else
- 			  cv->val[0]=value1+RND*(value2-value1);
+ 			  cv->val[ 0 ]=value1+RND*(value2-value1);
        }
       }
 
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set to random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set to random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
 
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
+           sprintf( msg, "Instances from %d to %d set to random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -659,46 +659,46 @@ case 5:
      fill=*choice;
      cmd( "set choice $step_in" );
       
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
        {
 			cv=cur->search_var(NULL, lab);
          cv->data_loaded='+';
-			if(cv->param==0)
+			if (cv->param == 0 )
 			  cv->val[lag]=norm(value1, value2);
 			else
-			  cv->val[0]=norm(value1, value2);
+			  cv->val[ 0 ]=norm(value1, value2);
 		  }
       }
 
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set to random values drawn from a normal with mean=%g and std. deviation=%g.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
 
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2);         
+           sprintf( msg, "Instances from %d to %d set to random values drawn from a normal with mean=%g and std. deviation=%g", cases_from, cases_to, value1, value2);         
            change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -709,17 +709,17 @@ case 5:
 case 6: 
 		cv=r->search_var(NULL, lab);
 		cv->data_loaded='+';
-        for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label),i++)
+        for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
         {
-       if(to_all==1 || (cases_from<=i && cases_to>=i))
+       if (to_all==1 || (cases_from<=i && cases_to>=i))
         {
          cv=cur->search_var(NULL, lab);
          cv->data_loaded='+';
-         if(step==value2)
-          {if(cv->param==0)
+         if (step==value2)
+          {if (cv->param == 0 )
             cv->val[lag]=value1;
            else
-            cv->val[0]=value1;
+            cv->val[ 0 ]=value1;
            step=0;
           }
          else
@@ -728,32 +728,32 @@ case 6:
         }
         }
 
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set to %g skipping %g instances.", i-1, value1, value2);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set to %g skipping %g instances.", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d set to %g skipping %g instances.",cd->init, cases_from, cases_to, value1, value2);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d set to %g skipping %g instances.",cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2);         
+           sprintf( msg, "Instances from %d to %d set to %g skipping %g instances.", cases_from, cases_to, value1, value2);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -765,59 +765,59 @@ case 6:
 case 7:
   cmd( "set oldpath [pwd]" );
   cmd( "set filename [ tk_getOpenFile -parent . -title \"File to Import Data\" -filetypes { { {Text Files} {.txt} } { {All Files} {*} }} ]" );
-  l=(char *)Tcl_GetVar(inter, "filename",0);
-  if(l!=(char *)NULL && strcmp(l, ""))
+  l=( char * ) Tcl_GetVar( inter, "filename", 0 );
+  if ( l != '\0' && strcmp( l, "" ) )
  { cmd( "cd [file dirname $filename]" );
    cmd( "set fn [file tail $filename]" );
-   l=(char *)Tcl_GetVar(inter, "fn",0);
-   f=fopen(l, "r");
+   l=( char * ) Tcl_GetVar( inter, "fn", 0 );
+   f = fopen(l, "r");
    cmd( "cd $oldpath" );
-   if(f!=NULL)
+   if (f != NULL )
     {
     fscanf(f, "%99s", ch); //the label
     kappa=fscanf(f, "%lf", &value);
-    for(i=1,cur=r; cur!=NULL && kappa!=EOF; cur=cur->hyper_next(r->label),i++)
+    for (i=1,cur=r; cur!=NULL && kappa!=EOF; cur=cur->hyper_next(r->label), ++i )
 		  {
-      if(to_all==1 || (cases_from<=i && cases_to>=i))
+      if (to_all==1 || (cases_from<=i && cases_to>=i))
       {
       cv=cur->search_var(NULL, lab);
 			cv->data_loaded='+';
-			if(cv->param==0)
+			if (cv->param == 0 )
 			  cv->val[lag]=value;
 			else
-			  cv->val[0]=value;
+			  cv->val[ 0 ]=value;
       kappa=fscanf(f, "%lf", &value);
 		  }
      }
-     if(cur!=NULL || kappa!=EOF)
+     if (cur!=NULL || kappa!=EOF)
       plog("\nWarning: problem loading data, the file may contain a different number\nof values compared to the objects to initialize");
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
       
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set with data from file %s.", i-1, l);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set with data from file %s.", i-1, l);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
 
-         if(cd->init!=NULL)
-         sprintf(msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l);
+         if (cd->init != NULL )
+         sprintf( msg, "%s Instances from %d to %d with data from file %s", cd->init, cases_from, cases_to, l);
          else
-           sprintf(msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l);         
+           sprintf( msg, "Instances from %d to %d with data from file %s", cases_from, cases_to, l);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -833,46 +833,46 @@ case 8:
      fill=*choice;
      cmd( "set choice $step_in" );
       
-     for(i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), i++)
+     for (i=1,cur=r, step=0; cur!=NULL; cur=cur->hyper_next(r->label), ++i )
       {
-      if((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice)==0)))
+      if ((to_all==1 || (cases_from<=i && cases_to>=i)) && (fill==1 || ((i-cases_from)%(*choice) == 0 )))
        {
        cv=cur->search_var(NULL, lab);
        cv->data_loaded='+';
-       if(cv->param==0)
+       if (cv->param == 0 )
  			  cv->val[lag]=uniform_int(value1,value2);
  			else
- 			  cv->val[0]=uniform_int(value1,value2);
+ 			  cv->val[ 0 ]=uniform_int(value1,value2);
        }
       }
 
-      if( update_description==1)
+      if ( update_description == 1 )
       {
       cd=search_description(lab);
     
-      if(cd==NULL)
+      if (cd == NULL )
       {  cv=r->search_var(NULL, lab);
-       if(cv->param==0)
+       if (cv->param == 0 )
          add_description(lab, "Variable", "(no description available)");
-       if(cv->param==1)
+       if (cv->param == 1 )
          add_description(lab, "Parameter", "(no description available)");  
-       if(cv->param==2)
+       if (cv->param==2)
          add_description(lab, "Function", "(no description available)");  
        plog( "\nWarning: description for '%s' not found. New one created.", "", lab );
        cd=search_description(lab);
       } 
 
-      if(to_all==1)
-        {sprintf(msg, "All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
+      if (to_all == 1 )
+        {sprintf( msg, "All %d instances set to integer random values drawn from a uniform in the range [%g,%g].", i-1, value1, value2);
          change_descr_lab(lab, "", "", "", msg);      
         } 
       else
         {
 
-         if(cd->init!=NULL)
-           sprintf(msg, "%s Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
+         if (cd->init != NULL )
+           sprintf( msg, "%s Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cd->init, cases_from, cases_to, value1, value2);
          else
-           sprintf(msg, "Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
+           sprintf( msg, "Instances from %d to %d set to integer random values drawn from a uniform in the range [%g,%g].", cases_from, cases_to, value1, value2);         
          change_descr_lab(lab, "", "", "", msg);        
         }  
        }
@@ -889,9 +889,9 @@ default:
 }
 }
 
-Tcl_UnlinkVar(inter, "value1");
-Tcl_UnlinkVar(inter, "value2");
-Tcl_UnlinkVar(inter, "res");
+Tcl_UnlinkVar( inter, "value1");
+Tcl_UnlinkVar( inter, "value2");
+Tcl_UnlinkVar( inter, "res");
 }
 
 
@@ -916,9 +916,9 @@ variable *cvar;
 
 cur=o;
 
-if(s->next!=NULL)
+if (s->next != NULL )
  {
-  for(i=0; i<s->nvalues; i++)
+  for ( i = 0; i<s->nvalues; ++i )
    {
     s->i=i;
     cur=sensitivity_parallel(cur,s->next);
@@ -927,16 +927,16 @@ if(s->next!=NULL)
  }
 
 
-for(i=0; i<s->nvalues; i++)
+for ( i = 0; i<s->nvalues; ++i )
   {
    s->i=i;
    for (cs=rsense; cs!=NULL; cs=cs->next) 
    {
     cvar=cur->search_var(cur, cs->label);
-	if(cs->param==0)				// handle lags > 0
+	if (cs->param == 0 )				// handle lags > 0
       cvar->val[cs->lag]=cs->v[cs->i];
 	else
-	  cvar->val[0]=cs->v[cs->i];
+	  cvar->val[ 0 ]=cs->v[cs->i];
    }
    cur=cur->hyper_next(cur->label);
   }
@@ -971,9 +971,9 @@ FILE *f;
 
 
 description *cur_descr; 
-if(s->next!=NULL)
+if (s->next != NULL )
  {
-  for(i=0; i<s->nvalues; i++)
+  for ( i = 0; i<s->nvalues; ++i )
    {
     s->i=i;
     sensitivity_sequential(findex,s->next,probSampl);
@@ -982,25 +982,25 @@ if(s->next!=NULL)
  }
 
 
-for(i=0; i<s->nvalues; i++)
+for ( i = 0; i<s->nvalues; ++i )
 {
    s->i=i;
    for (nv=1,cs=rsense; cs!=NULL; cs=cs->next) 
    {
     nv*=cs->nvalues;
     cvar=root->search_var(root, cs->label);
-    for(cur=cvar->up; cur!=NULL; cur=cur->hyper_next(cur->label) )
+    for (cur=cvar->up; cur!=NULL; cur=cur->hyper_next(cur->label) )
     {
       cvar=cur->search_var(cur, cs->label); 
-	  if(cs->param==1)				// handle lags > 0
-		cvar->val[0]=cs->v[cs->i];
+	  if (cs->param == 1 )				// handle lags > 0
+		cvar->val[ 0 ]=cs->v[cs->i];
 	  else
         cvar->val[cs->lag]=cs->v[cs->i];
     }
 
    }
 
- if(probSampl == 1.0 || RND <= probSampl)		// if required draw if point will be sampled
+ if (probSampl == 1.0 || RND <= probSampl)		// if required draw if point will be sampled
  {
 	if ( ! save_configuration( root, *findex ) )
 	{
@@ -1049,7 +1049,7 @@ double start, end;
 char *lab, *sss = NULL, *tok = NULL, type;
 FILE *f;
 
-Tcl_LinkVar( inter, "integerV", (char *) &integerV, TCL_LINK_BOOLEAN );
+Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
 integerV = s->entryOk ? s->integer : false;
 
 cmd( "set sens .sens" );
@@ -1078,8 +1078,8 @@ cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
 cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
 cmd( "pack .sens.fb" );
 
-cmd( "okcancel .sens fb2 { set choice 1 } { set choice 2 }" );
-cmd( "bind .sens.fb2.ok <KeyPress-Return> {set choice 1}" );
+cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
+cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
 cmd( "focus .sens.t" );
 
 if ( s->entryOk )	// is there valid data from a previous data entry?
@@ -1089,24 +1089,24 @@ if ( s->entryOk )	// is there valid data from a previous data entry?
 	strcpy( sss, "" );
 	for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
 	{
-		sprintf( tok, "%.15g ", s->v[i] );	// add each value
+		sprintf( tok, "%.15g ", s->v[ i ] );	// add each value
 		strcat( sss, tok );					// to the string
 	}
 	Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
 	cmd( ".sens.t insert 0.0 $sss" );		// insert string in entry window
-	delete [] tok; 
-	delete [] sss;
+	delete [ ] tok; 
+	delete [ ] sss;
 }
 
 cmd( "showtop .sens topleftW" );
 
-*choice=0;
+*choice = 0;
 
 do			// finish only after reading all values
 {
 
-while(*choice==0)
-  Tcl_DoOneEvent(0);
+while ( *choice == 0 )
+  Tcl_DoOneEvent( 0 );
 
 if ( *choice == 3 )	// force error to delete variable from list
 {
@@ -1114,11 +1114,11 @@ if ( *choice == 3 )	// force error to delete variable from list
 	*choice = 2; 
 }
 
-if(*choice==2)
+if ( *choice == 2 )
 	goto end;
 
 cmd( "set sss [.sens.t get 0.0 end]" );
-sss=(char*)Tcl_GetVar(inter,"sss",0);
+sss=( char* ) Tcl_GetVar( inter,"sss", 0 );
 
 if ( nval == 0 )					// undefined number of values?
 {	
@@ -1157,13 +1157,13 @@ if ( nval == 0 )					// undefined number of values?
 	 delete [ ] tss;
 }
 
-for(i=0; i<s->nvalues;)
+for ( i = 0; i<s->nvalues;)
  {
   tok=strtok(sss, SEP);		// accepts several separators
-  if(tok==NULL)		// finished too early?
+  if (tok == NULL )		// finished too early?
   {
 	  cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
-	  *choice=0;
+	  *choice = 0;
 	  cmd( "focus .sens.t" );
 	  break;
   }
@@ -1196,7 +1196,7 @@ for(i=0; i<s->nvalues;)
   }
  }
 }
-while( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
+while ( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
 
 s->integer = integerV;			// save integer restriction flag
 s->entryOk = true;				// flag valid data
@@ -1221,14 +1221,14 @@ Tcl_UnlinkVar( inter, "integerV" );
 */
 
 // NOLH tables (Sanchez 2009 + Cioppa 2002)
-int NOLH_1[][7] = { {6, 17, 14, 7, 5, 16, 10}, {2, 5, 15, 10, 1, 6, 11}, {3, 8, 2, 5, 11, 14, 17}, {4, 11, 6, 17, 10, 3, 13}, {13, 16, 8, 3, 6, 1, 14},
+int NOLH_1[ ][ 7 ] = { {6, 17, 14, 7, 5, 16, 10}, {2, 5, 15, 10, 1, 6, 11}, {3, 8, 2, 5, 11, 14, 17}, {4, 11, 6, 17, 10, 3, 13}, {13, 16, 8, 3, 6, 1, 14},
 {17, 6, 7, 14, 2, 13, 15}, {11, 4, 17, 6, 15, 8, 16}, {10, 15, 13, 16, 14, 11, 12}, {9, 9, 9, 9, 9, 9, 9}, {12, 1, 4, 11, 13, 2, 8}, {16, 13, 3, 8, 17, 12, 7},
 {15, 10, 16, 13, 7, 4, 1}, {14, 7, 12, 1, 8, 15, 5}, {5, 2, 10, 15, 12, 17, 4}, {1, 12, 11, 4, 16, 5, 3}, {7, 14, 1, 12, 3, 10, 2}, {8, 3, 5, 2, 4, 7, 6},
 {14, 10, 5, 16, 6, 17, 7}, {15, 11, 1, 6, 2, 5, 10}, {2, 17, 11, 14, 3, 8, 5}, {6, 13, 10, 3, 4, 11, 17}, {8, 14, 6, 1, 13, 16, 3}, {7, 15, 2, 13, 17, 6, 14}, 
 {17, 16, 15, 8, 11, 4, 6}, {13, 12, 14, 11, 10, 15, 16}, {4, 8, 13, 2, 12, 1, 11}, {3, 7, 17, 12, 16, 13, 8}, {16, 1, 7, 4, 15, 10, 13}, {12, 5, 8, 15, 14, 7, 1}, 
 {10, 4, 12, 17, 5, 2, 15}, {11, 3, 16, 5, 1, 12, 4}, {1, 2, 3, 10, 7, 14, 12}, {5, 6, 4, 7, 8, 3, 2} };
 
-int NOLH_2[][11] = { {15,7,29,23,16,33,23,21,4,20,33}, {5, 13, 16, 25, 11, 30, 15, 7, 33, 28, 30}, {30, 6, 2, 24, 2, 11, 32, 20, 15, 13, 29}, 
+int NOLH_2[ ][11] = { {15,7,29,23,16,33,23,21,4,20,33}, {5, 13, 16, 25, 11, 30, 15, 7, 33, 28, 30}, {30, 6, 2, 24, 2, 11, 32, 20, 15, 13, 29}, 
 {33, 14, 31, 27, 3, 15, 4, 6, 29, 8, 19}, {16, 8, 23, 14, 19, 3, 5, 24, 2, 23, 31}, {11, 10, 15, 6, 29, 2, 18, 8, 31, 25, 32}, {32, 9, 1, 13, 30, 29, 1, 22, 16, 10, 23}, 
 {31, 12, 30, 8, 33, 18, 31, 9, 23, 7, 18}, {8, 18, 24, 1, 7, 20, 20, 11, 9, 3, 22}, {10, 23, 8, 4, 13, 28, 7, 18, 22, 2, 25}, {25, 32, 12, 5, 6, 13, 21, 3, 8, 22, 24}, 
 {22, 31, 25, 16, 14, 8, 6, 32, 24, 19, 26}, {7, 19, 20, 32, 26, 12, 10, 5, 6, 1, 20}, {13, 29, 6, 31, 24, 9, 26, 19, 20, 5, 28}, {28, 30, 13, 22, 25, 24, 12, 1, 7, 30, 21}, 
@@ -1246,7 +1246,7 @@ int NOLH_2[][11] = { {15,7,29,23,16,33,23,21,4,20,33}, {5, 13, 16, 25, 11, 30, 1
 {22, 26, 21, 2, 31, 9, 12, 13, 10, 28, 29}, {9, 10, 26, 3, 2, 12, 15, 28, 8, 20, 18}, {14, 28, 22, 15, 29, 27, 33, 24, 14, 8, 2}, {28, 14, 25, 5, 15, 21, 29, 8, 6, 10, 3}, 
 {21, 27, 10, 4, 33, 6, 4, 22, 13, 9, 12}, {7, 13, 7, 1, 4, 14, 16, 9, 7, 12, 15} };
 
-int NOLH_3[][16] = { {47, 24, 22, 9, 50, 52, 32, 47, 36, 61, 63, 4, 13, 41, 53, 45}, {62, 8, 28, 23, 17, 36, 49, 60, 50, 32, 47, 47, 16, 23, 23, 11}, {58, 62, 15, 20, 56, 11, 30, 38, 52, 57, 27, 24, 31, 34, 18, 58}, 
+int NOLH_3[ ][16] = { {47, 24, 22, 9, 50, 52, 32, 47, 36, 61, 63, 4, 13, 41, 53, 45}, {62, 8, 28, 23, 17, 36, 49, 60, 50, 32, 47, 47, 16, 23, 23, 11}, {58, 62, 15, 20, 56, 11, 30, 38, 52, 57, 27, 24, 31, 34, 18, 58}, 
 {42, 47, 30, 5, 28, 18, 18, 64, 59, 41, 9, 58, 6, 14, 56, 22}, {60, 13, 2, 7, 11, 17, 40, 32, 5, 55, 40, 31, 42, 39, 46, 52}, {35, 16, 32, 11, 43, 10, 56, 8, 27, 51, 58, 60, 58, 5, 12, 4}, 
 {50, 35, 3, 17, 22, 58, 28, 29, 23, 59, 11, 13, 62, 48, 7, 36}, {53, 60, 21, 25, 60, 46, 2, 21, 2, 42, 17, 50, 47, 3, 36, 13}, {45, 2, 53, 27, 40, 26, 7, 20, 55, 26, 52, 3, 22, 16, 34, 65}, 
 {63, 32, 50, 1, 19, 60, 25, 1, 44, 3, 44, 45, 28, 55, 2, 31}, {34, 63, 35, 14, 29, 21, 45, 16, 47, 13, 2, 2, 15, 4, 16, 54}, {64, 45, 60, 12, 5, 25, 53, 25, 35, 17, 21, 34, 30, 38, 60, 15}, 
@@ -1290,7 +1290,7 @@ int NOLH_3[][16] = { {47, 24, 22, 9, 50, 52, 32, 47, 36, 61, 63, 4, 13, 41, 53, 
 {59, 7, 27, 14, 39, 58, 51, 57, 31, 46, 44, 17, 16, 11, 4, 49}, {11, 45, 2, 12, 21, 19, 41, 28, 6, 61, 57, 25, 18, 7, 23, 42}, {46, 52, 30, 26, 19, 45, 9, 59, 24, 7, 39, 57, 51, 5, 60, 10}, 
 {5, 2, 22, 18, 49, 26, 26, 23, 8, 11, 43, 43, 61, 20, 31, 15}, {57, 39, 31, 29, 57, 59, 13, 50, 4, 17, 16, 20, 6, 23, 16, 3}, {23, 24, 16, 10, 15, 31, 12, 3, 19, 25, 7, 5, 23, 9, 22, 26} };
 
-int NOLH_4[][22] = { {32, 58, 51, 59, 89, 73, 98, 72, 120, 100, 98, 78, 129, 120, 80, 109, 44, 70, 116, 124, 34, 115}, {115, 40, 56, 60, 59, 55, 27, 62, 50, 119, 77, 80, 122, 94, 104, 117, 13, 75, 79, 94, 29, 98}, 
+int NOLH_4[ ][22] = { {32, 58, 51, 59, 89, 73, 98, 72, 120, 100, 98, 78, 129, 120, 80, 109, 44, 70, 116, 124, 34, 115}, {115, 40, 56, 60, 59, 55, 27, 62, 50, 119, 77, 80, 122, 94, 104, 117, 13, 75, 79, 94, 29, 98}, 
 {58, 98, 1, 36, 21, 97, 84, 79, 74, 61, 21, 63, 111, 128, 82, 72, 54, 20, 108, 85, 62, 90}, {90, 115, 39, 48, 98, 10, 53, 35, 60, 54, 49, 44, 127, 87, 125, 79, 57, 47, 76, 100, 33, 72}, 
 {1, 51, 72, 31, 69, 47, 120, 129, 82, 15, 128, 110, 35, 58, 57, 113, 14, 87, 94, 84, 7, 91}, {91, 56, 90, 2, 43, 76, 6, 33, 16, 24, 129, 81, 63, 41, 45, 119, 52, 113, 98, 95, 11, 129}, 
 {51, 129, 98, 38, 30, 32, 121, 124, 94, 91, 14, 1, 15, 61, 41, 118, 21, 45, 121, 88, 4, 74}, {74, 91, 115, 9, 119, 112, 3, 40, 28, 64, 12, 22, 37, 44, 56, 61, 45, 13, 125, 75, 3, 79}, 
@@ -1420,7 +1420,7 @@ int NOLH_4[][22] = { {32, 58, 51, 59, 89, 73, 98, 72, 120, 100, 98, 78, 129, 120
 {96, 22, 47, 3, 72, 66, 104, 42, 82, 54, 12, 63, 57, 44, 113, 40, 52, 58, 4, 45, 24, 117}, {48, 53, 111, 63, 15, 116, 61, 53, 76, 13, 61, 10, 86, 4, 42, 32, 21, 21, 15, 100, 87, 54}, 
 {61, 7, 10, 47, 64, 34, 29, 60, 56, 44, 23, 18, 13, 32, 20, 15, 45, 38, 52, 55, 26, 57} };
 
-int NOLH_5[][29] = { 
+int NOLH_5[ ][29] = { 
 {103, 227, 153, 158, 162, 231, 257, 225, 49, 18, 62, 100, 17, 48, 88, 102, 115, 16, 10, 45, 72, 63, 76, 97, 50, 14, 77, 62, 8},
 {31, 103, 216, 246, 185, 137, 250, 217, 140, 157, 161, 191, 257, 228, 132, 7, 17, 36, 2, 91, 149, 62, 107, 134, 65, 102, 64, 65, 102},
 {42, 153, 31, 144, 247, 209, 242, 229, 166, 94, 53, 64, 34, 38, 241, 214, 146, 239, 217, 63, 22, 40, 10, 80, 5, 111, 76, 114, 49},
@@ -1682,13 +1682,13 @@ int NOLH_5[][29] = {
 int **NOLH_0 = NULL;				// pointer to the design loaded from file
 
 // characteristics of NOLH tables
-static struct { int kMin, kMax, n1, n2, loLevel, hiLevel, *table; } NOLH[] =
+static struct { int kMin, kMax, n1, n2, loLevel, hiLevel, *table; } NOLH[ ] =
 	   { { 0, 0, 0, 0, 0, 0, NULL }, 
-	     { 1, 7, 17, 33, 1, 17, NOLH_1[0] }, 
-		 { 8, 11, 33, 65, 1, 33, NOLH_2[0] }, 
-		 { 12, 16, 65, 129, 1, 65, NOLH_3[0] }, 
-		 { 17, 22, 129, 257, 1, 129, NOLH_4[0] }, 
-		 { 23, 29, 257, 257, 1, 257, NOLH_5[0] } };
+	     { 1, 7, 17, 33, 1, 17, NOLH_1[ 0 ] }, 
+		 { 8, 11, 33, 65, 1, 33, NOLH_2[ 0 ] }, 
+		 { 12, 16, 65, 129, 1, 65, NOLH_3[ 0 ] }, 
+		 { 17, 22, 129, 257, 1, 129, NOLH_4[ 0 ] }, 
+		 { 23, 29, 257, 257, 1, 257, NOLH_5[ 0 ] } };
 
 	   
 // function to get the index to the default NOLH design table or -1 otherwise
@@ -1707,8 +1707,8 @@ void NOLH_clear( void )
 {
 	if ( NOLH_0 == NULL )			// table is not allocated?
 		return;
-	delete [] NOLH_0[0];
-	delete [] NOLH_0;
+	delete [ ] NOLH_0[ 0 ];
+	delete [ ] NOLH_0;
 	NOLH_0 = NULL;
 	NOLH[ 0 ].kMin = NOLH[ 0 ].kMax = NOLH[ 0 ].n1 = NOLH[ 0 ].n2 = NOLH[ 0 ].loLevel = NOLH[ 0 ].hiLevel = 0;
 	NOLH[ 0 ].table = NULL;
@@ -1717,7 +1717,7 @@ void NOLH_clear( void )
 
 // function to load a .csv file named NOLH.csv as table 0 (first to be used)
 // if option 'force' is used, will be used for any number of factors
-bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )				
+bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )				
 {
 	int i, j, k, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
@@ -1781,22 +1781,22 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 		{
 			num = strtok( str, "," );	// get next value
 			str = NULL;					// continue strtok from last position
-			NOLH_0[i][j] = atoi( num );
+			NOLH_0[ i ][ j ] = atoi( num );
 
-			if ( num == NULL || NOLH_0[i][j] == 0 )
+			if ( num == NULL || NOLH_0[ i ][ j ] == 0 )
 			{
-				delete [] NOLH_0[0];
-				delete [] NOLH_0;
+				delete [ ] NOLH_0[ 0 ];
+				delete [ ] NOLH_0;
 				NOLH_0 = NULL;
 				sprintf( msg, "invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
 				error_hard( msg, "Invalid design of experiment file", "Check the file contents." );
 				goto end;
 			}
 
-			if ( NOLH_0[i][j] < loLevel )
-				loLevel = NOLH_0[i][j];
-			if ( NOLH_0[i][j] > hiLevel )
-				hiLevel = NOLH_0[i][j];
+			if ( NOLH_0[ i ][ j ] < loLevel )
+				loLevel = NOLH_0[ i ][ j ];
+			if ( NOLH_0[ i ][ j ] > hiLevel )
+				hiLevel = NOLH_0[ i ][ j ];
 		}
 	}
 	
@@ -1815,8 +1815,8 @@ bool NOLH_load( char const baseName[] = NOLH_DEF_FILE, bool force = false )
 	
 	ok = true;
 end:
-	delete [] fileName;
-	delete [] lBuffer;
+	delete [ ] fileName;
+	delete [ ] lBuffer;
 	return ok;
 }
 
@@ -1847,8 +1847,8 @@ double **mat_new( int m, int n )
 void mat_del( double **a, int m, int n )
 {
 	for ( int i = 0; i < m ; ++i )	 	//rows
-		delete [] a[ i ];
-	delete [] a;
+		delete [ ] a[ i ];
+	delete [ ] a;
 }
 // multiply two matrices (c<-a*b)
 double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, double **c )
@@ -1933,7 +1933,7 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 {
 	double sum = 0;
 	for ( int i = 0; i < m ; ++i )	 		//rows in a
-		for( int k = 0; k < m; ++k )		//rows in b 
+		for ( int k = 0; k < m; ++k )		//rows in b 
 		{
 			double dist2 = 0;
 			for ( int j = 0; j < n ; ++j )	//columns
@@ -1995,7 +1995,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 		for ( i = 0; i < k; ++i )
 			P[ i ][ perm[ i ] ] = 1;
 
-		delete [] perm;
+		delete [ ] perm;
 
         // starting point for this trajectory
 		for ( j = 0; j < k; ++j )
@@ -2259,17 +2259,17 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 // destructor function to the design object
 design::~design( void )
 {
-	for( int i = 0; i < n; i++ )		// run through all experiments
-		delete [] ptr[ i ];				// free memory
-	for( int i = 0; i < k; i++ )		// and all variables
-		delete [] lab[ i ];
-	delete [] ptr;
-	delete [] lab; 
-	delete [] hi; 
-	delete [] lo; 
-	delete [] par; 
-	delete [] lag;
-	delete [] intg;
+	for ( int i = 0; i < n; i++ )		// run through all experiments
+		delete [ ] ptr[ i ];				// free memory
+	for ( int i = 0; i < k; i++ )		// and all variables
+		delete [ ] lab[ i ];
+	delete [ ] ptr;
+	delete [ ] lab; 
+	delete [ ] hi; 
+	delete [ ] lo; 
+	delete [ ] par; 
+	delete [ ] lag;
+	delete [ ] intg;
 }
 
 // Constructor function to the design object
@@ -2364,7 +2364,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				
 				// copy label (name)
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[i], cs->label );
+				strcpy( lab[ i ], cs->label );
 				
 				i++;
 			}
@@ -2416,7 +2416,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				
 				// copy label (name)
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[i], cs->label );
+				strcpy( lab[ i ], cs->label );
 				
 				i++;
 			}
@@ -2471,7 +2471,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 				
 				// copy label (name)
 				lab[ i ] = new char[ strlen( cs->label ) + 1 ];
-				strcpy( lab[i], cs->label );
+				strcpy( lab[ i ], cs->label );
 				
 				i++;
 			}
@@ -2483,8 +2483,8 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			ptr = opt_trajectories( k, pool, samples, trajs, ptr );
 			
 			for ( i = 0; i < poolSz; i++ )	// free pool memory
-				delete [] pool[ i ];
-			delete [] pool;
+				delete [ ] pool[ i ];
+			delete [ ] pool;
 			
 			// scale the DoE to the sensitivity test ranges
 			for ( i = 0; i < n; i++ )		// for all experiments
@@ -2509,7 +2509,7 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 	// file name for saving table
 	sprintf( doeName, "%u_%u", ( unsigned ) findex, ( unsigned ) ( findex + n - 1 ) );
 	
-	if( strlen( path ) > 0 )				// non-default folder?
+	if ( strlen( path ) > 0 )				// non-default folder?
 	{
 		doefname = new char[ strlen( path ) + strlen( simul_name ) + strlen( doeName ) + 10 ];
 		sprintf( doefname, "%s/%s_%s.csv", path, simul_name, doeName );

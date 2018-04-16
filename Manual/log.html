@@ -173,9 +173,9 @@ src="image/log.png"></p>
 
 <p class=MsoNormal>The LSD Log window presents LSD messages to the user (e.g.,
 errors, simulation run information, statistics about data). Moreover, during a <a
-href="LSD_faqs.html#simulationrun">simulation run</a>, the Log window allows
-users to control the simulation flow, activate the <a href="debug.html">LSD Debugger</a>
-or abort the simulation. </p>
+href="LSD_faqs.html#simulationrun">simulation run</a>, the Log window
+allows users to control the simulation flow, activate the <a
+href="debug.html">LSD Debugger</a> or abort the simulation. </p>
 
 <p class=MsoNormal><a name=Messages></a><a name=buttons></a>Users can select
 the desired text by dragging over with the mouse. The selected text can be
@@ -185,11 +185,11 @@ any other program, as usual.</p>
 
 <h2>Simulation control buttons </h2>
 
-<p class=MsoNormal>While a simulation is running, users can use the buttons in the
-log window to control the simulation flow:</p>
+<p class=MsoNormal>While a simulation is running, users can use the buttons in
+the log window to control the simulation flow:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Stop</b></span>: (<i>shortcut</i> <span
 class=Cdigo>S</span>) Abort the simulation. Simulation data is saved up to the
@@ -197,24 +197,25 @@ last fully computed time step. In case multiple simulation runs are going on,
 the remaining simulation runs are not executed.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Pause</b></span> / <span class=Cdigo><b>Resume</b></span>:
 (<i>shortcut</i> <span class=Cdigo>P</span> / <span class=Cdigo>R</span>) allow
 the temporary suspension and resume of an ongoing simulation run, the <a
-href="LSD_windows.html#debugger">LSD Debugger</a> being available during the
-pause period.</p>
+href="LSD_windows.html#debugger">LSD Debugger</a> being available
+during the pause period.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Fast</b></span>: (<i>shortcut</i> <span
 class=Cdigo>F</span>) Increase the speed of the simulation run by preventing
 the system from writing non-critical messages, disabling some debug mechanisms
-and collapsing the <a href="LSD_windows.html#runtimeplot">Run Time Plot window</a>.</p>
+and collapsing the <a href="LSD_windows.html#runtimeplot">Run Time Plot
+window</a>.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Observe</b></span>: (<i>shortcut</i> <span
 class=Cdigo>O</span>) Reinstate the printing of all simulation run messages,
@@ -223,38 +224,40 @@ href="LSD_windows.html#runtimeplot">Run Time Plot window</a> in case <span
 class=Cdigo>Fast</span> has been previously used. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Debug</b></span>: (<i>shortcut</i> <span
 class=Cdigo>D</span>) Change the simulation run to debug mode. This means that,
-when a <a href="LSD_faqs.html#variable">Variable</a> previously set to be
-debugged finishes its Equation computation, LSD interrupts the simulation and opens
-the <a href="LSD_windows.html#debugger">LSD Debugger</a>. The button has no
-effect, while the simulation is running, if no Variable is marked to be
-debugged. However, if the simulation is paused, the debugger can be invoked, even
-if no Variable was previously marked, and the last Variable computed will be
-shown.</p>
+when a <a href="LSD_faqs.html#variable">Variable</a> previously set to
+be debugged finishes its Equation computation, LSD interrupts the simulation
+and opens the <a href="LSD_windows.html#debugger">LSD Debugger</a>. The
+button has no effect, while the simulation is running, if no Variable is marked
+to be debugged. However, if the simulation is paused, the debugger can be
+invoked, even if no Variable was previously marked, and the last Variable
+computed will be shown.</p>
 
 <p class=MsoNormal>If the <a href="LSD_faqs.html#modelsetting">model
 configuration</a> does not specify <a href="LSD_faqs.html#variable">Variables</a>
-to be plotted in the <a href="LSD_windows.html#runtimeplot">LSD Run-time Plot</a>,
-then the Log window will print an information line for each completed time step,
-indicating also the number of the simulation repetition, in case multiple runs
-have been requested (see <a href="menurun.html#simsetting">Simulation Settings</a>).
-These messages can be suppressed and reinstated with the buttons <span
-class=Cdigo>Fast</span> and <span class=Cdigo>Observe</span>, respectively. </p>
+to be plotted in the <a href="LSD_windows.html#runtimeplot">LSD
+Run-time Plot</a>, then the Log window will print an information line for each
+completed time step, indicating also the number of the simulation repetition,
+in case multiple runs have been requested (see <a
+href="menurun.html#simsetting">Simulation Settings</a>). These messages
+can be suppressed and reinstated with the buttons <span class=Cdigo>Fast</span>
+and <span class=Cdigo>Observe</span>, respectively. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:10.0pt'>&#9650;<a href="#top">Top</a></span></p>
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal style='margin:0cm;margin-bottom:.0001pt'>&nbsp;</p>
+<p class=MsoNormal>&nbsp;</p>
 
 </div>
 
