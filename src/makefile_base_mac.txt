@@ -23,6 +23,7 @@ $(TARGET).app/Contents/Info.plist: $(SRC_DIR)LSD.app/Contents/Info.plist
 	rm -f -R LSD-APP-DUMMY $(TARGET).app
 	cp -R $(SRC_DIR)LSD.app LSD-APP-DUMMY
 	mv LSD-APP-DUMMY $(TARGET).app
+	rm -f $(TARGET).app/Contents/MacOS/LSD
 	sed -e 's/LSD/$(TARGET)/g' -i '' $(TARGET).app/Contents/Info.plist
 
 $(SRC_DIR)file.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp $(SRC_DIR)decl.h
