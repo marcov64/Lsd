@@ -9,6 +9,24 @@
 	
 **************************************************************
 
+***********
+Legal stuff
+***********
+
+LSD is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices.
+
+LSD includes third party software under the license of the copyright owners:
+
+Eigen 3.3.4 is copyrighted by Benoit Jacob and others under a MPL2 license, http://eigen.tuxfamily.org
+SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
+Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
+Silk icon set 1.3 is copyrighted by Mark James under a CCA 2.5 license, http://www.famfamfam.com/lab/icons/silk
+
+
+********
+Contents
+********
+
 This Readme.txt file contains:
 - Brief introduction on LSD
 - Description of the installation content
@@ -246,14 +264,3 @@ When a model program is successfully compiled and run by LMM, then the user can 
 Please check LSD documentation using the menu Help at any time. The documentation includes from tutorials and a course on LSD to a complete manual covering all LSD details.
 
 For persisting problems email us: valente@ec.univaq.it or mcper@unicamp.br
-
-
-***********
-Legal stuff
-***********
-
-LSD is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices
-
-Shortcut.exe 1.11 is copyrighted by Marty List, http://www.OptimumX.com
-SetFileIcon 0.1 is copyrighted by HAMSoft Engineering, http://hamsoftengineering.com
-Silk icon set 1.3 is copyrighted by Mark James, http://www.famfamfam.com/lab/icons/silk

@@ -147,6 +147,9 @@ void assign( object *r, int *i, char *lab )
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
+		if ( cb->head == NULL )
+			continue;
+		
 		c = cb->head;
 		if ( c->next != NULL ) 		// multiple instances
 			for ( j = 1, c1 = c; c1 != NULL; c1 = go_brother( c1 ), ++j )

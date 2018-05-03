@@ -136,7 +136,6 @@ object *create( object *cr )
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "choice_g", ( char * ) &choice_g, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "actual_steps", ( char * ) &actual_steps, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "lattype", ( char * ) &lattice_type, TCL_LINK_INT );
 
 	// sort the list of choices with existing run data to use later
 	qsort( badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints );
@@ -203,7 +202,6 @@ object *create( object *cr )
 	Tcl_UnlinkVar( inter, "strWindowOn" );
 	Tcl_UnlinkVar( inter, "choice_g" );
 	Tcl_UnlinkVar( inter, "actual_steps" );
-	Tcl_UnlinkVar( inter, "lattype" );
 
 	return cr;
 }
@@ -676,7 +674,6 @@ int browse( object *r, int *choice )
 			cmd( "$w add command -label \"Create/Start Parallel Batch...\" -underline 11 -command { set choice 68 }" );
 			cmd( "$w add separator" );
 			cmd( "$w add command -label \"Simulation Settings...\" -underline 2 -accelerator Ctrl+M -command { set choice 22 }" );
-			cmd( "$w add checkbutton -label \"Frequent Lattice Updating\" -underline 2 -variable lattype -command { set choice 56 }" );
 
 			cmd( "$w add separator" );
 			
@@ -2677,7 +2674,6 @@ case 38: //quick reload
 			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
 
 		default:						// load ok
-			show_graph( r );
 			unsaved_change( false );	// no changes to save
 			iniShowOnce = false;		// show warning on # of columns in .ini
 			redrawRoot = true;			// force browser redraw
@@ -3684,9 +3680,7 @@ case 55:
 	*choice = 0;
 	lab1 = ( char * ) Tcl_GetVar( inter, "bidi", 0 );
 	strncpy( msg, lab1, MAX_ELEM_LENGTH - 1 );
-	no_error = true;
-	cv = r->search_var( r, msg );
-	no_error = false;
+	cv = r->search_var( r, msg, true );
 	if ( cv != NULL )
 	{
 		for ( i = 0, cur_v = cv->up->v; cur_v != cv; cur_v = cur_v->next, ++i );
@@ -3838,14 +3832,6 @@ case 54:
 	cmd( "set choice $ignore_eq_file" );
 	ignore_eq_file = *choice;
 	plog( "\n%s equation file\n", "", ignore_eq_file ? "Ignoring" : "Not ignoring" );
-
-break; 
-
-
-// Toggle fast lattice updating
-case 56:
-
-	plog( "\nLattice updating mode: %s\n", "", lattice_type == 0 ? "infrequent cells changes" : "frequent cells changes" );
 
 break; 
 

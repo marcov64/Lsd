@@ -250,8 +250,10 @@ class object
 	double cal( object *caller,  char const *l, int lag );
 	double cal( char const *l, int lag );
 	void recal( char const *l );
-	variable *search_var( object *caller,char const *label );
+	variable *search_var( object *caller, char const *label, bool no_error = false );
 	object *search_var_cond( char const *lab, double value, int lag );
+	double count( char const *lab );
+	double count_all( char const *lab );
 	double overall_max( char const *lab, int lag );
 	double overall_min( char const *lab, int lag );
 	double sum( char const *lab, int lag );
@@ -531,12 +533,13 @@ void create_table_init( object *r );
 void dataentry_sensitivity( int *choice, sense *s, int nval );
 void deb_show( object *r );
 void delete_bridge( object *d );
-void draw_obj( object *blk, object *t, int level, int center, int from );
+void draw_obj( object *t, int level, int center, int from );
 void edit_data( object *root, int *choice, char *obj_name );
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 void eliminate_obj( object **r, int actual, int desired , int *choice );
 void empty_cemetery( void );
 void empty_description( void );
+void empty_lattice( void );
 void empty_sensitivity( sense *cs );
 void entry_new_objnum( object *c, int *choice, char const *tag );
 void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
@@ -663,7 +666,6 @@ extern bool in_edit_data;	// in initial settings mode
 extern bool in_set_obj;		// in setting number of objects mode
 extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
-extern bool no_error;		// object search error control	
 extern bool on_bar;			// flag to indicate bar is being draw in log window
 extern bool parallel_mode;	// parallel mode (multithreading) status
 extern bool redrawRoot;		// control for redrawing root window (.)
@@ -699,7 +701,6 @@ extern int docsv;			// produce .csv text results files (bool)
 extern int dozip;			// compressed results file flag (bool)
 extern int fast_mode;		// fast mode (log window)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
-extern int lattice_type;	// lattice window mode
 extern int macro;			// equations style (macros or C++) (bool)
 extern int max_step;		// last simulation time step
 extern int max_threads;		// suggested maximum number of parallel threads 

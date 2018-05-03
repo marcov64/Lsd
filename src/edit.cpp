@@ -600,6 +600,9 @@ void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, 
 	strcpy( ch, tag );
 	for ( cb = root->b, counter = 1; cb != NULL && *done == 0; cb = cb->next, counter = 1 )
 	{ 
+		if ( cb->head == NULL )
+			continue;
+		
 		c = cb->head; 
 		*i += 1;
 		if ( *i == res )

@@ -36,8 +36,8 @@ set smoothP		no	; # options are no, yes or raw
 set splstepsP 	3	; # number of spline segments when smoothP is raw
 
 # lattice options (maximum & default, color scale)
-set hsizeLatMax	600	; # maximum lattice horizontal size in pixels
-set vsizeLatMax	600	; # maximum lattice vertical size in pixels
+set hsizeLatMax	1024; # maximum lattice horizontal size in pixels
+set vsizeLatMax	1024; # maximum lattice vertical size in pixels
 set hsizeLat	400	; # default lattice horizontal size in pixels
 set vsizeLat	400	; # default lattice vertical size in pixels
 set cscaleLat	1.0	; # default color scale (1:1.0)

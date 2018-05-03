@@ -813,22 +813,27 @@ while ( choice == 0 )
 			}
 			
 			for ( cb1 = NULL, cb = r->up->b; strcmp( r->label, cb->blabel ); cb1 = cb, cb = cb->next );
-			cur = cb->head;
-			if ( cur == r )
+			
+			if ( cb->head != NULL )
 			{
-				if ( cb1 != NULL )
+				cur = cb->head;
+				
+				if ( cur == r )
 				{
-					for (cur = cb1->head; cur->next != NULL; cur = cur->next );
-					choice = deb( cur, c, lab, res, interact );
+					if ( cb1 != NULL && cb1->head != NULL )
+					{
+						for ( cur = cb1->head; cur->next != NULL; cur = cur->next );
+						choice = deb( cur, c, lab, res, interact );
+						break;
+					}
+					else 
+						choice = 0;
 					break;
 				}
-				else 
-					choice = 0;
-				break;
+				  
+				for ( ; cur->next != r; cur = cur->next );
+				choice = deb( cur, c, lab, res, interact );
 			}
-			  
-			for ( ; cur->next != r; cur = cur->next );
-			choice = deb( cur, c, lab, res, interact );
 			
 			break;
 			

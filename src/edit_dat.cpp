@@ -244,40 +244,44 @@ SEARCH_TITLE
 
 ****************************************************/
 
-void search_title(object *root, char *tag, int *i, char *lab, int *incr)
+void search_title( object *root, char *tag, int *i, char *lab, int *incr )
 {
-char ch[2*MAX_ELEM_LENGTH];
-int num, multi, counter, j;
-object *c, *cur;
-variable *cv;
-bridge *cb;
+	char ch[ 2 * MAX_ELEM_LENGTH ];
+	int num, multi, counter, j;
+	object *c, *cur;
+	variable *cv;
+	bridge *cb;
 
-set_title(root, lab, tag, incr);
+	set_title( root, lab, tag, incr );
 
-for (cb=root->b, counter=1; cb!=NULL;cb=cb->next, counter=1)
- {  
- c=cb->head;
- *i=*i+1;
- if ( c->next != NULL )
-    multi=1;
-  else
-    multi = 0;
-  for (cur=c; cur!=NULL; counter++, cur=go_brother(cur))
-   {
-   if (multi == 1 )
-      if (strlen(tag) != 0 )
-        sprintf( ch, "%s-%d",tag, counter);
-      else
-        sprintf( ch, "%d",counter);
-   else
-		sprintf( ch, "%s",tag);
- 
-	if ( *incr <= MAX_COLS )
-	 search_title(cur, ch, i, lab, incr);
+	for ( cb = root->b, counter = 1; cb != NULL; cb = cb->next, counter = 1 )
+	{  
+		if ( cb->head == NULL )
+			continue;
+		
+		c = cb->head;
+		*i = *i + 1;
+		
+		if ( c->next != NULL )
+			multi=1;
+		else
+			multi = 0;
+		
+		for ( cur = c; cur != NULL; ++counter, cur = go_brother( cur ) )
+		{
+			if ( multi == 1 )
+				if ( strlen( tag ) != 0 )
+					sprintf( ch, "%s-%d", tag, counter );
+				else
+					sprintf( ch, "%d", counter );
+			else
+				sprintf( ch, "%s", tag );
+	 
+			if ( *incr <= MAX_COLS )
+				search_title( cur, ch, i, lab, incr );
 
-   }
-  }
-
+		}
+	}
 }
 
 /****************************************************

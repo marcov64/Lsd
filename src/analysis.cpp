@@ -614,7 +614,7 @@ while ( true )
 		 
 		// Brutally shut down the system
 		case 35:
-			error_hard( msg, "Abort requested", "If error persists, please contact developers." );
+			error_hard( "", "Abort requested", "If error persists, please contact developers" );
 			myexit( 20 );
 
 
@@ -3057,25 +3057,29 @@ SEARCH_LAB_TIT
 ****************************************************/
 double *search_lab_tit(object *r, char *s, char *t, int st, int en)
 {
-object *cur;
-variable *cv;
-double *res=NULL;
-sprintf( msg, "%s_%s", s, t);
-for (cur=r; cur != NULL && res == NULL; cur=cur->next )
-{ for ( cv = cur->v; cv != NULL; cv = cv->next )
-    {
-     if ( cv->save == 1 && !strcmp( cv->lab_tit, msg ) && st == cv->start )
-	return cv->data;
-    }
-  if (cur->b != NULL )
-   res=search_lab_tit(cur->b->head, s, t, st, en);
-}
-if (res == NULL &&r->up == NULL )
- for ( cv = cemetery; cv != NULL && res == NULL; cv = cv->next )
-  {if ( ! strcmp( cv->lab_tit, msg ) && st == cv->start )
-     return cv->data;
-  }
-return res;
+	object *cur;
+	variable *cv;
+	double *res = NULL;
+	
+	sprintf( msg, "%s_%s", s, t );
+	for ( cur = r; cur != NULL && res == NULL; cur = cur->next )
+	{ 
+		for ( cv = cur->v; cv != NULL; cv = cv->next )
+		{
+			if ( cv->save == 1 && ! strcmp( cv->lab_tit, msg ) && st == cv->start )
+			return cv->data;
+		}
+		
+		if ( cur->b != NULL && cur->b->head != NULL )
+			res = search_lab_tit( cur->b->head, s, t, st, en );
+	}
+	
+	if ( res == NULL && r->up == NULL )
+		for ( cv = cemetery; cv != NULL && res == NULL; cv = cv->next )
+			if ( ! strcmp( cv->lab_tit, msg ) && st == cv->start )
+				return cv->data;
+
+	return res;
 }
 
 
@@ -3111,12 +3115,9 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 			}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-	{
-		cur = cb->head;
-		if (cur != NULL && cur->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute == 1 )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_labels_mem( cur, num_v, num_c );
-	}
 	 
 	if ( r->up == NULL )
 		for ( cv = cemetery; cv != NULL; cv = cv->next )
@@ -3132,44 +3133,41 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 /***************************************************
 INSERT_STORE_MEM
 ****************************************************/
-void insert_store_mem(object *r, int *num_v)
+void insert_store_mem( object *r, int *num_v )
 {
-object *cur;
-variable *cv;
-bridge *cb;
+	object *cur;
+	variable *cv;
+	bridge *cb;
 
-for ( cv=r->v; cv != NULL; cv = cv->next )
- if ( cv->save )
-  {
-   set_lab_tit( cv);
-   strcpy( vs[*num_v].label,cv->label );
-   strcpy( vs[*num_v].tag,cv->lab_tit);
-   vs[*num_v].start=cv->start;
-   vs[*num_v].end=cv->end;
-   vs[*num_v].rank = *num_v;
-   vs[*num_v].data=cv->data;
-   *num_v += 1;
-  }
-  
-for (cb=r->b; cb != NULL; cb=cb->next )
-{
- cur=cb->head;
- if (cur != NULL && cur->to_compute == 1 )
-   for (cur=cb->head; cur != NULL; cur=cur->next )
-	insert_store_mem(cur, num_v);
-}    
- 
-if (r->up == NULL )
- for ( cv = cemetery; cv != NULL; cv = cv->next )
-  {
-     strcpy( vs[*num_v].label,cv->label );
-     strcpy( vs[*num_v].tag,cv->lab_tit);
-     vs[*num_v].start=cv->start;
-     vs[*num_v].end=cv->end;
-     vs[*num_v].rank = *num_v;
-     vs[*num_v].data=cv->data;
-     *num_v += 1;
-  }
+	for ( cv=r->v; cv != NULL; cv = cv->next )
+		if ( cv->save )
+		{
+			set_lab_tit( cv );
+			strcpy( vs[ *num_v ].label, cv->label );
+			strcpy( vs[ *num_v ].tag, cv->lab_tit );
+			vs[ *num_v ].start = cv->start;
+			vs[ *num_v ].end = cv->end;
+			vs[ *num_v ].rank = *num_v;
+			vs[ *num_v ].data = cv->data;
+			*num_v += 1;
+		}
+	  
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL && cb->head->to_compute == 1 )
+			for ( cur = cb->head; cur != NULL; cur = cur->next )
+				insert_store_mem( cur, num_v );
+	 
+	if ( r->up == NULL )
+	 for ( cv = cemetery; cv != NULL; cv = cv->next )
+	  {
+		 strcpy( vs[ *num_v ].label,cv->label );
+		 strcpy( vs[ *num_v ].tag,cv->lab_tit);
+		 vs[ *num_v ].start = cv->start;
+		 vs[ *num_v ].end = cv->end;
+		 vs[ *num_v ].rank = *num_v;
+		 vs[ *num_v ].data = cv->data;
+		 *num_v += 1;
+	  }
 }
 
 

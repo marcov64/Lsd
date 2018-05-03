@@ -83,7 +83,6 @@ bool ignore_eq_file = true;	// flag to ignore equation file in configuration fil
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
-int lattice_type = 1;		// default lattice type (frequent cells changes)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
 int saveConf = false;		// save configuration on results saving (bool)
@@ -599,6 +598,7 @@ int lsdmain( int argn, char **argv )
 
 #endif 
 
+	empty_lattice( );
 	empty_description( );
 	empty_cemetery( );
 	blueprint->empty( );

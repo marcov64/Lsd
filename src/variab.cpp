@@ -289,8 +289,8 @@ double variable::cal( object *caller, int lag )
 
 	if ( under_computation )
 	{
-		sprintf( msg, "the equation for '%s' (in object '%s') requested \nits own value while computing its current value", label, up->label );
-		error_hard( msg, "Dead-lock", "Check your code to prevent this situation." );
+		sprintf( msg, "The equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
+		error_hard( msg, "Dead-lock", "Check your code to prevent this situation" );
 		return 0;
 	}
 
@@ -316,8 +316,8 @@ double variable::cal( object *caller, int lag )
 		} 
 		else
 		{
-			sprintf( msg, "failure while pushing '%s' (in object '%s')", label, up->label );
-			error_hard( msg, "LSD trace stack corrupted", "Internal LSD error." );
+			sprintf( msg, "Failure while pushing '%s' (object '%s')", label, up->label );
+			error_hard( msg, "Internal error", "If error persists, please contact developers" );
 			return 0;
 		}
 
@@ -436,8 +436,8 @@ double variable::cal( object *caller, int lag )
 						deb( ( object * ) up, caller, label, &val[ 0 ], true );
 					break;
 				default:
-					sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
-					error_hard( msg, "Internal error", "If error persists, please contact developers." );
+					sprintf( msg, "Conditional debug '%d' in variable '%s'", deb_cond, label );
+					error_hard( msg, "Internal error", "If error persists, please contact developers" );
 					return -1;
 			}
 #endif
@@ -451,8 +451,8 @@ double variable::cal( object *caller, int lag )
 		}
 		else
 		{
-			sprintf( msg, "failure while poping '%s' (in object '%s')", label, up->label );
-			error_hard( msg, "LSD trace stack corrupted", "Internal LSD error." );
+			sprintf( msg, "Failure while poping '%s' (in object '%s')", label, up->label );
+			error_hard( msg, "Internal error", "If error persists, please contact developers" );
 			return 0;
 		}
 	}
@@ -463,8 +463,8 @@ double variable::cal( object *caller, int lag )
 
 	error:
 	
-	sprintf( msg, "in object '%s' variable or function '%s' requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", up->label, label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
-	error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation." );
+	sprintf( msg, "Variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", label, up->label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
+	error_hard( msg, "Lag error", "Check your configuration or code to prevent this situation" );
 	
 	return 0;
 }
@@ -696,11 +696,11 @@ bool worker::check( void )
 			else
 			{
 				if ( var != NULL && var->label != NULL )
-					sprintf( msg, "while computing variable '%s' in object '%s' a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
+					sprintf( msg, "While computing variable '%s' (object '%s') a multi-threading worker crashed", var->label, var->up->label != NULL ? var->up->label : "(none)" );
 				else
-					sprintf( msg, "a multi-threading worker crashed" );
+					sprintf( msg, "A multi-threading worker crashed" );
 				
-				error_hard( msg, "Parallel computation error", "Disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
+				error_hard( msg, "Parallel computation error", "Disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
 			}
 		}
 	}
@@ -751,8 +751,8 @@ void parallel_update( variable *v, object* p, object *caller )
 	
 	if ( nt > 0 )
 	{
-		sprintf( msg, "in object '%s' variable '%s' %d parallel worker(s) crashed", cv->up->label, cv->label, i );
-		error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
+		sprintf( msg, "Variable '%s' (object '%s') %d parallel worker(s) crashed", cv->label, cv->up->label, i );
+		error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
 		return;
 	}
 				
@@ -778,8 +778,8 @@ void parallel_update( variable *v, object* p, object *caller )
 					wait_time = ( clock( ) - start ) / CLOCKS_PER_SEC;
 					if ( wait_time > MAX_WAIT_TIME )
 					{
-						sprintf( msg, "in object '%s' variable '%s' more than %d seconds elapsed\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-						error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
+						sprintf( msg, "Variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
+						error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
 						return;
 					}
 				}
@@ -820,8 +820,8 @@ void parallel_update( variable *v, object* p, object *caller )
 			// if something go wrong, wait fist worker (always there)
 			if ( i >= max_threads )
 			{
-				sprintf( msg, "in object '%s' variable '%s' a multi-threading inconsistency occurred, maybe a dead-lock state", cv->up->label, cv->label );
-				error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
+				sprintf( msg, "Variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a dead-lock state", cv->label, cv->up->label );
+				error_hard( msg, "Multi-threading inconsistency", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
 				return;
 			}
 			else
@@ -846,8 +846,8 @@ void parallel_update( variable *v, object* p, object *caller )
 			wait_time = ( clock( ) - start ) / CLOCKS_PER_SEC;
 			if ( wait_time > MAX_WAIT_TIME )
 			{
-				sprintf( msg, "in object '%s' variable '%s' more than %d seconds elapsed\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-				error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box." );
+				sprintf( msg, "Variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
+				error_hard( msg, "Dead-lock in parallel computation", "Disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
 				return;
 			}
 		}
@@ -885,8 +885,8 @@ void variable::empty( void )
 		
 	if ( ( data != NULL && save != true && savei != true ) || label == NULL )
 	{
-		sprintf( msg, "failure in emptying Variable %s", label);
-		error_hard( msg, "Invalid pointer", "Check your code to prevent this situation." );
+		sprintf( msg, "Failure while deallocating variable %s", label );
+		error_hard( msg, "Internal error", "If error persists, please contact developers" );
 		return;
 	}
 

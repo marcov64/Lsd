@@ -883,9 +883,9 @@ case 8:
 
 
 default:
-		sprintf( msg, "invalid option in set_all" );
-		error_hard( msg, "Internal error", "If error persists, please contact developers." );
-		myexit(22);
+		sprintf( msg, "Invalid option for setting values" );
+		error_hard( msg, "Internal error", "If error persists, please contact developers" );
+		myexit( 22 );
 }
 }
 
@@ -1740,8 +1740,8 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	NOLHfile = fopen( fileName, "r");
 	if ( NOLHfile == NULL )
 	{
-		sprintf( msg, "error opening NOHL design file '%s'", fileName );
-		error_hard( msg, "Design of experiment file error", "Check the requested file exists." );
+		sprintf( msg, "Cannot open NOHL design file '%s'", fileName );
+		error_hard( msg, "Design of experiment file error", "Check the requested file exists" );
 		return false;
 	}
 
@@ -1788,8 +1788,8 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 				delete [ ] NOLH_0[ 0 ];
 				delete [ ] NOLH_0;
 				NOLH_0 = NULL;
-				sprintf( msg, "invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
-				error_hard( msg, "Invalid design of experiment file", "Check the file contents." );
+				sprintf( msg, "Invalid format in NOHL file '%s', line=%d", fileName, i + 1 );
+				error_hard( msg, "Invalid design of experiment file", "Check the file contents" );
 				goto end;
 			}
 
@@ -2302,8 +2302,8 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 			{
 				if ( factors != 0 && k > factors )	// invalid # of factors selected?
 				{
-					sprintf( msg, "number of NOLH variables selected is too small" );
-					error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
+					sprintf( msg, "Number of NOLH variables selected is too small" );
+					error_hard( msg, "Invalid design of experiment parameters", "Check the design" );
 					goto invalid;
 				}
 				// if user selected # of factors, use it to select internal table
@@ -2318,15 +2318,15 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 					tab = NOLH_table( k );	// design table to use
 					if ( tab == -1 )		// still too large?
 					{
-						sprintf( msg, "too many variables to test for NOLH.csv size" );
-						error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
+						sprintf( msg, "Too many variables to test for NOLH.csv size" );
+						error_hard( msg, "Invalid design of experiment parameters", "Check the design" );
 						goto invalid;		// abort
 					}
 				}
 				else
 				{
-					sprintf( msg, "too many variables to test" );
-					error_hard( msg, "Invalid design of experiment parameters", "Check the design." );
+					sprintf( msg, "Too many variables to test" );
+					error_hard( msg, "Invalid design of experiment parameters", "Check the design" );
 					goto invalid;			// abort
 				}
 			}

@@ -65,6 +65,14 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 
+
+int **lattice = NULL;		// lattice data colors array
+int rows = 0;							// lattice size
+int columns = 0;
+int error_count;
+double dimW = 0;						// lattice screen size
+double dimH = 0;
+
 #ifdef PARALLEL_MODE
 mutex error;
 #endif	
@@ -256,18 +264,19 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	if ( running )			// handle running events differently
 	{
 		plog( "\n\nError detected at time %d", "highlight", t );
+		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
 		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
-			plog( "\n\nOffending code contained in the equation for variable '%s'", "", stacklog == NULL ? "(none)" : stacklog->vs->label );
-		plog( "\n\nError message: %s", "", logText );
+			plog( "\nOffending code contained in the equation for variable: '%s'", "", stacklog->vs->label );
+		plog( "\nSuggestion: %s", "", boxText );
 		print_stack( );
 		cmd( "wm deiconify .log; raise .log; focus -force .log" );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
 	else
 	{
 		log_tcl_error( "ERROR", logText );
 		plog( "\n\nERROR: %s\n", "", logText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s\"", boxTitle, boxText  );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s.\"", boxTitle, boxText  );
 	}
 #endif
 
@@ -347,6 +356,18 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 
 /****************************
+NOP
+No operation.
+Escape function for invalid pointers
+in macros.
+*****************************/
+void nop( void )
+{
+	
+}
+
+
+/****************************
 PRINT_STACK
 Print the state of the stack in the log window. 
 This tells the user which variable is computed 
@@ -374,7 +395,7 @@ void print_stack( void )
 	for ( app = stacklog; app != NULL; app = app->prev )
 		plog( "\n%d\t%s", "", app->ns, app->label );
 
-	plog( "\n\n(the first-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones \nbecause necessary for completing their computation)\n" );
+	plog( "\n\n(the zero-level variable is computed by the simulation manager, \nwhile possible other variables are triggered by the lower level ones\nbecause necessary for completing their computation)\n" );
 }
 
 
@@ -885,7 +906,7 @@ if (fscanf(f, "%999s", got)==EOF)
 if ( strcmp( got, temp ) || strcmp( temp1,"Object:" ) )
 	return NULL;
 
-//hopefully, we are at the beginning of the vars in the correct object
+// hopefully, we are at the beginning of the vars in the correct object
 if (v->param == 1 )
  strcpy(typ,"Param:");
 else
@@ -914,28 +935,28 @@ else
 
 void set_counter(object *o)
 {
-object *cur;
-bridge *cb;
-int i;
+	object *cur;
+	bridge *cb;
+	int i;
 
-if (o->up == NULL )
-  return;
+	if (o->up == NULL )
+	  return;
 
-set_counter(o->up);  
+	set_counter(o->up);  
 
-for (cb=o->up->b; strcmp(cb->blabel,o->label); cb=cb->next);
+	for (cb=o->up->b; strcmp(cb->blabel,o->label); cb=cb->next);
 
-if (cb->counter_updated==true)
-  return;
+	if (cb->counter_updated==true)
+	  return;
 
-for (cur=cb->head,i=1; cur!=NULL; cur=cur->next, ++i )
-	if ( cur->lstCntUpd < t )		// don't update more than once per period
-	{								// to avoid deletions to change counters
-		cur->acounter = i;
-		cur->lstCntUpd = t;
-	}
+	for (cur=cb->head,i=1; cur!=NULL; cur=cur->next, ++i )
+		if ( cur->lstCntUpd < t )		// don't update more than once per period
+		{								// to avoid deletions to change counters
+			cur->acounter = i;
+			cur->lstCntUpd = t;
+		}
 
-cb->counter_updated=true;
+	cb->counter_updated=true;
 }
 
 /*
@@ -1119,6 +1140,9 @@ void result::data_recursive( object *r, int i )
 	 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
+		if ( cb->head == NULL )
+			continue;
+		
 		cur = cb->head;
 		if ( cur->to_compute )
 			for ( ; cur != NULL; cur = cur->next )
@@ -1254,6 +1278,9 @@ void result::title_recursive( object *r, int header )
 	 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
+		if ( cb->head == NULL )
+			continue;
+		
 		cur = cb->head;
 		if ( cur->to_compute )
 		{
@@ -1653,8 +1680,7 @@ double gamdev( int ia, long *idum_loc = NULL )
 
 	if (ia<1) 
 	{
-		sprintf( msg, "inconsistant state in gamdev");
-		error_hard( msg, "Internal error", "If error persists, please contact developers." );
+		error_hard( "Inconsistent state in gamma function", "Internal error", "If error persists, please contact developers" );
 		quit=1;
 		return 0;
 	} 
@@ -2073,9 +2099,8 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	object *res = parent->search( label );
 	if ( res == NULL )
 	{
-		sprintf( msg, "object '%s' not found in %s (variable '%s')", 
-				 label, command, stacklog == NULL || stacklog->vs == NULL ? "(none)" : stacklog->vs->label );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation." );
+		sprintf( msg, "'%s' is missing for cycling", label );
+		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
 	}
 	
 	return res;
@@ -2113,17 +2138,15 @@ int i, j, h=0;
 f = fopen("plot.file", "r");
 if ( f == NULL )
 {
-	sprintf( msg, "could not open plot file" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(14);
+	error_hard( "Cannot open plot file", "Internal error", "If error persists, please contact developers" );
+	myexit( 14 );
 }
 
 f1=fopen("plot_clean.file", "w");
 if ( f == NULL )
 {
-	sprintf( msg, "could not open clean plot file" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(15);
+	error_hard( "Cannot open clean plot file", "Internal error", "If error persists, please contact developers" );
+	myexit( 15 );
 }
 
 while (fgets(str, 2*MAX_ELEM_LENGTH, f ) != NULL )
@@ -2216,9 +2239,9 @@ int store(int x1, int x2, int x3, int x4)
 	  return 1;
 	 }
 
-	sprintf( msg, "invalid data structure" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(16);
+	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	myexit( 16 );
+	
 	return 0;
 }
 
@@ -2255,9 +2278,9 @@ int store(struct s *c, int x2, int x3, int x4)
 	  return 1;
 	 }
 
-	sprintf( msg, "invalid data structure" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(17);
+	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	myexit( 17 );
+	
 	return 0;
 }
 
@@ -2290,9 +2313,9 @@ int store(struct s *c, int x3, int x4)
 	  return 1;
 	 }
 
-	sprintf( msg, "invalid data structure" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(18);
+	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	myexit( 18 );
+	
 	return 0;
 }
 
@@ -2320,9 +2343,9 @@ int store(struct s *c, int x4)
 	  return 1;
 	 }
 
-	sprintf( msg, "invalid data structure" );
-	error_hard( msg, "Internal error", "If error persists, please contact developers." );
-	myexit(19);
+	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	myexit( 19 );
+	
 	return 0;
 }
 
@@ -2360,32 +2383,33 @@ generate recur. the descriptions of the model as it is
 *********************/
 void autofill_descr(object *o)
 {
+	int i;
+	description *cur;
+	variable *cv;
+	object *co;
+	bridge *cb;
 
-description *cur;
-variable *cv;
-object *co;
-int i;
-bridge *cb;
+	cur=search_description(o->label);
+	if (cur == NULL )
+	 add_description(o->label, "Object", "(no description available)");
 
-cur=search_description(o->label);
-if (cur == NULL )
- add_description(o->label, "Object", "(no description available)");
-
-for (cv=o->v; cv!=NULL; cv=cv->next)
- {
-  cur=search_description(cv->label);
-  if (cur == NULL )
-   {i=cv->param;
-   if (i == 1 )
-    add_description(cv->label, "Parameter", "(no description available)");
-   if (i == 0 )
-    add_description(cv->label, "Variable", "(no description available)");
-   if (i==2)
-    add_description(cv->label, "Function", "(no description available)");
-   } 
- } 
-for (cb=o->b; cb!=NULL; cb=cb->next)
-  autofill_descr(cb->head);
+	for (cv=o->v; cv!=NULL; cv=cv->next)
+	 {
+	  cur=search_description(cv->label);
+	  if (cur == NULL )
+	   {i=cv->param;
+	   if (i == 1 )
+		add_description(cv->label, "Parameter", "(no description available)");
+	   if (i == 0 )
+		add_description(cv->label, "Variable", "(no description available)");
+	   if (i==2)
+		add_description(cv->label, "Function", "(no description available)");
+	   } 
+	 } 
+	 
+	for ( cb = o->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			autofill_descr( cb->head );
 }
 
 
@@ -2692,27 +2716,47 @@ Create a new run time lattice having:
   If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 */
-#ifndef NO_WINDOW
-
-double dimW, dimH;
 
 double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
 {
-	object *cur;
-	int hsize, vsize, hsizeMax, vsizeMax;
-	double i, j, color;
+	int i, j, hsize, vsize, hsizeMax, vsizeMax;
 
 	// ignore invalid values
-	if ( nrow < 0 || ncol < 0 || nrow > INT_MAX || ncol > INT_MAX )
+	if ( nrow < 1 || ncol < 1 || nrow > INT_MAX || ncol > INT_MAX )
 	{
 		plog( "\nError: invalid lattice initialization values, ignoring.\n");
-		return 0;
+		return -1;
 	}
 
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+	{
+		for ( j = 0; j < columns; ++j )
+			delete [ ] lattice[ j ];
+		
+		delete [ ] lattice;
+	}
+	
+	rows = nrow;
+	columns = ncol;
+	error_count = 0;
+			
+	// create the color data matrix
+	lattice = new int *[ rows ];
+	for ( j = 0; j < columns; ++j )
+		lattice[ j ] = new int [ columns ];
+	
+	for ( i = 0; i < rows; ++i )
+		for ( j = 0; j < columns; ++j )
+			lattice[ i ][ j ] = init_color;
+		
+#ifndef NO_WINDOW
+
+	cmd( "destroytop .lat" );
+	
 	get_int( "hsizeLat", & hsize );			// 400
 	get_int( "vsizeLat", & vsize );			// 400
-	get_int( "hsizeLatMax", & hsizeMax );	// 600
-	get_int( "vsizeLatMax", & vsizeMax );	// 600
+	get_int( "hsizeLatMax", & hsizeMax );	// 1024
+	get_int( "vsizeLatMax", & vsizeMax );	// 1024
 
 	pixW = pixW > 0 ? pixW : hsize;
 	pixH = pixH > 0 ? pixH : vsize;
@@ -2721,11 +2765,10 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 	dimH = pixH / nrow;
 	dimW = pixW / ncol;
-	cmd( "destroytop .lat" );
+
 	// create the window with the lattice, roughly 600 pixels as maximum dimension
 	cmd( "newtop .lat \"%s%s - LSD Lattice (%.0lf x %.0lf)\" \"\" \"\"", unsaved_change() ? "*" : " ", simul_name, nrow, ncol );
 
-	cmd( "bind .lat <Button-1> { if { $lattype == 1 } { set lattype 0 } { set lattype 1 } }" );
 	cmd( "bind .lat <Button-2> { .lat.b.ok invoke }" );
 	cmd( "bind .lat <Button-3> { event generate .lat <Button-2> -x %%x -y %%y }" );
 
@@ -2741,17 +2784,9 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 	}
 			
 	if ( init_color == 1001 )
-	{
 		cmd( "canvas .lat.c -height %d -width %d -bg white", ( unsigned int ) pixH, ( unsigned int ) pixW );
-
-		cmd( ".lat.c create rect 0 0 %d %d -fill white", ( unsigned int ) pixW, ( unsigned int ) pixH );
-	}
 	else
-	{
 		cmd( "canvas .lat.c -height %d -width %d -bg %s", ( unsigned int ) pixH, ( unsigned int ) pixW, init_color_string );
-
-		cmd( ".lat.c create rect 0 0 %d %d -fill %s", ( unsigned int ) pixW, ( unsigned int ) pixH, init_color_string );
-	}
 
 	cmd( "pack .lat.c" );
 
@@ -2762,16 +2797,48 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 
 	for ( i = 1; i <= nrow; ++i )
 		for ( j = 1; j <= ncol; ++j )
-			cmd( ".lat.c addtag c%d_%d withtag [.lat.c create poly %d %d %d %d %d %d %d %d -fill %s]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), init_color_string );
+			cmd( ".lat.c addtag c%d_%d withtag [ .lat.c create rectangle %d %d %d %d -fill %s -outline \"\" ]", ( unsigned int ) i, ( unsigned int ) j, ( unsigned int ) ( ( j - 1 ) * dimW ), ( unsigned int ) ( ( i - 1 ) * dimH ), ( unsigned int ) ( j * dimW ), ( unsigned int ) ( i * dimH ), init_color_string );
 
 	cmd( "showtop .lat centerS no no no" );
 	set_shortcuts_log( ".lat", "lattice.html" );
+
+#endif
+
 	return 0;
 }
 
-double init_lattice( char const lrow[ ], char const lcol[ ], int init_color, double nrow, double ncol, double pixW, double pixH )
+
+// call for macro
+double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
 {
-	return init_lattice( pixW, pixH, nrow, ncol, lrow, lcol, "", NULL, init_color );
+	return init_lattice( pixW, pixH, nrow, ncol, "y", "x", "", NULL, init_color );
+}
+
+
+void empty_lattice( void )
+{
+	int j;
+	
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+	{
+		for ( j = 0; j < columns; ++j )
+			delete [ ] lattice[ j ];
+		
+		delete [ ] lattice;
+	}	
+	
+	lattice = NULL;
+	rows = columns = 0;
+}
+
+
+void close_lattice( void )
+{
+	empty_lattice( );
+	
+#ifndef NO_WINDOW
+	cmd( "destroytop .lat" );
+#endif
 }
 
 
@@ -2782,20 +2849,33 @@ negative values of val prompt for the use of the (positive) RGB equivalent
 */
 double update_lattice( double line, double col, double val )
 {
+	char *latcanv, val_string[ 32 ];		// the final string to be used to define tk color to use
+	
 	// ignore invalid values
-	if ( line < 0 || col < 0 || line > INT_MAX || col > INT_MAX || fabs( val ) > INT_MAX )
+	if ( line <= 0 || col <= 0 || line > rows || col > columns || fabs( val ) > INT_MAX )
 	{
-		plog( "\nError: invalid lattice update values, ignoring.\n");
-		return 0;
+		if ( error_count == ERR_LIM )
+			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		else
+			if ( error_count < ERR_LIM )
+				plog( "\nError: invalid lattice update values, ignoring." );
+
+		++error_count;
+		
+		return -1;
 	}
 	
-	// avoid operation if canvas was closed
-	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
-	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( latcanv[ 0 ] == '0' )
-		return 0;
+	// save lattice color data
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+		lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = val;
 	
-	char val_string[ 32 ];		// the final string to be used to define tk color to use
+#ifndef NO_WINDOW
+
+	// avoid operation if canvas was closed
+	cmd( "if [ winfo exists .lat.c ] { set latcanv 1 } { set latcanv 0 }" );
+	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
+	if ( ! strcmp( latcanv, "0" ) )
+		return -1;
 	
 	if ( val < 0 && ( - ( int )  val ) <= 0xffffff )	// RGB mode selected?
 		sprintf( val_string, "#%06x", - ( int ) val );	// yes: just use the positive RGB value
@@ -2806,54 +2886,64 @@ double update_lattice( double line, double col, double val )
 		cmd( "if { ! [ info exist c%d ] } { set c%d white }", ( unsigned int ) val, ( unsigned int ) val  );
 	}
 		
-	if ( lattice_type == 1 )
-	{
-		cmd( ".lat.c itemconfigure c%d_%d -fill %s", ( unsigned int ) line, ( unsigned int ) col, val_string );
-		return 0;
-	}
-
-	cmd( "set tempc [ .lat.c find withtag c%d_%d ] ", ( unsigned int ) line, ( unsigned int ) col );
-	cmd( "if { $tempc != \"\" } { .lat.c itemconfigure c%d_%d -fill %s }", ( unsigned int ) line, ( unsigned int ) col, val_string );
-	cmd( "if { $tempc == \"\" } { .lat.c addtag c%d_%d withtag [ .lat.c create poly %d %d %d %d %d %d %d %d -fill %s ] }", ( unsigned int ) line, ( unsigned int ) col, ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), ( unsigned int ) ( ( col - 1 ) * dimW ), ( unsigned int ) ( ( line ) * dimH ), ( unsigned int ) ( col * dimW ), ( unsigned int ) ( line * dimH ), ( unsigned int ) ( col *dimW ), ( unsigned int ) ( ( line - 1 ) * dimH ), val_string );
+	cmd( ".lat.c itemconfigure c%d_%d -fill %s", ( unsigned int ) line, ( unsigned int ) col, val_string );
+		
+#endif
 
 	return 0;  
 }
 
 
 /*
+read_lattice.
+read the cell line.col color val (1 to 21 as set in default.tcl palette)
+negative values of val mean the use of the (positive) RGB equivalent
+*/
+double read_lattice( double line, double col )
+{
+	// ignore invalid values
+	if ( line <= 0 || col <= 0 || line > rows || col > columns )
+	{
+		if ( error_count == ERR_LIM )
+			plog( "\nWarning: too many lattice parameter errors, messages suppressed.\n");
+		else
+			if ( error_count < ERR_LIM )
+				plog( "\nError: invalid lattice update values, ignoring." );
+
+		++error_count;
+
+		return -1;
+	}
+	
+	if ( lattice != NULL && rows > 0 && columns > 0 )
+		return lattice[ ( int ) line - 1 ][ ( int ) col - 1 ];
+	else
+		return 0;
+}
+
+	
+/*
 Save the existing lattice (if any) to the specified file name.
 */
 double save_lattice( const char *fname )
 {
+	char *latcanv;
+
+#ifndef NO_WINDOW
+
 	// avoid operation if no canvas or no file name
 	cmd( "if [ winfo exists .lat.c ] { set latcanv \"1\" } { set latcanv \"0\" }" );
-	char *latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
-	if ( latcanv[ 0 ] == '0' || strlen( fname ) == 0 )
+	latcanv = ( char * ) Tcl_GetVar( inter, "latcanv", 0 );
+	if ( latcanv == NULL || strlen( fname ) == 0 )
 		return -1;
 	
 	Tcl_SetVar( inter, "latname", fname, 0 );
 	cmd( "append latname \".eps\"; .lat.c postscript -colormode color -file $latname" );
-	return 0;
-}
-
-#else
-
-double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
-{
-	return 0;
-}
-
-double update_lattice( double line, double col, double val )
-{
-	return 0;
-}
-
-double save_lattice( const char *fname )
-{
-	return 0;
-}
 
 #endif
+
+	return 0;
+}
 
 
 void kill_initial_newline( char *s )

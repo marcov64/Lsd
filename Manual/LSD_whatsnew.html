@@ -173,8 +173,8 @@ div.WordSection1
 <p class=MsoNormal>The new version maintains the compatibility with all the
 models built with previous versions of. Main changes:</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Web interface.</b> A full HTML/PHP engine and associated tools
 to make any LSD model available to be used on the web by unexperienced users.
@@ -183,15 +183,45 @@ validation of user settings. On-server simulation running. Extensive web-based
 analysis of results support, including time series plots. User configurations
 up and download. Results CSV data download.</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Eigen library.</b> A powerful library for executing linear
+algebra in Equations code, including native C++ support to matrix and vector
+containers, numerical solvers, and related algorithms.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>New example models.</b> New examples on industrial dynamics,
 consumer networks and macroeconomics, including in-depth sensitivity analysis.</p>
 
-<p class=MsoListParagraph style='margin-left:35.7pt;text-indent:-17.85pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>&nbsp;</p>
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>New Macros.</b> Read lattice colors (<span class=Cdigo>V_LAT(…)</span>)
+and destroy lattice (<span class=Cdigo>DELETE_LAT(…)</span>), move in a Object
+structure organized as a lattice (<span class=Cdigo>UP_LAT(…)</span>, <span
+class=Cdigo>DOWN_LAT(…)</span>, <span class=Cdigo>RIGHT_LAT(…)</span>, <span
+class=Cdigo>LEFT_LAT(…)</span>), count object instances (<span class=Cdigo>COUNT(…)</span>/<span
+class=Cdigo>COUNT_ALL(…)</span>), access pure data extension C++ objects
+directly (<span class=Cdigo>EXT(…)</span>, <span class=Cdigo>EXTS(…)</span>),
+execute extension C++ objects methods (<span class=Cdigo>DO_EXT(…)</span>).
+Please refer to the <a href="LSD_macros.html">LSD Macros</a> documentation.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>No-</b><b>instance Objects handling</b>. Some Macros now deal
+with Objects which have all instances deleted (only during run-time), when
+meaningful (e.g., when counting instances). The modeler has to handle the
+results coming from those situations to avoid potentially serious errors. See
+the respective <a href="LSD_macros.html">Macros</a> documentation.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Other small bug fixes and improvements.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

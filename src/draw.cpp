@@ -77,7 +77,7 @@ int range_type;
 SHOW_GRAPH
 
 ****************************************************/
-void show_graph( object *t)
+void show_graph( object *t )
 {
 	object *top;
 
@@ -122,7 +122,7 @@ void show_graph( object *t)
 					} \
 				}" );
 
-		draw_obj( t, top, v0, h0, 0 );
+		draw_obj( top, v0, h0, 0 );
 
 		cmd( "bind $g.f.c <Button-1> { if [ info exists res_g ] { set choice_g 24 } }" );
 		cmd( "bind $g.f.c <Button-2> { if [ info exists res_g ] { set res $res_g; set vname $res; set useCurrObj no; tk_popup $g.f.c.v %%X %%Y } }" );
@@ -154,7 +154,7 @@ void show_graph( object *t)
 	else	// or just update canvas
 	{
 		cmd( "$g.f.c delete all" );
-		draw_obj( t, top, v0, h0, 0 );
+		draw_obj( top, v0, h0, 0 );
 	}
 
 	cmd( "wm title $g \"%s%s - LSD Model Structure\"", unsaved_change() ? "*" : " ", simul_name );
@@ -165,11 +165,11 @@ void show_graph( object *t)
 DRAW_OBJ
 
 ****************************************************/
-void draw_obj( object *blk, object *t, int level, int center, int from )
+void draw_obj( object *t, int level, int center, int from )
 {
 	char str[ MAX_LINE_SIZE ], ch[ TCL_BUFF_STR ], ch1[ MAX_ELEM_LENGTH ];
 	int i, j, k, step_type, begin, count, num_groups;
-	object *cur, *cur1;
+	object *cur;
 	variable *cv;
 	bridge *cb;
 
@@ -196,9 +196,9 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 		cmd( ch );
 	}
 
-	// drawn node only if it is not the root
+	// draw node only if it is not the root
 	if ( t->up != NULL )
-	{ 	// computes number of groups of this type
+	{ 	// compute number of groups of this type
 		sprintf( ch, "%s", t->label );
 		strcpy( ch1, "" );
 		
@@ -209,9 +209,11 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 				strcat( ch1, "." );
 				break;
 			}
-			cur1 = skip_next_obj( cur, &count );
+			
+			skip_next_obj( cur, &count );
 			sprintf( str, "%d ", count );
 			strcat( ch1, str );
+			
 			for ( ; cur->next != NULL; cur = cur->next ); // reaches the last object of this group
 		}
 		
@@ -294,7 +296,7 @@ void draw_obj( object *blk, object *t, int level, int center, int from )
 	// draw sons
 	for ( i = begin, cb = t->b; cb != NULL; i += step_type, cb = cb->next )
 		if ( cb->head != NULL )
-			draw_obj( blk, cb->head, level + step_level, i, center );
+			draw_obj( cb->head, level + step_level, i, center );
 }
 
 

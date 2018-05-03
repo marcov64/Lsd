@@ -40,7 +40,7 @@ together with its directory and the file shown.
 
 Any internal command is executed in a condition like this:
 
-if (choice==x)
+if ( choice == x)
  do_this_and_that
 
 and returned to the main cycle. After each block the flow returns to "loop" where the main 
@@ -868,22 +868,23 @@ while ( ! choice )
 cmd( "update_title_bar" );
 
 // verify if saving before command is necessary
-if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 33 || choice == 39 || choice == 41 || choice == 71 )
+if ( choice == 1 || choice == 2 || choice == 3 || choice == 5 || choice == 6 || choice == 8 || choice == 13 || choice == 14 || choice == 15 || choice == 33 || choice == 39 || choice == 41 || choice == 58 || choice == 71 )
 	if ( ! discard_change( ) )
 		goto loop;
 
 // start evaluating the executed command
 
 // exit LMM
+
 if ( choice == 1 )
 	return 0;
 
 
+// compile the model, invoking make
+// Run the model
+
 if ( choice == 2 || choice == 6 )
 {
-	/*compile the model, invoking make*/
-	/*Run the model in the selection*/
-
 	compile_run( choice == 2 ? true : false );
 	 
 	choice = 0;
@@ -891,68 +892,73 @@ if ( choice == 2 || choice == 6 )
 }
 
 
-if (choice==3)
- {
-  /*Insert in the text window the makefile of the selected model*/
+/* Insert in the text window the makefile of the selected model */
 
-cmd( ".f.t.t delete 0.0 end" );
-s=( char * ) Tcl_GetVar( inter, "modelname", 0 );
-
-if (s==NULL || !strcmp( s, "" ))
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-  choice=0;
-  goto loop;
- }
-
-cmd( "cd \"$modeldir\"" );
-make_makefile( ); 
-cmd( "cd \"$RootLsd\"" );
-cmd( "if { [file exists \"$modeldir/makefile\"]==1} {set choice 1} {set choice 0}" );
-if (choice == 1 )
- {
-  cmd( "set file [open \"$modeldir/makefile\" r]" );
-  cmd( ".f.t.t insert end [read -nonewline $file]" );
-  cmd( ".f.t.t edit reset" );
-  cmd( "close $file" );
- } 
-sourcefile=0; 
-cmd( "set before [.f.t.t get 1.0 end]" );
-cmd( "set filename makefile" );
-cmd( ".f.t.t mark set insert 1.0" );
-cmd( ".f.hea.file.dat conf -text \"makefile\"" );
-cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );  
-choice=0;
-goto loop;
-}
-
-
-if (choice==4)
+if ( choice == 3 )
 {
- /* Save the file currently shown */
+	cmd( ".f.t.t delete 0.0 end" );
+	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
-s=( char * ) Tcl_GetVar( inter, "curfilename", 0 );
+	if ( s == NULL || ! strcmp( s, "" ) )
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		choice = 0;
+		goto loop;
+	}
 
-if (s!=NULL && strcmp( s, "" ))
- {
-  cmd( "if { [file exist \"$dirname/$filename\"] == 1} {file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\"}" );
-  cmd( "set file [open \"$curfilename\" w]" );
-  cmd( "puts -nonewline $file [.f.t.t get 0.0 end]" );
-  cmd( "close $file" );
-  cmd( "set before [.f.t.t get 0.0 end]" );
-  cmd( "set dirname [file dirname \"$curfilename\"]" );
-  cmd( "set filename [file tail \"$curfilename\"]" );
-  cmd( ".f.hea.file.dat conf -text \"$filename\"" );
- }
- choice=0;
- goto loop;
+	cmd( "cd \"$modeldir\"" );
+	make_makefile( ); 
+	cmd( "cd \"$RootLsd\"" );
+	cmd( "if { [file exists \"$modeldir/makefile\"]==1} {set choice 1} {set choice 0}" );
+	if ( choice == 1 )
+	{
+		cmd( "set file [open \"$modeldir/makefile\" r]" );
+		cmd( ".f.t.t insert end [read -nonewline $file]" );
+		cmd( ".f.t.t edit reset" );
+		cmd( "close $file" );
+	} 
+	
+	sourcefile = 0; 
+	
+	cmd( "set before [.f.t.t get 1.0 end]" );
+	cmd( "set filename makefile" );
+	cmd( ".f.t.t mark set insert 1.0" );
+	cmd( ".f.hea.file.dat conf -text \"makefile\"" );
+	cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Makefile should not be changed\" -detail \"Direct changes to the 'makefile' will not affect compilation issued through LMM. Please check 'Model Options' and 'System Options' in menu 'Model' to change compilation options.\"" );  
+	
+	choice = 0;
+	goto loop;
 }
 
+
+/* Save the file currently shown */
+
+if ( choice == 4 )
+{
+	cmd( "set curfilename [tk_getSaveFile -parent . -title \"Save File\" -initialfile $filename -initialdir $dirname]" );
+	s = ( char * ) Tcl_GetVar( inter, "curfilename", 0 );
+
+	if ( s != NULL && strcmp( s, "" ) )
+	{
+		cmd( "if [ file exist \"$dirname/$filename\" ] { file copy -force \"$dirname/$filename\" \"$dirname/[file rootname \"$filename\"].bak\" }" );
+		cmd( "set file [ open \"$curfilename\" w ]" );
+		cmd( "puts -nonewline $file [ .f.t.t get 0.0 end ]" );
+		cmd( "close $file" );
+		cmd( "set before [ .f.t.t get 0.0 end ]" );
+		cmd( "set dirname [ file dirname \"$curfilename\" ]" );
+		cmd( "set filename [ file tail \"$curfilename\" ]" );
+		cmd( ".f.hea.file.dat conf -text \"$filename\"" );
+	}
+	
+	choice = 0;
+	goto loop;
+}
+
+
+/*Load the description file*/
 
 if ( choice == 5 || choice == 50 )
 {
-	/*Load the description file*/
 	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
 	if ( s == NULL || ! strcmp( s, "" ) )
@@ -1011,10 +1017,10 @@ if ( choice == 5 || choice == 50 )
 }
  
  
+/*Show compilation result*/
+
 if ( choice == 7 )
 {
-	/*Show compilation result*/
-
 	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 	if ( s == NULL || ! strcmp( s, "" ) )
 	{
@@ -1029,10 +1035,10 @@ if ( choice == 7 )
 }
 
 
+/* Insert in the text window the main equation file */
+
 if ( choice == 8 )
 {
-	/* Insert in the text window the main equation file */
-
 	cmd( ".f.t.t delete 1.0 end" );
 	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
@@ -1095,15 +1101,15 @@ if ( choice == 8 )
 	cmd( "lappend ud [.f.t.t get 0.0 end]" );
 	cmd( "lappend udi [.f.t.t index insert]" );
 
-	choice=0;
+	choice = 0;
 	goto loop;
 }
 
 
+/* Find a line in the text */
+
 if ( choice == 10 )
 {
-	/* Find a line in the text */
-
 	cmd( "if [ winfo exists .search_line ] { set choice 0; focus .search_line.e }" );
 	if ( choice == 0 )
 		goto loop;
@@ -1261,7 +1267,7 @@ if ( choice == 12 )
 }
 
 
-/* Find and replace a text pattern in the text*/
+/* Find and replace a text pattern in the text */
 
 if ( choice == 21 )
 {
@@ -1416,112 +1422,119 @@ if ( choice == 21 )
 }
 
 
-if (choice==13 || choice==58)
+// Run the model in the gdb debugger
+
+if ( choice == 13 || choice == 58 )
 {
- /*Run the model in the gdb debugger */
-s=( char * ) Tcl_GetVar( inter, "modelname", 0 );
+	s = ( char * ) Tcl_GetVar( inter, "modelname", 0 );
 
-if (s==NULL || !strcmp( s, "" ))
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
-  choice=0;
-  goto loop;
- }
-  
-cmd( "cd \"$modeldir\"" );
-
-if (choice==58)
- {
- cmd( "scan $vmenuInsert %%d.%%d line col" );
- cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
- cmd( "catch { set f [open break.$breakExt w]; puts $f $breakTxt; close $f }" );
- 
- cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
- }
-else
- cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
-
-make_makefile( );  
-cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
-s=( char * ) Tcl_GetVar( inter, "fapp", 0 );
-f = fopen( s, "r");
-if ( f == NULL )
- {
-  cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
-  goto end_gdb;
- }
-fscanf(f, "%999s", str);
-while (strncmp(str, "TARGET=", 7) && fscanf(f, "%999s", str)!=EOF);
-if (strncmp(str, "TARGET=", 7) != 0 )
- {
-  cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
-  goto end_gdb;
- }
-
-strcpy(str1, str+7);
-
-cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
-if (choice == 1 )
- {//Unix
-  sprintf( msg, "catch { exec $DbgTerm -e $DbgExe $cmdbreak %s & } result", str1 );
- }
-if (choice==2)
- {//Mac
-#ifdef MAC_PKG
-  sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s.app\\\"\" & } result", str1 );
-#else
-  sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s\\\"\" & } result", str1 );
-#endif
- }
-if (choice==3)
- {//Windows 2000, XP, 7, 8, 10...
-  strcat( str1, ".exe" );
-  sprintf( msg, "catch { exec $DbgTerm /c $DbgExe $cmdbreak %s & } result", str1 );
- }
-
-// check if executable file is older than model file
-s = get_fun_name( str );
-if ( s == NULL || ! strcmp( s, "" ) )
-	goto end_gdb;
-strncpy( str, s, 999 );
-s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
-if ( s != NULL && strcmp( s, "" ) )
-{
-	sprintf( str2, "%s/%s", s, str );
-#ifdef MAC_PKG
-	sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
-#else
-	sprintf( str, "%s/%s", s, str1 );
-#endif
-}
-
-// get OS info for files
-struct stat stExe, stMod;
-if ( stat( str, &stExe ) == 0 && stat( str2, &stMod ) == 0 )
-{
-	if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+	if ( s == NULL || ! strcmp( s, "" ) )
 	{
-		cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
-		if ( choice == 2 )
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"No model selected\" -detail \"Choose an existing model or create a new one.\"" );
+		choice = 0;
+		goto loop;
+	}
+	  
+	cmd( "cd \"$modeldir\"" );
+
+	if ( choice == 58 )
+	{
+		cmd( "scan $vmenuInsert %%d.%%d line col" );
+		cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
+		cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
+
+		cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
+	}
+	else
+		cmd( "if [ string equal -nocase $DbgExe gdb ] { set cmdbreak \"--args\" } { set cmdbreak \"\" }" ); 
+
+	make_makefile( );  
+	cmd( "set fapp [file nativename \"$modeldir/makefile\"]" );
+	s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
+	f = fopen( s, "r" );
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+		goto end_gdb;
+	}
+	fscanf( f, "%999s", str );
+	while ( strncmp( str, "TARGET=", 7 ) && fscanf( f, "%999s", str ) != EOF );
+	if ( strncmp(str, "TARGET=", 7) != 0 )
+	{
+		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Makefile corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
+		goto end_gdb;
+	}
+
+	strcpy( str1, str + 7 );
+
+	cmd( "if [ string equal $tcl_platform(platform) unix ] { if [ string equal $tcl_platform(os) Darwin ] { set choice 2 } { set choice 1 } } { set choice 3 }" );
+	
+	switch( choice )
+	{
+		case 1:		// Unix
+			sprintf( msg, "catch { exec $DbgTerm -e $DbgExe $cmdbreak %s & } result", str1 );
+			break;
+	
+		case 2:		// Mac
+#ifdef MAC_PKG
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s.app\\\"\" & } result", str1 );
+#else
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s\\\"\" & } result", str1 );
+#endif
+			break;
+			
+		case 3:		// Windows
+			strcat( str1, ".exe" );
+			sprintf( msg, "catch { exec $DbgTerm /c $DbgExe $cmdbreak %s & } result", str1 );
+			break;
+			
+		default:
 			goto end_gdb;
 	}
+	
+	// check if executable file is older than model file
+	s = get_fun_name( str );
+	if ( s == NULL || ! strcmp( s, "" ) )
+		goto end_gdb;
+	strncpy( str, s, 999 );
+	s = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+	if ( s != NULL && strcmp( s, "" ) )
+	{
+		sprintf( str2, "%s/%s", s, str );
+#ifdef MAC_PKG
+		sprintf( str, "%s/%s.app/Contents/MacOS/%s", s, str1, str1 );
+#else
+		sprintf( str, "%s/%s", s, str1 );
+#endif
+	}
+
+	// get OS info for files
+	struct stat stExe, stMod;
+	if ( stat( str, &stExe ) == 0 && stat( str2, &stMod ) == 0 )
+	{
+		if ( difftime( stExe.st_mtime, stMod.st_mtime ) < 0 )
+		{
+			cmd( "set answer [tk_messageBox -parent . -title Warning -icon warning -type okcancel -default cancel -message \"Old executable file\" -detail \"The existing executable file is older than the last version of the model.\n\nPress 'OK' to continue anyway or 'Cancel' to return to LMM. Please recompile the model to avoid this message.\"]; if [ string equal $answer ok ] { set choice 1 } { set choice 2 }" );
+			if ( choice == 2 )
+				goto end_gdb;
+		}
+	}
+	else
+	{
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
+		goto end_gdb;
+	}
+
+	cmd( msg );					// if all ok, run debug command
+
+	end_gdb:
+	cmd( "cd \"$RootLsd\"" );
+	choice = 0;
+	goto loop;
 }
-else
-{
-	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Executable not found\" -detail \"Compile the model before running it in the [ string toupper $DbgExe ] debugger.\"" );
-	goto end_gdb;
-}
-
-cmd( msg );					// if all ok, run debug command
-
-end_gdb:
-cmd( "cd \"$RootLsd\"" );
-choice =0;
-goto loop;
-}
 
 
-if (choice==14)
+if ( choice == 14 )
 {
 /* Create a new model/group */
 
@@ -1574,21 +1587,21 @@ cmd( "bind .a <Down> {.a.f.r2 invoke}" );
 
 cmd( "showtop .a" );
 
-choice=0;
-while (choice == 0 )
+choice = 0;
+while ( choice == 0 )
  Tcl_DoOneEvent( 0 );
 
 cmd( "destroytop .a" );
 
 //operation cancelled
-if (choice==2)
+if ( choice == 2)
  {
-  choice=0;
+  choice = 0;
   goto loop;
  }
 
 cmd( "set choice $temp" );
-if (choice==2)
+if ( choice == 2)
 {
 cmd( "set mname \"New group\"" );
 cmd( "set mdir \"newgroup\"" );
@@ -1628,22 +1641,22 @@ cmd( "focus .a.mname.e" );
 
 here_newgroup:
 
-choice=0;
+choice = 0;
 
-while (choice == 0 )
+while ( choice == 0 )
  Tcl_DoOneEvent( 0 );
 
 cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
 
 //operation cancelled
-if (choice==2)
+if ( choice == 2)
  {cmd( "destroytop .a" );
-  choice=0;
+  choice = 0;
   goto loop;
  }
 
 cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if (choice==-1)
+if ( choice == -1)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1651,7 +1664,7 @@ if (choice==-1)
  } 
 //control for existing directory
 cmd( "if {[file exists \"$groupdir/$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if (choice==3)
+if ( choice == 3)
 {
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1712,21 +1725,21 @@ cmd( "focus .a.mname.e" );
 
 loop_copy_new:
 
-choice=0;
+choice = 0;
 
-while (choice == 0 )
+while ( choice == 0 )
  Tcl_DoOneEvent( 0 );
 
 cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
 //operation cancelled
-if (choice==2)
+if ( choice == 2)
  {cmd( "destroytop .a" );
-  choice=0;
+  choice = 0;
   goto loop;
  }
 
 cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if (choice==-1)
+if ( choice == -1)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1735,7 +1748,7 @@ if (choice==-1)
 
 //control for existing directory
 cmd( "if {[file exists \"$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if (choice==3)
+if ( choice == 3)
  {
   cmd( "focus .a.mdir.e" );
   cmd( ".a.mdir.e selection range 0 end" );
@@ -1749,13 +1762,13 @@ strcpy(str, " ");
 for ( i = 0; i<num; ++i )
  {
   cmd( "if {[file isdirectory [lindex $dir %d] ] == 1} {set curdir [lindex $dir %i]} {set curdir ___}", i, i );
-  s=( char * ) Tcl_GetVar( inter, "curdir", 0 );
+  s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
   strncpy( str, s, 499 );
   if (strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
    {
     cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
     cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
-    if (choice == 1 )
+    if ( choice == 1 )
     {
       cmd( "set f [open \"$curdir/modelinfo.txt\" r]" );
       cmd( "set cname [gets $f]; set cver [gets $f];" );
@@ -1771,21 +1784,21 @@ for ( i = 0; i<num; ++i )
    }
  }
  
-if (choice==3)
+if ( choice == 3)
  {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"" );
   cmd( ".a.mname.e selection range 0 end" );
   cmd( "focus .a.mname.e" );
   goto loop_copy_new;
  } 
  
-if (choice==4)
+if ( choice == 4)
  {
- choice=0;
+ choice = 0;
  cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
-  s=( char * ) Tcl_GetVar( inter, "answer", 0 );
+  s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
 
   cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
-  if (choice == 0 )
+  if ( choice == 0 )
    {cmd( "destroytop .a" );
     goto loop;
    } 
@@ -1853,10 +1866,10 @@ goto loop;
 }
 
 
+/* open a text file*/
+
 if ( choice == 15 || choice == 71 )
 {
-	/* open a text file*/
-
 	if ( choice == 15 )
 	{
 		cmd( "set brr [ tk_getOpenFile -parent . -title \"Load Text File\" -initialdir $dirname ]" );
@@ -1901,7 +1914,7 @@ if ( choice == 15 || choice == 71 )
 	if ( s[0] != '\0' )
 	{
 	  strncpy( str, s, 499 );
-	  if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || !strcmp( str, ".H++" ) )
+	  if ( ! strcmp( str, ".cpp" ) || ! strcmp( str, ".c" ) || ! strcmp( str, ".C" ) || ! strcmp( str, ".CPP" ) || ! strcmp( str, ".Cpp" ) || ! strcmp( str, ".c++" ) || ! strcmp( str, ".C++" ) || ! strcmp( str, ".h" ) || ! strcmp( str, ".H" ) || ! strcmp( str, ".hpp" ) || ! strcmp( str, ".Hpp" ) || ! strcmp( str, ".h++" ) || ! strcmp( str, ".H++" ) )
 	  {
 		cmd( ".f.t.t tag add bc \"1.0\"" );
 		cmd( ".f.t.t tag add fc \"1.0\"" );
@@ -1927,6 +1940,7 @@ if ( choice == 15 || choice == 71 )
 
 
 /*insert automatic tabs */
+
 if ( choice == 16 )
 {
 	cmd( "set in [.f.t.t index insert]" );
@@ -1948,105 +1962,112 @@ if ( choice == 16 )
 	goto loop;
 }
 
-if (choice==17)
-{
+
 /* find matching parenthesis */
 
-cmd( "set sym [.f.t.t get insert]" );
-cmd( "if {[string compare $sym \"\\{\"]!=0} {if {[string compare $sym \"\\}\"]!=0} {set choice 0} {set num -1; set direction -backwards; set fsign +; set sign \"\"; set terminal \"1.0\"}} {set num 1; set direction -forwards; set fsign -; set sign +; set terminal end}" );
-
-if (choice == 0 )
- goto loop;
-cmd( "set cur [.f.t.t index insert]" );
-cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
-if (num>0)
-  cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
-while (num!=0 && choice != 0 )
+if ( choice == 17)
 {
- cmd( "set a [.f.t.t search $direction \"\\{\" $cur $terminal]" );
- cmd( "if {$a==\"\"} {set a [.f.t.t index $terminal]}" );
- cmd( "set b [.f.t.t search $direction \"\\}\" $cur $terminal]" );
- cmd( "if {$b==\"\"} {set b [.f.t.t index $terminal]}" );
- cmd( "if {$a==$b} {set choice 0}" );
- if (choice == 0 )
-  goto loop;
- if (num>0)
-   cmd( "if {[.f.t.t compare $a < $b]} {set num [expr $num + 1]; set cur [.f.t.t index \"$a+1char\"]} {set num [expr $num - 1]; set cur [.f.t.t index \"$b+1char\"]}" );
- else
-   cmd( "if {[.f.t.t compare $a > $b]} {set num [expr $num + 1]; set cur [.f.t.t index $a]} {set num [expr $num - 1]; set cur [.f.t.t index $b]}" );
+	cmd( "set sym [.f.t.t get insert]" );
+	cmd( "if {[string compare $sym \"\\{\"]!=0} {if {[string compare $sym \"\\}\"]!=0} {set choice 0} {set num -1; set direction -backwards; set fsign +; set sign \"\"; set terminal \"1.0\"}} {set num 1; set direction -forwards; set fsign -; set sign +; set terminal end}" );
 
-
-}
-choice=0;
-
-
-cmd( " if { [string compare $sign \"+\"]==0 } {.f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1} {.f.t.t tag add sel $cur \"$cur + 1char\"; set num 0}" );
-
-cmd( ".f.t.t see $cur" );
-goto loop;
-}
-
-
-if (choice==23)
-{ //reset colors after a sign for coloring
-
-if (sourcefile == 0 )
- {choice=0;
-  goto loop;
- }
-else
-{	
-  choice=0;
-  // text window not ready?
-  if (Tcl_GetVar( inter,"curPosIni",0) == NULL || Tcl_GetVar( inter,"curPosFin",0) == NULL)			
-	  goto loop;
-  // check if inside or close to multi-line comment and enlarge region appropriately
-  cmd( "if { [ lsearch -exact [ .f.t.t tag names $curPosIni ] comment1 ] != -1 } { \
-			set curPosFin [ .f.t.t search */ $curPosIni end ]; \
-			set newPosIni [ .f.t.t search -backwards /* $curPosIni 1.0 ]; \
-			set curPosIni $newPosIni \
-		} else { \
-			if { [ .f.t.t search -backwards */ $curPosIni \"$curPosIni linestart\" ] != \"\" } { \
-				set comIni [ .f.t.t search -backwards /* $curPosIni ]; \
-				if { $comIni != \"\" } { \
-					set curPosIni $comIni \
-				} \
-			}; \
-			if { [ .f.t.t search /* $curPosFin \"$curPosFin lineend\" ] != \"\" } { \
-				set comFin [.f.t.t search */ $curPosFin]; \
-				if { $comFin != \"\" } { \
-					set curPosFin $comFin \
-				} \
-			} \
-		}" );
-  // find the range of lines to reeval the coloring
-  char *curPosIni=( char* ) Tcl_GetVar( inter,"curPosIni", 0 ); // position before insertion
-  char *curPosFin=( char* ) Tcl_GetVar( inter,"curPosFin", 0 ); // position after insertion
-  char *curSelIni=( char* ) Tcl_GetVar( inter,"curSelIni", 0 ); // selection before insertion
-  char *curSelFin=( char* ) Tcl_GetVar( inter,"curSelFin", 0 ); // selection after insertion
-  // collect all selection positions, before and after change
-  float curPos[ 6 ];
-  int nVal = 0;
-  i = sscanf(curPosIni, "%f", &curPos[nVal]);
-  nVal += i < 0 ? 0 : i;
-  i = sscanf(curPosFin, "%f", &curPos[nVal]);
-  nVal += i < 0 ? 0 : i;
-  i = sscanf(curSelIni, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
-  nVal += i < 0 ? 0 : i;
-  i = sscanf(curSelFin, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
-  nVal += i < 0 ? 0 : i;
-  // find previous and next lines to select (worst case scenario)
-  long prevLin = (long)floor(curPos[0]);
-  long nextLin = (long)floor(curPos[0]) + 1;
-  for (i = 1; i < nVal; ++i )
-  {
-	  if (curPos[ i ] < prevLin) prevLin = (long)floor(curPos[ i ]);
-	  if (curPos[ i ] + 1 > nextLin) nextLin = (long)floor(curPos[ i ]) + 1;
-  }
+	if ( choice == 0 )
+		goto loop;
+	cmd( "set cur [.f.t.t index insert]" );
+	cmd( ".f.t.t tag add sel $cur \"$cur + 1char\"" );
+	if ( num > 0 )
+		cmd( "set cur [.f.t.t index \"insert + 1 char\"]" );
   
-color(shigh, prevLin, nextLin);
+	while ( num != 0 && choice != 0 )
+	{
+		cmd( "set a [.f.t.t search $direction \"\\{\" $cur $terminal]" );
+		cmd( "if {$a==\"\"} {set a [.f.t.t index $terminal]}" );
+		cmd( "set b [.f.t.t search $direction \"\\}\" $cur $terminal]" );
+		cmd( "if {$b==\"\"} {set b [.f.t.t index $terminal]}" );
+		cmd( "if {$a==$b} {set choice 0}" );
+		if ( choice == 0 )
+			goto loop;
+		
+		if ( num > 0 )
+			cmd( "if {[.f.t.t compare $a < $b]} {set num [expr $num + 1]; set cur [.f.t.t index \"$a+1char\"]} {set num [expr $num - 1]; set cur [.f.t.t index \"$b+1char\"]}" );
+		else
+			cmd( "if {[.f.t.t compare $a > $b]} {set num [expr $num + 1]; set cur [.f.t.t index $a]} {set num [expr $num - 1]; set cur [.f.t.t index $b]}" );
+
+
+	}
+	
+	choice = 0;
+
+	cmd( " if { [string compare $sign \"+\"]==0 } {.f.t.t tag add sel \"$cur - 1char\" $cur ; set num 1} {.f.t.t tag add sel $cur \"$cur + 1char\"; set num 0}" );
+
+	cmd( ".f.t.t see $cur" );
+	goto loop;
 }
-goto loop;
+
+
+// reset colors after a sign for coloring
+
+if ( choice == 23 )
+{ 
+	if ( sourcefile == 0 )
+	{
+		choice = 0;
+		goto loop;
+	}
+	else
+	{	
+		choice = 0;
+		// text window not ready?
+		if ( Tcl_GetVar( inter, "curPosIni", 0 ) == NULL || Tcl_GetVar( inter, "curPosFin", 0 ) == NULL )			
+			goto loop;
+		// check if inside or close to multi-line comment and enlarge region appropriately
+		cmd( "if { [ lsearch -exact [ .f.t.t tag names $curPosIni ] comment1 ] != -1 } { \
+					set curPosFin [ .f.t.t search */ $curPosIni end ]; \
+					set newPosIni [ .f.t.t search -backwards /* $curPosIni 1.0 ]; \
+					set curPosIni $newPosIni \
+				} else { \
+					if { [ .f.t.t search -backwards */ $curPosIni \"$curPosIni linestart\" ] != \"\" } { \
+						set comIni [ .f.t.t search -backwards /* $curPosIni ]; \
+						if { $comIni != \"\" } { \
+							set curPosIni $comIni \
+						} \
+					}; \
+					if { [ .f.t.t search /* $curPosFin \"$curPosFin lineend\" ] != \"\" } { \
+						set comFin [.f.t.t search */ $curPosFin]; \
+						if { $comFin != \"\" } { \
+							set curPosFin $comFin \
+						} \
+					} \
+				}" );
+		// find the range of lines to reeval the coloring
+		char *curPosIni=( char* ) Tcl_GetVar( inter,"curPosIni", 0 ); // position before insertion
+		char *curPosFin=( char* ) Tcl_GetVar( inter,"curPosFin", 0 ); // position after insertion
+		char *curSelIni=( char* ) Tcl_GetVar( inter,"curSelIni", 0 ); // selection before insertion
+		char *curSelFin=( char* ) Tcl_GetVar( inter,"curSelFin", 0 ); // selection after insertion
+		// collect all selection positions, before and after change
+		float curPos[ 6 ];
+		int nVal = 0;
+		i = sscanf(curPosIni, "%f", &curPos[nVal]);
+		nVal += i < 0 ? 0 : i;
+		i = sscanf(curPosFin, "%f", &curPos[nVal]);
+		nVal += i < 0 ? 0 : i;
+		i = sscanf(curSelIni, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
+		nVal += i < 0 ? 0 : i;
+		i = sscanf(curSelFin, "%f %f", &curPos[nVal], &curPos[nVal + 1]);
+		nVal += i < 0 ? 0 : i;
+		// find previous and next lines to select (worst case scenario)
+		long prevLin = (long)floor(curPos[0]);
+		long nextLin = (long)floor(curPos[0]) + 1;
+		for ( i = 1; i < nVal; ++i )
+		{
+			if ( curPos[ i ] < prevLin ) 
+				prevLin = ( long ) floor( curPos[ i ] );
+			if ( curPos[ i ] + 1 > nextLin ) 
+				nextLin = ( long ) floor( curPos[ i ] ) + 1;
+		}
+		
+		color( shigh, prevLin, nextLin );
+	}
+	goto loop;
 
 }
 
@@ -2311,7 +2332,7 @@ if ( choice == 25 )
 	}
 	else
 	{
-		cmd( ".f.t.t insert insert \"if (!strcmp(label,\\\"$v_label\\\"))\\n\"" );
+		cmd( ".f.t.t insert insert \"if (! strcmp(label,\\\"$v_label\\\") )\\n\"" );
 		cmd( ".f.t.t insert insert \"{\\n\"" );
 		cmd( ".f.t.t insert insert \"/*\\nComment\\n*/\\n\"" );
 		cmd( ".f.t.t insert insert \"\\n\"" );
@@ -2418,7 +2439,7 @@ if ( choice == 26 )
 }
 
 
-// insert a cycle for (cur=p->search("Label"); cur!=NULL; cur=go_brother(cur))
+// insert a cycle for (cur=p->search("Label"); cur!=NULL; cur=go_brother(cur) )
 if ( choice == 27 )
 {
 	cmd( "set v_label \"\"" );
@@ -2504,7 +2525,7 @@ if ( choice == 27 )
 	}
 	else
 	{
-		cmd( ".f.t.t insert insert \"for ($v_obj = $v_par->search(\\\"$v_label\\\"); $v_obj != NULL; $v_obj = go_brother($v_obj))\\n\"" );
+		cmd( ".f.t.t insert insert \"for ($v_obj = $v_par->search(\\\"$v_label\\\"); $v_obj != NULL; $v_obj = go_brother($v_obj) )\\n\"" );
 		cmd( ".f.t.t insert insert \"{\\n\\t\\n}\\n\"" );
 		cmd( ".f.t.t mark set insert \"$a + 2 line + 2 char\"" );
 	}
@@ -2923,7 +2944,7 @@ if ( choice == 31 )
 	}
 	else
 	{
-		if (choice == 1 )
+		if ( choice == 1 )
 		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"UP\\\");\\n\"" );
 		else
 		  cmd( ".f.t.t insert insert \"$v_obj->lsdqsort(\\\"$v_obj0\\\", \\\"$v_label\\\", \\\"DOWN\\\");\\n\"" );
@@ -3008,7 +3029,7 @@ if ( choice == 52 )
 		cmd( "if { $numobj == \"1\"} {set choice 1} {set choice 0}" );
 		cmd( "if {$v_obj0 != \"\"} {.f.t.t insert insert \"$v_obj0 = \"}" );
 
-		if (choice  == 1 )
+		if ( choice  == 1 )
 		{
 		cmd( "if {$v_obj == \"p\" && $v_num==\"\" } { .f.t.t insert insert \"ADDOBJ(\\\"$v_label\\\");\\n\"}" );
 		cmd( "if {$v_obj == \"p\" && $v_num!=\"\"} { .f.t.t insert insert \"ADDOBJ_EX(\\\"$v_label\\\", $v_num);\\n\"}" );
@@ -3164,7 +3185,7 @@ if ( choice == 54 )
 
 	if ( macro )
 	{
-		if (choice == 1 )
+		if ( choice == 1 )
 		 {
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\\n\"}" );  
@@ -3183,7 +3204,7 @@ if ( choice == 54 )
 	}
 	else
 	{
-		if (choice == 1 )
+		if ( choice == 1 )
 		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
 		else
 		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
@@ -4570,7 +4591,7 @@ if ( choice == 32 )
 		if ( choice == 0 )
 			goto loop;
 		if ( num > 0 )
-			cmd( "if [ .f.t.t compare $a < $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index \"$a+1char\" ] } { set num [ expr $num - 1 ]; set cur [ f.t.t index \"$b+1char\" ] }" );
+			cmd( "if [ .f.t.t compare $a < $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index \"$a+1char\" ] } { set num [ expr $num - 1 ]; set cur [ .f.t.t index \"$b+1char\" ] }" );
 		else
 			cmd( "if [ .f.t.t compare $a > $b ] { set num [ expr $num + 1 ]; set cur [ .f.t.t index $a ] } { set num [ expr $num - 1 ]; set cur [ .f.t.t index $b ] }" );
 	}
@@ -4688,7 +4709,7 @@ if ( choice == 41 )
 
 	loop_copy:
 
-	choice=0;
+	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
@@ -4731,7 +4752,7 @@ if ( choice == 41 )
 		{
 			cmd( "set ex [ file exists \"$curdir/modelinfo.txt\" ]" );
 			cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
-			if (choice == 1 )
+			if ( choice == 1 )
 			{
 				cmd( "set f [ open \"$curdir/modelinfo.txt\" r ]" );
 				cmd( "set cname [ gets $f ]; set cver [ gets $f ];" );
@@ -5945,7 +5966,7 @@ void log_tcl_error( const char *cm, const char *message )
 
 	time( &rawtime );
 	timeinfo = localtime( &rawtime );
-	strftime ( ftime, 80, "%F %T", timeinfo );
+	strftime ( ftime, 80, "%x %X", timeinfo );
 
 	if ( firstCall )
 	{
@@ -5976,7 +5997,7 @@ const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdm
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?)|SUM|SUML?S?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH_CNDL?S?|SEARCHS?|SEARCH_(NODES?|LINKS?)|TSEARCHS?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCHT?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|(P|EXEC)_EXTS?|(USE|NO)_NAN|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION|FUNCTION|RESULT|ABORT|DEBUG(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH_CNDL?S?|SEARCHS?|SEARCH_(NODES?|LINKS?)|TSEARCHS?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCHT?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
@@ -5987,11 +6008,11 @@ int strwrds(char string[ ])
 	int i = 0, words = 0;
 	char lastC = '\0';
 	if (string == NULL) return 0;
-	while (isspace(string[ i ])) i++;
+	while (isspace(string[ i ]) ) i++;
 	if (string[ i ] == '\0') return 0;
 	for ( ; string[ i ] != '\0'; lastC = string[i++])
-		if (isspace(string[ i ]) && ! isspace(lastC)) words++;
-	if (isspace(lastC)) return words;
+		if (isspace(string[ i ]) && ! isspace(lastC) ) words++;
+	if (isspace(lastC) ) return words;
 	else return words + 1;
 }
 
@@ -6003,7 +6024,7 @@ int map_color(int hiLev)
 		return 0;
 	if (hiLev == 1)
 		return 4;
-	if (ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex))
+	if (ITEM_COUNT(cTypes) > ITEM_COUNT(cRegex) )
 		return ITEM_COUNT(cRegex);
 	return ITEM_COUNT(cTypes);
 }
@@ -6047,7 +6068,7 @@ for (i = 0; i < maxColor; ++i )
 {
 	// locate all occurrences of each color group
 	Tcl_UnsetVar( inter, "ccount", 0 );
-	if (!strcmp(cTypes[ i ], "comment1"))	// multi line search element?
+	if (! strcmp(cTypes[ i ], "comment1") )	// multi line search element?
 		cmd( "set pos [.f.t.t search -regexp -all -nolinestop -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr);
 	else
 		cmd( "set pos [.f.t.t search -regexp -all -count ccount -- {%s} %ld.0 %s]", cRegex[ i ], iniLin == 0 ? 1 : iniLin, finStr );
@@ -6060,17 +6081,17 @@ for (i = 0; i < maxColor; ++i )
 	tsize += size[ i ];
 
 	// do intermediate store in C memory
-	count[ i ] = ( char* ) calloc(strlen(pcount) + 1, sizeof( char ));
+	count[ i ] = ( char* ) calloc(strlen(pcount) + 1, sizeof( char ) );
 	strcpy(count[ i ], pcount);
 	ppos = ( char* ) Tcl_GetVar( inter, "pos", 0 );
-	pos[ i ] = ( char* ) calloc(strlen(ppos) + 1, sizeof( char ));
+	pos[ i ] = ( char* ) calloc(strlen(ppos) + 1, sizeof( char ) );
 	strcpy(pos[ i ], ppos); 
 }
 if (tsize == 0)
 	return;							// nothing to do
 
 // organize all occurrences in a single array of C numbers (struct hit)
-hits = (hit*)calloc(tsize, sizeof(hit));
+hits = (hit*)calloc(tsize, sizeof(hit) );
 for (i = 0, k = 0; i < maxColor; ++i )
 {
 	if (size[ i ] == 0)				// nothing to do?
@@ -6100,7 +6121,7 @@ Tcl_LinkVar( inter, "col", ( char* ) &newCol, TCL_LINK_LONG | TCL_LINK_READ_ONLY
 Tcl_LinkVar( inter, "cnt", ( char* ) &newCnt, TCL_LINK_INT | TCL_LINK_READ_ONLY);
 for (k = 0; k < tsize; ++k )
 	// skip occurrences inside other occurrence
-	if (hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol))
+	if (hits[k].iniLin > curLin || (hits[k].iniLin == curLin && hits[k].iniCol >= curCol) )
 	{
 		newLin = hits[k].iniLin;
 		newCol = hits[k].iniCol;

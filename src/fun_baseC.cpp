@@ -59,16 +59,16 @@ Do not place equations beyond this point.
 
 *********************/
 
-sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
-error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation." );
+sprintf( msg, "Equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
+error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation" );
 return -1;
 
 end :
 
 if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
  {
-  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
-  error_hard( msg, "Invalid result", "Check your code to prevent this situation." );
+  sprintf( msg, "At time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
+  error_hard( msg, "Invalid result", "Check your code to prevent this situation" );
   debug_flag = true;
   debug = 'd';
  }

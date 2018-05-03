@@ -135,55 +135,46 @@ UTIL.CPP given the file name name, the routine searches for the data line for th
 /****************************************************
 OBJECT::SAVE_STRUCT
 ****************************************************/
-void object::save_struct(FILE *f, char const *tab)
+void object::save_struct( FILE *f, char const *tab )
 {
+	int count = 0, i, j;
+	char tab1[ 30 ];
 	object *o, *o1;
 	bridge *cb, *cb1;
 	variable *var, *c_var;
-	int count=0, i, j;
-	char tab1[30];
 
-	if (up == NULL )
-	  {
-	  
-	  fprintf(f, "\t\n");
-	  }
+	if ( up == NULL )
+		fprintf( f, "\t\n" );
 
-	strcpy(tab1, tab);
+	strcpy( tab1, tab );
+	fprintf( f, "%sLabel %s\n%s{\n", tab1, label, tab1 );
+	strcat( tab1, "\t" );
+	
+	if ( b != NULL )
+		cb1=b->next;
 
-	fprintf(f, "%sLabel %s\n%s{\n",tab1, label, tab1);
-	strcat(tab1, "\t");
-	if (b != NULL )
-	  cb1=b->next;
+	for ( cb = b; cb != NULL; cb = cb->next )
+	{
+		fprintf( f, "%sSon: %s\n", tab1, cb->blabel );
+		if ( cb->head == NULL )
+			o = blueprint->search( cb->blabel );
+		else
+			o = cb->head;
+		o->save_struct( f, tab1 );	
+	}
 
-	for (cb=b; cb!=NULL;cb=cb->next )
-	 {
-	 fprintf(f,"%sSon: %s\n",tab1,cb->blabel);
-	 if (cb->head == NULL )
-	  {
-	   o=blueprint->search(cb->blabel);
-	  }
-	 else
-	  {
-	   o=cb->head;
-	  }  
-	 o->save_struct(f,tab1);
+	for ( var = v; var != NULL; var = var->next )
+	{
+		if ( var->param == 0 )
+			fprintf( f, "%sVar: %s\n", tab1, var->label );
+		if ( var->param == 1 )
+			fprintf( f, "%sParam: %s\n", tab1, var->label );
+		if ( var->param == 2)
+			fprintf( f, "%sFunc: %s\n", tab1, var->label );		
+	}   
 	 
-	 }
-
-	for (var=v; var!=NULL; var=var->next)
-	 {if (var->param == 0 )
-	   fprintf(f,"%sVar: %s\n",tab1, var->label);
-	  if (var->param == 1 )
-		fprintf(f,"%sParam: %s\n",tab1, var->label);
-	  if (var->param==2)
-		fprintf(f,"%sFunc: %s\n",tab1, var->label);
-		
-	 }   
-	 
-	 fprintf(f,"\n");
-
-	fprintf(f,"%s}\n\n", tab);
+	fprintf( f, "\n" );
+	fprintf( f, "%s}\n\n", tab );
 } 
 
 
@@ -270,11 +261,10 @@ void object::save_param(FILE *f )
 	   }
 	 fprintf(f, "\n");
 	}
-	for (cb=b; cb!=NULL; cb=cb->next)
-	{
-	  cur=cb->head;
-	  cur->save_param(f);
-	}
+	
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			cb->head->save_param( f );
 }
 
 
@@ -368,16 +358,15 @@ bool object::load_param(char *file_name, int repl, FILE *f )
 	  }
 	}
 
-	for (cb=b; cb!=NULL; cb=cb->next)
-	 {
-	  cur=cb->head;
-	  if ( ! cur->load_param( file_name, repl, f ) )
-		return false;
-	  num=0;
-	 }
+	for ( cb = b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->head == NULL || ! cb->head->load_param( file_name, repl, f ) )
+			return false;
+		num = 0;
+	}
 
-	if (up == NULL )	//this is the root, and therefore the end of the loading
-	  set_blueprint(blueprint, this);
+	if ( up == NULL )	//this is the root, and therefore the end of the loading
+		set_blueprint( blueprint, this );
 	 
 	return true;
 }
@@ -429,45 +418,57 @@ void copy_descendant(object *from, object *to)
 	variable *cv;
 	int count;
 
-	if (from->b == NULL )
-	 {to->b=NULL;
-	  return;
-	 }
-	to->b=new bridge;
-	to->b->blabel=new char[strlen(from->b->blabel)+1];
-	strcpy(to->b->blabel, from->b->blabel);
-	to->b->counter_updated=false;
-	to->b->mn=NULL;
+	if ( from->b == NULL )
+	{
+		to->b = NULL;
+		return;
+	}
+	
+	if ( from->b->head == NULL )
+		app = blueprint->search( from->b->blabel );
+	else
+		app = from->b->head;
+	
+	to->b = new bridge;
+	to->b->blabel = new char[ strlen( from->b->blabel ) + 1 ];
+	strcpy( to->b->blabel, from->b->blabel );
+	to->b->counter_updated = false;
+	to->b->mn = NULL;
 
-	to->b->head=new object;
-	(to->b->head)->init(to, (from->b->head)->label);
-	for (cv=(from->b->head)->v; cv!=NULL; cv=cv->next)
-	  (to->b->head)->add_var_from_example(cv);
-	to->b->head->to_compute=from->b->head->to_compute;
+	to->b->head = new object;
+	to->b->head->init( to, app->label );
+	
+	for ( cv = app->v; cv != NULL; cv = cv->next )
+		to->b->head->add_var_from_example( cv );
+	
+	to->b->head->to_compute = app->to_compute;
+	copy_descendant( app, to->b->head );
+	to->b->next = NULL;
+	cb = to->b;
 
-	copy_descendant(from->b->head, to->b->head);
-	to->b->next=NULL;
-	cb=to->b;
-
-	//for (cur=skip_next_obj(from->son, &count), app=to->son; cur!=NULL; cur=skip_next_obj(cur, &count), app=app->next)
-	for (cb1=from->b->next; cb1!=NULL; cb1=cb1->next)
-	  { 
-		cb->next=new bridge;
-		cb=cb->next;
-		cb->next=NULL;
-		cb->mn=NULL;
-		cb->blabel=new char[strlen(cb1->blabel)+1];
-		strcpy(cb->blabel, cb1->blabel);
-		cb->counter_updated=false;
+	for ( cb1 = from->b->next; cb1 != NULL; cb1 = cb1->next )
+	{ 
+		cb->next = new bridge;
+		cb = cb->next;
+		cb->next = NULL;
+		cb->mn = NULL;
+		cb->blabel = new char[ strlen( cb1->blabel ) + 1 ];
+		strcpy( cb->blabel, cb1->blabel );
+		cb->counter_updated = false;
 		
-		  cb->head=new object;    
-		  cb->head->init(to, cb1->head->label);
-		  cb->head->next=NULL;
-		cb->head->to_compute=cb1->head->to_compute;
-		 for (cv=cb1->head->v; cv!=NULL; cv=cv->next)
-		  cb->head->add_var_from_example(cv);
-		 copy_descendant(cb1->head, cb->head);
-	  }
+		if ( cb1->head == NULL )
+			app = blueprint->search( cb1->blabel );
+		else
+			app = cb1->head;
+		
+		cb->head = new object;    
+		cb->head->init( to, app->label );
+		cb->head->next = NULL;
+		cb->head->to_compute = app->to_compute;
+		for ( cv = app->v; cv != NULL; cv = cv->next )
+			cb->head->add_var_from_example( cv );
+		copy_descendant( app, cb->head );
+	}
 }
 
 
@@ -478,7 +479,6 @@ bool object::load_struct( FILE *f )
 {
 	char ch[ MAX_ELEM_LENGTH ];
 	int len, i = 0;
-	object *cur;
 	bridge *cb;
 	variable *cv;
 
@@ -504,8 +504,8 @@ bool object::load_struct( FILE *f )
 	   { fscanf(f, "%*[ ]%99s", ch);
 		 add_obj( ch, 1, 0 );
 	   for (cb=b; strcmp(cb->blabel, ch); cb=cb->next);
-	   cur=cb->head;
-	   if ( ! cur->load_struct( f ) )
+
+	   if ( cb->head == NULL || ! cb->head->load_struct( f ) )
 		   return false;
 	   }
 	 if (!strcmp( ch, "Var:"))
@@ -690,11 +690,9 @@ void save_description(object *r, FILE *f )
 	   
 	 }
 
-	for (cb=r->b; cb!=NULL; cb=cb->next)
-	 {
-	  cur=cb->head;
-	  save_description(cur, f );
-	 }
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		if ( cb->head != NULL )
+			save_description( cb->head, f );
 }
 
 
@@ -703,24 +701,29 @@ SET_BLUEPRINT
 	copy the naked structure of the model into another object, called blueprint, 
 	to be used for adding objects without example
 ******************************************************************************/
-void set_blueprint(object *container, object *r)
+void set_blueprint( object *container, object *r )
 {
+	int temp;
 	object *cur, *cur1;
 	variable *cv;
 	bridge *cb, *cb1;
-	int temp;
 	
 	if ( r == NULL )
 		return;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
-	   container->add_var_from_example( cv );
+		container->add_var_from_example( cv );
+	
 	delete [ ] container->label;
+	
 	container->label = new char[ strlen( r->label ) + 1 ];
 	strcpy( container->label, r->label );
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
+		if ( cb->head == NULL )
+			continue;
+		
 		cur1 = cb->head;
 		container->add_obj( cur1->label, 1, 0 );
 		for ( cb1 = container->b; strcmp( cb1->blabel, cb->blabel ); cb1 = cb1->next );
