@@ -61,9 +61,9 @@
 
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 0
-#define _LSD_VERSION_ "7.0"
-#define _LSD_DATE_ "Apr 17 2018"        // __DATE__
+#define _LSD_MINOR_ 1
+#define _LSD_VERSION_ "7.1"
+#define _LSD_DATE_ "May 03 2018"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)

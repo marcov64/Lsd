@@ -1,6 +1,6 @@
 /*************************************************************
 
-	LSD 7.0 - January 2018
+	LSD 7.1 - May 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
@@ -65,8 +65,8 @@ The widget of importance are:
 
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
-#define _LSD_MINOR_ 0
-#define _LSD_VERSION_ "7.0"
+#define _LSD_MINOR_ 1
+#define _LSD_VERSION_ "7.1"
 #define _LSD_DATE_ __DATE__
 
 // general buffer limits
