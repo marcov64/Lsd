@@ -236,7 +236,7 @@ extern double i_values[ ];
 #define abs( a ) _abs( a )
 #define pi M_PI
 
-#define ABORT quit = 1;
+#define ABORT quit = 2;
 #define CURRENT ( var->val[ 0 ] )
 #define PARAMETER var->param = 1;
 #define OBSERVE set_fast( 0 );
