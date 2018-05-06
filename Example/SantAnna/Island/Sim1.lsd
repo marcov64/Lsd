@@ -75,7 +75,7 @@ Label Root
 	}
 
 	Param: latticeOpen
-	Param: showOcean
+	Param: showSea
 	Param: simSpeed
 	Param: sizeLattice
 
@@ -86,7 +86,7 @@ DATA
 
 Object: Root C	1
 Param: latticeOpen 0 n + n n	0
-Param: showOcean 0 n + n n	1
+Param: showSea 0 n + n n	1
 Param: simSpeed 0 n + n n	0
 Param: sizeLattice 0 n + n n	100
 
@@ -162,7 +162,7 @@ _INIT_
 All 1 instances equal to 0.
 END_DESCRIPTION
 
-Parameter_showOcean
+Parameter_showSea
 Flag to enable the sea lattice window:
 0 - no window
 1 - show the window

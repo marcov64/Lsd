@@ -38,21 +38,17 @@ v[5] = V( "rho" );								// degree of locality of interactions
 v[6] = V( "minSgnPrb" );						// minimum signal probability to consider
 v[7] = V( "sizeLattice" );						// size of the lattice window
 
-h = 2 * LAST_T + 1;								// the (square) total sea size
-
 // handle bounded economies (pi=0)
 if ( v[2] == 0 )
 {
 	v[2] = 1;									// islands everywhere to ensure picking 2
 	v[3] = 2;									// just two islands
-	
-	h = 2 * v[4] + 1;							// shrink the sea to the minimum			
 }
 
 // create the visual lattice (blue ocean)
-if ( ! V( "latticeOpen" ) && V( "showOcean" ) )
+if ( ! V( "latticeOpen" ) && V( "showSea" ) )
 {
-	i = v[7] + 1;								// effective size of the lattice window
+	i = min( v[7], 2 * LAST_T ) + 1;			// effective size of the lattice window
 	INIT_LAT( SEA, i, i );						// create lattice window using SEA color
 	WRITES( p->up, "latticeOpen", 1 );			// avoid more than one lattice instance
 	WRITE( "seaShown", 1 );						// signal this Sea instance has the lattice
