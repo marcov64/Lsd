@@ -597,15 +597,16 @@ long nodes2create( object *parent, char const *lab, long numNodes )
 
 long object::init_stub_net( char const *lab, const char* gen, long numNodes, long par1, double par2 )
 {
-	char option[32];
+	char option[ 32 ];
 	strncpy( option, gen, 31 );
-	option[31] = '\0';
+	option[ 31 ] = '\0';
 	strupr( option );
 	
-	if ( numNodes < 2 || lab == NULL )				// less than 2 nodes?
+	// must have a label, and two nodes except is a disconnected network (1 node minimum)
+	if ( ( numNodes < 2 && strcmp( option, "DISCONNECTED" ) ) || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for the specified network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -653,7 +654,7 @@ long object::init_stub_net( char const *lab, const char* gen, long numNodes, lon
 			return init_lattice_net( numNodes / par1, par1, lab, ( bool ) par2 );
 	
 	error_hard( "Wrong parameter values for the specified network", 
-				"Error while creating network", 
+				"Cannot create network", 
 				"Check your code to prevent this situation" );
 	return 0;
 }
@@ -669,10 +670,10 @@ long object::init_discon_net( char const *lab, long numNodes )
 	long idNode;
 	object *cur;
 	
-	if ( numNodes < 2 || lab == NULL )
+	if ( numNodes < 1 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for disconnected network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return -1;
 	}
@@ -733,7 +734,7 @@ long object::init_random_dir_net( char const *lab, long numNodes, long numLinks 
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for random directed network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -786,7 +787,7 @@ long object::init_random_undir_net( char const *lab, long numNodes, long numLink
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for random undirected network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -840,7 +841,7 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for random uniform network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -895,7 +896,7 @@ long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkPr
 	if ( numNodes < 2 || linkProb < 0 || linkProb > 1 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for Renyi-Erdos network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -945,7 +946,7 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for circle network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -1010,7 +1011,7 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || rho < 0 || rho > 1 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for Small-World network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -1082,7 +1083,7 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || expLink <= 0 || lab == NULL )
 	{
 		error_hard( "Wrong parameter values for scale-free network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}
@@ -1186,7 +1187,7 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, int eightNei
 	if ( nRow <= 0 || nCol <= 0 || lab == NULL || ( eightNeigbr != 0 && eightNeigbr != 1 ) )
 	{
 		error_hard( "Wrong parameter values for lattice network", 
-					"Error while creating network", 
+					"Cannot create network", 
 					"Check your code to prevent this situation" );
 		return 0;
 	}

@@ -447,8 +447,8 @@ extern double i_values[ ];
 // create a network using as nodes object label X, located inside object O,
 // applying generator Y, number of nodes Z, out-degree W and 
 // parameter V
-#define INIT_NET( X, Y, Z, ... ) ( p->init_stub_net( ( char * ) X, ( char * ) Y, ( long ) Z, __VA_ARGS__ ) )
-#define INIT_NETS( O, X, Y, Z, ... ) ( O == NULL ? 0. : O->init_stub_net( ( char * ) X, ( char * ) Y, ( long ) Z, __VA_ARGS__ ) )
+#define INIT_NET( X, Y, ... ) ( p->init_stub_net( ( char * ) X, ( char * ) Y, __VA_ARGS__ ) )
+#define INIT_NETS( O, X, Y, ... ) ( O == NULL ? 0. : O->init_stub_net( ( char * ) X, ( char * ) Y, __VA_ARGS__ ) )
 
 // read a network in Pajek format from file named Z_xx.net (xx is the current seed) 
 // using as nodes object with label X located inside object O
