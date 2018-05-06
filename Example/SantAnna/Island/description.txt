@@ -1,0 +1,8 @@
+Island Model (ver. 1.0)
+
+Based on Fagiolo, G., Dosi, G. (2003) Exploitation, exploration and innovation in a model of endogenous growth with locally interacting agents, Structural Change and Economic Dynamics,
+v. 14, p. 237-273.
+
+Recoded in LSD by Marcelo C. Pereira
+
+ 
