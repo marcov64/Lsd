@@ -1614,7 +1614,7 @@ void MTRand_int32::seed(const unsigned long* array, int size) { // init by array
 	ran_gen =	4 : Mersenne-Twister in [0,1)
 	ran_gen =	5 : Mersenne-Twister with 53 bits resolution in [0,1)
 */
-int ran_gen = 2;	// default pseudo-random number generator (Mersenne-Twister)
+int ran_gen = 1;	// default pseudo-random number generator (Mersenne-Twister)
 long idum = 0;		// Park-Miller sequential control (default seed)
 MTRand_open mt2;	// Mersenne-Twister object in (0,1)
 MTRand_closed mt3;	// Mersenne-Twister object in [0,1]
