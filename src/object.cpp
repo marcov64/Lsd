@@ -797,7 +797,7 @@ double object::overall_max( char const *lab, int lag )
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 	
-	for ( tot = DBL_MIN; cur != NULL; cur = go_brother( cur ) )
+	for ( tot = -DBL_MAX; cur != NULL; cur = go_brother( cur ) )
 		if ( tot < ( temp = cur->cal( this, lab, lag ) ) )
 			tot = temp;
 
