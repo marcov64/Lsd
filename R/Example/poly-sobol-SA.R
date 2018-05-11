@@ -62,7 +62,7 @@ dataSet <- read.doe.lsd( ".",                    # data files relative folder
 
 # ====== Estimate polynomial meta-models and select the best one ======
 
-mModel <- polynomial.model.lsd( data,
+mModel <- polynomial.model.lsd( dataSet,
                                 ext.wgth = 0.5,     # weight of external errors on model selection (0-1)
                                 ols.sig = 0.20,     # minimum significance considered in OLS regression
                                 orderModel = 0,     # polynomial model order (0=auto, 1=first, 2=second)
@@ -117,7 +117,7 @@ title( main = "Comparison of alternative polynomial models",
 
 # ------ Model estimation table ------
 
-textplot( mModel$estimation.std, show.colnames = FALSE, cmar = 2, rmar = 1 )
+textplot( mModel$estimation.std, cmar = 2, rmar = 1 )
 title( main = "Polynomial meta-model estimation (standardized)",
        sub = paste0( "All variables rescaled to [ 0, 1 ] / Average 95% CI = +/- ",
                      round( mResp$avgCIdev, digits = 2 ), "\nPredicted output at defaults: ",

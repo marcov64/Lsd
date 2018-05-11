@@ -87,7 +87,7 @@ DATA
 Object: Root C	1
 Param: latticeOpen 0 n + n n	0
 Param: simSpeed 0 n + n n	0
-Param: sizeLattice 0 n + n n	100
+Param: sizeLattice 0 n + n n	0
 
 Object: Sea C	1
 Param: N 0 n + n n	100
@@ -95,9 +95,9 @@ Param: alpha 0 n + n n	1.5
 Param: epsilon 0 n + n n	0.1
 Param: phi 0 n + n n	0.5
 Param: lambda 0 n + n n	1
-Param: pi 0 n + n n	0.1
+Param: pi 0 n + n n	0
 Param: rho 0 n + n n	0.1
-Param: l0radius 0 n + n n	25
+Param: l0radius 0 n + n n	2
 Param: minSgnPrb 0 n + n n	0.01
 Param: seaShown 0 n + n n	0
 Param: eastFrontier 0 n + n n	0
@@ -107,7 +107,7 @@ Param: westFrontier 0 n + n n	0
 Var: Init 0 n + n n
 Var: Step 0 n + n n
 Var: g 0 s + n n
-Var: l 1 s + n n	10
+Var: l 1 s + n n	2
 Var: m 1 s + n n	0
 Var: J 0 s + n n
 Var: Q 1 s + n n	0
@@ -145,7 +145,7 @@ Var: _a 1 n + n n	0
 
 SIM_NUM 1
 SEED 1
-MAX_STEP 500
+MAX_STEP 1000
 EQUATION fun_Island.cpp
 MODELREPORT report_Sim1.html
 
@@ -174,7 +174,7 @@ Set to zero to disable lattice.
 The size is measured in model's measure units.
 The lattice is always centered around the origin (0, 0) and the shown lattice size will be one unit larger. 
 _INIT_
-All 1 instances equal to 100.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Object_Sea
@@ -217,7 +217,7 @@ Parameter_pi
 The probability that a point in the se is an island (0 < pi < 1).
 If pi = 0, the number of knowable islands is fixed and equal to l0 (bounded economy).
 _INIT_
-All 1 instances equal to 0.1.
+All 1 instances equal to 0.
 END_DESCRIPTION
 
 Parameter_rho
@@ -231,7 +231,7 @@ END_DESCRIPTION
 Parameter_l0radius
 Radius from sea lattice origin (0, 0) where initial islands can be located.
 _INIT_
-All 1 instances equal to 25.
+All 1 instances equal to 2.
 END_DESCRIPTION
 
 Parameter_minSgnPrb
@@ -297,7 +297,7 @@ END_DESCRIPTION
 Variable_l
 Number of known islands (technologies).
 _INIT_
-All 1 instances equal to 10.
+All 1 instances equal to 2.
 END_DESCRIPTION
 
 Variable_m

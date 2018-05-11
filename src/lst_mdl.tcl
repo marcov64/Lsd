@@ -88,7 +88,7 @@ proc chs_mdl {} {
 	label .l.t.f1.m1.l -text "First model"
 	entry .l.t.f1.m1.d -width 50 -textvariable d1 -justify center
 	entry .l.t.f1.m1.f -width 20 -textvariable f1 -justify center
-	bind .l.t.f1.m1.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d1" ]; if { $tmp != "" && ! [ fn_spaces $tmp .l ] } {set f1 [file tail $tmp] } }
+	bind .l.t.f1.m1.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d1" ]; if { $tmp != "" && ! [ fn_spaces "$tmp" .l ] } {set f1 [file tail $tmp] } }
 	button .l.t.f1.m1.i -width $butWid -text Insert -command {slct; if { [info exists sd]} {set d1 "$sd"; set f1 "$sf"} }
 	pack .l.t.f1.m1.l -anchor nw
 	pack .l.t.f1.m1.d .l.t.f1.m1.f -expand yes -fill x
@@ -98,7 +98,7 @@ proc chs_mdl {} {
 	label .l.t.f1.m2.l -text "Second model"
 	entry .l.t.f1.m2.d -width 50 -textvariable d2 -justify center
 	entry .l.t.f1.m2.f -width 20 -textvariable f2 -justify center
-	bind .l.t.f1.m2.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d2" ]; if { $tmp != "" && ! [ fn_spaces $tmp .l ] } {set f2 [file tail $tmp] } }
+	bind .l.t.f1.m2.f <3> { set tmp [ tk_getOpenFile -parent .l -title "Load LSD File" -initialdir "$d2" ]; if { $tmp != "" && ! [ fn_spaces "$tmp" .l ] } {set f2 [file tail $tmp] } }
 	button .l.t.f1.m2.i -width $butWid -text Insert -command {slct; if { [info exists sd]} {set d2 "$sd"; set f2 "$sf"} }
 	pack .l.t.f1.m2.l -anchor nw
 	pack .l.t.f1.m2.d .l.t.f1.m2.f -expand yes -fill x -anchor nw

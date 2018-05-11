@@ -416,9 +416,9 @@ extern double i_values[ ];
 #define RNDDRAWLS( O, X, Y, Z ) O->draw_rnd( ( char * ) X, ( char * ) Y, Z )
 
 #define RNDDRAW_FAIR( X ) p->draw_rnd( ( char * ) X )
-#define RNDDRAW_FAIRS(Z, X ) Z->draw_rnd( ( char * ) X )
+#define RNDDRAW_FAIRS( Z, X ) Z->draw_rnd( ( char * ) X )
 
-#define RNDDRAW_TOT( X, Y,T ) p->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
+#define RNDDRAW_TOT( X, Y, T ) p->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
 #define RNDDRAW_TOTL( X, Y, Z, T ) p->draw_rnd( ( char * ) X, ( char * ) Y, Z, T )
 #define RNDDRAW_TOTS( Z, X, Y,T ) Z->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
 #define RNDDRAW_TOTLS( O, X, Y, Z, T ) O->draw_rnd( ( char * ) X, ( char * ) Y, Z, T )

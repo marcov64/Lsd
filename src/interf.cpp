@@ -2620,11 +2620,11 @@ case 38: //quick reload
 	if ( ! reload )
 	{
 		strcpy( lastObj, "" );		// disable last object for quick reload
-		cmd( "set res %s", simul_name );
+		cmd( "set res \"%s\"", simul_name );
 
 		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"$res.lsd\" -filetypes { { {LSD model file } {.lsd} } } ]" );
 		*choice = 0;
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
+		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
 		if ( *choice == 2 )
 			break;
 
@@ -3059,7 +3059,7 @@ case 28:
 	cmd( "set res %s", equation_name );
 
 	cmd( "set res1 [ file tail [ tk_getOpenFile -parent . -title \"Select New Equation File\" -initialfile \"$res\" -initialdir \"%s\" -filetypes { { {LSD equation files} {.cpp} } { {All files} {*} } } ] ]", exec_path );
-	cmd( "if [ fn_spaces $res1 . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
+	cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\" } { set res1 [ file tail $res1 ] }" );
 
 	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
@@ -3551,7 +3551,7 @@ case 44:
 			break;
 
 		cmd( "set fname [ tk_getOpenFile -parent . -title \"Load Report File\" -defaultextension \".html\" -initialdir \"%s\" -filetypes { { {HTML files} {.html} } { {All files} {*} } } ]", exec_path );
-		cmd( "if { $fname == \"\" || [ fn_spaces $fname . ] } { set choice 0 } { set fname [ file tail $fname ]; set choice 1 }" );
+		cmd( "if { $fname == \"\" || [ fn_spaces \"$fname\" . ] } { set choice 0 } { set fname [ file tail $fname ]; set choice 1 }" );
 		if ( *choice == 0 )
 			break;
 	}
@@ -3804,7 +3804,7 @@ case 82:
 
 	cmd( "set res1 [ tk_getOpenFile -parent . -title \"Select Configuration File to Compare to\" -initialdir \"$path\" -filetypes { { {LSD configuration files} {.lsd} } } ]" );
 	cmd( "set res2 [ file tail $res1 ]" );
-	cmd( "if [ fn_spaces $res1 . ] { set res1 \"\"; set res2 \"\" }" );
+	cmd( "if [ fn_spaces \"$res1\" . ] { set res1 \"\"; set res2 \"\" }" );
 
 	lab1 = ( char * ) Tcl_GetVar( inter, "res1", 0 );
 	lab2 = ( char * ) Tcl_GetVar( inter, "res2", 0 );
@@ -4543,7 +4543,7 @@ case 64:
 
 	// open dialog box to get file name & folder
 	cmd( " set bah [ tk_getOpenFile -parent . -title \"Load Sensitivity Analysis File\" -defaultextension \".sa\" -initialfile \"$res\" -initialdir \"$path\"  -filetypes { { {Sensitivity analysis files} {.sa} } } ]" );
-	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces $bah . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
+	cmd( "if { [string length $bah] > 0 && ! [ fn_spaces \"$bah\" . ] } {set res $bah; set path [file dirname $res]; set res [file tail $res];set last [expr [string last .sa $res] -1];set res [string range $res 0 $last]} {set choice 2}" );
 	if ( *choice == 2 )
 		break;
 	
@@ -4865,7 +4865,7 @@ case 68:
 		if ( fSeq )								// file sequence?
 		{
 			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load First Configuration File\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple no ]" );
-			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set choice [ expr [ string range $res $numpos end ] ]; set res [ string range $res 0 [ expr $numpos - 2 ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
+			cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set choice [ expr [ string range $res $numpos end ] ]; set res [ string range $res 0 [ expr $numpos - 2 ] ] } { plog \"\nInvalid file name for sequential set: $res\n\"; set choice 0 } } { set choice 0 }" );
 			if ( *choice == 0 )
 				break;
 			ffirst = *choice;
@@ -5054,7 +5054,7 @@ case 68:
 			if ( *choice == 1 || *choice == 4 )	// Windows
 				fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s\" -s %d -e %d %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
 			else								// Unix
-				fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
+				fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s -s %d -e %d %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, j <= sl ? i + num : i + num - 1, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, j );
 			j <= sl ? i += num + 1 : i += num;
 		}
 	}
@@ -5064,7 +5064,7 @@ case 68:
 				if ( *choice == 1 || *choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s_%d.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s_%d.log\" 2>&1\r\n", j, nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
 				else								// Unix
-					fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s_%d.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s_%d.log 2>&1 &\n", nature, out_file, i, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file, i );
 			else
 			{	// get the selected file names, one by one
 				cmd( "set res3 [lindex $bah %d]; set res3 [file tail $res3]; set last [expr [string last .lsd $res3] - 1]; set res3 [string range $res3 0 $last]", j - 1  );
@@ -5073,7 +5073,7 @@ case 68:
 				if ( *choice == 1 || *choice == 4 )	// Windows
 					fprintf( f, "start \"LSD Process %d\" /B \"%%LSD_EXEC%%\" -c %d -f \"%%LSD_CONFIG_PATH%%\\%s.lsd\" %s %s %s 1> \"%%LSD_CONFIG_PATH%%\\%s.log\" 2>&1\r\n", j, nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
 				else								// Unix
-					fprintf( f, "nice $LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s.log 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
+					fprintf( f, "$LSD_EXEC -c %d -f \"$LSD_CONFIG_PATH\"/%s.lsd %s %s %s > \"$LSD_CONFIG_PATH\"/%s.log 2>&1 &\n", nature, out_file, no_res ? "-r" : "", docsv ? "-t" : "", dozip ? "" : "-z", out_file );
 			}
 	
 	if ( fSeq )
@@ -5354,7 +5354,7 @@ case 88:
 
 	cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } { {All files} {*} } } ]" );
 	*choice = 0;
-	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 
@@ -5520,7 +5520,7 @@ case 89:
 	cmd( "set bah \"%s\"", simul_name );
 	cmd( "set bah [ tk_getSaveFile -parent . -title \"Save Network Structure File\"  -defaultextension \".net\" -initialdir \"$path\" -initialfile \"$bah.net\" -filetypes { { {Pajek network files} {.net} } } ]" );
 	*choice = 0;
-	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces $bah . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
+	cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set netPath [ file dirname $bah ]; set netFile [ file tail $bah ]; set posExt [ string last . $netFile ]; if { $posExt >= 0 } { set netExt [ string range $netFile [ expr $posExt + 1 ] end ]; set netFile [ string range $netFile 0 [ expr $posExt - 1 ] ] } { set netExt \"\" } } { set choice 2 }" );
 	if ( *choice == 2 )
 		break;
 

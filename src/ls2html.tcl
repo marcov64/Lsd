@@ -155,22 +155,26 @@ proc ls2html {from chop} {
 
 # FN_SPACES
 # 	Checks is a filename has spaces
-#
+#	set 'mult' to one if multiple file names are allowed
 
 proc fn_spaces { fn { par . } { mult 0 } } {
 	if $mult {
 		set count [ llength $fn ]
 	} else {
-		set count 0
+		set count 1
 	}
 
 	for { set i 0 } { $i < $count } { incr i } {
-		set file "[ lindex $fn $i ]"
-		if { [ string first " " $file ] == -1 } {
-			return false
+		if $mult {
+			set file "[ lindex $fn $i ]"
 		} else {
+			set file "$fn"
+		}
+		if { [ string first " " "$file" ] != -1 } {
 			tk_messageBox -parent $par -type ok -title Error -icon error -message "Invalid file name or path" -detail "Invalid file name/path:\n\n'$fn'\n\nLSD files must have no spaces in the file names nor in their directory path. Please rename the file and/or move it to a different directory."
 			return true
+		} else {
+			return false
 		}
 	}
 	return false

@@ -160,7 +160,7 @@ void log_tcl_error( const char *cm, const char *message )
 
 	time( &rawtime );
 	timeinfo = localtime( &rawtime );
-	strftime ( ftime, 80, "%F %T", timeinfo );
+	strftime ( ftime, 80, "%x %X", timeinfo );
 
 	if ( firstCall )
 	{

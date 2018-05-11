@@ -1113,7 +1113,7 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
 read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
-                          confFile = NULL, limFile = NULL,
+                          confFile = NULL, limFile = NULL, na.rm = FALSE,
                           iniDrop = 0, nKeep = -1, saveVars = c(  ),
                           addVars = c(  ), eval.vars = NULL, eval.run = NULL,
                           pool = TRUE, rm.temp = TRUE, rm.outl = FALSE,
@@ -1155,10 +1155,10 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   if( ! file.exists( respFile ) ) {
     write.response( folder, baseName, outVar = outVar,
                         iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe( doeFile )[ 1 ],
+                        iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
                         nExp = size.doe( doeFile )[ 2 ],
                         addVars = addVars, eval.vars = eval.vars,
-                        saveVars = saveVars )
+                        eval.run = eval.run, saveVars = saveVars )
   } else
     cat( "Using existing response file...\n\n" )
 
@@ -1166,9 +1166,9 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
     write.response( folder, baseName, outVar = outVar,
                         iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
                         iniExp = size.doe( validFile )[ 1 ],
-                        nExp = size.doe( validFile )[ 2 ],
+                        nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
                         addVars = addVars, eval.vars = eval.vars,
-                        saveVars = saveVars )
+                        eval.run = eval.run, saveVars = saveVars )
   } else
     if( does > 1 )
       cat( "Using existing validation response file...\n\n" )

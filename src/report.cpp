@@ -145,7 +145,7 @@ cmd( "pack .w.s.e2.header.tlab .w.s.e2.header.tit -side left -padx 2" );
 cmd( "frame .w.s.e2.file" );
 cmd( "label .w.s.e2.file.tlab -text \"Get from file\"" );
 cmd( "entry .w.s.e2.file.tit -width 25 -state disabled -textvariable file2 -justify center" );
-cmd( "button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces $file2 .w ] { set file2 \"\" } }", exec_path );
+cmd( "button .w.s.e2.file.new -width 5 -state disabled -text Search -command { set file2 [ tk_getOpenFile -parent .w -title \"Load Description File\" -filetypes {{{All files} {*}} } -initialdir \"%s\" ]; if [ fn_spaces \"$file2\" .w ] { set file2 \"\" } }", exec_path );
 cmd( "pack .w.s.e2.file.tlab .w.s.e2.file.tit .w.s.e2.file.new -side left -padx 2" );
 
 cmd( "pack .w.s.e2.h .w.s.e2.header .w.s.e2.file -padx 5 -pady 2" );
@@ -183,7 +183,7 @@ cmd( "destroytop .w" );
 
 while ( strlen( equation_name ) == 0 || ( ffun = fopen( equation_name, "r" ) ) == NULL )
 {
-  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces $res . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
+  cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file '%s' not found\" -detail \"Press 'OK' to select another file.\"]; if [ string equal $answer ok ] { set res [ file tail [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir [pwd] -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ] ]; if [ fn_spaces \"$res\" . ] { set res \"\" }; set choice 1 } { set choice 2 }", equation_name );
 
 if ( *choice == 1 )
 {

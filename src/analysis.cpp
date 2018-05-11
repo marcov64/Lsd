@@ -1636,7 +1636,7 @@ while ( true )
 					cmd( "cd \"$path\"" );
 			
 				cmd( "set lab [tk_getOpenFile -parent .da -title \"Load Results File\" -multiple yes -initialdir \"$path\" -filetypes {{{LSD result files} {%s}} {{LSD total files} {%s}} {{All files} {*}} }]", extRes, extTot );
-				cmd( "if { ! [ fn_spaces $lab .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
+				cmd( "if { ! [ fn_spaces \"$lab\" .da 1 ] } { set choice [ llength $lab ] } { set choice 0 }" );
 				if ( *choice == 0 )
 					break; 			// no file selected
 			
@@ -2081,7 +2081,7 @@ while ( true )
 					cmd( "cd \"$path\"" );
 
 				cmd( "set fname [tk_getOpenFile -parent .da -title \"Load Report File\" -defaultextension \".html\" -initialdir \"$path\" -filetypes {{{HTML files} {.html}} {{All files} {*}} }]" );
-				cmd( "if { $fname == \"\" || [ fn_spaces $fname .da ] } { set choice 0 } { set choice 1 }" );
+				cmd( "if { $fname == \"\" || [ fn_spaces \"$fname\" .da ] } { set choice 0 } { set choice 1 }" );
 				if ( *choice == 0 )
 					break;
 			}

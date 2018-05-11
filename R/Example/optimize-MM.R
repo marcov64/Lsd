@@ -19,7 +19,7 @@ minPar <- model.optim.lsd( mModel,                           # estimated kriging
                            lower.domain = dataSet$facLimLo,  # minimum values for all factors
                            upper.domain = dataSet$facLimUp,  # maximum values for all factors
                            starting.values = dataSet$facDef, # calibration values for all factors
-                           minimize = FALSE )
+                           minimize = TRUE )
 
 
 # ====== Find the meta-model predicted maximum and minimum values ======
@@ -43,16 +43,22 @@ library( gplots )           # package for plotting tables
 
 # ====== Present meta-model selection details ======
 
+  mClass <- class( mModel )   
+  if ( mClass == "polynomial-model" )     # adjust the table header
+    colNames <- TRUE
+  else
+    colNames <- FALSE
+
 # ------ Model comparison table ------
 
 textplot( signif( mModel$comparison, 4 ), rmar = 1 )
-title( main = "Comparison of alternative kriging models",
+title( main = paste( "Comparison of alternative models (", mClass, ")" ),
        sub = "Q2: cross validation Q2 ( higher is better )\nRMSE/MAE/RMA: external validation RMSE/MAE/RMA ( lower is better )" )
 
 # ------ Model estimation table ------
 
-textplot( mModel$estimation.std, show.colnames = FALSE, cmar = 2, rmar = 1 )
-title( main = "Kriging meta-model estimation (standardized)",
+textplot( mModel$estimation.std, show.colnames = colNames, cmar = 2, rmar = 1 )
+title( main = "Meta-model estimation (standardized)",
        sub = paste0( "All variables rescaled to [ 0, 1 ]" ) )
 
 
@@ -96,7 +102,7 @@ for( k in c( TRUE, FALSE ) ) {            # minimize and maximize
   }
 
   textplot( print, show.colnames = FALSE, cex = 1 )
-  title( main = paste( "Settings for", label, "kriging meta-model" ),
+  title( main = paste( "Settings for", label, "meta-model (", mClass, ")" ),
          sub = paste( "Predicted output at optimal setting:",
                       dataSet$saVarName, "=", round( pred$mean, digits = 2 ) ) )
 
