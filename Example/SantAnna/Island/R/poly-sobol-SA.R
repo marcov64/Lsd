@@ -29,7 +29,7 @@ raster <- FALSE                       # raster or vector plots
 res <- 600                            # resolution of raster mode (in dpi)
 
 grid3d <- 25                          # density for 3D wireframe plots
-theta3d <- 220                        # horizontal view angle
+theta3d <- 40                         # horizontal view angle
 phi3d <- 30                           # vertical view angle
 
 
@@ -59,7 +59,7 @@ eval.vars <- function( dataSet, allVars ) {
   # ---- Calculate values of new variables (added to LSD dataset) ----
 
   if ( dataSet[ tsteps, "Q" ] > 0 && dataSet[ 1, "Q" ] > 0 )
-    dataSet[ , "gM" ] <- ( log( dataSet[ tsteps, "Q" ] )  + log( dataSet[ 1, "Q" ] ) ) / tsteps
+    dataSet[ , "gM" ] <- ( log( dataSet[ tsteps, "Q" ] ) - log( dataSet[ 1, "Q" ] ) ) / tsteps
   else
     dataSet[ , "gM" ] <- 0
 

@@ -90,13 +90,13 @@ Param: simSpeed 0 n + n n	0
 Param: sizeLattice 0 n + n n	0
 
 Object: Sea C	1
-Param: N 0 n + n n	1000
-Param: alpha 0 n + n n	1
-Param: epsilon 0 n + n n	1
-Param: phi 0 n + n n	0
-Param: lambda 0 n + n n	2.33333
-Param: pi 0 n + n n	0.4
-Param: rho 0 n + n n	10
+Param: N 0 n + n n	100
+Param: alpha 0 n + n n	1.5
+Param: epsilon 0 n + n n	0.1
+Param: phi 0 n + n n	0.5
+Param: lambda 0 n + n n	1
+Param: pi 0 n + n n	0.1
+Param: rho 0 n + n n	0.1
 Param: l0radius 0 n + n n	0
 Param: minSgnPrb 0 n + n n	0.01
 Param: seaShown 0 n + n n	0

@@ -53,7 +53,7 @@ eval.vars <- function( dataSet, allVars ) {
   # ---- Calculate values of new variables (added to LSD dataset) ----
 
   if ( dataSet[ tsteps, "Q" ] > 0 && dataSet[ 1, "Q" ] > 0 )
-    dataSet[ , "gM" ] <- ( log( dataSet[ tsteps, "Q" ] )  + log( dataSet[ 1, "Q" ] ) ) / tsteps
+    dataSet[ , "gM" ] <- ( log( dataSet[ tsteps, "Q" ] ) - log( dataSet[ 1, "Q" ] ) ) / tsteps
   else
     dataSet[ , "gM" ] <- 0
 
