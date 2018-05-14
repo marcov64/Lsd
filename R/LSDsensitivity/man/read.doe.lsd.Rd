@@ -9,8 +9,8 @@ This function reads the sampling data produced by a LSD model design of experime
 \usage{
 read.doe.lsd(folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL,
              validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
-             iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(),
-             eval.vars = NULL, eval.run = NULL, pool = TRUE, rm.temp = TRUE,
+             iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
+             eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
              rm.outl = FALSE, lim.outl = 10)
 }
 \arguments{
@@ -64,6 +64,9 @@ a function to evaluate the DoE response for each experimental point, attributing
 }
   \item{pool}{
 logical: if TRUE then create a simpler data array, pooling together all non-NA Monte Carlo values from a single run for each variable. If FALSE (default) keep each Monte Carlo instance separated.
+}
+  \item{na.rm}{
+logical: if TRUE NA values are stripped before the computation proceeds.
 }
   \item{rm.temp}{
 logical: if TRUE then remove temporary speed up files. If FALSE (default), do not remove temporary speed up files, allowing fast execution of subsequent call to this function. Please note that the user \emph{must} remove temporary files (extension \code{.Rdata}) manually whenever LSD data files are updated.

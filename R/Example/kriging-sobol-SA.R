@@ -126,6 +126,14 @@ title( main = "Kriging meta-model estimation (standardized)",
                      round( mResp$default$lower, digits = 2 ), ",",
                      round( mResp$default$upper, digits = 2 ), "]" ) )
 
+					 
+# ====== Sobol sensitivity analysis results ======
+
+# ------ Sobol sensitivity analysis table ------
+
+textplot( signif( sSA$sa, 4 ) )
+title( main = "Sobol decomposition sensitivity analysis" )
+
 # ------ Sobol sensitivity analysis chart ------
 
 barplot( t( sSA$sa ), col = c( "white", "gray" ), las = 2, ylim = c( 0, 1 ),

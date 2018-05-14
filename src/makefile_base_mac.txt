@@ -53,7 +53,7 @@ $(SRC_DIR)edit.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)edit
 $(SRC_DIR)edit_dat.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt  $(SRC_DIR)edit_dat.cpp $(SRC_DIR)decl.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)edit_dat.cpp -o $(SRC_DIR)edit_dat.o $(INCLUDE)
 
-$(SRC_DIR)set_all.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)set_all.cpp $(SRC_DIR)decl.h
+$(SRC_DIR)set_all.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)set_all.cpp $(SRC_DIR)decl.h $(SRC_DIR)nolh.h
 	$(CC) $(GLOBAL_CC) $(SSWITCH_CC) -c $(SRC_DIR)set_all.cpp -o $(SRC_DIR)set_all.o $(INCLUDE)
 
 $(SRC_DIR)draw.o: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)draw.cpp $(SRC_DIR)decl.h

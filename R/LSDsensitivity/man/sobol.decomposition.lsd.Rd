@@ -7,14 +7,14 @@ Sobol variance decomposition sensitivity analysis
 This function performs the global sensitivity analysis of a previously fitted meta-model using the Sobol variance decomposition method (Saltelli et al., 2008).
 }
 \usage{
-sobol.decomposition.lsd(data, model, krig.sa = FALSE, sa.samp = 1000)
+sobol.decomposition.lsd(data, model = NULL, krig.sa = FALSE, sa.samp = 1000)
 }
 \arguments{
   \item{data}{
 an object created by a previous call to \code{\link{read.doe.lsd}} which contains all the required experimental data for the analysis.
 }
   \item{model}{
-an object created by a previous call to \code{\link{kriging.model.lsd}} or \code{\link{polynomial.model.lsd}} which contains the meta-model estimated hyper-parameters.
+an object created by a previous call to \code{\link{kriging.model.lsd}} or \code{\link{polynomial.model.lsd}} which contains the meta-model estimated hyper-parameters. If no model is supplied (the default), performs the decomposition directly over the experimental data.
 }
   \item{krig.sa}{
 logical: use alternative Kriging-specific algorithm if TRUE (see \code{\link[sensitivity]{sobolGP}}). Default is FALSE. Applicable only to Kriging meta-models.

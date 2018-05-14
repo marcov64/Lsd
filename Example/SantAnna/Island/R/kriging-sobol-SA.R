@@ -18,7 +18,7 @@ library( LSDsensitivity )
 folder   <- "sa-sobol"                # data files folder
 baseName <- "sobol"                   # data files base name (same as .lsd file)
 varName <- "gM"                       # variable to perform the sensitivity analysis on
-iniDrop <- 100                        # initial time steps to drop from analysis (0=none)
+iniDrop <- 0                          # initial time steps to drop from analysis (0=none)
 nKeep <- -1                           # number of time steps to keep (-1=all)
 
 plotRows <- 1                         # number of plots per row in a page
@@ -29,14 +29,14 @@ raster <- FALSE                       # raster or vector plots
 res <- 600                            # resolution of raster mode (in dpi)
 
 grid3d <- 25                          # density for 3D wireframe plots
-theta3d <- 40                         # horizontal view angle
-phi3d <- 30                           # vertical view angle
+theta3d <- 230                        # horizontal view angle
+phi3d <- 20                           # vertical view angle
 
 
 # ==== LSD variables to use (all, the ones to be used in log and new) ====
 
 lsdVars <- c( "Q", "g", "l", "m", "J" )
-logVars <- c( "Q" )
+logVars <- c( )
 newVars <- c( "gM" )
 
 
@@ -45,21 +45,10 @@ newVars <- c( "gM" )
 eval.vars <- function( dataSet, allVars ) {
   tsteps <- nrow( dataSet )        # number of timesteps in simulated data set
 
-  # ---- Recompute values for existing variables ----
-
-  for( var in allVars ) {
-    if( var %in% logVars ) {    # take the log values of selected variables
-      if( dataSet[ , var ] > 0 )
-        dataSet[ , var ] <- log( dataSet[ , var ] )
-      else
-        dataSet[ , var ] <- 0
-    }
-  }
-
   # ---- Calculate values of new variables (added to LSD dataset) ----
 
-  if ( dataSet[ tsteps, "Q" ] > 0 && dataSet[ 1, "Q" ] > 0 )
-    dataSet[ , "gM" ] <- ( log( dataSet[ tsteps, "Q" ] ) - log( dataSet[ 1, "Q" ] ) ) / tsteps
+  if ( dataSet[ tsteps, "Q" ] > 0 )
+    dataSet[ , "gM" ] <- log( dataSet[ tsteps, "Q" ] ) / tsteps
   else
     dataSet[ , "gM" ] <- 0
 
@@ -143,12 +132,12 @@ tryCatch( {    # enter error handling mode so PDF can be closed in case of error
   # Select type of output
   if( raster ){
     # Open PNG (bitmap) files for output
-    png( paste0( folder, "/", outDir, "/", baseName, "_k_sobol_%d.png" ),
+    png( paste0( folder, "/", outDir, "/", baseName, "_kriging_sobol_%d.png" ),
          width = plotW, height = plotH, units = "in", res = res )
 
   } else {
     # Open PDF plot file for output
-    pdf( paste0( folder, "/", outDir, "/", baseName, "_k_sobol_plots.pdf" ),
+    pdf( paste0( folder, "/", outDir, "/", baseName, "_kriging_sobol_plots.pdf" ),
          width = plotW, height = plotH )
     par( mfrow = c ( plotRows, plotCols ) )             # define plots per page
   }
@@ -170,6 +159,14 @@ tryCatch( {    # enter error handling mode so PDF can be closed in case of error
                        dataSet$saVarName, " = ", round( mResp$default$mean, digits = 2 ), " / 95% CI = [",
                        round( mResp$default$lower, digits = 2 ), ",",
                        round( mResp$default$upper, digits = 2 ), "]" ) )
+
+
+  # ====== Sobol sensitivity analysis results ======
+
+  # ------ Sobol sensitivity analysis table ------
+
+  textplot( signif( sSA$sa, 4 ) )
+  title( main = "Sobol decomposition sensitivity analysis" )
 
   # ------ Sobol sensitivity analysis chart ------
 

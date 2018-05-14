@@ -314,12 +314,15 @@ factor.lists <- function( data, sa, grid ) {
 
 # ==== Do sensitivity analysis of a fitted model ====
 
-sobol.decomposition.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) {
+sobol.decomposition.lsd <- function( data, model = NULL, krig.sa = FALSE, sa.samp = 1000 ) {
 
-  if( class( model ) == "kriging-model" )
-    out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
+  if( is.null( model ) )
+    out <- data.sensitivity( data )
   else
-    out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
+    if( class( model ) == "kriging-model" )
+      out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
+    else
+      out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
 
   return( out )
 }
@@ -330,7 +333,8 @@ sobol.decomposition.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 100
 
 model.pred.lsd <- function( data.point, model ) {
 
-  if( is.na( data.point[ 1 ] ) )
+  x <- is.na( data.point[ 1, ] )
+  if( length( x[ x == TRUE ] ) > 0 )
     return( NULL )
 
   if( class( model ) == "kriging-model" ) {
@@ -1113,11 +1117,10 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
 read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
-                          confFile = NULL, limFile = NULL, na.rm = FALSE,
-                          iniDrop = 0, nKeep = -1, saveVars = c(  ),
-                          addVars = c(  ), eval.vars = NULL, eval.run = NULL,
-                          pool = TRUE, rm.temp = TRUE, rm.outl = FALSE,
-                          lim.outl = 10 ) {
+                          confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
+                          saveVars = c(  ), addVars = c(  ), eval.vars = NULL,
+                          eval.run = NULL, pool = TRUE, na.rm = FALSE,
+                          rm.temp = TRUE, rm.outl = FALSE, lim.outl = 10 ) {
 
   # ---- Process LSD result files ----
 
@@ -1154,21 +1157,21 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   # If response files don't exist, try to create them
   if( ! file.exists( respFile ) ) {
     write.response( folder, baseName, outVar = outVar,
-                        iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
-                        nExp = size.doe( doeFile )[ 2 ],
-                        addVars = addVars, eval.vars = eval.vars,
-                        eval.run = eval.run, saveVars = saveVars )
+                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
+                    iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
+                    nExp = size.doe( doeFile )[ 2 ],
+                    addVars = addVars, eval.vars = eval.vars,
+                    eval.run = eval.run, saveVars = saveVars )
   } else
     cat( "Using existing response file...\n\n" )
 
   if( does > 1 && ! file.exists( valRespFile ) ) {
     write.response( folder, baseName, outVar = outVar,
-                        iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe( validFile )[ 1 ],
-                        nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
-                        addVars = addVars, eval.vars = eval.vars,
-                        eval.run = eval.run, saveVars = saveVars )
+                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
+                    iniExp = size.doe( validFile )[ 1 ],
+                    nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
+                    addVars = addVars, eval.vars = eval.vars,
+                    eval.run = eval.run, saveVars = saveVars )
   } else
     if( does > 1 )
       cat( "Using existing validation response file...\n\n" )
@@ -1239,6 +1242,42 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   class( doe ) <- "lsd-doe"
 
   return( doe )
+}
+
+
+# ==== Perform sensitivity analysis directly over data ====
+
+data.sensitivity <- function( data ) {
+
+  # ---- Sensitivity analysis using a B-spline smoothing interpolation model ----
+
+  metamodel <- sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe )
+
+  mainEffect <- function( x ) x$S[ , 1 ]
+
+  # algorithm provide only the main effects, so distribute the indirect effects evenly (approx.)
+  totalEffect <- ( 1 - sum( mainEffect( metamodel ) ) )
+  sa <- cbind( mainEffect( metamodel ),
+               mainEffect( metamodel ) * totalEffect / sum( mainEffect( metamodel ) ) )
+
+  rownames( sa ) <- colnames( data$doe )
+  colnames( sa ) <- c( "Direct effects", "Interactions" )
+
+  max.index <- function( x, pos = 1 )
+    as.integer( sapply( sort( x, index.return = TRUE ), `[`, length( x ) - pos + 1 )[ 2 ] )
+
+  topEffect <- c( max.index( mainEffect( metamodel ), 1 ), max.index( mainEffect( metamodel ), 2 ),
+                  max.index( mainEffect( metamodel ), 3 ) )
+
+  cat( "Top parameters influencing response surface:\n" )
+  cat( " First:", colnames( data$doe )[ topEffect[ 1 ] ], "\n" )
+  cat( " Second:", colnames( data$doe )[ topEffect[ 2 ] ], "\n" )
+  cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
+
+  sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
+  class( sa ) <- "b-spline-sa"
+
+  return( sa )
 }
 
 
@@ -1472,7 +1511,7 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
                          upr.bound = data$facLimUp )
 
     metamodel <- sensitivity::sobolGP( model = model$selected, type = "UK", X1 = X1, X2 = X2,
-                                       MCmethod = "soboljensen", nboot = 100 )
+                                       MCmethod = "soboljansen", nboot = 100 )
     mainEffect <- function( x ) x$S$mean
     totEffect <- function( x ) x$T$mean
   } else {

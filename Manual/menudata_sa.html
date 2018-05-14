@@ -223,16 +223,15 @@ div.WordSection1
 
 <p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
 
-<p class=MsoNormal><a href="LSD_faqs.html#sa">Sensitivity analysis</a>
-(SA) allows the user to generate one or more <a
-href="LSD_faqs.html#modelsetting">model configuration(s)</a> with a different
-combination of the initialization values for <a
-href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a>. SA is typically
-done to evaluate how uncertainty in the results of a <a
-href="LSD_faqs.html#simulationrun">simulation run</a> can be
-apportioned to the sources of uncertainty in the model <a
-href="LSD_faqs.html#equation">Equations</a> and configuration. </p>
+<p class=MsoNormal><a href="LSD_faqs.html#sa">Sensitivity analysis</a> (SA)
+allows the user to generate one or more <a href="LSD_faqs.html#modelsetting">model
+configuration(s)</a> with a different combination of the initialization values
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a>. SA is typically done to
+evaluate how uncertainty in the results of a <a
+href="LSD_faqs.html#simulationrun">simulation run</a> can be apportioned to the
+sources of uncertainty in the model <a href="LSD_faqs.html#equation">Equations</a>
+and configuration. </p>
 
 <p class=MsoNormal>When the number of elements involved in the SA is large or
 the number of values for each element is significant, the manual assignment of
@@ -255,14 +254,14 @@ different SA approaches.</p>
 <h1><a name="_SA_workflow"></a>SA workflow</h1>
 
 <p class=MsoNormal>The idea behind SA is the exploration of the model <a
-href="LSD_faqs.html#simulationrun">simulation results</a>, provided by
-its <a href="LSD_faqs.html#variable">Variables</a>, according to
-different <a href="LSD_faqs.html#modelsetting">initialization values</a>
-for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> (the factors, in SA
-terms). Comprehensive SA usually goes beyond simply changing initialization
-values one at a time and involves modifying multiple values for several factors
-at once, in a (likely complicated) combinatorial process. </p>
+href="LSD_faqs.html#simulationrun">simulation results</a>, provided by its <a
+href="LSD_faqs.html#variable">Variables</a>, according to different <a
+href="LSD_faqs.html#modelsetting">initialization values</a> for <a
+href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> (the factors, in SA terms).
+Comprehensive SA usually goes beyond simply changing initialization values one
+at a time and involves modifying multiple values for several factors at once,
+in a (likely complicated) combinatorial process. </p>
 
 <p class=MsoNormal>For example, suppose your model includes Parameter A and
 Parameter B (the factors), each with only one instance in the model. If you
@@ -279,11 +278,10 @@ class=Cdigo>4</span>), (<span class=Cdigo>7</span>,<span class=Cdigo>2</span>),
 approach is our design of experiments (DoE) and the ensuing combinations list
 represents the points in the sampling set. In LSD, to perform the SA of your
 model using this DoE you need to generate 8 different <span class=Cdigo>.lsd</span>
-<a href="LSD_faqs.html#modelsetting">model configuration</a> files,
-each one assigned to a sampling point, <a
-href="LSD_faqs.html#simulationrun">run the simulation</a> for each
-configuration file, and <a href="LSD_faqs.html#results">compare the
-results</a> obtained for the sampling set composing the DoE.</p>
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files, each one
+assigned to a sampling point, <a href="LSD_faqs.html#simulationrun">run the
+simulation</a> for each configuration file, and <a href="LSD_faqs.html#results">compare
+the results</a> obtained for the sampling set composing the DoE.</p>
 
 <p class=MsoNormal>Also note that, because of the “combinatorics curse”, the
 full exploration of the entire parametric space – a factorial DoE – is
@@ -295,13 +293,13 @@ two approaches are usually employed: sampling the factorial DoE or using a
 high-efficiency DoE.</p>
 
 <p class=MsoNormal>LSD offers a full set of tools to perform sophisticated <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), divided in two
-groups. The first one covers the sampling methods (DoE’s) required to collect
-samples of the model’s results across its parametric space (i.e., sets of the
-possible combinations of the <a href="LSD_faqs.html#modelsetting">initialization
-values</a> for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a>). LSD supports
-several DoE strategies: <a href="#_Full_sampling_SA_1">full factorial</a>, <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), divided in two groups.
+The first one covers the sampling methods (DoE’s) required to collect samples
+of the model’s results across its parametric space (i.e., sets of the possible
+combinations of the <a href="LSD_faqs.html#modelsetting">initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a>). LSD supports several DoE
+strategies: <a href="#_Full_sampling_SA_1">full factorial</a>, <a
 href="#_MC_point_sampling">Monte Carlo sampled factorial</a>, <a
 href="#_EE_sampling_SA">elementary effects</a>, and <a href="#_NOLH_sampling_SA">near-orthogonal
 Latin hypercube</a>. The second group of SA tools is targeted on performing the
@@ -315,23 +313,23 @@ the minimum steps to perform SA on a working LSD model.</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>1.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>In <a
-href="LMM.html">LMM</a> create a no-window (command prompt) version of
-your model by selecting menu <span class=Cdigo><a href="LMM.html">Model&gt;Create
+href="LMM.html">LMM</a> create a no-window (command prompt) version of your
+model by selecting menu <span class=Cdigo><a href="LMM.html">Model&gt;Create
 'No Window' Version</a></span>. This special version of the <a
-href="LSD_faqs.html#modelprogram">LSD model program</a> will be
-required to process your SA configurations as fast as possible, likely in
-parallel. Make sure to update (<a href="LSD_faqs.html#compiler">recompile</a>)
-the no-window version of your model before performing the SA every time you
-change your <a href="LSD_faqs.html#equationfile">equation file</a>.</p>
+href="LSD_faqs.html#modelprogram">LSD model program</a> will be required to
+process your SA configurations as fast as possible, likely in parallel. Make
+sure to update (<a href="LSD_faqs.html#compiler">recompile</a>) the no-window
+version of your model before performing the SA every time you change your <a
+href="LSD_faqs.html#equationfile">equation file</a>.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span>In LSD Browser make sure that all initialization values for Parameters
 and lagged Variables are set with the correct “calibration” (default) values
-(menu <span class=Cdigo><a href="menudata_init.html">Data&gt;Initial
-Values</a></span> or <span class=Cdigo>Initial Values</span> in the right mouse
-button context menu), that all the required result Variables are being saved
-(menu <span class=Cdigo><a href="browser.html#changeelement">Model&gt;Change</a></span>
+(menu <span class=Cdigo><a href="menudata_init.html">Data&gt;Initial Values</a></span>
+or <span class=Cdigo>Initial Values</span> in the right mouse button context
+menu), that all the required result Variables are being saved (menu <span
+class=Cdigo><a href="browser.html#changeelement">Model&gt;Change</a></span>
 Element or <span class=Cdigo>Save</span> in the right mouse button context
 menu) and the number of desired Monte Carlo runs (if stochastic components are
 present) for each SA sample (point) is defined (menu <span class=Cdigo><a
@@ -341,11 +339,10 @@ href="menurun.html">Run&gt;Simulation Settings</a></span>). </p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Save your
 “calibration” set up in a baseline <span class=Cdigo>.lsd</span> <a
 href="LSD_faqs.html#modelsetting">model configuration</a> file (menu <span
-class=Cdigo><a href="menufile.html">File&gt;Save As</a></span>),
-preferably in a new folder inside your current model configuration folder (you
-can create a new folder while in the Save As dialog box). The SA process
-creates many files and it is recommended to keep them in a dedicated
-subdirectory.</p>
+class=Cdigo><a href="menufile.html">File&gt;Save As</a></span>), preferably in
+a new folder inside your current model configuration folder (you can create a
+new folder while in the Save As dialog box). The SA process creates many files
+and it is recommended to keep them in a dedicated subdirectory.</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>4.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>(Re)load your
@@ -369,14 +366,14 @@ class=Cdigo><a href="menufile.html">File&gt;Save Sensitivity</a></span>).</p>
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>With both <span
 class=Cdigo>.lsd</span> and <span class=Cdigo>.sa</span> files loaded (use menu
 <span class=Cdigo><a href="menufile.html">File&gt;Load</a></span> and <span
-class=Cdigo><a href="menufile.html">File&gt;Load Sensitivity</a></span>
-if required), select menu <span class=Cdigo>Data&gt;Sensitivity
-Analysis&gt;XXXX</span>, replacing XXXX by the desired SA type (see options
-below), check the proposed defaults, and modify the required configuration
-values, if required (the defaults are usually adequate). When you click <span
-class=Cdigo>OK</span>, several new <span class=Cdigo>.lsd</span> configuration
-files will be created in your baseline configuration subdirectory (those are
-the sample points to be explored in the SA exercise).</p>
+class=Cdigo><a href="menufile.html">File&gt;Load Sensitivity</a></span> if
+required), select menu <span class=Cdigo>Data&gt;Sensitivity Analysis&gt;XXXX</span>,
+replacing XXXX by the desired SA type (see options below), check the proposed
+defaults, and modify the required configuration values, if required (the
+defaults are usually adequate). When you click <span class=Cdigo>OK</span>,
+several new <span class=Cdigo>.lsd</span> configuration files will be created
+in your baseline configuration subdirectory (those are the sample points to be
+explored in the SA exercise).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:72.0pt;text-indent:-18.0pt'>a.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
@@ -389,12 +386,11 @@ sampling points).</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>8.<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Immediately
-after the previous step, select menu <span class=Cdigo><a
-href="menurun.html">Run&gt;Create/Start Parallel Batch</a></span>,
-accept using the just created configuration, adjust the number of cores (only
-if going to run in another machine), and decide if you want to start the
-(time-consuming) processing right now or later (in the current or in another
-machine).</p>
+after the previous step, select menu <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+Parallel Batch</a></span>, accept using the just created configuration, adjust
+the number of cores (only if going to run in another machine), and decide if
+you want to start the (time-consuming) processing right now or later (in the
+current or in another machine).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:72.0pt;text-indent:-18.0pt'>a.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
@@ -418,12 +414,12 @@ contents of the created <span class=Cdigo>.log</span> file(s) created in your
 baseline directory.</p>
 
 <p class=MsoNormal>As soon as all the LSD <span class=Cdigo>.res[.gz]</span> <a
-href="LSD_faqs.html#results">results files</a> are generated (check the
-<span class=Cdigo>.log</span> files), the produced SA data can be directly
-imported in R or any other data analysis package. Basic SA can be performed in
-LSD, using the <a href="menudata_res.html">Analysis of Results window
-tools</a> to load the results files from disk and compare results from
-different initialization configurations. </p>
+href="LSD_faqs.html#results">results files</a> are generated (check the <span
+class=Cdigo>.log</span> files), the produced SA data can be directly imported
+in R or any other data analysis package. Basic SA can be performed in LSD,
+using the <a href="menudata_res.html">Analysis of Results window tools</a> to
+load the results files from disk and compare results from different
+initialization configurations. </p>
 
 <p class=MsoNormal>When using R, more sophisticated, ready to use tools to
 perform Elementary Effects (EE) SA and Sobol variance decomposition (SVD) SA
@@ -445,18 +441,17 @@ package</a> section below, including the follow up of this workflow.</p>
 
 <p class=MsoNormal>The first step to set up a sensitivity analysis (SA)
 consists in defining the elements (<a href="LSD_faqs.html#parameter">Parameters</a>
-and <a href="LSD_faqs.html#variable">lagged Variables</a>) and the
-respective <a href="LSD_faqs.html#modelsetting">initialization values</a>
-to be explored. Any model element requiring an initialization value can be
-included in a SA experiment. Any number of elements can be added to a SA
-experiment.</p>
+and <a href="LSD_faqs.html#variable">lagged Variables</a>) and the respective <a
+href="LSD_faqs.html#modelsetting">initialization values</a> to be explored. Any
+model element requiring an initialization value can be included in a SA
+experiment. Any number of elements can be added to a SA experiment.</p>
 
 <p class=MsoNormal>Elements are included for SA by defining at least two
 different values in which each element should be explored. The definition of
 exploration values is done in the Sensitivity Analysis entry window, shown
 below. The SA window can be open by selecting the button <span class=Cdigo>Sensitivity</span>
-in the <a href="browser.html#changeelement">Change Element</a> window
-(double click on the element, or using the menu <span class=Cdigo>Model&gt;Change
+in the <a href="browser.html#changeelement">Change Element</a> window (double
+click on the element, or using the menu <span class=Cdigo>Model&gt;Change
 Element</span>, or selecting <span class=Cdigo>Change</span> in the context
 menu, or yet pressing <span class=Cdigo>Enter</span> when the element name is
 selected) or right-clicking on the element in the <a
@@ -543,17 +538,16 @@ initialization values for elements assumed to take integers only.</p>
 
 <p class=MsoNormal>It should be noted that the values set for Parameters and
 lagged Variables SA <b>ARE NOT</b> saved in the regular <span class=Cdigo>.lsd</span>
-<a href="LSD_faqs.html#modelsetting">model configuration</a> files,
-because each configuration can be tested under different SA strategies. To save
-SA test values, the user should use the menu option <span class=Cdigo><a
-href="menufile.html">File&gt;Save Sensitivity</a></span> and select a
-name for the SA configuration. Similarly, existing SA configuration data is not
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files, because
+each configuration can be tested under different SA strategies. To save SA test
+values, the user should use the menu option <span class=Cdigo><a
+href="menufile.html">File&gt;Save Sensitivity</a></span> and select a name for
+the SA configuration. Similarly, existing SA configuration data is not
 automatically loaded when the user loads a <span class=Cdigo>.lsd</span>
 configuration. The menu option <span class=Cdigo><a href="menufile.html">File&gt;Load
 Sensitivity</a></span> has to be used when required. Also notice that SA test
 values are lost whenever a model configuration file is (re)loaded or unloaded.
-Check <a href="menufile.html">here</a> for more details on LSD file
-operations.</p>
+Check <a href="menufile.html">here</a> for more details on LSD file operations.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -569,33 +563,31 @@ operations.</p>
 <h1><a name="_Full_sampling_SA"></a>Full sampling SA (online)</h1>
 
 <p class=MsoNormal>This command produces a full factorial design of experiment
-(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA),
-where all combinations of the <a href="#_Configuring_values">configured test
-initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
-and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
-Differently from the other DoE methods, this one modifies the current <a
-href="LSD_faqs.html#modelstructure">model structure</a> to create a
-single <a href="LSD_faqs.html#modelsetting">model configuration</a>
-containing as many copies of the original model structure as necessary by the
-factorial combinatorics. It is appropriate to quickly analyze the SA of few
-elements without requiring more sophisticated batch/parallel processing.</p>
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
+of the <a href="#_Configuring_values">configured test initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
+from the other DoE methods, this one modifies the current <a
+href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
+href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
+copies of the original model structure as necessary by the factorial
+combinatorics. It is appropriate to quickly analyze the SA of few elements
+without requiring more sophisticated batch/parallel processing.</p>
 
 <p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, LSD would
 generate 8 different instances of the entire model structure directly
 descending from the <span class=Cdigo>Root</span> Object, in a single model
 configuration. Of course, there will be now 8 instances of the <a
-href="LSD_faqs.html#object">Object(s)</a> containing the Parameters A
-and B, each copy including a different combination of their initialization
-values.</p>
+href="LSD_faqs.html#object">Object(s)</a> containing the Parameters A and B,
+each copy including a different combination of their initialization values.</p>
 
 <p class=MsoNormal>Please note that the modified model structure is not saved
 or renamed. After creating the new structure, appropriate to run quick SA
-analysis online in the <a href="browser.html">LSD Browser</a>, the user
-most likely should save the modified model structure as a new model
-configuration (using menu option <span class=Cdigo><a
-href="menufile.html">File&gt;Save As</a></span>). Otherwise, the
-current configuration file would be overwritten by default when the generated
-SA configuration is run.</p>
+analysis online in the <a href="browser.html">LSD Browser</a>, the user most
+likely should save the modified model structure as a new model configuration
+(using menu option <span class=Cdigo><a href="menufile.html">File&gt;Save As</a></span>).
+Otherwise, the current configuration file would be overwritten by default when
+the generated SA configuration is run.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -611,15 +603,15 @@ SA configuration is run.</p>
 <h1><a name="_Full_sampling_SA_1"></a>Full sampling SA (batch)</h1>
 
 <p class=MsoNormal>This command produces a full factorial design of experiment
-(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA),
-where all combinations of the <a href="#_Configuring_values">configured test
-initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
-and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
-Differently from the <a href="#_Full_sampling_SA">online version</a>, the batch
-method creates multiple <span class=Cdigo>.lsd</span> <a
-href="LSD_faqs.html#modelsetting">model configuration</a> files, each
-one containing one copy of the original model structure configured as necessary
-by the factorial combinatorics. It is appropriate to perform the SA of larger
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
+of the <a href="#_Configuring_values">configured test initialization values</a>
+for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
+from the <a href="#_Full_sampling_SA">online version</a>, the batch method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files, each one
+containing one copy of the original model structure configured as necessary by
+the factorial combinatorics. It is appropriate to perform the SA of larger
 number of elements or test values, benefiting from the acceleration provided by
 more sophisticated batch/parallel processing.</p>
 
@@ -637,10 +629,9 @@ the remaining set of elements to perform the batch full SA.</p>
 
 <p class=MsoNormal>After executing this command, a certain number of <span
 class=Cdigo>.lsd</span> configuration files will be generated, as informed in
-the <a href="log.html">Log window</a>. Before the analysis can be
-concluded, they have to be run to produce <a
-href="LSD_faqs.html#results">simulation results</a>. Usually, the menu
-command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+the <a href="log.html">Log window</a>. Before the analysis can be concluded,
+they have to be run to produce <a href="LSD_faqs.html#results">simulation
+results</a>. Usually, the menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
 Parallel Batch</a></span> is the more convenient way to run the entire set of
 configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
 workflow</a> on how to proceed.</p>
@@ -659,12 +650,11 @@ workflow</a> on how to proceed.</p>
 <h1><a name="_MC_point_sampling"></a><a name=mcpoint></a>MC point sampling SA</h1>
 
 <p class=MsoNormal>This command produces a design of experiment (DoE) for <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a
-random fraction of a full factorial design (the Monte Carlo sample). A
-user-specified fraction of the combinations of the <a
-href="#_Configuring_values">configured test initialization values</a> for <a
-href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> is explored. The
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a random
+fraction of a full factorial design (the Monte Carlo sample). A user-specified
+fraction of the combinations of the <a href="#_Configuring_values">configured
+test initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a> is explored. The
 selected combinations are taken randomly. The method creates multiple <span
 class=Cdigo>.lsd</span> <a href="LSD_faqs.html#modelsetting">model
 configuration</a> files each one containing one copy of the original model
@@ -676,12 +666,12 @@ src="image/sa_mc_point.png"></p>
 <p class=MsoNormal>The user specifies the Monte Carlo sample size as a
 percentage (0 to 100), in a dialog box like the one depicted above. Large
 sample sizes are only recommended when there are few elements and values for
-the SA. Note that LSD shows in the <a href="log.html">Log window</a>
-the total number of combinations in a full factorial design, over which the
-provided percentage is applied to calculate the target number of points to
-sample. The provided factor should be large enough to produce (in average) at
-least one sample. The final number of configurations produced may be somewhat
-smaller or larger than the target number.</p>
+the SA. Note that LSD shows in the <a href="log.html">Log window</a> the total
+number of combinations in a full factorial design, over which the provided
+percentage is applied to calculate the target number of points to sample. The
+provided factor should be large enough to produce (in average) at least one
+sample. The final number of configurations produced may be somewhat smaller or
+larger than the target number.</p>
 
 <p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, if you set
 the MC sample size to 50%, LSD would generate, in average, 4 different <span
@@ -692,8 +682,8 @@ combinations for the initialization values of the Parameters A and B.</p>
 <p class=MsoNormal>After executing this command, a certain number of <span
 class=Cdigo>.lsd</span> configuration files will be generated, as informed in
 the Log window. Before the analysis can be concluded, they have to be run to
-produce <a href="LSD_faqs.html#results">simulation results</a>.
-Usually, the menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
 Parallel Batch</a></span> is the more convenient way to run the entire set of
 configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
 workflow</a> on how to proceed.</p>
@@ -712,15 +702,15 @@ workflow</a> on how to proceed.</p>
 <h1><a name="_MC_range_sampling"></a><a name=mcrange></a>MC range sampling SA</h1>
 
 <p class=MsoNormal>This command produces a design of experiment (DoE) for <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set
-of randomly selected sampling points (the Monte Carlo sample). The MC sample
-set is taken from the parametric space defined by the set of <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+randomly selected sampling points (the Monte Carlo sample). The MC sample set
+is taken from the parametric space defined by the set of <a
 href="#_Configuring_values">configured test ranges</a> for the <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The
-method creates multiple <span class=Cdigo>.lsd</span> <a
-href="LSD_faqs.html#modelsetting">model configuration</a> files each
-one containing one copy of the original model structure configured using the
+href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
 selected combination of values.</p>
 
 <p align=center style='text-align:center'><img border=0 width=225 height=138
@@ -749,8 +739,8 @@ the Parameters A and B.</p>
 <p class=MsoNormal>After executing this command, a certain number of <span
 class=Cdigo>.lsd</span> configuration files will be generated, as informed in
 the Log window. Before the analysis can be concluded, they have to be run to
-produce <a href="LSD_faqs.html#results">simulation results</a>.
-Usually, the menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
 Parallel Batch</a></span> is the more convenient way to run the entire set of
 configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
 workflow</a> on how to proceed.</p>
@@ -769,16 +759,15 @@ workflow</a> on how to proceed.</p>
 <h1><a name="_EE_sampling_SA"></a><a name=ee></a>EE sampling SA</h1>
 
 <p class=MsoNormal>This command produces a design of experiment (DoE) for <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a
-set of sampling points following elementary effects (EE) trajectories, i.e.,
-random one-at-a-time changes of the values for <a
-href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a>. The EE sample set
-is taken from the parametric space defined by the set of <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+sampling points following elementary effects (EE) trajectories, i.e., random
+one-at-a-time changes of the values for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a>. The EE sample set is
+taken from the parametric space defined by the set of <a
 href="#_Configuring_values">configured test ranges</a> for the Parameters and
 lagged Variables to be explored. The method creates multiple <span class=Cdigo>.lsd</span>
-<a href="LSD_faqs.html#modelsetting">model configuration</a> files each
-one containing one copy of the original model structure configured using the
+<a href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
 selected combination of values.</p>
 
 <p class=MsoNormal>This method was proposed Max D. Morris (1991) as a
@@ -840,8 +829,8 @@ variable for each new trajectory. It normally does not have to be changed.</p>
 <p class=MsoNormal>After executing this command, a certain number of <span
 class=Cdigo>.lsd</span> configuration files will be generated, as informed in
 the Log window. Before the analysis can be concluded, they have to be run to
-produce <a href="LSD_faqs.html#results">simulation results</a>.
-Usually, the menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <span class=Cdigo><a href="menurun.html">Run&gt;Create/Start
 Parallel Batch</a></span> is the more convenient way to run the entire set of
 configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
 workflow</a> on how to proceed.</p>
@@ -860,24 +849,24 @@ workflow</a> on how to proceed.</p>
 <h1><a name="_NOLH_sampling_SA"></a><a name=nolh></a>NOLH sampling SA</h1>
 
 <p class=MsoNormal>This command produces a design of experiment (DoE) for <a
-href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a
-set of sampling points from a near-orthogonal Latin hypercube (NOLH). The NOLH
-is specified from the parametric space defined by the set of <a
+href="LSD_faqs.html#sa">sensitivity analysis</a> (SA) consisting of a set of
+sampling points from a near-orthogonal Latin hypercube (NOLH). The NOLH is
+specified from the parametric space defined by the set of <a
 href="#_Configuring_values">configured test ranges</a> for the <a
 href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The
-method creates multiple <span class=Cdigo>.lsd</span> <a
-href="LSD_faqs.html#modelsetting">model configuration</a> files each
-one containing one copy of the original model structure configured using the
+href="LSD_faqs.html#variable">lagged Variables</a> to be explored. The method
+creates multiple <span class=Cdigo>.lsd</span> <a
+href="LSD_faqs.html#modelsetting">model configuration</a> files each one
+containing one copy of the original model structure configured using the
 selected combination of values.</p>
 
 <p class=MsoNormal>This method was proposed by Cioppa and Lucas (2007) as a
 very efficient DoE in terms of the required number of samples to explore the
 parametric space under SA. The NOLH tables used were developed by Susan Sanchez
-(2011). NOLH sample sets can be used to fit meta-modeling methods, like
-Kriging, for producing enough sampling points to perform Sobol variance
-decomposition, as proposed in the <a href="#_LSDsensitivity_R_package">LSDsensitivity
-R package</a>.</p>
+(2015). NOLH sample sets can be used to fit meta-modeling methods, like Kriging,
+for producing enough sampling points to perform Sobol variance decomposition,
+as proposed in the <a href="#_LSDsensitivity_R_package">LSDsensitivity R
+package</a>.</p>
 
 <p align=center style='text-align:center'><img border=0 width=225 height=254
 src="image/sa_nolh.png"></p>
@@ -887,17 +876,18 @@ a dialog box like the one depicted above. The default values are usually adequat
 for most applications as a reasonable tradeoff between precision and execution
 time. The available options are:</p>
 
-<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>NOLH table</b></span>: define the predefined
-NOLH table size to use. The size of the table must be equal or larger than the
-number of Parameters and lagged Variables to explore in the SA. The <span
-class=Cdigo>Auto</span> option selects the smallest table supporting the number
-of test elements chosen by the user, producing the smallest sample set. LSD
-comes with internal tables supporting up to 29 elements in the SA. For larger
-tables, the user must provide the NOLH table as an external file (see the <span
-class=Cdigo>External design file</span> option below).</p>
+NOLH table to use. The number of factors of the table (columns) must be equal
+or larger than the number of Parameters and lagged Variables to explore in the
+SA. The first option (default) selects the smallest table supporting the number
+of test elements chosen by the user, producing the smallest sample set. It is
+recommended to use the largest table your computation time budget allows. If
+the number of factors is larger than supported by the internal tables, the
+message <span class=Cdigo>External only</span> is presented and the user must
+provide the NOLH table as an external file (see the <span class=Cdigo>External
+design file</span> option below).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -906,31 +896,32 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 checked, this option increases the sampling density inside the hypercube,
 almost doubling the number of sampling points. This provides better sampling of
 the parametric space at the cost of duplicating the simulation execution time.
-Only required when the output Variables being analyzed are very sensitive to
-some of the initialization values.</p>
+Required when the output Variables being analyzed are very sensitive to some of
+the initialization values and more samples are needed to fully sampling them.
+Not all tables may support this option (in this case, this option is ignored).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>External design file</b></span>: when
 checked allows the user to supply the experimental design file to be used. It
-is normally required only when exploring more than 29 elements in the SA. The
-provided file can be named in the text box below this option (the default name
-is <span class=Cdigo>NOLH.csv</span>). The file must be placed in the same
-subdirectory as the current <span class=Cdigo>.lsd</span> model configuration
-file. The file shall comply with the CSV (comma separated values) text format.
-The data should be organized as a table where each column is associated to a
-dimension (factor) in the NOLH and the lines provide the factor level (integer)
-for each sampling point. Empty lines are not allowed.</p>
+is normally required only when exploring very large number of factors in the
+SA. The provided file can be named in the text box below this option (the
+default name is <span class=Cdigo>NOLH.csv</span>). The file must be placed in
+the same subdirectory as the current <span class=Cdigo>.lsd</span> model
+configuration file. The file shall comply with the CSV (comma separated values)
+text format. The data should be organized as a table where each column is
+associated to a dimension (factor) in the NOLH and the lines provide the factor
+level (integer) for each sampling point. Empty lines are not allowed.</p>
 
 <p class=MsoNormal>After executing this command, a certain number of <span
 class=Cdigo>.lsd</span> configuration files will be generated, as informed in
 the Log window. Before the analysis can be concluded, they have to be run to
-produce <a href="LSD_faqs.html#results">simulation results</a>.
-Usually, the menu command <a href="menurun.html">Run&gt;Create/Start
-Parallel Batch</a> is the more convenient way to run the entire set of
-configuration files. Please refer to the recommended <a href="#_SA_workflow">SA
-workflow</a> on how to proceed.</p>
+produce <a href="LSD_faqs.html#results">simulation results</a>. Usually, the
+menu command <a href="menurun.html">Run&gt;Create/Start Parallel Batch</a> is
+the more convenient way to run the entire set of configuration files. Please
+refer to the recommended <a href="#_SA_workflow">SA workflow</a> on how to
+proceed.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -945,18 +936,18 @@ workflow</a> on how to proceed.</p>
 
 <h1><a name="_LSDsensitivity_R_package"></a>LSDsensitivity R package</h1>
 
-<p class=MsoNormal>The LSDsensitivity <a href="LSD_faqs.html#r">R
-package</a> provides tools to analyze simulated experiments created using LSD
-native methods to sample the configuration (factor) space of the simulation
-model using different design of experiments (DoE). The LSD-produced
-experimental design data can be transparently imported to R by using the
-function <span class=Cdigo>read.doe.lsd</span> (see the package help pages for
-details on all the package functions).</p>
+<p class=MsoNormal>The LSDsensitivity <a href="LSD_faqs.html#r">R package</a>
+provides tools to analyze simulated experiments created using LSD native
+methods to sample the configuration (factor) space of the simulation model
+using different design of experiments (DoE). The LSD-produced experimental
+design data can be transparently imported to R by using the function <span
+class=Cdigo>read.doe.lsd</span> (see the package help pages for details on all
+the package functions).</p>
 
-<p class=MsoNormal>The package offers two sensitivity analysis (SA) methods
-pre-configured for application on LSD simulations: Morris Elementary Effects
-(EE) (<span class=Cdigo>elementary.effects.lsd</span>) and Sobol Variance
-Decomposition (SVD) (<span class=Cdigo>sobol.decomposition.lsd</span>).</p>
+<p class=MsoNormal>The package offers two sensitivity analysis (SA) methods pre-configured
+for application on LSD simulations: Morris Elementary Effects (EE) (<span
+class=Cdigo>elementary.effects.lsd</span>) and Sobol Variance Decomposition
+(SVD) (<span class=Cdigo>sobol.decomposition.lsd</span>).</p>
 
 <p class=MsoNormal>EE (<span class=Cdigo>elementary.effects.lsd</span>) employs
 a simple one-factor-at-a-time (OAT) SA and is usually applied as an initial
@@ -1040,8 +1031,8 @@ the analysis (let the vector empty, i.e., <span class=Cdigo>c( )</span>, if no
 log variable is required).</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>5.<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Include in the
-vector <span class=Cdigo>newVars</span> any new variable (not included in <span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Include in the vector
+<span class=Cdigo>newVars</span> any new variable (not included in <span
 class=Cdigo>lsdVars</span>) that has to be added to the dataset (let the vector
 empty, i.e., <span class=Cdigo>c( )</span>, if no new variable is required).</p>
 
@@ -1068,8 +1059,8 @@ first if required.</p>
 
 <p class=MsoNormal>Two examples using the LSDsensitivity R package are
 available in a standard LSD installation: the Industrial Dynamics model and the
-Island Model. They can be loaded in <a href="modelbrowser.html">LMM
-Model Browser</a> and are found in the <span class=Cdigo>Examples/Literature</span>
+Island Model. They can be loaded in <a href="modelbrowser.html">LMM Model
+Browser</a> and are found in the <span class=Cdigo>Examples/Literature</span>
 group.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"

@@ -7,8 +7,8 @@
 #
 #*******************************************************************************
 
-theta3d <- 220                            # horizontal view angle
-phi3d <- 30                               # vertical view angle
+theta3d <- 230                        # horizontal view angle
+phi3d <- 20                           # vertical view angle
 
 # ====== Find the parameter sets that maximize and minimize the meta-model ======
 

@@ -4147,20 +4147,22 @@ case 72:
 		if ( ! discard_change( false ) )	// unsaved configuration?
 			break;
 
-		int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
 		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
+		lab1 = NOLH_valid_tables( varSA, ch );
 
 		cmd( "set extdoe 0" );	// flag for using external DoE file
 		cmd( "set NOLHfile \"NOLH.csv\"" );
-		cmd( "set doesize Auto" );	// flag for selecting the DoE size (0=default)
+		cmd( "set doeList [list %s]", lab1 );
+		cmd( "set doesize [ lindex $doeList 0 ]" );	// minimum Doe size
 		cmd( "set doeext 0" );	// flag for using extended number of samples
 		
 		cmd( "newtop .s \"NOLH Sampling\" { set choice 2 }" );
 		
 		cmd( "frame .s.o" );
 		cmd( "label .s.o.l1 -text \"NOLH table\"" );
-		cmd( "ttk::combobox .s.o.c -width 10 -textvariable doesize -values [list Auto 7 11 16 22 29] -justify center" );
-		cmd( "label .s.o.l2 -text \"(maximum number of factors)\"" );
+		cmd( "ttk::combobox .s.o.c -width 15 -textvariable doesize -values $doeList -justify center" );
+		cmd( "label .s.o.l2 -text \"(factors \u00D7 samples \u00D7 ext. samples)\"" );
 		cmd( "pack .s.o.l1 .s.o.c .s.o.l2" );
 		
 		cmd( "checkbutton .s.e -text \"Extended number of samples\" -variable doeext" );
@@ -4201,7 +4203,8 @@ case 72:
 			strncpy( NOLHfile, fname, MAX_PATH_LENGTH - 1 );
 		}
 		
-		int doesz = strcmp( doesize, "Auto" ) ? atoi( doesize ) : 0;
+		i = sscanf( doesize, "%d\u00D7", &j );
+		int doesz = ( i > 0 ) ?  j : 0;
 		int samples = ( *doeext == '0') ? 0 : -1;
 
 		// adjust an NOLH design of experiment (DoE) for the sensitivity data
