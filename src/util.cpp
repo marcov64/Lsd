@@ -2742,8 +2742,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 			
 	// create the color data matrix
 	lattice = new int *[ rows ];
-	for ( j = 0; j < columns; ++j )
-		lattice[ j ] = new int [ columns ];
+	for ( i = 0; i < rows; ++i )
+		lattice[ i ] = new int [ columns ];
 	
 	for ( i = 0; i < rows; ++i )
 		for ( j = 0; j < columns; ++j )
@@ -2817,12 +2817,10 @@ double init_lattice( int init_color, double nrow, double ncol, double pixW, doub
 
 void empty_lattice( void )
 {
-	int j;
-	
-	if ( lattice != NULL && rows > 0 && columns > 0 )
+	if ( lattice != NULL && rows > 0 )
 	{
-		for ( j = 0; j < columns; ++j )
-			delete [ ] lattice[ j ];
+		for ( int i = 0; i < rows; ++i )
+			delete [ ] lattice[ i ];
 		
 		delete [ ] lattice;
 	}	
