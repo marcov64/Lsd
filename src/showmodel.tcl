@@ -1,6 +1,6 @@
 #*************************************************************
 #
-#	LSD 7.0 - January 2018
+#	LSD 7.1 - May 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
