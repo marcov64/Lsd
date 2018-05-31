@@ -236,8 +236,7 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><a href="#_Create/Start_Parallel_Batch">Create/Start Parallel
-Batch</a></p>
+</span></span><a href="#parallel">Create/Start Parallel Batch</a></p>
 
 <h2><a name="_Run"></a><a name=run></a>Run</h2>
 
@@ -605,6 +604,71 @@ the log files using the <span class=Cdigo>File&gt;Open</span> menu command
 (multiple log files can be selected using the <span class=Cdigo>Ctrl</span>
 key).</p>
 
+<h3><a name="_Scheduling_Monte_Carlo"></a>Scheduling Monte Carlo runs</h3>
+
+<p class=MsoNormal>It is a good practice to perform multiple runs of a model
+including stochastic elements, or a Monte Carlo (MC) experiment. The standard
+way to do it in LSD is by simply selecting the adequate <span class=Cdigo>Number
+of simulation runs</span> in <span class=Cdigo>Run&gt;Simulation Settings</span>
+dialog box (see <a href="#_Simulation_Settings">below</a>). However, for models
+requiring long times to process a <a href="LSD_faqs.html#simulationrun">simulation
+run</a> this approach may be inefficient, as it does not take advantage of all the
+resources (processing cores and memory) usually available in modern computers,
+particularly for high-capacity servers. In these situations, the <span
+class=Cdigo>Run&gt;Create/Start Parallel Batch</span> command offers two
+alternatives to reduce the total processing time required by using several
+cores (and more memory) simultaneously.</p>
+
+<p class=MsoNormal>The simplest approach is to manually create a certain number
+(say X) of similar <span class=Cdigo>.lsd</span> configuration files, each one
+defining one or more simulation runs (say Y) starting from a different
+pseudorandom number generator seed. Next, use command <span class=Cdigo>Run&gt;Create/Start
+Parallel Batch</span> to create a batch file (or script, in Linux/macOS) for
+parallel execution, select the <span class=Cdigo>.lsd</span> configuration
+files you just created (you may use the <span class=Cdigo>Ctrl</span> key to
+select many configurations files) and press <span class=Cdigo>OK</span>. Please
+see below how to proceed from this point. This way, when all the configuration
+files are processed, a total of X×Y simulation runs will be performed.</p>
+
+<p class=MsoNormal>An alternative approach, useful when the number of <span
+class=Cdigo>.lsd</span> configuration files is large, is to create a “fake” <a
+href="LSD_faqs.html#sa">sensitivity analysis</a>, by changing any single
+parameter always to the same value. To do this, load your <span class=Cdigo>.lsd</span>
+configuration, make sure the <span class=Cdigo>Number of simulation runs</span>
+is set to 1, save it if required, right click on any parameter and choose <span
+class=Cdigo>Sensitivity</span> in the context menu. In the entry box simply
+type <span class=Cdigo>=VAL:VAL@NUM%L</span>, replacing <span class=Cdigo>VAL</span>
+(twice!) by the current value of the parameter and <span class=Cdigo>NUM</span>
+by the number of desired MC runs and press <span class=Cdigo>OK</span>. Now
+select <span class=Cdigo>Data&gt;Sensitivity Analysis&gt;Full (batch)</span> so
+LSD produces <span class=Cdigo>NUM</span> similar <span class=Cdigo>.lsd</span>
+configuration files, using a different pseudorandom number generator seed for
+each. Next select <span class=Cdigo>Run&gt;Create/Start Parallel Batch</span>
+and accept the suggestion to use the just created configuration files.</p>
+
+<p class=MsoNormal>In both approaches, then choose the batch name, select the
+number of desired cores to use (LSD suggests the maximum available in the
+current machine), untick <span class=Cdigo>Native batch format</span> only if
+creating the batch/script to be used in a different kind of computer (from a
+Windows computer to a Linux/macOS server or vice versa), and press OK. If the
+configurations are to be executed in the current computer now, simply accept
+when LSD ask if the script should be run. If you are creating the <span
+class=Cdigo>.lsd</span> files to be run in a Linux server, for instance, now
+copy the entire model folder to the server (including the <span class=Cdigo>src</span>
+subfolder), open a server terminal window in the copied model directory,
+recompile the LSD No Window executable (<span class=Cdigo>make -f makefileNW</span>),
+adjust the script properties (<span class=Cdigo>chmod +x SCRIPT.sh</span>,
+replacing <span class=Cdigo>SCRIPT</span> with the name chosen before) and
+execute it (<span class=Cdigo>./SCRIPT.sh</span>). If the paths in the server
+are not exactly the same as in the computer you generated the script, you may
+have to edit the lines 4 and 5 of the script file (be careful to not remove the
+<span class=Cdigo>nice</span> prefix to the LSD No Window executable path) or
+pass the correct paths as parameters to the script <span class=Cdigo>(./SCRIPT.sh
+'nice /FULL-PATH-TO-EXEC/lsd_gnuNW' /FULL-PATH-TO-CONFIGS</span>).</p>
+
+<p class=MsoNormal>WARNING: In any case, do not forget to first create the LSD
+No Window version in <a href="LMM.html">LMM</a>!</p>
+
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
@@ -658,7 +722,10 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 number of <a href="LSD_faqs.html#simulationrun">simulation runs</a> to be
 sequentially executed. Each run uses the same initial <a
 href="LSD_faqs.html#modelsetting">model configuration</a> with unit-increasing
-seeds for the pseudo-random number generator.</p>
+seeds for the pseudo-random number generator. When scheduling a large number of
+simulation runs, or even a few for a time-demanding model, it may be preferable
+to schedule multiple <span class=Cdigo>.lsd</span> configuration files to be
+processed in parallel (see <a href="#_Scheduling_Monte_Carlo">above</a>).</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -844,8 +911,8 @@ results, although not all of them may be actually saved.</p>
 <h2>Show Elements to Parallelize</h2>
 
 <p class=MsoNormal>Print in the <a href="LSD_windows.html#log">LSD Log</a> the
-list of the <a href="LSD_faqs.html#variable">multi-instanced Variables</a> marked
-to be computed in parallel (multi-threading) during the <a
+list of the <a href="LSD_faqs.html#variable">multi-instanced Variables</a>
+marked to be computed in parallel (multi-threading) during the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>. These are the elements
 with the <a href="browser.html#variables">option</a> <span class=Cdigo>Parallel</span>
 set on.</p>

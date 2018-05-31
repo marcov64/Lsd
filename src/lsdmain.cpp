@@ -914,7 +914,7 @@ void run( object *root )
 		end = clock();
 
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
-			quit=0;
+			quit = 0;
 		
 		if ( fast_mode == 1 && on_bar )
 			plog( "100%%", "bar" );
@@ -932,7 +932,7 @@ void run( object *root )
 		reset_end( root );
 		root->emptyturbo( );
 		
-		if ( sim_num > 1 || no_window )
+		if ( quit != 2 && ( sim_num > 1 || no_window ) )
 		{
 			// save results for multiple simulation runs, if any
 			if ( series_saved > 0 )
