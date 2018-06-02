@@ -305,8 +305,8 @@ double variable::cal( object *caller, int lag )
 		// add the Variable to the stack
 		if ( stacklog != NULL && stacklog->next == NULL )
 		{
-			stack++;
-			stacklog->next=new lsdstack;
+			++stack;
+			stacklog->next = new lsdstack;
 			stacklog->next->next=NULL;
 			stacklog->next->prev = stacklog;
 			strcpy( stacklog->next->label, label );

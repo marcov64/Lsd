@@ -524,7 +524,8 @@ defines how many threads each individual LSD simulation may spawn (the default
 is just one). If the </span>Number of parallel LSD processes</span><span
 class=Cdigo><span style='font-family:"Arial","sans-serif";color:windowtext'>
 setting is left at default (to use all cores), it is recommended the default
-value of 1 is not changed. It is recommended that the product between the two
+value of 1 is not changed (using a larger value will just increase the
+operating system overhead). It is recommended that the product between the two
 settings be less or equal to the number of (logical) cores available in the
 computer where the job is going to be executed (beware if it is a different
 machine from the current one). If the current model configuration does not use
@@ -594,8 +595,8 @@ verify the status of the simulations running in background, any errors and
 warnings produced, and when each simulation execution is finished. Linux and
 macOS users can follow up these files in real time using the terminal command <span
 class=Cdigo>tail -f YYYY/XXXX.log</span>, where <span class=Cdigo>YYYY</span>
-is the configuration subdirectory and <span class=Cdigo>XXXX</span> is the configuration
-name to follow up. The command should be issued for each log file
+is the configuration subdirectory and <span class=Cdigo>XXXX</span> is the
+configuration name to follow up. The command should be issued for each log file
 (corresponding to a different model configuration file). For the same purpose,
 Windows users can execute the utility <span class=Cdigo>Tail.exe</span>,
 included in the subdirectory <span class=Cdigo>gnu/bin</span> in the <a
@@ -612,9 +613,9 @@ way to do it in LSD is by simply selecting the adequate <span class=Cdigo>Number
 of simulation runs</span> in <span class=Cdigo>Run&gt;Simulation Settings</span>
 dialog box (see <a href="#_Simulation_Settings">below</a>). However, for models
 requiring long times to process a <a href="LSD_faqs.html#simulationrun">simulation
-run</a> this approach may be inefficient, as it does not take advantage of all the
-resources (processing cores and memory) usually available in modern computers,
-particularly for high-capacity servers. In these situations, the <span
+run</a> this approach may be inefficient, as it does not take advantage of all
+the resources (processing cores and memory) usually available in modern
+computers, particularly for high-capacity servers. In these situations, the <span
 class=Cdigo>Run&gt;Create/Start Parallel Batch</span> command offers two
 alternatives to reduce the total processing time required by using several
 cores (and more memory) simultaneously.</p>
@@ -655,8 +656,8 @@ configurations are to be executed in the current computer now, simply accept
 when LSD ask if the script should be run. If you are creating the <span
 class=Cdigo>.lsd</span> files to be run in a Linux server, for instance, now
 copy the entire model folder to the server (including the <span class=Cdigo>src</span>
-subfolder), open a server terminal window in the copied model directory,
-recompile the LSD No Window executable (<span class=Cdigo>make -f makefileNW</span>),
+subfolder), open a server terminal window in the copied model directory, recompile
+the LSD No Window executable (<span class=Cdigo>make -f makefileNW</span>),
 adjust the script properties (<span class=Cdigo>chmod +x SCRIPT.sh</span>,
 replacing <span class=Cdigo>SCRIPT</span> with the name chosen before) and
 execute it (<span class=Cdigo>./SCRIPT.sh</span>). If the paths in the server
@@ -801,7 +802,11 @@ times for all instances of Each Variable, irrespective of the value set for the
 <span class=Cdigo>Profile up to stack level</span> option. However, the <span
 class=Cdigo>Profile minimum time</span> and <span class=Cdigo>Profile observed
 variables only</span> options also control which Variables are considered for
-the report.</p>
+the report. One common use for this option is to identify the
+computationally-heavy <a href="LSD_faqs.html#equation">Equations</a> associated
+to multi-instanced <a href="LSD_faqs.html#variable">Variables</a> which can be
+processed in parallel (see the <span class=Cdigo>Parallel</span> option in <span
+class=Cdigo><a href="browser.html#changeelement">Model&gt;Change Element</a></span>).</p>
 
 <p style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;margin-left:
 36.0pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -874,8 +879,8 @@ analysis. These are the elements with the <a href="browser.html#variables">optio
 <p class=MsoNormal>Print in the <a href="LSD_windows.html#log">LSD Log</a> the
 list of the <a href="LSD_faqs.html#variable">Variables</a> and <a
 href="LSD_faqs.html#parameter">Parameters</a> whose values will be plotted
-during the <a href="LSD_faqs.html#simulationrun">simulation run</a>. These are
-the elements with the <a href="browser.html#variables">option</a> <span
+during the <a href="LSD_faqs.html#simulationrun">simulation run</a>. These are the
+elements with the <a href="browser.html#variables">option</a> <span
 class=Cdigo>Run-time Plot</span> set on.</p>
 
 <h2><a name="_Show_Elements_to_3"></a>Show Elements to Debug</h2>
@@ -993,8 +998,8 @@ Flags to Parallelize</h2>
 
 <p class=MsoNormal>Disable from all <a href="LSD_faqs.html#variable">Variables</a>
 in the model any <span class=Cdigo>Parallel</span> <a
-href="browser.html#variables">option</a> set on, if any. After using this
-command, no Variable will be computed in parallel (multi-threading) during the <a
+href="browser.html#variables">option</a> set on, if any. After using this command,
+no Variable will be computed in parallel (multi-threading) during the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"

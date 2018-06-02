@@ -11,7 +11,7 @@ read.doe.lsd(folder, baseName, outVar, does = 1, doeFile = NULL, respFile = NULL
              validFile = NULL, valRespFile = NULL, confFile = NULL, limFile = NULL,
              iniDrop = 0, nKeep = -1, saveVars = c(), addVars = c(), eval.vars = NULL,
              eval.run = NULL, pool = TRUE, na.rm = FALSE, rm.temp = TRUE,
-             rm.outl = FALSE, lim.outl = 10)
+             rm.outl = FALSE, lim.outl = 10, nnodes = 1)
 }
 \arguments{
   \item{folder}{
@@ -76,6 +76,9 @@ logical: if TRUE, remove outliers from dataset. Default is FALSE, no outliers re
 }
   \item{lim.outl}{
 numeric: if \code{rm.outl = TRUE}, defines the limit for non-outliers deviation in number of standard deviations.
+}
+  \item{nnodes}{
+integer: the maximum number of parallel computing nodes (parallel threads) in the current computer to be used for reading the files. The default, nnodes = 1, means single thread processing (no parallelization). If equal to zero, creates up to one node per CPU core. Only "PSOCK" clusters are used, to ensure compatibility with any platform. Please note that each node requires its own memory space, so memory usage increases linearly with the number of nodes.
 }
 }
 \details{

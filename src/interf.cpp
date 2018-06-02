@@ -4166,6 +4166,9 @@ case 72:
 		cmd( "pack .s.o.l1 .s.o.c .s.o.l2" );
 		
 		cmd( "checkbutton .s.e -text \"Extended number of samples\" -variable doeext" );
+		if( varSA > 22 )
+			cmd( ".s.e configure -state disabled" );
+	
 		cmd( "checkbutton .s.d -text \"External design file\" -variable extdoe -command { if { $extdoe == 1 } { .s.o.c configure -state disabled; .s.e configure -state disabled; .s.i.e configure -state normal; .s.i.e selection range 0 end; focus .s.i.e } { .s.o.c configure -state normal; .s.e configure -state normal; .s.i.e configure -state disabled } }" );
 		
 		cmd( "frame .s.i" );

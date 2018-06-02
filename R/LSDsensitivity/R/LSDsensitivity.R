@@ -886,9 +886,10 @@ size.doe <- function( doeFile ) {
 # ==== Create DoE response file ====
 
 write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
-                                pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
-                                conf = 0.95, saveVars = c(  ), addVars = c(  ),
-                                eval.vars = NULL, eval.run = NULL, rm.temp = TRUE ) {
+                            pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
+                            conf = 0.95, saveVars = c(  ), addVars = c(  ),
+                            eval.vars = NULL, eval.run = NULL, rm.temp = TRUE,
+                            nnodes = 1 ) {
 
   # test if data files exit
   for( k in 1 : nExp ) {
@@ -927,7 +928,7 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
     for( k in 1 : nExp ) {
       # Experiment k
-      cat( "\nExperiment #", iniExp + k - 1, "\n---------------\n" )
+      cat( "\nExperiment #", iniExp + k - 1, "\n----------------\n" )
 
       # ---- Read data files ----
 
@@ -1001,7 +1002,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
         # Read data from text files and format it as 4D array with labels
         dataSet <- LSDinterface::read.4d.lsd( myFiles, col.names = saveVars,
-                                              nrows = nKeep, skip = iniDrop )
+                                              nrows = nKeep, skip = iniDrop,
+                                              nnodes = nnodes )
         nInsts <- dim( dataSet )[ 3 ]         # total number of instances
 
         # ------ Add new variables to data set ------
@@ -1117,10 +1119,11 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
 read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
-                          confFile = NULL, limFile = NULL, iniDrop = 0, nKeep = -1,
-                          saveVars = c(  ), addVars = c(  ), eval.vars = NULL,
-                          eval.run = NULL, pool = TRUE, na.rm = FALSE,
-                          rm.temp = TRUE, rm.outl = FALSE, lim.outl = 10 ) {
+                          confFile = NULL, limFile = NULL, iniDrop = 0,
+                          nKeep = -1, saveVars = c(  ), addVars = c(  ),
+                          eval.vars = NULL, eval.run = NULL, pool = TRUE,
+                          na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
+                          lim.outl = 10, nnodes = 1 ) {
 
   # ---- Process LSD result files ----
 
@@ -1159,9 +1162,9 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
     write.response( folder, baseName, outVar = outVar,
                     iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
                     iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
-                    nExp = size.doe( doeFile )[ 2 ],
-                    addVars = addVars, eval.vars = eval.vars,
-                    eval.run = eval.run, saveVars = saveVars )
+                    nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
+                    eval.vars = eval.vars, eval.run = eval.run,
+                    saveVars = saveVars, nnodes = nnodes )
   } else
     cat( "Using existing response file...\n\n" )
 
@@ -1171,7 +1174,8 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                     iniExp = size.doe( validFile )[ 1 ],
                     nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
                     addVars = addVars, eval.vars = eval.vars,
-                    eval.run = eval.run, saveVars = saveVars )
+                    eval.run = eval.run, saveVars = saveVars,
+                    nnodes = nnodes )
   } else
     if( does > 1 )
       cat( "Using existing validation response file...\n\n" )
