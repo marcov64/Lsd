@@ -891,26 +891,38 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
                             eval.vars = NULL, eval.run = NULL, rm.temp = TRUE,
                             nnodes = 1 ) {
 
-  # test if data files exit
-  for( k in 1 : nExp ) {
-    myFiles <- list.files( path = folder, full.names = TRUE,
-                           pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
-    if( length( myFiles ) < 2 )
-    stop( "Not enough data files (baseName_XX_YY.res[.gz]) found" )
-  }
-
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
   newNameVar <- append( LSDinterface::name.nice.lsd( saveVars ), addVars ) # new label set
   nVar <- length( newNameVar )          # total number of variables
 
   # first check if extraction was interrupted and continue with partial files if appropriate
-  noTemp <- TRUE
   tempFile <- paste0( folder, "/", baseName, "_", iniExp,
                       "_", iniExp + nExp - 1, ".RData" )
-  if( file.exists( tempFile ) && ( ! file.exists( myFiles[ 1 ] ) ||
-                                   file.info( tempFile )$mtime >
-                                   file.info( myFiles[ 1 ] )$mtime ) ) {
+  if( ! rm.temp && file.exists( tempFile ) )
+    tempDate <- file.mtime( tempFile )
+  else
+    tempDate <- 0
+
+  # test if data files exit and are newer
+  dataDate <- 0
+  for( k in 1 : nExp ) {
+    myFiles <- list.files( path = folder, full.names = TRUE,
+                           pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
+    if( tempDate == 0 && length( myFiles ) < 2 )
+      stop( "Not enough data files (baseName_XX_YY.res[.gz]) found" )
+
+    # get newest date
+    for( file in myFiles ) {
+      date <- file.mtime( file )
+      if( date > dataDate )
+        dataDate <- date
+    }
+  }
+
+  # Continue with temporary file if appropriate
+  noTemp <- TRUE
+  if( tempDate > dataDate ) {
     temp <- new.env( )
     load( tempFile, envir = temp )
 
@@ -925,6 +937,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
   # if no temporary data, start from zero
   if( noTemp ) {
+
+    if( dataDate == 0 )
+      stop( "No data files (baseName_XX_YY.res[.gz]) found" )
 
     for( k in 1 : nExp ) {
       # Experiment k
