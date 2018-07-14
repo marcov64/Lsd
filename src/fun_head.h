@@ -18,7 +18,11 @@ available in a model's equation file.
 
 #define FUN												// comment this line to access internal LSD functions
 
-//#include <Eigen/Eigen>									// Eigen linear algebra library
+#if defined( EIGENLIB ) && __cplusplus >= 201103L		// required C++11
+#include <Eigen/Eigen>									// Eigen linear algebra library
+using namespace Eigen;
+#endif
+
 #include "decl.h"										// LSD classes
 
 extern bool fast;										// flag to hide LOG messages & runtime (read-only)
@@ -43,11 +47,12 @@ bool is_nan( double x );
 double _abs( double a );
 double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
 double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
+double bernoulli( double p );							// draw from a Bernoulli distribution
 double beta( double alpha, double beta );				// draw from a beta distribution
 double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
 double betacf( double a, double b, double x );			// beta distribution function
 double fact( double x );								// Factorial function
-double gamma( double m );
+double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
 double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
 double lnorm( double mu, double sigma );				// draw from a lognormal distribution
 double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
@@ -77,9 +82,19 @@ void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
 
+#ifdef CPP11
+double binomial( double p, double t );					// draw from a binomial distribution
+double cauchy( double a, double b );					// draw from a Cauchy distribution
+double chi_squared( double n );							// draw from a chi-squared distribution
+double exponential( double lambda );					// draw from an exponential distribution
+double fisher( double m, double n );					// draw from a Fisher-F distribution
+double geometric( double p );							// draw from a geometric distribution
+double student( double n );								// draw from a Student-T distribution
+double weibull( double a, double b );					// draw from a Weibull distribution
+#endif
+
 double def_res = 0;										// default equation result
 
-//using namespace Eigen;
 
 #ifndef NO_WINDOW
 #include <tk.h>

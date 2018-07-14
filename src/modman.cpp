@@ -78,11 +78,15 @@ The widget of importance are:
 #define SIGMEM NSIG + 1			// out of memory signal
 #define SIGSTL NSIG + 2			// standard library exception signal
 
+// Eigen library include command
+#define EIGEN "#define EIGENLIB"
+
 using namespace std;
 
 // auxiliary C procedures
 bool compile_run( bool run, bool nw = false );
 bool discard_change( void );	// ask before discarding unsaved changes
+bool use_eigen( void );			// check is Eigen library is in use
 char *get_fun_name( char *str, bool nw = false );
 int ModManMain( int argn, char **argv );
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[ ] );// Tcl entry point
@@ -1440,7 +1444,7 @@ if ( choice == 13 || choice == 58 )
 	if ( choice == 58 )
 	{
 		cmd( "scan $vmenuInsert %%d.%%d line col" );
-		cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $filename:$line\nrun\n\" }" );
+		cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$dirname/$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $dirname/$filename:$line\nrun\n\" }" );
 		cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
 
 		cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
@@ -2213,8 +2217,8 @@ if ( choice == 51 )
 {
 	cmd( "set value1 \"0\"" ); 
 	cmd( "set value2 \"1\"" ); 
-	cmd( "set res 1" ); 
-	cmd( "set str {UNIFORM($value1, $value2)}" );
+	cmd( "set res 9" ); 
+	cmd( "set str {uniform($value1, $value2)}" );
 
 	cmd( "newtop .a \"Math Functions\" { set choice 2 }" );
 
@@ -2224,13 +2228,13 @@ if ( choice == 51 )
 	cmd( "frame .a.e.e -bd 2 -relief groove" );
 
 	cmd( "frame .a.e.e.e1" );
-	cmd( "label .a.e.e.e1.l -text \"Minimum\"" );
+	cmd( "label .a.e.e.e1.l -text Minimum" );
 	cmd( "entry .a.e.e.e1.e -width 20 -justify center -textvariable value1" );
 	cmd( "bind .a.e.e.e1.e <Return> { if [ string equal [ .a.e.e.e2.e cget -state ] normal ] { focus .a.e.e.e2.e; .a.e.e.e2.e selection range 0 end } { .a.b.ok invoke } }" );
 	cmd( "pack .a.e.e.e1.l .a.e.e.e1.e" );
 
 	cmd( "frame .a.e.e.e2" );
-	cmd( "label .a.e.e.e2.l -text \"Maximum\"" );
+	cmd( "label .a.e.e.e2.l -text Maximum" );
 	cmd( "entry .a.e.e.e2.e -width 20 -justify center -textvariable value2" );
 	cmd( "bind .a.e.e.e2.e <Return> { .a.b.ok invoke }" );
 	cmd( "pack .a.e.e.e2.l .a.e.e.e2.e" );
@@ -2240,23 +2244,29 @@ if ( choice == 51 )
 	cmd( "pack .a.e.l .a.e.e" );
 
 	cmd( "frame .a.f -bd 2 -relief groove" );
-	cmd( "radiobutton .a.f.r1 -text \"Uniform random draw\" -variable res -value 1 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {UNIFORM($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r3 -text \"Integer uniform random draw\" -variable res -value 3 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform_int($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r2 -text \"Normal random draw\" -variable res -value 2 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text Variance; .a.e.e.e2.e conf -state normal; set str {norm($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r4 -text \"Poisson random draw\" -variable res -value 4 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {poisson($value1)} }" );
-	cmd( "radiobutton .a.f.r5 -text \"Gamma random draw\" -variable res -value 5 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {gamma($value1)} }" );
-	cmd( "radiobutton .a.f.r6 -text \"Absolute value\" -variable res -value 6 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {abs($value1)} }" );
-	cmd( "radiobutton .a.f.r7 -text \"Minimum value\" -variable res -value 7 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {min($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r8 -text \"Maximum value\" -variable res -value 8 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {max($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r9 -text \"Round closest integer\" -variable res -value 9 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {round($value1)} }" );
-	cmd( "radiobutton .a.f.r12 -text \"Square root\" -variable res -value 12 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {sqrt($value1)} }" );
-	cmd( "radiobutton .a.f.r13 -text \"Power\" -variable res -value 13 -command {.a.e.e.e1.l conf -text \"Base\"; .a.e.e.e2.l conf -text \"Exponent\"; .a.e.e.e2.e conf -state normal; set str {pow($value1, $value2)} }" );
-	cmd( "radiobutton .a.f.r10 -text \"Exponential\" -variable res -value 10 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {exp($value1)} }" );
-	cmd( "radiobutton .a.f.r11 -text \"Logarithm\" -variable res -value 11 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {log($value1)} }" );
+	cmd( "radiobutton .a.f.r1 -text \"Square root\" -variable res -value 1 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {sqrt($value1)} }" );
+	cmd( "radiobutton .a.f.r2 -text \"Power\" -variable res -value 2 -command {.a.e.e.e1.l conf -text \"Base\"; .a.e.e.e2.l conf -text \"Exponent\"; .a.e.e.e2.e conf -state normal; set str {pow($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r3 -text \"Exponential\" -variable res -value 3 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {exp($value1)} }" );
+	cmd( "radiobutton .a.f.r4 -text \"Logarithm\" -variable res -value 4 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {log($value1)} }" );
+	cmd( "radiobutton .a.f.r5 -text \"Absolute value\" -variable res -value 5 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {abs($value1)} }" );
+	cmd( "radiobutton .a.f.r6 -text \"Minimum value\" -variable res -value 6 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {min($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r7 -text \"Maximum value\" -variable res -value 7 -command {.a.e.e.e1.l conf -text \"Value 1\"; .a.e.e.e2.l conf -text \"Value 2\"; .a.e.e.e2.e conf -state normal; set str {max($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r8 -text \"Round to closest integer\" -variable res -value 8 -command {.a.e.e.e1.l conf -text Value; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {round($value1)} }" );
+	cmd( "radiobutton .a.f.r9 -text \"Uniform random draw\" -variable res -value 9 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r10 -text \"Integer uniform random draw\" -variable res -value 10 -command {.a.e.e.e1.l conf -text Minimum; .a.e.e.e2.l conf -text Maximum; .a.e.e.e2.e conf -state normal; set str {uniform_int($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r11 -text \"Bernoulli random draw\" -variable res -value 11 -command {.a.e.e.e1.l conf -text Probability; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {bernoulli($value1)} }" );
+	cmd( "radiobutton .a.f.r12 -text \"Poisson random draw\" -variable res -value 12 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text (unused); .a.e.e.e2.e conf -state disabled; set str {poisson($value1)} }" );
+	cmd( "radiobutton .a.f.r13 -text \"Normal random draw\" -variable res -value 13 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {norm($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r14 -text \"Lognormal random draw\" -variable res -value 14 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text \"Std. deviation\"; .a.e.e.e2.e conf -state normal; set str {lnorm($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r15 -text \"Beta random draw\" -variable res -value 15 -command {.a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {beta($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r16 -text \"Gamma random draw\" -variable res -value 16 -command {.a.e.e.e1.l conf -text Alpha; .a.e.e.e2.l conf -text Beta; .a.e.e.e2.e conf -state normal; set str {gamma($value1, $value2)} }" );
+	cmd( "radiobutton .a.f.r17 -text \"Pareto random draw\" -variable res -value 17 -command {.a.e.e.e1.l conf -text Mean; .a.e.e.e2.l conf -text Alpha; .a.e.e.e2.e conf -state normal; set str {pareto($value1, $value2)} }" );
 
-	cmd( "pack .a.f.r1 .a.f.r3 .a.f.r2 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r12 .a.f.r13 .a.f.r10 .a.f.r11 -anchor w" );
+	cmd( "pack .a.f.r1 .a.f.r2 .a.f.r3 .a.f.r4 .a.f.r5 .a.f.r6 .a.f.r7 .a.f.r8 .a.f.r9 .a.f.r10 .a.f.r11 .a.f.r12 .a.f.r13 .a.f.r14 .a.f.r15 .a.f.r16 .a.f.r17 -anchor w" );
 
-	cmd( "pack .a.e .a.f -padx 5 -pady 5" );
+	cmd( "label .a.more -text \"See Help for more functions/distributions\"" );
+	
+	cmd( "pack .a.e .a.f .a.more -padx 5 -pady 5" );
 
 	cmd( "okhelpcancel .a b { set choice 1 } { LsdHelp LSD_macros.html#Math } { set choice 2 }" );
 
@@ -4860,8 +4870,7 @@ if ( choice == 44 )
 		goto loop;
 	}
 
-	cmd( "set ex [file exists \"$modeldir/modelinfo.txt\"]" );
-	cmd( "set choice $ex" );
+	cmd( "set choice [file exists \"$modeldir/modelinfo.txt\"]" );
 	i = choice;
 	if ( i == 0 )
 		cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Cannot find file for model info\" -detail \"Please, check the date of creation.\"" );
@@ -5104,8 +5113,8 @@ if ( choice == 48 )
 	cmd( "cd \"$modeldir\"" );
 
 	cmd( "set b \"%s\"", s );
-	cmd( "set f [open model_options.txt r]" );
-	cmd( "set a [read -nonewline $f]" );
+	cmd( "set f [ open model_options.txt r ]" );
+	cmd( "set a [ read -nonewline $f ]" );
 	cmd( "close $f" );
 
 	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
@@ -5523,6 +5532,10 @@ if ( choice == 62 )
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/fun_head_fast.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/decl.h\" \"$modeldir/src\"" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/system_options.txt\" \"$modeldir/src\"" );
+	
+	// copy Eigen library files if in use, just once to save time
+	if( use_eigen( ) )
+		cmd( "if { ! [ file exists \"$modeldir/src/Eigen\" ] } { file copy -force \"$RootLsd/$LsdSrc/Eigen\" \"$modeldir/src\" }" );
 
 	// define the no window compilation macro
 	cmd( "set f [ open \"$modeldir/src/choose.h\" w ]" );
@@ -6264,6 +6277,39 @@ char *get_fun_name( char *str, bool nw )
 error:
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
 	return NULL;
+}
+
+
+/*********************************
+ USE_EIGEN
+ *********************************/
+
+bool use_eigen( void )
+{
+	bool nfound = true;
+	char *path, *fun_file, full_name[ MAX_PATH_LENGTH ], buffer[ 2 * MAX_PATH_LENGTH ];
+	FILE *f;
+	
+	path = ( char * ) Tcl_GetVar( inter, "modeldir", 0 );
+	fun_file = get_fun_name( buffer, true );
+	
+	if( path == NULL || fun_file == NULL )
+		return false;
+	
+	snprintf( full_name, MAX_PATH_LENGTH, "%s/%s", path, fun_file );
+	f = fopen( full_name, "r" );
+	if( f == NULL )
+		return false;
+
+	while ( fgets( buffer, 2 * MAX_PATH_LENGTH, f ) != NULL && 
+			( nfound = strncmp( buffer, EIGEN, strlen( EIGEN ) ) ) );   
+	
+	fclose( f );
+	
+	if ( nfound )
+		return false;
+	
+	return true;
 }
 
 

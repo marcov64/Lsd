@@ -10,6 +10,8 @@ Place here your equations
 
 ****************************************************/
 
+//#define EIGENLIB				// uncomment to use Eigen linear algebra library
+
 #include "fun_head.h"
 
 double variable::fun( object *caller )

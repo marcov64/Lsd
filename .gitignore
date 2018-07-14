@@ -19,3 +19,4 @@ n++.wsp
 *.Rproj.user
 *.Rdata
 .Rproj.user
+*.Rproj

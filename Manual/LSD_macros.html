@@ -928,6 +928,33 @@
 @font-face
 	{font-family:StoneSerif;
 	panose-1:0 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Bahnschrift Light SemiCondensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift SemiLight SemiConde";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift SemiCondensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift SemiBold SemiConden";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift Light Condensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift SemiLight Condensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift Condensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Bahnschrift SemiBold Condensed";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Ink Free";
+	panose-1:3 8 4 2 0 5 0 0 0 0;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin-right:0cm;
@@ -2332,8 +2359,8 @@ specified the lag to which the operation refers to.</p>
 6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>The postfix “<span class=Cdigo>S</span>” means that the Macro
-contains the specification to the Object to which it must be applied, and it refers
-to the current time step.</p>
+contains the specification to the Object to which it must be applied, and it
+refers to the current time step.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:32.05pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
@@ -2562,11 +2589,11 @@ name="_MIN(_&quot;Lab&quot;_),"></a>MIN( &quot;<i>Lab</i>&quot; ), MINS( <i>obj<
 MINL( &quot;<i>Lab</i>&quot;, <i>lag </i>), MINLS( <i>obj</i>, &quot;<i>Lab</i>&quot;,
 <i>lag </i>) </h1>
 
-<p>Same as <span class=Cdigo><a href="#SUM">SUM(…)</a></span>, but, instead of
-the sum, these Macros compute the minimum value of the Variable or Parameter
-named <i>Lab</i> among the descendants of the current Object (<span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span>) or <i>obj</i>, using the
-appropriate lag. </p>
+<p>Same as <span class=Cdigo><a href="#SUM">SUM(…)</a></span>, but, instead of the
+sum, these Macros compute the minimum value of the Variable or Parameter named <i>Lab</i>
+among the descendants of the current Object (<span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span>) or <i>obj</i>, using the appropriate
+lag. </p>
 
 <div align=center>
 
@@ -3991,14 +4018,14 @@ SEARCH_NODES( <i>obj</i>, &quot;<i>node_Lab</i>&quot;, <i>id</i> )<br>
 <a name="SEARCH_LINK"></a>SEARCH_LINK( <i>id </i>), SEARCH_LINKS( <i>node_obj</i>,
 <i>id </i>)</h1>
 
-<p class=MsoNormal>The <span class=Cdigo>SEARCH_NODE(…)</span> Macros search for
-a Node from a Network composed by the Objects labelled <i>node_Lab</i>,
-descending from the Object pointed by <i>obj</i> or the current Object <span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise, for the first
-occurrence of an ID <i>id</i>. The Macros return an <a
-href="#_Temporary_Object's_pointers:">Object pointer</a> to the first found
-Node or <span class=Cdigo>NULL</span> if no Node is found. <span class=Cdigo>SEARCH_NODE(…)</span>
-can be slow for large networks, a customized <a href="#_TSEARCH(_&quot;obj_Lab&quot;,_pos">turbo
+<p class=MsoNormal>The <span class=Cdigo>SEARCH_NODE(…)</span> Macros search
+for a Node from a Network composed by the Objects labelled <i>node_Lab</i>, descending
+from the Object pointed by <i>obj</i> or the current Object <span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span> otherwise, for the first occurrence of
+an ID <i>id</i>. The Macros return an <a href="#_Temporary_Object's_pointers:">Object
+pointer</a> to the first found Node or <span class=Cdigo>NULL</span> if no Node
+is found. <span class=Cdigo>SEARCH_NODE(…)</span> can be slow for large
+networks, a customized <a href="#_TSEARCH(_&quot;obj_Lab&quot;,_pos">turbo
 search</a> approach is recommended in such cases.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>SEARCH_LINK(…)</span> Macros search
@@ -4072,9 +4099,9 @@ style='font-size:12.0pt;color:black;font-weight:normal'><br>
 <p class=MsoNormal>The <span class=Cdigo>DRAWPROB_NODE(…)</span> Macros reset
 to <i>prob</i> the random draw probability of the Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
-the current Node <span class=Cdigo>p</span> otherwise. When a random draw is performed,
-the probability values attributed to each Node are always rescaled to add up to
-1.</p>
+the current Node <span class=Cdigo>p</span> otherwise. When a random draw is
+performed, the probability values attributed to each Node are always rescaled
+to add up to 1.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>DRAWPROB_LINK(…)</span> Macros reset
 to <i>prob</i> the random draw probability of the Link indicated by the <a
@@ -4224,7 +4251,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 class=Cdigo>&quot;RENYI-ERDOS&quot;</span>) : <i>par1</i> is the average
 out-degree, <i>par2</i> not required<br>
 <b>Star network</b> (<i>gen </i>= <span class=Cdigo>&quot;STAR&quot;</span>)&nbsp;:
-does not require parameters <i>par1</i>/<i>par2</i> (hub is first Node in the chain)</p>
+does not require parameters <i>par1</i>/<i>par2</i> (hub is first Node in the
+chain)</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:50.15pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -4546,12 +4574,36 @@ income</span><br>
 
 <h1><a name=Math></a>Mathematical and statistical functions</h1>
 
-<p>Besides the LSD specific Macros modelers can use one of the following
-mathematical and statistical functions. </p>
+<p>Besides the LSD specific Macros, modelers can use the several mathematical and
+statistical functions, as listed below. The functions marked with an asterisk (<span
+class=Cdigo>*</span>) are only available when a C++11 or higher <a
+href="LSD_faqs.html#compiler">compiler</a> is available (this is <i>not</i> the
+case of a <a href="LSD_manual.html#install">Windows 32-bit LSD installation</a>).</p>
+
+<h2>Constants</h2>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>pi</b>: the number &#960;</p>
+
+<h2>Functions and operators</h2>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>abs( <i>a </i>)</b>: the absolute value of <i>a</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>exp( <i>a</i> )</b>: the exponential of <i>a</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>fact( <i>a</i> )</b>: the factorial of <i>a</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>log( <i>a</i> ), log10( <i>a</i> )</b>: the natural or base 10
+log of <i>a</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4565,34 +4617,11 @@ and <i>b</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>round( <i>a</i> )</b>: the integer closest to the real value <i>a</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>sqrt( <i>a</i> ), cbrt( <i>a</i> )</b>: the square or cubic
-root of <i>a</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>pow( <i>a</i>, <i>b</i> )</b>: the power b of <i>a</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>exp( <i>a</i> )</b>: the exponential of <i>a</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>log( <i>a</i> ), log10( <i>a</i> )</b>: the natural or base 10
-log of <i>a</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>fact( <i>a</i> )</b>: the factorial of <i>a</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>tgamma( <i>a</i> ), lgamma( <i>a</i> )</b>: the gamma or the
-log-gamma function of <i>a</i></p>
+</span></span><b>round( <i>a</i> )</b>: the integer closest to the real value <i>a</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4602,13 +4631,99 @@ in radians)</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>pi</b>: the number &#960;</p>
+</span></span><b>sqrt( <i>a</i> ), cbrt( <i>a</i> )</b>: the square or cubic
+root of <i>a</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>tgamma( <i>a</i> ), lgamma( <i>a</i> )</b>: the gamma or the
+log-gamma function of <i>a</i></p>
+
+<h2>Tests</h2>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>is_finite( <i>a</i> ), is_inf( <i>a</i> ), is_nan( <i>a</i> )</b>:
-logical tests to check <i>a</i> for being finite, infinite or NaN (return 0 if
-false)</p>
+logical tests to check <i>a</i> for being finite, infinite or NaN (not a
+number), returning a zero if false</p>
+
+<h2>Random number drawing</h2>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>alapl( <i>med</i>, <i>alpha1</i>, <i>alpha2</i> )</b>: a
+random draw from an asymmetric Laplace distribution with median med, parameters
+<i>alpha1</i> and <i>alpha2</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>bernoulli( <i>p</i> )</b>: a random draw from a Bernoulli
+distribution with probability <i>p</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>beta( <i>alpha</i>, <i>beta</i> ):</b> a random draw from a
+beta distribution with parameters <i>alpha</i> and <i>beta</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>binomial( <i>p</i>, <i>t</i> )*</b>: a random draw from a
+binomial distribution with probability <i>p</i> and <i>t</i> trials.</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>cauchy( <i>a</i>, <i>b</i> )*:</b> a random draw from a Cauchy
+distribution with mode <i>a</i> and scale <i>b</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>chi_squared( <i>n</i> )*:</b> a random draw from a chi-squared
+distribution with <i>n</i> degrees of freedom</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>exponential( <i>lambda</i> )*:</b> a random draw from an
+exponential distribution with <i>lambda</i> mean frequence</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>fisher( <i>m</i>, <i>n </i>)*</b>: a random draw from a Fisher
+F distribution with <i>m</i> and <i>n</i> degrees of freedom</p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>gamma( <i>alpha</i>, <i>beta </i>)</b>: a random draw from a
+gamma distribution with parameters <i>alpha</i> and <i>beta</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>geometric( <i>p</i> )*</b>: a random draw from a geometric
+distribution with probability <i>p</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>lnorm( <i>mean</i>, <i>dev</i> )</b>: a random draw from a
+lognormal distribution with mean <i>mean</i> and standard deviation <i>dev</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>norm( <i>mean</i>, <i>dev</i> )</b>: a random draw from a
+normal distribution with mean <i>mean</i> and standard deviation <i>dev</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>pareto( <i>mu</i>, <i>alpha</i> )</b>: a random draw from a
+Pareto distribution with scale <i>mu</i> and shape parameter <i>alpha</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson
+distribution with mean <i>mean</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>student( <i>n</i> )*:</b> a random draw from a Student T
+distribution with <i>n</i> degrees of freedom</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4622,73 +4737,16 @@ draw in the interval [<i>min</i>, <i>max</i>] with uniform probability</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>norm( <i>mean</i>, <i>dev</i> )</b>: a random draw from a
-normal distribution with mean <i>mean</i> and standard deviation <i>dev</i></p>
+</span></span><b>weibull( <i>a</i>, <i>b</i> )*:</b> a random draw from a
+Weibull distribution with parameters <i>a</i> and <i>b</i></p>
+
+<h2>Cumulative distribution functions</h2>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>lnorm( <i>mean</i>, <i>dev</i> )</b>: a random draw from a
-lognormal distribution with mean <i>mean</i> and standard deviation <i>dev</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>poisson( <i>mean</i> )</b>: a random draw from a Poisson
-distribution with mean <i>mean</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>pareto( <i>mu</i>, <i>alpha</i> )</b>: a random draw from a
-Pareto distribution with scale <i>mu</i> and shape parameter <i>alpha</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>gamma( <i>mean</i> )</b>: a random draw from a gamma
-distribution with mean <i>mean </i>(<i>&#946; </i>= 1)</p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>beta( <i>alpha</i>, <i>beta</i> ):</b> a random draw from a
-beta distribution with parameters <i>alpha</i> and <i>beta</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>alapl( <i>med</i>, <i>alpha1</i>, <i>alpha2</i> )</b>: a
-random draw from an asymmetric Laplace distribution with parameters <i>alpha1</i>
-and <i>alpha2</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>unifcdf( <i>min</i>, <i>max</i>, <i>x</i> )</b>: the uniform
-cumulative distribution in the interval [<i>min</i>, <i>max</i>] from minus
-infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>normcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the normal
-cumulative distribution with mean <i>mean</i> and deviation <i>dev</i> from
-minus infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the
-lognormal cumulative distribution with mean <i>mean</i> and deviation <i>dev</i>
-from minus infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>poissoncdf( <i>mean</i>, <i>x</i> )</b>: the Poisson
-cumulative distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>paretocdf( <i>mu</i>, <i>alpha </i>)</b>: the Pareto
-cumulative distribution with scale <i>mu</i> and shape parameter <i>alpha</i>
-from minus infinity to <i>x</i></p>
-
-<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>gammacdf( <i>mean</i>, <i>x</i> )</b>: the gamma cumulative
-distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
+</span></span><b>alaplcdf( <i>med</i>, <i>alpha1</i>, <i>alpha2</i>, <i>x</i> )</b>:
+the cumulative asymmetric Laplace distribution with parameters <i>alpha1</i>
+and <i>alpha2</i> from minus infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4698,26 +4756,64 @@ infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>alaplcdf( <i>med</i>, <i>alpha1</i>, <i>alpha2</i>, <i>x</i> )</b>:
-the cumulative asymmetric Laplace distribution with parameters <i>alpha1</i>
-and <i>alpha2</i> from minus infinity to <i>x</i></p>
+</span></span><b>gammacdf( <i>mean</i>, <i>x</i> )</b>: the gamma cumulative
+distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
 
-<p class=MsoNormal>Other C++14 functions defined in <span class=Cdigo>&lt;cmath&gt;</span>
-are also available. Of course, it is always possible to declare new functions
-or link any C++ library to the LSD model.</p>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the
+lognormal cumulative distribution with mean <i>mean</i> and deviation <i>dev</i>
+from minus infinity to <i>x</i></p>
 
-<h2><a name="_Eigen_library_algebra"></a>Eigen library algebra library</h2>
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>normcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the normal
+cumulative distribution with mean <i>mean</i> and deviation <i>dev</i> from
+minus infinity to <i>x</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>paretocdf( <i>mu</i>, <i>alpha </i>)</b>: the Pareto
+cumulative distribution with scale <i>mu</i> and shape parameter <i>alpha</i>
+from minus infinity to <i>x</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>poissoncdf( <i>mean</i>, <i>x</i> )</b>: the Poisson cumulative
+distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
+
+<p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>unifcdf( <i>min</i>, <i>max</i>, <i>x</i> )</b>: the uniform
+cumulative distribution in the interval [<i>min</i>, <i>max</i>] from minus
+infinity to <i>x</i></p>
+
+<p class=MsoNormal>Other C++11/14 functions defined in <span class=Cdigo>&lt;cmath&gt;</span>
+may also available, according to the compiler version. Of course, it is always
+possible to declare new functions or link any C++ library to the LSD model.</p>
+
+<h2><a name="_Eigen_library_algebra"></a>Eigen linear algebra library*</h2>
 
 <p class=MsoNormal>LSD includes the powerful Eigen library for linear algebra,
 including native C++ support to matrix containers, numerical solvers, and
 related algorithms. Eigen namespace classes, methods and functions are
-available by default for use in the Equations’ code. </p>
+available for use in the Equations’ code when the definition below is in the
+first line of the equations file:</p>
+
+<p class=MsoNormal><span class=Cdigo>#define EIGENLIB </span></p>
+
+<p class=MsoNormal>By default, the above line is <i>commented out</i>, please
+remove the <span class=Cdigo>//</span> in front of it to enable the Eigen
+library. Please notice that enabling the Eigen library substantially increase
+the size of the <span class=Cdigo>src</span> subfolder created inside the <a
+href="LSD_faqs.html#modelhome">model home folder</a> when creating a LSD <a
+href="LMM.html#nowindow">no-window version</a> of the model.</p>
 
 <p class=MsoNormal>Eigen objects, like matrices, can be easily associated with
 LSD Objects using the <span class=Cdigo><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span>
 family of macros. For instance, suppose you want to add a 2 by 2 floating point
-matrix to each Object named <span class=Cdigo>Firm</span>, and initializes the
-matrices with zeros:</p>
+matrix to each Object named <span class=Cdigo>Firm</span>, initialize the
+matrices with zeros, and then change some of the matrix elements:</p>
 
 <p><span class=Cdigo>EQUATION( &quot;Init&quot; )<br>
 /*</span><span class=Cdigo><span style='color:#00B050'><br>
@@ -4730,9 +4826,17 @@ class=Cdigo><span style='color:#00B050'><br>
   ADDEXTS( cur, MatrixXd );  </span><span class=Cdigo><span style='color:#00B050'>//
 adds an empty matrix extension to each Firm <br>
 </span>  DO_EXTS( cur, MatrixXd, resize, 2, 2 );  </span><span class=Cdigo><span
-style='color:#00B050'>// resize the matrix</span><br>
-  EXTS( cur, MatrixXd ) &lt;&lt; 0, 0, 0, 0;  </span><span class=Cdigo><span
-style='color:#00B050'>// set each matrix element to 0</span><br>
+style='color:#00B050'>// resize the matrix to 2x2</span><br>
+  EXTS( cur, MatrixXd ) &lt;&lt; 0, 0, 0, 0;  </span><span class=Cdigo><span
+style='color:#00B050'>// set each matrix element to 0<br>
+</span>  EXTS( cur, MatrixXd ) ( 0, 0 ) = 1;</span><span class=Cdigo><span
+style='color:#00B050'>  // set element a11 to 1</span><br>
+  EXTS( cur, MatrixXd ) ( 0, 1 ) = 2;</span><span class=Cdigo><span
+style='color:#00B050'>  // set element a12 to 2</span><br>
+  EXTS( cur, MatrixXd ) ( 1, 0 ) = 3;</span><span class=Cdigo><span
+style='color:#00B050'>  // set element a21 to 3</span><br>
+  EXTS( cur, MatrixXd ) ( 1, 1 ) = 4;</span><span class=Cdigo><span
+style='color:#00B050'>  // set element a22 to 4</span><br>
 }</span></p>
 
 <p><span class=Cdigo>PARAMETER;  </span><span class=Cdigo><span
@@ -4741,17 +4845,28 @@ style='color:#00B050'>// turns the variable &quot;Init&quot; into a parameter
 
 <p><span class=Cdigo>RESULT( 1 )</span></p>
 
-<p class=MsoNormal>To access elements in the matrix created above in a <span
-class=Cdigo>Firm</span> Object Equation:</p>
+<p class=MsoNormal>Notice that Eigen follows the C-language convention of
+starting indexes from zero, so the matrix element <span class=Cdigo>a<sub>11</sub></span>
+is addressed by <span class=Cdigo>( 0, 0 )</span> and so on.</p>
+
+<p class=MsoNormal>To compute the matrix determinant and to directly access
+elements in the matrix created above in a <span class=Cdigo>Firm</span> Object
+Equation:</p>
 
 <p><span class=Cdigo>…<br>
-v[1] = EXT( MatrixXd )( 0, 0 );  </span><span class=Cdigo><span
-style='color:#00B050'>// pick element in the first row and column</span><br>
-…</span></p>
+v[0] = DO_EXT( MatrixXd, determinant );  </span><span class=Cdigo><span
+style='color:#00B050'>// compute the determinant of matrix</span><br>
+v[11] = EXT( MatrixXd )( 0, 0 );  </span><span class=Cdigo><span
+style='color:#00B050'>// pick element in the first row and column<br>
+</span>…</span></p>
 
-<p class=MsoNormal>To use the library please refer to Eigen website and
-documentation at <span class=Cdigo><a href="http://eigen.tuxfamily.org">http://eigen.tuxfamily.org</a></span>.
-</p>
+<p class=MsoNormal>To use the library many functions, please refer to Eigen
+website and documentation at <span class=Cdigo><a
+href="http://eigen.tuxfamily.org">http://eigen.tuxfamily.org</a></span>. </p>
+
+<p class=MsoNormal>Eigen requires a recent C++ <a href="LSD_faqs.html#compiler">compiler</a>
+and is not supported on a <a href="LSD_manual.html#install">Windows 32-bit LSD
+installation</a>.</p>
 
 <p class=MsoNormal>Eigen is free software distributed under the <a
 href="http://www.mozilla.org/MPL/2.0">MPL2</a> license.</p>
@@ -4801,7 +4916,8 @@ in the example:</p>
 
 <p><span class=Cdigo>…<br>
 char[500] filename;&nbsp;&nbsp; </span><span class=Cdigo><span
-style='color:#00B050'>// allocate space for the file name character array (string)</span><br>
+style='color:#00B050'>// allocate space for the file name character array
+(string)</span><br>
 sprint( filename, &quot;%s/%s&quot;, PATH, CONFIG );&nbsp; </span><span
 class=Cdigo><span style='color:#00B050'>// concatenate with the &quot;/&quot;
 between<br>
@@ -4935,10 +5051,10 @@ see the C/C++ standard library documentation.</p>
 <p>Any message submitted with <span class=Cdigo>LOG(…)</span> is only presented
 while LSD simulation is running in <span class=Cdigo><u><span style='color:
 blue'><a href="#_PARAMETER">OBSERVE(…)</a></span></u></span> mode. Use <span
-class=Cdigo>PLOG(…)</span> (as “priority” log) to be able to present messages that
-are required in any running mode (<span class=Cdigo><u><span style='color:blue'><a
-href="#_PARAMETER">OBSERVE(…)</a></span></u></span> or <span class=Cdigo><u><span
-style='color:blue'><a href="#_PARAMETER">FAST(…)</a></span></u></span>).</p>
+class=Cdigo>PLOG(…)</span> (as “priority” log) to be able to present messages
+that are required in any running mode (<span class=Cdigo><u><span
+style='color:blue'><a href="#_PARAMETER">OBSERVE(…)</a></span></u></span> or <span
+class=Cdigo><u><span style='color:blue'><a href="#_PARAMETER">FAST(…)</a></span></u></span>).</p>
 
 <h2><a name="_NO_NAN_USE_NAN_1"></a><a name="NO_NAN"></a>NO_NAN<br>
 USE_NAN </h2>
@@ -4963,11 +5079,10 @@ for plot generation, statistics calculation and data export. </p>
 
 <h2><a name="_PARAMETER_1"></a><a name=PARAMETER></a>PARAMETER</h2>
 
-<p>This Macro within an Equation transforms the corresponding Variable in a
-Parameter, so that the Equation is never computed again during the simulation
-run. Normally, this is used in Equations meant to initialize a model at the
-very first time step, and does not need to be computed during a simulation run.
-</p>
+<p>This Macro within an Equation transforms the corresponding Variable in a Parameter,
+so that the Equation is never computed again during the simulation run.
+Normally, this is used in Equations meant to initialize a model at the very
+first time step, and does not need to be computed during a simulation run. </p>
 
 <h2><a name="_RECALC(_&quot;Lab&quot;_)"></a><a name="_RECALC(_&quot;Lab&quot;_),"></a><a
 name=RECALC></a>RECALC( &quot;<i>Lab</i>&quot; ), RECALCS( <i>obj</i>, &quot;<i>Lab</i>&quot;
@@ -4987,21 +5102,23 @@ supplied, Variable labelled <i>Lab</i> is supposed to be located in it.</p>
 when extract draws or producing pseudorandom numbers. The following <i>type</i>
 options are available:</p>
 
-<p class=MsoNormal style='margin-left:14.2pt'><b><span lang=DE>1</span></b><span
-lang=DE>. Park-Miller in (0,1)<br>
-<b>2</b>. Mersenne-Twister in (0,1) (default option)<br>
-<b>3</b>. </span>Mersenne-Twister in [0,1]<br>
-<b>4</b>. Mersenne-Twister in [0,1)<br>
-<b>5</b>. Mersenne-Twister with 53 bits resolution in [0,1)</p>
+<p class=MsoNormal style='margin-left:14.2pt'><b>1</b>. Linear congruential
+(32-bit) in (0,1)<br>
+<b>2</b>. Mersenne-Twister (32-bit) in (0,1) (default option)<br>
+<b>3</b>. Linear congruential (32-bit) in [0,1) (C++11 only)<br>
+<b>4</b>. Mersenne-Twister (32-bit) in [0,1)<br>
+<b>5</b>. Mersenne-Twister (64-bit) in [0,1)<br>
+<b>6</b>. Lagged Fibonacci (24-bit) in [0,1)<br>
+<b>7</b>. Lagged Fibonacci (48-bit) in [0,1)</p>
 
 <h2><a name="_RND_SETSEED(_seed_)"></a><a name="_RND_SEED_RND_SETSEED(_seed"></a><a
 name="RND_SEED"></a>RND_SEED<br>
 RND_SETSEED( <i>seed</i> )</h2>
 
 <p class=MsoNormal>Macros <span class=Cdigo>RND_SETSEED(…)</span> changes the
-integer seed number used by the pseudorandom number generator to <i>seed</i>. <span
-class=Cdigo>RND_SEED</span> reads the currently set integer seed number in
-double precision format. </p>
+integer seed number used by the pseudorandom number generator to <i>seed</i>,
+an unsigned integer value. <span class=Cdigo>RND_SEED</span> reads the
+currently set unsigned integer seed number in double precision format. </p>
 
 <h2><a name="_SLEEP(_msecs_)"></a><a name=SLEEP></a>SLEEP( <i>msecs</i> )</h2>
 
@@ -5095,14 +5212,14 @@ name="_V_EXT(_class,_ext"></a><a name="_P_EXT(_class_),"></a><a
 name="_V_EXT(_class,_var"></a><a name="_DELETE_EXT(_class_),"></a><a
 name=ADDEXT></a>ADDEXT( <i>class</i> ), ADDEXTS( <i>obj</i>, <i>class </i>)</h2>
 
-<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to
-the current LSD Object under computation, allocating memory space for it. If an
-<a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is supplied,
-the data extension is added to this specific Object. The data extension can be
-from a simple scalar variable to a fully defined C++ object like a <span
-class=Cdigo>class</span> or a <span class=Cdigo>struct</span>. Data extension
-allocation is automatically handled by LSD, being destroyed when the host
-Object is deleted (C++ object constructor and destructor are called
+<p>These Macros adds an arbitrary C++ data extension of type <i>class</i> to the
+current LSD Object under computation, allocating memory space for it. If an <a
+href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i> is
+supplied, the data extension is added to this specific Object. The data
+extension can be from a simple scalar variable to a fully defined C++ object
+like a <span class=Cdigo>class</span> or a <span class=Cdigo>struct</span>.
+Data extension allocation is automatically handled by LSD, being destroyed when
+the host Object is deleted (C++ object constructor and destructor are called
 accordingly). Each LSD Object instance can have a single data extension; adding
 an extension when one already exists automatically destroys the previous one.</p>
 
@@ -5175,12 +5292,13 @@ style='color:#00B050'>// turns the variable &quot;Init&quot; into a parameter
 
 <p><span class=Cdigo>RESULT( 1 )</span></p>
 
-<p>Then, in an Equation of a <i>Firm</i>-level Variable, it is possible to add/remove
-elements to the integer vector and read/change their values. In the example
-below, we make sure the <i>tech_params</i> vector is correctly set before using
-it to compute <i>Firm</i>’s productivity using an external library function
-(not shown below). If format is not ok, rebuild the vector, by clearing it and
-initializing the vector and the integer variable, before calling the function:</p>
+<p>Then, in an Equation of a <i>Firm</i>-level Variable, it is possible to
+add/remove elements to the integer vector and read/change their values. In the
+example below, we make sure the <i>tech_params</i> vector is correctly set
+before using it to compute <i>Firm</i>’s productivity using an external library
+function (not shown below). If format is not ok, rebuild the vector, by
+clearing it and initializing the vector and the integer variable, before
+calling the function:</p>
 
 <p><span class=Cdigo>…<br>
 </span><span class=Cdigo><span style='color:#00B050'>// refill the
@@ -5275,13 +5393,13 @@ does nothing.</p>
 <h2><a name="_DO_EXT(_class,_meth,"></a>DO_EXT( <i>class</i>, <i>meth</i>, … ),
 EXEC_EXTS( <i>obj</i>, <i>class</i>, <i>meth</i>, … )</h2>
 
-<p>Executes method (function) <i>meth</i> defined by the top class of an extension
-of type <i>class</i> (a <span class=Cdigo>class</span> or a <span class=Cdigo>struct</span>,
-in this case) hosted in the current Object <span class=Cdigo><a
-href="#_Parent_Object:_p">p</a></span>, or in the Object pointed by <i>obj</i>.
-If method <i>meth</i> requires arguments, they should be also included in <span
-class=Cdigo>DO_EXT(…)</span> call after the regular elements. If the method
-returns a value, the Macro also returns it. </p>
+<p>Executes method (function) <i>meth</i> defined by the top class of an
+extension of type <i>class</i> (a <span class=Cdigo>class</span> or a <span
+class=Cdigo>struct</span>, in this case) hosted in the current Object <span
+class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or in the Object pointed
+by <i>obj</i>. If method <i>meth</i> requires arguments, they should be also
+included in <span class=Cdigo>DO_EXT(…)</span> call after the regular elements.
+If the method returns a value, the Macro also returns it. </p>
 
 <p>Please note that <span class=Cdigo>DO_EXT(…)</span> does not allow directly
 invoking a method belonging to an object contained in <i>class</i>, please use
@@ -5327,9 +5445,9 @@ example. </p>
 within an extension of type <i>class</i> (a <span class=Cdigo>class</span> or a
 <span class=Cdigo>struct</span>, in this case) hosted in the current Object <span
 class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or in the Object pointed
-by <i>obj</i>. If method <i>meth</i> requires arguments, they should be also
-included in <span class=Cdigo>EXEC_EXT(…)</span> call after the regular
-elements. If the method returns a value, the Macro also returns it. </p>
+by <i>obj</i>. If method <i>meth</i> requires arguments, they should be also included
+in <span class=Cdigo>EXEC_EXT(…)</span> call after the regular elements. If the
+method returns a value, the Macro also returns it. </p>
 
 <p>Please note that <span class=Cdigo>EXEC_EXT(…)</span> does not allow
 directly invoking a method in <i>class</i>, please use the command <span
@@ -5343,8 +5461,9 @@ the extension exists, it is advisable to check it before executing <span
 class=Cdigo>EXEC_EXT(…)</span>, testing for a non-<span class=Cdigo>NULL</span>
 <span class=Cdigo><u><span style='color:blue'><a href="#_P_EXT(_class_),_1">P_EXT(…)</a></span></u></span>
 return. If the extension is not a C++ <span class=Cdigo>class</span> or <span
-class=Cdigo>struct</span>, or the named <i>c_obj</i> and <i>meth</i> do not exist
-inside it or have an incompatible type, a compiler error message is thrown.</p>
+class=Cdigo>struct</span>, or the named <i>c_obj</i> and <i>meth</i> do not
+exist inside it or have an incompatible type, a compiler error message is
+thrown.</p>
 
 <p>See <span class=Cdigo><u><span style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span> for more details on
@@ -5406,8 +5525,8 @@ class=Cdigo><u><span style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</
 a compiler error message is thrown.</p>
 
 <p>See <span class=Cdigo><u><span style='color:blue'><a
-href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span> for more details on
-C++ data extensions and an example. </p>
+href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span> for more details on C++
+data extensions and an example. </p>
 
 <h2><a name="close_sim"></a><span class=Ttulo2Char>close_sim( )</span></h2>
 
@@ -5563,13 +5682,13 @@ RESULT( v[1] )</span></p>
 basic code to compute the values of Variables. LSD Macros and functions are
 available to allow the reading of model’s values or to modify them. The
 elaboration of the Variables' Equation can use any legal C++ element or
-construction. Here we present some basic (and frequently used) commands.
-Remember that the code to compute a Variable's value is executed sequentially
-inside an <span class=Cdigo><u><span style='color:blue'><a href="#_EQUATION">EQUATION(…)</a></span></u></span>
-block when the system requires that Variable to be updated. At the end of the
-Equation's computation the system assign the value informed in <span
-class=Cdigo><a href="#RESULT">RESULT(…)</a></span> to the Variable and then
-moves to compute another Variable.</p>
+construction. Here we present some basic (and frequently used) commands. Remember
+that the code to compute a Variable's value is executed sequentially inside an <span
+class=Cdigo><u><span style='color:blue'><a href="#_EQUATION">EQUATION(…)</a></span></u></span>
+block when the system requires that Variable to be updated. At the end of the Equation's
+computation the system assign the value informed in <span class=Cdigo><a
+href="#RESULT">RESULT(…)</a></span> to the Variable and then moves to compute
+another Variable.</p>
 
 <p>The Equation code is composed by lines of commands that computer generally
 executes sequentially, moving to the next line when the previous one has been
@@ -5664,8 +5783,8 @@ style='font-family:"Arial","sans-serif"'> </span></span><span class=Cdigo><span
 style='font-family:"Arial","sans-serif";color:windowtext'>is equivalent to</span></span><span
 class=Cdigo><span style='font-family:"Arial","sans-serif"'> </span>a -= 32;</span></p>
 
-<p class=MsoNormal>A C++ peculiar command (<span class=Cdigo>++</span>) allows
-both to increase by 1 a variable and to use it as an assignment. That is, <span
+<p class=MsoNormal>A C++ peculiar command (<span class=Cdigo>++</span>) allows both
+to increase by 1 a variable and to use it as an assignment. That is, <span
 class=Cdigo>a++</span> (or <span class=Cdigo>++a</span>) is equivalent to <span
 class=Cdigo>a += 1</span>, which in turn is equivalent to <span class=Cdigo>a =
 a + 1</span>.</p>
@@ -5811,8 +5930,8 @@ from &quot;d&quot;<br>
 &nbsp; */<br>
 </span>}<br>
 else<br>
-{ </span><span class=Cdigo><span style='color:#00B050'>// if the process is
-here, than one of the two conditions above is not true</span><br>
+{ </span><span class=Cdigo><span style='color:#00B050'>// if the process is here,
+than one of the two conditions above is not true</span><br>
 &nbsp; if (a == b)<br>
 &nbsp;&nbsp;{<br>
 </span><span class=Cdigo><span style='color:#00B050'>&nbsp;&nbsp;&nbsp;&nbsp;

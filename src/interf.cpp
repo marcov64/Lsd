@@ -4860,10 +4860,11 @@ case 68:
 		else
 			fSeq = *choice;
 		
-		if ( strlen( simul_name ) > 0 )				// default name
+		if ( fSeq && strlen( simul_name ) > 0 )	// default name
 			cmd( "set res \"%s_1.lsd\"", simul_name );
 		else
 			cmd( "set res \"\"" );
+		
 		cmd( "set path \"%s\"", path );
 		if ( strlen( path ) > 0 )
 			cmd( "cd \"$path\"" );
@@ -4883,7 +4884,7 @@ case 68:
 				if ( strlen( out_dir ) == 0 )			// default path
 					sprintf( lab, "%s_%d.lsd", out_file, ( *choice )++ );
 				else
-					sprintf( lab, "%s/%s_%d.lsd", out_dir, out_file, (*choice)++ );
+					sprintf( lab, "%s/%s_%d.lsd", out_dir, out_file, ( *choice )++ );
 				if ( f != NULL ) 
 					fclose( f );
 				f = fopen( lab, "r" );
@@ -4893,7 +4894,7 @@ case 68:
 		}
 		else									// bunch of files?
 		{
-			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialfile $res -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
+			cmd( "set bah [ tk_getOpenFile -parent . -title \"Load Configuration Files\" -defaultextension \".lsd\" -initialdir \"$path\" -filetypes { { {LSD model files} {.lsd} } } -multiple yes ]" );
 			cmd( "set choice [ llength $bah ]; if { $choice > 0 && ! [ fn_spaces [ lindex $bah 0 ] . 1 ] } { set res [ lindex $bah 0 ]; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set numpos [ expr [ string last _ $res ] + 1 ]; if { $numpos > 0 } { set res [ string range $res 0 [ expr $numpos - 2 ] ] } }" );
 			if ( *choice == 0 )
 				break;
@@ -4967,6 +4968,7 @@ case 68:
 		break;
 	
 	get_int( "cores", & param );
+	get_int( "threads", & nature );
 	if ( param < 1 || param > 64 ) 
 		param = max_threads;
 	
@@ -5036,7 +5038,7 @@ case 68:
 		}
 		
 		// set background low priority in servers (cores/jobs > 8)
-		if ( param > 8 && fnext - ffirst > 8 )
+		if ( nature > 8 || ( param > 8 && fnext - ffirst > 8 ) )
 		{
 			sprintf( msg, "nice %s", ch );
 			strcpy( ch, msg );

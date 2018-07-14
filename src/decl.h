@@ -112,7 +112,7 @@
 // define the base pseudo random number generator
 #ifndef RND
 double ran1( long *idum_loc = NULL );
-#define RND ( (double ) ran1( ) )
+#define RND ( ran1( ) )
 #endif
 
 using namespace std;
@@ -592,7 +592,6 @@ void read_eq_filename( char *s );
 void report( int *choice, object *r );
 void reset_end( object *r );
 void results_alt_path( const char *altPath );
-void return_where_used( char *lab, char s[ ]);
 void run( object *r );
 void save_data1( int *choice );
 void save_datazip( int *choice );

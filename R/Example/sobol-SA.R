@@ -46,7 +46,7 @@ eval.vars <- function( dataSet, allVars ) {
 
 dataSet <- read.doe.lsd( ".",                    # data files relative folder
                          "Sim1",                 # data files base name (same as .lsd file)
-                         "var1",				         # variable name to perform the sensitivity analysis
+                         "var1",                 # variable name to perform the sensitivity analysis
                          does = 2,               # number of experiments (data + external validation)
                          iniDrop = 0,            # initial time steps to drop from analysis (0=none)
                          nKeep = -1,             # number of time steps to keep (-1=all)
@@ -58,7 +58,7 @@ dataSet <- read.doe.lsd( ".",                    # data files relative folder
                          lim.outl = 10 )         # limit non-outlier deviation (number of std. devs.)
 
 
-# ====== Sobol sensitivity analysis on meta-model ======
+# ====== Sobol sensitivity analysis on experimental data ======
 
 sSA <- sobol.decomposition.lsd( dataSet )        # LSD experimental data set
 

@@ -345,9 +345,9 @@ computer users can use to run and test the results from simulation models. </p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span>Model writers need to write just the code directly linked to the content
-of the model, having LSD automatically creating all the interfaces that allow accessing
-any aspect of the model, accelerating and simplifying the process of building
-simulation models and allowing for their easy distribution. </p>
+of the model, having LSD automatically creating all the interfaces that allow
+accessing any aspect of the model, accelerating and simplifying the process of
+building simulation models and allowing for their easy distribution. </p>
 
 <p class=MsoNormal>LSD tries to remove the trade-off between the simplicity to
 use a simulation model and the complexity to build it. This is obtained by
@@ -379,8 +379,8 @@ since it entails models based on a hierarchy of entities, with fast and
 automatic search through the “tree” of entities for the correct scheduling of
 the code calculating the elements. </p>
 
-<p class=MsoNormal>See the <a href="LSD_documentation.html">LSD
-documentation</a> for full information.</p>
+<p class=MsoNormal>See the <a href="LSD_documentation.html">LSD documentation</a>
+for full information.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -476,13 +476,13 @@ existing <a href="#_What_is_a_6">configuration</a>;</p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>5)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
 </span>Explore the menus of the LSD Browser (e.g., menu <span class=Cdigo>Run&gt;Run</span>
-starts the simulation). You may keep the <a href="browser.html">LSD
-Browser help<span style='color:windowtext;text-decoration:none'> </span></a>pages
-open for additional information.</p>
+starts the simulation). You may keep the <a href="browser.html">LSD Browser
+help<span style='color:windowtext;text-decoration:none'> </span></a>pages open
+for additional information.</p>
 
 <p class=MsoNormal>LSD <a href="LSD_manual.html">manual</a> includes a <a
-href="model_using.html">tutorial for the basic operations</a> for
-running a LSD model. </p>
+href="model_using.html">tutorial for the basic operations</a> for running a LSD
+model. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -539,8 +539,8 @@ style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nb
 </span></span>and so on.</p>
 
 <p class=MsoNormal>LSD <a href="LSD_manual.html">manual</a> includes a <a
-href="model_writing.html">tutorial for the basic operations</a> of
-creating a simple LSD model. </p>
+href="model_writing.html">tutorial for the basic operations</a> of creating a
+simple LSD model. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -606,8 +606,8 @@ kept inside the LSD installation directory (usually <span class=Cdigo>C:\Lsd-X.Y
 
 <p class=MsoNormal>When a new model is created in <a href="#_What_is_LMM?_1">LMM</a>,
 the user has the option to name its home directory (the default being <span
-class=Cdigo>newmodel</span>). After the model is created, its home directory
-can be easily retrieved by using the LMM command <span class=Cdigo>Model&gt;Model
+class=Cdigo>newmodel</span>). After the model is created, its home directory can
+be easily retrieved by using the LMM command <span class=Cdigo>Model&gt;Model
 Info</span> (check the <a href="LMM.html">LMM manual</a> for details).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -635,9 +635,9 @@ simulation to just produce data. Results must be fully understood and this is
 linked to the functional content of the model and its <a href="#_What_is_a_6">configuration</a>.
 For this reason, during a simulation run users must be able to interrupt,
 investigate the model, observe the data generated up to that time, modify
-values, and resume. Moreover, any LSD model comes with full documentation
-(automatically generated) to make easier to grasp the connections between the
-model’s elements even in very complex cases. </p>
+values, and resume. Moreover, any LSD model comes with full documentation (automatically
+generated) to make easier to grasp the connections between the model’s elements
+even in very complex cases. </p>
 
 <p class=MsoNormal>Technically, when a user runs a LSD simulation, the
 following steps are performed: </p>
@@ -730,14 +730,14 @@ determined from the set of difference equations itself. Also, several
 computations may potentially run in parallel, without the necessity to follow a
 specific order, speeding up the model computation.<br>
 <br>
-LSD relies on an automatic scheduling engine allowing modelers to decide the
-order of computation except in special circumstances, as when ambiguity is
-present. Only if there is a specific need to keep a certain evaluation
-sequence, then the model can be explicitly configured to follow it. For
-example, writing the Equation <i>x</i> = f(<i>y</i>) forces the system to
-compute <i>y</i> before <i>x</i>. Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i>
-– 1) ) tells the system to use a lagged value of <i>y</i> in the Equation for <i>x</i>
-and thus the Equation for <i>y</i> may be computed before or after that for <i>x</i>.</p>
+LSD relies on an automatic scheduling engine allowing modelers to decide the order
+of computation except in special circumstances, as when ambiguity is present.
+Only if there is a specific need to keep a certain evaluation sequence, then
+the model can be explicitly configured to follow it. For example, writing the
+Equation <i>x</i> = f(<i>y</i>) forces the system to compute <i>y</i> before <i>x</i>.
+Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i> – 1) ) tells the system
+to use a lagged value of <i>y</i> in the Equation for <i>x</i> and thus the
+Equation for <i>y</i> may be computed before or after that for <i>x</i>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -757,8 +757,8 @@ understood as a difference equation that computes a numerical value for a <a
 href="#_What_is_a_3">Variable</a> as a function of the present and the past
 values of all Variables and <a href="#_What_is_a_4">Parameters</a> of the
 model. Technically, it is a piece of code (C++ extended by a <a
-href="LSD_macros.html">library of LSD specific macros and functions</a>)
-that is executed once for each instance of each <a href="#_What_is_an_1">Object</a>
+href="LSD_macros.html">library of LSD specific macros and functions</a>) that
+is executed once for each instance of each <a href="#_What_is_an_1">Object</a>
 containing the Variable it refers to, at every time step of the simulation.
 Users of a model do not need to deal with the Equations, though they have
 access to the code implementing the Equations including all the explanations
@@ -785,19 +785,19 @@ the correct scheduling. A powerful debugger helps to solve the problem of
 scheduling errors even under the most extreme conditions. </p>
 
 <p class=MsoNormal>The problem of multiple Variables with the same name is
-solved by using a hierarchical structure. That is, if model writers do not
-specify which instance they need to use in their Equations, the system
-automatically provides the value of the &quot;closest&quot; instance of the
-requested element. Overruling systems allow anyway modelers to access any value
-of the model they may necessitate. </p>
+solved by using a hierarchical structure. That is, if model writers do not specify
+which instance they need to use in their Equations, the system automatically
+provides the value of the &quot;closest&quot; instance of the requested
+element. Overruling systems allow anyway modelers to access any value of the
+model they may necessitate. </p>
 
 <p class=MsoNormal>All in all, writing the Equations' code for a LSD model has
 the same difficulty of writing the C++ equivalent of the set of difference
-equations expressing the model, and therefore the complexity depends on the model
-only. Moreover, an Equation can contain any legal C++ code besides computing
-numerical values. For example, an Equation can overwrite other Variables' or
-Parameters' values of the model, create or remove Objects, quit the simulation,
-trigger messages under particular circumstances, etc. </p>
+equations expressing the model, and therefore the complexity depends on the
+model only. Moreover, an Equation can contain any legal C++ code besides
+computing numerical values. For example, an Equation can overwrite other
+Variables' or Parameters' values of the model, create or remove Objects, quit
+the simulation, trigger messages under particular circumstances, etc. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -849,13 +849,13 @@ is a LSD macro or function? </h1>
 href="#_What_is_an">Equations</a> clearly defined by the usage of predefined C++
 code constructs. Such constructs are usually provided in the form of <a
 href="LSD_macros.html">pre-defined macros</a>. Pure C++ coding using <a
-href="LSD_functions.html">library functions</a> directly is also
-possible for special cases (and skilled programmers). A macro function is a
-predefined set of <a href="#_What_is_C++_1">C++</a> instructions that can be
-executed by the usage of a single name attributed to it, hiding much of the
-coding complexity required to write programs. A convention in the C++ language
-is to use all capital names for macros, as in <span class=Cdigo>EQUATION</span>
-or <span class=Cdigo>RESULT</span> examples. </p>
+href="LSD_functions.html">library functions</a> directly is also possible for
+special cases (and skilled programmers). A macro function is a predefined set
+of <a href="#_What_is_C++_1">C++</a> instructions that can be executed by the
+usage of a single name attributed to it, hiding much of the coding complexity
+required to write programs. A convention in the C++ language is to use all
+capital names for macros, as in <span class=Cdigo>EQUATION</span> or <span
+class=Cdigo>RESULT</span> examples. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1083,8 +1083,8 @@ Variable, all of which using the same Equation for their updating. </p>
 attached to a (finite) list of numerical real values (LSD implements only
 double-precision IEEE 754 float-point Variables), each tagged with a time lag
 index. Different instances of the same Variable, despite using the same
-Equation to compute their value, in general may differ because they use
-different Object instances during the calculation. </p>
+Equation to compute their value, in general may differ because they use different
+Object instances during the calculation. </p>
 
 <p class=MsoNormal>Notice that a given Variable instance is calculate once, an
 only once, at every <a href="#_What_is_a_1">time step</a>. If many Equations
@@ -1096,10 +1096,10 @@ calculation once (except if explicitly disabled).</p>
 <p class=MsoNormal>The numerical values of Variables are computed using the
 associated Equation and the past (lagged) values can be used in the
 calculations. Variables that are never used with lagged (past) values in the
-model (i.e., in none of the Equations) do not require to be initialized before the
-simulation run. Instead, Variables used with lags in any Equation requires that
-the initial values to be used at the very beginning of the simulation run be
-explicitly defined by the <a href="#_What_is_a_6">model configuration</a>. </p>
+model (i.e., in none of the Equations) do not require to be initialized before
+the simulation run. Instead, Variables used with lags in any Equation requires
+that the initial values to be used at the very beginning of the simulation run
+be explicitly defined by the <a href="#_What_is_a_6">model configuration</a>. </p>
 
 <p class=MsoNormal>Variable names are subject to <a href="#_What_is_an_1">certain
 rules</a> and are case sensitive.</p>
@@ -1294,17 +1294,17 @@ In simpler terms, the model structure is a hierarchy which represents “what
 contains what”. </p>
 
 <p class=MsoNormal>The Objects in the model can be hierarchically (parenthood
-relation) or parallel (brotherhood relation) linked. In the first case, the parent
-Objects (higher in the hierarchy) can access one or many instances of the same
-son Objects, descending from them, so that they can easily compute aggregate
-values produced by the whole set of descendants. Descending Objects, instead,
-have access to only one instance of the parent Object, and this same instance
-is shared by all the same descendants (brothers), so that they can access the
-same values contained in the parent. This system allows modelers to easily
-write <a href="#_What_is_an">Equations</a> code relying on the hierarchical
-links to individuate the correct instance to use. In the second case, brothers,
-or parallel instances, can access each other’s values as long as they are
-unique instances and can be properly addressed. </p>
+relation) or parallel (brotherhood relation) linked. In the first case, the
+parent Objects (higher in the hierarchy) can access one or many instances of
+the same son Objects, descending from them, so that they can easily compute
+aggregate values produced by the whole set of descendants. Descending Objects,
+instead, have access to only one instance of the parent Object, and this same
+instance is shared by all the same descendants (brothers), so that they can
+access the same values contained in the parent. This system allows modelers to
+easily write <a href="#_What_is_an">Equations</a> code relying on the
+hierarchical links to individuate the correct instance to use. In the second
+case, brothers, or parallel instances, can access each other’s values as long
+as they are unique instances and can be properly addressed. </p>
 
 <p class=MsoNormal>The general rule is that Equations for Variables in
 descending Objects must make use of elements in parent (or grandparent) Objects
@@ -1363,13 +1363,12 @@ href="#_What_is_a_2">Equations' code</a>. </p>
 
 <h1><a name="_What_is_a_9"></a>What is a LSD lattice?</h1>
 
-<p class=MsoNormal>The <a href="lattice.html">LSD lattice window</a>
-represents a bi-dimensional graph in which the <a href="#_What_is_a">simulation
-model</a> may dynamically present graphical results during the <a
-href="#_What_is_a_1">simulation run</a>. The lattice is formed by points
-organized in rows and columns and each point may have its color set
-independently from the rest. The lattice size is arbitrary and is defined by
-the <a href="#_What_is_a_7">model program</a>.</p>
+<p class=MsoNormal>The <a href="lattice.html">LSD lattice window</a> represents
+a bi-dimensional graph in which the <a href="#_What_is_a">simulation model</a>
+may dynamically present graphical results during the <a href="#_What_is_a_1">simulation
+run</a>. The lattice is formed by points organized in rows and columns and each
+point may have its color set independently from the rest. The lattice size is
+arbitrary and is defined by the <a href="#_What_is_a_7">model program</a>.</p>
 
 <p class=MsoNormal>The lattice may be understood as a tabular data structure.
 The information in the lattice, defining its points’ colors, may be stored and
@@ -1606,20 +1605,20 @@ is the core tool to study the “Holy Grail” of agent-based models, the emergent
 properties, even though, at the end of the day, all simulation models do is to
 produce (large) streams of data. </p>
 
-<p class=MsoNormal>LSD is endowed with a powerful <a
-href="menudata_res.html">Analysis of Result module</a> that allows the
-generation of sophisticated graphs and produces some statistics from the
-generated time series. The same module exports data in a variety of formats for
-more sophisticated statistical or graphical elaboration. In case the select
-configuration asks for many simulation runs to be done in a sequence
-(typically, for robustness analysis), the system saves on files the data at the
-end of each simulation. Each of these files (extension <span class=Cdigo>.res</span>)
-can be used in the Analysis of Result module in LSD (or even directly in R).
-Moreover, in the case of multiple <a href="#_What_is_a_1">simulation runs</a>,
-the system saves also the values of all series at the very last time step for
-each simulation run in a single file (the extension <span class=Cdigo>.tot</span>
-file). This file, also to be used with the Analysis of Result module, can be
-easily used to compare the final status of the model in each simulation run. </p>
+<p class=MsoNormal>LSD is endowed with a powerful <a href="menudata_res.html">Analysis
+of Result module</a> that allows the generation of sophisticated graphs and
+produces some statistics from the generated time series. The same module
+exports data in a variety of formats for more sophisticated statistical or
+graphical elaboration. In case the select configuration asks for many
+simulation runs to be done in a sequence (typically, for robustness analysis),
+the system saves on files the data at the end of each simulation. Each of these
+files (extension <span class=Cdigo>.res</span>) can be used in the Analysis of
+Result module in LSD (or even directly in R). Moreover, in the case of multiple
+<a href="#_What_is_a_1">simulation runs</a>, the system saves also the values
+of all series at the very last time step for each simulation run in a single
+file (the extension <span class=Cdigo>.tot</span> file). This file, also to be
+used with the Analysis of Result module, can be easily used to compare the
+final status of the model in each simulation run. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1808,8 +1807,8 @@ description sections. The documentation for an element can be automatically
 appended by the list of <a href="#_What_is_an">Equations</a> using it, and by
 the list of other elements used by its own Equation. This way, one is
 immediately aware where the item affects or is affected by the <a
-href="#_What_is_the">model structure</a>. See the <a
-href="menumodel.html">documentation </a>on the LSD Browser for details.</p>
+href="#_What_is_the">model structure</a>. See the <a href="menumodel.html">documentation
+</a>on the LSD Browser for details.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1827,8 +1826,8 @@ LSD? </h1>
 
 <p class=MsoNormal>LSD has a single and consistent interface for all models and
 provides integral documentation on all its coding and operational aspects.
-Please see the <a href="LSD_documentation.html">guide for LSD
-documentation</a>. </p>
+Please see the <a href="LSD_documentation.html">guide for LSD documentation</a>.
+</p>
 
 <p class=MsoNormal>Concerning the documentation of any software, in general,
 the best way to learn LSD is to use it. A <a href="LSD_manual.html">manual</a>
@@ -1855,9 +1854,8 @@ numerical value used, etc. </p>
 
 <h1><a name="_What_is_the_1"></a>What is the LSD XXX window? </h1>
 
-<p class=MsoNormal>Please check the <a href="LSD_windows.html">LSD
-windows</a> help page for a pictorial introduction to the main windows used in
-LSD. </p>
+<p class=MsoNormal>Please check the <a href="LSD_windows.html">LSD windows</a>
+help page for a pictorial introduction to the main windows used in LSD. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

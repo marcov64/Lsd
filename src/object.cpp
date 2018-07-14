@@ -1602,7 +1602,7 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 	for ( ; cb != NULL && strcmp( cb->blabel, obj ); cb = cb->next );
 	if ( cb == NULL || cb->head == NULL )
 	{
-		sprintf( msg, "'%s' is missing for sorting", obj, label);
+		sprintf( msg, "'%s' is missing for sorting", label);
 		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
 		return;
 	}
@@ -1964,7 +1964,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 	
 	if ( a > tot )
 	{
-		sprintf( msg, "Number of %d for '%s' is invalid for random drawing", tot, lv );  
+		sprintf( msg, "Number of %lf for '%s' is invalid for random drawing", tot, lv );  
 		error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation" );
 		return NULL;
 	}
