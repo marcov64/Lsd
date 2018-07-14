@@ -19,6 +19,20 @@ sobol.rnd.exp <- function( n, factors, lwr.bound = 0, upr.bound = 1 ) {
 }
 
 
+# ==== Round data frames containing not just numbers ====
+# round all numeric variables
+# x: data frame
+# digits: number of digits to round
+
+round.df <- function( x, digits = 4 ) {
+
+  numeric_columns <- sapply( x, mode ) == 'numeric'
+  x[ numeric_columns ] <-  round( x[ numeric_columns ], digits )
+
+  return( x )
+}
+
+
 # ====== Remove outliers ======
 # Output:
 #  DoE/response tables with outliers removed
@@ -168,8 +182,8 @@ ww.test <- function( time.series, window.size ) {
 
 # ==== Calculate stationarity and ergodicity statistics table
 
-ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
-                            digits = 2, ad.method = "asymptotic" ) {
+ergod.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
+                            signif = 0.05, digits = 2, ad.method = "asymptotic" ) {
 
   stats <- c( "avg ADF", "rej ADF", "avg PP", "rej PP", "avg KPSS", "rej KPSS",
               "avg BDS", "rej BDS", "avg KS", "rej KS", "AD", "WW" )
@@ -193,25 +207,29 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
     for( n in 1 : nSize ) {
       series.list[[ n ]] <- series[ , n ]
       adf <- pp <- kpss <- bds <- NA
-      try( adf <- tseries::adf.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( adf <- tseries::adf.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( adf ) ) {
         nADF <- nADF + 1
         sumADF <- sumADF + adf
         if( adf < signif ) rejADF <- rejADF + 1
       }
-      try( pp <- stats::PP.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( pp <- stats::PP.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( pp ) ) {
         nPP <- nPP + 1
         sumPP <- sumPP + pp
         if( pp < signif ) rejPP <- rejPP + 1
       }
-      try( kpss <- tseries::kpss.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( kpss <- tseries::kpss.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( kpss ) ) {
         nKPSS <- nKPSS + 1
         sumKPSS <- sumKPSS + kpss
         if( kpss < signif ) rejKPSS <- rejKPSS + 1
       }
-      try( bds <- mean( tseries::bds.test( series[ , n ] )$p.value, na.rm = TRUE ), silent = TRUE )
+      try( suppressWarnings( bds <- mean( tseries::bds.test( series[ , n ] )$p.value,
+                                          na.rm = TRUE ) ), silent = TRUE )
       if( is.finite( bds ) ) {
         nBDS <- nBDS + 1
         sumBDS <- sumBDS + bds
@@ -220,7 +238,9 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
       if( n < nSize )
         for( m in ( n + 1 ) : nSize ) {
           ks <- NA
-          try( ks <- stats::ks.test( series[ , n ], series[ , m ] )$p.value, silent = TRUE )
+          try( suppressWarnings( ks <- stats::ks.test( series[ , n ],
+                                                      series[ , m ] )$p.value ),
+               silent = TRUE )
           if( is.finite( ks ) ) {
             nKS <- nKS + 1
             sumKS <- sumKS + ks
@@ -232,12 +252,13 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
     avgADF <- rADF <- avgPP <- rPP <- avgKPSS <- rKPSS <- avgBDS <- rBDS <-
       avgKS <- rKS <- ad <- ww <- NA
     # do Anderson-Darling for same distribution function
-    try( ad <- kSamples::ad.test( series.list, method = ad.method )$ad[ 1, 3 ],
-         silent = TRUE )
+    try( suppressWarnings( ad <- kSamples::ad.test( series.list,
+                                                    method = ad.method )$ad[ 1, 3 ] ),
+                          silent = TRUE )
     # do Wald-Wolfowitz for ergodicity (Grazzini 2012)
-    try( ww <- ww.test( series.list,
-                        floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] )
-                               / nSize + 1 ) )$p.value,
+    try( suppressWarnings( ww <- ww.test( series.list,
+                                          floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] ) /
+                                                   nSize + 1 ) )$p.value ),
          silent = TRUE )
 
     if( nADF > 0 ) {
@@ -264,7 +285,90 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
                          avgBDS, rBDS, avgKS, rKS, ad, ww )
   }
 
-  return( format( round( statErgo, digits = digits ), nsmall = digits ) )
+  return( format( round.df( statErgo, digits = digits ), nsmall = digits ) )
+}
+
+
+# ==== Calculate unimodality & symmetry estatistics table ====
+
+symmet.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ),
+                             start.period = 0, signif = 0.05, digits = 2,
+                             sym.boot = FALSE ) {
+
+  stats <- c( "avg Hdip", "rej Hdip", "avg CM", "rej CM",
+              "avg M", "rej M", "avg MGG", "rej MGG" )
+  statSymmet <- data.frame( matrix( nrow = length( vars ), ncol = length( stats ),
+                                    dimnames = list( vars, stats ) ) )
+  nTsteps <- length( data[ , 1, 1 ] )
+  nSize <- length( data[ 1, 1, ] )
+  if( start.period >= nTsteps )
+    stop( "Invalid start period" )
+
+  # do unimodality and symmetry tests individually for each variable
+  # counting the number of non-rejecting cases
+  for( j in vars ) {
+    # extract each series as a matrix where time in is the rows
+    # and MC instances in the columns
+    series <- data[ start.period : nTsteps, j, ]
+    nHdip <- nCM <- nM <- nMGG <-
+      sumHdip <- sumCM <- sumM <- sumMGG <-
+      rejHdip <- rejCM <- rejM <- rejMGG <- 0
+    # test all instances
+    # Hdip H0: unimodal, HVllh H0: bimodal, CM/M/MGG H0: symmetric
+    for( n in 1 : nSize ) {
+      Hdip <- CM <- M <- MGG <- NA
+      try( Hdip <- diptest::dip.test( series[ , n ] )$p.value, silent = TRUE )
+      if( is.finite( Hdip ) ) {
+        nHdip <- nHdip + 1
+        sumHdip <- sumHdip + Hdip
+        if( Hdip < signif ) rejHdip <- rejHdip + 1
+      }
+      try( CM <- lawstat::symmetry.test( series[ , n ], option = "CM",
+                                         boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( CM ) ) {
+        nCM <- nCM + 1
+        sumCM <- sumCM + CM
+        if( CM < signif ) rejCM <- rejCM + 1
+      }
+      try( M <- lawstat::symmetry.test( series[ , n ], option = "M",
+                                        boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( M ) ) {
+        nM <- nM + 1
+        sumM <- sumM + M
+        if( M < signif ) rejM <- rejM + 1
+      }
+      try( MGG <- lawstat::symmetry.test( series[ , n ], option = "MGG",
+                                          boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( MGG ) ) {
+        nMGG <- nMGG + 1
+        sumMGG <- sumMGG + MGG
+        if( MGG < signif ) rejMGG <- rejMGG + 1
+      }
+    }
+    # set all to NA for the case of errors
+    avgHdip <- rHdip <- avgCM <- rCM <- avgM <- rM <- avgMGG <- rMGG <- NA
+
+    if( nHdip > 0 ) {
+      avgHdip <- sumHdip / nHdip
+      rHdip <- rejHdip / nHdip
+    }
+    if( nCM > 0 ) {
+      avgCM <- sumCM / nCM
+      rCM <- rejCM / nCM
+    }
+    if( nM > 0 ) {
+      avgM <- sumM / nM
+      rM <- rejM / nM
+    }
+    if( nMGG > 0 ) {
+      avgMGG <- sumMGG / nMGG
+      rMGG <- rejMGG / nMGG
+    }
+
+    statSymmet[ j, ] <- c( avgHdip, rHdip, avgCM, rCM, avgM, rM, avgMGG, rMGG )
+  }
+
+  return( format( round.df( statSymmet, digits = digits ), nsmall = digits ) )
 }
 
 
@@ -1266,11 +1370,24 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
 
 # ==== Perform sensitivity analysis directly over data ====
 
-data.sensitivity <- function( data ) {
+data.sensitivity <- function( data, tries = 5 ) {
 
   # ---- Sensitivity analysis using a B-spline smoothing interpolation model ----
 
-  metamodel <- sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe )
+  metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+                    silent = TRUE )
+
+  # try a few times, as it usually succeeds...
+  while( class( metamodel ) == "try-error" && tries > 0 ) {
+    metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+                      silent = TRUE )
+    tries <- tries - 1
+    if( class( metamodel ) != "try-error" )
+      break
+  }
+
+  if( class( metamodel ) == "try-error" )
+    return( NULL )
 
   mainEffect <- function( x ) x$S[ , 1 ]
 
@@ -1355,17 +1472,27 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
     }
 
   # select model with maximum Q2
-  bestCross <- as.vector( which( Q2 == max( Q2 ), arr.ind = TRUE )[ 1, ] )
+  Q2[ is.nan( Q2 ) ] <- NA
+  bestCross <- as.vector( which( Q2 == max( Q2, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
   cat( "\nCross validation of alternative models:\n" )
   cat( " Best trend model:", trendNames[ bestCross[ 1 ] ], "\n" )
   cat( " Best covariation model:", covNames[ bestCross[ 2 ] ], "\n\n" )
 
   if( ! onlyCross ) {
+    # remove failed statistics
+    rmse[ is.nan( rmse ) ] <- NA
+    mae[ is.nan( mae ) ] <- NA
+    rma[ is.nan( rma ) ] <- NA
+
     # select model with minimum measures
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
     cat( "External validation of alternative models:\n" )
     cat( " Best trend model (RMSE):", trendNames[ bestRmse[ 1 ] ], "\n" )
@@ -1382,13 +1509,14 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
       rank[ i, j ] <- ( 1 - ext.wgth ) * ( 1 - Q2[ i, j ] )
       if( ! onlyCross )
         rank[ i, j ] <- rank[ i, j ] +
-          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse ) ) +
-          ext.wgth * mae[ i, j ] / ( 3 * max( mae ) ) +
-          ext.wgth * rma[ i, j ] / ( 3 * max( rma ) )
+          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse, na.rm = TRUE ) ) +
+          ext.wgth * mae[ i, j ] / ( 3 * max( mae, na.rm = TRUE ) ) +
+          ext.wgth * rma[ i, j ] / ( 3 * max( rma, na.rm = TRUE ) )
     }
 
   # Check if use fixed or best models
-  bestOvrall <- as.vector( which( rank == min( rank ), arr.ind = TRUE )[ 1, ] )
+  bestOvrall <- as.vector( which( rank == min( rank, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
   if( trendModel == 0 )
     trendModel = bestOvrall[ 1 ]
   if( covModel == 0 )
@@ -1609,23 +1737,36 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       }
     }
 
+  # remove failed statistics
+  R2[ is.nan( R2 ) ] <- NA
+  rmse[ is.nan( rmse ) ] <- NA
+  mae[ is.nan( mae ) ] <- NA
+  rma[ is.nan( rma ) ] <- NA
+
   # select model with maximum R2
-  bestCross <- as.vector( which( R2 == max( R2 ), arr.ind = TRUE )[ 1, ] )
+  bestCross <- as.vector( which( R2 == max( R2, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
   cat( "Cross validation of alternative models:\n" )
   cat( " Best model (R2):", modelNames[ bestCross[ 1 ], bestCross[ 2 ] ], "\n\n" )
 
   if( ! onlyCross ) {
     # select model with minimum measures
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
     cat( "External validation of alternative models:\n" )
 
   } else {
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
   }
   cat( " Best model (RMSE):", modelNames[ bestRmse[ 1 ], bestRmse[ 2 ] ], "\n" )
   cat( " Best model (MAE):", modelNames[ bestMae[ 1 ], bestMae[ 2 ] ], "\n" )
@@ -1637,13 +1778,14 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       rank[ i, j ] <- ( 1 - ext.wgth ) * ( 1 - R2[ i, j ] )
       if( ! onlyCross )
         rank[ i, j ] <- rank[ i, j ] +
-          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse ) ) +
-          ext.wgth * mae[ i, j ] / ( 3 * max( mae ) ) +
-          ext.wgth * rma[ i, j ] / ( 3 * max( rma ) )
+          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse, na.rm = TRUE ) ) +
+          ext.wgth * mae[ i, j ] / ( 3 * max( mae, na.rm = TRUE ) ) +
+          ext.wgth * rma[ i, j ] / ( 3 * max( rma, na.rm = TRUE ) )
     }
 
   # Check if use fixed or best models
-  bestOvrall <- as.vector( which( rank == min( rank ), arr.ind = TRUE )[ 1, ] )
+  bestOvrall <- as.vector( which( rank == min( rank, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
   if( orderModel == 0 )
     orderModel = bestOvrall[ 1 ]
   if( interactModel == 0 )
@@ -1671,7 +1813,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
 
   table <- data.frame( rbind( R2, rmse, mae, rma, deparse.level = 0 ) )
   colnames( table ) <- interactNames
-  rownames( table ) <- c( apply( cbind( rep( "Q2", nrow( modelNames ) ), polyNames ),
+  rownames( table ) <- c( apply( cbind( rep( "R2", nrow( modelNames ) ), polyNames ),
                                  1, paste, collapse = " " ),
                           apply( cbind( rep( "RMSE", nrow( modelNames ) ), polyNames ),
                                  1, paste, collapse = " " ),

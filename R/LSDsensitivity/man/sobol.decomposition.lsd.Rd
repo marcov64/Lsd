@@ -4,7 +4,7 @@
 Sobol variance decomposition sensitivity analysis
 }
 \description{
-This function performs the global sensitivity analysis of a previously fitted meta-model using the Sobol variance decomposition method (Saltelli et al., 2008).
+This function performs the global sensitivity analysis of a previously fitted meta-model using the Sobol variance decomposition method (Saltelli et al., 2008). If no model is supplied, uses a B-spline smoothing interpolation model.
 }
 \usage{
 sobol.decomposition.lsd(data, model = NULL, krig.sa = FALSE, sa.samp = 1000)
@@ -14,7 +14,7 @@ sobol.decomposition.lsd(data, model = NULL, krig.sa = FALSE, sa.samp = 1000)
 an object created by a previous call to \code{\link{read.doe.lsd}} which contains all the required experimental data for the analysis.
 }
   \item{model}{
-an object created by a previous call to \code{\link{kriging.model.lsd}} or \code{\link{polynomial.model.lsd}} which contains the meta-model estimated hyper-parameters. If no model is supplied (the default), performs the decomposition directly over the experimental data.
+an object created by a previous call to \code{\link{kriging.model.lsd}} or \code{\link{polynomial.model.lsd}} which contains the meta-model estimated hyper-parameters. If no model is supplied (the default), performs the decomposition directly over the experimental data assuming a B-spline smoothing interpolation model.
 }
   \item{krig.sa}{
 logical: use alternative Kriging-specific algorithm if TRUE (see \code{\link[sensitivity]{sobolGP}}). Default is FALSE. Applicable only to Kriging meta-models.
@@ -34,6 +34,8 @@ The function returns an object/list of class \code{kriging-sa} or \code{polynomi
 \item{metamodel}{an object/list of class \code{\link[sensitivity]{fast99}} containing the estimated total and conditional variances for all the meta-model factors.}
 \item{sa}{a print-ready table with the Sobol indexes for each factor.}
 \item{topEffect}{a vector containing the indexes to the three most influential factors, automatically calculated (if \code{factorX = 0}) or according to the order pre selected by the user.}
+
+If no model is supplied and a B-spline smoothing interpolation model cannot be fitted, returns \code{NULL}.
 }
 \references{
 Saltelli A, Ratto M, Andres T, Campolongo F, Cariboni J, Gatelli D, Saisana M, Tarantola S (2008) \emph{Global sensitivity analysis: the primer}. Wiley, New York
