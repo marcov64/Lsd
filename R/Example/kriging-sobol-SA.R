@@ -126,6 +126,14 @@ title( main = "Kriging meta-model estimation (standardized)",
                      round( mResp$default$lower, digits = 2 ), ",",
                      round( mResp$default$upper, digits = 2 ), "]" ) )
 
+					 
+# ====== Sobol sensitivity analysis results ======
+
+# ------ Sobol sensitivity analysis table ------
+
+textplot( signif( sSA$sa, 4 ) )
+title( main = "Sobol decomposition sensitivity analysis" )
+
 # ------ Sobol sensitivity analysis chart ------
 
 barplot( t( sSA$sa ), col = c( "white", "gray" ), las = 2, ylim = c( 0, 1 ),
@@ -209,13 +217,6 @@ for( i in 1 : length( mResp$grid[[ 4 ]] ) ) {        # do for each top factor
                               colnames( dataSet$doe )[ sSA$topEffect[ 3 ] ],
                               "=", mResp$grid[[ 4 ]][ i ], ")" ) ),
          sub = subTitle )
-
-  # ------ 3D response surface (shaded) ------
-
-  persp3d( mResp$grid[[ 1 ]], mResp$grid[[ 2 ]],
-           matrix( mResp$calib[[ i ]]$mean, grid3d, grid3d ), col = "lightgray",
-           xlab = colnames( dataSet$doe )[ sSA$topEffect[ 1 ] ],
-           ylab = colnames( dataSet$doe )[ sSA$topEffect[ 2 ] ], zlab = dataSet$saVarName )
 }
 
 

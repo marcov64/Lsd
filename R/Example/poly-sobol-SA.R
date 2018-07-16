@@ -62,7 +62,7 @@ dataSet <- read.doe.lsd( ".",                    # data files relative folder
 
 # ====== Estimate polynomial meta-models and select the best one ======
 
-mModel <- polynomial.model.lsd( data,
+mModel <- polynomial.model.lsd( dataSet,
                                 ext.wgth = 0.5,     # weight of external errors on model selection (0-1)
                                 ols.sig = 0.20,     # minimum significance considered in OLS regression
                                 orderModel = 0,     # polynomial model order (0=auto, 1=first, 2=second)
@@ -117,13 +117,21 @@ title( main = "Comparison of alternative polynomial models",
 
 # ------ Model estimation table ------
 
-textplot( mModel$estimation.std, show.colnames = FALSE, cmar = 2, rmar = 1 )
+textplot( mModel$estimation.std, cmar = 2, rmar = 1 )
 title( main = "Polynomial meta-model estimation (standardized)",
        sub = paste0( "All variables rescaled to [ 0, 1 ] / Average 95% CI = +/- ",
                      round( mResp$avgCIdev, digits = 2 ), "\nPredicted output at defaults: ",
                      dataSet$saVarName, " = ", round( mResp$default$mean, digits = 2 ), " / 95% CI = [",
                      round( mResp$default$lower, digits = 2 ), ",",
                      round( mResp$default$upper, digits = 2 ), "]" ) )
+
+					 
+# ====== Sobol sensitivity analysis results ======
+
+# ------ Sobol sensitivity analysis table ------
+
+textplot( signif( sSA$sa, 4 ) )
+title( main = "Sobol decomposition sensitivity analysis" )
 
 # ------ Sobol sensitivity analysis chart ------
 
@@ -208,13 +216,6 @@ for( i in 1 : length( mResp$grid[[ 4 ]] ) ) {        # do for each top factor
                               colnames( dataSet$doe )[ sSA$topEffect[ 3 ] ],
                               "=", mResp$grid[[ 4 ]][ i ], ")" ) ),
          sub = subTitle )
-
-  # ------ 3D response surface (shaded) ------
-
-  persp3d( mResp$grid[[ 1 ]], mResp$grid[[ 2 ]],
-           matrix( mResp$calib[[ i ]]$mean, grid3d, grid3d ), col = "lightgray",
-           xlab = colnames( dataSet$doe )[ sSA$topEffect[ 1 ] ],
-           ylab = colnames( dataSet$doe )[ sSA$topEffect[ 2 ] ], zlab = dataSet$saVarName )
 }
 
 

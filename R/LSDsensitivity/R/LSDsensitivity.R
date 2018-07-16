@@ -19,6 +19,20 @@ sobol.rnd.exp <- function( n, factors, lwr.bound = 0, upr.bound = 1 ) {
 }
 
 
+# ==== Round data frames containing not just numbers ====
+# round all numeric variables
+# x: data frame
+# digits: number of digits to round
+
+round.df <- function( x, digits = 4 ) {
+
+  numeric_columns <- sapply( x, mode ) == 'numeric'
+  x[ numeric_columns ] <-  round( x[ numeric_columns ], digits )
+
+  return( x )
+}
+
+
 # ====== Remove outliers ======
 # Output:
 #  DoE/response tables with outliers removed
@@ -32,7 +46,7 @@ remove.outliers <- function( doe, resp, limit ) {
 
   origLen <- nrow( doe )
   if( origLen != nrow( resp ) )
-    stop( "Design of Experiments and response files do not match!" )
+    stop( "Design of Experiments and response files do not match" )
 
   # check for abnormal DoE sample averages
   m <- mean( resp$Mean )
@@ -52,8 +66,6 @@ remove.outliers <- function( doe, resp, limit ) {
   }
 
   removed <- origLen - nrow( doe )
-  if( removed > 0 )
-    cat( " DoE sample outliers removed:", removed, "\n" )
   if( removed > 0.1 * origLen )
     warning( "Too many DoE outliers (>10%), check 'limit' parameter" )
 
@@ -168,8 +180,8 @@ ww.test <- function( time.series, window.size ) {
 
 # ==== Calculate stationarity and ergodicity statistics table
 
-ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
-                            digits = 2, ad.method = "asymptotic" ) {
+ergod.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
+                            signif = 0.05, digits = 2, ad.method = "asymptotic" ) {
 
   stats <- c( "avg ADF", "rej ADF", "avg PP", "rej PP", "avg KPSS", "rej KPSS",
               "avg BDS", "rej BDS", "avg KS", "rej KS", "AD", "WW" )
@@ -193,25 +205,29 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
     for( n in 1 : nSize ) {
       series.list[[ n ]] <- series[ , n ]
       adf <- pp <- kpss <- bds <- NA
-      try( adf <- tseries::adf.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( adf <- tseries::adf.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( adf ) ) {
         nADF <- nADF + 1
         sumADF <- sumADF + adf
         if( adf < signif ) rejADF <- rejADF + 1
       }
-      try( pp <- stats::PP.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( pp <- stats::PP.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( pp ) ) {
         nPP <- nPP + 1
         sumPP <- sumPP + pp
         if( pp < signif ) rejPP <- rejPP + 1
       }
-      try( kpss <- tseries::kpss.test( series[ , n ] )$p.value, silent = TRUE )
+      try( suppressWarnings( kpss <- tseries::kpss.test( series[ , n ] )$p.value ),
+           silent = TRUE )
       if( is.finite( kpss ) ) {
         nKPSS <- nKPSS + 1
         sumKPSS <- sumKPSS + kpss
         if( kpss < signif ) rejKPSS <- rejKPSS + 1
       }
-      try( bds <- mean( tseries::bds.test( series[ , n ] )$p.value, na.rm = TRUE ), silent = TRUE )
+      try( suppressWarnings( bds <- mean( tseries::bds.test( series[ , n ] )$p.value,
+                                          na.rm = TRUE ) ), silent = TRUE )
       if( is.finite( bds ) ) {
         nBDS <- nBDS + 1
         sumBDS <- sumBDS + bds
@@ -220,7 +236,9 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
       if( n < nSize )
         for( m in ( n + 1 ) : nSize ) {
           ks <- NA
-          try( ks <- stats::ks.test( series[ , n ], series[ , m ] )$p.value, silent = TRUE )
+          try( suppressWarnings( ks <- stats::ks.test( series[ , n ],
+                                                      series[ , m ] )$p.value ),
+               silent = TRUE )
           if( is.finite( ks ) ) {
             nKS <- nKS + 1
             sumKS <- sumKS + ks
@@ -232,12 +250,13 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
     avgADF <- rADF <- avgPP <- rPP <- avgKPSS <- rKPSS <- avgBDS <- rBDS <-
       avgKS <- rKS <- ad <- ww <- NA
     # do Anderson-Darling for same distribution function
-    try( ad <- kSamples::ad.test( series.list, method = ad.method )$ad[ 1, 3 ],
-         silent = TRUE )
+    try( suppressWarnings( ad <- kSamples::ad.test( series.list,
+                                                    method = ad.method )$ad[ 1, 3 ] ),
+                          silent = TRUE )
     # do Wald-Wolfowitz for ergodicity (Grazzini 2012)
-    try( ww <- ww.test( series.list,
-                        floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] )
-                               / nSize + 1 ) )$p.value,
+    try( suppressWarnings( ww <- ww.test( series.list,
+                                          floor( length( series.list[[ 1 ]][ ! is.na( series.list[[ 1 ]] ) ] ) /
+                                                   nSize + 1 ) )$p.value ),
          silent = TRUE )
 
     if( nADF > 0 ) {
@@ -264,7 +283,90 @@ ergod.test.lsd <- function( data, vars, start.period = 0, signif = 0.05,
                          avgBDS, rBDS, avgKS, rKS, ad, ww )
   }
 
-  return( format( round( statErgo, digits = digits ), nsmall = digits ) )
+  return( format( round.df( statErgo, digits = digits ), nsmall = digits ) )
+}
+
+
+# ==== Calculate unimodality & symmetry estatistics table ====
+
+symmet.test.lsd <- function( data, vars = names( data[ 1, , 1 ] ),
+                             start.period = 0, signif = 0.05, digits = 2,
+                             sym.boot = FALSE ) {
+
+  stats <- c( "avg Hdip", "rej Hdip", "avg CM", "rej CM",
+              "avg M", "rej M", "avg MGG", "rej MGG" )
+  statSymmet <- data.frame( matrix( nrow = length( vars ), ncol = length( stats ),
+                                    dimnames = list( vars, stats ) ) )
+  nTsteps <- length( data[ , 1, 1 ] )
+  nSize <- length( data[ 1, 1, ] )
+  if( start.period >= nTsteps )
+    stop( "Invalid start period" )
+
+  # do unimodality and symmetry tests individually for each variable
+  # counting the number of non-rejecting cases
+  for( j in vars ) {
+    # extract each series as a matrix where time in is the rows
+    # and MC instances in the columns
+    series <- data[ start.period : nTsteps, j, ]
+    nHdip <- nCM <- nM <- nMGG <-
+      sumHdip <- sumCM <- sumM <- sumMGG <-
+      rejHdip <- rejCM <- rejM <- rejMGG <- 0
+    # test all instances
+    # Hdip H0: unimodal, HVllh H0: bimodal, CM/M/MGG H0: symmetric
+    for( n in 1 : nSize ) {
+      Hdip <- CM <- M <- MGG <- NA
+      try( Hdip <- diptest::dip.test( series[ , n ] )$p.value, silent = TRUE )
+      if( is.finite( Hdip ) ) {
+        nHdip <- nHdip + 1
+        sumHdip <- sumHdip + Hdip
+        if( Hdip < signif ) rejHdip <- rejHdip + 1
+      }
+      try( CM <- lawstat::symmetry.test( series[ , n ], option = "CM",
+                                         boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( CM ) ) {
+        nCM <- nCM + 1
+        sumCM <- sumCM + CM
+        if( CM < signif ) rejCM <- rejCM + 1
+      }
+      try( M <- lawstat::symmetry.test( series[ , n ], option = "M",
+                                        boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( M ) ) {
+        nM <- nM + 1
+        sumM <- sumM + M
+        if( M < signif ) rejM <- rejM + 1
+      }
+      try( MGG <- lawstat::symmetry.test( series[ , n ], option = "MGG",
+                                          boot = sym.boot )$p.value, silent = TRUE )
+      if( is.finite( MGG ) ) {
+        nMGG <- nMGG + 1
+        sumMGG <- sumMGG + MGG
+        if( MGG < signif ) rejMGG <- rejMGG + 1
+      }
+    }
+    # set all to NA for the case of errors
+    avgHdip <- rHdip <- avgCM <- rCM <- avgM <- rM <- avgMGG <- rMGG <- NA
+
+    if( nHdip > 0 ) {
+      avgHdip <- sumHdip / nHdip
+      rHdip <- rejHdip / nHdip
+    }
+    if( nCM > 0 ) {
+      avgCM <- sumCM / nCM
+      rCM <- rejCM / nCM
+    }
+    if( nM > 0 ) {
+      avgM <- sumM / nM
+      rM <- rejM / nM
+    }
+    if( nMGG > 0 ) {
+      avgMGG <- sumMGG / nMGG
+      rMGG <- rejMGG / nMGG
+    }
+
+    statSymmet[ j, ] <- c( avgHdip, rHdip, avgCM, rCM, avgM, rM, avgMGG, rMGG )
+  }
+
+  return( format( round.df( statSymmet, digits = digits ), nsmall = digits ) )
 }
 
 
@@ -314,12 +416,15 @@ factor.lists <- function( data, sa, grid ) {
 
 # ==== Do sensitivity analysis of a fitted model ====
 
-sobol.decomposition.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) {
+sobol.decomposition.lsd <- function( data, model = NULL, krig.sa = FALSE, sa.samp = 1000 ) {
 
-  if( class( model ) == "kriging-model" )
-    out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
+  if( is.null( model ) )
+    out <- data.sensitivity( data )
   else
-    out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
+    if( class( model ) == "kriging-model" )
+      out <- kriging.sensitivity( data, model, krig.sa = krig.sa, sa.samp = sa.samp )
+    else
+      out <- polynomial.sensitivity( data, model, sa.samp = sa.samp )
 
   return( out )
 }
@@ -330,7 +435,8 @@ sobol.decomposition.lsd <- function( data, model, krig.sa = FALSE, sa.samp = 100
 
 model.pred.lsd <- function( data.point, model ) {
 
-  if( is.na( data.point[ 1 ] ) )
+  x <- is.na( data.point[ 1, ] )
+  if( length( x[ x == TRUE ] ) > 0 )
     return( NULL )
 
   if( class( model ) == "kriging-model" ) {
@@ -756,7 +862,7 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
               } )
   }
   if( trial == trials )
-    stop( "Selected model: Can't fit a model using function 'km', try removing outliers" )
+    stop( "Can't fit a model using function 'km', try removing outliers" )
 
   fit <- list( model = fit, Q2 = Q2 )
   class( fit ) <- "kriging-fit"
@@ -778,7 +884,7 @@ read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
       file <- paste0( folder, "/", fileName )
 
   if( ! file.exists( file ) )
-    stop( "Sensitivity file does not exist!" )
+    stop( "Sensitivity file does not exist" )
 
   limits <- utils::read.table( file, stringsAsFactors = FALSE )
   limits <- limits[ -2 : -3 ]
@@ -814,7 +920,7 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
       file <- paste0( folder, "/", fileName )
 
   if( ! file.exists( file ) )
-    stop( "LSD configuration file does not exist!" )
+    stop( "LSD configuration file does not exist" )
 
   lsd <- readLines( file )
   config <- data.frame( stringsAsFactors = FALSE )
@@ -847,7 +953,7 @@ files.doe <- function( folder, baseName ) {
   doeFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+_[0-9]+.csv" ) )
 
   if( length( doeFiles ) < 1 )
-    stop( "Valid DoE .csv file(s) required! ")
+    stop( "Valid DoE .csv file(s) required")
 
   for( i in 1 : length( doeFiles ) )
     doeFiles[ i ] <- unlist( strsplit( doeFiles[ i ], split = ".", fixed = TRUE ) )[ 1 ]
@@ -867,14 +973,14 @@ size.doe <- function( doeFile ) {
   split <- strsplit( doeFile, "_" )[[ 1 ]]
   if( is.na( as.integer( split[ length( split ) ] ) ) ||
       is.na( as.integer( split[ length( split ) - 1 ] ) ) )
-    stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)")
+    stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)" )
 
   doe <- c( as.integer( split[ length( split ) - 1 ] ),
             as.integer( split[ length( split ) ] ) -
               as.integer( split[ length( split ) - 1 ] ) + 1 )
   names( doe ) <- c( "ini", "n" )
   if( doe[ "n" ] < 1 )
-    stop( "Invalid DoE .csv file numbering (must have at least 1 experiment)")
+    stop( "Invalid DoE .csv file numbering (must have at least 1 sampling point)" )
 
   return( doe )
 }
@@ -882,30 +988,46 @@ size.doe <- function( doeFile ) {
 # ==== Create DoE response file ====
 
 write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
-                                pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
-                                conf = 0.95, saveVars = c(  ), addVars = c(  ),
-                                eval.vars = NULL, eval.run = NULL, rm.temp = TRUE ) {
-
-  # test if data files exit
-  for( k in 1 : nExp ) {
-    myFiles <- list.files( path = folder, full.names = TRUE,
-                           pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
-    if( length( myFiles ) < 2 )
-    stop( "Not enough data files (baseName_XX_YY.res[.gz]) found" )
-  }
+                            pool = TRUE, iniDrop = 0, nKeep = -1, na.rm = FALSE,
+                            conf = 0.95, saveVars = c(  ), addVars = c(  ),
+                            eval.vars = NULL, eval.run = NULL, rm.temp = TRUE,
+                            nnodes = 1 ) {
 
   # evaluate new variables (not in LSD files) names
   nVarNew <- length( addVars )           # number of new variables to add
   newNameVar <- append( LSDinterface::name.nice.lsd( saveVars ), addVars ) # new label set
   nVar <- length( newNameVar )          # total number of variables
 
+  if( nVar == 0 && nVarNew == 0 )
+    stop( "No variable to be bept in the data set, at least one required" )
+
   # first check if extraction was interrupted and continue with partial files if appropriate
-  noTemp <- TRUE
   tempFile <- paste0( folder, "/", baseName, "_", iniExp,
                       "_", iniExp + nExp - 1, ".RData" )
-  if( file.exists( tempFile ) && ( ! file.exists( myFiles[ 1 ] ) ||
-                                   file.info( tempFile )$mtime >
-                                   file.info( myFiles[ 1 ] )$mtime ) ) {
+  if( ! rm.temp && file.exists( tempFile ) )
+    tempDate <- file.mtime( tempFile )
+  else
+    tempDate <- 0
+
+  # test if data files exit and are newer
+  dataDate <- 0
+  for( k in 1 : nExp ) {
+    myFiles <- list.files( path = folder, full.names = TRUE,
+                           pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
+    if( tempDate == 0 && length( myFiles ) < 2 )
+      stop( "Not enough data files (baseName_XX_YY.res[.gz]) found" )
+
+    # get newest date
+    for( file in myFiles ) {
+      date <- file.mtime( file )
+      if( date > dataDate )
+        dataDate <- date
+    }
+  }
+
+  # Continue with temporary file if appropriate
+  noTemp <- TRUE
+  if( tempDate > dataDate ) {
     temp <- new.env( )
     load( tempFile, envir = temp )
 
@@ -921,9 +1043,12 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   # if no temporary data, start from zero
   if( noTemp ) {
 
+    if( dataDate == 0 )
+      stop( "No data files (baseName_XX_YY.res[.gz]) found" )
+
     for( k in 1 : nExp ) {
-      # Experiment k
-      cat( "\nExperiment #", iniExp + k - 1, "\n---------------\n" )
+
+      cat( "\nSample #", iniExp + k - 1, "\n" )
 
       # ---- Read data files ----
 
@@ -931,7 +1056,7 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
       myFiles <- list.files( path = folder, full.names = TRUE,
                              pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
 
-      cat( "\n Data files: ", myFiles, "\n\n" )
+      cat( "\nData files: ", myFiles, "\n\n" )
 
       # Determine the DoE sample size (repetitions on the same DoE point)
       nSize  <- length( myFiles )
@@ -940,15 +1065,15 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
       nTsteps <- dimData$tSteps
       origNvar <- dimData$nVars
 
-      cat( " Number of MC cases: ", nSize, "\n" )
-      cat( " Number of periods: ", nTsteps, "\n" )
+      cat( "Number of MC runs: ", nSize, "\n" )
+      cat( "Number of periods: ", nTsteps, "\n" )
       nTsteps <- nTsteps - iniDrop
       if( nKeep != -1 )
         nTsteps <- min( nKeep, nTsteps )
-      cat( " Number of used periods: ", nTsteps, "\n" )
-      cat( " Number of variable instances: ", origNvar, "\n\n" )
+      cat( "Number of used periods: ", nTsteps, "\n" )
+      cat( "Number of variable instances: ", origNvar, "\n\n" )
 
-      cat( "Reading data from files...\n\n" )
+      cat( "Reading data from files...\n" )
 
       if( pool ) {
 
@@ -964,13 +1089,15 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
           dataSet <- LSDinterface::read.raw.lsd( myFiles[ j ], nrows = nKeep,
                                                  skip = iniDrop )
 
-          # Increase array size to allow for new variables
-          oldNameVar <- colnames( dataSet )
-          dataSet <- abind::abind( dataSet, array( as.numeric(NA),
-                                                   dim = c( nTsteps, nVarNew ) ),
-                                   along = 2, use.first.dimnames = TRUE )
-          colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
-                                         addVars )
+          if( nVarNew != 0 ) {
+            # Increase array size to allow for new variables
+            oldNameVar <- colnames( dataSet )
+            dataSet <- abind::abind( dataSet, array( as.numeric(NA),
+                                                     dim = c( nTsteps, nVarNew ) ),
+                                     along = 2, use.first.dimnames = TRUE )
+            colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
+                                           addVars )
+          }
 
           # Call function to fill new variables with data or reevaluate old ones
           if( ! is.null( eval.vars ) )
@@ -978,6 +1105,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
           # Extract the requested variables (columns)
           for( i in 1 : nVar ) {
+            if( ! make.names( newNameVar[ i ] ) %in% colnames( dataSet ) )
+              stop( "Invalid variable to be saved (not in LSD data)" )
+
             x <- dataSet[ , make.names( newNameVar[ i ] ) ]
             if( na.rm ) {
               poolData[[ k, i, j ]] <- x[ ! is.na( x ) ]  # remove NAs
@@ -997,7 +1127,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
         # Read data from text files and format it as 4D array with labels
         dataSet <- LSDinterface::read.4d.lsd( myFiles, col.names = saveVars,
-                                              nrows = nKeep, skip = iniDrop )
+                                              nrows = nKeep, skip = iniDrop,
+                                              nnodes = nnodes )
         nInsts <- dim( dataSet )[ 3 ]         # total number of instances
 
         # ------ Add new variables to data set ------
@@ -1033,8 +1164,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
           }
       }
 
-      cat( " Number of variables selected: ", nVar, "\n" )
-      cat( " Number of pooled samples: ", nSampl, "\n\n" )
+      cat( "\nNumber of variables selected: ", nVar, "\n" )
+      cat( "Number of pooled samples: ", nSampl, "\n\n" )
 
       # Clean temp variables
       rm( dataSet, x )
@@ -1046,8 +1177,6 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   }
 
   # ---- Process data in each experiment (nSize points) ----
-
-  cat( "Design of Experiments response processing...\n\n" )
 
   if( length( outVar ) == 0 ) {         # no output var?
     outVar <- newNameVar[ 1 ]           # use first var
@@ -1099,9 +1228,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   utils::write.csv( tresp, respFile, row.names = FALSE )
 
   cat( "DoE response file saved:", respFile, "\n" )
-  cat( " Doe points =", k, "\n" )
-  cat( " Total observations =", tobs, "\n" )
-  cat( " Discarded observations =", tdiscards, "\n\n" )
+  cat( "Doe points =", k, "\n" )
+  cat( "Total observations =", tobs, "\n" )
+  cat( "Discarded observations =", tdiscards, "\n\n" )
 
   rm( poolData, resp, tresp )
   if( rm.temp )
@@ -1113,11 +1242,11 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
 read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
                           respFile = NULL, validFile = NULL, valRespFile = NULL,
-                          confFile = NULL, limFile = NULL,
-                          iniDrop = 0, nKeep = -1, saveVars = c(  ),
-                          addVars = c(  ), eval.vars = NULL, eval.run = NULL,
-                          pool = TRUE, rm.temp = TRUE, rm.outl = FALSE,
-                          lim.outl = 10 ) {
+                          confFile = NULL, limFile = NULL, iniDrop = 0,
+                          nKeep = -1, saveVars = c(  ), addVars = c(  ),
+                          eval.vars = NULL, eval.run = NULL, pool = TRUE,
+                          na.rm = FALSE, rm.temp = TRUE, rm.outl = FALSE,
+                          lim.outl = 10, nnodes = 1 ) {
 
   # ---- Process LSD result files ----
 
@@ -1125,28 +1254,28 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   files <- files.doe( folder, baseName )
   if( is.null( doeFile ) ) {
     if( length( files ) > does )
-      warning( "Too many experiments (.csv) files, using first one(s) only!" )
+      warning( "Too many DoE (.csv) files, using first one(s) only" )
     if( length( files ) < 1 )
-      stop( "No valid DoE file!" )
+      stop( "No valid DoE file" )
     doeFile <- paste0( folder, "/", files[ 1 ], ".csv" )
   }
 
 
   if( is.null( respFile ) ) {
     if( length( files ) < 1 )
-      stop( "No valid response file!" )
+      stop( "No valid response file" )
     respFile <- paste0( folder, "/", files[ 1 ], "_", outVar, ".csv" )
   }
 
   if( does > 1 ) {
     if( is.null( validFile ) ) {
       if( length( files ) < 2 )
-        stop( "No valid DoE validation file!" )
+        stop( "No valid DoE validation file" )
       validFile <- paste0( folder, "/", files[ 2 ], ".csv" )
     }
     if( is.null( valRespFile ) ) {
       if( length( files ) < 2 )
-        stop( "No valid DoE validation response file!" )
+        stop( "No valid DoE validation response file" )
       valRespFile <- paste0( folder, "/", files[ 2 ], "_", outVar, ".csv" )
     }
   }
@@ -1154,21 +1283,22 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   # If response files don't exist, try to create them
   if( ! file.exists( respFile ) ) {
     write.response( folder, baseName, outVar = outVar,
-                        iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe( doeFile )[ 1 ],
-                        nExp = size.doe( doeFile )[ 2 ],
-                        addVars = addVars, eval.vars = eval.vars,
-                        saveVars = saveVars )
+                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
+                    iniExp = size.doe( doeFile )[ 1 ], na.rm = na.rm,
+                    nExp = size.doe( doeFile )[ 2 ], addVars = addVars,
+                    eval.vars = eval.vars, eval.run = eval.run,
+                    saveVars = saveVars, nnodes = nnodes )
   } else
     cat( "Using existing response file...\n\n" )
 
   if( does > 1 && ! file.exists( valRespFile ) ) {
     write.response( folder, baseName, outVar = outVar,
-                        iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
-                        iniExp = size.doe( validFile )[ 1 ],
-                        nExp = size.doe( validFile )[ 2 ],
-                        addVars = addVars, eval.vars = eval.vars,
-                        saveVars = saveVars )
+                    iniDrop = iniDrop, nKeep = nKeep, rm.temp = rm.temp,
+                    iniExp = size.doe( validFile )[ 1 ],
+                    nExp = size.doe( validFile )[ 2 ], na.rm = na.rm,
+                    addVars = addVars, eval.vars = eval.vars,
+                    eval.run = eval.run, saveVars = saveVars,
+                    nnodes = nnodes )
   } else
     if( does > 1 )
       cat( "Using existing validation response file...\n\n" )
@@ -1211,7 +1341,7 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   for( i in 1 : length( colnames( doe ) ) ) {
     j <- which( limits$Par == colnames( doe )[ i ], arr.ind = TRUE )
     if( j == 0 )
-      stop( "Parameter not found in LSD sensitivity file!" )
+      stop( "Parameter not found in LSD sensitivity file" )
     facLim[[ i ]] <- list( min = limits$Min[ j ], max = limits$Max[ j ] )
     facLimLo[ i ] <- limits$Min[ j ]
     facLimUp[ i ] <- limits$Max[ j ]
@@ -1239,6 +1369,55 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   class( doe ) <- "lsd-doe"
 
   return( doe )
+}
+
+
+# ==== Perform sensitivity analysis directly over data ====
+
+data.sensitivity <- function( data, tries = 5 ) {
+
+  # ---- Sensitivity analysis using a B-spline smoothing interpolation model ----
+
+  metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+                    silent = TRUE )
+
+  # try a few times, as it usually succeeds...
+  while( class( metamodel ) == "try-error" && tries > 0 ) {
+    metamodel <- try( sensitivity::sobolSmthSpl( as.matrix( data$resp$Mean ), data$doe ),
+                      silent = TRUE )
+    tries <- tries - 1
+    if( class( metamodel ) != "try-error" )
+      break
+  }
+
+  if( class( metamodel ) == "try-error" )
+    return( NULL )
+
+  mainEffect <- function( x ) x$S[ , 1 ]
+
+  # algorithm provide only the main effects, so distribute the indirect effects evenly (approx.)
+  totalEffect <- ( 1 - sum( mainEffect( metamodel ) ) )
+  sa <- cbind( mainEffect( metamodel ),
+               mainEffect( metamodel ) * totalEffect / sum( mainEffect( metamodel ) ) )
+
+  rownames( sa ) <- colnames( data$doe )
+  colnames( sa ) <- c( "Direct effects", "Interactions" )
+
+  max.index <- function( x, pos = 1 )
+    as.integer( sapply( sort( x, index.return = TRUE ), `[`, length( x ) - pos + 1 )[ 2 ] )
+
+  topEffect <- c( max.index( mainEffect( metamodel ), 1 ), max.index( mainEffect( metamodel ), 2 ),
+                  max.index( mainEffect( metamodel ), 3 ) )
+
+  cat( "Top parameters influencing response surface:\n" )
+  cat( " First:", colnames( data$doe )[ topEffect[ 1 ] ], "\n" )
+  cat( " Second:", colnames( data$doe )[ topEffect[ 2 ] ], "\n" )
+  cat( " Third:", colnames( data$doe )[ topEffect[ 3 ] ], "\n\n" )
+
+  sa <- list( metamodel = metamodel, sa = sa, topEffect = topEffect )
+  class( sa ) <- "b-spline-sa"
+
+  return( sa )
 }
 
 
@@ -1297,17 +1476,27 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
     }
 
   # select model with maximum Q2
-  bestCross <- as.vector( which( Q2 == max( Q2 ), arr.ind = TRUE )[ 1, ] )
+  Q2[ is.nan( Q2 ) ] <- NA
+  bestCross <- as.vector( which( Q2 == max( Q2, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
-  cat( "\nCross validation of alternative models:\n" )
+  cat( "Cross validation of alternative models:\n" )
   cat( " Best trend model:", trendNames[ bestCross[ 1 ] ], "\n" )
   cat( " Best covariation model:", covNames[ bestCross[ 2 ] ], "\n\n" )
 
   if( ! onlyCross ) {
+    # remove failed statistics
+    rmse[ is.nan( rmse ) ] <- NA
+    mae[ is.nan( mae ) ] <- NA
+    rma[ is.nan( rma ) ] <- NA
+
     # select model with minimum measures
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
     cat( "External validation of alternative models:\n" )
     cat( " Best trend model (RMSE):", trendNames[ bestRmse[ 1 ] ], "\n" )
@@ -1324,13 +1513,14 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
       rank[ i, j ] <- ( 1 - ext.wgth ) * ( 1 - Q2[ i, j ] )
       if( ! onlyCross )
         rank[ i, j ] <- rank[ i, j ] +
-          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse ) ) +
-          ext.wgth * mae[ i, j ] / ( 3 * max( mae ) ) +
-          ext.wgth * rma[ i, j ] / ( 3 * max( rma ) )
+          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse, na.rm = TRUE ) ) +
+          ext.wgth * mae[ i, j ] / ( 3 * max( mae, na.rm = TRUE ) ) +
+          ext.wgth * rma[ i, j ] / ( 3 * max( rma, na.rm = TRUE ) )
     }
 
   # Check if use fixed or best models
-  bestOvrall <- as.vector( which( rank == min( rank ), arr.ind = TRUE )[ 1, ] )
+  bestOvrall <- as.vector( which( rank == min( rank, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
   if( trendModel == 0 )
     trendModel = bestOvrall[ 1 ]
   if( covModel == 0 )
@@ -1472,7 +1662,7 @@ kriging.sensitivity <- function( data, model, krig.sa = FALSE, sa.samp = 1000 ) 
                          upr.bound = data$facLimUp )
 
     metamodel <- sensitivity::sobolGP( model = model$selected, type = "UK", X1 = X1, X2 = X2,
-                                       MCmethod = "soboljensen", nboot = 100 )
+                                       MCmethod = "soboljansen", nboot = 100 )
     mainEffect <- function( x ) x$S$mean
     totEffect <- function( x ) x$T$mean
   } else {
@@ -1551,23 +1741,36 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       }
     }
 
+  # remove failed statistics
+  R2[ is.nan( R2 ) ] <- NA
+  rmse[ is.nan( rmse ) ] <- NA
+  mae[ is.nan( mae ) ] <- NA
+  rma[ is.nan( rma ) ] <- NA
+
   # select model with maximum R2
-  bestCross <- as.vector( which( R2 == max( R2 ), arr.ind = TRUE )[ 1, ] )
+  bestCross <- as.vector( which( R2 == max( R2, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
 
   cat( "Cross validation of alternative models:\n" )
   cat( " Best model (R2):", modelNames[ bestCross[ 1 ], bestCross[ 2 ] ], "\n\n" )
 
   if( ! onlyCross ) {
     # select model with minimum measures
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
     cat( "External validation of alternative models:\n" )
 
   } else {
-    bestRmse <- as.vector( which( rmse == min( rmse ), arr.ind = TRUE )[ 1, ] )
-    bestMae <- as.vector( which( mae == min( mae ), arr.ind = TRUE )[ 1, ] )
-    bestRma <- as.vector( which( rma == min( rma ), arr.ind = TRUE )[ 1, ] )
+    bestRmse <- as.vector( which( rmse == min( rmse, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
+    bestMae <- as.vector( which( mae == min( mae, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
+    bestRma <- as.vector( which( rma == min( rma, na.rm = TRUE ),
+                                 arr.ind = TRUE )[ 1, ] )
   }
   cat( " Best model (RMSE):", modelNames[ bestRmse[ 1 ], bestRmse[ 2 ] ], "\n" )
   cat( " Best model (MAE):", modelNames[ bestMae[ 1 ], bestMae[ 2 ] ], "\n" )
@@ -1579,13 +1782,14 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
       rank[ i, j ] <- ( 1 - ext.wgth ) * ( 1 - R2[ i, j ] )
       if( ! onlyCross )
         rank[ i, j ] <- rank[ i, j ] +
-          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse ) ) +
-          ext.wgth * mae[ i, j ] / ( 3 * max( mae ) ) +
-          ext.wgth * rma[ i, j ] / ( 3 * max( rma ) )
+          ext.wgth * rmse[ i, j ] / ( 3 * max( rmse, na.rm = TRUE ) ) +
+          ext.wgth * mae[ i, j ] / ( 3 * max( mae, na.rm = TRUE ) ) +
+          ext.wgth * rma[ i, j ] / ( 3 * max( rma, na.rm = TRUE ) )
     }
 
   # Check if use fixed or best models
-  bestOvrall <- as.vector( which( rank == min( rank ), arr.ind = TRUE )[ 1, ] )
+  bestOvrall <- as.vector( which( rank == min( rank, na.rm = TRUE ),
+                                  arr.ind = TRUE )[ 1, ] )
   if( orderModel == 0 )
     orderModel = bestOvrall[ 1 ]
   if( interactModel == 0 )
@@ -1613,7 +1817,7 @@ polynomial.model.lsd <- function( data, ext.wgth = 0.5, ols.sig = 0.2,
 
   table <- data.frame( rbind( R2, rmse, mae, rma, deparse.level = 0 ) )
   colnames( table ) <- interactNames
-  rownames( table ) <- c( apply( cbind( rep( "Q2", nrow( modelNames ) ), polyNames ),
+  rownames( table ) <- c( apply( cbind( rep( "R2", nrow( modelNames ) ), polyNames ),
                                  1, paste, collapse = " " ),
                           apply( cbind( rep( "RMSE", nrow( modelNames ) ), polyNames ),
                                  1, paste, collapse = " " ),

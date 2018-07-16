@@ -4,18 +4,18 @@
 Stationarity and ergodicity tests
 }
 \description{
-Perform a set of stationarity and ergodicity tests useful for simulation model data. The included tests are: Augmented Dickey-Fuller test (ADF), Phillips-Perron test (PP),  Kwiatkowski-Phillips-Schmidt-Shin test (KPSS), Brock-Dechert-Scheinkman test (BDS), Kolmogorov-Smirnov k-sample test (KS), Anderson-Darling k-sample test (AD) and Wald-Wolfowitz k-sample test (WW).
+Perform a set of stationarity and ergodicity tests useful for simulation model data from a Monte Carlo experiment time series. The included tests are: Augmented Dickey-Fuller test (ADF), Phillips-Perron test (PP),  Kwiatkowski-Phillips-Schmidt-Shin test (KPSS), Brock-Dechert-Scheinkman test (BDS), Kolmogorov-Smirnov k-sample test (KS), Anderson-Darling k-sample test (AD) and Wald-Wolfowitz k-sample test (WW).
 }
 \usage{
-ergod.test.lsd( data, vars, start.period = 0, signif = 0.05,
-                digits = 2, ad.method = "asymptotic" )
+ergod.test.lsd( data, vars = names( data[ 1, , 1 ] ), start.period = 0,
+                signif = 0.05, digits = 2, ad.method = "asymptotic" )
 }
 \arguments{
   \item{data}{
 a three-dimensional array, as the ones produced by \code{\link[LSDinterface]{read.3d.lsd}}, organized as (time steps x variables x Monte Carlo instances).
 }
   \item{vars}{
-a vector of the variable names (as strings) contained in \code{data} for which the tests will be performed.
+a vector of the variable names (as strings) contained in \code{data} for which the tests will be performed. The default is to test all variables.
 }
   \item{start.period}{
 integer: the first time step in \code{data} to be considered for the tests. The default value is 0 (all time steps considered).
@@ -35,12 +35,13 @@ This function is a wrapper to the functions \code{\link[tseries]{adf.test}}, \co
 }
 \value{
 The function returns a data frame presenting both the average test statistics and the frequency of test null-hyphotesis rejections for all the variables selected in \code{vars}.
+Null hypothesis (H0) for ADF and PP tests is non-stationarity of the time series. Null hypothesis (H0) for KPSS test is stationarity of the time series. Null hypothesis (H0) for BDS test the time series is i.i.d.. Null hypothesis (H0) for KS, AD and WW tests is ergodicity of the time series.
 }
 \author{
 \packageAuthor{LSDsensitivity}
 }
 \seealso{
-\code{\link[LSDinterface]{read.3d.lsd}}
+\code{\link[LSDsensitivity]{symmet.test.lsd}}, \code{\link[LSDinterface]{read.3d.lsd}}
 
 \code{\link[tseries]{adf.test}}, \code{\link[tseries]{kpss.test}}, \code{\link[tseries]{bds.test}},
 

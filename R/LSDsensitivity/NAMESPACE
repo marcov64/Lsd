@@ -1,3 +1,3 @@
-export( read.doe.lsd, elementary.effects.lsd, sobol.decomposition.lsd, kriging.model.lsd, polynomial.model.lsd, response.surface.lsd, model.optim.lsd, model.limits.lsd, model.pred.lsd, ergod.test.lsd )
+export( read.doe.lsd, elementary.effects.lsd, sobol.decomposition.lsd, kriging.model.lsd, polynomial.model.lsd, response.surface.lsd, model.optim.lsd, model.limits.lsd, model.pred.lsd, ergod.test.lsd, symmet.test.lsd )
 S3method( print, morris )
 S3method( plot, morris )
