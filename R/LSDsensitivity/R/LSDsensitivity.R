@@ -46,7 +46,7 @@ remove.outliers <- function( doe, resp, limit ) {
 
   origLen <- nrow( doe )
   if( origLen != nrow( resp ) )
-    stop( "Design of Experiments and response files do not match!" )
+    stop( "Design of Experiments and response files do not match" )
 
   # check for abnormal DoE sample averages
   m <- mean( resp$Mean )
@@ -66,8 +66,6 @@ remove.outliers <- function( doe, resp, limit ) {
   }
 
   removed <- origLen - nrow( doe )
-  if( removed > 0 )
-    cat( " DoE sample outliers removed:", removed, "\n" )
   if( removed > 0.1 * origLen )
     warning( "Too many DoE outliers (>10%), check 'limit' parameter" )
 
@@ -864,7 +862,7 @@ fit.kriging <- function( response, doe, resp.noise = NULL, trend.func = ~1,
               } )
   }
   if( trial == trials )
-    stop( "Selected model: Can't fit a model using function 'km', try removing outliers" )
+    stop( "Can't fit a model using function 'km', try removing outliers" )
 
   fit <- list( model = fit, Q2 = Q2 )
   class( fit ) <- "kriging-fit"
@@ -886,7 +884,7 @@ read.sens <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
       file <- paste0( folder, "/", fileName )
 
   if( ! file.exists( file ) )
-    stop( "Sensitivity file does not exist!" )
+    stop( "Sensitivity file does not exist" )
 
   limits <- utils::read.table( file, stringsAsFactors = FALSE )
   limits <- limits[ -2 : -3 ]
@@ -922,7 +920,7 @@ read.config <- function( folder = NULL, baseName = NULL, fileName = NULL ) {
       file <- paste0( folder, "/", fileName )
 
   if( ! file.exists( file ) )
-    stop( "LSD configuration file does not exist!" )
+    stop( "LSD configuration file does not exist" )
 
   lsd <- readLines( file )
   config <- data.frame( stringsAsFactors = FALSE )
@@ -955,7 +953,7 @@ files.doe <- function( folder, baseName ) {
   doeFiles <- list.files( path = folder, pattern = paste0( baseName, "_[0-9]+_[0-9]+.csv" ) )
 
   if( length( doeFiles ) < 1 )
-    stop( "Valid DoE .csv file(s) required! ")
+    stop( "Valid DoE .csv file(s) required")
 
   for( i in 1 : length( doeFiles ) )
     doeFiles[ i ] <- unlist( strsplit( doeFiles[ i ], split = ".", fixed = TRUE ) )[ 1 ]
@@ -975,14 +973,14 @@ size.doe <- function( doeFile ) {
   split <- strsplit( doeFile, "_" )[[ 1 ]]
   if( is.na( as.integer( split[ length( split ) ] ) ) ||
       is.na( as.integer( split[ length( split ) - 1 ] ) ) )
-    stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)")
+    stop( "Invalid DoE .csv file naming/numbering (must be baseName_XX_YY)" )
 
   doe <- c( as.integer( split[ length( split ) - 1 ] ),
             as.integer( split[ length( split ) ] ) -
               as.integer( split[ length( split ) - 1 ] ) + 1 )
   names( doe ) <- c( "ini", "n" )
   if( doe[ "n" ] < 1 )
-    stop( "Invalid DoE .csv file numbering (must have at least 1 experiment)")
+    stop( "Invalid DoE .csv file numbering (must have at least 1 sampling point)" )
 
   return( doe )
 }
@@ -999,6 +997,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   nVarNew <- length( addVars )           # number of new variables to add
   newNameVar <- append( LSDinterface::name.nice.lsd( saveVars ), addVars ) # new label set
   nVar <- length( newNameVar )          # total number of variables
+
+  if( nVar == 0 && nVarNew == 0 )
+    stop( "No variable to be bept in the data set, at least one required" )
 
   # first check if extraction was interrupted and continue with partial files if appropriate
   tempFile <- paste0( folder, "/", baseName, "_", iniExp,
@@ -1046,8 +1047,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
       stop( "No data files (baseName_XX_YY.res[.gz]) found" )
 
     for( k in 1 : nExp ) {
-      # Experiment k
-      cat( "\nExperiment #", iniExp + k - 1, "\n----------------\n" )
+
+      cat( "\nSample #", iniExp + k - 1, "\n" )
 
       # ---- Read data files ----
 
@@ -1055,7 +1056,7 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
       myFiles <- list.files( path = folder, full.names = TRUE,
                              pattern = paste0( baseName, "_", iniExp + k - 1, "_[0-9]+.res") )
 
-      cat( "\n Data files: ", myFiles, "\n\n" )
+      cat( "\nData files: ", myFiles, "\n\n" )
 
       # Determine the DoE sample size (repetitions on the same DoE point)
       nSize  <- length( myFiles )
@@ -1064,15 +1065,15 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
       nTsteps <- dimData$tSteps
       origNvar <- dimData$nVars
 
-      cat( " Number of MC cases: ", nSize, "\n" )
-      cat( " Number of periods: ", nTsteps, "\n" )
+      cat( "Number of MC runs: ", nSize, "\n" )
+      cat( "Number of periods: ", nTsteps, "\n" )
       nTsteps <- nTsteps - iniDrop
       if( nKeep != -1 )
         nTsteps <- min( nKeep, nTsteps )
-      cat( " Number of used periods: ", nTsteps, "\n" )
-      cat( " Number of variable instances: ", origNvar, "\n\n" )
+      cat( "Number of used periods: ", nTsteps, "\n" )
+      cat( "Number of variable instances: ", origNvar, "\n\n" )
 
-      cat( "Reading data from files...\n\n" )
+      cat( "Reading data from files...\n" )
 
       if( pool ) {
 
@@ -1088,13 +1089,15 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
           dataSet <- LSDinterface::read.raw.lsd( myFiles[ j ], nrows = nKeep,
                                                  skip = iniDrop )
 
-          # Increase array size to allow for new variables
-          oldNameVar <- colnames( dataSet )
-          dataSet <- abind::abind( dataSet, array( as.numeric(NA),
-                                                   dim = c( nTsteps, nVarNew ) ),
-                                   along = 2, use.first.dimnames = TRUE )
-          colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
-                                         addVars )
+          if( nVarNew != 0 ) {
+            # Increase array size to allow for new variables
+            oldNameVar <- colnames( dataSet )
+            dataSet <- abind::abind( dataSet, array( as.numeric(NA),
+                                                     dim = c( nTsteps, nVarNew ) ),
+                                     along = 2, use.first.dimnames = TRUE )
+            colnames( dataSet ) <- append( LSDinterface::name.var.lsd( oldNameVar ),
+                                           addVars )
+          }
 
           # Call function to fill new variables with data or reevaluate old ones
           if( ! is.null( eval.vars ) )
@@ -1102,6 +1105,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
 
           # Extract the requested variables (columns)
           for( i in 1 : nVar ) {
+            if( ! make.names( newNameVar[ i ] ) %in% colnames( dataSet ) )
+              stop( "Invalid variable to be saved (not in LSD data)" )
+
             x <- dataSet[ , make.names( newNameVar[ i ] ) ]
             if( na.rm ) {
               poolData[[ k, i, j ]] <- x[ ! is.na( x ) ]  # remove NAs
@@ -1158,8 +1164,8 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
           }
       }
 
-      cat( " Number of variables selected: ", nVar, "\n" )
-      cat( " Number of pooled samples: ", nSampl, "\n\n" )
+      cat( "\nNumber of variables selected: ", nVar, "\n" )
+      cat( "Number of pooled samples: ", nSampl, "\n\n" )
 
       # Clean temp variables
       rm( dataSet, x )
@@ -1171,8 +1177,6 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   }
 
   # ---- Process data in each experiment (nSize points) ----
-
-  cat( "Design of Experiments response processing...\n\n" )
 
   if( length( outVar ) == 0 ) {         # no output var?
     outVar <- newNameVar[ 1 ]           # use first var
@@ -1224,9 +1228,9 @@ write.response <- function( folder, baseName, iniExp = 1, nExp = 1, outVar = "",
   utils::write.csv( tresp, respFile, row.names = FALSE )
 
   cat( "DoE response file saved:", respFile, "\n" )
-  cat( " Doe points =", k, "\n" )
-  cat( " Total observations =", tobs, "\n" )
-  cat( " Discarded observations =", tdiscards, "\n\n" )
+  cat( "Doe points =", k, "\n" )
+  cat( "Total observations =", tobs, "\n" )
+  cat( "Discarded observations =", tdiscards, "\n\n" )
 
   rm( poolData, resp, tresp )
   if( rm.temp )
@@ -1250,28 +1254,28 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   files <- files.doe( folder, baseName )
   if( is.null( doeFile ) ) {
     if( length( files ) > does )
-      warning( "Too many experiments (.csv) files, using first one(s) only!" )
+      warning( "Too many DoE (.csv) files, using first one(s) only" )
     if( length( files ) < 1 )
-      stop( "No valid DoE file!" )
+      stop( "No valid DoE file" )
     doeFile <- paste0( folder, "/", files[ 1 ], ".csv" )
   }
 
 
   if( is.null( respFile ) ) {
     if( length( files ) < 1 )
-      stop( "No valid response file!" )
+      stop( "No valid response file" )
     respFile <- paste0( folder, "/", files[ 1 ], "_", outVar, ".csv" )
   }
 
   if( does > 1 ) {
     if( is.null( validFile ) ) {
       if( length( files ) < 2 )
-        stop( "No valid DoE validation file!" )
+        stop( "No valid DoE validation file" )
       validFile <- paste0( folder, "/", files[ 2 ], ".csv" )
     }
     if( is.null( valRespFile ) ) {
       if( length( files ) < 2 )
-        stop( "No valid DoE validation response file!" )
+        stop( "No valid DoE validation response file" )
       valRespFile <- paste0( folder, "/", files[ 2 ], "_", outVar, ".csv" )
     }
   }
@@ -1337,7 +1341,7 @@ read.doe.lsd <- function( folder, baseName, outVar, does = 1, doeFile = NULL,
   for( i in 1 : length( colnames( doe ) ) ) {
     j <- which( limits$Par == colnames( doe )[ i ], arr.ind = TRUE )
     if( j == 0 )
-      stop( "Parameter not found in LSD sensitivity file!" )
+      stop( "Parameter not found in LSD sensitivity file" )
     facLim[[ i ]] <- list( min = limits$Min[ j ], max = limits$Max[ j ] )
     facLimLo[ i ] <- limits$Min[ j ]
     facLimUp[ i ] <- limits$Max[ j ]
@@ -1476,7 +1480,7 @@ kriging.model.lsd <- function( data, ext.wgth = 0.5, trendModel = 0,
   bestCross <- as.vector( which( Q2 == max( Q2, na.rm = TRUE ),
                                  arr.ind = TRUE )[ 1, ] )
 
-  cat( "\nCross validation of alternative models:\n" )
+  cat( "Cross validation of alternative models:\n" )
   cat( " Best trend model:", trendNames[ bestCross[ 1 ] ], "\n" )
   cat( " Best covariation model:", covNames[ bestCross[ 2 ] ], "\n\n" )
 

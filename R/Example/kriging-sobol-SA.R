@@ -217,13 +217,6 @@ for( i in 1 : length( mResp$grid[[ 4 ]] ) ) {        # do for each top factor
                               colnames( dataSet$doe )[ sSA$topEffect[ 3 ] ],
                               "=", mResp$grid[[ 4 ]][ i ], ")" ) ),
          sub = subTitle )
-
-  # ------ 3D response surface (shaded) ------
-
-  persp3d( mResp$grid[[ 1 ]], mResp$grid[[ 2 ]],
-           matrix( mResp$calib[[ i ]]$mean, grid3d, grid3d ), col = "lightgray",
-           xlab = colnames( dataSet$doe )[ sSA$topEffect[ 1 ] ],
-           ylab = colnames( dataSet$doe )[ sSA$topEffect[ 2 ] ], zlab = dataSet$saVarName )
 }
 
 
