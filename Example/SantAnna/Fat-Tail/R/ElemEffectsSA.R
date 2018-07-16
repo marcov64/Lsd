@@ -94,6 +94,10 @@ tryCatch({
   title( main = paste0( "Elementary effects composition ( ", dataSet$saVarName, " )" ),
          sub = "mu.star: overall effects / sigma: non-linear/non-additive effects" )
 
+  # ---- Save results to file ----
+  
+  write.csv( eeSA$table, paste0( folder, "/", baseName, "_EE_SA_", varName, ".csv" ) )
+
   # ------------- Exception handling code (tryCatch) -------------
 
 }, interrupt = function( ex ) {

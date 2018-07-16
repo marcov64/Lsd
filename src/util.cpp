@@ -74,7 +74,6 @@ int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size
 int columns = 0;
 int error_count;
-int ran_gen = 2;						// default pseudo-random number generator
 double dimW = 0;						// lattice screen size
 double dimH = 0;
 
@@ -2619,6 +2618,8 @@ ran_gen =	5 : Mersenne-Twister with 64 bits resolution in [0,1)
 ran_gen =	6 : Lagged fibonacci with 24 bits resolution in [0,1)
 ran_gen =	7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
+int ran_gen = 2;					// default pseudo-random number generator
+
 minstd_rand lc;						// linear congruential generator
 mt19937 mt32;						// Mersenne-Twister 32 bits generator
 mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
@@ -2709,7 +2710,7 @@ double norm( double mean, double dev )
 	if ( dev < 0 )
 	{
 		plog( "\nWarning: bad dev in function: norm" );
-		return 0.0;
+		return mean;
 	}
 
 	normal_distribution< double > distr( mean, dev );
@@ -2725,8 +2726,8 @@ double lnorm( double mean, double dev )
 {
 	if ( dev < 0 )
 	{
-		plog( "\nWarning: bad dev in function: norm" );
-		return 0.0;
+		plog( "\nWarning: bad dev in function: lnorm" );
+		return exp( mean );
 	}
 
 	lognormal_distribution< double > distr( mean, dev );
@@ -2753,12 +2754,15 @@ double gamma( double alpha, double beta )
 /****************************************************
 BERNOULLI
 ****************************************************/
-int bernoulli( double p )
+double bernoulli( double p )
 {
 	if ( p < 0 || p > 1 )
 	{
 		plog( "\nWarning: bad p in function: bernoulli" );
-		return 0.0;
+		if ( p < 0 )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	bernoulli_distribution distr( p );
@@ -2790,7 +2794,10 @@ double geometric( double p )
 	if ( p < 0 || p > 1 )
 	{
 		plog( "\nWarning: bad p in function: geometric" );
-		return 0.0;
+		if ( p < 0 )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	geometric_distribution< int > distr( p );
@@ -2806,7 +2813,10 @@ double binomial( double p, double t )
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
 		plog( "\nWarning: bad p, t in function: binomial" );
-		return 0.0;
+		if ( p < 0 || t <= 0 )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	binomial_distribution< int > distr( t, p );
@@ -2819,10 +2829,10 @@ CAUCHY
 ***************************************************/
 double cauchy( double a, double b )
 {
-	if ( b < 0 )
+	if ( b <= 0 )
 	{
 		plog( "\nWarning: bad b in function: cauchy" );
-		return 0.0;
+		return a;
 	}
 
 	cauchy_distribution< double > distr( a, b );
@@ -2867,7 +2877,7 @@ FISHER
 ***************************************************/
 double fisher( double m, double n )
 {
-	if ( m < 0 || n < 0 )
+	if ( m <= 0 || n <= 0 )
 	{
 		plog( "\nWarning: bad m, n in function: fisher" );
 		return 0.0;
@@ -2919,7 +2929,10 @@ double beta( double alpha, double beta )
 	if ( alpha <= 0 || beta <= 0 )
 	{
 		plog( "\nWarning: bad alpha, beta in function: beta" );
-		return 0.0;
+		if ( alpha < beta )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	gamma_distribution< double > distr1( alpha, 1.0 ), distr2( beta, 1.0 );
@@ -3182,8 +3195,10 @@ ran_gen =	3 : Mersenne-Twister in [0,1]
 ran_gen =	4 : Mersenne-Twister in [0,1)
 ran_gen =	5 : Mersenne-Twister with 53 bits resolution in [0,1)
 ****************************************************/
+int ran_gen = 1;	// default pseudo-random number generator
 int dum = 0;
 long idum = 0;		// Park-Miller sequential control (default seed)
+
 MTRand_open mt2;	// Mersenne-Twister object in (0,1)
 MTRand_closed mt3;	// Mersenne-Twister object in [0,1]
 MTRand mt4; 		// Mersenne-Twister object in [0,1)
@@ -3268,7 +3283,7 @@ double norm( double mean, double dev )
 	if ( dev < 0 )
 	{
 		plog( "\nWarning: bad dev in function: norm" );
-		return 0.0;
+		return mean;
 	}
 
 	if ( dum == 0 )
@@ -3305,15 +3320,15 @@ double norm( double mean, double dev )
 LNORM
 Return a draw from a lognormal distribution
 ***************************************************/
-double lnorm( double mu, double dev )
+double lnorm( double mean, double dev )
 {
 	if ( dev <= 0 )
 	{
 		plog( "\nWarning: bad dev in function: lnorm" );
-		return 0.0;
+		return exp( mean );
 	}
 
-	return exp( norm( mu, dev ) );
+	return exp( norm( mean, dev ) );
 }
 
 
@@ -3387,12 +3402,15 @@ double gamma( double alpha, double beta )
 /****************************************************
 BERNOULLI
 ****************************************************/
-int bernoulli( double p )
+double bernoulli( double p )
 {
 	if ( p < 0 || p > 1 )
 	{
 		plog( "\nWarning: bad p in function: bernoulli" );
-		return 0.0;
+		if ( p < 0 )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	double dice = ran1( );
@@ -3501,7 +3519,10 @@ double beta( double alpha, double beta )
 	if ( alpha <= 0 || beta <= 0 )
 	{
 		plog( "\nWarning: bad alpha, beta in function: beta" );
-		return 0.0;
+		if ( alpha < beta )
+			return 0.0;
+		else
+			return 1.0;
 	}
 
 	double U, V, den;
@@ -3530,7 +3551,7 @@ double pareto( double mu, double alpha )
 	if ( mu <= 0 || alpha <= 0 )
 	{
 		plog( "\nWarning: bad mu, alpha in function: pareto" );
-		return 0.0;
+		return mu;
 	}
 
 	return mu / pow( 1 - ran1( ), 1 / alpha );
@@ -3546,7 +3567,7 @@ double alapl( double mu, double alpha1, double alpha2 )
 	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
 	{
 		plog( "\nWarning: bad alpha in function: alapl" );
-		return 0.0;
+		return mu;
 	}
 
 	double draw = ran1( );

@@ -1,0 +1,12 @@
+Models in M. Pereira's Masters and PhD thesis
+
+These models have been produced for the theses: 
+"The internet sector in Brazil: an analysis of the competition in the access market", 2012, University of Campinas, Brazil
+"Schumpeterian competition and network-organized consumers: an analysis of the Brazilian market for internet access", 2015, University of Campinas, Brazil
+
+The group M. Pereira Thesis include:
+- Internet access service market model
+- Internet market with networked consumers
+
+
+

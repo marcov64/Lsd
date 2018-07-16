@@ -1,0 +1,55 @@
+INTERNET ACCESS SERVICE MARKET AND CONSUMER NETWORKS
+====================================================
+
+Marcelo C. Pereira - 2015 - Version 2.2
+
+References:
+
+Pereira, M. C. "Schumpeterian competition and network-organized consumers: an analysis of the Brazilian market for internet access", PhD thesis, University of Campinas, Brazil, 2015.
+
+
+Simulation of a provider and a consumer market of recurring services
+====================================================================
+
+The service is defined as a single offer connecting the user to the internet. There are no offer differentiation other than prices and network quality. Service is contracted for a given period, being paid for every period. While the contract is running, prices are fixed. On renewal, users have to choose a new provider or stay with the previous one, at then current prices. Users make errors while evaluating new providers and have some resistance to change providers (loyalty).
+
+Market is based on heterogeneous users who decide which provider to contract based on price, network quality and the popularity of providers in his/her own social network. Relative importance of these factors varies between users. Access service contracting is still constrained by user budget, so the relative best provider should be also affordable enough to be hired. Users have different budgets and their budgets may grow over time. New users enter the market periodically.
+
+Service providers are also heterogeneous. They have their own prices, reviewed every period, according to specific behavior rules. Providers also plan their network capacities for every period, defining the base for its network quality. They have access to finance to cover both their investment needs and for running capital. Interest rates, however, are variable according to borrower's profile (financial constraint).
+
+Providers have different strategies mixes for price setting and network planning. 9 different strategies are available to be used. Providers reassess their strategies from time to time, picking a new one if average indicators are better than current strategy results. Strategy selection is based on imitation of best practices inside provider's social group (incumbent/entrant).
+
+Network quality is a relative measure of network (capital) utilization for each provider. Each "capital unit" is designed by capital equipment supplier to adequately support one "typical" network user. Access providers may freely design their networks to accommodate more or less than one user per capital unit, according to their strategy mix, with correspondingly impact on network quality. The more capital units per user, the better network quality becomes, also at higher capital and maintenance costs.
+
+Technology is generated endogenously by a single network equipment supplier and drives access service productivity. Technology innovation happens by both incremental productivity gains for existing technologies or emergence of new and more productive technoloies. Successive waves of new technology, then, drive downstream market competition. All providers have access to the same technology but incumbents may have access to lower prices. 
+
+Depreciation is calculated from an optimization perspective, due to the quick technological advances, that frequently render equipment obsolete (too expensive to maintain in comparison to new equipment replacement) well before traditional accounting time spans (5-15 years). So, network equipment is replaced (accelerated depreciation) as soon as economical interesting to the sevice provider.
+
+New providers may join the market, according if the current conditions are attractive. Providers on a loss for given periods, or with a too low market share, exit the market.
+
+Model is build to be not tied to a given timescale, but initial parameters are configured to resemble quarterly periods (3 months) in a real market.
+
+
+Ready to use configurations
+===========================
+
+In the model home directory (usually in ~/Lsd/Example/Economic/MPereira/Internet_22) there is the baseline LSD configuration file, named Facebook.lsd. This configuration uses external-defined complex networks (Pajek format) to model the connections among consumers. The subdirectory facebook, inside the model home directory, contains 10 realizations of a random network with the same properties of the Facebook social network. Because of space constraints, only one network file, network_1.net, is uncompressed, please uncompress the rest from networks.zip file. The network file to be used is automatically chosen according to the random generator seed used (for seeds larger than 10, the network files are recycled).
+
+After preparing the desired network file(s), just load the configuration in LSD, choose menu Run>Simulation Settings (or click on the wrench icon), pick the desired random seed, select Run>Run (or click on the blue triangle icon), wait for the simulation to finish (press F to accelerate the execution), and analyze the results using menu Data>Analysis of Results (or click on the chart icon).
+
+
+Sensitivity analysis in R
+=========================
+
+There are is a Facebook.sa file in the model home directory pre-configured for sensitivity analysis of the main parameters under the external random networks configuration.
+
+There are two .R scripts for doing the model sensitivity analysis in the subdirectory R, inside the model home directory. When using these scripts, the best approach is to generate the LSD results files in a subdirectory inside the R one. There are two full two examples for sensitivity analysis in the subdirectories R/data/EE and R/data/Sobol. To generate the simulation data and do the analysis in R, follow these steps:
+
+1. In LMM, generate a 'No Window' version of the simulation model (menu Model>Create 'No Window' Version).
+2. Copy the network files (see above) to a subdirectory named 'facebook' inside the chosen configuration subdirectory.
+3. Load the desired configuration file in LSD (R/data/EE/Facebook.lsd, for an Elementary Effects analysis, or R/data/Sobol/Facebook.lsd for Sobol analysis).
+4. Load the sensitivity data file in LSD (Facebook.sa).
+5. Generate the sensitivity analysis configuration files (menu Data>Sensitivity Analysis>EE Sampling, for Elementary Effects, or Data>Sensitivity Analysis>NOLH Sampling, for Sobol). Accept the defaults. It may take a while to produce all configuration files (530 for EE and 257 for Sobol), please wait.
+6. Only if performing a Sobol analysis, create configuration files for an external data sample (menu Data>Sensitivity Analysis>MC Range Sampling). Accept the defaults.
+7. Execute the created analysis configurations (menu Run>Create/Start Parallel Batch) and wait for the processing to finish (it will take several hours, depending on the speed and the number of CPU cores). Check the created .log files to know when all configurations were run (or use the computer task manager).
+8. Set the R subdirectory (inside the model home directory) as the working directory for R and run the desired script (elementary-effects-SA.R or kriging-sobol-SA.R) using the 'Rscript' terminal command or open the script in RStudio and click on the 'Source' button. Please wait while the data is read and the computations performed (it may take several minutes). The results (.csv and .pdf files) are generated in the same subdirectory.

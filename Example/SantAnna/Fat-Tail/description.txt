@@ -52,14 +52,15 @@ There are .R scripts for doing the model analysis in the subdirectory R. When us
 
 As an example, the R/MarkII/Beta subdirectory contains an example configuration (MarkII-Beta.lsd) which can be loaded in LSD and executed (it will produce 10 runs of data, as an short MC sample). The generated data can be analyzed using the scripts in the R subdirectory (except for the SA ones, see below). Set the R subdirectory as the working directory for R and run the scripts using the 'Rscript' terminal command or open the desired script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
 
-There are also full two examples for sensitivity analysis in the subdirectories R/MarkII/Beta/EE and R/MarkII/Beta/Sobol. To generate the simulation data and do the analysis in R, follow these steps:
+There are also two full examples for sensitivity analysis in the subdirectories R/MarkII/Beta/EE and R/MarkII/Beta/Sobol. To generate the simulation data and do the analysis in R, follow these steps:
 
-1. Load the desired configuration file in LSD (R/MarkII/Beta/EE/MarkII-Beta.lsd, for an Elementary Effects analysis, or R/MarkII/Beta/Sobol/MarkII-Beta.lsd for Sobol analysis).
-2. Load the sensitivity data file in LSD (MarkII-Beta.sa).
-3. Generate the sensitivity analysis configuration files (menu Data>Sensitivity Analysis>EE Sampling, for Elementary Effects, or Data>Sensitivity Analysis>NOLH Sampling, for Sobol). Accept the defaults.
-4. Only if performing a Sobol analysis, create configuration files for an external data sample (menu Data>Sensitivity Analysis>MC Range Sampling). Accept the defaults.
-5. Execute the created analysis configurations (menu Run>Create/Start Parallel Batch) and wait for the processing to finish (it may take several minutes). Check the created .log files to know when all configurations were run (or use the computer task manager).
-6. Set the R subdirectory (inside the model home directory) as the working directory for R and run the desired script (ElemEffectsSA.R or SobolSA.R) using the 'Rscript' terminal command or open the script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
+1. In LMM, generate a 'No Window' version of the simulation model (menu Model>Create 'No Window' Version).
+2. Load the desired configuration file in LSD (R/MarkII/Beta/EE/MarkII-Beta.lsd, for an Elementary Effects analysis, or R/MarkII/Beta/Sobol/MarkII-Beta.lsd for Sobol analysis).
+3. Load the sensitivity data file in LSD (MarkII-Beta.sa).
+4. Generate the sensitivity analysis configuration files (menu Data>Sensitivity Analysis>EE Sampling, for Elementary Effects, or Data>Sensitivity Analysis>NOLH Sampling, for Sobol). Accept the defaults.
+5. Only if performing a Sobol analysis, create configuration files for an external data sample (menu Data>Sensitivity Analysis>MC Range Sampling). Accept the defaults.
+6. Execute the created analysis configurations (menu Run>Create/Start Parallel Batch) and wait for the processing to finish (it may take several minutes). Check the created .log files to know when all configurations were run (or use the computer task manager).
+7. Set the R subdirectory (inside the model home directory) as the working directory for R and run the desired script (ElemEffectsSA.R or SobolSA.R) using the 'Rscript' terminal command or open the script in RStudio and click on the 'Source' button. The results (.csv and .pdf files) are generated in the same subdirectory.
 
 
 Available simulation configuration options

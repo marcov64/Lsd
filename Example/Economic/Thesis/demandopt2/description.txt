@@ -1,0 +1,18 @@
+Demand evolution (by Marco Valente)
+(Very complex model)
+
+VER 2.0: replace the TTB admitting minimum requirements and negative qualities.
+
+
+The model represents a simple market made of a (fixed) group of producers selling a (constant) product. Products are defined over a set of product dimensions, or characteristics. Producers collect the data about the sales, market shares and installed bases (i.e. number of consumers currently owning their product), and never modify their products.
+The dynamics of the model is provided by the demand side, since the goal of the model is to study how market configurations emerge from given demand settings. There are three different (overlapping) dynamics: entry (and preferences formation), purchase and learning.
+
+Consumers enter in the market following a contagion diffusion model: early consumers bring in many new consumers, while latter consumers do not bring in any new consumer. When a consumer enters in the market its preferences are formed. They are obtained with a formula which takes into account: 1) producers' marketing strategies and 2) relative market shares. Preferences are defined as a ranking of product characteristics.
+
+Every ramdomly chosen time steps each consumer makes a purchase. This is implemented using the Take-The-Best strategy, using lexicographic preferences. Each consumer represents preferences as a ranking of product's characteristics. Initially ranks products according to their value on the most important characteristic. The worse performing products are discarded, and the remaining ones are re-sorted according to the next characteristics in the consumer preferences. The procedure continues using gradually less important characteristics (lower ranking in the preferences) until one single product remains.
+
+Learning takes place automatically while consumers are owning their products. The initial low knowledge (when consumers have just entered the market) is reflected in the large errors made in judging products. That is, the values consumers read of product characteristics are a normal random draw from a distribution centered on the true value and whose variance is a function of consumer knowledge. Through time learning increases the knowledge therefore narrowing the range of errors.
+
+
+
+

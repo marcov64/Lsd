@@ -261,6 +261,14 @@ tryCatch({
            ylab = colnames( dataSet$doe )[ sSA$topEffect[ 2 ] ] )
   }
 
+  # ---- Save results to file ----
+  
+  write.csv( mModel$comparison, paste0( folder, "/", baseName,
+                                        "_Kriging_models_", varName, ".csv" ) )
+  write.csv( mModel$estimation.std, paste0( folder, "/", baseName,
+                                            "_Kriging_estim_", varName, ".csv" ) )
+  write.csv( sSA$sa, paste0( folder, "/", baseName, "_Sobol_SA_", varName, ".csv" ) )
+
   # ------------- Exception handling code (tryCatch) -------------
 
 }, interrupt = function( ex ) {

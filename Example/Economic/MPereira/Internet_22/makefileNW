@@ -1,0 +1,79 @@
+# Model compilation options
+TARGET=lsd_gnu
+FUN=fun_INTERNET
+FUN_EXTRA= fun_internet.h
+SWITCH_CC=-O3
+SWITCH_CC_LNK=
+
+
+# System compilation options
+LSDROOT=C:/Lsd
+SRC=src
+EXT=.exe
+
+# Libraries options
+TCL_VERSION=86
+PATH_TCL_HEADER=$(LSDROOT)/gnu64/include
+PATH_TK_HEADER=$(LSDROOT)/gnu64/include
+PATH_HEADER=$(LSDROOT)/gnu64/include
+PATH_TCL_LIB=$(LSDROOT)/gnu64/lib
+PATH_TK_LIB=$(LSDROOT)/gnu64/lib
+PATH_LIB=$(LSDROOT)/gnu64/lib
+TCL_LIB=-ltcl$(TCL_VERSION)
+TK_LIB=-ltk$(TCL_VERSION)
+LIBS=-lz
+
+# Compiler options
+CC=x86_64-w64-mingw32-g++
+GLOBAL_CC=-march=native -std=gnu++14
+SSWITCH_CC=-mthreads -mwindows -O3
+LSDROOT=C:/Lsd
+
+# Body of makefileNW (from src/makefile_baseNW.txt)
+# CORRECTIONS: need to reset these variables to allow for no window version
+CC_NW=$(CC_CROSS)g++
+SRC_DIR=$(SRC)/
+LSDROOT=.
+INCLUDE=-I$(PATH_HEADER) -I$(SRC)
+LIBS_NW=$(LIBS) -lpthread
+SWITCH_CC_NW=$(GLOBAL_CC) $(SWITCH_CC) -O3
+TARGET_NW=lsd_gnuNW
+
+$(TARGET_NW)$(EXT): $(FUN).obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)file.obj \
+$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
+$(SRC_DIR)nets.obj
+	$(CC_NW) $(SWITCH_CC_NW) $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
+	$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
+	$(SRC_DIR)nets.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
+
+$(SRC_DIR)file.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp \
+$(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)file.cpp -o $(SRC_DIR)file.obj $(INCLUDE)
+$(SRC_DIR)main_gnuwin.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)main_gnuwin.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)main_gnuwin.cpp -o $(SRC_DIR)main_gnuwin.obj \
+	$(INCLUDE)
+$(SRC_DIR)util.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)util.cpp \
+$(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)util.cpp -o $(SRC_DIR)util.obj $(INCLUDE)
+$(SRC_DIR)variab.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)variab.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)variab.cpp -o $(SRC_DIR)variab.obj $(INCLUDE)
+$(SRC_DIR)object.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)object.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)object.cpp -o $(SRC_DIR)object.obj $(INCLUDE)
+$(SRC_DIR)lsdmain.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)lsdmain.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)lsdmain.cpp -o $(SRC_DIR)lsdmain.obj $(INCLUDE)
+$(SRC_DIR)report.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)report.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)report.cpp -o $(SRC_DIR)report.obj $(INCLUDE)
+$(SRC_DIR)nets.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
+$(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
+$(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)
+
+clean:
+	rm $(SRC_DIR)*.obj $(FUN).obj $(TARGET_NW)*
