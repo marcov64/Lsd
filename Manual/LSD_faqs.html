@@ -286,32 +286,36 @@ and what can I do with that?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>29.<span style='font:7.0pt "Times New Roman"'>
-</span><a href="#_What_are_the_1">What are the R packages for LSD?</a></p>
+</span><a href="#_What_is_the_3">What is the LSD Web Interface (LWI)?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>30.<span style='font:7.0pt "Times New Roman"'>
-</span><a href="#_What_is_sensitivity">What is sensitivity analysis?</a></p>
+</span><a href="#_What_are_the_1">What are the R packages for LSD?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>31.<span style='font:7.0pt "Times New Roman"'>
-</span><a href="#modelreport">What is a model report?</a></p>
+</span><a href="#_What_is_sensitivity">What is sensitivity analysis?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>32.<span style='font:7.0pt "Times New Roman"'>
+</span><a href="#modelreport">What is a model report?</a></p>
+
+<p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>33.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#modeldocumentation">How do I document the elements of a LSD
 model?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>33.<span style='font:7.0pt "Times New Roman"'>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>34.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_What_documentation_does">What documentation does exist on
 LSD?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>34.<span style='font:7.0pt "Times New Roman"'>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>35.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_What_is_the_1">What is the LSD XXX window?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>35.<span style='font:7.0pt "Times New Roman"'>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>36.<span style='font:7.0pt "Times New Roman"'>
 </span><a href="#_Who_did_write">Who wrote LSD, and why?</a></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -332,8 +336,8 @@ LSD?</a></p>
 
 <p class=MsoNormal>LSD (Laboratory for Simulation Development) is a language
 and a platform to write simulation models, which appear as stand-alone programs
-complete with graphical based interfaces for all possible applications of the model
-(from running the simulation to preparing scientific publications). Two
+complete with graphical based interfaces for all possible applications of the
+model (from running the simulation to preparing scientific publications). Two
 characteristics make LSD particularly useful in order to use simulation models
 in social sciences: </p>
 
@@ -349,17 +353,17 @@ of the model, having LSD automatically creating all the interfaces that allow
 accessing any aspect of the model, accelerating and simplifying the process of
 building simulation models and allowing for their easy distribution. </p>
 
-<p class=MsoNormal>LSD tries to remove the trade-off between the simplicity to
-use a simulation model and the complexity to build it. This is obtained by
-allowing modelers to just write pieces of code (independently) for each
-Equation (i.e., Variable) of the model. In this way, the process of code
-writing is greatly simplified because a complex model is decomposed in
-individually coded Equations. When the Equations are (supposed to be) ready,
-the system automatically generates an executable program, complete with an
-easy-to-use graphical interface. The system automatically executes the
-Variables' code as required during a simulation run, storing the results, signaling
-errors, and allowing the model inspections, without any need for the modeler to
-write specific code for these operations. </p>
+<p class=MsoNormal>LSD tries to remove the trade-off between the simplicity to use
+a simulation model and the complexity to build it. This is obtained by allowing
+modelers to just write pieces of code (independently) for each Equation (i.e.,
+Variable) of the model. In this way, the process of code writing is greatly
+simplified because a complex model is decomposed in individually coded
+Equations. When the Equations are (supposed to be) ready, the system
+automatically generates an executable program, complete with an easy-to-use
+graphical interface. The system automatically executes the Variables' code as
+required during a simulation run, storing the results, signaling errors, and
+allowing the model inspections, without any need for the modeler to write
+specific code for these operations. </p>
 
 <p class=MsoNormal>Although very simple to use, LSD is also extremely powerful,
 since it is based on <a href="#_What_is_C++?">C++11</a>, and therefore the
@@ -443,10 +447,9 @@ their simulation models. </p>
 <h1><a name="_Where_do_I"></a>Where do I start using a LSD model? </h1>
 
 <p>The distribution of LSD includes several example models, some of which are
-for purely teaching purposes, while others are complex models with scientific
-purposes. The simplest way is to play with them is to use <a
-href="#_What_is_LMM?_1">LMM</a> to compile and run them. To do so, please
-follow the following steps: </p>
+for purely teaching purposes, while others are complex models with scientific purposes.
+The simplest way is to play with them is to use <a href="#_What_is_LMM?_1">LMM</a>
+to compile and run them. To do so, please follow the following steps: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
@@ -555,9 +558,9 @@ simple LSD model. </p>
 
 <h1><a name="_What_is_a"></a><a name=model></a>What is a model in LSD? </h1>
 
-<p class=MsoNormal>An abstract definition of a simulation model is: a
-collection of variables that change values through simulation time according to
-specified rules. However, this definition leaves a lot at an implicit level. </p>
+<p class=MsoNormal>An abstract definition of a simulation model is: a collection
+of variables that change values through simulation time according to specified
+rules. However, this definition leaves a lot at an implicit level. </p>
 
 <p class=MsoNormal>A more pedantic definition is maybe better to understand how
 LSD works. Usually a model includes several <a href="#_What_is_a_3">Variables</a>
@@ -596,18 +599,19 @@ EPS plots, statistics tables, and so on. </p>
 <h1><a name="_What_is_the_2"></a><a name=modelhome></a>What is the model home
 (sub) directory?</h1>
 
-<p class=MsoNormal>Every LSD model is composed by a set of files which are
-stored in a single location (a directory/folder) in the computer file system
+<p class=MsoNormal>Every LSD model is composed by a set of files which are stored
+in a single location (a directory/folder) in the computer file system
 (contained in a hard disk, a SSD, an USB pen drive etc.). By default, new LSD
 models are created in the <span class=Cdigo>Work</span> subdirectory which is
 kept inside the LSD installation directory (usually <span class=Cdigo>C:\Lsd-X.Y
 </span>in Windows or <span class=Cdigo>~/LSD-X.Y</span> in Linux/macOS, see the
-<a href="LSD_manual.html#install">installation details</a> for more information).</p>
+<a href="LSD_manual.html#install">installation details</a> for more
+information).</p>
 
 <p class=MsoNormal>When a new model is created in <a href="#_What_is_LMM?_1">LMM</a>,
 the user has the option to name its home directory (the default being <span
-class=Cdigo>newmodel</span>). After the model is created, its home directory can
-be easily retrieved by using the LMM command <span class=Cdigo>Model&gt;Model
+class=Cdigo>newmodel</span>). After the model is created, its home directory
+can be easily retrieved by using the LMM command <span class=Cdigo>Model&gt;Model
 Info</span> (check the <a href="LMM.html">LMM manual</a> for details).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -635,9 +639,9 @@ simulation to just produce data. Results must be fully understood and this is
 linked to the functional content of the model and its <a href="#_What_is_a_6">configuration</a>.
 For this reason, during a simulation run users must be able to interrupt,
 investigate the model, observe the data generated up to that time, modify
-values, and resume. Moreover, any LSD model comes with full documentation (automatically
-generated) to make easier to grasp the connections between the model’s elements
-even in very complex cases. </p>
+values, and resume. Moreover, any LSD model comes with full documentation
+(automatically generated) to make easier to grasp the connections between the
+model’s elements even in very complex cases. </p>
 
 <p class=MsoNormal>Technically, when a user runs a LSD simulation, the
 following steps are performed: </p>
@@ -730,14 +734,14 @@ determined from the set of difference equations itself. Also, several
 computations may potentially run in parallel, without the necessity to follow a
 specific order, speeding up the model computation.<br>
 <br>
-LSD relies on an automatic scheduling engine allowing modelers to decide the order
-of computation except in special circumstances, as when ambiguity is present.
-Only if there is a specific need to keep a certain evaluation sequence, then
-the model can be explicitly configured to follow it. For example, writing the
-Equation <i>x</i> = f(<i>y</i>) forces the system to compute <i>y</i> before <i>x</i>.
-Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i> – 1) ) tells the system
-to use a lagged value of <i>y</i> in the Equation for <i>x</i> and thus the
-Equation for <i>y</i> may be computed before or after that for <i>x</i>.</p>
+LSD relies on an automatic scheduling engine allowing modelers to decide the
+order of computation except in special circumstances, as when ambiguity is
+present. Only if there is a specific need to keep a certain evaluation
+sequence, then the model can be explicitly configured to follow it. For
+example, writing the Equation <i>x</i> = f(<i>y</i>) forces the system to
+compute <i>y</i> before <i>x</i>. Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i>
+– 1) ) tells the system to use a lagged value of <i>y</i> in the Equation for <i>x</i>
+and thus the Equation for <i>y</i> may be computed before or after that for <i>x</i>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -785,11 +789,11 @@ the correct scheduling. A powerful debugger helps to solve the problem of
 scheduling errors even under the most extreme conditions. </p>
 
 <p class=MsoNormal>The problem of multiple Variables with the same name is
-solved by using a hierarchical structure. That is, if model writers do not specify
-which instance they need to use in their Equations, the system automatically
-provides the value of the &quot;closest&quot; instance of the requested
-element. Overruling systems allow anyway modelers to access any value of the
-model they may necessitate. </p>
+solved by using a hierarchical structure. That is, if model writers do not
+specify which instance they need to use in their Equations, the system
+automatically provides the value of the &quot;closest&quot; instance of the
+requested element. Overruling systems allow anyway modelers to access any value
+of the model they may necessitate. </p>
 
 <p class=MsoNormal>All in all, writing the Equations' code for a LSD model has
 the same difficulty of writing the C++ equivalent of the set of difference
@@ -846,8 +850,8 @@ Multi-file models can be easily managed by <a href="#_What_is_LMM?_1">LMM</a>.</
 is a LSD macro or function? </h1>
 
 <p class=MsoNormal>An equation file must provide the model’s <a
-href="#_What_is_an">Equations</a> clearly defined by the usage of predefined C++
-code constructs. Such constructs are usually provided in the form of <a
+href="#_What_is_an">Equations</a> clearly defined by the usage of predefined
+C++ code constructs. Such constructs are usually provided in the form of <a
 href="LSD_macros.html">pre-defined macros</a>. Pure C++ coding using <a
 href="LSD_functions.html">library functions</a> directly is also possible for
 special cases (and skilled programmers). A macro function is a predefined set
@@ -1003,9 +1007,9 @@ label.</p>
 type and an Object instance? </h1>
 
 <p class=MsoNormal>In broad terms, an object in a computer language is the
-representation of a set of heterogeneous information. In particular, LSD
-Objects are data containers defined by a set of <a href="#_What_is_a_3">Variables</a>,
-<a href="#_What_is_a_4">Parameters</a> and other Objects: </p>
+representation of a set of heterogeneous information. In particular, LSD Objects
+are data containers defined by a set of <a href="#_What_is_a_3">Variables</a>, <a
+href="#_What_is_a_4">Parameters</a> and other Objects: </p>
 
 <p class=MsoNormal><span class=Cdigo>Object Obj <br>
 { <br>
@@ -1041,9 +1045,9 @@ class=Cdigo>A</span> will use the instance of B in the same Object. However, if
 class=Cdigo>A</span> and there may be many instances of the Object containing <span
 class=Cdigo>B</span> the structure of the model becomes crucial. LSD has an
 automatic scheduling system that tries to always provide the required values
-for computation by searching through the entire model. The modeler, when
-designing the model, must ensure that the correct instance is used according to
-the LSD scheduler rules. Most of the times, LSD points to the correct
+for computation by searching through the entire model. The modeler, when designing
+the model, must ensure that the correct instance is used according to the LSD
+scheduler rules. Most of the times, LSD points to the correct
 Variable/Parameter instance. But modelers can always overrule the automatic
 scheduler and implement model-specific data retrieving arrangements. </p>
 
@@ -1117,8 +1121,8 @@ rules</a> and are case sensitive.</p>
 
 <h1><a name="_What_is_a_4"></a><a name=parameter></a>What is a Parameter? </h1>
 
-<p class=MsoNormal>A Parameter is a numerical (double-precision IEEE 754 float-point
-real value) element of a LSD model that is not associated with any <a
+<p class=MsoNormal>A Parameter is a numerical (double-precision IEEE 754
+float-point real value) element of a LSD model that is not associated with any <a
 href="#_What_is_an">Equation</a>. Therefore, a Parameter must have its value
 set during the <a href="#_What_is_a_6">model configuration</a> and usually
 remain constant along the <a href="#_What_is_a_1">simulation run</a>. However,
@@ -1285,13 +1289,12 @@ numerical initialization values and/or simulation settings. </p>
 structure? </h1>
 
 <p class=MsoNormal>The LSD model structure is the functional organization of
-the <a href="#_What_is_an_2">Objects</a> composing a model. Typically, each
-Object represents an entity of the “virtual reality” captured by the model. An
-Object can contain other “nested” Objects, and so on, forming a hierarchical
-structure (besides other Objects, an Object may also contain <a
-href="#_What_is_a_3">Variables</a> and <a href="#_What_is_a_4">Parameters</a>).
-In simpler terms, the model structure is a hierarchy which represents “what
-contains what”. </p>
+the <a href="#_What_is_an_2">Objects</a> composing a model. Typically, each Object
+represents an entity of the “virtual reality” captured by the model. An Object
+can contain other “nested” Objects, and so on, forming a hierarchical structure
+(besides other Objects, an Object may also contain <a href="#_What_is_a_3">Variables</a>
+and <a href="#_What_is_a_4">Parameters</a>). In simpler terms, the model
+structure is a hierarchy which represents “what contains what”. </p>
 
 <p class=MsoNormal>The Objects in the model can be hierarchically (parenthood
 relation) or parallel (brotherhood relation) linked. In the first case, the
@@ -1393,11 +1396,11 @@ runs.</p>
 
 <p class=MsoNormal>In LSD a network is a structure composed by nodes
 interconnected by links. The nodes of a network must <a href="#_What_is_an_2">instances
-of the same Object type</a>, that is, homogeneous brother Objects descending from
-the same common parent Object. Each Object type can participate in a single
-network but a <a href="#_What_is_a">LSD model</a> may contain as many networks
-as desired. Directed weighted links can be created among any pairs of nodes
-(Object instances).</p>
+of the same Object type</a>, that is, homogeneous brother Objects descending
+from the same common parent Object. Each Object type can participate in a
+single network but a <a href="#_What_is_a">LSD model</a> may contain as many
+networks as desired. Directed weighted links can be created among any pairs of
+nodes (Object instances).</p>
 
 <p class=MsoNormal>Each network node is attributed a unique (fixed and integer)
 serial number and may have also an optional name assigned (the usual
@@ -1525,8 +1528,8 @@ desired</p>
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Change <a href="#_What_is_a_6">any numerical value</a> in the
-model, including the number of instances of Objects and the Parameters and lagged
-Variables values to simulate different settings</p>
+model, including the number of instances of Objects and the Parameters and
+lagged Variables values to simulate different settings</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
@@ -1563,8 +1566,8 @@ users</p>
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span>Fully debug a simulation run, exploring the state of the model,
-analyzing the data produced data produced up to any time step, proceed step-by-step,
-abort the simulation or resume the full-speed run</p>
+analyzing the data produced data produced up to any time step, proceed
+step-by-step, abort the simulation or resume the full-speed run</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
@@ -1631,14 +1634,35 @@ final status of the model in each simulation run. </p>
  </tr>
 </table>
 
+<h1><a name="_What_is_the_3"></a>What is the LSD Web Interface (LWI)?</h1>
+
+<p class=MsoNormal>This manual presents the user-friendly, web-based interface
+to LSD (LWI). LWI make a basic subset of the LSD tools available for web browser
+users, allowing the configuration, execution, and analysis of results produced
+by LSD models and the export of such data. <a href="LSD_web.html#use">LWI web
+front-end</a> is compatible with any computer platform equipped with a modern
+HTML5 browser and can be <a href="LSD_web.html#install">configured</a> in
+closed (intranet) or open (internet) networks.</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
+ <tr>
+  <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
+  none'>&#9650;Top</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
 <h1><a name="_What_are_the_1"></a><a name=r></a>What are the R packages for
 LSD?</h1>
 
 <p class=MsoNormal>LSD has two dedicated packages (or libraries) in the R
 statistical computing program (see <a href="https://www.r-project.org">https://www.r-project.org</a>).
 These packages are available at CRAN (the Comprehensive R Archive Network) for
-transparent download and usage by R users. Please check R documentation on how
-to download and load packages.</p>
+transparent download and usage by R users. Please check R documentation on how to
+download and load packages.</p>
 
 <p class=MsoNormal>Package LSDinterface provides transparent access to <a
 href="#_What_are_the">LSD results files</a> (no format conversion required) in
@@ -1649,9 +1673,9 @@ object-oriented data organization during the model design and the data
 analysis, simplifying significantly the management of data-rich, multilayered
 LSD models. Also, to accelerate data reading from multiple files, parallel
 multi-core file reading is automatically enabled, turning the reading of
-hundreds or thousands of LSD results files much faster on servers or
-high-performance computers. Automatic handling of compressed results files (<span
-class=Cdigo>.res.gz </span>extension) is also supported.</p>
+hundreds or thousands of LSD results files much faster on servers or high-performance
+computers. Automatic handling of compressed results files (<span class=Cdigo>.res.gz
+</span>extension) is also supported.</p>
 
 <p class=MsoNormal>Package LSDsensitivity offers several tools for performing <a
 href="#_What_is_sensitivity">sensitivity analysis</a> and the study of response
@@ -1678,8 +1702,8 @@ the documentation included with them.</p>
 analysis?</h1>
 
 <p class=MsoNormal>In a broader sense, the sensitivity analysis (SA) evaluate
-how uncertainty in the results of a <a href="#_What_is_a_1">simulation run</a> can
-be apportioned to the sources of uncertainty in the model Equations and
+how uncertainty in the results of a <a href="#_What_is_a_1">simulation run</a>
+can be apportioned to the sources of uncertainty in the model Equations and
 configuration. In practical terms, SA allow the modeler explain what is the
 role of (1) stochastic events (random draws), (2) Parameters and lagged
 Variables <a href="#_What_is_a_6">initial values</a>, and the (3) chosen <a
@@ -1750,9 +1774,9 @@ section is disabled and must be enabled when the report is created.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:53.85pt;text-indent:-18.0pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span><b>Model structure section.</b> It lists all model elements showing
-where they are located in the <a href="#_What_is_the">model structure</a> along
-a textual description of their role in the model and how to set the <a
+</span><b>Model structure section.</b> It lists all model elements showing where
+they are located in the <a href="#_What_is_the">model structure</a> along a
+textual description of their role in the model and how to set the <a
 href="#_What_is_a_6">initial values</a>, if applicable.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
