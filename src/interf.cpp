@@ -314,25 +314,24 @@ int browse( object *r, int *choice )
 		// variables panel bindings
 		if ( r->v != NULL )
 		{
-			cmd( "bind .l.v.c.var_name <Return> \
-			{ \
+			cmd( "bind .l.v.c.var_name <Return> { \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-				{ \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 					set choice 7 \
 				} \
 			}" );
-			cmd( "bind .l.v.c.var_name <Double-Button-1> { event generate .l.v.c.var_name <Return> }" );
-			cmd( "bind .l.v.c.var_name <Button-2> \
-			{ \
+			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
+				after 50; \
+				event generate .l.v.c.var_name <Return> \
+			}" );
+			cmd( "bind .l.v.c.var_name <Button-2> { \
 				.l.v.c.var_name selection clear 0 end; \
 				.l.v.c.var_name selection set @%%x,%%y; \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
 				set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-				{ \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 					.l.v.c.var_name.v entryconfig 5 -state normal; \
 					.l.v.c.var_name.v entryconfig 6 -state normal; \
 					.l.v.c.var_name.v entryconfig 8 -state normal; \
@@ -346,16 +345,13 @@ int browse( object *r, int *choice )
 					set plot [ get_var_conf $vname plot ]; \
 					set num [ get_var_conf $vname debug ]; \
 					set parallel [ get_var_conf $vname parallel ]; \
-					switch $color \
-					{ \
+					switch $color { \
 						purple { } \
-						blue \
-						{ \
+						blue { \
 							.l.v.c.var_name.v entryconfig 18 -state disabled; \
 							.l.v.c.var_name.v entryconfig 19 -state disabled; \
 						} \
-						black \
-						{ \
+						black { \
 							.l.v.c.var_name.v entryconfig 5 -state disabled; \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
 							.l.v.c.var_name.v entryconfig 14 -state disabled; \
@@ -364,48 +360,41 @@ int browse( object *r, int *choice )
 						tomato { \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
 						} \
-						firebrick \
-						{ \
+						firebrick { \
 							.l.v.c.var_name.v entryconfig 6 -state disabled; \
 							.l.v.c.var_name.v entryconfig 18 -state disabled; \
 							.l.v.c.var_name.v entryconfig 19 -state disabled; \
 						} \
 					}; \
-					if { $itemfocus == 0 } \
-					{ \
+					if { $itemfocus == 0 } { \
 						.l.v.c.var_name.v entryconfig 8 -state disabled \
 					}; \
-					if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } \
-					{ \
+					if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { \
 						.l.v.c.var_name.v entryconfig 9 -state disabled \
 					}; \
 					tk_popup .l.v.c.var_name.v %%X %%Y \
 				} \
 			}" );
-			cmd( "bind .l.v.c.var_name <Button-3> { event generate .l.v.c.var_name <Button-2> -x %%x -y %%y }" );
-			cmd( "bind .l.v.c.var_name <Control-Up> \
-			{ \
+			cmd( "bind .l.v.c.var_name <Button-3> { \
+				event generate .l.v.c.var_name <Button-2> -x %%x -y %%y \
+			}" );
+			cmd( "bind .l.v.c.var_name <Control-Up> { \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { $itemfocus > 0 } \
-				{ \
+				if { $itemfocus > 0 } { \
 					incr itemfocus -1 \
 				}; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-				{ \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 					set choice 58 \
 				} \
 			}" );
-			cmd( "bind .l.v.c.var_name <Control-Down> \
-			{ \
+			cmd( "bind .l.v.c.var_name <Control-Down> { \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } \
-				{ \
+				if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { \
 					incr itemfocus \
 				}; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } \
-				{ \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 					set choice 59 \
 				} \
 			}" );
@@ -475,6 +464,7 @@ int browse( object *r, int *choice )
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
+					after 50; \
 					event generate .l.s.c.son_name <Return> \
 				}" );
 			cmd( "bind .l.s.c.son_name <Button-2> { \
