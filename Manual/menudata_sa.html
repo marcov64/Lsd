@@ -233,12 +233,12 @@ href="LSD_faqs.html#simulationrun">simulation run</a> can be apportioned to the
 sources of uncertainty in the model <a href="LSD_faqs.html#equation">Equations</a>
 and configuration. </p>
 
-<p class=MsoNormal>When the number of elements involved in the SA is large or
-the number of values for each element is significant, the manual assignment of
-the initialization data can be difficult and prone to errors. LSD can
-automatically generate and run all the required configurations, each one
-containing one combination of the required initialization values, to perform
-different SA approaches.</p>
+<p class=MsoNormal>When the number of elements involved in the SA is large or the
+number of values for each element is significant, the manual assignment of the
+initialization data can be difficult and prone to errors. LSD can automatically
+generate and run all the required configurations, each one containing one
+combination of the required initialization values, to perform different SA
+approaches.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -486,12 +486,12 @@ can use the special <span class=Cdigo>=BEGIN:END@SAMPLES%TYPE</span> clause. It
 is interpreted by LSD as a set containing the number <span class=Cdigo>SAMPLES</span>
 of values. <span class=Cdigo>TYPE</span> can define two types of sampling sets,
 linear (<span class=Cdigo>L</span>) or random (<span class=Cdigo>R</span>).
-Linear sets start from the value given by <span class=Cdigo>BEGIN</span> and include
-the number <span class=Cdigo>SAMPLES</span> of values until <span class=Cdigo>END</span>.
-For instance, the clause <span class=Cdigo>=10:20@6%L</span> produces the
-sampling set <span class=Cdigo>10,12,14,16,18,20</span>. Random sets include a
-number <span class=Cdigo>SAMPLES</span> of random values between <span
-class=Cdigo>BEGIN</span> and <span class=Cdigo>END</span> (included). For
+Linear sets start from the value given by <span class=Cdigo>BEGIN</span> and
+include the number <span class=Cdigo>SAMPLES</span> of values until <span
+class=Cdigo>END</span>. For instance, the clause <span class=Cdigo>=10:20@6%L</span>
+produces the sampling set <span class=Cdigo>10,12,14,16,18,20</span>. Random
+sets include a number <span class=Cdigo>SAMPLES</span> of random values between
+<span class=Cdigo>BEGIN</span> and <span class=Cdigo>END</span> (included). For
 example, the clause <span class=Cdigo>=0:1@5%R</span> may generate a sampling
 set like <span class=Cdigo>0.124,0.572,0.390,0.972,0.641</span> (float numbers
 have usually 15 significant digits). Multiple clauses, as well individual
@@ -563,11 +563,11 @@ Check <a href="menufile.html">here</a> for more details on LSD file operations.<
 <h1><a name="_Full_sampling_SA"></a>Full sampling SA (online)</h1>
 
 <p class=MsoNormal>This command produces a full factorial design of experiment
-(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
-of the <a href="#_Configuring_values">configured test initialization values</a>
-for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
-from the other DoE methods, this one modifies the current <a
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all
+combinations of the <a href="#_Configuring_values">configured test
+initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
+Differently from the other DoE methods, this one modifies the current <a
 href="LSD_faqs.html#modelstructure">model structure</a> to create a single <a
 href="LSD_faqs.html#modelsetting">model configuration</a> containing as many
 copies of the original model structure as necessary by the factorial
@@ -575,11 +575,11 @@ combinatorics. It is appropriate to quickly analyze the SA of few elements
 without requiring more sophisticated batch/parallel processing.</p>
 
 <p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, LSD would
-generate 8 different instances of the entire model structure directly
-descending from the <span class=Cdigo>Root</span> Object, in a single model
-configuration. Of course, there will be now 8 instances of the <a
-href="LSD_faqs.html#object">Object(s)</a> containing the Parameters A and B,
-each copy including a different combination of their initialization values.</p>
+generate 8 different instances of the entire model structure directly descending
+from the <span class=Cdigo>Root</span> Object, in a single model configuration.
+Of course, there will be now 8 instances of the <a href="LSD_faqs.html#object">Object(s)</a>
+containing the Parameters A and B, each copy including a different combination
+of their initialization values.</p>
 
 <p class=MsoNormal>Please note that the modified model structure is not saved
 or renamed. After creating the new structure, appropriate to run quick SA
@@ -603,12 +603,12 @@ the generated SA configuration is run.</p>
 <h1><a name="_Full_sampling_SA_1"></a>Full sampling SA (batch)</h1>
 
 <p class=MsoNormal>This command produces a full factorial design of experiment
-(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all combinations
-of the <a href="#_Configuring_values">configured test initialization values</a>
-for <a href="LSD_faqs.html#parameter">Parameters</a> and <a
-href="LSD_faqs.html#variable">lagged Variables</a> are explored. Differently
-from the <a href="#_Full_sampling_SA">online version</a>, the batch method
-creates multiple <span class=Cdigo>.lsd</span> <a
+(DoE) for <a href="LSD_faqs.html#sa">sensitivity analysis</a> (SA), where all
+combinations of the <a href="#_Configuring_values">configured test
+initialization values</a> for <a href="LSD_faqs.html#parameter">Parameters</a>
+and <a href="LSD_faqs.html#variable">lagged Variables</a> are explored.
+Differently from the <a href="#_Full_sampling_SA">online version</a>, the batch
+method creates multiple <span class=Cdigo>.lsd</span> <a
 href="LSD_faqs.html#modelsetting">model configuration</a> files, each one
 containing one copy of the original model structure configured as necessary by
 the factorial combinatorics. It is appropriate to perform the SA of larger
@@ -717,8 +717,8 @@ selected combination of values.</p>
 src="image/sa_mc_range.png"></p>
 
 <p class=MsoNormal>The user specifies the Monte Carlo sample size as an integer
-number, in a dialog box like the one depicted above. Very large sample sizes are
-only recommended when there are few elements and values for the SA, as
+number, in a dialog box like the one depicted above. Very large sample sizes
+are only recommended when there are few elements and values for the SA, as
 processing time grows linearly with this number. If a previous SA sample was
 just created, LSD will offer the checkbox option <span class=Cdigo>Append to
 existing configuration files</span>. If checked, this option will create the
@@ -728,8 +728,8 @@ the <a href="#_SA_workflow">SA workflow</a> for details).</p>
 
 <p class=MsoNormal>In the example <a href="#_SA_workflow">above</a>, we could
 define ranges instead of points to perform SA with Parameters A and B.
-Similarly to the initial configuration, we could use the range 1-7 for
-Parameter A and 1-2 for B, taking care of specifying them as integers in the <a
+Similarly to the initial configuration, we could use the range 1-7 for Parameter
+A and 1-2 for B, taking care of specifying them as integers in the <a
 href="#_Configuring_values">SA data entry window</a> if necessary. In this
 case, if you set the MC sample size to 4, LSD would generate 4 different <span
 class=Cdigo>.lsd</span> configuration files with the same model structure. Each
@@ -764,8 +764,8 @@ sampling points following elementary effects (EE) trajectories, i.e., random
 one-at-a-time changes of the values for <a href="LSD_faqs.html#parameter">Parameters</a>
 and <a href="LSD_faqs.html#variable">lagged Variables</a>. The EE sample set is
 taken from the parametric space defined by the set of <a
-href="#_Configuring_values">configured test ranges</a> for the Parameters and
-lagged Variables to be explored. The method creates multiple <span class=Cdigo>.lsd</span>
+href="#_Configuring_values">configured test ranges</a> for the Parameters and lagged
+Variables to be explored. The method creates multiple <span class=Cdigo>.lsd</span>
 <a href="LSD_faqs.html#modelsetting">model configuration</a> files each one
 containing one copy of the original model structure configured using the
 selected combination of values.</p>
@@ -794,8 +794,8 @@ how many times each Parameter or lagged variable under test will be changed.
 The higher the number of trajectories, the better of the parametric space is
 explored. The number of sampling points, with regard to this parameter,
 increases by a factor of the number of Parameters and lagged Variables under
-test plus 1. So, as simulation execution times increase linearly on this
-setting, large values may be unpractical.</p>
+test plus 1. So, as simulation execution times increase linearly on this setting,
+large values may be unpractical.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -862,19 +862,19 @@ selected combination of values.</p>
 
 <p class=MsoNormal>This method was proposed by Cioppa and Lucas (2007) as a
 very efficient DoE in terms of the required number of samples to explore the
-parametric space under SA. The NOLH tables used were developed by Susan Sanchez
-(2015). NOLH sample sets can be used to fit meta-modeling methods, like Kriging,
-for producing enough sampling points to perform Sobol variance decomposition,
-as proposed in the <a href="#_LSDsensitivity_R_package">LSDsensitivity R
-package</a>.</p>
+parametric space under SA. The NOLH tables used were developed by Hélcio Vieira
+Jr. (2012) and Susan Sanchez (2015). NOLH sample sets can be used to fit
+meta-modeling methods, like Kriging, for producing enough sampling points to
+perform Sobol variance decomposition, as proposed in the <a
+href="#_LSDsensitivity_R_package">LSDsensitivity R package</a>.</p>
 
 <p align=center style='text-align:center'><img border=0 width=225 height=254
 src="image/sa_nolh.png"></p>
 
 <p class=MsoNormal>The user specifies a few settings for the NOLH algorithm in
-a dialog box like the one depicted above. The default values are usually adequate
-for most applications as a reasonable tradeoff between precision and execution
-time. The available options are:</p>
+a dialog box like the one depicted above. The default values are usually
+adequate for most applications as a reasonable tradeoff between precision and
+execution time. The available options are:</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -944,10 +944,10 @@ design data can be transparently imported to R by using the function <span
 class=Cdigo>read.doe.lsd</span> (see the package help pages for details on all
 the package functions).</p>
 
-<p class=MsoNormal>The package offers two sensitivity analysis (SA) methods pre-configured
-for application on LSD simulations: Morris Elementary Effects (EE) (<span
-class=Cdigo>elementary.effects.lsd</span>) and Sobol Variance Decomposition
-(SVD) (<span class=Cdigo>sobol.decomposition.lsd</span>).</p>
+<p class=MsoNormal>The package offers two sensitivity analysis (SA) methods
+pre-configured for application on LSD simulations: Morris Elementary Effects
+(EE) (<span class=Cdigo>elementary.effects.lsd</span>) and Sobol Variance
+Decomposition (SVD) (<span class=Cdigo>sobol.decomposition.lsd</span>).</p>
 
 <p class=MsoNormal>EE (<span class=Cdigo>elementary.effects.lsd</span>) employs
 a simple one-factor-at-a-time (OAT) SA and is usually applied as an initial
@@ -1031,8 +1031,8 @@ the analysis (let the vector empty, i.e., <span class=Cdigo>c( )</span>, if no
 log variable is required).</p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'>5.<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Include in the vector
-<span class=Cdigo>newVars</span> any new variable (not included in <span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span>Include in the
+vector <span class=Cdigo>newVars</span> any new variable (not included in <span
 class=Cdigo>lsdVars</span>) that has to be added to the dataset (let the vector
 empty, i.e., <span class=Cdigo>c( )</span>, if no new variable is required).</p>
 
@@ -1057,11 +1057,10 @@ modified script, renaming if necessary, and run it in R (or click the <span
 class=Cdigo>Source</span> button in RScript), redirecting output to a file
 first if required.</p>
 
-<p class=MsoNormal>Two examples using the LSDsensitivity R package are
-available in a standard LSD installation: the Industrial Dynamics model and the
-Island Model. They can be loaded in <a href="modelbrowser.html">LMM Model
-Browser</a> and are found in the <span class=Cdigo>Examples/Literature</span>
-group.</p>
+<p class=MsoNormal>Two examples using the LSDsensitivity R package are available
+in a standard LSD installation: the Industrial Dynamics model and the Island
+Model. They can be loaded in <a href="modelbrowser.html">LMM Model Browser</a>
+and are found in the <span class=Cdigo>Examples/Literature</span> group.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>

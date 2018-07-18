@@ -1,4 +1,4 @@
-#include "fun_head.h"
+#include "fun_head_fast.h"
 
 /*******************************************************************************
 
@@ -67,7 +67,6 @@ Sets the global pointers, creates objects and initializes them.
 NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 */ 
 	rank_strat *r;
-	int i,j;
 
 	r=(rank_strat *)malloc(sizeof(rank_strat));	// allocate a new rank matrix object
 	for(i=0;i<RANK_DIM;i++)						// clears rank matrix (accumulators)
@@ -165,10 +164,10 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 		WRITES(cur1,"group",1);					// is incumbent
 		WRITES(cur1,"tentr",0);					// entry in t=0
 		WRITES(cur1,"laststratt0",0);			// last strategy pick period
-		WRITES(cur1,"strat",rnd_integer(1,STRAT_INC));	// picks an incumbent strategy
-		WRITES(cur1,"mL",UNIFORM(v[21],v[22]));	// average user rentability target
-		WRITES(cur1,"mM",UNIFORM(v[25],v[26]));	// network quality target
-		WRITES(cur1,"mQ",UNIFORM(v[27],v[28]));	// capacity upgrade response profile
+		WRITES(cur1,"strat",uniform_int(1,STRAT_INC));	// picks an incumbent strategy
+		WRITES(cur1,"mL",uniform(v[21],v[22]));	// average user rentability target
+		WRITES(cur1,"mM",uniform(v[25],v[26]));	// network quality target
+		WRITES(cur1,"mQ",uniform(v[27],v[28]));	// capacity upgrade response profile
 		
 		cur2=SEARCHS(cur1,"Network");			// all capacity in initial technology
 		WRITES(cur2,"QMtech",v[3]);				// init tech capacity installed
@@ -191,7 +190,7 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 
 	CYCLE(cur4,"User")
 	{
-		v[38]=rnd_integer(1,v[11]);				// choose a provider
+		v[38]=uniform_int(1,v[11]);				// choose a provider
 		WRITES(cur4,"prov",v[38]);
 		cur4->hook=SEARCH_CNDS(cur,"provID",v[38]);	// update pointer to provider
 		WRITES(cur4,"B",v[8]/2);				// initial budget = initial prices
@@ -202,8 +201,8 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 			v[35]=1;
 		WRITES(cur4,"T",v[35]);					// average contract duration
 
-		v[36]=UNIFORM(v[19],v[20]);				// tentative b1 draw
-		v[37]=UNIFORM(v[33],v[34]);				// tentative b3 draw
+		v[36]=uniform(v[19],v[20]);				// tentative b1 draw
+		v[37]=uniform(v[33],v[34]);				// tentative b3 draw
 		if((v[36]+v[37])>1)						// if draws out of range
 		{
 			v[36]=v[36]/(v[36]+v[37]);			// normalize values
@@ -212,13 +211,13 @@ NEW OBJECTS EQUATIONS NOT INCLUDED HERE ARE NOT CALCULATED IN T=1!!!
 		WRITES(cur4,"b1",v[36]);				// user price sensitivity
 		WRITES(cur4,"b2",1-v[36]-v[37]);		// user quality sensitivity
 		WRITES(cur4,"b3",v[37]);				// user market share sensitivity
-		WRITES(cur4,"ed",UNIFORM(v[29],v[30]));	// user quality evaluation error
-		WRITES(cur4,"es",UNIFORM(v[31],v[32]));	// user loyalty threshold
+		WRITES(cur4,"ed",uniform(v[29],v[30]));	// user quality evaluation error
+		WRITES(cur4,"es",uniform(v[31],v[32]));	// user loyalty threshold
 	}
 
 	plog("Simulation initialization complete...\n");
 
-	param=1;									// transform "init" in a parameter  
+	PARAMETER;									// transform "init" in a parameter  
 												// so to not compute again
 RESULT(1) 
 
@@ -267,8 +266,8 @@ Population total (users and wanna be users)
 		while(v[18]<v[21]);						// search until above minimum
 
 		WRITELS(cur1,"B",v[18],t-1);			// initial budget
-		v[19]=UNIFORM(v[7],v[8]);				// tentative b1 draw
-		v[20]=UNIFORM(v[9],v[10]);				// tentative b3 draw
+		v[19]=uniform(v[7],v[8]);				// tentative b1 draw
+		v[20]=uniform(v[9],v[10]);				// tentative b3 draw
 		if((v[19]+v[20])>1)						// if draws out of range
 		{
 			v[19]=v[19]/(v[19]+v[20]);			// normalize values
@@ -277,8 +276,8 @@ Population total (users and wanna be users)
 		WRITES(cur1,"b1",v[19]);				// user price sensitivity
 		WRITES(cur1,"b2",1-v[19]-v[20]);			// user quality sensitivity
 		WRITES(cur1,"b3",v[20]);				// user market share sensitivity
-		WRITES(cur1,"ed",UNIFORM(v[11],v[12]));	// user quality evaluation error
-		WRITES(cur1,"es",UNIFORM(v[13],v[14]));	// user loyalty threshold
+		WRITES(cur1,"ed",uniform(v[11],v[12]));	// user quality evaluation error
+		WRITES(cur1,"es",uniform(v[13],v[14]));	// user loyalty threshold
 		WRITELS(cur1,"prov",0,t-1);				// no initial provider
 	}
 
@@ -1653,7 +1652,7 @@ Insert new entrants in market
 		if((1-v[3]/v[9])>v[25] && v[36]==0) 	// if there are unserved users
 			v[20]=1;							// try to enter anyway in none did
 		else									// if not
-			v[20]=round(UNIFORM(0,1)*v[37]);	// draws entry decision
+			v[20]=round(uniform(0,1)*v[37]);	// draws entry decision
 	else
 		v[20]=0;								// not time to enter
 
@@ -1697,10 +1696,10 @@ Insert new entrants in market
 			WRITELS(cur1,"group",0,t-1);		// is entrant
 			WRITES(cur1,"tentr",t);				// time of entry in market
 			WRITES(cur1,"laststratt0",(double)t);	// last strategy pick period
-			WRITELS(cur1,"strat",rnd_integer(11,10+STRAT_ENTR),t-1);// picks entrant strategy
-			WRITES(cur1,"mL",UNIFORM(v[11],v[12]));	// average user rentability target
-			WRITES(cur1,"mM",UNIFORM(v[13],v[14]));	// network quality target
-			WRITES(cur1,"mQ",UNIFORM(v[15],v[16]));	// capacity upgrade response profile
+			WRITELS(cur1,"strat",uniform_int(11,10+STRAT_ENTR),t-1);// picks entrant strategy
+			WRITES(cur1,"mL",uniform(v[11],v[12]));	// average user rentability target
+			WRITES(cur1,"mM",uniform(v[13],v[14]));	// network quality target
+			WRITES(cur1,"mQ",uniform(v[15],v[16]));	// capacity upgrade response profile
 
 			v[24]=0;							// counts networks found
 			CYCLE_SAFES(cur1,cur2,"Network")	// removes existing networks
@@ -1729,7 +1728,7 @@ Insert new entrants in market
 RESULT(v[0])
 
 
-FUNCTION("KeT")
+EQUATION("KeT")
 /*
 Total capital committed by entrants in period
 Can be updated several times in a single period, if more than a company decides to enter the market.
@@ -1819,7 +1818,7 @@ Overwritten to 1 after the first firm commits capital.
 RESULT(0)
 
 
-FUNCTION("genprovID")
+EQUATION("genprovID")
 /*
 Generates a unique provider ID each call
 */
