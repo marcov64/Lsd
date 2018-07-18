@@ -8,6 +8,9 @@
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:"MS Gothic";
 	panose-1:2 11 6 9 7 2 5 8 2 4;}
 @font-face
@@ -210,7 +213,7 @@ the web interface</a>.</p>
 <h1><a name="_Introduction"></a><span class=Ttulo1Char>Introduction</span></h1>
 
 <p>This manual presents the user-friendly, web-based interface to LSD (LWI).
-LWI make a basic subset of the LSD tools available for web browser users,
+LWI makes a basic subset of the LSD tools available for web browser users,
 allowing the configuration, execution, and analysis of results produced by LSD
 models and the export of such data. <a href="#_LSD_web_interface">LWI web
 front-end</a> is compatible with any computer platform equipped with a modern
@@ -220,10 +223,11 @@ networks. </p>
 <p>As a web interface to existing LSD models, LWI does not add new
 functionalities to them. However, it allows a simplified access to LSD models
 to users which lack the technical knowledge to operate the full LSD interface,
-or use a platform (smartphone, tablet etc.) in which LSD is not available for installation.
-LWI can be integrated to any HTML-based <a href="#_Server_requirements">web
-server</a> platform. LWI, per se, does not provide accounts or persistent
-storage to users, which can be provided by the host web platform. </p>
+or use a platform (smartphone, tablet etc.) in which LSD is not available for
+installation. LWI can be integrated to any HTML-based <a
+href="#_Server_requirements">web server</a> platform. LWI, per se, does not
+provide accounts or persistent storage to users, which can be provided by the
+host web platform. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -245,9 +249,9 @@ LWI web back-end is compatible with any web server platform equipped with a
 modern HTTP server supporting PHP server scripting. In principle any relatively
 recent Linux or Windows 64-bit server is adequate for hosting LWI. </p>
 
-<p>The manual is not intended to be a guide unexperienced server operators, as
-a minimum knowledge of server administration is required. Some experience on
-operating in the command line is also a pre-requisite.</p>
+<p>This section of the manual is not intended to be a guide to unexperienced
+server operators, as a minimum knowledge of server administration is required.
+Some experience on operating in the command line is also a pre-requisite.</p>
 
 <p>This section is organized in three subsections. Initially, we describe the
 minimum hardware and software <a href="#_Server_requirements">requirements for
@@ -261,9 +265,9 @@ server</a>.</p>
 
 <h2><a name="_Server_requirements"></a>Server requirements</h2>
 
-<p>The LWI server must be able to efficiently execute a complex, computed
-intensive simulation process for each LWI user session actively running a simulation
-(an “executing session”). Each LWI executing session must get sufficient server
+<p>The LWI server must be able to efficiently execute a complex, computed intensive
+simulation process for each LWI user session actively running a simulation (an
+“executing session”). Each LWI executing session must get sufficient server
 resources to produce an adequate experience to the end user. Such requirement
 defines the specification of the hardware recommended for the server. On the
 software side, there are no strong requirements on the server configuration,
@@ -355,11 +359,20 @@ CentOS configuration, the HTTP server directory for the website is <span
 class=Cdigo>/var/www</span>. This location may be different according to the
 adopted combination of HTTP server and operating system/distribution.</p>
 
-<p>Before start, please copy the provided LWI subdirectory inside your LSD
-installation directory (normally at <span class=Cdigo>~/Lsd/lwi</span>) to the
-appropriate web server directory. On Ubuntu, Windows/WSL and CentOS:</p>
+<p>Each LWI installation supports a single <a href="LSD_faqs_arquivos#model">LSD
+model</a> under a unique baseline <a href="LSD_faqs_arquivos#simsetting">configuration</a>
+(see <a href="#_Customizing_the_LWI">below</a>). If different models or
+configurations must be supported, it is necessary to configure multiple virtual
+web servers (in a single physical server), installing one independent LWI
+instance (different directory) for each virtual server. Please refer Apache documentation
+on how to set up virtual web servers.</p>
 
-<p><span class=Cdigo>sudo cp -R ~/Lsd/lwi /var/www/</span></p>
+<p>To start, please copy the provided LWI subdirectory inside your LSD
+installation directory (normally at <span class=Cdigo>~/Lsd/lwi</span>) to the
+appropriate web server directory. On Ubuntu, Windows/WSL and CentOS use the
+following terminal command:</p>
+
+<p><span class=Cdigo><span lang=PT-BR>sudo cp -R ~/Lsd/lwi /var/www/</span></span></p>
 
 <p>In macOS:</p>
 
@@ -379,19 +392,23 @@ holds the files visible to the user browser. The <span class=Cdigo>lwi/public_ht
 subdirectory holds the session-related, temporary user files
 (downloaded/uploaded simulation configurations and simulation results), also
 deleted periodically. The user/group associated to the HTTP and the PHP server
-must have read-write to the entire <span class=Cdigo>lwi</span> subdirectory
-tree (the default configuration).</p>
+(<span class=Cdigo>www-data</span> in Ubuntu, <span class=Cdigo>apache</span>
+in CentOS, etc.) must have read-write to the entire <span class=Cdigo>lwi</span>
+subdirectory tree (the default configuration).</p>
 
 <p><span lang=EN-GB>The provided files must yet be set with all required file
 permissions/ownership for a typical setup. Usually it is enough to adjust the
 ownership. For Ubuntu and Windows use:</span></p>
 
-<p><span class=Cdigo><span lang=PT-BR>sudo chown -R www-data:www-data
-/var/www/lwi</span></span></p>
+<p><span class=Cdigo>sudo chown -R www-data:www-data /var/www/lwi<br>
+sudo chmod g+w /var/www/lwi/tmp<br>
+sudo chmod g+w /var/www/lwi/public_html/tmp</span></p>
 
 <p>For CentOS, because of SELinux, a longer setup is required: </p>
 
 <p><span class=Cdigo>sudo chown -R apache:apache /var/www/lwi<br>
+sudo chmod g+w /var/www/lwi/tmp<br>
+sudo chmod g+w /var/www/lwi/public_html/tmp<br>
 sudo semanage fcontext -a -t httpd_sys_content_t &quot;/var/www/lwi(/.*)?&quot;<br>
 sudo semanage fcontext -a -t httpd_sys_rw_content_t
 &quot;/var/www/lwi/tmp(/.*)?&quot;<br>
@@ -410,12 +427,13 @@ sudo setsebool -P httpd_ssi_exec on</span></p>
 
 <p>It is now necessary to configure the Apache web server to use LWI as the web
 entry point (virtual web server). Use the following commands to adjust the
-entry point in Ubuntu and Windows/WSL servers: </p>
+entry point in Ubuntu and Windows/WSL servers (replace <span class=Cdigo>000-default</span>
+by the name of your configuration, if changed from the installation default): </p>
 
 <p><span class=Cdigo>sudo cp /var/www/lwi/lwi.conf /etc/apache2/sites-available<br>
 sudo a2dissite 000-default<br>
 sudo a2ensite lwi<br>
-sudo service apache2 restart</span></p>
+sudo service apache2 reload</span></p>
 
 <p>For CentOS, the command is:</p>
 
@@ -464,11 +482,12 @@ used:</p>
 
 <p><span class=Cdigo>sudo apachectl restart</span></p>
 
-<p>Your LWI server should be up and running now. You can test it using a
-browser in the same machine using the address <span class=Cdigo>http://localhost</span>.
-You can also access the server from other machines connected in the same local
-network by using the server IP address (or the DNS name, if you have one
-assigned). To get the server IP address(es), type the command:</p>
+<p><a name=openbrowser></a>Your LWI server should be up and running now. You can
+test it using a browser in the same machine using the address <span
+class=Cdigo>http://localhost</span>. You can also access the server from other
+machines connected in the same local network by using the server IP address (or
+the DNS name, if you have one assigned). To get the server IP address(es), type
+the command:</p>
 
 <p><span class=Cdigo>ifconfig | grep &quot;inet addr&quot;</span></p>
 
@@ -509,13 +528,13 @@ appropriate subdirectory.</p>
 
 <p>LWI temporary files are used/valid only while the corresponding user
 sessions are active and cannot be retrieved by the users after that. As PHP
-sessions are usually configured to last less than 24 hours (the default is 3 hours),
-it is recommended that files older than 2 days to be permanently deleted. In
-most Linux configurations, the temporary file clean up can be performed
-automatically using a <span class=Cdigo>cron</span> job. Of course, other
-similar tools can be used, in any platform. To configure a <span class=Cdigo>cron</span>
-job, please first create the following script file in the server and name it <span
-class=Cdigo>lwi-cleanup</span>:</p>
+sessions are usually configured to last less than 24 hours (the default is 3
+hours), it is recommended that files older than 2 days to be permanently
+deleted. In most Linux configurations, the temporary file clean up can be
+performed automatically using a <span class=Cdigo>cron</span> job. Of course,
+other similar tools can be used, in any platform. To configure a <span
+class=Cdigo>cron</span> job, please first create the following script file in
+the server and name it <span class=Cdigo>lwi-cleanup</span>:</p>
 
 <p><span class=Cdigo>nano lwi-cleanup</span></p>
 
@@ -563,10 +582,19 @@ href="LSD_faqs.html#variable">Variable initial conditions</a> should be exposed
 for the configuration by the user, as well the allowed value ranges, <a
 href="#_Defining_the_Variables">(3)</a> defining for which <a
 href="LSD_faqs.html#results">result Variables</a> the model’s output should be
-presented to the user, and <a href="#_Customizing_the_LWI">(4)</a> customizing
-the <a href="#_Installation_of_the">LWI server</a> for the model. The
-customization is performed using standard LSD commands and configuration files,
-as described below.</p>
+presented to the user, <a href="#_Installing_the_new">(4)</a> installing the
+produced configuration in the <a href="#_Installation_of_the">LWI server</a>,
+and <a href="#_Customizing_the_LWI">(5)</a> customizing the LWI server for the
+model. The customization is performed using standard LSD commands and
+configuration files, as described below.</p>
+
+<p class=MsoNormal>The default configuration of LWI after the installation of
+LSD brings the Schumpeterian Competition Model by Nelson &amp; Winter (1983)
+(available in the <span class=Cdigo>Example Models</span> group of the <a
+href="modelbrowser.html">LSD Model Browser</a>, under <span class=Cdigo>Literature
+Models/nw2004</span>). It is strongly recommended the user test the LWI server
+configuration with this configuration <i>before</i> trying to customize it to
+other models.</p>
 
 <h2><a name="_Producing_the_baseline"></a>Producing the baseline simulation
 model executable</h2>
@@ -574,15 +602,18 @@ model executable</h2>
 <p class=MsoNormal>The first step of making a <a href="LSD_faqs.html#model">LSD
 simulation model</a> available for use with LWI is to create a baseline <a
 href="LSD_faqs.html#modelsetting">configuration file</a> (<span class=Cdigo>.lsd</span>
-extension) using the <a href="browser.html">LSD Browser</a>. Please ensure that
-the chosen configuration is robust to multiple simulation runs, using different
-<a href="menurun.html#simsetting">random number generator seeds</a>, to avoid
-the <a href="#_LSD_web_interface">LWI user sessions</a> to crash. The baseline
+extension) using the <a href="browser.html">LSD Browser</a>. The baseline
 configuration is automatically loaded whenever a LWI user <a href="#_Why_LSD?">starts
-a session</a> or <a href="#_Configuration_page">reset it to the defaults</a>.
-Save your configuration file in the LSD Browser with the name <span
-class=Cdigo>lwi.lsd</span>. using the menu command <span class=Cdigo><a
-href="menufile.html#save">File&gt;Save As</a></span>.</p>
+a session</a> or <a href="#_Configuration_page">reset it to the defaults</a>. </p>
+
+<p class=MsoNormal>Please ensure that the chosen configuration is robust to
+multiple simulation runs, using different <a href="menurun.html#simsetting">random
+number generator seeds</a>, to avoid the <a href="#_LSD_web_interface">LWI user
+sessions</a> to crash. Also ensure the configuration is set for a <a
+href="menurun.html#simsetting">single simulation run</a> (if multiple runs are
+set, just the last one will be presented). Save your configuration file in the
+LSD Browser with the name <span class=Cdigo>lwi.lsd</span>. using the menu
+command <span class=Cdigo><a href="menufile.html#save">File&gt;Save As</a></span>.</p>
 
 <p class=MsoNormal>The second step is to produce a ‘No Window’ version of the <a
 href="LSD_faqs.html#modelprogram">LSD model program</a>. This is an executable
@@ -593,34 +624,141 @@ every time a LWI user <a href="#_Execution_section">starts a simulation</a>.
 The ‘No Window’ model program can be generated in <a href="LMM.html">LMM</a>,
 by using the menu command <span class=Cdigo><a href="LMM.html#nowindow">Model&gt;Create
 'No Window<span style='font-family:"Arial","sans-serif"'> </span>' Version</a></span>.
-Please note that the model program must be generated in a computer using the
-same operating system version as the LWI server (or in the server itself). If
-this is not possible (e.g., it is a headless server), it is possible to compile
-the ‘No Window’ model program using a terminal session in the server, see the
-instructions <a href="LMM.html#nowindow">here</a>.</p>
+</p>
 
-<p class=MsoNormal>When both files are ready (<span class=Cdigo>lwi.lsd</span>
-and <span class=Cdigo>lsd_gnuNW[.exe]</span>), copy them to the base
-subdirectory of LWI in the server. For Ubuntu, Windows/WSL and CentOS, use the
-following terminal command (see <a href="#_LWI_installation_and">above</a> for
-details on the directory structure):</p>
-
-<p class=MsoNormal><a name="_Selecting_the_Parameters"></a><span class=Cdigo>sudo
-cp lwi.lsd /var/www/lwi<br>
-sudo cp lsd_gnuNW /var/www/lwi</span></p>
+<p class=MsoNormal>Please note that the model program must be generated in a
+computer using the same operating system version as the LWI server (or in the
+server itself). If this is not possible (e.g., it is a headless server), it is
+possible to compile the ‘No Window’ model program using a terminal session in
+the server, see the instructions <a href="LMM.html#nowindow">here</a>.</p>
 
 <h2>Selecting the Parameters and Variables to configure</h2>
 
-<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal>The <a href="LSD_faqs.html#parameter">Parameters</a> and <a
+href="LSD_faqs.html#variable">Variable initial conditions</a> which are to be
+exposed for the LWI users to configure must be defined in a sensitivity
+analysis file (<span class=Cdigo>.sa</span> extension) using the <a
+href="browser.html">LSD Browser</a>. Parameters and lagged Variables not
+included in this file are not presented to the user and always assume the values
+defined in the baseline configuration (<span class=Cdigo>lwi.lsd</span>).</p>
+
+<p class=MsoNormal>To create the sensitivity analysis file, first make sure the
+baseline configuration is loaded in the LSD Browser using the menu command <span
+class=Cdigo><a href="menufile.html#load">File&gt;Load</a></span>. Next, for
+each Parameter and lagged Variable to be included, select the desired element
+in the <a href="browser.html#variables">LSD Browser list box</a>, and choose
+command <span class=Cdigo><a href="browser.html#changeelement">Model&gt;Change
+Element</a></span>. Now, in the Change Element window, click on the <span
+class=Cdigo>Sensitivity</span> button. Finally, in the Sensitivity Analysis
+window, enter the minimum and the maximum values for the Parameter or lagged
+Variable, separated by a space, select the <span class=Cdigo>Round to integer</span>
+option if the element is an integer number, and click on <span class=Cdigo>OK</span>.
+Repeat this procedure until all elements to be exposed to the user have their
+ranges defined. To see the list of already selected elements, use the menu
+command <span class=Cdigo><a href="menurun.html#showsave">Run&gt;Show Elements
+to&gt;Sensitivity Analysis</a></span>.</p>
+
+<p class=MsoNormal>When all required Parameters and Variables are set, save the
+sensitivity analysis file using the command <span class=Cdigo><a
+href="menufile.html">File&gt;Save Sensitivity</a></span>. The name of the saved
+file must be <span class=Cdigo>lwi.sa</span>.</p>
 
 <h2><a name="_Defining_the_Variables"></a>Defining the Variables to present as
 results</h2>
 
-<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal>The <a href="LSD_faqs.html#variable">Variables</a>’ time
+series which will be presented to the LWI users must be set to be saved in the <span
+class=Cdigo>lwi.lsd</span> <a href="LSD_faqs.html#modelsetting">configuration
+file</a>. All time series regularly marked to be saved in the <a
+href="browser.html">LSD Browser</a> are made available to the users. Select the
+desired Variable in the <a href="browser.html#variables">LSD Browser list box</a>
+and use the menu command <span class=Cdigo><a href="browser.html#changeelement">Model&gt;Change
+Element</a></span> to select the <span class=Cdigo>Save</span> checkbox in the
+Change Element window.</p>
 
-<h2><a name="_Customizing_the_LWI"></a>Customizing the LWI server</h2>
+<p class=MsoNormal>After selecting all Variables to be saved and presented to
+the LWI users, save the baseline configuration under the name <span
+class=Cdigo>lwi.lsd</span> using the LSD Browser command <span class=Cdigo><a
+href="menufile.html#save">File&gt;Save As</a></span>.</p>
 
-<p class=MsoNormal>&nbsp;</p>
+<h2><a name="_Installing_the_new"></a>Installing the new LWI configuration</h2>
+
+<p class=MsoNormal>When all the required configuration files are ready (<span
+class=Cdigo>lwi.lsd</span>, <span class=Cdigo>lwi.sa</span> and <span
+class=Cdigo>lsd_gnuNW[.exe]</span>) in the <a href="LSD_faqs.html#modelhome">model
+home directory</a>, copy them to the base subdirectory of LWI in the server.
+For Ubuntu, Windows/WSL and CentOS, use the following terminal commands (see <a
+href="#_LWI_installation_and">above</a> for details on the server directory
+structure):</p>
+
+<p class=MsoNormal><a name="_Selecting_the_Parameters"></a><span class=Cdigo>cd
+~/Lsd/Work/[YOUR_MODEL_PATH]<br>
+sudo cp lwi.lsd /var/www/lwi<br>
+sudo cp lwi.sa /var/www/lwi<br>
+sudo cp lsd_gnuNW /var/www/lwi</span></p>
+
+<p class=MsoNormal>These three files will replace the previous model and
+configuration used by LWI. Finally, reload the web server so it can start using
+the new files. On Ubuntu and Windows/WSL use:</p>
+
+<p class=MsoNormal><span class=Cdigo>sudo service apache2 reload</span></p>
+
+<p class=MsoNormal>For CentOS:</p>
+
+<p><span class=Cdigo>sudo systemctl restart httpd.service</span></p>
+
+<p class=MsoNormal>For macOS:</p>
+
+<p><span class=Cdigo>sudo apachectl restart</span></p>
+
+<p class=MsoNormal><a name="_Customizing_the_LWI"></a>Launch the browser in the
+appropriate address (see <a href="#openbrowser">here</a> for details) and check
+the LWI operation for your model.</p>
+
+<h2>Customizing the LWI server</h2>
+
+<p class=MsoNormal>Almost everything in the LWI server can be customized.
+However, other than basic personalization, changing the HTML/PHP code require
+reasonable web programming skills, and should be unnecessary for most
+applications.</p>
+
+<p class=MsoNormal>The main file to be customized in LWI is <span class=Cdigo>lwi/public_htnl/index.php</span>.
+Basic customization can be performed by changing <i>only</i> the text marked
+between the special comment marks (starting with <span class=Cdigo>&lt;!-- ###
+LWI ###</span>). The pre-set change points include adding:</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Name of the model, in two versions. For large screen devices, the
+name used is the one marked by:<br>
+ <span class=Cdigo>&lt;!-- ### LWI ### ADD THE LONG NAME OF YOUR MODEL HERE
+--&gt;</span><br>
+For narrow screen devices, change the text following:<br>
+<span class=Cdigo>&lt;!-- ### LWI ### ADD THE SHORT NAME OF YOUR MODEL HERE
+--&gt;</span>.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Welcome message. Several lines of (HTML formatted) text can be
+added following the mark (the existing message can be removed):<br>
+<span class=Cdigo>&lt;!-- ### LWI ### ADD YOUR WELCOME MESSAGE HERE --&gt;</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Copyright link. Add a website and a name for the holder of the
+copyright after the mark:<br>
+<span class=Cdigo>&lt;!-- ### LWI ### ADD YOUR COPYRIGHT LINK HERE --&gt;</span></p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span class=Cdigo><span
+style='font-family:Symbol;color:windowtext'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span>Copyright and no-warranties messages. Define your
+copyright conditions and limit responsibilities following the mark:<br>
+<span class=Cdigo>&lt;!-- ### LWI ### ADD YOUR COPYRIGHT AND WARRANTY MESSAGES
+HERE --&gt;</span></p>
+
+<p class=MsoNormal>Be careful on not changing the contents outside the
+comment-mark regions. Please reload the web server after any change (follow the
+instructions <a href="#_Installing_the_new">above</a>).</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -659,18 +797,18 @@ series.</span></p>
 
 <h2><a name="_Why_LSD?"></a><a name="_Navigation_Panel"></a>Navigation panel</h2>
 
-<p class=MsoNormal>The Navigation panel is located in the left column of any
-page of the LSD Web Interface (LWI). When initiating a new LWI session, the
-Navigation Panel is presented together with the Welcome page.</p>
+<p class=MsoNormal>LWI is organized in several interaction areas or “cards”,
+which can be scrolled or directly reached using the Navigation panel. When initiating
+a new LWI session, the Navigation Panel is presented together with the Welcome
+area. In devices with a narrow screen, like smartphones, the user has to click
+in the “<span style='font-family:"MS Gothic"'>&#9776;</span>” symbol to open
+the Navigation panel.</p>
 
 <p class=MsoNormal>The options in the Navigation panel correspond to the four
-main LWI sections, presented below, plus the <span class=Cdigo>Welcome</span>, <span
+main LWI areas, presented below, plus the <span class=Cdigo>Welcome</span>, <span
 class=Cdigo>Reset</span>, <span class=Cdigo>Help</span> and <span class=Cdigo>Contact</span>
-sections. User can switch sections by simply clicking in the name of the
-desired section in the navigation panel or by scrolling the interface. In
-devices with a narrow screen, like smartphones, the user has to click in the “<span
-style='font-family:"MS Gothic"'>&#9776;</span>” symbol to open the navigation
-panel.</p>
+areas. User can switch sections by simply clicking in the name of the desired
+section in the navigation panel or by scrolling the interface.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>Reset</span> page offers a command to
 discard any changes made by the user, including configurations, running
@@ -687,8 +825,8 @@ between the user and the LSD web server administrator.</p>
 <h2><a name="_Configuration_page"></a><a name="_Configuration_area"></a>Configuration
 area</h2>
 
-<p class=MsoNormal>The Configuration area allows the user to control many of
-its parameters, initial conditions and general simulation settings. Each set of
+<p class=MsoNormal>The Configuration area allows the user to control many of its
+parameters, initial conditions and general simulation settings. Each set of
 values to all the required parameters, initial conditions and simulation
 settings is defined as one <i>model configuration</i>. Every time the user
 initiates a new LWI session, the default model configuration is automatically
@@ -702,9 +840,8 @@ outside these ranges (an error message is produced). Below you have a
 description of the available configuration options. Please note that not all
 combinations of configuration values may be adequate for the proper model
 operation. If unexpected results are obtained after changing several values at
-once, please try to restore some of them to the default configuration (by
-pressing the Reset button besides any changed value) and execute the simulation
-again.</p>
+once, please try to restore some of them to the default configuration (by pressing
+the Reset button besides any changed value) and execute the simulation again.</p>
 
 <p class=MsoNormal>The Configuration area is divided in two areas: the
 configurable item list, divided in two groups, and the command buttons. Model
@@ -757,8 +894,8 @@ no data is saved for analysis. </p>
 
 <p class=MsoNormal>While the execution is going on, <span class=Cdigo>Simulation
 running</span> is show in the Status box, together with the elapsed time. User
-can execute only one simulation instance at a time. If there is any error
-preventing the simulation execution to complete, the status box will show <span
+can execute only one simulation instance at a time. If there is any error preventing
+the simulation execution to complete, the status box will show <span
 class=Cdigo>Simulation error</span>, the execution will be aborted, and no data
 is saved for analysis. User can click on the <span class=Cdigo>Log</span>
 button to check the causes of the failure.</p>
@@ -773,9 +910,9 @@ time series list, the option selectors, and the command buttons. Please make
 sure your browser is configured to allow the LWI website to open new browser
 windows/tabs when using the commands in this area.</p>
 
-<p class=MsoNormal>The user can select one or more items in the time series
-list to be used when the command buttons are clicked. Clicking once selects the
-time series and an additional click unselects it. </p>
+<p class=MsoNormal>The user can select one or more items in the time series list
+to be used when the command buttons are clicked. Clicking once selects the time
+series and an additional click unselects it. </p>
 
 <p class=MsoNormal>By default, the commands in the Analysis page operate over
 all simulation time steps, from <span class=Cdigo>t = 1</span> to the number of
@@ -796,7 +933,8 @@ selected time series, including the mean, the standard deviation and minimum
 and maximum values. Clicking on <span class=Cdigo>Data</span> button creates a
 new browser window containing a table with the selected time series in the
 columns and the time step values in the rows. At least one and up to 15 series
-can be selected at a time. However, multiple data windows may be open at any time.</p>
+can be selected at a time. However, multiple data windows may be open at any
+time.</p>
 
 <p class=MsoNormal>Clicking on <span class=Cdigo>Plot</span> button creates a
 new browser window with the selected time series plots. The horizontal axis
