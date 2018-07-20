@@ -8091,7 +8091,7 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	}
 
 	if ( i < nLine )
-		cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text ( more...)" );
+		cmd( "$p create text $xlabel $ylabel -font $fontP -anchor nw -text \"( more...)\"" );
 
 	cmd( "update" );	
 }
