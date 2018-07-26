@@ -1444,7 +1444,7 @@ if ( choice == 13 || choice == 58 )
 	if ( choice == 58 )
 	{
 		cmd( "scan $vmenuInsert %%d.%%d line col" );
-		cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f$dirname/$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $dirname/$filename:$line\nrun\n\" }" );
+		cmd( "if [ string equal -nocase $DbgExe lldb ] { set breakExt lldb; set breakTxt \"breakpoint set -f $dirname/$filename -l$line\nrun\n\" } { set breakExt gdb; set breakTxt \"break $dirname/$filename:$line\nrun\n\" }" );
 		cmd( "catch { set f [ open break.$breakExt w ]; puts $f $breakTxt; close $f }" );
 
 		cmd( "if [ string equal -nocase $DbgExe lldb ] { set cmdbreak \"-sbreak.lldb\" } { set cmdbreak \"--command=break.gdb\" }" );
@@ -1481,9 +1481,10 @@ if ( choice == 13 || choice == 58 )
 	
 		case 2:		// Mac
 #ifdef MAC_PKG
-			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s.app\\\"\" & } result", str1 );
+            cmd("if [string equal $cmdbreak \"--args\"] { set cmdbreak \"\"} {}");
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
 #else
-			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f%s\\\"\" & } result", str1 );
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
 #endif
 			break;
 			
