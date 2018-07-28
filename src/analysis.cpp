@@ -4947,7 +4947,8 @@ double rang[ 4 ];
 if ( type == 2 )
 {
 	if ( ! gnu )
-		cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Unsupported options for the internal graphical window\" -detail \"Gnuplot automatically selected to support the chosen 3D plot options.\"" );
+		
+cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Unsupported options for the internal graphical window\" -detail \"Gnuplot automatically selected to support the chosen 3D plot options.\"" );
 	gnu = true;
 	type = 1;
 }
@@ -4956,7 +4957,8 @@ cmd( "raise .da ." );
 	
 if ( type == 1 )
 {	//plot with external gnuplot
-	cmd( "if {$tcl_platform(platform) == \"unix\"} { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } {if {$tcl_platform(os) == \"Windows NT\"} { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }" );
+	cmd( "if {$tcl_platform(platform) == \"unix\"} { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } {if {$tcl_platform(os) == \"Windows NT\"} { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }" );
+
 	
 	if ( *choice != 0 )			// Gnuplot failed
 	{
@@ -6098,7 +6100,7 @@ CREATE_SERIES
 ****************************************************/
 void create_series( int *choice )
 {
-	int i, j, k, *start, *end, idseries, flt;
+	int i, j, k, *start, *end, idseries, flt, cs_long, type_series;
 	double nmax, nmin, nmean, nvar, nn, thflt, confi;
 	double step;
 	bool first;
@@ -6167,7 +6169,7 @@ void create_series( int *choice )
 	cmd( "radiobutton .da.s.i.r.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Var\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 
 	cmd( "frame .da.s.i.r.ci" );
-	cmd( "radiobutton .da.s.i.r.ci.c -text \"Std. Dev.\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"CI\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.ci.c -text \"Conf.Interv. (3 series) Std. Dev. x\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"CI\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "label .da.s.i.r.ci.x -text \u00D7" );
 	cmd( "entry .da.s.i.r.ci.p -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
 	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
@@ -6218,6 +6220,7 @@ void create_series( int *choice )
 		*choice = 0;
 		return;
 	}
+
 
 	data = new double *[ nv ];
 	start = new int [ nv ];
@@ -6275,10 +6278,22 @@ void create_series( int *choice )
 	flt = *choice;
 
 	cmd( "set choice $bido" );
+  cs_long=*choice;
+	cmd( "set choice $bidi" );
+  type_series=*choice;
+start_creating_series: //label for the goto in case of creation of multiple series
 
-	if ( *choice == 1 )
+	if ( cs_long== 1 )
 	{	//compute over series
+
 		vs[ num_var ].data = new double[ max_c+2 ];
+        if(type_series==6)
+         cmd("set headname \"Avg\"; set vname $headname$basename");
+        if(type_series==11)
+         cmd("set headname \"CIUpper\"; set vname $headname$basename"); 
+        if(type_series==12)
+         cmd("set headname \"CILower\"; set vname $headname$basename"); 
+         
 		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 		strcpy( msg,lapp );
 		strcpy( vs[ num_var ].label, msg );
@@ -6288,8 +6303,6 @@ void create_series( int *choice )
 		strcpy( msg,lapp );
 		strcpy( vs[ num_var ].tag, msg );
 		vs[ num_var ].rank = num_var;
-
-		cmd( "set choice $bidi" );
 
 		for ( i = min_c; i <= max_c; ++i )
 		{
@@ -6326,20 +6339,23 @@ void create_series( int *choice )
 				nvar -= nmean * nmean;
 			}
 		   
-			if ( *choice == 1 )
+			if ( type_series == 1 || type_series==6 )
 				vs[ num_var ].data[ i ] = nmean;
-			if ( *choice==5)
+			if ( type_series==5)
 				vs[ num_var ].data[ i ] = nmean * nn;
-			if ( *choice == 2 )
+			if ( type_series == 2 )
 				vs[ num_var ].data[ i ] = nmax;
-			if ( *choice == 3 )
+			if ( type_series == 3 )
 				vs[ num_var ].data[ i ] = nmin;
-			if ( *choice==4)
+			if ( type_series==4)
 				vs[ num_var ].data[ i ] = nvar;
-			if ( *choice==7)
+			if ( type_series==7)
 				vs[ num_var ].data[ i ] = nn;
-			if ( *choice==6)
-				vs[ num_var ].data[ i ] = sqrt( nvar)*confi;
+			if ( type_series==11)
+				vs[ num_var ].data[ i ] = nmean + sqrt( nvar)*confi;
+			if ( type_series==12)
+				vs[ num_var ].data[ i ] = nmean - sqrt( nvar)*confi;
+                
 		}
 		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, min_c, max_c, num_var ); 
 
@@ -6349,6 +6365,13 @@ void create_series( int *choice )
 	{
 		//compute over cases
 		vs[ num_var ].data = new double[ nv ];
+        if(type_series==6)
+         cmd("set headname \"Avg\"; set vname $headname$basename");
+        if(type_series==11)
+         cmd("set headname \"CIUpper\"; set vname $headname$basename"); 
+        if(type_series==12)
+         cmd("set headname \"CILower\"; set vname $headname$basename"); 
+        
 		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 		strcpy( msg,lapp );
 		strcpy( vs[ num_var ].label, msg );
@@ -6358,8 +6381,6 @@ void create_series( int *choice )
 		strcpy( msg,lapp );
 		strcpy( vs[ num_var ].tag, msg );
 		vs[ num_var ].rank = num_var;
-
-		cmd( "set choice $bidi" );
 
 		for ( j = 0; j < nv; ++j )
 		{
@@ -6396,20 +6417,23 @@ void create_series( int *choice )
 				nvar -= nmean * nmean;
 		   }
 			  
-			if ( *choice == 1 )
+			if ( type_series == 1 || type_series==6)
 				vs[ num_var ].data[ j ] = nmean;
-			if ( *choice==5)
+			if ( type_series==5)
 				vs[ num_var ].data[ j ] = nmean * nn;
-			if ( *choice == 2 )
+			if ( type_series == 2 )
 				vs[ num_var ].data[ j ] = nmax;
-			if ( *choice == 3 )
+			if ( type_series == 3 )
 				vs[ num_var ].data[ j ] = nmin;
-			if ( *choice==4)
+			if ( type_series==4)
 				vs[ num_var ].data[ j ] = nvar;
-			if ( *choice==7)
+			if ( type_series==7)
 				vs[ num_var ].data[ j ] = nn;
-			if ( *choice==6)
-				vs[ num_var ].data[ j ] = sqrt( nvar)*confi;
+			if ( type_series==11)
+				vs[ num_var ].data[ i ] = nmean + sqrt( nvar)*confi;
+			if ( type_series==12)
+				vs[ num_var ].data[ i ] = nmean - sqrt( nvar)*confi;
+                
 		 }
 
 		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, 0, nv - 1, num_var ); 
@@ -6418,6 +6442,16 @@ void create_series( int *choice )
 	}
 	cmd( ".da.vars.lb.v see end" );
 	num_var++; 
+    if(type_series==6)
+     {
+      type_series=11;
+      goto start_creating_series;
+     }
+    if(type_series==11)
+     {
+      type_series=12;
+      goto start_creating_series;
+     }
 
 	delete [ ] start;
 	delete [ ] end;
