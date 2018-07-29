@@ -38,6 +38,13 @@ set logWndFn	false
 # Enable coordinates test window
 set testWnd		false
 
+# Warn old Tcl/Tk
+if [ string equal [ info tclversion ] 8.5 ] {
+	tk_messageBox -type ok -icon warning -title Warning \
+	-message "Old Tcl/Tk version" \
+	-detail "Please update your Tcl/Tk version to version 8.6 or higher.\nSome problems may appear when using an old version."
+}
+
 # Variable 'alignMode' configure special, per module (LMM, LSD), settings
 unset -nocomplain defaultPos defaultFocus
 if [ info exists alignMode ] {
@@ -139,7 +146,7 @@ image create photo resultImg -file "$RootLsd/$LsdSrc/icons/result.$iconExt"
 # lists to hold the windows parents stacks and exceptions to the parent mgmt.
 set parWndLst [ list ]
 set grabLst [ list ]
-set noParLst [ list .log .str .plt .lat ]
+set noParLst [ list .log .str .plt .lat .tst ]
 
 # set global key mappings
 proc setglobkeys { w { chkChg 1 } } {
@@ -186,11 +193,15 @@ proc newtop { w { name "" } { destroy { } } { par "." } } {
 				wm transient $w $par 
 			}
 		} {
+			# attribute transient only if not in the no parent list and window is visible
 			if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+				# remove non-existing windows in the beginning of the parents list
 				while { [ llength $parWndLst ] > 0 && ! [ winfo exists [ lindex $parWndLst 0 ] ] } {
-						set parWndLst [ lreplace $parWndLst 0 0 ]
-					}
+					set parWndLst [ lreplace $parWndLst 0 0 ]
+				}
+				# avoid setting the window transient to itself
 				if { [ llength $parWndLst ] > 0 && ! [ string equal [ lindex $parWndLst 0 ] $w ] } {
+					# set transient only if parent's parent is visible
 					if { [ winfo viewable [ winfo toplevel [ lindex $parWndLst 0 ] ] ] } {
 						wm transient $w [ lindex $parWndLst 0 ] 
 					}
@@ -1352,67 +1363,67 @@ if { $conWnd } {
 
 # Open test window if enabled
 if $testWnd {
-	newtop .test "LSD Coordinates Test Window" { destroytop .test } ""
+	newtop .tst "LSD Coordinates Test Window" { destroytop .tst } ""
 	
-	frame .test.xy
-	label .test.xy.l1 -anchor e -text "X:"
-	label .test.xy.v1 -anchor w -fg red
-	label .test.xy.l2 -anchor e -text "   Y:"
-	label .test.xy.v2 -anchor w -fg red
-	pack .test.xy.l1 .test.xy.v1 .test.xy.l2 .test.xy.v2 -side left -padx 2 -pady 2
+	frame .tst.xy
+	label .tst.xy.l1 -anchor e -text "X:"
+	label .tst.xy.v1 -anchor w -fg red
+	label .tst.xy.l2 -anchor e -text "   Y:"
+	label .tst.xy.v2 -anchor w -fg red
+	pack .tst.xy.l1 .tst.xy.v1 .tst.xy.l2 .tst.xy.v2 -side left -padx 2 -pady 2
 	
-	frame .test.r
-	label .test.r.l1 -anchor e -text "rootx:"
-	label .test.r.v1 -anchor w -fg red
-	label .test.r.l2 -anchor e -text "   rooty:"
-	label .test.r.v2 -anchor w -fg red
-	pack .test.r.l1 .test.r.v1 .test.r.l2 .test.r.v2 -side left -padx 2 -pady 2
+	frame .tst.r
+	label .tst.r.l1 -anchor e -text "rootx:"
+	label .tst.r.v1 -anchor w -fg red
+	label .tst.r.l2 -anchor e -text "   rooty:"
+	label .tst.r.v2 -anchor w -fg red
+	pack .tst.r.l1 .tst.r.v1 .tst.r.l2 .tst.r.v2 -side left -padx 2 -pady 2
 	
-	frame .test.v
-	label .test.v.l1 -anchor e -text "vrootx:"
-	label .test.v.v1 -anchor w -fg red
-	label .test.v.l2 -anchor e -text "   vrooty:"
-	label .test.v.v2 -anchor w -fg red
-	pack .test.v.l1 .test.v.v1 .test.v.l2 .test.v.v2 -side left -padx 2 -pady 2
+	frame .tst.v
+	label .tst.v.l1 -anchor e -text "vrootx:"
+	label .tst.v.v1 -anchor w -fg red
+	label .tst.v.l2 -anchor e -text "   vrooty:"
+	label .tst.v.v2 -anchor w -fg red
+	pack .tst.v.l1 .tst.v.v1 .tst.v.l2 .tst.v.v2 -side left -padx 2 -pady 2
 	
-	frame .test.s
-	label .test.s.l1 -anchor e -text "screenwidth:"
-	label .test.s.v1 -anchor w -fg red
-	label .test.s.l2 -anchor e -text "   screenheight:"
-	label .test.s.v2 -anchor w -fg red
-	pack .test.s.l1 .test.s.v1 .test.s.l2 .test.s.v2 -side left -padx 2 -pady 2
+	frame .tst.s
+	label .tst.s.l1 -anchor e -text "screenwidth:"
+	label .tst.s.v1 -anchor w -fg red
+	label .tst.s.l2 -anchor e -text "   screenheight:"
+	label .tst.s.v2 -anchor w -fg red
+	pack .tst.s.l1 .tst.s.v1 .tst.s.l2 .tst.s.v2 -side left -padx 2 -pady 2
 	
-	frame .test.t
-	label .test.t.l1 -anchor e -text "vrootwidth:"
-	label .test.t.v1 -anchor w -fg red
-	label .test.t.l2 -anchor e -text "   vrootheight:"
-	label .test.t.v2 -anchor w -fg red
-	pack .test.t.l1 .test.t.v1 .test.t.l2 .test.t.v2 -side left -padx 2 -pady 2
+	frame .tst.t
+	label .tst.t.l1 -anchor e -text "vrootwidth:"
+	label .tst.t.v1 -anchor w -fg red
+	label .tst.t.l2 -anchor e -text "   vrootheight:"
+	label .tst.t.v2 -anchor w -fg red
+	pack .tst.t.l1 .tst.t.v1 .tst.t.l2 .tst.t.v2 -side left -padx 2 -pady 2
 	
-	frame .test.m
-	label .test.m.l1 -anchor e -text "maxwidth:"
-	label .test.m.v1 -anchor w -fg red
-	label .test.m.l2 -anchor e -text "   maxheight:"
-	label .test.m.v2 -anchor w -fg red
-	pack .test.m.l1 .test.m.v1 .test.m.l2 .test.m.v2 -side left -padx 2 -pady 2
+	frame .tst.m
+	label .tst.m.l1 -anchor e -text "maxwidth:"
+	label .tst.m.v1 -anchor w -fg red
+	label .tst.m.l2 -anchor e -text "   maxheight:"
+	label .tst.m.v2 -anchor w -fg red
+	pack .tst.m.l1 .tst.m.v1 .tst.m.l2 .tst.m.v2 -side left -padx 2 -pady 2
 	
-	pack .test.xy .test.r .test.v .test.s .test.t .test.m
+	pack .tst.xy .tst.r .tst.v .tst.s .tst.t .tst.m
 	
-	bind .test <Motion> { 
-		.test.xy.v1 configure -text %X
-		.test.xy.v2 configure -text %Y
-		.test.r.v1 configure -text [ winfo rootx .test ]
-		.test.r.v2 configure -text [ winfo rooty .test ]
-		.test.v.v1 configure -text [ winfo vrootx .test ]
-		.test.v.v2 configure -text [ winfo vrooty .test ]
-		.test.s.v1 configure -text [ winfo screenwidth .test ]
-		.test.s.v2 configure -text [ winfo screenheight .test ]
-		.test.t.v1 configure -text [ winfo vrootwidth .test ]
-		.test.t.v2 configure -text [ winfo vrootheight .test ]
-		.test.m.v1 configure -text [ lindex [ wm maxsize .test ] 0 ]
-		.test.m.v2 configure -text [ lindex [ wm maxsize .test ] 1 ]
+	bind .tst <Motion> { 
+		.tst.xy.v1 configure -text %X
+		.tst.xy.v2 configure -text %Y
+		.tst.r.v1 configure -text [ winfo rootx .tst ]
+		.tst.r.v2 configure -text [ winfo rooty .tst ]
+		.tst.v.v1 configure -text [ winfo vrootx .tst ]
+		.tst.v.v2 configure -text [ winfo vrooty .tst ]
+		.tst.s.v1 configure -text [ winfo screenwidth .tst ]
+		.tst.s.v2 configure -text [ winfo screenheight .tst ]
+		.tst.t.v1 configure -text [ winfo vrootwidth .tst ]
+		.tst.t.v2 configure -text [ winfo vrootheight .tst ]
+		.tst.m.v1 configure -text [ lindex [ wm maxsize .tst ] 0 ]
+		.tst.m.v2 configure -text [ lindex [ wm maxsize .tst ] 1 ]
 	}
 	
-	showtop .test current yes yes no
+	showtop .tst current yes yes no
 }
 

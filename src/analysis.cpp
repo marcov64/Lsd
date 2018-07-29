@@ -2655,10 +2655,11 @@ cmd( "write_disabled .da.f.h.v.ft.to.mxc $maxc" );
 plot( TSERIES, nv, data, start, end, str, tag, choice );
 
 for ( i = 0; i < nv; ++i )
-{delete [ ] str[ i ];
-  delete [ ] tag[ i ];
-  if ( logs )
-    delete [ ] logdata[ i ];
+{
+	delete [ ] str[ i ];
+	delete [ ] tag[ i ];
+	if ( logs )
+		delete [ ] logdata[ i ];
 }
 delete [ ] str;
 delete [ ] tag;
@@ -8040,6 +8041,13 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 	}
 
 	cmd( "showtop $w current yes yes no" );
+	
+	// hack to bring the new plot to the foreground during debugging in macOS
+	cmd( "if { $running && [ string equal [ tk windowingsystem ] aqua ] } { \
+			wm transient $w .da; \
+			wm transient $w \
+		}" );
+	
 	cmd( "$p xview moveto 0; $p yview moveto 0" );
 	cmd( "set zoomLevel%d 1.0", cur_plot );
 	
