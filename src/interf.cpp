@@ -2933,7 +2933,7 @@ case 22:
 	cmd( "bind $T.f.e.e2 <KeyPress-Return> {focus $T.f.f.e2; $T.f.f.e2 selection range 0 end}" );
 	cmd( "bind $T.f.f.e2 <KeyPress-Return>  {focus $T.b.ok}" );
 
-	cmd( "showtop $T centerW" );
+	cmd( "showtop $T" );
 	cmd( "$T.f.c.e2 selection range 0 end" );
 	cmd( "focus $T.f.c.e2" );
 

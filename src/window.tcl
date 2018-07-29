@@ -268,6 +268,17 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		
 		update idletasks
 		
+		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+			set parWndLst [ linsert $parWndLst 0 $w ]
+			
+			if $grab {
+				if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+					lappend grabLst "$w [ grab current $w ]"
+				}
+				grab set $w
+			}
+		}
+		
 		if { ! [ string equal $pos current ] } {
 		
 			# handle different window default position
@@ -319,16 +330,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		
 		wm resizable $w $resizeX $resizeY
-		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
-			set parWndLst [ linsert $parWndLst 0 $w ]
-			
-			if $grab {
-				if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
-					lappend grabLst "$w [ grab current $w ]"
-				}
-				grab set $w
-			}
-		}
+		
 	} {
 		#known windows - simply apply defaults if not done before
 		if { ! [ string equal $pos current ] } {
@@ -351,7 +353,7 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 	update
 	
-	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], parWndLst:$parWndLst, grab:$grabLst)" } 
+	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
 
 proc destroytop w {
@@ -536,37 +538,41 @@ proc getx { w pos } {
 	
 	switch $pos {
 		centerS { 
-			return [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + [ winfo width [ winfo parent $w ] ] / 2  - [ winfo reqwidth $w ] / 2 ]
 		}
 		topleftS { 
-			return [ expr $hmargin + $corrX ]
+			set hpos [ expr $hmargin + $corrX ]
 		}
 		topleftW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + 10 ]
 		}
 		overM { 
-			return [ expr [ winfo x . ] + $corrX ]
+			set hpos [ expr [ winfo x . ] + $corrX ]
 		}
 		coverW { 
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX ]
 		}
 		bottomrightS {
-			return [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
+			set hpos [ expr [ winfo screenwidth $w ] - $hmargin - [ winfo reqwidth $w ] ]
 		}
 		righttoW {
-			return [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
+			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX + $hmargin + [ winfo reqwidth [ winfo parent $w ] ] - 2 * $bordsize ]
 		}
 		lefttoW {
 			set hpos [ expr [ winfo x [ winfo parent $w ] ] + $corrX - $hmargin - [ winfo reqwidth $w ] + 2 * $bordsize ]
-			if { $hpos < 0 && [ primdisp [ winfo parent $w ] ] } {
-				return 0
-			} else {
-				return $hpos
-			}
 		}
+		default { 
+			set hpos [ expr [ winfo screenwidth $w ] / 2 - [ winfo reqwidth $w ] / 2 ]
+		}
+	}
+		
+	if { $hpos < 0 && [ primdisp [ winfo parent $w ] ] } {
+		return 0
+	} else {
+		return $hpos
 	}
 }
 
@@ -575,33 +581,42 @@ proc gety { w pos } {
 	
 	switch $pos {
 		centerS { 
-			return [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 		centerW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + [ winfo height [ winfo parent $w ] ] / 2  - [ winfo reqheight $w ] / 2 ]
 		}
 		topleftS { 
-			return [ expr $vmargin + $corrY ]
+			set vpos [ expr $vmargin + $corrY ]
 		}
 		topleftW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY + 30 ]
 		}
 		overM { 
-			return [ expr [ winfo y . ] + $corrY ]
+			set vpos [ expr [ winfo y . ] + $corrY ]
 		}
 		coverW { 
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 		bottomrightS {
-			return [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
+			set vpos [ expr [ winfo screenheight $w ] - $vmargin - $tbarsize - [ winfo reqheight $w ] ]
 		}
 		righttoW {
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
 		}
 		lefttoW {
-			return [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+			set vpos [ expr [ winfo y [ winfo parent $w ] ] + $corrY ]
+		}
+		default { 
+			set vpos [ expr [ winfo screenheight $w ] / 2 - [ winfo reqheight $w ] / 2 ]
 		}
 	} 
+		
+	if { $vpos < 0 && [ primdisp [ winfo parent $w ] ] } {
+		return 0
+	} else {
+		return $vpos
+	}
 }
 
 # procedures to create standard button sets

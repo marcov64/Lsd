@@ -207,7 +207,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 			cmd( "bind .deb <KeyPress-v> {.deb.b.act.prn_v invoke}; bind .deb <KeyPress-V> {.deb.b.act.prn_v invoke}" );
 		}
 		else
-			cmd( "pack .deb.b.act.run .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
+			cmd( "pack .deb.b.act.run .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
 		
 		cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
 		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
