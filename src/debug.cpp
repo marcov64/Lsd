@@ -138,8 +138,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "destroy .deb.b" );
 
 	cmd( "frame .deb.b -border 6" );
+	
+	// first row of buttons (always shown)
 	cmd( "frame .deb.b.move" );
-	cmd( "frame .deb.b.act" );
 
 	cmd( "button .deb.b.move.up -width $butWid -text Up -command {set choice 3} -underline 0" );
 	cmd( "button .deb.b.move.down -width $butWid -text Down -command {set choice 6} -underline 0" );
@@ -148,48 +149,13 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "button .deb.b.move.hypern -width $butWid -text \"Next Type\" -command {set choice 5} -underline 5" );
 	cmd( "button .deb.b.move.last -width $butWid -text Last -command {set choice 14} -underline 0" );
 	cmd( "button .deb.b.move.search -width $butWid -text Find -command {set choice 10} -underline 0" );
+	cmd( "button .deb.b.move.hook -width $butWid -text Hook -command {set choice 21} -underline 0" );
 	cmd( "button .deb.b.move.net -width $butWid -text Network -command {set choice 22} -underline 3" );
 	
-	if ( mode == 3 )
-	{
-		cmd( "button .deb.b.move.run -width $butWid -text Resume -command {set choice 2} -underline 0" );
-		cmd( "button .deb.b.move.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
-		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.net .deb.b.move.an .deb.b.move.run -padx 3 -pady 10 -side left -expand no -fill none" );
-
-		cmd( "bind .deb <KeyPress-r> {.deb.b.move.run invoke}; bind .deb <KeyPress-R> {.deb.b.move.run invoke}" );
-		cmd( "bind .deb <KeyPress-a> {.deb.b.move.an invoke}; bind .deb <KeyPress-A> {.deb.b.move.an invoke}" );
-	}
-	else
-		cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.net -padx 10 -pady 10 -side left -expand no -fill none" );
+	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx 10 -pady 5 -side left -expand no -fill none" );
 	
-	if ( mode == 1 )
-	{
-		cmd( "set stack_flag %d", stack_info );
-		cmd( "button .deb.b.act.run -width $butWid -text Run -command {set choice 2} -underline 0" );
-		cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16} -underline 3" );
-		cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
-		cmd( "button .deb.b.act.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
-		cmd( "button .deb.b.act.call -width $butWid -text Caller -command {set choice 9} -underline 0" );
-		cmd( "button .deb.b.act.hook -width $butWid -text Hook -command {set choice 21} -underline 0" );
-		cmd( "button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command {set choice 15}" );
-		cmd( "button .deb.b.act.prn_stck -width $butWid -text Stack -command {set choice 13}" );
-		cmd( "frame .deb.b.act.stack" );
-		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
-		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
-		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
-		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
-		cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.an .deb.b.act.call .deb.b.act.hook .deb.b.act.prn_v .deb.b.act.prn_stck .deb.b.act.stack -padx 5 -pady 10 -side left -expand no -fill none" );
-
-		cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
-		cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
-		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
-		cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
-		cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
-		cmd( "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}" );
-	}
+	cmd( "pack .deb.b.move -expand no -fill none -anchor e" );
 	
-	cmd( "pack .deb.b.move .deb.b.act -expand no -fill none" );
-
 	cmd( "bind .deb <KeyPress-u> {.deb.b.move.up invoke}; bind .deb <KeyPress-U> {.deb.b.move.up invoke}" );
 	cmd( "bind .deb <Up> {.deb.b.move.up invoke}" );
 	cmd( "bind .deb <KeyPress-n> {.deb.b.move.broth invoke}; bind .deb <KeyPress-N> {.deb.b.move.broth invoke}" );
@@ -198,11 +164,57 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "bind .deb <KeyPress-l> {.deb.b.move.last invoke}; bind .deb <KeyPress-L> {.deb.b.move.last invoke}" );
 	cmd( "bind .deb <KeyPress-d> {.deb.b.move.down invoke}; bind .deb <KeyPress-D> {.deb.b.move.down invoke}" );
 	cmd( "bind .deb <Down> {.deb.b.move.down invoke}" );
+	cmd( "bind .deb <KeyPress-h> {set choice 21}; bind .deb <KeyPress-H> {set choice 21}" );
 	cmd( "bind .deb <KeyPress-w> {set choice 22}; bind .deb <KeyPress-W> {set choice 22}" );
 	cmd( "bind .deb <KeyPress-f> {.deb.b.move.search invoke}; bind .deb <KeyPress-F> {.deb.b.move.search invoke}" );
 	cmd( "bind .deb <KeyPress-p> {.deb.b.move.prev invoke}; bind .deb <KeyPress-P> {.deb.b.move.prev invoke}" );
 	cmd( "bind .deb <Left> {.deb.b.move.prev invoke}" );
 	cmd( "bind .deb <KeyPress-Escape> {set choice 7}" );
+
+	// second row of buttons (if applicable)
+	if ( mode != 2 )
+	{
+		cmd( "set stack_flag %d", stack_info );
+		
+		cmd( "frame .deb.b.act" );
+		
+		cmd( "button .deb.b.act.run -width $butWid -text \"%s\" -command {set choice 2} -underline 0", mode == 1 ? "Run" : "Resume" );
+		
+		if ( mode == 1 )
+		{
+			cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16} -underline 3" );
+			cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
+			cmd( "button .deb.b.act.call -width $butWid -text Caller -command {set choice 9} -underline 0" );
+			cmd( "button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command {set choice 15} -underline 0" );
+		}
+		
+		cmd( "button .deb.b.act.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
+		cmd( "button .deb.b.act.prn_stck -width $butWid -text Stack -command {set choice 13} -underline 4" );
+		
+		cmd( "frame .deb.b.act.stack" );
+		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
+		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
+		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
+		
+		if ( mode == 1 )
+		{
+			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
+
+			cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
+			cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
+			cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
+			cmd( "bind .deb <KeyPress-v> {.deb.b.act.prn_v invoke}; bind .deb <KeyPress-V> {.deb.b.act.prn_v invoke}" );
+		}
+		else
+			cmd( "pack .deb.b.act.run .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
+		
+		cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
+		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
+		cmd( "bind .deb <KeyPress-k> {.deb.b.act.prn_stck invoke}; bind .deb <KeyPress-K> {.deb.b.act.prn_stck invoke}" );
+	
+		cmd( "pack .deb.b.act -expand no -fill none -anchor e" );
+	}
 }
 
 app_res = *res;
@@ -255,10 +267,16 @@ while ( choice == 0 )
 
 	cmd( "raise .deb; focus .deb" );
 
+	// disable or enable the hook button
+	if( r->hook == NULL )
+		cmd( ".deb.b.move.hook configure -state disabled" );
+	else
+		cmd( ".deb.b.move.hook configure -state normal" );
+		
 	// update the temporary variables watch window
 	cmd( "set existVal [ winfo exists .deb.val ]" );
 	if ( ! strcmp( Tcl_GetVar( inter, "existVal", 0 ), "1" ) )
-			show_tmp_vars( );
+			show_tmp_vars( true );
 
 	// remove or update the network window
 	if ( r->node == NULL )
@@ -270,10 +288,10 @@ while ( choice == 0 )
 	{
 		cmd( "set existNet [ winfo exists .deb.net ]" );
 		if ( ! strcmp( Tcl_GetVar( inter, "existNet", 0 ), "1" ) )
-			show_neighbors( r );
+			show_neighbors( r, true );
 		cmd( ".deb.b.move.net configure -state normal" );
 	}
-
+	
 	ch[ 0 ] = '\0';
 	attach_instance_number( ch, r );
 
@@ -854,7 +872,7 @@ while ( choice == 0 )
 
 		// show v[...] variables 
 		case 15:
-			show_tmp_vars( );
+			show_tmp_vars( false );
 			choice = 0;
 			break;
 
@@ -944,7 +962,7 @@ while ( choice == 0 )
 					
 		// Network
 		case 22:
-			show_neighbors( r );
+			show_neighbors( r, false );
 			choice = 0;
 			break;
 			
@@ -1136,7 +1154,7 @@ void deb_show( object *r )
 /*******************************************
 SHOW_TMP_VARS
 ********************************************/
-void show_tmp_vars( void )
+void show_tmp_vars( bool update )
 {
 	cmd( "set in .deb.val" );
 	cmd( "set existVal [ winfo exists $in ]" );
@@ -1152,8 +1170,6 @@ void show_tmp_vars( void )
 		cmd( "pack $in.n.t -expand yes -fill both" );
 		cmd( "pack $in.n -expand yes -fill both" );
 
-		cmd( "done $in c { destroytop .deb.val }" );
-
 		cmd( "showtop $in topleftW 0 1 0" );
 
 		cmd( "$in.n.t tag configure red -foreground red" );
@@ -1161,10 +1177,17 @@ void show_tmp_vars( void )
 		cmd( "if { ! [ winfo exists .deb.net ] } { align $in .deb } { align $in .deb.net }" );
 	}
 	else
-	{
-		cmd( "$in.n.t configure -state normal" );
-		cmd( "$in.n.t delete 1.0 end" );
-	}
+		if ( update )
+		{
+			
+			cmd( "$in.n.t configure -state normal" );
+			cmd( "$in.n.t delete 1.0 end" );
+		}
+		else
+		{
+			cmd( "destroytop .deb.val" );
+			return;
+		}
 	
 	for ( int i = 0; i < 100; ++i )
 	{
@@ -1179,7 +1202,7 @@ void show_tmp_vars( void )
 /*******************************************
 SHOW_NEIGHBORS
 ********************************************/
-void show_neighbors( object *r )
+void show_neighbors( object *r, bool update )
 {
 	if ( r->node == NULL )
 		return;
@@ -1228,16 +1251,21 @@ void show_neighbors( object *r )
 		cmd( "label $n.l4 -text \"(double-click ID to\nchange to node)\"" );
 		cmd( "pack $n.l4 -pady 5" );
 		
-		cmd( "done $n c { destroytop .deb.net }" ); 
 		cmd( "showtop $n topleftW 0 1 0" );
 		
 		cmd( "if { ! [ winfo exists .deb.val ] } { align $n .deb } { align $n .deb.val }" );
 	}
 	else
-	{
-		cmd( "$n.n.t configure -state normal" );
-		cmd( "$n.n.t delete 1.0 end" );
-	}
+		if ( update )
+		{
+			cmd( "$n.n.t configure -state normal" );
+			cmd( "$n.n.t delete 1.0 end" );
+		}
+		else
+		{
+			cmd( "destroytop .deb.net" );
+			return;
+		}
 	
 	cmd( "$n.l1.n.id configure -text \"%ld\"", r->node->id );
 	cmd( "$n.l1.n.name configure -text \"%s\"", r->node->name == NULL ? "" : r->node->name );

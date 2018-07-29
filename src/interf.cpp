@@ -2962,7 +2962,9 @@ case 22:
 		parallel_disable = temp[ 8 ];
 	}
 	else
-		unsaved_change( true );		// signal unsaved change
+		// signal unsaved change if anything to be saved
+		if ( temp[ 1 ] != sim_num || temp[ 2 ] != seed || temp[ 3 ] != max_step ) 
+			unsaved_change( true );
 
 	Tcl_UnlinkVar( inter, "sim_num" );
 	Tcl_UnlinkVar( inter, "seed" );
