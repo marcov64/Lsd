@@ -235,23 +235,24 @@ while ( choice == 0 )
 				label .deb.v.v1.time1 -text \"      Time step:\"; \
 				label .deb.v.v1.time2 -fg red -text \"      \"; \
 				label .deb.v.v1.val1 -text \"Value \"; \
-				entry .deb.v.v1.val2 -width 10 -validate focusout -vcmd { \
-					if [ string is double %%P ] { \
+				entry .deb.v.v1.val2 -width 10 -validate focusout \
+				-justify center -state disabled -vcmd { \
+					if { [ string is double %%P ] } { \
 						set value %%P; \
 						return 1 \
 					} { \
 						%%W delete 0 end; \
-						if [ string is double $value ] { \
-							%%W insert 0 [ format \"%%.4g\" $value ]; \
+						if { [ string is double $value ] } { \
+							%%W insert 0 [ format \"%%.4g\" $value ] \
 						} { \
-							%%W insert 0 $value; \
-						} \
+							%%W insert 0 $value \
+						}; \
 						return 0 \
 					} \
-				} -invcmd { bell } -justify center -state disabled; \
+				}; \
 				pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
-				bind .deb <KeyPress-g> {set choice 77}; \
-				bind .deb <KeyPress-G> {set choice 77} \
+				bind .deb <KeyPress-g> { set choice 77 }; \
+				bind .deb <KeyPress-G> { set choice 77 } \
 			}" );
 		cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
 		Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
@@ -334,7 +335,7 @@ while ( choice == 0 )
 	 
 	if ( mode == 1 )
 	{
-		cmd( "set value [ .deb.v.v1.val2 get ]" ); 
+		cmd( "if [ string is double [ .deb.v.v1.val2 get ] ] { set value [ .deb.v.v1.val2 get ] }" ); 
 		cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
 		cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 		i = choice;
@@ -938,7 +939,7 @@ while ( choice == 0 )
 					try { lstUpd = r->hook->lstCntUpd; }
 					catch ( ... ) {	lstUpd = 0; }
 					
-					if ( lstUpd <= 0 || lstUpd > t )
+					if ( lstUpd < 0 || lstUpd > t )
 					{
 						cmd( "tk_messageBox -parent .deb -type ok -icon error -title Error -message \"Invalid hook pointer\" -detail \"Check if your code is using valid pointers to LSD objects or avoid using this option. If non-standard hooks are used, consider adding the command 'invalidHooks = true' to your model code.\"" );
 						choice = 0;
