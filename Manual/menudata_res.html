@@ -987,7 +987,7 @@ from selected</span> is chosen, the user has several choices on how to generate
 the new series:</p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
-width=225 height=479 src="image/create_series.png"></p>
+width=225 height=498 src="image/create_series.png"></p>
 
 <p class=MsoNormal>The selected series can be aggregated along two dimensions:</p>
 
@@ -1014,10 +1014,23 @@ computed as the average value of the series number t over all the time steps
 chosen, according to the order in the <a href="#_Series_selected">Series
 selected</a> list box.</p>
 
-<p class=MsoNormal>The new series can be computed as the average, maximum,
-minimum, variance, standard deviation (multiplied by a factor) and simple count
-of the values in the series (equal to the number of series if all series have
-values for all the time steps). Select the desired type accordingly.</p>
+<p class=MsoNormal>The new series can be computed as the average, sum, count,
+maximum, minimum, variance, standard deviation and confidence interval (at the
+specified confidence level) of the series. Select the desired type accordingly.</p>
+
+<p class=MsoNormal>The <span class=Cdigo>Count</span> option produces a maximum
+value equal to the number of series if all series have values for all the time
+steps. Series which do not have values for a certain period are not considered
+in the counting for this period.</p>
+
+<p class=MsoNormal>The <span class=Cdigo>Confidence interval</span> option
+produces three series: the average (same as selecting <span class=Cdigo>Average</span>),
+and the confidence interval upper and lower bounds. This way, the confidence
+interval for a multi-realization variable can be conveniently plotted by
+selecting the three generated series. The user can select the desired
+confidence level in the range from <span class=Cdigo>80%</span> to <span
+class=Cdigo>99%</span> (integer values only), entering the value in the entry
+box <span class=Cdigo>@</span>.</p>
 
 <p class=MsoNormal>It is possible to filter away data during the new series
 calculations by ignoring values below or above a specified threshold. If
@@ -1043,8 +1056,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 arithmetic average of the defined past period (t, t - 1,…, t - (p – 1), p is
 the selected period) to define every time step of each time series being
 created (one for each of the series in the <a href="#_Series_selected">Series
-selected</a> list box). By construction, the created time series are back-shifted
-in time with regards to the original series.</p>
+selected</a> list box). By construction, the created time series are
+back-shifted in time with regards to the original series.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.7pt;text-indent:-17.85pt'><a name=empty></a><a
@@ -1185,8 +1198,8 @@ off to apply the commands to a subset of the cases available. </p>
 width=317 height=29 src="image/xall.png"></p>
 
 <p class=MsoNormal><a name=initendcase></a><a name=xmanual></a>When the <span
-class=Cdigo>Use all cases</span> option is off, two fields are available to
-specify the initial (<span class=Cdigo>From case</span>) and the last (<span
+class=Cdigo>Use all cases</span> option is off, two fields are available to specify
+the initial (<span class=Cdigo>From case</span>) and the last (<span
 class=Cdigo>to case</span>) time steps to use. </p>
 
 <h2><a name=scaling></a><a name=yscaling></a><a name="_Y_self-scaling_/"></a><span
@@ -1202,8 +1215,8 @@ setting this option off may be desirable. </p>
 <p class=MsoNormal align=center style='text-align:center'><img border=0
 width=332 height=29 src="image/yselfscaling.png"></p>
 
-<p class=MsoNormal><a name=minmaxy></a>To manually set the maximum and minimum values
-of the vertical axis (Y), uncheck this option to make the fields <span
+<p class=MsoNormal><a name=minmaxy></a>To manually set the maximum and minimum
+values of the vertical axis (Y), uncheck this option to make the fields <span
 class=Cdigo>Min.</span> <span class=Cdigo>Y</span> and <span class=Cdigo>Max.</span>
 <span class=Cdigo>Y</span> available for editing. </p>
 
@@ -1227,12 +1240,11 @@ axis</h2>
 <p class=MsoNormal>Check the <span class=Cdigo>Y2</span> <span class=Cdigo>axis</span>
 option to enable the secondary vertical axis scale (Y2) when <a href="#ts_cs">plotting
 time series</a> on the right side of the <a href="#graph">plot window</a>. In
-this case, some of the series in the <a href="#_Series_selected">Series
-selected</a> list box will be plotted along the primary vertical scale (Y),
-while others (see next) will use the secondary one (Y2). This option is ignored
-for <a href="#ts_cs">cross-section plots</a>. Y2 always use self-scaling (from
-series values) but the primary scale (Y) can still be <a href="#scaling">manually
-set</a>.</p>
+this case, some of the series in the <a href="#_Series_selected">Series selected</a>
+list box will be plotted along the primary vertical scale (Y), while others
+(see next) will use the secondary one (Y2). This option is ignored for <a
+href="#ts_cs">cross-section plots</a>. Y2 always use self-scaling (from series
+values) but the primary scale (Y) can still be <a href="#scaling">manually set</a>.</p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
 width=216 height=27 src="image/y2_axis.png"></p>
@@ -1344,8 +1356,8 @@ href="#_Series_selected">Series selected</a> list box is used to perform most
 commands (e.g., <span class=Cdigo><a href="#timeseries">Plot</a></span>, <span
 class=Cdigo><a href="#statistics">Statistics</a></span>, <span class=Cdigo><a
 href="#_Histogram">Histogram</a></span>, and <span class=Cdigo><a
-href="#_Lattice">Lattice</a></span>). Data can be handled as the entire (or a range
-of) time series or for just one (or a few) cross-section time steps. Time
+href="#_Lattice">Lattice</a></span>). Data can be handled as the entire (or a
+range of) time series or for just one (or a few) cross-section time steps. Time
 series analysis usually compares the properties of two or more series along the
 same time period while cross-section analysis focus on comparing data from
 different model elements at a certain (or a small set of) point in time.</p>
@@ -1467,8 +1479,8 @@ the remaining selected series. The user must specify one time step and how many
 of the initial series in the <a href="#_Series_selected">Series selected</a>
 list box will provide the values for the X axis. The number of series chosen
 for the X axis (the number of dependent variables) must be an exact divisor of
-the remaining number of selected series. See the details on producing scatter plots
-<a href="#3dCrossSection">below</a>.</p>
+the remaining number of selected series. See the details on producing scatter
+plots <a href="#3dCrossSection">below</a>.</p>
 
 <h2><a name=crosssection></a><a name="_Cross-section_time_steps"></a>Cross-section
 time steps </h2>
@@ -1514,8 +1526,8 @@ reference (the default is the last typed cross-section).</p>
 
 <p class=MsoNormal>If the options <span class=Cdigo><a href="#ts_cs">Cross-section</a></span>
 &amp; <span class=Cdigo><a href="#seq_xy">XY plot</a></span> are checked and
-the command <span class=Cdigo><a href="#timeseries">Plot</a></span> is used, some
-specific options are required before a scatter plot can be generated. The
+the command <span class=Cdigo><a href="#timeseries">Plot</a></span> is used,
+some specific options are required before a scatter plot can be generated. The
 scatter plot is built with points generated from data in the <a
 href="#_Series_selected">selected series</a> at a specific time step (case).
 LSD extracts from each time series just one value, at the specified time step.
@@ -1618,8 +1630,8 @@ selected</a> list box, the <span class=Cdigo><a href="#timeseries">Plot</a></spa
 command will offer the option to produce a 3-dimensional plot. By default, a 3D
 plot considers the first two series in the list box as the independent
 variables, plotted on the horizontal XY plane, and the subsequent series, as
-the dependent variables, plotted on the vertical Z axis. Alternative
-definitions for the data used for the XY plane are available.</p>
+the dependent variables, plotted on the vertical Z axis. Alternative definitions
+for the data used for the XY plane are available.</p>
 
 <p class=MsoNormal align=center style='text-align:center'><img border=0
 width=225 height=262 src="image/cd3Dts.png"></p>
@@ -2122,8 +2134,8 @@ considered in the computation are defined by the <a href="#xscaling">cases
 selection option</a>. Alternatively, when <span class=Cdigo><a href="#ts_cs">Cross-section</a></span>
 is selected, the computation is performed across the time series using the time
 steps chosen by the user as cross-section(s). If the <span class=Cdigo><a
-href="#_Series_in_logs">Series in logs</a></span> option is set, the natural
-logarithm of the time series data is used for computation.</p>
+href="#_Series_in_logs">Series in logs</a></span> option is set, the natural logarithm
+of the time series data is used for computation.</p>
 
 <p class=MsoNormal>The provided statistics are: average, standard deviation,
 variance, absolute minimum and maximum. The statistics are reported as one line
@@ -2149,8 +2161,8 @@ the natural logarithm of the time series data is used for computation.</p>
 <p align=center style='text-align:center'><img border=0 width=581 height=371
 src="image/histogram_plot.png"></p>
 
-<p class=MsoNormal>Above, a sample histogram plot is shown. The bars represent the
-classes or bins grouping the data according to their values, as indicated in
+<p class=MsoNormal>Above, a sample histogram plot is shown. The bars represent
+the classes or bins grouping the data according to their values, as indicated in
 the horizontal (X) axis. The bar heights, measured by the vertical axes,
 represent the frequency (left) and number (right) of data values in each bin
 range. The plot also includes the normal distribution fitting (the green line)
@@ -2200,10 +2212,10 @@ number of data points.</p>
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+L</span>.</p>
 
 <p class=MsoNormal>This command creates a 2-dimensional lattice <a href="#graph">plot
-window</a> where each square is colored according to the values of an n×m data
-matrix build from the series in the <a href="#_Series_selected">Series selected
-list box</a>. The data values must be positive values, including 0, in which
-just the integer part is considered. If the <span class=Cdigo><a
+window</a> where each square is colored according to the values of an n×m data matrix
+build from the series in the <a href="#_Series_selected">Series selected list
+box</a>. The data values must be positive values, including 0, in which just
+the integer part is considered. If the <span class=Cdigo><a
 href="#_Series_in_logs">Series in logs</a></span> option is set, the natural
 logarithm of the time series data is used for computation and 0 is not a valid
 data value).</p>
@@ -2220,14 +2232,14 @@ of the lattice suggests a reduction in the frequency of the data values change
 <p class=MsoNormal>If <span class=Cdigo><a href="#ts_cs">Time series</a></span>
 is checked, a single time series should be included in the selection list and
 the time steps to be included in the lattice matrix are defined by the <a
-href="#xscaling">cases selection option</a>. The time series values are split in
-the selected <span class=Cdigo>Number of data columns</span> (the m dimension,
-see below) and used to build the lattice matrix data rows (the n dimension).
-Conversely, when <span class=Cdigo><a href="#ts_cs">Cross-section</a></span> is
-selected, the lattice matrix is constructed across two or more of the selected
-series using the chosen <span class=Cdigo>Cross-section time step</span>. The
-resulting cross-section data values are split into the m columns and n rows of
-the lattice matrix.</p>
+href="#xscaling">cases selection option</a>. The time series values are split
+in the selected <span class=Cdigo>Number of data columns</span> (the m
+dimension, see below) and used to build the lattice matrix data rows (the n
+dimension). Conversely, when <span class=Cdigo><a href="#ts_cs">Cross-section</a></span>
+is selected, the lattice matrix is constructed across two or more of the
+selected series using the chosen <span class=Cdigo>Cross-section time step</span>.
+The resulting cross-section data values are split into the m columns and n rows
+of the lattice matrix.</p>
 
 <p class=MsoNormal>For instance, the cross-section lattice options dialog box
 is presented below (the times series version omits the first field). </p>
@@ -2257,8 +2269,8 @@ possible square lattice.</p>
 <p class=MsoNormal>If the number of columns is not an exact divisor of the data
 length, the command is aborted with an error message. If using a time series as
 the data source, change the number of columns or the <a href="#xscaling">number
-of time steps (cases) used</a>. If plotting a cross-section, adjust the number
-of columns or add or remove series to the <a href="#_Series_selected">Series
+of time steps (cases) used</a>. If plotting a cross-section, adjust the number of
+columns or add or remove series to the <a href="#_Series_selected">Series
 selected list box</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -2302,10 +2314,10 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 <p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Esc</span> or click the
 X on the title bar.</p>
 
-<p class=MsoNormal>Exit the Analysis of Result module and return to the LSD Browser
-window or to the Debugger window, whichever launched the module. All non-saved
-items in the <a href="#graphs">Plots list box</a> are lost when the Analysis of
-Results is closed. Only items explicitly saved to file, using the <span
+<p class=MsoNormal>Exit the Analysis of Result module and return to the LSD
+Browser window or to the Debugger window, whichever launched the module. All
+non-saved items in the <a href="#graphs">Plots list box</a> are lost when the
+Analysis of Results is closed. Only items explicitly saved to file, using the <span
 class=Cdigo><a href="#postscript">Save Plot</a></span> and <span class=Cdigo><a
 href="#save">Save Data</a></span> buttons, are preserved after the Analysis of
 Results session is terminated (even if the <a href="browser.html">LSD Browser</a>
@@ -2498,8 +2510,8 @@ all plot parameters to the defaults.</p>
 
 <p class=MsoNormal>Show current or set customized parameters to be used in new <a
 href="#_Lattice_1">lattice plot windows</a>. Only the lattice plots produced
-after the changes are affected. Changes are stored only during the current
-Analysis of Results session. Every time a new session is restarted, all lattice
+after the changes are affected. Changes are stored only during the current Analysis
+of Results session. Every time a new session is restarted, all lattice
 parameters are assigned to defaults (advanced users may change the defaults
 permanently in the <span class=Cdigo>src/defaults.tcl</span> file).</p>
 
@@ -2530,18 +2542,18 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><span class=Cdigo><b>Lattice height</b></span>: vertical height
 in screen pixels of the <a href="#_Lattice_1">lattice plotting</a> area.</p>
 
-<p class=MsoNormal>Clicking the <span class=Cdigo>Default</span> button resets
-all lattice parameters to the defaults.</p>
+<p class=MsoNormal>Clicking the <span class=Cdigo>Default</span> button resets all
+lattice parameters to the defaults.</p>
 
 <h3><a name=averageyvalues></a>Options&gt;Average Y values</h3>
 
 <p class=MsoNormal>When enabled, the default, this toggle option enable the
 averaging of data values in the Y axis when there are more data points than the
-number of visual pixels in the X axis. On special circumstances, the averaging may
-create graphical glitches and can be turned off. Only the plots produced after
-changing the option are affected by it. Changes are stored only during the
-current Analysis of Results session. Every time a new session is restarted, the
-option is assigned to default (advanced users may change the defaults
+number of visual pixels in the X axis. On special circumstances, the averaging
+may create graphical glitches and can be turned off. Only the plots produced
+after changing the option are affected by it. Changes are stored only during
+the current Analysis of Results session. Every time a new session is restarted,
+the option is assigned to default (advanced users may change the defaults
 permanently in the <span class=Cdigo>src/defaults.tcl</span> file).</p>
 
 <h2><a name="_Help"></a>Help </h2>
