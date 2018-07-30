@@ -255,6 +255,11 @@ proc settop { w { name no } { destroy no } { par no } } {
 proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX 0 } { sizeY 0 } { buttonF b } { noMinSize no } } {
 	global defaultPos wndLst parWndLst grabLst noParLst logWndFn
 	
+	# copy of applied geometry, if any
+	set gm ""
+	
+	set doGrab 0
+	
 	#handle main windows differently
 	if { [ lsearch $wndLst $w ] < 0 } {
 	
@@ -267,17 +272,6 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		}
 		
 		update idletasks
-		
-		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
-			set parWndLst [ linsert $parWndLst 0 $w ]
-			
-			if $grab {
-				if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
-					lappend grabLst "$w [ grab current $w ]"
-				}
-				grab set $w
-			}
-		}
 		
 		if { ! [ string equal $pos current ] } {
 		
@@ -313,14 +307,16 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 					set sizeY [ expr [ winfo height [ winfo parent $w ] ] + 30 ]
 				}
 				if { ! [ string equal $pos xy ]	&& $sizeX != 0 && $sizeY != 0 } {
-					wm geom $w ${sizeX}x${sizeY}+$x+$y 
+					set gm ${sizeX}x${sizeY}+$x+$y
 				} {
-					wm geom $w +$x+$y
+					set gm +$x+$y
 				}
+				wm geometry $w $gm 
 			}
 		} {
 			if { $sizeX != 0 && $sizeY != 0 } {
-				wm geom $w ${sizeX}x${sizeY} 
+				set gm ${sizeX}x${sizeY} 
+				wm geometry $w $gm 
 			}
 		}
 		
@@ -331,6 +327,15 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		
 		wm resizable $w $resizeX $resizeY
 		
+		if { [ lsearch $noParLst [ string range $w 0 3 ] ] < 0 } {
+		
+			set parWndLst [ linsert $parWndLst 0 $w ]
+			
+			# postpone grab to make sure window is visible
+			if { $grab } {
+				set doGrab 1
+			}
+		}	
 	} {
 		#known windows - simply apply defaults if not done before
 		if { ! [ string equal $pos current ] } {
@@ -341,7 +346,9 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	if { ! [ winfo viewable [ winfo toplevel $w ] ] } {
 		wm deiconify $w
 	}
+
 	raise $w
+	
 	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
 		$w.$buttonF.ok configure -default active -state active
 		focus $w.$buttonF.ok
@@ -352,6 +359,21 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		focus $w
 	}
 	update
+	
+	# grab focus, if required, updating the grabbing list
+	if { $doGrab } {
+	
+		if { ! [ info exists grabLst ] || [ lsearch -glob $grabLst "$w *" ] < 0 } {
+			lappend grabLst "$w [ grab current $w ]"
+		}
+		
+		grab set $w
+		
+		# reposition window because of macOS bug when grabbing
+		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } { 
+			wm geometry $w $gm
+		}
+	}
 	
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" } 
 }
@@ -368,6 +390,11 @@ proc destroytop w {
 				grab release $w
 				set grabPar [ string range [ lindex $grabLst $igrab ] [ expr [ string first " " [ lindex $grabLst $igrab ] ] + 1 ] end ]
 				if { $grabPar != "" } {
+					if { ! [ winfo viewable $grabPar ] } {
+						wm deiconify $grabPar
+					}
+					raise $grabPar
+					focus $grabPar
 					grab set $grabPar 
 				}
 				set grabLst [ lreplace $grabLst $igrab $igrab ]
