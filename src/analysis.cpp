@@ -6099,10 +6099,13 @@ delete [ ] tag;
 /***************************************************
 CREATE_SERIES
 ****************************************************/
+// Confidence level  0.80      0.81      0.82      0.83      0.84      0.85      0.86      0.87      0.88      0.89      0.90      0.91      0.92      0.93      0.94      0.95       0.96      0.97      0.98      0.99
+double z_star[ ] = { 1.281552, 1.310579, 1.340755, 1.372204, 1.405072, 1.439531, 1.475791, 1.514102, 1.554774, 1.598193, 1.644854, 1.695398, 1.750686, 1.811911, 1.880794, 1.959964,  2.053749, 2.170090, 2.326348, 2.575829 };
+
 void create_series( int *choice )
 {
-	int i, j, k, *start, *end, idseries, flt, cs_long, type_series;
-	double nmax, nmin, nmean, nvar, nn, thflt, confi;
+	int i, j, k, *start, *end, idseries, flt, cs_long, type_series, new_series, confi;
+	double nmax, nmin, nmean, nvar, nn, thflt, z_crit;
 	double step;
 	bool first;
 	char *lapp, **str, **tag;
@@ -6120,10 +6123,10 @@ void create_series( int *choice )
 		cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \"Series in logs not allowed\" -detail \"The option 'Series in logs' is checked but it does not affect the data produced by this command.\"" );
 
 	Tcl_LinkVar( inter, "thflt", ( char * ) &thflt, TCL_LINK_DOUBLE );
-	Tcl_LinkVar( inter, "confi", ( char * ) &confi, TCL_LINK_DOUBLE );
+	Tcl_LinkVar( inter, "confi", ( char * ) &confi, TCL_LINK_INT );
 
 	thflt = 0;
-	confi = 1.96;
+	confi = 95;
 	cmd( "set flt 0" );
 	cmd( "set bido 1" );
 	cmd( "set bidi 1" );
@@ -6135,7 +6138,7 @@ void create_series( int *choice )
 	cmd( "label .da.s.o.l -text \"Aggregation mode\"" );
 
 	cmd( "frame .da.s.o.r -relief groove -bd 2" );
-	cmd( "radiobutton .da.s.o.r.m -text \"Calculate over series ( same # of cases)\" -variable bido -value 1" );
+	cmd( "radiobutton .da.s.o.r.m -text \"Calculate over series (same # of cases)\" -variable bido -value 1" );
 	cmd( "radiobutton .da.s.o.r.f -text \"Calculate over cases (# cases = # of series)\" -variable bido -value 2" );
 	cmd( "pack .da.s.o.r.m .da.s.o.r.f -anchor w" );
 
@@ -6168,15 +6171,17 @@ void create_series( int *choice )
 	cmd( "radiobutton .da.s.i.r.f -text \"Maximum\" -variable bidi -value 2 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Max\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "radiobutton .da.s.i.r.t -text \"Minimum\" -variable bidi -value 3 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Min\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "radiobutton .da.s.i.r.c -text \"Variance\" -variable bidi -value 4 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"Var\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "radiobutton .da.s.i.r.s -text \"Standard deviation\" -variable bidi -value 8 -command { .da.s.i.r.ci.p configure -state disabled; set headname \"SD\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 
 	cmd( "frame .da.s.i.r.ci" );
-	cmd( "radiobutton .da.s.i.r.ci.c -text \"Conf.Interv. (3 series) Std. Dev. x\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"CI\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
-	cmd( "label .da.s.i.r.ci.x -text \u00D7" );
-	cmd( "entry .da.s.i.r.ci.p -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
+	cmd( "label .da.s.i.r.ci.x -text \@" );
+	cmd( "label .da.s.i.r.ci.perc -text %%" );
+	cmd( "entry .da.s.i.r.ci.p -width 3 -validate focusout -vcmd { if { [ string is integer \"%%P\" ] && %%P >= 80 && %%P <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
 	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
-	cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p -side left" );
+	cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
-	cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.ci -anchor w" );
+	cmd( "pack .da.s.i.r.m .da.s.i.r.z .da.s.i.r.n .da.s.i.r.f .da.s.i.r.t .da.s.i.r.c .da.s.i.r.s .da.s.i.r.ci -anchor w" );
 	cmd( "pack .da.s.i.l .da.s.i.r" );
 
 	cmd( "set a [ .da.vars.ch.v get 0 ]" );
@@ -6221,15 +6226,36 @@ void create_series( int *choice )
 		*choice = 0;
 		return;
 	}
-
-
+	
+	cmd( "set choice $flt" );
+	flt = *choice;
+	cmd( "set choice $bido" );
+	cs_long = *choice;
+	cmd( "set choice $bidi" );
+	type_series = *choice;
+	
+	// set option specific parameters
+	if ( type_series == 6 )
+	{
+		new_series = 3;
+		
+		// first series to produce
+		cmd( "set basename $vname; set headname \"Avg\"; set vname $headname$basename" );
+		
+		// get the critical value to the chosen confidence level
+		z_crit = z_star[ ( int ) max( min( confi, 99 ), 80 ) - 80 ];	
+	}
+	else
+		new_series = 1;
+	
 	data = new double *[ nv ];
 	start = new int [ nv ];
 	end = new int [ nv ];
 	str = new char *[ nv ];
 	tag = new char *[ nv ];
 
-	app = new store[ 1 + num_var ];
+	// allocate space for the new series
+	app = new store[ num_var + new_series ];
 	for ( i = 0; i < num_var; ++i )
 	{
 		app[ i ] = vs[ i ];
@@ -6275,185 +6301,168 @@ void create_series( int *choice )
 				max_c = end[ i ] > num_c?num_c:end[ i ];
 		}
 
-	cmd( "set choice $flt" );
-	flt = *choice;
-
-	cmd( "set choice $bido" );
-  cs_long=*choice;
-	cmd( "set choice $bidi" );
-  type_series=*choice;
-start_creating_series: //label for the goto in case of creation of multiple series
-
-	if ( cs_long== 1 )
-	{	//compute over series
-
-		vs[ num_var ].data = new double[ max_c+2 ];
-        if(type_series==6)
-         cmd("set headname \"Avg\"; set vname $headname$basename");
-        if(type_series==11)
-         cmd("set headname \"CIUpper\"; set vname $headname$basename"); 
-        if(type_series==12)
-         cmd("set headname \"CILower\"; set vname $headname$basename"); 
-         
-		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-		strcpy( msg,lapp );
-		strcpy( vs[ num_var ].label, msg );
-		vs[ num_var ].end = max_c;
-		vs[ num_var ].start = min_c;
-		lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
-		strcpy( msg,lapp );
-		strcpy( vs[ num_var ].tag, msg );
-		vs[ num_var ].rank = num_var;
-
-		for ( i = min_c; i <= max_c; ++i )
-		{
-			nmean = nn = nvar = 0;
-			first = true;
-			for ( j = 0; j < nv; ++j )
-			{
-				if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )		// ignore NaNs
-				{
-					nmean += data[ j ][ i ];
-					nvar += data[ j ][ i ]*data[ j ][ i ];
-					nn++;
-					if ( first)
-					{
-						nmin = nmax = data[ j ][ i ];
-						first = false;
-					}
-					else
-					{
-						if ( nmin>data[ j ][ i ] )
-							nmin = data[ j ][ i ];
-						if ( nmax<data[ j ][ i ] )
-							nmax = data[ j ][ i ];
-					} 
-				}
-			}
-
-			if ( nn == 0 )	// not a single valid value?
-				nn = nmean = nvar = nmin = nmax = NAN;
-			else
-			{
-				nmean /= nn;
-				nvar /= nn;
-				nvar -= nmean * nmean;
-			}
-		   
-			if ( type_series == 1 || type_series==6 )
-				vs[ num_var ].data[ i ] = nmean;
-			if ( type_series==5)
-				vs[ num_var ].data[ i ] = nmean * nn;
-			if ( type_series == 2 )
-				vs[ num_var ].data[ i ] = nmax;
-			if ( type_series == 3 )
-				vs[ num_var ].data[ i ] = nmin;
-			if ( type_series==4)
-				vs[ num_var ].data[ i ] = nvar;
-			if ( type_series==7)
-				vs[ num_var ].data[ i ] = nn;
-			if ( type_series==11)
-				vs[ num_var ].data[ i ] = nmean + sqrt( nvar)*confi;
-			if ( type_series==12)
-				vs[ num_var ].data[ i ] = nmean - sqrt( nvar)*confi;
-                
-		}
-		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, min_c, max_c, num_var ); 
-
-		cmd( "lappend DaModElem %s", vs[ num_var ].label  );
-	} 
-	else
+	// handle creation of multiple series
+	for ( k = 0; k < new_series; ++k, ++num_var )
 	{
-		//compute over cases
-		vs[ num_var ].data = new double[ nv ];
-        if(type_series==6)
-         cmd("set headname \"Avg\"; set vname $headname$basename");
-        if(type_series==11)
-         cmd("set headname \"CIUpper\"; set vname $headname$basename"); 
-        if(type_series==12)
-         cmd("set headname \"CILower\"; set vname $headname$basename"); 
-        
-		lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
-		strcpy( msg,lapp );
-		strcpy( vs[ num_var ].label, msg );
-		vs[ num_var ].end=nv - 1;
-		vs[ num_var ].start = 0;
-		lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
-		strcpy( msg,lapp );
-		strcpy( vs[ num_var ].tag, msg );
-		vs[ num_var ].rank = num_var;
-
-		for ( j = 0; j < nv; ++j )
+		if ( cs_long == 1 )									// compute over series?
 		{
-			nmean = nn = nvar = 0;
-			first = true;
+			vs[ num_var ].data = new double[ max_c + 2 ];
+			
+			lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+			strcpy( vs[ num_var ].label, lapp );
+			vs[ num_var ].end = max_c;
+			vs[ num_var ].start = min_c;
+			lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
+			strcpy( vs[ num_var ].tag, lapp );
+			vs[ num_var ].rank = num_var;
+
 			for ( i = min_c; i <= max_c; ++i )
 			{
-				if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )
+				nmean = nn = nvar = 0;
+				first = true;
+				for ( j = 0; j < nv; ++j )
 				{
-					nmean += data[ j ][ i ];
-					nvar += data[ j ][ i ]*data[ j ][ i ];
-					nn++;
-					if ( first)
+					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )		// ignore NaNs
 					{
-						nmin = nmax = data[ j ][ i ];
-						first = false;
+						nmean += data[ j ][ i ];
+						nvar += data[ j ][ i ] * data[ j ][ i ];
+						nn++;
+						if ( first)
+						{
+							nmin = nmax = data[ j ][ i ];
+							first = false;
+						}
+						else
+						{
+							if ( nmin>data[ j ][ i ] )
+								nmin = data[ j ][ i ];
+							if ( nmax<data[ j ][ i ] )
+								nmax = data[ j ][ i ];
+						} 
 					}
-					else
-					{
-						if ( nmin>data[ j ][ i ] )
-							nmin = data[ j ][ i ];
-						if ( nmax<data[ j ][ i ] )
-							nmax = data[ j ][ i ];
-					} 
 				}
-		   }
 
-		   if ( nn == 0 )	// not a single valid value?
-				nn = nmean = nvar=nmin = nmax=NAN;
-		   else
-		   {
-				nmean /= nn;
-				nvar /= nn;
-				nvar -= nmean * nmean;
-		   }
-			  
-			if ( type_series == 1 || type_series==6)
-				vs[ num_var ].data[ j ] = nmean;
-			if ( type_series==5)
-				vs[ num_var ].data[ j ] = nmean * nn;
-			if ( type_series == 2 )
-				vs[ num_var ].data[ j ] = nmax;
-			if ( type_series == 3 )
-				vs[ num_var ].data[ j ] = nmin;
-			if ( type_series==4)
-				vs[ num_var ].data[ j ] = nvar;
-			if ( type_series==7)
-				vs[ num_var ].data[ j ] = nn;
-			if ( type_series==11)
-				vs[ num_var ].data[ i ] = nmean + sqrt( nvar)*confi;
-			if ( type_series==12)
-				vs[ num_var ].data[ i ] = nmean - sqrt( nvar)*confi;
-                
-		 }
+				if ( nn == 0 )	// not a single valid value?
+					nn = nmean = nvar = nmin = nmax = NAN;
+				else
+				{
+					nmean /= nn;
+					nvar /= nn;
+					nvar -= nmean * nmean;
+				}
+			   
+				if ( type_series == 1 || type_series == 6 )
+					vs[ num_var ].data[ i ] = nmean;
+				if ( type_series == 2 )
+					vs[ num_var ].data[ i ] = nmax;
+				if ( type_series == 3 )
+					vs[ num_var ].data[ i ] = nmin;
+				if ( type_series == 4 )
+					vs[ num_var ].data[ i ] = nvar;
+				if ( type_series == 5 )
+					vs[ num_var ].data[ i ] = nmean * nn;
+				if ( type_series == 7 )
+					vs[ num_var ].data[ i ] = nn;
+				if ( type_series == 8 )
+					vs[ num_var ].data[ i ] = sqrt( nvar );
+				if ( type_series == 11 )
+					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+				if ( type_series == 12 )
+					vs[ num_var ].data[ i ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+					
+			}
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, min_c, max_c, num_var ); 
 
-		cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, 0, nv - 1, num_var ); 
+			cmd( "lappend DaModElem %s", vs[ num_var ].label  );
+		} 
+		else												// compute over cases
+		{
+			vs[ num_var ].data = new double[ nv ];
+			lapp = ( char * ) Tcl_GetVar( inter, "vname", 0 );
+			strcpy( vs[ num_var ].label, lapp );
+			vs[ num_var ].end=nv - 1;
+			vs[ num_var ].start = 0;
+			lapp = ( char * ) Tcl_GetVar( inter, "vtag", 0 );
+			strcpy( vs[ num_var ].tag, lapp );
+			vs[ num_var ].rank = num_var;
 
-		cmd( "lappend DaModElem %s", vs[ num_var ].label  );
+			for ( j = 0; j < nv; ++j )
+			{
+				nmean = nn = nvar = 0;
+				first = true;
+				for ( i = min_c; i <= max_c; ++i )
+				{
+					if ( i >= start[ j ] && i <= end[ j ] && is_finite( data[ j ][ i ] ) && ( flt == 0 || ( flt == 1 && data[ j ][ i ] > thflt) || ( flt == 2 && data[ j ][ i ] < thflt) ) )
+					{
+						nmean += data[ j ][ i ];
+						nvar += data[ j ][ i ]*data[ j ][ i ];
+						nn++;
+						if ( first)
+						{
+							nmin = nmax = data[ j ][ i ];
+							first = false;
+						}
+						else
+						{
+							if ( nmin>data[ j ][ i ] )
+								nmin = data[ j ][ i ];
+							if ( nmax<data[ j ][ i ] )
+								nmax = data[ j ][ i ];
+						} 
+					}
+			   }
+
+			   if ( nn == 0 )	// not a single valid value?
+					nn = nmean = nvar = nmin = nmax = NAN;
+			   else
+			   {
+					nmean /= nn;
+					nvar /= nn;
+					nvar -= nmean * nmean;
+			   }
+				  
+				if ( type_series == 1 || type_series == 6 )
+					vs[ num_var ].data[ j ] = nmean;
+				if ( type_series == 2 )
+					vs[ num_var ].data[ j ] = nmax;
+				if ( type_series == 3 )
+					vs[ num_var ].data[ j ] = nmin;
+				if ( type_series == 4 )
+					vs[ num_var ].data[ j ] = nvar;
+				if ( type_series == 5 )
+					vs[ num_var ].data[ j ] = nmean * nn;
+				if ( type_series == 7 )
+					vs[ num_var ].data[ j ] = nn;
+				if ( type_series == 8 )
+					vs[ num_var ].data[ i ] = sqrt( nvar );
+				if ( type_series == 11 )
+					vs[ num_var ].data[ i ] = nmean + z_crit * sqrt( nvar ) / sqrt( nn );
+				if ( type_series == 12 )
+					vs[ num_var ].data[ i ] = nmean - z_crit * sqrt( nvar ) / sqrt( nn );
+					
+			 }
+
+			cmd( ".da.vars.lb.v insert end \"%s %s (%d - %d) # %d (created)\"", vs[ num_var ].label, vs[ num_var ].tag, 0, nv - 1, num_var ); 
+
+			cmd( "lappend DaModElem %s", vs[ num_var ].label  );
+		}
+		
+		// define next series options for multiple series (must be reverse order!)
+		if ( type_series == 11 )
+		{
+			type_series = 12;
+			cmd( "set headname \"CILo\"; set vname $headname$basename" ); 
+		}
+		
+		if ( type_series == 6 )
+		{
+			type_series = 11;
+			cmd( "set headname \"CIUp\"; set vname $headname$basename" ); 
+		}
 	}
-	cmd( ".da.vars.lb.v see end" );
-	num_var++; 
-    if(type_series==6)
-     {
-      type_series=11;
-      goto start_creating_series;
-     }
-    if(type_series==11)
-     {
-      type_series=12;
-      goto start_creating_series;
-     }
 
+	cmd( ".da.vars.lb.v see end" );
+	
 	delete [ ] start;
 	delete [ ] end;
 	delete [ ] data;
