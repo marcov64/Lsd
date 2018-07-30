@@ -569,8 +569,8 @@ proc getx { w pos } {
 		}
 	}
 		
-	if { $hpos < 0 && [ primdisp [ winfo parent $w ] ] } {
-		return 0
+	if { $hpos < $corrX && [ primdisp [ winfo parent $w ] ] } {
+		return $corrX
 	} else {
 		return $hpos
 	}
@@ -612,8 +612,8 @@ proc gety { w pos } {
 		}
 	} 
 		
-	if { $vpos < 0 && [ primdisp [ winfo parent $w ] ] } {
-		return 0
+	if { $vpos < $corrY && [ primdisp [ winfo parent $w ] ] } {
+		return $corrY
 	} else {
 		return $vpos
 	}
