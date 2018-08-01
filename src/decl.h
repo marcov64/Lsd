@@ -59,6 +59,11 @@
 // LSD compilation options file
 #include "choose.h"
 
+// disable code that make gdb debugging harder
+#ifdef DEBUG_MODE
+#define NO_ERROR_TRAP
+#endif
+
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1

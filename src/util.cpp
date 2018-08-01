@@ -194,8 +194,9 @@ const char *tags[ NUM_TAGS ] = { "", "highlight", "tabel", "series", "prof1", "p
 
 void plog( char const *cm, char const *tag, ... )
 {
-	char buffer[ TCL_BUFF_STR ];
+	char buffer[ TCL_BUFF_STR ], *message;
 	bool tag_ok = false;
+	int i, j;
 	va_list argptr;
 
 	for ( int i = 0; i < NUM_TAGS; ++i )
@@ -224,9 +225,19 @@ void plog( char const *cm, char const *tag, ... )
 	
 	if ( reqSz >= maxSz )
 		plog( "\nWarning: message truncated\n" );
+	
+	// remove invalid charaters and Tk control characters
+	message = new char[ strlen( buffer ) + 1 ];
+	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
+		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' || 
+			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
+			 ! ( buffer[ i ] == '\"' || 
+				 ( buffer[ i ] == '$' && buffer[ i + 1 ] != '$' ) ) )
+			message[ j++ ] = buffer[ i ];
+	message[ j ] = '\0';
 
 #ifdef NO_WINDOW 
-	printf( "%s", buffer );
+	printf( "%s", message );
 	fflush( stdout );
 #else
 	if ( ! tk_ok || ! log_ok )
@@ -236,13 +247,15 @@ void plog( char const *cm, char const *tag, ... )
 	{
 		cmd( "set log_ok [ winfo exists .log ]" );
 		cmd( "if $log_ok { .log.text.text.internal see [ .log.text.text.internal index insert ] }" );
-		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", buffer, tag );
+		cmd( "if $log_ok { .log.text.text.internal insert end \"%s\" %s }", message, tag );
 		cmd( "if $log_ok { .log.text.text.internal see end }" );
 		cmd( "update idletasks" );
 	}
 	else
-		plog( "\nError: invalid tag, message ignored:\n%s\n", "", buffer );
+		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
 #endif 
+	delete message;
+	
 	message_logged = true;
 }
 

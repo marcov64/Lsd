@@ -18,12 +18,17 @@ int main( int argn, char **argv )
 {
 	int res;
 
+#ifndef NO_ERROR_TRAP
 	// register all signal handlers
 	handle_signals( signal_handler );
 
 	try
 	{
+#endif
+
 		res = lsdmain( argn, argv );
+		
+#ifndef NO_ERROR_TRAP
 	}
 	catch ( bad_alloc& )	// out of memory conditions
 	{
@@ -47,6 +52,8 @@ int main( int argn, char **argv )
 		Tcl_Finalize( );
 	}
 #endif
+#endif
+
 	return res;
 }
 
