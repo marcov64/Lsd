@@ -259,7 +259,7 @@ void plog( char const *cm, char const *tag, ... )
 	message_logged = true;
 }
 
-
+int deb( object *r, object *c,  char const *lab, double *res, bool interact );
 /***********
 ERROR_HARD
 Procedure called when an unrecoverable error occurs. 
@@ -304,6 +304,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 #ifndef NO_WINDOW
 	uncover_browser( );
+    init_error:
 	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 
 	cmd( "set err 1" );
@@ -322,7 +323,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
 	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
 	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
-	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e -anchor w" );
+	cmd( "radiobutton .cazzo.e.b.a -variable err -value 3 -text \"Open the debugger showing the offending variable\"" );
+
+	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e .cazzo.e.b.a -anchor w" );
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );
 
@@ -343,7 +346,12 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
-
+    if (choice == 3 )
+     {
+      double ass=0;
+      deb(stacklog->vs->up, NULL, stacklog->vs->label, &ass, false);
+      goto init_error;
+     }
 	if ( choice == 2 )
 	{
 		// do run( ) cleanup
