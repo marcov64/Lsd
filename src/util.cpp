@@ -1645,7 +1645,7 @@ else
   strcpy(cur->text, "(no description available)");
  }
    
-cur->init=(char)NULL;
+cur->init=NULL;
 
 }
 
