@@ -33,15 +33,6 @@ FILE *f = NULL;
 //You may need an integer to be used as a counter
 int i, j, h, k;
 
-//Uncommenting the following lines the file "log.log" will
-//contain the name of the variable just computed.
-//To be used in case of unexpected crashes. It slows down sensibly the simulation
-/**
-f = fopen( "log.log", "a" );
-fprintf( f, "t=%d %s\n", t, label );
-fclose( f );
-**/
-
 //Place here your equations. They must be blocks of the following type
 
 
@@ -61,16 +52,16 @@ Do not place equations beyond this point.
 
 *********************/
 
-sprintf( msg, "Equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
-error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation" );
+sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
+error_hard( msg, "equation not found", "check your configuration or code to prevent this situation" );
 return -1;
 
 end :
 
 if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
  {
-  sprintf( msg, "At time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
-  error_hard( msg, "Invalid result", "Check your code to prevent this situation" );
+  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
+  error_hard( msg, "invalid result", "check your code to prevent this situation" );
   debug_flag = true;
   debug = 'd';
  }
@@ -79,6 +70,16 @@ if ( debug_flag )
  for ( i = 0; i < 1000; i++ )
   i_values[ i ] = v[ i ];
  }
+
+//Uncommenting the following lines the file "log.txt" will
+//contain the name of the variable just computed.
+//To be used in case of unexpected crashes. It slows down sensibly the simulation
+/**
+f = fopen( "log.txt", "a" );
+fprintf( f, "%s\t= %g\t(t=%d)\n", label, res, t );
+fclose( f );
+**/
+
 return res;
 }
 

@@ -459,7 +459,8 @@ variable *object::search_var( object *caller, char const *l, bool no_error )
 			if ( ! no_error )
 			{
 				sprintf( msg, "'%s' is missing", l );
-				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+				error_hard( msg, "variable or parameter not found", 
+							"check your code to prevent this situation" );
 			}
 			
 			return NULL;
@@ -492,7 +493,8 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 			if ( ! var_exist )
 			{
 				sprintf( msg, "'%s' is missing for conditional searching", lab );
-				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+				error_hard( msg, "variable or parameter not found", 
+							"check your code to prevent this situation" );
 			}
 			
 			return NULL;
@@ -580,7 +582,8 @@ variable *object::add_empty_var( char const *str )
 		app = new variable;
 		if ( app == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding variable", "Out of memory" );
+			error_hard( "cannot allocate memory for adding variable", 
+						"out of memory" );
 			return NULL;
 		}
 		
@@ -594,7 +597,8 @@ variable *object::add_empty_var( char const *str )
 		cv->next = new variable;
 		if ( cv->next == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding variable", "Out of memory" );
+			error_hard( "cannot allocate memory for adding variable", 
+						"out of memory" );
 			return NULL;
 		}
 		cv = cv->next;
@@ -619,7 +623,8 @@ void object::add_var_from_example( variable *example )
 		v = new variable;
 		if ( v == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding object", "Out of memory" );
+			error_hard( "cannot allocate memory for adding object", 
+						"out of memory" );
 			return;
 		}
 
@@ -633,7 +638,8 @@ void object::add_var_from_example( variable *example )
 		cv->next = new variable;
 		if ( cv->next == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding object", "Out of memory" );
+			error_hard( "cannot allocate memory for adding object", 
+						"out of memory" );
 			return;
 		}
 
@@ -796,7 +802,8 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	if ( cb2 == NULL )
 	{
 		sprintf( msg, "'%s' contains no object '%s' for adding object(s)", label, lab );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}
 	
@@ -817,7 +824,8 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 		if ( cur == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding object", "Out of memory" );
+			error_hard( "cannot allocate memory for adding object", 
+						"out of memory" );
 			return NULL;
 		}
 		cur->init( this, lab );
@@ -827,7 +835,8 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
 			if ( cur->node == NULL )
 			{
-				error_hard( "Cannot allocate memory for adding object", "Out of memory" );
+				error_hard( "cannot allocate memory for adding object", 
+							"out of memory" );
 				return NULL;
 			}
 		}
@@ -940,8 +949,9 @@ void object::delete_obj( void )
 					cb->head = NULL;
 				else
 				{
-					sprintf( msg, "Cannot delete all instances of '%s'", label );
-					error_hard( msg, "Last object instance", "Check your code to prevent this situation" );
+					sprintf( msg, "cannot delete all instances of '%s'", label );
+					error_hard( msg, "last object instance", 
+								"check your code to prevent this situation" );
 					return;
 				}
 		else
@@ -1102,12 +1112,14 @@ double object::cal( object *caller,  char const *l, int lag )
 		if ( curr == NULL )
 		{
 			sprintf( msg, "'%s' is missing for retrieving", l );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		else
 		{
-			sprintf( msg, "All instances of '%s' (containing '%s') were deleted", curr->up->label, l );
-			error_hard( msg, "No object instance", "Check your code to prevent this situation" );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", curr->up->label, l );
+			error_hard( msg, "no object instance", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1147,12 +1159,14 @@ void object::recal( char const *l )
 		if ( curr == NULL )
 		{
 			sprintf( msg, "'%s' is missing for recalculating", l );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		else
 		{
-			sprintf( msg, "All instances of '%s' (containing '%s') were deleted", curr->up->label, l );
-			error_hard( msg, "No object instance", "Check your code to prevent this situation" );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", curr->up->label, l );
+			error_hard( msg, "no object instance", 
+						"check your code to prevent this situation" );
 		}
 		
 		return;
@@ -1179,7 +1193,8 @@ double object::sum( char const *lab, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for summing", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1212,7 +1227,8 @@ double object::overall_max( char const *lab, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for maximizing", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1246,7 +1262,8 @@ double object::overall_min( char const *lab, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for minimizing", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1281,7 +1298,8 @@ double object::av( char const *lab, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for averaging", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1317,7 +1335,8 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for weighted averaging", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1329,7 +1348,8 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		if ( blueprint->search_var( this, lab2, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for weighted averaging", lab2 );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1367,7 +1387,8 @@ double object::sd( char const *lab, int lag )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating s.d.", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1406,7 +1427,8 @@ double object::count( char const *lab )
 		if ( blueprint->search( lab ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for counting", lab );
-			error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+			error_hard( msg, "object not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return 0;
@@ -1438,7 +1460,8 @@ double object::count_all( char const *lab )
 		if ( blueprint->search( lab ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for counting", lab );
-			error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+			error_hard( msg, "object not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return 0;
@@ -1480,7 +1503,8 @@ double object::stat( char const *lab, double *r )
 		if ( blueprint->search_var( this, lab, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lab );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NAN;
@@ -1495,7 +1519,8 @@ double object::stat( char const *lab, double *r )
 			if ( blueprint->search_var( cur->up, lab, true ) == NULL )
 			{
 				sprintf( msg, "'%s' is missing for calculating statistics", lab );
-				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+				error_hard( msg, "variable or parameter not found", 
+							"check your code to prevent this situation" );
 			}
 			
 			return NAN;
@@ -1555,12 +1580,14 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 			if ( blueprint->search_var( this, var, true ) == NULL )
 			{
 				sprintf( msg, "'%s' is missing for sorting", var );
-				error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+				error_hard( msg, "variable or parameter not found", 
+							"check your code to prevent this situation" );
 			}
 			else
 			{
-				sprintf( msg, "All instances of '%s' (containing '%s') were deleted", cur_v->up->label, var );
-				error_hard( msg, "No object instance", "Check your code to prevent this situation" );
+				sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cur_v->up->label, var );
+				error_hard( msg, "no object instance", 
+							"check your code to prevent this situation" );
 			}
 			
 			return;
@@ -1570,14 +1597,16 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 		if ( strcmp( obj, cur->label ) )
 		{
 			sprintf( msg, "'%s' is missing (object '%s') for sorting", var, obj );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 			return;
 		}
 	
 		if ( cur->up == NULL )
 		{
 			sprintf( msg, "'%s' is missing for sorting", obj );
-			error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+			error_hard( msg, "object not found", 
+						"check your code to prevent this situation" );
 			return;
 		}
 	
@@ -1592,7 +1621,8 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 			else
 			{
 				sprintf( msg, "'%s' has no network data structure", obj );
-				error_hard( msg, "Invalid network object", "Check your code to prevent this situation" );
+				error_hard( msg, "invalid network object", 
+							"check your code to prevent this situation" );
 				return;
 			}
 		else
@@ -1603,7 +1633,8 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 	if ( cb == NULL || cb->head == NULL )
 	{
 		sprintf( msg, "'%s' is missing for sorting", label);
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return;
 	}
 	
@@ -1626,8 +1657,9 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
 		else
 		{
-			sprintf( msg, "Direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "Invalid sort option", "Check your code to prevent this situation" );
+			sprintf( msg, "direction '%s' is invalid for sorting", direction );
+			error_hard( msg, "invalid sort option", 
+						"check your code to prevent this situation" );
 			delete [ ] mylist;
 			return;
 		}
@@ -1701,7 +1733,8 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 	if ( cb == NULL || cb->head == NULL )
 	{
 		sprintf( msg, "'%s' is missing for sorting", obj );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return;
 	}
 	
@@ -1711,12 +1744,14 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		if ( blueprint->search_var( this, var1, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for sorting", var1 );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		else
 		{
-			sprintf( msg, "All instances of '%s' (containing '%s') were deleted", cur_v->up->label, var1 );
-			error_hard( msg, "No object instance", "Check your code to prevent this situation" );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cur_v->up->label, var1 );
+			error_hard( msg, "no object instance", 
+						"check your code to prevent this situation" );
 		}
 		
 		return;
@@ -1726,14 +1761,16 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 	if ( strcmp( obj, cur->label ) )
 	{
 		sprintf( msg, "'%s' is missing (object '%s') for sorting", var1, obj );
-		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+		error_hard( msg, "variable or parameter not found", 
+					"check your code to prevent this situation" );
 		return;
 	}
 
 	if ( cur->up == NULL )
 	{
 		sprintf( msg, "'%s' is missing for sorting", obj );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return;
 	}
 
@@ -1757,8 +1794,9 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down_two );
 		else
 		{
-			sprintf( msg, "Direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "Invalid sort option", "Check your code to prevent this situation" );
+			sprintf( msg, "direction '%s' is invalid for sorting", direction );
+			error_hard( msg, "invalid sort option", 
+						"check your code to prevent this situation" );
 			delete [ ] mylist;
 			return;
 		}
@@ -1835,7 +1873,8 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 		if ( blueprint->search_var( this, lv, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lv );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NULL;
@@ -1849,14 +1888,16 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	if ( is_inf( a ) )
 	{
 		sprintf( msg, "'%s' has invalid values for random drawing", lv );  
-		error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation" );
+		error_hard( msg, "invalid random draw option", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}
 
 	if ( a == 0 )
 	{
 		sprintf( msg, "'%s' has only zero values for random drawing", lv );  
-		error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation" );
+		error_hard( msg, "invalid random draw option", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}
 	
@@ -1892,7 +1933,8 @@ object *object::draw_rnd( char const *lo )
 		if ( blueprint->search( lo ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for random drawing", lo );
-			error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+			error_hard( msg, "object not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NULL;
@@ -1904,7 +1946,8 @@ object *object::draw_rnd( char const *lo )
 	if ( a == 0 )
 	{
 		sprintf( msg, "'%s' is missing for random drawing", lo );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}
 
@@ -1936,7 +1979,8 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 	if ( tot <= 0 )
 	{
 		sprintf( msg, "'%s'=%g is invalid for random drawing", lv, tot );  
-		error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation" );
+		error_hard( msg, "invalid random draw option", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}  
 
@@ -1946,7 +1990,8 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		if ( blueprint->search_var( this, lv, true ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lv );
-			error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+			error_hard( msg, "variable or parameter not found", 
+						"check your code to prevent this situation" );
 		}
 		
 		return NULL;
@@ -1964,8 +2009,9 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 	
 	if ( a > tot )
 	{
-		sprintf( msg, "Number of %lf for '%s' is invalid for random drawing", tot, lv );  
-		error_hard( msg, "Invalid random draw option", "Check your code to prevent this situation" );
+		sprintf( msg, "value %g for '%s' is invalid for random drawing", tot, lv );  
+		error_hard( msg, "invalid random draw option", 
+					"check your code to prevent this situation" );
 		return NULL;
 	}
 	
@@ -1984,8 +2030,9 @@ void object::write( char const *lab, double value, int time, int lag )
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		sprintf( msg, "'%s' value is invalid for writing", lab );
-		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation" );
+		sprintf( msg, "'%g' is invalid for writing to '%s'", value, lab );
+		error_hard( msg, "invalid write operation", 
+					"check your code to prevent this situation" );
         return;
     }
     
@@ -1996,7 +2043,8 @@ void object::write( char const *lab, double value, int time, int lag )
 			if ( cv->under_computation == 1 )
 			{
 				sprintf( msg, "'%s' is under computation and cannot be written", lab );
-				error_hard( msg, "Invalid write operation", "Check your code to prevent this situation" );
+				error_hard( msg, "invalid write operation", 
+							"check your code to prevent this situation" );
 				return;
 			}
 			
@@ -2052,7 +2100,8 @@ void object::write( char const *lab, double value, int time, int lag )
     }
 	
     sprintf( msg, "'%s' is missing for writing", lab );
-	error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+	error_hard( msg, "variable or parameter not found", 
+				"check your code to prevent this situation" );
 }
 
 void object::write( char const *lab, double value, int time )
@@ -2075,7 +2124,8 @@ double object::increment( char const *lab, double value )
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
 		sprintf( msg, "'%g' is invalid for incrementing '%s'", value, lab );
-		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation" );
+		error_hard( msg, "invalid write operation", 
+					"check your code to prevent this situation" );
         return NAN;
     }
 
@@ -2086,7 +2136,8 @@ double object::increment( char const *lab, double value )
 	if ( cv == NULL )
 	{
 		sprintf( msg, "'%s' is missing in object '%s' for incrementing", lab, label );
-		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+		error_hard( msg, "variable or parameter not found", 
+					"check your code to prevent this situation" );
         return NAN;
 	}
 	
@@ -2110,8 +2161,9 @@ double object::multiply(char const *lab, double value)
 	
     if ( ( ! use_nan && is_nan( value ) ) || is_inf( value ) )
     {
-		sprintf( msg, "%g is invalid for multiplying '%s'", value, lab );
-		error_hard( msg, "Invalid write operation", "Check your code to prevent this situation" );
+		sprintf( msg, "'%g' is invalid for multiplying '%s'", value, lab );
+		error_hard( msg, "invalid write operation", 
+					"check your code to prevent this situation" );
         return NAN;
     }
 
@@ -2122,7 +2174,8 @@ double object::multiply(char const *lab, double value)
 	if ( cv == NULL )
 	{
 		sprintf( msg, "'%s' is missing in object '%s' for multiplying", lab, label );
-		error_hard( msg, "Variable or parameter not found", "Check your code to prevent this situation" );
+		error_hard( msg, "variable or parameter not found", 
+					"check your code to prevent this situation" );
         return NAN;
 	}
 	
@@ -2348,15 +2401,17 @@ object *object::turbosearch( char const *label, double tot, double num )
 			break;
 	if ( cb == NULL )
 	{
-		sprintf( msg, "Failure when searching object '%s'", label ); 
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		sprintf( msg, "failure when searching object '%s'", label ); 
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 		return NULL;
 	} 
 
 	if ( cb->mn == NULL )
 	{
 		sprintf( msg, "'%s' is not initialized for turbo search", label ); 
-		error_hard( msg, "Invalid search operation", "Check your code to prevent this situation" );
+		error_hard( msg, "invalid search operation", 
+					"check your code to prevent this situation" );
 		return NULL;
 	} 
 	 
@@ -2386,8 +2441,9 @@ void object::initturbo( char const *label, double tot = 0 )
 			break;
 	if ( cb == NULL || cb->head == NULL )
 	{
-		sprintf( msg, "Failure when initializing object '%s' for turbo search", label ); 
-		error_hard( msg, "Object has no instance", "Check your code to prevent this situation" );
+		sprintf( msg, "failure when initializing object '%s' for turbo search", label ); 
+		error_hard( msg, "object has no instance", 
+					"check your code to prevent this situation" );
 		return;
 	} 
 

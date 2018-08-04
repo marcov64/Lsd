@@ -346,3 +346,14 @@ void plot_rt( variable *v )
 	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", x2, y2, x1, y1, cur_plt );
 	++cur_plt;
 }
+
+
+/**************************************
+RESET_PLOT
+**************************************/
+void reset_plot( int run )
+{
+	// allow for run-time plot window destruction
+	cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", 
+		 run, run, run, run );
+}

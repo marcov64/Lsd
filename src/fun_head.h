@@ -25,76 +25,7 @@ using namespace Eigen;
 
 #include "decl.h"										// LSD classes
 
-extern bool fast;										// flag to hide LOG messages & runtime (read-only)
-extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
-extern bool use_nan;									// flag to allow using Not a Number value
-extern char *path;										// folder where the configuration is
-extern char *simul_name;								// configuration name being run (for saving networks)
-extern int cur_sim;
-extern int debug_flag;
-extern int fast_mode;
-extern int max_step;
-extern int quit;
-extern int ran_gen;										// pseudo-random number generator to use (1-5) )
-extern int seed;
-extern int sim_num;
-extern int t;
-extern object *root;
-
-bool is_finite( double x );
-bool is_inf( double x );
-bool is_nan( double x );
-double _abs( double a );
-double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
-double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
-double bernoulli( double p );							// draw from a Bernoulli distribution
-double beta( double alpha, double beta );				// draw from a beta distribution
-double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
-double betacf( double a, double b, double x );			// beta distribution function
-double fact( double x );								// Factorial function
-double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
-double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
-double lnorm( double mu, double sigma );				// draw from a lognormal distribution
-double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
-double max( double a, double b );
-double min( double a, double b );
-double norm( double mean, double dev );
-double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
-double pareto( double mu, double alpha );
-double paretocdf( double mu, double alpha, double x );
-double poisson( double m );
-double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
-double round( double r );
-double save_lattice( const char fname[ ] = "lattice" );
-double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
-double uniform( double min, double max );
-double uniform_int( double min, double max );
-double read_lattice( double line, double col );
-double update_lattice( double line, double col, double val = 1 );
-object *get_cycle_obj( object *c, char const *label, char const *command );
-object *go_brother( object *c );
-void close_lattice( void );
-void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
-void init_random( int seed );							// reset the random number generator seed
-void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
-void nop( void );										// no operation
-void plog( char const *msg, char const *tag = "", ... );
-void results_alt_path( const char * );  				// change where results are saved.
-void set_fast( int level );								// enable fast mode
-
-#ifdef CPP11
-double binomial( double p, double t );					// draw from a binomial distribution
-double cauchy( double a, double b );					// draw from a Cauchy distribution
-double chi_squared( double n );							// draw from a chi-squared distribution
-double exponential( double lambda );					// draw from an exponential distribution
-double fisher( double m, double n );					// draw from a Fisher-F distribution
-double geometric( double p );							// draw from a geometric distribution
-double student( double n );								// draw from a Student-T distribution
-double weibull( double a, double b );					// draw from a Weibull distribution
-#endif
-
 double def_res = 0;										// default equation result
-
 
 #ifndef NO_WINDOW
 #include <tk.h>
@@ -131,16 +62,16 @@ extern double i_values[ ];
 
 #define EQ_NOT_FOUND \
 	char msg[ TCL_BUFF_STR ]; \
-	sprintf( msg, "Equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
-	error_hard( msg, "Equation not found", "Check your configuration or code to prevent this situation" ); \
+	sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
+	error_hard( msg, "equation not found", "check your configuration or code to prevent this situation" ); \
 	return res;
 	
 #define EQ_TEST_RESULT \
 	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, "At time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
-		error_hard( msg, "Invalid result", "Check your code to prevent this situation" ); \
+		sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
+		error_hard( msg, "invalid result", "check your code to prevent this situation" ); \
 		debug_flag = true; \
 		debug = 'd'; \
 	}
@@ -185,17 +116,6 @@ extern double i_values[ ];
 		res = X; \
 		goto end; \
 	}
-
-#define DEBUG \
-	f = fopen( "log.txt", "a" ); \
-	fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
-	fclose( f );
- 
-#define DEBUG_AT( X ) \
-	if ( t >= X ) \
-	{ \
-		DEBUG \
-	};
 
 #else
 // use fast map method for equation look-up
@@ -266,12 +186,19 @@ extern double i_values[ ];
 #define RND_GENERATOR( X ) ran_gen = ( int ) X;
 #define RND_SETSEED( X ) seed = ( int ) X; init_random( seed );
 #define SLEEP( X ) msleep( ( unsigned ) X );
+#define DEBUG_START deb_log( true );
+#define DEBUG_START_AT( X ) deb_log( true, ( int ) X );
+#define DEBUG_STOP deb_log( false );
+#define DEBUG_STOP_AT( X ) deb_log( false, ( int ) X );
 
 #define RND_SEED ( ( double ) seed )
 #define PATH ( ( const char * ) path )
 #define CONFIG ( ( const char * ) simul_name )
 #define T ( ( double ) t )
 #define LAST_T ( ( double ) max_step )
+
+#define INTERACT( X, Y )  p->interact( ( char * ) X, Y, v)
+#define INTERACTS( Z, X, Y ) Z->interact( ( char * ) X, Y, v)
 
 // regular logging (disabled in any fast mode)
 #define LOG( ... ) \
@@ -438,9 +365,6 @@ extern double i_values[ ];
 #define RNDDRAW_TOTS( Z, X, Y,T ) Z->draw_rnd( ( char * ) X, ( char * ) Y, 0 ,T )
 #define RNDDRAW_TOTLS( O, X, Y, Z, T ) O->draw_rnd( ( char * ) X, ( char * ) Y, Z, T )
 
-#define INTERACT( X, Y )  p->interact( ( char * ) X, Y, v)
-#define INTERACTS( Z, X, Y ) Z->interact( ( char * ) X, Y, v)
-
 // LATTICE MACROS
 #define INIT_LAT( ... ) init_lattice( __VA_ARGS__ )
 #define DELETE_LAT close_lattice( )
@@ -567,12 +491,12 @@ extern double i_values[ ];
 
 // cycle through set of links of object C, using link pointer O
 #define CYCLE_LINK( O ) if ( p->node == NULL ) \
-	error_hard( "Object has no network data structure", "Invalid network object", "Check your code to prevent this situation" ); \
+	error_hard( "object has no network data structure", "invalid network object", "check your code to prevent this situation" ); \
 else \
 	for ( O = p->node->first; O != NULL; O = O->next )
 
 #define CYCLE_LINKS( C, O ) if ( C == NULL || C->node == NULL ) \
-	error_hard( "Object has no network data structure", "Invalid network object", "Check your code to prevent this situation" ); \
+	error_hard( "object has no network data structure", "invalid network object", "check your code to prevent this situation" ); \
 else \
 	for ( O = C->node->first; O != NULL; O = O->next )
 
@@ -677,5 +601,16 @@ void cmd( const char *cm, ... );
 #define WRITES_EXT( PTR, CLASS, OBJ, VAL ) WRITE_EXTS( PTR, CLASS, OBJ, VAL )
 #define EXECS_EXT( PTR, CLASS, OBJ, METHOD, ... ) EXEC_EXTS( PTR, CLASS, OBJ, METHOD, __VA_ARGS__ )
 #define CYCLES_EXT( PTR, ITER, CLASS, OBJ ) CYCLE_EXTS( PTR, ITER, CLASS, OBJ )
+
+#define DEBUG \
+	f = fopen( "log.txt", "a" ); \
+	fprintf( f, "t=%d\t%s\t(cur=%g)\n", t, var->label, var->val[0] ); \
+	fclose( f );
+ 
+#define DEBUG_AT( X ) \
+	if ( t >= X ) \
+	{ \
+		DEBUG \
+	};
 
 #endif

@@ -68,7 +68,7 @@
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
 #define _LSD_VERSION_ "7.1"
-#define _LSD_DATE_ "May 03 2018"        // __DATE__
+#define _LSD_DATE_ "Aug 03 2018"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -442,9 +442,89 @@ struct worker
 };
 #endif
 
-#ifndef FUN						// prevent exposing internals in users' fun_xxx.cpp
 
-// standalone C functions/procedures
+// standalone C functions/procedures (visible to the users)
+
+bool is_finite( double x );
+bool is_inf( double x );
+bool is_nan( double x );
+double _abs( double a );
+double alapl( double mu, double alpha1, double alpha2 );// draw from an asymmetric laplace distribution
+double alaplcdf( double mu, double alpha1, double alpha2, double x );	// asymmetric laplace cdf
+double bernoulli( double p );							// draw from a Bernoulli distribution
+double beta( double alpha, double beta );				// draw from a beta distribution
+double betacdf( double alpha, double beta, double x );	// beta cumulative distribution function
+double betacf( double a, double b, double x );			// beta distribution function
+double fact( double x );								// Factorial function
+double gamma( double alpha, double beta = 1 );			// draw from a gamma distribution
+double init_lattice( int init_color = -0xffffff, double nrow = 100, double ncol = 100, double pixW = 0, double pixH = 0 );
+double lnorm( double mu, double sigma );				// draw from a lognormal distribution
+double lnormcdf( double mu, double sigma, double x );	// lognormal cumulative distribution function
+double max( double a, double b );
+double min( double a, double b );
+double norm( double mean, double dev );
+double normcdf( double mu, double sigma, double x );	// normal cumulative distribution function
+double pareto( double mu, double alpha );
+double paretocdf( double mu, double alpha, double x );
+double poisson( double m );
+double poissoncdf( double lambda, double k );			// poisson cumulative distribution function
+double round( double r );
+double save_lattice( const char fname[ ] = "lattice" );
+double unifcdf( double a, double b, double x );			// uniform cumulative distribution function
+double uniform( double min, double max );
+double uniform_int( double min, double max );
+double read_lattice( double line, double col );
+double update_lattice( double line, double col, double val = 1 );
+object *get_cycle_obj( object *c, char const *label, char const *command );
+object *go_brother( object *c );
+void close_lattice( void );
+void deb_log( bool on, int time = 0 );					// control debug mode
+void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
+void init_random( int seed );							// reset the random number generator seed
+void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
+void nop( void );										// no operation
+void plog( char const *msg, char const *tag = "", ... );
+void results_alt_path( const char * );  				// change where results are saved.
+void set_fast( int level );								// enable fast mode
+
+#ifdef CPP11
+double binomial( double p, double t );					// draw from a binomial distribution
+double cauchy( double a, double b );					// draw from a Cauchy distribution
+double chi_squared( double n );							// draw from a chi-squared distribution
+double exponential( double lambda );					// draw from an exponential distribution
+double fisher( double m, double n );					// draw from a Fisher-F distribution
+double geometric( double p );							// draw from a geometric distribution
+double student( double n );								// draw from a Student-T distribution
+double weibull( double a, double b );					// draw from a Weibull distribution
+#endif
+
+
+// global variables (visible to the users)
+extern bool fast;										// flag to hide LOG messages & runtime (read-only)
+extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
+extern bool use_nan;									// flag to allow using Not a Number value
+extern char *path;										// folder where the configuration is
+extern char *simul_name;								// configuration name being run (for saving networks)
+extern int cur_sim;
+extern int debug_flag;
+extern int fast_mode;
+extern int max_step;
+extern int quit;
+extern int ran_gen;										// pseudo-random number generator to use (1-5) )
+extern int seed;
+extern int sim_num;
+extern int t;
+extern object *root;
+
+#ifdef CPP11
+extern eq_mapT eq_map;									// map to fast equation look-up
+#endif
+
+
+// prevent exposing internals in users' fun_xxx.cpp
+#ifndef FUN
+
+// standalone internal C functions/procedures (not visible to the users)
 
 FILE *create_frames( char *t );
 FILE *search_data_ent( char *name, variable *v );
@@ -453,9 +533,6 @@ FILE *search_str( char const *name, char const *str );
 bool alloc_save_mem( object *root );
 bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
 bool get_bool( const char *tcl_var, bool *var = NULL );
-bool is_finite( double x );						// standard library redefinitions to workaround gcc bug
-bool is_inf( double x );
-bool is_nan( double x );
 bool load_description( char *msg, FILE *f );
 bool save_configuration( object *r, int findex = 0 );
 bool save_sensitivity( FILE *f );
@@ -468,10 +545,6 @@ char *NOLH_valid_tables( int k, char* ch );
 char *upload_eqfile( void );
 description *search_description( char *lab );
 double get_double( const char *tcl_var, double *var = NULL );
-double max( double a, double b );
-double min( double a, double b );
-double norm( double mean, double dev );
-double uniform_int( double min, double max );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
@@ -496,7 +569,6 @@ long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
 object *create( object *r );
-object *go_brother( object *cur );
 object *operate( int *choice, object *r );
 object *restore_pos( object * );
 object *sensitivity_parallel( object *o, sense *s );
@@ -548,7 +620,6 @@ void empty_description( void );
 void empty_lattice( void );
 void empty_sensitivity( sense *cs );
 void entry_new_objnum( object *c, int *choice, char const *tag );
-void error_hard( const char *logText, const char *boxTitle, const char *boxText = "" );
 void file_name( char *name );
 void fill_list_par( object *r, int flag_all );
 void fill_list_var( object *r, int flag_all, int flag_init );
@@ -562,7 +633,6 @@ void histograms( int *choice );
 void histograms_cs( int *choice );
 void init_map( void );
 void init_plot( int i, int id_sim );
-void init_random( int seed );
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem( object *r, int *num_v, int *num_c );
 void insert_labels_mem( object *r, int *num_v, int *num_c );
@@ -573,9 +643,7 @@ void kill_trailing_newline( char *s );
 void link_data( object *root, char *lab );
 void load_configuration_failed( void );
 void log_tcl_error( const char *cm, const char *message );
-void msleep( unsigned msec );
 void myexit( int v );
-void plog( char const *msg, char const *tag = "", ... );
 void plog_series( int *choice );
 void plot( int type, int *start, int *end, char **str, char **tag, int *choice, bool norm );
 void plot( int type, int nv, double **data, int *start, int *end, char **str, char **tag, int *choice );
@@ -596,7 +664,7 @@ void read_data( int *choice );
 void read_eq_filename( char *s );
 void report( int *choice, object *r );
 void reset_end( object *r );
-void results_alt_path( const char *altPath );
+void reset_plot( int run );
 void run( object *r );
 void save_data1( int *choice );
 void save_datazip( int *choice );
@@ -615,7 +683,6 @@ void set_all( int *choice, object *original, char *lab, int lag );
 void set_blueprint( object *container, object *r );
 void set_buttons_log( bool on );
 void set_cs_data( int *choice );
-void set_fast( int level );
 void set_lab_tit( variable *var );
 void set_obj_number( object *r, int *choice );
 void set_shortcuts( const char *window, const char *help );
@@ -661,8 +728,7 @@ void write_var( variable *v, FILE *frep );
 void parallel_update( variable *v, object* p, object *caller = NULL );
 #endif
 
-
-// global variables
+// global internal variables (not visible to the users)
 
 extern bool fast_lookup;	// flag for fast look-up mode
 extern bool ignore_eq_file;	// control of configuration files equation updating
@@ -676,7 +742,6 @@ extern bool parallel_mode;	// parallel mode (multithreading) status
 extern bool redrawRoot;		// control for redrawing root window (.)
 extern bool running;		// simulation is running
 extern bool struct_loaded;	// a valid configuration file is loaded
-extern bool use_nan;		// flag to allow using Not a Number value
 extern bool unsavedData;	// control for unsaved simulation results
 extern bool unsavedSense;	// control for unsaved changes in sensitivity data
 extern bool user_exception;	// flag indicating exception was generated by user code
@@ -684,9 +749,7 @@ extern bool tk_ok;			// control for tk_ready to operate
 extern char *eq_file;		// equation file content
 extern char *exec_file;		// name of executable file
 extern char *exec_path;		// path of executable file
-extern char *path;			// path of current configuration
 extern char *sens_file;		// current sensitivity analysis file
-extern char *simul_name;	// name of current simulation configuration
 extern char *struct_file;	// name of current configuration file
 extern char equation_name[ ];// equation file name
 extern char lsd_eq_file[ ];	// equations saved in configuration file
@@ -701,13 +764,12 @@ extern int add_to_tot;		// type of totals file generated (bool)
 extern int choice;			// Tcl menu control variable (main window)
 extern int choice_g;		// Tcl menu control variable ( structure window)
 extern int cur_plt;			// current graph plot number
-extern int debug_flag;		// debug enable control (bool)
 extern int docsv;			// produce .csv text results files (bool)
 extern int dozip;			// compressed results file flag (bool)
-extern int fast_mode;		// fast mode (log window)
 extern int findexSens;		// index to sequential sensitivity configuration filenames
+extern int log_start;		// first period to start logging to file, if any
+extern int log_stop;		// last period to log to file, if any
 extern int macro;			// equations style (macros or C++) (bool)
-extern int max_step;		// last simulation time step
 extern int max_threads;		// suggested maximum number of parallel threads 
 extern int no_res;			// do not produce .res results files (bool)
 extern int overwConf;		// overwrite current configuration file on run (bool)
@@ -715,15 +777,11 @@ extern int parallel_disable;// flag to control parallel mode
 extern int prof_aggr_time;	// show aggregate profiling times
 extern int prof_min_msecs;	// profile only variables taking more than X msecs.
 extern int prof_obs_only;	// profile only observed variables
-extern int quit;			// simulation interruption mode (0=none )
 extern int saveConf;		// save configuration on results saving (bool)
-extern int seed;			// pseudo random number generator seed in use
 extern int series_saved;	// number of series saved
-extern int sim_num;			// simulation number running
 extern int stack;			// LSD stack call level
 extern int stack_info; 		// LSD stack control
 extern int strWindowOn;		// control the presentation of the model structure window (bool)
-extern int t;               // current time step
 extern int total_obj;		// total objects in model
 extern int total_var;       // total variables/parameters in model
 extern int watch;			// allow for graph generation interruption (bool)
@@ -732,10 +790,10 @@ extern int wr_warn_cnt;		// invalid write operations warning counter
 extern long nodesSerial;	// network node serial number global counter
 extern lsdstack *stacklog;	// LSD stack
 extern object *blueprint;   // LSD blueprint (effective model in use )
-extern object *root;        // LSD root object
 extern sense *rsense;       // LSD sensitivity analysis structure
 extern variable *cemetery;  // LSD saved data series (from last simulation run )
 extern map< string, profile > prof;// set of saved profiling times
+extern FILE *log_file;		// log file, if any
 
 // multi-threading control 
 #ifdef PARALLEL_MODE
@@ -761,8 +819,3 @@ extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
 #endif						// NO_WINDOW
 
 #endif						// FUN
-
-// map to fast equation look-up
-#ifdef CPP11
-extern eq_mapT eq_map;		// equations map
-#endif

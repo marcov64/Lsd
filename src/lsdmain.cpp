@@ -135,6 +135,8 @@ int fast_mode;				// level of LOG messages & runtime plot
 int fend;					// last multi configuration job to run
 int findex;					// current multi configuration job
 int findexSens = 0;			// index to sequential sensitivity configuration filenames
+int log_start;				// first period to start logging to file
+int log_stop;				// last period to log to file, if any
 int macro;					// equations style (macros or C++) (bool)
 int max_threads = 1;		// suggested maximum number of parallel threads 
 int no_res = false;			// do not produce .res results files (bool)
@@ -159,6 +161,7 @@ object *root = NULL;		// LSD root object
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 map < string, profile > prof;	// set of saved profiling times
+FILE *log_file = NULL;		// log file, if any
 
 #ifdef PARALLEL_MODE
 map< thread::id, worker * > thr_ptr;	// worker thread pointers
@@ -911,7 +914,8 @@ void run( object *root )
 		actual_steps = t - 1;
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
-		end = clock();
+		deb_log( false );			// close debug log file, if any
+		end = clock( );
 
 		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
 			quit = 0;
@@ -924,8 +928,7 @@ void run( object *root )
 #ifndef NO_WINDOW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
-		// allow for run-time plot window destruction
-		cmd( "if [ winfo exists .plt%d ] { wm protocol .plt%d WM_DELETE_WINDOW \"\"; .plt%d.fond.go conf -state disabled; .plt%d.fond.shift conf -state disabled }", i, i, i, i  );
+		reset_plot( i );
 #endif
 
 		close_sim( );
@@ -1087,16 +1090,14 @@ void set_fast( int level )
 	// remove the variables stack when switching to any fast mode
 	if ( fast_mode == 0 && level > 0 )
 	{
-		if ( stack_info > 0 || prof_aggr_time )
+		if ( when_debug > 0 || stack_info > 0 || prof_aggr_time )
 		{
-#ifndef NO_WINDOW   
-			cmd( "tk_messageBox -parent .log -title Warning -icon warning -type ok -message \"Fast mode not available\" -detail \"Fast mode is not supported when stack profiling is activated.\nTo enable fast mode, please disable stack profiling using menu 'Run', option 'Simulation Settings'.\"" );
-#else
-			fprintf( stderr, "\nFast mode is not supported.\n" );	
-#endif
+			plog( "\nWarning: %s is active, fast mode command ignored", "", 
+				  when_debug > 0 ? "debugging" : "profiling" );
 			return;
 		}
 		unwind_stack( );
+		deb_log( false );
 	}
 	
 	fast_mode = level;

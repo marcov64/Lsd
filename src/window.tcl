@@ -38,8 +38,8 @@ set logWndFn	false
 # Enable coordinates test window
 set testWnd		false
 
-# Warn old Tcl/Tk
-if [ string equal [ info tclversion ] 8.5 ] {
+# Warn old Tcl/Tk in macOS
+if { [ string equal [ tk windowingsystem ] aqua ] && [ string equal [ info tclversion ] 8.5 ] } {
 	tk_messageBox -type ok -icon warning -title Warning \
 	-message "Old Tcl/Tk version" \
 	-detail "Please update your Tcl/Tk version to version 8.6 or higher.\nSome problems may appear when using an old version."
@@ -348,16 +348,8 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 	}
 
 	raise $w
+	focus $w
 	
-	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
-		$w.$buttonF.ok configure -default active -state active
-		focus $w.$buttonF.ok
-	} elseif { [ info exists buttonF ] && [ winfo exists $w.$buttonF.r2.ok ] } {
-		$w.$buttonF.r2.ok configure -default active -state active
-		focus $w.$buttonF.r2.ok
-	} {
-		focus $w
-	}
 	update
 	
 	# grab focus, if required, updating the grabbing list
@@ -373,6 +365,18 @@ proc showtop { w { pos none } { resizeX no } { resizeY no } { grab yes } { sizeX
 		if { [ string equal [ tk windowingsystem ] aqua ] && $gm != "" } { 
 			wm geometry $w $gm
 		}
+		
+		raise $w
+	}
+	
+	if { [ info exists buttonF ] && [ winfo exists $w.$buttonF.ok ] } {
+		$w.$buttonF.ok configure -default active -state active
+		focus $w.$buttonF.ok
+	} elseif { [ info exists buttonF ] && [ winfo exists $w.$buttonF.r2.ok ] } {
+		$w.$buttonF.r2.ok configure -default active -state active
+		focus $w.$buttonF.r2.ok
+	} {
+		focus $w
 	}
 	
 	if { $logWndFn && [ info procs plog ] != "" } { plog "\nshowtop (w:$w, master:[wm transient $w], pos:([winfo x $w],[winfo y $w]), size:[winfo width $w]x[winfo height $w], minsize:[wm minsize $w], primdisp:[ primdisp [ winfo parent $w ] ], parWndLst:$parWndLst, grab:$grabLst)" } 

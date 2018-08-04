@@ -259,7 +259,7 @@ void plog( char const *cm, char const *tag, ... )
 	message_logged = true;
 }
 
-int deb( object *r, object *c,  char const *lab, double *res, bool interact );
+
 /***********
 ERROR_HARD
 Procedure called when an unrecoverable error occurs. 
@@ -280,6 +280,11 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 #ifndef NO_WINDOW
 	if ( running )			// handle running events differently
 	{
+		cmd( "if [ winfo exists .deb ] { destroytop .deb }" );
+		deb_log( false );	// close any open debug log file
+		reset_plot( cur_sim );	// allow closing run-time plot
+		set_buttons_log( false );
+
 		plog( "\n\nError detected at time %d", "highlight", t );
 		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
 		if ( ! parallel_mode && stacklog != NULL && stacklog->vs != NULL )
@@ -304,10 +309,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 #ifndef NO_WINDOW
 	uncover_browser( );
-    init_error:
 	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 
-	cmd( "set err 1" );
+	cmd( "set err 2" );
 
 	cmd( "newtop .cazzo Error" );
 
@@ -322,10 +326,10 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 	cmd( "frame .cazzo.e.b -relief groove -bd 2" );
 	cmd( "radiobutton .cazzo.e.b.r -variable err -value 2 -text \"Return to LSD Browser to edit the model configuration\"" );
+	cmd( "radiobutton .cazzo.e.b.d -variable err -value 3 -text \"Open LSD Debugger on the offending variable and object instance\"" );
 	cmd( "radiobutton .cazzo.e.b.e -variable err -value 1 -text \"Quit LSD Browser to edit the model equations' code in LMM\"" );
-	cmd( "radiobutton .cazzo.e.b.a -variable err -value 3 -text \"Open the debugger showing the offending variable\"" );
 
-	cmd( "pack .cazzo.e.b.r .cazzo.e.b.e .cazzo.e.b.a -anchor w" );
+	cmd( "pack .cazzo.e.b.r .cazzo.e.b.d .cazzo.e.b.e -anchor w" );
 
 	cmd( "pack .cazzo.e.l .cazzo.e.b" );
 
@@ -333,25 +337,32 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 
 	cmd( "okhelp .cazzo b { set choice 1 }  { LsdHelp debug.html#crash }" );
 
-	cmd( "bind .cazzo.e.b.r <Down> {focus .cazzo.e.b.e; .cazzo.e.b.e invoke}" );
-	cmd( "bind .cazzo.e.b.e <Up> {focus .cazzo.e.b.r; .cazzo.e.b.r invoke}" );
-	cmd( "bind .cazzo.e.b.r <Return> {set choice 1}" );
-	cmd( "bind .cazzo.e.b.e <Return> {set choice 1}" );
-
 	cmd( "showtop .cazzo centerS" );
+	
+	if ( parallel_mode || fast_mode != 0 )
+		cmd( ".cazzo.e.b.d configure -state disabled" );
 
-	choice=0;
-	while (choice == 0 )
+	choice = 0;
+	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "set choice $err" );
 	cmd( "destroytop .cazzo" );
-    if (choice == 3 )
-     {
-      double ass=0;
-      deb(stacklog->vs->up, NULL, stacklog->vs->label, &ass, false);
-      goto init_error;
-     }
+	
+	if ( choice == 3 )
+	{
+		if ( ! parallel_mode && fast_mode == 0 && stacklog != NULL && 
+			 stacklog->vs != NULL && stacklog->vs->label != NULL )
+		{
+			char err_msg[ MAX_LINE_SIZE ];
+			double useless = -1;
+			sprintf( err_msg, "%s (ERROR)", stacklog->vs->label );
+			deb( stacklog->vs->up, NULL, err_msg, &useless );
+		}
+		
+		choice = 2;
+	}
+
 	if ( choice == 2 )
 	{
 		// do run( ) cleanup
@@ -361,7 +372,6 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 		close_sim( );
 		reset_end( root );
 		root->emptyturbo( );
-		set_buttons_log( false );
 		uncover_browser( );
 
 #ifdef PARALLEL_MODE
@@ -520,7 +530,8 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	if ( res == NULL )
 	{
 		sprintf( msg, "'%s' is missing for cycling", label );
-		error_hard( msg, "Object not found", "Check your code to prevent this situation" );
+		error_hard( msg, "object not found", 
+					"check your code to prevent this situation" );
 	}
 	
 	return res;
@@ -1837,14 +1848,18 @@ int shrink_gnufile( void )
 	f = fopen("plot.file", "r");
 	if ( f == NULL )
 	{
-		error_hard( "Cannot open plot file", "Internal error", "If error persists, please contact developers" );
+		error_hard( "cannot open plot file", 
+					"internal error", 
+					"if error persists, please contact developers" );
 		myexit( 14 );
 	}
 
 	f1=fopen("plot_clean.file", "w");
 	if ( f == NULL )
 	{
-		error_hard( "Cannot open clean plot file", "Internal error", "If error persists, please contact developers" );
+		error_hard( "cannot open clean plot file",
+					"internal error", 
+					"if error persists, please contact developers" );
 		myexit( 15 );
 	}
 
@@ -1937,7 +1952,9 @@ int store(int x1, int x2, int x3, int x4)
 	  return 1;
 	 }
 
-	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	error_hard( "invalid data structure", 
+				"internal error", 
+				"if error persists, please contact developers" );
 	myexit( 16 );
 	
 	return 0;
@@ -1975,7 +1992,9 @@ int store(struct s *c, int x2, int x3, int x4)
 	  return 1;
 	 }
 
-	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	error_hard( "invalid data structure",
+				"internal error", 
+				"if error persists, please contact developers" );
 	myexit( 17 );
 	
 	return 0;
@@ -2009,7 +2028,9 @@ int store(struct s *c, int x3, int x4)
 	  return 1;
 	 }
 
-	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	error_hard( "invalid data structure",
+				"internal error", 
+				"if error persists, please contact developers" );
 	myexit( 18 );
 	
 	return 0;
@@ -2038,7 +2059,9 @@ int store(struct s *c, int x4)
 	  return 1;
 	 }
 
-	error_hard( "Invalid data structure", "Internal error", "If error persists, please contact developers" );
+	error_hard( "invalid data structure",
+				"internal error", 
+				"if error persists, please contact developers" );
 	myexit( 19 );
 	
 	return 0;
@@ -3371,7 +3394,9 @@ double gamdev( int ia, long *idum_loc = NULL )
 
 	if ( ia < 1 ) 
 	{
-		error_hard( "Inconsistent state in gamma function", "Internal error", "If error persists, please contact developers" );
+		error_hard( "inconsistent state in gamma function",
+					"internal error", 
+					"if error persists, please contact developers" );
 		quit = 1;
 		return 0;
 	} 

@@ -147,7 +147,8 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		origNode->node = new netNode( );// create node data structure
 		if ( origNode->node == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding node", "Out of memory" );
+			error_hard( "cannot allocate memory for adding node", 
+						"out of memory" );
 			myexit( 25 );
 		}
 	}
@@ -156,7 +157,8 @@ netLink::netLink( object *origNode, object *destNode, double linkWeight, double 
 		destNode->node = new netNode( );// create node data structure
 		if ( destNode->node == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding node", "Out of memory" );
+			error_hard( "cannot allocate memory for adding node", 
+						"out of memory" );
 			myexit( 25 );
 		}
 	}
@@ -222,7 +224,8 @@ netLink *object::add_link_net( object *destPtr, double weight, double probTo )
 	cur = new netLink( this, destPtr, weight, probTo );
 	if ( cur == NULL )
 	{
-		error_hard( "Cannot allocate memory for adding link", "Out of memory" );
+		error_hard( "cannot allocate memory for adding link", 
+					"out of memory" );
 		myexit( 26 );
 		return NULL;
 	}
@@ -288,7 +291,9 @@ netLink *object::draw_link_net( void )
 		
 	if ( ! is_finite( sum ) || sum <= 0 )		// check valid probabilities
 	{
-		error_hard( "Probabilities are invalid for link drawing", "Invalid network operation", "Check your code to prevent this situation" );
+		error_hard( "probabilities are invalid for link drawing", 
+					"invalid network operation", 
+					"check your code to prevent this situation" );
 		return node->first;
 	}
 
@@ -328,7 +333,8 @@ netNode::netNode( long nodeId, char const *nodeName, double nodeProb )
 		name = new char[ strlen( nodeName ) + 1 ];
 		if ( name == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding node", "Out of memory" );
+			error_hard( "cannot allocate memory for adding node", 
+						"out of memory" );
 			myexit( 27 );
 		}
 		strcpy( name, nodeName );
@@ -375,7 +381,8 @@ netNode *object::add_node_net( long id, char const nodeName[ ],
 	node = new netNode( id, nodeName );
 	if ( node == NULL )
 	{
-		error_hard( "Cannot allocate memory for adding node", "Out of memory" );
+		error_hard( "cannot allocate memory for adding node", 
+					"out of memory" );
 		myexit( 25 );
 		return NULL;
 	}
@@ -419,7 +426,8 @@ void object::name_node_net( char const *nodeName )
 		node->name = new char[ strlen( nodeName ) + 1 ];
 		if ( node->name == NULL )
 		{
-			error_hard( "Cannot allocate memory for adding node", "Out of memory" );
+			error_hard( "cannot allocate memory for adding node", 
+						"out of memory" );
 			myexit( 27 );
 		}
 		strcpy( node->name, nodeName );
@@ -510,7 +518,9 @@ object *object::draw_node_net( char const *lab )
 		
 	if ( ! is_finite( sum ) || sum <= 0 )			// check valid probabilities
 	{
-		error_hard( "Probabilities are invalid for node drawing", "Invalid network draw parameters", "Check your code to prevent this situation" );
+		error_hard( "probabilities are invalid for node drawing", 
+					"invalid network draw parameters", 
+					"check your code to prevent this situation" );
 		return cur1;
 	}
 
@@ -556,7 +566,8 @@ object *object::shuffle_nodes_net( char const *lab )
 		if ( cur->node == NULL || cur1->node == NULL )
 		{
 			sprintf( msg, "'%s' has no network data structure", lab );
-			error_hard( msg, "Invalid network object", "Check your code to prevent this situation" );
+			error_hard( msg, "invalid network object", 
+						"check your code to prevent this situation" );
 			return NULL;
 		}
 		
@@ -605,9 +616,9 @@ long object::init_stub_net( char const *lab, const char* gen, long numNodes, lon
 	// must have a label, and two nodes except is a disconnected network (1 node minimum)
 	if ( ( numNodes < 2 && strcmp( option, "DISCONNECTED" ) ) || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for the specified network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for the specified network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -653,9 +664,9 @@ long object::init_stub_net( char const *lab, const char* gen, long numNodes, lon
 		if ( numNodes % par1 == 0 && par1 > 0 )
 			return init_lattice_net( numNodes / par1, par1, lab, ( bool ) par2 );
 	
-	error_hard( "Wrong parameter values for the specified network", 
-				"Cannot create network", 
-				"Check your code to prevent this situation" );
+	error_hard( "wrong parameter values for the specified network", 
+				"cannot create network", 
+				"check your code to prevent this situation" );
 	return 0;
 }
 
@@ -672,9 +683,9 @@ long object::init_discon_net( char const *lab, long numNodes )
 	
 	if ( numNodes < 1 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for disconnected network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for disconnected network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return -1;
 	}
 	
@@ -733,16 +744,17 @@ long object::init_random_dir_net( char const *lab, long numNodes, long numLinks 
 	
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for random directed network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for random directed network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) )				// test if net is achievable
 	{
-		sprintf( msg, "Object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) )", lab );
-		error_hard( msg, "Invalid network parameters", "Check your code to prevent this situation" );
+		sprintf( msg, "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) )", lab );
+		error_hard( msg, "invalid network parameters", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -786,16 +798,17 @@ long object::init_random_undir_net( char const *lab, long numNodes, long numLink
 	
 	if ( numNodes < 2 || numLinks < 0 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for random undirected network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for random undirected network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
 	if ( numLinks > ( numNodes * ( numNodes - 1 ) ) / 2 )			// test if net is achievable
 	{
-		sprintf( msg, "Object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2", lab );
-		error_hard( msg, "Invalid network parameters", "Check your code to prevent this situation" );
+		sprintf( msg, "object '%s' has numLinks > ( numNodes * ( numNodes - 1 ) ) / 2", lab );
+		error_hard( msg, "invalid network parameters", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -840,9 +853,9 @@ long object::init_uniform_net( char const *lab, long numNodes, long outDeg )
 	
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for random uniform network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for random uniform network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -895,9 +908,9 @@ long object::init_renyi_erdos_net( char const *lab, long numNodes, double linkPr
 
 	if ( numNodes < 2 || linkProb < 0 || linkProb > 1 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for Renyi-Erdos network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for Renyi-Erdos network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -945,9 +958,9 @@ long object::init_circle_net( char const *lab, long numNodes, long outDeg )
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for circle network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for circle network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -1010,9 +1023,9 @@ long object::init_small_world_net( char const *lab, long numNodes, long outDeg, 
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || rho < 0 || rho > 1 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for Small-World network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for Small-World network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -1082,9 +1095,9 @@ long object::init_scale_free_net( char const *lab, long numNodes, long outDeg, d
 
 	if ( numNodes < 2 || outDeg < 0 || outDeg >= numNodes || expLink <= 0 || lab == NULL )
 	{
-		error_hard( "Wrong parameter values for scale-free network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for scale-free network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
 	
@@ -1186,9 +1199,9 @@ long object::init_lattice_net( int nRow, int nCol, char const *lab, int eightNei
 	
 	if ( nRow <= 0 || nCol <= 0 || lab == NULL || ( eightNeigbr != 0 && eightNeigbr != 1 ) )
 	{
-		error_hard( "Wrong parameter values for lattice network", 
-					"Cannot create network", 
-					"Check your code to prevent this situation" );
+		error_hard( "wrong parameter values for lattice network", 
+					"cannot create network", 
+					"check your code to prevent this situation" );
 		return 0;
 	}
  
@@ -1320,8 +1333,9 @@ long object::read_file_net( char const *lab, char const dir[ ], char const base_
 	{
 		if ( serial >= 0 )									// interactive mode - handle in interf.cpp
 		{
-			sprintf( msg, "Cannot open network file '%s'", fileName );
-			error_hard( msg, "Network file error", "Check the requested file exists" );
+			sprintf( msg, "cannot open network file '%s'", fileName );
+			error_hard( msg, "network file error", 
+						"check the requested file exists" );
 		}
 		return 0;
 	}
@@ -1340,8 +1354,9 @@ long object::read_file_net( char const *lab, char const dir[ ], char const base_
 		fclose( pajekFile );
 		if ( serial >= 0 )									// interactive mode - handle in interf.cpp
 		{
-			sprintf( msg, "Empty or invalid network file '%s'", fileName );
-			error_hard( msg, "Network file error", "Check the requested file content" );
+			sprintf( msg, "empty or invalid network file '%s'", fileName );
+			error_hard( msg, "network file error", 
+						"check the requested file content" );
 		}
 		return 0;
 	}
@@ -1465,8 +1480,9 @@ long object::write_file_net( char const *lab, char const dir[ ], char const base
 	{
 		if ( serial >= 0 )									// interactive mode - handle in interf.cpp
 		{
-			sprintf( msg, "Cannot create network file '%s'", fileName );
-			error_hard( msg, "Network file error", "Check disk space and permissions" );
+			sprintf( msg, "cannot create network file '%s'", fileName );
+			error_hard( msg, "network file error", 
+						"check disk space and permissions" );
 		}
 		return 0;
 	}
@@ -1495,7 +1511,8 @@ long object::write_file_net( char const *lab, char const dir[ ], char const base
 			if ( serial >= 0 )								// interactive mode - handle in interf.cpp
 			{
 				sprintf( msg, "'%s' has no network data structure, file '%s' not saved", lab, fileName );
-				error_hard( msg, "Invalid network object", "Check your code to prevent this situation" );
+				error_hard( msg, "invalid network object", 
+							"check your code to prevent this situation" );
 			}
 			return 0;
 		}
@@ -1553,16 +1570,17 @@ object *check_net_struct( object *caller, char const *nodeLab, bool noErr )
 		if ( ! noErr )									// interactive mode - handle in interf.cpp
 		{
 			sprintf( msg, "'%s' is missing", nodeLab );
-			error_hard( msg, "Object not found", "Check your configuration to prevent this situation" );
+			error_hard( msg, "object not found", 
+						"check your configuration to prevent this situation" );
 		}
 		return NULL;		
 	}
 	if ( cur->up == NULL )
 	{
 		if ( ! noErr )									// interactive mode - handle in interf.cpp
-			error_hard( "Cannot create network at the Root level", 
-						"Invalid network data structure", 
-						"Check your configuration to prevent this situation" );
+			error_hard( "cannot create network at the Root level", 
+						"invalid network data structure", 
+						"check your configuration to prevent this situation" );
 
 		return NULL;		
 	}
@@ -1570,8 +1588,9 @@ object *check_net_struct( object *caller, char const *nodeLab, bool noErr )
 	{
 		if ( ! noErr )									// interactive mode - handle in interf.cpp
 		{
-			sprintf( msg, "No descending object '%s' in container object", nodeLab );
-			error_hard( msg, "Invalid network data structure", "Check your configuration to prevent this situation" );
+			sprintf( msg, "no descending object '%s' in container object", nodeLab );
+			error_hard( msg, "invalid network data structure", 
+						"check your configuration to prevent this situation" );
 		}
 		return NULL;		
 	}

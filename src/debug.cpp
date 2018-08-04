@@ -73,6 +73,7 @@ did not issue an error message.
 #include "decl.h"
 
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
+bool non_var = false;			// flag to indicate INTERACT macro condition
 double i_values[ 1000 ];
 lsdstack *asl = NULL;
 
@@ -80,7 +81,7 @@ lsdstack *asl = NULL;
 /*******************************************
 DEB
 ********************************************/
-int deb( object *r, object *c,  char const *lab, double *res, bool interact )
+int deb( object *r, object *c, char const *lab, double *res, bool interact )
 {
 bool pre_running;
 char ch[ 4 * MAX_ELEM_LENGTH ], *ch1;
@@ -91,8 +92,8 @@ object *cur, *cur1, *cur2;
 bridge *cb, *cb1;
 variable *cv, *cv1;
 
-// define the presentation mode ( 1 = normal debug, 2 = data browse, 3 = pause debug )
-int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : 1; 
+// define the presentation mode ( 1 = normal debug, 2 = data browse, 3 = pause debug, 4 = error )
+int mode = ( lab == NULL ) ? 2 : ( ! strcmp( lab, "Paused by User" ) ) ? 3 : ( strstr( lab, "(ERROR)" ) != NULL ) ? 4 : 1; 
 Tcl_SetVar( inter, "lab", lab, 0 );
 
 cmd( "set deb .deb" );
@@ -152,7 +153,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "button .deb.b.move.hook -width $butWid -text Hook -command {set choice 21} -underline 0" );
 	cmd( "button .deb.b.move.net -width $butWid -text Network -command {set choice 22} -underline 3" );
 	
-	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx 10 -pady 5 -side left -expand no -fill none" );
+	cmd( "pack .deb.b.move.up .deb.b.move.down .deb.b.move.prev .deb.b.move.broth .deb.b.move.hypern .deb.b.move.last .deb.b.move.search .deb.b.move.hook .deb.b.move.net -padx 8 -pady 5 -side left -expand no -fill none" );
 	
 	cmd( "pack .deb.b.move -expand no -fill none -anchor e" );
 	
@@ -172,24 +173,32 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 	cmd( "bind .deb <KeyPress-Escape> {set choice 7}" );
 
 	// second row of buttons (if applicable)
-	if ( mode != 2 )
+	if ( mode == 1 || mode == 3 )
 	{
 		cmd( "set stack_flag %d", stack_info );
 		
 		cmd( "frame .deb.b.act" );
 		
-		cmd( "button .deb.b.act.run -width $butWid -text \"%s\" -command {set choice 2} -underline 0", mode == 1 ? "Run" : "Resume" );
-		
 		if ( mode == 1 )
 		{
-			cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16} -underline 3" );
+			cmd( "button .deb.b.act.run -width $butWid -text Run -command {set choice 2; set_c_var done_in 0} -underline 0" );
+			cmd( "button .deb.b.act.until -width $butWid -text Until -command {set choice 16; set_c_var done_in 0} -underline 3" );
 			cmd( "button .deb.b.act.ok -width $butWid -text Step -command {set choice 1; set_c_var done_in 3} -underline 0" );
 			cmd( "button .deb.b.act.call -width $butWid -text Caller -command {set choice 9} -underline 0" );
 			cmd( "button .deb.b.act.prn_v -width $butWid -text \"v\\\[...\\]\" -command {set choice 15} -underline 0" );
+			
+			cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
+			cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
+			cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
+			cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
+			cmd( "bind .deb <KeyPress-v> {.deb.b.act.prn_v invoke}; bind .deb <KeyPress-V> {.deb.b.act.prn_v invoke}" );
 		}
 		
 		cmd( "button .deb.b.act.an -width $butWid -text Analysis -command {set choice 11} -underline 0" );
 		cmd( "button .deb.b.act.prn_stck -width $butWid -text Stack -command {set choice 13} -underline 4" );
+		
+		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
+		cmd( "bind .deb <KeyPress-k> {.deb.b.act.prn_stck invoke}; bind .deb <KeyPress-K> {.deb.b.act.prn_stck invoke}" );
 		
 		cmd( "frame .deb.b.act.stack" );
 		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
@@ -198,20 +207,9 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
 		
 		if ( mode == 1 )
-		{
 			cmd( "pack .deb.b.act.run .deb.b.act.until .deb.b.act.ok .deb.b.act.call .deb.b.act.prn_v .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
-
-			cmd( "bind .deb <KeyPress-i> {.deb.b.act.until invoke}; bind .deb <KeyPress-I> {.deb.b.act.until invoke}" );
-			cmd( "bind .deb <KeyPress-s> {.deb.b.act.ok invoke}; bind .deb <KeyPress-S> {.deb.b.act.ok invoke}" );
-			cmd( "bind .deb <KeyPress-c> {.deb.b.act.call invoke}; bind .deb <KeyPress-C> {.deb.b.act.call invoke}" );
-			cmd( "bind .deb <KeyPress-v> {.deb.b.act.prn_v invoke}; bind .deb <KeyPress-V> {.deb.b.act.prn_v invoke}" );
-		}
 		else
-			cmd( "pack .deb.b.act.run .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
-		
-		cmd( "bind .deb <KeyPress-r> {.deb.b.act.run invoke}; bind .deb <KeyPress-R> {.deb.b.act.run invoke}" );
-		cmd( "bind .deb <KeyPress-a> {.deb.b.act.an invoke}; bind .deb <KeyPress-A> {.deb.b.act.an invoke}" );
-		cmd( "bind .deb <KeyPress-k> {.deb.b.act.prn_stck invoke}; bind .deb <KeyPress-K> {.deb.b.act.prn_stck invoke}" );
+			cmd( "pack .deb.b.act.an .deb.b.act.prn_stck .deb.b.act.stack -padx 10 -pady 5 -side left -expand no -fill none" );
 	
 		cmd( "pack .deb.b.act -expand no -fill none -anchor e" );
 	}
@@ -219,41 +217,47 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 
 app_res = *res;
 Tcl_LinkVar( inter, "value", ( char * ) &app_res, TCL_LINK_DOUBLE );
+cmd( "set value_change 0" );
 
 choice = 0;
 
 while ( choice == 0 )
 {
 	// if necessary, create the variable name and the time info bar
-	if ( mode == 1 )
+	if ( mode == 1 || mode == 4 )
 	{
 		cmd( "if { ! [ winfo exists .deb.v ] } { \
 				frame .deb.v -relief groove -bd 2; \
 				frame .deb.v.v1; \
 				label .deb.v.v1.name1 -text \"Variable:\"; \
-				label .deb.v.v1.name2 -fg red -text \"\"; \
-				label .deb.v.v1.time1 -text \"      Time step:\"; \
-				label .deb.v.v1.time2 -fg red -text \"      \"; \
+				label .deb.v.v1.name2 -width 20 -anchor w -fg red -text \"\"; \
+				label .deb.v.v1.time1 -text \"Time step:\"; \
+				label .deb.v.v1.time2 -width 5 -anchor w -fg red; \
 				label .deb.v.v1.val1 -text \"Value \"; \
-				entry .deb.v.v1.val2 -width 10 -validate focusout \
+				entry .deb.v.v1.val2 -width 15 -validate key \
 				-justify center -state disabled -vcmd { \
 					if { [ string is double %%P ] } { \
 						set value %%P; \
+						set value_change 1; \
 						return 1 \
 					} { \
 						%%W delete 0 end; \
 						if { [ string is double $value ] } { \
-							%%W insert 0 [ format \"%%.4g\" $value ] \
+							%%W insert 0 [ format \"%%g\" $value ] \
 						} { \
 							%%W insert 0 $value \
 						}; \
 						return 0 \
 					} \
 				}; \
-				pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
-				bind .deb <KeyPress-g> { set choice 77 }; \
-				bind .deb <KeyPress-G> { set choice 77 } \
-			}" );
+				if { %d == 1 } { \
+					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
+					bind .deb <KeyPress-g> { set choice 77 }; \
+					bind .deb <KeyPress-G> { set choice 77 } \
+				} { \
+					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left; \
+				} \
+			}", mode );
 		cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
 		Tcl_LinkVar( inter, "time", ( char * ) &t, TCL_LINK_INT );
 		cmd( ".deb.v.v1.time2 conf -text \"$time      \"" );
@@ -267,7 +271,25 @@ while ( choice == 0 )
 	cmd( "if $justCreated { showtop .deb topleftW 0 1; set justCreated false }" );
 
 	cmd( "raise .deb; focus .deb" );
+	
+	// update variable label field
+	cmd( "if [ winfo exists .deb.v.v1.name1 ] { \
+			if { %d == 0 } { \
+				.deb.v.v1.name1 configure -text \"Variable:\" \
+			} { \
+				.deb.v.v1.name1 configure -text \"Message:\" \
+			} \
+		} ", non_var ? 1 : 0 );
 
+	// disable or enable the caller button
+	if ( mode == 1 )
+	{
+		if( c == NULL )
+			cmd( ".deb.b.act.call configure -state disabled" );
+		else
+			cmd( ".deb.b.act.call configure -state normal" );
+	}
+		
 	// disable or enable the hook button
 	if( r->hook == NULL )
 		cmd( ".deb.b.move.hook configure -state disabled" );
@@ -303,7 +325,7 @@ while ( choice == 0 )
 
 	if ( mode == 1 )
 	{
-		cmd( "if [ string is double $value ] { write_any .deb.v.v1.val2 [ format \"%%.4g\" $value ] } { write_any .deb.v.v1.val2 $value }" ); 
+		cmd( "if [ string is double $value ] { write_any .deb.v.v1.val2 [ format \"%%g\" $value ] } { write_any .deb.v.v1.val2 $value }" ); 
 		cmd( "write_any .deb.b.act.stack.e $stack_flag" ); 
 		if ( interact )
 		{
@@ -323,7 +345,7 @@ while ( choice == 0 )
 		{
 			Tcl_DoOneEvent( 0 );
 		}
-		catch ( bad_alloc& ) 	// raise memory problems
+		catch ( bad_alloc& ) 		// raise memory problems
 		{
 			throw;
 		}
@@ -352,16 +374,15 @@ while ( choice == 0 )
 			{
 				cmd( "destroytop .deb" );
 				debug_flag = false;
-				when_debug = 0;
 			}
 			break;
 
-		// Run / Resume
+		// Run
 		case 2:
 			cmd( "destroytop .deb" );
-			debug_flag = false;
-			if ( t <= when_debug )
-				when_debug = 0;
+			if ( ! non_var )
+				debug_flag = false;
+
 			break;
 
 		// Up
@@ -621,10 +642,10 @@ while ( choice == 0 )
 				}
 			}
 
-			if ( choice == 8)
+			if ( choice == 8 )
 			{
 				choice = 3;	// point .deb window as parent for the following window
-				show_eq(cv->label, &choice);
+				show_eq( cv->label, &choice );
 				choice = 8;
 			}
 
@@ -909,7 +930,7 @@ while ( choice == 0 )
 
 			if ( choice == 1 )
 			{
-				//restart execution
+				// restart execution
 				choice = 2;
 				debug_flag = false;
 				cmd( "if { $tdebug > %d } { set when_debug $tdebug } { set when_debug %d }", t, t + 1 );
@@ -993,7 +1014,7 @@ while ( choice == 0 )
 		case 44:
 			cmd( "set name_rep %s", name_rep );
 
-			cmd( "set choice [file exists $name_rep]" );
+			cmd( "set choice [ file exists $name_rep ]" );
 
 			cmd( "if { $choice == 1 } { LsdHtml $name_rep }" );
 			cmd( "if { $choice == 0 } { tk_messageBox -parent .deb -type ok -title Error -icon error -message \"Report file not available\" -detail \"You can create the report in menu Model.\" }" );
@@ -1019,23 +1040,25 @@ while ( choice == 0 )
 				}
 				else
 				{
-					asl=asl->next;
+					asl = asl->next;
 					plog( "\nVariable: %s", "", asl->label );
 					choice = deb( asl->vs->up, c, lab, res, interact );
 				}
 			}  
 			break;  
-
 			
 		default:
-			plog( "\nDebug window choice not recognized\n" );
 			choice = 0;
-			break;
 	}
 }
 
-Tcl_UnlinkVar( inter, "value" );
+// only update if user typed a new valid value
+cmd( "if { $value_change == 0 } { set value %lf }", *res );
 *res = app_res;
+
+non_var = false;
+
+Tcl_UnlinkVar( inter, "value" );
 
 return choice;
 }
@@ -1122,7 +1145,7 @@ void deb_show( object *r )
 		for ( i = 1, ap_v = r->v; ap_v != NULL; ap_v = ap_v->next, ++i )
 		{
 			cmd( "set last %d", ap_v->last_update );
-			cmd( "set val %.4g", ap_v->val[ 0 ] );
+			cmd( "set val %g", ap_v->val[ 0 ] );
 			cmd( "frame .deb.cc.l.e$i" );
 			cmd( "label .deb.cc.l.e$i.name -width $w1 -pady 0 -anchor w -bd 0 -text %s", ap_v->label );
 			if (ap_v->param == 0 )
@@ -1343,6 +1366,7 @@ double object::interact( char const *text, double v, double *tv )
 		for ( i = 0; i < 100; ++i )
 			i_values[ i ] = tv[ i ];
 		
+		non_var = true;					// signals INTERACT macro
 		deb( this, NULL, text, &app, true );
 	}
 	
@@ -1355,3 +1379,68 @@ double object::interact( char const *text, double v, double *tv )
 	return v;
 }
 #endif
+
+
+/*******************************************
+DEB_LOG
+Creates/saves the file "log.txt" and 
+enable/disable logging the variables 
+computation order and enable/disable the 
+debugger 
+********************************************/
+void deb_log( bool on, int time )
+{ 
+#ifndef NO_WINDOW  
+	// check if should turn off
+	if ( ! on || parallel_mode || fast_mode != 0 )
+	{
+		// disable debugging
+		if ( time > t && when_debug >= time )
+			when_debug = 0;
+		else
+			if ( ( time == 0 && when_debug == t ) || time == t )
+				debug_flag = false;
+			
+		// act now?
+		if ( time == 0 || t > time )
+		{
+			// close file if open
+			if ( log_file != NULL )
+			{
+				fclose( log_file );
+				log_file = NULL;
+			}
+		}
+		else
+			log_stop = time;
+	}
+
+	// check if should turn on
+	if ( on && ! parallel_mode && fast_mode == 0 )
+	{
+		// enable debugging
+		if ( time > t )
+			when_debug = time;
+		else
+			if ( time == 0 || time == t )
+			{
+				when_debug = t;
+				debug_flag = true;
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+			}
+		
+		// ignore if log already open
+		if ( log_file == NULL )
+		{
+			log_file = fopen( "log.txt", "a" );
+			log_start = time;
+			log_stop = max_step;
+		}
+	}
+	
+	if ( on && ( parallel_mode || fast_mode > 0 ) )
+		plog( "\nWarning: %s is active, debug command ignored", "", 
+			  parallel_mode ? "parallel processing" : "fast mode" );
+			
+#endif
+}

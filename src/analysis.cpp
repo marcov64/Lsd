@@ -614,7 +614,8 @@ while ( true )
 		 
 		// Brutally shut down the system
 		case 35:
-			error_hard( "", "Abort requested", "If error persists, please contact developers" );
+			error_hard( "", "abort requested", 
+						"if error persists, please contact developers" );
 			myexit( 20 );
 
 
