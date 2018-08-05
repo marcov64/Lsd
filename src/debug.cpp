@@ -236,7 +236,7 @@ while ( choice == 0 )
 				label .deb.v.v1.val1 -text \"Value \"; \
 				entry .deb.v.v1.val2 -width 15 -validate key \
 				-justify center -state disabled -vcmd { \
-					if { [ string is double %%P ] } { \
+					if { [ string length %%P ] > 0 && [ string is double %%P ] } { \
 						set value %%P; \
 						set value_change 1; \
 						return 1 \
