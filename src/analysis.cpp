@@ -6176,7 +6176,7 @@ void create_series( int *choice )
 
 	cmd( "frame .da.s.i.r.ci" );
 	cmd( "radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
-	cmd( "label .da.s.i.r.ci.x -text \@" );
+	cmd( "label .da.s.i.r.ci.x -text @" );
 	cmd( "label .da.s.i.r.ci.perc -text %%" );
 	cmd( "entry .da.s.i.r.ci.p -width 3 -validate focusout -vcmd { if { [ string is integer \"%%P\" ] && %%P >= 80 && %%P <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
 	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 

@@ -337,10 +337,10 @@ void plot_rt( variable *v )
 		return;
 	}
 
-	x1 = h_margin + t * plot_step;
-	x2 = h_margin + ( t - 1 ) * plot_step;
-	y1 = t_margin + ( height - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * height );
-	y2 = t_margin + ( height - ( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * height );
+	x1 = ( int ) floor( h_margin + t * plot_step );
+	x2 = ( int ) floor( h_margin + ( t - 1 ) * plot_step );
+	y1 = ( int ) floor( t_margin + ( height - ( ( v->val[ 0 ] - ymin ) / ( ymax - ymin ) ) * height ) );
+	y2 = ( int ) floor( t_margin + ( height - ( ( old_val[ cur_plt ] - ymin ) / ( ymax - ymin ) ) * height ) );
 	old_val[ cur_plt ] = v->val[ 0 ];
 
 	cmd( "$activeplot.c.c.cn create line %d %d %d %d -tag punto -fill $c%d", x2, y2, x1, y1, cur_plt );

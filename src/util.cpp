@@ -2114,8 +2114,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		delete [ ] lattice;
 	}
 	
-	rows = nrow;
-	columns = ncol;
+	rows = ( int ) max( 0, floor( nrow ) );
+	columns = ( int ) max( 0, floor( ncol ) );
 	error_count = 0;
 			
 	// create the color data matrix
@@ -2248,7 +2248,7 @@ double update_lattice( double line, double col, double val )
 	
 	// save lattice color data
 	if ( lattice != NULL && rows > 0 && columns > 0 )
-		lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = val;
+		lattice[ ( int ) line - 1 ][ ( int ) col - 1 ] = ( int ) max( 0, floor( val ) );
 	
 #ifndef NO_WINDOW
 

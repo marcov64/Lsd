@@ -21,3 +21,4 @@ n++.wsp
 *.Rdata
 .Rproj.user
 *.Rproj
+lsd_gnu*.exe

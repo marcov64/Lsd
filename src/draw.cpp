@@ -274,12 +274,12 @@ void draw_obj( object *t, int level, int center, int from )
 				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
 		}
 		
-		range_type = level_factor[ 0 ] * range_init;
+		range_type = ( int ) floor( level_factor[ 0 ] * range_init );
 	}
 	else
 	{
 		// reduce object type width at each level
-		range_type = fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 );
+		range_type = ( int ) floor( fabs( level_factor[ j ] * range_init / pow( 2, j + range_fact ) - pow( range_init * 2 / 3, 1 / j ) + 1 ) );
 	}
 	
 	if ( i <= 1 )					// single object type son?
