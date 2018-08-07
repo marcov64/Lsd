@@ -275,7 +275,7 @@ cmd( "pack $f.v $f.v_scroll -side left -fill y" );
 cmd( "mouse_wheel $f.v" );
 cmd( "bind $f.v <BackSpace> {.da.vars.b.out invoke}" );
 cmd( "bind $f.v <Return> {.da.b.ts invoke}" );
-cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <Return> }" );
+cmd( "bind $f.v <Double-Button-1> { event generate .da.vars.ch.v <BackSpace> }" );
 cmd( "bind $f.v <Button-2> {.da.vars.ch.v selection clear 0 end;.da.vars.ch.v selection set @%%x,%%y; set res [selection get]; set choice 33}" );
 cmd( "bind $f.v <Button-3> { event generate .da.vars.ch.v <Button-2> -x %%x -y %%y }" );
 cmd( "bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}; bind $f.v <KeyPress-space> {set res [.da.vars.ch.v get active]; set choice 33}" );
