@@ -191,7 +191,7 @@ extern double i_values[ ];
 #define DEBUG_STOP deb_log( false );
 #define DEBUG_STOP_AT( X ) deb_log( false, ( int ) X );
 
-#define RND_SEED ( ( double ) seed )
+#define RND_SEED ( ( double ) seed - 1 )
 #define PATH ( ( const char * ) path )
 #define CONFIG ( ( const char * ) simul_name )
 #define T ( ( double ) t )
