@@ -73,8 +73,6 @@ did not issue an error message.
 #include "decl.h"
 
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
-bool non_var = false;			// flag to indicate INTERACT macro condition
-double i_values[ 1000 ];
 lsdstack *asl = NULL;
 
 
@@ -250,12 +248,13 @@ while ( choice == 0 )
 						return 0 \
 					} \
 				}; \
+				label .deb.v.v1.obs -text \"\"; \
 				if { %d == 1 } { \
-					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 -side left; \
+					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 .deb.v.v1.val1 .deb.v.v1.val2 .deb.v.v1.obs -side left; \
 					bind .deb <KeyPress-g> { set choice 77 }; \
 					bind .deb <KeyPress-G> { set choice 77 } \
 				} { \
-					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left; \
+					pack .deb.v.v1.name1 .deb.v.v1.name2 .deb.v.v1.time1 .deb.v.v1.time2 -side left \
 				} \
 			}", mode );
 		cmd( ".deb.v.v1.name2 conf -text \"%s\"", lab );
@@ -278,6 +277,15 @@ while ( choice == 0 )
 				.deb.v.v1.name1 configure -text \"Variable:\" \
 			} { \
 				.deb.v.v1.name1 configure -text \"Message:\" \
+			} \
+		} ", non_var ? 1 : 0 );
+
+	// update observations field
+	cmd( "if [ winfo exists .deb.v.v1.obs ] { \
+			if { %d == 0 } { \
+				.deb.v.v1.obs configure -text \"     (enter new value to change variable)\" \
+			} { \
+				.deb.v.v1.obs configure -text \"     (enter value and click Run or press Enter to continue)\" \
 			} \
 		} ", non_var ? 1 : 0 );
 
@@ -325,17 +333,22 @@ while ( choice == 0 )
 
 	if ( mode == 1 )
 	{
-		cmd( "if [ string is double $value ] { write_any .deb.v.v1.val2 [ format \"%%g\" $value ] } { write_any .deb.v.v1.val2 $value }" ); 
 		cmd( "write_any .deb.b.act.stack.e $stack_flag" ); 
+		
 		if ( interact )
-		{
-			cmd( "if [ string is double $value ] { \
+		{	// write 3 time because of Tcl bug
+			cmd( "if [ string is double -strict $value ] { \
 					.deb.v.v1.val2 configure -state normal; \
+					write_any .deb.v.v1.val2 [ format %%g $value ]; \
+					write_any .deb.v.v1.val2 [ format %%g $value ]; \
+					write_any .deb.v.v1.val2 [ format %%g $value ]; \
 					.deb.v.v1.val2 selection range 0 end; \
 					focus .deb.v.v1.val2; \
-					bind .deb.v.v1.val2 <Return> {.deb.b.act.run invoke} \
+					bind .deb.v.v1.val2 <Return> { .deb.b.act.run invoke } \
 			}" );
 		}
+		else
+			cmd( "if [ string is double -strict $value ] { write_any .deb.v.v1.val2 [ format %%g $value ] }" ); 
 	}
 
 	// debug command loop
@@ -354,7 +367,7 @@ while ( choice == 0 )
 			goto debug_maincycle;
 		}
 	}   
-	 
+
 	if ( mode == 1 )
 	{
 		cmd( "if [ string is double [ .deb.v.v1.val2 get ] ] { set value [ .deb.v.v1.val2 get ] }" ); 
@@ -1347,100 +1360,4 @@ void attach_instance_number( char *ch, object *r )
 	else
 		sprintf( msg, " |  %d:%s (%d/%d) ", ++depth, r->label, j, i - 1 );
 	strncat( ch, msg, 2 * MAX_ELEM_LENGTH - 1 - strlen( ch ) );
-}
-
-
-/*******************************************
-INTERACT
-Interrupt the simulation, as for the debugger, allowing the insertion of a value.
-Note that the debugging window, in this model, accept the entry key stroke as a run.
-********************************************/
-#ifndef NO_WINDOW
-double object::interact( char const *text, double v, double *tv )
-{
-	int i;
-	double app = v;
-
-	if ( quit == 0 )
-	{
-		for ( i = 0; i < 100; ++i )
-			i_values[ i ] = tv[ i ];
-		
-		non_var = true;					// signals INTERACT macro
-		deb( this, NULL, text, &app, true );
-	}
-	
-	return app;
-}
-
-#else
-double object::interact( char const *text, double v, double *tv )
-{
-	return v;
-}
-#endif
-
-
-/*******************************************
-DEB_LOG
-Creates/saves the file "log.txt" and 
-enable/disable logging the variables 
-computation order and enable/disable the 
-debugger 
-********************************************/
-void deb_log( bool on, int time )
-{ 
-#ifndef NO_WINDOW  
-	// check if should turn off
-	if ( ! on || parallel_mode || fast_mode != 0 )
-	{
-		// disable debugging
-		if ( time > t && when_debug >= time )
-			when_debug = 0;
-		else
-			if ( ( time == 0 && when_debug == t ) || time == t )
-				debug_flag = false;
-			
-		// act now?
-		if ( time == 0 || t > time )
-		{
-			// close file if open
-			if ( log_file != NULL )
-			{
-				fclose( log_file );
-				log_file = NULL;
-			}
-		}
-		else
-			log_stop = time;
-	}
-
-	// check if should turn on
-	if ( on && ! parallel_mode && fast_mode == 0 )
-	{
-		// enable debugging
-		if ( time > t )
-			when_debug = time;
-		else
-			if ( time == 0 || time == t )
-			{
-				when_debug = t;
-				debug_flag = true;
-				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
-			}
-		
-		// ignore if log already open
-		if ( log_file == NULL )
-		{
-			log_file = fopen( "log.txt", "a" );
-			log_start = time;
-			log_stop = max_step;
-		}
-	}
-	
-	if ( on && ( parallel_mode || fast_mode > 0 ) )
-		plog( "\nWarning: %s is active, debug command ignored", "", 
-			  parallel_mode ? "parallel processing" : "fast mode" );
-			
-#endif
 }

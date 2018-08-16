@@ -67,21 +67,12 @@ position of the file is just after str.
 
 #include "decl.h"
 
-#ifndef NO_WINDOW			// global Tcl interpreter in LSD
-Tcl_Interp *inter = NULL;
-#endif
-
-#ifdef LIBZ
-int dozip = true;			// compressed results file flag (bool)
-#else
-int dozip = false;
-#endif
-
 // some program defaults
 bool grandTotal = false;	// flag to produce or not grand total in batch processing
 bool ignore_eq_file = true;	// flag to ignore equation file in configuration file
 char nonavail[ ] = "NA";	// string for unavailable values (use R default)
 char tabs[ ] = "5c 7.5c 10c 12.5c 15c 17.5c 20c";	// Log window tabs
+double def_res = 0;			// default equation result
 int add_to_tot = false;		// flag to append results to existing totals file (bool)
 int max_step = 100;			// default number of simulation runs
 int overwConf = true;		// overwrite configuration on run flag (bool)
@@ -95,6 +86,7 @@ bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
 bool no_window = false;		// no-window command line job
+bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
 bool parallel_mode;			// parallel mode (multithreading) status
 bool pause_run;				// pause running simulation
@@ -163,14 +155,25 @@ variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 map < string, profile > prof;	// set of saved profiling times
 FILE *log_file = NULL;		// log file, if any
 
+#ifdef CPP11
+eq_mapT eq_map;				// fast equation look-up map
+#endif
+
+#ifdef LIBZ
+int dozip = true;			// compressed results file flag (bool)
+#else
+int dozip = false;
+#endif
+
+#ifndef NO_WINDOW			// global Tcl interpreter in LSD
+double i_values[ 1000 ];	// user temporary variables copy
+Tcl_Interp *inter = NULL;
+#endif
+
 #ifdef PARALLEL_MODE
 map< thread::id, worker * > thr_ptr;	// worker thread pointers
 thread::id main_thread;		// LSD main thread ID
 worker *workers = NULL;		// multi-thread parallel worker data
-#endif
-
-#ifdef CPP11
-eq_mapT eq_map;				// fast equation look-up map
 #endif
 
 
@@ -1533,4 +1536,96 @@ bool search_parallel( object *r )
 				return true;
 
 	return false;
+}
+
+
+/*******************************************
+INTERACT
+Interrupt the simulation, as for the debugger, allowing the insertion of a value.
+Note that the debugging window, in this model, accept the entry key stroke as a run.
+********************************************/
+double object::interact( char const *text, double v, double *tv )
+{
+#ifndef NO_WINDOW
+	int i;
+	double app = v;
+
+	if ( quit == 0 )
+	{
+		for ( i = 0; i < 100; ++i )
+			i_values[ i ] = tv[ i ];
+		
+		non_var = true;					// signals INTERACT macro
+		deb( this, NULL, text, &app, true );
+	}
+	
+	return app;
+#else
+	return v;
+#endif
+}
+
+
+/*******************************************
+DEB_LOG
+Creates/saves the file "log.txt" and 
+enable/disable logging the variables 
+computation order and enable/disable the 
+debugger 
+********************************************/
+void deb_log( bool on, int time )
+{ 
+#ifndef NO_WINDOW  
+	// check if should turn off
+	if ( ! on || parallel_mode || fast_mode != 0 )
+	{
+		// disable debugging
+		if ( time > t && when_debug >= time )
+			when_debug = 0;
+		else
+			if ( ( time == 0 && when_debug == t ) || time == t )
+				debug_flag = false;
+			
+		// act now?
+		if ( time == 0 || t > time )
+		{
+			// close file if open
+			if ( log_file != NULL )
+			{
+				fclose( log_file );
+				log_file = NULL;
+			}
+		}
+		else
+			log_stop = time;
+	}
+
+	// check if should turn on
+	if ( on && ! parallel_mode && fast_mode == 0 )
+	{
+		// enable debugging
+		if ( time > t )
+			when_debug = time;
+		else
+			if ( time == 0 || time == t )
+			{
+				when_debug = t;
+				debug_flag = true;
+				cmd( "if [ winfo exists .deb ] { wm deiconify .deb; raise .deb; focus -force .deb; update idletasks }" );
+			}
+		
+		// ignore if log already open
+		if ( log_file == NULL )
+		{
+			log_file = fopen( "log.txt", "a" );
+			log_start = time;
+			log_stop = max_step;
+		}
+	}
+	
+	if ( on && ( parallel_mode || fast_mode > 0 ) )
+		plog( "\nWarning: %s is active, debug command ignored", "", 
+			  parallel_mode ? "parallel processing" : "fast mode" );
+			
+#endif
 }

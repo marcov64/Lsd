@@ -25,14 +25,7 @@ using namespace Eigen;
 
 #include "decl.h"										// LSD classes
 
-double def_res = 0;										// default equation result
-
 #ifndef NO_WINDOW
-#include <tk.h>
-
-extern Tcl_Interp *inter;
-extern double i_values[ ];
-
 #define DEBUG_CODE \
 	if ( debug_flag ) \
 	{ \

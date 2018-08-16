@@ -9,6 +9,9 @@
 	
  *************************************************************/
 
+// LSD compilation options file
+#include "choose.h"
+
 // check compiler C++ standard support
 #ifndef CPP_DEFAULT
 #if __cplusplus >= 201103L 
@@ -56,8 +59,10 @@
 #endif
 #endif
 
-// LSD compilation options file
-#include "choose.h"
+// Tcl/Tk for graphical version (not no-window version)
+#ifndef NO_WINDOW
+#include <tk.h>
+#endif
 
 // disable code that make gdb debugging harder
 #ifdef DEBUG_MODE
@@ -68,7 +73,7 @@
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
 #define _LSD_VERSION_ "7.1"
-#define _LSD_DATE_ "Aug 03 2018"        // __DATE__
+#define _LSD_DATE_ "Aug 15 2018"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -500,24 +505,30 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 
 
 // global variables (visible to the users)
-extern bool fast;										// flag to hide LOG messages & runtime (read-only)
-extern bool invalidHooks;								// flag to invalid hooks pointers (set by simulation)
-extern bool use_nan;									// flag to allow using Not a Number value
-extern char *path;										// folder where the configuration is
-extern char *simul_name;								// configuration name being run (for saving networks)
+extern bool fast;				// flag to hide LOG messages & runtime (read-only)
+extern bool invalidHooks;		// flag to invalid hooks pointers (set by simulation)
+extern bool use_nan;			// flag to allow using Not a Number value
+extern char *path;				// folder where the configuration is
+extern char *simul_name;		// configuration name being run (for saving networks)
+extern double def_res;			// default equation result
 extern int cur_sim;
 extern int debug_flag;
 extern int fast_mode;
 extern int max_step;
 extern int quit;
-extern int ran_gen;										// pseudo-random number generator to use (1-5) )
+extern int ran_gen;				// pseudo-random number generator to use (1-5) )
 extern int seed;
 extern int sim_num;
 extern int t;
 extern object *root;
 
 #ifdef CPP11
-extern eq_mapT eq_map;									// map to fast equation look-up
+extern eq_mapT eq_map;			// map to fast equation look-up
+#endif
+
+#ifndef NO_WINDOW
+extern double i_values[ ];		// user temporary variables copy
+extern Tcl_Interp *inter;		// Tcl standard interpreter pointer
 #endif
 
 
@@ -737,6 +748,7 @@ extern bool in_edit_data;	// in initial settings mode
 extern bool in_set_obj;		// in setting number of objects mode
 extern bool log_ok;			// control for log window available
 extern bool message_logged;	// new message posted in log window
+extern bool non_var;		// flag to indicate INTERACT macro condition
 extern bool on_bar;			// flag to indicate bar is being draw in log window
 extern bool parallel_mode;	// parallel mode (multithreading) status
 extern bool redrawRoot;		// control for redrawing root window (.)
@@ -805,17 +817,11 @@ extern worker *workers;					// multi-thread parallel worker data
 
 // Tcl/Tk specific definitions (for the windowed version only)
 #ifndef NO_WINDOW
-
-#include <tk.h>
-
 int Tcl_discard_change( ClientData, Tcl_Interp *, int, const char *[ ] );	// ask before discarding unsaved changes
 int Tcl_get_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_set_c_var( ClientData cdata, Tcl_Interp *inter, int argc, const char *argv[ ] );
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] );
-
-extern Tcl_Interp *inter;	// Tcl standard interpreter pointer
-
 #endif						// NO_WINDOW
 
 #endif						// FUN

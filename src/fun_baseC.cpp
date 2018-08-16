@@ -38,11 +38,11 @@ int i, j, h, k;
 
 if ( ! strcmp( label, "VarX" ) )
 {
-/*
-comment the equation
-*/
-res = v[0]; //final result for Variable VarX at the generic time step t
-goto end;
+	/*
+	comment the equation
+	*/
+	res = v[0]; //final result for Variable VarX at the generic time step t
+	goto end;
 }
 
 
@@ -59,17 +59,20 @@ return -1;
 end :
 
 if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
- {
-  sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
-  error_hard( msg, "invalid result", "check your code to prevent this situation" );
-  debug_flag = true;
-  debug = 'd';
- }
+{
+	sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
+	error_hard( msg, "invalid result", "check your code to prevent this situation" );
+	debug_flag = true;
+	debug = 'd';
+}
+
+#ifndef NO_WINDOW
 if ( debug_flag )
- {
- for ( i = 0; i < 1000; i++ )
-  i_values[ i ] = v[ i ];
- }
+{
+	for ( i = 0; i < 1000; i++ )
+	i_values[ i ] = v[ i ];
+}
+#endif
 
 //Uncommenting the following lines the file "log.txt" will
 //contain the name of the variable just computed.
