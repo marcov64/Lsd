@@ -73,7 +73,7 @@ did not issue an error message.
 #include "decl.h"
 
 bool invalidHooks = false;		// flag to invalid hooks pointers (set by simulation)
-lsdstack *asl = NULL;
+lsdstack *asl = NULL;			// debug stack
 
 
 /*******************************************
@@ -326,8 +326,7 @@ while ( choice == 0 )
 	ch[ 0 ] = '\0';
 	attach_instance_number( ch, r );
 
-	if ( asl != NULL && asl->vs->up != r )
-		asl = NULL;
+	asl = NULL;
 
 	debug_maincycle:
 
@@ -1036,11 +1035,12 @@ while ( choice == 0 )
 
 		// Debug variable under computation CTRL+G
 		case 77: 
-			if ( asl == NULL && stacklog != NULL && stacklog->vs != NULL )
+			if ( asl == NULL && stacklog != NULL )
 			{
 				asl = stacklog;
-				plog( "\nVariable: %s", "", asl->label );
-				choice = deb( asl->vs->up, c, lab, res, interact );
+				plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+				if ( asl->vs != NULL && asl->vs->up != NULL )
+					choice = deb( asl->vs->up, c, lab, res, interact );
 			}
 			else
 			{
@@ -1048,14 +1048,16 @@ while ( choice == 0 )
 				{
 					while ( asl->prev->prev != NULL )
 						asl = asl->prev;
-					plog( "\nVariable: %s", "", asl->label );
-					choice = deb(asl->vs->up,c, lab, res, interact );
+					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					if ( asl->vs != NULL && asl->vs->up != NULL )
+						choice = deb( asl->vs->up, c, lab, res, interact );
 				}
 				else
 				{
 					asl = asl->next;
-					plog( "\nVariable: %s", "", asl->label );
-					choice = deb( asl->vs->up, c, lab, res, interact );
+					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					if ( asl->vs != NULL && asl->vs->up != NULL )
+						choice = deb( asl->vs->up, c, lab, res, interact );
 				}
 			}  
 			break;  
