@@ -405,7 +405,7 @@ for (cv1=cur1->v, j = 0; cv1!=NULL;  )
   if (cv->param == 1 )
     { sprintf( ch1,"p%s_%d", cv->label,i);
       Tcl_LinkVar( inter, ch1, ( char * ) &(cv->val[ 0 ]), TCL_LINK_DOUBLE );
-      cmd( "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i  );
+      cmd( "entry $w.c%d_v%sp -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double -strict %%P] {set p%s_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $p%s_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, cv->label, i, cv->label, i  );
       cmd( "$w.c%d_v%sp insert 0 $p%s_%d", i, cv->label, cv->label, i );
       if (set_focus == 0 )
        {
@@ -428,7 +428,7 @@ for (cv1=cur1->v, j = 0; cv1!=NULL;  )
       {
       sprintf( ch1,"v%s_%d_%d", cv->label,i, j);
       Tcl_LinkVar( inter, ch1, ( char * ) &(cv->val[ j ]), TCL_LINK_DOUBLE );
-      cmd( "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j  );
+      cmd( "entry $w.c%d_v%s_%d -width $cwidth -bd $cbd -validate focusout -vcmd {if [string is double -strict %%P] {set v%s_%d_%d %%P; return 1} {%%W delete 0 end; %%W insert 0 $v%s_%d_%d; return 0}} -invcmd {bell} -justify center", i, cv->label, j, cv->label, i, j, cv->label, i, j  );
       cmd( "$w.c%d_v%s_%d insert 0 $v%s_%d_%d", i, cv->label, j, cv->label, i, j );
       if (set_focus == 0 )
        {

@@ -949,7 +949,7 @@ case 2:
 		cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
 		cmd( "label $T.f.sp -width 5" );
 		cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-		cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
 		cmd( "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}" );
 		cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
 	}
@@ -1995,7 +1995,7 @@ case 76:
 		cmd( "entry $T.n.e -width 20 -textvariable vname -justify center" );
 		cmd( "label $T.n.sp -width 2" );
 		cmd( "label $T.n.l -text \"Lags\"" );
-		cmd( "entry $T.n.lag -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry $T.n.lag -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set numlag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numlag; return 0 } } -invcmd { bell } -justify center" );
 		cmd( "$T.n.lag insert 0 $numlag" ); 
 		cmd( "if { $nature != 0 } { $T.n.lag configure -state disabled }" );
 		cmd( "pack $T.n.var $T.n.e $T.n.sp $T.n.l $T.n.lag -side left -padx 2" );
@@ -2267,7 +2267,7 @@ case 78:
 
 		cmd( "frame $T.i" );
 		cmd( "label $T.i.l -text \"Use lag\"" );
-		cmd( "entry $T.i.e -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry $T.i.e -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set lag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lag; return 0 } } -invcmd { bell } -justify center" );
 		cmd( "$T.i.e insert 0 $lag" ); 
 		cmd( "pack $T.i.l $T.i.e -side left -padx 2" );
 		
@@ -2876,37 +2876,37 @@ case 22:
 
 	cmd( "frame $T.f.c" );
 	cmd( "label $T.f.c.l2 -width 25 -anchor e -text \"Simulation steps\"" );
-	cmd( "entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.c.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set max_step %%P; return 1 } { %%W delete 0 end; %%W insert 0 $max_step; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.c.e2 insert 0 $max_step" ); 
 	cmd( "pack $T.f.c.l2 $T.f.c.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "frame $T.f.a" );
 	cmd( "label $T.f.a.l -width 25 -anchor e -text \"Number of simulation runs\"" );
-	cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set sim_num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sim_num; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.a.e insert 0 $sim_num" ); 
 	cmd( "pack $T.f.a.l $T.f.a.e -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "frame $T.f.b" );
 	cmd( "label $T.f.b.l1 -width 25 -anchor e -text \"Random numbers initial seed\"" );
-	cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.b.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $seed; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.b.e1 insert 0 $seed" ); 
 	cmd( "pack $T.f.b.l1 $T.f.b.e1 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "frame $T.f.d" );
 	cmd( "label $T.f.d.l2 -width 25 -anchor e -text \"Start debugger at step (0:none)\"" );
-	cmd( "entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.d.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set when_debug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $when_debug; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.d.e2 insert 0 $when_debug" ); 
 	cmd( "pack $T.f.d.l2 $T.f.d.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "frame $T.f.e" );
 	cmd( "label $T.f.e.l2 -width 25 -anchor e -text \"Profile up to stack level (0:none)\"" );
-	cmd( "entry $T.f.e.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.e.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_info %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_info; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.e.e2 insert 0 $stack_info" ); 
 	cmd( "pack $T.f.e.l2 $T.f.e.e2 -side left -anchor w -padx 2 -pady 2" );
 
 	cmd( "frame $T.f.f" );
 	cmd( "label $T.f.f.l2 -width 25 -anchor e -text \"Profile minimum time (0:all)\"" );
-	cmd( "entry $T.f.f.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.f.f.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set prof_min_msecs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $prof_min_msecs; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "$T.f.f.e2 insert 0 $prof_min_msecs" ); 
 	cmd( "pack $T.f.f.l2 $T.f.f.e2 -side left -anchor w -padx 2 -pady 2" );
 
@@ -3258,7 +3258,7 @@ case 33:
 
 	cmd( "frame $T.e.e" );
 	cmd( "label $T.e.e.l -text \"Number of instances\"" );
-	cmd( "entry $T.e.e.ent -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.e.e.ent -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "pack $T.e.e.l $T.e.e.ent -side left -padx 2" );
 
 	cmd( "label $T.e.l -text \"(all groups of this object will be affected)\"" );
@@ -3266,7 +3266,7 @@ case 33:
 
 	cmd( "frame $T.cp" );
 	cmd( "label $T.cp.l -text \"Copy from instance\"" );
-	cmd( "entry $T.cp.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $T.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "button $T.cp.compute -width 7 -text Compute -command { set choice 3 }" );
 	cmd( "pack $T.cp.l $T.cp.e $T.cp.compute -side left -padx 2" );
 
@@ -4050,7 +4050,7 @@ case 71:
 		
 		cmd( "frame .s.i" );
 		cmd( "label .s.i.l -text \"Monte Carlo sample size as\n%% of sensitivity space size\n(0 to 100)\"" );
-		cmd( "entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is double -strict %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
 		
@@ -4284,7 +4284,7 @@ case 80:
 		
 		cmd( "frame .s.i" );
 		cmd( "label .s.i.l -text \"Monte Carlo sample size\nas number of samples\"" );
-		cmd( "entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.i.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set sizMC %%P; return 1 } { %%W delete 0 end; %%W insert 0 $sizMC; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.i.e insert 0 $sizMC" ); 
 		cmd( "pack .s.i.l .s.i.e" );
 		
@@ -4401,28 +4401,28 @@ case 81:
 		
 		cmd( "frame .s.i" );
 		cmd( "label .s.i.l1 -text \"Number of trajectories (r)\"" );
-		cmd( "entry .s.i.e1 -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.i.e1 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nTraj %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nTraj; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.i.e1 insert 0 $nTraj" ); 
 		cmd( "label .s.i.l2 -text \"([expr $varSA + 1]\u00D7r samples to create)\"" );
 		cmd( "pack .s.i.l1 .s.i.e1 .s.i.l2" );	
 		
 		cmd( "frame .s.p" );
 		cmd( "label .s.p.l1 -text \"Trajectories pool size (M)\"" );
-		cmd( "entry .s.p.e2 -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set nSampl %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nSampl; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.p.e2 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nSampl %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nSampl; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.p.e2 insert 0 $nSampl" ); 
 		cmd( "label .s.p.l2 -text \"(M > r enables optimization)\"" );
 		cmd( "pack .s.p.l1 .s.p.e2 .s.p.l2" );	
 		
 		cmd( "frame .s.l" );
 		cmd( "label .s.l.l1 -text \"Number of levels (p)\"" );
-		cmd( "entry .s.l.e3 -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set nLevels %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nLevels; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.l.e3 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set nLevels %%P; return 1 } { %%W delete 0 end; %%W insert 0 $nLevels; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.l.e3 insert 0 $nLevels" ); 
 		cmd( "label .s.l.l2 -text \"(must be even)\"" );
 		cmd( "pack .s.l.l1 .s.l.e3 .s.l.l2" );	
 		
 		cmd( "frame .s.j" );
 		cmd( "label .s.j.l1 -text \"Jump size\"" );
-		cmd( "entry .s.j.e4 -width 10 -validate focusout -vcmd { if [ string is integer %%P ] { set jumpSz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $jumpSz; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .s.j.e4 -width 10 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set jumpSz %%P; return 1 } { %%W delete 0 end; %%W insert 0 $jumpSz; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".s.j.e4 insert 0 $jumpSz" ); 
 		cmd( "label .s.j.l2 -text \"( \u0394\u00D7(p - 1) )\"" );
 		cmd( "pack .s.j.l1 .s.j.e4 .s.j.l2" );	
@@ -4914,14 +4914,14 @@ case 68:
 		
 	cmd( "frame .s.c" );
 	cmd( "label .s.c.l -text \"Number of parallel\nLSD processes\"" );
-	cmd( "entry .s.c.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry .s.c.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cores %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cores; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".s.c.e insert 0 $cores" ); 
 	cmd( "label .s.c.w -text \"(a number higher than the\nnumber of processors/cores\nis not recommended)\"" );
 	cmd( "pack .s.c.l .s.c.e .s.c.w" );
 	
 	cmd( "frame .s.p" );
 	cmd( "label .s.p.l -text \"Number of threads\nper LSD process\"" );
-	cmd( "entry .s.p.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry .s.p.e -width 5 -justify center -validate focusout -vcmd { if [ string is integer -strict %%P ] { set threads %%P; return 1 } { %%W delete 0 end; %%W insert 0 $threads; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".s.p.e insert 0 $threads" ); 
 	cmd( "label .s.p.w -text \"(a number higher than 1\nis only useful when parallel\ncomputation is enabled)\"" );
 	cmd( "pack .s.p.l .s.p.e .s.p.w" );

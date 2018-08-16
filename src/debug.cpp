@@ -200,7 +200,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		
 		cmd( "frame .deb.b.act.stack" );
 		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
-		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
 		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
 		
@@ -234,13 +234,13 @@ while ( choice == 0 )
 				label .deb.v.v1.val1 -text \"Value \"; \
 				entry .deb.v.v1.val2 -width 15 -validate key \
 				-justify center -state disabled -vcmd { \
-					if { [ string length %%P ] > 0 && [ string is double %%P ] } { \
+					if [ string is double -strict %%P ] { \
 						set value %%P; \
 						set value_change 1; \
 						return 1 \
 					} { \
 						%%W delete 0 end; \
-						if { [ string is double $value ] } { \
+						if [ string is double -strict $value ] { \
 							%%W insert 0 [ format \"%%g\" $value ] \
 						} { \
 							%%W insert 0 $value \
@@ -370,7 +370,7 @@ while ( choice == 0 )
 
 	if ( mode == 1 )
 	{
-		cmd( "if [ string is double [ .deb.v.v1.val2 get ] ] { set value [ .deb.v.v1.val2 get ] }" ); 
+		cmd( "if [ string is double -strict [ .deb.v.v1.val2 get ] ] { set value [ .deb.v.v1.val2 get ] }" ); 
 		cmd( "set stack_flag [ .deb.b.act.stack.e get ]" ); 
 		cmd( "bind .deb <KeyPress-g> { }; bind .deb <KeyPress-G> { }" );
 		i = choice;
@@ -527,7 +527,7 @@ while ( choice == 0 )
 				else
 					cmd( "label $e.v.l$i.l -text \"Lag $i:\"" );
 
-				cmd( "entry $e.v.l%d.e -width 15 -validate focusout -vcmd { if [ string is double %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i );
+				cmd( "entry $e.v.l%d.e -width 15 -validate focusout -vcmd { if [ string is double -strict %%P ] { set val%d %%P; return 1 } { %%W delete 0 end; %%W insert 0 $val%d; return 0 } } -invcmd { bell } -justify center", i, i, i );
 				cmd( "$e.v.l%d.e insert 0 $val%d", i, i ); 
 
 				cmd( "button $e.v.l$i.sa -width 5 -text \"Set All\" -command { set sa %i; set choice 10 }", i );
@@ -628,7 +628,7 @@ while ( choice == 0 )
 
 				cmd( "frame $cb.v" );
 				cmd( "label $cb.v.l -text Value" );
-				cmd( "entry $cb.v.e -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center -state disabled" );
+				cmd( "entry $cb.v.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set cond_val %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cond_val; return 0 } } -invcmd { bell } -justify center -state disabled" );
 				cmd( "write_any $cb.v.e $cond_val" ); 
 				cmd( "if { $cond != 0 } { $cb.v.e configure -state normal; $cb.v.e selection range 0 end; focus $cb.v.e }" );
 				cmd( "pack $cb.v.l $cb.v.e" );
@@ -723,7 +723,7 @@ while ( choice == 0 )
 
 			cmd( "frame $s.v" );
 			cmd( "label $s.v.l -text Value" );
-			cmd( "entry $s.v.e -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set value_search %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry $s.v.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value_search %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value_search; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "write_any $s.v.e $value_search" ); 
 			cmd( "pack $s.v.l $s.v.e" );
 
@@ -920,7 +920,7 @@ while ( choice == 0 )
 
 			cmd( "frame $t.t" );
 			cmd( "label $t.t.l -text \"Run until time step\"" );
-			cmd( "entry $t.t.val -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry $t.t.val -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set tdebug %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tdebug; return 0 } } -invcmd { bell } -justify center" );
 			cmd( "$t.t.val insert 0 $tdebug" ); 
 			cmd( "pack $t.t.l $t.t.val" );
 

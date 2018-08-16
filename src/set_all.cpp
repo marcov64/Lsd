@@ -174,12 +174,12 @@ cmd( "frame .sa.m.f1.val.i -relief groove -bd 2" );
 
 cmd( "frame .sa.m.f1.val.i.l1" );
 cmd( "label .sa.m.f1.val.i.l1.l1 -text \"Equal to\"" );
-cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .sa.m.f1.val.i.l1.e1 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value1; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .sa.m.f1.val.i.l1.l1 .sa.m.f1.val.i.l1.e1" );
 
 cmd( "frame .sa.m.f1.val.i.l2" );
 cmd( "label .sa.m.f1.val.i.l2.l2 -text \"(none)\"" );
-cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .sa.m.f1.val.i.l2.e2 -validate focusout -vcmd { if [ string is double -strict %%P ] { set value2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value2; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .sa.m.f1.val.i.l2.l2 .sa.m.f1.val.i.l2.e2" );
 
 cmd( "pack .sa.m.f1.val.i.l1 .sa.m.f1.val.i.l2 -expand yes -fill x  -ipadx 5 -ipady 2" );
@@ -247,7 +247,7 @@ cmd( "frame .sa.m.f2.s.i.l" );
 
 cmd( "frame .sa.m.f2.s.i.l.a" );
 cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-cmd( "entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
 cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance(s)\"" );
 cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
@@ -265,9 +265,9 @@ cmd( "frame .sa.m.f2.s.i.sel2" );
 
 cmd( "frame .sa.m.f2.s.i.sel2.c" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
 cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
@@ -287,7 +287,7 @@ cmd( "frame .sa.m.f2.rnd.i.le" );
 cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
 cmd( "frame .sa.m.f2.rnd.i.le.s" );
 cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-cmd( "entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
 cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );

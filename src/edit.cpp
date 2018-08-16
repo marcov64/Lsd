@@ -384,7 +384,7 @@ int compute_copyfrom( object *c, int *choice )
 		k = 1;
 		for ( j = 1, cur1 = cur; cur1->up != NULL; cur1 = cur1->up, ++j )
 		{
-			cmd( "if [ string is integer $num%d ] { set choice $num%d } { set choice -1 }", j, j );
+			cmd( "if [ string is integer -strict $num%d ] { set choice $num%d } { set choice -1 }", j, j );
 			if ( *choice < 0 )
 				break;
 
@@ -471,12 +471,12 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 
 	cmd( "frame $n.e" );
 	cmd( "label $n.e.l -text \"Number of instances\"" );
-	cmd( "entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "pack $n.e.l $n.e.e -side left -padx 2" );
 
 	cmd( "frame $n.cp" );
 	cmd( "label $n.cp.l -text \"Copy from instance\"" );
-	cmd( "entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
 	cmd( "button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
 	cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left -padx 2" );
 
@@ -705,7 +705,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 
 		cmd( "frame $d.t" );
 		cmd( "label $d.t.tit -text \"Instance to delete\"", (*r)->label );
-		cmd( "entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center" );
 		cmd( "label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
 		cmd( "pack $d.l $d.t -padx 5 -pady 5" );

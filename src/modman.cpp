@@ -1075,9 +1075,9 @@ if ( choice == 8 )
 	cmd( "focus -force .f.t.t" );
 
 	// handle the opening of files from the compilation error window
-	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer $errlin ] } { \
+	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$modeldir/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 			.f.t.t tag add sel $errlin.0 $errlin.end; \
-			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer $errcol ] } { \
+			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 				.f.t.t see $errlin.$errcol; \
 				.f.t.t mark set insert $errlin.$errcol \
 			} else { \
@@ -1132,7 +1132,7 @@ if ( choice == 10 )
 			if { $line == \"\" } { \
 				.search_line.can invoke \
 			} else { \
-				if [ string is integer $line ] { \
+				if [ string is integer -strict $line ] { \
 					.f.t.t tag remove sel 1.0 end; \
 					.f.t.t see $line.0; \
 					.f.t.t tag add sel $line.0 $line.end; \
@@ -1898,9 +1898,9 @@ if ( choice == 15 || choice == 71 )
 	cmd( ".f.t.t tag remove sel 1.0 end" ); 
 
 	// handle the opening of files from the compilation error window
-	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer $errlin ] } { \
+	cmd( "if { [ info exists errfil ] && [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] && [ info exists errlin ] && [ string is integer -strict $errlin ] } { \
 			.f.t.t tag add sel $errlin.0 $errlin.end; \
-			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer $errcol ] } { \
+			if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 				.f.t.t see $errlin.$errcol; \
 				.f.t.t mark set insert $errlin.$errcol \
 			} else { \
@@ -2424,16 +2424,16 @@ if ( choice == 26 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
 
 		cmd( "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"V(\\\"$v_label\\\")\"}" );
 		cmd( "if {$v_lag!=0 && $v_obj==\"p\"} { .f.t.t insert insert \"VL(\\\"$v_label\\\", $v_lag)\"}" );
 		cmd( "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"VS($v_obj, \\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && $v_obj!=\"p\" && [string is integer $v_lag]} { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
+		cmd( "if {$v_lag!=0 && $v_obj!=\"p\" && [string is integer -strict $v_lag]} { .f.t.t insert insert \"VLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->cal(\\\"$v_label\\\", $v_lag)\"; incr v_num}" );
+		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->cal(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->cal(\\\"$v_label\\\", $v_lag)\"; incr v_num}" );
 	}
 
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
@@ -2610,12 +2610,12 @@ if ( choice == 40 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
 		cmd( "if {$v_obj!=\"p\"} {.f.t.t insert insert \"INCRS($v_obj, \\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"INCR(\\\"$v_label\\\", $v_val)\"}" );
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer $v_num]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->increment(\\\"$v_label\\\", $v_val)\";incr v_num}" );
+		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->increment(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->increment(\\\"$v_label\\\", $v_val)\";incr v_num}" );
 	}
 
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
@@ -2694,12 +2694,12 @@ if ( choice == 45 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
 		cmd( "if {$v_obj!=\"p\"} {.f.t.t insert insert \"MULTS($v_obj, \\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"MULT(\\\"$v_label\\\", $v_val)\"}" );
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer $v_num]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->multiply(\\\"$v_label\\\", $v_val)\";incr v_num}" );
+		cmd( "if {$v_num==\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"$v_obj->multiply(\\\"$v_label\\\", $v_val)\"} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->multiply(\\\"$v_label\\\", $v_val)\";incr v_num}" );
 	}
 
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
@@ -2779,13 +2779,13 @@ if ( choice == 29 )
 	if ( macro )
 	{
 		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITE(\\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITEL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"WRITES($v_obj, \\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"WRITELS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 	}
 	else
 	{
-		cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj->write(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -2865,13 +2865,13 @@ if ( choice == 30 )
 	if ( macro )
 	{
 		cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CND(\\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj == \"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj == \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDL(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 		cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDS($v_obj, \\\"$v_label\\\", $v_num);\\n\"}" );
-		cmd( "if {$v_obj != \"p\" && [string is integer $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {$v_obj != \"p\" && [string is integer -strict $v_lag] && $v_lag != 0} { .f.t.t insert insert \"$v_obj0 = SEARCH_CNDLS($v_obj, \\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 	}
 	else
 	{
-		cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->search_var_cond(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
+		cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->search_var_cond(\\\"$v_label\\\", $v_num, $v_lag);\\n\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3049,16 +3049,16 @@ if ( choice == 52 )
 		}
 		else
 		{
-		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
-		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
+		cmd( "if {$v_obj == \"p\" && $v_num!=\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EX(\\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
+		cmd( "if {$v_obj != \"p\" && $v_num!= \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ_EXS($v_obj, \\\"$v_label\\\", $numobj, $v_num);\\n\"; set choice -3}" );
+		cmd( "if {$v_obj == \"p\" && $v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJ(\\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
+		cmd( "if {$v_obj != \"p\" && $v_num== \"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"ADDNOBJS($v_obj, \\\"$v_label\\\", $numobj);\\n\"; set choice -3}" );
 		}
 	}
 	else
 	{
-		cmd( "if {$v_num==\"\" && [string is integer $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\\n\"}" );
-		cmd( "if {$v_num!=\"\" && [string is integer $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\\n\"}" );
+		cmd( "if {$v_num==\"\" && [string is integer -strict $numobj]} { .f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj);\\n\"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $numobj]} {.f.t.t insert insert \"$v_obj0 = $v_obj->add_n_objects2(\\\"$v_label\\\", $numobj, $v_num);\\n\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3200,25 +3200,25 @@ if ( choice == 54 )
 		 {
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label != \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW(\\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0 && $v_label == \"\"} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIR(\\\"$v_num\\\");\\n\"}" );  
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
 		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label != \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAWS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\");\\n\"}" );
 		  cmd( "if {$v_obj != \"p\" && $v_lag == 0 && $v_label == \"\" } { .f.t.t insert insert \"$v_obj0 = RNDDRAW_FAIRS($v_obj, \\\"$v_num\\\");\\n\"}" );  
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAWLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
 		 }
 		else
 		 {
 		  cmd( "if {$v_obj == \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOT(\\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\\n\"}" );
-		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
+		  cmd( "if {$v_obj == \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTL(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
 		  cmd( "if {$v_obj != \"p\" && $v_lag == 0} { .f.t.t insert insert \"$v_obj0 = RNDDRAWTOTS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_tot);\\n\"}" );
-		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
+		  cmd( "if {$v_obj != \"p\" && $v_lag != 0 && [string is integer -strict $v_lag]} { .f.t.t insert insert \"$v_obj0 = RNDDRAW_TOTLS($v_obj, \\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
 		 }
 	}
 	else
 	{
 		if ( choice == 1 )
-		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
+		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag);\\n\"}" );
 		else
-		  cmd( "if {[string is integer $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
+		  cmd( "if {[string is integer -strict $v_lag]} {.f.t.t insert insert \"$v_obj0 = $v_obj->draw_rnd(\\\"$v_num\\\", \\\"$v_label\\\", $v_lag, $v_tot);\\n\"}" );
 	}
 	cmd( ".f.t.t see insert" );
 
@@ -3355,16 +3355,16 @@ if ( choice == 56 )
 
 	if ( macro )
 	{
-		cmd( "if {$v_num!=\"\" && [string is integer $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num]} {.f.t.t insert insert \"v\\\[$v_num\\] = \"}" );
 
 		cmd( "if {$v_lag==0 && $v_obj==\"p\"} { .f.t.t insert insert \"SUM(\\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && [string is integer $v_lag] && $v_obj==\"p\"} { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\"}" );
+		cmd( "if {$v_lag!=0 && [string is integer -strict $v_lag] && $v_obj==\"p\"} { .f.t.t insert insert \"SUML(\\\"$v_label\\\", $v_lag)\"}" );
 		cmd( "if {$v_lag==0 && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMS($v_obj, \\\"$v_label\\\")\"}" );
-		cmd( "if {$v_lag!=0 && [string is integer $v_lag] && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
+		cmd( "if {$v_lag!=0 && [string is integer -strict $v_lag] && $v_obj!=\"p\"} { .f.t.t insert insert \"SUMLS($v_obj, \\\"$v_label\\\", $v_lag)\"}" );
 	}
 	else
 	{
-		cmd( "if {$v_num!=\"\" && [string is integer $v_num] && [string is integer $v_lag]} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->sum(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\", $v_lag)\"}" );
+		cmd( "if {$v_num!=\"\" && [string is integer -strict $v_num] && [string is integer -strict $v_lag]} {.f.t.t insert insert \"v\\\[$v_num\\] = $v_obj->sum(\\\"$v_label\\\", $v_lag)\"} {.f.t.t insert insert \"$v_obj->sum(\\\"$v_label\\\", $v_lag)\"}" );
 	}
 
 	cmd( "if {$v_num!=\"\"} {.f.t.t insert insert \";\\n\"}" );
@@ -3531,13 +3531,13 @@ if ( choice == 73 )
 	cmd( "if { $v_par1 == \"\"} { set v_par1 0 }" );
 	cmd( "if { $v_par2 == \"\"} { set v_par2 0 }" );
 	
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer $v_num ] && [ string is integer $v_par1 ] && [ string is double $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer $v_num ] && [ string is integer $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
-	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
+	cmd( "if { $v_obj == \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NET(\\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
 	
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer $v_num ] && [ string is integer $v_par1 ] && [ string is double $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer $v_num ] && [ string is integer $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
-	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 2 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] && [ string is double -strict $v_par2 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1, $v_par2);\\n\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 1 && [ string is integer -strict $v_num ] && [ string is integer -strict $v_par1 ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num, $v_par1);\\n\"}" );
+	cmd( "if { $v_obj != \"p\" && [ llength [ lindex $netListPar $res ] ] == 0 && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"INIT_NETS($v_obj, \\\"$v_label\\\", \\\"[ lindex $netListShort $res ]\\\", $v_num);\\n\"}" );
 	cmd( ".f.t.t see insert" );
 
 	cmd( "savCurFin; updCurWnd" );	// save data for recolor
@@ -3802,15 +3802,15 @@ if ( choice == 77 )
 	
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\");\\n\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\");\\n\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODE($v_num, \\\"$v_label\\\");\\n\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"ADDNODES($v_obj, $v_num, \\\"$v_label\\\");\\n\" }" );
 	}
 	else
 	{
 		cmd( "if { $v_obj == \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINK($v_label);\\n\" }" );
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is double $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num);\\n\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKW($v_label, $v_num);\\n\" }" );
 		cmd( "if { $v_obj != \"p\" && $v_num ==\"\" } { .f.t.t insert insert \"ADDLINKS($v_obj, $v_label);\\n\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num);\\n\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"ADDLINKWS($v_obj, $v_label, $v_num);\\n\" }" );
 	}
 	
 	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
@@ -3886,7 +3886,7 @@ if ( choice == 78 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+			cmd( "if { $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 			cmd( "if { $v_obj == \"p\" } { .f.t.t insert insert \"V_NODEID()\" }" );
 			cmd( "if { $v_obj != \"p\" } { .f.t.t insert insert \"V_NODEIDS($v_obj)\" }" );
 
@@ -3902,7 +3902,7 @@ if ( choice == 78 )
 			break;
 
 		case 2:
-			cmd( "if { $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
+			cmd( "if { $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"v\\\[$v_num\\] = \" }" );
 			cmd( ".f.t.t insert insert \"V_LINK($v_obj)\"" );
 
 			cmd( "if { $v_num == \"\" } { set num -1 } { set num $v_num }" );
@@ -3987,8 +3987,8 @@ if ( choice == 79 )
 	switch ( choice )
 	{
 		case 0:
-			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\\n\" }" );
-			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\\n\" }" );
+			cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEID($v_num);\\n\" }" );
+			cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"WRITE_NODEIDS($v_obj, $v_num);\\n\" }" );
 			break;
 			
 		case 1:
@@ -3997,7 +3997,7 @@ if ( choice == 79 )
 			break;
 
 		case 2:
-			cmd( "if { $v_num !=\"\" && [ string is double $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\\n\" }" );
+			cmd( "if { $v_num !=\"\" && [ string is double -strict $v_num ] } { .f.t.t insert insert \"WRITE_LINK($v_obj, $v_num);\\n\" }" );
 			break;
 
 		default:
@@ -4166,13 +4166,13 @@ if ( choice == 81 )
 	
 	if ( choice == 0 )
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODE(\\\"$v_label\\\", $v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_NODES($v_obj, \\\"$v_label\\\", $v_num)\" }" );
 	}
 	else
 	{
-		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
-		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
+		cmd( "if { $v_obj == \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINK($v_num)\" }" );
+		cmd( "if { $v_obj != \"p\" && $v_num !=\"\" && [ string is integer -strict $v_num ] } { .f.t.t insert insert \"SEARCH_LINKS($v_obj, $v_num)\" }" );
 	}
 	
 	cmd( "if { $v_obj0!=\"\" } { .f.t.t insert insert \";\\n\" }" );
@@ -5478,8 +5478,8 @@ if ( choice == 60 )
 		cmd( "set fonttype \"$temp_var3\"" );
 		cmd( "set wish $temp_var4" );
 		cmd( "set LsdSrc $temp_var5" );
-		cmd( "if [string is integer $temp_var6] {set dim_character $temp_var6}" );
-		cmd( "if [string is integer $temp_var7] {set tabsize $temp_var7}" );
+		cmd( "if [string is integer -strict $temp_var6] {set dim_character $temp_var6}" );
+		cmd( "if [string is integer -strict $temp_var7] {set tabsize $temp_var7}" );
 		cmd( "set wrap $temp_var8" );
 		cmd( "set shigh $temp_var9" );
 		cmd( "set autoHide $temp_var10" );
@@ -5618,7 +5618,7 @@ if ( choice == 67 )
 		choice = 0;
 		goto loop;
 	}
-	cmd( "if [string is integer $tabsize] {settab .f.t.t $tabsize \"[.f.t.t cget -font]\"}" );
+	cmd( "if [string is integer -strict $tabsize] {settab .f.t.t $tabsize \"[.f.t.t cget -font]\"}" );
 	
 	choice = 0;
 	goto loop;
@@ -5863,10 +5863,10 @@ if ( choice == 87 )
 
 	if ( choice == 1 )
 	{	// file already loaded, just point error
-		cmd( "if { [ info exists errlin ] && $errlin != \"\" && [ string is integer $errlin ] } { \
+		cmd( "if { [ info exists errlin ] && $errlin != \"\" && [ string is integer -strict $errlin ] } { \
 				.f.t.t tag remove sel 1.0 end; \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
-				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer $errcol ] } { \
+				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
 					.f.t.t see $errlin.$errcol; \
 					.f.t.t mark set insert $errlin.$errcol \
 				} else { \
@@ -6528,14 +6528,14 @@ void create_compresult_window( bool nw )
 					set errfil \"[ lindex $errdat 0 ]\"; \
 					set idxfil 1 \
 				}; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
 					set errfil \"\"; \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
 					set errfil \"\"; \
@@ -6569,14 +6569,14 @@ void create_compresult_window( bool nw )
 					set errfil \"[ lindex $errdat 0 ]\"; \
 					set idxfil 1 \
 				}; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
 					set errfil \"\"; \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
-				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer [ lindex $errdat $idxfil ] ] } { \
+				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
 					set errfil \"\"; \

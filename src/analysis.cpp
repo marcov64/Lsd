@@ -335,12 +335,12 @@ cmd( "checkbutton .da.f.h.v.ft.auto -text \"Use all cases \" -variable auto_x -c
 
 cmd( "frame .da.f.h.v.ft.from" );
 cmd( "label .da.f.h.v.ft.from.minc -text \"From case\"" );
-cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.ft.from.mnc -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set minc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $minc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.ft.from.minc .da.f.h.v.ft.from.mnc -side left" );
 
 cmd( "frame .da.f.h.v.ft.to" );
 cmd( "label .da.f.h.v.ft.to.maxc -text \"to case\"" );
-cmd( "entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.ft.to.mxc -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set maxc %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxc; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack  .da.f.h.v.ft.to.maxc .da.f.h.v.ft.to.mxc -side left" );
 
 cmd( "pack .da.f.h.v.ft.auto .da.f.h.v.ft.from .da.f.h.v.ft.to -side left -ipadx 15" );
@@ -351,12 +351,12 @@ cmd( "checkbutton .da.f.h.v.sc.auto -text \"Y self-scaling\" -variable auto -com
 
 cmd( "frame .da.f.h.v.sc.min" );
 cmd( "label .da.f.h.v.sc.min.lmin -text \"Min. Y\"" );
-cmd( "entry .da.f.h.v.sc.min.min -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set miny %%P; return 1 } { %%W delete 0 end; %%W insert 0 $miny; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.sc.min.min -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set miny %%P; return 1 } { %%W delete 0 end; %%W insert 0 $miny; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.sc.min.lmin .da.f.h.v.sc.min.min -side left" );
 
 cmd( "frame .da.f.h.v.sc.max" );
 cmd( "label .da.f.h.v.sc.max.lmax -text \"Max. Y\"" );
-cmd( "entry .da.f.h.v.sc.max.max -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set maxy %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxy; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.sc.max.max -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set maxy %%P; return 1 } { %%W delete 0 end; %%W insert 0 $maxy; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.sc.max.lmax .da.f.h.v.sc.max.max -side left" );
 
 cmd( "pack .da.f.h.v.sc.auto .da.f.h.v.sc.min .da.f.h.v.sc.max -side left -ipadx 5" );
@@ -367,7 +367,7 @@ cmd( "checkbutton .da.f.h.v.y2.y2 -text \"Y2 axis\" -variable y2 -command {if {$
 
 cmd( "frame .da.f.h.v.y2.f" );
 cmd( "label .da.f.h.v.y2.f.l -text \"First series in Y2 axis\"" );
-cmd( "entry .da.f.h.v.y2.f.e -width 4 -validate focusout -vcmd { if [ string is integer %%P ] { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.f.h.v.y2.f.e -width 4 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num_y2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num_y2; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "pack .da.f.h.v.y2.f.l .da.f.h.v.y2.f.e -side left" );
 
 cmd( "pack .da.f.h.v.y2.logs .da.f.h.v.y2.y2 .da.f.h.v.y2.f -side left -ipadx 7" );
@@ -403,7 +403,7 @@ cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
 
 cmd( "frame .da.f.tit.ps" );
 cmd( "label .da.f.tit.ps.l -text \"Point size\"" );
-cmd( "entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
 
 cmd( "frame .da.f.tit.run" );			// field for adjusting 
@@ -413,7 +413,7 @@ cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
 
 cmd( "frame .da.f.tit.pr" );			// field for adjusting y-axis precision
 cmd( "label .da.f.tit.pr.l -text \"Precision\"" );
-cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is integer %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
 cmd( "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5" );
@@ -849,7 +849,7 @@ while ( true )
 			cmd( "set dim 270" );
 			cmd( "frame .da.file.dim -bd 2" );
 			cmd( "label .da.file.dim.l1 -text \"Dimension\"" );
-			cmd( "entry .da.file.dim.n -width 4 -validate focusout -vcmd { if [ string is integer %%P ] { set dim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $dim; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.file.dim.n -width 4 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set dim %%P; return 1 } { %%W delete 0 end; %%W insert 0 $dim; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.file.dim.n insert 0 $dim" );
 			cmd( "label .da.file.dim.l2 -text \"( mm@96DPI)\"" );
 			cmd( "pack .da.file.dim.l1 .da.file.dim.n .da.file.dim.l2 -side left" );
@@ -980,13 +980,13 @@ while ( true )
 			cmd( "frame .da.a.c.v" );
 			cmd( "frame .da.a.c.v.c" );
 			cmd( "label .da.a.c.v.c.l -text \"Comparison value\"" );
-			cmd( "entry .da.a.c.v.c.e -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry .da.a.c.v.c.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.c.e $compvalue" ); 
 			cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 			cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 			cmd( "frame .da.a.c.v.t" );
 			cmd( "label .da.a.c.v.t.t -text \"Case\"" );
-			cmd( "entry .da.a.c.v.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry .da.a.c.v.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
 			cmd( "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
@@ -1209,13 +1209,13 @@ while ( true )
 			cmd( "frame .da.a.c.v" );
 			cmd( "frame .da.a.c.v.c" );
 			cmd( "label .da.a.c.v.c.l -text \"Comparison value\"" );
-			cmd( "entry .da.a.c.v.c.e -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry .da.a.c.v.c.e -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set compvalue %%P; return 1 } { %%W delete 0 end; %%W insert 0 $compvalue; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.c.e $compvalue" ); 
 			cmd( "bind .da.a.c.v.c.e <Return> {focus .da.a.c.v.t.e2; .da.a.c.v.t.e2 selection range 0 end }" );
 			cmd( "pack .da.a.c.v.c.l .da.a.c.v.c.e" );
 			cmd( "frame .da.a.c.v.t" );
 			cmd( "label .da.a.c.v.t.t -text \"Case\"" );
-			cmd( "entry .da.a.c.v.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry .da.a.c.v.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set tvar %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tvar; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "write_any .da.a.c.v.t.e2 $tvar" ); 
 			cmd( "bind .da.a.c.v.t.e2 <Return> {focus .da.a.b.ok}" );
 			cmd( "pack .da.a.c.v.t.t .da.a.c.v.t.e2" );
@@ -1852,11 +1852,11 @@ while ( true )
 			cmd( "label .da.s.x.l0 -text \"Plot width:\"" );
 			cmd( "label .da.s.x.l1 -anchor e -text \"Sequence\"" );
 			cmd( "set lx1 $hsizeP" ); 
-			cmd( "entry .da.s.x.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set lx1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx1; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.x.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set lx1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx1; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.x.e1 insert 0 $lx1" ); 
 			cmd( "label .da.s.x.l2 -anchor e -text \"  XY\"" );
 			cmd( "set lx2 $hsizePxy" ); 
-			cmd( "entry .da.s.x.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set lx2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx2; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.x.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set lx2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx2; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.x.e2 insert 0 $lx2" ); 
 			cmd( "pack .da.s.x.l0 .da.s.x.l1 .da.s.x.e1 .da.s.x.l2 .da.s.x.e2 -side left -padx 2 -pady 2" );
 
@@ -1864,18 +1864,18 @@ while ( true )
 			cmd( "label .da.s.y.l0 -anchor e -text \"Plot height:\"" );
 			cmd( "label .da.s.y.l1 -anchor e -text \"Sequence\"" );
 			cmd( "set ly1 $vsizeP" ); 
-			cmd( "entry .da.s.y.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set ly1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly1; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.y.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set ly1 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly1; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.y.e1 insert 0 $ly1" ); 
 			cmd( "label .da.s.y.l2 -anchor e -text \"  XY\"" );
 			cmd( "set ly2 $vsizePxy" ); 
-			cmd( "entry .da.s.y.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set ly2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly2; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.y.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set ly2 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly2; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.y.e2 insert 0 $ly2" ); 
 			cmd( "pack .da.s.y.l0 .da.s.y.l1 .da.s.y.e1 .da.s.y.l2 .da.s.y.e2 -side left -padx 2 -pady 2" );
 
 			cmd( "frame .da.s.h" );
 			cmd( "label .da.s.h.l -anchor e -text \"Horizontal borders\"" );
 			cmd( "set hb $hmbordsizeP" ); 
-			cmd( "entry .da.s.h.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set hb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $hb; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.h.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set hb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $hb; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.h.e insert 0 $hb" ); 
 			cmd( "pack .da.s.h.l .da.s.h.e -side left -padx 2 -pady 2" );
 
@@ -1883,11 +1883,11 @@ while ( true )
 			cmd( "label .da.s.v.l0 -anchor e -text \"Vertical borders:\"" );
 			cmd( "label .da.s.v.l1 -anchor e -text \"Top\"" );
 			cmd( "set tb $tbordsizeP" ); 
-			cmd( "entry .da.s.v.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set tb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tb; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.v.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set tb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tb; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.v.e1 insert 0 $tb" ); 
 			cmd( "label .da.s.v.l2 -anchor e -text \"  Bottom\"" );
 			cmd( "set bb $bbordsizeP" ); 
-			cmd( "entry .da.s.v.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set bb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bb; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.v.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set bb %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bb; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.v.e2 insert 0 $bb" ); 
 			cmd( "pack .da.s.v.l0 .da.s.v.l1 .da.s.v.e1 .da.s.v.l2 .da.s.v.e2 -side left -padx 2 -pady 2" );
 
@@ -1897,11 +1897,11 @@ while ( true )
 			cmd( "label .da.s.t.l0 -anchor e -text \"Number of axis ticks:\"" );
 			cmd( "label .da.s.t.l1 -anchor e -text \"Horizontal\"" );
 			cmd( "set ht $hticksP" ); 
-			cmd( "entry .da.s.t.e1 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set ht %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ht; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.t.e1 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set ht %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ht; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.t.e1 insert 0 $ht" ); 
 			cmd( "label .da.s.t.l2 -anchor e -text \"  Vertical\"" );
 			cmd( "set vt $vticksP" ); 
-			cmd( "entry .da.s.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set vt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $vt; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.t.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set vt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $vt; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.t.e2 insert 0 $vt" ); 
 			cmd( "pack .da.s.t.l0 .da.s.t.l1 .da.s.t.e1 .da.s.t.l2 .da.s.t.e2 -side left -padx 2 -pady 2" );
 
@@ -1911,7 +1911,7 @@ while ( true )
 			cmd( "ttk::combobox .da.s.s.e1 -textvariable sm -values [ list no yes raw ] -width 5 -justify center" );
 			cmd( "label .da.s.s.l2 -anchor e -text \"  Spline segments\"" );
 			cmd( "set ss $splstepsP" ); 
-			cmd( "entry .da.s.s.e2 -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set ss %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ss; return 0 } } -invcmd { bell } -justify center -state disabled" );
+			cmd( "entry .da.s.s.e2 -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set ss %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ss; return 0 } } -invcmd { bell } -justify center -state disabled" );
 			cmd( "if { $sm == \"raw\" } { .da.s.s.e2 configure -state normal }" );
 			cmd( "write_any .da.s.s.e2 $ss" ); 
 			cmd( "pack .da.s.s.l1 .da.s.s.e1 .da.s.s.l2 .da.s.s.e2 -side left -padx 2 -pady 2" );
@@ -2004,21 +2004,21 @@ while ( true )
 			cmd( "frame .da.s.s" );
 			cmd( "label .da.s.s.l -width 30 -anchor e -text \"Color scale\"" );
 			cmd( "set cs $cscaleLat" ); 
-			cmd( "entry .da.s.s.e -width 5 -validate focusout -vcmd { if [ string is double %%P ] { set cs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cs; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.s.e -width 5 -validate focusout -vcmd { if [ string is double -strict %%P ] { set cs %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cs; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.s.e insert 0 $cs" ); 
 			cmd( "pack .da.s.s.l .da.s.s.e -side left -anchor w -padx 2 -pady 2" );
 
 			cmd( "frame .da.s.x" );
 			cmd( "label .da.s.x.l -width 30 -anchor e -text \"Lattice width (pixels)\"" );
 			cmd( "set lx $hsizeLat" ); 
-			cmd( "entry .da.s.x.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set lx %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.x.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set lx %%P; return 1 } { %%W delete 0 end; %%W insert 0 $lx; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.x.e insert 0 $lx" ); 
 			cmd( "pack .da.s.x.l .da.s.x.e -side left -anchor w -padx 2 -pady 2" );
 
 			cmd( "frame .da.s.y" );
 			cmd( "label .da.s.y.l -width 30 -anchor e -text \"Lattice heigth (pixels)\"" );
 			cmd( "set ly $vsizeLat" ); 
-			cmd( "entry .da.s.y.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set ly %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly; return 0 } } -invcmd { bell } -justify center" );
+			cmd( "entry .da.s.y.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set ly %%P; return 1 } { %%W delete 0 end; %%W insert 0 $ly; return 0 } } -invcmd { bell } -justify center" );
 			cmd( ".da.s.y.e insert 0 $ly" ); 
 			cmd( "pack .da.s.y.l .da.s.y.e -side left -anchor w -padx 2 -pady 2" );
 
@@ -2235,7 +2235,7 @@ while ( true )
 			
 			cmd( "frame $w.l" );
 			cmd( "label $w.l.t -text \"Width\"" );
-			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -vcmd { if [ string is double %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
+			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -state disabled -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
 			cmd( "pack $w.l.t $w.l.e -padx 2 -side left" );
 			
 			cmd( "frame $w.c" );
@@ -2396,7 +2396,7 @@ while ( true )
 			
 			cmd( "frame $w.l" );
 			cmd( "label $w.l.t -text \"Outline width\"" );
-			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -validate focusout -vcmd { if [ string is double %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
+			cmd( "entry $w.l.e -textvariable iwidth -width 5 -justify center -validate focusout -vcmd { if [ string is double -strict %%P ] { set iwidth %%P; return 1 } { %%W delete 0 end; %%W insert 0 $iwidth; return 0 } } -invcmd { bell }" );
 			cmd( "label $w.l.l -text \" color\"" );
 			cmd( "button $w.l.color -width 5 -text Set -foreground white -background $icolor1 -command { set app [ tk_chooseColor -parent $w -title \"Outline Color\" -initialcolor $icolor1 ]; if { $app != \"\" } { set icolor1 $app }; $w.l.color configure -background $icolor1 }" );
 			cmd( "pack $w.l.t $w.l.e $w.l.l $w.l.color -padx 2 -side left" );
@@ -2916,7 +2916,7 @@ cmd( "frame $p.u.i" );
 
 cmd( "frame $p.u.i.e" );
 cmd( "label $p.u.i.e.l -text \"Time step to add\"" );
-cmd( "entry $p.u.i.e.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P  >= 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry $p.u.i.e.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P  >= 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( "$p.u.i.e.e insert 0 $bidi" );
 cmd( "pack $p.u.i.e.l $p.u.i.e.e" );
  
@@ -2946,7 +2946,7 @@ cmd( "pack $p.u.s.b -padx 5" );
 
 cmd( "frame $p.u.s.r" );
 cmd( "label $p.u.s.r.l -text \"Time step reference\nfor series sorting\"" );
-cmd( "entry $p.u.s.r.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && [ lsearch $list_times %%P ]  >= 0 } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry $p.u.s.r.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && [ lsearch $list_times %%P ]  >= 0 } { set res %%P; return 1 } { %%W delete 0 end; %%W insert 0 $res; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "write_disabled $p.u.s.r.e $res" );
 cmd( "pack $p.u.s.r.l $p.u.s.r.e" );
 cmd( "pack $p.u.s.r -pady 10" );
@@ -2959,9 +2959,9 @@ cmd( "bind $p.u.i.e.e <KeyPress-Return> { .da.s.fb.r1.x invoke }" );
 cmd( "bind $p.u.i.e.e <Control-f> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-F> { set sfrom [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 cmd( "bind $p.u.i.e.e <Control-t> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-T> { set sto [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
 cmd( "bind $p.u.i.e.e <Control-s> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-S> { set sskip [ .da.s.u.i.e.e get ]; .da.s.u.i.e.e selection range 0 end }" );
-cmd( "bind $p.u.i.e.e <Control-z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-Z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer $sfrom ] && [ string is integer $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }" );
+cmd( "bind $p.u.i.e.e <Control-z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }; bind $p.u.i.e.e <Control-Z> { if { [ info exists sfrom ] && [ info exists sto ] && [ string is integer -strict $sfrom ] && [ string is integer -strict $sto ] && [ expr $sto - $sfrom ] > 0 } { if { ! [ info exists sskip ] } { set sskip 1 }; for { set x $sfrom } { $x <= $sto && $x <= $maxc } { incr x $sskip } { .da.s.u.i.lb.lb.lb insert end $x } }; .da.s.u.i.e.e selection range 0 end }" );
 
-cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; .da.s.u.i.lb.lb.lb see end; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp menudata_res.html#crosssection } { set choice 2 }" );
+cmd( "XYokhelpcancel $p fb Add Delete { set a [ .da.s.u.i.e.e get ]; if { [ lsearch $list_times $a ] < 0 && [ string is integer -strict $a ] && $a >= 0 && $a <= $maxc } { .da.s.u.i.lb.lb.lb insert end $a; .da.s.u.i.lb.lb.lb see end; focus .da.s.u.i.e.e; .da.s.u.i.e.e selection range 0 end; .da.s.u.i.lb.lb.lb selection set end } { bell } } { set sel [ .da.s.u.i.lb.lb.lb curselection ]; if { [ llength $sel ] > 0 } { .da.s.u.i.lb.lb.lb delete [ lindex $sel 0 ] [ lindex $sel [ expr [ llength $sel ] - 1 ] ]; .da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e } } { set choice 1 } { LsdHelp menudata_res.html#crosssection } { set choice 2 }" );
 
 cmd( "showtop $p centerW no no yes 0 0 .da.s.fb.r1.add" );
 cmd( ".da.s.u.i.e.e selection range 0 end; focus .da.s.u.i.e.e" );
@@ -4406,7 +4406,7 @@ cmd( "newtop .da.s \"XY Plot Options\" { set choice 2 } .da" );
 
 cmd( "frame .da.s.i" );
 cmd( "label .da.s.i.l -text \"Time step\"" );
-cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.i.e insert 0 $bidi" ); 
 cmd( "pack .da.s.i.l .da.s.i.e" );
 
@@ -4437,7 +4437,7 @@ else
 cmd( "set numv 1" );
 cmd( "frame .da.s.v" );
 cmd( "label .da.s.v.l -text \"Number of dependent variables\"" );
-cmd( "entry .da.s.v.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 && %%P < %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invcmd { bell } -justify center", nv );
+cmd( "entry .da.s.v.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P < %d } { set numv %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numv; return 0 } } -invcmd { bell } -justify center", nv );
 cmd( ".da.s.v.e insert 0 $numv" ); 
 cmd( "label .da.s.v.n -text \"Block length: $blength\"" );
 cmd( "pack .da.s.v.l .da.s.v.e .da.s.v.n" );
@@ -4803,7 +4803,7 @@ cmd( "newtop .da.s \"Lags Selection\" { set choice 2 } .da" );
 cmd( "frame .da.s.i" );
 cmd( "label .da.s.i.l -text \"Number of lags\"" );
 cmd( "set bidi 1" );
-cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.i.e -width 10 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.i.e insert 0 $bidi" ); 
 cmd( "pack .da.s.i.l .da.s.i.e" );
 
@@ -5272,14 +5272,14 @@ cmd( "newtop .da.s \"Lattice Options\" { set choice 2 } .da" );
 cmd( "frame .da.s.t" );
 cmd( "label .da.s.t.l -width 25 -anchor e -text \"Cross-section time step\"" );
 cmd( "set time %d", num_c );
-cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.t.e insert 0 $time" ); 
 cmd( "pack .da.s.t.l .da.s.t.e -side left -anchor w -padx 2 -pady 2" );
 
 cmd( "frame .da.s.i" );
 cmd( "label .da.s.i.l -width 25 -anchor e -text \"Number of data columns\"" );
 cmd( "set bidi %d", ncol );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.i.e insert 0 $bidi" ); 
 cmd( "pack .da.s.i.l .da.s.i.e -side left -anchor w -padx 2 -pady 2" );
 
@@ -5672,7 +5672,7 @@ cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 cmd( "frame .da.s.i" );
 cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
 cmd( "set bidi %d", j < 25 ? j : 25 );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.i.e insert 0 $bidi" ); 
 cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
@@ -5915,14 +5915,14 @@ cmd( "newtop .da.s \"Histogram Options\" { set choice 2 } .da" );
 cmd( "frame .da.s.t" );
 cmd( "label .da.s.t.l -text \"Cross-section time step\"" );
 cmd( "set time %d", end[ 0 ] );
-cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.t.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set time %%P; return 1 } { %%W delete 0 end; %%W insert 0 $time; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.t.e insert 0 $time" ); 
 cmd( "pack .da.s.t.l .da.s.t.e -side left -padx 2" );
 
 cmd( "frame .da.s.i" );
 cmd( "label .da.s.i.l -text \"Number of classes/bins\"" );
 cmd( "set bidi %d", nv < 25 ? nv : 25 );
-cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
+cmd( "entry .da.s.i.e -width 5 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P > 0 && %%P <= $maxc } { set bidi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bidi; return 0 } } -invcmd { bell } -justify center" );
 cmd( ".da.s.i.e insert 0 $bidi" ); 
 cmd( "pack .da.s.i.l .da.s.i.e -side left -padx 2" );
 
@@ -6156,7 +6156,7 @@ void create_series( int *choice )
 
 	cmd( "frame .da.s.f.t" );
 	cmd( "label .da.s.f.t.l -text \"Threshold\"" );
-	cmd( "entry .da.s.f.t.th -width 10 -validate focusout -vcmd { if [ string is double %%P ] { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "entry .da.s.f.t.th -width 10 -validate focusout -vcmd { if [ string is double -strict %%P ] { set thflt %%P; return 1 } { %%W delete 0 end; %%W insert 0 $thflt; return 0 } } -invcmd { bell } -justify center -state disabled" );
 	cmd( "write_disabled .da.s.f.t.th $thflt" ); 
 	cmd( "pack .da.s.f.t.l .da.s.f.t.th -side left -padx 2" );
 
@@ -6178,7 +6178,7 @@ void create_series( int *choice )
 	cmd( "radiobutton .da.s.i.r.ci.c -text \"Confidence interval (3 series)\" -variable bidi -value 6 -command { .da.s.i.r.ci.p configure -state normal; set headname \"\"; set vname $headname$basename; .da.s.n.nv selection range 0 end }" );
 	cmd( "label .da.s.i.r.ci.x -text @" );
 	cmd( "label .da.s.i.r.ci.perc -text %%" );
-	cmd( "entry .da.s.i.r.ci.p -width 3 -validate focusout -vcmd { if { [ string is integer \"%%P\" ] && %%P >= 80 && %%P <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
+	cmd( "entry .da.s.i.r.ci.p -width 3 -validate focusout -vcmd { if { [ string is integer -strict \"%%P\" ] && %%P >= 80 && %%P <= 99 } { set confi %%P; return 1 } { %%W delete 0 end; %%W insert 0 $confi; return 0 } } -invcmd { bell } -justify center -state disabled" );
 	cmd( "write_disabled .da.s.i.r.ci.p $confi" ); 
 	cmd( "pack .da.s.i.r.ci.c .da.s.i.r.ci.x .da.s.i.r.ci.p .da.s.i.r.ci.perc -side left" );
 
@@ -6507,7 +6507,7 @@ void create_maverag( int *choice )
 
 	cmd( "frame .da.s.o" );
 	cmd( "label .da.s.o.l -text \"Number of time steps\"" );
-	cmd( "entry .da.s.o.th -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "entry .da.s.o.th -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set bido %%P; return 1 } { %%W delete 0 end; %%W insert 0 $bido; return 0 } } -invcmd { bell } -justify center" );
 	cmd( ".da.s.o.th insert 0 $bido" ); 
 	cmd( "pack .da.s.o.l .da.s.o.th" );
 	
@@ -6837,7 +6837,7 @@ cmd( "pack .da.lab.c.l .da.lab.c.del" );
 
 cmd( "frame .da.lab.e" );
 cmd( "label .da.lab.e.l -text \"Column width (10-80 chars)\"" );
-cmd( "entry .da.lab.e.ecol -width 5 -validate focusout -vcmd { if [ string is integer %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
+cmd( "entry .da.lab.e.ecol -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set numcol %%P; return 1 } { %%W delete 0 end; %%W insert 0 $numcol; return 0 } } -invcmd { bell } -justify center -state disabled" );
 cmd( "write_disabled .da.lab.e.ecol $numcol" );
 cmd( "pack .da.lab.e.l .da.lab.e.ecol" );
 
