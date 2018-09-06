@@ -223,7 +223,7 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : file name or base name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				delete [ ] simul_name;
 				simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
@@ -231,14 +231,14 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 			// read -s parameter : first sequential file to process
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				findex = atoi( argv[ i + 1 ] );
 				batch_sequential = true;   
 				continue;
 			}
 			// read -e parameter : last sequential file to process
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'e' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'e' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				fend = atoi( argv[ i + 1 ] );
 				continue;
@@ -273,13 +273,13 @@ int lsdmain( int argn, char **argv )
 				continue;
 			}
 			// change the path for the output of result files
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				results_alt_path( argv[ 1 + i ] );
 				continue;
 			}
 			// read -c parameter : max number of cores
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				j = atoi( argv[ i + 1 ] );
 				continue;

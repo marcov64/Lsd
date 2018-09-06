@@ -86,7 +86,7 @@ int lsdmain( int argn, char **argv )
 
 	findex = 1;
 
-	if ( argn < 3 )
+	if ( argn < 5 )
 	{
 		fprintf( stderr, "\nThis is LSD Initial Values Range Reader.\nIt reads a LSD configuration file (.lsd) and a LSD sensitivity analysis file\n(.sa) and shows the ranges used for variables/parameters being analyzed,\noptionally saving them in a comma separated text file (.csv).\n\nCommand line options:\n'-f FILENAME.lsd' the configuration file to use\n'-s FILENAME.sa' the sensitivity analysis file to use\n'-o OUTPUT.csv' name for the comma separated output text file\n" );
 		myexit( 1 );
@@ -96,21 +96,21 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : original configuration file
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				struct_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -s parameter : sensitivity file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 's' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				sens_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( sens_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -o parameter : output file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				out_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( out_file, argv[ 1 + i ] );

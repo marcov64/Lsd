@@ -92,7 +92,7 @@ int lsdmain( int argn, char **argv )
 
 	findex = 1;
 
-	if ( argn < 3 )
+	if ( argn < 7 )
 	{
 		fprintf( stderr, "\nThis is LSD Configuration Generator.\nIt creates new LSD configuration file(s) (.lsd) based on changed parameters\nor variables initial values described in a comma separated text file (.csv).\nEach changed element should take one line. First column must contain the\nparameter or variable name. Second (and additional) column(s) must contain\nthe values to apply in the new configuration. First line (header) is required\nand considered for the number of columns only. One configuration is generated\nfor each column with values, sequentially numbered.\n\nCommand line options:\n'-f FILENAME.lsd' the original configuration file to use as base\n'-c CONFIG.csv' comma separated text file with new configuration values\n'-o FILE_BASE_NAME' base name (no extension) to save new configuration file(s)\n" );
 		myexit( 1 );
@@ -102,21 +102,21 @@ int lsdmain( int argn, char **argv )
 		for ( i = 1; i < argn; i += 2 )
 		{
 			// read -f parameter : original configuration file
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'f' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				struct_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( struct_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -c parameter : text configuration file name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'c' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				config_file = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( config_file, argv[ 1 + i ] );
 				continue;
 			}
 			// read -o parameter : output base name
-			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' )
+			if ( argv[ i ][ 0 ] == '-' && argv[ i ][ 1 ] == 'o' && 1 + i < argn && strlen( argv[ 1 + i ] ) > 0 )
 			{
 				simul_name = new char[ strlen( argv[ 1 + i ] ) + 1 ];
 				strcpy( simul_name, argv[ 1 + i ] );

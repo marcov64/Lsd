@@ -1315,7 +1315,7 @@ void count_save( object *n, int *count )
 /****************************************************
 GET_SAVED
 ****************************************************/
-void get_saved( object *n, FILE *out, const char *sep )
+void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
@@ -1325,7 +1325,7 @@ void get_saved( object *n, FILE *out, const char *sep )
 	description *cd;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
-		if ( cv->save )
+		if ( cv->save || all_var )
 		{
 			// get element description
 			cd = search_description( cv->label );
@@ -1353,7 +1353,7 @@ void get_saved( object *n, FILE *out, const char *sep )
 			co = blueprint->search( cb->blabel );
 		else
 			co = cb->head; 
-		get_saved( co, out, sep );
+		get_saved( co, out, sep, all_var );
 	}
 }
 

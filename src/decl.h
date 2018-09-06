@@ -637,7 +637,7 @@ void fill_list_var( object *r, int flag_all, int flag_init );
 void find_lags( object *r );
 void find_using( object *r, variable *v, FILE *frep );
 void get_sa_limits( object *r, FILE *out, const char *sep );
-void get_saved( object *n, FILE *out, const char *sep );
+void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
 void go_next( object **t );
 void handle_signals( void ( * handler )( int signum ) );
 void histograms( int *choice );
