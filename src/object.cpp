@@ -530,6 +530,7 @@ int object::init( object *_up, char const *_label )
 	b = NULL;
 	hook = NULL;
 	node = NULL;	// not part of a network yet
+	position = NULL; //not part of a GIS yet
 	cext = NULL;	// no C++ object extension yet
 	acounter = 0;	// "fail safe" when creating labels
 	lstCntUpd = 0; 	// counter never updated
@@ -1088,6 +1089,11 @@ void object::empty( void )
 	{
 		delete node;
 		node = NULL;
+	}
+
+	if ( position != NULL ) // gis data to delete?
+	{
+		unregister_from_gis();
 	}
 }
 

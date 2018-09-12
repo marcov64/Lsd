@@ -1,0 +1,98 @@
+	
+Label Root
+{
+	Son: Patch
+	Label Patch
+	{
+
+	}
+
+	Var: Init_GIS
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: Init_GIS 0 n + n n
+
+Object: Patch C	1
+
+SIM_NUM 1
+SEED 1
+MAX_STEP 100
+EQUATION fun_gisExample.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_Init_GIS
+(no description available)
+END_DESCRIPTION
+
+Object_Patch
+(no description available)
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+
+#include "fun_head_fast.h"
+
+
+// do not add Equations in this area
+
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+
+EQUATION("Init_GIS")
+cur = SEARCH("Patch"); //Get first object of "Patch" type. This will be our fixed landscape.
+
+if (p->init_gis_regularGrid("Patch",10,20) ){
+	PLOG("\nInitialised the Grid.");
+}	else {
+	PLOG("\nError");
+}
+
+RESULT(0.0)
+
+
+
+
+
+
+
+
+
+
+MODELEND
+
+
+// do not add Equations in this area
+
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

@@ -36,6 +36,9 @@
 #include <list>
 #include <new>
 #include <map>
+#include <vector>
+#include <deque>
+#include <iterator>
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -130,6 +133,7 @@ using namespace std;
 // classes definitions
 class object;
 class variable;
+struct gisMap;
 
 #ifdef CPP11
 // special types used for fast equation lookup
@@ -242,6 +246,120 @@ struct netNode		// network node data
 	~netNode( void );// destructor
 };
 
+/*
+//to do: provide advanced attributes for netLink and netNode
+struct linkAttributes //network link attributes
+{
+  netLink *link; //link to netLink object
+  object *linkObj; //link to associated object (if any)
+
+  linkAttributes(netLink *link, object *linkObj); //constructor
+  ~linkAttributes( void ); //destructor
+
+  double attribute(char const attrName[ ]); //get attribute from assoc. LSD object.
+}
+
+struct nodeAttributes //network link attributes
+{
+  netNode *node; //link to netNode object
+  object *nodeObj; //link to associated object
+
+
+  nodeAttributes(netNode *node, object *nodeObj); //constructor
+  ~nodeAttributes( void ); //destructor
+
+  double attribute(char const attrName[ ]); //get attribute from assoc. LSD object.
+}
+*/
+
+struct gisPosition
+{
+  public:
+  gisMap* map;  //link to shared map
+  double x;     //x position
+  double y;     //y position
+  double z;     //z position, if any (default 0, not used in map!
+  std::deque<object*> in_radius; //list of objects in range, used by search
+
+  gisPosition (gisMap* map, double x, double y, double z=0) : map(map), x(x), y(y), z(z)  //constructor.
+  {
+  };
+
+//   ~gisPosition( void ); //destructor. Take care of getting it OUT OF THE MAP
+};
+
+struct Wrap
+{
+    bool noWrap;
+    bool left;
+    bool right;
+    bool top;
+    bool bottom;
+   /*wrapping: there are 2^4 options. We use a bit-code (0=off):
+    0-bit: left     : 0=0 1=1
+    1-bit: right    : 0=0 1=2
+    2-bit: top      : 0=0 1=4
+    3-bit: bottom   : 0=0 1=8
+    */
+    Wrap(int wrap){
+      if (wrap == 0) {
+        noWrap = true;
+      } else {
+        noWrap = false;
+        if (wrap>7){bottom=true; wrap-=8;} else {bottom=false; }
+        if (wrap>3){top=true;    wrap-=4;} else {top=false;    }
+        if (wrap>1){right=true;  wrap-=2;} else {right=false;  }
+        if (wrap>0){left=true;           } else {left=false;   }
+      }
+    };
+    Wrap(bool left, bool right, bool top, bool bottom) : left(left),right(right),top(top),bottom(bottom)
+    {
+      if (left == right == top == bottom == false){
+        noWrap = true;
+      } else {
+        noWrap = false;
+      }
+    };
+//     ~Wrap( void );
+};
+
+struct gisMap
+{
+  int xn;
+  int yn;
+  Wrap wrap;
+  /*
+    there are 2^4 options. We use a bit-code (0=off):
+    0-bit: left     : 0=0 1=1
+    1-bit: right    : 0=0 1=2
+    2-bit: top      : 0=0 1=4
+    3-bit: bottom   : 0=0 1=8
+    Simply sum up the options selected and pass this as argument.
+    Examples: 0 = None, 1 = left, 2 = right, 3 (1+2) left-right,
+    5 up, 7 down, 12 (5+7) up-down, 15 (1+2+5+7) torus.
+  */
+  std::vector<std::vector <std::deque<object*> >> elements;
+  int nelements; //count number of elements
+
+  gisMap(int xn, int yn, int _wrap=0) : xn(xn), yn(yn),wrap(_wrap) //constructor
+  {
+      nelements = 0;
+      elements.resize(xn);
+      for (auto& x : elements){
+        x.resize(yn); //number of rows, copy
+      }
+    };
+
+//   ~gisMap( void ) //destructor
+//   {
+//     //no need to do any thing, this is done in the objects with gisPosition in map.
+//   };
+};
+
+     //to do: allow doubles
+  std::vector<object*> within_radius(object *origin, char const label[], double radius, bool random = true); //give back elements in radius
+  std::vector<object*> at_position(char const label[], int x, int y, bool random = true); //give back elements at position
+  gisMap* map_from_obj(object* origin); //get mapPointer from an Object situated in a GIS
 class object
 {
 	public:
@@ -255,6 +373,7 @@ class object
 	int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 	int to_compute;
 	netNode *node;		// pointer to network node data structure
+	gisPosition *position; //Pointer to gis data structure
 	void *cext;			// pointer to a C++ object extension to the LSD object
 
 	double cal( object *caller,  char const *l, int lag );
@@ -341,6 +460,28 @@ class object
 	long init_scale_free_net( char const *lab, long numNodes, long outDeg, double expLink );
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
 	void delete_net( char const *lab );
+
+	//set the new GIS handling methods
+	double distance(object* other); //distance to other object
+	double pseudo_distance(object* other); //pseudo distance to other object
+	std::deque<object*>::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
+
+	bool register_position(double _x, double _y);
+	bool unregister_position(bool move);
+	bool change_position(double _x, double _y);
+
+	bool register_at_map(gisMap* map, double _x, double _y);
+	bool unregister_from_gis();
+
+
+	gisMap* ptr_map(); //get ptr to map, if gis object
+
+	gisMap* init_map(int xn, int yn, int _wrap=0); //initialise a new map and register the ob to it.
+	bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
+
+	bool init_gis_singleObj(object* gisObj, double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
+	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0); //Create a gis and add the objects to it, creating new ones if necessary.
+
 };
 
 struct lsdstack
@@ -491,6 +632,7 @@ void nop( void );										// no operation
 void plog( char const *msg, char const *tag = "", ... );
 void results_alt_path( const char * );  				// change where results are saved.
 void set_fast( int level );								// enable fast mode
+long nodes2create( object *parent, char const *lab, long numNodes ); //calculate nodes missing
 
 #ifdef CPP11
 double binomial( double p, double t );					// draw from a binomial distribution
