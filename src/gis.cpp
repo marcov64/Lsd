@@ -116,7 +116,14 @@ extern char msg[300];
   //  Caution: Only use in combo with creating a gis object
   gisMap* object::init_map(int xn, int yn, int _wrap)
   {
-    return new gisMap(xn, yn, _wrap); //delete is taken care of later.
+    gisMap* map = new gisMap(xn, yn, _wrap);
+    if ( map == NULL )
+		{
+			error_hard( "cannot allocate memory for init_map()",
+						"out of memory" );
+			return NULL;
+		}
+    return map;
   }
 
   //  delete_map
@@ -168,6 +175,12 @@ extern char msg[300];
       return false; //re-registering not allowed. derigster at gis first."
     }
     position = new  gisPosition (map, _x, _y);
+    if ( position == NULL )
+		{
+			error_hard( "cannot allocate memory for register_at_map()",
+						"out of memory" );
+			return false;
+		}
     register_position(_x,_y);
     return true;
   }
@@ -181,24 +194,33 @@ extern char msg[300];
 					"check your code to prevent this situation" );
       return false;
     }
-    if (_x < 0 || _x >= position->map->xn || _y < 0 || _y >= position->map->yn) {
+    if (_x < 0.0 || _x >= double(position->map->xn) || _y < 0.0 || _y >= double(position->map->yn) ) {
+      sprintf( msg, "failure in register_position() for object '%s' position (%g,%g)", label,_x,_y );
+		      error_hard( msg, "the position is outside the map",
+					"check your code to prevent this situation" );
       return false; //error!
     }
+    position->x=_x;
+    position->y=_y;
     position->map->elements.at(int(_x)).at(int(_y)).push_back( this );
     position->map->nelements++;
     return true;
   }
 
   bool object::unregister_position(bool move) {
+    if (ptr_map() == NULL){
+      sprintf( msg, "failure in unregister_position() for object '%s'", label );
+		      error_hard( msg, "the object is not yet connected to a map",
+					"check your code to prevent this situation" );
+      return false;
+    }
     //https://stackoverflow.com/a/31329841/3895476
-    auto& list = position->map->elements.at(int(position->x)).at(int(position->y));
-    auto begin = list.begin();
-    auto end   = list.end();
-    for (auto it_item =  list.begin();  it_item != list.end(); /*nothing*/){
+    auto begin = position->map->elements.at(int(position->x)).at(int(position->y)).begin();
+    auto end   = position->map->elements.at(int(position->x)).at(int(position->y)).end();
+    for (auto it_item =  begin;  it_item != end; it_item++){
       if (*it_item == this ){
-        list.erase(it_item);
+        position->map->elements.at(int(position->x)).at(int(position->y)).erase(it_item);
         position->map->nelements--;
-
         if (move == false && position->map->nelements == 0){ //important: If unregistering before move, do not delete gis map
           //Last element removed
           delete position->map;
@@ -214,6 +236,9 @@ extern char msg[300];
   }
 
   bool object::change_position(double _x, double _y){
+    if (check_positions(_x, _y) == false){
+      return false; //Out of range
+    }
     if (unregister_position(true) == false) {
       return false; //cannot change position, error in init position
     }
@@ -224,12 +249,24 @@ extern char msg[300];
     //  pseudo_distance
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(object *b){
-    if (b->position == NULL){
-      //invalid result - both elements need to be gis elements
-      return NaN;
-    } else if (b->position->map != position->map){
+    if (ptr_map() == NULL){
+        sprintf( msg, "failure in pseudo_distance() for object '%s'", label );
+  		      error_hard( msg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    if (b->ptr_map() == NULL){
+        sprintf( msg, "failure in pseudo_distance() for second object '%s'", b->label );
+  		      error_hard( msg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+    if (b->ptr_map() != ptr_map()){
       //both elements need to be part of the same gis
-      return NaN;
+      sprintf( msg, "failure in pseudo_distance() for objects '%s' and '%s'", label, b->label );
+  		      error_hard( msg, "the objects are not on the same map",
+  					"check your code to prevent this situation" );
+        return NaN;
     }
 
     double x_1 = position->x;
@@ -293,6 +330,9 @@ extern char msg[300];
       for (int y=0; y<position->map->yn;y++){
         for (object* candidate : position->map->elements.at(x).at(y)){
           //in naive approach no sorting!
+            if (candidate == this){
+              continue; //skip self
+            }
             if ( strcmp(candidate->label,lab) == 0){
               if (pseudo_distance(candidate) <= pseudo_radius) {
                 position->in_radius.push_back(candidate);
@@ -305,6 +345,139 @@ extern char msg[300];
   }
 
 
+  double object::get_pos(char xyz)
+  {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in pos() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    switch (xyz) {
+      case 'x' :
+      case 'X' : return position->x;
+      case 'y' :
+      case 'Y' : return position->y;
+      case 'Z' :
+      case 'z' : return position->z;
+      default  : ;
+    }
+    sprintf( msg, "failure in pos() for object '%s'", label );
+		      error_hard( msg, "only position x, y or z possible",
+					"check your code to prevent this situation" );
+      return -1;
+  }
+
+  bool object::move(char const direction[])
+  {
+    int dir = 0; //stay put
+
+    switch (direction[0]) {
+
+      case 'n':   if (direction[1]=='w'){
+                    dir = 8; //north-west
+                  } else if (direction[1]=='e'){
+                    dir = 2; //north-west
+                  } else {
+                    dir = 1; //north
+                  }
+                  break;
+      case 'w':   dir = 3;
+                  break;
+      case 's':   if (direction[1]=='w'){
+                    dir = 6; //south-west
+                  } else if (direction[1]=='e'){
+                    dir = 4; //south-west
+                  } else {
+                    dir = 5; //south
+                  }
+                  break;
+      case 'e':   dir = 7;
+                  break;
+      default :   dir = 0; //stay put.
+    }
+
+    return move(dir);
+  }
+
+  bool object::move(int direction)
+  {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in move() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return false;
+    }
+    double x_out = position->x;
+    double y_out = position->y;
+    switch (direction) {
+      case 0: return true;
+      case 1: y_out++; break;
+      case 2: y_out++; x_out++; break;
+      case 3: x_out++; break;
+      case 4: y_out--; x_out++; break;
+      case 5: y_out--; break;
+      case 6: y_out--; x_out--; break;
+      case 7: x_out--; break;
+      case 8: y_out++; x_out--; break;
+    }
+    return change_position(x_out, y_out);
+  }
+
+    //  check_positions
+    //  Function to check if the x any y are in the bounds of the map.
+    //  If wrapping is possible and allowed, the positions are transformed
+    //  accordingly
+  bool object::check_positions(double& _xOut, double& _yOut)
+  {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in check_positions() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return false;
+    }
+    if (   (_xOut >= 0.0 && _xOut < double(position->map->xn) )
+        && (_yOut >= 0.0 && _yOut < double(position->map->yn) ) ) {
+      return true; //all fine, nothing to change.
+    }
+
+    double _x = _xOut;
+    double _y = _yOut;
+    if (_x <0) {
+      if (position->map->wrap.left == true){
+        while (_x <0) {_x = double(position->map->xn) + _x;} //_x is neg
+      } else {
+        return false;
+      }
+    }
+    if (_y <0) {
+      if (position->map->wrap.bottom == true){
+        while (_y <0) {_y = double(position->map->yn) + _y;} //_y is neg
+      } else {
+        return false;
+      }
+    }
+    if (_x >= position->map->xn){
+      if (position->map->wrap.right == true){
+        while (_x >= position->map->xn) { _x -= double(position->map->xn); }
+      } else {
+        return false;
+      }
+    }
+    if (_y >= position->map->yn){
+      if (position->map->wrap.top == true){
+        while (_y >= position->map->yn) { _y -= double(position->map->yn); }
+      } else {
+        return false;
+      }
+    }
+    if (check_positions(_x, _y) == false){ //recursively for new corner cases!
+      return false;
+    }
+    _yOut = _y; //set values
+    _xOut = _x;
+    return true;
+  }
 //   std::vector<object*> gisPosition::at_position(char const label[], int x, int y){
 //     std::vector<object*> elements;
 //     gisMap *map = map_from_obj(gisObj);

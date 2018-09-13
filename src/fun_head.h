@@ -528,6 +528,42 @@ else \
 #define CYCLE_EXT( ITER, CLASS, OBJ ) for ( ITER = EXEC_EXT( CLASS, OBJ, begin ); ITER != EXEC_EXT( CLASS, OBJ, end ); ++ITER )
 #define CYCLE_EXTS( PTR, ITER, CLASS, OBJ ) for ( ITER = EXEC_EXTS( PTR, CLASS, OBJ, begin ); ITER != EXEC_EXTS( PTR, CLASS, OBJ, end ); ++ITER )
 
+//  gis macros
+// Initialisation macros
+#define INIT_SPACE_SINGLE( GISOBJ, X, Y, XN, YN)              { p->init_gis_singleObj(GISOBJ, X, Y, XN, YN); }
+#define INIT_SPACE_SINGLE_WRAP( GISOBJ, X, Y, XN, YN, WRAP )  { p->init_gis_singleObj(GISOBJ, X, Y, XN, YN, WRAP ); }
+
+#define INIT_SPACE( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+
+#define INIT_SPACES( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+
+#define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
+
+#define ADD_POSITION( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_POSITIONS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+
+#define POSITION_X ( p->get_pos('x') )
+#define POSITION_Y ( p->get_pos('y') )
+#define POSITION_Z ( p->get_pos('z') )
+#define POSITION_XS(PTR) ( PTR->get_pos('x') )
+#define POSITION_YS(PTR) ( PTR->get_pos('y') )
+#define POSITION_ZS(PTR) ( PTR->get_pos('z') )
+
+#define TELEPORT(X,Y) ( p->change_position(X,Y) )
+#define TELEPORTS(PTR,X,Y) ( PTR->change_position(X,Y) )
+
+#define MOVE(DIRECTION) ( p->move(DIRECTION) )
+#define MOVES(PTR, DIRECTION) ( PTR->move(DIRECTION) )
+
+// #define CYCLE( O, L ) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE" ); O != NULL; O = go_brother( O ) )
+// #define CYCLES( C, O, L ) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLES" ); O != NULL; O = go_brother( O ) )
+
+
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj != p->position->in_radius.end(); O = *(++it_obj) )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj !=  C->position->in_radius.end(); O = *(++it_obj) )
+
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)

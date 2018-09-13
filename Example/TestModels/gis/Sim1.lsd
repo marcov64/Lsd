@@ -4,10 +4,30 @@ Label Root
 	Son: Patch
 	Label Patch
 	{
+		Param: Owned
 
 	}
 
+	Son: Agent
+	Label Agent
+	{
+		Var: Move
+		Param: Colour
+		Param: Strength
+		Param: NextSpawn
+
+	}
+
+	Var: Scheduler
 	Var: Init_GIS
+	Param: nColours
+	Param: nAgents
+	Param: Avg_Strength
+	Param: Min_Strength
+	Param: Max_Strength
+	Param: RandomiseOrder
+	Param: Time_Sim_Ends
+	Param: Manual_Seed
 
 }
 
@@ -15,13 +35,29 @@ Label Root
 DATA
 
 Object: Root C	1
+Var: Scheduler 0 n + n n
 Var: Init_GIS 0 n + n n
+Param: nColours 0 n + n p	0
+Param: nAgents 0 n + n p	0
+Param: Avg_Strength 0 n + n p	0
+Param: Min_Strength 0 n + n p	0
+Param: Max_Strength 0 n + n p	0
+Param: RandomiseOrder 0 n + n n	1
+Param: Time_Sim_Ends 0 s + n n	0
+Param: Manual_Seed 0 n + n n	-1
 
 Object: Patch C	1
+Param: Owned 0 n + n n	0
+
+Object: Agent C	1
+Var: Move 0 n + n n
+Param: Colour 0 n + n n	0
+Param: Strength 0 n + n n	0
+Param: NextSpawn 0 n + n n	0
 
 SIM_NUM 1
-SEED 1
-MAX_STEP 100
+SEED 200
+MAX_STEP 3000
 EQUATION fun_gisExample.cpp
 MODELREPORT report_Sim1.html
 
@@ -31,12 +67,109 @@ Object_Root
 (no description available)
 END_DESCRIPTION
 
+Variable_Scheduler
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
 Variable_Init_GIS
 (no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nColours
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_nAgents
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Avg_Strength
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Min_Strength
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Max_Strength
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RandomiseOrder
+1: Random Order
+0: Default (fixed) order
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Time_Sim_Ends
+Time when only one colour survives.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Manual_Seed
+Define the Seed manually (>0). Useful for CRN simulations.
+
+Set negative to work as dummy
+_INIT_
+
 END_DESCRIPTION
 
 Object_Patch
 (no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Owned
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Move
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Colour
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Strength
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_NextSpawn
+(no description available)
+_INIT_
+
 END_DESCRIPTION
 
 

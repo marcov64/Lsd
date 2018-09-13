@@ -304,6 +304,7 @@ struct Wrap
     Wrap(int wrap){
       if (wrap == 0) {
         noWrap = true;
+        left = right = top = bottom = false;
       } else {
         noWrap = false;
         if (wrap>7){bottom=true; wrap-=8;} else {bottom=false; }
@@ -481,6 +482,13 @@ class object
 
 	bool init_gis_singleObj(object* gisObj, double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
 	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0); //Create a gis and add the objects to it, creating new ones if necessary.
+
+  double get_pos(char xyz);
+
+  bool move(char const direction[]);
+  bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
+
+  bool check_positions(double& _x, double& _y); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
 
 };
 
