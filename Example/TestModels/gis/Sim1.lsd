@@ -45,7 +45,7 @@ Param: nAgents 0 n + n p	0
 Param: Avg_Strength 0 n + n p	0
 Param: Min_Strength 0 n + n p	0
 Param: Max_Strength 0 n + n p	0
-Param: RandomiseOrder 0 n + n n	1
+Param: RandomiseOrder 0 n + n n	0
 Param: Time_Sim_Ends 0 s + n n	0
 Param: Manual_Seed 0 n + n n	0
 Param: x_dim 0 n + n n	40
@@ -138,10 +138,14 @@ END_DESCRIPTION
 
 Parameter_x_dim
 (no description available)
+_INIT_
+
 END_DESCRIPTION
 
 Parameter_y_dim
 (no description available)
+_INIT_
+
 END_DESCRIPTION
 
 Parameter_Wrap
@@ -153,6 +157,7 @@ There are 2^4 options. We use a bit-code (0=off):
     3-bit: bottom   : 0=0 1=8
 Simply add the numbers to define the wraping. 
 E.g. 5 -> wrap left and top.
+_INIT_
 
 END_DESCRIPTION
 
