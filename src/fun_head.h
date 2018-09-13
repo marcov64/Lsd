@@ -557,10 +557,6 @@ else \
 #define MOVE(DIRECTION) ( p->move(DIRECTION) )
 #define MOVES(PTR, DIRECTION) ( PTR->move(DIRECTION) )
 
-// #define CYCLE( O, L ) for ( O = get_cycle_obj( p, ( char * ) L, "CYCLE" ); O != NULL; O = go_brother( O ) )
-// #define CYCLES( C, O, L ) for ( O = get_cycle_obj( C, ( char * ) L, "CYCLES" ); O != NULL; O = go_brother( O ) )
-
-
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj != p->position->in_radius.end(); O = *(++it_obj) )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj !=  C->position->in_radius.end(); O = *(++it_obj) )
 

@@ -478,14 +478,5 @@ extern char msg[300];
     _xOut = _x;
     return true;
   }
-//   std::vector<object*> gisPosition::at_position(char const label[], int x, int y){
-//     std::vector<object*> elements;
-//     gisMap *map = map_from_obj(gisObj);
-//     if (map == NULL){
-//       return elements;
-//     }
-//     //fill vector
-//     return elements;
-//   }
 
 

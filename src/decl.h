@@ -357,10 +357,6 @@ struct gisMap
 //   };
 };
 
-     //to do: allow doubles
-  std::vector<object*> within_radius(object *origin, char const label[], double radius, bool random = true); //give back elements in radius
-  std::vector<object*> at_position(char const label[], int x, int y, bool random = true); //give back elements at position
-  gisMap* map_from_obj(object* origin); //get mapPointer from an Object situated in a GIS
 class object
 {
 	public:
