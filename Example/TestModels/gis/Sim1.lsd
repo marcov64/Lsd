@@ -28,6 +28,9 @@ Label Root
 	Param: RandomiseOrder
 	Param: Time_Sim_Ends
 	Param: Manual_Seed
+	Param: x_dim
+	Param: y_dim
+	Param: Wrap
 
 }
 
@@ -44,9 +47,12 @@ Param: Min_Strength 0 n + n p	0
 Param: Max_Strength 0 n + n p	0
 Param: RandomiseOrder 0 n + n n	1
 Param: Time_Sim_Ends 0 s + n n	0
-Param: Manual_Seed 0 n + n n	-1
+Param: Manual_Seed 0 n + n n	0
+Param: x_dim 0 n + n n	40
+Param: y_dim 0 n + n n	40
+Param: Wrap 0 n + n n	16
 
-Object: Patch C	1
+Object: Patch N	1
 Param: Owned 0 n + n n	0
 
 Object: Agent C	1
@@ -56,7 +62,7 @@ Param: Strength 0 n + n n	0
 Param: NextSpawn 0 n + n n	0
 
 SIM_NUM 1
-SEED 200
+SEED 201
 MAX_STEP 3000
 EQUATION fun_gisExample.cpp
 MODELREPORT report_Sim1.html
@@ -127,6 +133,26 @@ Define the Seed manually (>0). Useful for CRN simulations.
 
 Set negative to work as dummy
 _INIT_
+
+END_DESCRIPTION
+
+Parameter_x_dim
+(no description available)
+END_DESCRIPTION
+
+Parameter_y_dim
+(no description available)
+END_DESCRIPTION
+
+Parameter_Wrap
+Define with a bitcode if wrapping is allowed
+There are 2^4 options. We use a bit-code (0=off):
+    0-bit: left     : 0=0 1=1
+    1-bit: right    : 0=0 1=2
+    2-bit: top      : 0=0 1=4
+    3-bit: bottom   : 0=0 1=8
+Simply add the numbers to define the wraping. 
+E.g. 5 -> wrap left and top.
 
 END_DESCRIPTION
 

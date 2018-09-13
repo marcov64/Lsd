@@ -1,6 +1,74 @@
 Model GIS Example (ver. 1.0)
 
-This is a simple example model to show how the new GIS module works.
+This is a simple toy example model to show how the new GIS module works. 
+Initially there are 20 agents with different colours that spawn at random points on the map.
+The agents attributes are Strength (initially 1) and NewSpawn (initally 2). The agents move randomly on the map, colouring the patch they just visited in their colour. For each point in strength they can move one step further. If they encounter another agent with a different colour in the same patch, they fight. The one agent with the higher Strength wins, reducing the strength of its counterpart by one and adding one to his own Strength. Whenever the strength reaches 0, an agent dies. Whenever the Strength equals NewSpan, the agent spawns a copy of itself at the same position on the map, but with Strength 1 and NewSpawn 2 (initial values). At the same time, NewSpawn is doubled (i.e. an agent needs to double strength before spawning a new one). Once all colours are defeated, the game ends and the simulation stops.
+
+Controls:
+Wrap : Define with a bitcode if wrapping is allowed
+		There are 2^4 options. We use a bit-code (0=off):
+    0-bit: left     : 0=0 1=1
+    1-bit: right    : 0=0 1=2
+    2-bit: top      : 0=0 1=4
+    3-bit: bottom   : 0=0 1=8
+    Simply add the numbers to define the wraping. E.g. 5 -> wrap left and top.
+  
+x_dim and y_dim : Define the size of the grid
+RandomiseOrder: 0 - off (LSD default), 1 - on (Agents act in random order)
+
+--------------------------
+General Info:
+
+Objects can have double-valued positions with x in [0,xn).
+If you copy an agent by using ADDOBJ_EX, the position is also copied and the new agent registered in the map.
+If you delete an agent, it is also deregistered from the map. If it is the last element in the
+map, then the map is deleted.
+---------------------------
+Macros (up to now):
+
+#Initialising the space, 
+# ...either with a single object GISOBJ added to the space ...
+INIT_SPACE_SINGLE( GISOBJ, X, Y, XN, YN)   	         
+INIT_SPACE_SINGLE_WRAP( GISOBJ, X, Y, XN, YN, WRAP )
+# ...or with a number of objects with label LAB added                                                     
+INIT_SPACE( LAB, XN, YN )         
+INIT_SPACES( PTR, LAB, XN, YN )           
+
+# ...and potentially with wrapping
+INIT_SPACE_WRAP( LAB, XN, YN, WRAP )
+INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP )  
+                                  
+#Delete the space in which OBJ is situated, also "despacing" all other objects in that space
+DELETE_SPACE( OBJ )         
+
+#Add a single object to the space                                                    
+ADD_TO_SPACE( GISOBJ, X, Y) 
+ADD_TO_SPACES( PTR, GISOBJ, X, Y) 
+                                 
+#Get Position information of the object, if it is a spatial object                                                    
+POSITION_X                     
+POSITION_Y                      
+POSITION_XS(PTR)              
+POSITION_YS(PTR)  
+#... z position not in use currently. In future, this can be meters above see level (e.g.) for
+#... ....hiking algorithms (e.g.)
+POSITION_Z                                   
+POSITION_ZS(PTR)             
+          
+#Move an object, either directly                                                    
+TELEPORT(X,Y)       
+TELEPORTS(PTR,X,Y)    
+
+#or by providing a direction. Will be ammended (perhaps) to allow a path (more efficient)                                                    
+MOVE(DIRECTION)              
+MOVES(PTR, DIRECTION)       
+ 
+#Search inside a radius for agents with label LAB.
+#... currently this works but is a complete search and thus very inefficient.
+#... the algorithms are work in progress                                                    
+CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_i
+CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->
+
 
 (Enter the Model description text here)
 

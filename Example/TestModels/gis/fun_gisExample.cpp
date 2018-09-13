@@ -8,8 +8,7 @@
 
 // do not add Equations in this area
 
-const int x_dim = 30;
-const int y_dim = 30;
+
 #include<set>
 
 std::mt19937 my_PRNG;
@@ -30,7 +29,7 @@ CYCLE(cur,"Agent"){
 
 
 if (V("RandomiseOrder")==1){
-std::shuffle(agent_set.begin(),agent_set.end(),my_PRNG); //do not know how to link to LSD prng, a macro/bind would be nice!
+  std::shuffle(agent_set.begin(),agent_set.end(),my_PRNG); //do not know how to link to LSD prng, a macro/bind would be nice!
 }
 
 //CYCLE_SAFE(cur,"Agent"){    //randomisation missing
@@ -82,9 +81,11 @@ cur = SEARCH("Patch"); //Get first object of "Patch" type. This will be our fixe
 INIT_SPACE("Patch",10,20); //Initialise Grid
 
 // Print info on space.
-auto flatView = multidim::makeFlatView(cur->position->map->elements);
-for (object* obj : flatView){
-  PLOG("\n1: (%g,%g)",obj->position->x,obj->position->y);
+if(false){
+  auto flatView = multidim::makeFlatView(cur->position->map->elements);
+  for (object* obj : flatView){
+//     PLOG("\n1: (%g,%g)",obj->position->x,obj->position->y);
+  }
 }
 
 
@@ -95,7 +96,7 @@ INIT_SPACE_SINGLE_WRAP(cur, 0,0, 10,20,0)//Initialise grid but link to single it
 int x=0;
 int y=0;
 CYCLE(cur1,"Patch"){ //link to all remaining items manually. Existing ones are skipped.
-  ADD_POSITIONS(cur1,cur,x,y)
+  ADD_TO_SPACES(cur1,cur,x,y)
   x++;
   if (x == 10) {
     x = 0;
@@ -105,24 +106,26 @@ CYCLE(cur1,"Patch"){ //link to all remaining items manually. Existing ones are s
   //No one owns it
   WRITES(cur1,"Owned",1000); //White colour for lattice
 }
-// Print info on space.
-flatView = multidim::makeFlatView(cur->position->map->elements);
-for (object* obj : flatView){
-  PLOG("\n2: (%g,%g)",obj->position->x,obj->position->y);
+if(false){
+  // Print info on space.
+  auto flatView = multidim::makeFlatView(cur->position->map->elements);
+  for (object* obj : flatView){
+//     PLOG("\n2: (%g,%g)",obj->position->x,obj->position->y);
+  }
 }
 DELETE_SPACE(cur)//Delete it, again
-INIT_SPACE_WRAP("Patch", x_dim,y_dim,0)//Initialise relative large space
+INIT_SPACE_WRAP("Patch", V("x_dim"),V("y_dim"),V("Wrap"))//Initialise relative large space
 CYCLE(cur1,"Patch"){
   WRITES(cur1,"Owned",1000); //White colour for lattice
 }
 
-INIT_LAT( 1000, y_dim, y_dim, 400, 400 );
+INIT_LAT( 1000, V("y_dim"), V("x_dim"), 400, 400 );      //Lattice is row-major
 
 //Add other objects
 double color = 0;
 ADDNOBJ("Agent",19);
 CYCLE(cur1,"Agent"){
-  ADD_POSITIONS(cur1,cur,uniform(0,x_dim),uniform(0,y_dim))
+  ADD_TO_SPACES(cur1,cur,uniform(0,V("x_dim")),uniform(0,V("y_dim")))
   WRITES(cur1,"Colour",color++);
   WRITES(cur1,"Strength",1);
   WRITES(cur1,"NextSpawn",2);
@@ -150,6 +153,9 @@ they fight. If they have equal strength, a random coin toss decides who wins.
     object *winner = p; //assume self wins
     //Check if there are agents to fight with at the patch. Fight first one once.
     CYCLE_NEIGHBOUR(cur,"Agent",1.0){
+      if (VS(cur,"Colour")==V("Colour")){
+        continue; //skip
+      }
       object *sucker = cur;
       if ( V("Strength") <  VS(cur,"Strength") //other stronger
         || ( V("Strength") ==  VS(cur,"Strength") && uniform(0,1) < .5 ) ) //other lucky
@@ -160,7 +166,7 @@ they fight. If they have equal strength, a random coin toss decides who wins.
       INCRS(winner,"Strength",1.0);
       if (VS(winner,"Strength")>=VS(winner,"NextSpawn")){
         //Spawn new one!
-        PLOG("\nGrowing in Numbers!");
+//         PLOG("\nGrowing in Numbers!");
         object* newOne = ADDOBJ_EXS(p->up,"Agent",winner);
         WRITES(newOne, "Strength", 1.0); //reset
         WRITES(newOne, "NextSpawn", 2.0); //reset
@@ -169,7 +175,7 @@ they fight. If they have equal strength, a random coin toss decides who wins.
       INCRS(sucker,"Strength",-1.0);
     }
     if (winner==p){
-      WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn
+      WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
     } else {
       break; //if succer, no more move.
     }
