@@ -541,8 +541,8 @@ else \
 
 #define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
 
-#define ADD_POSITION( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
-#define ADD_POSITIONS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_TO_SPACE( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_TO_SPACES( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
 
 #define POSITION_X ( p->get_pos('x') )
 #define POSITION_Y ( p->get_pos('y') )
