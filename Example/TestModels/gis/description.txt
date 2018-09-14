@@ -36,7 +36,9 @@ INIT_SPACES( PTR, LAB, XN, YN )
 
 # ...and potentially with wrapping
 INIT_SPACE_WRAP( LAB, XN, YN, WRAP )
-INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP )  
+INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP ) 
+
+# ... the L, INIT_SPACE_WRAPL(S) and INIT_SPACE(L)S work as well.  
                                   
 #Delete the space in which OBJ is situated, also "despacing" all other objects in that space
 DELETE_SPACE( OBJ )         
@@ -66,8 +68,12 @@ MOVES(PTR, DIRECTION)
 #Search inside a radius for agents with label LAB.
 #... currently this works but is a complete search and thus very inefficient.
 #... the algorithms are work in progress                                                    
-CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_i
-CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->
+CYCLE_NEIGHBOUR( O, LAB, RAD ) 
+CYCLE_NEIGHBOURS( C, O, LAB, RAD ) 
+
+#Get first item with label LAB at position floor(X)..ceil(x), floor(y)..ceil(y), if any (else NULL)
+SEARCH_POSITION(LAB, X, Y)
+SEARCH_POSITIONS(PTR, LAB, X, Y)
 
 
 (Enter the Model description text here)

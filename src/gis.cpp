@@ -374,6 +374,28 @@ extern char msg[300];
   }
 
 
+  object* object::search_at_position(char const lab[], double x, double y) {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in search_at_position() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return NULL;
+    }
+    if (check_positions(x,y) == false ){
+        sprintf( msg, "failure in search_at_position() searching at position (%g,%g)", x,y );
+		      error_hard( msg, "the position is not on the map",
+					"check your code to prevent this situation. Could be wrapping issues." );
+      return NULL; //position incorrect
+    }
+    for (object* candidate : position->map->elements.at(int(x)).at(int(y)) ) {
+      //return first element with label
+      if (strcmp(lab,candidate->label) == 0 ){
+        return candidate;
+      }
+    }
+    return NULL; //no candidate at position
+  }
+
   double object::get_pos(char xyz)
   {
     if (ptr_map()==NULL){
