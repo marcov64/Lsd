@@ -464,6 +464,7 @@ class object
 	double pseudo_distance(object* other); //pseudo distance to other object
 	std::deque<object*>::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
   object* search_at_position(char const lab[], double x, double y);
+  object* search_at_position(char const lab[]);
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);

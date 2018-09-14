@@ -568,8 +568,11 @@ else \
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj != p->position->in_radius.end(); O = *(++it_obj) )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj !=  C->position->in_radius.end(); O = *(++it_obj) )
 
-#define SEARCH_POSITION(LAB, X, Y)  ( p->search_at_position(LAB, X, Y) )
-#define SEARCH_POSITIONS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y) )
+#define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y) )
+#define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y) )
+
+#define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB) )
+#define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB) )
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)

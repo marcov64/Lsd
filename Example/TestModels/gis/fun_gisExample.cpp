@@ -132,7 +132,7 @@ CYCLE(cur1,"Agent"){
 }
 
 //Testing command
-cur1 = SEARCH_POSITIONS(cur,"Patch",1.3,2);
+cur1 = SEARCH_POSITION_XYS(cur,"Patch",1.3,2);
 if (cur1!=NULL)
   PLOG("\nSearched for patch at position 1.3,2 and found %s with (%g,%g)",cur1->label,POSITION_XS(cur1),POSITION_YS(cur1));
 

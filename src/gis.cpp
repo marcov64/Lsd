@@ -396,6 +396,22 @@ extern char msg[300];
     return NULL; //no candidate at position
   }
 
+  object* object::search_at_position(char const lab[]) {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in search_at_position() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return NULL;
+    }
+    for (object* candidate : position->map->elements.at(int(position->x)).at(int(position->y)) ) {
+      //return first element with label
+      if (strcmp(lab,candidate->label) == 0 ){
+        return candidate;
+      }
+    }
+    return NULL; //no candidate at position
+  }
+
   double object::get_pos(char xyz)
   {
     if (ptr_map()==NULL){
