@@ -539,6 +539,14 @@ else \
 #define INIT_SPACES( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
 #define INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
 
+#define INIT_SPACEL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_SPACE_WRAPL( LAB, XN, YN, WRAP, L )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP , LAG ); }
+
+#define INIT_SPACELS( PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_SPACE_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
+
+
+
 #define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
 
 #define ADD_TO_SPACE( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }

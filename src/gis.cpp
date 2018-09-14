@@ -54,7 +54,7 @@ extern char msg[300];
   //  init_gis_regularGrid
   //  Initialise a regular Grid GIS and link the objects of the same type to it.
   //  The gis objects need to be contained in the calling object
-  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap){
+  bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag){
     if ( ptr_map() != NULL ){
         sprintf( msg, "failure in init_gis_regularGrid() for object '%s'", label );
 		    error_hard( msg, "the object was already part of a GIS",
@@ -76,7 +76,7 @@ extern char msg[300];
       return false; //error
     }
     int numNodes = xn*yn;
-    add_n_objects2( lab , nodes2create( this, lab, numNodes ) );	// creates the missing node objects,
+    add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
 																	// cloning the first one
     int _x = 0;
     int _y = 0;
@@ -323,12 +323,39 @@ extern char msg[300];
   // give back first element in list
   std::deque<object*>::iterator object::it_in_radius(char const lab[], double radius, bool random){
 
+    //Add check
+
     position->in_radius.clear();//reset vector
     double pseudo_radius = radius*radius;
+
+    //bounding boxes
+    int x_left  = floor( position->x - radius );
+    int x_right = ceil(  position->x + radius );
+    int y_top   = ceil(  position->y + radius );
+    int y_bottom= floor( position->y - radius );
+
+    //to do (?) recursive adjustment if to far outside
+
+    //adjust box for wrapping
+    if (position->map->wrap.left == false)
+      x_left = max(0,x_left);
+    if (position->map->wrap.right == false)
+      x_right = min(position->map->xn,x_right);
+    if (position->map->wrap.top == false)
+      y_top = min(position->map->yn,y_top);
+    if (position->map->wrap.bottom == false)
+      y_bottom = max(0,y_bottom);
+
+
     //fill vector - naive approach until Kyaw's algorithm is ready
-    for (int x=0; x<position->map->xn;x++){
-      for (int y=0; y<position->map->yn;y++){
-        for (object* candidate : position->map->elements.at(x).at(y)){
+    for (int x=x_left; x<x_right;x++){
+      for (int y=y_bottom; y<y_top;y++){
+        double x_test = x;
+        double y_test = y;
+        if (check_positions(x_test,y_test) == false ){
+          continue; //invalid position
+        }
+        for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
           //in naive approach no sorting!
             if (candidate == this){
               continue; //skip self
@@ -341,6 +368,8 @@ extern char msg[300];
         }
       }
     }
+    //sort by distance
+    //make items unique
     return position->in_radius.begin();
   }
 

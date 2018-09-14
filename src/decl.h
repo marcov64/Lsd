@@ -39,6 +39,7 @@
 #include <vector>
 #include <deque>
 #include <iterator>
+#include <set>
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -477,7 +478,7 @@ class object
 	bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
 
 	bool init_gis_singleObj(object* gisObj, double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
-	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0); //Create a gis and add the objects to it, creating new ones if necessary.
+	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0, int _lag=-1); //Create a gis and add the objects to it, creating new ones if necessary.
 
   double get_pos(char xyz);
 
