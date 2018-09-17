@@ -78,7 +78,7 @@ if (V("Manual_Seed")>0){
 my_PRNG.seed(RND_SEED);
 cur = SEARCH("Patch"); //Get first object of "Patch" type. This will be our fixed landscape.
 
-INIT_SPACE("Patch",10,20); //Initialise Grid
+INIT_SPACE_GRID("Patch",10,20); //Initialise Grid
 
 // Print info on space.
 if(false){
@@ -91,12 +91,12 @@ if(false){
 
 DELETE_SPACE(cur)//Delete it
 //INIT_SPACE_SINGLE_WRAP(cur, 0,0, 10,20, 16)//Initialise grid but link to single item
-INIT_SPACE_SINGLE_WRAP(cur, 0,0, 10,20,0)//Initialise grid but link to single item
+INIT_SPACE_SINGLE_WRAPS(cur, 0,0, 10,20,0)//Initialise grid but link to single item
 
 int x=0;
 int y=0;
-CYCLE(cur1,"Patch"){ //link to all remaining items manually. Existing ones are skipped.
-  ADD_TO_SPACES(cur1,cur,x,y)
+CYCLE(cur1,"Patch"){ //link to all remaining items manually. Items linked already to the same space are only moved.
+  ADD_TO_SPACE_XYS(cur1,cur,x,y)
   x++;
   if (x == 10) {
     x = 0;
@@ -114,7 +114,7 @@ if(false){
   }
 }
 DELETE_SPACE(cur)//Delete it, again
-INIT_SPACE_WRAP("Patch", V("x_dim"),V("y_dim"),V("Wrap"))//Initialise relative large space
+INIT_SPACE_GRID_WRAP("Patch", V("x_dim"),V("y_dim"),V("Wrap"))//Initialise relative large space
 CYCLE(cur1,"Patch"){
   WRITES(cur1,"Owned",1000); //White colour for lattice
 }
@@ -125,7 +125,7 @@ INIT_LAT( 1000, V("y_dim"), V("x_dim"), 400, 400 );      //Lattice is row-major
 double color = 0;
 ADDNOBJ("Agent",19);
 CYCLE(cur1,"Agent"){
-  ADD_TO_SPACES(cur1,cur,uniform(0,V("x_dim")),uniform(0,V("y_dim")))
+  ADD_TO_SPACE_XYS(cur1,cur,uniform(0,V("x_dim")),uniform(0,V("y_dim")))
   WRITES(cur1,"Colour",color++);
   WRITES(cur1,"Strength",1);
   WRITES(cur1,"NextSpawn",2);

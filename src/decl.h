@@ -465,12 +465,15 @@ class object
 	std::deque<object*>::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
   object* search_at_position(char const lab[], double x, double y);
   object* search_at_position(char const lab[]);
+  object* closest_in_distance(char const lab[], double radius, bool random);
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);
 	bool change_position(double _x, double _y);
+  bool change_position(object *shareObj );
 
 	bool register_at_map(gisMap* map, double _x, double _y);
+  bool register_at_map(object *shareObj ); //register at same position as gisObj
 	bool unregister_from_gis();
 
 
@@ -479,7 +482,7 @@ class object
 	gisMap* init_map(int xn, int yn, int _wrap=0); //initialise a new map and register the ob to it.
 	bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
 
-	bool init_gis_singleObj(object* gisObj, double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
+	bool init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
 	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0, int _lag=-1); //Create a gis and add the objects to it, creating new ones if necessary.
 
   double get_pos(char xyz);

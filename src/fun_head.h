@@ -528,30 +528,65 @@ else \
 #define CYCLE_EXT( ITER, CLASS, OBJ ) for ( ITER = EXEC_EXT( CLASS, OBJ, begin ); ITER != EXEC_EXT( CLASS, OBJ, end ); ++ITER )
 #define CYCLE_EXTS( PTR, ITER, CLASS, OBJ ) for ( ITER = EXEC_EXTS( PTR, CLASS, OBJ, begin ); ITER != EXEC_EXTS( PTR, CLASS, OBJ, end ); ++ITER )
 
-//  gis macros
+ /*****************
+ *** GIS MACROS ***
+ *****************/
+//  Generally, the object p calling is used as GISOBJ, i.e. any object part of the gis.
+//  Alternatively, the "S" versions of the macros use a provided object (pointer)
+//  For most macros, a special "root" version exists. This is useful if there exists only one GIS or a default GIS that is used in most cases.
+
+
 // Initialisation macros
-#define INIT_SPACE_SINGLE( GISOBJ, X, Y, XN, YN)              { p->init_gis_singleObj(GISOBJ, X, Y, XN, YN); }
-#define INIT_SPACE_SINGLE_WRAP( GISOBJ, X, Y, XN, YN, WRAP )  { p->init_gis_singleObj(GISOBJ, X, Y, XN, YN, WRAP ); }
+// Uses the calling object (and/or its brothers) as starting point
+// S version changes that.
+// WRAP Versions allow to define world wrapping
+// there are 2^4 options. We use a bit-code (0=off):
+//   0-bit: left     : 0=0 1=1
+//   1-bit: right    : 0=0 1=2
+//   2-bit: top      : 0=0 1=4
+//   3-bit: bottom   : 0=0 1=8
+//   sum the values to generate desired wrapping (e.g. 15 - torus world)
 
-#define INIT_SPACE( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
-#define INIT_SPACE_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+// INIT_SPACE_ROOT
+// If there is only one GIS or a single GIS is used heavily, it makes sense to
+// host in in the root object for easy accessing lateron.
+#define INIT_SPACE_ROOT(XN,YN)  { root->init_gis_singleObj(0, 0, XN, YN); }
+#define INIT_SPACE_ROOT_WRAP(XN, YN, WRAP)  { root->init_gis_singleObj(0, 0, XN, YN, WRAP); }
+// INIT_SPACE_SINGLE
+// Initialise the space with a single object
+#define INIT_SPACE_SINGLE( X, Y, XN, YN)              { p->init_gis_singleObj(X, Y, XN, YN); }
+#define INIT_SPACE_SINGLES( GISOBJ, X, Y, XN, YN)              { GISOBJ->init_gis_singleObj(X, Y, XN, YN); }
+#define INIT_SPACE_SINGLE_WRAP( X, Y, XN, YN, WRAP )  { p->init_gis_singleObj( X, Y, XN, YN, WRAP ); }
+#define INIT_SPACE_SINGLE_WRAPS( GISOBJ, X, Y, XN, YN, WRAP )  { GISOBJ->init_gis_singleObj( X, Y, XN, YN, WRAP ); }
 
-#define INIT_SPACES( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
-#define INIT_SPACE_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+//Initialise the regular space and use the object LAB contained in p as "Patches"
+//Using Column Major (change?) the objects are added to a 2d grid and get xy coords respectively
+#define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+#define INIT_SPACE_GRIDS( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+#define INIT_GRID_SPACEL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_GRID_SPACE_WRAPL( LAB, XN, YN, WRAP, L )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP , LAG ); }
+#define INIT_GRID_SPACELS( PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_GRID_SPACE_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
 
-#define INIT_SPACEL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
-#define INIT_SPACE_WRAPL( LAB, XN, YN, WRAP, L )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP , LAG ); }
-
-#define INIT_SPACELS( PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
-#define INIT_SPACE_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
-
-
-
+//Delete the map and unregister all objects in the map. Do not delte the objects.
 #define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
 
-#define ADD_TO_SPACE( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
-#define ADD_TO_SPACES( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+//Register object in space, providing explicit x,y positions
+//If already registered, move instead and print info.
+#define ADD_TO_SPACE_XY( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_TO_SPACE_XYS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
 
+//Regsiter object in space, sharing the coordinates with the source object
+//If already registered, move instead and print info.
+#define ADD_TO_SPACE_SHARE(GISOBJ) { p->register_at_map(GISOBJ); }
+#define ADD_TO_SPACE_SHARES(PTR, GISOBJ) { PTR->register_at_map(GISOBJ); }
+
+#define DELETE_FROM_SPACE { p->unregister_from_gis(); }
+#define DELETE_FROM_SPACES( PTR ) { PTR->unregister_from_gis(); }
+
+//Macros to get x or y position
 #define POSITION_X ( p->get_pos('x') )
 #define POSITION_Y ( p->get_pos('y') )
 #define POSITION_Z ( p->get_pos('z') )
@@ -559,14 +594,24 @@ else \
 #define POSITION_YS(PTR) ( PTR->get_pos('y') )
 #define POSITION_ZS(PTR) ( PTR->get_pos('z') )
 
-#define TELEPORT(X,Y) ( p->change_position(X,Y) )
-#define TELEPORTS(PTR,X,Y) ( PTR->change_position(X,Y) )
+//Move object to target xy or position of object
+#define TELEPORT_XY(X,Y) { p->change_position(X,Y); }
+#define TELEPORT_XYS(PTR,X,Y) { PTR->change_position(X,Y); }
+//Or to position of other object in same space
+#define TELEPORT_SHARE(GISOBJ) { p->change_position(GISOBJ); }
+#define TELEPORT_SHARES(PTR, GISOBJ) { PTR->change_position(GISOBJ); }
 
+//always works if in any space. If movement not possible, returns false.
 #define MOVE(DIRECTION) ( p->move(DIRECTION) )
 #define MOVES(PTR, DIRECTION) ( PTR->move(DIRECTION) )
 
+//to add: Move sequence, use ints.
+
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj != p->position->in_radius.end(); O = *(++it_obj) )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj !=  C->position->in_radius.end(); O = *(++it_obj) )
+
+#define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
+#define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
 
 #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y) )
 #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y) )

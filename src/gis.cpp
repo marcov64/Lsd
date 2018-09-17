@@ -39,16 +39,16 @@ extern char msg[300];
 
   //  init_gis_singleObj
   //  Initialise the gis and add the single object to it
-  bool object::init_gis_singleObj(object* gisObj, double _x, double _y, int xn, int yn, int _wrap)
+  bool object::init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap)
   {
-    if ( gisObj->ptr_map() != NULL ){
+    if ( ptr_map() != NULL ){
           sprintf( msg, "failure in init_gis_singleObj() for object '%s'", label );
 		      error_hard( msg, "the object was already part of a GIS",
 					"check your code to prevent this situation" );
       return false; //there is already a gis structure
     }
     gisMap* map = init_map(xn, yn, _wrap); //create gis
-    return gisObj->register_at_map(map, _x, _y); //register the object at the gis
+    return register_at_map(map, _x, _y); //register the object at the gis
   }
 
   //  init_gis_regularGrid
@@ -159,6 +159,9 @@ extern char msg[300];
   bool object::unregister_from_gis()
   {
     if (  unregister_position( false ) == false){
+        sprintf( msg, "failure in unregister_from_gis() for object '%s'", label );
+		      error_hard( msg, "not connected to a gis",
+					"check your code to prevent this situation" );
       return false; //error
     }
     delete position;
@@ -166,13 +169,39 @@ extern char msg[300];
     return true;
   }
 
+  bool object::register_at_map(object *shareObj)
+  {
+    if (shareObj -> ptr_map() == NULL ) {
+      sprintf( msg, "failure in register_at_map() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( msg, "the destination object is not registered in any space" ,
+					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+
+    return register_at_map(shareObj -> position -> map , shareObj -> position -> x, shareObj -> position -> y );
+  }
+
   bool object::register_at_map(gisMap* map, double _x, double _y)
   {
-    if (ptr_map() != NULL || map == NULL) {
+    if (map == NULL) {
       sprintf( msg, "failure in register_at_map() for object '%s'", label );
-		      error_hard( msg, (map == NULL? "no map to connect to provided":"object was already registered"),
+		      error_hard( msg, "no map to connect to provided",
 					"check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
+    }
+    if ( ptr_map() != NULL ){  //already registered?!
+      if ( ptr_map() != map ) {
+          sprintf( msg, "failure in register_at_map() for object '%s'", label );
+  		      error_hard( msg, "already registered in a space different from the one provided",
+  					"check your code to prevent this situation. If you want to change the space, deregister elemet from old one first." );
+        return false; //re-registering not allowed. derigster at gis first."
+      } else {
+        sprintf( msg,"\nInfo (t=%i): In register_at_map() the item %s is already part of the space.",t,label);
+        plog(msg);
+        sprintf( msg,"It will be moved from pos (%g,%g) to pos (%g,%g) instead.",position->x,position->y,_x,_y);
+        plog(msg);
+        return change_position(_x,_y);
+      }
     }
     position = new  gisPosition (map, _x, _y);
     if ( position == NULL )
@@ -235,7 +264,31 @@ extern char msg[300];
     return false;
   }
 
-  bool object::change_position(double _x, double _y){
+  bool object::change_position(object* shareObj)
+  {
+    if (shareObj -> ptr_map() == NULL ) {
+      sprintf( msg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( msg, "the destination object is not registered in any space" ,
+					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+    if (ptr_map() == NULL){
+      sprintf( msg, "failure in change_position() for object '%s'", label );
+		      error_hard( msg, "the source object is not registered in any space" ,
+					"check your code to prevent this situation" );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+    if (shareObj -> ptr_map() != ptr_map() ) {
+      sprintf( msg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( msg, "the destination object is not registered at the same space as the target object" ,
+					"check your code to prevent this situation. If you want to use positions from one space in another, use explicit approach via x,y coordinates." );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+    return change_position(shareObj->position->x, shareObj->position->y);
+  }
+
+  bool object::change_position(double _x, double _y)
+  {
     if (check_positions(_x, _y) == false){
       return false; //Out of range
     }
@@ -371,6 +424,16 @@ extern char msg[300];
     //sort by distance
     //make items unique
     return position->in_radius.begin();
+  }
+
+    //find object with label lab closest to caller, if any inside radius fits
+  object* object::closest_in_distance(char const lab[], double radius, bool random)
+  {
+    it_in_radius(lab, radius, random);
+    if (position->in_radius.size()==0 ) {
+      return NULL; //no candidate
+    }
+    return position->in_radius.front();
   }
 
 
