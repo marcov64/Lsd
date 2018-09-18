@@ -374,11 +374,11 @@ extern char msg[300];
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  std::deque<object*>::iterator object::it_in_radius(char const lab[], double radius, bool random){
+  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random){
 
     //Add check
 
-    position->in_radius.clear();//reset vector
+    position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
 
     //bounding boxes
@@ -415,7 +415,8 @@ extern char msg[300];
             }
             if ( strcmp(candidate->label,lab) == 0){
               if (pseudo_distance(candidate) <= pseudo_radius) {
-                position->in_radius.push_back(candidate);
+                //position->in_radius.push_back(candidate);
+				position->objDis_inRadius.push_back(make_pair(pseudo_distance(candidate),candidate));
               }
             }
         }
@@ -423,17 +424,20 @@ extern char msg[300];
     }
     //sort by distance
     //make items unique
-    return position->in_radius.begin();
+	std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end()); 
+	//for (auto it = position->objDis_inRadius.begin() ; it != position->objDis_inRadius.end(); ++it)
+	//		position->in_radius.push_back(it->second);
+    return position->objDis_inRadius.begin();
   }
-
+  
     //find object with label lab closest to caller, if any inside radius fits
   object* object::closest_in_distance(char const lab[], double radius, bool random)
   {
     it_in_radius(lab, radius, random);
-    if (position->in_radius.size()==0 ) {
+    if (position->objDis_inRadius.size()==0 ) {
       return NULL; //no candidate
     }
-    return position->in_radius.front();
+    return position->objDis_inRadius.front().second;
   }
 
     //find object at position xy. Check that it is the only one. Use exact position.

@@ -19,6 +19,14 @@ MODELBEGIN
 EQUATION("Scheduler")
 V("Init_GIS");
 
+object* patch = SEARCH("Patch");
+i = 0;
+CYCLE_NEIGHBOURS(patch,cur,"Patch",3){
+  PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
+  POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
+  POSITION_XS(cur),POSITION_YS(cur)  );
+}
+
 //We need to check if an agent dies before and after a potential combat.
 //Also, the order in which agents act are very important.
 

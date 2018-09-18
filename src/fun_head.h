@@ -607,11 +607,14 @@ else \
 
 //to add: Move sequence, use ints.
 
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj != p->position->in_radius.end(); O = *(++it_obj) )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = *it_obj; it_obj !=  C->position->in_radius.end(); O = *(++it_obj) )
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj != p->position->objDis_inRadius.end(); O = (++it_obj)->second )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj !=  C->position->objDis_inRadius.end(); O = (++it_obj)->second )
 
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
+
+#define DISTANCE(OBJ) (p -> distance (OBJ) )
+#define DISTANCES(PTR, OBJ) (PTR -> distance (OBJ) )
 
 //  SEARCH_POSITION_XY(S) and SEARCH_POSITION(S) macros search at the exact position.
 //  If more than one item of the given type exist, an error is returned.
