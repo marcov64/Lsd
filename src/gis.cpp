@@ -436,8 +436,8 @@ extern char msg[300];
     return position->in_radius.front();
   }
 
-
-  object* object::search_at_position(char const lab[], double x, double y) {
+    //find object at position xy. Check that it is the only one. Use exact position.
+  object* object::search_at_position(char const lab[], double x, double y, bool single) {
     if (ptr_map()==NULL){
         sprintf( msg, "failure in search_at_position() for object '%s'", label );
 		      error_hard( msg, "the object is not registered in any map",
@@ -445,34 +445,46 @@ extern char msg[300];
       return NULL;
     }
     if (check_positions(x,y) == false ){
-        sprintf( msg, "failure in search_at_position() searching at position (%g,%g)", x,y );
+        sprintf( msg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
 		      error_hard( msg, "the position is not on the map",
 					"check your code to prevent this situation. Could be wrapping issues." );
       return NULL; //position incorrect
     }
+    std::vector<object*> singleCandidates;
     for (object* candidate : position->map->elements.at(int(x)).at(int(y)) ) {
       //return first element with label
-      if (strcmp(lab,candidate->label) == 0 ){
-        return candidate;
+      if (x == candidate->position->x && y == candidate->position->y) {
+        if (strcmp(lab,candidate->label) == 0 ){
+          if (single == true && singleCandidates.empty() == false){
+            sprintf( msg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
+  		        error_hard( msg, "there are several (at least two) items of this type present at the map.",
+  					   "check your code to prevent this situation." );
+            return NULL;
+          }
+          singleCandidates.push_back(candidate);
+        }
       }
     }
-    return NULL; //no candidate at position
+    if (single == true) {
+      if (singleCandidates.empty() == false)
+        return singleCandidates.front(); //no candidate at position
+      else
+        return NULL;
+    } else {
+      int select_random = uniform_int(0,singleCandidates.size()-1);
+      return singleCandidates.at(select_random);
+    }
   }
 
-  object* object::search_at_position(char const lab[]) {
+  object* object::search_at_position(char const lab[], bool single)
+  {
     if (ptr_map()==NULL){
         sprintf( msg, "failure in search_at_position() for object '%s'", label );
 		      error_hard( msg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
-    for (object* candidate : position->map->elements.at(int(position->x)).at(int(position->y)) ) {
-      //return first element with label
-      if (strcmp(lab,candidate->label) == 0 ){
-        return candidate;
-      }
-    }
-    return NULL; //no candidate at position
+    return search_at_position(lab, position->x, position->y, single);
   }
 
   double object::get_pos(char xyz)

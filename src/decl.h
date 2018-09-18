@@ -463,8 +463,8 @@ class object
 	double distance(object* other); //distance to other object
 	double pseudo_distance(object* other); //pseudo distance to other object
 	std::deque<object*>::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
-  object* search_at_position(char const lab[], double x, double y);
-  object* search_at_position(char const lab[]);
+  object* search_at_position(char const lab[], double x, double y, bool single);
+  object* search_at_position(char const lab[], bool single);
   object* closest_in_distance(char const lab[], double radius, bool random);
 
 	bool register_position(double _x, double _y);

@@ -613,11 +613,21 @@ else \
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
 
-#define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y) )
-#define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y) )
+//  SEARCH_POSITION_XY(S) and SEARCH_POSITION(S) macros search at the exact position.
+//  If more than one item of the given type exist, an error is returned.
+//  Alternatively use the SEARCH_POSITION_RND(S) and SEARCH_POSITION_XY_RND(S)
+//  commands to retrieve the first such item
+#define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
+#define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
 
-#define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB) )
-#define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB) )
+#define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
+#define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
+
+#define SEARCH_POSITION_RND_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
+#define SEARCH_POSITION_RND_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
+
+#define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
+#define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
