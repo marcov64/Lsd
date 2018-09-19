@@ -363,6 +363,45 @@ extern char msg[300];
     b_sq *= b_sq;
     return a_sq + b_sq;
   }
+  //a function that receives all objects inside the bounding box of the object
+  //at x,y with radius and performs whatever the provided funtion do_stuff tells
+  bool object::traverse_boundingBox(double radius, std::function<bool(object* use_obj)> do_stuff )
+  {
+    //define the bounding box
+    int x_left  = floor( position->x - radius );
+    int x_right = ceil(  position->x + radius );
+    int y_top   = ceil(  position->y + radius );
+    int y_bottom= floor( position->y - radius );
+
+    //adjust box for wrapping
+    if (position->map->wrap.left == false)
+      x_left = max(0,x_left);
+    if (position->map->wrap.right == false)
+      x_right = min(position->map->xn,x_right);
+    if (position->map->wrap.top == false)
+      y_top = min(position->map->yn,y_top);
+    if (position->map->wrap.bottom == false)
+      y_bottom = max(0,y_bottom);
+
+    //we could make sure that we do not traverse the same point several times.
+
+      //fill vector - naive approach until Kyaw's algorithm is ready
+    for (int x=x_left; x<x_right;x++){
+      for (int y=y_bottom; y<y_top;y++){
+        double x_test = x;
+        double y_test = y;
+        if (check_positions(x_test,y_test) == false ){
+          continue; //invalid position
+        }
+        for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
+          if (do_stuff(candidate) == false){
+            return false; //break condition
+          }
+        }
+      }
+    }
+    return true; //went to end without any break;
+  }
 
   // distance
   // Calculate the distance between to objects in the same gis.
@@ -381,47 +420,20 @@ extern char msg[300];
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
 
-    //bounding boxes
-    int x_left  = floor( position->x - radius );
-    int x_right = ceil(  position->x + radius );
-    int y_top   = ceil(  position->y + radius );
-    int y_bottom= floor( position->y - radius );
-
-    //to do (?) recursive adjustment if to far outside
-
-    //adjust box for wrapping
-    if (position->map->wrap.left == false)
-      x_left = max(0,x_left);
-    if (position->map->wrap.right == false)
-      x_right = min(position->map->xn,x_right);
-    if (position->map->wrap.top == false)
-      y_top = min(position->map->yn,y_top);
-    if (position->map->wrap.bottom == false)
-      y_bottom = max(0,y_bottom);
-
-
-    //fill vector - naive approach until Kyaw's algorithm is ready
-    for (int x=x_left; x<x_right;x++){
-      for (int y=y_bottom; y<y_top;y++){
-        double x_test = x;
-        double y_test = y;
-        if (check_positions(x_test,y_test) == false ){
-          continue; //invalid position
+    //define a lambda function that is passed to the bounding box function.
+    auto do_stuff = [this,lab,pseudo_radius](object* candidate)
+      {
+        if (candidate == this)
+          return true; //do not collect self
+        if ( strcmp(candidate->label,lab) == 0){
+          if (pseudo_distance(candidate) <= pseudo_radius) {
+  			    position->objDis_inRadius.push_back(make_pair(pseudo_distance(candidate),candidate));
+          }
         }
-        for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
-          //in naive approach no sorting!
-            if (candidate == this){
-              continue; //skip self
-            }
-            if ( strcmp(candidate->label,lab) == 0){
-              if (pseudo_distance(candidate) <= pseudo_radius) {
-                //position->in_radius.push_back(candidate);
-				position->objDis_inRadius.push_back(make_pair(pseudo_distance(candidate),candidate));
-              }
-            }
-        }
-      }
-    }
+        return true;
+      };
+    traverse_boundingBox(radius, do_stuff );
+
     //sort by distance
     //make items unique
 	std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end()); 

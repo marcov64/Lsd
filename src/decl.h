@@ -39,7 +39,7 @@
 #include <vector>
 #include <deque>
 #include <iterator>
-#include <set>
+#include <functional>
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -463,6 +463,7 @@ class object
 	double distance(object* other); //distance to other object
 	double pseudo_distance(object* other); //pseudo distance to other object
 	std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
+  bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
   object* search_at_position(char const lab[], double x, double y, bool single);
   object* search_at_position(char const lab[], bool single);
   object* closest_in_distance(char const lab[], double radius, bool random);
