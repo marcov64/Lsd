@@ -89,9 +89,6 @@ if [ string equal $tcl_platform(platform) unix ] {
 	set gnuplotTerm $gnuplotTermWindows
 }
 
-# current plot directory, if any
-set curPlotDir "[ pwd ]"
-
 # text line default canvas height & minimum horizontal border width
 set lheightP [ expr int( [ font actual $fontP -size ] * [ tk scaling ] ) + $vtmarginP ]
 set hbordsizeP	$hmbordsizeP
@@ -1382,7 +1379,7 @@ proc update_title_bar { } {
 
 # Open gnuplot window
 proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global tcl_platform curPlotDir
+	global tcl_platform
 	
 	if [ string equal $script "" ] { 
 		set args "" 
@@ -1393,9 +1390,9 @@ proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
 	if [ string equal $tcl_platform(platform) unix ] {
 		if [ string equal $tcl_platform(os) Darwin ] {
 			if { $wait } {
-				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd $curPlotDir; gnuplot $script; exit\"" } ]
+				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
 			} else {
-				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd $curPlotDir; gnuplot $args; exit\"" & } ]
+				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
 			}
 		} else {
 			if { $wait } {

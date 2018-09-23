@@ -1398,12 +1398,10 @@ while ( true )
 				getcwd( dirname, MAX_PATH_LENGTH - 1 );
 				cmd( "set choice $a" );
 				sprintf( msg, "plotxy_%d", *choice );
-				cmd( "set curPlotDir \"%s/%s\"", dirname, msg );
 				chdir( msg );
 				cmd( "set choice $a" );
 				show_plot_gnu( *choice, choice, 1, NULL, NULL );
 				chdir( dirname );
-				cmd( "set curPlotDir \"%s\"", dirname );
 			}
 			
 			miny = maxy = 0;
@@ -3950,7 +3948,6 @@ cmd( "set dirxy plotxy_%d", cur_plot );
 cmd( "file mkdir $dirxy" );
 getcwd( dirname, MAX_PATH_LENGTH - 1 );
 sprintf( msg, "plotxy_%d", cur_plot );
-cmd( "set curPlotDir \"%s/%s\"", dirname, msg );
 chdir( msg );
 f = fopen( "data.gp", "w" );
 fprintf( f, "#" );
@@ -4251,7 +4248,6 @@ else
 show_plot_gnu( cur_plot, choice, *choice, str, tag );
 
 chdir( dirname );
-cmd( "set curPlotDir \"%s\"", dirname );
 
 end:
 for ( i = 0; i < nv; ++i )
@@ -4491,7 +4487,6 @@ cmd( "set dirxy plotxy_%d", cur_plot );
 cmd( "file mkdir $dirxy" );
 getcwd( dirname, MAX_PATH_LENGTH-1 );
 sprintf( msg, "plotxy_%d",cur_plot);
-cmd( "set curPlotDir \"%s/%s\"", dirname, msg );
 chdir( msg );
 
 f = fopen( "data.gp", "w" );
@@ -4650,7 +4645,6 @@ else
 show_plot_gnu( cur_plot, choice, *choice, str, tag );
 
 chdir( dirname );
-cmd( "set curPlotDir \"%s\"", dirname );
 
 end:
 for ( i = 0; i < nv; ++i )
@@ -4822,7 +4816,6 @@ cmd( "set dirxy plotxy_%d", cur_plot );
 cmd( "file mkdir $dirxy" );
 getcwd( dirname, MAX_PATH_LENGTH-1 );
 sprintf( msg, "plotxy_%d",cur_plot);
-cmd( "set curPlotDir \"%s/%s\"", dirname, msg );
 chdir( msg );
 
 cmd( "set choice $bidi" );
@@ -4908,7 +4901,6 @@ cmd( "set choice $gnu" );
 show_plot_gnu( cur_plot, choice, *choice, str, tag );
 
 chdir( dirname );
-cmd( "set curPlotDir \"%s\"", dirname );
 
 end:
 for ( i = 0; i < nv; ++i )
@@ -5034,12 +5026,10 @@ cmd( "frame $w.b.s" );
 cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0", n );
 cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { \
 		set oldpath [pwd]; \
-		set curPlotDir \"$oldpath/plotxy_%d\"; \
 		cd plotxy_%d; \
 		open_gnuplot gnuplot.gp; \
 		cd $oldpath; \
-		set curPlotDir \"$oldpath\"; \
-	} -state disabled -underline 0", n, n );
+	} -state disabled -underline 0", n );
 cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
 
 cmd( "label $w.b.pad -width 6" );
