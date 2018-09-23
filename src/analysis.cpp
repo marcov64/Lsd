@@ -192,7 +192,6 @@ cmd( "set point_size $pointsizeP" );
 cmd( "set line_point $linemodeP" );
 cmd( "set pdigits $pdigitsP" );
 cmd( "set avgSmpl $avgSmplP" );
-cmd( "set gpterm \"$gnuplotTerm\"" );
 cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
 cmd( "set gpoptions \"$gnuplotOptions\"" );
 
@@ -1681,17 +1680,22 @@ while ( true )
 			  
 		// set options for gnuplot
 		case 37: 
+			cmd( "set sysTermTmp $sysTerm" );
 			cmd( "set gptermTmp $gpterm" );
 			cmd( "set gpdgrid3dTmp $gpdgrid3d" );
 			
 			cmd( "newtop .da.a \"Gnuplot Options\" { set choice 2 } .da" );
 			cmd( "label .da.a.l -text \"Options for invoking Gnuplot\"" );
 
+			cmd( "frame .da.a.st -bd 2" );
+			cmd( "label .da.a.st.l -text \"System terminal\"" );
+			cmd( "entry .da.a.st.e -textvariable sysTermTmp -width 20 -justify center" );
+			cmd( "pack .da.a.st.l .da.a.st.e -side left" );
+
 			cmd( "frame .da.a.t -bd 2" );
-			cmd( "label .da.a.t.l -text \"Terminal\"" );
+			cmd( "label .da.a.t.l -text \"Plot terminal (blank for default)\"" );
 			cmd( "entry .da.a.t.e -textvariable gptermTmp -width 12 -justify center" );
-			cmd( "label .da.a.t.o -text \"(blank for system default)\"" );
-			cmd( "pack .da.a.t.l .da.a.t.e .da.a.t.o -side left" );
+			cmd( "pack .da.a.t.l .da.a.t.e -side left" );
 
 			cmd( "frame .da.a.d -bd 2" );
 			cmd( "label .da.a.d.l -text \"3D grid configuration\"" );
@@ -1704,7 +1708,7 @@ while ( true )
 			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
 			cmd( "pack .da.a.o.l .da.a.o.t" );
 
-			cmd( "pack .da.a.l .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
+			cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
 			cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 			cmd( "showtop .da.a" );
@@ -1717,7 +1721,8 @@ while ( true )
 
 			if ( *choice == 3 )
 			{
-				cmd( "set gptermTmp \"$gnuplotTerm\"" );
+				cmd( "set sysTermTmp $systemTerm" );
+				cmd( "set gptermTmp $gnuplotTerm" );
 				cmd( "set gpdgrid3dTmp \"$gnuplotGrid3D\"" );
 				cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gnuplotOptions\"" );
 				goto gpoptions;
@@ -1725,6 +1730,7 @@ while ( true )
 			 
 			if ( *choice == 1 )
 			{
+				cmd( "set sysTerm $sysTermTmp" );
 				cmd( "set gpterm $gptermTmp" );
 				cmd( "set gpdgrid3d $gpdgrid3dTmp" );
 				cmd( "set gpoptions [.da.a.o.t get 0.0 end]" ); 
@@ -4966,13 +4972,19 @@ get_int( "sbordsizeP", & sbordsize );	// 0
 // generate tk canvas filling routine using Gnuplot
 cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\" true ]" );
 
-if ( *choice != 0 )			// Gnuplot failed
+if ( *choice != 0 )						// Gnuplot failed
 {
 	*choice = 2;
 	return;
 }
 
-shrink_gnufile( );
+if ( shrink_gnufile( ) != 0 )			// file conversion failed
+{
+	*choice = 2;
+	return;
+}
+	
+
 cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
 // create plot window & canvas
@@ -8372,19 +8384,15 @@ int shrink_gnufile( void )
 	
 	if ( f == NULL )
 	{
-		error_hard( "cannot open plot file", 
-					"internal error", 
-					"if error persists, please contact developers" );
-		myexit( 18 );
+		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot open plot\" -detail \"The plot file produced by Gnuplot is not available.\nPlease check if you have selected an adequate configuration for the plot.\nIf the error persists if Gnuplot is installed and set up properly.\"" );
+		return 1;
 	}
 
 	f1 = fopen( "plot_clean.file", "w" );
 	if ( f == NULL )
 	{
-		error_hard( "cannot open clean plot file",
-					"internal error", 
-					"if error persists, please contact developers" );
-		myexit( 19 );
+		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot create plot file\" -detail \"Please check if the drive or the directory is not set READ-ONLY or full\nand try again\"" );
+		return 2;
 	}
 
 	while ( fgets( str, 2 * MAX_ELEM_LENGTH, f ) != NULL )

@@ -268,24 +268,12 @@ for ( i = 0; i < num; ++i )
 		rootLsd[ i ] = '/';
 cmd( "set RootLsd \"%s\"", rootLsd );
 
-// set platform-specific variables
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set DefaultExe lsd_gnu; set DefaultMakeExe make; set DefaultWish wish; set DefaultDbgTerm xterm; set DefaultDbgExe gdb; set DefaultHtmlBrowser firefox; set DefaultFont Courier; set DefaultFontSize 12 }" );
-#ifdef MAC_PKG
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe LSD; set DefaultMakeExe make; set DefaultWish wish8.6; set DefaultDbgTerm Terminal; set DefaultDbgExe lldb; set DefaultHtmlBrowser open; set DefaultFont Monaco; set DefaultFontSize 14 }" );
-#else
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe lsd_gnu; set DefaultMakeExe make; set DefaultWish wish8.5; set DefaultDbgTerm Terminal; set DefaultDbgExe lldb; set DefaultHtmlBrowser open; set DefaultFont Monaco; set DefaultFontSize 14 }" );
-#endif
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultExe lsd_gnu; set DefaultMakeExe \"make.exe\"; set DefaultWish wish85.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultExe lsd_gnu; set DefaultWish wish86.exe; set DefaultDbgTerm cmd; set DefaultDbgExe gdb; set DefaultHtmlBrowser open; set DefaultFont Consolas; set DefaultFontSize 11; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe \"gnumake.exe\" } { set DefaultMakeExe \"make.exe\" } }" );
-
-cmd( "set MakeExe \"$DefaultMakeExe\"" );
-cmd( "set small_character [ expr $DefaultFontSize - 2 ]" );
-
+// read configuration file
 cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-if ( choice )
+if ( choice == 1 )
 {
 	cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-	cmd( "gets $f DbgTerm" );
+	cmd( "gets $f sysTerm" );
 	cmd( "gets $f HtmlBrowser" );
 	cmd( "gets $f fonttype" );
 	cmd( "gets $f wish" );
@@ -300,11 +288,11 @@ if ( choice )
 	cmd( "gets $f DbgExe" );
 	cmd( "close $f" );
 	// handle old options file
-	cmd( "if { $DbgTerm == \"\" || $HtmlBrowser == \"\" || $fonttype == \"\" || $wish == \"\" || $LsdSrc == \"\" || $dim_character == \"\" || $tabsize == \"\" || $wrap == \"\" || $shigh == \"\" || $autoHide == \"\" || $showFileCmds == \"\" || $LsdNew == \"\" || $DbgExe == \"\" } { set choice 0 }" );
+	cmd( "if { $sysTerm == \"\" || $HtmlBrowser == \"\" || $fonttype == \"\" || $wish == \"\" || $LsdSrc == \"\" || $dim_character == \"\" || $tabsize == \"\" || $wrap == \"\" || $shigh == \"\" || $autoHide == \"\" || $showFileCmds == \"\" || $LsdNew == \"\" || $DbgExe == \"\" } { set choice 0 }" );
 }
 else
 {
-	cmd( "set DbgTerm \"\"" );
+	cmd( "set sysTerm \"\"" );
 	cmd( "set HtmlBrowser \"\"" );
 	cmd( "set fonttype \"\"" );
 	cmd( "set wish \"\"" );
@@ -319,11 +307,43 @@ else
 	cmd( "set DbgExe \"\"" );
 }
 
+i = choice;
+
+// load required Tcl/Tk data, procedures and packages
+choice = 0;
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+if ( choice != 0 )
+{
+	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	return 10 + choice;
+}
+
+// create a Tcl command that calls the C discard_change function before killing LMM
+Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
+
+// set platform-specific variables
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set DefaultExe lsd_gnu; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - 1 ] }" );
+#ifdef MAC_PKG
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe LSD; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk86; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - 1 ] }" );
+#else
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe lsd_gnu; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - 1 ] }" );
+#endif
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultExe lsd_gnu; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - 2 ]; set LsdGnu gnu }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultExe lsd_gnu; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - 2 ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
+
+cmd( "set MakeExe \"$DefaultMakeExe\"" );
+
 // handle non-existent or old options file for new options
-if ( ! choice )
+if ( i == 0 )
  {
 	// set new parameters
-	cmd( "if { $DbgTerm == \"\" } { set DbgTerm \"$DefaultDbgTerm\" }" );// default debugger terminal
+	cmd( "if { $sysTerm == \"\" } { set sysTerm \"$DefaultSysTerm\" }" );// default debugger terminal
 	cmd( "if { $HtmlBrowser == \"\" } { set HtmlBrowser \"$DefaultHtmlBrowser\" }" );// default browser
 	cmd( "if { $wish == \"\" } { set wish \"$DefaultWish\" }" );// default tcl interpreter
 	cmd( "if { $LsdSrc == \"\" } { set LsdSrc src }" );	// source path
@@ -339,7 +359,7 @@ if ( ! choice )
 	
 	// save to config file
 	cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
-	cmd( "puts $f \"$DbgTerm\"" );
+	cmd( "puts $f \"$sysTerm\"" );
 	cmd( "puts $f \"$HtmlBrowser\"" );
 	cmd( "puts $f \"$fonttype\"" );
 	cmd( "puts $f $wish" );  
@@ -370,23 +390,7 @@ cmd( "set v_num 0" );
 cmd( "set shigh_temp $shigh" );
 cmd( "set alignMode \"LMM\"" );
 
-// load required Tcl/Tk data, procedures and packages
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-if ( choice != 0 )
-{
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
-	return 10 + choice;
-}
-
-// create a Tcl command that calls the C discard_change function before killing LMM
-Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
-
+// TCL to C globally connected variables
 Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
 Tcl_LinkVar( inter, "tosave", ( char * ) &tosave, TCL_LINK_BOOLEAN);
 Tcl_LinkVar( inter, "macro", ( char * ) &macro, TCL_LINK_BOOLEAN);
@@ -1476,21 +1480,21 @@ if ( choice == 13 || choice == 58 )
 	switch( choice )
 	{
 		case 1:		// Unix
-			sprintf( msg, "catch { exec $DbgTerm -e $DbgExe $cmdbreak %s & } result", str1 );
+			sprintf( msg, "catch { exec $sysTerm -e $DbgExe $cmdbreak %s & } result", str1 );
 			break;
 	
 		case 2:		// Mac
 #ifdef MAC_PKG
             cmd("if [string equal $cmdbreak \"--args\"] { set cmdbreak \"\"} {}");
-			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s.app/Contents/MacOS/%s\\\"\" & } result", str1, str1 );
 #else
-			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$DbgTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
+			sprintf( msg, "catch { exec osascript -e \"tell application \\\"$sysTerm\\\" to do script \\\"cd $dirname; clear; $DbgExe $cmdbreak -f %s\\\"\" & } result", str1 );
 #endif
 			break;
 			
 		case 3:		// Windows
 			strcat( str1, ".exe" );
-			sprintf( msg, "catch { exec $DbgTerm /c $DbgExe $cmdbreak %s & } result", str1 );
+			sprintf( msg, "catch { exec $sysTerm /c $DbgExe $cmdbreak %s & } result", str1 );
 			break;
 			
 		default:
@@ -5359,7 +5363,7 @@ if ( choice == 59 )
 // LMM system options
 if ( choice == 60 )
 {
-	cmd( "set temp_var1 \"$DbgTerm\"" );
+	cmd( "set temp_var1 \"$sysTerm\"" );
 	cmd( "set temp_var2 \"$HtmlBrowser\"" );
 	cmd( "set temp_var3 \"$fonttype\"" );
 	cmd( "set temp_var4 $wish" );
@@ -5376,13 +5380,13 @@ if ( choice == 60 )
 	cmd( "newtop .a \"Options\" { set choice 2 }" );
 
 	cmd( "frame .a.num" );
-	cmd( "label .a.num.l -text \"Terminal for debugger\"" );
+	cmd( "label .a.num.l -text \"System terminal\"" );
 	cmd( "entry .a.num.v -width 25 -textvariable temp_var1 -justify center" );
 	cmd( "pack .a.num.l .a.num.v" );
 	cmd( "bind .a.num.v <Return> {focus .a.num13.v; .a.num13.v selection range 0 end}" );
 
 	cmd( "frame .a.num13" );
-	cmd( "label .a.num13.l -text \"Debugger command\"" );
+	cmd( "label .a.num13.l -text \"Debugger\"" );
 	cmd( "entry .a.num13.v -width 25 -textvariable temp_var13 -justify center" );
 	cmd( "pack .a.num13.l .a.num13.v" );
 	cmd( "bind .a.num13.v <Return> {focus .a.num2.v; .a.num2.v selection range 0 end}" );
@@ -5394,7 +5398,7 @@ if ( choice == 60 )
 	cmd( "bind .a.num2.v <Return> {focus .a.num4.v; .a.num4.v selection range 0 end}" );
 
 	cmd( "frame .a.num4" );
-	cmd( "label .a.num4.l -text \"Wish program\"" );
+	cmd( "label .a.num4.l -text \"Tcl/Tk Wish\"" );
 	cmd( "entry .a.num4.v -width 25 -textvariable temp_var4 -justify center" );
 	cmd( "pack .a.num4.l .a.num4.v" );
 	cmd( "bind .a.num4.v <Return> {focus .a.num12.v; .a.num12.v selection range 0 end}" );
@@ -5452,7 +5456,7 @@ if ( choice == 60 )
 	cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 	cmd( "frame .a.f1" );
-	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultDbgTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
+	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultSysTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
 	cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM.html#SystemOpt}" );
 	cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 	cmd( "pack .a.f1 -anchor e" );
@@ -5473,7 +5477,7 @@ if ( choice == 60 )
 	{
 		cmd( "if { $showFileCmds != $temp_var11 } { tk_messageBox -parent . -icon warning -title Warning -type ok -message \"Restart required\" -detail \"Restart required after configuration changes. Only after LMM is closed and restarted the changes will be applied.\" }" );
 
-		cmd( "set DbgTerm \"$temp_var1\"" );
+		cmd( "set sysTerm \"$temp_var1\"" );
 		cmd( "set HtmlBrowser \"$temp_var2\"" );
 		cmd( "set fonttype \"$temp_var3\"" );
 		cmd( "set wish $temp_var4" );
@@ -5495,7 +5499,7 @@ if ( choice == 60 )
 
 		// save to config file
 		cmd( "set f [open \"$RootLsd/lmm_options.txt\" w]" );
-		cmd( "puts $f  \"$DbgTerm\"" );
+		cmd( "puts $f  \"$sysTerm\"" );
 		cmd( "puts $f \"$HtmlBrowser\"" );
 		cmd( "puts $f \"$fonttype\"" );
 		cmd( "puts $f $wish" );

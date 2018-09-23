@@ -71,6 +71,7 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set corrX $corrXmac
 		set corrY $corrYmac
 		
+		set systemTerm $sysTermMac
 		set gnuplotTerm $gnuplotTermMac
 	} {
 		set butWid $butLinux
@@ -78,6 +79,7 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set corrX $corrXlinux
 		set corrY $corrYlinux
 		
+		set systemTerm $sysTermLinux
 		set gnuplotTerm $gnuplotTermLinux
 	}
 } {
@@ -86,6 +88,7 @@ if [ string equal $tcl_platform(platform) unix ] {
 	set corrX $corrXwindows
 	set corrY $corrYwindows
 	
+	set systemTerm $sysTermWindows
 	set gnuplotTerm $gnuplotTermWindows
 }
 
@@ -1379,7 +1382,7 @@ proc update_title_bar { } {
 
 # Open gnuplot window
 proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
-	global tcl_platform
+	global tcl_platform sysTerm
 	
 	if [ string equal $script "" ] { 
 		set args "" 
@@ -1390,15 +1393,15 @@ proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
 	if [ string equal $tcl_platform(platform) unix ] {
 		if [ string equal $tcl_platform(os) Darwin ] {
 			if { $wait } {
-				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
 			} else {
-				set ret [ catch { exec osascript -e "tell application \"Terminal\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
 			}
 		} else {
 			if { $wait } {
-				set ret [ catch { exec xterm -e "gnuplot $script; exit" } ]
+				set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
 			} else {
-				set ret [ catch { exec xterm -e "gnuplot $args; exit" & } ]
+				set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
 			}
 		}
 	} else {

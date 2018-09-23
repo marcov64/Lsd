@@ -83,21 +83,60 @@ set daCwidWindows	36	; # Windows
 set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
+# OS specific monospaced font name
+set fontMac		"Monaco"		; # "Courier"
+set fontLinux	"Courier"		; # "Courier"
+set fontWindows	"Consolas"		; # "Courier"
+
+# OS specific monospaced font size
+set fontSizeMac		14
+set fontSizeLinux	11
+set fontSizeWindows	11
+
 # OS specific default window buttons widths
-set butLinux	7	;
-set butMacTk85	7	;
-set butMacTk86	8	;
-set butWindows	9	;
+set butLinux	7
+set butMacTk85	7
+set butMacTk86	8
+set butWindows	9
 
 # OS specific screen location offset adjustments
-set corrXmac	0	;
-set corrYmac	0	;
-set corrXlinux	0	;
-set corrYlinux	-55	;
-set corrXwindows 0	;
-set corrYwindows 0	;
+set corrXmac	0
+set corrYmac	0
+set corrXlinux	0
+set corrYlinux	-55
+set corrXwindows 0
+set corrYwindows 0
 
-# OS specific gnuplot terminal name
+# OS specific default system terminal
+set sysTermMac		"Terminal"	; # "Terminal", "xterm"
+set sysTermLinux	"xterm"		; # "gnome-terminal", "xterm", "uxterm"
+set sysTermWindows	"cmd"		;
+
+# OS specific default debugger command
+set dbgMac			"lldb"		; # "gdb"
+set dbgLinux		"gdb"		;
+set dbgWindows		"gdb"		;
+
+# OS specific default browser (open=system default)
+set browserMac		"open"		; # "open", "firefox", "safari"
+set browserLinux	"firefox"	; # "open", "firefox", "chrome"
+set browserWindows	"open"		; # "open", "firefox", "chrome"
+
+# OS specific default wish utility
+set wishMacTk85		"wish8.5"
+set wishMacTk86		"wish8.6"
+set wishLinux		"wish"
+set wishWinTk85		"wish85.exe"
+set wishWinTk86		"wish86.exe"
+
+# OS specific make utility
+set makeMac			"make"
+set makeLinux		"make"
+set makeWin32		"make.exe"
+set makeWin64cyg	"make.exe"
+set makeWin64mgw	"gnumake.exe"
+
+# OS specific default gnuplot terminal (empty string=gnuplot default)
 set gnuplotTermMac		""	; # "qt", "x11"
 set gnuplotTermLinux	""	; # "qt", "wxt", "x11"
 set gnuplotTermWindows	""	; # "wxt", "qt" , "windows"

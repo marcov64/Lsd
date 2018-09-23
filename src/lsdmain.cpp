@@ -422,6 +422,7 @@ int lsdmain( int argn, char **argv )
 	}
 	choice = 0;
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
+	
 	// check if directory is ok and if executable is inside a macOS package
 	cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
 			cd \"$path\" \
@@ -482,10 +483,10 @@ int lsdmain( int argn, char **argv )
 	cmd( "set RootLsd \"%s\"", lsdroot );
 
 	cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-	if ( choice )
+	if ( choice == 1 )
 	{
 		cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-		cmd( "gets $f Terminal" );
+		cmd( "gets $f sysTerm" );
 		cmd( "gets $f HtmlBrowser" );
 		cmd( "gets $f fonttype" );
 		cmd( "gets $f wish" );
@@ -497,21 +498,15 @@ int lsdmain( int argn, char **argv )
 	else
 	{
 		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
-		// set platform-specific variables
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish wish; set Terminal xterm; set HtmlBrowser firefox; set fonttype Courier; set dim_character 12 }" );
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish wish8.5; set Terminal Terminal; set HtmlBrowser open; set fonttype Monaco; set dim_character 14 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish wish85.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish wish86.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
+		
 		cmd( "set LsdSrc src" );
 		cmd( "set tabsize 2" );
 	}
-
-	cmd( "set small_character [ expr $dim_character - 2 ]" );
-	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
-	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
-
-	choice = 0;
+		
+	i = choice;
+	
 	// load native Tk windows defaults
+	choice = 0;
 	cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
 
 	// load native Tk procedures for windows management
@@ -539,6 +534,24 @@ int lsdmain( int argn, char **argv )
 
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
+
+	// set platform-specific variables 
+	if ( i == 0 )
+	{
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
+#ifdef MAC_PKG
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk86; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#else
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk85; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#endif
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish $wishWinTk85; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish $wishWinTk86; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+	}
+
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - 2 ] } { set small_character [ expr $dim_character - 1 ] }" );
+	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
+	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
+	cmd( "set gpterm $gnuplotTerm" );
 
 	// set main window
 	cmd( "wm withdraw ." );
