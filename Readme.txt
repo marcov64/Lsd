@@ -114,6 +114,12 @@ If you have the full Cygwin or MinGW 32-bit distribution installed and want to u
 
 In some rare cases, the included minimum tool set may not work properly with your particular Windows configuration (double-clicking not working, graphical glitches, compiler errors). In this case, you may need to perform a full installation of Cygwin 32-bits. Please use the guide below (for 64-bit) as a reference to the process of setting it up.
 
+You may have to install Gnuplot if you want to produce more elaborated plots in LSD. The required installer (64-bit preferred, even for LSD 32-bit installation) can be downloaded from:
+
+http://www.gnuplot.info
+
+When download finishes, simply run the downloaded installer, accept defaults EXCEPT the option "Add application directory to your PATH environment variable" which MUST be checked.
+
 
 *************************************
 MS Windows Installation (64-bit only)
@@ -146,11 +152,11 @@ Please note that you need a FULLY installed Cygwin64 to use LSD 64-bit. Just cop
 Linux Installation
 ******************
 
-To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics). 
+To use the LSD system it is necessary to have the GNU gcc/g++ compiler (version 4.9+) with the standard libraries, including zlib and Tcl/Tk 8.6 packages; you likely have zlib/Tcl/Tk already installed on your system but you may need the development packages. Use your preferred package manager to get the 'dev' package versions and beware of 32/64-bit variants according to your architecture. Though not strictly necessary, it is also suggested to have the gdb debugger (for low-level inspection of a simulation) and the gnuplot graphical package (for advanced graphics), preferably using Qt. 
 
 In Debian or Ubuntu, to make sure you have the correct libraries you can use:
 
-sudo apt-get install build-essential gdb gnuplot zlib1g-dev tcl8.6-dev tk8.6-dev
+sudo apt-get install build-essential gdb gnuplot-qt zlib1g-dev tcl8.6-dev tk8.6-dev
 
 In Fedora or CentOS, the equivalent command is:
 
@@ -225,9 +231,9 @@ You may have to install Gnuplot if you want to produce more elaborated plots in 
 
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-When Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal:
+When Homebrew installation finishes (details at http://brew.sh), you can install Gnuplot using the following command in Terminal (Qt framework will be automatically installed too):
 
-brew install gnuplot
+brew install gnuplot --with-qt
 
 
 *************************

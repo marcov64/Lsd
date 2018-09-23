@@ -84,17 +84,26 @@ set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
 # OS specific default window buttons widths
-set butLinux	7
-set butMacTk85	7
-set butMacTk86	8
-set butWindows	9
+set butLinux	7	;
+set butMacTk85	7	;
+set butMacTk86	8	;
+set butWindows	9	;
 
 # OS specific screen location offset adjustments
-set corrXmac	0
-set corrYmac	0
-set corrXlinux	0
-set corrYlinux	-55
-set corrXwindows 0
-set corrYwindows 0
+set corrXmac	0	;
+set corrYmac	0	;
+set corrXlinux	0	;
+set corrYlinux	-55	;
+set corrXwindows 0	;
+set corrYwindows 0	;
+
+# OS specific gnuplot terminal name
+set gnuplotTermMac		""	; # "qt", "x11"
+set gnuplotTermLinux	""	; # "qt", "wxt", "x11"
+set gnuplotTermWindows	""	; # "wxt", "qt" , "windows"
+
+# default gnuplot options
+set gnuplotGrid3D	"60,60,3"				;
+set gnuplotOptions	"set ticslevel 0.0"		;
 
 proc defaults_loaded { } { }
