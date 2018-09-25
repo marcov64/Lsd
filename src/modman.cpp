@@ -810,7 +810,8 @@ cmd( "set dirname \"[pwd]\"" );
 cmd( "set modeldir \"[pwd]\"" );
 cmd( "set groupdir \"[pwd]\"" );
 
-cmd( ".f.t.t tag conf sel -foreground white" );
+cmd( ".f.t.t tag remove sel 1.0 end" );
+cmd( ".f.t.t mark set insert 1.0" );
 cmd( "set before [.f.t.t get 1.0 end]" );
 
 if ( argn > 1 )
@@ -848,7 +849,7 @@ if ( argn > 1 )
 else
 	choice = 33; 				// open model browser
   
-cmd( "wm deiconify .; focus -force .f.t.t; update" );
+cmd( "wm deiconify .; raise .; focus -force .f.t.t; update" );
 
 loop:
 
@@ -1845,7 +1846,7 @@ cmd( "set before [.f.t.t get 1.0 end]" );
 cmd( "set f [open modelinfo.txt w]" );
 cmd( "puts $f \"$modelname\"" );
 cmd( "puts $f \"$version\"" );
-cmd( "set frmt \"%d %%B, %%Y\"" );
+cmd( "set frmt \"%%d %%B, %%Y\"" );
 cmd( "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"" );
 cmd( "close $f" );
 
@@ -4634,6 +4635,8 @@ if ( choice == 33 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .l; bind .f.t.t <Enter> { }" );
+	cmd( "wm deiconify .; raise .; focus -force .f.t.t" );
+
 	choice = num;
 	Tcl_UnlinkVar( inter, "choiceSM" );
 
@@ -4807,7 +4810,7 @@ if ( choice == 41 )
 	cmd( "set f [open \"$dirname/modelinfo.txt\" w]" );
 	cmd( "puts $f \"$modelname\"" );
 	cmd( "puts $f \"$version\"" );
-	cmd( "set frmt \"%d %%B, %%Y\"" );
+	cmd( "set frmt \"%%d %%B, %%Y\"" );
 	cmd( "puts $f \"[ clock format [clock seconds] -format \"$frmt\" ]\"" );
 	cmd( "close $f" );
 	cmd( "tk_messageBox -parent . -type ok -title \"Save Model As...\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );

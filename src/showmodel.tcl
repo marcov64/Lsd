@@ -280,12 +280,14 @@ proc showmodel pippo {
 				set f [open "$i/modelinfo.txt" r]
 				set app1 "[gets $f]"
 				set app2 "[gets $f]"
+				set app3 "[gets $f]"
+				close $f
+				fix_info $i $app1 $app2 $app3
 				lappend lmn "$app1"
 				lappend lver "$app2"
 				lappend ldn "$pippo/$i"
 				lappend lrn "[pwd]"
 				lappend lbn "$modelgroup"
-				close $f
 				if [ file exists "$i/description.txt" ] {
 					set f [open "$i/description.txt"]
 					lappend lmd "[read -nonewline $f]"
@@ -571,4 +573,28 @@ proc mpaste i {
 	destroytop .l.p
 	set choiceSM 0
 	showmodel [lindex $lrn $i]
+}
+
+
+#################################
+# Fix invalid information in modelinfo.txt
+################################
+proc fix_info { fi l1 l2 l3 } {
+	if { [ string length $l3 ] != 0 } {
+		set date [ split $l3 ]
+		set day [ lindex $date 0 ]
+		if { [ string is integer $day ] && ( $day < 1 || $day > 31 ) } {
+			set newDate 1
+			catch { set newDate [ clock format $day -format "%d" ] }
+			set len [ llength $date ]
+			for { set i 1 } { $i < $len } { incr i } {
+				set newDate "$newDate [ lindex $date $i ]"
+			}
+			set f [ open "$fi/modelinfo.txt" w ]
+			puts $f $l1
+			puts $f $l2
+			puts $f $newDate
+			close $f
+		}
+	}
 }
