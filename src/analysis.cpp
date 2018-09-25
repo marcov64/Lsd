@@ -2923,7 +2923,7 @@ cmd( "label $p.u.i.lb.l -text \"Selected time steps\"" );
 
 cmd( "frame $p.u.i.lb.lb" );
 cmd( "scrollbar $p.u.i.lb.lb.v_scroll -command \".da.s.u.i.lb.lb.lb yview\"" );
-cmd( "listbox $p.u.i.lb.lb.lb -listvariable list_times -width 8 -height 7 -justify center -selectmode extended -yscroll \".da.s.u.i.lb.lb.v_scroll set\"" );
+cmd( "listbox $p.u.i.lb.lb.lb -listvariable list_times -width 8 -height 7 -selectmode extended -yscroll \".da.s.u.i.lb.lb.v_scroll set\"" );
 cmd( "mouse_wheel $p.u.i.lb.lb.lb" );
 cmd( "pack $p.u.i.lb.lb.lb $p.u.i.lb.lb.v_scroll -side left -fill y" );
 
