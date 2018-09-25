@@ -84,14 +84,19 @@ set sfmwheel	1	; # increase to accelerate mouse wheel and decrease to slow down
 set winmwscale	30	; # scroll minimum wheel movement (precision) factor in Windows
 
 # OS specific monospaced font name
-set fontMac		"Monaco"		; # "Courier"
-set fontLinux	"Courier"		; # "Courier"
-set fontWindows	"Consolas"		; # "Courier"
+set fontMac		"Monaco"			; # "Courier"
+set fontLinux	"DejaVu Sans Mono"	; # "Courier"
+set fontWindows	"Consolas"			; # "Courier"
 
 # OS specific monospaced font size
 set fontSizeMac		14
 set fontSizeLinux	11
 set fontSizeWindows	11
+
+# OS specific monospaced small font size delta (negative)
+set deltaSizeMac		1
+set deltaSizeLinux		1
+set deltaSizeWindows	2
 
 # OS specific default window buttons widths
 set butLinux	7

@@ -548,7 +548,7 @@ int lsdmain( int argn, char **argv )
 		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish $wishWinTk86; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
 	}
 
-	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - 2 ] } { set small_character [ expr $dim_character - 1 ] }" );
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - $deltaSizeWindows ] } { if [ string equal $tcl_platform(os) Darwin ] { set small_character [ expr $dim_character - $deltaSizeMac ] } { set small_character [ expr $dim_character - $deltaSizeLinux ] } }" );
 	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
 	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
 	cmd( "set gpterm $gnuplotTerm" );

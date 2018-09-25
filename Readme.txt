@@ -176,21 +176,13 @@ If you want to create a desktop link (icon) to run LSD/LMM, you can use the scri
 
 ./add-shortcut-linux.sh
 
-or (for 32-bit machines)
-
-./add-shortcut-linux.sh 32
-
 To run LMM from a system shell, please open a terminal in the installation directory (or use your graphical file browser) and execute:
 
 ./lmm
 
-or (for 32-bit machines)
-
-./lmm32
-
 If you get an error when trying to execute any of the above commands, please make sure the respective files are set as executable (use terminal command "chmod +x FILENAME" in the installation directory, replacing FILENAME by the name of the corresponding file).
 
-You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup. Move in the new LSD directory and use the makefile "makefile.ln" (64/32-bit, native) ("makefile32.ln" is used ONLY for creating a 32-bit version in a 64-bit machine):
+You may need to recompile LMM if the included pre-compiled versions have problems with your Linux setup (32-bit distribution, for instance). Move in the new LSD directory and use the makefile "makefile.ln":
 
 make -f makefile.ln
 
