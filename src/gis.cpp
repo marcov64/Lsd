@@ -437,6 +437,22 @@ extern char msg[300];
       }
   };
 
+  void object::make_objDisSet_unique(){
+    for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
+    {
+      if (it == position->objDis_inRadius.begin()){
+        ++it;
+        continue; //skip 1. entry
+      }
+
+      if (std::prev(it)->second == it->second){
+        it = position->objDis_inRadius.erase(it);
+      } else {
+         ++it;
+      }
+    }
+  };
+
   // within_radius
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
@@ -456,20 +472,7 @@ extern char msg[300];
 	  std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end());
 
     //make items unique
-    for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
-    {
-      if (it == position->objDis_inRadius.begin()){
-        ++it;
-        continue; //skip 1. entry
-      }
-
-      if (std::prev(it)->second == it->second){
-//        PLOG("\nErase same elements. left: %i, right: %i ",(std::prev(it)->second),it->second);
-        it = position->objDis_inRadius.erase(it);
-      } else {
-         ++it;
-      }
-    }
+    make_objDisSet_unique();
 
     //randomize in intervals of same distance
     //TO DO
