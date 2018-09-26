@@ -19,9 +19,10 @@ MODELBEGIN
 EQUATION("Scheduler")
 V("Init_GIS");
 
-object* patch = SEARCH("Patch");
+object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",3,5);
 i = 0;
-CYCLE_NEIGHBOURS(patch,cur,"Patch",3){
+
+CYCLE_NEIGHBOURS(patch,cur,"Patch",21){
   PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
   POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
   POSITION_XS(cur),POSITION_YS(cur)  );

@@ -394,9 +394,7 @@ extern char msg[300];
           continue; //invalid position
         }
         for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
-          if (do_stuff(candidate) == false){
-            return false; //break condition
-          }
+          do_stuff(candidate); //do not use rvalue (true/false)
         }
       }
     }
@@ -409,6 +407,36 @@ extern char msg[300];
     return sqrt( pseudo_distance(b) );
   }
 
+   //functor to check if an object is valid candidate
+   //checks distance and label
+  struct add_if_dist_lab
+  {
+    object* this_obj;
+    double pseudo_radius;
+    char lab[300];
+
+    add_if_dist_lab(object* this_obj, double pseudo_radius, char const _lab[])
+      : this_obj(this_obj), pseudo_radius(pseudo_radius)
+      {
+        strcpy(lab, _lab);
+      };
+
+    bool operator()(object* candidate) const
+      {
+        if (candidate == this_obj)
+          return false; //do not collect self
+
+        if ( strcmp(candidate->label,lab) == 0){
+          double ps_dst = this_obj->pseudo_distance(candidate);
+          if (ps_dst <= pseudo_radius) {
+  			    this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
+            return true;
+          }
+        }
+        return false;
+      }
+  };
+
   // within_radius
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
@@ -420,26 +448,33 @@ extern char msg[300];
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
 
-    //define a lambda function that is passed to the bounding box function.
-    auto do_stuff = [this,lab,pseudo_radius](object* candidate)
-      {
-        if (candidate == this)
-          return true; //do not collect self
-        if ( strcmp(candidate->label,lab) == 0){
-          if (pseudo_distance(candidate) <= pseudo_radius) {
-  			    position->objDis_inRadius.push_back(make_pair(pseudo_distance(candidate),candidate));
-          }
-        }
-        return true;
-      };
-    traverse_boundingBox(radius, do_stuff );
+
+    add_if_dist_lab functor_add(this,pseudo_radius,lab);  //define conditions for adding
+    traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
     //sort by distance
+	  std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end());
+
     //make items unique
-	std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end()); 
-	//for (auto it = position->objDis_inRadius.begin() ; it != position->objDis_inRadius.end(); ++it)
-	//		position->in_radius.push_back(it->second);
-    return position->objDis_inRadius.begin();
+    for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
+    {
+      if (it == position->objDis_inRadius.begin()){
+        ++it;
+        continue; //skip 1. entry
+      }
+
+      if (std::prev(it)->second == it->second){
+//        PLOG("\nErase same elements. left: %i, right: %i ",(std::prev(it)->second),it->second);
+        it = position->objDis_inRadius.erase(it);
+      } else {
+         ++it;
+      }
+    }
+
+    //randomize in intervals of same distance
+    //TO DO
+
+	  return position->objDis_inRadius.begin();
   }
   
     //find object with label lab closest to caller, if any inside radius fits
