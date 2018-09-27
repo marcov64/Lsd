@@ -465,10 +465,17 @@ class object
   variable* search_var_local(char const l[]); //search only in object
   std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
   void make_objDisSet_unique();
+  double complete_radius();
+  bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
+  bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
   bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
+  bool traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff );
+  bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
+
   object* search_at_position(char const lab[], double x, double y, bool single);
   object* search_at_position(char const lab[], bool single, bool grid=false);
-  object* closest_in_distance(char const lab[], double radius, bool random);
+//   object* closest_in_distance(char const lab[], double radius, bool random);
+  object* closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);

@@ -363,40 +363,120 @@ extern char msg[300];
     b_sq *= b_sq;
     return a_sq + b_sq;
   }
+
+  bool object::boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in boundingBox() for object '%s'", label );
+  	      error_hard( msg, "the object is not registered in any map",
+  				"check your code to prevent this situation" );
+      return false;
+    }
+    return boundingBox(position->x, position->y, left_io, right_io, top_io, bottom_io, radius);
+  }
+
+    //Calculate the bounding box points.
+    //Takes care of wrapping
+  bool object::boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in boundingBox() for object '%s'", label );
+  	      error_hard( msg, "the object is not registered in any map",
+  				"check your code to prevent this situation" );
+      return false;
+    }
+    //define the bounding box
+    left_io   = floor( x - radius );
+    right_io  = ceil(  x + radius );
+    top_io    = ceil(  y + radius );
+    bottom_io = floor( y - radius );
+
+    //adjust box for wrapping
+    if (position->map->wrap.left == false)
+      left_io = max(0,left_io);
+    if (position->map->wrap.right == false)
+      right_io = min(position->map->xn,right_io);
+    if (position->map->wrap.top == false)
+      top_io = min(position->map->yn,top_io);
+    if (position->map->wrap.bottom == false)
+      bottom_io = max(0,bottom_io);
+
+    //we could make sure that we do not traverse the same point several times.
+  }
+
+
   //a function that receives all objects inside the bounding box of the object
   //at x,y with radius and performs whatever the provided funtion do_stuff tells
   bool object::traverse_boundingBox(double radius, std::function<bool(object* use_obj)> do_stuff )
   {
     //define the bounding box
-    int x_left  = floor( position->x - radius );
-    int x_right = ceil(  position->x + radius );
-    int y_top   = ceil(  position->y + radius );
-    int y_bottom= floor( position->y - radius );
+    int x_left, x_right, y_top, y_bottom;
+    if (boundingBox(x_left, x_right, y_top, y_bottom,radius) == false){
+      return false; //Error msg in boundingBox
+    }
 
-    //adjust box for wrapping
-    if (position->map->wrap.left == false)
-      x_left = max(0,x_left);
-    if (position->map->wrap.right == false)
-      x_right = min(position->map->xn,x_right);
-    if (position->map->wrap.top == false)
-      y_top = min(position->map->yn,y_top);
-    if (position->map->wrap.bottom == false)
-      y_bottom = max(0,y_bottom);
-
-    //we could make sure that we do not traverse the same point several times.
-
-      //fill vector - naive approach until Kyaw's algorithm is ready
+      //fill vector - naive approach (complete)
     for (int x=x_left; x<x_right;x++){
       for (int y=y_bottom; y<y_top;y++){
-        double x_test = x;
-        double y_test = y;
-        if (check_positions(x_test,y_test) == false ){
-          continue; //invalid position
-        }
-        for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
-          do_stuff(candidate); //do not use rvalue (true/false)
-        }
+        access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
+//         double x_test = x;
+//         double y_test = y;
+//         if (check_positions(x_test,y_test) == false ){
+//           continue; //invalid position
+//         }
+//         for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
+//           do_stuff(candidate); //do not use rvalue (true/false)
+//         }
       }
+    }
+    return true; //went to end without any break;
+  }
+
+  //Access all elements registered at the position x,y and use the function on them
+  bool object::access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff)
+  {
+      //control for wrapping and adjust if necessary
+      double x_test = x;
+      double y_test = y;
+      if (check_positions(x_test,y_test) == false ){
+        return false; //invalid position
+      }
+
+      //Cycle through all the potential ellements
+      for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
+        do_stuff(candidate); //do not use rvalue (true/false)
+      }
+      return true;
+  }
+
+
+  //a function that receives all objects inside the belt of the bounding box
+  //(i.e., only the right/left columns and top/bottom rows of the grid)
+  //at x,y with radius and performs whatever the provided funtion do_stuff tells
+  bool object::traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff )
+  {
+    //define the bounding box
+    int x_left, x_right, y_top, y_bottom;
+    if (boundingBox(x_left, x_right, y_top, y_bottom,radius) == false){
+      return false; //Error msg in boundingBox
+    }
+
+    //left column
+    for (int x=x_left, y=y_top; y>=y_bottom; y--){
+      access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
+    }
+
+    //right column
+    for (int x=x_right, y=y_top; y>=y_bottom; y--){
+      access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
+    }
+
+    //top row w/o left/right element
+    for (int y=y_top, x=x_left+1; x<x_right; x++){
+      access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
+    }
+
+    //bottom row w/o left/right element
+    for (int y=y_bottom, x=x_left+1; x<x_right; x++){
+      access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
     }
     return true; //went to end without any break;
   }
@@ -407,35 +487,6 @@ extern char msg[300];
     return sqrt( pseudo_distance(b) );
   }
 
-   //functor to check if an object is valid candidate
-   //checks distance and label
-//   struct add_if_dist_lab
-//   {
-//     object* this_obj;
-//     double pseudo_radius;
-//     char lab[300];
-//
-//     add_if_dist_lab(object* this_obj, double pseudo_radius, char const _lab[])
-//       : this_obj(this_obj), pseudo_radius(pseudo_radius)
-//       {
-//         strcpy(lab, _lab);
-//       };
-//
-//     bool operator()(object* candidate) const
-//       {
-//         if (candidate == this_obj)
-//           return false; //do not collect self
-//
-//         if ( strcmp(candidate->label,lab) == 0){
-//           double ps_dst = this_obj->pseudo_distance(candidate);
-//           if (ps_dst <= pseudo_radius) {
-//   			    this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
-//             return true;
-//           }
-//         }
-//         return false;
-//       }
-//   };
 
   variable* object::search_var_local(char const l[])
   {
@@ -452,6 +503,7 @@ extern char msg[300];
 
     //in addition to add_if_dist_lab checks if VAR CONDITION condVAL is true
     //VAR is a variable contained in the object lab.
+    //if operator() is called with negative pseudo_radius, it will ignore the distance check
   struct add_if_dist_lab_cond
   {
     object* this_obj;
@@ -488,7 +540,7 @@ extern char msg[300];
 
         if ( strcmp(candidate->label,lab) == 0){
           double ps_dst = this_obj->pseudo_distance(candidate);
-          if (ps_dst <= pseudo_radius) {
+          if (pseudo_radius<0 || ps_dst <= pseudo_radius) {
             bool isCandidate = true;
 
             //if conditional, additional check
@@ -559,8 +611,9 @@ extern char msg[300];
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
     add_if_dist_lab_cond functor_add(this,pseudo_radius,lab);
-    if (caller != NULL)
+    if (caller != NULL){
      functor_add = add_if_dist_lab_cond(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+    }
 
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
@@ -576,15 +629,66 @@ extern char msg[300];
 
 	  return position->objDis_inRadius.begin();
   }
+
+  //Return the radius that is necessary to include all the potential items
+  //NOT OPTIMISED
+  double object::complete_radius()
+  {
+    return max(  max(position->x,position->map->xn - position->x) , max(position->y , position->map->yn - position->y) );
+  }
   
     //find object with label lab closest to caller, if any inside radius fits
-  object* object::closest_in_distance(char const lab[], double radius, bool random)
+    //efficient implementation with increasing search radius
+  object* object::closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
-    it_in_radius(lab, radius, random);
-    if (position->objDis_inRadius.size()==0 ) {
-      return NULL; //no candidate
+    double cur_radius = ceil(min(radius,1.0));
+    double max_radius = complete_radius(); //we do not need to go beyond this radius
+    position->objDis_inRadius.clear();//reset vector
+
+    //depending on the call of this function, the conditions are initialised meaningfully or not.
+    add_if_dist_lab_cond functor_add(this,-1,lab); //pseudo_radius<0 -> do checking later!
+    if (caller != NULL){
+     functor_add = add_if_dist_lab_cond(this,-1,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
     }
-    return position->objDis_inRadius.front().second;
+
+
+    //In a first initial step, we identify the items in the boundary box.
+    traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
+    std::sort( position->objDis_inRadius.begin(),position->objDis_inRadius.end() ); //sort list
+
+    for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); cur_radius++ )
+    {
+      //always: check if the set is yet empty, in which case the radius is increased and new items are added before we continue
+      if (position->objDis_inRadius.empty() == false){
+
+        //check if there is a closed interval OR the radius is at least 1 level beyond the element
+        if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first
+           || ceil(position->objDis_inRadius.back().first) < cur_radius ){
+          break; //we found a solution set
+        }
+      }
+
+      traverse_boundingBoxBelt(cur_radius, functor_add );//add new options
+      //sort the elements - THIS CAN BE OPTIMISED
+      std::sort( position->objDis_inRadius.begin(),position->objDis_inRadius.end() );
+    }
+
+
+    if (position->objDis_inRadius.empty() == true){
+      return NULL; //no option found;
+    } else {
+      if (random == false)
+        return position->objDis_inRadius.front().second;
+
+      int n = -1;  //select randomly amongst set of candidates.
+      for (auto const& item : position->objDis_inRadius){
+        if (item.first == position->objDis_inRadius.front().first){
+          n++;
+        }
+      }
+      return position->objDis_inRadius.at( uniform_int(0,n) ).second;
+    }
+
   }
 
     //find object at position xy. Check that it is the only one. Use exact position.
