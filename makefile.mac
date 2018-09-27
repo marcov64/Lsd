@@ -2,18 +2,19 @@
 
 CC=g++
 TARGET=LMM
-SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.9 -O3
-
-# For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
-LSDROOT=.
-PATH_TCL_HEADER=$(LSDROOT)/$(TARGET).app/Contents/Frameworks/Tcl.framework/Headers
-PATH_TK_HEADER=$(LSDROOT)/$(TARGET).app/Contents/Frameworks/Tk.framework/Headers
-PATH_LIB=$(LSDROOT)/$(TARGET).app/Contents/Frameworks
+SWITCH_CC=-DMAC_PKG -Wno-unused-result -mmacosx-version-min=10.10 -O3
 
 # from here you should not need to modify anything
-RM=rm -f
+LSDROOT=.
 SRC=src
 SRC_DIR=$(LSDROOT)/$(SRC)/
+
+# For MacOS, using native compiler and Lsd supplied Tcl/Tk frameworks.
+PATH_TCL_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tcl.framework/Headers
+PATH_TK_HEADER=$(SRC_DIR)LSD.app/Contents/Frameworks/Tk.framework/Headers
+PATH_LIB=$(SRC_DIR)LSD.app/Contents/Frameworks
+
+RM=rm -f
 TARGET_PKG=$(TARGET).app/Contents/MacOS/$(TARGET)
 
 # Variable used to prepare the options to search for the tcl and tk headers

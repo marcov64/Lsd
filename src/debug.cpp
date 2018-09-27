@@ -1038,7 +1038,7 @@ while ( choice == 0 )
 			if ( asl == NULL && stacklog != NULL )
 			{
 				asl = stacklog;
-				plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+				plog( "\nVariable: %s", "", asl->label );
 				if ( asl->vs != NULL && asl->vs->up != NULL )
 					choice = deb( asl->vs->up, c, lab, res, interact );
 			}
@@ -1048,14 +1048,14 @@ while ( choice == 0 )
 				{
 					while ( asl->prev->prev != NULL )
 						asl = asl->prev;
-					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					plog( "\nVariable: %s", "", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
 				}
 				else
 				{
 					asl = asl->next;
-					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					plog( "\nVariable: %s", "", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
 				}
