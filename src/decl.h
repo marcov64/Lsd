@@ -462,6 +462,7 @@ class object
 	//set the new GIS handling methods
 	double distance(object* other); //distance to other object
 	double pseudo_distance(object* other); //pseudo distance to other object
+  variable* search_var_local(char const l[]); //search only in object
 	std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
   void make_objDisSet_unique();
   bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );

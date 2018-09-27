@@ -437,6 +437,74 @@ extern char msg[300];
       }
   };
 
+  variable* object::search_var_local(char const l[])
+  {
+    for ( variable* cv = v; cv != NULL; cv = cv->next ){
+      if ( ! strcmp( l, cv->label ) ){
+        return cv;
+      }
+    }
+      sprintf( msg, "'%s' is missing for conditional searching in search_var_local()", l );
+				error_hard( msg, "variable or parameter not found",
+							"check your code to prevent this situation" );
+    return NULL;
+  }
+
+    //in addition to add_if_dist_lab checks if VAR CONDITION condVAL is true
+    //VAR is a variable contained in the object lab.
+  struct add_if_dist_lab_cond
+  {
+    object* this_obj;
+    double pseudo_radius;
+    char lab[ MAX_ELEM_LENGTH ];
+    char varLab[ MAX_ELEM_LENGTH ];
+    char condition; // 1 : == ; 2 : > ; 3 : < ; that's it
+    double condVal;
+
+    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[], char const _varLab[], char const _condition[], double condVal)
+      : this_obj(this_obj), pseudo_radius(pseudo_radius), condition(_condition[0]), condVal(condVal)
+      {
+        strcpy(lab, _lab);
+        strcpy(varLab,_varLab);
+      };
+
+    bool operator()(object* candidate, object* caller, int lag) const
+      {
+        if (candidate == this_obj)
+          return false; //do not collect self
+
+        if ( strcmp(candidate->label,lab) == 0){
+          double ps_dst = this_obj->pseudo_distance(candidate);
+          if (ps_dst <= pseudo_radius) {
+            variable* condVar = candidate->search_var_local(varLab);
+            if (condVar == NULL){
+              sprintf( msg, "'%s' is missing for conditional searching in add_if_dist_lab()", varLab );
+  				      error_hard( msg, "variable or parameter not found",
+  							"check your code to prevent this situation" );
+              return false;
+            }
+            bool isCandidate;
+            double val = condVar->cal(caller,lag);
+            switch (condition)
+            {
+              case '=': isCandidate = ( val == condVal ? true : false );
+                        break;
+              case '>': isCandidate = ( val > condVal ? true : false );
+                        break;
+              case '<': isCandidate = ( val < condVal ? true : false );
+                        break;
+              default : isCandidate = false;
+            }
+            if ( isCandidate == true ){
+  			     this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
+              return true;
+            }
+          }
+        }
+        return false;
+      } //operator()
+  };
+
   void object::make_objDisSet_unique(){
     for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
     {
@@ -459,11 +527,16 @@ extern char msg[300];
   // give back first element in list
   std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random){
 
-    //Add check
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in it_in_radius() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+        std::deque<std::pair <double,object *> > empty_vec; //just to work without exception.
+      return empty_vec.end();
+    }
 
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
-
 
     add_if_dist_lab functor_add(this,pseudo_radius,lab);  //define conditions for adding
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
