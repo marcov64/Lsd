@@ -1,0 +1,29 @@
+To configure for mingw in Cygwin 64-bit use:
+
+TCL/TK (https://www.tcl.tk/software/tcltk/download.html):
+
+./configure --enable-threads --disable-symbols --enable-64bit CC=x86_64-w64-mingw32-gcc CFLAGS="-O3 -mthreads" --prefix=/Lsd/gnu64 --exec-prefix=/Lsd/gnu64 --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
+
+MAKE (http://ftp.gnu.org/gnu/make):
+
+./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/Lsd/gnu64 --exec-prefix=/Lsd/gnu64 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32
+
+GDB (http://ftp.gnu.org/gnu/gdb/):
+(see sourceforge.net/p/gdbmingw/wiki/Build%20GDB%20under%20MSYS)
+
+./configure CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads" --prefix=/Lsd/gnu64 --exec-prefix=/Lsd/gnu64 --build=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --with-expat --disable-nls --disable-binutils --disable-gas --disable-ld --disable-gprof
+make install INSTALL_PROGRAM='install -s' -C gdb
+
+EXPAT library (https://sourceforge.net/projects/expat/):
+
+./configure --prefix=/usr/x86_64-w64-mingw32/sys-root/mingw --disable-shared --enable-static CC=x86_64-w64-mingw32-gcc CFLAGS="-O2 -mthreads"
+
+ZLIB library (https://zlib.net/):
+
+make -f win32/Makefile.gcc \
+PREFIX=x86_64-w64-mingw32- \
+LOC=-mthreads \
+BINARY_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin \
+INCLUDE_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include \
+LIBRARY_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
+install
