@@ -195,7 +195,9 @@ if ( choice )
 }
 tk_ok = true;
 cmd( "tk appname lmm" );
-cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
+
+// disable Carbon compatibility in Mac
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
 
 // close console if open (usually only in Mac)
 cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
