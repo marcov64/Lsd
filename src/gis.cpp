@@ -409,33 +409,33 @@ extern char msg[300];
 
    //functor to check if an object is valid candidate
    //checks distance and label
-  struct add_if_dist_lab
-  {
-    object* this_obj;
-    double pseudo_radius;
-    char lab[300];
-
-    add_if_dist_lab(object* this_obj, double pseudo_radius, char const _lab[])
-      : this_obj(this_obj), pseudo_radius(pseudo_radius)
-      {
-        strcpy(lab, _lab);
-      };
-
-    bool operator()(object* candidate) const
-      {
-        if (candidate == this_obj)
-          return false; //do not collect self
-
-        if ( strcmp(candidate->label,lab) == 0){
-          double ps_dst = this_obj->pseudo_distance(candidate);
-          if (ps_dst <= pseudo_radius) {
-  			    this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
-            return true;
-          }
-        }
-        return false;
-      }
-  };
+//   struct add_if_dist_lab
+//   {
+//     object* this_obj;
+//     double pseudo_radius;
+//     char lab[300];
+//
+//     add_if_dist_lab(object* this_obj, double pseudo_radius, char const _lab[])
+//       : this_obj(this_obj), pseudo_radius(pseudo_radius)
+//       {
+//         strcpy(lab, _lab);
+//       };
+//
+//     bool operator()(object* candidate) const
+//       {
+//         if (candidate == this_obj)
+//           return false; //do not collect self
+//
+//         if ( strcmp(candidate->label,lab) == 0){
+//           double ps_dst = this_obj->pseudo_distance(candidate);
+//           if (ps_dst <= pseudo_radius) {
+//   			    this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
+//             return true;
+//           }
+//         }
+//         return false;
+//       }
+//   };
 
   variable* object::search_var_local(char const l[])
   {
@@ -457,18 +457,31 @@ extern char msg[300];
     object* this_obj;
     double pseudo_radius;
     char lab[ MAX_ELEM_LENGTH ];
+    object* caller;
+    int lag;
     char varLab[ MAX_ELEM_LENGTH ];
     char condition; // 1 : == ; 2 : > ; 3 : < ; that's it
     double condVal;
 
-    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[], char const _varLab[], char const _condition[], double condVal)
-      : this_obj(this_obj), pseudo_radius(pseudo_radius), condition(_condition[0]), condVal(condVal)
+    //unconditional
+    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[])
+      : this_obj(this_obj), pseudo_radius(pseudo_radius)
+      {
+        strcpy(lab, _lab);
+        caller = NULL;
+        strcpy(varLab,"");
+      };
+
+    //conditional
+    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[],object* caller, int lag, char const _varLab[], char const _condition[], double condVal)
+      : this_obj(this_obj), pseudo_radius(pseudo_radius), caller(caller), lag(lag), condition(_condition[0]), condVal(condVal)
       {
         strcpy(lab, _lab);
         strcpy(varLab,_varLab);
       };
 
-    bool operator()(object* candidate, object* caller, int lag) const
+                                        //defaults for the unconditional call
+    bool operator()(object* candidate) const
       {
         if (candidate == this_obj)
           return false; //do not collect self
@@ -476,25 +489,30 @@ extern char msg[300];
         if ( strcmp(candidate->label,lab) == 0){
           double ps_dst = this_obj->pseudo_distance(candidate);
           if (ps_dst <= pseudo_radius) {
-            variable* condVar = candidate->search_var_local(varLab);
-            if (condVar == NULL){
-              sprintf( msg, "'%s' is missing for conditional searching in add_if_dist_lab()", varLab );
-  				      error_hard( msg, "variable or parameter not found",
-  							"check your code to prevent this situation" );
-              return false;
-            }
-            bool isCandidate;
-            double val = condVar->cal(caller,lag);
-            switch (condition)
-            {
-              case '=': isCandidate = ( val == condVal ? true : false );
-                        break;
-              case '>': isCandidate = ( val > condVal ? true : false );
-                        break;
-              case '<': isCandidate = ( val < condVal ? true : false );
-                        break;
-              default : isCandidate = false;
-            }
+            bool isCandidate = true;
+
+            //if conditional, additional check
+            if (caller != NULL){
+              variable* condVar = candidate->search_var_local(varLab);
+              if (condVar == NULL){
+                sprintf( msg, "'%s' is missing for conditional searching in add_if_dist_lab_cond()", varLab );
+    				      error_hard( msg, "variable or parameter not found",
+    							"check your code to prevent this situation" );
+                return false;
+              }
+
+              double val = condVar->cal(caller,lag);
+              switch (condition)
+              {
+                case '=': isCandidate = ( val == condVal ? true : false );
+                          break;
+                case '>': isCandidate = ( val > condVal ? true : false );
+                          break;
+                case '<': isCandidate = ( val < condVal ? true : false );
+                          break;
+                default : isCandidate = false;
+              }
+            }//end conditional
             if ( isCandidate == true ){
   			     this_obj->position->objDis_inRadius.push_back(make_pair(ps_dst,candidate));
               return true;
@@ -525,7 +543,7 @@ extern char msg[300];
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random){
+  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
 
     if (ptr_map()==NULL){
         sprintf( msg, "failure in it_in_radius() for object '%s'", label );
@@ -538,8 +556,14 @@ extern char msg[300];
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
 
-    add_if_dist_lab functor_add(this,pseudo_radius,lab);  //define conditions for adding
+
+    //depending on the call of this function, the conditions are initialised meaningfully or not.
+    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab);
+    if (caller != NULL)
+     functor_add = add_if_dist_lab_cond(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
+
 
     //sort by distance
 	  std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end());
@@ -594,16 +618,16 @@ extern char msg[300];
     }
     if (single == true) {
       if (singleCandidates.empty() == false)
-        return singleCandidates.front(); //no candidate at position
+        return singleCandidates.front();
       else
-        return NULL;
+        return NULL; //no candidate at position
     } else {
       int select_random = uniform_int(0,singleCandidates.size()-1);
       return singleCandidates.at(select_random);
     }
   }
 
-  object* object::search_at_position(char const lab[], bool single)
+  object* object::search_at_position(char const lab[], bool single, bool grid)
   {
     if (ptr_map()==NULL){
         sprintf( msg, "failure in search_at_position() for object '%s'", label );
@@ -611,7 +635,10 @@ extern char msg[300];
 					"check your code to prevent this situation" );
       return NULL;
     }
-    return search_at_position(lab, position->x, position->y, single);
+    if (grid == false)
+      return search_at_position(lab, position->x, position->y, single);
+    else
+      return search_at_position(lab, trunc(position->x), trunc(position->y), single);
   }
 
   double object::get_pos(char xyz)

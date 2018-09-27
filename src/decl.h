@@ -463,11 +463,11 @@ class object
 	double distance(object* other); //distance to other object
 	double pseudo_distance(object* other); //pseudo distance to other object
   variable* search_var_local(char const l[]); //search only in object
-	std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random); //for the cycle in radius
+  std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
   void make_objDisSet_unique();
   bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
   object* search_at_position(char const lab[], double x, double y, bool single);
-  object* search_at_position(char const lab[], bool single);
+  object* search_at_position(char const lab[], bool single, bool grid=false);
   object* closest_in_distance(char const lab[], double radius, bool random);
 
 	bool register_position(double _x, double _y);

@@ -610,6 +610,9 @@ else \
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj != p->position->objDis_inRadius.end(); O = (++it_obj)->second )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj !=  C->position->objDis_inRadius.end(); O = (++it_obj)->second )
 
+//  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
+#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) auto it_obj = C->it_in_radius(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); for ( O = it_obj->second; it_obj != C->position->objDis_inRadius.end(); O = (++it_obj)->second )
+
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
 
@@ -620,17 +623,25 @@ else \
 //  If more than one item of the given type exist, an error is returned.
 //  Alternatively use the SEARCH_POSITION_RND(S) and SEARCH_POSITION_XY_RND(S)
 //  commands to retrieve the first such item
+//  In additon there exist _GRID versions, which search at the current "Patch", considering
+//  only the integers from each position
 #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
 
 #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
 #define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
 
+#define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
+#define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
+
 #define SEARCH_POSITION_RND_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
 #define SEARCH_POSITION_RND_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
 
 #define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
 #define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
+
+#define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
+#define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)

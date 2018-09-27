@@ -22,10 +22,20 @@ V("Init_GIS");
 object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",3,5);
 i = 0;
 
-CYCLE_NEIGHBOURS(patch,cur,"Patch",21){
+CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
   PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
   POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
   POSITION_XS(cur),POSITION_YS(cur)  );
+}
+
+{
+i = 0;
+CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Patch", 5, "Owned", "<", 99.0, 0, patch  )
+{
+  PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g) with colour %g", ++i,patch->label,
+  POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
+  POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Owned")  );
+}
 }
 
 //We need to check if an agent dies before and after a potential combat.
@@ -190,6 +200,8 @@ they fight. If they have equal strength, a random coin toss decides who wins.
     }
     if (winner==p){
       WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
+      object* patch = SEARCH_POSITION_GRID("Patch");
+      WRITES(patch,"Owned",V("Colour"));
     } else {
       break; //if succer, no more move.
     }
