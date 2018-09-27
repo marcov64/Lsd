@@ -15,7 +15,7 @@ GIS.CPP
     located in 2d space.
 
 	
-	v1: initial compilation by Frederik Schaff and Kyaw Oo
+	v1: initial compilation by Frederik Schaff
 	to do: v2: full integration with LSD
 	
 	All functions work on specially defined LSD object's data structures (named here as 
@@ -592,6 +592,10 @@ extern char msg[300];
     }
   };
 
+  void object::randomise_objDisSetIntvls(){
+    //to do!
+  }
+
   // within_radius
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
@@ -626,7 +630,7 @@ extern char msg[300];
     make_objDisSet_unique();
 
     //randomize in intervals of same distance
-    //TO DO
+    randomise_objDisSetIntvls();    //TO DO
 
 	  return position->objDis_inRadius.begin();
   }

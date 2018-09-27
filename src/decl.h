@@ -465,6 +465,7 @@ class object
   variable* search_var_local(char const l[]); //search only in object
   std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
   void make_objDisSet_unique();
+  void randomise_objDisSetIntvls();
   double complete_radius();
   bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
   bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
