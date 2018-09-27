@@ -399,6 +399,7 @@ extern char msg[300];
     if (position->map->wrap.bottom == false)
       bottom_io = max(0,bottom_io);
 
+    return true;
     //we could make sure that we do not traverse the same point several times.
   }
 
@@ -658,12 +659,14 @@ extern char msg[300];
 
     for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); cur_radius++ )
     {
+//       PLOG("\nRadius now: %g",cur_radius);
       //always: check if the set is yet empty, in which case the radius is increased and new items are added before we continue
       if (position->objDis_inRadius.empty() == false){
 
         //check if there is a closed interval OR the radius is at least 1 level beyond the element
         if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first
            || ceil(position->objDis_inRadius.back().first) < cur_radius ){
+//           PLOG("\nFound a solution set.");
           break; //we found a solution set
         }
       }
@@ -676,6 +679,7 @@ extern char msg[300];
 
     if (position->objDis_inRadius.empty() == true){
       return NULL; //no option found;
+      PLOG("\nNo Options.");
     } else {
       if (random == false)
         return position->objDis_inRadius.front().second;
@@ -686,7 +690,11 @@ extern char msg[300];
           n++;
         }
       }
-      return position->objDis_inRadius.at( uniform_int(0,n) ).second;
+//       PLOG("\nTotal %i options, selecting randomly",n);
+      if (n>0){
+        n = uniform_int(0,n);
+      }
+      return position->objDis_inRadius.at( n ).second;
     }
 
   }

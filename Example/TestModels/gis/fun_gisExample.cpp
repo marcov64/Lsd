@@ -30,13 +30,22 @@ CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
 
 {
 i = 0;
-CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Patch", 5, "Owned", "<", 99.0, 0, patch  )
+PLOG("\n\n----\nLooking for ALL Agents with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
+CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
 {
-  PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g) with colour %g", ++i,patch->label,
-  POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
-  POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Owned")  );
+  PLOG("\n%i %s at (%g,%g) : distance to %s %g position (%g,%g) with colour %g", ++i,patch->label,
+  POSITION_XS(patch),POSITION_YS(patch), cur->label, DISTANCES(patch,cur),
+  POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Colour")  );
 }
 }
+PLOG("\nLooking for CLOSEST Agent with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
+cur = NEAREST_IN_DISTANCE_COND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
+ if (cur == NULL){
+  PLOG("\n\tNothing found");
+} else {
+  PLOG("\n\tFound an %s at Position (%g,%g) with Colour %g. Distance is %g.",cur->label,POSITION_XS(cur),POSITION_YS(cur),VS(cur,"Colour"),DISTANCES(patch,cur));
+}
+PLOG("\n----\n")
 
 //We need to check if an agent dies before and after a potential combat.
 //Also, the order in which agents act are very important.

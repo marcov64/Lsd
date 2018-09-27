@@ -611,10 +611,15 @@ else \
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj !=  C->position->objDis_inRadius.end(); O = (++it_obj)->second )
 
 //  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
-#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) auto it_obj = C->it_in_radius(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); for ( O = it_obj->second; it_obj != C->position->objDis_inRadius.end(); O = (++it_obj)->second )
+#define CYCLE_NEIGHBOUR_COND_CHEATLS(PTR, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) auto it_obj = PTR->it_in_radius(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); for ( O = it_obj->second; it_obj != PTR->position->objDis_inRadius.end(); O = (++it_obj)->second )
+
 
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
+
+//closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+#define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+
 
 #define DISTANCE(OBJ) (p -> distance (OBJ) )
 #define DISTANCES(PTR, OBJ) (PTR -> distance (OBJ) )
