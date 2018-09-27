@@ -396,6 +396,7 @@ int lsdmain( int argn, char **argv )
 	}
 	tk_ok = true;
 	cmd( "tk appname lsd" );
+	cmd( "set ::tk::mac::useCompatibilityMetrics 0" );	// disable Carbon compatibility
 
 	// close console if open (usually only in Mac)
 	cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
