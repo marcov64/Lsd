@@ -41,6 +41,7 @@
 #include <iterator>
 #include <functional>
 
+
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
 #define PARALLEL_MODE
@@ -135,12 +136,27 @@ using namespace std;
 class object;
 class variable;
 struct gisMap;
+class PRNG;
 
 #ifdef CPP11
 // special types used for fast equation lookup
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef map< string, eq_funcT > eq_mapT;
 #endif
+
+/***************************************************
+PRNG
+suitable for <random> methods like std::shuffle
+***************************************************/
+class PRNG {
+public:
+  typedef size_t result_type;
+  static size_t min() { return 0; }
+  static size_t max() { return 1; }
+  size_t operator()() {
+    return RND;// generate a random number in the range [0, 42]
+  }
+};
 
 class variable
 {
@@ -464,8 +480,9 @@ class object
 	double pseudo_distance(object* other); //pseudo distance to other object
   variable* search_var_local(char const l[]); //search only in object
   std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
-  void make_objDisSet_unique();
-  void randomise_objDisSetIntvls();
+  void sort_objDisSet(bool pointer_sort);
+  void make_objDisSet_unique(bool sorted);
+  void randomise_objDisSetIntvls(bool sorted);
   double complete_radius();
   bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
   bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);

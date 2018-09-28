@@ -576,7 +576,19 @@ extern char msg[300];
       } //operator()
   };
 
-  void object::make_objDisSet_unique(){
+  inline void object::sort_objDisSet(bool pointer_sort){
+    if (pointer_sort)
+      std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end() ); //sort - for unique its important that also second is used.
+    else
+      std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by distance
+  }
+
+
+  void object::make_objDisSet_unique(bool sorted)
+  {
+    if (sorted == false)
+      sort_objDisSet(true);
+
     for (auto it = position->objDis_inRadius.begin(); it!= position->objDis_inRadius.end(); /*nothing*/)
     {
       if (it == position->objDis_inRadius.begin()){
@@ -592,8 +604,25 @@ extern char msg[300];
     }
   };
 
-  void object::randomise_objDisSetIntvls(){
-    //to do!
+    //go through intervals with same distance and randomise the order in each
+  void object::randomise_objDisSetIntvls(bool sorted){
+    if (sorted == false)
+      sort_objDisSet(false); //sort only by distance
+
+    auto it_start = position->objDis_inRadius.begin();
+    auto it_last = position->objDis_inRadius.end()-1;
+    for (auto it = position->objDis_inRadius.begin(); it != position->objDis_inRadius.end(); it++){
+
+        //entering new interval or at end of last interval?
+      if (it->second != it_start->second || it == it_last)
+      {
+          //interval with more than one object?
+        if (std::distance(it_start,it)>1){
+           std::shuffle(it_start,it,PRNG());
+        }
+        it_start = it;
+      }
+    }
   }
 
   // within_radius
@@ -624,13 +653,13 @@ extern char msg[300];
 
 
     //sort by distance
-	  std::sort(position->objDis_inRadius.begin(), position->objDis_inRadius.end());
+    sort_objDisSet(true); //pointer_sort = true
 
     //make items unique
-    make_objDisSet_unique();
+    make_objDisSet_unique(true); //sorted = true
 
     //randomize in intervals of same distance
-    randomise_objDisSetIntvls();    //TO DO
+    randomise_objDisSetIntvls(true); //sorted = true
 
 	  return position->objDis_inRadius.begin();
   }
