@@ -533,7 +533,7 @@ else \
  *****************/
 //  Generally, the object p calling is used as GISOBJ, i.e. any object part of the gis.
 //  Alternatively, the "S" versions of the macros use a provided object (pointer)
-//  For most macros, a special "root" version exists. This is useful if there exists only one GIS or a default GIS that is used in most cases.
+//  Note:
 
 
 // Initialisation macros
@@ -594,6 +594,12 @@ else \
 #define POSITION_YS(PTR) ( PTR->get_pos('y') )
 #define POSITION_ZS(PTR) ( PTR->get_pos('z') )
 
+#define RANDOM_POSITION_X ( p->random_pos('x') )
+#define RANDOM_POSITION_Y ( p->random_pos('y') )
+
+#define RANDOM_POSITION_XS(GISOBJ) ( GISOBJ->random_pos('x') )
+#define RANDOM_POSITION_YS(GISOBJ) ( GISOBJ->random_pos('y') )
+
 //Move object to target xy or position of object
 #define TELEPORT_XY(X,Y) { p->change_position(X,Y); }
 #define TELEPORT_XYS(PTR,X,Y) { PTR->change_position(X,Y); }
@@ -618,9 +624,18 @@ else \
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
 
+//Please note: if NULL is passed as fake_caller, this is equivalent not not using the fake_caller.
+
 //closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
 #define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
 
+#define NEAREST_IN_DISTANCE_CONDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND(LAB, RAD, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDL(LAB, RAD, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
 
 #define DISTANCE(OBJ) ( p -> distance (OBJ) )
 #define DISTANCES(PTR, OBJ) ( PTR -> distance (OBJ) )

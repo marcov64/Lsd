@@ -482,7 +482,7 @@ class object
 	double pseudo_distance(object* other); //pseudo distance to other object
   double pseudo_distance(double x, double y); //pseudo distance to point in plain
   variable* search_var_local(char const l[]); //search only in object
-  void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+  void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
   object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
   bool next_neighbour_exists();
   object* next_neighbour();
@@ -498,7 +498,7 @@ class object
 
   object* search_at_position(char const lab[], double x, double y, bool single);
   object* search_at_position(char const lab[], bool single, bool grid=false);
-  object* closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
+  object* closest_in_distance(char const lab[], double radius, bool random, object* caller=NULL, int lag=0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);
@@ -519,6 +519,7 @@ class object
 	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0, int _lag=-1); //Create a gis and add the objects to it, creating new ones if necessary.
 
   double get_pos(char xyz);
+  double random_pos(const char xy);
 
   bool move(char const direction[]);
   bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...

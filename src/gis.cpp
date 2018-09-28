@@ -522,27 +522,27 @@ extern char msg[300];
     //if operator() is called with negative pseudo_radius, it will ignore the distance check
   struct add_if_dist_lab_cond
   {
-    object* this_obj;
+    object* this_obj; //object for which the search is conducted
     double pseudo_radius;
     char lab[ MAX_ELEM_LENGTH ];
-    object* caller;
+    object* fake_caller; //can be a fake-caller if not NULL.
     int lag;
     char varLab[ MAX_ELEM_LENGTH ];
-    char condition; // 1 : == ; 2 : > ; 3 : < ; that's it
+    char condition; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
     double condVal;
 
-    //unconditional
-    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[])
-      : this_obj(this_obj), pseudo_radius(pseudo_radius)
-      {
-        strcpy(lab, _lab);
-        caller = NULL;
-        strcpy(varLab,"");
-      };
+//     //unconditional
+//     add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[])
+//       : this_obj(this_obj), pseudo_radius(pseudo_radius)
+//       {
+//         strcpy(lab, _lab);
+//         caller = NULL;
+//         strcpy(varLab,"");
+//       };
 
     //conditional
-    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[],object* caller, int lag, char const _varLab[], char const _condition[], double condVal)
-      : this_obj(this_obj), pseudo_radius(pseudo_radius), caller(caller), lag(lag), condition(_condition[0]), condVal(condVal)
+    add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[],object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)
+      : this_obj(this_obj), pseudo_radius(pseudo_radius), fake_caller(fake_caller), lag(lag), condition(_condition[0]), condVal(condVal)
       {
         strcpy(lab, _lab);
         strcpy(varLab,_varLab);
@@ -560,7 +560,7 @@ extern char msg[300];
             bool isCandidate = true;
 
             //if conditional, additional check
-            if (caller != NULL){
+            if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ){
               variable* condVar = candidate->search_var_local(varLab);
               if (condVar == NULL){
                 sprintf( msg, "'%s' is missing for conditional searching in add_if_dist_lab_cond()", varLab );
@@ -569,7 +569,12 @@ extern char msg[300];
                 return false;
               }
 
-              double val = condVar->cal(caller,lag);
+              double val;
+              if (fake_caller == NULL)
+                val = condVar->cal(candidate,lag);
+              else
+                val = condVar->cal(fake_caller,lag);
+
               switch (condition)
               {
                 case '=': isCandidate = ( val == condVal ? true : false );
@@ -577,6 +582,8 @@ extern char msg[300];
                 case '>': isCandidate = ( val > condVal ? true : false );
                           break;
                 case '<': isCandidate = ( val < condVal ? true : false );
+                          break;
+                case '!': isCandidate = ( val != condVal ? true : false );
                           break;
                 default : isCandidate = false;
               }
@@ -651,10 +658,8 @@ extern char msg[300];
 
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
-    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab);
-    if (caller != NULL){
-     functor_add = add_if_dist_lab_cond(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
-    }
+    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+
 
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
@@ -716,10 +721,8 @@ extern char msg[300];
     position->objDis_inRadius.clear();//reset vector
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
-    add_if_dist_lab_cond functor_add(this,-1,lab); //pseudo_radius<0 -> do checking later!
-    if (caller != NULL){
-     functor_add = add_if_dist_lab_cond(this,-1,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
-    }
+    add_if_dist_lab_cond functor_add(this,-1,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+
 
 
     //In a first initial step, we identify the items in the boundary box.
@@ -820,6 +823,28 @@ extern char msg[300];
       return search_at_position(lab, position->x, position->y, single);
     else
       return search_at_position(lab, trunc(position->x), trunc(position->y), single);
+  }
+
+  double object::random_pos(const char xy)
+  {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in random_pos() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    switch (xy) {
+
+      case 'x':
+      case 'X': return uniform(0,position->map->xn);
+      case 'y':
+      case 'Y': return uniform(0,position->map->yn);
+      default :
+        sprintf( msg, "failure in random_pos() for object '%s' parameter '%c'", label, xy );
+		      error_hard( msg, "the parameter is not correct.",
+					"check your code to prevent this situation. Options are 'x' or 'y'" );
+        return -1;
+    }
   }
 
   double object::get_pos(char xyz)

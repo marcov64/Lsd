@@ -3,50 +3,55 @@
 #include<random> //before fun_head**
 #include "fun_head_fast.h"
 #include "gis.cpp"
-
+#include <set>
 // see https://github.com/AlbertoMarnetto/multidim for details
 
 // do not add Equations in this area
 
+#define TRACK_SEQUENCE_MAX_T 10
+#include "debug.h"
 
-#include<set>
-
-std::mt19937 my_PRNG;
 MODELBEGIN
 
 // insert your equations here, between the MODELBEGIN and MODELEND words
 
+EQUATION("Get_ID")
+/* Produce a unique ID */
+double id = CURRENT + 1;
+RESULT(id)
+
 EQUATION("Scheduler")
 V("Init_GIS");
 
-object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",3,5);
-i = 0;
+if (t<20){
+  object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",3,5);
+  i = 0;
 
-CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
-  PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
-  POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
-  POSITION_XS(cur),POSITION_YS(cur)  );
+  CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
+    PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
+    POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
+    POSITION_XS(cur),POSITION_YS(cur)  );
+  }
+
+
+  i = 0;
+  PLOG("\n\n----\nLooking for ALL Agents with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
+  CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
+  {
+    PLOG("\n%i %s at (%g,%g) : distance to %s %g position (%g,%g) with colour %g", ++i,patch->label,
+    POSITION_XS(patch),POSITION_YS(patch), cur->label, DISTANCES(patch,cur),
+    POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Colour")  );
+  }
+
+  PLOG("\nLooking for CLOSEST Agent with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
+  cur = NEAREST_IN_DISTANCE_COND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
+   if (cur == NULL){
+    PLOG("\n\tNothing found");
+  } else {
+    PLOG("\n\tFound an %s at Position (%g,%g) with Colour %g. Distance is %g.",cur->label,POSITION_XS(cur),POSITION_YS(cur),VS(cur,"Colour"),DISTANCES(patch,cur));
+  }
+  PLOG("\n----\n")
 }
-
-
-i = 0;
-PLOG("\n\n----\nLooking for ALL Agents with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
-CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
-{
-  PLOG("\n%i %s at (%g,%g) : distance to %s %g position (%g,%g) with colour %g", ++i,patch->label,
-  POSITION_XS(patch),POSITION_YS(patch), cur->label, DISTANCES(patch,cur),
-  POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Colour")  );
-}
-
-PLOG("\nLooking for CLOSEST Agent with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
-cur = NEAREST_IN_DISTANCE_COND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
- if (cur == NULL){
-  PLOG("\n\tNothing found");
-} else {
-  PLOG("\n\tFound an %s at Position (%g,%g) with Colour %g. Distance is %g.",cur->label,POSITION_XS(cur),POSITION_YS(cur),VS(cur,"Colour"),DISTANCES(patch,cur));
-}
-PLOG("\n----\n")
-
 //We need to check if an agent dies before and after a potential combat.
 //Also, the order in which agents act are very important.
 
@@ -57,7 +62,7 @@ CYCLE(cur,"Agent"){
 
 
 if (V("RandomiseOrder")==1){
-  std::shuffle(agent_set.begin(),agent_set.end(),my_PRNG); //do not know how to link to LSD prng, a macro/bind would be nice!
+  std::shuffle(agent_set.begin(),agent_set.end(),PRNG() ); //do not know how to link to LSD prng, a macro/bind would be nice!
 }
 
 //CYCLE_SAFE(cur,"Agent"){    //randomisation missing
@@ -103,10 +108,10 @@ EQUATION("Init_GIS")
 if (V("Manual_Seed")>0){
   RND_SETSEED(V("Manual_Seed"));
 }
-my_PRNG.seed(RND_SEED);
 cur = SEARCH("Patch"); //Get first object of "Patch" type. This will be our fixed landscape.
 
-INIT_SPACE_GRID("Patch",10,20); //Initialise Grid
+/***** Some operations just to check if they work **/
+INIT_SPACE_GRID("Patch",5,5); //Initialise Grid
 
 // Print info on space.
 if(false){
@@ -119,14 +124,14 @@ if(false){
 
 DELETE_SPACE(cur)//Delete it
 //INIT_SPACE_SINGLE_WRAP(cur, 0,0, 10,20, 16)//Initialise grid but link to single item
-INIT_SPACE_SINGLE_WRAPS(cur, 0,0, 10,20,0)//Initialise grid but link to single item
+INIT_SPACE_SINGLE_WRAPS(cur, 0,0, 5,5,0)//Initialise grid but link to single item
 
 int x=0;
 int y=0;
 CYCLE(cur1,"Patch"){ //link to all remaining items manually. Items linked already to the same space are only moved.
   ADD_TO_SPACE_XYS(cur1,cur,x,y)
   x++;
-  if (x == 10) {
+  if (x == 5) {
     x = 0;
     y++;
   }
@@ -142,21 +147,31 @@ if(false){
   }
 }
 DELETE_SPACE(cur)//Delete it, again
+
+/*********** END OF TEST **********/
+
+
+
 INIT_SPACE_GRID_WRAP("Patch", V("x_dim"),V("y_dim"),V("Wrap"))//Initialise relative large space
 CYCLE(cur1,"Patch"){
   WRITES(cur1,"Owned",1000); //White colour for lattice
 }
 
-INIT_LAT( 1000, V("y_dim"), V("x_dim"), 400, 400 );      //Lattice is row-major
+if (V("y_dim") * V("x_dim") < 2500){
+  INIT_LAT( 1000, V("y_dim"), V("x_dim"), 400, 400 );      //Lattice is row-major
+} else {
+  PLOG("\nThe number of cells is to high for a graphical lattice.");
+}
 
 //Add other objects
 double color = 0;
-ADDNOBJ("Agent",19);
+ADDNOBJ("Agent",V("n_agents")-1);
 CYCLE(cur1,"Agent"){
-  ADD_TO_SPACE_XYS(cur1,cur,uniform(0,V("x_dim")),uniform(0,V("y_dim")))
-  WRITES(cur1,"Colour",color++);
+  ADD_TO_SPACE_XYS(cur1,cur,RANDOM_POSITION_XS(cur),RANDOM_POSITION_YS(cur));
+  WRITES(cur1,"Colour",uniform_int(0,20));
   WRITES(cur1,"Strength",1);
   WRITES(cur1,"NextSpawn",2);
+  WRITES(cur1,"Agent_ID",V("Get_ID"));
 }
 
 //Testing command
@@ -167,8 +182,21 @@ if (cur1!=NULL)
 PARAMETER
 RESULT(0.0)
 
+EQUATION("Am_I_Target")
+/* This function is called via a fake-caller. It determines if THIS object is
+  considered a valid target from the fake_caller.
+*/
+TRACK_SEQUENCE
+double iAmTarget = 0.0; //nope
+double myStrength = V("Strength");
+if (myStrength > 0 && VS(c,"Strength")>=myStrength && VS(c,"Colour") != V("Colour") ){
+  iAmTarget = 1.0;
+}
+
+RESULT(iAmTarget)
+
 EQUATION("Move")
-/* Simplistic Toy model: Agents move one field per strength they have.
+/* Simplistic Toy model: Agents move up to one field per strength they have.
 They colour the patch equal to
 their own color. When they encounter another agent with different colour,
 they fight. If they have equal strength, a random coin toss decides who wins.
@@ -176,24 +204,35 @@ they fight. If they have equal strength, a random coin toss decides who wins.
  The winner gains 1 more strength, the looser's strength is reduced by an equal
  amount. If strength drops to zero, the agent dies. If strength doubles, the
  agent spawns a second copy of itself.
+
+ Agents search in a radius equal to their strength for other agents. If another
+ agent with different colour, at most equal strength and "living" exists, they fight.
+
+ If no such agent exists, the move randomly.
+
 */
-
-
-
-  //Move randomly to a neaby patch
-  for (i=0; i<V("Strength"); i++){
-    MOVE(uniform_int(0,8));
+  TRACK_SEQUENCE
+  for (i=V("Strength"); i>0; ){
+    SET_LOCAL_CLOCK_RF;
+    double radius = V("Strength")-i;
+    if (radius < 0){
+      radius = 0;
+      PLOG("\nIt happened");          // NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  )
+    }
+    object* target = NEAREST_IN_DISTANCE_COND_CHEAT("Agent", radius, "Am_I_Target", "=", 1.0,  p );
+    REPORT_LOCAL_CLOCK_CND(1);
     object *winner = p; //assume self wins
-    //Check if there are agents to fight with at the patch. Fight first one once.
-    CYCLE_NEIGHBOUR(cur,"Agent",1.0){
-      if (VS(cur,"Colour")==V("Colour")){
-        continue; //skip
-      }
-      object *sucker = cur;
-      if ( V("Strength") <  VS(cur,"Strength") //other stronger
-        || ( V("Strength") ==  VS(cur,"Strength") && uniform(0,1) < .5 ) ) //other lucky
+    if (target == NULL){
+      MOVE(uniform_int(0,8));//Move randomly to a neaby patch at max distance
+      i--; //costs one strength.
+    } else {
+      i-= max(1.0, ceil(DISTANCE(target) ) ); //here they may move shortest path //max because of feeding on succers
+      TELEPORT_SHARE(target);
+      object *sucker = target;
+      if ( V("Strength") <  VS(target,"Strength") //other stronger
+        || ( V("Strength") ==  VS(target,"Strength") && uniform(0,1) < .5 ) ) //other lucky
       {
-        winner = cur;
+        winner = target;
         sucker = p;
       }
       INCRS(winner,"Strength",1.0);
@@ -203,17 +242,25 @@ they fight. If they have equal strength, a random coin toss decides who wins.
         object* newOne = ADDOBJ_EXS(p->up,"Agent",winner);
         WRITES(newOne, "Strength", 1.0); //reset
         WRITES(newOne, "NextSpawn", 2.0); //reset
+        WRITES(newOne,"Agent_ID",V("Get_ID"));
         MULTS(winner,"NextSpawn",2.0);
       }
       INCRS(sucker,"Strength",-1.0);
+      //eventually delete sucker. Important, else infinit loop with fight against sucker at no cost.
+      if (sucker != p && VS(sucker,"Strength")<1){
+        //DELETE(sucker); Not possible. So currently one can feed on the canvas of suckers.
+      }
     }
     if (winner==p){
-      WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
+      if (V("y_dim") * V("x_dim") < 2500){
+        WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
+      }
       object* patch = SEARCH_POSITION_GRID("Patch");
       WRITES(patch,"Owned",V("Colour"));
     } else {
       break; //if succer, no more move.
     }
+
   }
 
 

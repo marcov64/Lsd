@@ -24,67 +24,7 @@ If you copy an agent by using ADDOBJ_EX, the position is also copied and the new
 If you delete an agent, it is also deregistered from the map. If it is the last element in the
 map, then the map is deleted.
 ---------------------------
-Macros (up to now):
-
-#Initialising the space, 
-# ...either with a single object GISOBJ added to the space ...
-INIT_SPACE_SINGLE( GISOBJ, X, Y, XN, YN)   	         
-INIT_SPACE_SINGLE_WRAP( GISOBJ, X, Y, XN, YN, WRAP )
-# ...or with a number of objects with label LAB added                                                     
-INIT_SPACE_GRID( LAB, XN, YN )         
-INIT_SPACE_GRIDS( PTR, LAB, XN, YN )           
-
-# ...and potentially with wrapping
-INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )
-INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP ) 
-
-# ... the L, INIT_SPACE_GRID_WRAPL(S) and INIT_GRID_SPACE(L)S work as well.  
-                                  
-#Delete the space in which OBJ is situated, also "despacing" all other objects in that space
-DELETE_SPACE( OBJ )         
-
-#Add a single object to the space                                                    
-ADD_TO_SPACE( GISOBJ, X, Y) 
-ADD_TO_SPACES( PTR, GISOBJ, X, Y) 
-
-#Remove single item from spae
-#define DELETE_FROM_SPACE
-#define DELETE_FROM_SPACES( PTR )
-
-                                 
-#Get Position information of the object, if it is a spatial object                                                    
-POSITION_X                     
-POSITION_Y                      
-POSITION_XS(PTR)              
-POSITION_YS(PTR)  
-#... z position not in use currently. In future, this can be meters above see level (e.g.) for
-#... ....hiking algorithms (e.g.)
-POSITION_Z                                   
-POSITION_ZS(PTR)             
-          
-#Move an object, either directly                                                    
-TELEPORT(X,Y)       
-TELEPORTS(PTR,X,Y)    
-
-#or by providing a direction. Will be ammended (perhaps) to allow a path (more efficient)                                                    
-MOVE(DIRECTION)              
-MOVES(PTR, DIRECTION)       
- 
-#Search inside a radius for agents with label LAB.
-#... currently this works but is not optimal.
-#... currently the result is neither sorted nor randomised
-#... the algorithms are work in progress                                                    
-CYCLE_NEIGHBOUR( O, LAB, RAD ) 
-CYCLE_NEIGHBOURS( C, O, LAB, RAD ) 
-
-#Get closest object with label LAB in distance, else NULL
-NEAREST_IN_DISTANCE(LAB, RAD)
-NEAREST_IN_DISTANCES(PTR, LAB, RAD)
-
-#Get first item with label LAB at position floor(X)..ceil(x), floor(y)..ceil(y), if any (else NULL)
-SEARCH_POSITION(LAB, X, Y)
-SEARCH_POSITIONS(PTR, LAB, X, Y)
-
+Macros (see fun_head.h)!
 
 (Enter the Model description text here)
 

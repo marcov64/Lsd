@@ -15,6 +15,8 @@ Label Root
 		Param: Colour
 		Param: Strength
 		Param: NextSpawn
+		Func: Am_I_Target
+		Param: Agent_ID
 
 	}
 
@@ -31,6 +33,8 @@ Label Root
 	Param: x_dim
 	Param: y_dim
 	Param: Wrap
+	Param: n_agents
+	Func: Get_ID
 
 }
 
@@ -40,17 +44,19 @@ DATA
 Object: Root C	1
 Var: Scheduler 0 n + n n
 Var: Init_GIS 0 n + n n
-Param: nColours 0 n + n p	0
-Param: nAgents 0 n + n p	0
-Param: Avg_Strength 0 n + n p	0
-Param: Min_Strength 0 n + n p	0
-Param: Max_Strength 0 n + n p	0
+Param: nColours 0 s + n n	0
+Param: nAgents 0 s + n n	0
+Param: Avg_Strength 0 s + n n	0
+Param: Min_Strength 0 s + n n	0
+Param: Max_Strength 0 s + n n	0
 Param: RandomiseOrder 0 n + n n	0
 Param: Time_Sim_Ends 0 s + n n	0
 Param: Manual_Seed 0 n + n n	0
-Param: x_dim 0 n + n n	40
-Param: y_dim 0 n + n n	40
+Param: x_dim 0 n + n n	200
+Param: y_dim 0 n + n n	200
 Param: Wrap 0 n + n n	16
+Param: n_agents 0 n + n n	100
+Func: Get_ID 0 n + n n
 
 Object: Patch N	1
 Param: Owned 0 n + n n	0
@@ -60,10 +66,12 @@ Var: Move 0 n + n n
 Param: Colour 0 n + n n	0
 Param: Strength 0 n + n n	0
 Param: NextSpawn 0 n + n n	0
+Func: Am_I_Target 0 n + n n
+Param: Agent_ID 0 n + n n	0
 
 SIM_NUM 1
-SEED 201
-MAX_STEP 3000
+SEED 200
+MAX_STEP 5000
 EQUATION fun_gisExample.cpp
 MODELREPORT report_Sim1.html
 
@@ -161,6 +169,18 @@ _INIT_
 
 END_DESCRIPTION
 
+Parameter_n_agents
+Number of initial agents
+_INIT_
+
+END_DESCRIPTION
+
+Function_Get_ID
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
 Object_Patch
 (no description available)
 _INIT_
@@ -198,6 +218,18 @@ _INIT_
 END_DESCRIPTION
 
 Parameter_NextSpawn
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_Am_I_Target
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Agent_ID
 (no description available)
 _INIT_
 
