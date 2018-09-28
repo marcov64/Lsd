@@ -63,6 +63,12 @@ The widget of importance are:
 #include <sys/stat.h>
 #include <new>
 
+// check compiler C++ standard support
+#if __cplusplus >= 201103L 
+#define CPP11
+#include <thread>
+#endif
+
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
@@ -6331,8 +6337,9 @@ bool compile_run( bool run, bool nw )
 {
 	bool ret = false;
 	char *s, str[ 2 * MAX_PATH_LENGTH ];
+	int res, max_threads = 1;
 	FILE *f;
-	int res;
+	
 	Tcl_LinkVar( inter, "res", ( char * ) &res, TCL_LINK_INT );
 	
 	cmd( "destroytop .mm" );	// close any open compilation results window
@@ -6394,12 +6401,17 @@ bool compile_run( bool run, bool nw )
 	cmd( "set res $autoHide" );		// get auto hide status
 	if ( res && run )				// hide LMM?
 		cmd( "wm iconify ." );
-		
+
+	// number of cores for make parallelization
+#ifdef CPP11
+	max_threads = thread::hardware_concurrency( );
+#endif
+
 	// start compilation
 	cmd( "if [ string equal $tcl_platform(platform) windows ] { set add_exe \".exe\" } { set add_exe \"\" }" );  
 	cmd( "if { [ string equal $tcl_platform(platform) windows ] && ! [ string equal $tcl_platform(machine) amd64 ] } { set res 1 } { set res 0 }" );
 	if ( res == 0 )
-		cmd( "catch { exec $MakeExe -f makefile%s 2> makemessage.txt } result", nw ? "NW" : "" ); 
+		cmd( "catch { exec $MakeExe -j %d -f makefile%s 2> makemessage.txt } result", max_threads, nw ? "NW" : "" ); 
 	else
 	{   // handle Windows 32-bit old compiler
 		cmd( "set file [ open make.bat w ]" );
