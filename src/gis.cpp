@@ -298,7 +298,6 @@ extern char msg[300];
     return register_position( _x,  _y);
   }
 
-
     //  pseudo_distance
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(object *b){
@@ -322,10 +321,22 @@ extern char msg[300];
         return NaN;
     }
 
+    return pseudo_distance( b->position->x , b->position->y );
+  }
+
+
+    //  pseudo_distance
+    //  Calculate the pseudo (squared) distance between an object p and another object b.
+  double object::pseudo_distance(double x_2, double y_2){
+    if (ptr_map() == NULL){
+        sprintf( msg, "failure in pseudo_distance() for object '%s'", label );
+  		      error_hard( msg, "the object is not yet connected to a map",
+  					"check your code to prevent this situation" );
+        return NaN;
+    }
+
     double x_1 = position->x;
-    double x_2 = b->position->x;
     double y_1 = position->y;
-    double y_2 = b->position->y;
 
     double xn = position->map->xn;
     double yn = position->map->yn;
@@ -486,6 +497,10 @@ extern char msg[300];
   // Calculate the distance between to objects in the same gis.
   double object::distance(object* b){
     return sqrt( pseudo_distance(b) );
+  }
+
+  double object::distance(double x, double y){
+    return sqrt( pseudo_distance(x, y) );
   }
 
 

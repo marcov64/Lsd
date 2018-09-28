@@ -622,8 +622,11 @@ else \
 #define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
 
 
-#define DISTANCE(OBJ) (p -> distance (OBJ) )
-#define DISTANCES(PTR, OBJ) (PTR -> distance (OBJ) )
+#define DISTANCE(OBJ) ( p -> distance (OBJ) )
+#define DISTANCES(PTR, OBJ) ( PTR -> distance (OBJ) )
+
+#define DISTANCE_XY(X, Y) ( p-> distance (X,Y) )
+#define DISTANCE_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
 
 //  SEARCH_POSITION_XY(S) and SEARCH_POSITION(S) macros search at the exact position.
 //  If more than one item of the given type exist, an error is returned.
