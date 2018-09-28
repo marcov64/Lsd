@@ -629,15 +629,7 @@ extern char msg[300];
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
-
-    if (ptr_map()==NULL){
-        sprintf( msg, "failure in it_in_radius() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
-					"check your code to prevent this situation" );
-        std::deque<std::pair <double,object *> > empty_vec; //just to work without exception.
-      return empty_vec.end();
-    }
+  void object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
 
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = radius*radius;
@@ -661,7 +653,36 @@ extern char msg[300];
     //randomize in intervals of same distance
     randomise_objDisSetIntvls(true); //sorted = true
 
-	  return position->objDis_inRadius.begin();
+	  position->it_obj = position->objDis_inRadius.begin();
+  }
+
+  //check if the current state points to an existing object or all objects have been traversed.
+  bool object::next_neighbour_exists()
+  {
+    return position->it_obj != position->objDis_inRadius.end();
+  }
+
+  //Initialise the nearest neighbour search and return nearest neighbours
+  object* object::next_neighbour()
+  {
+    object* next_ngbo = NULL;
+    if (position->it_obj != position->objDis_inRadius.end() ){
+      next_ngbo =  position->it_obj->second;
+      position->it_obj++; //advance
+    }
+    return next_ngbo;
+  }
+
+  object* object::first_neighbour(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  {
+    if (ptr_map()==NULL){
+        sprintf( msg, "failure in next_neighbour() for object '%s'", label );
+		      error_hard( msg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return NULL;
+    }
+    it_in_radius(lab, radius, random, caller, lag, varLab, condition, condVal);
+    return next_neighbour();
   }
 
   //Return the radius that is necessary to include all the potential items

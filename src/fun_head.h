@@ -607,11 +607,12 @@ else \
 
 //to add: Move sequence, use ints.
 
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj != p->position->objDis_inRadius.end(); O = (++it_obj)->second )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) auto it_obj = C->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj !=  C->position->objDis_inRadius.end(); O = (++it_obj)->second )
+//#define CYCLE_NEIGHBOUR( O, LAB, RAD ) auto it_obj = p->it_in_radius(LAB, RAD, true); for ( O = it_obj->second; it_obj != p->position->objDis_inRadius.end(); O = (++it_obj)->second )
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); p->next_neighbour_exists(); O = p->next_neighbour() )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); C->next_neighbour_exists(); O = C->next_neighbour() )
 
 //  std::deque<std::pair <double,object *> >::iterator object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
-#define CYCLE_NEIGHBOUR_COND_CHEATLS(PTR, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) auto it_obj = PTR->it_in_radius(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); for ( O = it_obj->second; it_obj != PTR->position->objDis_inRadius.end(); O = (++it_obj)->second )
+#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); C->next_neighbour_exists(); O = C->next_neighbour() )
 
 
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )

@@ -297,6 +297,7 @@ struct gisPosition
   double y;     //y position
   double z;     //z position, if any (default 0, not used in map!
   std::deque<std::pair <double,object *> > objDis_inRadius; //list of objects in range, used by search
+  std::deque<std::pair <double,object *> >::iterator it_obj; //iterator for the CYCLES
 
   gisPosition (gisMap* map, double x, double y, double z=0) : map(map), x(x), y(y), z(z)  //constructor.
   {
@@ -479,7 +480,10 @@ class object
 	double distance(object* other); //distance to other object
 	double pseudo_distance(object* other); //pseudo distance to other object
   variable* search_var_local(char const l[]); //search only in object
-  std::deque<std::pair <double,object *> >::iterator it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+  void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+  object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+  bool next_neighbour_exists();
+  object* next_neighbour();
   void sort_objDisSet(bool pointer_sort);
   void make_objDisSet_unique(bool sorted);
   void randomise_objDisSetIntvls(bool sorted);
@@ -492,7 +496,6 @@ class object
 
   object* search_at_position(char const lab[], double x, double y, bool single);
   object* search_at_position(char const lab[], bool single, bool grid=false);
-//   object* closest_in_distance(char const lab[], double radius, bool random);
   object* closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal);
 
 	bool register_position(double _x, double _y);

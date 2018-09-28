@@ -28,7 +28,7 @@ CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
   POSITION_XS(cur),POSITION_YS(cur)  );
 }
 
-{
+
 i = 0;
 PLOG("\n\n----\nLooking for ALL Agents with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
 CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
@@ -37,7 +37,7 @@ CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, pa
   POSITION_XS(patch),POSITION_YS(patch), cur->label, DISTANCES(patch,cur),
   POSITION_XS(cur),POSITION_YS(cur), VS(cur,"Colour")  );
 }
-}
+
 PLOG("\nLooking for CLOSEST Agent with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
 cur = NEAREST_IN_DISTANCE_COND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
  if (cur == NULL){
