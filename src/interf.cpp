@@ -321,6 +321,20 @@ int browse( object *r, int *choice )
 					set choice 7 \
 				} \
 			}" );
+			cmd( "bind .l.v.c.var_name <F2> { \
+				set listfocus 1; \
+				set itemfocus [ .l.v.c.var_name curselection ]; \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					set choice 75 \
+				} \
+			}" );
+			cmd( "bind .l.v.c.var_name <Delete> { \
+				set listfocus 1; \
+				set itemfocus [ .l.v.c.var_name curselection ]; \
+				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+					set choice 76 \
+				} \
+			}" );
 			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
 				after 50; \
 				event generate .l.v.c.var_name <Return> \
@@ -461,6 +475,20 @@ int browse( object *r, int *choice )
 					set itemfocus [ .l.s.c.son_name curselection ]; \
 					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
 						set choice 4 \
+					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <F2> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 83 \
+					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <Delete> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 74 \
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
