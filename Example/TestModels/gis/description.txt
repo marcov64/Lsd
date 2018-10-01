@@ -1,8 +1,9 @@
 Model GIS Example (ver. 1.0)
 
 This is a simple toy example model to show how the new GIS module works. 
-Initially there are 20 agents with different colours that spawn at random points on the map.
-The agents attributes are Strength (initially 1) and NewSpawn (initally 2). The agents move randomly on the map, colouring the patch they just visited in their colour. For each point in strength they can move one step further. If they encounter another agent with a different colour in the same patch, they fight. The one agent with the higher Strength wins, reducing the strength of its counterpart by one and adding one to his own Strength. Whenever the strength reaches 0, an agent dies. Whenever the Strength equals NewSpan, the agent spawns a copy of itself at the same position on the map, but with Strength 1 and NewSpawn 2 (initial values). At the same time, NewSpawn is doubled (i.e. an agent needs to double strength before spawning a new one). Once all colours are defeated, the game ends and the simulation stops.
+Initially there are "n_agent" agents with different colours that spawn at random points on the map.
+The agents attributes are "Strength" (initially 1) and "NewSpawn" (initally 2). The agents move on the map, colouring the patch they just visited in their colour. For each point in strength they can move one step further. Agents can sense a radius equal to their strength. If they encounter another agent with a different colour and not stronger within reach, they move there and fight. The one agent with the higher Strength wins, reducing the strength of its counterpart by one and adding one to his own Strength. Whenever the strength reaches 0, an agent dies. Whenever the Strength equals NewSpan, the agent spawns a copy of itself at the same position on the map, but with Strength 1 and NewSpawn 2 (initial values). At the same time, NewSpawn is doubled (i.e. an agent needs to double strength before spawning a new one). Once all colours are defeated, the game ends and the simulation stops.
+A Lattice is implemented but only enabled for small (max 50x50) grids.
 
 Controls:
 Wrap : Define with a bitcode if wrapping is allowed
@@ -24,7 +25,179 @@ If you copy an agent by using ADDOBJ_EX, the position is also copied and the new
 If you delete an agent, it is also deregistered from the map. If it is the last element in the
 map, then the map is deleted.
 ---------------------------
-Macros (see fun_head.h)!
+Macros (see fun_head.h):
+
+// GIS MACROS
+// The GIS is implemented as a 2d map (continous euclidean space) with a
+//   raster-filter (the integer positions). All different kind of LSD objects
+//   can be registered in a map. They can share the same map, but it is also
+//   possible to have multiple maps.
+//
+// As with all LSD macros, the macro uses the current object (p) as starting
+//   point. Alternative "S" versions of the macros exist as well as all the
+//   other standard LSD macro-types, when appropriate (CHEAT, L, S)
+//   CHEAT: Please note that passing NULL is equivalent of passing the candidate
+//          itself (i.e. using non-cheat version)
+//
+// A new, GIS-specific post-fix is SHARE which means that the target object
+//   (TARGET) will use GIS information of the calling object.
+//
+// Many macros require the reference to an existing gis-object to defer
+//  from this object the map. In this case, GISOBJ relates to such an object.
+//  If the user selected one of the "root" options (see below) the user
+//  may safely use root each time GISOBJ is demanded.
+//
+//
+//
+// There are NN classes of macros:
+// a) Initialisation of the map
+// b) Adding and Removing objects from the map
+//    (note: if an object is deleted, it is removed from the map automatically)
+// c) Moving objects inside the map (MOVE, TELEPORT)
+// d) General utilities (POSITION, DISTANCE)
+// e) Search utilities (search at (grid-)position, CYCLE_NEIGHBOUR, get nearest neighbour with conditions
+
+// Initialisation macros
+//
+// WRAP Versions allow to define world wrapping
+// Non-WRAP Versions assume there is no world wrapping
+// there are 2^4 options. We use a bit-code (0=off):
+//   0-bit: left     : 0=0 1=1
+//   1-bit: right    : 0=0 1=2
+//   2-bit: top      : 0=0 1=4
+//   3-bit: bottom   : 0=0 1=8
+//   sum the values to generate desired wrapping (e.g. 15 - torus world)
+
+// INIT_SPACE_ROOT
+// If there is only one GIS or a single GIS is used heavily, it makes sense to
+// host in in the root object for easy accessing later on.
+#define INIT_SPACE_ROOT(XN,YN)  { root->init_gis_singleObj(0, 0, XN, YN); }
+#define INIT_SPACE_ROOT_WRAP(XN, YN, WRAP)  { root->init_gis_singleObj(0, 0, XN, YN, WRAP); }
+#define ADD_ROOT_TO_SPACE(GISOBJ) { ( root==GISOBJ ? false : root->register_at_map(GISOBJ->ptr_map(), 0, 0) ); }
+
+// INIT_SPACE_SINGLE
+// Initialise the space with a single object
+#define INIT_SPACE_SINGLE( X, Y, XN, YN)              { p->init_gis_singleObj(X, Y, XN, YN); }
+#define INIT_SPACE_SINGLES( GISOBJ, X, Y, XN, YN)              { GISOBJ->init_gis_singleObj(X, Y, XN, YN); }
+#define INIT_SPACE_SINGLE_WRAP( X, Y, XN, YN, WRAP )  { p->init_gis_singleObj( X, Y, XN, YN, WRAP ); }
+#define INIT_SPACE_SINGLE_WRAPS( GISOBJ, X, Y, XN, YN, WRAP )  { GISOBJ->init_gis_singleObj( X, Y, XN, YN, WRAP ); }
+
+// INIT_SPACE_GRID
+// Initialise the regular space and use the object LAB contained in p as "Patches"
+// Using Column Major (change?) the objects are added to a 2d grid and get xy coords respectively
+#define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+#define INIT_SPACE_GRIDS( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
+#define INIT_GRID_SPACEL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_GRID_SPACE_WRAPL( LAB, XN, YN, WRAP, L )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP , LAG ); }
+#define INIT_GRID_SPACELS( PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_GRID_SPACE_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
+
+// DELETE_SPACE / DELETE_FROM_SPACE
+// Delete the map and unregister all object-registrations in the map. Do not delte the LSD objects.
+#define DELETE_SPACE( OBJ ) { OBJ->delete_map(); }
+#define DELETE_FROM_SPACE { p->unregister_from_gis(); }
+#define DELETE_FROM_SPACES( PTR ) { PTR->unregister_from_gis(); }
+
+// ADD_TO_SPACE
+// Register object in space, providing explicit x,y position or sharing object
+// If already registered, move instead and print info.
+#define ADD_TO_SPACE_XY( GISOBJ, X, Y)  { ( p==GISOBJ ? false : p->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_TO_SPACE_XYS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
+#define ADD_TO_SPACE_SHARE(TARGET) { p->register_at_map(TARGET); }
+#define ADD_TO_SPACE_SHARES(PTR, TARGET) { PTR->register_at_map(TARGET); }
+
+// POSITION
+// Macros to get x or y position or produce random position
+#define POSITION_X ( p->get_pos('x') )
+#define POSITION_Y ( p->get_pos('y') )
+#define POSITION_Z ( p->get_pos('z') )
+#define POSITION_XS(PTR) ( PTR->get_pos('x') )
+#define POSITION_YS(PTR) ( PTR->get_pos('y') )
+#define POSITION_ZS(PTR) ( PTR->get_pos('z') )
+#define RANDOM_POSITION_X ( p->random_pos('x') )
+#define RANDOM_POSITION_Y ( p->random_pos('y') )
+#define RANDOM_POSITION_XS(GISOBJ) ( GISOBJ->random_pos('x') )
+#define RANDOM_POSITION_YS(GISOBJ) ( GISOBJ->random_pos('y') )
+
+// MOVE
+// move a single step in one of eight directions
+// 0: stay put. 1: north, 2: north-west, 3: west, 4: south-west,
+// 5: south, 6: sout-east, 7: east and 8: north-east
+// Note: There is no "orientation" currently.
+// return value: succes, bool (true == 1/false == 0)
+#define MOVE(DIRECTION) ( p->move(DIRECTION) )
+#define MOVES(PTR, DIRECTION) ( PTR->move(DIRECTION) )
+//to add: Move sequence, use ints.
+
+// TELEPORT
+// Move object to target xy or position of target
+// return value: succes, bool (true == 1/false == 0)
+#define TELEPORT_XY(X,Y) { p->change_position(X,Y); }
+#define TELEPORT_XYS(PTR,X,Y) { PTR->change_position(X,Y); }
+#define TELEPORT_SHARE(TARGET) { p->change_position(TARGET); }
+#define TELEPORT_SHARES(PTR, TARGET) { PTR->change_position(TARGET); }
+
+// CYCLE_NEIGHBOUR
+// Cycle through all the objects LAB within radius RAD
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); p->next_neighbour_exists(); O = p->next_neighbour() )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); C->next_neighbour_exists(); O = C->next_neighbour() )
+// Special version that checks conditions
+// For each candidate it is checked if the Variable VAR with lag LAG called by
+// either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
+// Note that CHEAT does not work with NULL.
+#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); C->next_neighbour_exists(); O = C->next_neighbour() )
+
+// NEAREST_IN_DISTANCE
+// Provide the closest item in distance RAD with label LAB or NULL if none.
+// If several items with the same distance exist, draw randomly with equal probability
+#define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
+#define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
+// Special version that checks conditions
+// For each candidate it is checked if the Variable VAR with lag LAG called by
+// either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
+// Note that CHEAT does not work with NULL.
+#define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND(LAB, RAD, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDL(LAB, RAD, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+
+// DISTANCE
+// measures the distance to a TARGET or a position
+#define DISTANCE(TARGET) ( p -> distance (TARGET) )
+#define DISTANCES(PTR, TARGET) ( PTR -> distance (TARGET) )
+#define DISTANCE_XY(X, Y) ( p-> distance (X,Y) )
+#define DISTANCE_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
+
+//  SEARCH_POSITION and SEARCH_POSITION_RND
+//  Searches at an exact position for an object with label LAB
+//  If it exists it is reported. The RND version works if there can be more
+//  than one object at the same place (returning one randomly)
+//  The standard version will yield an error if more than one option exist.
+#define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
+#define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
+#define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
+#define SEARCH_POSITIONS(PTR, LAB)  ( PTR->search_at_position(LAB, true) )
+
+#define SEARCH_POSITION_RND_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, false) )
+#define SEARCH_POSITION_RND_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
+#define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
+#define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
+
+//  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
+//  Similar to above, but it searches at the raster-level (all items registered)
+//  at the grid.
+//  NOTE: This is not the same as assuming a radius around the grid.
+//   In this case, please use one of the CYCLE or NEAREST_IN_DISTANCE macros.
+#define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
+#define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
+#define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
+#define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
 
 (Enter the Model description text here)
 
