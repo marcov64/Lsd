@@ -8,7 +8,7 @@
 
 // do not add Equations in this area
 
-#define TRACK_SEQUENCE_MAX_T 10
+#define TRACK_SEQUENCE_MAX_T 1
 #include "debug.h"
 
 MODELBEGIN
@@ -74,7 +74,26 @@ for (i=0;i<agent_set.size();i++){
   }
   VS(cur,"Move");
   if (VS(cur,"Strength") < 1){
+    double cur_colour = VS(cur,"Colour");
     DELETE(cur);
+    // Check if others of the same colour exist. If not, colour all patches white.
+    bool others_of_colour = false;
+    CYCLE(cur2,"Agent"){
+      if (VS(cur2,"Colour")==cur_colour){
+        others_of_colour = true;
+        break;
+      }
+    }
+    if (others_of_colour == false){
+      CYCLE(cur2,"Patch"){
+        if (VS(cur2,"Owned") == cur_colour){
+          WRITES(cur2,"Owned",1000);
+          if (V("y_dim") * V("x_dim") < 2501) {
+            WRITE_LAT( int(POSITION_YS(cur2)+1), int(POSITION_XS(cur2)+1), 1000 ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
+          }
+        }
+      }
+    }
   }
 }
 cur=SEARCH("Agent");
@@ -157,7 +176,7 @@ CYCLE(cur1,"Patch"){
   WRITES(cur1,"Owned",1000); //White colour for lattice
 }
 
-if (V("y_dim") * V("x_dim") < 2500){
+if (V("y_dim") * V("x_dim") < 2501){
   INIT_LAT( 1000, V("y_dim"), V("x_dim"), 400, 400 );      //Lattice is row-major
 } else {
   PLOG("\nThe number of cells is to high for a graphical lattice.");
@@ -235,7 +254,7 @@ they fight. If they have equal strength, a random coin toss decides who wins.
         winner = target;
         sucker = p;
       }
-      INCRS(winner,"Strength",1.0);
+        INCRS(winner,"Strength",1.0);
       if (VS(winner,"Strength")>=VS(winner,"NextSpawn")){
         //Spawn new one!
 //         PLOG("\nGrowing in Numbers!");
@@ -252,7 +271,7 @@ they fight. If they have equal strength, a random coin toss decides who wins.
       }
     }
     if (winner==p){
-      if (V("y_dim") * V("x_dim") < 2500){
+      if (V("y_dim") * V("x_dim") < 2501) {
         WRITE_LAT( int(POSITION_Y+1), int(POSITION_X+1), V("Colour") ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major
       }
       object* patch = SEARCH_POSITION_GRID("Patch");
