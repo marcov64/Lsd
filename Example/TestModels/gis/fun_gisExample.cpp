@@ -32,6 +32,9 @@ if (t<20){
     POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
     POSITION_XS(cur),POSITION_YS(cur)  );
   }
+  
+  cur=NEAREST_IN_DISTANCES(patch,"Patch",2);
+  PLOG("\n%s %g,%g looks for nearest 'Patch' in distance. Result is %s at %g,%g",patch->label,POSITION_XS(patch),POSITION_YS(patch),cur->label,POSITION_XS(cur),POSITION_YS(cur));
 
 
   i = 0;
@@ -110,6 +113,15 @@ count++;
   max_strength=max(max_strength,VS(cur,"Strength"));
 }
 avg_strength/=count;
+//Delete colours
+CYCLE(cur,"Patch"){	
+	const bool is_in = std::find(colors.begin(),colors.end(),VS(cur,"Owned")) != colors.end();
+	if (!is_in){
+		WRITES(cur,"Owned",1000);
+		WRITE_LAT( int(POSITION_YS(cur)+1), int(POSITION_XS(cur)+1), 1000 ); //Offset: Lattice ranges from 1 to xn, 1 to yn AND row-major	
+	}
+}
+
 WRITE("nColours",colors.size());
 WRITE("nAgents",count);
 WRITE("Avg_Strength",avg_strength);

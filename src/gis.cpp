@@ -76,10 +76,12 @@ extern char msg[300];
       return false; //error
     }
     int numNodes = xn*yn;
+    PLOG("\nWe need to create a new %i %s's",nodes2create( this, lab, numNodes ),lab);
     add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
 																	// cloning the first one
     int _x = 0;
     int _y = 0;
+    firstNode = search( lab );
   	for ( cur = firstNode; cur != NULL; cur = go_brother( cur ) ){
   		  if (cur->register_at_map(map, _x, _y) == false){							// scan all nodes aplying ID numbers
           return false; //error!
@@ -93,7 +95,7 @@ extern char msg[300];
     if (_x != xn || _y != 0){
       sprintf( msg, "failure in init_gis_regularGrid() for object '%s'", label );
 		      error_hard( msg, "check the implementation",
-					"check your code to prevent this situation" );
+					"please contact the developer" );
       return false; //error!
     } else {
       return true;
@@ -104,6 +106,12 @@ extern char msg[300];
   //  map_from_obj
   //  Check if the object is a gis object and return pointer to map.
   gisMap* object::ptr_map(){
+    if (this == NULL){
+      sprintf( msg, "failure in ptr_map()");
+		      error_hard( msg, "called with 'NULL'",
+					"check your code to prevent the error. Provide valide objects to the macro" );
+      return NULL;
+    }
     if (position == NULL){
       return NULL;
     } else {
@@ -716,8 +724,11 @@ extern char msg[300];
     //efficient implementation with increasing search radius
   object* object::closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
-    double cur_radius = ceil(min(radius,1.0));
     double max_radius = complete_radius(); //we do not need to go beyond this radius
+    if (radius < 0){
+      radius = max_radius; //we search everything
+    }
+    double cur_radius = ceil(min(radius,1.0));
     position->objDis_inRadius.clear();//reset vector
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
@@ -727,7 +738,7 @@ extern char msg[300];
 
     //In a first initial step, we identify the items in the boundary box.
     traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
-    std::sort( position->objDis_inRadius.begin(),position->objDis_inRadius.end() ); //sort list
+    make_objDisSet_unique(false); //sort and make unique
 
     for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); cur_radius++ )
     {
@@ -745,7 +756,7 @@ extern char msg[300];
 
       traverse_boundingBoxBelt(cur_radius, functor_add );//add new options
       //sort the elements - THIS CAN BE OPTIMISED
-      std::sort( position->objDis_inRadius.begin(),position->objDis_inRadius.end() );
+      make_objDisSet_unique(false); //sort and make unique
     }
 
 
@@ -756,7 +767,7 @@ extern char msg[300];
       if (random == false)
         return position->objDis_inRadius.front().second;
 
-      int n = -1;  //select randomly amongst set of candidates.
+      int n = -1;  //select randomly amongst set of candidates with minimum distance
       for (auto const& item : position->objDis_inRadius){
         if (item.first == position->objDis_inRadius.front().first){
           n++;

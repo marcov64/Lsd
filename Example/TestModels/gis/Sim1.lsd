@@ -52,10 +52,10 @@ Param: Max_Strength 0 s + n n	0
 Param: RandomiseOrder 0 n + n n	0
 Param: Time_Sim_Ends 0 s + n n	0
 Param: Manual_Seed 0 n + n n	0
-Param: x_dim 0 n + n n	200
-Param: y_dim 0 n + n n	200
+Param: x_dim 0 n + n n	20
+Param: y_dim 0 n + n n	20
 Param: Wrap 0 n + n n	16
-Param: n_agents 0 n + n n	100
+Param: n_agents 0 n + n n	10
 Func: Get_ID 0 n + n n
 
 Object: Patch N	1

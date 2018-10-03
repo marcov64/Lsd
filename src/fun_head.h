@@ -652,6 +652,7 @@ else \
 
 // NEAREST_IN_DISTANCE
 // Provide the closest item in distance RAD with label LAB or NULL if none.
+// A radius <0 searches everything
 // If several items with the same distance exist, draw randomly with equal probability
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
@@ -700,7 +701,17 @@ else \
 #define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
 #define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
 
+// Additional Utilities
+#define ANY_GIS ( p->position != NULL ? true : false  )
+#define ANY_GISS(PTR) ( PTR->position != NULL ? true : false )
 
+#define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
+#define SAME_GISS(PTR,TARGET) ( PTR->ptr_map() == TARGET->ptr_map() )
+
+//to do:
+
+//#define COUNT_POSITION(LAB)
+//#define COUNT_POSITIONS(LAB)
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)

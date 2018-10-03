@@ -40,6 +40,7 @@
 #include <deque>
 #include <iterator>
 #include <functional>
+#include <algorithm>
 
 
 #ifdef CPP11
