@@ -257,6 +257,7 @@ class object
 	netNode *node;		// pointer to network node data structure
 	void *cext;			// pointer to a C++ object extension to the LSD object
 
+	bool under_computation( void );
 	double cal( object *caller,  char const *l, int lag );
 	double cal( char const *l, int lag );
 	void recal( char const *l );

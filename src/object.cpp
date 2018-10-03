@@ -1036,18 +1036,43 @@ void object::chg_var_lab( char const *old, char const *n )
 
 
 /****************************************************
+UNDER_COMPUTATION
+Check if any variable in or below the object is
+still under computation.
+****************************************************/
+bool object::under_computation( void )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+
+	// check variables in descendants
+	for ( cb = b; cb != NULL; cb = cb->next )
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			if ( cur->under_computation( ) )
+				return true;
+	 
+	// check variables directly contained in object
+	for ( cv = v; cv != NULL; cv = cv->next )
+		if ( cv->under_computation )
+			return true;
+	
+	return false;
+}
+	
+	
+/****************************************************
 EMPTY
-Garbage collection for Objects. Before killing the Variables data to be saved are stored
-in the "cemetery", a linked chain storing data to be analysed.
+Garbage collection for Objects.
 ****************************************************/
 void object::empty( void ) 
 {
-	variable *cv, *cv1;
-	object *cur, *cur1;
 	bridge *cb, *cb1;
+	object *cur, *cur1;
+	variable *cv, *cv1;
 
 	if ( root == this )
-	 blueprint->empty( );
+		blueprint->empty( );
  
 	for ( cv = v; cv != NULL; cv = cv1 )
 		if ( running == 1 && ( cv->save || cv->savei ) )
@@ -1061,10 +1086,10 @@ void object::empty( void )
 
 	v = NULL;
 
-	for ( cb = b; cb != NULL; cb = cb1)
+	for ( cb = b; cb != NULL; cb = cb1 )
 	{
 		cb1 = cb->next;
-		for ( cur = cb->head; cur != NULL; cur = cur1)
+		for ( cur = cb->head; cur != NULL; cur = cur1 )
 		{ 
 			cur1 = cur->next;
 			cur->empty( );

@@ -1417,7 +1417,6 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b {}" );
 			cmd( "set b [lsort -command comp_und $a]" );		// use special sort procedure to keep underscores at the end
 			cmd( ".da.vars.lb.v delete 0 end" );
 			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
@@ -1432,7 +1431,6 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b {}" );
 			cmd( "set b [lsort -decreasing -dictionary $a]" );
 			cmd( ".da.vars.lb.v delete 0 end" );
 			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
