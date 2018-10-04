@@ -8228,7 +8228,7 @@ int store( struct s *c, int x4 )
 	}
 
 	error_hard( "invalid data structure",
-				"internal error", 
+				"internal problem in LSD", 
 				"if error persists, please contact developers" );
 	myexit( 14 );
 	
@@ -8262,7 +8262,7 @@ int store( struct s *c, int x3, int x4 )
 	 }
 
 	error_hard( "invalid data structure",
-				"internal error", 
+				"internal problem in LSD", 
 				"if error persists, please contact developers" );
 	myexit( 15 );
 	
@@ -8301,7 +8301,7 @@ int store( struct s *c, int x2, int x3, int x4 )
 	}
 
 	error_hard( "invalid data structure",
-				"internal error", 
+				"internal problem in LSD", 
 				"if error persists, please contact developers" );
 	myexit( 16 );
 	
@@ -8345,7 +8345,7 @@ int store( int x1, int x2, int x3, int x4 )
 	}
 
 	error_hard( "invalid data structure", 
-				"internal error", 
+				"internal problem in LSD", 
 				"if error persists, please contact developers" );
 	myexit( 17 );
 	

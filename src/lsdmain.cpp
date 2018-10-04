@@ -150,6 +150,7 @@ long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
+object *wait_delete = NULL;	// LSD object waiting for deletion
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 map < string, profile > prof;	// set of saved profiling times
@@ -742,7 +743,7 @@ void run( object *root )
 		// reset trace stack
 		unwind_stack( );
 
-		//new random routine' initialization
+		// new random routine' initialization
 		init_random(seed);
 
 		seed++;
@@ -750,6 +751,7 @@ void run( object *root )
 		pause_run = false;
 		running = true;
 		debug_flag = false;
+		wait_delete = NULL;
 		stack_info = 0;
 		use_nan = false;
 		on_bar = false;

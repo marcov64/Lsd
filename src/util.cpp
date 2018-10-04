@@ -3130,7 +3130,7 @@ double gamdev( int ia, long *idum_loc = NULL )
 	if ( ia < 1 ) 
 	{
 		error_hard( "inconsistent state in gamma function",
-					"internal error", 
+					"internal problem in LSD", 
 					"if error persists, please contact developers" );
 		quit = 1;
 		return 0;

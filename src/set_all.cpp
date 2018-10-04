@@ -885,7 +885,7 @@ case 8:
 
 default:
 		error_hard( "invalid option for setting values", 
-					"internal error", 
+					"internal problem in LSD", 
 					"if error persists, please contact developers" );
 		myexit( 22 );
 }
@@ -1292,7 +1292,7 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( NOLHfile == NULL )
 	{
 		sprintf( msg, "cannot open NOHL design file '%s'", fileName );
-		error_hard( msg, "design of experiment file error", 
+		error_hard( msg, "problem with design of experiment file", 
 					"check the requested file exists" );
 		return false;
 	}

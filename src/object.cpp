@@ -317,8 +317,8 @@ should be the fastest.
 ****************************************************/
 void object::update( void ) 
 {
-	object *cur;
-	bridge *cb;
+	object *cur, *cur1;
+	bridge *cb, *cb1;
 	variable *var;
 
 	for ( var = v; var != NULL && quit!=2; var = var->next )
@@ -341,10 +341,16 @@ void object::update( void )
 #endif   
 	}
 
-	for ( cb = b; cb != NULL && quit != 2; cb = cb->next )
+	for ( cb = b; cb != NULL && quit != 2; cb = cb1 )
+	{
+		cb1 = cb->next;
 		if ( cb->head != NULL && cb->head->to_compute == 1 )
-			for ( cur = cb->head; cur != NULL; cur = cur->next )
+			for ( cur = cb->head; cur != NULL; cur = cur1 )
+			{
+				cur1 = cur->next;
 				cur->update( );
+			}
+	}
 } 
 
 
@@ -529,10 +535,11 @@ int object::init( object *_up, char const *_label )
 	strcpy( label, _label );
 	b = NULL;
 	hook = NULL;
-	node = NULL;	// not part of a network yet
-	cext = NULL;	// no C++ object extension yet
-	acounter = 0;	// "fail safe" when creating labels
-	lstCntUpd = 0; 	// counter never updated
+	node = NULL;				// not part of a network yet
+	cext = NULL;				// no C++ object extension yet
+	acounter = 0;				// "fail safe" when creating labels
+	lstCntUpd = 0; 				// counter never updated
+	deleting = false;			// not being deleted
 	
 	return 0;
 }
@@ -923,13 +930,43 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 /****************************************************
 DELETE_OBJ
-Remove the object from the model, calling object->empty for garbage collection
-and data storing
+Remove the object from the model
+Before killing the Variables data to be saved are stored
+in the "cemetery", a linked chain storing data to be analysed.
 ****************************************************/
 void object::delete_obj( void ) 
 {
 	object *cur;
 	bridge *cb;
+	
+	{							// create context for lock
+#ifdef PARALLEL_MODE
+		// prevent concurrent deletion by more than one thread
+		lock_guard < mutex > lock( parallel_delete );
+#endif	
+
+		if ( deleting )			// ignore if deleting already going on
+			return;					
+		
+		if ( under_computation( ) )
+			if ( wait_delete != NULL && wait_delete != this )
+			{
+				sprintf( msg, "cannot schedule the deletion of object '%s'", label );
+				error_hard( msg, "another deletion is already pending", 
+							"check your code to prevent this situation" );
+				return;
+			}
+			else
+			{
+				wait_delete = this;
+				return;
+			}
+			
+		deleting = true;		// signal deletion to other threads
+		
+		if ( wait_delete == this )
+			wait_delete = NULL;	// finally deleting pending object
+	}
 
 	collect_cemetery( this );	// collect required variables BEFORE removing object from linked list
 
@@ -950,7 +987,7 @@ void object::delete_obj( void )
 				else
 				{
 					sprintf( msg, "cannot delete all instances of '%s'", label );
-					error_hard( msg, "last object instance", 
+					error_hard( msg, "last object instance deleted", 
 								"check your code to prevent this situation" );
 					return;
 				}
@@ -1104,16 +1141,16 @@ void object::empty( void )
 		}
 		delete cb; 
 	}
-	 
-	delete [ ] label;
-	label = NULL;
-	b = NULL; 
 
 	if ( node != NULL )			// network data to delete?
 	{
 		delete node;
 		node = NULL;
 	}
+	 
+	delete [ ] label;
+	label = NULL;
+	b = NULL; 
 }
 
 
