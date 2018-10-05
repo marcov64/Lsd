@@ -278,8 +278,11 @@ struct variable
 #endif
 
 #ifdef CPP11
-	eq_funcT eq_func = NULL;			// pointer to equation function for fast look-up
+	eq_funcT eq_func;					// pointer to equation function for fast look-up
 #endif
+
+	variable( void );					// empty constructor
+	variable( const variable &v );		// copy constructor
 
 	double cal( object *caller, int lag );
 	double fun( object *caller );
@@ -555,7 +558,7 @@ bool load_description( char *msg, FILE *f );
 bool save_configuration( object *r, int findex = 0 );
 bool save_sensitivity( FILE *f );
 bool search_parallel( object *r );
-bool sort_listbox( int box, int order );
+bool sort_listbox( int box, int order, object *r );
 bool unsaved_change( bool );
 bool unsaved_change( void );					// control for unsaved changes in configuration
 char *NOLH_valid_tables( int k, char* ch );

@@ -13,7 +13,7 @@
  *************************************************************/
 
 /*
-USED CASE 93
+USED CASE 94
 */
 
 /****************************************************
@@ -114,7 +114,7 @@ int lcount;
 object *currObj;
 
 // list of choices that are bad with existing run data
-int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93 };
+int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36, 43, 57, 58, 59, 62, 63, 64, 65, 68, 69, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 83, 88, 90, 91, 92, 93, 94 };
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
@@ -143,11 +143,28 @@ object *create( object *cr )
 
 	cmd( "set ignore_eq_file %d", ignore_eq_file ? 1 : 0  );
 	cmd( "set listfocus 1" );
+	cmd( "set prevlistfocus 0" );
 	cmd( "set itemfocus 0" );
-	cmd( "set cur 0" ); 	//Set yview for vars listbox
 	cmd( "set c \"\"" );
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 
+	// function to update active options according to panel in use
+	cmd( "proc update_options { } { \
+			global listfocus prevlistfocus; \
+			if { $listfocus == 1 && $prevlistfocus != 1 } { \
+				.m.model.sort entryconfig 2 -state normal; \
+				.m.model.sort entryconfig 3 -state normal; \
+				.m.model.sort entryconfig 4 -state normal; \
+				.m.model.sort entryconfig 5 -state normal \
+			}; \
+			if { $listfocus == 2  && $prevlistfocus != 2 } { \
+				.m.model.sort entryconfig 2 -state disabled; \
+				.m.model.sort entryconfig 3 -state disabled; \
+				.m.model.sort entryconfig 4 -state disabled; \
+				.m.model.sort entryconfig 5 -state disabled \
+			}; \
+			set prevlistfocus $listfocus \
+		}" );
 
 	// restore previous object and cursor position in browser, if any
 	if ( strlen( lastObj ) > 0 )
@@ -231,9 +248,7 @@ int browse( object *r, int *choice )
 		cmd( "frame .l.v.c" );
 		cmd( "scrollbar .l.v.c.v_scroll -command \".l.v.c.var_name yview\"" );
 		cmd( "listbox .l.v.c.var_name -selectmode browse -yscroll \".l.v.c.v_scroll set\"" );
-
 		cmd( "mouse_wheel .l.v.c.var_name" );
-		cmd( "bind .l.v.c.var_name <Left> { focus .l.s.c.son_name; set listfocus 2; set itemfocus 0; ; .l.s.c.son_name selection set 0; .l.s.c.son_name activate 0; .l.s.c.son_name see 0 }" );
 
 		// populate the variables panel
 		if ( r->v == NULL )
@@ -280,7 +295,14 @@ int browse( object *r, int *choice )
 				if ( ap_v->next == NULL && justAddedVar )	// last variable & just added a new variable?
 				{
 					justAddedVar = false;
-					cmd( ".l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set end; set lst [ .l.v.c.var_name curselection ]; if { ! [ string equal $lst \"\" ] } { set res [ .l.v.c.var_name get $lst ]; set listfocus 1; set itemfocus $lst}" );
+					cmd( ".l.v.c.var_name selection clear 0 end; \
+						.l.v.c.var_name selection set end; \
+						set lst [ .l.v.c.var_name curselection ]; \
+						if { ! [ string equal $lst \"\" ] } { \
+							set res [ .l.v.c.var_name get $lst ]; \
+							set listfocus 1; \
+							set itemfocus $lst \
+						}" );
 				}
 			}
 			cmd( "set nVar [ .l.v.c.var_name size ]" );
@@ -315,115 +337,156 @@ int browse( object *r, int *choice )
 		if ( r->v != NULL )
 		{
 			cmd( "bind .l.v.c.var_name <Return> { \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					set choice 7 \
-				} \
-			}" );
-			cmd( "bind .l.v.c.var_name <F2> { \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					set choice 75 \
-				} \
-			}" );
-			cmd( "bind .l.v.c.var_name <Delete> { \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					set choice 76 \
-				} \
-			}" );
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 7 \
+					} \
+				}" );
 			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
-				after 50; \
-				event generate .l.v.c.var_name <Return> \
-			}" );
+					after 50; \
+					event generate .l.v.c.var_name <Return> \
+				}" );
 			cmd( "bind .l.v.c.var_name <Button-2> { \
-				.l.v.c.var_name selection clear 0 end; \
-				.l.v.c.var_name selection set @%%x,%%y; \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					.l.v.c.var_name.v entryconfig 5 -state normal; \
-					.l.v.c.var_name.v entryconfig 6 -state normal; \
-					.l.v.c.var_name.v entryconfig 8 -state normal; \
-					.l.v.c.var_name.v entryconfig 9 -state normal; \
-					.l.v.c.var_name.v entryconfig 14 -state normal; \
-					.l.v.c.var_name.v entryconfig 15 -state normal; \
-					.l.v.c.var_name.v entryconfig 16 -state normal; \
-					.l.v.c.var_name.v entryconfig 18 -state normal; \
-					.l.v.c.var_name.v entryconfig 19 -state normal; \
-					set save [ get_var_conf $vname save ]; \
-					set plot [ get_var_conf $vname plot ]; \
-					set num [ get_var_conf $vname debug ]; \
-					set parallel [ get_var_conf $vname parallel ]; \
-					switch $color { \
-						purple { } \
-						blue { \
-							.l.v.c.var_name.v entryconfig 18 -state disabled; \
-							.l.v.c.var_name.v entryconfig 19 -state disabled; \
-						} \
-						black { \
-							.l.v.c.var_name.v entryconfig 5 -state disabled; \
-							.l.v.c.var_name.v entryconfig 6 -state disabled; \
-							.l.v.c.var_name.v entryconfig 14 -state disabled; \
-							.l.v.c.var_name.v entryconfig 15 -state disabled \
-						} \
-						tomato { \
-							.l.v.c.var_name.v entryconfig 6 -state disabled; \
-						} \
-						firebrick { \
-							.l.v.c.var_name.v entryconfig 6 -state disabled; \
-							.l.v.c.var_name.v entryconfig 18 -state disabled; \
-							.l.v.c.var_name.v entryconfig 19 -state disabled; \
-						} \
-					}; \
-					if { $itemfocus == 0 } { \
-						.l.v.c.var_name.v entryconfig 8 -state disabled \
-					}; \
-					if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { \
-						.l.v.c.var_name.v entryconfig 9 -state disabled \
-					}; \
-					tk_popup .l.v.c.var_name.v %%X %%Y \
-				} \
-			}" );
+					.l.v.c.var_name selection clear 0 end; \
+					.l.v.c.var_name selection set @%%x,%%y; \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					set color [ lindex [ .l.v.c.var_name itemconf $itemfocus -fg ] end ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						.l.v.c.var_name.v entryconfig 5 -state normal; \
+						.l.v.c.var_name.v entryconfig 6 -state normal; \
+						.l.v.c.var_name.v entryconfig 8 -state normal; \
+						.l.v.c.var_name.v entryconfig 9 -state normal; \
+						.l.v.c.var_name.v entryconfig 14 -state normal; \
+						.l.v.c.var_name.v entryconfig 15 -state normal; \
+						.l.v.c.var_name.v entryconfig 16 -state normal; \
+						.l.v.c.var_name.v entryconfig 18 -state normal; \
+						.l.v.c.var_name.v entryconfig 19 -state normal; \
+						set save [ get_var_conf $vname save ]; \
+						set plot [ get_var_conf $vname plot ]; \
+						set num [ get_var_conf $vname debug ]; \
+						set parallel [ get_var_conf $vname parallel ]; \
+						switch $color { \
+							purple { } \
+							blue { \
+								.l.v.c.var_name.v entryconfig 18 -state disabled; \
+								.l.v.c.var_name.v entryconfig 19 -state disabled; \
+							} \
+							black { \
+								.l.v.c.var_name.v entryconfig 5 -state disabled; \
+								.l.v.c.var_name.v entryconfig 6 -state disabled; \
+								.l.v.c.var_name.v entryconfig 14 -state disabled; \
+								.l.v.c.var_name.v entryconfig 15 -state disabled \
+							} \
+							tomato { \
+								.l.v.c.var_name.v entryconfig 6 -state disabled; \
+							} \
+							firebrick { \
+								.l.v.c.var_name.v entryconfig 6 -state disabled; \
+								.l.v.c.var_name.v entryconfig 18 -state disabled; \
+								.l.v.c.var_name.v entryconfig 19 -state disabled; \
+							} \
+						}; \
+						if { $itemfocus == 0 } { \
+							.l.v.c.var_name.v entryconfig 8 -state disabled \
+						}; \
+						if { $itemfocus == [ expr [ .l.v.c.var_name size ] - 1 ] } { \
+							.l.v.c.var_name.v entryconfig 9 -state disabled \
+						}; \
+						tk_popup .l.v.c.var_name.v %%X %%Y \
+					} \
+				}" );
 			cmd( "bind .l.v.c.var_name <Button-3> { \
-				event generate .l.v.c.var_name <Button-2> -x %%x -y %%y \
-			}" );
+					event generate .l.v.c.var_name <Button-2> -x %%x -y %%y \
+				}" );
 			cmd( "bind .l.v.c.var_name <Control-Up> { \
-				set listfocus 1; \
-				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { $itemfocus > 0 } { \
-					incr itemfocus -1 \
-				}; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					set choice 58 \
-				} \
-			}" );
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { $itemfocus > 0 } { \
+						incr itemfocus -1 \
+					}; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 58 \
+					} \
+				}" );
 			cmd( "bind .l.v.c.var_name <Control-Down> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { \
+						incr itemfocus \
+					}; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 59 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <Delete> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 76 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F2> { \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 75 \
+					} \
+				}" );
+			cmd( "bind .l.v.c.var_name <F3> { \
+					set listfocus 1; \
+					set sort_order 0; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.v.c.var_name <F4> { \
+					set listfocus 1; \
+					set sort_order 1; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.v.c.var_name <Shift-F3> { \
+					set listfocus 1; \
+					set sort_order 2; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.v.c.var_name <Shift-F4> { \
+					set listfocus 1; \
+					set sort_order 3; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.v.c.var_name <Control-F3> { \
+					set listfocus 1; \
+					set sort_order 4; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.v.c.var_name <Control-F4> { \
+					set listfocus 1; \
+					set sort_order 5; \
+					set choice 94 \
+				}" );
+		}
+
+		cmd( "bind .l.v.c.var_name <Button-1> { \
 				set listfocus 1; \
 				set itemfocus [ .l.v.c.var_name curselection ]; \
-				if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { \
-					incr itemfocus \
-				}; \
-				if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-					set choice 59 \
-				} \
+				update_options \
 			}" );
-		}
-		cmd( ".l.v.c.var_name yview $cur" );
-
+		cmd( "bind .l.v.c.var_name <Left> { \
+				focus .l.s.c.son_name; \
+				set listfocus 2; \
+				set itemfocus 0; \
+				.l.s.c.son_name selection set 0; \
+				.l.s.c.son_name activate 0; \
+				.l.s.c.son_name see 0; \
+				update_options \
+			}" );
+			
 		cmd( "frame .l.s" );
 
 		cmd( "frame .l.s.c" );
 		cmd( "scrollbar .l.s.c.v_scroll -command \".l.s.c.son_name yview\"" );
 		cmd( "listbox .l.s.c.son_name -selectmode browse -yscroll \".l.s.c.v_scroll set\"" );
-
 		cmd( "mouse_wheel .l.s.c.son_name" );
-		cmd( "bind .l.s.c.son_name <Right> { focus .l.v.c.var_name; set listfocus 1; set itemfocus 0; .l.v.c.var_name selection set 0; .l.v.c.var_name activate 0; .l.v.c.var_name see 0 }" );
-		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
 
 		// populate the objects panel
 		if ( r->b == NULL )
@@ -477,20 +540,6 @@ int browse( object *r, int *choice )
 						set choice 4 \
 					} \
 				}" );
-			cmd( "bind .l.s.c.son_name <F2> { \
-					set listfocus 2; \
-					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						set choice 83 \
-					} \
-				}" );
-			cmd( "bind .l.s.c.son_name <Delete> { \
-					set listfocus 2; \
-					set itemfocus [ .l.s.c.son_name curselection ]; \
-					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
-						set choice 74 \
-					} \
-				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
 					after 50; \
 					event generate .l.s.c.son_name <Return> \
@@ -538,7 +587,47 @@ int browse( object *r, int *choice )
 						set choice 61 \
 					} \
 				}" );
+			cmd( "bind .l.s.c.son_name <Delete> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 74 \
+					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <F2> { \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						set choice 83 \
+					} \
+				}" );
+			cmd( "bind .l.s.c.son_name <F3> { \
+					set listfocus 2; \
+					set sort_order 0; \
+					set choice 94 \
+				}" );
+			cmd( "bind .l.s.c.son_name <F4> { \
+					set listfocus 2; \
+					set sort_order 1; \
+					set choice 94 \
+				}" );
 		}
+
+		cmd( "bind .l.s.c.son_name <BackSpace> { set choice 5 }" );
+		cmd( "bind .l.s.c.son_name <Button-1> { \
+				set listfocus 2; \
+				set itemfocus [ .l.s.c.son_name curselection ]; \
+				update_options \
+			}" );
+		cmd( "bind .l.s.c.son_name <Right> { \
+				focus .l.v.c.var_name; \
+				set listfocus 1; \
+				set itemfocus 0; \
+				.l.v.c.var_name selection set 0; \
+				.l.v.c.var_name activate 0; \
+				.l.v.c.var_name see 0; \
+				update_options \
+			}" );
 
 		// navigation (top) panel
 		cmd( "frame .l.p -relief groove -bd 2" );
@@ -641,12 +730,11 @@ int browse( object *r, int *choice )
 			
 			cmd( "$w add separator" );
 			
-			cmd( "$w add command -label \"Change Element...\" -underline 0 -command { set choice 7 }" );
-			cmd( "$w add command -label \"Change Object...\" -underline 7 -command { set choice 6 }" );
-			
-			cmd( "$w add separator" );
-			
+			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set choice 7 }" );
+			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Enter -command { set choice 6 }" );
 			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
+
+			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );
 
 			cmd( "$w add separator" );
 			
@@ -657,9 +745,18 @@ int browse( object *r, int *choice )
 
 			cmd( "$w add separator" );
 			
-			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 7 -accelerator Ctrl+Tab -variable strWindowOn -command { set choice 70 }" );
+			cmd( "$w add checkbutton -label \"Enable Structure Window\" -underline 17 -accelerator Ctrl+Tab -variable strWindowOn -command { set choice 70 }" );
 			cmd( "$w add checkbutton -label \"Ignore Equation File\" -underline 0 -variable ignore_eq_file -command { set choice 54 }" );
 
+			cmd( "set w .m.model.sort" );
+			cmd( "menu $w -tearoff 0" );
+			cmd( "$w add command -label \"Ascending (alphabetic only)\" -underline 0 -accelerator F3 -command { set sort_order 0; set choice 94 }" );
+			cmd( "$w add command -label \"Descending (alphabetic only)\" -underline 0 -accelerator F4 -command { set sort_order 1; set choice 94 }" );
+			cmd( "$w add command -label \"Ascending (parameters first)\" -underline 11 -accelerator Shift+F3 -command { set sort_order 2; set choice 94 }" );
+			cmd( "$w add command -label \"Descending (parameters first)\" -underline 18 -accelerator Shift+F4 -command { set sort_order 3; set choice 94 }" );
+			cmd( "$w add command -label \"Ascending (variables first)\" -underline 11 -accelerator Ctrl+F3 -command { set sort_order 4; set choice 94 }" );
+			cmd( "$w add command -label \"Descending (variables first)\" -underline 17 -accelerator Ctrl+F4 -command { set sort_order 5; set choice 94 }" );
+			
 			cmd( "set w .m.data" );
 			cmd( "menu $w -tearoff 0" );
 			cmd( ".m add cascade -label Data -menu $w -underline 0" );
@@ -805,12 +902,24 @@ int browse( object *r, int *choice )
 	cmd( "update" );
 
 	main_cycle:
-
+	
 	cmd( "if [ info exists ModElem ] { set ModElem [ lsort -dictionary $ModElem ] }" );
 
-	cmd( "if { $listfocus == 1 } { focus .l.v.c.var_name; .l.v.c.var_name selection clear 0 end; .l.v.c.var_name selection set $itemfocus; .l.v.c.var_name activate $itemfocus; .l.v.c.var_name see $itemfocus }" );
-	cmd( "if { $listfocus == 2 } { focus .l.s.c.son_name; .l.s.c.son_name selection clear 0 end; .l.s.c.son_name selection set $itemfocus; .l.s.c.son_name activate $itemfocus }" );
+	cmd( "if { $listfocus == 1 } { \
+			focus .l.v.c.var_name; \
+			.l.v.c.var_name selection clear 0 end; \
+			.l.v.c.var_name selection set $itemfocus; \
+			.l.v.c.var_name activate $itemfocus; \
+			.l.v.c.var_name see $itemfocus \
+		}" );
+	cmd( "if { $listfocus == 2 } { \
+			focus .l.s.c.son_name; \
+			.l.s.c.son_name selection clear 0 end; \
+			.l.s.c.son_name selection set $itemfocus; \
+			.l.s.c.son_name activate $itemfocus \
+		}" );
 
+	cmd( "update_options" );		// update active menu options
 	cmd( "if $strWindowOn { set strWindowB active } { set strWindowB normal }" );
 	cmd( "set useCurrObj yes" );	// flag to select among the current or the clicked object
 
@@ -843,7 +952,15 @@ int browse( object *r, int *choice )
 	}
 
 	// update focus memory
-	cmd( "if { [ .l.v.c.var_name curselection ] != \"\" } { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ] } { if { [ .l.s.c.son_name curselection ] != \"\" } { set listfocus 2; set itemfocus [ .l.s.c.son_name curselection ] } }" );
+	cmd( "if { [ .l.v.c.var_name curselection ] != \"\" } { \
+			set listfocus 1; \
+			set itemfocus [ .l.v.c.var_name curselection ] \
+		} { \
+			if { [ .l.s.c.son_name curselection ] != \"\" } { \
+				set listfocus 2; \
+				set itemfocus [ .l.s.c.son_name curselection ] \
+			} \
+		}" );
 
 	if ( actual_steps > 0 )
 	{ 	// search the sorted list of choices that are bad with existing run data
@@ -1392,7 +1509,7 @@ case 4:
 		break;
 	}
 
-	cmd( "set cur 0; set listfocus 2; set itemfocus 0" );
+	cmd( "set listfocus 2; set itemfocus 0" );
 
 	redrawRoot = true;			// force browser redraw
 	return n;
@@ -1407,7 +1524,7 @@ case 5:
 	
 	for ( i = 0, cb = r->up->b; cb->head != r; cb = cb->next, ++i );
 	
-	cmd( "set cur 0; set listfocus 2; set itemfocus %d", i ); 
+	cmd( "set listfocus 2; set itemfocus %d", i ); 
 
 	redrawRoot = true;					// force browser redraw
 	return r->up;
@@ -2696,7 +2813,8 @@ case 38: //quick reload
 			iniShowOnce = false;		// show warning on # of columns in .ini
 			redrawRoot = true;			// force browser redraw
 			if ( ! reload )
-				cmd( "set cur 0" ); // point for first var in listbox
+				 // point for first var in listbox
+				cmd( "set listfocus 1; set itemfocus 0" );
 			*choice = 0;
 	}
 
@@ -2870,7 +2988,7 @@ case 20:
 
 	unsaved_change( false );	// signal no unsaved change
 	redrawRoot = true;			// force browser redraw
-	cmd( "set cur 0" ); 	// point for first var in listbox
+	cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
 
 break;
 
@@ -3018,7 +3136,7 @@ case 24:
 	if ( n != r )
 	{
 		redrawRoot = true;	// force browser redraw
-		cmd( "set cur 0; set listfocus 1; set itemfocus 0" ); // point for first var in listbox
+		cmd( "set listfocus 1; set itemfocus 0" ); // point for first var in listbox
 	}
 
 	*choice = 0;
@@ -3704,7 +3822,7 @@ case 55:
 	if ( cv != NULL )
 	{
 		for ( i = 0, cur_v = cv->up->v; cur_v != cv; cur_v = cur_v->next, ++i );
-		cmd( "set cur %d; set listfocus 1; set itemfocus $cur", i );
+		cmd( "set listfocus 1; set itemfocus %d", i );
 		redrawRoot = true;			// request browser redraw
 		return cv->up;
 	}
@@ -3955,6 +4073,21 @@ case 61:
 
 	unsaved_change( true );		// signal unsaved change
 	redrawRoot = true;			// request browser redraw
+
+break;
+
+
+// Sort current list box on the selected order
+case 94:
+	cmd( "set choice $listfocus" );
+	i = *choice;
+	cmd( "set choice $sort_order" );
+	
+	if ( sort_listbox( i, *choice, r ) )
+	{
+		unsaved_change( true );		// signal unsaved change
+		redrawRoot = true;			// request browser redraw
+	}
 
 break;
 
@@ -6261,6 +6394,169 @@ void shift_desc( int direction, char *dlab, object *r )
 	} 
 	 
 	plog("\nWarning: should never reach this point in shift_desc" ); 
+}
+
+
+/****************************************************
+SORT_LISTBOX
+****************************************************/
+bool ascending_objects( const bridge &a, const bridge &b )
+{ return ( strcmp( a.blabel, b.blabel ) < 0 ); }
+
+bool descending_objects( const bridge &a, const bridge &b )
+{ return ( strcmp( a.blabel, b.blabel ) > 0 ); }
+
+bool ascending_variables( const variable &a, const variable &b )
+{ return ( strcmp( a.label, b.label ) < 0 ); }
+
+bool descending_variables( const variable &a, const variable &b )
+{ return ( strcmp( a.label, b.label ) > 0 ); }
+
+bool sort_listbox( int box, int order, object *r )
+{
+	bool first;
+	int i;
+	
+	// handle variable/parameter list
+	if ( box == 1 )
+	{
+		if ( r->v == NULL || order < 0 || order > 5 )	// invalid sort?
+			return false;
+		
+		variable *cv, *cv1;
+		list < variable > newv, newvV, newvP, newvF;
+		list < variable > :: iterator it;
+		
+		// move LSD linked list of variables to a C++ linked list
+		for ( cv = r->v; cv != NULL; ++i, cv = cv1 )
+		{
+			cv1 = cv->next;
+			
+			if ( order < 2 )		// no grouping?
+				newv.push_back( *cv );
+			else
+				switch ( cv->param )
+				{
+					case 0:			// variable
+						newvV.push_back( *cv );
+						break;
+					case 1:			// parameter
+						newvP.push_back( *cv );
+						break;
+					case 2:			// function
+						newvF.push_back( *cv );
+				}
+			
+			delete cv;
+		}
+		
+		if ( order < 2 )			// no grouping?
+			if ( order == 0 )		// ascending order ?
+				newv.sort( ascending_variables );
+			else					// descending order
+				newv.sort( descending_variables );	
+		else
+		{
+			switch ( order )
+			{
+				case 2:				// ascending order by type (par. first)
+					newvV.sort( ascending_variables );
+					newvP.sort( ascending_variables );
+					newvF.sort( ascending_variables );
+					newv.splice( newv.end( ), newvP );
+					newv.splice( newv.end( ), newvF );
+					newv.splice( newv.end( ), newvV );
+					break;
+					
+				case 3:				// descending order by type (par. first)
+					newvV.sort( descending_variables );
+					newvP.sort( descending_variables );
+					newvF.sort( descending_variables );
+					newv.splice( newv.end( ), newvP );
+					newv.splice( newv.end( ), newvF );
+					newv.splice( newv.end( ), newvV );
+					break;
+					
+				case 4:				// ascending order by type (var. first)
+					newvV.sort( ascending_variables );
+					newvP.sort( ascending_variables );
+					newvF.sort( ascending_variables );
+					newv.splice( newv.end( ), newvV );
+					newv.splice( newv.end( ), newvF );
+					newv.splice( newv.end( ), newvP );
+					break;
+					
+				case 5:				// descending order by type (var. first)
+					newvV.sort( descending_variables );
+					newvP.sort( descending_variables );
+					newvF.sort( descending_variables );
+					newv.splice( newv.end( ), newvV );
+					newv.splice( newv.end( ), newvF );
+					newv.splice( newv.end( ), newvP );
+					break;
+			}
+		}
+		
+		// rebuild LSD linked list from C++ list
+		for ( first = true, it = newv.begin( ); it != newv.end( ); ++it )
+		{
+			cv = new variable( *it );
+			if ( first )
+			{
+				r->v = cv;
+				first = false;
+			}
+			else
+				cv1->next = cv;
+			cv1 = cv;
+		}
+		cv1->next = NULL;
+		
+		return true;
+	}
+	
+	// handle object list
+	if ( box == 2 )
+	{
+		if ( r->b == NULL || order < 0 || order > 1 )	// invalid sort?
+			return false;
+		
+		bridge *cb, *cb1;	
+		list < bridge > newb;
+		list < bridge > :: iterator it;
+		
+		// move LSD linked list of objects to a C++ linked list
+		for ( cb = r->b; cb != NULL; ++i, cb = cb1 )
+		{
+			cb1 = cb->next;
+			newb.push_back( *cb );
+			delete cb;
+		}
+		
+		if ( order == 0 )			// ascending order ?
+			newb.sort( ascending_objects );
+		else						// descending order
+			newb.sort( descending_objects );			
+		
+		// rebuild LSD linked list from C++ list
+		for ( first = true, it = newb.begin( ); it != newb.end( ); ++it )
+		{
+			cb = new bridge( *it );
+			if ( first )
+			{
+				r->b = cb;
+				first = false;
+			}
+			else
+				cb1->next = cb;
+			cb1 = cb;
+		}
+		cb1->next = NULL;
+		
+		return true;
+	}
+	
+	return false;
 }
 
 

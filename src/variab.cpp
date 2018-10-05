@@ -165,6 +165,72 @@ mutex crash_lock;
 
 
 /****************************************************
+VARIABLE constructor
+****************************************************/
+variable::variable( void )
+{
+	observe = false;
+	parallel = false;
+	plot = false;
+	save = false;
+	savei = false;
+	under_computation = false;
+	lab_tit = NULL;
+	label = NULL;
+	data_loaded = '-';
+	debug = 'n';
+	data = NULL;
+	val = NULL;
+	deb_cnd_val = 0;
+	deb_cond = 0;
+	end = 0;
+	last_update = 0;
+	num_lag = 0;
+	param = 0;
+	start = 0;
+	up = NULL;
+	next = NULL;
+	
+#ifdef CPP11
+	eq_func = NULL;
+#endif	
+}
+
+
+/****************************************************
+VARIABLE copy constructor
+****************************************************/
+variable::variable( const variable &v )
+{
+	observe = v.observe;
+	parallel = v.parallel;
+	plot = v.plot;
+	save = v.save;
+	savei = v.savei;
+	under_computation = v.under_computation;
+	lab_tit = v.lab_tit;
+	label = v.label;
+	data_loaded = v.data_loaded;
+	debug = v.debug;
+	data = v.data;
+	val = v.val;
+	deb_cnd_val = v.deb_cnd_val;
+	deb_cond = v.deb_cond;
+	end = v.end;
+	last_update = v.last_update;
+	num_lag = v.num_lag;
+	param = v.param;
+	start = v.start;
+	up = v.up;
+	next = v.next;
+	
+#ifdef CPP11
+	eq_func = v.eq_func;
+#endif	
+}
+
+
+/****************************************************
 INIT
 ****************************************************/
 int variable::init( object *_up, char const *_label, int _num_lag, double *v, int _save )
@@ -179,12 +245,13 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	total_var++;
 
 	up =_up;
-	label = NULL;
-	i = strlen(_label)+1;
+    save =_save;
+	
+	i = strlen( _label ) + 1;
 	label = new char[ i ];
 	strcpy( label, _label );
-	param = 0;
-	num_lag =_num_lag;
+	
+	num_lag = _num_lag;
 	if ( num_lag >= 0 )
 	{
 		val = new double[ num_lag + 1 ];
@@ -194,20 +261,6 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	else
 		val = NULL;
 	
-	next = NULL;
-	last_update = 0;
-	save =_save;
-	savei = false;
-	under_computation = false;
-	deb_cond = 0;
-	deb_cnd_val = 0;
-	data_loaded = '-';
-	plot = false;
-	parallel = false;
-	observe = false;
-	data = NULL;
-	lab_tit = NULL;
-
 	return 0;
 }
 

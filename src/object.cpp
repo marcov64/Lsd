@@ -307,6 +307,32 @@ object *globalcur;
 
 
 /****************************************************
+INIT
+Set the basics for a newly created object
+****************************************************/
+int object::init( object *_up, char const *_label )
+{
+	++total_obj;
+	up = _up;
+	v = NULL;
+	next = NULL;
+	to_compute = 1;
+	label = new char[ strlen( _label ) + 1 ];
+	strcpy( label, _label );
+	b = NULL;
+	hook = NULL;
+	node = NULL;				// not part of a network yet
+	cext = NULL;				// no C++ object extension yet
+	acounter = 0;				// "fail safe" when creating labels
+	lstCntUpd = 0; 				// counter never updated
+	del_flag = NULL;			// address of flag to signal deletion
+	deleting = false;			// not being deleted
+	
+	return 0;
+}
+
+
+/****************************************************
 UPDATE
 Compute the value of all the Variables in the Object, saving the values 
 and updating the runtime plot. 
@@ -322,9 +348,9 @@ void object::update( void )
 	bridge *cb, *cb1;
 	variable *cv;
 	
-	del_flag = & deleted;
+	del_flag = & deleted;			// register feedback channel
 
-	for ( cv = v; cv != NULL && ! deleted && quit != 2; cv = cv->next )
+	for ( cv = v; ! deleted && cv != NULL && quit != 2; cv = cv->next )
 	{ 
 		if ( cv->last_update < t && cv->param == 0 )
 		{
@@ -336,19 +362,22 @@ void object::update( void )
 				cv->cal( NULL, 0 );
 		}
 		
-		if ( cv->save || cv->savei )
-			cv->data[ t ] = cv->val[ 0 ];
+		if ( ! deleted  )
+		{
+			if ( cv->save || cv->savei )
+				cv->data[ t ] = cv->val[ 0 ];
 #ifndef NO_WINDOW    
-		if ( cv->plot == 1 )
+			if ( cv->plot == 1 )
 			plot_rt( cv );
 #endif   
+		}
 	}
 
-	for ( cb = b; cb != NULL && ! deleted && quit != 2; cb = cb1 )
+	for ( cb = b; ! deleted && cb != NULL && quit != 2; cb = cb1 )
 	{
 		cb1 = cb->next;
 		if ( cb->head != NULL && cb->head->to_compute == 1 )
-			for ( cur = cb->head; cur != NULL && ! deleted; cur = cur1 )
+			for ( cur = cb->head; ! deleted && cur != NULL; cur = cur1 )
 			{
 				cur1 = cur->next;
 				cur->update( );
@@ -356,7 +385,7 @@ void object::update( void )
 	}
 	
 	if ( ! deleted )				// do only if not already deleted
-		del_flag = NULL;
+		del_flag = NULL;			// unregister feedback channel
 } 
 
 
@@ -523,31 +552,6 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 	}
 
 	return NULL;
-}
-
-
-/****************************************************
-INIT
-Set the basics for a newly created object
-****************************************************/
-int object::init( object *_up, char const *_label )
-{
-	++total_obj;
-	up = _up;
-	v = NULL;
-	next = NULL;
-	to_compute = 1;
-	label = new char[ strlen( _label ) + 1 ];
-	strcpy( label, _label );
-	b = NULL;
-	hook = NULL;
-	node = NULL;				// not part of a network yet
-	cext = NULL;				// no C++ object extension yet
-	acounter = 0;				// "fail safe" when creating labels
-	lstCntUpd = 0; 				// counter never updated
-	deleting = false;			// not being deleted
-	
-	return 0;
 }
 
 
@@ -1006,11 +1010,11 @@ void object::delete_obj( void )
 		cb->counter_updated = false;
 	}	
 	
-	empty( );
-	
 	if ( del_flag != NULL )
 		*del_flag = true;	// flag deletion to caller, if requested
 		
+	empty( );
+	
 	delete this;
 }
 
