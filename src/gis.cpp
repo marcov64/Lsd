@@ -892,22 +892,22 @@ extern char msg[300];
       case 'n':   if (direction[1]=='w'){
                     dir = 8; //north-west
                   } else if (direction[1]=='e'){
-                    dir = 2; //north-west
+                    dir = 2; //north-east
                   } else {
                     dir = 1; //north
                   }
                   break;
-      case 'w':   dir = 3;
+      case 'e':   dir = 3;
                   break;
       case 's':   if (direction[1]=='w'){
                     dir = 6; //south-west
                   } else if (direction[1]=='e'){
-                    dir = 4; //south-west
+                    dir = 4; //south-east
                   } else {
                     dir = 5; //south
                   }
                   break;
-      case 'e':   dir = 7;
+      case 'w':   dir = 7;
                   break;
       default :   dir = 0; //stay put.
     }
@@ -926,15 +926,15 @@ extern char msg[300];
     double x_out = position->x;
     double y_out = position->y;
     switch (direction) {
-      case 0: return true;
-      case 1: y_out++; break;
-      case 2: y_out++; x_out++; break;
-      case 3: x_out++; break;
-      case 4: y_out--; x_out++; break;
-      case 5: y_out--; break;
-      case 6: y_out--; x_out--; break;
-      case 7: x_out--; break;
-      case 8: y_out++; x_out--; break;
+      case 0: return true;    //no move
+      case 1: y_out++; break; //n
+      case 2: y_out++; x_out++; break; //ne
+      case 3: x_out++; break;  //e
+      case 4: y_out--; x_out++; break; //se
+      case 5: y_out--; break; //s
+      case 6: y_out--; x_out--; break; //sw
+      case 7: x_out--; break; //w
+      case 8: y_out++; x_out--; break; //nw
     }
     return change_position(x_out, y_out);
   }

@@ -623,8 +623,8 @@ else \
 
 // MOVE
 // move a single step in one of eight directions
-// 0: stay put. 1: north, 2: north-west, 3: west, 4: south-west,
-// 5: south, 6: sout-east, 7: east and 8: north-east
+// 0: stay put. 1: north, 2: north-east, 3: east, 4: south-east,
+// 5: south, 6: sout-west, 7: west and 8: north-west
 // Note: There is no "orientation" currently.
 // return value: succes, bool (true == 1/false == 0)
 #define MOVE(DIRECTION) ( p->move(DIRECTION) )
