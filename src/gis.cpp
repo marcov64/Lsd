@@ -32,6 +32,8 @@ GIS.CPP
 ****************************************************************************************/
 
 //to do: correct linking. Currently included in example file.
+#ifndef GIS_CPP
+#define GIS_CPP
 
 extern char msg[300];
 
@@ -992,4 +994,4 @@ extern char msg[300];
     return true;
   }
 
-
+#endif //#ifndef GIS_CPP

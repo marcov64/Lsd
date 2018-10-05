@@ -24,7 +24,6 @@ using namespace Eigen;
 #endif
 
 #include "decl.h"										// LSD classes
-
 #ifndef NO_WINDOW
 #define DEBUG_CODE \
 	if ( debug_flag ) \
@@ -791,3 +790,5 @@ void cmd( const char *cm, ... );
 	};
 
 #endif
+
+#include "gis.cpp" //until linked

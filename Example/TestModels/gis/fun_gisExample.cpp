@@ -2,7 +2,7 @@
 #include "multidim.hpp" //to allow easy excess of multi dim containers used for debugging only
 #include<random> //before fun_head**
 #include "fun_head_fast.h"
-#include "gis.cpp"
+//#include "gis.cpp"
 #include <set>
 // see https://github.com/AlbertoMarnetto/multidim for details
 
