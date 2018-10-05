@@ -144,6 +144,7 @@ class object
 {
 	public:
 	
+	bool *del_flag;						// address of flag to signal deletion
 	bool deleting;						// indicate deletion in process
 	bridge *b;
 	char *label;
@@ -258,7 +259,6 @@ struct variable
 	bool under_computation;
 	char *lab_tit;
 	char *label;
-	char computable;
 	char data_loaded;
 	char debug;
 	double *data;

@@ -900,23 +900,35 @@ EMPTY
 ****************************************************/
 void variable::empty( void ) 
 {
-#ifdef PARALLEL_MODE
-	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
-#endif	
-		
-	if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+	if ( running )
 	{
-		sprintf( msg, "failure while deallocating variable %s", label );
-		error_hard( msg, "internal problem in LSD", 
-					"if error persists, please contact developers" );
-		return;
-	}
+#ifdef PARALLEL_MODE
+		// prevent concurrent use by more than one thread
+		lock_guard < mutex > lock( parallel_comp );
+#endif	
+			
+		if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+		{
+			sprintf( msg, "failure while deallocating variable %s", label );
+			error_hard( msg, "internal problem in LSD", 
+						"if error persists, please contact developers" );
+			return;
+		}
 
-	total_var--;
-	
-	delete [ ] label;
-	delete [ ] data;
-	delete [ ] lab_tit;
-	delete [ ] val;
+		total_var--;
+		
+		delete [ ] label;
+		delete [ ] data;
+		delete [ ] lab_tit;
+		delete [ ] val;
+	}
+	else
+	{
+		total_var--;
+		
+		delete [ ] label;
+		delete [ ] data;
+		delete [ ] lab_tit;
+		delete [ ] val;
+	}
 }

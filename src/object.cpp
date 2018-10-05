@@ -317,40 +317,46 @@ should be the fastest.
 ****************************************************/
 void object::update( void ) 
 {
+	bool deleted = false;
 	object *cur, *cur1;
 	bridge *cb, *cb1;
-	variable *var;
+	variable *cv;
+	
+	del_flag = & deleted;
 
-	for ( var = v; var != NULL && quit!=2; var = var->next )
+	for ( cv = v; cv != NULL && ! deleted && quit != 2; cv = cv->next )
 	{ 
-		if ( var->last_update < t && var->param == 0 )
+		if ( cv->last_update < t && cv->param == 0 )
 		{
 #ifdef PARALLEL_MODE
-			if ( parallel_ready && var->parallel )
-				parallel_update( var, this );
+			if ( parallel_ready && cv->parallel )
+				parallel_update( cv, this );
 			else
 #endif
-				var->cal( NULL, 0 );
+				cv->cal( NULL, 0 );
 		}
 		
-		if ( var->save || var->savei )
-			var->data[ t ] = var->val[ 0 ];
+		if ( cv->save || cv->savei )
+			cv->data[ t ] = cv->val[ 0 ];
 #ifndef NO_WINDOW    
-		if ( var->plot == 1 )
-			plot_rt( var );
+		if ( cv->plot == 1 )
+			plot_rt( cv );
 #endif   
 	}
 
-	for ( cb = b; cb != NULL && quit != 2; cb = cb1 )
+	for ( cb = b; cb != NULL && ! deleted && quit != 2; cb = cb1 )
 	{
 		cb1 = cb->next;
 		if ( cb->head != NULL && cb->head->to_compute == 1 )
-			for ( cur = cb->head; cur != NULL; cur = cur1 )
+			for ( cur = cb->head; cur != NULL && ! deleted; cur = cur1 )
 			{
 				cur1 = cur->next;
 				cur->update( );
 			}
 	}
+	
+	if ( ! deleted )				// do only if not already deleted
+		del_flag = NULL;
 } 
 
 
@@ -859,7 +865,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );
 #endif		
-			if ( running == 1 && cv->param == 0 )
+			if ( running && cv->param == 0 )
 			{
 				if ( t_update < 0 && cv->last_update == 0 )
 					cv->last_update = t;
@@ -879,7 +885,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			}
 			if ( cv->save || cv->savei )
 			{
-				if ( running == 1 )
+				if ( running )
 				   cv->data = new double[ max_step + 1 ];
 
 				cv->start = t;
@@ -1002,6 +1008,9 @@ void object::delete_obj( void )
 	
 	empty( );
 	
+	if ( del_flag != NULL )
+		*del_flag = true;	// flag deletion to caller, if requested
+		
 	delete this;
 }
 
@@ -1112,7 +1121,7 @@ void object::empty( void )
 		blueprint->empty( );
  
 	for ( cv = v; cv != NULL; cv = cv1 )
-		if ( running == 1 && ( cv->save || cv->savei ) )
+		if ( running && ( cv->save || cv->savei ) )
 			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
 		else
 		{
@@ -1134,6 +1143,7 @@ void object::empty( void )
 			--total_obj;
 		}
 		delete [ ] cb->blabel;
+		
 		if ( cb->mn != NULL )	// turbo search node exists?
 		{
 			cb->mn->empty( );

@@ -368,7 +368,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 		// do run( ) cleanup
 		unwind_stack( );
 		actual_steps = t;
-		running = 0;
+		running = false;
 		close_sim( );
 		reset_end( root );
 		root->emptyturbo( );
@@ -1150,7 +1150,7 @@ void add_cemetery( variable *v )
 	if ( cemetery == NULL )
 	{
 		cemetery = v;
-		v->next=NULL;
+		v->next = NULL;
 	}
 	else
 	{
@@ -1174,7 +1174,8 @@ void collect_cemetery( object *o )
 	{
 		nv = cv->next;						// pointer to next variable
 		
-		if ( running==1 && ( cv->save == true || cv->savei == true ) )	// need to save?
+		// need to save?
+		if ( running && ( cv->save == true || cv->savei == true ) )
 		{
 			cv->end = t;					// define last period,
 			cv->data[ t ] = cv->val[ 0 ];	// last value
