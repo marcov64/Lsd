@@ -36,12 +36,13 @@
 #include <list>
 #include <new>
 #include <map>
+#ifdef CPP11
 #include <vector>
 #include <deque>
 #include <iterator>
 #include <functional>
 #include <algorithm>
-
+#endif
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -136,8 +137,10 @@ using namespace std;
 // classes definitions
 class object;
 class variable;
+#ifdef CPP11
 struct gisMap;
 class PRNG;
+#endif
 
 #ifdef CPP11
 // special types used for fast equation lookup
@@ -155,7 +158,7 @@ public:
   static size_t min() { return 0; }
   static size_t max() { return 1; }
   size_t operator()() {
-    return RND;// generate a random number in the range [0, 42]
+    return RND;// generate a random number in the range (0, 1)
   }
 };
 
@@ -263,7 +266,7 @@ struct netNode		// network node data
 					// constructor
 	~netNode( void );// destructor
 };
-
+#ifdef CPP11
 /*
 //to do: provide advanced attributes for netLink and netNode
 struct linkAttributes //network link attributes
@@ -309,72 +312,74 @@ struct gisPosition
 
 struct Wrap
 {
-    bool noWrap;
-    bool left;
-    bool right;
-    bool top;
-    bool bottom;
-   /*wrapping: there are 2^4 options. We use a bit-code (0=off):
-    0-bit: left     : 0=0 1=1
-    1-bit: right    : 0=0 1=2
-    2-bit: top      : 0=0 1=4
-    3-bit: bottom   : 0=0 1=8
-    */
-    Wrap(int wrap){
-      if (wrap == 0) {
-        noWrap = true;
-        left = right = top = bottom = false;
-      } else {
-        noWrap = false;
-        if (wrap>7){bottom=true; wrap-=8;} else {bottom=false; }
-        if (wrap>3){top=true;    wrap-=4;} else {top=false;    }
-        if (wrap>1){right=true;  wrap-=2;} else {right=false;  }
-        if (wrap>0){left=true;           } else {left=false;   }
-      }
-    };
-    Wrap(bool left, bool right, bool top, bool bottom) : left(left),right(right),top(top),bottom(bottom)
-    {
-      if (left == right == top == bottom == false){
-        noWrap = true;
-      } else {
-        noWrap = false;
-      }
-    };
-//     ~Wrap( void );
+	bool noWrap;
+	bool left;
+	bool right;
+	bool top;
+	bool bottom;
+	/*wrapping: there are 2^4 options. We use a bit-code (0=off):
+	0-bit: left     : 0=0 1=1
+	1-bit: right    : 0=0 1=2
+	2-bit: top      : 0=0 1=4
+	3-bit: bottom   : 0=0 1=8
+	*/
+	Wrap(int wrap)
+	{
+		if (wrap == 0) {
+			noWrap = true;
+			left = right = top = bottom = false;
+		} else {
+			noWrap = false;
+			if (wrap>7){bottom=true; wrap-=8;} else {bottom=false; }
+			if (wrap>3){top=true;    wrap-=4;} else {top=false;    }
+			if (wrap>1){right=true;  wrap-=2;} else {right=false;  }
+			if (wrap>0){left=true;           } else {left=false;   }
+		}
+	};
+	Wrap(bool left, bool right, bool top, bool bottom) : left(left),right(right),top(top),bottom(bottom)
+	{
+		if (left == right == top == bottom == false){
+			noWrap = true;
+		} else {
+			noWrap = false;
+		}
+	};
+//	~Wrap( void );
 };
 
 struct gisMap
 {
-  int xn;
-  int yn;
-  Wrap wrap;
-  /*
-    there are 2^4 options. We use a bit-code (0=off):
-    0-bit: left     : 0=0 1=1
-    1-bit: right    : 0=0 1=2
-    2-bit: top      : 0=0 1=4
-    3-bit: bottom   : 0=0 1=8
-    Simply sum up the options selected and pass this as argument.
-    Examples: 0 = None, 1 = left, 2 = right, 3 (1+2) left-right,
-    5 up, 7 down, 12 (5+7) up-down, 15 (1+2+5+7) torus.
-  */
-  std::vector<std::vector <std::deque<object*> >> elements;
-  int nelements; //count number of elements
+	int xn;
+	int yn;
+	Wrap wrap;
+	/*
+		there are 2^4 options. We use a bit-code (0=off):
+		0-bit: left     : 0=0 1=1
+		1-bit: right    : 0=0 1=2
+		2-bit: top      : 0=0 1=4
+		3-bit: bottom   : 0=0 1=8
+		Simply sum up the options selected and pass this as argument.
+		Examples: 0 = None, 1 = left, 2 = right, 3 (1+2) left-right,
+		5 up, 7 down, 12 (5+7) up-down, 15 (1+2+5+7) torus.
+	*/
+	std::vector<std::vector <std::deque<object*> >> elements;
+	int nelements; //count number of elements
 
-  gisMap(int xn, int yn, int _wrap=0) : xn(xn), yn(yn),wrap(_wrap) //constructor
-  {
-      nelements = 0;
-      elements.resize(xn);
-      for (auto& x : elements){
-        x.resize(yn); //number of rows, copy
-      }
-    };
+	gisMap(int xn, int yn, int _wrap=0) : xn(xn), yn(yn),wrap(_wrap) //constructor
+	{
+		nelements = 0;
+		elements.resize(xn);
+		for (auto& x : elements){
+			x.resize(yn); //number of rows, copy
+		}
+	};
 
-//   ~gisMap( void ) //destructor
-//   {
-//     //no need to do any thing, this is done in the objects with gisPosition in map.
-//   };
+//	~gisMap( void ) //destructor
+//	{
+//	//no need to do any thing, this is done in the objects with gisPosition in map.
+//	};
 };
+#endif
 
 class object
 {
@@ -389,7 +394,9 @@ class object
 	int lstCntUpd;		// period of last counter update (to avoid multiple updates)
 	int to_compute;
 	netNode *node;		// pointer to network node data structure
+	#ifdef CPP11
 	gisPosition *position; //Pointer to gis data structure
+	#endif
 	void *cext;			// pointer to a C++ object extension to the LSD object
 
 	double cal( object *caller,  char const *l, int lag );
@@ -477,56 +484,55 @@ class object
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
 	void delete_net( char const *lab );
 
+	#ifdef CPP11
 	//set the new GIS handling methods
 	double distance(object* other); //distance to other object
-  double distance(double x, double y); //distance to point in plain
+	double distance(double x, double y); //distance to point in plain
 	double pseudo_distance(object* other); //pseudo distance to other object
-  double pseudo_distance(double x, double y); //pseudo distance to point in plain
-  variable* search_var_local(char const l[]); //search only in object
-  void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
-  object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
-  bool next_neighbour_exists();
-  object* next_neighbour();
-  void sort_objDisSet(bool pointer_sort);
-  void make_objDisSet_unique(bool sorted);
-  void randomise_objDisSetIntvls(bool sorted);
-  double complete_radius();
-  bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
-  bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
-  bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
-  bool traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff );
-  bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
+	double pseudo_distance(double x, double y); //pseudo distance to point in plain
+	variable* search_var_local(char const l[]); //search only in object
+	void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
+	object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
+	bool next_neighbour_exists();
+	object* next_neighbour();
+	void sort_objDisSet(bool pointer_sort);
+	void make_objDisSet_unique(bool sorted);
+	void randomise_objDisSetIntvls(bool sorted);
+	double complete_radius();
+	bool boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
+	bool boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius);
+	bool traverse_boundingBox(double radius, std::function<bool(object* candidate)> do_stuff );
+	bool traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff );
+	bool access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff);
 
-  object* search_at_position(char const lab[], double x, double y, bool single);
-  object* search_at_position(char const lab[], bool single, bool grid=false);
-  object* closest_in_distance(char const lab[], double radius, bool random, object* caller=NULL, int lag=0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
+	object* search_at_position(char const lab[], double x, double y, bool single);
+	object* search_at_position(char const lab[], bool single, bool grid=false);
+	object* closest_in_distance(char const lab[], double radius, bool random, object* caller=NULL, int lag=0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);
 	bool change_position(double _x, double _y);
-  bool change_position(object *shareObj );
+	bool change_position(object *shareObj );
 
 	bool register_at_map(gisMap* map, double _x, double _y);
-  bool register_at_map(object *shareObj ); //register at same position as gisObj
+	bool register_at_map(object *shareObj ); //register at same position as gisObj
 	bool unregister_from_gis();
 
-
 	gisMap* ptr_map(); //get ptr to map, if gis object
-
 	gisMap* init_map(int xn, int yn, int _wrap=0); //initialise a new map and register the ob to it.
 	bool delete_map(); //delete the map, unregistering all gis-objects but leaving them otherwise untouched.
 
 	bool init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap=0); //Create a gis and add the object to it
 	bool init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap = 0, int _lag=-1); //Create a gis and add the objects to it, creating new ones if necessary.
 
-  double get_pos(char xyz);
-  double random_pos(const char xy);
+	double get_pos(char xyz);
+	double random_pos(const char xy);
 
-  bool move(char const direction[]);
-  bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
+	bool move(char const direction[]);
+	bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
 
-  bool check_positions(double& _x, double& _y); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
-
+	bool check_positions(double& _x, double& _y); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
+	#endif
 };
 
 struct lsdstack

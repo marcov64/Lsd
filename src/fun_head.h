@@ -527,6 +527,7 @@ else \
 #define CYCLE_EXT( ITER, CLASS, OBJ ) for ( ITER = EXEC_EXT( CLASS, OBJ, begin ); ITER != EXEC_EXT( CLASS, OBJ, end ); ++ITER )
 #define CYCLE_EXTS( PTR, ITER, CLASS, OBJ ) for ( ITER = EXEC_EXTS( PTR, CLASS, OBJ, begin ); ITER != EXEC_EXTS( PTR, CLASS, OBJ, end ); ++ITER )
 
+#ifdef CPP11
 // GIS MACROS
 // The GIS is implemented as a 2d map (continous euclidean space) with a
 //   raster-filter (the integer positions). All different kind of LSD objects
@@ -711,6 +712,7 @@ else \
 
 //#define COUNT_POSITION(LAB)
 //#define COUNT_POSITIONS(LAB)
+#endif
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
@@ -790,5 +792,6 @@ void cmd( const char *cm, ... );
 	};
 
 #endif
-
+#ifdef CPP11
 #include "gis.cpp" //until linked
+#endif
