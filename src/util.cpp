@@ -65,10 +65,6 @@ given the file name name, the routine searches for the data line for the variabl
 
 #include "decl.h"
 
-#ifdef CPP11
-#include <random>						// use new random libraries if possible
-#endif
-
 
 int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size

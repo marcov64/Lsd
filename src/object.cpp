@@ -1582,6 +1582,56 @@ double object::stat( char const *lab, double *r )
 	return r[ 0 ];								// return the number of instances
 }
 
+/****************************************************
+rndsort
+Use the shuffle function in the standard library to randomly
+sort a group of Objects
+****************************************************/
+
+void object::lsdrndsort(char const *obj)
+{
+  int num, i;
+	object *cur, *nex;
+  bridge *cb;
+
+//   sprintf( msg,"\nCalled by %s",label);
+//   plog(msg);
+//   for (cb = b; cb != NULL; cb=cb->next)
+//     sprintf(msg,"\nBridge label is %s",cb->blabel);plog(msg);
+
+
+  for ( cb = b; cb != NULL && strcmp( cb->blabel, obj ); cb = cb->next );
+	if ( cb == NULL || cb->head == NULL )
+	{
+        sprintf( msg, "'%s' decending from '%s' is missing for random sorting", obj,label );
+				error_hard( msg, "object not found",
+							"check your code to prevent this situation" );
+	}
+	cb->counter_updated = false;
+	cur = cb->head;
+
+  nex = skip_next_obj( cur, &num );
+  #ifdef CPP11
+  std::vector<object*> mylist;
+	for ( i = 0; i < num; ++i )
+	{
+		mylist.push_back(cur);
+		cur = cur->next;
+	}
+
+  shuffle( std::begin(mylist), std::end(mylist), PRNG() );
+
+  cb->head = mylist[ 0 ];
+
+	for ( i = 1; i < num; ++i )
+		( mylist[ i - 1 ] )->next = mylist[ i ];
+
+	mylist[ i - 1 ]->next = NULL;
+
+  #else
+  plog("\nSORT_RND not implemented for <CPP11");
+  #endif
+}
 
 /****************************************************
 lsdqsort
@@ -1680,15 +1730,15 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 	else
 		if ( ! strcmp( direction, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
-		else
-		{
-			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option", 
-						"check your code to prevent this situation" );
-			delete [ ] mylist;
-			return;
-		}
-	
+    else
+    {
+  			sprintf( msg, "direction '%s' is invalid for sorting", direction );
+  			error_hard( msg, "invalid sort option",
+  						"check your code to prevent this situation" );
+  			delete [ ] mylist;
+  			return;
+  		}
+
 	cb->head = mylist[ 0 ];
 
 	for ( i = 1; i < num; ++i )

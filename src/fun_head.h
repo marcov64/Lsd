@@ -322,6 +322,10 @@ using namespace Eigen;
 #define SORT2( X, Y, L, Z ) p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) L, ( char * ) Z )
 #define SORT2S( O, X, Y, L, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) L, ( char * ) Z )
 
+// Added RND option for sorting in CPP11
+#define SORT_RND( X ) p->lsdrndsort( ( char * ) X )
+#define SORT_RNDS( O, X ) O->lsdrndsort( ( char * ) X )
+
 #define ADDOBJ( X ) p->add_n_objects2( ( char * ) X, 1 )
 #define ADDOBJL( X, Y ) p->add_n_objects2( ( char * ) X, 1 , ( int ) Y )
 #define ADDOBJS( O, X ) O->add_n_objects2( ( char * ) X, 1 )

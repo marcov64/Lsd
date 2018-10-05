@@ -36,12 +36,14 @@
 #include <list>
 #include <new>
 #include <map>
+
 #ifdef CPP11
 #include <vector>
 #include <deque>
 #include <iterator>
 #include <functional>
 #include <algorithm>
+#include <random>						// use new random libraries if possible
 #endif
 
 #ifdef CPP11
@@ -435,6 +437,7 @@ class object
 	void sort( char const *obj, char const *var, char *direction );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
+  void lsdrndsort(char const *obj);
 	void empty( void );
 	void delete_obj( void );
 	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
