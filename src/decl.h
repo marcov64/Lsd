@@ -146,11 +146,11 @@ class object
 	
 	bool *del_flag;						// address of flag to signal deletion
 	bool deleting;						// indicate deletion in process
+	bool to_compute;
 	bridge *b;
 	char *label;
 	int acounter;
 	int lstCntUpd;						// period of last counter update
-	int to_compute;
 	netNode *node;						// pointer to network node data structure
 	object *hook;
 	object *next;

@@ -204,10 +204,10 @@ object *create( object *cr )
 			}    
 		}    
 
-		cmd( "bind . <KeyPress-Escape> {}" );
-		cmd( "bind . <KeyPress-Return> {}" );
-		cmd( "bind . <Destroy> {set choice 35}" );
-		cmd( "bind .log <Destroy> {set choice 35}" );
+		cmd( "bind . <KeyPress-Escape> { }" );
+		cmd( "bind . <KeyPress-Return> { }" );
+		cmd( "bind . <Destroy> { set choice 35 }" );
+		cmd( "bind .log <Destroy> { set choice 35 }" );
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
@@ -258,34 +258,37 @@ int browse( object *r, int *choice )
 			cmd( "set app 0" );
 			for ( ap_v = r->v; ap_v != NULL; ap_v = ap_v->next )
 			{
+				// set flags string
+				cmd( "set varFlags \"%s%s%s%s\"", ( ap_v->save || ap_v->savei ) ? "+" : "", ap_v->plot ? "*" : "", ap_v->debug == 'd' ? "!" : "", ap_v->parallel ? "&" : "" );
+				
 				// add elements to the listbox 
 				if ( ap_v->param == 0 )
 				{
 					if ( ap_v->num_lag == 0 )
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+						cmd( ".l.v.c.var_name insert end \"%s (V$varFlags)\"", ap_v->label );
 						cmd( ".l.v.c.var_name itemconf $app -fg blue" );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (V_%d%s)\"", ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+						cmd( ".l.v.c.var_name insert end \"%s (V_%d$varFlags)\"", ap_v->label, ap_v->num_lag );
 						cmd( ".l.v.c.var_name itemconf $app -fg purple" );
 					}
 				}
 				
 				if ( ap_v->param == 1 )
-					cmd( ".l.v.c.var_name insert end \"%s (P%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", ap_v->label );
 				
 				if ( ap_v->param == 2 )
 				{
 					if ( ap_v->num_lag == 0 )
 					{
-						cmd( " .l.v.c.var_name insert end \"%s (F%s)\"", ap_v->label, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+						cmd( " .l.v.c.var_name insert end \"%s (F$varFlags)\"", ap_v->label );
 						cmd( ".l.v.c.var_name itemconf $app -fg firebrick" );
 					}
 					else
 					{
-						cmd( ".l.v.c.var_name insert end \"%s (F_%d%s)\"", ap_v->label, ap_v->num_lag, ( ap_v->save || ap_v->savei ) ? "+" : "" );
+						cmd( ".l.v.c.var_name insert end \"%s (F_%d$varFlags)\"", ap_v->label, ap_v->num_lag );
 						cmd( ".l.v.c.var_name itemconf $app -fg tomato" );
 					}
 				}
@@ -315,10 +318,10 @@ int browse( object *r, int *choice )
 		cmd( ".l.v.c.var_name.v add command -label Change -command { set choice 7 }" );	// entryconfig 0
 		cmd( ".l.v.c.var_name.v add command -label Properties -command { set choice 75 }" );	// entryconfig 1
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 2
-		cmd( ".l.v.c.var_name.v add checkbutton -label Save -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
-		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }" );	// entryconfig 4
-		cmd( ".l.v.c.var_name.v add checkbutton -label Debug -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
-		cmd( ".l.v.c.var_name.v add checkbutton -label Parallel -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Save (+)\" -variable save -command { if { $actual_steps == 0 } { set_var_conf $vname save $save; set choice 70 } { set choice 7 } }" );	// entryconfig 3
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Run Plot (*)\" -variable plot -command { if { $actual_steps == 0 } { set_var_conf $vname plot $plot; set choice 70 } { set choice 7 } }" );	// entryconfig 4
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Debug (!)\" -state disabled -variable num -command { if { $actual_steps == 0 } { set_var_conf $vname debug $num; set choice 70 } { set choice 7 } }" );	// entryconfig 5
+		cmd( ".l.v.c.var_name.v add checkbutton -label \"Parallel (&)\" -state disabled -variable parallel -command { if { $actual_steps == 0 } { set_var_conf $vname parallel $parallel; set choice 70 } { set choice 7 } }" );	// entryconfig 6
 		cmd( ".l.v.c.var_name.v add separator" );	// entryconfig 7
 		cmd( ".l.v.c.var_name.v add command -label \"Move Up\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus > 0 } { incr itemfocus -1 }; set choice 58 }" );	// entryconfig 8
 		cmd( ".l.v.c.var_name.v add command -label \"Move Down\" -state disabled -command { set listfocus 1; set itemfocus [ .l.v.c.var_name curselection ]; if { $itemfocus < [ expr [ .l.v.c.var_name size ] - 1 ] } { incr itemfocus }; set choice 59 }" );	// entryconfig 9
@@ -497,7 +500,7 @@ int browse( object *r, int *choice )
 			for ( cb = r->b; cb != NULL; cb = cb->next )
 			{
 				skip_next_obj( cb->head, &num );
-				cmd( ".l.s.c.son_name insert end \"%s (#%d)\"", cb->blabel, num );
+				cmd( ".l.s.c.son_name insert end \"%s (#%d%s)\"", cb->blabel, num, cb->head->to_compute ? "" : "-" );
 				cmd( ".l.s.c.son_name itemconf $app -fg red" );
 				cmd( "incr app" );
 			}
@@ -730,8 +733,8 @@ int browse( object *r, int *choice )
 			
 			cmd( "$w add separator" );
 			
-			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set choice 7 }" );
-			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Enter -command { set choice 6 }" );
+			cmd( "$w add command -label \"Change Element...\" -underline 0 -accelerator Enter -command { set useCurrObj yes; set choice 7 }" );
+			cmd( "$w add command -label \"Change Object...\" -underline 7 -accelerator Enter -command { set useCurrObj yes; set choice 6 }" );
 			cmd( "$w add command -label \"Find Element...\" -underline 0 -accelerator Ctrl+F -command { set choice 50 }" );
 
 			cmd( "$w add cascade -label \"Sort Elements\" -underline 0 -menu $w.sort" );
@@ -1451,12 +1454,12 @@ case 32:
 			cur = new object;
 			cur->init( NULL, lab );
 			cur->next = NULL;
-			cur->up=r;
-			cur->to_compute = 1;
+			cur->up = r;
+			cur->to_compute = true;
 			cur->b = r->b;
-			r->b=new bridge;
+			r->b = new bridge;
 			r->b->next = NULL;
-			r->b->blabel=new char[ strlen( lab ) + 1 ];
+			r->b->blabel = new char[ strlen( lab ) + 1 ];
 			strcpy( r->b->blabel, lab );
 			r->b->head = cur;
 			cur->v = r->v;
@@ -1566,7 +1569,7 @@ case 6:
 		cur_descr = search_description( lab_old );
 	} 
 	  
-	cmd( "set to_compute %d", r->to_compute );
+	cmd( "set to_compute %d", r->to_compute ? 1 : 0 );
 
 	cmd( "set T .objprop" );
 	cmd( "newtop $T \"Change Object\" { set choice 2 }" );
@@ -1578,7 +1581,7 @@ case 6:
 	cmd( "pack $T.h.lab_ent $T.h.ent_var -side left -padx 2" );
 
 	cmd( "frame $T.b0" );
-	cmd( "button $T.b0.prop -width $butWid -text Rename -command { set choice 83 } -underline 0" );
+	cmd( "button $T.b0.prop -width $butWid -text Rename -command { set useCurrObj yes; set choice 83 } -underline 0" );
 	cmd( "button $T.b0.num -width $butWid -text Number -command { set useCurrObj yes; set choice 33 } -underline 0" );
 	cmd( "button $T.b0.del -width $butWid -text Delete -command { set choice 74 } -underline 0" );
 	cmd( "pack $T.b0.prop $T.b0.num $T.b0.del -padx 10 -side left" );
@@ -1621,7 +1624,7 @@ case 6:
 	while ( *choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	redrawRoot = false;			// no browser redraw yet
+	redrawRoot = false;				// no browser redraw yet
 	done = *choice;
 
 	if ( *choice != 2 )
@@ -1643,13 +1646,13 @@ case 6:
 				cur->to_compute = *choice;
 			for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				cur->to_compute = *choice;
+
+			redrawRoot = true;		// force browser redraw
 		}   
 
 		// control for elements to save in objects to be not computed
 		if ( *choice == 0 )
 			control_tocompute( r, r->label );
-
-		redrawRoot = true;			// force browser redraw
 	}
 
 	cmd( "destroytop .objprop" );
@@ -1660,6 +1663,13 @@ case 6:
 		cmd( "set vname $lab" );
 		*choice = done;
 		return r;
+	}
+	
+	// avoid entering into descendant
+	if ( done == 1 )
+	{
+		*choice = 0;
+		return r->up;
 	}
 
 break;
@@ -2045,7 +2055,7 @@ case 7:
 	   if ( save == 1 || savei == 1 )
 	   {
 		  for ( cur = r; cur != NULL; cur = cur->up )
-			if ( cur->to_compute == 0 )
+			if ( ! cur->to_compute )
 			{
 			   cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
 			}
@@ -6795,16 +6805,10 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 	{
 		cv = cur->search_var( NULL, vname );
 		if ( ! strcmp( argv[ 2 ], "save" ) )
-		{
 			cv->save = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
-			redrawReq = true;
-		}
 		else 
 			if ( ! strcmp( argv[ 2 ], "savei" ) )
-			{
 				cv->savei = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
-				redrawReq = true;
-			}
 			else
 				if ( ! strcmp( argv[ 2 ], "plot" ) )
 					cv->plot = ( ! strcmp( argv[ 3 ], "1" ) ) ? true : false;
@@ -6818,11 +6822,12 @@ int Tcl_set_var_conf( ClientData cdata, Tcl_Interp *inter, int argc, const char 
 							return TCL_ERROR;
 	}
 	unsaved_change( true );				// signal unsaved change
+	redrawReq = true;
 
 	if ( cv->save || cv->savei )
 	{
 		for ( cur = currObj; cur != NULL; cur = cur->up )
-			if ( cur->to_compute == 0 )
+			if ( ! cur->to_compute )
 			{
 				cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", vname, cur->label );
 			}

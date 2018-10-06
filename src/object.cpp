@@ -27,7 +27,7 @@ used in LSD, yet.
 the first element of a linked chain of variable. They are the computational content
 of the model
 
-- int to_compute;
+- bool to_compute;
 flag set by default to 1. If it is zero, the system will not compute the equations
 of this object as a default, but only if they are requested by other equations.
 Used to speed up the simulation.
@@ -316,7 +316,7 @@ int object::init( object *_up, char const *_label )
 	up = _up;
 	v = NULL;
 	next = NULL;
-	to_compute = 1;
+	to_compute = true;
 	label = new char[ strlen( _label ) + 1 ];
 	strcpy( label, _label );
 	b = NULL;
@@ -376,7 +376,7 @@ void object::update( void )
 	for ( cb = b; ! deleted && cb != NULL && quit != 2; cb = cb1 )
 	{
 		cb1 = cb->next;
-		if ( cb->head != NULL && cb->head->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; ! deleted && cur != NULL; cur = cur1 )
 			{
 				cur1 = cur->next;

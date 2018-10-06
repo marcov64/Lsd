@@ -3106,7 +3106,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 			}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL && cb->head->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_labels_mem( cur, num_v, num_c );
 	 
@@ -3144,7 +3144,7 @@ void insert_store_mem( object *r, int *num_v )
 		}
 	  
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL && cb->head->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_store_mem( cur, num_v );
 	 

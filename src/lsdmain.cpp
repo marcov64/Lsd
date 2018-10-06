@@ -1309,7 +1309,7 @@ void reset_end( object *r )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		cur = cb->head;
-		if ( cur != NULL && cur->to_compute == 1 )
+		if ( cur != NULL && cur->to_compute )
 			for ( ; cur != NULL; cur = go_brother( cur ) )
 				reset_end( cur );
 	}
