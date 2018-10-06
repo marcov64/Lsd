@@ -35,7 +35,7 @@ GIS.CPP
 #ifndef GIS_CPP
 #define GIS_CPP
 
-extern char msg[300];
+char gismsg[300];
 
 //NEW gis creation stuff below
 
@@ -44,8 +44,8 @@ extern char msg[300];
   bool object::init_gis_singleObj(double _x, double _y, int xn, int yn, int _wrap)
   {
     if ( ptr_map() != NULL ){
-          sprintf( msg, "failure in init_gis_singleObj() for object '%s'", label );
-		      error_hard( msg, "the object was already part of a GIS",
+          sprintf( gismsg, "failure in init_gis_singleObj() for object '%s'", label );
+		      error_hard( gismsg, "the object was already part of a GIS",
 					"check your code to prevent this situation" );
       return false; //there is already a gis structure
     }
@@ -58,8 +58,8 @@ extern char msg[300];
   //  The gis objects need to be contained in the calling object
   bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag){
     if ( ptr_map() != NULL ){
-        sprintf( msg, "failure in init_gis_regularGrid() for object '%s'", label );
-		    error_hard( msg, "the object was already part of a GIS",
+        sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
+		    error_hard( gismsg, "the object was already part of a GIS",
 					"check your code to prevent this situation" );
       return false; //there is already a gis structure
     }
@@ -72,8 +72,8 @@ extern char msg[300];
       firstNode = search( lab );
     }
     if ( firstNode == NULL ){
-      sprintf( msg, "failure in init_gis_regularGrid() for object '%s'", label );
-		  error_hard( msg, "No object present below callee object",
+      sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
+		  error_hard( gismsg, "No object present below callee object",
 					"check your code to prevent this situation" );
       return false; //error
     }
@@ -95,8 +95,8 @@ extern char msg[300];
       }
     }
     if (_x != xn || _y != 0){
-      sprintf( msg, "failure in init_gis_regularGrid() for object '%s'", label );
-		      error_hard( msg, "check the implementation",
+      sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
+		      error_hard( gismsg, "check the implementation",
 					"please contact the developer" );
       return false; //error!
     } else {
@@ -109,8 +109,8 @@ extern char msg[300];
   //  Check if the object is a gis object and return pointer to map.
   gisMap* object::ptr_map(){
     if (this == NULL){
-      sprintf( msg, "failure in ptr_map()");
-		      error_hard( msg, "called with 'NULL'",
+      sprintf( gismsg, "failure in ptr_map()");
+		      error_hard( gismsg, "called with 'NULL'",
 					"check your code to prevent the error. Provide valide objects to the macro" );
       return NULL;
     }
@@ -142,8 +142,8 @@ extern char msg[300];
   {
     gisMap* map = ptr_map();
     if (map == NULL ){
-      sprintf( msg, "failure in delete_map() for object '%s'", label );
-		      error_hard( msg, "the object was not part of a gis",
+      sprintf( gismsg, "failure in delete_map() for object '%s'", label );
+		      error_hard( gismsg, "the object was not part of a gis",
 					"check your code to prevent this situation" );
       return false; //not part of a gis
     }
@@ -169,8 +169,8 @@ extern char msg[300];
   bool object::unregister_from_gis()
   {
     if (  unregister_position( false ) == false){
-        sprintf( msg, "failure in unregister_from_gis() for object '%s'", label );
-		      error_hard( msg, "not connected to a gis",
+        sprintf( gismsg, "failure in unregister_from_gis() for object '%s'", label );
+		      error_hard( gismsg, "not connected to a gis",
 					"check your code to prevent this situation" );
       return false; //error
     }
@@ -182,8 +182,8 @@ extern char msg[300];
   bool object::register_at_map(object *shareObj)
   {
     if (shareObj -> ptr_map() == NULL ) {
-      sprintf( msg, "failure in register_at_map() for object '%s' at position of object %s", label, shareObj->label );
-		      error_hard( msg, "the destination object is not registered in any space" ,
+      sprintf( gismsg, "failure in register_at_map() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( gismsg, "the destination object is not registered in any space" ,
 					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
@@ -194,22 +194,22 @@ extern char msg[300];
   bool object::register_at_map(gisMap* map, double _x, double _y)
   {
     if (map == NULL) {
-      sprintf( msg, "failure in register_at_map() for object '%s'", label );
-		      error_hard( msg, "no map to connect to provided",
+      sprintf( gismsg, "failure in register_at_map() for object '%s'", label );
+		      error_hard( gismsg, "no map to connect to provided",
 					"check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
     if ( ptr_map() != NULL ){  //already registered?!
       if ( ptr_map() != map ) {
-          sprintf( msg, "failure in register_at_map() for object '%s'", label );
-  		      error_hard( msg, "already registered in a space different from the one provided",
+          sprintf( gismsg, "failure in register_at_map() for object '%s'", label );
+  		      error_hard( gismsg, "already registered in a space different from the one provided",
   					"check your code to prevent this situation. If you want to change the space, deregister elemet from old one first." );
         return false; //re-registering not allowed. derigster at gis first."
       } else {
-        sprintf( msg,"\nInfo (t=%i): In register_at_map() the item %s is already part of the space.",t,label);
-        plog(msg);
-        sprintf( msg,"It will be moved from pos (%g,%g) to pos (%g,%g) instead.",position->x,position->y,_x,_y);
-        plog(msg);
+        sprintf( gismsg,"\nInfo (t=%i): In register_at_map() the item %s is already part of the space.",t,label);
+        plog(gismsg);
+        sprintf( gismsg,"It will be moved from pos (%g,%g) to pos (%g,%g) instead.",position->x,position->y,_x,_y);
+        plog(gismsg);
         return change_position(_x,_y);
       }
     }
@@ -228,14 +228,14 @@ extern char msg[300];
 
   bool object::register_position(double _x, double _y){
     if (ptr_map() == NULL){
-      sprintf( msg, "failure in register_position() for object '%s'", label );
-		      error_hard( msg, "the object is not yet connected to a map",
+      sprintf( gismsg, "failure in register_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not yet connected to a map",
 					"check your code to prevent this situation" );
       return false;
     }
     if (_x < 0.0 || _x >= double(position->map->xn) || _y < 0.0 || _y >= double(position->map->yn) ) {
-      sprintf( msg, "failure in register_position() for object '%s' position (%g,%g)", label,_x,_y );
-		      error_hard( msg, "the position is outside the map",
+      sprintf( gismsg, "failure in register_position() for object '%s' position (%g,%g)", label,_x,_y );
+		      error_hard( gismsg, "the position is outside the map",
 					"check your code to prevent this situation" );
       return false; //error!
     }
@@ -248,8 +248,8 @@ extern char msg[300];
 
   bool object::unregister_position(bool move) {
     if (ptr_map() == NULL){
-      sprintf( msg, "failure in unregister_position() for object '%s'", label );
-		      error_hard( msg, "the object is not yet connected to a map",
+      sprintf( gismsg, "failure in unregister_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not yet connected to a map",
 					"check your code to prevent this situation" );
       return false;
     }
@@ -268,8 +268,8 @@ extern char msg[300];
         return true;
       }
     }
-      sprintf( msg, "failure in unregister_position() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in the map connected to",
+      sprintf( gismsg, "failure in unregister_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in the map connected to",
 					"check your code to prevent this situation" );
     return false;
   }
@@ -277,20 +277,20 @@ extern char msg[300];
   bool object::change_position(object* shareObj)
   {
     if (shareObj -> ptr_map() == NULL ) {
-      sprintf( msg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
-		      error_hard( msg, "the destination object is not registered in any space" ,
+      sprintf( gismsg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( gismsg, "the destination object is not registered in any space" ,
 					"likely, the shareObj provided is not registered in any space. Check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
     if (ptr_map() == NULL){
-      sprintf( msg, "failure in change_position() for object '%s'", label );
-		      error_hard( msg, "the source object is not registered in any space" ,
+      sprintf( gismsg, "failure in change_position() for object '%s'", label );
+		      error_hard( gismsg, "the source object is not registered in any space" ,
 					"check your code to prevent this situation" );
       return false; //re-registering not allowed. derigster at gis first."
     }
     if (shareObj -> ptr_map() != ptr_map() ) {
-      sprintf( msg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
-		      error_hard( msg, "the destination object is not registered at the same space as the target object" ,
+      sprintf( gismsg, "failure in change_position() for object '%s' at position of object %s", label, shareObj->label );
+		      error_hard( gismsg, "the destination object is not registered at the same space as the target object" ,
 					"check your code to prevent this situation. If you want to use positions from one space in another, use explicit approach via x,y coordinates." );
       return false; //re-registering not allowed. derigster at gis first."
     }
@@ -312,21 +312,21 @@ extern char msg[300];
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(object *b){
     if (ptr_map() == NULL){
-        sprintf( msg, "failure in pseudo_distance() for object '%s'", label );
-  		      error_hard( msg, "the object is not yet connected to a map",
+        sprintf( gismsg, "failure in pseudo_distance() for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
   					"check your code to prevent this situation" );
         return NaN;
     }
     if (b->ptr_map() == NULL){
-        sprintf( msg, "failure in pseudo_distance() for second object '%s'", b->label );
-  		      error_hard( msg, "the object is not yet connected to a map",
+        sprintf( gismsg, "failure in pseudo_distance() for second object '%s'", b->label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
   					"check your code to prevent this situation" );
         return NaN;
     }
     if (b->ptr_map() != ptr_map()){
       //both elements need to be part of the same gis
-      sprintf( msg, "failure in pseudo_distance() for objects '%s' and '%s'", label, b->label );
-  		      error_hard( msg, "the objects are not on the same map",
+      sprintf( gismsg, "failure in pseudo_distance() for objects '%s' and '%s'", label, b->label );
+  		      error_hard( gismsg, "the objects are not on the same map",
   					"check your code to prevent this situation" );
         return NaN;
     }
@@ -339,8 +339,8 @@ extern char msg[300];
     //  Calculate the pseudo (squared) distance between an object p and another object b.
   double object::pseudo_distance(double x_2, double y_2){
     if (ptr_map() == NULL){
-        sprintf( msg, "failure in pseudo_distance() for object '%s'", label );
-  		      error_hard( msg, "the object is not yet connected to a map",
+        sprintf( gismsg, "failure in pseudo_distance() for object '%s'", label );
+  		      error_hard( gismsg, "the object is not yet connected to a map",
   					"check your code to prevent this situation" );
         return NaN;
     }
@@ -387,8 +387,8 @@ extern char msg[300];
 
   bool object::boundingBox(int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in boundingBox() for object '%s'", label );
-  	      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in boundingBox() for object '%s'", label );
+  	      error_hard( gismsg, "the object is not registered in any map",
   				"check your code to prevent this situation" );
       return false;
     }
@@ -399,8 +399,8 @@ extern char msg[300];
     //Takes care of wrapping
   bool object::boundingBox(double x, double y, int &left_io, int &right_io, int &top_io, int &bottom_io, double radius){
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in boundingBox() for object '%s'", label );
-  	      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in boundingBox() for object '%s'", label );
+  	      error_hard( gismsg, "the object is not registered in any map",
   				"check your code to prevent this situation" );
       return false;
     }
@@ -432,7 +432,7 @@ extern char msg[300];
     //define the bounding box
     int x_left, x_right, y_top, y_bottom;
     if (boundingBox(x_left, x_right, y_top, y_bottom,radius) == false){
-      return false; //Error msg in boundingBox
+      return false; //Error gismsg in boundingBox
     }
 
       //fill vector - naive approach (complete)
@@ -478,7 +478,7 @@ extern char msg[300];
     //define the bounding box
     int x_left, x_right, y_top, y_bottom;
     if (boundingBox(x_left, x_right, y_top, y_bottom,radius) == false){
-      return false; //Error msg in boundingBox
+      return false; //Error gismsg in boundingBox
     }
 
     //left column
@@ -521,8 +521,8 @@ extern char msg[300];
         return cv;
       }
     }
-      sprintf( msg, "'%s' is missing for conditional searching in search_var_local()", l );
-				error_hard( msg, "variable or parameter not found",
+      sprintf( gismsg, "'%s' is missing for conditional searching in search_var_local()", l );
+				error_hard( gismsg, "variable or parameter not found",
 							"check your code to prevent this situation" );
     return NULL;
   }
@@ -573,8 +573,8 @@ extern char msg[300];
             if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ){
               variable* condVar = candidate->search_var_local(varLab);
               if (condVar == NULL){
-                sprintf( msg, "'%s' is missing for conditional searching in add_if_dist_lab_cond()", varLab );
-    				      error_hard( msg, "variable or parameter not found",
+                sprintf( gismsg, "'%s' is missing for conditional searching in add_if_dist_lab_cond()", varLab );
+    				      error_hard( gismsg, "variable or parameter not found",
     							"check your code to prevent this situation" );
                 return false;
               }
@@ -650,11 +650,69 @@ extern char msg[300];
       {
           //interval with more than one object?
         if (std::distance(it_start,it)>1){
-           std::shuffle(it_start,it,PRNG());
+          switch ( ran_gen )
+          	{
+          		case 1:						// linear congruential in (0,1)
+          		case 3:						// linear congruential in [0,1)
+          		default:
+                shuffle( it_start,it, lc);
+                break;
+          		case 2:						// Mersenne-Twister 32 bits in (0,1)
+          		case 4:						// Mersenne-Twister 32 bits in [0,1)
+                shuffle( it_start,it, mt32);
+                break;
+          		case 5:						// Mersenne-Twister 64 bits in [0,1)
+                shuffle( it_start,it, mt64);
+                break;
+          		case 6:						// lagged fibonacci 24 bits in [0,1)
+                shuffle( it_start,it, lf24);
+                break;
+          		case 7:						// lagged fibonacci 48 bits in [0,1)
+                shuffle( it_start,it, lf48);
+                break;
+          	}
         }
         it_start = it;
       }
     }
+  }
+
+  // it_rnd_all
+  // Initialise all objects with label for cycle in random order
+  void object::it_rnd_full(char const lab[]){
+    position->objDis_inRadius.clear();//reset vector
+    for (int x = 0; x < position->map->xn; x++){
+      for (int y = 0; y < position->map->yn; y++){
+        for (object* candidate : position->map->elements.at(x).at(y)){
+          if ( strcmp(candidate->label,lab) == 0)
+            position->objDis_inRadius.emplace_back(-1.0,candidate);
+        }
+      }
+    }
+
+    switch ( ran_gen )
+    	{
+    		case 1:						// linear congruential in (0,1)
+    		case 3:						// linear congruential in [0,1)
+    		default:
+          shuffle(position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lc);
+          break;
+    		case 2:						// Mersenne-Twister 32 bits in (0,1)
+    		case 4:						// Mersenne-Twister 32 bits in [0,1)
+          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt32);
+          break;
+    		case 5:						// Mersenne-Twister 64 bits in [0,1)
+          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt64);
+          break;
+    		case 6:						// lagged fibonacci 24 bits in [0,1)
+          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf24);
+          break;
+    		case 7:						// lagged fibonacci 48 bits in [0,1)
+          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf48);
+          break;
+    	}
+
+    position->it_obj = position->objDis_inRadius.begin();
   }
 
   // within_radius
@@ -703,11 +761,23 @@ extern char msg[300];
     return next_ngbo;
   }
 
+  object* object::first_neighbour_rnd_full(char const lab[])
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in first_neighbour_rnd_full() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return NULL;
+    }
+    it_rnd_full(lab);
+    return next_neighbour();
+  }
+
   object* object::first_neighbour(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in next_neighbour() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in next_neighbour() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
@@ -787,14 +857,14 @@ extern char msg[300];
     //find object at position xy. Check that it is the only one. Use exact position.
   object* object::search_at_position(char const lab[], double x, double y, bool single) {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in search_at_position() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
     if (check_positions(x,y) == false ){
-        sprintf( msg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
-		      error_hard( msg, "the position is not on the map",
+        sprintf( gismsg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
+		      error_hard( gismsg, "the position is not on the map",
 					"check your code to prevent this situation. Could be wrapping issues." );
       return NULL; //position incorrect
     }
@@ -804,8 +874,8 @@ extern char msg[300];
       if (x == candidate->position->x && y == candidate->position->y) {
         if (strcmp(lab,candidate->label) == 0 ){
           if (single == true && singleCandidates.empty() == false){
-            sprintf( msg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
-  		        error_hard( msg, "there are several (at least two) items of this type present at the map.",
+            sprintf( gismsg, "failure in search_at_position() searching at position (%g,%g) for '%s'", x,y, lab );
+  		        error_hard( gismsg, "there are several (at least two) items of this type present at the map.",
   					   "check your code to prevent this situation." );
             return NULL;
           }
@@ -827,8 +897,8 @@ extern char msg[300];
   object* object::search_at_position(char const lab[], bool single, bool grid)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in search_at_position() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return NULL;
     }
@@ -841,8 +911,8 @@ extern char msg[300];
   double object::random_pos(const char xy)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in random_pos() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in random_pos() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
@@ -853,8 +923,8 @@ extern char msg[300];
       case 'y':
       case 'Y': return uniform(0,position->map->yn);
       default :
-        sprintf( msg, "failure in random_pos() for object '%s' parameter '%c'", label, xy );
-		      error_hard( msg, "the parameter is not correct.",
+        sprintf( gismsg, "failure in random_pos() for object '%s' parameter '%c'", label, xy );
+		      error_hard( gismsg, "the parameter is not correct.",
 					"check your code to prevent this situation. Options are 'x' or 'y'" );
         return -1;
     }
@@ -863,8 +933,8 @@ extern char msg[300];
   double object::get_pos(char xyz)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in pos() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in pos() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return -1;
     }
@@ -877,8 +947,8 @@ extern char msg[300];
       case 'z' : return position->z;
       default  : ;
     }
-    sprintf( msg, "failure in pos() for object '%s'", label );
-		      error_hard( msg, "only position x, y or z possible",
+    sprintf( gismsg, "failure in pos() for object '%s'", label );
+		      error_hard( gismsg, "only position x, y or z possible",
 					"check your code to prevent this situation" );
       return -1;
   }
@@ -918,8 +988,8 @@ extern char msg[300];
   bool object::move(int direction)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in move() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in move() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return false;
     }
@@ -946,8 +1016,8 @@ extern char msg[300];
   bool object::check_positions(double& _xOut, double& _yOut)
   {
     if (ptr_map()==NULL){
-        sprintf( msg, "failure in check_positions() for object '%s'", label );
-		      error_hard( msg, "the object is not registered in any map",
+        sprintf( gismsg, "failure in check_positions() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
 					"check your code to prevent this situation" );
       return false;
     }
@@ -993,5 +1063,4 @@ extern char msg[300];
     _xOut = _x;
     return true;
   }
-
 #endif //#ifndef GIS_CPP

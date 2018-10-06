@@ -2678,7 +2678,6 @@ void init_random( int seed )
 	lf48.seed( seed );				// lagged fibonacci 48 bits
 }
 
-
 /***************************************************
 CUR_GEN
 Generate the draw using current generator object
@@ -2686,7 +2685,7 @@ Generate the draw using current generator object
 template< class distr >
 double cur_gen( distr &d )
 {
-	switch ( ran_gen )
+ switch ( ran_gen )
 	{
 		case 1:						// linear congruential in (0,1)
 		case 3:						// linear congruential in [0,1)

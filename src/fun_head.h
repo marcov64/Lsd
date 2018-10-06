@@ -645,9 +645,15 @@ else \
 #define TELEPORT_SHARES(PTR, TARGET) { PTR->change_position(TARGET); }
 
 // CYCLE_NEIGHBOUR
-// Cycle through all the objects LAB within radius RAD
+// Cycle through all the objects LAB within radius RAD by increasing radius
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); p->next_neighbour_exists(); O = p->next_neighbour() )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); C->next_neighbour_exists(); O = C->next_neighbour() )
+
+//Cycle through all the objects LAB anywhere in random order
+#define CYCLE_GIS_RND( O, LAB ) for ( O = p->first_neighbour_rnd_full(LAB); p->next_neighbour_exists(); O = p->next_neighbour() )
+#define CYCLE_GIS_RNDS( C, O, LAB ) for ( O = C->first_neighbour_rnd_full(LAB); C->next_neighbour_exists(); O = C->next_neighbour() )
+
+
 // Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL

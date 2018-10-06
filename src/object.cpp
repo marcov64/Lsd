@@ -305,7 +305,6 @@ char *qsort_lab;
 char *qsort_lab_secondary;
 object *globalcur;
 
-
 /****************************************************
 UPDATE
 Compute the value of all the Variables in the Object, saving the values 
@@ -1613,13 +1612,35 @@ void object::lsdrndsort(char const *obj)
   nex = skip_next_obj( cur, &num );
   #ifdef CPP11
   std::vector<object*> mylist;
+  mylist.reserve(num);
 	for ( i = 0; i < num; ++i )
 	{
 		mylist.push_back(cur);
 		cur = cur->next;
 	}
 
-  shuffle( std::begin(mylist), std::end(mylist), PRNG() );
+
+  switch ( ran_gen )
+	{
+		case 1:						// linear congruential in (0,1)
+		case 3:						// linear congruential in [0,1)
+		default:
+      shuffle( std::begin(mylist), std::end(mylist), lc);
+      break;
+		case 2:						// Mersenne-Twister 32 bits in (0,1)
+		case 4:						// Mersenne-Twister 32 bits in [0,1)
+      shuffle( std::begin(mylist), std::end(mylist), mt32);
+      break;
+		case 5:						// Mersenne-Twister 64 bits in [0,1)
+      shuffle( std::begin(mylist), std::end(mylist), mt64);
+      break;
+		case 6:						// lagged fibonacci 24 bits in [0,1)
+      shuffle( std::begin(mylist), std::end(mylist), lf24);
+      break;
+		case 7:						// lagged fibonacci 48 bits in [0,1)
+      shuffle( std::begin(mylist), std::end(mylist), lf48);
+      break;
+	}
 
   cb->head = mylist[ 0 ];
 

@@ -141,7 +141,6 @@ class object;
 class variable;
 #ifdef CPP11
 struct gisMap;
-class PRNG;
 #endif
 
 #ifdef CPP11
@@ -149,20 +148,6 @@ class PRNG;
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef map< string, eq_funcT > eq_mapT;
 #endif
-
-/***************************************************
-PRNG
-suitable for <random> methods like std::shuffle
-***************************************************/
-class PRNG {
-public:
-  typedef size_t result_type;
-  static size_t min() { return 0; }
-  static size_t max() { return 1; }
-  size_t operator()() {
-    return RND;// generate a random number in the range (0, 1)
-  }
-};
 
 class variable
 {
@@ -494,7 +479,9 @@ class object
 	double pseudo_distance(object* other); //pseudo distance to other object
 	double pseudo_distance(double x, double y); //pseudo distance to point in plain
 	variable* search_var_local(char const l[]); //search only in object
+  void it_rnd_full(char const lab[]);
 	void it_in_radius(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="0", char const condition[]="", double condVal=0.0);
+  object* first_neighbour_rnd_full(char const lab[]);
 	object* first_neighbour(char const lab[], double radius, bool random, object* caller=NULL, int lag=-1, char const varLab[]="", char const condition[]="", double condVal=0.0);
 	bool next_neighbour_exists();
 	object* next_neighbour();
@@ -713,6 +700,11 @@ extern int fast_mode;
 extern int max_step;
 extern int quit;
 extern int ran_gen;				// pseudo-random number generator to use (1-5) )
+extern minstd_rand lc;						// linear congruential generator
+extern mt19937 mt32;						// Mersenne-Twister 32 bits generator
+extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
+extern ranlux24 lf24;						// lagged fibonacci 24 bits generator
+extern ranlux48 lf48;						// lagged fibonacci 48 bits generator
 extern int seed;
 extern int sim_num;
 extern int t;
