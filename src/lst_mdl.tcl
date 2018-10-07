@@ -11,7 +11,7 @@
 
 # list models returning the list a exploring directory b
 
-proc lst_mdl {} {
+proc lst_mdl { } {
 	global lmod ldir lgroup cgroup
 
 	if { [file exists modelinfo.txt]==1 } {
@@ -46,7 +46,7 @@ proc lst_mdl {} {
 	} 
 }
 
-proc chs_mdl {} {
+proc chs_mdl { } {
 	global lmod ldir sd sf d1 d2 f1 f2 lgroup cgroup butWid
 
 	set lmod ""
@@ -131,7 +131,7 @@ proc chs_mdl {} {
 	showtop .l centerS
 }
 
-proc slct {} {
+proc slct { } {
 	global sd sf ldir
 	set tmp [.l.l.l curselection]
 	if { $tmp=="" } {
@@ -142,4 +142,86 @@ proc slct {} {
 
 	set sd [lindex $ldir $tmp]
 	set sf [file tail [glob -nocomplain [file join $sd *.cpp]]]
+}
+
+
+# check (best guess) if system option configuration is valid for the platform
+
+set win32Yes [ list ".exe" "85" "/gnu/" "g++" "-lz" "-mthreads" "-mwindows" ]
+set win32No  [ list "/gnu64/" "-framework" "-lpthread" ]
+set win64Yes [ list ".exe" "86" "/gnu64/" "x86_64-w64-mingw32-g++" "gnu++14" "-lz" "-mthreads" "-mwindows" ]
+set win64No  [ list "/gnu/" "-framework" "-lpthread" ]
+set linuxYes [ list "8.6" "g++" "-lz" "-lpthread" "gnu++14" ]
+set linuxNo  [ list ".exe" "/gnu64/" "x86_64-w64-mingw32-g++" "-framework" "-mthreads" "-mwindows" ]
+set osxYes [ list "g++" "-framework" "-lz" "-lpthread" "gnu++14" ]
+set osxNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
+set macYes [ list "g++" "-framework" "-lz" "-lpthread" "-DMAC_PKG" "gnu++14" ]
+set macNo  [ list ".exe" "/gnu/" "/gnu64/" "x86_64-w64-mingw32-g++" "-mthreads" "-mwindows" ]
+
+proc check_sys_opt { } {
+	global LsdSrc CurPlatform win32Yes win32No win64Yes win64No linuxYes linuxNo osxYes osxNo macYes macNo
+	
+	if { ! [ file exists "$LsdSrc/system_options.txt" ] } { 
+		return "File 'system_options.txt' not found (click 'Default' button to recreate it)"
+	}
+	
+	set f [ open $LsdSrc/system_options.txt r ]
+	set options [ read -nonewline $f ]
+	close $f
+	
+	switch $CurPlatform {
+		win32 {
+			set yes $win32Yes
+			set no $win32No
+		}
+		win64 {
+			set yes $win64Yes
+			set no $win64No
+		}
+		linux {
+			set yes $linuxYes
+			set no $linuxNo
+		}
+		osx {
+			set yes $osxYes
+			set no $osxNo
+		}
+		mac {
+			set yes $macYes
+			set no $macNo
+		}
+	}
+	
+	set missingItems ""
+	set yesCount 0
+	foreach yesItem $yes {
+		if { [ string first $yesItem $options ] >= 0 } {
+			incr yesCount
+		} else {
+			lappend missingItems $yesItem
+		}
+	}
+		
+	set invalidItems ""
+	set noCount 0
+	foreach noItem $no {
+		if { [ string first $noItem $options ] >= 0 } {
+			incr noCount
+			lappend invalidItems $noItem
+		}
+	}
+	
+#	if { $noCount > 0 || $yesCount < [ llength $yes ] } {
+#		tk_messageBox -message "Missing configuration items: $missingItems\nInvalid configuration items: $invalidItems"
+#	}
+	
+	if { $noCount > 0 } {
+		return "Invalid option(s) detected (click 'Default' button to recreate options)"
+	}
+	
+	if { $yesCount < [ llength $yes ] } {
+		return "Missing option(s) detected (click 'Default' button to recreate options)"	
+	}
+	
+	return ""
 }

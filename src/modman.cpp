@@ -337,14 +337,14 @@ if ( choice != 0 )
 Tcl_CreateCommand( inter, "discard_change", Tcl_discard_change, NULL, NULL );
 
 // set platform-specific variables
-cmd( "if [ string equal $tcl_platform(platform) unix ] { set DefaultExe lsd_gnu; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - $deltaSizeLinux ] }" );
+cmd( "if [ string equal $tcl_platform(platform) unix ] { set CurPlatform linux; set DefaultExe lsd_gnu; set DefaultMakeExe $makeLinux; set DefaultWish $wishLinux; set DefaultSysTerm $sysTermLinux; set DefaultDbgExe $dbgLinux; set DefaultHtmlBrowser $browserLinux; set DefaultFont $fontLinux; set DefaultFontSize $fontSizeLinux; set small_character [ expr $DefaultFontSize - $deltaSizeLinux ] }" );
 #ifdef MAC_PKG
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe LSD; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk86; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform mac; set DefaultExe LSD; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk86; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
 #else
-cmd( "if [ string equal $tcl_platform(os) Darwin ] { set DefaultExe lsd_gnu; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
+cmd( "if [ string equal $tcl_platform(os) Darwin ] { set CurPlatform osx; set DefaultExe lsd_gnu; set DefaultMakeExe $makeMac; set DefaultWish $wishMacTk85; set DefaultSysTerm $sysTermMac; set DefaultDbgExe $dbgMac; set DefaultHtmlBrowser $browserMac; set DefaultFont $fontMac; set DefaultFontSize $fontSizeMac; set small_character [ expr $DefaultFontSize - $deltaSizeMac ] }" );
 #endif
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set DefaultExe lsd_gnu; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
-cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set DefaultExe lsd_gnu; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set CurPlatform win32; set DefaultExe lsd_gnu; set DefaultMakeExe $makeWin32; set DefaultWish $wishWinTk85; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu }" );
+cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set CurPlatform win64; set DefaultExe lsd_gnu; set DefaultWish $wishWinTk86; set DefaultSysTerm $sysTermWindows; set DefaultDbgExe $dbgWindows; set DefaultHtmlBrowser $browserWindows; set DefaultFont $fontWindows; set DefaultFontSize $fontSizeWindows; set small_character [ expr $DefaultFontSize - $deltaSizeWindows ]; set LsdGnu gnu64; if { [ catch { exec where cygwin1.dll } ] || [ catch { exec where cygintl-8.dll } ] } { set DefaultMakeExe $makeWin64mgw } { set DefaultMakeExe $makeWin64cyg } }" );
 
 cmd( "set MakeExe \"$DefaultMakeExe\"" );
 
@@ -903,9 +903,14 @@ if ( choice == 1 )
 
 if ( choice == 2 || choice == 6 )
 {
-	compile_run( choice == 2 ? true : false );
-	 
-	choice = 0;
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', click on the 'Default' button, and then on 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+
+	if ( choice != 0 )
+	{
+		compile_run( choice == 2 ? true : false );
+		choice = 0;
+	}
+	
 	goto loop;
 }
 
@@ -5014,11 +5019,11 @@ if ( choice == 46 || choice == 49 )
 // System Options
 if ( choice == 47 )
 {
-	cmd( "set choice [file exists \"$LsdSrc/system_options.txt\"]" );
+	cmd( "set choice [ file exists \"$LsdSrc/system_options.txt\" ]" );
 	if ( choice == 1 )
 	{
-		cmd( "set f [open \"$LsdSrc/system_options.txt\" r]" );
-		cmd( "set a [read -nonewline $f]" );
+		cmd( "set f [ open \"$LsdSrc/system_options.txt\" r ]" );
+		cmd( "set a [ read -nonewline $f ]" );
 		cmd( "close $f" );
 		choice = 0;
 	}
@@ -5032,62 +5037,27 @@ if ( choice == 47 )
 	cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
+	cmd( "pack .l.t.text" );
 
-	cmd( "frame .l.t.d" );
+	cmd( "frame .l.d" );
+	cmd( "label .l.d.msg -text [ check_sys_opt ] -fg red" );
+	cmd( "pack .l.d.msg" );
+	
+	cmd( "pack .l.t .l.d" );
 
-	cmd( "frame .l.t.d.os" );
-	cmd( "if [ string equal $tcl_platform(machine) intel ] { \
-			button .l.t.d.os.win -width [ expr $butWid + 6 ] -text \"Default Windows32\" -command { .l.t.text delete 1.0 end; \
-				set file [ open \"$RootLsd/$LsdSrc/sysopt_win32.txt\" r ]; \
+	cmd( "okXhelpcancel .l b Default { \
+			.l.t.text delete 1.0 end; \
+			if [ file exists \"$RootLsd/$LsdSrc/sysopt_$CurPlatform.txt\" ] { \
+				set file [ open \"$RootLsd/$LsdSrc/sysopt_$CurPlatform.txt\" r ]; \
 				set a [ read -nonewline $file ]; \
-				close $file; \
-				.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
-				.l.t.text insert end \"$a\" \
-			} \
-		} else { \
-			button .l.t.d.os.win -width [ expr $butWid + 6 ] -text \"Default Windows64\" -command { \
-				.l.t.text delete 1.0 end; \
-				set file [ open \"$RootLsd/$LsdSrc/sysopt_win64.txt\" r ]; \
-				set a [ read -nonewline $file ]; \
-				close $file; \
-				.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
-				.l.t.text insert end \"$a\" \
-			} \
-		} " ); 
-	cmd( "button .l.t.d.os.lin -width [ expr $butWid + 6 ] -text \"Default Linux\" -command { \
-			.l.t.text delete 1.0 end; \
-			set file [open \"$RootLsd/$LsdSrc/sysopt_linux.txt\" r]; \
-			set a [read -nonewline $file]; \
-			close $file; \
+				close $file \
+			} { \
+				set a \"File $DefaultSysOpt is missing\nPlease reinstall LSD\" \
+			}; \
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
-			.l.t.text insert end \"$a\" \
-		}" );
-#ifdef MAC_PKG
-	cmd( "button .l.t.d.os.mac -width [ expr $butWid + 6 ] -text \"Default MacOS\" -command { \
-			.l.t.text delete 1.0 end; \
-			set file [open \"$RootLsd/$LsdSrc/sysopt_mac.txt\" r]; \
-			set a [read -nonewline $file]; \
-			close $file; \
-			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
-			.l.t.text insert end \"$a\" \
-		}" ); 
-#else
-	cmd( "button .l.t.d.os.mac -width [ expr $butWid + 6 ] -text \"Default OSX\" -command { \
-			.l.t.text delete 1.0 end; \
-			set file [open \"$RootLsd/$LsdSrc/sysopt_osx.txt\" r]; \
-			set a [read -nonewline $file]; \
-			close $file; \
-			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
-			.l.t.text insert end \"$a\" \
-		}" ); 
-#endif
-	cmd( "pack .l.t.d.os.win .l.t.d.os.lin .l.t.d.os.mac -padx 10 -pady 5 -side left" );
-
-	cmd( "pack .l.t.d.os" );
-	cmd( "pack .l.t.text .l.t.d" );
-	cmd( "pack .l.t" );
-
-	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
+			.l.t.text insert end \"$a\"; \
+			.l.d.msg configure -text \"\" \
+		} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 	cmd( "showtop .l" );
 	cmd( "focus .l.t.text" );
@@ -5098,8 +5068,8 @@ if ( choice == 47 )
 
 	if ( choice == 1 )
 	{
-		cmd( "set f [open \"$LsdSrc/system_options.txt\" w]" );
-		cmd( "puts -nonewline $f [.l.t.text get 1.0 end]" );
+		cmd( "set f [ open \"$LsdSrc/system_options.txt\" w ]" );
+		cmd( "puts -nonewline $f [ .l.t.text get 1.0 end ]" );
 		cmd( "close $f" );
 		choice = 46; 	//go to create makefile
 	}
@@ -5147,15 +5117,16 @@ if ( choice == 48 )
 	cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
+	cmd( "pack .l.t.text" );
 
-	cmd( "frame .l.t.d" );
+	cmd( "frame .l.d" );
 
-	cmd( "frame .l.t.d.opt" );
-	cmd( "checkbutton .l.t.d.opt.debug -text Debug -variable debug -command { \
+	cmd( "frame .l.d.opt" );
+	cmd( "checkbutton .l.d.opt.debug -text Debug -variable debug -command { \
 			set a [.l.t.text get 1.0 end]; \
 			set pos [ string first \"SWITCH_CC=\" $a ]; \
 			if { $pos == -1 } { \
-				.l.t.d.opt.def invoke \
+				.l.d.opt.def invoke \
 			} else { \
 				if $debug { \
 					if { [ string first \" -g\" $a $pos ] != -1 } { \
@@ -5197,11 +5168,11 @@ if ( choice == 48 )
 				.l.t.text insert end \"[ string trim $a ]\n\" \
 			} \
 		}" );
-	cmd( "button .l.t.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
+	cmd( "button .l.d.opt.ext -width $butWid -text \"Add Extra\" -command { \
 			set a [.l.t.text get 1.0 end]; \
 			set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			if { $pos == -1 } { \
-				.l.t.d.opt.def invoke; \
+				.l.d.opt.def invoke; \
 				set a [.l.t.text get 1.0 end]; \
 				set pos [ string first \"FUN_EXTRA=\" $a ]; \
 			}; \
@@ -5230,7 +5201,7 @@ if ( choice == 48 )
 			.l.t.text delete 1.0 end; \
 			.l.t.text insert end \"[ string trim $a ]\n\" \
 		}" );
-	cmd( "button .l.t.d.opt.def -width $butWid -text \"Default\" -command { \
+	cmd( "button .l.d.opt.def -width $butWid -text \"Default\" -command { \
 			if { $debug == 0 } { \
 				set default \"$gcc_opt\" \
 			} else { \
@@ -5239,7 +5210,7 @@ if ( choice == 48 )
 			.l.t.text delete 1.0 end; \
 			.l.t.text insert end \"$default\" \
 		}" );
-	cmd( "button .l.t.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
+	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
 			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
 				foreach i $objs { \
 					catch { \
@@ -5248,11 +5219,11 @@ if ( choice == 48 )
 				} \
 			} \
 		}" );
-	cmd( "pack .l.t.d.opt.debug .l.t.d.opt.ext .l.t.d.opt.def .l.t.d.opt.cle -padx 10 -pady 5 -side left" );
+	cmd( "pack .l.d.opt.debug .l.d.opt.ext .l.d.opt.def .l.d.opt.cle -padx 10 -pady 5 -side left" );
 
-	cmd( "pack .l.t.d.opt" );
-	cmd( "pack .l.t.text .l.t.d" );
-	cmd( "pack .l.t" );
+	cmd( "pack .l.d.opt" );
+	
+	cmd( "pack .l.t .l.d -anchor e" );
 
 	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#model_options } { set choice 2 }" );
 
@@ -5535,6 +5506,10 @@ if ( choice == 60 )
 // generate the no window distribution
 if ( choice == 62 )
 {
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', click on the 'Default' button, and then on 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+	if ( choice == 0 )
+		goto loop;
+	
 	// copy the base LSD source files to distribution directory
 	cmd( "if { ! [ file exists \"$modeldir/src\" ] } { file mkdir \"$modeldir/src\" }" );
 	cmd( "file copy -force \"$RootLsd/$LsdSrc/lsdmain.cpp\" \"$modeldir/src\"" );
