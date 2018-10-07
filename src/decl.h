@@ -217,7 +217,7 @@ class object
 	object *shuffle_nodes_net( char const *lab );
 	object *turbosearch( char const *label, double tot, double num );
 	variable *add_empty_var( char const *str );
-	variable *search_var( object *caller, char const *label, bool no_error = false );
+	variable *search_var( object *caller, char const *label, bool no_error = false, bool no_search = false );
 	void add_obj( char const *label, int num, int propagate );
 	void add_var( char const *label, int lag, double *val, int save );
 	void add_var_from_example( variable *example );
@@ -518,6 +518,7 @@ double weibull( double a, double b );					// draw from a Weibull distribution
 // global variables (visible to the users)
 extern bool fast;						// flag to hide LOG messages & runtime (read-only)
 extern bool invalidHooks;				// flag to invalid hooks pointers (set by simulation)
+extern bool no_search;					// disable the standard variable search mechanism
 extern bool use_nan;					// flag to allow using Not a Number value
 extern char *path;						// folder where the configuration is
 extern char *simul_name;				// configuration name being run (for saving networks)

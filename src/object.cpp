@@ -468,7 +468,7 @@ search is starting from.
 The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
 *************************************************/
-variable *object::search_var( object *caller, char const *l, bool no_error )
+variable *object::search_var( object *caller, char const *l, bool no_error, bool no_search )
 {
 	variable *cv;
 	bridge *cb; 
@@ -477,6 +477,10 @@ variable *object::search_var( object *caller, char const *l, bool no_error )
 	for ( cv = v; cv != NULL; cv = cv->next )
 		if ( ! strcmp( l, cv->label ) )
 			return cv;
+		
+	// stop if search is disabled
+	if ( no_search )
+		return NULL;
 
 	// Search among descendants
 	for ( cb = b, cv = NULL; cb != NULL; cb = cb->next )
@@ -528,7 +532,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 
 	for ( cur1 = this; cur1 != NULL; cur1 = cur1->up )
 	{
-		cv = cur1->search_var( this, lab, true );
+		cv = cur1->search_var( this, lab, true, no_search );
 		if ( cv == NULL )
 		{
 			if ( ! var_exist )
@@ -1181,10 +1185,10 @@ double object::cal( object *caller,  char const *l, int lag )
 	if ( quit == 2 )
 		return NAN;
 
-	curr = search_var( this, l, true );
+	curr = search_var( this, l, true, no_search );
 	if ( curr == NULL )
 	{	// check if it is not a zero-instance object
-		curr = blueprint->search_var( this, l, true );
+		curr = blueprint->search_var( this, l, true, no_search );
 		if ( curr == NULL )
 		{
 			sprintf( msg, "'%s' is missing for retrieving", l );
@@ -1228,10 +1232,10 @@ void object::recal( char const *l )
 {
 	variable *curr;
 
-	curr = search_var( this, l, true );
+	curr = search_var( this, l, true, no_search );
 	if ( curr == NULL )
 	{	// check if it is not a zero-instance object
-		curr = blueprint->search_var( this, l, true );
+		curr = blueprint->search_var( this, l, true, no_search );
 		if ( curr == NULL )
 		{
 			sprintf( msg, "'%s' is missing for recalculating", l );
@@ -1263,10 +1267,10 @@ double object::sum( char const *lab, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for summing", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1297,10 +1301,10 @@ double object::overall_max( char const *lab, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for maximizing", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1332,10 +1336,10 @@ double object::overall_min( char const *lab, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for minimizing", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1368,10 +1372,10 @@ double object::av( char const *lab, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for averaging", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1405,10 +1409,10 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for weighted averaging", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1418,10 +1422,10 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		return NAN;
 	}
 
-	cur_v = search_var( this, lab2, true );
+	cur_v = search_var( this, lab2, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab2, true ) == NULL )
+		if ( blueprint->search_var( this, lab2, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for weighted averaging", lab2 );
 			error_hard( msg, "variable or parameter not found", 
@@ -1457,10 +1461,10 @@ double object::sd( char const *lab, int lag )
 	object *cur;
 	variable *cur_v;
 
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating s.d.", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1573,10 +1577,10 @@ double object::stat( char const *lab, double *r )
 	
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
-	cur_v = search_var( this, lab, true );
+	cur_v = search_var( this, lab, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lab, true ) == NULL )
+		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lab );
 			error_hard( msg, "variable or parameter not found", 
@@ -1586,25 +1590,6 @@ double object::stat( char const *lab, double *r )
 		return NAN;
 	}
 
-	cur = cur_v->up;
-	if ( cur->up != NULL )
-	{
-		cur_v = cur->up->search_var( cur->up, lab, true );
-		if ( cur_v == NULL )
-		{	// check if it is not a zero-instance object
-			if ( blueprint->search_var( cur->up, lab, true ) == NULL )
-			{
-				sprintf( msg, "'%s' is missing for calculating statistics", lab );
-				error_hard( msg, "variable or parameter not found", 
-							"check your code to prevent this situation" );
-			}
-			
-			return NAN;
-		}
-	}
-	else
-		return NAN;
-		
 	cur = cur_v->up;
 	if ( cur != NULL )
 	{
@@ -1640,7 +1625,7 @@ Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
 ****************************************************/
-void object::lsdqsort(char const *obj, char const *var, char const *direction)
+void object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
 	int num, i;
 	object *cur, *nex, **mylist;
@@ -1650,10 +1635,10 @@ void object::lsdqsort(char const *obj, char const *var, char const *direction)
 
 	if ( ! useNodeId )
 	{
-		cur_v = search_var( this, var, true );
+		cur_v = search_var( this, var, true, no_search );
 		if ( cur_v == NULL )
 		{	// check if it is not a zero-instance object
-			if ( blueprint->search_var( this, var, true ) == NULL )
+			if ( blueprint->search_var( this, var, true, no_search ) == NULL )
 			{
 				sprintf( msg, "'%s' is missing for sorting", var );
 				error_hard( msg, "variable or parameter not found", 
@@ -1814,10 +1799,10 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		return;
 	}
 	
-	cur_v = search_var( this, var1, true );
+	cur_v = search_var( this, var1, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, var1, true ) == NULL )
+		if ( blueprint->search_var( this, var1, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for sorting", var1 );
 			error_hard( msg, "variable or parameter not found", 
@@ -1943,10 +1928,10 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 	object *cur, *cur1;
 	variable *cur_v;
 
-	cur_v = search_var( this, lv, true );
+	cur_v = search_var( this, lv, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lv, true ) == NULL )
+		if ( blueprint->search_var( this, lv, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lv );
 			error_hard( msg, "variable or parameter not found", 
@@ -2060,10 +2045,10 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		return NULL;
 	}  
 
-	cur_v = search_var( this, lv, true );
+	cur_v = search_var( this, lv, true, no_search );
 	if ( cur_v == NULL )
 	{	// check if it is not a zero-instance object
-		if ( blueprint->search_var( this, lv, true ) == NULL )
+		if ( blueprint->search_var( this, lv, true, no_search ) == NULL )
 		{
 			sprintf( msg, "'%s' is missing for calculating statistics", lv );
 			error_hard( msg, "variable or parameter not found", 

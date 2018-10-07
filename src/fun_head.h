@@ -175,6 +175,8 @@ using namespace Eigen;
 #define FAST_FULL set_fast( 2 );
 #define USE_NAN use_nan = true;
 #define NO_NAN use_nan = false;
+#define USE_SEARCH no_search = false;
+#define NO_SEARCH no_search = true;
 #define DEFAULT_RESULT( X ) def_res = X;
 #define RND_GENERATOR( X ) ran_gen = ( int ) X;
 #define RND_SETSEED( X ) seed = ( int ) X; init_random( seed );

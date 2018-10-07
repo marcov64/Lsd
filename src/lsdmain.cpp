@@ -85,6 +85,7 @@ bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
+bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
@@ -754,6 +755,7 @@ void run( object *root )
 		wait_delete = NULL;
 		stack_info = 0;
 		use_nan = false;
+		no_search = false;
 		on_bar = false;
 		done_in = 0;
 		actual_steps = 0;

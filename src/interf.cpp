@@ -277,7 +277,10 @@ int browse( object *r, int *choice )
 				}
 				
 				if ( ap_v->param == 1 )
+				{
 					cmd( ".l.v.c.var_name insert end \"%s (P$varFlags)\"", ap_v->label );
+					cmd( ".l.v.c.var_name itemconf $app -fg black" );
+				}
 				
 				if ( ap_v->param == 2 )
 				{
