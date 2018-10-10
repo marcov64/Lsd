@@ -493,7 +493,7 @@ if ( num_var == 0 )
   cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
 
 // make a copy to allow insertion of new temporary variables
-cmd( "if [ info exists ModElem ] { set DaModElem $ModElem } { set DaModElem [ list ] }" );
+cmd( "if [ info exists modElem ] { set DaModElem $modElem } { set DaModElem [ list ] }" );
 
 // main loop
 

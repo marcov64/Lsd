@@ -74,6 +74,8 @@ p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
 	margin-left:0cm;
 	font-size:8.0pt;
 	font-family:"Tahoma","sans-serif";}
+span.MsoPlaceholderText
+	{color:gray;}
 p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
 	{margin-right:0cm;
 	margin-left:0cm;
@@ -262,15 +264,34 @@ href="browser.html">LSD Browser</a>. A pop-up window will request a unique <a
 href="LSD_faqs.html#name">name</a> and the maximum <a
 href="LSD_faqs.html#variable">number of lags</a> for the Variable. An optional
 description text can also be provided to be used in the <a
-href="LSD_faqs.html#modeldocumentation">model documentation</a>. It is
-necessary that a name-matching <a href="LSD_faqs.html#equation">Equation</a>
-exists in the <a href="LSD_faqs.html#equationfile">equation file</a>.</p>
+href="LSD_faqs.html#modeldocumentation">model documentation</a>. </p>
 
-<p class=MsoNormal>The names in LSD are case-sensitive and should only use
-alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’. All
-other symbol or blank characters, including space, tab and new line are
-forbidden. Maximum name length is 99 characters. See more details <a
-href="LSD_faqs.html#name">here</a>. </p>
+<p class=MsoNormal>The user can choose a name from the drop-down list of unset <a
+href="LSD_faqs.html#equation">Equation</a> names, type the first letters of the
+desired (unset) name, or enter the full desired Variable name. Both the
+drop-down list and the auto-fill feature propose only names which are
+associated to an Equation in the <a href="LSD_faqs.html#equationfile">equation
+file</a>, and are not yet present in the <a href="LSD_faqs.html#modelstructure">model
+structure</a>. It is necessary that a name-matching Equation exists in the
+equation file.</p>
+
+<p class=MsoNormal>Names in LSD are case-sensitive, should only use
+alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’, and
+cannot start with a number. All other symbol or blank characters, including
+space, tab and new line are forbidden. Maximum name length is 99 characters.
+See more details <a href="LSD_faqs.html#name">here</a>. </p>
+
+<p class=MsoNormal>The maximum number of lags which can be manually set is 99,
+by clicking on the arrows or typing the desired value. If more lags are
+required, the user may simply turn on the <span class=Cdigo>Save</span> flag
+for the Variable (see how <a href="browser.html#changeelement">here</a>). When
+this flag is on, the modeler has access to an unlimited number of lagged
+values. When lags are requested, the user can immediately initialize the
+required value(s) by pressing the <span class=Cdigo>Initial Values</span>
+button. The required initial value for each lag is asked in sequence, starting
+from the first lag (<i>t</i> = 0). Otherwise, if the user presses <span
+class=Cdigo>OK</span>, the initial value(s) is (are) not set but it (they) must
+still be defined before the simulation is run.</p>
 
 <h2><a name=AddAPar></a><a name="_Add_Parameter"></a>Add Parameter</h2>
 
@@ -283,31 +304,54 @@ href="LSD_faqs.html#name">name</a> for the Parameter. An optional description
 text can also be provided to be used in the <a
 href="LSD_faqs.html#modeldocumentation">model documentation</a>.</p>
 
-<p class=MsoNormal>The names in LSD are case-sensitive and should only use
-alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’. All
-other symbol or blank characters, including space, tab and new line are
-forbidden. Maximum name length is 99 characters. See more details <a
-href="LSD_faqs.html#name">here</a>. </p>
+<p class=MsoNormal><a name=AddAFun></a><a name="_Add_Function"></a>The user can
+choose a name from the drop-down list of unset Parameters, type the first
+letters of the desired (unset) name, or enter the complete Parameter name. Both
+the drop-down list and the auto-fill feature propose only Parameter names which
+are used at least in one <a href="LSD_faqs.html#equation">Equation</a> in the <a
+href="LSD_faqs.html#equationfile">equation file</a>, and are not yet present in
+the <a href="LSD_faqs.html#modelstructure">model structure</a>.</p>
 
-<h2><a name=AddAFun></a><a name="_Add_Function"></a>Add Function</h2>
+<p class=MsoNormal>Names in LSD are case-sensitive, should only use
+alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’, and
+cannot start with a number. All other symbol or blank characters, including
+space, tab and new line are forbidden. Maximum name length is 99 characters.
+See more details <a href="LSD_faqs.html#name">here</a>. </p>
+
+<p class=MsoNormal>As all Parameter must be initialized, the user can
+immediately set the required value by pressing the <span class=Cdigo>Initial
+Values</span> button. Otherwise, if the user presses <span class=Cdigo>OK</span>,
+the initial value is not set but it must still be defined before the simulation
+is run.</p>
+
+<h2>Add Function</h2>
 
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+N</span>.</p>
 
 <p class=MsoNormal>Insert a new <a href="LSD_faqs.html#function">Function</a>
 in the current <a href="LSD_faqs.html#object">Object type</a> selected on the <a
 href="browser.html">LSD Browser</a>. A pop-up window will request a unique <a
-href="LSD_faqs.html#name">name</a> for the Function. An optional description
-text can also be provided to be used in the <a
+href="LSD_faqs.html#name">name</a> for the Function. An optional description text
+can also be provided to be used in the <a
 href="LSD_faqs.html#modeldocumentation">model documentation</a>.</p>
 
-<p class=MsoNormal>The names in LSD are case-sensitive and should only use
-alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’. All
-other symbol or blank characters, including space, tab and new line are
-forbidden. Maximum name length is 99 characters. See more details <a
-href="LSD_faqs.html#name">here</a>. </p>
+<p class=MsoNormal><a name=AddADesc></a><a name="_Add_Descending_Object"></a>The
+user can choose a name from the drop-down list of unset <a
+href="LSD_faqs.html#equation">Equation</a> names, type the first letters of the
+desired (unset) name, or enter the full desired Function name. Both the
+drop-down list and the auto-fill feature propose only names which are
+associated to an Equation in the <a href="LSD_faqs.html#equationfile">equation
+file</a>, and are not yet present in the <a href="LSD_faqs.html#modelstructure">model
+structure</a>. It is necessary that a name-matching Equation exists in the
+equation file.</p>
 
-<h2><a name=AddADesc></a><a name="_Add_Descending_Object"></a>Add Descending
-Object</h2>
+<p class=MsoNormal>Names in LSD are case-sensitive, should only use
+alphanumeric characters and the underscore ‘<span class=Cdigo>_</span>’, and
+cannot start with a number. All other symbol or blank characters, including
+space, tab and new line are forbidden. Maximum name length is 99 characters.
+See more details <a href="LSD_faqs.html#name">here</a>. </p>
+
+<h2>Add Descending Object</h2>
 
 <p class=MsoNormal><i>Shortcut</i>: <span class=Cdigo>Ctrl+D</span>.</p>
 

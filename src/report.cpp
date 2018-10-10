@@ -428,8 +428,9 @@ WRITE_VAR
 void write_var(variable *v, FILE *frep)
 {
 FILE *ffun ;
+bool one;
 char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], c3_lab[2*MAX_LINE_SIZE], *app, *fname;
-int done, i, one, j, k, flag_begin, flag_string, flag_comm, flag_var, nfiles;
+int done, i, j, k, flag_begin, flag_string, flag_comm, flag_var, nfiles;
 object *cur, *cur2;
 
 cmd( "update" );
@@ -447,48 +448,23 @@ fprintf(frep, "<I>Contained in: &nbsp;</I><A HREF=\"#%s\"><TT>%s</TT></A><BR>", 
  
 fprintf(frep, "<I>Used in: &nbsp;</I>");
 
-// search in all extra source files
-cmd( "if [ file exists \"%s/model_options.txt\" ] { \
-		set f [ open model_options.txt r ]; \
-		set a [ read -nonewline $f ]; \
-		close $f; \
-		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
-		if { $pos1 != -1 } { \
-			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
-			if { $pos2 == -1 } { \
-				set pos2 end \
-			}; \
-			set fun_extra [ string range $a $pos1 $pos2 ]; \
-			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
-			set extra_files [ list ]; \
-			foreach x $fun_extra { \
-				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
-					lappend extra_files $x \
-				} \
-			}; \
-			set res [ llength $extra_files ] \
-		} else { \
-			set res 0 \
-		} \
-	}", exec_path, exec_path );
+// search in all source files
+cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+cmd( "set res [ llength $source_files ]" );
 get_int( "res", &nfiles );
 	
-for ( one = 0, k = 0; k <= nfiles; ++k )
+for ( one = false, k = 0; k < nfiles; ++k )
 {
-	if ( k == 0 )
-		fname = equation_name;
-	else
-	{
-		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-	}
+	cmd( "set brr [ lindex $source_files %d ]", k );
+	cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+	fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 	if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 		continue;
 
-	strcpy(c1_lab, "" );
-	strcpy(c2_lab, "" );
+	strcpy( c1_lab, "" );
+	strcpy( c2_lab, "" );
 
 	while ( fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL )
 	{
@@ -499,8 +475,8 @@ for ( one = 0, k = 0; k <= nfiles; ++k )
 
 		if (done == 1 )
 		{
-		   fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", c2_lab,  c2_lab );
-		   one=1;
+		   fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", c2_lab,  c2_lab );
+		   one = true;
 		}
 	  }
 	}
@@ -508,8 +484,8 @@ for ( one = 0, k = 0; k <= nfiles; ++k )
 	fclose( ffun );
 }
 
-if ( one == 0 )
-	fprintf(frep, "(never used)");
+if ( ! one )
+	fprintf( frep, "(never used)" );
 
 fprintf(frep, "<BR>\n");
 
@@ -528,37 +504,32 @@ fprintf(frep,"<BR>\n");
 if ( v->param == 1 )
 	return;
 
-for ( one = 0, k = 0; one == 0 && k <= nfiles; ++k )
+for ( one = false, k = 0; ! one && k < nfiles; ++k )
 {
-	if ( k == 0 )
-		fname = equation_name;
-	else
-	{
-		cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
-		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-	}
+	cmd( "set brr [ lindex $source_files %d ]", k );
+	cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+	fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 
 	if ( ( ffun = fopen( fname, "r" ) ) == NULL )
 		continue;
 
-	strcpy(c1_lab, "" );
-	strcpy(c2_lab, "" );
-	flag_comm=0;
+	strcpy( c1_lab, "" );
+	strcpy( c2_lab, "" );
+	flag_comm = 0;
 
 	while ( fgets(c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL  )
 	{
 	  if (is_equation_header(c1_lab,c2_lab) == 1 )
 	  {
-	   if (!macro)
+	   if ( ! macro )
 		 done = 0;
 	   else
-		 done=1; //will never stop with {} only
+		 done = 1; //will never stop with {} only
 	 
 	   if (!strcmp(c2_lab, v->label))
 	   {
-		 fatto=0;
-		 one = 1;
+		 fatto = 0;
+		 one = true;
 		 
 		 if ( k == 0 )
 			fprintf( frep,"<BR><I>Equation code:</I><BR>\n" );
@@ -686,86 +657,63 @@ FIND_USING
 *******************************/
 void find_using(object *r, variable *v, FILE *frep)
 {
-object *cur;
-variable *cv;
-int count, done, i, one, nfiles;
-char c1_lab[2*MAX_LINE_SIZE], c2_lab[2*MAX_LINE_SIZE], *fname;
-FILE *ffun;
+	bool one;
+	int count, done, i, nfiles;
+	char c1_lab[ 2 * MAX_LINE_SIZE ], c2_lab[ 2 * MAX_LINE_SIZE ], *fname;
+	object *cur;
+	variable *cv;
+	FILE *ffun;
 
-// search in all extra source files
-cmd( "if [ file exists \"%s/model_options.txt\" ] { \
-		set f [ open model_options.txt r ]; \
-		set a [ read -nonewline $f ]; \
-		close $f; \
-		set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
-		if { $pos1 != -1 } { \
-			set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
-			if { $pos2 == -1 } { \
-				set pos2 end \
-			}; \
-			set fun_extra [ string range $a $pos1 $pos2 ]; \
-			set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
-			set extra_files [ list ]; \
-			foreach x $fun_extra { \
-				if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
-					lappend extra_files $x \
-				} \
-			}; \
-			set res [ llength $extra_files ] \
-		} else { \
-			set res 0 \
-		} \
-	}", exec_path, exec_path );
-get_int( "res", &nfiles );
-	
-for ( one = 0, cur = r; cur != NULL; cur = skip_next_obj( cur, &count ) )
-{
-	for ( cv = cur->v; cv != NULL; cv = cv->next )
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set res [ llength $source_files ]" );
+	get_int( "res", &nfiles );
+		
+	for ( one = false, cur = r; cur != NULL; cur = skip_next_obj( cur, &count ) )
 	{
-		for ( i = 0; i <= nfiles; ++i )
+		for ( cv = cur->v; cv != NULL; cv = cv->next )
 		{
-			if ( i == 0 )
-				fname = equation_name;
-			else
+			for ( i = 0; i < nfiles; ++i )
 			{
-				cmd( "set brr [ lindex $extra_files %d ]", i - 1 );
+				cmd( "set brr [ lindex $source_files %d ]", i );
 				cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
 				fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-			}
 
-			if ( ( ffun = fopen( fname, "r" ) ) == NULL )
-				continue;
+				if ( ( ffun = fopen( fname, "r" ) ) == NULL )
+					continue;
 
-			strcpy(c1_lab, "" );
-			strcpy(c2_lab, "" );
+				strcpy( c1_lab, "" );
+				strcpy( c2_lab, "" );
 
-			for ( ; fgets(c1_lab, 2*MAX_LINE_SIZE, ffun)!=NULL;  )
-			{
-				if (is_equation_header(c1_lab,c2_lab) == 1 )
+				for ( ; fgets( c1_lab, 2 * MAX_LINE_SIZE, ffun ) != NULL; )
 				{
-					done = 0;
-					if (!strcmp(c2_lab, v->label) )
-						done=contains(ffun, cv->label, strlen(cv->label));
-					if (done == 1 )
+					if ( is_equation_header( c1_lab, c2_lab ) == 1 )
 					{
-						if (frep != NULL )
+						done = 0;
+						if ( ! strcmp( c2_lab, v->label ) )
+							done = contains( ffun, cv->label, strlen( cv->label ) );
+						if ( done == 1 )
 						{
-							fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one == 1 ? ", " : "", cv->label, cv->label );
-							one = 1;
+							if (frep != NULL )
+							{
+								fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", cv->label, cv->label );
+								one = true;
+							}
+							else
+								cmd( "$list.l.l insert end %s", cv->label );
+							fatto = 1;
 						}
-						else
-							cmd( "$list.l.l insert end %s", cv->label );
-						fatto=1;
 					}
 				}
+				
+				fclose( ffun );
 			}
-			fclose(ffun);
 		}
-	}
 
-	if (cur->b != NULL )
-		find_using(cur->b->head, v, frep);
-}
+		if ( cur->b != NULL )
+			find_using( cur->b->head, v, frep );
+	}
 }
 
 

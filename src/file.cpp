@@ -508,7 +508,8 @@ bool object::load_struct( FILE *f )
 		{ 
 			fscanf( f, "%*[ ]%99s", ch );
 			add_empty_var( ch );
-			cmd( "lappend ModElem %s", ch );
+			cmd( "lappend modElem %s", ch );
+			cmd( "lappend modVar %s", ch );
 		}
 		
 		if ( ! strcmp( ch, "Param:" ) )
@@ -516,7 +517,8 @@ bool object::load_struct( FILE *f )
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 1;
-			cmd( "lappend ModElem %s", ch );
+			cmd( "lappend modElem %s", ch );
+			cmd( "lappend modPar %s", ch );
 		}
 		
 		if ( ! strcmp( ch, "Func:" ) )
@@ -524,7 +526,8 @@ bool object::load_struct( FILE *f )
 			fscanf( f, "%*[ ]%99s", ch );
 			cv = add_empty_var( ch );
 			cv->param = 2;
-			cmd( "lappend ModElem %s", ch );
+			cmd( "lappend modElem %s", ch );
+			cmd( "lappend modFun %s", ch );
 		}
 
 		fscanf( f, "%*[{\r\t\n]%99s", ch );

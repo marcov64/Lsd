@@ -104,11 +104,13 @@ Exit function, which is customized on the operative system.
 
 #include "decl.h"
 
+bool initVal = false;				// new variable initial setting going on
 bool justAddedVar = false;			// control the selection of last added variable
 bool redrawReq = false;				// flag for asynchronous window redraw request
 char lastObj[MAX_ELEM_LENGTH] = "";	// to save last shown object for quick reload (choice=38)
 char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
+int next_lag;						// new variable initial setting next lag to set
 int result_loaded;
 int lcount;
 object *currObj;
@@ -909,7 +911,8 @@ int browse( object *r, int *choice )
 
 	main_cycle:
 	
-	cmd( "if [ info exists ModElem ] { set ModElem [ lsort -dictionary $ModElem ] }" );
+	// update element list removing duplicates and sorting
+	cmd( "if [ info exists modElem ] { set modElem [ lsort -dictionary -unique $modElem ] }" );
 
 	cmd( "if { $listfocus == 1 } { \
 			focus .l.v.c.var_name; \
@@ -1031,11 +1034,11 @@ OPERATE
 ****************************************************/
 object *operate( int *choice, object *r )
 {
+bool saveAs, delVar, renVar, reload, table;
 char observe, initial, cc, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
 double fake = 0;
-bool saveAs, delVar, renVar, reload, table;
 FILE *f;
 bridge *cb;
 object *n, *cur, *cur1, *cur2;
@@ -1076,62 +1079,116 @@ case 2:
 	}
 	else
 		cur2 = NULL;
+	
+	// read the lists of variables/functions and parameters in model program 
+	// from disk, if needed, or just update the missing elements lists
+	cmd( "if { [ llength $missVar ] == 0 || [ llength $missPar ] == 0 } { read_elem_file %s } { upd_miss_elem }", exec_path );
 
 	Tcl_LinkVar( inter, "done", ( char * ) &done, TCL_LINK_INT );
-	Tcl_LinkVar( inter, "copy_param", ( char * ) &param, TCL_LINK_INT );
 	Tcl_LinkVar( inter, "num", ( char * ) &num, TCL_LINK_INT );
+	
+	get_int( "param", & param );
+	cmd( "set num 0" );
+	cmd( "set lab \"\"" );
 
 	cmd( "set T .addelem" );
 	cmd( "newtop $T \"Add Element\" { set done 2 }" );
 
-	cmd( "set copy_param $param" );
-	cmd( "set num 0" );
-	cmd( "set lab \"\"" );
-
-	if ( param == 0 )
+	switch ( param )
 	{
-		cmd( "frame $T.l" );
-		cmd( "label $T.l.l1 -text \"New variable in object:\"" );
-		cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
-		cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+		case 0:								// variable
+			cmd( "frame $T.l" );
+			cmd( "label $T.l.l1 -text \"New variable in object:\"" );
+			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
 
-		cmd( "frame $T.f" );
-		cmd( "label $T.f.lab_ent -text \"Variable name\"" );
-		cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
-		cmd( "label $T.f.sp -width 5" );
-		cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-		cmd( "entry $T.f.ent_num -width 2 -validate focusout -vcmd { if { [ string is integer -strict %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
-		cmd( "bind $T.f.ent_num <KeyPress-Return> {focus $T.b.ok}" );
-		cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
+			cmd( "frame $T.f" );
+			cmd( "label $T.f.lab_ent -text \"Variable name\"" );
+			cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
+			cmd( "label $T.f.sp -width 5" );
+			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
+			cmd( "entry $T.f.ent_num -width 3 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center" );
+			cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
+			cmd( "bind $T.f.ent_var <KeyRelease> { \
+					if { %%N < 256 } { \
+						set b [ .addelem.f.ent_var index insert ]; \
+						set s [ .addelem.f.ent_var get ]; \
+						set f [ lsearch -glob $missVar $s* ]; \
+						if { $f !=-1 } { \
+							set d [ lindex $missVar $f ]; \
+							.addelem.f.ent_var delete 0 end; \
+							.addelem.f.ent_var insert 0 $d; \
+							.addelem.f.ent_var index $b; \
+							.addelem.f.ent_var selection range $b end \
+						} \
+					} \
+				}" );
+			cmd( "bind $T.f.ent_var <KeyPress-Return> { if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
+			cmd( "bind $T.f.ent_num <KeyPress-Return> { if { [ .addelem.f.ent_num get ] > 0 } { focus $T.b.x } { focus $T.b.ok } }" );
+			cmd( "set help menumodel.html#AddAVar");
+			break;
+
+		case 2:								// function
+			cmd( "frame $T.l" );
+			cmd( "label $T.l.l1 -text \"New function in object:\"" );
+			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+
+			cmd( "frame $T.f" );
+			cmd( "label $T.f.lab_ent -text \"Function name\"" );
+			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
+			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
+			cmd( "bind $T.f.ent_var <KeyRelease> { \
+					if { %%N < 256 } { \
+						set b [ .addelem.f.ent_var index insert ]; \
+						set s [ .addelem.f.ent_var get ]; \
+						set f [ lsearch -glob $missVar $s* ]; \
+						if { $f !=-1 } { \
+							set d [ lindex $missVar $f ]; \
+							.addelem.f.ent_var delete 0 end; \
+							.addelem.f.ent_var insert 0 $d; \
+							.addelem.f.ent_var index $b; \
+							.addelem.f.ent_var selection range $b end \
+						} \
+					} \
+				}" );
+			cmd( "set help menumodel.html");
+			cmd( "bind $T.f.ent_var <KeyPress-Return> { focus $T.b.ok }" );
+
+			break;
+
+		case 1:								// parameter
+			cmd( "frame $T.l" );
+			cmd( "label $T.l.l1 -text \"New parameter in object:\"" );
+			cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
+			cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
+
+			cmd( "frame $T.f" );
+			cmd( "label $T.f.lab_ent -text \"Parameter name\"" );
+			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missPar" );
+			cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
+			cmd( "bind $T.f.ent_var <KeyRelease> { \
+					if { %%N < 256 } { \
+						set b [ .addelem.f.ent_var index insert ]; \
+						set s [ .addelem.f.ent_var get ]; \
+						set f [ lsearch -glob $missPar $s* ]; \
+						if { $f !=-1 } { \
+							set d [ lindex $missPar $f ]; \
+							.addelem.f.ent_var delete 0 end; \
+							.addelem.f.ent_var insert 0 $d; \
+							.addelem.f.ent_var index $b; \
+							.addelem.f.ent_var selection range $b end \
+						} \
+					} \
+				}" );
+			cmd( "bind $T.f.ent_var <KeyPress-Return> { focus $T.b.x }" );
+			cmd( "set help menumodel.html#AddAPar");
+			break;
+			
+		default:
+			done = 2;
+			goto err_newelem;
 	}
-
-	if ( param == 2 )
-	{
-		cmd( "frame $T.l" );
-		cmd( "label $T.l.l1 -text \"New function in object:\"" );
-		cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
-		cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
-
-		cmd( "frame $T.f" );
-		cmd( "label $T.f.lab_ent -text \"Function name\"" );
-		cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-		cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
-	}
-
-	if ( param == 1 )
-	{ //insert a parameter
-		cmd( "frame $T.l" );
-		cmd( "label $T.l.l1 -text \"New parameter in object:\"" );
-		cmd( "label $T.l.l2 -text \"%s\" -fg red", r->label );
-		cmd( "pack $T.l.l1 $T.l.l2 -side left -padx 2" );
-
-		cmd( "frame $T.f" );
-		cmd( "label $T.f.lab_ent -text \"Parameter name\"" );
-		cmd( "entry $T.f.ent_var -width 20 -textvariable lab -justify center" );
-		cmd( "pack $T.f.lab_ent $T.f.ent_var -side left -padx 2" );
-	}
-
-	cmd( "bind $T.f.ent_var <KeyPress-Return> {focus $T.b.ok}" );
 
 	cmd( "set w $T.d" );
 	cmd( "frame $w" );
@@ -1144,13 +1201,11 @@ case 2:
 	cmd( "pack $w.f" );
 
 	cmd( "pack $T.l $T.f $T.d -pady 5" );
-	if ( param == 0 )
-		cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAVar } { set done 2 }" );
+	
+	if ( param != 2 )
+		cmd( "okXhelpcancel $T b \"Initial Values\" { set done 3 } { set done 1 } { LsdHelp $help } { set done 2 }" );
 	else
-		if ( param == 1 )
-			cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html#AddAPar } { set done 2 }" );
-		else
-			cmd( "okhelpcancel $T b { set done 1 } { LsdHelp menumodel.html } { set done 2 }" );
+		cmd( "okhelpcancel $T b { set done 1 } { LsdHelp $help } { set done 2 }" );
 
 	cmd( "showtop $T topleftW" );
 	cmd( "focus $T.f.ent_var; $T.f.ent_var selection range 0 end" );
@@ -1166,7 +1221,9 @@ case 2:
 	if ( param == 0 )
 		cmd( "set num [ .addelem.f.ent_num get ]" ); 
 
-	if ( done == 1 )
+	initVal = ( done == 3 ) ? true : false;
+	
+	if ( done == 1 || done == 3 )
 	{
 		lab1 = ( char * ) Tcl_GetVar( inter, "lab", 0 );
 		strncpy( lab, lab1, MAX_ELEM_LENGTH - 1 );
@@ -1226,24 +1283,45 @@ case 2:
 					justAddedVar = true;	// flag variable just added (for acquiring focus)
 				}
 				
-				unsaved_change( true );	// signal unsaved change
+				unsaved_change( true );		// signal unsaved change
 			}
+		}
+		else
+		{
+			done = 2;
+			initVal = false;
 		}
 	}
 
+	if ( done != 2 )
+		cmd( "lappend modElem %s }", lab );
+
+	err_newelem:
+	
 	cmd( "destroytop .addelem" );
 	redrawRoot = ( done == 2 ) ? false : true;
 
-	if ( done != 2 )
-		cmd( "if [ info exists ModElem ] { lappend ModElem %s }", lab );
-
-	if ( cur2 != NULL )			// restore original current object
+	if ( cur2 != NULL )						// restore original current object
 		r = cur2;
 
 	Tcl_UnlinkVar( inter, "done" );
 	Tcl_UnlinkVar( inter, "num" );
-	Tcl_UnlinkVar( inter, "copy_param" );
 	cmd( "unset done" );
+	
+	if ( initVal )
+	{
+		if ( param == 0 && num < 1 )
+		{
+			cmd( "tk_messageBox -parent . -type ok -title Warning -icon warning -message \"Cannot set initial value\" -detail \"The variable '%s' was created with maximum lag equal to zero. No initial value is required.\"", lab );
+			initVal = false;
+			break;
+		}
+		
+		cmd( "set vname %s", lab );
+		next_lag = 0;						// lag to initialize
+		*choice = 77;						// change initial values for $vname
+		return r;							// execute command
+	}
 
 break;
 
@@ -1763,8 +1841,6 @@ case 83:
 					goto here_newname;
 				}
 				
-				cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ]; lappend ModElem %s } }", r->label, lab );
-	   
 				change_descr_lab( cur->label, lab, "", "", "" );
 				cur->chg_lab( lab );
 			}
@@ -2122,10 +2198,14 @@ case 76:
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
 	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
-
+	cv = r->search_var( NULL, lab_old );
+	if ( cv == NULL )
+		break;
+	
 	if ( *choice == 76 )
 	{
 		delVar = renVar = true;
+
 		cmd( "set answer [ tk_messageBox -parent . -title Confirmation -icon question -type yesno -default yes -message \"Delete element?\" -detail \"Press 'Yes' to confirm deleting '$vname'\" ]; switch $answer { yes { set choice 1 } no { set choice 2 } }" );
 		if ( *choice == 1 )
 			cmd( "set vname \"\"; set nature 3; set numlag 0" );	// configure to delete
@@ -2136,7 +2216,6 @@ case 76:
 	{
 		delVar = renVar = false;
 
-		cv = r->search_var( NULL, lab_old );
 		cmd( "set nature %d", cv->param );
 		cmd( "if { $nature == 0 } { set numlag %d } { set numlag 0 }", cv->num_lag );
 
@@ -2256,13 +2335,15 @@ case 76:
 			}
 		}
 		
-		// remove from find list
-		cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", lab_old  );
+		// remove from element list
+		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", lab_old  );
 
 		if ( ! delVar )
 		{
+			// add to element lists
+			cmd( "lappend modElem %s", lab );
+			
 			change_descr_lab( lab_old, lab, "", "", "" );
-			cmd( "if [ info exists ModElem ] { lappend ModElem %s }", lab );		// add to find list
 		}
 		
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
@@ -2408,14 +2489,14 @@ case 78:
 	lab1 = ( char * ) Tcl_GetVar( inter, "vname", 0 );
 	if ( lab1 == NULL || ! strcmp( lab1, "" ) )
 		break;
-	sscanf( lab1, "%99s", lab_old );		// get var/par name in lab_old
-	cv = r->search_var( NULL, lab_old );	// get var/par pointer
+	sscanf( lab1, "%99s", lab_old );	// get var/par name in lab_old
+	cv = r->search_var( NULL, lab_old );// get var/par pointer
 	if ( cv == NULL )
 		break;
 
 	// do lag selection, if necessary, for initialization/sensitivity data entry
 	lag = 0;							// lag option for the next cases (first lag)
-	if ( ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
+	if ( ! initVal && ( cv->param == 0 || cv->param == 2 ) && cv->num_lag > 1 )
 	{									// more than one lag to choose?
 		cmd( "set lag \"1\"" );
 		
@@ -2447,7 +2528,7 @@ case 78:
 		cmd( "focus $T.i.e" );
 		
 		*choice = -1;
-		while ( *choice == -1 )		// wait for user action
+		while ( *choice == -1 )			// wait for user action
 			Tcl_DoOneEvent( 0 );
 			
 		cmd( "set lag [ .lag.i.e get ]" ); 
@@ -2457,7 +2538,7 @@ case 78:
 			break;
 		
 		cmd( "set choice $lag" ); 
-		lag = abs( *choice ) - 1;	// try to extract chosed lag
+		lag = abs( *choice ) - 1;		// try to extract chosed lag
 		
 		// abort if necessary
 		if ( lag < 0 || lag > ( cv->num_lag - 1 ) )
@@ -2470,8 +2551,26 @@ case 78:
 	// initialize
 	if ( done == 1 )
 	{
-		*choice = 0;		// set top window as parent
+		if ( initVal )					// running just after element creation?
+			lag = next_lag;
+		
+		*choice = 0;					// set top window as parent
 		set_all( choice, r, cv->label, lag );
+		
+		if ( initVal )
+		{
+			if ( next_lag < ( cv->num_lag - 1 ) )
+			{
+				++next_lag;
+				*choice = 77;			// execute command again
+				return r;
+			}
+			else
+			{
+				initVal = false;
+				redrawRoot = true;		// redraw is needed to show new element
+			}
+		}
 	}
 	// edit sensitivity analysis data
 	else
@@ -2480,7 +2579,7 @@ case 78:
 		bool exist = false;
 		sense *cs, *ps = NULL;
 
-		if ( rsense == NULL )		// no sensitivity analysis structure yet?
+		if ( rsense == NULL )			// no sensitivity analysis structure yet?
 			rsense = cs = new sense;
 		else
 		{
@@ -2490,29 +2589,29 @@ case 78:
 					 ( cs->param == 1 || cs->lag == lag ) )
 				{
 					exist = true;
-					break;	// get out of the inner for loop
+					break;				// get out of the inner for loop
 				}
 				
-			if ( ! exist )	// if new variable, append at the end of the list
+			if ( ! exist )				// if new variable, append at the end of the list
 			{
 				for ( cs = rsense; cs->next != NULL; cs = cs->next );	// pick last
 				cs->next = new sense;	// create new variable
-				ps = cs;	// keep previous sensitivity variable
+				ps = cs;				// keep previous sensitivity variable
 				cs = cs->next;
 			}
 		}
 			
-		if ( ! exist )		// do only for new variables in the list
+		if ( ! exist )					// do only for new variables in the list
 		{
 			cs->label = new char[ strlen( cv->label ) + 1 ];
 			strcpy( cs->label, cv->label );
 			cs->next = NULL;
 			cs->nvalues = 0;
 			cs->v = NULL;
-			cs->entryOk = false;	// no valid data yet
+			cs->entryOk = false;		// no valid data yet
 		}
 		else
-			cs->entryOk = true;		// valid data already there
+			cs->entryOk = true;			// valid data already there
 
 		// save type and specific lag in this case
 		cs->param = cv->param;
@@ -2520,17 +2619,17 @@ case 78:
 		
 		dataentry_sensitivity( choice, cs, 0 );
 		
-		if ( ! cs->entryOk )		// data entry failed?
+		if ( ! cs->entryOk )			// data entry failed?
 		{
-			if ( rsense == cs )		// is it the first variable?
-				rsense = cs->next;	// update list root
+			if ( rsense == cs )			// is it the first variable?
+				rsense = cs->next;		// update list root
 			else
-				ps->next = cs->next;// remove from sensitivity list		
-			delete [ ] cs->label;	// garbage collection
+				ps->next = cs->next;	// remove from sensitivity list		
+			delete [ ] cs->label;		// garbage collection
 			delete cs;
 		}
 		else
-			unsavedSense = true;	// signal unsaved change
+			unsavedSense = true;		// signal unsaved change
 	}
 
 break;
@@ -2754,7 +2853,7 @@ case 38: //quick reload
 		unsavedSense = false;		// nothing to save
 		findexSens = 0;
 		nodesSerial = 0;			// network node serial number global counter
-		cmd( "unset -nocomplain ModElem" );
+		cmd( "unset -nocomplain modElem" );
 	}
 
 	struct_loaded = false;
@@ -2986,7 +3085,7 @@ case 20:
 	findexSens = 0;
 	nodesSerial = 0;				// network node serial number global counter
 	add_description( "Root", "Object", "(no description available)" );      
-	cmd( "unset -nocomplain ModElem" );
+	cmd( "unset -nocomplain modElem" );
 	
 	delete [ ] path;
 	path = new char[ strlen( exec_path ) + 1 ];
@@ -3800,7 +3899,7 @@ case 50:
 
 	cmd( "frame .srch.i" );
 	cmd( "label .srch.i.l -text \"Element name\"" );
-	cmd( "entry .srch.i.e -width 20 -textvariable bidi -justify center" );
+	cmd( "ttk::combobox .srch.i.e -width 20 -textvariable bidi -justify center -values $modElem" );
 	cmd( "pack .srch.i.l .srch.i.e" );
 
 	cmd( "label .srch.o -text \"(type the initial letters of the\nname, LSD will complete it)\"" );
@@ -6126,13 +6225,12 @@ void wipe_out( object *d )
 	object *cur;
 	variable *cv;
 
-	cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", d->label );
-
 	change_descr_lab( d->label, "", "", "", "" );
 
 	for ( cv = d->v; cv != NULL; cv = cv->next )
 	{
-		cmd( "if [ info exists ModElem ] { set pos [ lsearch -exact $ModElem \"%s\" ]; if { $pos >= 0 } { set ModElem [ lreplace $ModElem $pos $pos ] } }", cv->label  );
+		// remove from element list
+		cmd( "if [ info exists modElem ] { set pos [ lsearch -exact $modElem %s ]; if { $pos >= 0 } { set modElem [ lreplace $modElem $pos $pos ] } }", cv->label  );
 
 		change_descr_lab( cv->label, "" , "", "", "" );
 	}
