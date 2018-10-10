@@ -479,6 +479,7 @@ while ( choice == 0 )
 			count = ( cv->debug == 'd' ) ? 1 : 0;
 			app_values = new double[ cv->num_lag + 1 ];
 			cmd( "set debugall 0" );
+			cmd( "set undebugall 0" );
 
 			cmd( "set e .deb.stat" );
 			cmd( "newtop $e \"Element Status\" { set choice 1 } .deb" );
@@ -545,7 +546,7 @@ while ( choice == 0 )
 				
 				cmd( "frame $e.d" );
 				cmd( "checkbutton $e.d.deb -text \"Debug (this instance only)\" -variable debug" );
-				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; .deb.stat.d.deb configure -state disabled } { set debug 0; .deb.stat.d.deb configure -state normal } }" );
+				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 				cmd( "pack $e.d.deb $e.d.deball" );
 
 				cmd( "pack $e.v $e.d -pady 5 -padx 5" );	
@@ -590,7 +591,7 @@ while ( choice == 0 )
 			Tcl_UnlinkVar( inter, "debug" );
 			count = choice;
 
-			cmd( "set choice $debugall" );
+			cmd( "if { $debugall || $undebugall } { set choice 1 } { set choice 0 }" );
 			if ( choice == 1 )
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
