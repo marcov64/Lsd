@@ -403,7 +403,7 @@ cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
 
 cmd( "frame .da.f.tit.ps" );
 cmd( "label .da.f.tit.ps.l -text \"Point size\"" );
-cmd( "entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .da.f.tit.ps.e -width 4 -from 0.2 -to 9.8 -increment 0.2 -validate focusout -validatecommand { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invalidcommand { bell } -justify center } { entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
 
 cmd( "frame .da.f.tit.run" );			// field for adjusting 
@@ -413,7 +413,7 @@ cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
 
 cmd( "frame .da.f.tit.pr" );			// field for adjusting y-axis precision
 cmd( "label .da.f.tit.pr.l -text \"Precision\"" );
-cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .da.f.tit.pr.e -width 2 -from 0 -to 9 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center } { entry .da.f.tit.pr.e -width 2 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center }" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
 cmd( "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5" );

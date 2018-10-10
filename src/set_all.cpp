@@ -121,7 +121,7 @@ value2 = 0;
 cmd( "set value 1" ); 	// method
 cmd( "set to_all 1" );
 cmd( "set step_in 1" );
-cmd( "set cases_from 1; set cases_to 10000" );
+cmd( "set cases_from 1; set cases_to 1000" );
 cmd( "set rnd_seed 1" );
 cmd( "set use_seed 0" );
 cmd( "set update_d 1" );
@@ -247,7 +247,7 @@ cmd( "frame .sa.m.f2.s.i.l" );
 
 cmd( "frame .sa.m.f2.s.i.l.a" );
 cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-cmd( "entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance(s)\"" );
 cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
@@ -265,9 +265,9 @@ cmd( "frame .sa.m.f2.s.i.sel2" );
 
 cmd( "frame .sa.m.f2.s.i.sel2.c" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
 cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
@@ -287,7 +287,7 @@ cmd( "frame .sa.m.f2.rnd.i.le" );
 cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
 cmd( "frame .sa.m.f2.rnd.i.le.s" );
 cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-cmd( "entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
 cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );

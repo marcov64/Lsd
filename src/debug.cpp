@@ -200,7 +200,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		
 		cmd( "frame .deb.b.act.stack" );
 		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
-		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center } { entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center }" );
 		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
 		
