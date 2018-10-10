@@ -305,7 +305,7 @@ else
 	cmd( "set HtmlBrowser \"\"" );
 	cmd( "set fonttype \"\"" );
 	cmd( "set wish \"\"" );
-	cmd( "set LsdSrc \"\"" );
+	cmd( "set LsdSrc \"src\"" );
 	cmd( "set dim_character \"\"" );
 	cmd( "set tabsize \"\"" );
 	cmd( "set wrap \"\"" );
