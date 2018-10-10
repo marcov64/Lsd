@@ -5034,7 +5034,7 @@ if ( choice == 47 )
 
 	cmd( "frame .l.t" );
 	cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
+	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 20 -yscrollcommand \".l.t.yscroll set\"" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
@@ -5128,7 +5128,7 @@ if ( choice == 48 )
 
 	cmd( "frame .l.t" );
 	cmd( "scrollbar .l.t.yscroll -command \".l.t.text yview\"" );
-	cmd( "text .l.t.text -undo 1 -wrap word -font \"$DefaultFont $small_character normal\" -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
+	cmd( "text .l.t.text -undo 1 -wrap word -font [ list \"$DefaultFont\" $small_character normal ] -width 70 -height 16 -yscrollcommand \".l.t.yscroll set\"" );
 	cmd( ".l.t.text insert end $a" );
 	cmd( "pack .l.t.yscroll -side right -fill y" );
 	cmd( "pack .l.t.text" );
