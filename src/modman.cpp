@@ -903,7 +903,7 @@ if ( choice == 1 )
 
 if ( choice == 2 || choice == 6 )
 {
-	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', click on the 'Default' button, and then on 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 
 	if ( choice != 0 )
 	{
@@ -5056,7 +5056,21 @@ if ( choice == 47 )
 			}; \
 			.l.t.text insert end \"LSDROOT=[pwd]\\n\"; \
 			.l.t.text insert end \"$a\"; \
-			.l.d.msg configure -text \"\" \
+			.l.d.msg configure -text \"\"; \
+			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
+				foreach i $objs { \
+					catch { \
+						file delete -force \"$i\" \
+					} \
+				} \
+			}; \
+			if { [ catch { glob \"$modeldir/*.o\" } objs ] == 0 } { \
+				foreach i $objs { \
+					catch { \
+						file delete -force \"$i\" \
+					} \
+				} \
+			} \
 		} { set choice 1 } { LsdHelp LMM.html#compilation_options } { set choice 2 }" );
 
 	cmd( "showtop .l" );
@@ -5212,6 +5226,13 @@ if ( choice == 48 )
 		}" );
 	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
 			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
+				foreach i $objs { \
+					catch { \
+						file delete -force \"$i\" \
+					} \
+				} \
+			}; \
+			if { [ catch { glob \"$modeldir/*.o\" } objs ] == 0 } { \
 				foreach i $objs { \
 					catch { \
 						file delete -force \"$i\" \
@@ -5506,7 +5527,7 @@ if ( choice == 60 )
 // generate the no window distribution
 if ( choice == 62 )
 {
-	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', click on the 'Default' button, and then on 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
+	cmd( "if { \"[ check_sys_opt ]\" != \"\" } { if { [ tk_messageBox -parent . -icon warning -title Warning -type yesno -default no -message \"Invalid system options detected\" -detail \"The current LSD configuration is invalid for your platform. To fix it, please use menu option 'Model>System Options', press the 'Default' button, and then 'OK'.\n\nDo you want to proceed anyway?\" ] == no } { set choice 0 } }" );
 	if ( choice == 0 )
 		goto loop;
 	
@@ -5694,7 +5715,7 @@ if ( choice == 70 )
 	fclose( f );
 	if ( strncmp( str, "FUN_EXTRA=", 10 ) || sscanf( str + 10, "%s", str1 ) < 1 )
 	{
-		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, click on 'Default' button first.\"" );
+		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"No extra files defined\" -detail \"Open 'Model Options' in menu 'Model' and include all extra files names in the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
 		goto loop;
 	}
 	i = strlen( str ) - 1;
@@ -5785,43 +5806,37 @@ if ( choice == 87 )
 	
 	// check if file is already loaded
 	cmd( "if { [ string equal \"$errfil\" \"[ file normalize \"$dirname/$filename\" ]\" ] } { \
-				set choice 1 \
-			} { \
-				set choice 0 \
-			}" );
+			set choice 1 \
+		} { \
+			set choice 0 \
+		}" );
+		
 	if ( choice == 0 )
 	{	
 		// check if main equation file is not the current file
 		s = get_fun_name( str );
 		if ( s != NULL && strlen( s ) > 0 )
-			cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modeldir/%s\" ]\" ] { set choice 8 }", s );
-												// open main equation file
+			cmd( "if [ string equal \"$errfil\" \"[ file normalize \"$modeldir/%s\" ]\" ] { set choice 8 }", s );		// open main equation file
 												
 		// try to open an extra file defined by the user
 		if ( choice == 0 )
-		{
-			// open the configuration file
+		{	// open the configuration file
 			cmd( "set fapp [ file nativename \"$modeldir/model_options.txt\" ]" );
 			s = ( char * ) Tcl_GetVar( inter, "fapp", 0 );
-			if ( s == NULL || ( f = fopen( s, "r" ) ) == NULL )
+			if ( s == NULL || strlen( s ) == 0 || ( f = fopen( s, "r" ) ) == NULL )
 			{
-				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then 'Recompile'.\"" );
+				cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not created\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model' and then try again.\"" );
 				goto loop;
 			}
-
-			// try to extract the extra files list
-			while ( fgets( str, MAX_LINE_SIZE - 1, f ) != NULL && strncmp( str, "FUN_EXTRA=", 10 ) );
-			fclose( f );
-			// make sure extra section exists and have elements
-			if ( ! strncmp( str, "FUN_EXTRA=", 10 ) && sscanf( str + 10, "%s", str1 ) > 0 )
-			{
-				i = strlen( str ) - 1;
-				str[ i ] = '\0';				// remove LF
-				if ( str[ --i ] == '\r' )
-					str[ i ] = '\0';			// remove CR (Windows)
+			else
+				fclose( f );
 				
-				// search error file in the extra files list
-				cmd( "set fun_extra [ split [ string trim \"%s\" ] \" \t\" ]", str + 10 );
+			// search in all source files (except main, already done)
+			cmd( "set source_files [ get_source_files $modeldir ]" );
+			cmd( "if { [ llength $source_files ] > 1 } { set fun_extra [ lreplace $source_files 0 0 ]; set choice [ llength $fun_extra ] } { set choice 0 }" );
+	
+			if ( choice > 0 )
+			{	// search error file in the extra files list
 				cmd( "foreach x $fun_extra { \
 						set x \"[ string trim $x ]\"; \
 						if { $x != \"\" } { \
@@ -5842,7 +5857,7 @@ if ( choice == 87 )
 			
 			if ( choice == 0 )
 			{
-				cmd( "tk_messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, click on 'Default' button first.\"" );
+				cmd( "tk_messageBox -parent .mm -title Warning -icon warning -type ok -message \"File not tracked\" -detail \"LMM is able to show error only in your main equation file or in extra files explicitly included.\n\nIf you want to track additional extra files, please open 'Model Options' in menu 'Model' and include all (additional) extra files names at the end of the line starting with 'FUN_EXTRA='. Add the names after the '=' character and separate them with spaces or use 'Add Extra' button to select one or more files.\n\nIf there is no 'FUN_EXTRA=' line, press 'Default' button first.\"" );
 				goto loop;				// file not available
 			}
 		}
@@ -5858,8 +5873,8 @@ if ( choice == 87 )
 				.f.t.t tag remove sel 1.0 end; \
 				.f.t.t tag add sel $errlin.0 $errlin.end; \
 				if { [ info exists errcol ] && $errcol != \"\" && [ string is integer -strict $errcol ] } { \
-					.f.t.t see $errlin.$errcol; \
-					.f.t.t mark set insert $errlin.$errcol \
+					.f.t.t see $errlin.[ expr $errcol - 1 ]; \
+					.f.t.t mark set insert $errlin.[ expr $errcol - 1 ] \
 				} else { \
 					.f.t.t see $errlin.0; \
 					.f.t.t mark set insert $errlin.0 \
@@ -6241,7 +6256,7 @@ void check_option_files( bool sys )
  *********************************/
 char *get_fun_name( char *str, bool nw )
 {
-	char *s;
+	char *s, buf[ MAX_PATH_LENGTH ];
 	FILE *f;
 	
 	make_makefile( nw );
@@ -6253,18 +6268,18 @@ char *get_fun_name( char *str, bool nw )
 	if ( f == NULL )
 		goto error;
 	
-	fscanf( f, "%999s", str );
-	while ( strncmp( str, "FUN=", 4 ) && fscanf( f, "%999s", str ) != EOF );   
+	fgets( str, MAX_LINE_SIZE - 1, f );
+	while ( strncmp( str, "FUN=", 4 ) && ! feof( f ) )
+		fgets( str, MAX_LINE_SIZE - 1, f );   
 	
 	fclose( f );
 	
 	if ( strncmp( str, "FUN=", 4 ) != 0 )
 		goto error;
 
-	s = str + 4;
-	strcat( s, ".cpp" );
-	
-	return s;
+	sscanf( str + 4, "%499s", buf );
+	sprintf( str, "%s.cpp", buf );
+	return str;
 	
 error:
 	cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"Makefile not found or corrupted\" -detail \"Please check 'Model Options' and 'System Options' in menu 'Model'.\"" );
@@ -6335,8 +6350,14 @@ bool compile_run( bool run, bool nw )
   
 	// get source name
 	s = get_fun_name( str, nw );
-	if ( s == NULL || ! strcmp( s, "" ) )
+	if ( s == NULL || ! strcmp( s, "" ) || ( f = fopen( s, "r" ) ) == NULL )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Equation file not found\" -detail \"File '%s' is no longer available in directory '$modeldir'.\" ", s );
 		goto end;
+	}
+	else
+		fclose( f );
+	
 	cmd( "set fname \"%s\"", s );
 	
 	// get target exec name
@@ -6407,7 +6428,6 @@ bool compile_run( bool run, bool nw )
 	cmd( "if { [ file size makemessage.txt] == 0 } { file delete makemessage.txt; set res 0 } { set res 1 }" );
 	if ( res == 1 )
 	{	// Check if the executable is newer than the compilation command, implying just warnings
-		cmd( "set funtime [ file mtime \"$fname\"] " );
 #ifdef MAC_PKG
 		if ( ! nw )
 			cmd( "if [ string equal $tcl_platform(os) Darwin ] { set pkgPath \"%s.app/Contents/MacOS/\" } { set pkgPath \"\" }", str + 7 );
@@ -6531,15 +6551,12 @@ void create_compresult_window( bool nw )
 				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
-					set errfil \"\"; \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
 				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
-					set errfil \"\"; \
-					set errlin  \"\"; \
 					set errcol \"\" \
 				}; \
 				.mm.i.f.n configure -text $errfil; \
@@ -6572,15 +6589,12 @@ void create_compresult_window( bool nw )
 				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errlin [ lindex $errdat $idxfil ] \
 				} else { \
-					set errfil \"\"; \
 					set errlin  \"\" \
 				}; \
 				incr idxfil; \
 				if { $errfil != \"\" && [ llength $errdat ] > $idxfil && [ string is integer -strict [ lindex $errdat $idxfil ] ] } { \
 					set errcol [ lindex $errdat $idxfil ] \
 				} else { \
-					set errfil \"\"; \
-					set errlin  \"\"; \
 					set errcol \"\" \
 				}; \
 				.mm.i.f.n configure -text $errfil; \

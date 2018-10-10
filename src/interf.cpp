@@ -3909,7 +3909,20 @@ case 50:
 	cmd( "okcancel .srch b { set choice 1 } { set choice 2 }" );
 
 	cmd( "bind .srch.i.e <KeyPress-Return> { set choice 1 }" );
-	cmd( "bind .srch.i.e <KeyRelease> {if { %%N < 256 && [ info exists ModElem ] } { set b [.srch.i.e index insert]; set s [.srch.i.e get]; set f [lsearch -glob $ModElem $s*]; if { $f !=-1 } {set d [lindex $ModElem $f]; .srch.i.e delete 0 end; .srch.i.e insert 0 $d; .srch.i.e index $b; .srch.i.e selection range $b end } } }" );
+	cmd( "bind .srch.i.e <KeyRelease> { \
+			if { %%N < 256 && [ info exists modElem ] } { \
+				set b [ .srch.i.e index insert ]; \
+				set s [ .srch.i.e get ]; \
+				set f [ lsearch -glob $modElem $s* ]; \
+				if { $f !=-1 } { \
+					set d [ lindex $modElem $f ]; \
+					.srch.i.e delete 0 end; \
+					.srch.i.e insert 0 $d; \
+					.srch.i.e index $b; \
+					.srch.i.e selection range $b end \
+				} \
+			} \
+		}" );
 
 	cmd( "showtop .srch" );
 	cmd( "focus .srch.i.e" );
