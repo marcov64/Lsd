@@ -318,18 +318,31 @@ else
 
 i = choice;
 
-// load required Tcl/Tk data, procedures and packages
+// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 choice = 0;
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
-cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+
+// load native Tk windows defaults
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
+
+// load native Tk procedures for windows management
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
+
+// load native Tcl procedures for external files handling
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+
+// load additional native Tcl procedures for external files handling
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
+
+// load module to improve to improve mouse selection
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
+
+// load the model browser module
+cmd( "if [ file exists \"$RootLsd/$LsdSrc/showmodel.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/showmodel.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x2000, 0x20 );
+
 if ( choice != 0 )
 {
-	log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files ($choice) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+	log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+	cmd( "tk_messageBox -type ok -icon error -title Error -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 	return 10 + choice;
 }
 
@@ -858,7 +871,7 @@ if ( argn > 1 )
 else
 	choice = 33; 				// open model browser
   
-cmd( "wm deiconify .; raise .; focus -force .f.t.t; update" );
+cmd( "wm deiconify .; raise .; focus .f.t.t; update" );
 
 loop:
 
@@ -1142,31 +1155,30 @@ if ( choice == 10 )
 
 	cmd( "frame .search_line.l" );
 	cmd( "label .search_line.l.l -text \"Line number\"" );
-	cmd( "entry .search_line.l.e -justify center -width 10 -textvariable line" );
+	cmd( "entry .search_line.l.e -width 10 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set line %%P; return 1 } { %%W delete 0 end; %%W insert 0 $line; return 0 } } -invalidcommand { bell } -justify center" );
 	cmd( "pack .search_line.l.l .search_line.l.e" );
 
 	cmd( "pack .search_line.l -padx 5 -pady 5" );
 
 	cmd( "okcancel .search_line b { \
-			if { $line == \"\" } { \
-				.search_line.can invoke \
-			} else { \
-				if [ string is integer -strict $line ] { \
-					.f.t.t tag remove sel 1.0 end; \
-					.f.t.t see $line.0; \
-					.f.t.t tag add sel $line.0 $line.end; \
-					.f.t.t mark set insert $line.0; \
-					.f.hea.line.line conf -text [ .f.t.t index insert ]; \
-					destroytop .search_line \
-				} else { \
-					destroytop .search_line; \
-					tk_messageBox -parent .search_line -type ok -title Error -icon error -message \"Invalid value\" -detail \"Please check that a valid integer is used.\" \
-				} \
-			} \
+			set line [ .search_line.l.e get ]; \
+			if { $line != \"\" && [ string is integer -strict $line ] && $line > 0 } { \
+				.f.t.t tag remove sel 1.0 end; \
+				.f.t.t see $line.0; \
+				.f.t.t mark set insert $line.0; \
+				.f.t.t tag add sel $line.0 $line.end; \
+				.f.hea.line.line conf -text [ .f.t.t index insert ] \
+			} { \
+				bell \
+			}; \
+			destroytop .search_line; \
+			focus .f.t.t \
 		} { \
-			destroytop .search_line \
+			destroytop .search_line; \
+			focus .f.t.t \
 		}" );
-	cmd( "bind .search_line <KeyPress-Return> { .search_line.b.ok invoke }" );
+
+	cmd( "bind .search_line.l.e <KeyPress-Return> { .search_line.b.ok invoke }" );
 
 	cmd( "showtop .search_line" );
 	cmd( "focus .search_line.l.e" );
@@ -1225,7 +1237,8 @@ if ( choice == 11 )
 					.f.t.t mark set insert \"$cur + $length char\" ; \
 					update; \
 					.f.t.t see $cur; \
-					destroytop .find \
+					destroytop .find; \
+					focus .f.t.t \
 				} else { \
 					.find.l.e selection range 0 end; \
 					bell \
@@ -1233,7 +1246,10 @@ if ( choice == 11 )
 			} { \
 				bell \
 			} \
-		} { destroytop .find }" );
+		} { \
+			destroytop .find; \
+			focus .f.t.t \
+		}" );
 
 	cmd( "bind .find.l.e <Up> { \
 			if { $lfindsize > 0 && $curcounter > 0 } { \
@@ -1249,7 +1265,10 @@ if ( choice == 11 )
 				.find.l.e selection range 0 end \
 			} \
 		}" );
-	cmd( "bind .find <KeyPress-Return> { .find.b.ok invoke }" );
+	cmd( "bind .find.l.e <KeyPress-Return> { .find.b.ok invoke }" );
+	cmd( "bind .find.r.r1 <KeyPress-Return> { .find.b.ok invoke }" );
+	cmd( "bind .find.r.r2 <KeyPress-Return> { .find.b.ok invoke }" );
+	cmd( "bind .find.c <KeyPress-Return> { .find.b.ok invoke }" );
 
 	cmd( "showtop .find" );
 	cmd( ".find.l.e selection range 0 end" );
@@ -1391,7 +1410,13 @@ if ( choice == 21 )
 				.l.l.e selection range 0 end \
 			} \
 		}" );
-	cmd( "bind .l <KeyPress-Return> {.l.b2.ok invoke}" );
+	cmd( "bind .l.l.e <KeyPress-Return> { .l.b2.ok invoke }" );
+	cmd( "bind .l.p.e <KeyPress-Return> { .l.b2.ok invoke }" );
+	cmd( "bind .l.r.r1 <KeyPress-Return> { .l.b2.ok invoke }" );
+	cmd( "bind .l.r.r2 <KeyPress-Return> { .l.b2.ok invoke }" );
+	cmd( "bind .l.c <KeyPress-Return> { .l.b2.ok invoke }" );
+	cmd( "bind .l.b1.repl <KeyPress-Return> { .l.b1.repl invoke }" );
+	cmd( "bind .l.b1.all <KeyPress-Return> { .l.b1.all invoke }" );
 
 	cmd( "showtop .l" );
 	cmd( ".l.l.e selection range 0 end" );
@@ -1437,7 +1462,7 @@ if ( choice == 21 )
 	}
 
 	cmd( "destroytop .l" );
-
+	cmd( "focus .f.t.t" );
 	cmd( ".f.t.t tag remove found 1.0 end" );
 	color( shigh, 0, 0 );				// reevaluate colors
 	choice = 0;
@@ -1558,335 +1583,345 @@ if ( choice == 13 || choice == 58 )
 }
 
 
+/* create a new model/group */
+
 if ( choice == 14 )
 {
-/* Create a new model/group */
+	cmd( "destroytop .mm" );	// close compilation results, if open
 
-cmd( "destroytop .mm" );	// close compilation results, if open
-
-// prevent creating new groups in LSD directory
-cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
-		{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
-			-icon warning -default ok -message \"Invalid parent group\" \
-			-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
-			if [ string equal $answer ok ] { \
-				set groupdir \"$groupdir/$LsdNew\"; \
-				set f [open \"$groupdir/groupinfo.txt\" r]; \
-				set app \"[gets $f]\"; \
-				close $f; \
-				if [ string equal \"$modelgroup\" \"$rootname\" ] { \
-					set modelgroup \"$app\" \
+	// prevent creating new groups in LSD directory
+	cmd( "if { [ string equal $groupdir [ pwd ] ] && [ file exists \"$groupdir/$LsdNew/groupinfo.txt\" ] } \
+			{	set answer [ tk_messageBox -parent . -type okcancel -title Warning \
+				-icon warning -default ok -message \"Invalid parent group\" \
+				-detail \"Cannot create group/model in the Root group. Press 'OK' to change to the '$LsdNew' group before proceeding.\" ]; \
+				if [ string equal $answer ok ] { \
+					set groupdir \"$groupdir/$LsdNew\"; \
+					set f [open \"$groupdir/groupinfo.txt\" r]; \
+					set app \"[gets $f]\"; \
+					close $f; \
+					if [ string equal \"$modelgroup\" \"$rootname\" ] { \
+						set modelgroup \"$app\" \
+					} else { \
+						set modelgroup \"$modelgroup/$app\" \
+					}; \
+					.f.hea.grp.dat conf -text \"$modelgroup\"; \
+					set choice 1 \
 				} else { \
-					set modelgroup \"$modelgroup/$app\" \
-				}; \
-				.f.hea.grp.dat conf -text \"$modelgroup\"; \
-				set choice 1 \
-			} else { \
-				set choice 0 \
-			} \
-		}");		
-if ( choice == 0 )
+					set choice 0 \
+				} \
+			}");		
+	if ( choice == 0 )
+		goto loop;
+
+	cmd( "set temp 1" );
+
+	cmd( "newtop .a \"New Model\" { set choice 2 }" );
+
+	cmd( "frame .a.tit" );
+	cmd( "label .a.tit.l -text \"Current group:\"" );
+	cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+	cmd( "pack .a.tit.l .a.tit.n" );
+
+	cmd( "frame .a.f -relief groove -bd 2" );
+	cmd( "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -anchor w" );
+	cmd( "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -anchor w" );
+	cmd( "pack .a.f.r1 .a.f.r2 -anchor w" );
+
+	cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
+
+	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
+	
+	cmd( "bind .a.f <KeyPress-Return> { .a.b.ok invoke }" );
+	cmd( "bind .a <Up> {.a.f.r1 invoke}" );
+	cmd( "bind .a <Down> {.a.f.r2 invoke}" );
+
+	cmd( "showtop .a" );
+
+	choice = 0;
+	while ( choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "destroytop .a" );
+
+	if ( choice == 2 )
+	{
+		choice = 0;
+		cmd( "focus .f.t.t" );
+		goto loop;
+	}
+
+	cmd( "set choice $temp" );
+	if ( choice == 2 )
+	{
+		cmd( "set mname \"New group\"" );
+		cmd( "set mdir \"newgroup\"" );
+
+		cmd( "newtop .a \"New Group\" { set choice 2 }" );
+
+		cmd( "frame .a.tit" );
+		cmd( "label .a.tit.l -text \"Current group:\"" );
+		cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+		cmd( "pack .a.tit.l .a.tit.n" );
+
+		cmd( "frame .a.mname" );
+		cmd( "label .a.mname.l -text \"New group name\"" );
+		cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+		cmd( "pack .a.mname.l .a.mname.e" );
+
+		cmd( "frame .a.mdir" );
+		cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
+		cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
+		cmd( "pack .a.mdir.l .a.mdir.e" );
+
+		cmd( "frame .a.tdes" );
+		cmd( "label .a.tdes.l -text \"Group description\"" );
+		cmd( "set a [ list \"$fonttype\" $small_character ]" );
+		cmd( "text .a.tdes.e -undo 1 -width 60 -height 15 -font \"$a\"" );
+		cmd( "pack .a.tdes.l .a.tdes.e" );
+
+		cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
+
+		cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
+		cmd( "bind .a.mname.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
+		cmd( "bind .a.mdir.e <Return> { focus .a.tdes.e }" );
+
+		cmd( "showtop .a" );
+		cmd( ".a.mname.e selection range 0 end" );
+		cmd( "focus .a.mname.e" );
+
+		here_newgroup:
+
+		choice = 0;
+
+		while ( choice == 0 )
+			Tcl_DoOneEvent( 0 );
+
+		cmd( "if { [ string length $mdir ] == 0 || [ string length $mname ] == 0 } { set choice 2 }" );
+
+		if ( choice == 2 )
+		{
+			cmd( "destroytop .a" );
+			cmd( "focus .f.t.t" );
+			choice = 0;
+			goto loop;
+		}
+
+		cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
+		if ( choice == -1 )
+		{
+			cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
+			cmd( "focus .a.mdir.e" );
+			cmd( ".a.mdir.e selection range 0 end" );
+			goto here_newgroup;
+		}
+		
+		// control for existing directory
+		cmd( "if { [ file exists \"$groupdir/$mdir\"] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+		if ( choice == 3 )
+		{
+			cmd( "focus .a.mdir.e" );
+			cmd( ".a.mdir.e selection range 0 end" );
+			goto here_newgroup;
+		}
+
+		cmd( "file mkdir \"$groupdir/$mdir\"" );
+		cmd( "cd \"$groupdir/$mdir\"" );
+		cmd( "set groupdir \"$groupdir/$mdir\"" );
+		cmd( "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $f" );
+		cmd( "set f [open description.txt w]; puts -nonewline $f \"[ .a.tdes.e get 0.0 end ]\"; close $f" );
+		cmd( "if [ string equal \"$modelgroup\" \"$rootname\" ] { set modelgroup \"$mname\" } { set modelgroup \"$modelgroup/$mname\" }" );
+
+		cmd( "destroytop .a" );
+		//end of creation of a new group
+	}
+	else
+		cmd( "cd \"$groupdir\"" );	// if no group is created, move in the current group
+
+	// create a new model
+	cmd( "set mname \"New model\"" );
+	cmd( "set mver \"1.0\"" );
+	cmd( "set mdir \"newmodel\"" );
+
+
+	cmd( "newtop .a \"New Model\" { set choice 2 }" );
+
+	cmd( "frame .a.tit" );
+	cmd( "label .a.tit.l -text \"Current group:\"" );
+	cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
+	cmd( "pack .a.tit.l .a.tit.n" );
+
+	cmd( "frame .a.mname" );
+	cmd( "label .a.mname.l -text \"New model name\"" );
+	cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
+	cmd( "pack .a.mname.l .a.mname.e" );
+
+	cmd( "frame .a.mver" );
+	cmd( "label .a.mver.l -text \"Version\"" );
+	cmd( "entry .a.mver.e -width 10 -textvariable mver -justify center" );
+	cmd( "pack .a.mver.l .a.mver.e" );
+
+	cmd( "frame .a.mdir" );
+	cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
+	cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
+	cmd( "pack .a.mdir.l .a.mdir.e" );
+
+	cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
+
+	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
+	cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
+	cmd( "bind .a.mver.e <Return> { focus .a.mdir.e; .a.mdir.e selection range 0 end }" );
+	cmd( "bind .a.mdir.e <Return> { focus .a.b.ok }" );
+
+	cmd( "showtop .a" );
+	cmd( ".a.mname.e selection range 0 end" );
+	cmd( "focus .a.mname.e" );
+
+	loop_copy_new:
+
+	choice = 0;
+
+	while ( choice == 0 )
+		Tcl_DoOneEvent( 0 );
+
+	cmd( "if { [ string length $mdir ] == 0 || [ string length $mname ] == 0 } { set choice 2 }" );
+	if ( choice == 2 )
+	{
+		cmd( "destroytop .a" );
+		cmd( "focus .f.t.t" );
+		choice = 0;
+		goto loop;
+	}
+
+	cmd( "if { [ llength [ split $mdir ] ] > 1 } { set choice -1 }" );
+	if ( choice == -1 )
+	{
+		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
+	   cmd( "focus .a.mdir.e" );
+	   cmd( ".a.mdir.e selection range 0 end" );
+	   goto loop_copy_new;
+	} 
+
+	// control for existing directory
+	cmd( "if { [ file exists \"$mdir\" ] == 1 } { tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3 }" );
+	if ( choice == 3 )
+	{
+		cmd( "focus .a.mdir.e" );
+		cmd( ".a.mdir.e selection range 0 end" );
+		goto loop_copy_new;
+	} 
+
+	// control for an existing model with the same name AND same version
+	cmd( "set dir [ glob -nocomplain * ]" );
+	cmd( "set num [ llength $dir ]" );
+	strcpy(str, " ");
+	
+	for ( i = 0; i < num; ++i )
+	{
+		cmd( "if { [ file isdirectory [ lindex $dir %d ] ] == 1 } { set curdir [ lindex $dir %i ] } { set curdir ___ }", i, i );
+		s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
+		strncpy( str, s, 499 );
+		if ( strcmp( str, "___" ) && strcmp( str, "gnu" )  && strcmp( str, "gnu64" ) && strcmp( str, "src" ) && strcmp( str, "Manual" ) && strcmp( str, "R" ) && strcmp( str, "lwi" ) )
+		{
+			cmd( "set ex [ file exists \"$curdir/modelinfo.txt\" ]" );
+			cmd( "if { $ex == 0 } { set choice 0 } { set choice 1 }" );
+			if ( choice == 1 )
+			{
+				cmd( "set f [ open \"$curdir/modelinfo.txt\" r ]" );
+				cmd( "set cname [ gets $f ]; set cver [ gets $f ];" );
+				cmd( "close $f" );
+			} 
+			else
+				cmd( "set cname $curdir; set cver \"0.1\"" );
+			
+			cmd( "set comp [ string compare $cname $mname ]" );
+			cmd( "set comp1 [ string compare $cver $mver ]" );
+			cmd( "if { $comp == 0 && $comp1 == 0} { set choice 3; set errdir $curdir }" );
+			cmd( "if { $comp == 0 } { set choice 4; set errdir $curdir }" );
+		}
+	 }
+	 
+	if ( choice == 3 )
+	{
+		cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"" );
+		cmd( ".a.mname.e selection range 0 end" );
+		cmd( "focus .a.mname.e" );
+		goto loop_copy_new;
+	} 
+	 
+	if ( choice == 4 )
+	{
+		choice = 0;
+		cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
+		s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
+	
+		cmd( "if { ! [ string compare $answer ok] } { set choice 1 } { set choice 0 }" );
+		if ( choice == 0 )
+		{
+			cmd( "destroytop .a" );
+			cmd( "focus .f.t.t" );
+			goto loop;
+		} 
+	} 
+	 
+	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
+
+	// create a new empty model
+
+	cmd( "set dirname $groupdir/$mdir" );
+	cmd( "set modeldir $groupdir/$mdir" );
+	cmd( "set modelname $mname" );
+	cmd( "set version $mver" );
+	cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
+	cmd( ".f.hea.ver.dat conf -text \"$version\"" );
+	cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
+
+	cmd( "file mkdir \"$dirname\"" );
+
+	if ( macro )
+		cmd( "set fun_base \"fun_baseMacro.cpp\"" );
+	else 
+		cmd( "set fun_base \"fun_baseC.cpp\"" );
+
+	// create the empty equation file
+	cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modeldir/fun_$mdir.cpp\"" ); 
+
+	cmd( "cd \"$dirname\"" );
+
+	// create the model_options.txt file
+	check_option_files( );
+
+	// insert the modelinfo file, 
+	cmd( "set before [ .f.t.t get 1.0 end ]" );
+	cmd( "set f [ open modelinfo.txt w ]" );
+	cmd( "puts $f \"$modelname\"" );
+	cmd( "puts $f \"$version\"" );
+	cmd( "set frmt \"%%d %%B, %%Y\"" );
+	cmd( "puts $f \"[ clock format [ clock seconds ] -format \"$frmt\" ]\"" );
+	cmd( "close $f" );
+
+	cmd( "cd \"$RootLsd\"" );
+
+	cmd( ".m.file entryconf 2 -state normal" );
+	cmd( ".m.file entryconf 3 -state normal" );
+	cmd( ".m.model entryconf 0 -state normal" );
+	cmd( ".m.model entryconf 1 -state normal" );
+	cmd( ".m.model entryconf 2 -state normal" );
+	cmd( ".m.model entryconf 3 -state normal" );
+	cmd( ".m.model entryconf 4 -state normal" );
+	cmd( ".m.model entryconf 6 -state normal" );
+	cmd( ".m.model entryconf 7 -state normal" );
+	cmd( ".m.model entryconf 8 -state normal" );
+	cmd( ".m.model entryconf 9 -state normal" );
+	cmd( ".m.model entryconf 10 -state normal" );
+	cmd( ".m.model entryconf 12 -state normal" );
+
+	cmd( "tk_messageBox -parent . -type ok -title \"Model Created\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );
+
+	cmd( "set before [ .f.t.t get 0.0 end ]" ); //avoid to re-issue a warning for non saved files
+	
+	choice = 50;
 	goto loop;
-
-cmd( "set temp 1" );
-
-cmd( "newtop .a \"New Model\" { set choice 2 }" );
-
-cmd( "frame .a.tit" );
-cmd( "label .a.tit.l -text \"Current group:\"" );
-cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
-cmd( "pack .a.tit.l .a.tit.n" );
-
-cmd( "frame .a.f -relief groove -bd 2" );
-cmd( "radiobutton .a.f.r1 -variable temp -value 1 -text \"Create a new model in the current group\" -anchor w" );
-cmd( "radiobutton .a.f.r2 -variable temp -value 2 -text \"Create a new model in a new group\" -anchor w" );
-cmd( "pack .a.f.r1 .a.f.r2 -anchor w" );
-
-cmd( "pack .a.tit .a.f -padx 5 -pady 5" );
-
-cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-cmd( "bind .a <KeyPress-Return> { .a.b.ok invoke }" );
-cmd( "bind .a <Up> {.a.f.r1 invoke}" );
-cmd( "bind .a <Down> {.a.f.r2 invoke}" );
-
-cmd( "showtop .a" );
-
-choice = 0;
-while ( choice == 0 )
- Tcl_DoOneEvent( 0 );
-
-cmd( "destroytop .a" );
-
-//operation cancelled
-if ( choice == 2)
- {
-  choice = 0;
-  goto loop;
- }
-
-cmd( "set choice $temp" );
-if ( choice == 2)
-{
-cmd( "set mname \"New group\"" );
-cmd( "set mdir \"newgroup\"" );
-
-cmd( "newtop .a \"New Group\" { set choice 2 }" );
-
-cmd( "frame .a.tit" );
-cmd( "label .a.tit.l -text \"Current group:\"" );
-cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
-cmd( "pack .a.tit.l .a.tit.n" );
-
-cmd( "frame .a.mname" );
-cmd( "label .a.mname.l -text \"New group name\"" );
-cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
-cmd( "pack .a.mname.l .a.mname.e" );
-
-cmd( "frame .a.mdir" );
-cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
-cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
-cmd( "pack .a.mdir.l .a.mdir.e" );
-
-cmd( "frame .a.tdes" );
-cmd( "label .a.tdes.l -text \"Group description\"" );
-cmd( "set a [ list \"$fonttype\" $small_character ]" );
-cmd( "text .a.tdes.e -undo 1 -width 60 -height 15 -font \"$a\"" );
-cmd( "pack .a.tdes.l .a.tdes.e" );
-
-cmd( "pack .a.tit .a.mname .a.mdir .a.tdes -padx 5 -pady 5" );
-
-cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-cmd( "bind .a.mname.e <Return> {focus .a.mdir.e; .a.mdir.e selection range 0 end}" );
-cmd( "bind .a.mdir.e <Return> {focus .a.tdes.e}" );
-
-cmd( "showtop .a" );
-cmd( ".a.mname.e selection range 0 end" );
-cmd( "focus .a.mname.e" );
-
-here_newgroup:
-
-choice = 0;
-
-while ( choice == 0 )
- Tcl_DoOneEvent( 0 );
-
-cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
-
-//operation cancelled
-if ( choice == 2)
- {cmd( "destroytop .a" );
-  choice = 0;
-  goto loop;
- }
-
-cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if ( choice == -1)
- {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
-  cmd( "focus .a.mdir.e" );
-  cmd( ".a.mdir.e selection range 0 end" );
-  goto here_newgroup;
- } 
-//control for existing directory
-cmd( "if {[file exists \"$groupdir/$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if ( choice == 3)
-{
-  cmd( "focus .a.mdir.e" );
-  cmd( ".a.mdir.e selection range 0 end" );
-  goto here_newgroup;
-}
-
-cmd( "file mkdir \"$groupdir/$mdir\"" );
-cmd( "cd \"$groupdir/$mdir\"" );
-cmd( "set groupdir \"$groupdir/$mdir\"" );
-cmd( "set f [open groupinfo.txt w]; puts -nonewline $f \"$mname\"; close $f" );
-cmd( "set f [open description.txt w]; puts -nonewline $f \"[.a.tdes.e get 0.0 end]\"; close $f" );
-cmd( "if [ string equal \"$modelgroup\" \"$rootname\" ] { set modelgroup \"$mname\" } { set modelgroup \"$modelgroup/$mname\" }" );
-
-cmd( "destroytop .a" );
-//end of creation of a new group
-}
-else
- cmd( "cd \"$groupdir\"" ); //if no group is created, move in the current group
-
-//create a new model
-cmd( "set mname \"New model\"" );
-cmd( "set mver \"1.0\"" );
-cmd( "set mdir \"newmodel\"" );
-
-
-cmd( "newtop .a \"New Model\" { set choice 2 }" );
-
-cmd( "frame .a.tit" );
-cmd( "label .a.tit.l -text \"Current group:\"" );
-cmd( "label .a.tit.n -fg red -text \"$modelgroup\"" );
-cmd( "pack .a.tit.l .a.tit.n" );
-
-cmd( "frame .a.mname" );
-cmd( "label .a.mname.l -text \"New model name\"" );
-cmd( "entry .a.mname.e -width 25 -textvariable mname -justify center" );
-cmd( "pack .a.mname.l .a.mname.e" );
-
-cmd( "frame .a.mver" );
-cmd( "label .a.mver.l -text \"Version\"" );
-cmd( "entry .a.mver.e -width 10 -textvariable mver -justify center" );
-cmd( "pack .a.mver.l .a.mver.e" );
-
-cmd( "frame .a.mdir" );
-cmd( "label .a.mdir.l -text \"New (non-existing) subdirectory name\"" );
-cmd( "entry .a.mdir.e -width 35 -textvariable mdir -justify center" );
-cmd( "pack .a.mdir.l .a.mdir.e" );
-
-cmd( "pack .a.tit .a.mname .a.mver .a.mdir -padx 5 -pady 5" );
-
-cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-cmd( "bind .a.mname.e <Return> {focus .a.mver.e; .a.mver.e selection range 0 end}" );
-cmd( "bind .a.mver.e <Return> {focus .a.mdir.e; .a.mdir.e selection range 0 end}" );
-cmd( "bind .a.mdir.e <Return> {focus .a.b.ok}" );
-
-cmd( "showtop .a" );
-cmd( ".a.mname.e selection range 0 end" );
-cmd( "focus .a.mname.e" );
-
-loop_copy_new:
-
-choice = 0;
-
-while ( choice == 0 )
- Tcl_DoOneEvent( 0 );
-
-cmd( "if {[string length $mdir] == 0 || [string length $mname]==0} {set choice 2}" );
-//operation cancelled
-if ( choice == 2)
- {cmd( "destroytop .a" );
-  choice = 0;
-  goto loop;
- }
-
-cmd( "if {[llength [split $mdir]]>1} {set choice -1}" );
-if ( choice == -1)
- {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Space in path\" -detail \"Directory name must not contain spaces, please try a new name.\"" );
-  cmd( "focus .a.mdir.e" );
-  cmd( ".a.mdir.e selection range 0 end" );
-  goto loop_copy_new;
- } 
-
-//control for existing directory
-cmd( "if {[file exists \"$mdir\"] == 1} {tk_messageBox -parent .a -type ok -title Error -icon error -message \"Cannot create directory\" -detail \"$groupdir/$mdir\\n\\nPossibly there is already such a directory, please try a new directory.\"; set choice 3}" );
-if ( choice == 3)
- {
-  cmd( "focus .a.mdir.e" );
-  cmd( ".a.mdir.e selection range 0 end" );
-  goto loop_copy_new;
- } 
-
-//control for an existing model with the same name AND same version
-cmd( "set dir [glob -nocomplain *]" );
-cmd( "set num [llength $dir]" );
-strcpy(str, " ");
-for ( i = 0; i<num; ++i )
- {
-  cmd( "if {[file isdirectory [lindex $dir %d] ] == 1} {set curdir [lindex $dir %i]} {set curdir ___}", i, i );
-  s = ( char * ) Tcl_GetVar( inter, "curdir", 0 );
-  strncpy( str, s, 499 );
-  if (strcmp(str,"___") && strcmp(str, "gnu")  && strcmp(str, "gnu64") && strcmp(str, "src") && strcmp(str, "Manual") && strcmp(str, "R") )
-   {
-    cmd( "set ex [file exists \"$curdir/modelinfo.txt\"]" );
-    cmd( "if { $ex == 0 } {set choice 0} {set choice 1}" );
-    if ( choice == 1 )
-    {
-      cmd( "set f [open \"$curdir/modelinfo.txt\" r]" );
-      cmd( "set cname [gets $f]; set cver [gets $f];" );
-      cmd( "close $f" );
-    } 
-    else
-      cmd( "set cname $curdir; set cver \"0.1\"" );
-    cmd( "set comp [string compare $cname $mname]" );
-    cmd( "set comp1 [string compare $cver $mver]" );
-    cmd( "if {$comp == 0 && $comp1 == 0} {set choice 3; set errdir $curdir}" );
-    cmd( "if {$comp == 0 } {set choice 4; set errdir $curdir}" );
-
-   }
- }
- 
-if ( choice == 3)
- {cmd( "tk_messageBox -parent .a -type ok -title Error -icon error -message \"Model already exists\" -detail \"Cannot create the new model '$mname' (ver. $mver) because it already exists (directory: $errdir).\"" );
-  cmd( ".a.mname.e selection range 0 end" );
-  cmd( "focus .a.mname.e" );
-  goto loop_copy_new;
- } 
- 
-if ( choice == 4)
- {
- choice = 0;
- cmd( "set answer [tk_messageBox -parent .a -type okcancel -title Warning -icon warning -default cancel -message \"Model already exists\" -detail \"A model named '$mname' already exists (ver. $mver).\\n\\nIf you want the new model to inherit the same equations, data etc. of that model you should cancel this operation, and use the 'Save Model As...' command. Or press 'OK' to continue creating a new (empty) model '$mname'.\"]" );
-  s = ( char * ) Tcl_GetVar( inter, "answer", 0 );
-
-  cmd( "if {[string compare $answer ok] == 0} {set choice 1} {set choice 0}" );
-  if ( choice == 0 )
-   {cmd( "destroytop .a" );
-    goto loop;
-   } 
- } 
- 
-cmd( "destroytop .a" );
-
-//here we are: create a new empty model
-
-cmd( "set dirname $groupdir/$mdir" );
-cmd( "set modeldir $groupdir/$mdir" );
-cmd( "set modelname $mname" );
-cmd( "set version $mver" );
-cmd( ".f.hea.mod.dat conf -text \"$modelname\"" );
-cmd( ".f.hea.ver.dat conf -text \"$version\"" );
-cmd( ".f.hea.grp.dat conf -text \"$modelgroup\"" );
-
-cmd( "file mkdir \"$dirname\"" );
-
-if ( macro )
- cmd( "set fun_base \"fun_baseMacro.cpp\"" );
-else 
- cmd( "set fun_base \"fun_baseC.cpp\"" );
-
-//create the empty equation file
-cmd( "file copy \"$RootLsd/$LsdSrc/$fun_base\" \"$modeldir/fun_$mdir.cpp\"" ); 
-
-cmd( "cd \"$dirname\"" );
-
-//create the model_options.txt file
-check_option_files( );
-
-//insert the modelinfo file, 
-cmd( "set before [.f.t.t get 1.0 end]" );
-cmd( "set f [open modelinfo.txt w]" );
-cmd( "puts $f \"$modelname\"" );
-cmd( "puts $f \"$version\"" );
-cmd( "set frmt \"%%d %%B, %%Y\"" );
-cmd( "puts $f \"[clock format [clock seconds] -format \"$frmt\"]\"" );
-cmd( "close $f" );
-
-cmd( "cd \"$RootLsd\"" );
-
-cmd( ".m.file entryconf 2 -state normal" );
-cmd( ".m.file entryconf 3 -state normal" );
-cmd( ".m.model entryconf 0 -state normal" );
-cmd( ".m.model entryconf 1 -state normal" );
-cmd( ".m.model entryconf 2 -state normal" );
-cmd( ".m.model entryconf 3 -state normal" );
-cmd( ".m.model entryconf 4 -state normal" );
-cmd( ".m.model entryconf 6 -state normal" );
-cmd( ".m.model entryconf 7 -state normal" );
-cmd( ".m.model entryconf 8 -state normal" );
-cmd( ".m.model entryconf 9 -state normal" );
-cmd( ".m.model entryconf 10 -state normal" );
-cmd( ".m.model entryconf 12 -state normal" );
-
-
-cmd( "tk_messageBox -parent . -type ok -title \"Model Created\" -icon info -message \"Model '$mname' created\" -detail \"Version: $mver\nDirectory: $dirname\"" );
-
-cmd( "set before [.f.t.t get 0.0 end]" ); //avoid to re-issue a warning for non saved files
-choice=50;
-goto loop;
-
 }
 
 
@@ -2153,6 +2188,7 @@ if ( choice == 28 && macro )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -2220,6 +2256,7 @@ if ( choice == 28 && ! macro )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2299,6 +2336,7 @@ if ( choice == 51 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -2342,6 +2380,7 @@ if ( choice == 25 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2431,6 +2470,7 @@ if ( choice == 26 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2512,6 +2552,7 @@ if ( choice == 27 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2617,6 +2658,7 @@ if ( choice == 40 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2701,6 +2743,7 @@ if ( choice == 45 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2785,6 +2828,7 @@ if ( choice == 29 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2871,6 +2915,7 @@ if ( choice == 30 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -2951,6 +2996,7 @@ if ( choice == 31 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3044,6 +3090,7 @@ if ( choice == 52 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3116,6 +3163,7 @@ if ( choice == 53 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3202,6 +3250,7 @@ if ( choice == 54 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3290,6 +3339,7 @@ if ( choice == 55 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3362,6 +3412,7 @@ if ( choice == 56 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -3457,6 +3508,7 @@ if ( choice == 72 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{ 
@@ -3537,6 +3589,7 @@ if ( choice == 73 )
 
 	cmd( "set res [ .a.d.e current ]" );
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3605,6 +3658,7 @@ if ( choice == 74 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3665,6 +3719,7 @@ if ( choice == 75 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3725,6 +3780,7 @@ if ( choice == 76 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3806,6 +3862,7 @@ if ( choice == 77 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3890,6 +3947,7 @@ if ( choice == 78 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -3991,6 +4049,7 @@ if ( choice == 79 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4063,6 +4122,7 @@ if ( choice == 80 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4170,6 +4230,7 @@ if ( choice == 81 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4249,6 +4310,7 @@ if ( choice == 82 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4309,6 +4371,7 @@ if ( choice == 83 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4383,6 +4446,7 @@ if ( choice == 84 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4465,6 +4529,7 @@ if ( choice == 85 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4551,6 +4616,7 @@ if ( choice == 86 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 	  
 	if ( choice == 2 )
 	{
@@ -4649,7 +4715,7 @@ if ( choice == 33 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .l; bind .f.t.t <Enter> { }" );
-	cmd( "wm deiconify .; raise .; focus -force .f.t.t" );
+	cmd( "wm deiconify .; raise .; focus .f.t.t" );
 
 	choice = num;
 	Tcl_UnlinkVar( inter, "choiceSM" );
@@ -4745,10 +4811,10 @@ if ( choice == 41 )
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
-	// operation cancelled
 	if ( choice == 2 )
 	{
 		cmd( "destroytop .a" );  
+		cmd( "focus .f.t.t" );
 		choice = 0;
 		goto loop;
 	}
@@ -4807,6 +4873,7 @@ if ( choice == 41 )
 	} 
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	// create a new copycat model
 	cmd( "file copy \"$dirname\" \"$mdir\"" );
@@ -4950,8 +5017,8 @@ if ( choice == 44 )
 	cmd( "pack .a.mname .a.mver .a.mdir .a.date .a.mdate -padx 5 -pady 5" );
 
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-	cmd( "bind .a.mname.e <Return> {focus .a.mver.e; .a.mver.e selection range 0 end}" );
-	cmd( "bind .a.mver.e <Return> {focus .a.b.ok}" );
+	cmd( "bind .a.mname.e <Return> { focus .a.mver.e; .a.mver.e selection range 0 end }" );
+	cmd( "bind .a.mver.e <Return> { focus .a.b.ok }" );
 
 	cmd( "showtop .a" );
 	cmd( ".a.mname.e selection range 0 end" );
@@ -4962,6 +5029,7 @@ if ( choice == 44 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 1 )
 	{
@@ -5091,6 +5159,7 @@ if ( choice == 47 )
 		choice = 0; 
 
 	cmd( "destroytop .l" );
+	cmd( "focus .f.t.t" );
 
 	goto loop;
 } 
@@ -5247,6 +5316,11 @@ if ( choice == 48 )
 	cmd( "pack .l.t .l.d -anchor e" );
 
 	cmd( "okhelpcancel .l b { set choice 1 } { LsdHelp LMM.html#model_options } { set choice 2 }" );
+	
+	cmd( "bind .l.d.opt.ext <KeyPress-Return> { .l.d.opt.ext invoke }" );
+	cmd( "bind .l.d.opt.def <KeyPress-Return> { .l.d.opt.def invoke }" );
+	cmd( "bind .l.d.opt.cle <KeyPress-Return> { .l.d.opt.cle invoke }" );
+
 
 	cmd( "showtop .l" );
 	cmd( "focus .l.t.text" );
@@ -5268,6 +5342,7 @@ if ( choice == 48 )
 	cmd( "cd \"$RootLsd\"" );
 
 	cmd( "destroytop .l" );
+	cmd( "focus .f.t.t" );
 
 	goto loop;
 } 
@@ -5348,6 +5423,7 @@ if ( choice == 59 )
 		Tcl_DoOneEvent( 0 );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
@@ -5430,7 +5506,8 @@ if ( choice == 60 )
 
 	cmd( "frame .a.num7" );
 	cmd( "label .a.num7.l -text \"Tab size (characters)\"" );
-	cmd( "entry .a.num7.v -width 2 -textvariable temp_var7 -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .a.num7.v -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center } { entry .a.num7.v -width 2 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set temp_var7 %%P; return 1 } { %%W delete 0 end; %%W insert 0 $temp_var7; return 0 } } -invalidcommand { bell } -justify center }" );
+	cmd( "write_any .a.num7.v $temp_var7" );
 	cmd( "pack .a.num7.l .a.num7.v" );
 	cmd( "bind .a.num7.v <Return> {focus .a.num9.r.v3}" );
 
@@ -5460,12 +5537,15 @@ if ( choice == 60 )
 	cmd( "pack .a.num .a.num13 .a.num2 .a.num4 .a.num12 .a.num5 .a.num3 .a.num7 .a.num9 .a.num8 -padx 5 -pady 5" );
 
 	cmd( "frame .a.f1" );
-	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultSysTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; set temp_var7 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
+	cmd( "button .a.f1.def -width $butWid -text Default -command {set temp_var1 \"$DefaultSysTerm\"; set temp_var2 \"$DefaultHtmlBrowser\"; set temp_var3 \"$DefaultFont\"; set temp_var5 src; set temp_var6 $DefaultFontSize; write_any .a.num7.v 2; set temp_var8 1; set temp_var9 2; set temp_var10 0; set temp_var11 0; set temp_var12 Work; set temp_var13 \"$DefaultDbgExe\"}" );
 	cmd( "button .a.f1.help -width $butWid -text Help -command {LsdHelp LMM.html#SystemOpt}" );
 	cmd( "pack .a.f1.def .a.f1.help -padx 10 -side left" );
 	cmd( "pack .a.f1 -anchor e" );
 
 	cmd( "okcancel .a f2 { set choice 1 } { set choice 2 }" );
+
+	cmd( "bind .a.f1.def <KeyPress-Return> { .a.f1.def invoke }" );
+	cmd( "bind .a.f1.help <KeyPress-Return> { .a.f1.help invoke }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.num.v" );
@@ -5474,8 +5554,11 @@ if ( choice == 60 )
 	choice = 0;
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
+	
+	cmd( "set temp_var7 [ .a.num7.v get ]" );
 
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 1 )
 	{
@@ -5486,8 +5569,8 @@ if ( choice == 60 )
 		cmd( "set fonttype \"$temp_var3\"" );
 		cmd( "set wish $temp_var4" );
 		cmd( "set LsdSrc $temp_var5" );
-		cmd( "if [string is integer -strict $temp_var6] {set dim_character $temp_var6}" );
-		cmd( "if [string is integer -strict $temp_var7] {set tabsize $temp_var7}" );
+		cmd( "if [ string is integer -strict $temp_var6 ] { set dim_character $temp_var6 }" );
+		cmd( "if [ string is integer -strict $temp_var7 ] { set tabsize $temp_var7 }" );
 		cmd( "set wrap $temp_var8" );
 		cmd( "set shigh $temp_var9" );
 		cmd( "set autoHide $temp_var10" );
@@ -5607,13 +5690,15 @@ if ( choice == 67 )
 
 	cmd( "frame .a.l" );
 	cmd( "label .a.l.l -text \"Tab size (characters)\"" );
-	cmd( "entry .a.l.v_num -justify center -width 3 -textvariable tabsize -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .a.l.v_num -width 3 -from 1 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center } { entry .a.l.v_num -width 3 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set tabsize %%P; return 1 } { %%W delete 0 end; %%W insert 0 $tabsize; return 0 } } -invalidcommand { bell } -justify center }" );
+	cmd( "write_any .a.l.v_num $tabsize" );
 	cmd( "pack .a.l.l .a.l.v_num" );
 
 	cmd( "pack .a.l -padx 5 -pady 5" );
 
 	cmd( "okcancel .a b { set choice 1 } { set choice 2 }" );
-	cmd( "bind .a <KeyPress-Return> {focus .a.f.ok}" );
+	
+	cmd( "bind .a.l.v_num <KeyPress-Return> { .a.b.ok invoke }" );
 
 	cmd( "showtop .a" );
 	cmd( "focus .a.l.v_num" );
@@ -5623,14 +5708,18 @@ if ( choice == 67 )
 	while ( choice == 0 )
 		Tcl_DoOneEvent( 0 );
 
+	cmd( "if [ string is integer -strict [ .a.l.v_num get ] ] { set tabsize [ .a.l.v_num get ] } { set choice 2 }" );
+	
 	cmd( "destroytop .a" );
+	cmd( "focus .f.t.t" );
 
 	if ( choice == 2 )
 	{
 		choice = 0;
 		goto loop;
 	}
-	cmd( "if [string is integer -strict $tabsize] {settab .f.t.t $tabsize \"[.f.t.t cget -font]\"}" );
+	
+	cmd( "settab .f.t.t $tabsize \"[ .f.t.t cget -font ]\"" );
 	
 	choice = 0;
 	goto loop;
@@ -5763,6 +5852,7 @@ if ( choice == 70 )
 	
 	cmd( "set i [ $e.l.l curselection ]" );
 	cmd( "destroytop $e" );
+	cmd( "focus .f.t.t" );
 	
 	cmd( "if { $i == \"\" } { set brr \"\" } { set brr [ lindex $extra_files $i ] }" );
 	s = ( char * ) Tcl_GetVar( inter, "brr", 0 );
@@ -5864,8 +5954,7 @@ if ( choice == 87 )
 	}
 	
 	// show the error position on screen
-	cmd( "wm deiconify ." );
-	cmd( "focus -force .f.t.t" );
+	cmd( "wm deiconify .; raise .; focus .f.t.t" );
 
 	if ( choice == 1 )
 	{	// file already loaded, just point error
@@ -6532,6 +6621,7 @@ void create_compresult_window( bool nw )
 	cmd( "frame .mm.b" );
 	
 	cmd( "button .mm.b.perr -width [ expr $butWid + 4 ] -text \"Previous Error\" -underline 0 -command { \
+			focus .mm.t.t; \
 			set start \"$cerr linestart\"; \
 			set errtemp [ .mm.t.t search -nocase -regexp -count errlen -backward -- $error $start 1.0];  \
 			if { [ string length $errtemp ] != 0 } { \
@@ -6566,6 +6656,7 @@ void create_compresult_window( bool nw )
 		}" );
 	cmd( "button .mm.b.gerr -width [ expr $butWid + 4 ] -text \"Go to Error\" -underline 0 -command { set choice 87 }" );
 	cmd( "button .mm.b.ferr -width [ expr $butWid + 4 ] -text \"Next Error\" -underline 0 -command { \
+			focus .mm.t.t; \
 			if { ! [ string equal $cerr 1.0 ] } { \
 				set start \"$cerr lineend\" \
 			} else { \
@@ -6602,7 +6693,7 @@ void create_compresult_window( bool nw )
 				.mm.i.c.n configure -text $errcol; \
 			} \
 		}" );
-	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm }" );
+	cmd( "button .mm.b.close -width [ expr $butWid + 4 ] -text Done -underline 0 -command { unset -nocomplain errfil errlin errcol; destroytop .mm; wm deiconify .; raise .; focus . }" );
 	cmd( "pack .mm.b.perr .mm.b.gerr .mm.b.ferr .mm.b.close -padx 10 -pady 10 -expand yes -fill x -side left" );
 	cmd( "pack .mm.b -side right" );
 	
@@ -6614,8 +6705,12 @@ void create_compresult_window( bool nw )
 	cmd( "bind .mm.t.t <Down> { .mm.b.ferr invoke; break }" );
 	cmd( "bind .mm.t.t <Right> { .mm.b.ferr invoke; break }" );
 	cmd( "bind .mm <d> { .mm.b.close invoke }; bind .mm <D> { .mm.b.close invoke }" );
-	cmd( "bind .mm <Return> { .mm.b.gerr invoke }" );
-	cmd( "bind .mm <Escape> { .mm.b.close invoke }" );
+	cmd( "bind .mm.t.t <KeyPress-Return> { .mm.b.gerr invoke }" );
+	cmd( "bind .mm <KeyPress-Escape> { .mm.b.close invoke }" );
+	cmd( "bind .mm.b.perr <KeyPress-Return> { .mm.b.perr invoke }" );
+	cmd( "bind .mm.b.gerr <KeyPress-Return> { .mm.b.gerr invoke }" );
+	cmd( "bind .mm.b.ferr <KeyPress-Return> { .mm.b.ferr invoke }" );
+	cmd( "bind .mm.b.close <KeyPress-Return> { .mm.b.close invoke }" );
 
 	cmd( "showtop .mm lefttoW no no no" );
 

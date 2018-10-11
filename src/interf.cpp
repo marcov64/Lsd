@@ -1107,7 +1107,8 @@ case 2:
 			cmd( "label $T.f.lab_num -text \"Maximum lags\"" );
 			cmd( "label $T.f.sp -width 5" );
 			cmd( "ttk::combobox $T.f.ent_var -width 20 -textvariable lab -justify center -values $missVar" );
-			cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.ent_num -width 3 -validate focusout -validatecommand { if { [ string is integer -strict %%P ] && %%P >= 0 } { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center }" );
+			cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $T.f.ent_num -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $T.f.ent_num -width 3 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center }" );
+			cmd( "write_any $T.f.ent_num $num" );
 			cmd( "pack $T.f.lab_ent $T.f.ent_var $T.f.sp $T.f.lab_num $T.f.ent_num -side left -padx 2" );
 			cmd( "bind $T.f.ent_var <KeyRelease> { \
 					if { %%N < 256 } { \
