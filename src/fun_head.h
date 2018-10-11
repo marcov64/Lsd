@@ -701,6 +701,9 @@ else \
 #define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
 #define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
 
+#define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
+#define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
+
 //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
 //  Similar to above, but it searches at the raster-level (all items registered)
 //  at the grid.

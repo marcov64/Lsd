@@ -404,6 +404,12 @@ char gismsg[300];
   				"check your code to prevent this situation" );
       return false;
     }
+    if (radius < 0){
+      left_io = 0;
+      right_io = position->map->xn - 1;
+      top_io = position->map->yn - 1;
+      bottom_io = 0;
+    }
     //define the bounding box
     left_io   = floor( x - radius );
     right_io  = ceil(  x + radius );
@@ -436,8 +442,8 @@ char gismsg[300];
     }
 
       //fill vector - naive approach (complete)
-    for (int x=x_left; x<x_right;x++){
-      for (int y=y_bottom; y<y_top;y++){
+    for (int x=x_left; x<=x_right;x++){
+      for (int y=y_bottom; y<=y_top;y++){
         access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
 //         double x_test = x;
 //         double y_test = y;
@@ -722,7 +728,7 @@ char gismsg[300];
   void object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
 
     position->objDis_inRadius.clear();//reset vector
-    double pseudo_radius = radius*radius;
+    double pseudo_radius = (radius < 0 ? -1 : radius*radius);
 
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
@@ -907,6 +913,41 @@ char gismsg[300];
     else
       return search_at_position(lab, trunc(position->x), trunc(position->y), single);
   }
+    double object::elements_at_position(char const lab[], double x, double y)
+    {
+      if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+        return 0;
+      }
+      int n = 0;
+      for (auto const &item : position->map->elements.at(int(x)).at(int(y)) ){
+        if (item->position->x == x && item->position->y == y){
+          if (strcmp(item->label,lab )==0){
+            n++;
+          }
+        }
+      }
+      return double(n);
+    }
+
+  double object::elements_at_position(char const lab[], bool grid)
+  {
+
+    if (ptr_map()==NULL){
+          sprintf( gismsg, "failure in elements_at_position() for object '%s'", label );
+  		      error_hard( gismsg, "the object is not registered in any map",
+  					"check your code to prevent this situation" );
+        return 0;
+      }
+      if (grid == false)
+        return elements_at_position(lab, position->x, position->y);
+      else
+        return elements_at_position(lab, trunc(position->x), trunc(position->y));
+  }
+
+
 
   double object::random_pos(const char xy)
   {
@@ -1045,6 +1086,8 @@ char gismsg[300];
     if (_x >= position->map->xn){
       if (position->map->wrap.right == true){
         while (_x >= position->map->xn) { _x -= double(position->map->xn); }
+      } else if (_x == position->map->xn){
+        _x -= 0.00001; //minus small epsilon
       } else {
         return false;
       }
@@ -1052,6 +1095,8 @@ char gismsg[300];
     if (_y >= position->map->yn){
       if (position->map->wrap.top == true){
         while (_y >= position->map->yn) { _y -= double(position->map->yn); }
+      } else if (_y == position->map->yn){
+        _y -= 0.00001;
       } else {
         return false;
       }
