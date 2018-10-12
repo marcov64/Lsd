@@ -314,6 +314,7 @@ proc create_elem_file { path } {
 		
 		set f [ open "$path/$fname" r ]
 		set text [ read -nonewline $f ]
+		close $f
 
 		set eqs [ regexp -all -inline -- {EQUATION[ \t]*\([ \t]*\"(\w+)\"[ \t]*\)} $text ]
 		foreach { eq var } $eqs {
