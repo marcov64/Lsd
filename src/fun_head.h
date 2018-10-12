@@ -646,19 +646,19 @@ else \
 
 // CYCLE_NEIGHBOUR
 // Cycle through all the objects LAB within radius RAD by increasing radius
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); p->next_neighbour_exists(); O = p->next_neighbour() )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); C->next_neighbour_exists(); O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); O != NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); O != NULL; O = C->next_neighbour() )
 
 //Cycle through all the objects LAB anywhere in random order
-#define CYCLE_GIS_RND( O, LAB ) for ( O = p->first_neighbour_rnd_full(LAB); p->next_neighbour_exists(); O = p->next_neighbour() )
-#define CYCLE_GIS_RNDS( C, O, LAB ) for ( O = C->first_neighbour_rnd_full(LAB); C->next_neighbour_exists(); O = C->next_neighbour() )
+#define CYCLE_GIS_RND( O, LAB ) for ( O = p->first_neighbour_rnd_full(LAB); O != NULL; O = p->next_neighbour() )
+#define CYCLE_GIS_RNDS( C, O, LAB ) for ( O = C->first_neighbour_rnd_full(LAB); O != NULL; O = C->next_neighbour() )
 
 
 // Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
-#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); C->next_neighbour_exists(); O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
 // NEAREST_IN_DISTANCE
 // Provide the closest item in distance RAD with label LAB or NULL if none.

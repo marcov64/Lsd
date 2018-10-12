@@ -24,9 +24,9 @@ EQUATION("Scheduler")
 V("Init_GIS");
 
 if (t<20){
-  object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",3,5);
+  object* patch = SEARCH_POSITION_XYS(SEARCH("Patch"),"Patch",2,2);
   i = 0;
-
+PLOG("\nLooking for 'Patch' in distance 1 to 'Patch' with pos %g,%g",POSITION_XS(patch),POSITION_YS(patch));
   CYCLE_NEIGHBOURS(patch,cur,"Patch",1){
     PLOG("\n%i %s at (%g,%g) : distance %g position (%g,%g)", ++i,patch->label,
     POSITION_XS(patch),POSITION_YS(patch), DISTANCES(patch,cur),
@@ -63,10 +63,7 @@ CYCLE(cur,"Agent"){
   agent_set.push_back(cur); //Add pointer to set
 }
 
-
-if (V("RandomiseOrder")==1){
-  std::shuffle(agent_set.begin(),agent_set.end(),PRNG() ); //do not know how to link to LSD prng, a macro/bind would be nice!
-}
+SORT_RND("Agent");
 
 //CYCLE_SAFE(cur,"Agent"){    //randomisation missing
 for (i=0;i<agent_set.size();i++){

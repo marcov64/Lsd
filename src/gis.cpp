@@ -78,7 +78,7 @@ char gismsg[300];
       return false; //error
     }
     int numNodes = xn*yn;
-    PLOG("\nWe need to create a new %i %s's",nodes2create( this, lab, numNodes ),lab);
+//     PLOG("\nWe need to create a new %i %s's",nodes2create( this, lab, numNodes ),lab);
     add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
 																	// cloning the first one
     int _x = 0;
@@ -444,6 +444,7 @@ char gismsg[300];
       //fill vector - naive approach (complete)
     for (int x=x_left; x<=x_right;x++){
       for (int y=y_bottom; y<=y_top;y++){
+//         PLOG("\nBounding Box: %i,%i",x,y);
         access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
 //         double x_test = x;
 //         double y_test = y;
@@ -574,7 +575,7 @@ char gismsg[300];
           double ps_dst = this_obj->pseudo_distance(candidate);
           if (pseudo_radius<0 || ps_dst <= pseudo_radius) {
             bool isCandidate = true;
-
+//             PLOG("\nadd_if_dist_lab_cond() : Checking if object '%s' at pos %g,%g is within pseudo_distance ( %g<= %g ?) to object '%s' at pos %g,%g",candidate->label,candidate->position->x,candidate->position->y,ps_dst,pseudo_radius,this_obj->label,this_obj->position->x,this_obj->position->y);
             //if conditional, additional check
             if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ){
               variable* condVar = candidate->search_var_local(varLab);
@@ -737,15 +738,31 @@ char gismsg[300];
 
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
+//     int i=0;
+//     for (auto item : position->objDis_inRadius){
+//       PLOG("\nit_in_radius : 1  checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
+//     }
 
     //sort by distance
     sort_objDisSet(true); //pointer_sort = true
+//     i=0;
+//     for (auto item : position->objDis_inRadius){
+//       PLOG("\nit_in_radius : 2 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
+//     }
 
     //make items unique
     make_objDisSet_unique(true); //sorted = true
-
+//     i=0;
+//     for (auto item : position->objDis_inRadius){
+//       PLOG("\nit_in_radius : 3 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
+//     }
     //randomize in intervals of same distance
     randomise_objDisSetIntvls(true); //sorted = true
+
+//     i=0;
+//     for (auto item : position->objDis_inRadius){
+//       PLOG("\nit_in_radius : 4 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
+//     }
 
 	  position->it_obj = position->objDis_inRadius.begin();
   }
@@ -763,6 +780,7 @@ char gismsg[300];
     if (position->it_obj != position->objDis_inRadius.end() ){
       next_ngbo =  position->it_obj->second;
       position->it_obj++; //advance
+//       PLOG("\nnext_neighbour");
     }
     return next_ngbo;
   }
@@ -788,6 +806,9 @@ char gismsg[300];
       return NULL;
     }
     it_in_radius(lab, radius, random, caller, lag, varLab, condition, condVal);
+//     if (objDis_inRadius.empty()==true){
+//       return NULL;
+//     }
     return next_neighbour();
   }
 
@@ -840,7 +861,7 @@ char gismsg[300];
 
     if (position->objDis_inRadius.empty() == true){
       return NULL; //no option found;
-      PLOG("\nNo Options.");
+//       PLOG("\nNo Options.");
     } else {
       if (random == false)
         return position->objDis_inRadius.front().second;

@@ -71,7 +71,7 @@ Param: Agent_ID 0 n + n n	0
 
 SIM_NUM 1
 SEED 200
-MAX_STEP 5000
+MAX_STEP 2
 EQUATION fun_gisExample.cpp
 MODELREPORT report_Sim1.html
 
