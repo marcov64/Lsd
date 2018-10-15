@@ -50,23 +50,9 @@ it sends the replicate message to the hypernext, first. It should be applied
 to a structure model, that is, where the object is there are no more than
 one instance in any group.
 
-
 - void copy_descendant(object *from, object *to)
 This is a function called by replicate above, so that the replicated object
 are initialized also the descendants.
-
--object *create(object *root)
-The main cycle for the Browser, from which it exits only to run a simulation
-or to quit the program. The cycle is just once call to browsw followed by
-a call to operate.
-
-- int browse(object *r, int *choice);
-build the browser window and waits for an action (on the form of
-values for choice or choice_g different from 0)
-
-- object *operate(Tcl_Interp *in, int *choice, object *r);
-takes the value of choice and operate the relative command on the
-object r. See the switch for the complete list of the available commands
 
 - void clean_debug(object *n);
 remove all the flags to debug from any variable in the model
@@ -742,10 +728,10 @@ void set_blueprint( object *container, object *r )
 /*****************************************************************************
 LOAD_CONFIGURATION
 	Load current defined configuration
-	If reload is true, just the structure and the parameters are retrieved
+	If quick is true, just the structure and the parameters are retrieved
 	Returns: 0: load ok, 1,2,3,4,...: load failure
 ******************************************************************************/
-int load_configuration( object *r, bool reload )
+int load_configuration( bool reload, bool quick )
 {
 	int i, j = 0, load = 0;
 	char msg[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ];
@@ -754,19 +740,9 @@ int load_configuration( object *r, bool reload )
 	description *cur_descr;
 	FILE *f, *g;
 	
-	for ( cur = r; cur->up != NULL; cur = cur->up );
-	r = cur;
+	unload_configuration( false );				// unload current
 	
-	r->empty( );
-	r->init( NULL, "Root" );
-	empty_description( );
-	add_description( "Root", "Object", "(no description available)" );
-	blueprint->empty( );
-	blueprint->init( NULL, "Root" );
-	empty_cemetery( );
-	nodesSerial = 0;							// restart network nodes serial counter
-
-	if ( ! struct_loaded )
+	if ( ! reload )
 	{
 		delete [ ] struct_file;
 		if ( strlen( path ) > 0 )
@@ -785,7 +761,7 @@ int load_configuration( object *r, bool reload )
 	if ( f == NULL )
 		return 1;
 
-	struct_loaded = r->load_struct( f );
+	struct_loaded = root->load_struct( f );
 	if ( ! struct_loaded )
 	{
 		load = 2;
@@ -793,18 +769,18 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	strcpy( msg, "" );
-    fscanf( f, "%999s", msg );					//should be DATA
-	if ( ! ( ! strcmp( msg, "DATA" ) && r->load_param( struct_file, 1, f ) ) )
+    fscanf( f, "%999s", msg );					// should be DATA
+	if ( ! ( ! strcmp( msg, "DATA" ) && root->load_param( struct_file, 1, f ) ) )
 	{
 		load = 3;
 		goto endLoad;
 	}
 	
-	if ( reload )								// just quick reload?
+	if ( reload && quick )						// just quick reload?
 		goto endLoad;
 		
 	sim_num = 1;
-	fscanf( f, "%999s", msg );					//should be SIM_NUM 
+	fscanf( f, "%999s", msg );					// should be SIM_NUM 
 	if ( ! ( ! strcmp( msg, "SIM_NUM" ) && fscanf( f, "%d", &sim_num ) ) )
 	{
 		load = 4;
@@ -812,7 +788,7 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	seed = 1;
-	fscanf( f, "%999s", msg );					//should be SEED
+	fscanf( f, "%999s", msg );					// should be SEED
 	if ( ! ( ! strcmp( msg, "SEED" ) && fscanf( f, "%d", &seed ) ) )
 	{
 		load = 5;
@@ -820,14 +796,14 @@ int load_configuration( object *r, bool reload )
 	}
 	
 	max_step = 100;
-	fscanf( f, "%999s", msg );					//should be MAX_STEP
+	fscanf( f, "%999s", msg );					// should be MAX_STEP
 	if ( ! ( ! strcmp( msg, "MAX_STEP" ) && fscanf( f, "%d", &max_step ) ) )
 	{
 		load = 6;
 		goto endLoad;
 	}
 
-	fscanf( f, "%999s", msg );					//should be EQUATION
+	fscanf( f, "%999s", msg );					// should be EQUATION
 	if ( strcmp( msg, "EQUATION" ) )
 	{
 		load = 7;
@@ -849,21 +825,21 @@ int load_configuration( object *r, bool reload )
 		strncpy( equation_name, msg + 1, MAX_PATH_LENGTH - 1 );
 	}
 	
-	fscanf( f, "%999s", msg );					//should be MODELREPORT
+	fscanf( f, "%999s", msg );					// should be MODELREPORT
 	if ( ! ( ! strcmp( msg, "MODELREPORT" ) && fscanf( f, "%499s", name_rep ) ) )
 	{
 		load = 8;
 		goto endLoad;
 	}
 
-	fscanf( f, "%999s", msg );					//should be DESCRIPTION
+	fscanf( f, "%999s", msg );					// should be DESCRIPTION
 	if ( strcmp( msg, "DESCRIPTION" ) )
 	{
 		load = 9;
 		goto endLoad;
 	}  
 	
-	i = fscanf( f, "%999s", msg );				//should be the first description   
+	i = fscanf( f, "%999s", msg );				// should be the first description   
 	for ( j = 0; strcmp( msg, "DOCUOBSERVE" ) && i == 1 && j < MAX_FILE_TRY; ++j )
 	{ 
 		i = load_description( msg, f );
@@ -884,7 +860,7 @@ int load_configuration( object *r, bool reload )
 		if ( cur_descr != NULL )
 		{
 			cur_descr->observe = 'y';
-			cur_var = r->search_var( NULL, msg );
+			cur_var = root->search_var( NULL, msg );
 			if ( cur_var != NULL )
 				for ( cur = cur_var->up; cur != NULL; cur = cur->hyper_next( cur_var->up->label ) )
 				{
@@ -902,7 +878,7 @@ int load_configuration( object *r, bool reload )
 		goto endLoad;
 	} 
 	
-	fscanf( f, "%999s", msg );  				//should be the DOCUINITIAL
+	fscanf( f, "%999s", msg );  				// should be the DOCUINITIAL
 	if ( strcmp( msg, "DOCUINITIAL" ) )
 	{
 		load = 12;
@@ -959,6 +935,76 @@ endLoad:
 }
 
 
+/*****************************************************************************
+UNLOAD_CONFIGURATION
+	Unload the current configuration
+	If reload is true, just the model data is unloaded
+	Returns: pointer to root object
+******************************************************************************/
+void unload_configuration ( bool full )
+{
+	root->empty( );								// remove current model structure
+	root->init( NULL, "Root" );
+	empty_description( );
+	add_description( "Root", "Object", "(no description available)" );      
+	blueprint->empty( );
+	blueprint->init( NULL, "Root" );
+
+	empty_cemetery( );							// garbage collection
+	empty_sensitivity( rsense ); 				// discard sensitivity analysis data
+	
+	unsavedData = false;						// no unsaved simulation results
+	unsavedSense = false;						// no sensitivity data to save
+	rsense = NULL;								// no sense data 
+	
+	actual_steps = 0;							// reset steps counter
+	findexSens = 0;								// reset sensitivity serial number
+	nodesSerial = 0;							// reset network node serial number
+	
+#ifndef NO_WINDOW
+	unsaved_change( false );					// signal no unsaved change
+	cmd( "destroytop .lat" );					// remove lattice window
+	cmd( "set a [ split [ winfo children . ] ]" );	// remove run-time plot windows
+	cmd( "foreach i $a { if [ string match .plt* $i ] { destroytop $i } }" );
+	cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );	// delete temporary files
+	cmd( "unset -nocomplain modElem" );			// no elements in model structure
+#endif
+
+	if ( full )									// full unload? (no new config?)
+	{
+		delete [ ] path;						// reset current path
+		path = new char[ strlen( exec_path ) + 1 ];
+		strcpy( path, exec_path );
+		
+		delete [ ] simul_name;					// reset simulation name to default
+		simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
+		strcpy( simul_name, DEF_CONF_FILE );
+		
+		delete [ ] struct_file;					// reset structure
+		struct_file = new char[ strlen( simul_name ) + 5 ];
+		sprintf( struct_file, "%s.lsd", simul_name );
+		struct_loaded = false;
+
+		delete sens_file;						// reset sensitivity file name
+		sens_file = NULL;
+		
+		strcpy( lsd_eq_file, "" );				// reset other file names
+		sprintf( name_rep, "report_%s.html", simul_name );
+
+#ifndef NO_WINDOW
+		cmd( "set path \"%s\"", path );
+		cmd( "set res \"%s\"", simul_name );
+		if ( strlen( path ) > 0 )
+			cmd( "cd \"$path\"" );
+		
+		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
+		strcpy( lastObj, "" );			// disable last object for reload
+		redrawRoot = true;				// force browser redraw
+#endif
+	}
+}
+
+
 /*********************************
 SAVE_SINGLE
 *********************************/
@@ -990,47 +1036,45 @@ void save_single( variable *vcv )
 
 /*****************************************************************************
 SAVE_CONFIGURATION
-	Save current defined configuration (renaming if appropriate)
+	Save current defined configuration (adding tag index if appropriate)
 	Returns: true: save ok, false: save failure
 ******************************************************************************/
-bool save_configuration( object *r, int findex )
+bool save_configuration( int findex )
 {
 	int indexDig = ( findex > 0 ) ? ( int ) floor( log10( findex ) + 2 ) : 0;
+	char *save_file;
 	object *cur;
 	description *cur_descr;
 	
-	delete [ ] struct_file;
-	
 	if ( strlen( path ) > 0 )
 	{
-		struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 + indexDig ];
-		sprintf( struct_file, "%s/%s", path, simul_name );
+		save_file = new char[ strlen( path ) + strlen( simul_name ) + 6 + indexDig ];
+		sprintf( save_file, "%s/%s", path, simul_name );
 	}
 	else
 	{
-		struct_file = new char[ strlen( simul_name ) + 6 + indexDig ];
-		sprintf( struct_file, "%s", simul_name );
+		save_file = new char[ strlen( simul_name ) + 6 + indexDig ];
+		sprintf( save_file, "%s", simul_name );
 	}
-	if ( findex > 0 )
-		sprintf( struct_file, "%s_%d.lsd", struct_file, findex );
-	else
-		sprintf( struct_file, "%s.lsd", struct_file );
 	
-	FILE * f = fopen( struct_file, "w" );
+	if ( findex > 0 )
+		sprintf( save_file, "%s_%d.lsd", save_file, findex );
+	else
+		sprintf( save_file, "%s.lsd", save_file );
+	
+	FILE * f = fopen( save_file, "w" );
 	if ( f == NULL )
 		return false;
 
-	for ( cur = r; cur->up != NULL; cur = cur->up );
-	
-	cur->save_struct( f, "" );
+	root->save_struct( f, "" );
 	fprintf( f, "\nDATA\n" );
-	cur->save_param( f );
+	root->save_param( f );
 	
 	int delta = ( findex > 0 ) ? sim_num * ( findex - 1 ) : 0;
 	fprintf( f, "\nSIM_NUM %d\nSEED %d\nMAX_STEP %d\nEQUATION %s\nMODELREPORT %s\n", sim_num, seed + delta, max_step, equation_name, name_rep );
 	
 	fprintf( f, "\nDESCRIPTION\n\n" );
-	save_description( cur, f );
+	save_description( root, f );
 	
 	fprintf( f, "\nDOCUOBSERVE\n" );
 	for ( cur_descr = descr; cur_descr != NULL; cur_descr = cur_descr->next )
@@ -1048,11 +1092,6 @@ bool save_configuration( object *r, int findex )
 	
 	fclose( f );
 	
-#ifndef NO_WINDOW
-	if ( findex <= 0 )
-		unsaved_change( false );		// no changes to save
-#endif
-	
 	return true;
 }
 
@@ -1062,11 +1101,10 @@ LOAD_SENSITIVITY
 	Load defined sensitivity analysis configuration
 	Returns: 0: load ok, 1,2,3,4,...: load failure
 ******************************************************************************/
-int load_sensitivity( object *r, FILE *f )
+int load_sensitivity( FILE *f )
 {
 	int i;
 	char cc, lab[ MAX_ELEM_LENGTH ];
-	object *n;
 	variable *cv;
 	sense *cs;
 	
@@ -1085,8 +1123,7 @@ int load_sensitivity( object *r, FILE *f )
 		if ( feof( f ) )					// ended too early?
 			break;
 
-		for ( n = r; n->up != NULL; n = n->up );// check if element exists
-		cv = n->search_var( n, lab );
+		cv = root->search_var( root, lab );
 		if ( cv == NULL || ( cv->param != 1 && cv->num_lag == 0 ) )
 			goto error1;					// and not parameter or lagged variable
 		

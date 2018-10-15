@@ -81,7 +81,7 @@ void show_graph( object *t )
 {
 	object *top;
 
-	if ( ! strWindowOn )	// model structure window is deactivated?
+	if ( ! struct_loaded || ! strWindowOn )		// model structure window is deactivated?
 	{
 		cmd( "destroytop .str" );
 		return;

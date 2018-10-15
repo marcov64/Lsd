@@ -24,56 +24,55 @@ by this function, use the Data Browse option.
 
 The functions contained in this file are:
 
-- void edit_data(object *root, int *choice, char *obj_name)
+- void edit_data( object *root, int *choice, char *obj_name )
 Initialize the window, calls search_title and link_data, then wait for a
 message from user.
 
-- void search_title(object *root, char *tag, int *i, char *lab, int *incr)
+- void search_title( object *root, char *tag, int *i, char *lab, int *incr )
 It is a recursive routine. Scan the model structure looking for the object
 of type as root and prepare the relative tag for any object. The tag is then
 used by set_title to be printed as columns headers
 
-- void set_title(object *c, char *lab, char *tag, int *incr);
+- void set_title( object *c, char *lab, char *tag, int *incr );
 prints the column headers
 
-- void link_data(object *root, char *lab);
+- void link_data( object *root, char *lab );
 prints the line headers and create the cells, each linked to one variable value
 of the model
 
-- void clean_cell(object *root, char *tag, char *lab);
+- void clean_cell( object *root, char *tag, char *lab );
 called before exiting, removes all the links between tcl variables and model
 values
 
 
-
 Functions used here from other files are:
 
-- void set_all(int *choice, object *r, char *lab, int lag );
+- void set_all( int *choice, object *r, char *lab, int lag );
 SET_ALL.CPP It contains the routine called from the edit_dat file for setting all the
 values of a variable with a function, instead of inserting manually.
 
-- object *skip_next_obj(object *t, int *i);
+- object *skip_next_obj( object *t, int *i );
 UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series.
 
-- void cmd(char *cc);
+- void cmd( char *cc );
 UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
 
-- object *go_brother(object *cur);
+- object *go_brother( object *cur );
 UTIL.CPP returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
-- void go_next(object **t)
+- void go_next( object **t )
 UTIL.CPP
 returns next if (*t)->next is not null. Don't know it is used any longer
 
-- void show_graph( object *t);
+- void show_graph( object *t );
 DRAW.CPP shows the grsphical representation of the model
 
-- void set_obj_number(object *r, int *choice);
+- void set_obj_number( object *r, int *choice );
 EDIT.CPP allows to edit the number of instances in the model
 
 ****************************************************/

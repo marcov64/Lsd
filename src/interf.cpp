@@ -23,81 +23,81 @@ commanded from the browser window, implemented as a switch in operate.
 
 The functions contained in this file are:
 
--object *create( object *root)
+-object *create( )
 The main cycle for the Browser, from which it exits only to run a simulation
 or to quit the program. The cycle is just once call to browsw followed by
 a call to operate.
 
-- int browse( object *r, int *choice);
+- int browse( object *r, int *choice );
 build the browser window and waits for an action (on the form of
 values for choice or choice_g different from 0)
 
-- object *operate( int *choice, object *r);
+- object *operate( int *choice, object *r );
 takes the value of choice and operate the relative command on the
 object r. See the switch for the complete list of the available commands
 
-- void clean_debug(object *n);
+- void clean_debug( object *n );
 remove all the flags to debug from any variable in the model
 
-- void clean_save(object *n);
+- void clean_save( object *n );
 remove all the flags to save from any variable in the model
 
-- void show_save(object *n)
+- void show_save( object *n )
 shows all variables to be saved in the result files
 
-- void clean_plot(object *n);
+- void clean_plot( object *n );
 remove all the flags to plot from any variable in the model
 
-- void wipe_out(object *d);
+- void wipe_out( object *d );
 Eliminate all the Object like d from the model. Cancel also the their descendants
 
 
 Functions used here from other files are:
 
-- void plog(char *m);
+- void plog( char *m );
 LSDMAIN.CPP print  message string m in the Log screen.
 
-- void analysis(int *choice);
+- void analysis( int *choice );
 ANALYSIS.CPP analysis of result files
 
-- void show_eq(char *lab, int *choice);
+- void show_eq( char *lab, int *choice );
 SHOW_EQ.CPP shows one equation for variable lab
 
-- object *skip_next_obj(object *t, int *i);
+- object *skip_next_obj( object *t, int *i );
 UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series.
 
-- int my_strcmp(char *a, char *b);
+- int my_strcmp( char *a, char *b );
 UTIL.CPP It is a normal strcmp, but it catches the possibility of both strings being
 NULL
 
-- void cmd(char *cc);
+- void cmd( char *cc );
 UTIL.CPP Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
 
-- object *go_brother(object *cur);
+- object *go_brother( object *cur );
 UTIL.CPP returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
-- void show_graph( object *t);
+- void show_graph( object *t );
 DRAW.CPP shows the grsphical representation of the model
 
-- void set_obj_number(object *r, int *choice);
+- void set_obj_number( object *r, int *choice );
 EDIT.CPP allows to edit the number of instances in the model
 
-- void edit_data(object *root, int *choice, char *obj_name);
+- void edit_data( object *root, int *choice, char *obj_name );
 EDIT_DAT.CPP allows to edit the initial values
 
-- FILE *search_str(char *name, char *str);
+- FILE *search_str( char *name, char *str );
 UTIL.CPP given a string name, returns the file corresponding to name, and the current
 position of the file is just after str.
 
-- int deb(object *r, object *c, char *lab, double *res);
+- int deb( object *r, object *c, char *lab, double *res );
 Use the debugger interface to browse through the model
 
-- void myexit(int v);
+- void myexit( int v );
 Exit function, which is customized on the operative system.
 
 ****************************************************/
@@ -107,7 +107,6 @@ Exit function, which is customized on the operative system.
 bool initVal = false;				// new variable initial setting going on
 bool justAddedVar = false;			// control the selection of last added variable
 bool redrawReq = false;				// flag for asynchronous window redraw request
-char lastObj[MAX_ELEM_LENGTH] = "";	// to save last shown object for quick reload (choice=38)
 char *res_g;
 int natBat = true;					// native (Windows/Linux) batch format flag (bool)
 int next_lag;						// new variable initial setting next lag to set
@@ -130,9 +129,9 @@ int comp_ints ( const void *a, const void *b ) { return ( *( int * ) a - *( int 
 /****************************************************
 CREATE
 ****************************************************/
-object *create( object *cr )
+void create( void )
 {
-	object *cur;
+	object *cur = root;
 	char *s;
 
 	Tcl_LinkVar( inter, "strWindowOn", ( char * ) &strWindowOn, TCL_LINK_BOOLEAN );
@@ -171,58 +170,48 @@ object *create( object *cr )
 	// restore previous object and cursor position in browser, if any
 	if ( strlen( lastObj ) > 0 )
 	{
-		for ( cur = cr; cur->up != NULL; cur = cur->up );
-		cur = cur->search( lastObj );
+		cur = root->search( lastObj );
 		if ( cur != NULL )
 		{
-			cr = cur;
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
 			cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
 		}
 	}
 
-	redrawRoot = true;			// browser redraw when drawing the first time
+	redrawRoot = true;					// browser redraw when drawing the first time
 
 	choice_g = choice = 0;
 
 	// Main Cycle ********************************
 	while ( choice != 1 )
 	{
-		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change() ? "*" : " ", simul_name  );
-		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change() ? "*" : " ", simul_name  );
+		cmd( "wm title . \"%s%s - LSD Browser\"", unsaved_change( ) ? "*" : " ", simul_name  );
+		cmd( "wm title .log \"%s%s - LSD Log\"", unsaved_change( ) ? "*" : " ", simul_name  );
 
-		for ( cur = cr; cur->up != NULL; cur = cur->up );
+		// find root and minimally check the configuration
+		if ( struct_loaded && root->v == NULL && root->b == NULL ) 
+			error_hard( "invalid model configuration loaded",
+						"corrupted configuration file or internal problem in LSD", 
+						"if error persists, please contact developers" );
 
-		if ( cur->v == NULL && cur->b == NULL )
-			struct_loaded = false;
-		else
-		{ 
-			struct_loaded = true;
-			show_graph( cr );
-			if ( message_logged )
-			{
-				cmd( "wm deiconify .log; raise .log; focus .log; update idletasks" );
-				message_logged = false;
-			}    
+		show_graph( cur );
+		
+		if ( message_logged )
+		{
+			cmd( "wm deiconify .log; raise .log; focus .log; update idletasks" );
+			message_logged = false;
 		}    
-
-		cmd( "bind . <KeyPress-Escape> { }" );
-		cmd( "bind . <KeyPress-Return> { }" );
-		cmd( "bind . <Destroy> { set choice 35 }" );
-		cmd( "bind .log <Destroy> { set choice 35 }" );
 
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
-			choice = browse( cr, &choice );
+			choice = browse( cur, &choice );
 
-		cr = operate( &choice, cr );
+		cur = operate( cur, &choice );
 	}
 
 	Tcl_UnlinkVar( inter, "strWindowOn" );
 	Tcl_UnlinkVar( inter, "choice_g" );
 	Tcl_UnlinkVar( inter, "actual_steps" );
-
-	return cr;
 }
 
 
@@ -352,8 +341,11 @@ int browse( object *r, int *choice )
 					} \
 				}" );
 			cmd( "bind .l.v.c.var_name <Double-Button-1> { \
-					after 50; \
-					event generate .l.v.c.var_name <Return> \
+					set listfocus 1; \
+					set itemfocus [ .l.v.c.var_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						after idle { set choice 7 } \
+					} \
 				}" );
 			cmd( "bind .l.v.c.var_name <Button-2> { \
 					.l.v.c.var_name selection clear 0 end; \
@@ -549,8 +541,11 @@ int browse( object *r, int *choice )
 					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Double-Button-1> { \
-					after 50; \
-					event generate .l.s.c.son_name <Return> \
+					set listfocus 2; \
+					set itemfocus [ .l.s.c.son_name curselection ]; \
+					if { ! [ catch { set vname [ lindex [ split [ selection get ] ] 0 ] } ] } { \
+						after idle { set choice 4 } \
+					} \
 				}" );
 			cmd( "bind .l.s.c.son_name <Button-2> { \
 					.l.s.c.son_name selection clear 0 end; \
@@ -652,9 +647,9 @@ int browse( object *r, int *choice )
 		}
 		cmd( ch );
 
-		cmd( "bind .l.p.up_name.n <Enter> {set ttip \"Select parent object\"}" );
-		cmd( "bind .l.p.up_name.n <Leave> {set ttip \"\"}" );
-		cmd( "bind . <KeyPress-u> {catch {.l.p.up_name.n invoke}}; bind . <KeyPress-U> {catch {.l.p.up_name.n invoke}}" );
+		cmd( "bind .l.p.up_name.n <Enter> { set ttip \"Select parent object\" }" );
+		cmd( "bind .l.p.up_name.n <Leave> { set ttip \"\" }" );
+		cmd( "bind . <KeyPress-u> { catch { .l.p.up_name.n invoke } }; bind . <KeyPress-U> { catch { .l.p.up_name.n invoke } }" );
 
 		cmd( "pack .l.p.up_name.d .l.p.up_name.n -side left" );
 		cmd( "pack .l.p.up_name -padx 9 -anchor w" );
@@ -670,8 +665,8 @@ int browse( object *r, int *choice )
 			strcat( ch, " \" -command { }" );
 		cmd( ch );
 
-		cmd( "bind .l.p.tit.but <Enter> {set ttip \"Change...\"}" );
-		cmd( "bind .l.p.tit.but <Leave> {set ttip \"\"}" );
+		cmd( "bind .l.p.tit.but <Enter> { set ttip \"Change...\" }" );
+		cmd( "bind .l.p.tit.but <Leave> { set ttip \"\" }" );
 
 		cmd( "pack .l.p.tit.lab .l.p.tit.but -side left" );
 		cmd( "pack .l.p.tit -padx 8 -anchor w" );
@@ -914,18 +909,20 @@ int browse( object *r, int *choice )
 	// update element list removing duplicates and sorting
 	cmd( "if [ info exists modElem ] { set modElem [ lsort -dictionary -unique $modElem ] }" );
 
-	cmd( "if { $listfocus == 1 } { \
+	// restore correct selection on list boxes
+	cmd( "if { $listfocus == 1 && $itemfocus != [ .l.v.c.var_name curselection ] } { \
 			focus .l.v.c.var_name; \
 			.l.v.c.var_name selection clear 0 end; \
 			.l.v.c.var_name selection set $itemfocus; \
 			.l.v.c.var_name activate $itemfocus; \
 			.l.v.c.var_name see $itemfocus \
 		}" );
-	cmd( "if { $listfocus == 2 } { \
+	cmd( "if { $listfocus == 2 && $itemfocus != [ .l.s.c.son_name curselection ] } { \
 			focus .l.s.c.son_name; \
 			.l.s.c.son_name selection clear 0 end; \
 			.l.s.c.son_name selection set $itemfocus; \
-			.l.s.c.son_name activate $itemfocus \
+			.l.s.c.son_name activate $itemfocus; \
+			.l.s.c.son_name see $itemfocus \
 		}" );
 
 	cmd( "update_options" );		// update active menu options
@@ -951,8 +948,8 @@ int browse( object *r, int *choice )
 		}
 	}   
 
-
-	if ( choice_g )		// coming from the structure window
+	// coming from the structure window
+	if ( choice_g )	
 	{
 		*choice = choice_g;
 		choice_g = 0;
@@ -964,77 +961,38 @@ int browse( object *r, int *choice )
 	cmd( "if { [ .l.v.c.var_name curselection ] != \"\" } { \
 			set listfocus 1; \
 			set itemfocus [ .l.v.c.var_name curselection ] \
-		} { \
-			if { [ .l.s.c.son_name curselection ] != \"\" } { \
-				set listfocus 2; \
-				set itemfocus [ .l.s.c.son_name curselection ] \
-			} \
+		}" );
+	cmd( "if { [ .l.s.c.son_name curselection ] != \"\" } { \
+			set listfocus 2; \
+			set itemfocus [ .l.s.c.son_name curselection ] \
 		}" );
 
+	// if simulation was run, check to see if operation is valid
 	if ( actual_steps > 0 )
-	{ 	// search the sorted list of choices that are bad with existing run data
+	 	// search the sorted list of choices that are bad with existing run data
 		if ( bsearch( choice, badChoices, NUM_BAD_CHOICES, sizeof ( int ), comp_ints ) != NULL )
-		{ 	// prevent changing data if analysis is open
-			cmd( "if [ winfo exists .da ] { tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Analysis of Results window is open\" -detail \"Please close it before proceeding with any option that requires existing data to be removed.\"; set daOpen 1 } { set daOpen 0 }" );
-			if ( ! strcmp( Tcl_GetVar( inter, "daOpen", 0 ), "1" ) )
+		{
+			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
+			{
+				if ( ! open_configuration( r, true ) )
+					*choice = 20;		// reload failed, unload configuration
+			}
+			else
+			{
+				*choice = 0;
 				goto main_cycle;
-
-			cmd( "set temp 38" );
-
-			cmd( "set T .warn" );
-			cmd( "newtop $T \"Warning\"" );
-
-			cmd( "label $T.l1 -fg red -text \"Simulation just run\"" );
-			cmd( "label $T.l2 -text \"Data loaded is the last step of a previous run.\nThe requested operation is inappropriate now.\"" );
-
-			cmd( "frame $T.f" );
-			cmd( "label $T.f.l -text \"Choose one option to proceed\"" );
-
-			cmd( "frame $T.f.o -relief groove -bd 2" );
-			cmd( "radiobutton $T.f.o.reload -variable temp -value 38 -text \"Reload the current initial configuration\"" );
-			cmd( "radiobutton $T.f.o.load -variable temp -value 17 -text \"Load a new initial configuration\"" );     
-			cmd( "radiobutton $T.f.o.ar -variable temp -value 26 -text \"Analyze the final results\"" );     
-			cmd( "pack $T.f.o.reload $T.f.o.load $T.f.o.ar -anchor w" );
-
-			cmd( "pack $T.f.l $T.f.o" );
-
-			cmd( "pack $T.l1 $T.l2 $T.f -ipadx 5 -padx 5 -pady 5" );
-
-			cmd( "okhelpcancel $T b { set choice 1 } { LsdHelp LSD_quickhelp.html#problem } { set choice 2 }" );
-			cmd( "bind $T <Return> {set choice 1}" );
-
-			cmd( "showtop $T centerS" );
-			cmd( "bell; update" );
-
-			*choice = 0;
-			while ( *choice == 0 && choice_g == 0 )
-				Tcl_DoOneEvent( 0 );
-
-			cmd( "destroytop .warn" );
-
-			if ( *choice == 1 )
-				cmd( "set choice $temp" );
-			else 
-				goto main_cycle;
+			}
 		}
-	} 
 	 
-	if ( *choice != 35 )
-	{
-		cmd( "if { [ winfo exists . ] == 1 } { bind . <Destroy> { } }" );
-		cmd( "if { [ winfo exists .str ] == 1 } { bind .str <Destroy> { } }" );
-		cmd( "if { [ winfo exists .list ] == 1 } { destroy .list }" );
-	}
-
 	return *choice;
 }
 
 /****************************************************
 OPERATE
 ****************************************************/
-object *operate( int *choice, object *r )
+object *operate( object *r, int *choice )
 {
-bool saveAs, delVar, renVar, reload, table;
+bool saveAs, delVar, renVar, table;
 char observe, initial, cc, *lab1, *lab2, *lab3, *lab4, lab[ 2 * MAX_PATH_LENGTH ], lab_old[ 2 * MAX_PATH_LENGTH ], ch[ 2 * MAX_PATH_LENGTH ], out_file[ MAX_PATH_LENGTH ], out_dir[ MAX_PATH_LENGTH ], out_bat[ MAX_PATH_LENGTH ], win_dir[ MAX_PATH_LENGTH ];
 int sl, done = 0, num, i, j, param, save, plot, nature, numlag, k, lag, fSeq, ffirst, fnext, temp[ 10 ];
 long nLinks;
@@ -2442,8 +2400,7 @@ case 79:
 		break;
 		
 	cv = r->search_var( NULL, lab_old );
-	//if ( cv->param == 1 || cv->num_lag > 0 ) 		// force initial value request
-	//	cv->data_loaded = '-';
+
 	for ( cur = root->search( lab1 ); cur != NULL; cur = cur->hyper_next( cur->label ) )
 		cur->add_var_from_example( cv );
 
@@ -2804,7 +2761,7 @@ case 1:
 	set_blueprint( blueprint, n );
 
 	if ( overwConf )					// save if needed
-		if ( ! save_configuration( r ) )
+		if ( ! save_configuration( ) )
 		{
 			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
 			if ( *choice == 2 )
@@ -2829,120 +2786,23 @@ break;
 
 // Load a model
 case 17:
-case 38: //quick reload
+// Reload model
+case 38:
 
-	reload = ( *choice == 38 ) ? true : false;
-
-	if ( reload )
-		save_pos( r );
-
-	if ( struct_loaded )
-	{ 
-		if ( ! discard_change( ) )		// unsaved configuration?
-			break;
-
-		cmd( "set a [split [winfo children .] ]" );  // remove old runtime plots
-		cmd( "foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );	// remove lattice
-		cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );
-
-		empty_sensitivity(rsense); 	// discard sensitivity analysis data
-		rsense = NULL;
-		unsavedSense = false;		// nothing to save
-		findexSens = 0;
-		nodesSerial = 0;			// network node serial number global counter
-		cmd( "unset -nocomplain modElem" );
-	}
-
-	struct_loaded = false;
-	actual_steps = 0;				//Flag that no simulation has been run
-	unsavedData = false;			// no unsaved simulation results
-	// make sure there is a path set
-	cmd( "set path \"%s\"", path );
-	if ( strlen( path ) > 0 )
-		cmd( "cd \"$path\"" );
-
-	if ( ! reload )
-	{
-		strcpy( lastObj, "" );		// disable last object for quick reload
-		cmd( "set res \"%s\"", simul_name );
-
-		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"$res.lsd\" -filetypes { { {LSD model file } {.lsd} } } ]" );
-		*choice = 0;
-		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ] } { set choice 2 }" );
-		if ( *choice == 2 )
-			break;
-
-		lab1 = ( char * ) Tcl_GetVar( inter, "res", 0 );
-		if ( strlen( lab1 ) == 0 )
-			break;
-		delete [ ] simul_name;
-		simul_name = new char[ strlen( lab1 ) + 1 ];
-		strcpy( simul_name, lab1 );
-
-		lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
-		delete [ ] path;
-		path = new char[ strlen( lab1 ) + 1 ];
-		strcpy( path, lab1 );
-		if ( strlen( lab1 ) > 0 )
-			cmd( "cd $path" );
-	}
-
-	switch ( load_configuration( r, false ) )
-	{
-		case 1:							// file/path not found
-			if ( strlen( path ) > 0 )
-				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
-			else
-				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name  );
+	if ( discard_change( ) )	// unsaved configuration changes ?
+		if ( ! open_configuration( r, *choice == 38 ? true : false ) )
+		{
 			*choice = 20;
-			break;
-			
-		case 2:
-		case 3:
-			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
-			*choice = 20;
-			break;
-			
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:							// problem from MODELREPORT section
-		case 9:							// problem from DESCRIPTION section
-			autofill_descr( r );
-			
-		case 10:						// problem from DOCUOBSERVE section
-		case 11:
-		case 12:						// problem from DOCUINITIAL section
-		case 13:
-			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
-
-		default:						// load ok
-			unsaved_change( false );	// no changes to save
-			iniShowOnce = false;		// show warning on # of columns in .ini
-			redrawRoot = true;			// force browser redraw
-			if ( ! reload )
-				 // point for first var in listbox
-				cmd( "set listfocus 1; set itemfocus 0" );
-			*choice = 0;
-	}
-
-	// restore pointed object and variable
-	n = restore_pos( r );
-
-	if ( n != r )
-		return n;
-
+			return r;
+		}
+	
 break;
 
 	
 // Save a model
-case 73:
 case 18:
+// Save a model as different name
+case 73:
 
 	saveAs = ( *choice == 73 ) ? true : false;
 
@@ -2996,11 +2856,13 @@ case 18:
 			cmd( "cd $path" );
 	}
 
-	if ( ! save_configuration( r ) )
+	if ( ! save_configuration( ) )
 	{
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"File '%s.lsd' cannot be saved\" -detail \"The model is NOT saved! Check if the drive or the file is set READ-ONLY, change file name or select a drive with write permission and try again.\"", simul_name  );
 	}
-
+	else
+		unsaved_change( false );					// signal no unsaved change
+	
 	save_end:
 	Tcl_UnlinkVar( inter, "done" );
 	cmd( "unset done" );
@@ -3019,7 +2881,7 @@ case 19:
 	cmd( "destroytop .ini" );
 	r = n->search( lab );
 
-	unsaved_change( true );			// signal unsaved change
+	unsaved_change( true );							// signal unsaved change
 
 break;
 
@@ -3061,47 +2923,12 @@ break;
 // Unload the model
 case 20:
 
-	if ( ! discard_change( ) )	// check for unsaved configuration changes
+	if ( ! discard_change( ) )		// check for unsaved configuration changes
 		break;
 
-	cmd( "destroytop .str" );
-	cmd( "set a [split [winfo children .] ]" );
-	cmd( "foreach i $a {if [string match .plt* $i] {destroytop $i}}" );
-	cmd( "destroytop .lat" );	// remove lattice
-	cmd( "if { [ file exists temp.html ] } { file delete temp.html }" );
+	unload_configuration( true );
 
-	for ( n = r; n->up != NULL; n = n->up );
-	n->empty( );
-	empty_cemetery( );
-	n->label = new char[ strlen( "Root" ) + 1 ];
-	strcpy( n->label, "Root" );
-	r = n;
-	strcpy( lastObj, "" );			// disable last object for quick reload
-	actual_steps = 0;
-	unsavedData = false;			// no unsaved simulation results
-	empty_description( );
-	empty_sensitivity( rsense ); 	// discard sensitivity analysis data
-	rsense = NULL;
-	unsavedSense = false;			// nothing to save
-	findexSens = 0;
-	nodesSerial = 0;				// network node serial number global counter
-	add_description( "Root", "Object", "(no description available)" );      
-	cmd( "unset -nocomplain modElem" );
-	
-	delete [ ] path;
-	path = new char[ strlen( exec_path ) + 1 ];
-	strcpy( path, exec_path );
-	cmd( "set path \"%s\"; cd \"$path\"", path );
-	
-	delete [ ] simul_name;
-	simul_name = new char[ strlen( "Sim1" ) + 1 ];
-	strcpy( simul_name, "Sim1" );
-	strcpy( lsd_eq_file, "" );
-	sprintf( name_rep, "report_%s.html", simul_name );
-
-	unsaved_change( false );	// signal no unsaved change
-	redrawRoot = true;			// force browser redraw
-	cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
+	r = root;						// just an empty root exists
 
 break;
 
@@ -4226,9 +4053,9 @@ case 62:
 		if ( ! discard_change( false ) )	// unsaved configuration?
 			break;
 
-		int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+		int varSA = num_sensitivity_variables( rsense );// number of variables to test
 		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
-		long ptsSa = num_sensitivity_points(rsense);	// total number of points in sensitivity space
+		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
@@ -4236,20 +4063,23 @@ case 62:
 		{
 			plog( "\nWarning: sensitivity analysis space size is too big!" );
 			sensitivity_too_large( );		// ask user before proceeding
-			if (*choice == 0)
+			if ( *choice == 0 )
 				break;
 		}
 		
 		for ( i = 1, cs = rsense; cs!=NULL; cs = cs->next )
-			i*=cs->nvalues;
+			i *= cs->nvalues;
 		cur = root->b->head;
-		root->add_n_objects2( cur->label, i-1, cur );
+		root->add_n_objects2( cur->label, i - 1, cur );
 		
-		plog( "\nUpdating configuration, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
+		plog( "\nUpdating configuration, it may take a while, please wait..." );
 		sensitivity_parallel( cur, rsense );
-		
+		plog( " Done" );
+	
 		unsaved_change( true );				// signal unsaved change
+		redrawRoot = true;					// request browser redraw
+		
 		cmd( "tk_messageBox -parent . -type ok -icon warning -title Warning -message \"Structure changed\" -detail \"LSD has changed your model structure, replicating the entire model for each sensitivity configuration. If you want to preserve your original configuration file, save your new configuration using a different name BEFORE running the model.\"" );
 	}
 	else
@@ -4266,9 +4096,9 @@ case 63:
 		if ( ! discard_change( false ) )	// unsaved configuration?
 			break;
 
-		int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+		int varSA = num_sensitivity_variables( rsense );// number of variables to test
 		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
-		long ptsSa = num_sensitivity_points(rsense);	// total number of points in sensitivity space
+		long ptsSa = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", ptsSa );
 		
 		// Prevent running into too big sensitivity spaces (high computation times)
@@ -4285,23 +4115,16 @@ case 63:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiment, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
+		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
 		sensitivity_sequential( &findexSens, rsense );
+		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );	
 		sensitivity_created( );				// explain user how to proceed
 		
 		// now reload the previously existing configuration
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );
-		if ( load_configuration( r ) != 0 )
-		{
-			load_configuration_failed( );	// throw error message
-			*choice = 20;
-			break;
-		}
-			
+		if ( ! load_prev_configuration( ) )
+			unload_configuration( true );
+	
 		// restore pointed object and variable
 		n = restore_pos( r );
 		if ( n != r )
@@ -4324,9 +4147,9 @@ case 71:
 		if ( ! discard_change( false ) )	// unsaved configuration?
 			break;
 
-		int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+		int varSA = num_sensitivity_variables( rsense );// number of variables to test
 		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
-		long maxMC = num_sensitivity_points(rsense);	// total number of points in sensitivity space
+		long maxMC = num_sensitivity_points( rsense );	// total number of points in sensitivity space
 		plog( "\nSensitivity analysis space size: %ld", "", maxMC );
 
 		// get the number of Monte Carlo samples to produce
@@ -4387,23 +4210,16 @@ case 71:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiment, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
+		plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait... " );
 		sensitivity_sequential( &findexSens, rsense, sizMC );
+		plog( " Done\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
 		sensitivity_created( );				// explain user how to proceed
-		
+	
 		// now reload the previously existing configuration
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );
-		if ( load_configuration( r ) != 0 )
-		{
-			load_configuration_failed( );	// throw error message
-			*choice = 20;
-			break;
-		}
-
+		if ( ! load_prev_configuration( ) )
+			unload_configuration( true );
+		
 		// restore pointed object and variable
 		n = restore_pos( r );
 		if ( n != r )
@@ -4517,24 +4333,11 @@ case 72:
 		findexSens = 1;
 		
 		// create a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiment, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
 		sensitivity_doe( &findexSens, NOLHdoe );
 		sensitivity_created( );				// explain user how to proceed
 		
 		delete NOLHdoe;
-
-		// now reload the previously existing configuration
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );
-		if ( load_configuration( r ) != 0 )
-		{
-			load_configuration_failed( );	// throw error message
-			*choice = 20;
-			break;
-		}
 
 		// restore pointed object and variable
 		n = restore_pos( r );
@@ -4631,7 +4434,6 @@ case 80:
 			findexSens = 1;
 		
 		// adjust a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiment, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
 		design *rand_doe = new design( rsense, 2, "", findexSens, sizMC );
 		sensitivity_doe( &findexSens, rand_doe );
@@ -4639,18 +4441,6 @@ case 80:
 
 		delete rand_doe;
 		
-		// now reload the previously existing configuration
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );
-		if ( load_configuration( r ) != 0 )
-		{
-			load_configuration_failed( );	// throw error message
-			*choice = 20;
-			break;
-		}
-
 		// restore pointed object and variable
 		n = restore_pos( r );
 		if ( n != r )
@@ -4673,7 +4463,7 @@ case 81:
 		if ( ! discard_change( false ) )	// unsaved configuration?
 			break;
 
-		int varSA = num_sensitivity_variables(rsense);	// number of variables to test
+		int varSA = num_sensitivity_variables( rsense );	// number of variables to test
 		plog( "\nNumber of variables for sensitivity analysis: %d", "", varSA );
 
 		// get the number of Monte Carlo samples to produce
@@ -4764,7 +4554,6 @@ case 81:
 		findexSens = 1;
 		
 		// adjust a design of experiment (DoE) for the sensitivity data
-		plog( "\nCreating design of experiment, it may take a while, please wait... " );
 		cmd( "wm deiconify .log; raise .log; focus .log" );
 		design *rand_doe = new design( rsense, 3, "", findexSens, nSampl, nLevels, jumpSz, nTraj );
 		sensitivity_doe( &findexSens, rand_doe );
@@ -4772,18 +4561,6 @@ case 81:
 
 		delete rand_doe;
 		
-		// now reload the previously existing configuration
-		for ( n = r; n->up != NULL; n = n->up );
-		r = n;
-		cmd( "destroytop .str" );
-		cmd( "destroytop .lat" );
-		if ( load_configuration( r ) != 0 )
-		{
-			load_configuration_failed( );	// throw error message
-			*choice = 20;
-			break;
-		}
-
 		// restore pointed object and variable
 		n = restore_pos( r );
 		if ( n != r )
@@ -4852,7 +4629,7 @@ case 64:
 		break;
 	}
 	
-	if ( load_sensitivity( r, f ) != 0 )
+	if ( load_sensitivity( f ) != 0 )
 		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Invalid sensitivity analysis file\" -detail \"Please check if you select a valid file or recreate your sensitivity configuration.\"" );
 
 	fclose( f );
@@ -5596,7 +5373,7 @@ case 69:
 	set_blueprint( blueprint, n );
 	
 	if ( overwConf )				// save if needed
-		if ( ! save_configuration( r ) )
+		if ( ! save_configuration( ) )
 		{
 			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
 			if ( *choice == 2 )
@@ -6699,7 +6476,6 @@ SENSITIVITY_CREATED
 ****************************************************/
 void sensitivity_created( void )
 {
-	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
 	cmd( "tk_messageBox -parent . -type ok -icon info -title \"Sensitivity Analysis\" -message \"Configuration files created\" -detail \"LSD has created configuration files (.lsd) for all the sensitivity analysis required points.\n\nTo run the analysis first you have to create a 'No Window' version of the model program, using the 'Model'/'Generate 'No Window' Version' menu option in LMM. This step has to be done every time you modify your equations file.\n\nSecond, start the processing of sensitivity configuration files by selecting 'Run'/'Create/Run Parallel Batch...' menu option.\n\nAlternatively, open a command prompt (terminal window) and execute the following command in the directory of the model:\n\n> lsd_gnuNW  -f  <configuration_file>  -s  <n>\n\nReplace <configuration_file> with the name of your original configuration file WITHOUT the '.lsd' extension and <n> with the number of the first configuration file to be run (usually 1). If your configuration files are in a subdirectory of your model directory, please add their relative path before the configuration file name (i.e. <path>/<configuration_file>).\"" );
 }
 
@@ -6714,11 +6490,126 @@ void sensitivity_undefined( void )
 
 
 /****************************************************
-LOAD_CONFIGURATION_FAILED
+LOAD_PREV_CONFIGURATION
+Also restore sensitivity configuration 
 ****************************************************/
-void load_configuration_failed( void )
+bool load_prev_configuration( void )
 {
-	cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has WRITE access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+	char *saFile = NULL;
+	object *cur;
+	FILE *f;
+	
+	if ( sens_file != NULL )					// save SA file name if one is loaded
+	{
+		saFile = new char[ strlen( sens_file ) + 1 ];
+		strcpy( saFile, sens_file );
+	}
+	
+	if ( load_configuration( true ) != 0 )
+	{
+		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration file cannot be reloaded\" -detail \"Previously loaded configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+		
+		unload_configuration( true );			// full unload everything
+		return false;
+	}
+	
+	if ( saFile != NULL )						// restore SA configuration, if any
+	{
+		f = fopen( saFile, "rt" );
+		if ( f == NULL || load_sensitivity( f ) != 0 )
+		{
+			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Sensitivity analysis file cannot be reloaded\" -detail \"Previously loaded SA configuration could not be restored. Check if LSD still has access to the model directory.\n\nCurrent configuration will be reset now.\"" );
+			return false;
+		}
+		
+		if ( f != NULL )
+			fclose( f );
+		
+		delete [ ] saFile;
+	}
+	
+	return true;
+}
+
+
+/****************************************************
+OPEN_CONFIGURATION
+Open a clean configuration, either the current or not
+****************************************************/
+bool open_configuration( object *&r, bool reload )
+{
+	int choice;
+	char *lab1, *lab2;
+	
+	if ( reload )
+		save_pos( r );					// save current position when reloading
+	else
+	{									// ask user the file to use, if not reloading
+		cmd( "set bah [ tk_getOpenFile -parent . -title \"Open Configuration File\"  -defaultextension \".lsd\" -initialdir \"$path\" -initialfile \"%s.lsd\" -filetypes { { {LSD model file} {.lsd} } } ]", simul_name );
+		cmd( "if { [ string length $bah ] > 0 && ! [ fn_spaces \"$bah\" . ] } { set res $bah; set path [ file dirname $res ]; set res [ file tail $res ]; set last [ expr [ string last .lsd $res ] - 1 ]; set res [ string range $res 0 $last ]; set choice 0 } { set choice 2 }" );
+		get_int( "choice", &choice );
+		if ( choice == 2 )
+			return false;
+
+		lab1 = ( char * ) Tcl_GetVar( inter, "path", 0 );
+		lab2 = ( char * ) Tcl_GetVar( inter, "res", 0 );
+		if ( lab1 == NULL || lab2 == NULL || strlen( lab2 ) == 0 )
+			return false;
+		
+		delete [ ] path;
+		path = new char[ strlen( lab1 ) + 1 ];
+		strcpy( path, lab1 );
+		
+		delete [ ] simul_name;
+		simul_name = new char[ strlen( lab2 ) + 1 ];
+		strcpy( simul_name, lab2 );
+
+		if ( strlen( path ) > 0 )
+			cmd( "cd $path" );	
+		
+		cmd( "set listfocus 1; set itemfocus 0" ); 	// point for first var in listbox
+		strcpy( lastObj, "" );					// disable last object for reload
+		redrawRoot = true;						// force browser redraw
+	}
+
+	switch ( load_configuration( reload ) )		// try to load the configuration
+	{
+		case 1:									// file/path not found
+			if ( strlen( path ) > 0 )
+				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in directory '%s'.\"", simul_name, path );
+			else
+				cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"File not found\" -detail \"File for model '%s' not found in current directory\"", simul_name  );
+			return false;
+			
+		case 2:
+		case 3:
+			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected.\"" );
+			return false;
+			
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:									// problem from MODELREPORT section
+		case 9:									// problem from DESCRIPTION section
+			autofill_descr( r );
+			
+		case 10:								// problem from DOCUOBSERVE section
+		case 11:
+		case 12:								// problem from DOCUINITIAL section
+		case 13:
+			cmd( "tk_messageBox -parent . -type ok -title Error -icon error -message \"Invalid or damaged file\" -detail \"Please check if a proper file was selected and if the loaded configuration is correct.\"" );
+	}
+
+	if ( reload )
+		r = restore_pos( root );				// restore pointed object and variable
+	else
+		r = root;								// new structure
+	
+	iniShowOnce = false;						// show warning on # of columns in .ini
+	redrawRoot = true;							// force browser redraw
+
+	return true;
 }
 
 
@@ -6742,19 +6633,20 @@ Restore user position in browser
 ****************************************************/
 object *restore_pos( object *r )
 {
-	object *n;
+	object *cur;
 	
-	if ( strlen( lastObj ) > 0 )
+	if ( r != NULL && strlen( lastObj ) > 0 )
 	{
-		for ( n = r; n->up != NULL; n = n->up );
-		n = n->search( lastObj );
-		if ( n != NULL )
+		for ( cur = r; cur->up != NULL; cur = cur->up );
+		cur = cur->search( lastObj );
+		if ( cur != NULL )
 		{
 			cmd( "if [ info exists lastList ] { set listfocus $lastList }" );
 			cmd( "if [ info exists lastItem ] { set itemfocus $lastItem }" );
-			return n;
+			return cur;
 		}
 	}
+	
 	return r;
 }
 
@@ -6764,27 +6656,28 @@ UNSAVED_CHANGE
 Read or set the UnsavedChange flag and update windows titles accordingly
 ****************************************************/
 bool unsavedChange = false;		// control for unsaved changes in configuration
-#define WND_NUM 7
+#define WND_NUM 7				// number of windows to update (in wndName)
 const char *wndName[ ] = { ".", ".log", ".str", ".ini", ".da", ".deb", ".lat" };
 
 bool unsaved_change( bool val )
 {
-	int i; 
-	
 	if ( unsavedChange != val )
 	{
 		unsavedChange = val;
+		
+#ifndef NO_WINDOW
 		char chgMark[ ] = "\0\0";
 		chgMark[ 0 ] = unsavedChange ? '*' : ' ';
-		
+
 		// change all the possibly open (single) windows
-		for ( i = 0; i < WND_NUM; ++i )
+		for ( int i = 0; i < WND_NUM; ++i )
 		{
 			cmd( "if [ winfo exist %s ] { wm title %s \"%s[ string range [ wm title %s ] 1 end ]\" }", wndName[ i ], wndName[ i ], chgMark, wndName[ i ]  );
 		}
 		// handle (possibly multiple) run-time plot windows
 		cmd( "set a [ split [ winfo children . ] ]" );
 		cmd( "foreach i $a { if [ string match .plt* $i ] { wm title $i \"%s[ string range [ wm title $i ] 1 end ]\" } }", chgMark  );
+#endif
 	}
 	
 	return unsavedChange;
@@ -6801,33 +6694,36 @@ DISCARD_CHANGE
 Ask user to discard changes in configuration, if applicable
 Returns: 0: abort, 1: continue without saving
 ****************************************************/
-bool discard_change( bool checkSense, bool senseOnly )
+bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 {
 	// don't stop if simulation is runnig
 	if ( running )
 	{
-		cmd( "set answer [tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\"]" );
+		cmd( "set answer [ tk_messageBox -parent .log -type ok -icon error -title Error -message \"Cannot quit LSD\" -detail \"Cannot quit while simulation is running. Press 'OK' to continue simulation processing. If you really want to abort the simulation, press 'Stop' in the 'Log' window first.\" ]" );
 		return false;
 	}
 	// nothing to save?
 	if ( ! unsavedData && ! unsavedChange && ! unsavedSense )
 		return true;					// yes: simply discard configuration
-	else								// no: ask for confirmation
-		if ( ! senseOnly && unsavedData )
-			cmd( "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?\" -detail \"All data generated and not saved will be lost!\nDo you want to continue?\"]" );
-		else
-			if ( ! senseOnly && unsavedChange )
-			{
-				Tcl_SetVar( inter, "filename", simul_name , 0 );
-				cmd( "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard changes?\" -detail \"Recent changes to configuration '$filename' are not saved!\nDo you want to discard and continue?\"]" );
-			}
-			else						// there is unsaved sense data
-				if ( checkSense )
-					cmd( "set answer [tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard changes?\" -detail \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"]" );
-				else
-					return true;		// checking sensitivity data is disabled
-
-	cmd( "if [ string equal $answer yes ] { set ans 1 } { set ans 0 }" );  
+	
+	// no: ask for confirmation
+	if ( ! senseOnly && unsavedData )
+		cmd( "set question \"All data generated and not saved will be lost!\nDo you want to continue?\"" );
+	else
+		if ( ! senseOnly && unsavedChange )
+			cmd( "set question \"Recent changes to configuration '%s' are not saved!\nDo you want to discard and continue?\"", simul_name );
+		else						// there is unsaved sense data
+			if ( checkSense )
+				cmd( "set question \"Recent changes to sensitivity data are not saved!\nDo you want to discard and continue?\"" );
+			else
+				return true;		// checking sensitivity data is disabled
+				
+	// must disable because of a bug in Tk when open dialog
+	cmd( ".l.s.c.son_name configure -state disabled" );
+	cmd( ".l.v.c.var_name configure -state disabled" );
+	cmd( "if [ string equal [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { set ans 1 } { set ans 0 }", strlen( title ) != 0 ? "\n\n" : "", title );  
+	cmd( ".l.s.c.son_name configure -state normal" );
+	cmd( ".l.v.c.var_name configure -state normal" );
 	const char *ans = Tcl_GetVar( inter, "ans", 0 );
 	if ( atoi( ans ) == 1 )
 		return true;

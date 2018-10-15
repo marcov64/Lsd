@@ -82,6 +82,7 @@
 #define MAX_FILE_SIZE 1000000			// max number of bytes to read from files
 #define MAX_FILE_TRY 100000				// max number of lines to read from files
 #define MAX_LINE_SIZE 1000				// max size of a text line to read from files (>999)
+#define DEF_CONF_FILE "Sim1"			// default new configuration name
 #define NOLH_DEF_FILE "NOLH.csv"		// default NOLH file name
 #define MAX_SENS_POINTS 999				// default warning threshold for sensitivity analysis
 #define MAX_COLS 100					// max numbers of columns in init. editor
@@ -94,6 +95,7 @@
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
 #define CSV_SEP ","						// single char string with the .csv format separator
+#define SENS_SEP " ,;|/#\t\n"			// sensitivity data valid separators
 
 // user defined signals
 #define SIGMEM NSIG + 1					// out of memory signal
@@ -296,7 +298,7 @@ struct mnode
 	mnode *son;
 	object *pntr;
 
-	void create( double level);
+	void create( double level );
 	void empty( void );
 	object *fetch( double *n, double level = 0 );
 };
@@ -552,16 +554,18 @@ FILE *create_frames( char *t );
 FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
-bool alloc_save_mem( object *root );
-bool discard_change( bool checkSense = true, bool senseOnly = false );	// ask before discarding unsaved changes
+bool alloc_save_mem( object *r );
+bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 bool get_bool( const char *tcl_var, bool *var = NULL );
 bool load_description( char *msg, FILE *f );
-bool save_configuration( object *r, int findex = 0 );
+bool load_prev_configuration( void );
+bool open_configuration( object *&r, bool reload );
+bool save_configuration( int findex = 0 );
 bool save_sensitivity( FILE *f );
 bool search_parallel( object *r );
 bool sort_listbox( int box, int order, object *r );
 bool unsaved_change( bool );
-bool unsaved_change( void );					// control for unsaved changes in configuration
+bool unsaved_change( void );
 char *NOLH_valid_tables( int k, char* ch );
 char *clean_file( char * );
 char *clean_path( char * );
@@ -575,12 +579,12 @@ int contains ( FILE *f, char *lab, int len );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 int get_int( const char *tcl_var, int *var = NULL );
 int is_equation_header( char *line, char *var );
-int load_configuration( object *, bool reload = false );
-int load_sensitivity( object *r, FILE *f );
+int load_configuration( bool reload, bool quick = false );
+int load_sensitivity( FILE *f );
 int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int my_strcmp( char *a, char *b );
-int num_sensitivity_variables( sense *rsens );	// calculates the number of variables to test
+int num_sensitivity_variables( sense *rsens );
 int reset_bridges( object *r );
 int shrink_gnufile( void );
 int sort_function_down( const void *a, const void *b );
@@ -589,15 +593,14 @@ int sort_function_up( const void *a, const void *b );
 int sort_function_up_two( const void *a, const void *b );
 int sort_labels_down( const void *a, const void *b );
 long get_long( const char *tcl_var, long *var = NULL );
-long num_sensitivity_points( sense *rsens );	// calculates the sensitivity space size
+long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
-object *create( object *r );
-object *operate( int *choice, object *r );
+object *operate( object *r, int *choice );
 object *restore_pos( object * );
 object *sensitivity_parallel( object *o, sense *s );
 object *skip_next_obj( object *t );
 object *skip_next_obj( object *t, int *count );
-void NOLH_clear( void );						// external DoE	cleanup
+void NOLH_clear( void );
 void add_cemetery( variable *v );
 void add_description( char const *lab, char const *type, char const *text );
 void analysis( int *choice );
@@ -619,19 +622,20 @@ void clean_save( object *n );
 void clean_spaces( char *s );
 void close_sim( void );
 void cmd( const char *cc, ... );
-void collect_cemetery( object *o );				// collect variables from object before deletion
+void collect_cemetery( object *o );
 void control_tocompute(object *r, char *ch);
 void copy_descendant( object *from, object *to );
 void count( object *r, int *i );
 void count_save( object *n, int *count );
 void cover_browser( const char *, const char *, const char * );
+void create( void );
 void create_form( int num, char const *title, char const *prefix );
 void create_initial_values( object *r );
 void create_logwindow( void );
 void create_maverag( int *choice );
 void create_series( int *choice );
 void create_table_init( object *r );
-void dataentry_sensitivity( int *choice, sense *s, int nval );
+void dataentry_sensitivity( int *choice, sense *s, int nval = 0 );
 void deb_show( object *r );
 void delete_bridge( object *d );
 void draw_obj( object *t, int level, int center, int from );
@@ -664,7 +668,6 @@ void insert_object( const char *w, object *r, bool netOnly = false );
 void insert_store_mem( object *r, int *num_v );
 void kill_trailing_newline( char *s );
 void link_data( object *root, char *lab );
-void load_configuration_failed( void );
 void log_tcl_error( const char *cm, const char *message );
 void myexit( int v );
 void plog_series( int *choice );
@@ -688,7 +691,7 @@ void read_eq_filename( char *s );
 void report( int *choice, object *r );
 void reset_end( object *r );
 void reset_plot( int run );
-void run( object *r );
+void run( void );
 void save_data1( int *choice );
 void save_datazip( int *choice );
 void save_eqfile( FILE *f );
@@ -740,6 +743,7 @@ void tex_report_initall( object *r, FILE *f, bool table = true );
 void tex_report_observe( object *r, FILE *f, bool table = true );
 void tex_report_struct( object *r, FILE *f, bool table = true );
 void uncover_browser( void );
+void unload_configuration ( bool full );
 void unwind_stack( void );
 void wipe_out( object *d );
 void write_list( FILE *frep, object *root, int flag_all, char const *prefix );
@@ -776,6 +780,7 @@ extern char *exec_path;			// path of executable file
 extern char *sens_file;			// current sensitivity analysis file
 extern char *struct_file;		// name of current configuration file
 extern char equation_name[ ];	// equation file name
+extern char lastObj[ ];			// last shown object for quick reload
 extern char lsd_eq_file[ ];		// equations saved in configuration file
 extern char msg[ ];				// auxiliary Tcl buffer
 extern char name_rep[ ];		// documentation report file name

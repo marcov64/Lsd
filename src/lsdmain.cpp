@@ -17,51 +17,49 @@ LSD_MAIN.CPP contains:
 
 The functions contained here are:
 
-- void run(object *r)
+- void run( )
 Run the simulation model whose root is r. Running is not only the actual
 simulation run, but also the initialization of result files. Of course, it has
 also to manage the messages from user and from the model at run time.
 
-- bool alloc_save_mem( object *root );
+- bool alloc_save_mem( );
 Prepare variables to store saved data.
 
-- Tcl_Interp *InterpInitWin(char *tcl_dir);
+- Tcl_Interp *InterpInitWin( char *tcl_dir );
 A function that manages to initialize the tcl interpreter. Guess the standard
 functions are actually bugged, because of the difficulty to retrive the directory
 for the tk library. Why is difficult only for tk and not for tcl, don't know.
 But is a good thing, so that I can actually copy the tcl directory and make
 the modifications
 
-- void plog(char *m);
+- void plog( char *m );
 print  message string m in the Log screen.
 
 Other functions used here, and the source files where are contained:
 
-- object *create( object *r);
+- object *create( );
 manage the browser. Its code is in INTERF.CPP
 
-- object *skip_next_obj(object *t, int *count);
+- object *skip_next_obj( object *t, int *count );
 Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series.
 
-- object *go_brother(object *c);
+- object *go_brother( object *c );
 Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
-
-- void cmd(char *cc);
+- void cmd( char *cc );
 Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
 
-- void myexit(int v);
+- void myexit( int v );
 Exit function, which is customized on the operative system.
 
-- FILE *search_str(char *name, char *str);
+- FILE *search_str( char *name, char *str );
 UTIL.CPP given a string name, returns the file corresponding to name, and the current
 position of the file is just after str.
-
 
 ****************************************************/
 
@@ -111,6 +109,7 @@ char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
+char lastObj[ MAX_ELEM_LENGTH ] = "";		// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
@@ -189,10 +188,10 @@ int lsdmain( int argn, char **argv )
 	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
-	simul_name = new char[ strlen( "Sim1" ) + 1 ];
+	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
 	strcpy( path, "" );
 	strcpy( tcl_dir, "" );
-	strcpy( simul_name, "Sim1" );
+	strcpy( simul_name, DEF_CONF_FILE );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( getcwd( NULL, 0 ) );	// global pointer to path of executable file
 
@@ -312,9 +311,8 @@ int lsdmain( int argn, char **argv )
 		myexit( 3 );
 	}
 	fclose( f );
-	struct_loaded = true;
 
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n", struct_file );
 		myexit( 4 );
@@ -606,11 +604,11 @@ int lsdmain( int argn, char **argv )
 
 	while ( 1 )
 	{
-		root = create( root );
+		create( );
 		
 		try 
 		{
-			run( root );
+			run( );
 		}
 		catch( int p )           	// return point from error_hard() (in object.cpp)
 		{		
@@ -626,7 +624,7 @@ int lsdmain( int argn, char **argv )
 
 #else
 
-	run( root );
+	run( );
 
 #endif 
 
@@ -650,7 +648,7 @@ int lsdmain( int argn, char **argv )
 /*********************************
 RUN
 *********************************/
-void run( object *root )
+void run( void )
 {
 	int i, j, perc_done, last_done;
 	bool batch_sequential_loop = false;
@@ -710,7 +708,7 @@ void run( object *root )
 		// if new batch configuration file, reload all
 		if ( batch_sequential_loop )
 		{
-			if ( load_configuration( root, false ) != 0 )
+			if ( load_configuration( true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -725,7 +723,7 @@ void run( object *root )
 
 		// if just another run seed, reload just structure & parameters
 		if ( i > 1 )
-			if ( load_configuration( root, true ) != 0 )
+			if ( load_configuration( true, true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -1046,7 +1044,7 @@ void run( object *root )
 				if ( fast_mode < 2 )
 					plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 				fclose( f );  								// process next file
-				struct_loaded = true;
+
 				i = 0;   									// force restarting run count
 				batch_sequential_loop = true;				// force reloading configuration
 			} 
@@ -1172,7 +1170,7 @@ void unwind_stack( void )
 /*********************************
 ALLOC_SAVE_MEM
 *********************************/
-bool alloc_save_mem( object *root )
+bool alloc_save_mem( object *r )
 {
 	int toquit = quit;
 	object *cur;
@@ -1180,7 +1178,7 @@ bool alloc_save_mem( object *root )
 	bridge *cb;
 
 	//for each variable set the data saving support
-	for ( var = root->v; var != NULL; var = var->next )
+	for ( var = r->v; var != NULL; var = var->next )
 	{ 
 		var->last_update = 0;
 
@@ -1218,19 +1216,19 @@ bool alloc_save_mem( object *root )
 		
 		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
 		{
-			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
+			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, r->label );
 #ifndef NO_WINDOW   
 			plog( "Use the Initial Values editor to set its values\n" );
 			if ( var->param == 1 )
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, r->label, r->label );
 			else
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, r->label, r->label );  
 #endif
 			toquit = 2;
 		}
 	}
 
-	for ( cb = root->b; cb != NULL; cb = cb->next )
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
 			alloc_save_mem( cur );
 

@@ -135,7 +135,6 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
-	struct_loaded = true;
 	
 	root = new object;
 	root->init( NULL, "Root" );
@@ -150,7 +149,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 	
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Saved Variable Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
