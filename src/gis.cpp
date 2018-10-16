@@ -362,7 +362,7 @@ char gismsg[300];
         }
       } else if (position->map->wrap.left) {
         double alt_a = xn - x_2 + x_1;
-        if (alt_a < a_sq){
+        if (alt_a < -a_sq){
           a_sq=alt_a;
         }
       }
@@ -374,7 +374,7 @@ char gismsg[300];
         }
       } else if (position->map->wrap.bottom){
         double alt_b = yn - y_2 + y_1;
-        if (alt_b < b_sq){
+        if (alt_b < -b_sq){
           b_sq=alt_b;
         }
       }
@@ -831,7 +831,8 @@ char gismsg[300];
     position->objDis_inRadius.clear();//reset vector
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
-    add_if_dist_lab_cond functor_add(this,-1,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+    double pseudo_radius = radius*radius;
+    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
 
 
 
