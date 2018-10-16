@@ -55,16 +55,16 @@ using namespace Eigen;
 
 #define EQ_NOT_FOUND \
 	char msg[ TCL_BUFF_STR ]; \
-	sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label ); \
-	error_hard( msg, "equation not found", "check your configuration or code to prevent this situation" ); \
+	sprintf( msg, "equation not found for variable '%s'", label ); \
+	error_hard( msg, "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)" ); \
 	return res;
 	
 #define EQ_TEST_RESULT \
 	if ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
-		sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.", t, label, res ); \
-		error_hard( msg, "invalid result", "check your code to prevent this situation" ); \
+		sprintf( msg, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t ); \
+		error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true ); \
 		debug_flag = true; \
 		debug = 'd'; \
 	}
@@ -486,14 +486,22 @@ using namespace Eigen;
 
 // cycle through set of links of object C, using link pointer O
 #define CYCLE_LINK( O ) if ( p->node == NULL ) \
-	error_hard( "object has no network data structure", "invalid network object", "check your code to prevent this situation" ); \
-else \
-	for ( O = p->node->first; O != NULL; O = O->next )
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, "object '%s' has no network data structure", p->label ); \
+		error_hard( msg, "invalid network object", "check your equation code to add\nthe network structure before using this macro", true ); \
+	}\
+	else \
+		for ( O = p->node->first; O != NULL; O = O->next )
 
 #define CYCLE_LINKS( C, O ) if ( C == NULL || C->node == NULL ) \
-	error_hard( "object has no network data structure", "invalid network object", "check your code to prevent this situation" ); \
-else \
-	for ( O = C->node->first; O != NULL; O = O->next )
+	{ \
+		char msg[ TCL_BUFF_STR ]; \
+		sprintf( msg, "object '%s' has no network data structure", C->label ); \
+		error_hard( msg, "invalid network object", "check your equation code to add\nthe network structure before using this macro", true ); \
+	} \
+	else \
+		for ( O = C->node->first; O != NULL; O = O->next )
 
 // EXTENDED DATA/ATTRIBUTES MANAGEMENT MACROS
 // macros for handling extended attributes (usually lists) attached to objects' cext pointer

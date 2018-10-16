@@ -344,7 +344,8 @@ double variable::cal( object *caller, int lag )
 	{
 		sprintf( msg, "equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
 		error_hard( msg, "dead-lock",
-					"check your code to prevent this situation" );
+					"check your equation code to prevent this situation\nprobably using the variable lagged value instead", 
+					true );
 		return 0;
 	}
 
@@ -372,7 +373,8 @@ double variable::cal( object *caller, int lag )
 		{
 			sprintf( msg, "failure while pushing '%s' (object '%s')", label, up->label );
 			error_hard( msg, "internal problem in LSD",
-						"if error persists, please contact developers" );
+						"if error persists, please contact developers",
+						true );
 			return 0;
 		}
 
@@ -497,7 +499,8 @@ double variable::cal( object *caller, int lag )
 				default:
 					sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
 					error_hard( msg, "internal problem in LSD", 
-								"if error persists, please contact developers" );
+								"if error persists, please contact developers",
+								true );
 					return -1;
 			}
 #endif
@@ -513,7 +516,8 @@ double variable::cal( object *caller, int lag )
 		{
 			sprintf( msg, "failure while poping '%s' (in object '%s')", label, up->label );
 			error_hard( msg, "internal problem in LSD", 
-						"if error persists, please contact developers" );
+						"if error persists, please contact developers",
+						true );
 			return 0;
 		}
 	}
@@ -530,7 +534,7 @@ double variable::cal( object *caller, int lag )
 	
 	sprintf( msg, "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", label, up->label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
 	error_hard( msg, "invalid lag used", 
-				"check your configuration or code to prevent this situation" );
+				"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation" );
 	
 	return 0;
 }
@@ -760,7 +764,7 @@ bool worker::check( void )
 			if ( pexcpt != nullptr )
 			{
 				user_exception = user_excpt;
-				error_hard( err_msg2, err_msg1, err_msg3 );
+				error_hard( err_msg2, err_msg1, err_msg3, true );
 				rethrow_exception( pexcpt );
 			}
 			else
@@ -771,7 +775,7 @@ bool worker::check( void )
 					sprintf( msg, "multi-threading worker crashed" );
 				
 				error_hard( msg, "parallel computation problem", 
-							"disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+							"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 			}
 		}
 	}
@@ -824,7 +828,7 @@ void parallel_update( variable *v, object* p, object *caller )
 	{
 		sprintf( msg, "variable '%s' (object '%s') %d parallel worker(s) crashed", cv->label, cv->up->label, i );
 		error_hard( msg, "parallel computation problem", 
-					"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+					"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 		return;
 	}
 				
@@ -852,7 +856,7 @@ void parallel_update( variable *v, object* p, object *caller )
 					{
 						sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
 						error_hard( msg, "dead-lock during parallel computation", 
-									"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 						return;
 					}
 				}
@@ -895,7 +899,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			{
 				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a dead-lock state", cv->label, cv->up->label );
 				error_hard( msg, "parallel computation problem", 
-							"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
 			else
@@ -922,7 +926,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			{
 				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
 				error_hard( msg, "dead-lock during parallel computation", 
-							"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
 		}
@@ -964,7 +968,7 @@ void variable::empty( void )
 		{
 			sprintf( msg, "failure while deallocating variable %s", label );
 			error_hard( msg, "internal problem in LSD", 
-						"if error persists, please contact developers" );
+						"if error persists, please contact developers", true );
 			return;
 		}
 

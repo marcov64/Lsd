@@ -612,13 +612,6 @@ while ( true )
 			return;
 		  
 		 
-		// Brutally shut down the system
-		case 35:
-			error_hard( "", "abort requested", 
-						"if error persists, please contact developers" );
-			myexit( 20 );
-
-
 		// MAIN BUTTONS OPTIONS
 
 		// Plot
@@ -8229,7 +8222,8 @@ int store( struct s *c, int x4 )
 
 	error_hard( "invalid data structure",
 				"internal problem in LSD", 
-				"if error persists, please contact developers" );
+				"if error persists, please contact developers",
+				true );
 	myexit( 14 );
 	
 	return 0;
@@ -8263,7 +8257,8 @@ int store( struct s *c, int x3, int x4 )
 
 	error_hard( "invalid data structure",
 				"internal problem in LSD", 
-				"if error persists, please contact developers" );
+				"if error persists, please contact developers",
+				true );
 	myexit( 15 );
 	
 	return 0;
@@ -8302,7 +8297,8 @@ int store( struct s *c, int x2, int x3, int x4 )
 
 	error_hard( "invalid data structure",
 				"internal problem in LSD", 
-				"if error persists, please contact developers" );
+				"if error persists, please contact developers",
+				true );
 	myexit( 16 );
 	
 	return 0;
@@ -8346,7 +8342,8 @@ int store( int x1, int x2, int x3, int x4 )
 
 	error_hard( "invalid data structure", 
 				"internal problem in LSD", 
-				"if error persists, please contact developers" );
+				"if error persists, please contact developers",
+				true );
 	myexit( 17 );
 	
 	return 0;

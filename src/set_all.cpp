@@ -886,7 +886,8 @@ case 8:
 default:
 		error_hard( "invalid option for setting values", 
 					"internal problem in LSD", 
-					"if error persists, please contact developers" );
+					"if error persists, please contact developers",
+					true );
 		myexit( 22 );
 }
 }
@@ -1298,8 +1299,8 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( NOLHfile == NULL )
 	{
 		sprintf( msg, "cannot open NOHL design file '%s'", fileName );
-		error_hard( msg, "problem with design of experiment file", 
-					"check the requested file exists" );
+		error_hard( msg, "problem accessing the design of experiment file", 
+					"check if the requested file exists" );
 		return false;
 	}
 
@@ -2105,7 +2106,11 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 }
 
 
-// procedure to generate the configuration files for the Design of Experiment (DOE)
+/****************************************************
+SENSITIVITY_DOE
+Generate the configuration files for the 
+Design of Experiment (DOE)
+****************************************************/
 void sensitivity_doe( int *findex, design *doe )
 {
 	int i, j;
@@ -2144,8 +2149,4 @@ void sensitivity_doe( int *findex, design *doe )
 	plog( " Done" );
 	
 	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
-	
-	// now reload the previously existing configuration
-	if ( ! load_prev_configuration( ) )
-		unload_configuration( true );
 }

@@ -751,7 +751,10 @@ void run( void )
 		unwind_stack( );
 
 		// new random routine' initialization
-		init_random(seed);
+		init_random( seed );
+		
+		// reset math error counters
+		init_math_error( );
 
 		seed++;
 		scroll = false;

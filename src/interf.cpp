@@ -119,7 +119,7 @@ int badChoices[ ] = { 1, 2, 3, 6, 7, 19, 21, 22, 25, 27, 28, 30, 31, 32, 33, 36,
 #define NUM_BAD_CHOICES ( sizeof( badChoices ) / sizeof( badChoices[ 0 ] ) )
 
 // list of choices that are run twice (called from another choice)
-int redoChoices[ ] = { 20, 33, 55, 74, 75, 76, 77, 78, 79, 83 };
+int redoChoices[ ] = { 33, 55, 74, 75, 76, 77, 78, 79, 83 };
 #define NUM_REDO_CHOICES ( sizeof( redoChoices ) / sizeof( redoChoices[ 0 ] ) )
 
 // comparison function for bsearch and qsort
@@ -190,9 +190,13 @@ void create( void )
 
 		// find root and minimally check the configuration
 		if ( struct_loaded && root->v == NULL && root->b == NULL ) 
+		{
 			error_hard( "invalid model configuration loaded",
 						"corrupted configuration file or internal problem in LSD", 
 						"if error persists, please contact developers" );
+			unload_configuration( true );
+			cur = root;
+		}
 
 		show_graph( cur );
 		
@@ -938,7 +942,7 @@ int browse( object *r, int *choice )
 		{
 			Tcl_DoOneEvent( 0 );
 		}
-		catch ( bad_alloc& ) 	// raise memory problems
+		catch ( bad_alloc& ) 		// raise memory problems
 		{
 			throw;
 		}
@@ -975,7 +979,7 @@ int browse( object *r, int *choice )
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
 				if ( ! open_configuration( r, true ) )
-					*choice = 20;		// reload failed, unload configuration
+					*choice = 20;	// reload failed, unload configuration
 			}
 			else
 			{
@@ -986,6 +990,7 @@ int browse( object *r, int *choice )
 	 
 	return *choice;
 }
+
 
 /****************************************************
 OPERATE
@@ -2792,8 +2797,9 @@ case 38:
 	if ( discard_change( ) )	// unsaved configuration changes ?
 		if ( ! open_configuration( r, *choice == 38 ? true : false ) )
 		{
-			*choice = 20;
-			return r;
+			unload_configuration( true );
+			*choice = 0;
+			return root;
 		}
 	
 break;
@@ -2870,6 +2876,19 @@ case 73:
 break;
 
 
+// Unload the model
+case 20:
+
+	if ( ! discard_change( ) )		// check for unsaved configuration changes
+		break;
+
+	unload_configuration( true );
+
+	r = root;						// just an empty root exists
+
+break;
+
+
 // Edit Objects' numbers
 case 19:
 
@@ -2916,19 +2935,6 @@ case 21:
 
 	if ( cur2 != NULL )				// restore original current object
 		r = cur2;
-
-break;
-
-
-// Unload the model
-case 20:
-
-	if ( ! discard_change( ) )		// check for unsaved configuration changes
-		break;
-
-	unload_configuration( true );
-
-	r = root;						// just an empty root exists
 
 break;
 
@@ -4123,7 +4129,10 @@ case 63:
 		
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
-			unload_configuration( true );
+		{
+			*choice = 0;
+			return root;			
+		}
 	
 		// restore pointed object and variable
 		n = restore_pos( r );
@@ -4218,7 +4227,10 @@ case 71:
 	
 		// now reload the previously existing configuration
 		if ( ! load_prev_configuration( ) )
-			unload_configuration( true );
+		{
+			*choice = 0;
+			return root;			
+		}
 		
 		// restore pointed object and variable
 		n = restore_pos( r );
@@ -4339,6 +4351,13 @@ case 72:
 		
 		delete NOLHdoe;
 
+		// now reload the previously existing configuration
+		if ( ! load_prev_configuration( ) )
+		{
+			*choice = 0;
+			return root;			
+		}
+		
 		// restore pointed object and variable
 		n = restore_pos( r );
 		if ( n != r )
@@ -4440,6 +4459,13 @@ case 80:
 		sensitivity_created( );				// explain user how to proceed
 
 		delete rand_doe;
+		
+		// now reload the previously existing configuration
+		if ( ! load_prev_configuration( ) )
+		{
+			*choice = 0;
+			return root;			
+		}
 		
 		// restore pointed object and variable
 		n = restore_pos( r );
@@ -4560,6 +4586,13 @@ case 81:
 		sensitivity_created( );				// explain user how to proceed
 
 		delete rand_doe;
+		
+		// now reload the previously existing configuration
+		if ( ! load_prev_configuration( ) )
+		{
+			*choice = 0;
+			return root;			
+		}
 		
 		// restore pointed object and variable
 		n = restore_pos( r );

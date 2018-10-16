@@ -497,7 +497,7 @@ object *get_cycle_obj( object *c, char const *label, char const *command );
 object *go_brother( object *c );
 void close_lattice( void );
 void deb_log( bool on, int time = 0 );					// control debug mode
-void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "" );
+void error_hard( const char *logText, const char *boxTitle = "", const char *boxText = "", bool defQuit = false );
 void init_random( int seed );							// reset the random number generator seed
 void msleep( unsigned msec = 1000 );					// sleep process for milliseconds
 void nop( void );										// no operation
@@ -659,6 +659,7 @@ void handle_signals( void ( * handler )( int signum ) );
 void histograms( int *choice );
 void histograms_cs( int *choice );
 void init_map( void );
+void init_math_error( void );
 void init_plot( int i, int id_sim );
 void insert_data_file( bool gz, int *num_v, int *num_c );
 void insert_data_mem( object *r, int *num_v, int *num_c );
