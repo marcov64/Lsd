@@ -1833,7 +1833,6 @@ Create a new run time lattice having:
   If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 ***************************************************/
-
 double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
 {
 	int i, j, hsize, vsize, hsizeMax, vsizeMax;
@@ -1845,14 +1844,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		return -1;
 	}
 
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-	{
-		for ( j = 0; j < columns; ++j )
-			delete [ ] lattice[ j ];
-		
-		delete [ ] lattice;
-	}
-	
+	// reset the LSD lattice, if any
+	close_lattice( );
 	rows = ( int ) max( 0, floor( nrow ) );
 	columns = ( int ) max( 0, floor( ncol ) );
 	error_count = 0;
