@@ -1,0 +1,8 @@
+Model GisTest (ver. 1.0)
+
+Just a simple test-model for debugging / checking if the GIS module works as it should.
+
+(Enter the Model description text here)
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+
