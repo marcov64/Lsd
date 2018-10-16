@@ -209,6 +209,13 @@ void create( void )
 		// browse only if not running two-cycle operations
 		if ( bsearch( & choice, redoChoices, NUM_REDO_CHOICES, sizeof ( int ), comp_ints ) == NULL )
 			choice = browse( cur, &choice );
+		
+		// check if configuration was just reloaded
+		if ( choice < 0 )
+		{
+			choice = - choice;
+			cur = root;
+		}
 
 		cur = operate( cur, &choice );
 	}
@@ -978,7 +985,9 @@ int browse( object *r, int *choice )
 		{
 			if ( discard_change( true, false, "Invalid command after a simulation run." ) )	// for sure there are changes, just get the pop-up
 			{
-				if ( ! open_configuration( r, true ) )
+				if ( open_configuration( r, true ) )
+					*choice = - *choice;	// signal the reload
+				else
 					*choice = 20;	// reload failed, unload configuration
 			}
 			else
