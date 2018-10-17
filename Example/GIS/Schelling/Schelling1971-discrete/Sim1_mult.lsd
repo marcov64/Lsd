@@ -1,0 +1,289 @@
+	
+Label Root
+{
+	Son: Model
+	Label Model
+	{
+		Son: Agent
+		Label Agent
+		{
+			Param: Colour
+			Var: Move
+			Func: locFracOther
+			Func: Content
+
+		}
+
+		Son: Patch
+		Label Patch
+		{
+			Func: isOption
+
+		}
+
+		Var: Scheduler
+		Param: xn
+		Param: fracAgents
+		Param: fracBlue
+		Param: wrapping
+		Param: tolerance
+		Param: distance
+		Var: fracMove
+		Var: fracContent
+		Var: Initialise
+		Param: Randomise
+		Var: dissimilarity
+
+	}
+
+	Var: EndOfSim
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: EndOfSim 0 n + n n
+
+Object: Model C	100
+Var: Scheduler 0 s + n n
+Param: xn 0 s + n n	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40	40
+Param: fracAgents 0 s + n n	0.998592	0.966279	0.564062	0.99952	0.618044	0.69829	0.693955	0.834873	0.96777	0.923155	0.656637	0.762274	0.721726	0.614789	0.767207	0.956981	0.728602	0.715349	0.969564	0.889195	0.857985	0.901379	0.5464	0.759076	0.93251	0.914573	0.914802	0.636525	0.529622	0.835264	0.796533	0.835827	0.705894	0.598775	0.644815	0.57106	0.891657	0.706269	0.517086	0.812015	0.830318	0.649248	0.723067	0.611062	0.536682	0.734619	0.548086	0.951685	0.559745	0.7624	0.541812	0.958431	0.955224	0.649465	0.792195	0.782956	0.806969	0.978268	0.630489	0.615508	0.766724	0.974969	0.74653	0.7703	0.882743	0.522673	0.569983	0.896202	0.514901	0.941563	0.770394	0.72399	0.946068	0.688792	0.769212	0.826149	0.680631	0.785504	0.818918	0.563157	0.845102	0.823875	0.67697	0.881617	0.678266	0.876394	0.940671	0.505835	0.749055	0.536896	0.893476	0.532034	0.677655	0.970918	0.689902	0.88146	0.885797	0.65068	0.88637	0.576465
+Param: fracBlue 0 s + n n	0.37359	0.202702	0.412713	0.341192	0.429378	0.340218	0.2807	0.449508	0.365397	0.221024	0.341743	0.422829	0.257587	0.339293	0.269109	0.352474	0.26257	0.214791	0.355659	0.251684	0.318894	0.23221	0.352943	0.230641	0.286615	0.269528	0.4903	0.283496	0.270087	0.227467	0.37102	0.325378	0.310353	0.443898	0.286928	0.415217	0.383884	0.328073	0.425562	0.328344	0.328515	0.308571	0.246002	0.481157	0.474923	0.434588	0.384899	0.2108	0.396297	0.238931	0.288308	0.308244	0.282394	0.222191	0.245641	0.248486	0.481614	0.31134	0.215005	0.422287	0.289604	0.261307	0.494527	0.467906	0.427805	0.395336	0.211905	0.444163	0.428772	0.336585	0.359548	0.232801	0.24381	0.352637	0.264695	0.474933	0.338646	0.23968	0.429272	0.26382	0.222278	0.228626	0.248662	0.306939	0.228592	0.242979	0.479304	0.372975	0.451894	0.386988	0.297355	0.418403	0.356821	0.421043	0.249622	0.406117	0.328043	0.418567	0.426901	0.319283
+Param: wrapping 0 s + n n	3	3	2	0	3	0	2	3	1	1	1	0	2	0	2	1	3	3	3	1	1	2	3	0	0	1	0	0	0	2	2	0	0	1	3	3	3	1	0	1	0	0	1	2	0	3	3	2	1	1	3	1	2	3	3	0	3	0	3	3	1	1	2	1	3	2	1	0	1	3	2	1	0	3	2	0	1	0	3	3	1	0	3	3	2	2	0	0	3	2	2	0	0	0	1	0	2	1	3	2
+Param: tolerance 0 s + n n	0.794014	0.72893	0.303762	0.165804	0.226205	0.267594	0.433906	0.378152	0.659907	0.658008	0.159779	0.129176	0.73152	0.820423	0.103731	0.311363	0.473902	0.387853	0.292174	0.118535	0.525334	0.204156	0.549167	0.234265	0.43686	0.64775	0.31912	0.108	0.275893	0.125565	0.847898	0.725674	0.514075	0.11317	0.33904	0.532576	0.787907	0.248091	0.166837	0.135418	0.455046	0.115455	0.153626	0.749417	0.609032	0.71828	0.664546	0.290569	0.135534	0.324974	0.792072	0.158499	0.628266	0.249903	0.517829	0.823103	0.480122	0.777618	0.771024	0.211424	0.532244	0.473668	0.274946	0.452663	0.484223	0.366627	0.10713	0.504371	0.638518	0.144367	0.226064	0.584083	0.355379	0.812414	0.732299	0.273999	0.260167	0.644352	0.224973	0.508289	0.890452	0.215754	0.13864	0.819251	0.672264	0.348262	0.414352	0.164627	0.381697	0.100811	0.599704	0.260217	0.600089	0.357161	0.137855	0.678692	0.707402	0.425043	0.663468	0.568287
+Param: distance 0 s + n n	7	8	6	3	3	3	3	2	6	6	3	7	7	5	4	5	7	1	8	4	3	8	2	3	8	5	5	4	8	8	6	2	8	8	5	6	5	7	2	4	3	8	1	5	2	5	6	8	1	3	3	6	7	7	6	4	6	4	2	7	4	5	5	3	8	4	2	3	2	2	3	6	7	8	4	2	1	8	5	4	2	6	7	3	3	4	1	2	5	1	7	2	4	5	6	7	5	8	5	2
+Var: fracMove 0 s + n n
+Var: fracContent 0 s + n n
+Var: Initialise 0 n + n n
+Param: Randomise 0 n + n n	1	1	1	0	0	1	1	0	0	0	1	0	0	1	0	1	0	0	0	0	0	1	1	0	1	0	1	0	1	1	0	1	1	0	0	1	1	1	1	0	0	1	0	1	0	1	0	1	0	1	0	0	0	1	1	1	0	0	1	1	0	1	0	1	0	1	0	0	1	1	0	1	1	1	0	1	1	0	0	1	1	1	0	1	1	0	0	0	1	1	1	1	1	1	1	1	0	0	0	1
+Var: dissimilarity 0 s + n p
+
+Object: Agent C	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Param: Colour 0 n + n n	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Var: Move 0 n + n n
+Func: locFracOther 0 n + n n
+Func: Content 0 n + n n
+
+Object: Patch C	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+Func: isOption 0 n + n n
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 1000
+EQUATION fun_Schelling.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_EndOfSim
+ Stop the simulation if no model changes any more. 
+'EndOfSim' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Model
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Scheduler
+The Scheduler controls the updating scheme (that part which is not endogeneously defined 
+
+'Scheduler' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_xn
+x-dimension of the grid
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fracAgents
+The number of Agents compared to the size of the grid (0..1) exclusive
+_INIT_
+All 100 instances set to random values drawn from a uniform in the range [0.5,1].
+END_DESCRIPTION
+
+Parameter_fracBlue
+The fraction of agents that is blue (0). The mirrored fraction is red (1)
+_INIT_
+All 100 instances set to random values drawn from a uniform in the range [0.2,0.5].
+END_DESCRIPTION
+
+Parameter_wrapping
+0: off, 1: left, 2: right, 3: left & right
+_INIT_
+All 100 instances set to integer random values drawn from a uniform in the range [0,3].
+END_DESCRIPTION
+
+Parameter_tolerance
+Defines how many agents of different colour need to be in the neighbourhood, before the agent wants to move away. (0.0,1.0).
+_INIT_
+All 100 instances set to random values drawn from a uniform in the range [0.1,0.9].
+END_DESCRIPTION
+
+Parameter_distance
+defines the maximum number of agents to the left and right in the neighbourhood (1, 2, .... xn)
+_INIT_
+All 100 instances set to integer random values drawn from a uniform in the range [1,8].
+END_DESCRIPTION
+
+Variable_fracMove
+Monitor the fraction of agents that decided to move.
+
+'fracMove' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_fracContent
+Monitor the fraction of agents that are content.
+
+'fracContent' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Initialise
+Initialise the model
+
+'Initialise' appears in the equation for: Scheduler
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Randomise
+Defines if the order of agents movement per step is randomised or not.
+0 = off
+1 = on (default)
+_INIT_
+All 100 instances set to integer random values drawn from a uniform in the range [0,1].
+END_DESCRIPTION
+
+Variable_dissimilarity
+Monitor the aggregate level of segregation with the dissimilarity index for the
+moore neighbourhood.
+D = 1/xn * sum_xn ( |b_i/B_t - r_i/R_t| )
+
+where b_i is the number of blue in the 9-field neighbourhood (moore) and r_i the
+number of red respectively. B_t and R_t are the total numbers of Blue and Red.
+
+To define the neighbourhood accordingly in both, 2d and 1d setting and also the
+continuous case, we define it as the patch and its neirest 8 neighbours.
+
+'dissimilarity' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+The agent
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Colour
+The Colour of the Agent (0:Blue, 1:Red)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Move
+The agent decides if it should move.
+
+'Move' appears in the equation for: Scheduler, fracMove
+_INIT_
+
+END_DESCRIPTION
+
+Function_locFracOther
+Measures the fraction of people in the neighbourhood that differ from ones own color.
+
+'locFracOther' appears in the equation for: Content
+_INIT_
+
+END_DESCRIPTION
+
+Function_Content
+Function that at the point in time measures if the agent is content with its situation.
+
+'Content' appears in the equation for: Move, fracContent
+_INIT_
+
+END_DESCRIPTION
+
+Object_Patch
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_isOption
+ Check if the place would be an option for the calling agent
+   check 1: is empty?
+   if empty, then check 2 else it is not an option
+   check 2: is locFracOther <= tolerance?
+   if true, then it is an option else not
+
+'isOption' appears in the equation for: Move
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+
+#include "fun_head_fast.h"
+
+
+// do not add Equations in this area
+
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+
+
+
+
+
+
+
+
+
+
+
+MODELEND
+
+
+// do not add Equations in this area
+
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE

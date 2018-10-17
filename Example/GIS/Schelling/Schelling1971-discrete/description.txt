@@ -1,0 +1,63 @@
+#Model Schelling Segregation Model (1d discrete)
+
+##Description
+This is a simple implementation of the Schelling Segregation Model in it's one
+dimensional version (1971), discretesised.
+
+The set of agents populates a 1d line with discrete number of "patches".
+Agents are blue or red. They prefer to have neighbours with equal colour,
+but not too strongly. The parameter "tolerance" in [0,1] defines the fraction
+of agents with a different colour that are O.K.
+
+They look in their neighbourhood spanning "distance" patches to the left and
+right to see if they are content. They are content as long as the fraction of
+neighbours with a different colour is at most equal to the "tolarance" level.
+
+The number of agents is strictly less then the number of patches. If an agent is
+not content with its situation, it moves to the closest place where it would be
+content if such a place exists. In cases of ambiguity between options, a random
+decision takes place. The agent does not anticipate the behaviour of other
+agents.
+
+The simulation stops when no agent wants to move, either because they are all
+content or because they do not find a new position that would make them content.
+
+##Parameters and Variables
+
+Control:
+[V]	Scheduler		: Represents the "Updating Scheme"
+[V]	Initialise	: Initialisation of the Model	
+
+Global (Sensitivity) Parameters :
+[P] xn  			  : Length of the line		(integer>>3)
+[P] wrapping  	: Wrapping 		(0: off, 1: left, 2: right, >=3: left & right)
+[P] fracAgents	: relative number of agents compared to xn (0..1)
+[P] fracBlue		: relative number of blue agents from total (0..1)
+[P] tolerance		: the tolerance level (homogeneous, 0..1)
+[P] distance		: size of the neighbourhood, to left and right (1, ... xn)
+
+
+Agent:
+[P] Colour			:	The colour of the agent (red=1/blue=5, decided by initialisation)
+[F] locFracOther: Fraction of other coloured agents in the local neighbourhood. (take care of empty places!)
+[F] Content			: 1.0 - the agent is content with the situation, 0.0 - it is not.
+[V] Move				: Decide if the agent wants to move. If yes, move. Value: 0-no move, 1-move
+
+Patch:
+[F] isOption     : Dummy, based on the asking agent tells if it is an option or not.
+
+Monitor / Output:
+( lattice				: graphical representation, only windowed, singular modus)
+[V] fracMove 		:	fraction of agents that move.
+[V] fracContent	:	fraction of agents that are content with their situation
+[V] dissimilarity	: measurement of segregation (dissimilarity index)
+
+##Questions before running the model:
+What do you expect?
+What is underspecified?
+How would you analys the model?
+...
+
+
+(PRESS CTRL+E TO EDIT EQUATIONS)
+
