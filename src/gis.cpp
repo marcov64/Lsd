@@ -108,12 +108,6 @@ char gismsg[300];
   //  map_from_obj
   //  Check if the object is a gis object and return pointer to map.
   gisMap* object::ptr_map(){
-    if (this == NULL){
-      sprintf( gismsg, "failure in ptr_map()");
-		      error_hard( gismsg, "called with 'NULL'",
-					"check your code to prevent the error. Provide valide objects to the macro" );
-      return NULL;
-    }
     if (position == NULL){
       return NULL;
     } else {

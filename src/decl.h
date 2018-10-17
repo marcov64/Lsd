@@ -44,7 +44,7 @@
 #include <functional>
 #include <algorithm>
 #include <random>						// use new random libraries if possible
-#endif
+#endif //#ifdef CPP11
 
 #ifdef CPP11
 // comment the next line to disable parallel mode (multi-threading)
@@ -58,7 +58,7 @@
 #include <condition_variable>
 #include <functional>
 #include <chrono>
-#endif
+#endif //#ifdef CPP11
 
 // comment the next line to compile without libz
 #ifndef CPP_DEFAULT
@@ -141,13 +141,13 @@ class object;
 class variable;
 #ifdef CPP11
 struct gisMap;
-#endif
+#endif //#ifdef CPP11
 
 #ifdef CPP11
 // special types used for fast equation lookup
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef map< string, eq_funcT > eq_mapT;
-#endif
+#endif //#ifdef CPP11
 
 class variable
 {
@@ -181,7 +181,7 @@ class variable
 
 #ifdef CPP11
 	eq_funcT eq_func = NULL;	// pointer to equation function for fast look-up
-#endif
+#endif //#ifdef CPP11
 
 	int init( object *_up, char const *_label, int _num_lag, double *val, int _save );
 	double cal( object *caller, int lag );
@@ -325,7 +325,8 @@ struct Wrap
 	};
 	Wrap(bool left, bool right, bool top, bool bottom) : left(left),right(right),top(top),bottom(bottom)
 	{
-		if (left == right == top == bottom == false){
+		if ( (((left == right) == top ) == bottom ) == false)
+    {
 			noWrap = true;
 		} else {
 			noWrap = false;
@@ -366,7 +367,7 @@ struct gisMap
 //	//no need to do any thing, this is done in the objects with gisPosition in map.
 //	};
 };
-#endif
+#endif //#ifdef CPP11
 
 class object
 {
@@ -383,7 +384,7 @@ class object
 	netNode *node;		// pointer to network node data structure
 	#ifdef CPP11
 	gisPosition *position; //Pointer to gis data structure
-	#endif
+	#endif //#ifdef CPP11
 	void *cext;			// pointer to a C++ object extension to the LSD object
 
 	double cal( object *caller,  char const *l, int lag );
@@ -422,7 +423,9 @@ class object
 	void sort( char const *obj, char const *var, char *direction );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
+  #ifdef CPP11
   void lsdrndsort(char const *obj);
+  #endif //#ifdef CPP11
 	void empty( void );
 	void delete_obj( void );
 	object *add_n_objects2( char const *lab, int n, object *ex, int t_update );
@@ -526,7 +529,7 @@ class object
 	bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
 
 	bool check_positions(double& _x, double& _y); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
-	#endif
+	#endif //#ifdef CPP11
 };
 
 struct lsdstack
@@ -688,7 +691,7 @@ double fisher( double m, double n );					// draw from a Fisher-F distribution
 double geometric( double p );							// draw from a geometric distribution
 double student( double n );								// draw from a Student-T distribution
 double weibull( double a, double b );					// draw from a Weibull distribution
-#endif
+#endif //#ifdef CPP11
 
 
 // global variables (visible to the users)
@@ -716,7 +719,7 @@ extern object *root;
 
 #ifdef CPP11
 extern eq_mapT eq_map;			// map to fast equation look-up
-#endif
+#endif //#ifdef CPP11
 
 #ifndef NO_WINDOW
 extern double i_values[ ];		// user temporary variables copy

@@ -323,8 +323,10 @@ using namespace Eigen;
 #define SORT2S( O, X, Y, L, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) L, ( char * ) Z )
 
 // Added RND option for sorting in CPP11
-#define SORT_RND( X ) p->lsdrndsort( ( char * ) X )
-#define SORT_RNDS( O, X ) O->lsdrndsort( ( char * ) X )
+#ifdef CPP11
+  #define SORT_RND( X ) p->lsdrndsort( ( char * ) X )
+  #define SORT_RNDS( O, X ) O->lsdrndsort( ( char * ) X )
+#endif //#ifdef CPP11
 
 #define ADDOBJ( X ) p->add_n_objects2( ( char * ) X, 1 )
 #define ADDOBJL( X, Y ) p->add_n_objects2( ( char * ) X, 1 , ( int ) Y )
@@ -705,27 +707,29 @@ else \
 #define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
 
 //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
-//  Similar to above, but it searches at the raster-level (all items registered)
-//  at the grid.
-//  NOTE: This is not the same as assuming a radius around the grid.
-//   In this case, please use one of the CYCLE or NEAREST_IN_DISTANCE macros.
+//  Similar to above, but it searches at the truncated position.
+//  This macro is useful if one set of agents is distributed in continuous space
+//  And another one, like "land patches", in discrete space. Then, the modeller
+//  Can safely get information on the associated "land patch" of an "agent" with
+//  this command.
 #define SEARCH_POSITION_GRID(LAB)  ( p->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
 #define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
 
+#define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
+#define COUNT_POSITION_GRIDS(PTR, LAB) ( PTR->elements_at_position( LAB, true ) )
+
 // Additional Utilities
+// ANY_GIS just checks if there is a map associated to the object
+// SAME_GIS checks if the two objects share the same map
 #define ANY_GIS ( p->position != NULL ? true : false  )
 #define ANY_GISS(PTR) ( PTR->position != NULL ? true : false )
 
 #define SAME_GIS(TARGET) ( p->ptr_map() == TARGET->ptr_map() )
 #define SAME_GISS(PTR,TARGET) ( PTR->ptr_map() == TARGET->ptr_map() )
 
-//to do:
-
-//#define COUNT_POSITION(LAB)
-//#define COUNT_POSITIONS(LAB)
-#endif
+#endif //#ifdef CPP11
 	
 // DEPRECATED MACRO COMPATIBILITY DEFINITIONS
 // enabled only when directly including fun_head.h (and not fun_head_fast.h)
@@ -807,4 +811,4 @@ void cmd( const char *cm, ... );
 #endif
 #ifdef CPP11
 #include "gis.cpp" //until linked
-#endif
+#endif //#ifdef CPP11

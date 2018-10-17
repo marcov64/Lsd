@@ -1651,7 +1651,7 @@ void object::lsdrndsort(char const *obj)
 
   #else
   plog("\nSORT_RND not implemented for <CPP11");
-  #endif
+  #endif //#ifdef CPP11
 }
 
 /****************************************************
