@@ -9,10 +9,10 @@ TARGET_NW=lsd_gnuNW
 
 $(TARGET_NW)$(EXT): $(FUN).obj $(SRC_DIR)main_gnuwin.obj $(SRC_DIR)file.obj \
 $(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
-$(SRC_DIR)nets.obj
+$(SRC_DIR)nets.obj $(SRC_DIR)gis.obj
 	$(CC_NW) $(SWITCH_CC_NW) $(FUN).obj $(SRC_DIR)file.obj $(SRC_DIR)main_gnuwin.obj \
 	$(SRC_DIR)util.obj $(SRC_DIR)object.obj $(SRC_DIR)variab.obj $(SRC_DIR)lsdmain.obj \
-	$(SRC_DIR)nets.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
+	$(SRC_DIR)nets.obj $(SRC_DIR)gis.obj $(SWITCH_CC_LNK) -L$(PATH_LIB) $(LIBS_NW) -o $(TARGET_NW)
 
 $(SRC_DIR)file.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt $(SRC_DIR)file.cpp \
 $(SRC_DIR)decl.h
@@ -39,6 +39,9 @@ $(SRC_DIR)report.cpp $(SRC_DIR)decl.h
 $(SRC_DIR)nets.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
 $(SRC_DIR)nets.cpp $(SRC_DIR)decl.h
 	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)nets.cpp -o $(SRC_DIR)nets.obj $(INCLUDE)
+$(SRC_DIR)gis.obj: $(SRC_DIR)choose.h $(SRC_DIR)system_options.txt \
+$(SRC_DIR)gis.cpp $(SRC_DIR)decl.h
+	$(CC_NW) $(SWITCH_CC_NW) -c $(SRC_DIR)gis.cpp -o $(SRC_DIR)gis.obj $(INCLUDE)
 $(FUN).obj: $(FUN).cpp $(FUN_EXTRA) model_options.txt $(SRC_DIR)choose.h \
 $(SRC_DIR)decl.h $(SRC_DIR)fun_head.h
 	$(CC_NW) $(SWITCH_CC_NW) -c $(FUN).cpp -o $(FUN).obj $(INCLUDE)

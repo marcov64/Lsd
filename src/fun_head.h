@@ -593,13 +593,16 @@ else \
 // Initialise the regular space and use the object LAB contained in p as "Patches"
 // Using Column Major (change?) the objects are added to a 2d grid and get xy coords respectively
 #define INIT_SPACE_GRID( LAB, XN, YN )             { p->init_gis_regularGrid( LAB, XN, YN ); }
+#define INIT_SPACE_GRIDS(PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
+
+#define INIT_SPACE_GRIDL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+#define INIT_SPACE_GRIDLS(PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
+
 #define INIT_SPACE_GRID_WRAP( LAB, XN, YN, WRAP )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
-#define INIT_SPACE_GRIDS( PTR, LAB, XN, YN )             { PTR->init_gis_regularGrid( LAB, XN, YN ); }
 #define INIT_SPACE_GRID_WRAPS( PTR, LAB, XN, YN, WRAP )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP ); }
-#define INIT_GRID_SPACEL( LAB, XN, YN, LAG )             { p->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
-#define INIT_GRID_SPACE_WRAPL( LAB, XN, YN, WRAP, L )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP , LAG ); }
-#define INIT_GRID_SPACELS( PTR, LAB, XN, YN, LAG )             { PTR->init_gis_regularGrid( LAB, XN, YN, 0, LAG ); }
-#define INIT_GRID_SPACE_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
+
+#define INIT_SPACE_GRID_WRAPL( LAB, XN, YN, WRAP, LAG )  { p->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
+#define INIT_SPACE_GRID_WRAPLS( PTR, LAB, XN, YN, WRAP, LAG )  { PTR->init_gis_regularGrid( LAB, XN, YN, WRAP, LAG ); }
 
 // DELETE_SPACE / DELETE_FROM_SPACE
 // Delete the map and unregister all object-registrations in the map. Do not delte the LSD objects.
@@ -828,6 +831,3 @@ void cmd( const char *cm, ... );
 	};
 
 #endif
-#ifdef CPP11
-#include "gis.cpp" //until linked
-#endif //#ifdef CPP11

@@ -49,9 +49,7 @@ GIS.CPP
   precede the method.
 ****************************************************************************************/
 
-//to do: correct linking. Currently included at end of decl.h
-#ifndef GIS_CPP
-#define GIS_CPP
+#include "decl.h"
 
 char gismsg[300];
 
@@ -1125,4 +1123,3 @@ char gismsg[300];
     _xOut = _x;
     return true;
   }
-#endif //#ifndef GIS_CPP
