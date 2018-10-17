@@ -12,11 +12,11 @@
 /****************************************************************************************
 GIS.CPP
 	GIS tools: Advancing LSD to represent a GIS structure, where objects can be
-    located in 2d space.
+    located in 2d continuous space defined by the matrix [0,xn)*[0,yn).
 
 	
 	v1: initial compilation by Frederik Schaff
-	to do: v2: full integration with LSD
+  v2: full integration with LSD (tested with windows and cygwin)
 	
 	All functions work on specially defined LSD object's data structures (named here as 
     "gisPosition" and "gisMap"), with the following organization:
@@ -24,14 +24,32 @@ GIS.CPP
 	
     object --+-- gisPosition  --+- x (double) : position in x direction
                                 +- y (double) : position in y direction
-                                +- z (double) : position in z direction (if any)
+                                +- z (double) : position in z direction (if any, not yet used)
                                 +- map (ptr)  : pointer to gisMap
+                                +- objDis_inRadius  : container used to store temporary elements for radius search
+                                +- it_obj : iterator for the objDis_inRadius container. Used for the Cycles.
 
-  to do
-	
+
+  The gisMap holds pointers to the elements associated with it. The pointers are
+  stored in a 2d container "elements". Each element in the container is
+  associated with a position in the grid, going from (0,0) to (xn-1,yn-1).
+  For example, an object that has x=0.5 and y=1.9 would be 'registered' at
+  position (0,1). This allows to use efficient spatial search algorithms.
+
+    gisMap --+- xn (integer) : x-dimension boundary
+             +- yn (integer) : y-dimension boundary
+             +- wrap --+- wrap_left : wrapping to left allowed
+	                     +- wrap_right
+                       +- wrap_top
+                       +- wrap_bottom
+             +- elements (stl container, random access, xn * yn): contains pointers to all elements in the map
+             +- nelements (integer) : number of total elements registered in the map
+
+  For explanations of the single methods, please refer to the comments that
+  precede the method.
 ****************************************************************************************/
 
-//to do: correct linking. Currently included in example file.
+//to do: correct linking. Currently included at end of decl.h
 #ifndef GIS_CPP
 #define GIS_CPP
 
@@ -78,7 +96,6 @@ char gismsg[300];
       return false; //error
     }
     int numNodes = xn*yn;
-//     PLOG("\nWe need to create a new %i %s's",nodes2create( this, lab, numNodes ),lab);
     add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
 																	// cloning the first one
     int _x = 0;
@@ -105,7 +122,7 @@ char gismsg[300];
 
   }
 
-  //  map_from_obj
+  //  ptr_map
   //  Check if the object is a gis object and return pointer to map.
   gisMap* object::ptr_map(){
     if (position == NULL){
@@ -218,8 +235,8 @@ char gismsg[300];
     return true;
   }
 
-//New GIS handling stuff below
-
+//  register_position
+//  register the object in the already associated gis at a new position.
   bool object::register_position(double _x, double _y){
     if (ptr_map() == NULL){
       sprintf( gismsg, "failure in register_position() for object '%s'", label );
@@ -240,6 +257,9 @@ char gismsg[300];
     return true;
   }
 
+  // unregister_position
+  // unregister the object at the position.
+  // when move is false, the map is deleted if it is the last element in the map.
   bool object::unregister_position(bool move) {
     if (ptr_map() == NULL){
       sprintf( gismsg, "failure in unregister_position() for object '%s'", label );
@@ -268,6 +288,8 @@ char gismsg[300];
     return false;
   }
 
+  //change_position
+  //change the objects position to the position of shareObj
   bool object::change_position(object* shareObj)
   {
     if (shareObj -> ptr_map() == NULL ) {
@@ -291,6 +313,8 @@ char gismsg[300];
     return change_position(shareObj->position->x, shareObj->position->y);
   }
 
+  //  change_position
+  //  change_position to the new position x y
   bool object::change_position(double _x, double _y)
   {
     if (check_positions(_x, _y) == false){
@@ -421,12 +445,11 @@ char gismsg[300];
       bottom_io = max(0,bottom_io);
 
     return true;
-    //we could make sure that we do not traverse the same point several times.
   }
 
-
-  //a function that receives all objects inside the bounding box of the object
-  //at x,y with radius and performs whatever the provided funtion do_stuff tells
+  //  traverse_boundingBox
+  //  a function that receives all objects inside the bounding box of the object
+  //  at x,y with radius and performs whatever the provided funtion do_stuff tells
   bool object::traverse_boundingBox(double radius, std::function<bool(object* use_obj)> do_stuff )
   {
     //define the bounding box
@@ -435,25 +458,16 @@ char gismsg[300];
       return false; //Error gismsg in boundingBox
     }
 
-      //fill vector - naive approach (complete)
     for (int x=x_left; x<=x_right;x++){
       for (int y=y_bottom; y<=y_top;y++){
-//         PLOG("\nBounding Box: %i,%i",x,y);
         access_GridPosElements(x,y,do_stuff); //do nothing if rvalue is false/wrong
-//         double x_test = x;
-//         double y_test = y;
-//         if (check_positions(x_test,y_test) == false ){
-//           continue; //invalid position
-//         }
-//         for (object* candidate : position->map->elements.at(int(x_test)).at(int(y_test)) ) {
-//           do_stuff(candidate); //do not use rvalue (true/false)
-//         }
       }
     }
     return true; //went to end without any break;
   }
 
-  //Access all elements registered at the position x,y and use the function on them
+  //  access_GridPosElements
+  //  Access all elements registered at the position x,y and use the function on them
   bool object::access_GridPosElements (int x, int y, std::function<bool(object* use_obj)> do_stuff)
   {
       //control for wrapping and adjust if necessary
@@ -470,10 +484,10 @@ char gismsg[300];
       return true;
   }
 
-
-  //a function that receives all objects inside the belt of the bounding box
-  //(i.e., only the right/left columns and top/bottom rows of the grid)
-  //at x,y with radius and performs whatever the provided funtion do_stuff tells
+  //  traverse_boundingBoxBelt
+  //  a function that receives all objects inside the belt of the bounding box
+  //  (i.e., only the right/left columns and top/bottom rows of the grid)
+  //  at x,y with radius and performs whatever the provided funtion do_stuff tells
   bool object::traverse_boundingBoxBelt(double radius, std::function<bool(object* use_obj)> do_stuff )
   {
     //define the bounding box
@@ -514,7 +528,9 @@ char gismsg[300];
     return sqrt( pseudo_distance(x, y) );
   }
 
-
+  //  search_var_local
+  //  A localised version of the search_var method.
+  //  needed for the conditional search.
   variable* object::search_var_local(char const l[])
   {
     for ( variable* cv = v; cv != NULL; cv = cv->next ){
@@ -528,9 +544,10 @@ char gismsg[300];
     return NULL;
   }
 
-    //in addition to add_if_dist_lab checks if VAR CONDITION condVAL is true
-    //VAR is a variable contained in the object lab.
-    //if operator() is called with negative pseudo_radius, it will ignore the distance check
+  //  add_if_dist_lab_cond
+  //  in addition to add_if_dist_lab checks if VAR CONDITION condVAL is true
+  //  VAR is a variable contained in the object lab.
+  //  if operator() is called with negative pseudo_radius, it will ignore the distance check
   struct add_if_dist_lab_cond
   {
     object* this_obj; //object for which the search is conducted
@@ -542,16 +559,7 @@ char gismsg[300];
     char condition; // 1 : == ; 2 : > ; 3 : < ; 4: !=; that's it
     double condVal;
 
-//     //unconditional
-//     add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[])
-//       : this_obj(this_obj), pseudo_radius(pseudo_radius)
-//       {
-//         strcpy(lab, _lab);
-//         caller = NULL;
-//         strcpy(varLab,"");
-//       };
-
-    //conditional
+    //constructor
     add_if_dist_lab_cond(object* this_obj, double pseudo_radius, char const _lab[],object* fake_caller, int lag, char const _varLab[], char const _condition[], double condVal)
       : this_obj(this_obj), pseudo_radius(pseudo_radius), fake_caller(fake_caller), lag(lag), condition(_condition[0]), condVal(condVal)
       {
@@ -559,7 +567,9 @@ char gismsg[300];
         strcpy(varLab,_varLab);
       };
 
-                                        //defaults for the unconditional call
+    //  defaults for the unconditional call are set in the decl.h for the COND
+    //  methods.
+
     bool operator()(object* candidate) const
       {
         if (candidate == this_obj)
@@ -569,8 +579,6 @@ char gismsg[300];
           double ps_dst = this_obj->pseudo_distance(candidate);
           if (pseudo_radius<0 || ps_dst <= pseudo_radius) {
             bool isCandidate = true;
-//             PLOG("\nadd_if_dist_lab_cond() : Checking if object '%s' at pos %g,%g is within pseudo_distance ( %g<= %g ?) to object '%s' at pos %g,%g",candidate->label,candidate->position->x,candidate->position->y,ps_dst,pseudo_radius,this_obj->label,this_obj->position->x,this_obj->position->y);
-            //if conditional, additional check
             if (condition == '>' || condition == '<' || condition == '=' || condition == '!' ){
               variable* condVar = candidate->search_var_local(varLab);
               if (condVar == NULL){
@@ -607,8 +615,10 @@ char gismsg[300];
         }
         return false;
       } //operator()
-  };
+  }; //add_if_dist_lab_cond
 
+  //  sort_objDisSet
+  //  sort by distance to caller and also by pointer, if necessary.
   inline void object::sort_objDisSet(bool pointer_sort){
     if (pointer_sort)
       std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end() ); //sort - for unique its important that also second is used.
@@ -616,7 +626,8 @@ char gismsg[300];
       std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by distance
   }
 
-
+  //  make_objDisSet_unique
+  //  make the set unique. May assume sorted set.
   void object::make_objDisSet_unique(bool sorted)
   {
     if (sorted == false)
@@ -637,7 +648,9 @@ char gismsg[300];
     }
   };
 
-    //go through intervals with same distance and randomise the order in each
+  //  randomise_objDisSetIntvls
+  //  go through intervals with same distance and randomise the order in each
+  //  if already sorted, do not sort again.
   void object::randomise_objDisSetIntvls(bool sorted){
     if (sorted == false)
       sort_objDisSet(false); //sort only by distance
@@ -678,8 +691,8 @@ char gismsg[300];
     }
   }
 
-  // it_rnd_all
-  // Initialise all objects with label for cycle in random order
+  // it_rnd_full
+  // Grab all objects with label for cycle in random order
   void object::it_rnd_full(char const lab[]){
     position->objDis_inRadius.clear();//reset vector
     for (int x = 0; x < position->map->xn; x++){
@@ -716,7 +729,7 @@ char gismsg[300];
     position->it_obj = position->objDis_inRadius.begin();
   }
 
-  // within_radius
+  // it_in_radius -- works on position->objDis_inRadius
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
@@ -725,60 +738,39 @@ char gismsg[300];
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = (radius < 0 ? -1 : radius*radius);
 
-
     //depending on the call of this function, the conditions are initialised meaningfully or not.
     add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
 
-
     traverse_boundingBox(radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
 
-//     int i=0;
-//     for (auto item : position->objDis_inRadius){
-//       PLOG("\nit_in_radius : 1  checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
-//     }
-
-    //sort by distance
     sort_objDisSet(true); //pointer_sort = true
-//     i=0;
-//     for (auto item : position->objDis_inRadius){
-//       PLOG("\nit_in_radius : 2 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
-//     }
-
-    //make items unique
     make_objDisSet_unique(true); //sorted = true
-//     i=0;
-//     for (auto item : position->objDis_inRadius){
-//       PLOG("\nit_in_radius : 3 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
-//     }
-    //randomize in intervals of same distance
     randomise_objDisSetIntvls(true); //sorted = true
-
-//     i=0;
-//     for (auto item : position->objDis_inRadius){
-//       PLOG("\nit_in_radius : 4 checking elements added: %i - '%s' at %g,%g with dist to home %g",++i,item.second->label,item.second->position->x,item.second->position->y,item.first);
-//     }
 
 	  position->it_obj = position->objDis_inRadius.begin();
   }
 
-  //check if the current state points to an existing object or all objects have been traversed.
+  //  next_neighbour_exists
+  //  check if the current state points to an existing object or all objects have been traversed.
   bool object::next_neighbour_exists()
   {
     return position->it_obj != position->objDis_inRadius.end();
   }
 
-  //Initialise the nearest neighbour search and return nearest neighbours
+  //  next_neighbour()
+  //  produce the next neighbour in the CYCLE command or NULL if no next, ending the cycle.
   object* object::next_neighbour()
   {
     object* next_ngbo = NULL;
     if (position->it_obj != position->objDis_inRadius.end() ){
       next_ngbo =  position->it_obj->second;
       position->it_obj++; //advance
-//       PLOG("\nnext_neighbour");
     }
     return next_ngbo;
   }
 
+  //  first_neighbour_rnd_full
+  //  Initialise the gis neighbour search using the full landscape and a random order
   object* object::first_neighbour_rnd_full(char const lab[])
   {
     if (ptr_map()==NULL){
@@ -791,6 +783,8 @@ char gismsg[300];
     return next_neighbour();
   }
 
+  //  first_neighbour
+  //  Initialise the nearest neighbour search and return nearest neighbours
   object* object::first_neighbour(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
   {
     if (ptr_map()==NULL){
@@ -800,21 +794,21 @@ char gismsg[300];
       return NULL;
     }
     it_in_radius(lab, radius, random, caller, lag, varLab, condition, condVal);
-//     if (objDis_inRadius.empty()==true){
-//       return NULL;
-//     }
     return next_neighbour();
   }
 
-  //Return the radius that is necessary to include all the potential items
-  //NOT OPTIMISED
+  //  complete_radius
+  //  Return the radius that is necessary to include all the potential items
+  //  provides a boundary for the spatial search algorithms
+  //  NOT OPTIMISED
   double object::complete_radius()
   {
     return max(  max(position->x,position->map->xn - position->x) , max(position->y , position->map->yn - position->y) );
   }
   
-    //find object with label lab closest to caller, if any inside radius fits
-    //efficient implementation with increasing search radius
+  //  closest_in_distance
+  //  find object with label lab closest to caller, if any inside radius fits
+  //  efficient implementation with increasing search radius
   object* object::closest_in_distance(char const lab[], double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
   {
     double max_radius = complete_radius(); //we do not need to go beyond this radius
@@ -828,35 +822,28 @@ char gismsg[300];
     double pseudo_radius = radius*radius;
     add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,fake_caller,lag,varLab,condition,condVal);  //define conditions for adding
 
-
-
     //In a first initial step, we identify the items in the boundary box.
     traverse_boundingBox(cur_radius, functor_add ); //add all elements inside bounding box to the list, if they are within radius
     make_objDisSet_unique(false); //sort and make unique
 
     for (/*is init*/; (cur_radius < radius && cur_radius < max_radius); cur_radius++ )
     {
-//       PLOG("\nRadius now: %g",cur_radius);
-      //always: check if the set is yet empty, in which case the radius is increased and new items are added before we continue
       if (position->objDis_inRadius.empty() == false){
 
         //check if there is a closed interval OR the radius is at least 1 level beyond the element
         if (position->objDis_inRadius.front().first < position->objDis_inRadius.back().first
            || ceil(position->objDis_inRadius.back().first) < cur_radius ){
-//           PLOG("\nFound a solution set.");
           break; //we found a solution set
         }
       }
 
       traverse_boundingBoxBelt(cur_radius, functor_add );//add new options
-      //sort the elements - THIS CAN BE OPTIMISED
       make_objDisSet_unique(false); //sort and make unique
     }
 
 
     if (position->objDis_inRadius.empty() == true){
       return NULL; //no option found;
-//       PLOG("\nNo Options.");
     } else {
       if (random == false)
         return position->objDis_inRadius.front().second;
@@ -867,16 +854,18 @@ char gismsg[300];
           n++;
         }
       }
-//       PLOG("\nTotal %i options, selecting randomly",n);
       if (n>0){
         n = uniform_int(0,n);
       }
       return position->objDis_inRadius.at( n ).second;
     }
-
   }
 
-    //find object at position xy. Check that it is the only one. Use exact position.
+  //  search_at_position
+  //  find object lab at position xy. If it exists, produce it, else return NULL
+  //  if single is true, check that it is the only one
+  //    and if not throw exception. Use exact position.
+  //  if not single, randomise order of potential candidates.
   object* object::search_at_position(char const lab[], double x, double y, bool single) {
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in search_at_position() for object '%s'", label );
@@ -916,6 +905,10 @@ char gismsg[300];
     }
   }
 
+  //  search_at_position
+  //  see above, just transform the position of the element to coordinates.
+  //  in the grid=true version use the truncated coordinates of the calling
+  //  object.
   object* object::search_at_position(char const lab[], bool single, bool grid)
   {
     if (ptr_map()==NULL){
@@ -963,8 +956,8 @@ char gismsg[300];
         return elements_at_position(lab, trunc(position->x), trunc(position->y));
   }
 
-
-
+  //  random_pos
+  //  Produce a random x or y position, only ensuring that it is inside the map
   double object::random_pos(const char xy)
   {
     if (ptr_map()==NULL){
@@ -987,6 +980,8 @@ char gismsg[300];
     }
   }
 
+  //  get_pos
+  //  get the position of the object and return it.
   double object::get_pos(char xyz)
   {
     if (ptr_map()==NULL){
@@ -1010,6 +1005,11 @@ char gismsg[300];
       return -1;
   }
 
+  //  move
+  //  move the object in the direction specified (one step).
+  //  return true, if movement was possible, or false, if not.
+  //  Currently only boarders may prevent movement.
+  //  to do: Add version with COND Check.
   bool object::move(char const direction[])
   {
     int dir = 0; //stay put
@@ -1038,10 +1038,11 @@ char gismsg[300];
                   break;
       default :   dir = 0; //stay put.
     }
-
     return move(dir);
   }
 
+  //  move
+  //  see above.
   bool object::move(int direction)
   {
     if (ptr_map()==NULL){
@@ -1066,10 +1067,10 @@ char gismsg[300];
     return change_position(x_out, y_out);
   }
 
-    //  check_positions
-    //  Function to check if the x any y are in the bounds of the map.
-    //  If wrapping is possible and allowed, the positions are transformed
-    //  accordingly
+  //  check_positions
+  //  Function to check if the x any y are in the bounds of the map.
+  //  If wrapping is possible and allowed, the positions are transformed
+  //  accordingly
   bool object::check_positions(double& _xOut, double& _yOut)
   {
     if (ptr_map()==NULL){

@@ -296,6 +296,10 @@ METHODS FOR NETWORK OPERATION
 
 see nets.cpp
 
+METHODS FOR GIS
+
+see gis.cpp
+
 ****************************************************/
 
 #include "decl.h"

@@ -646,40 +646,54 @@ else \
 #define TELEPORT_SHARE(TARGET) { p->change_position(TARGET); }
 #define TELEPORT_SHARES(PTR, TARGET) { PTR->change_position(TARGET); }
 
-// CYCLE_NEIGHBOUR
-// Cycle through all the objects LAB within radius RAD by increasing radius
-#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); O != NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); O != NULL; O = C->next_neighbour() )
-
 //Cycle through all the objects LAB anywhere in random order
 #define CYCLE_GIS_RND( O, LAB ) for ( O = p->first_neighbour_rnd_full(LAB); O != NULL; O = p->next_neighbour() )
 #define CYCLE_GIS_RNDS( C, O, LAB ) for ( O = C->first_neighbour_rnd_full(LAB); O != NULL; O = C->next_neighbour() )
 
-
-// Special version that checks conditions
+// CYCLE_NEIGHBOUR
+// Cycle through all the objects LAB within radius RAD by increasing radius
+// _COND: Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
+
+#define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); O != NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); O != NULL; O = C->next_neighbour() )
+
+#define CYCLE_NEIGHBOUR_COND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CONDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define CYCLE_NEIGHBOUR_CONDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CONDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define CYCLE_NEIGHBOUR_COND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_COND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+
+#define CYCLE_NEIGHBOUR_COND_CHEATL(O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
 #define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
 // NEAREST_IN_DISTANCE
 // Provide the closest item in distance RAD with label LAB or NULL if none.
 // A radius <0 searches everything
 // If several items with the same distance exist, draw randomly with equal probability
-#define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
-#define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
-// Special version that checks conditions
+// _COND: Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
-#define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_COND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_COND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_CONDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_CONDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
+#define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
+
 #define NEAREST_IN_DISTANCE_COND(LAB, RAD, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+
 #define NEAREST_IN_DISTANCE_CONDL(LAB, RAD, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CONDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+
+#define NEAREST_IN_DISTANCE_COND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+
+#define NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_COND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
 
 // DISTANCE
 // measures the distance to a TARGET or a position
@@ -688,11 +702,12 @@ else \
 #define DISTANCE_XY(X, Y) ( p-> distance (X,Y) )
 #define DISTANCE_XYS(PTR, X, Y) ( PTR-> distance (X,Y) )
 
-//  SEARCH_POSITION and SEARCH_POSITION_RND
+//  SEARCH_POSITION, SEARCH_POSITION_RND
 //  Searches at an exact position for an object with label LAB
 //  If it exists it is reported. The RND version works if there can be more
 //  than one object at the same place (returning one randomly)
 //  The standard version will yield an error if more than one option exist.
+
 #define SEARCH_POSITION_XY(LAB, X, Y)  ( p->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, true) )
 #define SEARCH_POSITION(LAB)  ( p->search_at_position(LAB, true) )
@@ -702,9 +717,6 @@ else \
 #define SEARCH_POSITION_RND_XYS(PTR, LAB, X, Y)  ( PTR->search_at_position(LAB, X, Y, false) )
 #define SEARCH_POSITION_RND(LAB)  ( p->search_at_position(LAB, false) )
 #define SEARCH_POSITION_RNDS(PTR, LAB)  ( PTR->search_at_position(LAB, false) )
-
-#define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
-#define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
 
 //  SEARCH_POSITION_GRID and SEARCH_POSITION_RND_GRID
 //  Similar to above, but it searches at the truncated position.
@@ -716,6 +728,13 @@ else \
 #define SEARCH_POSITION_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, true, true) )
 #define SEARCH_POSITION_RND_GRID(LAB)  ( p->search_at_position(LAB, false, true) )
 #define SEARCH_POSITION_RND_GRIDS(PTR, LAB)  ( PTR->search_at_position(LAB, false, true) )
+
+//  COUNT_POSITION(S)(_GRID(S))
+//  Similar to the search, you can use these macros to count the number of
+//  elements at the given position.
+
+#define COUNT_POSITION(LAB)  ( p->elements_at_position( LAB, false ) )
+#define COUNT_POSITIONS(PTR, LAB) ( PTR->elements_at_position( LAB, false ) )
 
 #define COUNT_POSITION_GRID(LAB)  ( p->elements_at_position( LAB, true ) )
 #define COUNT_POSITION_GRIDS(PTR, LAB) ( PTR->elements_at_position( LAB, true ) )
