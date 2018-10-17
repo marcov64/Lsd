@@ -301,7 +301,15 @@ MOVES(cur,"s");
 PLOG("\n After moving to South dir Agent is at (%g,%g)",POSITION_XS(cur),POSITION_YS(cur));
 MOVES(cur,"s");
 PLOG("\n After moving to South dir Agent is at(%g,%g)",POSITION_XS(cur),POSITION_YS(cur));
+////////////////////////////////////////////////////////////////////////////////
 
+PLOG("\nCreating new Agent");
+cur1 = ADDOBJ("Agent");
+PLOG("\nNew agent is not in space: %s",ANY_GISS(cur1)==true?"false":"true");
+PLOG("\nAdding Agent to random position");
+ADD_TO_SPACE_RNDS(cur1,cur); //Add agent to the space of cur, random position.
+PLOG("\nNew agent now shares the same GIS as the Target: %s",SAME_GISS(cur,cur1)==true?"true":"false");
+PLOG("\nIt is positioned at: %g,%g",POSITION_XS(cur1),POSITION_YS(cur1));
 
 PARAMETER
 

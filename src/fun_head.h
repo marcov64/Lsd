@@ -617,6 +617,8 @@ else \
 #define ADD_TO_SPACE_XYS( PTR, GISOBJ, X, Y)  { ( PTR==GISOBJ ? false : PTR->register_at_map(GISOBJ->ptr_map(), X, Y) ); }
 #define ADD_TO_SPACE_SHARE(TARGET) { p->register_at_map(TARGET); }
 #define ADD_TO_SPACE_SHARES(PTR, TARGET) { PTR->register_at_map(TARGET); }
+#define ADD_TO_SPACE_RND(TARGET) { p->register_at_map_rnd(TARGET); }
+#define ADD_TO_SPACE_RNDS(PTR, TARGET) { PTR->register_at_map_rnd(TARGET); }
 
 // POSITION
 // Macros to get x or y position or produce random position

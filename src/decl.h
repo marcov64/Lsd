@@ -511,6 +511,7 @@ class object
 	bool change_position(double _x, double _y);
 	bool change_position(object *shareObj );
 
+  bool register_at_map_rnd(object *gisObj);
 	bool register_at_map(gisMap* map, double _x, double _y);
 	bool register_at_map(object *shareObj ); //register at same position as gisObj
 	bool unregister_from_gis();

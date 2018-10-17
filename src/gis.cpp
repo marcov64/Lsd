@@ -175,6 +175,8 @@ char gismsg[300];
     return true;
   }
 
+  //  unregister_from_gis
+  //  unregister the object from the space
   bool object::unregister_from_gis()
   {
     if (  unregister_position( false ) == false){
@@ -188,6 +190,8 @@ char gismsg[300];
     return true;
   }
 
+  //  register_at_map
+  //  register the object at the map, using the same position as share_obj
   bool object::register_at_map(object *shareObj)
   {
     if (shareObj -> ptr_map() == NULL ) {
@@ -200,6 +204,27 @@ char gismsg[300];
     return register_at_map(shareObj -> position -> map , shareObj -> position -> x, shareObj -> position -> y );
   }
 
+  //  register_at_map_rnd
+  //  register the object at the map, using random positions.
+  bool object::register_at_map_rnd(object *gisObj)
+  {
+    if (gisObj -> ptr_map() == NULL ) {
+      sprintf( gismsg, "failure in register_at_map_rnd() for object '%s' at position of object %s", label, gisObj->label );
+		      error_hard( gismsg, "the gisObj object is not registered in any space" ,
+					"likely, the gisObj provided is not registered in any space. Check your code to prevent this situation" );
+      return false; //re-registering not allowed. derigster at gis first."
+    }
+    double x = 0;
+    do {x = uniform (0, gisObj -> position -> map->xn); }
+      while (x == gisObj -> position -> map->xn);  //prevent boarder case
+    double y = 0;
+    do {y = uniform (0, gisObj -> position -> map->yn); }
+      while (x == gisObj -> position -> map->yn); //prevent boarder case
+    return register_at_map(gisObj -> position -> map , x, y );
+  }
+
+  //  register_at_map
+  //  register the object at the map, using x and y positions
   bool object::register_at_map(gisMap* map, double _x, double _y)
   {
     if (map == NULL) {
