@@ -27,7 +27,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
       steps++;
       #ifndef NO_WINDOW
       if (COUNTS(p->up,"Model")==1){
-        sprintf(filename,"Lattice/Schelling_%i_t%i_step%g",RND_SEED,t,steps);
+        sprintf(filename,"Schelling_%g_t%i_step%g",RND_SEED,t,steps);
         SAVE_LAT(filename);
         SLEEP(10);
       }
@@ -84,7 +84,7 @@ Initialise the model
     #ifndef NO_WINDOW
     if (COUNTS(p->up,"Model")==1){
       char filename[300];
-      sprintf(filename,"Lattice/Schelling_%i_t%i_step0",RND_SEED,t);
+      sprintf(filename,"Schelling_%g_t%i_step0",RND_SEED,t);
       SAVE_LAT(filename);
     }
     #endif
