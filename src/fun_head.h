@@ -678,8 +678,6 @@ else \
 #define CYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
 #define CYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CND_CHEATL(O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
 // NEAREST_IN_DISTANCE
 // Provide the closest item in distance RAD with label LAB or NULL if none.
