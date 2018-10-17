@@ -508,7 +508,7 @@ class object
 
 	bool register_position(double _x, double _y);
 	bool unregister_position(bool move);
-	bool change_position(double _x, double _y);
+	bool change_position(double _x, double _y, bool noAdjust = false);
 	bool change_position(object *shareObj );
 
   bool register_at_map_rnd(object *gisObj);
@@ -529,7 +529,7 @@ class object
 	bool move(char const direction[]);
 	bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
 
-	bool check_positions(double& _x, double& _y); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
+	bool check_positions(double& _x, double& _y, bool noChange=false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
 	#endif //#ifdef CPP11
 };
 

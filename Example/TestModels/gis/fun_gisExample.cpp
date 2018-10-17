@@ -39,7 +39,7 @@ PLOG("\nLooking for 'Patch' in distance 1 to 'Patch' with pos %g,%g",POSITION_XS
 
   i = 0;
   PLOG("\n\n----\nLooking for ALL Agents with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
-  CYCLE_NEIGHBOUR_COND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
+  CYCLE_NEIGHBOUR_CND_CHEATLS(patch, cur, "Agent", 20, "Colour", ">", 10.0, 0, patch  )
   {
     PLOG("\n%i %s at (%g,%g) : distance to %s %g position (%g,%g) with colour %g", ++i,patch->label,
     POSITION_XS(patch),POSITION_YS(patch), cur->label, DISTANCES(patch,cur),
@@ -47,7 +47,7 @@ PLOG("\nLooking for 'Patch' in distance 1 to 'Patch' with pos %g,%g",POSITION_XS
   }
 
   PLOG("\nLooking for CLOSEST Agent with Colour > 10 within distance of 20 to %s at position (%g,%g)",patch->label,POSITION_XS(patch),POSITION_YS(patch));
-  cur = NEAREST_IN_DISTANCE_COND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
+  cur = NEAREST_IN_DISTANCE_CND_CHEATLS(patch, "Agent", 20, "Colour", ">", 10.0, 0, patch  );
    if (cur == NULL){
     PLOG("\n\tNothing found");
   } else {
@@ -245,9 +245,9 @@ they fight. If they have equal strength, a random coin toss decides who wins.
     double radius = V("Strength")-i;
     if (radius < 0){
       radius = 0;
-      PLOG("\nIt happened");          // NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  )
+      PLOG("\nIt happened");          // NEAREST_IN_DISTANCE_CND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  )
     }
-    object* target = NEAREST_IN_DISTANCE_COND_CHEAT("Agent", radius, "Am_I_Target", "=", 1.0,  p );
+    object* target = NEAREST_IN_DISTANCE_CND_CHEAT("Agent", radius, "Am_I_Target", "=", 1.0,  p );
     REPORT_LOCAL_CLOCK_CND(1);
     object *winner = p; //assume self wins
     if (target == NULL){

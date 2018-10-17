@@ -646,8 +646,12 @@ else \
 // TELEPORT
 // Move object to target xy or position of target
 // return value: succes, bool (true == 1/false == 0)
-#define TELEPORT_XY(X,Y) { p->change_position(X,Y); }
-#define TELEPORT_XYS(PTR,X,Y) { PTR->change_position(X,Y); }
+// the ADJUST version allows to adjust positions if wrapping is allowed.
+// the direction is from the starting position in direction of the new one
+#define TELEPORT_XY(X,Y) { p->change_position(X,Y,true); }
+#define TELEPORT_XYS(PTR,X,Y) { PTR->change_position(X,Y,true); }
+#define TELEPORT_ADJUST_XY(X,Y) { p->change_position(X,Y); }
+#define TELEPORT_ADJUST_XYS(PTR,X,Y) { PTR->change_position(X,Y); }
 #define TELEPORT_SHARE(TARGET) { p->change_position(TARGET); }
 #define TELEPORT_SHARES(PTR, TARGET) { PTR->change_position(TARGET); }
 
@@ -657,7 +661,7 @@ else \
 
 // CYCLE_NEIGHBOUR
 // Cycle through all the objects LAB within radius RAD by increasing radius
-// _COND: Special version that checks conditions
+// _CND: Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
@@ -665,40 +669,40 @@ else \
 #define CYCLE_NEIGHBOUR( O, LAB, RAD ) for ( O = p->first_neighbour(LAB, RAD, true); O != NULL; O = p->next_neighbour() )
 #define CYCLE_NEIGHBOURS( C, O, LAB, RAD ) for ( O = C->first_neighbour(LAB, RAD, true); O != NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_COND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CONDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND(O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDS(C, O, LAB, RAD, VAR, COND, CONDVAL ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_CONDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_CONDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDL(O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = p->first_neighbour(LAB, RAD, true, NULL,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CNDLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG ) for ( O = C->first_neighbour(LAB, RAD, true, NULL,0,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_COND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_COND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEAT(O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,0,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEATS(C, O, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
-#define CYCLE_NEIGHBOUR_COND_CHEATL(O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
-#define CYCLE_NEIGHBOUR_COND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEATL(O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = p->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = p->next_neighbour() )
+#define CYCLE_NEIGHBOUR_CND_CHEATLS(C, O, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) for ( O = C->first_neighbour(LAB, RAD, true,CHEAT_C,LAG,VAR,COND,CONDVAL); O!=NULL; O = C->next_neighbour() )
 
 // NEAREST_IN_DISTANCE
 // Provide the closest item in distance RAD with label LAB or NULL if none.
 // A radius <0 searches everything
 // If several items with the same distance exist, draw randomly with equal probability
-// _COND: Special version that checks conditions
+// _CND: Special version that checks conditions
 // For each candidate it is checked if the Variable VAR with lag LAG called by
 // either the candidate or CHEAT_C is  COND (<,>,==,!=) CONDVAL
 // Note that CHEAT does not work with NULL.
 #define NEAREST_IN_DISTANCE(LAB, RAD) ( p->closest_in_distance(LAB, RAD, true) )
 #define NEAREST_IN_DISTANCES(PTR, LAB, RAD) ( PTR->closest_in_distance(LAB, RAD, true) )
 
-#define NEAREST_IN_DISTANCE_COND(LAB, RAD, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_CONDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CND(LAB, RAD, VAR, COND, CONDVAL ) ( p->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CNDS(PTR, LAB, RAD, VAR, COND, CONDVAL ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, 0, VAR, COND, CONDVAL) )
 
-#define NEAREST_IN_DISTANCE_CONDL(LAB, RAD, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_CONDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CNDL(LAB, RAD, VAR, COND, CONDVAL, LAG ) ( p->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CNDLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG ) ( PTR->closest_in_distance(LAB, RAD, true, NULL, LAG, VAR, COND, CONDVAL) )
 
-#define NEAREST_IN_DISTANCE_COND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_COND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CND_CHEATL(LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CND_CHEATLS(PTR, LAB, RAD, VAR, COND, CONDVAL, LAG, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, LAG, VAR, COND, CONDVAL) )
 
-#define NEAREST_IN_DISTANCE_COND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
-#define NEAREST_IN_DISTANCE_COND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CND_CHEAT(LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( p->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
+#define NEAREST_IN_DISTANCE_CND_CHEATS(PTR, LAB, RAD, VAR, COND, CONDVAL, CHEAT_C  ) ( PTR->closest_in_distance(LAB, RAD, true, CHEAT_C, 0, VAR, COND, CONDVAL) )
 
 // DISTANCE
 // measures the distance to a TARGET or a position

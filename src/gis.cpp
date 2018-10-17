@@ -338,9 +338,9 @@ char gismsg[300];
 
   //  change_position
   //  change_position to the new position x y
-  bool object::change_position(double _x, double _y)
+  bool object::change_position(double _x, double _y, bool noAdjust)
   {
-    if (check_positions(_x, _y) == false){
+    if (check_positions(_x, _y, noAdjust) == false){
       return false; //Out of range
     }
     if (unregister_position(true) == false) {
@@ -1094,7 +1094,8 @@ char gismsg[300];
   //  Function to check if the x any y are in the bounds of the map.
   //  If wrapping is possible and allowed, the positions are transformed
   //  accordingly
-  bool object::check_positions(double& _xOut, double& _yOut)
+  //  in case change of positions is not allowed, only check and do not adjust
+  bool object::check_positions(double& _xOut, double& _yOut, bool noChange)
   {
     if (ptr_map()==NULL){
         sprintf( gismsg, "failure in check_positions() for object '%s'", label );
@@ -1106,6 +1107,9 @@ char gismsg[300];
         && (_yOut >= 0.0 && _yOut < double(position->map->yn) ) ) {
       return true; //all fine, nothing to change.
     }
+
+    if (noChange == true)
+      return false;
 
     double _x = _xOut;
     double _y = _yOut;

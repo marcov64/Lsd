@@ -145,7 +145,7 @@ The agent decides if it should move.
   //   PLOG("\nLooking for a free patch!");
 
     //Search for the nearest free place in which the agent would be content, if any.
-    object* freePatch = NEAREST_IN_DISTANCE_COND("Patch",-1,"isOption","=",1.0);
+    object* freePatch = NEAREST_IN_DISTANCE_CND("Patch",-1,"isOption","=",1.0);
 
     if (freePatch != NULL){
       move = 1; 	//move
