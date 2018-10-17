@@ -588,7 +588,7 @@ char gismsg[300];
 
               double val;
               if (fake_caller == NULL)
-                val = condVar->cal(candidate,lag);
+                val = condVar->cal(this_obj,lag);
               else
                 val = condVar->cal(fake_caller,lag);
 
@@ -821,7 +821,7 @@ char gismsg[300];
   
     //find object with label lab closest to caller, if any inside radius fits
     //efficient implementation with increasing search radius
-  object* object::closest_in_distance(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  object* object::closest_in_distance(char const lab[], double radius, bool random, object* fake_caller, int lag, char const varLab[], char const condition[], double condVal)
   {
     double max_radius = complete_radius(); //we do not need to go beyond this radius
     if (radius < 0){
@@ -832,7 +832,7 @@ char gismsg[300];
 
     //depending on the call of this function, the conditions are initialised meaningfully or not.
     double pseudo_radius = radius*radius;
-    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,caller,lag,varLab,condition,condVal);  //define conditions for adding
+    add_if_dist_lab_cond functor_add(this,pseudo_radius,lab,fake_caller,lag,varLab,condition,condVal);  //define conditions for adding
 
 
 

@@ -497,7 +497,7 @@ class object
 
 	object* search_at_position(char const lab[], double x, double y, bool single);
 	object* search_at_position(char const lab[], bool single, bool grid=false);
-	object* closest_in_distance(char const lab[], double radius, bool random, object* caller=NULL, int lag=0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
+	object* closest_in_distance(char const lab[], double radius, bool random, object* fake_caller=NULL, int lag=0, char const varLab[] = "", char const condition[] = "", double condVal = 0.0);
 
   double elements_at_position(char const lab[], double x, double y);
   double elements_at_position(char const lab[], bool grid);
