@@ -52,8 +52,8 @@ Var: EndOfSim 0 n + n n
 
 Object: Model C	1
 Var: Scheduler 0 s + n n
-Param: xn 0 s + n n	50
-Param: yn 0 s + n n	50
+Param: xn 0 s + n n	100
+Param: yn 0 s + n n	100
 Param: fracAgents 0 s + n n	0.85
 Param: fracBlue 0 s + n n	0.5
 Param: wrapping 0 s + n n	0
@@ -64,9 +64,9 @@ Var: fracContent 0 s + n n
 Var: Initialise 0 n + n n
 Param: Randomise 0 s + n n	1
 Var: dissimilarity 0 s + n p
-Param: SequentialUpdating 0 s + n n	0
-Param: RationalExpectations 0 s + n n	0
-Param: lattice 0 n + n n	2
+Param: SequentialUpdating 0 s + n n	1
+Param: RationalExpectations 0 s + n n	1
+Param: lattice 0 n + n n	0
 
 Object: Agent C	1
 Param: Colour 0 n + n n	0

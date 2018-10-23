@@ -73,13 +73,6 @@ char gismsg[300];
   //  Initialise a regular Grid GIS and link the objects of the same type to it.
   //  The gis objects need to be contained in the calling object
   bool object::init_gis_regularGrid(char const lab[], int xn, int yn, int _wrap, int _lag){
-    if ( ptr_map() != NULL ){
-        sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", label );
-		    error_hard( gismsg, "the object was already part of a GIS",
-					"check your code to prevent this situation" );
-      return false; //there is already a gis structure
-    }
-    gisMap* map = init_map(xn, yn, _wrap); //create gis
     object *firstNode;
     object *cur;
     if (strcmp(label,lab)==0){
@@ -93,6 +86,14 @@ char gismsg[300];
 					"check your code to prevent this situation" );
       return false; //error
     }
+    if ( firstNode->ptr_map() != NULL ){
+        sprintf( gismsg, "failure in init_gis_regularGrid() for object '%s'", lab );
+		    error_hard( gismsg, "the object was already part of a GIS",
+					"check your code to prevent this situation" );
+      return false; //there is already a gis structure
+    }
+    gisMap* map = init_map(xn, yn, _wrap); //create gis
+
     int numNodes = xn*yn;
     add_n_objects2( lab , nodes2create( this, lab, numNodes ), _lag );	// creates the missing node objects,
 																	// cloning the first one
@@ -1108,6 +1109,7 @@ char gismsg[300];
       return true; //all fine, nothing to change.
     }
 
+      //no change allowed.
     if (noChange == true)
       return false;
 
@@ -1151,4 +1153,76 @@ char gismsg[300];
     _yOut = _y; //set values
     _xOut = _x;
     return true;
+  }
+
+    //Initialise a lattice for the gis.
+  double object::init_lattice_gis(int init_color, double pixW, double pixH)
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in gis_init_lattice() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    //double init_lattice( int init_color, double nrow, double ncol, double pixW, double pixH )
+    return init_lattice( init_color, position->map->yn, position->map->xn, pixW, pixH  );
+  }
+
+  //Lattice commands adjusted for GIS
+
+  double object::update_lattice_gis(double colour)
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in update_lattice_gis() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    return update_lattice_gis(position->x,position->y,colour, true);
+  }
+
+  double object::update_lattice_gis(double x, double y, double colour, bool noChange)
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    if (check_positions(x, y, noChange) == false){
+      return -1; //error
+    }
+    //transform coordinates for lattice. lattice starts with (1,1) top left.
+    //gis starts with (0,0) top down.
+    double col = x + 1;
+    double line = position->map->yn - y;
+    return update_lattice( line, col, colour );
+  }
+  double object::read_lattice_gis( )
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in write_lattice_gis() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    return read_lattice_gis(position->x,position->y,true);
+  }
+
+  double object::read_lattice_gis( double x, double y, bool noChange)
+  {
+    if (ptr_map()==NULL){
+        sprintf( gismsg, "failure in read_lattice_gis() for object '%s'", label );
+		      error_hard( gismsg, "the object is not registered in any map",
+					"check your code to prevent this situation" );
+      return -1;
+    }
+    if (check_positions(x, y, noChange) == false){
+      return -1; //error
+    }
+    //transform coordinates for lattice. lattice starts with (1,1) top left.
+    //gis starts with (0,0) top down.
+    double col = x + 1;
+    double line = position->map->yn - y;
+    return read_lattice( line, col );
   }

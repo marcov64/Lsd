@@ -18,6 +18,12 @@ Label Root
 
 	}
 
+	Son: lat_obj
+	Label lat_obj
+	{
+
+	}
+
 	Var: Init_GIS
 	Param: nColours
 	Param: nAgents
@@ -33,6 +39,7 @@ Label Root
 	Param: n_agents
 	Func: Get_ID
 	Var: Init_GIS_W
+	Var: TEST_LATTICE
 
 }
 
@@ -55,6 +62,7 @@ Param: Wrap 0 n + n n	15
 Param: n_agents 0 n + n n	16
 Func: Get_ID 0 n + n n
 Var: Init_GIS_W 0 n + n n
+Var: TEST_LATTICE 0 n + n n
 
 Object: Patch N	1
 Param: Owned 0 n + n n	0
@@ -64,6 +72,8 @@ Param: Colour 0 n + n n	0
 Param: Strength 0 n + n n	0
 Param: NextSpawn 0 n + n n	0
 Param: Agent_ID 0 n + n n	0
+
+Object: lat_obj C	1
 
 SIM_NUM 1
 SEED 200
@@ -159,7 +169,6 @@ E.g. 5 -> wrap left and top.
 
 
 'Wrap' appears in the equation for: Init_GIS_W
-
 _INIT_
 All 1 instances equal to 15.
 END_DESCRIPTION
@@ -180,6 +189,10 @@ Variable_Init_GIS_W
 (no description available)
 _INIT_
 
+END_DESCRIPTION
+
+Variable_TEST_LATTICE
+(no description available)
 END_DESCRIPTION
 
 Object_Patch
@@ -222,6 +235,10 @@ Parameter_Agent_ID
 (no description available)
 _INIT_
 
+END_DESCRIPTION
+
+Object_lat_obj
+(no description available)
 END_DESCRIPTION
 
 

@@ -530,7 +530,14 @@ class object
 	bool move(int dir); //0 stay put, 1 move north, 2 move north-east , ...
 
 	bool check_positions(double& _x, double& _y, bool noChange=false); //check if coordinates are on map. If not, transform if possible (wrapping) or report false
-	#endif //#ifdef CPP11
+
+  double init_lattice_gis(int init_color=1000, double pixW=400, double pixH=400);
+  double update_lattice_gis(double colour);
+  double update_lattice_gis(double x, double y, double colour, bool noChange);
+  double read_lattice_gis( );
+  double read_lattice_gis( double x, double y, bool noChange);
+
+  #endif //#ifdef CPP11
 };
 
 struct lsdstack

@@ -315,7 +315,29 @@ PARAMETER
 
 RESULT(0.0)
 
+EQUATION("TEST_LATTICE")
+/* Create a lattice and test it. */
+ INIT_SPACE_GRID("lat_obj",20,20);
+ cur = SEARCH("lat_obj");
+ INIT_LAT_GISS(cur);
+ char filename[300];
+ int step = 0;
+ sprintf(filename,"TestLattice_step_%i",step);
+ SAVE_LAT_GIS(filename);
+ PLOG("\nAdded the lattice. Bottom left corner should be black.");
+ CYCLE_GIS_RNDS(cur,cur1,"lat_obj"){
+  if (POSITION_XS(cur1) < 5)
+    PLOG("\nChanging colour for position (%g,%g) from %g",POSITION_XS(cur1),POSITION_YS(cur1), V_LAT_GIS_XYS(cur,POSITION_XS(cur1),POSITION_YS(cur1)));
+  WRITE_LAT_GISS(cur1,max(POSITION_XS(cur1),POSITION_YS(cur1)));
+  if (POSITION_XS(cur1) < 5)
+    PLOG(" to %g", V_LAT_GISS(cur1) );
+  sprintf(filename,"TestLattice_step_%i",++step);
+  SAVE_LAT_GIS(filename);
+ }
 
+
+PARAMETER
+RESULT(0.0)
 
 
 
