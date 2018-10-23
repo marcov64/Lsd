@@ -5188,8 +5188,9 @@ if ( choice == 48 )
 	cmd( "close $f" );
 
 	cmd( "set gcc_conf \"TARGET=$DefaultExe\\nFUN=[file rootname \"$b\"]\\nFUN_EXTRA=\\nSWITCH_CC=\"" );
-	cmd( "set gcc_deb \"$gcc_conf-O0 -ggdb3\\nSWITCH_CC_LNK=\"" );
-	cmd( "set gcc_opt \"$gcc_conf-O3\\nSWITCH_CC_LNK=\"" );
+	cmd( "if [ string equal $CurPlatform \"win32\" ] { set gcc_deb_nopt \"-O0\" } { set gcc_deb_nopt \"-Og\" }" );
+	cmd( "set gcc_deb \"$gcc_conf$gcc_deb_nopt -ggdb3\\nSWITCH_CC_LNK=\"" );
+	cmd( "set gcc_opt \"$gcc_conf -O3\\nSWITCH_CC_LNK=\"" );
 
 	cmd( "set pos [ string first \"SWITCH_CC=\" $a ]; if { $pos == -1 } { set choice 0 } { if { [ string first \" -g\" $a $pos ] == -1 } { set debug 0 } { set debug 1 } }" );
 
@@ -5223,7 +5224,7 @@ if ( choice == 48 )
 					}; \
 					set pos2 [ string first \"-O\" $a $pos ]; \
 					if { $pos2 != -1 } { \
-						set a [ string replace $a $pos2 $pos2+2 \"-O0\" ] \
+						set a [ string replace $a $pos2 $pos2+2 $gcc_deb_nopt ] \
 					} \
 				} else { \
 					set pos1 [ string first \" -ggdb3\" $a $pos ]; \
