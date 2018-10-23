@@ -1,0 +1,18 @@
+A set of T. Schelling segregation models
+
+The Schelling Seggregation models:
+- Schelling1971-discrete
+- Schelling1971-continuous (to do)
+- Schelling1978
+
+The original model is a 1d line with continuous space. It is implemented in a
+1d discrete version and a 1d continous version.
+
+The 1978 model is a discrete 2d model with a Moore Neighbourhood.
+
+Schelling, Thomas C. (1971): Dynamic models of segregation.
+In The Journal of Mathematical Sociology 1 (2), pp. 143–186.
+DOI: 10.1080/0022250X.1971.9989794.
+
+Schelling, Thomas C. (1978): Micromotives and macrobehavior.
+1st. New York: Norton.

@@ -1,0 +1,7 @@
+GIS Models
+
+These models make explicit use of the GIS module
+
+The group of GIS models include:
+- Schelling Segregation Models
+
