@@ -1,0 +1,329 @@
+	
+Label Root
+{
+	Son: Model
+	Label Model
+	{
+		Son: Agent
+		Label Agent
+		{
+			Param: Colour
+			Var: Move
+			Func: locFracOther
+			Func: Content
+
+		}
+
+		Son: Patch
+		Label Patch
+		{
+			Func: isOption
+
+		}
+
+		Var: Scheduler
+		Param: xn
+		Param: yn
+		Param: fracAgents
+		Param: fracBlue
+		Param: wrapping
+		Param: tolerance
+		Param: distance
+		Var: fracMove
+		Var: fracContent
+		Var: Initialise
+		Param: Randomise
+		Var: dissimilarity
+		Param: SequentialUpdating
+		Param: RationalExpectations
+		Param: lattice
+
+	}
+
+	Var: EndOfSim
+
+}
+
+
+DATA
+
+Object: Root C	1
+Var: EndOfSim 0 n + n n
+
+Object: Model C	1
+Var: Scheduler 0 s + n n
+Param: xn 0 s + n n	50
+Param: yn 0 s + n n	50
+Param: fracAgents 0 s + n n	0.85
+Param: fracBlue 0 s + n n	0.5
+Param: wrapping 0 s + n n	0
+Param: tolerance 0 s + n n	0.3
+Param: distance 0 s + n n	1.5
+Var: fracMove 0 s + n n
+Var: fracContent 0 s + n n
+Var: Initialise 0 n + n n
+Param: Randomise 0 s + n n	1
+Var: dissimilarity 0 s + n p
+Param: SequentialUpdating 0 s + n n	1
+Param: RationalExpectations 0 s + n n	1
+Param: lattice 0 n + n n	2
+
+Object: Agent C	1
+Param: Colour 0 n + n n	0
+Var: Move 0 n + n n
+Func: locFracOther 0 n + n n
+Func: Content 0 n + n n
+
+Object: Patch C	1
+Func: isOption 0 n + n n
+
+SIM_NUM 1
+SEED 2
+MAX_STEP 1000
+EQUATION fun_Schelling.cpp
+MODELREPORT report_Sim1.html
+
+DESCRIPTION
+
+Object_Root
+(no description available)
+END_DESCRIPTION
+
+Variable_EndOfSim
+ Stop the simulation if no model changes any more. 
+'EndOfSim' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Model
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Scheduler
+The Scheduler controls the updating scheme (that part which is not endogeneously defined 
+
+'Scheduler' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_xn
+x-dimension of the grid
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_yn
+y-dimension of the space
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fracAgents
+The number of Agents compared to the size of the grid (0..1) exclusive
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_fracBlue
+The fraction of agents that is blue (0). The mirrored fraction is red (1)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_wrapping
+0: off, 1: left, 2: right, 3: left & right
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_tolerance
+Defines how many agents of different colour need to be in the neighbourhood, before the agent wants to move away. (0.0,1.0).
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_distance
+defines the maximum number of agents to the left and right in the neighbourhood (1, 2, .... xn)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_fracMove
+Monitor the fraction of agents that decided to move.
+
+'fracMove' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_fracContent
+Monitor the fraction of agents that are content.
+
+'fracContent' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Initialise
+Initialise the model
+
+'Initialise' appears in the equation for: Scheduler
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Randomise
+Defines if the order of agents movement per step is randomised or not.
+0 = off
+1 = on (default)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_dissimilarity
+Monitor the aggregate level of segregation with the dissimilarity index for the
+moore neighbourhood.
+D = 1/xn * sum_xn ( |b_i/B_t - r_i/R_t| )
+
+where b_i is the number of blue in the 9-field neighbourhood (moore) and r_i the
+number of red respectively. B_t and R_t are the total numbers of Blue and Red.
+
+To define the neighbourhood accordingly in both, 2d and 1d setting and also the
+continuous case, we define it as the patch and its neirest 8 neighbours.
+
+'dissimilarity' appears in the equation for: (never used)
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_SequentialUpdating
+if on (1) agents decide on movement based on the current state. 
+if off (0) agents decide in parallel, i.e. with the same 
+information set for all agents.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_RationalExpectations
+if on (1) agents only move if movement makes them content. 
+if off (0), agents do not check ex-ante if movement makes them better off.
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_lattice
+graphical representation, only windowed, singular modus. 
+Options:
+0 - off
+1 - show 
+2- show & save every timestep 
+3 - show & save every movement (careful!)
+_INIT_
+
+END_DESCRIPTION
+
+Object_Agent
+The agent
+_INIT_
+
+END_DESCRIPTION
+
+Parameter_Colour
+The Colour of the Agent (0:Blue, 1:Red)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_Move
+The agent decides if it should move.
+
+'Move' appears in the equation for: Scheduler, fracMove
+_INIT_
+
+END_DESCRIPTION
+
+Function_locFracOther
+Measures the fraction of people in the neighbourhood that differ from ones own color.
+
+'locFracOther' appears in the equation for: Content
+_INIT_
+
+END_DESCRIPTION
+
+Function_Content
+Function that at the point in time measures if the agent is content with its situation.
+
+'Content' appears in the equation for: Move, fracContent
+_INIT_
+
+END_DESCRIPTION
+
+Object_Patch
+(no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Function_isOption
+ Check if the place would be an option for the calling agent
+   check 1: is empty?
+   if empty, then check 2 else it is not an option
+   check 2: is locFracOther <= tolerance?
+   if true, then it is an option else not
+
+'isOption' appears in the equation for: Move
+_INIT_
+
+END_DESCRIPTION
+
+
+DOCUOBSERVE
+
+END_DOCUOBSERVE
+
+
+DOCUINITIAL
+
+END_DOCUINITIAL
+
+
+EQ_FILE
+//#define EIGENLIB			// uncomment to use Eigen linear algebra library
+
+#include "fun_head_fast.h"
+
+
+// do not add Equations in this area
+
+
+MODELBEGIN
+
+// insert your equations here, between the MODELBEGIN and MODELEND words
+
+
+
+
+
+
+
+
+
+
+
+
+MODELEND
+
+
+// do not add Equations in this area
+
+
+void close_sim( void )
+{
+	// close simulation special commands go here
+}
+
+END_EQ_FILE
