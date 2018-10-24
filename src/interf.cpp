@@ -1256,23 +1256,19 @@ case 2:
 					justAddedVar = true;	// flag variable just added (for acquiring focus)
 				}
 				
+				cmd( "lappend modElem %s }", lab );
+				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
+				redrawRoot = true;			// force browser redraw
 			}
 		}
 		else
-		{
-			done = 2;
 			initVal = false;
-		}
 	}
-
-	if ( done != 2 )
-		cmd( "lappend modElem %s }", lab );
 
 	err_newelem:
 	
 	cmd( "destroytop .addelem" );
-	redrawRoot = ( done == 2 ) ? false : true;
 
 	if ( cur2 != NULL )						// restore original current object
 		r = cur2;
@@ -1392,16 +1388,18 @@ case 3:
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 		add_description( lab, "Object", lab1 );
 		
+		struct_loaded = true;	// some model structure loaded
 		unsaved_change( true );	// signal unsaved change
-		redrawRoot = true;			// force browser redraw
+		redrawRoot = true;		// force browser redraw
 	}
 
 	here_endobject:
 
+	cmd( "destroytop .addobj" );
+	
 	if ( cur2 != NULL )			// restore original current object
 		r = cur2;
 
-	cmd( "destroytop .addobj" );
 	Tcl_UnlinkVar( inter, "done" );
 	cmd( "unset done" );
 
@@ -1824,8 +1822,15 @@ case 83:
 		cmd( "destroytop .chgnam" );
 	}
 
-	unsaved_change( true );				// signal unsaved change
-	redrawRoot = true;					// force browser redraw
+	if ( root->v == NULL && root->b == NULL )	// if last object
+	{
+		unsaved_change( false );				// no unsaved change
+		struct_loaded = false;					// no config loaded
+	}
+	else
+		unsaved_change( true );					// signal unsaved change
+	
+	redrawRoot = true;							// request browser redraw
 
 break;
 
@@ -2355,8 +2360,15 @@ case 76:
 		}
 	}
 
-	unsaved_change( true );		// signal unsaved change
-	redrawRoot = true;			// request browser redraw
+	if ( root->v == NULL && root->b == NULL )	// if last variable
+	{
+		unsaved_change( false );				// no unsaved change
+		struct_loaded = false;					// no config loaded
+	}
+	else
+		unsaved_change( true );					// signal unsaved change
+	
+	redrawRoot = true;							// request browser redraw
 
 	here_endprop:
 
