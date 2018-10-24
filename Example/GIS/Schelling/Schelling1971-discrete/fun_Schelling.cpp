@@ -36,7 +36,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
     if (VS(cur,"Move") > 0.0) {
       steps++;
       #ifndef NO_WINDOW
-      if (V("lattice")>2){
+      if (V("lattice")>1){
         if (COUNTS(p->up,"Model")==1){
           sprintf(filename,"Schelling_%g_t%i_step%g",RND_SEED,t,steps);
           SAVE_LAT(filename);
