@@ -331,7 +331,6 @@ del gnu\bin\cc1plus.exe
 del gnu\bin\crt2.o
 del gnu\bin\crtbegin.o
 del gnu\bin\crtend.o
-del gnu\bin\cygz.dll
 del gnu\bin\g++.exe
 del gnu\bin\gcc.exe
 del gnu\bin\gdb.exe

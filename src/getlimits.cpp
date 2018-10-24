@@ -135,7 +135,6 @@ int lsdmain( int argn, char **argv )
 		myexit( 4 );
 	}
 	fclose( f );
-	struct_loaded = true;
 	
 	root = new object;
 	root->init( NULL, "Root" );
@@ -150,7 +149,7 @@ int lsdmain( int argn, char **argv )
 	strcpy( stacklog->label, "LSD Simulation Manager" );
 	stack = 0;
 	
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD configuration or regenerate it using the LSD Browser.\n", struct_file );
 		myexit( 5 );
@@ -170,7 +169,7 @@ int lsdmain( int argn, char **argv )
 		myexit( 7 );
 	}
 	
-	if ( load_sensitivity( root, f ) != 0 )
+	if ( load_sensitivity( f ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is LSD Initial Values Range Reader.\nCheck if the file is a valid LSD sensitivity analysis or regenerate it using the LSD Browser.\n", sens_file  );
 		fclose( f );

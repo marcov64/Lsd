@@ -33,7 +33,7 @@ FILE *f = NULL;
 //You may need an integer to be used as a counter
 int i, j, h, k;
 
-//Place here your equations. They must be blocks of the following type
+//Place here your equations. They must be blocks of the following type:
 
 
 if ( ! strcmp( label, "VarX" ) )
@@ -46,22 +46,18 @@ if ( ! strcmp( label, "VarX" ) )
 }
 
 
-/*********************
+//Do not place equations beyond this point
 
-Do not place equations beyond this point.
-
-*********************/
-
-sprintf( msg, "equation not found for variable '%s'\nPossible problems:\n- There is no equation for variable '%s';\n- The spelling in equation's code is different from the name in the configuration;\n- The equation's code was terminated incorrectly", label, label );
-error_hard( msg, "equation not found", "check your configuration or code to prevent this situation" );
+sprintf( msg, "equation not found for variable '%s'", label );
+error_hard( msg, "equation not found", "check your configuration (variable name) or\ncode (equation name) to prevent this situation\nPossible problems:\n- There is no equation for this variable\n- The equation name is different from the variable name (case matters!)" );
 return -1;
 
 end :
 
 if ( ( quit == 0 && ( ( ! use_nan && is_nan( res ) ) || is_inf( res ) ) ) )
 {
-	sprintf( msg, "at time %d the equation for '%s' produces the invalid value '%lf',\ncheck the equation code and the temporary values v\\[...\\] to find the faulty line.\nLSD debugger will open next.", t, label, res );
-	error_hard( msg, "invalid result", "check your code to prevent this situation" );
+	sprintf( msg, "equation for '%s' produces the invalid value '%lf' at time %d", label, res, t );
+	error_hard( msg, "invalid equation result", "check your equation code to prevent invalid math operations\nPossible problems:\n- Illegal math operation (division by zero, log of negative number etc.)\n- Use of too-large/small value in calculation\n- Use of non-initialized temporary variable in calculation", true );
 	debug_flag = true;
 	debug = 'd';
 }

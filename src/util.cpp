@@ -69,7 +69,10 @@ given the file name name, the routine searches for the data line for the variabl
 int **lattice = NULL;					// lattice data colors array
 int rows = 0;							// lattice size
 int columns = 0;
-int error_count;
+int error_count;						// error counters
+int	normErrCnt, lnormErrCnt, gammaErrCnt, bernoErrCnt, poissErrCnt;
+int geomErrCnt, binomErrCnt, cauchErrCnt, chisqErrCnt, expErrCnt;
+int fishErrCnt, studErrCnt, weibErrCnt, betaErrCnt, paretErrCnt, alaplErrCnt;
 double dimW = 0;						// lattice screen size
 double dimH = 0;
 
@@ -263,7 +266,7 @@ Information about the state of the simulation when the error
 occured is provided. Users can abort the program or analyse 
 the results collected up the latest time step available.
 *************/
-void error_hard( const char *logText, const char *boxTitle, const char *boxText )
+void error_hard( const char *logText, const char *boxTitle, const char *boxText, bool defQuit )
 {
 	if ( quit == 2 )		// simulation already being stopped
 		return;
@@ -288,7 +291,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 		plog( "\nSuggestion: %s", "", boxText );
 		print_stack( );
 		cmd( "wm deiconify .log; raise .log; focus -force .log" );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\n\nSimulation cannot continue.\"", boxTitle, boxText  );
 	}
 	else
 	{
@@ -307,7 +310,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 	uncover_browser( );
 	cmd( "wm deiconify .; wm deiconify .log; raise .log; focus -force .log" );
 
-	cmd( "set err 2" );
+	cmd( "set err %d", defQuit ? 1 : 2 );
 
 	cmd( "newtop .cazzo Error" );
 
@@ -364,7 +367,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText 
 		// do run( ) cleanup
 		unwind_stack( );
 		actual_steps = t;
-		running = 0;
+		running = false;
 		close_sim( );
 		reset_end( root );
 		root->emptyturbo( );
@@ -527,7 +530,7 @@ object *get_cycle_obj( object *parent, char const *label, char const *command )
 	{
 		sprintf( msg, "'%s' is missing for cycling", label );
 		error_hard( msg, "object not found", 
-					"check your code to prevent this situation" );
+					"create object in model structure" );
 	}
 	
 	return res;
@@ -1146,7 +1149,7 @@ void add_cemetery( variable *v )
 	if ( cemetery == NULL )
 	{
 		cemetery = v;
-		v->next=NULL;
+		v->next = NULL;
 	}
 	else
 	{
@@ -1170,7 +1173,8 @@ void collect_cemetery( object *o )
 	{
 		nv = cv->next;						// pointer to next variable
 		
-		if ( running==1 && ( cv->save == true || cv->savei == true ) )	// need to save?
+		// need to save?
+		if ( running && ( cv->save == true || cv->savei == true ) )
 		{
 			cv->end = t;					// define last period,
 			cv->data[ t ] = cv->val[ 0 ];	// last value
@@ -1812,271 +1816,6 @@ result::~result( void )
 
 
 /***************************************************
-SHRINK_GNUFILE
-Prepare gnuplot file
-***************************************************/
-struct s
-{
-	int x;
-	struct s *son;
-	struct s *next;
-} d;
-
-// support functions (below)
-int store( int x1, int x2, int x3, int x4 );
-int store( struct s *c, int x2, int x3, int x4 );
-int store( struct s *c, int x3, int x4 );
-int store( struct s *c, int x4 );
-void free_storage( struct s *c );
-
-int shrink_gnufile( void ) 
-{
-	d.son=NULL;
-	d.next=NULL;
-	d.x=-1;
-
-	char str[2*MAX_ELEM_LENGTH], str1[2*MAX_ELEM_LENGTH], str2[2*MAX_ELEM_LENGTH], str3[2*MAX_ELEM_LENGTH], str4[2*MAX_ELEM_LENGTH];
-
-	int x1, x2, x3, x4, count=1;
-
-	FILE *f, *f1;
-	int i, j, h=0;
-	f = fopen("plot.file", "r");
-	if ( f == NULL )
-	{
-		error_hard( "cannot open plot file", 
-					"internal error", 
-					"if error persists, please contact developers" );
-		myexit( 14 );
-	}
-
-	f1=fopen("plot_clean.file", "w");
-	if ( f == NULL )
-	{
-		error_hard( "cannot open clean plot file",
-					"internal error", 
-					"if error persists, please contact developers" );
-		myexit( 15 );
-	}
-
-	while (fgets(str, 2*MAX_ELEM_LENGTH, f ) != NULL )
-	 {if (h++ == 1 )
-	   fprintf(f1, "set font \"{$::fontP}\"\n");
-	 sscanf(str, "%s %s", str1, str2);
-	 if (!strcmp(str1, "$can") && !strcmp(str2, "create") )
-	   {
-	   i=strcspn(str, "[");
-	   j=strcspn(str, "]");
-	   strncpy(str1, str+i, j-i+1);
-	   str1[j-i+1]='\0';
-	   sscanf(str1,"[expr $cmx * %d /1000]", &x1);
-
-	   i=strcspn(str+j+1, "[");
-	   i+=j+1;
-	   j=strcspn(str+i+1, "]");
-	   j+=i+1;
-	   strncpy(str2, str+i, j-i+1);
-	   str2[j-i+1]='\0';
-	   sscanf(str2,"[expr $cmy * %d /1000]", &x2);
-
-	   i=strcspn(str+j+1, "[");
-	   i+=j+1;
-	   j=strcspn(str+i+1, "]");
-	   j+=i+1;
-	   strncpy(str3, str+i, j-i+1);
-	   str3[j-i+1]='\0';
-	   sscanf(str3,"[expr $cmx * %d /1000]", &x3);
-
-	   i=strcspn(str+j+1, "[");
-	   i+=j+1;
-	   j=strcspn(str+i+1, "]");
-	   j+=i+1;
-	   strncpy(str4, str+i, j-i+1);
-	   str4[j-i+1]='\0';
-	   sscanf(str4,"[expr $cmy * %d /1000]", &x4);
-	   if (store(x1, x2, x3, x4) == 1 )   //if new data are stored, then add it to the cleaned file
-		 fprintf(f1, "%s", str);
-	   }
-	  else
-	   fprintf(f1, "%s", str);
-
-	 }
-	fclose( f );
-	fclose(f1);
-
-
-	if (d.next != NULL )
-	 free_storage(d.next);
-	if (d.son != NULL )
-	 free_storage(d.son);
-
-	return 0;
-}
-
-int store(int x1, int x2, int x3, int x4)
-{
-	int flag=0, res;
-	struct s *app, *prev;
-
-	for (app=&d; app!=NULL; app=app->next)
-	 {if (app->x==x1)
-	   { res=store(app->son,x2, x3, x4);
-		 return res;
-		 break;
-	   }
-	  else
-	   prev=app;
-	 }
-	if (app == NULL )
-	 {prev->next=new struct s;
-	  app=prev->next;
-	  app->x=x1;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x2;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x3;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x4;
-	  app->next=NULL;
-	  app->son=NULL;
-	  return 1;
-	 }
-
-	error_hard( "invalid data structure", 
-				"internal error", 
-				"if error persists, please contact developers" );
-	myexit( 16 );
-	
-	return 0;
-}
-
-int store(struct s *c, int x2, int x3, int x4)
-{
-	int flag=0, res;
-	struct s *app, *prev;
-
-	for (app=c; app!=NULL; app=app->next)
-	 {if (app->x==x2)
-	   { res=store(app->son, x3, x4);
-		 return res;
-		 break;
-	   }
-	  else
-	   prev=app;
-	 }
-	if (app == NULL )
-	 {prev->next=new struct s;
-	  app=prev->next;
-	  app->x=x2;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x3;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x4;
-	  app->next=NULL;
-	  app->son=NULL;
-
-	  return 1;
-	 }
-
-	error_hard( "invalid data structure",
-				"internal error", 
-				"if error persists, please contact developers" );
-	myexit( 17 );
-	
-	return 0;
-}
-
-int store(struct s *c, int x3, int x4)
-{
-	int flag=0, res;
-	struct s *app, *prev;
-
-	for (app=c; app!=NULL; app=app->next)
-	 {if (app->x==x3)
-	   { res=store(app->son, x4);
-		 return res;
-		 break;
-	   }
-	  else
-	   prev=app;
-	 }
-	if (app == NULL )
-	 {prev->next=new struct s;
-	  app=prev->next;
-	  app->x=x3;
-	  app->next=NULL;
-	  app->son=new struct s;
-	  app=app->son;
-	  app->x=x4;
-	  app->next=NULL;
-	  app->son=NULL;
-
-	  return 1;
-	 }
-
-	error_hard( "invalid data structure",
-				"internal error", 
-				"if error persists, please contact developers" );
-	myexit( 18 );
-	
-	return 0;
-}
-
-int store(struct s *c, int x4)
-{
-	int flag=0, res;
-	struct s *app, *prev;
-
-	for (app=c; app!=NULL; app=app->next)
-	 {if (app->x==x4)
-	   { return 0;
-		 break;
-	   }
-	  else
-	   prev=app; 
-	 }
-	if (app == NULL )
-	 {prev->next=new struct s;
-	  app=prev->next;
-	  app->x=x4;
-	  app->next=NULL;
-	  app->son=NULL;
-
-	  return 1;
-	 }
-
-	error_hard( "invalid data structure",
-				"internal error", 
-				"if error persists, please contact developers" );
-	myexit( 19 );
-	
-	return 0;
-}
-
-void free_storage(struct s *c)
-{
-	struct s *app, *n, *down;
-
-	if (c->next != NULL )
-	 free_storage(c->next);
-	if (c->son != NULL )
-	 free_storage(c->son);
-
-	delete c;
-}
-
-
-/***************************************************
 INIT_LATTICE
 Create a new run time lattice having:
 - pix=maximum pixel (600 should fit in typical screens, 0=default size)
@@ -2090,7 +1829,6 @@ Create a new run time lattice having:
   If init_color < 0, the (positive) RGB equivalent to init_color is used.
   Otherwise, the lattice is homogeneously initialized to the palette color specified by init_color.
 ***************************************************/
-
 double init_lattice( double pixW, double pixH, double nrow, double ncol, char const lrow[ ], char const lcol[ ], char const lvar[ ], object *p, int init_color )
 {
 	int i, j, hsize, vsize, hsizeMax, vsizeMax;
@@ -2102,14 +1840,8 @@ double init_lattice( double pixW, double pixH, double nrow, double ncol, char co
 		return -1;
 	}
 
-	if ( lattice != NULL && rows > 0 && columns > 0 )
-	{
-		for ( j = 0; j < columns; ++j )
-			delete [ ] lattice[ j ];
-		
-		delete [ ] lattice;
-	}
-	
+	// reset the LSD lattice, if any
+	close_lattice( );
 	rows = ( int ) max( 0, floor( nrow ) );
 	columns = ( int ) max( 0, floor( ncol ) );
 	error_count = 0;
@@ -2746,9 +2478,22 @@ NORM
 ***************************************************/
 double norm( double mean, double dev )
 {
-	if ( dev < 0 )
+	static bool normStopErr;
+	
+	if ( dev < 0 )	
 	{
-		plog( "\nWarning: bad dev in function: norm" );
+		if ( ++normErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative standard deviation in function 'norm'" );
+			normStopErr = false;
+		}
+		else
+			if ( ! normStopErr )
+			{
+				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				normStopErr = true;
+			}
+
 		return mean;
 	}
 
@@ -2763,9 +2508,22 @@ Return a draw from a lognormal distribution
 ***************************************************/
 double lnorm( double mean, double dev )
 {
+	static bool lnormStopErr;
+	
 	if ( dev < 0 )
 	{
-		plog( "\nWarning: bad dev in function: lnorm" );
+		if ( ++lnormErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative standard deviation in function 'lnorm'" );
+			lnormStopErr = false;
+		}
+		else
+			if ( ! lnormStopErr )
+			{
+				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				lnormStopErr = true;
+			}
+			
 		return exp( mean );
 	}
 
@@ -2779,9 +2537,22 @@ GAMMA
 ****************************************************/
 double gamma( double alpha, double beta )
 {
+	static bool gammaStopErr;
+	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		plog( "\nWarning: bad alpha, beta in function: gamma" );
+		if ( ++gammaErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive alpha or beta parameters in function 'gamma'" );
+			gammaStopErr = false;
+		}
+		else
+			if ( ! gammaStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				gammaStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2795,9 +2566,22 @@ BERNOULLI
 ****************************************************/
 double bernoulli( double p )
 {
+	static bool bernoStopErr;
+	
 	if ( p < 0 || p > 1 )
 	{
-		plog( "\nWarning: bad p in function: bernoulli" );
+		if ( ++bernoErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: probability out of [0, 1] in function 'bernoulli'" );
+			bernoStopErr = false;
+		}
+		else
+			if ( ! bernoStopErr )
+			{
+				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				bernoStopErr = true;
+			}
+			
 		if ( p < 0 )
 			return 0.0;
 		else
@@ -2814,9 +2598,22 @@ POISSON
 ****************************************************/
 double poisson( double mean )
 {
+	static bool poissStopErr;
+	
 	if ( mean < 0 )
 	{
-		plog( "\nWarning: bad mean in function: poisson" );
+		if ( ++poissErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative mean in function 'poisson'" );
+			poissStopErr = false;
+		}
+		else
+			if ( ! poissStopErr )
+			{
+				plog( "\nWarning: too many negative mean errors, stop reporting...\n" );
+				poissStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2830,9 +2627,22 @@ GEOMETRIC
 ****************************************************/
 double geometric( double p )
 {
+	static bool geomStopErr;
+	
 	if ( p < 0 || p > 1 )
 	{
-		plog( "\nWarning: bad p in function: geometric" );
+		if ( ++geomErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: probability out of [0, 1] in function 'geometric'" );
+			geomStopErr = false;
+		}
+		else
+			if ( ! geomStopErr )
+			{
+				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				geomStopErr = true;
+			}
+			
 		if ( p < 0 )
 			return 0.0;
 		else
@@ -2849,9 +2659,22 @@ BINOMIAL
 ****************************************************/
 double binomial( double p, double t )
 {
+	static bool binomStopErr;
+	
 	if ( p < 0 || p > 1 || t <= 0 )
 	{
-		plog( "\nWarning: bad p, t in function: binomial" );
+		if ( ++binomErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: invalid parameters in function 'binomial'" );
+			binomStopErr = false;
+		}
+		else
+			if ( ! binomStopErr )
+			{
+				plog( "\nWarning: too many invalid parameter errors, stop reporting...\n" );
+				binomStopErr = true;
+			}
+			
 		if ( p < 0 || t <= 0 )
 			return 0.0;
 		else
@@ -2868,9 +2691,22 @@ CAUCHY
 ***************************************************/
 double cauchy( double a, double b )
 {
+	static bool cauchStopErr;
+	
 	if ( b <= 0 )
 	{
-		plog( "\nWarning: bad b in function: cauchy" );
+		if ( ++cauchErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive b parameter in function 'cauchy'" );
+			cauchStopErr = false;
+		}
+		else
+			if ( ! cauchStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				cauchStopErr = true;
+			}
+			
 		return a;
 	}
 
@@ -2884,9 +2720,22 @@ CHI_SQUARED
 ***************************************************/
 double chi_squared( double n )
 {
+	static bool chisqStopErr;
+	
 	if ( n <= 0 )
 	{
-		plog( "\nWarning: bad n in function: chi_squared" );
+		if ( ++chisqErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive n parameter in function 'chi_squared'" );
+			chisqStopErr = false;
+		}
+		else
+			if ( ! chisqStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				chisqStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2900,9 +2749,22 @@ EXPONENTIAL
 ***************************************************/
 double exponential( double lambda )
 {
+	static bool expStopErr;
+	
 	if ( lambda <= 0 )
 	{
-		plog( "\nWarning: bad lambda in function: exponential" );
+		if ( ++expErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive lambda parameter in function 'exponential'" );
+			expStopErr = false;
+		}
+		else
+			if ( ! expStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				expStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2916,9 +2778,22 @@ FISHER
 ***************************************************/
 double fisher( double m, double n )
 {
+	static bool fishStopErr;
+	
 	if ( m <= 0 || n <= 0 )
 	{
-		plog( "\nWarning: bad m, n in function: fisher" );
+		if ( ++fishErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: invalid parameters in function 'fisher'" );
+			fishStopErr = false;
+		}
+		else
+			if ( ! fishStopErr )
+			{
+				plog( "\nWarning: too many invalid parameter errors, stop reporting...\n" );
+				fishStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2932,9 +2807,22 @@ STUDENT
 ***************************************************/
 double student( double n )
 {
+	static bool studStopErr;
+	
 	if ( n <= 0 )
 	{
-		plog( "\nWarning: bad n in function: student" );
+		if ( ++studErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive n parameter in function 'student'" );
+			studStopErr = false;
+		}
+		else
+			if ( ! studStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				studStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2948,9 +2836,22 @@ WEIBULL
 ***************************************************/
 double weibull( double a, double b )
 {
+	static bool weibStopErr;
+	
 	if ( a <= 0 || b <= 0 )
 	{
-		plog( "\nWarning: bad a, b in function: weibull" );
+		if ( ++weibErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive a or b parameters in function 'weibull'" );
+			weibStopErr = false;
+		}
+		else
+			if ( ! weibStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				weibStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -2965,9 +2866,22 @@ Return a draw from a Beta(alfa,beta) distribution
 ***************************************************/
 double beta( double alpha, double beta )
 {
+	static bool betaStopErr;
+	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		plog( "\nWarning: bad alpha, beta in function: beta" );
+		if ( ++betaErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive alpha or beta parameters in function 'beta'" );
+			betaStopErr = false;
+		}
+		else
+			if ( ! betaStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				betaStopErr = true;
+			}
+			
 		if ( alpha < beta )
 			return 0.0;
 		else
@@ -3315,13 +3229,25 @@ NORM
 ***************************************************/
 double norm( double mean, double dev )
 {
+	static bool normStopErr;
 	double gasdev, R, v1, v2, fac;
 	static double gset;
 	int boh = 1;
 	
 	if ( dev < 0 )
 	{
-		plog( "\nWarning: bad dev in function: norm" );
+		if ( ++normErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative standard deviation in function 'norm'" );
+			normStopErr = false;
+		}
+		else
+			if ( ! normStopErr )
+			{
+				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				normStopErr = true;
+			}
+
 		return mean;
 	}
 
@@ -3361,9 +3287,22 @@ Return a draw from a lognormal distribution
 ***************************************************/
 double lnorm( double mean, double dev )
 {
+	static bool lnormStopErr;
+	
 	if ( dev <= 0 )
 	{
-		plog( "\nWarning: bad dev in function: lnorm" );
+		if ( ++lnormErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative standard deviation in function 'lnorm'" );
+			lnormStopErr = false;
+		}
+		else
+			if ( ! lnormStopErr )
+			{
+				plog( "\nWarning: too many negative standard deviation errors, stop reporting...\n" );
+				lnormStopErr = true;
+			}
+			
 		return exp( mean );
 	}
 
@@ -3390,8 +3329,9 @@ double gamdev( int ia, long *idum_loc = NULL )
 	if ( ia < 1 ) 
 	{
 		error_hard( "inconsistent state in gamma function",
-					"internal error", 
-					"if error persists, please contact developers" );
+					"internal problem in LSD", 
+					"if error persists, please contact developers", 
+					true );
 		quit = 1;
 		return 0;
 	} 
@@ -3430,9 +3370,22 @@ double gamdev( int ia, long *idum_loc = NULL )
 
 double gamma( double alpha, double beta )
 {
+	static bool gammaStopErr;
+	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		plog( "\nWarning: bad alpha, beta in function: gamma" );
+		if ( ++gammaErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive alpha or beta parameters in function 'gamma'" );
+			gammaStopErr = false;
+		}
+		else
+			if ( ! gammaStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				gammaStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -3445,9 +3398,22 @@ BERNOULLI
 ****************************************************/
 double bernoulli( double p )
 {
+	static bool bernoStopErr;
+	
 	if ( p < 0 || p > 1 )
 	{
-		plog( "\nWarning: bad p in function: bernoulli" );
+		if ( ++bernoErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: probability out of [0, 1] in function 'bernoulli'" );
+			bernoStopErr = false;
+		}
+		else
+			if ( ! bernoStopErr )
+			{
+				plog( "\nWarning: too many invalid probability errors, stop reporting...\n" );
+				bernoStopErr = true;
+			}
+			
 		if ( p < 0 )
 			return 0.0;
 		else
@@ -3540,9 +3506,22 @@ double poidev( double xm, long *idum_loc = NULL )
 
 double poisson( double mean )
 {
+	static bool poissStopErr;
+	
 	if ( mean < 0 )
 	{
-		plog( "\nWarning: bad mean in function: poisson" );
+		if ( ++poissErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: negative mean in function 'poisson'" );
+			poissStopErr = false;
+		}
+		else
+			if ( ! poissStopErr )
+			{
+				plog( "\nWarning: too many negative mean errors, stop reporting...\n" );
+				poissStopErr = true;
+			}
+			
 		return 0.0;
 	}
 
@@ -3557,9 +3536,22 @@ Dosi et al. (2010) K+S
 ***************************************************/
 double beta( double alpha, double beta )
 {
+	static bool betaStopErr;
+	
 	if ( alpha <= 0 || beta <= 0 )
 	{
-		plog( "\nWarning: bad alpha, beta in function: beta" );
+		if ( ++betaErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive alpha or beta parameters in function 'beta'" );
+			betaStopErr = false;
+		}
+		else
+			if ( ! betaStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				betaStopErr = true;
+			}
+			
 		if ( alpha < beta )
 			return 0.0;
 		else
@@ -3589,9 +3581,22 @@ PARETO
 ****************************************************/
 double pareto( double mu, double alpha )
 {
+	static bool paretStopErr;
+	
 	if ( mu <= 0 || alpha <= 0 )
 	{
-		plog( "\nWarning: bad mu, alpha in function: pareto" );
+		if ( ++paretErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive mu or alpha parameters in function 'pareto'" );
+			paretStopErr = false;
+		}
+		else
+			if ( ! paretStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				paretStopErr = true;
+			}
+			
 		return mu;
 	}
 
@@ -3605,9 +3610,22 @@ Return a draw from an asymmetric laplace distribution
 ***************************************************/
 double alapl( double mu, double alpha1, double alpha2 )
 {
-	if ( alpha1 <= 0.0 || alpha2 <= 0.0 )
+	static bool alaplStopErr;
+	
+	if ( alpha1 <= 0 || alpha2 <= 0 )
 	{
-		plog( "\nWarning: bad alpha in function: alapl" );
+		if ( ++alaplErrCnt < ERR_LIM )	// prevent slow down due to I/O
+		{
+			plog( "\nWarning: non-positive alpha1 or alpha2 parameters in function 'alapl'" );
+			alaplStopErr = false;
+		}
+		else
+			if ( ! alaplStopErr )
+			{
+				plog( "\nWarning: too many non-positive parameter errors, stop reporting...\n" );
+				alaplStopErr = true;
+			}
+			
 		return mu;
 	}
 
@@ -3616,4 +3634,16 @@ double alapl( double mu, double alpha1, double alpha2 )
 		return mu + alpha1 * log( draw * ( 1 + alpha1 / alpha2 ) );
 	else 
 		return mu - alpha2 * log( ( 1 - draw ) * ( 1 + alpha1 / alpha2 ) );
+}
+
+
+/***************************************************
+INIT_MATH_ERROR
+Initialize the math functions error controls
+***************************************************/
+void init_math_error( void )
+{
+	normErrCnt = lnormErrCnt = gammaErrCnt = bernoErrCnt = poissErrCnt = 0;
+	geomErrCnt = binomErrCnt = cauchErrCnt = chisqErrCnt = expErrCnt = 0;
+	fishErrCnt = studErrCnt = weibErrCnt = betaErrCnt = paretErrCnt = alaplErrCnt = 0;
 }

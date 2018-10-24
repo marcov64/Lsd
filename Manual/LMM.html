@@ -568,7 +568,7 @@ the <a href="#_Options">Options</a> window.<a name="_Options"></a></p>
  </tr>
 </table>
 
-<h2>Options </h2>
+<h2><a name=options></a>Options </h2>
 
 <p class=MsoNormal>LSD user can set several options in both LMM and the <a
 href="LSD_faqs.html#modelprogram">LSD model programs</a> using this option. The
@@ -577,25 +577,29 @@ configuration items are:</p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Terminal for debugger</b>: the name of the operating system
-console to use when invoking the debugger.</p>
+</span></span><b>System terminal</b>: the name of the operating system console
+to use when invoking the system commands like the debugger and Gnuplot. Usually
+<span class=Cdigo>cmd</span> for Windows, <span class=Cdigo>Terminal</span> for
+macOS and <span class=Cdigo>gnome-terminal</span> for Linux.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Debugger command</b>: the debugger command to use.</p>
+</span></span><b>Debugger</b>: the debugger command to use, normally <span
+class=Cdigo>gdb</span> in Windows and Linux and <span class=Cdigo>lldb</span>
+in macOS.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>HTML browser</b>: the web browser to use (open invokes the default
-operating system browser).</p>
+</span></span><b>HTML browser</b>: the web browser to use (<span class=Cdigo>open</span>
+invokes the default operating system browser).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Wish program</b>: the Tcl/Tk interpreter command name used to
-run scripts.</p>
+</span></span><b>Tcl/Tk Wish</b>: the Tcl/Tk interpreter executable used to run
+scripts.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -921,8 +925,8 @@ class=Cdigo><span style='font-family:"Arial","sans-serif";color:windowtext'>.</s
 
 <p class=MsoNormal>Insert a left-side curly bracket.</p>
 
-<p class=MsoNormal>In some international keyboards there may be no curly bracket
-keys, required for editing C++ code. </p>
+<p class=MsoNormal>In some international keyboards there may be no curly
+bracket keys, required for editing C++ code. </p>
 
 <h2><a name=insertclosegr></a>Insert } </h2>
 
@@ -964,8 +968,8 @@ line(s) of text. It is useful to organize blocks of code for easier reading.</p>
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
  <tr>
   <td width="100%" style='width:100.0%;padding:2.85pt 5.4pt 2.85pt 5.4pt'>
-  <p class=MsoNormal align=center style='text-align:center'><a
-  name="_Larger_Font"></a><a name=lfont></a><a name=wrap></a><a name=LsdScript></a>&nbsp;<span
+  <p class=MsoNormal align=center style='text-align:center'><a name=LsdScript></a><a
+  name=wrap></a><a name=lfont></a><a name="_Larger_Font"></a>&nbsp;<span
   style='font-size:10.0pt'><a href="#top"><span style='color:red;text-decoration:
   none'>&#9650;Top</span></a></span></p>
   </td>
@@ -1017,8 +1021,8 @@ href="#_Options">Options</a>.</p>
 
 <h2><a name="_Wrap/Unwrap_Text_(Ctrl+w)"></a><a name="_Wrap/Unwrap_(Ctrl+w)"></a>Wrap/Unwrap</h2>
 
-<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+w</span> or click
-the wrap icon on the tool bar.</p>
+<p class=MsoNormal><i>Shortcuts</i>: <span class=Cdigo>Ctrl+w</span> or click the
+wrap icon on the tool bar.</p>
 
 <p class=MsoNormal>The text area can be set to wrap the text so lines wider
 than the window width do not spill over the right side of the window. The
@@ -1052,8 +1056,8 @@ minimizing mistakes. </p>
 <p class=MsoNormal>The available code blocks are presented in a list (see <a
 href="LSD_macros.html">LSD macros</a> for the complete reference). After the
 user choice, a template window requesting the values necessary for the option
-appears. It contains default values for most values required and modelers can move
-between fields just pressing <span class=Cdigo>Enter</span>.</p>
+appears. It contains default values for most values required and modelers can
+move between fields just pressing <span class=Cdigo>Enter</span>.</p>
 
 <p class=MsoNormal>The list of available code blocks also has shortcut keys.
 Pay attention to the highlighted letters as they can be used pressing Control
@@ -1126,9 +1130,9 @@ pointing to the found problems.</p>
 <p class=MsoNormal>Errors are presented when the <a
 href="LSD_faqs.html#compiler">compiler</a> cannot interpret or disambiguate a
 command in the <a href="LSD_faqs.html#equationfile">equation file</a>. It may
-be caused by several situations, like invalid syntax, typos, undeclared
-variables, etc. Check here the most <a href="LSD_quickhelp.html#errors">common
-errors and possible fixes</a>. </p>
+be caused by several situations, like invalid syntax, typos, undeclared variables,
+etc. Check here the most <a href="LSD_quickhelp.html#errors">common errors and
+possible fixes</a>. </p>
 
 <p class=MsoNormal>When LMM presents a compiler error it also offers the
 possibility to directly jump to the file and position where the compiler found
@@ -1319,10 +1323,10 @@ Version</h2>
 
 <p class=MsoNormal>Generate a command-line version (no graphical interface) of
 the <a href="LSD_faqs.html#modelprogram">LSD model program</a>, including the
-source code to recompile it in other computers and operating systems. This is
-useful to run the simulation in servers or computer clusters, allowing the
-processing of huge numbers of <a href="LSD_faqs.html#simulationrun">simulation
-runs</a> in parallel. </p>
+source code to recompile it in other computers and operating systems. This is useful
+to run the simulation in servers or computer clusters, allowing the processing
+of huge numbers of <a href="LSD_faqs.html#simulationrun">simulation runs</a> in
+parallel. </p>
 
 <p class=MsoNormal>Since there is no graphical interface, the No Window version
 needs a <a href="LSD_faqs.html#modelsetting">model configuration file</a> (<span
@@ -1423,8 +1427,8 @@ appended to the commands above).</p>
 
 <p class=MsoNormal><i>Shortcut</i>: click the on i blue icon on the tool bar.</p>
 
-<p class=MsoNormal>Show summary information about the model and allow the
-edition of the name and version: </p>
+<p class=MsoNormal>Show summary information about the model and allow the edition
+of the name and version: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -1491,12 +1495,12 @@ the on the white C++ page icon on the tool bar.</p>
 of the current model in the <a href="#_The_LMM_window">LMM editor area</a>. The
 equation file contains the <a href="LSD_faqs.html#equation">Equations</a>
 required to create the <a href="LSD_faqs.html#modelprogram">LSD model program</a>.
-The modeler writes in this file the code for the Equations in separated blocks
-whose order is of no importance. There are two possibilities to code one
-equation: the <a href="LSD_macros.html">LSD macro language</a> &nbsp;and using
-the (now deprecated) LSD C++ <a href="LSD_functions.html">functions</a>
-(recommended only for the maintenance of old models). Check this <a
-href="model_writing.html">tutorial</a> on how to create your first model.</p>
+The modeler writes in this file the code for the Equations in separated blocks whose
+order is of no importance. There are two possibilities to code one equation:
+the <a href="LSD_macros.html">LSD macro language</a> &nbsp;and using the (now
+deprecated) LSD C++ <a href="LSD_functions.html">functions</a> (recommended
+only for the maintenance of old models). Check this <a href="model_writing.html">tutorial</a>
+on how to create your first model.</p>
 
 <p class=MsoNormal>The equation file shown in LMM should be used only for
 editing a model and should not be used just for learning a model. It is not
@@ -1538,8 +1542,8 @@ or using the arrow keys and <span class=Cdigo>Enter</span>).</p>
 the <a href="LSD_faqs.html#modelprogram">LSD model program</a>. The make file
 is a text file which contains the commands necessary to build the model program
 using the LSD source code and the <a href="LSD_faqs.html#equationfile">equation
-file(s)</a>. This command is provided only for checking the contents of the
-make file used during the last model <a href="LSD_faqs.html#compiler">compilation</a>.
+file(s)</a>. This command is provided only for checking the contents of the make
+file used during the last model <a href="LSD_faqs.html#compiler">compilation</a>.
 Changes made to it are going to be destroyed next time the model is recompiled.
 To modify the compilation options see the <a href="#_Model_Options_1">Model</a>
 and <a href="#description">System Options</a>. </p>
@@ -1548,8 +1552,8 @@ and <a href="#description">System Options</a>. </p>
 Compilation Errors </h2>
 
 <p class=MsoNormal>Show again the errors from the last <a
-href="LSD_faqs.html#compiler">compilation</a>, if any, in a new Compilation
-Errors window. If the compilation did not issue any error the window is empty. </p>
+href="LSD_faqs.html#compiler">compilation</a>, if any, in a new Compilation Errors
+window. If the compilation did not issue any error the window is empty. </p>
 
 <p class=MsoNormal>This option may be useful whenever there are many errors in
 the <a href="LSD_faqs.html#equationfile">equation file</a>. Please note that
@@ -1640,9 +1644,9 @@ the table below. </p>
   </td>
   <td style='padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal>Extra source code file names added by the modeler. Files
-  names must be separated only by spaces and <i>no</i> new lines should be manually
-  entered. File names can be added using the <span class=Cdigo>Add Extra</span>
-  button.</p>
+  names must be separated only by spaces and <i>no</i> new lines should be
+  manually entered. File names can be added using the <span class=Cdigo>Add
+  Extra</span> button.</p>
   </td>
  </tr>
  <tr>
@@ -1701,8 +1705,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 extra source files to the model. Adding files here do not add the corresponding
 <span class=Cdigo>#include</span> lines to your main <a
 href="LSD_faqs.html#equationfile">equation file</a>. Please check the
-discussion <a href="#_Show_Extra_Files">here</a> about the use of extra source
-files in your model. </p>
+discussion <a href="#_Show_Extra_Files">here</a> about the use of extra source files
+in your model. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -2005,21 +2009,24 @@ installed in case of Linux computers) </p>
   </td>
   <td width="42%" style='width:42.9%;padding:5.65pt 5.65pt 5.65pt 5.65pt'>
   <p class=MsoNormal>Default compiler switches (options) to be used for all
-  models. May be reset by the <a href="#_Model_Options_1">model specific
-  switches</a> for the <a href="LSD_faqs.html#equationfile">equation file(s)</a>.</p>
-  <p class=MsoNormal>Except for the <span class=Cdigo>-O3</span> switch (full code
-  optimization), all the remaining default switches are <i>compulsory</i> and
-  should not be changed.</p>
+  models. May be reset by the <a href="#_Model_Options_1">model specific switches</a>
+  for the <a href="LSD_faqs.html#equationfile">equation file(s)</a>.</p>
+  <p class=MsoNormal>Except for the <span class=Cdigo>-O3</span> switch (full
+  code optimization), all the remaining default switches are <i>compulsory</i>
+  and should not be changed.</p>
   </td>
  </tr>
 </table>
 
 </div>
 
-<p class=MsoNormal><i>Observation</i>: the default values for some still
-supported legacy operating systems (OSX and Windows 32-bit) are not shown above
-but are correctly handled when the <span class=Cdigo>Default</span> button is
-used. However, not all LSD modern features are supported under such systems.</p>
+<p class=MsoNormal><i>Observation</i>: the default values for some still supported
+legacy operating systems (OSX and Windows 32-bit) are not shown above but are
+correctly handled when the <span class=Cdigo>Default</span> button is used.
+However, not all LSD modern features are supported under such systems. In case
+of missing or mismatched required configurations, a warning (in red text) is
+present under the text window, clicking <span class=Cdigo>Default</span> should
+fix the most common problems.</p>
 
 <p class=MsoNormal>These options are used to create the make file used to
 compile the <a href="LSD_faqs.html#modelprogram">LSD model program</a>. Besides
@@ -2027,11 +2034,10 @@ the <a href="LSD_faqs.html#equation">Equations</a>’ code, compiling a model
 program requires the exact name and location of several system files. This
 information is not standard on all operating systems and versions. Generally,
 the default values proposed should suit most cases, and are applied by using
-the <span class=Cdigo>Default</span> buttons for each operating system (<span
-class=Cdigo>Windows</span>, <span class=Cdigo>Linux</span> or <span
-class=Cdigo>macOS</span>). The details about the compiler and the associated
-tools are described for each operating system in <a href="../Readme.txt">Readme.txt</a>.
-</p>
+the <span class=Cdigo>Default</span> button, which automatically detects the
+current operating system (among Windows 32-bit, Windows 64-bit, Linux, legacy
+OSX, and macOS). The details about the compiler and the associated tools are
+described for each operating system in <a href="../Readme.txt">Readme.txt</a>. </p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -2115,7 +2121,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <p class=MsoNormal>Access the <a href="#_top">LMM manual</a> (this document) in
 the configured web browser. If the browser is already open, the help page may
-show as an additional window or tab, according to the web browser configuration.</p>
+show as an additional window or tab, according to the web browser
+configuration.</p>
 
 <p class=MsoNormal>From any help page you can navigate the entire LSD
 documentation using the top navigation bar.</p>
@@ -2177,8 +2184,8 @@ of the example models available in the LSD installation. </p>
 
 <h2><a name="_Using_LSD_Models"></a>Using LSD Models Tutorial</h2>
 
-<p class=MsoNormal>The <a href="model_using.html">second tutorial</a> is
-targeted on LSD users willing to learn, use and test existing <a
+<p class=MsoNormal>The <a href="model_using.html">second tutorial</a> is targeted
+on LSD users willing to learn, use and test existing <a
 href="LSD_faqs.html#model">LSD models</a>, provided by the models’ authors. It
 presents the main steps to start using LSD models for practical purposes.</p>
 

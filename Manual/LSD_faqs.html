@@ -353,17 +353,17 @@ of the model, having LSD automatically creating all the interfaces that allow
 accessing any aspect of the model, accelerating and simplifying the process of
 building simulation models and allowing for their easy distribution. </p>
 
-<p class=MsoNormal>LSD tries to remove the trade-off between the simplicity to use
-a simulation model and the complexity to build it. This is obtained by allowing
-modelers to just write pieces of code (independently) for each Equation (i.e.,
-Variable) of the model. In this way, the process of code writing is greatly
-simplified because a complex model is decomposed in individually coded
-Equations. When the Equations are (supposed to be) ready, the system
-automatically generates an executable program, complete with an easy-to-use
-graphical interface. The system automatically executes the Variables' code as
-required during a simulation run, storing the results, signaling errors, and
-allowing the model inspections, without any need for the modeler to write
-specific code for these operations. </p>
+<p class=MsoNormal>LSD tries to remove the trade-off between the simplicity to
+use a simulation model and the complexity to build it. This is obtained by
+allowing modelers to just write pieces of code (independently) for each
+Equation (i.e., Variable) of the model. In this way, the process of code
+writing is greatly simplified because a complex model is decomposed in
+individually coded Equations. When the Equations are (supposed to be) ready,
+the system automatically generates an executable program, complete with an
+easy-to-use graphical interface. The system automatically executes the Variables'
+code as required during a simulation run, storing the results, signaling
+errors, and allowing the model inspections, without any need for the modeler to
+write specific code for these operations. </p>
 
 <p class=MsoNormal>Although very simple to use, LSD is also extremely powerful,
 since it is based on <a href="#_What_is_C++?">C++11</a>, and therefore the
@@ -447,9 +447,10 @@ their simulation models. </p>
 <h1><a name="_Where_do_I"></a>Where do I start using a LSD model? </h1>
 
 <p>The distribution of LSD includes several example models, some of which are
-for purely teaching purposes, while others are complex models with scientific purposes.
-The simplest way is to play with them is to use <a href="#_What_is_LMM?_1">LMM</a>
-to compile and run them. To do so, please follow the following steps: </p>
+for purely teaching purposes, while others are complex models with scientific
+purposes. The simplest way is to play with them is to use <a
+href="#_What_is_LMM?_1">LMM</a> to compile and run them. To do so, please
+follow the following steps: </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
@@ -558,9 +559,9 @@ simple LSD model. </p>
 
 <h1><a name="_What_is_a"></a><a name=model></a>What is a model in LSD? </h1>
 
-<p class=MsoNormal>An abstract definition of a simulation model is: a collection
-of variables that change values through simulation time according to specified
-rules. However, this definition leaves a lot at an implicit level. </p>
+<p class=MsoNormal>An abstract definition of a simulation model is: a
+collection of variables that change values through simulation time according to
+specified rules. However, this definition leaves a lot at an implicit level. </p>
 
 <p class=MsoNormal>A more pedantic definition is maybe better to understand how
 LSD works. Usually a model includes several <a href="#_What_is_a_3">Variables</a>
@@ -599,14 +600,13 @@ EPS plots, statistics tables, and so on. </p>
 <h1><a name="_What_is_the_2"></a><a name=modelhome></a>What is the model home
 (sub) directory?</h1>
 
-<p class=MsoNormal>Every LSD model is composed by a set of files which are stored
-in a single location (a directory/folder) in the computer file system
-(contained in a hard disk, a SSD, an USB pen drive etc.). By default, new LSD
-models are created in the <span class=Cdigo>Work</span> subdirectory which is
-kept inside the LSD installation directory (usually <span class=Cdigo>C:\Lsd-X.Y
-</span>in Windows or <span class=Cdigo>~/LSD-X.Y</span> in Linux/macOS, see the
-<a href="LSD_manual.html#install">installation details</a> for more
-information).</p>
+<p class=MsoNormal>Every LSD model is composed by a set of files which are
+stored in a single location (a directory/folder) in the computer file system (contained
+in a hard disk, a SSD, an USB pen drive etc.). By default, new LSD models are
+created in the <span class=Cdigo>Work</span> subdirectory which is kept inside
+the LSD installation directory (usually <span class=Cdigo>C:\Lsd-X.Y </span>in
+Windows or <span class=Cdigo>~/LSD-X.Y</span> in Linux/macOS, see the <a
+href="LSD_manual.html#install">installation details</a> for more information).</p>
 
 <p class=MsoNormal>When a new model is created in <a href="#_What_is_LMM?_1">LMM</a>,
 the user has the option to name its home directory (the default being <span
@@ -737,11 +737,37 @@ specific order, speeding up the model computation.<br>
 LSD relies on an automatic scheduling engine allowing modelers to decide the
 order of computation except in special circumstances, as when ambiguity is
 present. Only if there is a specific need to keep a certain evaluation
-sequence, then the model can be explicitly configured to follow it. For
-example, writing the Equation <i>x</i> = f(<i>y</i>) forces the system to
-compute <i>y</i> before <i>x</i>. Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i>
-– 1) ) tells the system to use a lagged value of <i>y</i> in the Equation for <i>x</i>
+sequence, then the model can be explicitly configured to follow it. For example,
+writing the Equation <i>x</i> = f(<i>y</i>) forces the system to compute <i>y</i>
+before <i>x</i>. Otherwise, the code for <i>x</i> = f( <i>y</i>(<i>t</i> – 1) )
+tells the system to use a lagged value of <i>y</i> in the Equation for <i>x</i>
 and thus the Equation for <i>y</i> may be computed before or after that for <i>x</i>.</p>
+
+<p class=MsoNormal>Anyway, the order of the computations follows a simple rule.
+LSD starts each simulation time step computing the first <a href="#_What_is_a_3">Variable</a>,
+if any, in the topmost <a href="#_What_is_an_1">Object</a> for the <a
+href="#_What_is_the">model structure</a> (<span class=Cdigo>root</span>). If
+this Variable’s <a href="#_What_is_an">Equation</a> requires contemporaneous
+values from other Variables, these are computed on demand. As soon as the first
+Variable is calculated, LSD moves on to compute the second Variable, if any and
+if not already computed before. When all Variables in the topmost Object, if
+any, are updated, LSD moves to the first descending (son) Object and computes
+all Variables in all of its instances. Next, LSD goes down again to evaluate
+the son own descending Objects (grandsons of <span class=Cdigo>root</span>).
+This downward-recursive path goes ahead until the last Variable in the last
+instance of the bottommost Object is reached and, so, all the Variables in the
+model are updated for the current time step. </p>
+
+<p class=MsoNormal>Considering the downward-recursive algorithm used by LSD to
+schedule the computations, the user can influence the sequence of evaluation of
+the <a href="#_What_is_a_3">Variables</a> by the order the elements are listed
+in the <a href="browser.html#descendants">Descending Objects list box</a> and
+the <a href="browser.html#variables">Variables list box</a> in the <a
+href="browser.html">LSD Browser</a>. When Variables are not updated because of
+previous Variables’ computation, LSD uses the list boxes order to update them
+(from top to bottom). The list boxes can be easily reordered in the LSD
+Browser, <a href="browser.html#listboxes">element-by-element</a> and <a
+href="menumodel.html#sort">overall</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -761,8 +787,8 @@ understood as a difference equation that computes a numerical value for a <a
 href="#_What_is_a_3">Variable</a> as a function of the present and the past
 values of all Variables and <a href="#_What_is_a_4">Parameters</a> of the
 model. Technically, it is a piece of code (C++ extended by a <a
-href="LSD_macros.html">library of LSD specific macros and functions</a>) that
-is executed once for each instance of each <a href="#_What_is_an_1">Object</a>
+href="LSD_macros.html">library of LSD specific macros and functions</a>) that is
+executed once for each instance of each <a href="#_What_is_an_1">Object</a>
 containing the Variable it refers to, at every time step of the simulation.
 Users of a model do not need to deal with the Equations, though they have
 access to the code implementing the Equations including all the explanations
@@ -905,10 +931,10 @@ operation under C++98 possible under some limitations.</p>
 <h1><a name="_By_the_way,"></a><a name="_What_does_it"></a><a name=compiler></a>What
 does it mean “compiler” or “recompile”? </h1>
 
-<p class=MsoNormal>The compilation of <a href="#_What_is_a_2">LSD equation
-files</a>, and the possible dealing with the associated error messages, is
-automatically performed by <a href="#_What_is_LMM?_1">LMM</a> whenever a
-modeler tries to run a model.</p>
+<p class=MsoNormal>The compilation of <a href="#_What_is_a_2">LSD equation files</a>,
+and the possible dealing with the associated error messages, is automatically
+performed by <a href="#_What_is_LMM?_1">LMM</a> whenever a modeler tries to run
+a model.</p>
 
 <p class=MsoNormal>The so-called “compiled” languages, like <a
 href="#_What_is_C++_1">C++</a>, are based on a compiler. That is, programmers
@@ -917,11 +943,11 @@ comply with a given (strict) syntax (like C, C++, Java, etc.). When programmers
 (believe to) have finished the coding, they compile it by using a compiler
 program which converts the source file into an executable program file. The
 compiler reads the commands in the exact sequence in the source file and, if
-there are no errors, produces as output a file containing the actual
-“executable code” that can be run on any computer sharing the same operating
-system (OS). Different OS’s require specific recompilation. The executable code
-translates the commands written in the source code in the actual operations to
-be performed by the computer, in the same sequence. </p>
+there are no errors, produces as output a file containing the actual “executable
+code” that can be run on any computer sharing the same operating system (OS).
+Different OS’s require specific recompilation. The executable code translates
+the commands written in the source code in the actual operations to be
+performed by the computer, in the same sequence. </p>
 
 <p class=MsoNormal>If the source file(s) containing the program is (are)
 modified, the changes do not immediately affect the executable program, unless
@@ -950,10 +976,10 @@ program?</h1>
 
 <p class=MsoNormal>A LSD model program is an executable compiled file with all
 the <a href="#equation">Equations</a> defined in the <a href="#equationfile">equation
-file</a> (usually written using <a href="#_What_is_LMM?_1">LMM</a>) and LSD
-code. The LSD model program is usually executed using LMM but can be directly
-invoked if necessary (the setting of environment variables may be necessary in
-this case).</p>
+file</a> (usually written using <a href="#_What_is_LMM?_1">LMM</a>) and LSD code.
+The LSD model program is usually executed using LMM but can be directly invoked
+if necessary (the setting of environment variables may be necessary in this
+case).</p>
 
 <p class=MsoNormal>The LSD model program has the same interface for all models,
 but the embedded Equations are different. Any LSD model program can create new
@@ -1007,9 +1033,9 @@ label.</p>
 type and an Object instance? </h1>
 
 <p class=MsoNormal>In broad terms, an object in a computer language is the
-representation of a set of heterogeneous information. In particular, LSD Objects
-are data containers defined by a set of <a href="#_What_is_a_3">Variables</a>, <a
-href="#_What_is_a_4">Parameters</a> and other Objects: </p>
+representation of a set of heterogeneous information. In particular, LSD
+Objects are data containers defined by a set of <a href="#_What_is_a_3">Variables</a>,
+<a href="#_What_is_a_4">Parameters</a> and other Objects: </p>
 
 <p class=MsoNormal><span class=Cdigo>Object Obj <br>
 { <br>
@@ -1045,18 +1071,18 @@ class=Cdigo>A</span> will use the instance of B in the same Object. However, if
 class=Cdigo>A</span> and there may be many instances of the Object containing <span
 class=Cdigo>B</span> the structure of the model becomes crucial. LSD has an
 automatic scheduling system that tries to always provide the required values
-for computation by searching through the entire model. The modeler, when designing
-the model, must ensure that the correct instance is used according to the LSD
-scheduler rules. Most of the times, LSD points to the correct
+for computation by searching through the entire model. The modeler, when
+designing the model, must ensure that the correct instance is used according to
+the LSD scheduler rules. Most of the times, LSD points to the correct
 Variable/Parameter instance. But modelers can always overrule the automatic
 scheduler and implement model-specific data retrieving arrangements. </p>
 
 <p class=MsoNormal>Generally speaking, any Object (except <span class=Cdigo>Root</span>)
 must be represented as a descendant from a parent Object. This parenthood
 relation is usually permanent and defined during the <a href="#_What_is_a_6">model
-configuration</a>. However, Objects can also be created or removed during
-simulation time. In this case, a child Object “inherits” the values of an
-identical existing instance (as chosen by the modeler) in the parent Object. </p>
+configuration</a>. However, Objects can also be created or removed during simulation
+time. In this case, a child Object “inherits” the values of an identical
+existing instance (as chosen by the modeler) in the parent Object. </p>
 
 <p class=MsoNormal>Objects names are subject to <a href="#_What_is_an_1">certain
 rules</a> and are case sensitive.</p>
@@ -1087,8 +1113,8 @@ Variable, all of which using the same Equation for their updating. </p>
 attached to a (finite) list of numerical real values (LSD implements only
 double-precision IEEE 754 float-point Variables), each tagged with a time lag
 index. Different instances of the same Variable, despite using the same
-Equation to compute their value, in general may differ because they use different
-Object instances during the calculation. </p>
+Equation to compute their value, in general may differ because they use
+different Object instances during the calculation. </p>
 
 <p class=MsoNormal>Notice that a given Variable instance is calculate once, an
 only once, at every <a href="#_What_is_a_1">time step</a>. If many Equations
@@ -1220,8 +1246,8 @@ Browser</a>: </p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span>The structure of the model (Object hierarchy, labels and
-locations of Variables and Parameters)</p>
+</span></span>The structure of the model (Object hierarchy, labels and locations
+of Variables and Parameters)</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:46.35pt;text-indent:-28.5pt'><span style='font-family:Symbol'>·<span
@@ -1289,12 +1315,13 @@ numerical initialization values and/or simulation settings. </p>
 structure? </h1>
 
 <p class=MsoNormal>The LSD model structure is the functional organization of
-the <a href="#_What_is_an_2">Objects</a> composing a model. Typically, each Object
-represents an entity of the “virtual reality” captured by the model. An Object
-can contain other “nested” Objects, and so on, forming a hierarchical structure
-(besides other Objects, an Object may also contain <a href="#_What_is_a_3">Variables</a>
-and <a href="#_What_is_a_4">Parameters</a>). In simpler terms, the model
-structure is a hierarchy which represents “what contains what”. </p>
+the <a href="#_What_is_an_2">Objects</a> composing a model. Typically, each
+Object represents an entity of the “virtual reality” captured by the model. An
+Object can contain other “nested” Objects, and so on, forming a hierarchical
+structure (besides other Objects, an Object may also contain <a
+href="#_What_is_a_3">Variables</a> and <a href="#_What_is_a_4">Parameters</a>).
+In simpler terms, the model structure is a hierarchy which represents “what
+contains what”. </p>
 
 <p class=MsoNormal>The Objects in the model can be hierarchically (parenthood
 relation) or parallel (brotherhood relation) linked. In the first case, the
@@ -1342,11 +1369,10 @@ firm will use the value of a different instance of Variable <span class=Cdigo>Pr
 (one for each firm), while, in the second case, all firms will use the same
 instance, since they will find the same Variable Price contained in the Object <span
 class=Cdigo>Supply</span> containing them. The same applies also if there are
-multiple Objects of type <span class=Cdigo>Supply</span> (or several markets),
-each with its own set of firms (sons). In this case (under a centralized price)
-each firm will use the instance of <span class=Cdigo>Price</span> in its own
-market, with no risk of a wrong instance of <span class=Cdigo>Price</span>
-being used.</p>
+multiple Objects of type <span class=Cdigo>Supply</span> (or several markets), each
+with its own set of firms (sons). In this case (under a centralized price) each
+firm will use the instance of <span class=Cdigo>Price</span> in its own market,
+with no risk of a wrong instance of <span class=Cdigo>Price</span> being used.</p>
 
 <p class=MsoNormal>A final warning: the structure of a model is created
 together with the coding of the Equations of the model. Therefore, the model
@@ -1637,12 +1663,12 @@ final status of the model in each simulation run. </p>
 <h1><a name="_What_is_the_3"></a>What is the LSD Web Interface (LWI)?</h1>
 
 <p class=MsoNormal>This manual presents the user-friendly, web-based interface
-to LSD (LWI). LWI make a basic subset of the LSD tools available for web browser
-users, allowing the configuration, execution, and analysis of results produced
-by LSD models and the export of such data. <a href="LSD_web.html#use">LWI web
-front-end</a> is compatible with any computer platform equipped with a modern
-HTML5 browser and can be <a href="LSD_web.html#install">configured</a> in
-closed (intranet) or open (internet) networks.</p>
+to LSD (LWI). LWI make a basic subset of the LSD tools available for web
+browser users, allowing the configuration, execution, and analysis of results
+produced by LSD models and the export of such data. <a href="LSD_web.html#use">LWI
+web front-end</a> is compatible with any computer platform equipped with a
+modern HTML5 browser and can be <a href="LSD_web.html#install">configured</a>
+in closed (intranet) or open (internet) networks.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -1661,8 +1687,8 @@ LSD?</h1>
 <p class=MsoNormal>LSD has two dedicated packages (or libraries) in the R
 statistical computing program (see <a href="https://www.r-project.org">https://www.r-project.org</a>).
 These packages are available at CRAN (the Comprehensive R Archive Network) for
-transparent download and usage by R users. Please check R documentation on how to
-download and load packages.</p>
+transparent download and usage by R users. Please check R documentation on how
+to download and load packages.</p>
 
 <p class=MsoNormal>Package LSDinterface provides transparent access to <a
 href="#_What_are_the">LSD results files</a> (no format conversion required) in
@@ -1673,9 +1699,9 @@ object-oriented data organization during the model design and the data
 analysis, simplifying significantly the management of data-rich, multilayered
 LSD models. Also, to accelerate data reading from multiple files, parallel
 multi-core file reading is automatically enabled, turning the reading of
-hundreds or thousands of LSD results files much faster on servers or high-performance
-computers. Automatic handling of compressed results files (<span class=Cdigo>.res.gz
-</span>extension) is also supported.</p>
+hundreds or thousands of LSD results files much faster on servers or
+high-performance computers. Automatic handling of compressed results files (<span
+class=Cdigo>.res.gz </span>extension) is also supported.</p>
 
 <p class=MsoNormal>Package LSDsensitivity offers several tools for performing <a
 href="#_What_is_sensitivity">sensitivity analysis</a> and the study of response
@@ -1774,9 +1800,9 @@ section is disabled and must be enabled when the report is created.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:53.85pt;text-indent:-18.0pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span><b>Model structure section.</b> It lists all model elements showing where
-they are located in the <a href="#_What_is_the">model structure</a> along a
-textual description of their role in the model and how to set the <a
+</span><b>Model structure section.</b> It lists all model elements showing
+where they are located in the <a href="#_What_is_the">model structure</a> along
+a textual description of their role in the model and how to set the <a
 href="#_What_is_a_6">initial values</a>, if applicable.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
@@ -1939,8 +1965,8 @@ href="mailto:mcper@unicamp.br">mcper@unicamp.br</a>) started to contribute to
 LSD development, still in version 6.x. He took the lead on the development of
 version 7 which further pushed in the two directions listed above, bringing new
 advanced capabilities to LSD (like parallel processing, networks, sensitivity
-analysis, integration with R, etc.) and improving the non-technical user
-experience (renewed GUI, a web interface, updated documentation, etc.). See <a
+analysis, integration with R, etc.) and improving the non-technical user experience
+(renewed GUI, a web interface, updated documentation, etc.). See <a
 href="LSD_whatsnew.html">what is new</a>.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"

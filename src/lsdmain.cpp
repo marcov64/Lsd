@@ -17,51 +17,49 @@ LSD_MAIN.CPP contains:
 
 The functions contained here are:
 
-- void run(object *r)
+- void run( )
 Run the simulation model whose root is r. Running is not only the actual
 simulation run, but also the initialization of result files. Of course, it has
 also to manage the messages from user and from the model at run time.
 
-- bool alloc_save_mem( object *root );
+- bool alloc_save_mem( );
 Prepare variables to store saved data.
 
-- Tcl_Interp *InterpInitWin(char *tcl_dir);
+- Tcl_Interp *InterpInitWin( char *tcl_dir );
 A function that manages to initialize the tcl interpreter. Guess the standard
 functions are actually bugged, because of the difficulty to retrive the directory
 for the tk library. Why is difficult only for tk and not for tcl, don't know.
 But is a good thing, so that I can actually copy the tcl directory and make
 the modifications
 
-- void plog(char *m);
+- void plog( char *m );
 print  message string m in the Log screen.
 
 Other functions used here, and the source files where are contained:
 
-- object *create( object *r);
+- object *create( );
 manage the browser. Its code is in INTERF.CPP
 
-- object *skip_next_obj(object *t, int *count);
+- object *skip_next_obj( object *t, int *count );
 Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series.
 
-- object *go_brother(object *c);
+- object *go_brother( object *c );
 Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
-
-- void cmd(char *cc);
+- void cmd( char *cc );
 Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
 Basically it makes a simple Tcl_Eval, but controls also that the interpreter
 did not issue an error message.
 
-- void myexit(int v);
+- void myexit( int v );
 Exit function, which is customized on the operative system.
 
-- FILE *search_str(char *name, char *str);
+- FILE *search_str( char *name, char *str );
 UTIL.CPP given a string name, returns the file corresponding to name, and the current
 position of the file is just after str.
-
 
 ****************************************************/
 
@@ -85,6 +83,7 @@ bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
 bool no_more_memory = false;// memory overflow when setting data save structure	
+bool no_search;				// disable the standard variable search mechanism
 bool no_window = false;		// no-window command line job
 bool non_var = false;		// flag to indicate INTERACT macro condition
 bool on_bar;				// flag to indicate bar is being draw in log window
@@ -110,6 +109,7 @@ char *sens_file = NULL;		// current sensitivity analysis file
 char *simul_name = NULL;	// name of current simulation configuration
 char *struct_file = NULL;	// name of current configuration file
 char equation_name[ MAX_PATH_LENGTH ] = "";	// equation file name
+char lastObj[ MAX_ELEM_LENGTH ] = "";		// last shown object for quick reload
 char lsd_eq_file[ MAX_FILE_SIZE + 1 ] = "";	// equations saved in configuration file
 char msg[ TCL_BUFF_STR ] = "";				// auxiliary Tcl buffer
 char name_rep[ MAX_PATH_LENGTH ] = "";		// documentation report file name
@@ -150,6 +150,7 @@ long nodesSerial = 1;		// network node's serial number global counter
 lsdstack *stacklog = NULL;	// LSD stack
 object *blueprint = NULL;	// LSD blueprint (effective model in use)
 object *root = NULL;		// LSD root object
+object *wait_delete = NULL;	// LSD object waiting for deletion
 sense *rsense = NULL;		// LSD sensitivity analysis structure
 variable *cemetery = NULL;	// LSD saved data series (from last simulation run)
 map < string, profile > prof;	// set of saved profiling times
@@ -187,10 +188,10 @@ int lsdmain( int argn, char **argv )
 	FILE *f;
 
 	path = new char[ strlen( "" ) + 1 ];
-	simul_name = new char[ strlen( "Sim1" ) + 1 ];
+	simul_name = new char[ strlen( DEF_CONF_FILE ) + 1 ];
 	strcpy( path, "" );
 	strcpy( tcl_dir, "" );
-	strcpy( simul_name, "Sim1" );
+	strcpy( simul_name, DEF_CONF_FILE );
 	exec_file = clean_file( argv[ 0 ] );	// global pointer to the name of executable file
 	exec_path = clean_path( getcwd( NULL, 0 ) );	// global pointer to path of executable file
 
@@ -310,9 +311,8 @@ int lsdmain( int argn, char **argv )
 		myexit( 3 );
 	}
 	fclose( f );
-	struct_loaded = true;
 
-	if ( load_configuration( root, false ) != 0 )
+	if ( load_configuration( true ) != 0 )
 	{
 		fprintf( stderr, "\nFile '%s' is invalid.\nThis is the no window version of LSD.\nCheck if the file is a valid LSD configuration or regenerate it using the\nLSD Browser.\n", struct_file );
 		myexit( 4 );
@@ -397,6 +397,9 @@ int lsdmain( int argn, char **argv )
 	tk_ok = true;
 	cmd( "tk appname lsd" );
 
+	// disable Carbon compatibility in Mac
+	cmd( "if [ string equal $tcl_platform(os) Darwin ] { set ::tk::mac::useCompatibilityMetrics 0 }" );
+
 	// close console if open (usually only in Mac)
 	cmd( "if [ string equal $tcl_platform(os) Darwin ] { foreach i [ winfo interps ] { if { ! [ string equal [ string range $i 0 2 ] lmm ] && ! [ string equal [ string range $i 0 2 ] lsd ] } { send $i \"wm iconify .; wm withdraw .; destroy .\" } } }" );
 
@@ -422,6 +425,7 @@ int lsdmain( int argn, char **argv )
 	}
 	choice = 0;
 	cmd( "set path [ file normalize \"%s\" ]", exec_path );
+	
 	// check if directory is ok and if executable is inside a macOS package
 	cmd( "if [ file exists \"$path/modelinfo.txt\" ] { \
 			cd \"$path\" \
@@ -482,10 +486,10 @@ int lsdmain( int argn, char **argv )
 	cmd( "set RootLsd \"%s\"", lsdroot );
 
 	cmd( "set choice [ file exist \"$RootLsd/lmm_options.txt\" ]" );
-	if ( choice )
+	if ( choice == 1 )
 	{
 		cmd( "set f [open \"$RootLsd/lmm_options.txt\" r]" );
-		cmd( "gets $f Terminal" );
+		cmd( "gets $f sysTerm" );
 		cmd( "gets $f HtmlBrowser" );
 		cmd( "gets $f fonttype" );
 		cmd( "gets $f wish" );
@@ -497,33 +501,35 @@ int lsdmain( int argn, char **argv )
 	else
 	{
 		cmd( "tk_messageBox -parent . -title Warning -icon warning -type ok -message \"Could not locate LMM system options\" -detail \"It may be impossible to open help files and compare the equation files. Any other functionality will work normally. When possible set in LMM the 'Options' in menu 'File'.\"" );
-		// set platform-specific variables
-		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish wish; set Terminal xterm; set HtmlBrowser firefox; set fonttype Courier; set dim_character 12 }" );
-		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish wish8.5; set Terminal Terminal; set HtmlBrowser open; set fonttype Monaco; set dim_character 14 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish wish85.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
-		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish wish86.exe; set Terminal cmd; set HtmlBrowser open; set fonttype Consolas; set dim_character 11 }" );
+		
 		cmd( "set LsdSrc src" );
 		cmd( "set tabsize 2" );
 	}
-
-	cmd( "set small_character [ expr $dim_character - 2 ]" );
-	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
-	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
-
+		
+	i = choice;
+	
+	// load required Tcl/Tk data, procedures and packages (error coded by file/bit position)
 	choice = 0;
+
 	// load native Tk windows defaults
-	cmd( "if [ file exists $RootLsd/$LsdSrc/defaults.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/defaults.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/defaults.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/defaults.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0100, 0x01 );
 
 	// load native Tk procedures for windows management
-	cmd( "if [ file exists $RootLsd/$LsdSrc/window.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/window.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/window.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/window.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0200, 0x02 );
 
 	// load native Tcl procedures for external files handling
-	cmd( "if [ file exists $RootLsd/$LsdSrc/ls2html.tcl ] { if { [ catch { source $RootLsd/$LsdSrc/ls2html.tcl } ] != 0 } { set choice [ expr $choice + 1 ] } } { set choice [ expr $choice + 2 ] }" );
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/ls2html.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/ls2html.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0400, 0x04 );
+
+	// load additional native Tcl procedures for external files handling
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/lst_mdl.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/lst_mdl.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x0800, 0x08 );
+
+	// load module to improve to improve mouse selection
+	cmd( "if [ file exists \"$RootLsd/$LsdSrc/dblclick.tcl\" ] { if { [ catch { source \"$RootLsd/$LsdSrc/dblclick.tcl\" } ] != 0 } { set choice [ expr $choice + %d ] } } { set choice [ expr $choice + %d ] }", 0x1000, 0x10 );
 
 	if ( choice != 0 )
 	{
-		log_tcl_error( "Source files check", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
-		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"" );
+		log_tcl_error( "Source files check failed", "Required Tcl/Tk source file(s) missing or corrupted, check the installation of LSD and reinstall LSD if the problem persists" );
+		cmd( "tk_messageBox -parent . -title Error -icon error -type ok -message \"File(s) missing or corrupted\" -detail \"Some critical Tcl files (0x%04x) are missing or corrupted.\nPlease check your installation and reinstall LSD if the problem persists.\n\nLSD is aborting now.\"", choice );
 		myexit( 200 + choice );
 	}
 
@@ -539,6 +545,24 @@ int lsdmain( int argn, char **argv )
 
 	// create Tcl command to upload series data
 	Tcl_CreateObjCommand( inter, "upload_series", Tcl_upload_series, NULL, NULL );
+
+	// set platform-specific variables 
+	if ( i == 0 )
+	{
+		cmd( "if [ string equal $tcl_platform(platform) unix ] { set wish $wishLinux; set sysTerm $sysTermLinux; set HtmlBrowser $browserLinux; set fonttype $fontLinux; set dim_character $fontSizeLinux }" );
+#ifdef MAC_PKG
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk86; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#else
+		cmd( "if [ string equal $tcl_platform(os) Darwin ] { set wish $wishMacTk85; set sysTerm $sysTermMac; set HtmlBrowser $browserMac; set fonttype $fontMac; set dim_character $fontSizeMac }" );
+#endif
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) intel ] } { set wish $wishWinTk85; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+		cmd( "if { [ string equal $tcl_platform(platform) windows ] && [ string equal $tcl_platform(machine) amd64 ] } { set wish $wishWinTk86; set sysTerm $sysTermWindows; set HtmlBrowser $browserWindows; set fonttype $fontWindows; set dim_character $fontSizeWindows }" );
+	}
+
+	cmd( "if [ string equal $tcl_platform(platform) windows ] { set small_character [ expr $dim_character - $deltaSizeWindows ] } { if [ string equal $tcl_platform(os) Darwin ] { set small_character [ expr $dim_character - $deltaSizeMac ] } { set small_character [ expr $dim_character - $deltaSizeLinux ] } }" );
+	cmd( "set font_normal [ list \"$fonttype\" $dim_character ]" );
+	cmd( "set font_small [ list \"$fonttype\" $small_character ]" );
+	cmd( "set gpterm $gnuplotTerm" );
 
 	// set main window
 	cmd( "wm withdraw ." );
@@ -580,11 +604,11 @@ int lsdmain( int argn, char **argv )
 
 	while ( 1 )
 	{
-		root = create( root );
+		create( );
 		
 		try 
 		{
-			run( root );
+			run( );
 		}
 		catch( int p )           	// return point from error_hard() (in object.cpp)
 		{		
@@ -600,7 +624,7 @@ int lsdmain( int argn, char **argv )
 
 #else
 
-	run( root );
+	run( );
 
 #endif 
 
@@ -624,7 +648,7 @@ int lsdmain( int argn, char **argv )
 /*********************************
 RUN
 *********************************/
-void run( object *root )
+void run( void )
 {
 	int i, j, perc_done, last_done;
 	bool batch_sequential_loop = false;
@@ -684,7 +708,7 @@ void run( object *root )
 		// if new batch configuration file, reload all
 		if ( batch_sequential_loop )
 		{
-			if ( load_configuration( root, false ) != 0 )
+			if ( load_configuration( true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -699,7 +723,7 @@ void run( object *root )
 
 		// if just another run seed, reload just structure & parameters
 		if ( i > 1 )
-			if ( load_configuration( root, true ) != 0 )
+			if ( load_configuration( true, true ) != 0 )
 			{
 #ifndef NO_WINDOW 
 				log_tcl_error( "Load configuration", "Configuration file not found or corrupted" );	
@@ -726,16 +750,21 @@ void run( object *root )
 		// reset trace stack
 		unwind_stack( );
 
-		//new random routine' initialization
-		init_random(seed);
+		// new random routine' initialization
+		init_random( seed );
+		
+		// reset math error counters
+		init_math_error( );
 
 		seed++;
 		scroll = false;
 		pause_run = false;
 		running = true;
 		debug_flag = false;
+		wait_delete = NULL;
 		stack_info = 0;
 		use_nan = false;
+		no_search = false;
 		on_bar = false;
 		done_in = 0;
 		actual_steps = 0;
@@ -1018,7 +1047,7 @@ void run( object *root )
 				if ( fast_mode < 2 )
 					plog( "\nProcessing configuration file %s ...\n", "", struct_file );
 				fclose( f );  								// process next file
-				struct_loaded = true;
+
 				i = 0;   									// force restarting run count
 				batch_sequential_loop = true;				// force reloading configuration
 			} 
@@ -1144,7 +1173,7 @@ void unwind_stack( void )
 /*********************************
 ALLOC_SAVE_MEM
 *********************************/
-bool alloc_save_mem( object *root )
+bool alloc_save_mem( object *r )
 {
 	int toquit = quit;
 	object *cur;
@@ -1152,7 +1181,7 @@ bool alloc_save_mem( object *root )
 	bridge *cb;
 
 	//for each variable set the data saving support
-	for ( var = root->v; var != NULL; var = var->next )
+	for ( var = r->v; var != NULL; var = var->next )
 	{ 
 		var->last_update = 0;
 
@@ -1190,19 +1219,19 @@ bool alloc_save_mem( object *root )
 		
 		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
 		{
-			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, root->label );
+			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, r->label );
 #ifndef NO_WINDOW   
 			plog( "Use the Initial Values editor to set its values\n" );
 			if ( var->param == 1 )
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, root->label, root->label );
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, r->label, r->label );
 			else
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, root->label, root->label );  
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, r->label, r->label );  
 #endif
 			toquit = 2;
 		}
 	}
 
-	for ( cb = root->b; cb != NULL; cb = cb->next )
+	for ( cb = r->b; cb != NULL; cb = cb->next )
 		for ( cur = cb->head; cur != NULL && quit != 2; cur = go_brother( cur ) )
 			alloc_save_mem( cur );
 
@@ -1291,7 +1320,7 @@ void reset_end( object *r )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		cur = cb->head;
-		if ( cur != NULL && cur->to_compute == 1 )
+		if ( cur != NULL && cur->to_compute )
 			for ( ; cur != NULL; cur = go_brother( cur ) )
 				reset_end( cur );
 	}

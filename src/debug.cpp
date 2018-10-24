@@ -200,7 +200,7 @@ if ( ! strcmp( Tcl_GetVar( inter, "existButtons", 0 ), "0" ) )
 		
 		cmd( "frame .deb.b.act.stack" );
 		cmd( "label .deb.b.act.stack.l -text \"Stack level\"" );
-		cmd( "entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .deb.b.act.stack.e -width 3 -from 0 -to 99 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invalidcommand { bell } -justify center } { entry .deb.b.act.stack.e -width 3 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set stack_flag %%P; return 1 } { %%W delete 0 end; %%W insert 0 $stack_flag; return 0 } } -invcmd { bell } -justify center }" );
 		cmd( ".deb.b.act.stack.e insert 0 $stack_flag" ); 
 		cmd( "pack .deb.b.act.stack.l .deb.b.act.stack.e -side left -pady 1 -expand no -fill none" );
 		
@@ -479,6 +479,7 @@ while ( choice == 0 )
 			count = ( cv->debug == 'd' ) ? 1 : 0;
 			app_values = new double[ cv->num_lag + 1 ];
 			cmd( "set debugall 0" );
+			cmd( "set undebugall 0" );
 
 			cmd( "set e .deb.stat" );
 			cmd( "newtop $e \"Element Status\" { set choice 1 } .deb" );
@@ -545,7 +546,7 @@ while ( choice == 0 )
 				
 				cmd( "frame $e.d" );
 				cmd( "checkbutton $e.d.deb -text \"Debug (this instance only)\" -variable debug" );
-				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; .deb.stat.d.deb configure -state disabled } { set debug 0; .deb.stat.d.deb configure -state normal } }" );
+				cmd( "checkbutton $e.d.deball -text \"Debug all instances\" -variable debugall -command { if { $debugall == 1 } { set debug 1; set undebugall 0; .deb.stat.d.deb configure -state disabled } { set debug 0; set undebugall 1; .deb.stat.d.deb configure -state normal } }" );
 				cmd( "pack $e.d.deb $e.d.deball" );
 
 				cmd( "pack $e.v $e.d -pady 5 -padx 5" );	
@@ -590,7 +591,7 @@ while ( choice == 0 )
 			Tcl_UnlinkVar( inter, "debug" );
 			count = choice;
 
-			cmd( "set choice $debugall" );
+			cmd( "if { $debugall || $undebugall } { set choice 1 } { set choice 0 }" );
 			if ( choice == 1 )
 				for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
 				{
@@ -702,7 +703,7 @@ while ( choice == 0 )
 			cmd( "frame $s.l" );
 			cmd( "label $s.l.l -text \"Find object containing variable\"" );
 			cmd( "entry $s.l.e -width 20 -justify center -textvariable en" );
-			cmd( "bind $s.l.e <KeyRelease> {if { %%N < 256 && [info exists ModElem] } { set bb1 [.deb.so.l.e index insert]; set bc1 [.deb.so.l.e get]; set bf1 [lsearch -glob $ModElem $bc1*]; if { $bf1 !=-1 } { set bd1 [lindex $ModElem $bf1]; .deb.so.l.e delete 0 end; .deb.so.l.e insert 0 $bd1; .deb.so.l.e index $bb1; .deb.so.l.e selection range $bb1 end } } }" );
+			cmd( "bind $s.l.e <KeyRelease> {if { %%N < 256 && [info exists modElem] } { set bb1 [.deb.so.l.e index insert]; set bc1 [.deb.so.l.e get]; set bf1 [lsearch -glob $modElem $bc1*]; if { $bf1 !=-1 } { set bd1 [lindex $modElem $bf1]; .deb.so.l.e delete 0 end; .deb.so.l.e insert 0 $bd1; .deb.so.l.e index $bb1; .deb.so.l.e selection range $bb1 end } } }" );
 			cmd( "pack $s.l.l $s.l.e" );
 
 			cmd( "frame $s.c" );
@@ -1038,7 +1039,7 @@ while ( choice == 0 )
 			if ( asl == NULL && stacklog != NULL )
 			{
 				asl = stacklog;
-				plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+				plog( "\nVariable: %s", "", asl->label );
 				if ( asl->vs != NULL && asl->vs->up != NULL )
 					choice = deb( asl->vs->up, c, lab, res, interact );
 			}
@@ -1048,14 +1049,14 @@ while ( choice == 0 )
 				{
 					while ( asl->prev->prev != NULL )
 						asl = asl->prev;
-					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					plog( "\nVariable: %s", "", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
 				}
 				else
 				{
 					asl = asl->next;
-					plog( "\nVariable: %s", "", asl->label != NULL ? asl->label : "(unavailable)" );
+					plog( "\nVariable: %s", "", asl->label );
 					if ( asl->vs != NULL && asl->vs->up != NULL )
 						choice = deb( asl->vs->up, c, lab, res, interact );
 				}

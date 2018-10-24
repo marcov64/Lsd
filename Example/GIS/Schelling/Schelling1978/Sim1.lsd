@@ -52,9 +52,9 @@ Var: EndOfSim 0 n + n n
 
 Object: Model C	1
 Var: Scheduler 0 s + n n
-Param: xn 0 s + n n	100
-Param: yn 0 s + n n	100
-Param: fracAgents 0 s + n n	0.85
+Param: xn 0 s + n n	50
+Param: yn 0 s + n n	50
+Param: fracAgents 0 s + n n	0.9
 Param: fracBlue 0 s + n n	0.5
 Param: wrapping 0 s + n n	0
 Param: tolerance 0 s + n n	0.3
@@ -64,13 +64,13 @@ Var: fracContent 0 s + n n
 Var: Initialise 0 n + n n
 Param: Randomise 0 s + n n	1
 Var: dissimilarity 0 s + n p
-Param: SequentialUpdating 0 s + n n	1
+Param: SequentialUpdating 0 s + n n	0
 Param: RationalExpectations 0 s + n n	1
-Param: lattice 0 n + n n	0
+Param: lattice 0 n + n n	1
 
 Object: Agent C	1
 Param: Colour 0 n + n n	0
-Var: Move 0 n + n n
+Var: Move 0 n + d n
 Func: locFracOther 0 n + n n
 Func: Content 0 n + n n
 
@@ -171,7 +171,7 @@ END_DESCRIPTION
 Variable_Initialise
 Initialise the model
 
-'Initialise' appears in the equation for: Scheduler
+'Initialise' appears in the equation for: (never used)
 _INIT_
 
 END_DESCRIPTION
@@ -187,13 +187,23 @@ END_DESCRIPTION
 Variable_dissimilarity
 Monitor the aggregate level of segregation with the dissimilarity index for the
 moore neighbourhood.
-D = 1/xn * sum_xn ( |b_i/B_t - r_i/R_t| )
 
+This is an adjusted concept of the standard index:
+D = 1/2 * sum_xn ( |b_i/B_t - r_i/R_t| )
 where b_i is the number of blue in the 9-field neighbourhood (moore) and r_i the
 number of red respectively. B_t and R_t are the total numbers of Blue and Red.
 
-To define the neighbourhood accordingly in both, 2d and 1d setting and also the
-continuous case, we define it as the patch and its neirest 8 neighbours.
+In our case, we measure overlapping neighbourhoods. To define the neighbourhood
+accordingly in both, 2d and 1d setting and also the continuous case, we define
+it as the patch and its neirest 8 neighbours.Therefore, we aggegragte
+for each agent, the deviation of the local segregation from the global
+segregation and normalised in 0..1:
+
+D = (2 * sum_n ( |b_i/n_i - B/n| ) ) / n
+
+Note: The distance for the measurement is different from that of the agents
+      perception of "neighbourhood".
+
 
 'dissimilarity' appears in the equation for: (never used)
 _INIT_
@@ -239,9 +249,9 @@ _INIT_
 END_DESCRIPTION
 
 Variable_Move
-The agent decides if it should move.
+The agent moves if it is not content with its situation.
 
-'Move' appears in the equation for: Scheduler, fracMove
+'Move' appears in the equation for: (never used)
 _INIT_
 
 END_DESCRIPTION
@@ -249,7 +259,7 @@ END_DESCRIPTION
 Function_locFracOther
 Measures the fraction of people in the neighbourhood that differ from ones own color.
 
-'locFracOther' appears in the equation for: Content
+'locFracOther' appears in the equation for: (never used)
 _INIT_
 
 END_DESCRIPTION
@@ -257,7 +267,7 @@ END_DESCRIPTION
 Function_Content
 Function that at the point in time measures if the agent is content with its situation.
 
-'Content' appears in the equation for: Move, fracContent
+'Content' appears in the equation for: (never used)
 _INIT_
 
 END_DESCRIPTION
@@ -270,12 +280,13 @@ END_DESCRIPTION
 
 Function_isOption
  Check if the place would be an option for the calling agent
-   check 1: is empty?
-   if empty, then check 2 else it is not an option
+   check 1: is empty? else it is not an option
+   if empty, then, without RationalExpectations take true, else check 2.
    check 2: is locFracOther <= tolerance?
    if true, then it is an option else not
+   Take into account that self is no more at old position!
 
-'isOption' appears in the equation for: Move
+'isOption' appears in the equation for: (never used)
 _INIT_
 
 END_DESCRIPTION

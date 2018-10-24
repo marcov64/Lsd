@@ -241,7 +241,7 @@ system environment.</p>
  </tr>
 </table>
 
-<h1><a name="_The_Browser_window"></a>The Browser window</h1>
+<h1><a name="_The_Browser_window"></a><a name=listboxes></a>The Browser window</h1>
 
 <p class=MsoNormal>The Browser window is formed by five elements: (1) the menu
 bar, (2) a shortcut tool bar, (3) the current Object information bar, (4) the
@@ -315,17 +315,25 @@ href="#_Editing_Objects_1">below</a>).</p>
 <p class=MsoNormal>Additionally to the names, the LSD Browser also shows the
 number of instances of each Object type as in <span class=Cdigo>XXXX (#n)</span>,
 where <span class=Cdigo>n</span> is the corresponding number of instances of
-Object <span class=Cdigo>XXXX</span>.</p>
+Object <span class=Cdigo>XXXX</span>. Additionally, Objects set not to be
+computed (see <a href="#_Changing_Objects">below</a>) have the symbol “<span
+class=Cdigo>-</span>” (minus) appended to <span class=Cdigo>n</span>.</p>
 
 <p class=MsoNormal>The order in which the Objects are listed depends on the
 order in which they have been created during the <a
-href="LSD_faqs.html#modelsetting">model configuration</a>, and has no relevance
-for the <a href="LSD_faqs.html#simulationrun">simulation run</a>. However, for
-organization purposes, the order of the Objects can be changed. Select the
-Object to be moved, press and hold the <span class=Cdigo>Ctrl</span> key and
-use the arrow up and down keys to relocate it along the list box.
-Alternatively, the <span class=Cdigo>Move Up</span> and <span class=Cdigo>Move
-Down</span> (right-click) context menu provide the same functionality.</p>
+href="LSD_faqs.html#modelsetting">model configuration</a>. In some cases, the
+order of the <a href="LSD_faqs.html#object">Objects</a> in the list box may be
+important for helping LSD to disambiguate the sequence of evaluation of the <a
+href="LSD_faqs.html#variable">Variables</a> during a <a
+href="LSD_faqs.html#simulationrun">simulation run</a> (see more details <a
+href="LSD_faqs.html#scheduling">here</a>).  The order of Objects can be changed
+individually or as a whole (see menu <span class=Cdigo><a
+href="menumodel.html#sort">Model&gt;Sort Elements</a></span>). To move
+individual Objects, select the one to be moved, press and hold the <span
+class=Cdigo>Ctrl</span> key and use the arrow up and down keys to relocate it
+along the list box. Alternatively, the <span class=Cdigo>Move Up</span> and <span
+class=Cdigo>Move Down</span> (right-click) context menu provide the same
+functionality.</p>
 
 <h2><a name=variables></a>Variables and Parameters list box</h2>
 
@@ -350,8 +358,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo>(V)</span> or <span class=Cdigo>(V_X)</span>,
 where <span class=Cdigo>X</span> is a positive integer, means the element is a
-Variable. If <span class=Cdigo>X</span> is not present, it means the Variable is
-not used with lagged values in <a href="LSD_faqs.html#equation">Equations</a>
+Variable. If <span class=Cdigo>X</span> is not present, it means the Variable
+is not used with lagged values in <a href="LSD_faqs.html#equation">Equations</a>
 (name in blue color). Otherwise, the <span class=Cdigo>X</span> indicates that
 the Variable is used in Equations with a maximum lag of <span class=Cdigo>X</span>
 (name in magenta).</p>
@@ -362,9 +370,32 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><span class=Cdigo>(F)</span> means the element is a Function
 (name in dark red color).</p>
 
-<p class=MsoNormal>In any case, the code may have the symbol “<span
-class=Cdigo>+</span>” appended, indicating that the element is configured to
+<p class=MsoNormal>In any case, the code may have one or more symbols appended,
+indicating the option flags selected for the element (see details <a
+href="#_Changing_properties">below</a>):</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>“<span class=Cdigo><b>+</b></span>” (plus): element configured to
 have its time series <a href="LSD_quickhelp.html#save">saved for analysis</a>.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>“<span class=Cdigo><b>*</b></span>” (asterisk): element set to be
+presented during the <a href="LSD_faqs.html#simulationrun">simulation run</a>
+on the <a href="runtime.html">Run-time Plot</a> window.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>“<span class=Cdigo><b>!</b></span>” (exclamation): Variable
+marked for interrupting the <a href="debug.html">LSD Debugger</a> at the time
+step selected in menu <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation
+Settings</a></span>.</p>
+
+<p class=MsoListParagraph style='text-indent:-18.0pt'><span style='font-family:
+Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>“<span class=Cdigo><b>&amp;</b></span>” (ampersand): Variable
+configured to have all of its instances computed in parallel.</p>
 
 <p class=MsoNormal>The names of the elements can be double-clicked to open the
 corresponding <a href="#_Editing_Variables_and">Change Element</a> window. The
@@ -375,13 +406,18 @@ most used options in the main menu (see <a href="#change_nature">below</a>).</p>
 
 <p class=MsoNormal>The order in which the elements are listed depends on the
 order in which they have been inserted during the <a
-href="LSD_faqs.html#modelsetting">model configuration</a>, and has no relevance
-for the <a href="LSD_faqs.html#simulationrun">simulation run</a>. However, for
-organization purposes, the order of the elements can be changed. Select the
-element to be moved, press and hold the <span class=Cdigo>Ctrl</span> key and
-use the arrow up and down keys to relocate it along the list box.
-Alternatively, the <span class=Cdigo>Move Up</span> and <span class=Cdigo>Move
-Down</span> (right-click) context menu provide the same functionality.</p>
+href="LSD_faqs.html#modelsetting">model configuration</a>. In some cases, the
+order of the <a href="LSD_faqs.html#variable">Variables</a> in the list box may
+be important for helping LSD to disambiguate the sequence they are evaluated
+during a <a href="LSD_faqs.html#simulationrun">simulation run</a> (see more
+details <a href="LSD_faqs.html#scheduling">here</a>).  The order of elements in
+the list box can be changed individually or as a whole (see menu <span
+class=Cdigo><a href="menumodel.html#sort">Model&gt;Sort Elements</a></span>).
+To move individual elements, select the one to be moved, press and hold the <span
+class=Cdigo>Ctrl</span> key and use the arrow up and down keys to relocate it
+along the list box.. Alternatively, the <span class=Cdigo>Move Up</span> and <span
+class=Cdigo>Move Down</span> (right-click) context menu provide the same
+functionality.</p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.0%;background:#D9D9D9;border-collapse:collapse'>
@@ -395,7 +431,7 @@ Down</span> (right-click) context menu provide the same functionality.</p>
 </table>
 
 <h1><a name="_Editing_Objects_1"></a><a name=changeobject></a><a
-name=chobjname></a>Changing Objects</h1>
+name=chobjname></a><a name="_Changing_Objects"></a>Changing Objects</h1>
 
 <p class=MsoNormal>Click on any Object name in the <span class=Cdigo>Descending
 Objects</span> list box or the <a href="graphrep.html">LSD Model Structure</a>
@@ -452,8 +488,8 @@ configuration</a>.</p>
 <p class=MsoNormal>Finally, there is a box for entering the textual description
 of the Object, which is used in the model <a
 href="LSD_faqs.html#modeldocumentation">documentation</a>. The filling of the <span
-class=Cdigo>Description</span> box is optional (but recommended) and does not affect
-the simulation run.</p>
+class=Cdigo>Description</span> box is optional (but recommended) and does not
+affect the simulation run.</p>
 
 <p class=MsoNormal>The last row of buttons offer the options for saving the
 changes made (<span class=Cdigo>OK</span>), to continue without saving the
@@ -553,7 +589,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 class=Cdigo>Ctrl+D</span>) (Variables only) Check to cause the <a
 href="debug.html">LSD Debugger</a> to stop the simulation just after the
 computation of any <a href="LSD_faqs.html#object">instance</a> of the Variable
-and show the state of the model. </p>
+and show the state of the model. It requires that a time step (different than
+zero) is set in menu <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation
+Settings</a></span>.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
@@ -564,17 +602,17 @@ processing when computing the <a href="LSD_faqs.html#equation">Equation</a> for
 multiple instances of this Variable in brother <a href="LSD_faqs.html#object">Object</a>
 copies. Beware that not all multi-instanced Variables can or should be
 processed in parallel, to avoid deadlocks because of the particular <a
-href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS
-overhead of creating new processing threads for computationally-light
-Equations. To identify the Variables which may provide parallelization gains,
-please check the <span class=Cdigo>Show aggregated profiling times</span>
-option in <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation
-Settings</a></span>. It is recommended to enable parallel processing of one
-Variable at a time, starting with the computationally-heavy ones, to make sure
-that the variable can be (logically) computed in parallel. If, because of the
-model structure, changing one Variable instance affects the computation of
-another instance of the same Variable, directly or indirectly, such Variable
-calculation cannot be parallelized and will throw a deadlock error. <br>
+href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS overhead
+of creating new processing threads for computationally-light Equations. To
+identify the Variables which may provide parallelization gains, please check
+the <span class=Cdigo>Show aggregated profiling times</span> option in <span
+class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation Settings</a></span>.
+It is recommended to enable parallel processing of one Variable at a time,
+starting with the computationally-heavy ones, to make sure that the variable
+can be (logically) computed in parallel. If, because of the model structure,
+changing one Variable instance affects the computation of another instance of
+the same Variable, directly or indirectly, such Variable calculation cannot be
+parallelized and will throw a deadlock error. <br>
 WARNING: only Variables that are computationally intensive should have this
 option enabled or this may end up slowing down the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>.</p>
@@ -591,9 +629,9 @@ href="LSD_faqs.html#modeldocumentation">documentation</a> of the model.</p>
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Initialized</b></span>: (<i>shortcut</i>: <span
 class=Cdigo>Ctrl+I</span>)<b> </b>(lagged Variables and Parameters only) Check
-to include this element in the list of lagged Variables and Parameters
-requiring careful initialization values, typically the ones most relevant for
-the simulation results, in the <a href="LSD_faqs.html#modeldocumentation">documentation</a>
+to include this element in the list of lagged Variables and Parameters requiring
+careful initialization values, typically the ones most relevant for the
+simulation results, in the <a href="LSD_faqs.html#modeldocumentation">documentation</a>
 of the model. </p>
 
 <p class=MsoNormal>Next, there is a box for entering the textual description of
@@ -676,18 +714,19 @@ changes made (<span class=Cdigo>OK</span>), to continue without saving the
 modified options (<span class=Cdigo>Cancel</span>) or to open the this help
 page (<span class=Cdigo>Help</span>). </p>
 
-<h3><a name="_Change_the_properties_1"></a><a name="change_nature"></a>Changing
-properties </h3>
+<h3><a name="_Change_the_properties_1"></a><a name="change_nature"></a><a
+name="_Changing_properties"></a>Changing properties </h3>
 
 <p class=MsoNormal>Click on the <span class=Cdigo>Properties</span> button on
 the Change Element window or select <span class=Cdigo>Properties</span> in the
 (right-click) context menu of the target <a href="LSD_faqs.html#variable">Variable</a>
-or <a href="LSD_faqs.html#parameter">Parameter</a> to change its properties.
-After having inserted a Variable or a Parameter, it is possible to change the
-properties of any element by modifying its name, transforming a Parameter into
-a Variable (of <a href="LSD_faqs.html#function">Function</a>), a Variable into
-a Parameter or changing the maximum <a href="LSD_faqs.html#variable">number of
-lags</a> to use (Variables only). </p>
+or <a href="LSD_faqs.html#parameter">Parameter</a> or press <span class=Cdigo>F2</span>
+on the element to change its properties. After having inserted a Variable or a
+Parameter, it is possible to change the properties of any element by modifying
+its name, transforming a Parameter into a Variable (of <a
+href="LSD_faqs.html#function">Function</a>), a Variable into a Parameter or
+changing the maximum <a href="LSD_faqs.html#variable">number of lags</a> to use
+(Variables only). </p>
 
 <p class=MsoNormal><i>WARNING: </i>changing the properties of an element can
 severely compromise the model. Use this option only to fix errors. If the model
@@ -759,10 +798,10 @@ to which the element should be moved to and click on <span class=Cdigo>OK</span>
 <p class=MsoNormal>Click on the <span class=Cdigo>Delete</span> button on the
 Change Element window or select <span class=Cdigo>Delete</span> in the
 (right-click) context menu of the target <a href="LSD_faqs.html#variable">Variable</a>
-or <a href="LSD_faqs.html#parameter">Parameter</a> to permanently remove the
-element from the model. After the confirmation of the element deletion, there
-is no way to undelete it (it has to be recreated using the menu <a
-href="menumodel.html">Model</a>, if needed). </p>
+or <a href="LSD_faqs.html#parameter">Parameter</a> or press <span class=Cdigo>Delete</span>
+on the element to permanently remove the it from the model. After the
+confirmation of the element deletion, there is no way to undelete it (it has to
+be recreated using the menu <a href="menumodel.html">Model</a>, if needed). </p>
 
 <p class=MsoNormal><i>WARNING: </i>deleting an element can severely compromise
 the model. Use this option only to fix errors. If the model is running fine,

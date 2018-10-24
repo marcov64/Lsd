@@ -165,6 +165,72 @@ mutex crash_lock;
 
 
 /****************************************************
+VARIABLE constructor
+****************************************************/
+variable::variable( void )
+{
+	observe = false;
+	parallel = false;
+	plot = false;
+	save = false;
+	savei = false;
+	under_computation = false;
+	lab_tit = NULL;
+	label = NULL;
+	data_loaded = '-';
+	debug = 'n';
+	data = NULL;
+	val = NULL;
+	deb_cnd_val = 0;
+	deb_cond = 0;
+	end = 0;
+	last_update = 0;
+	num_lag = 0;
+	param = 0;
+	start = 0;
+	up = NULL;
+	next = NULL;
+	
+#ifdef CPP11
+	eq_func = NULL;
+#endif	
+}
+
+
+/****************************************************
+VARIABLE copy constructor
+****************************************************/
+variable::variable( const variable &v )
+{
+	observe = v.observe;
+	parallel = v.parallel;
+	plot = v.plot;
+	save = v.save;
+	savei = v.savei;
+	under_computation = v.under_computation;
+	lab_tit = v.lab_tit;
+	label = v.label;
+	data_loaded = v.data_loaded;
+	debug = v.debug;
+	data = v.data;
+	val = v.val;
+	deb_cnd_val = v.deb_cnd_val;
+	deb_cond = v.deb_cond;
+	end = v.end;
+	last_update = v.last_update;
+	num_lag = v.num_lag;
+	param = v.param;
+	start = v.start;
+	up = v.up;
+	next = v.next;
+	
+#ifdef CPP11
+	eq_func = v.eq_func;
+#endif	
+}
+
+
+/****************************************************
 INIT
 ****************************************************/
 int variable::init( object *_up, char const *_label, int _num_lag, double *v, int _save )
@@ -179,12 +245,13 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	total_var++;
 
 	up =_up;
-	label = NULL;
-	i = strlen(_label)+1;
+    save =_save;
+	
+	i = strlen( _label ) + 1;
 	label = new char[ i ];
 	strcpy( label, _label );
-	param = 0;
-	num_lag =_num_lag;
+	
+	num_lag = _num_lag;
 	if ( num_lag >= 0 )
 	{
 		val = new double[ num_lag + 1 ];
@@ -194,20 +261,6 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	else
 		val = NULL;
 	
-	next = NULL;
-	last_update = 0;
-	save =_save;
-	savei = false;
-	under_computation = false;
-	deb_cond = 0;
-	deb_cnd_val = 0;
-	data_loaded = '-';
-	plot = false;
-	parallel = false;
-	observe = false;
-	data = NULL;
-	lab_tit = NULL;
-
 	return 0;
 }
 
@@ -291,7 +344,8 @@ double variable::cal( object *caller, int lag )
 	{
 		sprintf( msg, "equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
 		error_hard( msg, "dead-lock",
-					"check your code to prevent this situation" );
+					"check your equation code to prevent this situation\nprobably using the variable lagged value instead", 
+					true );
 		return 0;
 	}
 
@@ -318,8 +372,9 @@ double variable::cal( object *caller, int lag )
 		else
 		{
 			sprintf( msg, "failure while pushing '%s' (object '%s')", label, up->label );
-			error_hard( msg, "internal error",
-						"if error persists, please contact developers" );
+			error_hard( msg, "internal problem in LSD",
+						"if error persists, please contact developers",
+						true );
 			return 0;
 		}
 
@@ -443,8 +498,9 @@ double variable::cal( object *caller, int lag )
 					break;
 				default:
 					sprintf( msg, "conditional debug '%d' in variable '%s'", deb_cond, label );
-					error_hard( msg, "internal error", 
-								"if error persists, please contact developers" );
+					error_hard( msg, "internal problem in LSD", 
+								"if error persists, please contact developers",
+								true );
 					return -1;
 			}
 #endif
@@ -459,21 +515,26 @@ double variable::cal( object *caller, int lag )
 		else
 		{
 			sprintf( msg, "failure while poping '%s' (in object '%s')", label, up->label );
-			error_hard( msg, "internal error", 
-						"if error persists, please contact developers" );
+			error_hard( msg, "internal problem in LSD", 
+						"if error persists, please contact developers",
+						true );
 			return 0;
 		}
 	}
 	
 	under_computation = false;
+	
+	// if there is a pending deletion, try to do it now
+	if ( wait_delete != NULL )
+		wait_delete->delete_obj( );
 
-	return val[ 0 ];	//by default the requested value is the last one, not yet computed
+	return val[ 0 ];	// by default the requested value is the last one, not yet computed
 
 	error:
 	
 	sprintf( msg, "variable or function '%s' (object '%s') requested \nwith lag=%d but declared with lag=%d\nThree possible fixes:\n- change the model configuration, declaring '%s' with at least lag=%d,\n- change the code of '%s' requesting the value of '%s' with lag=%d maximum, or\n- mark '%s' to be saved (variables only)", label, up->label, lag, num_lag, label, lag, caller == NULL ? "(none)" : caller->label, label, num_lag, label );
-	error_hard( msg, "lag error", 
-				"check your configuration or code to prevent this situation" );
+	error_hard( msg, "invalid lag used", 
+				"check your configuration (variable max lag) or\ncode (used lags in equation) to prevent this situation" );
 	
 	return 0;
 }
@@ -520,7 +581,7 @@ void worker::cal_worker( void )
 
 				if ( var->under_computation )
 				{
-					sprintf( err_msg1, "Dead-lock" );
+					sprintf( err_msg1, "dead-lock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
 					sprintf( err_msg3, "Check your code to prevent this situation." );
 					user_excpt = true;
@@ -552,6 +613,10 @@ void worker::cal_worker( void )
 
 				var->last_update = t;
 				var->under_computation = false;
+				
+				// if there is a pending object deletion, try to do it now
+				if ( wait_delete != NULL )
+					wait_delete->delete_obj( );
 			}
 			
 		end:
@@ -576,9 +641,9 @@ void worker::cal_worker( void )
 		if ( pexcpt != nullptr )
 		{
 			pexcpt = current_exception( );
-			sprintf( err_msg1, "Unknown error" );
+			sprintf( err_msg1, "parallel computation problem" );
 			sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-			sprintf( err_msg3, "Disable parallel computation for this variable\nor check your code to prevent this situation." );
+			sprintf( err_msg3, "disable parallel computation for this variable\nor check your code to prevent this situation." );
 		}
 	}
 	
@@ -699,7 +764,7 @@ bool worker::check( void )
 			if ( pexcpt != nullptr )
 			{
 				user_exception = user_excpt;
-				error_hard( err_msg2, err_msg1, err_msg3 );
+				error_hard( err_msg2, err_msg1, err_msg3, true );
 				rethrow_exception( pexcpt );
 			}
 			else
@@ -709,8 +774,8 @@ bool worker::check( void )
 				else
 					sprintf( msg, "multi-threading worker crashed" );
 				
-				error_hard( msg, "parallel computation error", 
-							"disable parallel computation for this variable\nor check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+				error_hard( msg, "parallel computation problem", 
+							"disable parallel computation for this variable\nor check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 			}
 		}
 	}
@@ -762,8 +827,8 @@ void parallel_update( variable *v, object* p, object *caller )
 	if ( nt > 0 )
 	{
 		sprintf( msg, "variable '%s' (object '%s') %d parallel worker(s) crashed", cv->label, cv->up->label, i );
-		error_hard( msg, "multi-threading inconsistency", 
-					"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+		error_hard( msg, "parallel computation problem", 
+					"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 		return;
 	}
 				
@@ -790,8 +855,8 @@ void parallel_update( variable *v, object* p, object *caller )
 					if ( wait_time > MAX_WAIT_TIME )
 					{
 						sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
-						error_hard( msg, "dead-lock in parallel computation", 
-									"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+						error_hard( msg, "dead-lock during parallel computation", 
+									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 						return;
 					}
 				}
@@ -833,8 +898,8 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( i >= max_threads )
 			{
 				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a dead-lock state", cv->label, cv->up->label );
-				error_hard( msg, "multi-threading inconsistency", 
-							"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+				error_hard( msg, "parallel computation problem", 
+							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
 			else
@@ -860,8 +925,8 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( wait_time > MAX_WAIT_TIME )
 			{
 				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-				error_hard( msg, "dead-lock in parallel computation", 
-							"disable parallel computation for this variable or check your code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box" );
+				error_hard( msg, "dead-lock during parallel computation", 
+							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
 		}
@@ -892,23 +957,35 @@ EMPTY
 ****************************************************/
 void variable::empty( void ) 
 {
-#ifdef PARALLEL_MODE
-	// prevent concurrent use by more than one thread
-	lock_guard < mutex > lock( parallel_comp );
-#endif	
-		
-	if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+	if ( running )
 	{
-		sprintf( msg, "failure while deallocating variable %s", label );
-		error_hard( msg, "internal error", 
-					"if error persists, please contact developers" );
-		return;
-	}
+#ifdef PARALLEL_MODE
+		// prevent concurrent use by more than one thread
+		lock_guard < mutex > lock( parallel_comp );
+#endif	
+			
+		if ( ( data != NULL && save != true && savei != true ) || label == NULL )
+		{
+			sprintf( msg, "failure while deallocating variable %s", label );
+			error_hard( msg, "internal problem in LSD", 
+						"if error persists, please contact developers", true );
+			return;
+		}
 
-	total_var--;
-	
-	delete [ ] label;
-	delete [ ] data;
-	delete [ ] lab_tit;
-	delete [ ] val;
+		total_var--;
+		
+		delete [ ] label;
+		delete [ ] data;
+		delete [ ] lab_tit;
+		delete [ ] val;
+	}
+	else
+	{
+		total_var--;
+		
+		delete [ ] label;
+		delete [ ] data;
+		delete [ ] lab_tit;
+		delete [ ] val;
+	}
 }

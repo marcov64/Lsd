@@ -121,7 +121,7 @@ value2 = 0;
 cmd( "set value 1" ); 	// method
 cmd( "set to_all 1" );
 cmd( "set step_in 1" );
-cmd( "set cases_from 1; set cases_to 10000" );
+cmd( "set cases_from 1; set cases_to 1000" );
 cmd( "set rnd_seed 1" );
 cmd( "set use_seed 0" );
 cmd( "set update_d 1" );
@@ -247,7 +247,7 @@ cmd( "frame .sa.m.f2.s.i.l" );
 
 cmd( "frame .sa.m.f2.s.i.l.a" );
 cmd( "label .sa.m.f2.s.i.l.a.l -text \"Apply every\"" );
-cmd( "entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.l.a.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.l.a.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set step_in %%P; return 1 } { %%W delete 0 end; %%W insert 0 $step_in; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "label .sa.m.f2.s.i.l.a.l1 -text \"instance(s)\"" );
 cmd( "pack .sa.m.f2.s.i.l.a.l .sa.m.f2.s.i.l.a.e .sa.m.f2.s.i.l.a.l1 -side left -padx 1" );
 
@@ -265,9 +265,9 @@ cmd( "frame .sa.m.f2.s.i.sel2" );
 
 cmd( "frame .sa.m.f2.s.i.sel2.c" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lfrom -text \"From\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.from -width 5 -from 1 -to 9999 -state disabled -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.from -width 5 -state disabled -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_from %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_from; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "label .sa.m.f2.s.i.sel2.c.lto -text \"to\"" );
-cmd( "entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.s.i.sel2.c.to -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.s.i.sel2.c.to -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cases_to %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cases_to; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .sa.m.f2.s.i.sel2.c.lfrom .sa.m.f2.s.i.sel2.c.from .sa.m.f2.s.i.sel2.c.lto .sa.m.f2.s.i.sel2.c.to -side left -pady 1" );
 
 cmd( "label .sa.m.f2.s.i.sel2.obs -text \"(use right button on cells for options)\"" );
@@ -287,7 +287,7 @@ cmd( "frame .sa.m.f2.rnd.i.le" );
 cmd( "checkbutton .sa.m.f2.rnd.i.le.f -text \"Reset the generator\" -variable use_seed -command { if $use_seed { .sa.m.f2.rnd.i.le.s.e1 conf -state normal } { .sa.m.f2.rnd.i.le.s.e1 conf -state disabled } }" );
 cmd( "frame .sa.m.f2.rnd.i.le.s" );
 cmd( "label .sa.m.f2.rnd.i.le.s.l1 -text \"Seed\"" );
-cmd( "entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .sa.m.f2.rnd.i.le.s.e1 -width 5 -from 1 -to 9999 -state disabled -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invalidcommand { bell } -justify center } { entry .sa.m.f2.rnd.i.le.s.e1 -width 5 -state disabled -validate focusout -vcmd { if [ string is integer -strict %%P ] { set rnd_seed %%P; return 1 } { %%W delete 0 end; %%W insert 0 $rnd_seed; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .sa.m.f2.rnd.i.le.s.l1 .sa.m.f2.rnd.i.le.s.e1 -side left -padx 1" );
 
 cmd( "pack .sa.m.f2.rnd.i.le.f .sa.m.f2.rnd.i.le.s -side left -padx 5" );
@@ -885,8 +885,9 @@ case 8:
 
 default:
 		error_hard( "invalid option for setting values", 
-					"internal error", 
-					"if error persists, please contact developers" );
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
 		myexit( 22 );
 }
 }
@@ -897,8 +898,6 @@ Tcl_UnlinkVar( inter, "res");
 }
 
 
-object *sensitivity_parallel(object *o, sense *s )
-{
 /*
 This function fills the initial values according to the sensitivity analysis system performed by parallel simulations: 1 single run over many independent configurations
 descending in parallel from Root.
@@ -909,47 +908,45 @@ When all elements involved in the sensitivity analysis are configured, the user 
 The user is supposed then to save the resulting configuration.
 
 Options concerning initialization for sensitivity analysis are not saved into the model configuration files, and are therefore lost when closing the LSD model program if not saved in a .sa file. 
-
 */
-int i;
-sense *cs;
-object *cur;
-variable *cvar;
 
-cur=o;
+object *sensitivity_parallel( object *o, sense *s )
+{
+	int i;
+	sense *cs;
+	object *cur = o;
+	variable *cvar;
 
-if (s->next != NULL )
- {
-  for ( i = 0; i<s->nvalues; ++i )
-   {
-    s->i=i;
-    cur=sensitivity_parallel(cur,s->next);
-   }
- return cur;
- }
+	if ( s->next != NULL )
+	{
+		for ( i = 0; i < s->nvalues; ++i )
+		{
+			s->i = i;
+			cur = sensitivity_parallel( cur, s->next );
+		}
+		
+		return cur;
+	}
 
+	for ( i = 0; i < s->nvalues; ++i )
+	{
+		s->i = i;
+		for ( cs = rsense; cs != NULL; cs = cs->next ) 
+		{
+			cvar = cur->search_var( cur, cs->label );
+			if ( cs->param == 0 )				// handle lags > 0
+				cvar->val[ cs->lag ] = cs->v[ cs->i ];
+			else
+				cvar->val[ 0 ] = cs->v[ cs->i ];
+		}
+		
+		cur = cur->hyper_next( cur->label );
+	}
 
-for ( i = 0; i<s->nvalues; ++i )
-  {
-   s->i=i;
-   for (cs=rsense; cs!=NULL; cs=cs->next) 
-   {
-    cvar=cur->search_var(cur, cs->label);
-	if (cs->param == 0 )				// handle lags > 0
-      cvar->val[cs->lag]=cs->v[cs->i];
-	else
-	  cvar->val[ 0 ]=cs->v[cs->i];
-   }
-   cur=cur->hyper_next(cur->label);
-  }
-
-return cur;
- 
+	return cur;
 }
 
 
-void sensitivity_sequential(int *findex, sense *s, double probSampl)
-{
 /*
 This function fills the initial values according to the sensitivity analysis system performed by sequential simulations: each run executes one configuration labelled with sequential labels.
 
@@ -964,74 +961,83 @@ to define the parameter "probSampl" with the (uniform) probability of a given po
 this allows for the Monte Carlo sampling of the parameter space, which is often necessary when the s.a. space is too big to be analyzed in its entirety.
 
 */
-int i,nv;
-sense *cs;
-object *cur;
-variable *cvar;
-char *fname;
-FILE *f;
 
-
-description *cur_descr; 
-if (s->next != NULL )
- {
-  for ( i = 0; i<s->nvalues; ++i )
-   {
-    s->i=i;
-    sensitivity_sequential(findex,s->next,probSampl);
-   }
- return;
- }
-
-
-for ( i = 0; i<s->nvalues; ++i )
+void sensitivity_sequential( int *findex, sense *s, double probSampl )
 {
-   s->i=i;
-   for (nv=1,cs=rsense; cs!=NULL; cs=cs->next) 
-   {
-    nv*=cs->nvalues;
-    cvar=root->search_var(root, cs->label);
-    for (cur=cvar->up; cur!=NULL; cur=cur->hyper_next(cur->label) )
-    {
-      cvar=cur->search_var(cur, cs->label); 
-	  if (cs->param == 1 )				// handle lags > 0
-		cvar->val[ 0 ]=cs->v[cs->i];
-	  else
-        cvar->val[cs->lag]=cs->v[cs->i];
-    }
+	int i, nv;
+	sense *cs;
+	object *cur;
+	variable *cvar;
 
-   }
-
- if (probSampl == 1.0 || RND <= probSampl)		// if required draw if point will be sampled
- {
-	if ( ! save_configuration( root, *findex ) )
+	if ( s->next != NULL )
 	{
-		cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+		for ( i = 0; i < s->nvalues; ++i )
+		{
+			s->i = i;
+			sensitivity_sequential( findex, s->next, probSampl );
+		}
+		
 		return;
 	}
-	*findex=*findex+1;
- }
-}
- 
+	
+	for ( i = 0; i < s->nvalues; ++i )
+	{
+		s->i = i;
+		for ( nv = 1,cs = rsense; cs != NULL; cs = cs->next ) 
+		{
+			nv *= cs->nvalues;
+			cvar = root->search_var( root, cs->label );
+			
+			for ( cur = cvar->up; cur != NULL; cur = cur->hyper_next( cur->label ) )
+			{
+				cvar = cur->search_var( cur, cs->label ); 
+				if ( cs->param == 1 )				// handle lags > 0
+					cvar->val[ 0 ] = cs->v[ cs->i ];
+				else
+					cvar->val[ cs->lag ] = cs->v[ cs->i ];
+			}
+
+		}
+
+		if ( probSampl == 1.0 || RND <= probSampl )	// if required draw if point will be sampled
+		{
+			if ( ! save_configuration( *findex ) )
+			{
+				plog( " Aborted" );
+				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
+				return;
+			}
+			
+			*findex = *findex + 1;
+		}
+	}
 }
 
 
-// calculates the sensitivity space size
+/*****************************************************************************
+NUM_SENSITIVITY_POINTS
+Calculate the sensitivity space size
+******************************************************************************/
 long num_sensitivity_points( sense *rsens )	
 {
 	long nv;
 	sense *cs;
+	
 	for ( nv = 1, cs = rsens; cs != NULL; cs = cs->next )	// scan the linked-list
 		nv *= cs->nvalues;	// update the number of variables
 	return nv;
 }
 
 
-// calculates the number of variables to test
+/*****************************************************************************
+NUM_SENSITIVITY_VARIABLES
+Calculate the number of variables to test
+******************************************************************************/
 int num_sensitivity_variables( sense *rsens )	
 {
 	int nv;
 	sense *cs;
+	
 	for ( nv = 0, cs = rsens; cs != NULL; cs = cs->next)								
 		if ( cs->nvalues > 1 )				// count variables with 2 or more values
 			nv++;
@@ -1039,173 +1045,174 @@ int num_sensitivity_variables( sense *rsens )
 }
 
 			
-// try to get values for sensitivity analysis (true: values are ok)
-
-#define SEP	" ,;|/#\t\n"					// sensitivity data valid separators
-
-void dataentry_sensitivity(int *choice, sense *s, int nval = 0)
+/*****************************************************************************
+NUM_SENSITIVITY_POINTS
+Try to get values for sensitivity analysis
+true: values are ok
+******************************************************************************/
+void dataentry_sensitivity( int *choice, sense *s, int nval )
 {
+	int i, j, nPar, samples, integerV;
+	double start, end;
+	char *sss = NULL, *tok = NULL, type;
 
-int i, j, nPar, samples, integerV;
-double start, end;
-char *lab, *sss = NULL, *tok = NULL, type;
-FILE *f;
+	Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
+	integerV = s->entryOk ? s->integer : false;
 
-Tcl_LinkVar( inter, "integerV", ( char * ) &integerV, TCL_LINK_BOOLEAN );
-integerV = s->entryOk ? s->integer : false;
+	cmd( "set sens .sens" );
+	cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
 
-cmd( "set sens .sens" );
-cmd( "newtop .sens \"Sensitivity Analysis\" { set choice 2 }" );
+	cmd( "frame .sens.lab" );
+	if ( nval > 0)								// number of values defined (0=no)?
+		cmd( "label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
+	else
+		cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
 
-cmd( "frame .sens.lab" );
-if ( nval > 0)								// number of values defined (0=no)?
-	cmd( "label .sens.lab.l1 -text \"Enter n=%d values for:\"", s->nvalues );
-else
-	cmd( "label .sens.lab.l1 -text \"Enter the desired values (at least 2) for:\"" );
+	cmd( "label .sens.lab.l2 -fg red -text \"%s\"", s->label );
+	cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
 
-cmd( "label .sens.lab.l2 -fg red -text \"%s\"", s->label );
-cmd( "pack .sens.lab.l1 .sens.lab.l2 -side left -padx 2" );
+	cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
+	cmd( "pack .sens.lab .sens.obs -pady 5" );
 
-cmd( "label .sens.obs -text \"Paste of clipboard data is allowed, most separators are accepted\n\nUse a \'=BEGIN:END@SAMPLES%%TYPE\' clause to specify a number of samples within a range.\nSpaces are not allowed within clauses. TYPE values are \'L\' for linear and \'R\' for random samples.\"" );
-cmd( "pack .sens.lab .sens.obs -pady 5" );
+	cmd( "text .sens.t -undo 1 -height 12 -width 60 -font \"$font_normal\"" ); 
+	cmd( "pack .sens.t" ); 
 
-cmd( "text .sens.t -undo 1 -height 12 -width 60 -font \"$font_normal\"" ); 
-cmd( "pack .sens.t" ); 
+	cmd( "frame .sens.fb" );
+	cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
+	cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
+	cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command {set choice 3}" );
+	cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
+	cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
+	cmd( "pack .sens.fb" );
 
-cmd( "frame .sens.fb" );
-cmd( "button .sens.fb.paste -width [ expr $butWid + 3 ] -text \"Paste Clipboard\" -command {tk_textPaste .sens.t}" );
-cmd( "button .sens.fb.del -width [ expr $butWid + 3 ] -text \"Delete Values\" -command {.sens.t delete 0.0 end}" );
-cmd( "button .sens.fb.rem -width [ expr $butWid + 3 ] -text \"Remove\" -command {set choice 3}" );
-cmd( "checkbutton .sens.fb.int -variable integerV -text \"Round to integer\"" );
-cmd( "pack .sens.fb.paste .sens.fb.del .sens.fb.rem .sens.fb.int -padx 10 -pady 10 -side left" );
-cmd( "pack .sens.fb" );
+	cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
+	cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
+	cmd( "focus .sens.t" );
 
-cmd( "okhelpcancel .sens fb2 { set choice 1 } { LsdHelp menudata_sa.html#entry } { set choice 2 }" );
-cmd( "bind .sens.fb2.ok <KeyPress-Return> { set choice 1 }" );
-cmd( "focus .sens.t" );
-
-if ( s->entryOk )	// is there valid data from a previous data entry?
-{
-	sss = new char[ 26 * s->nvalues + 1];	// allocate space for string
-	tok = new char[ 26 + 1 ];				
-	strcpy( sss, "" );
-	for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
+	if ( s->entryOk )	// is there valid data from a previous data entry?
 	{
-		sprintf( tok, "%.15g ", s->v[ i ] );	// add each value
-		strcat( sss, tok );					// to the string
+		sss = new char[ 26 * s->nvalues + 1];	// allocate space for string
+		tok = new char[ 26 + 1 ];				
+		strcpy( sss, "" );
+		for ( i = 0; i < s->nvalues; i++ )		// pass existing data as a string
+		{
+			sprintf( tok, "%.15g ", s->v[ i ] );	// add each value
+			strcat( sss, tok );					// to the string
+		}
+		Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
+		cmd( ".sens.t insert 0.0 $sss" );		// insert string in entry window
+		delete [ ] tok; 
+		delete [ ] sss;
 	}
-	Tcl_SetVar( inter, "sss", sss, 0 ); 	// pass string to Tk window
-	cmd( ".sens.t insert 0.0 $sss" );		// insert string in entry window
-	delete [ ] tok; 
-	delete [ ] sss;
-}
 
-cmd( "showtop .sens topleftW" );
+	cmd( "showtop .sens topleftW" );
 
-*choice = 0;
+	*choice = 0;
 
-do			// finish only after reading all values
-{
-
-while ( *choice == 0 )
-  Tcl_DoOneEvent( 0 );
-
-if ( *choice == 3 )	// force error to delete variable from list
-{
-	s->entryOk = false;
-	*choice = 2; 
-}
-
-if ( *choice == 2 )
-	goto end;
-
-cmd( "set sss [.sens.t get 0.0 end]" );
-sss=( char* ) Tcl_GetVar( inter,"sss", 0 );
-
-if ( nval == 0 )					// undefined number of values?
-{	
-	double temp;
-	char *tss, *ss = new char[ strlen( sss ) + 1 ];
-	tss = ss;						// save original pointer to gc
-	strcpy( ss, sss );				// make a draft copy
+	do										// finish only after reading all values
+	{
+		while ( *choice == 0 )
+			Tcl_DoOneEvent( 0 );
 	
-	i = 0;							// count number of values
-	do
-	{
-		tok = strtok( ss, SEP );	// accepts several separators
-		if ( tok == NULL )			// finished?
-			break;
-		ss = NULL;
-		
-		// is it a clause to be expanded?
-		nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
-		if ( nPar == 4 )			// all values are required
-			i += samples;			// samples to create
-		else						// no, read as regular double float
-			i += sscanf( tok, "%lf", &temp );	// count valid doubles only
-	 }
-	 while ( tok != NULL );
-	 
-	 if ( i < 2 )					// invalid number of elements?
-		i = 2;						// minimum is 2
-		
-	 if ( s->nvalues < i )			// is there insufficient space already alloc'd?
-	 {
-		 delete [ ] s->v;			// free old and reallocate enough space
-		 s->v = new double[ i ];
-	 }
-	 s->nvalues = i;				// update # of values
-	 
-	 delete [ ] tss;
-}
-
-for ( i = 0; i<s->nvalues;)
- {
-  tok=strtok(sss, SEP);		// accepts several separators
-  if (tok == NULL )		// finished too early?
-  {
-	  cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
-	  *choice = 0;
-	  cmd( "focus .sens.t" );
-	  break;
-  }
-  sss=NULL;
-  // is it a clause to be expanded?
-  nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
-  if ( nPar == 4 )								// all values are required
-  {
-	if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
-	{
-		s->v[ i++ ] = integerV ? round( fmin( start, end ) ) : fmin( start, end );
-		for ( int j = 1; j < samples; ++j, ++i )
+		if ( *choice == 3 )					// force error to delete variable from list
 		{
-			s->v[ i ] = s->v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
-			s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+			s->entryOk = false;
+			*choice = 2; 
+		}
+	
+		if ( *choice == 2 )
+			goto end;
+	
+		cmd( "set sss [ .sens.t get 0.0 end ]" );
+		sss=( char* ) Tcl_GetVar( inter,"sss", 0 );
+	
+		if ( nval == 0 )					// undefined number of values?
+		{	
+			double temp;
+			char *tss, *ss = new char[ strlen( sss ) + 1 ];
+			tss = ss;						// save original pointer to gc
+			strcpy( ss, sss );				// make a draft copy
+			
+			i = 0;							// count number of values
+			do
+			{
+				tok = strtok( ss, SENS_SEP );	// accepts several separators
+				if ( tok == NULL )			// finished?
+					break;
+				ss = NULL;
+				
+				// is it a clause to be expanded?
+				nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
+				if ( nPar == 4 )			// all values are required
+					i += samples;			// samples to create
+				else						// no, read as regular double float
+					i += sscanf( tok, "%lf", &temp );	// count valid doubles only
+			}
+			while ( tok != NULL );
+			
+			if ( i < 2 )					// invalid number of elements?
+				i = 2;						// minimum is 2
+				
+			if ( s->nvalues < i )			// is there insufficient space already alloc'd?
+			{
+				delete [ ] s->v;			// free old and reallocate enough space
+				s->v = new double[ i ];
+			}
+			s->nvalues = i;					// update # of values
+			
+			delete [ ] tss;
+		}
+	
+		for ( i = 0; i < s->nvalues; )
+		{
+			tok=strtok( sss, SENS_SEP );	// accepts several separators
+			if ( tok == NULL )				// finished too early?
+			{
+				cmd( "tk_messageBox -parent . -title \"Sensitivity Analysis\" -icon error -type ok -message \"Less values than required\" -detail \"Please insert the correct number of values.\"" );
+				*choice = 0;
+				cmd( "focus .sens.t" );
+				break;
+			}
+			
+			sss = NULL;
+			
+			// is it a clause to be expanded?
+			nPar = sscanf( tok, "=%lf:%lf@%u%%%c", &start, &end, &samples, &type );
+			
+			if ( nPar == 4 )				// all values are required
+			{
+				if ( toupper( type ) == 'L' && samples > 0 )// linear sampling
+				{
+					s->v[ i++ ] = integerV ? round( fmin( start, end ) ) : fmin( start, end );
+					for ( int j = 1; j < samples; ++j, ++i )
+					{
+						s->v[ i ] = s->v[ i - 1 ] + ( fmax( start, end ) - fmin( start, end ) ) / ( samples - 1 );
+						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+					}
+				}
+				if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
+					for ( int j = 0; j < samples; ++j, ++i )
+					{
+						s->v[ i ] = fmin( start, end ) + RND * ( fmax( start, end ) - fmin( start, end ) );
+						s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
+					}
+			}
+			else											// no, read as regular double float
+			{
+				j = i;
+				i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
+				s->v[ j ] = integerV ? round( s->v[ j ] ) : s->v[ j ];
+			}
 		}
 	}
-	if ( toupper( type ) == 'R' && samples > 0 )// random sampling 
-		for ( int j = 0; j < samples; ++j, ++i )
-		{
-			s->v[ i ] = fmin( start, end ) + RND * ( fmax( start, end ) - fmin( start, end ) );
-			s->v[ i ] = integerV ? round( s->v[ i ] ) : s->v[ i ];
-		}
-  }
-  else											// no, read as regular double float
-  {
-	j = i;
-	i += sscanf( tok, "%lf", &( s->v[ i ] ) );	// count valid doubles only
-	s->v[ j ] = integerV ? round( s->v[ j ] ) : s->v[ j ];
-  }
- }
-}
-while ( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
+	while ( tok == NULL || i < 2 );	// require enough values (if more, extra ones are discarded)
 
-s->integer = integerV;			// save integer restriction flag
-s->entryOk = true;				// flag valid data
+	s->integer = integerV;			// save integer restriction flag
+	s->entryOk = true;				// flag valid data
 
-end:
-cmd( "destroytop .sens" );
-Tcl_UnlinkVar( inter, "integerV" );
+	end:
+	cmd( "destroytop .sens" );
+	Tcl_UnlinkVar( inter, "integerV" );
 }
 
 
@@ -1292,8 +1299,8 @@ bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )
 	if ( NOLHfile == NULL )
 	{
 		sprintf( msg, "cannot open NOHL design file '%s'", fileName );
-		error_hard( msg, "design of experiment file error", 
-					"check the requested file exists" );
+		error_hard( msg, "problem accessing the design of experiment file", 
+					"check if the requested file exists" );
 		return false;
 	}
 
@@ -2099,17 +2106,18 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 }
 
 
-// procedure to generate the configuration files for the Design of Experiment (DOE)
+/****************************************************
+SENSITIVITY_DOE
+Generate the configuration files for the 
+Design of Experiment (DOE)
+****************************************************/
 void sensitivity_doe( int *findex, design *doe )
 {
 	int i, j;
 	object *cur;
 	variable *cvar;
-	description *cdescr; 
-	char *fname;
-	FILE *f;
 	
-	plog( "\nCreating a configuration file for each sample.\nIt may take a while, please wait..." );
+	plog( "\nCreating design of experiments configuration files.\nIt may take a while, please wait..." );
 	
 	for ( i = 0; i < doe->n; i++ )				// run through all experiments
 	{
@@ -2128,13 +2136,17 @@ void sensitivity_doe( int *findex, design *doe )
 		}
 		
 		// generate a configuration file for the experiment
-		if ( ! save_configuration( root, *findex ) )
+		if ( ! save_configuration( *findex ) )
 		{
+			plog( " Aborted" );
 			cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Configuration files cannot be saved\" -detail \"Check if the drive or the current directory is set READ-ONLY, select a drive/directory with write permission and try again.\"" );
 			return;
 		}
 		
 		*findex = *findex + 1;
 	}
+	
 	plog( " Done" );
+	
+	plog( "\nSensitivity analysis configurations produced: %d", "", findexSens - 1 );
 }

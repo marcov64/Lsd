@@ -54,8 +54,9 @@ SHOW_EQ
 ****************************************************/
 void show_eq( char *lab, int *choice )
 {
+	bool done;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], *app, *fname;
-	int i, j, k, done, bra, start, lun, printing_var = 0, comment_line = 0, temp_var = 0;
+	int i, j, k, bra, start, lun, printing_var = 0, comment_line = 0, temp_var = 0;
 	FILE *f;
 
 	cmd( "if [ string compare [ info command .eq_%s ] .eq_%s ] { set ex yes } { set ex no }", lab, lab );
@@ -72,8 +73,8 @@ void show_eq( char *lab, int *choice )
 	sprintf( full_name, "%s/%s", exec_path, fname );
 	if ( ( f = fopen( full_name, "r" ) ) == NULL )
 	{
-		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } } ", equation_name  );
-		cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } }", exec_path );
+		cmd( "set answer [ tk_messageBox -parent . -type okcancel -default ok -icon error -title Error -message \"Equation file not found\" -detail \"Check equation file name '%s' and press 'OK' to search it.\" ]; switch $answer { ok { set choice 1 } cancel { set choice 2 } }", equation_name  );
+		cmd( "if { $choice == 1 } { set res [ tk_getOpenFile -parent . -title \"Load Equation File\" -initialdir \"%s\" -filetypes { { {LSD Equation Files} {.cpp} } { {All Files} {*} } } ]; if [ fn_spaces \"$res\" . ] { set res \"\" } { set res [ file tail $res ] } }", exec_path );
 
 		if ( *choice == 1 )
 		{
@@ -88,49 +89,26 @@ void show_eq( char *lab, int *choice )
 		else
 			return;
 	}
+	else
+		fclose( f );
 
-	// search in all extra source files
-	cmd( "if [ file exists \"%s/model_options.txt\" ] { \
-			set f [ open model_options.txt r ]; \
-			set a [ read -nonewline $f ]; \
-			close $f; \
-			set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
-			if { $pos1 != -1 } { \
-				set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
-				if { $pos2 == -1 } { \
-					set pos2 end \
-				}; \
-				set fun_extra [ string range $a $pos1 $pos2 ]; \
-				set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
-				set extra_files [ list ]; \
-				foreach x $fun_extra { \
-					if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
-						lappend extra_files $x \
-					} \
-				}; \
-				set choice [ llength $extra_files ] \
-			} else { \
-				set choice 0 \
-			} \
-		}", exec_path, exec_path );
-
-	for ( done = 0, k = 0; done == 0 && k <= *choice; ++k )
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set choice [ llength $source_files ]" );
+	
+	for ( done = false, k = 0; done == false && k < *choice; ++k )
 	{
-		if ( k > 0 )
-		{
-			if ( f != NULL )
-				fclose( f );
-			cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
-			cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-			fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-			if ( ( f = fopen( fname, "r" ) ) == NULL )
-				continue;
-		}
+		cmd( "set brr [ lindex $source_files %d ]", k );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		if ( ( f = fopen( fname, "r" ) ) == NULL )
+			continue;
 		
 		strcpy( c1_lab, "" );
 		strcpy( c2_lab, "" );
 
-		while ( done == 0 && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL )
+		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f ) != NULL )
 		{
 			clean_spaces( c1_lab ); 	// eliminate the spaces
 			for ( i = 0; c1_lab[ i ] != '"' && c1_lab[ i ] != '\0'; ++i )
@@ -147,12 +125,12 @@ void show_eq( char *lab, int *choice )
 					c3_lab[ j - i - 1 ] = c1_lab[ j ];
 				c3_lab[ j - i - 1 ]= '\0';
 				if ( ! strcmp( c3_lab, lab ) )
-					done = 1;
+					done = true;
 			}
 		}
 	}
 
-	if ( done == 0 )
+	if ( ! done )
 	{
 		if ( f != NULL )
 			fclose( f );
@@ -357,8 +335,9 @@ SCAN_USED_LAB
 ****************************************************/
 void scan_used_lab( char *lab, int *choice )
 {
+	bool exist;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], *fname;
-	int i, j, k, done, bra, start, exist, caller = *choice;
+	int i, j, k, done, bra, start, caller = *choice;
 	FILE *f;
 
 	cmd( "set list .list_%s", lab );
@@ -389,41 +368,16 @@ void scan_used_lab( char *lab, int *choice )
 
 	cmd( "done $list b { destroytop .list_%s }", lab );		// done button
 
-	// search in all extra source files
-	cmd( "if [ file exists \"%s/model_options.txt\" ] { \
-			set f [ open model_options.txt r ]; \
-			set a [ read -nonewline $f ]; \
-			close $f; \
-			set pos1 [ expr [ string first \"FUN_EXTRA=\" $a ] + 10 ]; \
-			if { $pos1 != -1 } { \
-				set pos2 [ expr [ string first \"\n\" $a $pos1 ] - 1 ]; \
-				if { $pos2 == -1 } { \
-					set pos2 end \
-				}; \
-				set fun_extra [ string range $a $pos1 $pos2 ]; \
-				set fun_extra [ split \"$fun_extra\" \" \t\" ]; \
-				set extra_files [ list ]; \
-				foreach x $fun_extra { \
-					if { [ file exists $x ] || [ file exists \"%s/$x\" ] } { \
-						lappend extra_files $x \
-					} \
-				}; \
-				set choice [ llength $extra_files ] \
-			} else { \
-				set choice 0 \
-			} \
-		}", exec_path, exec_path );
-
-	for ( exist = 0, k = 0; k <= *choice; ++k )
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set choice [ llength $source_files ]" );
+	
+	for ( exist = false, k = 0; k < *choice; ++k )
 	{
-		if ( k == 0 )
-			fname = equation_name;
-		else
-		{
-			cmd( "set brr [ lindex $extra_files %d ]", k - 1 );
-			cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
-			fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
-		}
+		cmd( "set brr [ lindex $source_files %d ]", k );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
 		
 		if ( ( f = fopen( fname, "r" ) ) != NULL )
 		{
@@ -455,7 +409,7 @@ void scan_used_lab( char *lab, int *choice )
 					if ( done == 1 )
 					{
 						cmd( "$list.l.l insert end %s", c2_lab );
-						exist = 1;
+						exist = true;
 					}
 				}
 			}
@@ -464,7 +418,7 @@ void scan_used_lab( char *lab, int *choice )
 		}
 	}
 
-	if ( exist == 1 )
+	if ( exist )
 	{
 		if ( caller != 1 )
 			cmd( "bind $list <Double-Button-1> {set bidi [selection get]; set done 8; set choice 55}" );

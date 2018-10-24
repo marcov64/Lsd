@@ -192,8 +192,8 @@ cmd( "set point_size $pointsizeP" );
 cmd( "set line_point $linemodeP" );
 cmd( "set pdigits $pdigitsP" );
 cmd( "set avgSmpl $avgSmplP" );
-
-cmd( "if { ! [ info exists gpterm ] } { set gpooptions \"set ticslevel 0.0\"; set gpdgrid3d \"60,60,3\"; if { [ string equal $tcl_platform(platform) windows ] } { set gpterm windows } { set gpterm x11 } }" );
+cmd( "set gpdgrid3d \"$gnuplotGrid3D\"" );
+cmd( "set gpoptions \"$gnuplotOptions\"" );
 
 cmd( "newtop .da \"%s%s - LSD Analysis of Results\" { set choice 2 } \"\"", unsaved_change() ? "*" : " ", simul_name );
 
@@ -403,7 +403,7 @@ cmd( "pack .da.f.tit.lp.line .da.f.tit.lp.point -anchor w" );
 
 cmd( "frame .da.f.tit.ps" );
 cmd( "label .da.f.tit.ps.l -text \"Point size\"" );
-cmd( "entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .da.f.tit.ps.e -width 4 -from 0.2 -to 9.8 -increment 0.2 -validate focusout -validatecommand { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invalidcommand { bell } -justify center } { entry .da.f.tit.ps.e -width 4 -validate focusout -vcmd { if [ string is double -strict %%P ] { set point_size %%P; return 1 } { %%W delete 0 end; %%W insert 0 $point_size; return 0 } } -invcmd { bell } -justify center }" );
 cmd( "pack .da.f.tit.ps.l .da.f.tit.ps.e" );
 
 cmd( "frame .da.f.tit.run" );			// field for adjusting 
@@ -413,7 +413,7 @@ cmd( "pack .da.f.tit.run.watch .da.f.tit.run.gnu -anchor w" );
 
 cmd( "frame .da.f.tit.pr" );			// field for adjusting y-axis precision
 cmd( "label .da.f.tit.pr.l -text \"Precision\"" );
-cmd( "entry .da.f.tit.pr.e -width 2 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invcmd { bell } -justify center" );
+cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox .da.f.tit.pr.e -width 2 -from 0 -to 9 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center } { entry .da.f.tit.pr.e -width 2 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set pdigits %%P; return 1 } { %%W delete 0 end; %%W insert 0 $pdigits; return 0 } } -invalidcommand { bell } -justify center }" );
 cmd( "pack .da.f.tit.pr.l .da.f.tit.pr.e" );
 
 cmd( "pack .da.f.tit.l .da.f.tit.e .da.f.tit.chk .da.f.tit.run .da.f.tit.pr .da.f.tit.ps .da.f.tit.lp -side left -padx 5" );
@@ -493,7 +493,7 @@ if ( num_var == 0 )
   cmd( "tk_messageBox -parent .da -type ok -title \"Analysis of Results\" -icon info -message \"There are no series available\" -detail \"Click on button 'Add...' to load series from results files.\n\nIf you were looking for data after a simulation run, please make sure you have selected the series to be saved, or have not set the objects containing them to not be computed.\"" );  
 
 // make a copy to allow insertion of new temporary variables
-cmd( "if [ info exists ModElem ] { set DaModElem $ModElem } { set DaModElem [ list ] }" );
+cmd( "if [ info exists modElem ] { set DaModElem $modElem } { set DaModElem [ list ] }" );
 
 // main loop
 
@@ -612,13 +612,6 @@ while ( true )
 			return;
 		  
 		 
-		// Brutally shut down the system
-		case 35:
-			error_hard( "", "abort requested", 
-						"if error persists, please contact developers" );
-			myexit( 20 );
-
-
 		// MAIN BUTTONS OPTIONS
 
 		// Plot
@@ -1417,7 +1410,6 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b {}" );
 			cmd( "set b [lsort -command comp_und $a]" );		// use special sort procedure to keep underscores at the end
 			cmd( ".da.vars.lb.v delete 0 end" );
 			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
@@ -1432,7 +1424,6 @@ while ( true )
 			if ( *choice == 0 )
 				break;
 			
-			cmd( "set b {}" );
 			cmd( "set b [lsort -decreasing -dictionary $a]" );
 			cmd( ".da.vars.lb.v delete 0 end" );
 			cmd( "foreach i $b {.da.vars.lb.v insert end $i}" );
@@ -1674,40 +1665,29 @@ while ( true )
 
 		// open Gnuplot
 		case 4:
-			cmd( "if { $tcl_platform(platform) == \"unix\" } { \
-					set answer [ catch { exec xterm -e gnuplot & } ] \
-				} { \
-					if { $tcl_platform(os) == \"Windows NT\" } { \
-						set answer [ catch { exec wgnuplot & } ] \
-					} { \
-						set answer [ catch { exec start wgnuplot & } ] \
-					} \
-				}; \
-				if { $answer != 0 } { \
-					tk_messageBox \
-						-parent .da \
-						-type ok \
-						-icon error \
-						-title Error \
-						-message \"Gnuplot failed to launch\" \
-						-detail \"Gnuplot returned error '$answer' during setup.\nPlease check if Gnuplot is set up properly.\" \
-				}" );
-				
+			cmd( "open_gnuplot" );
 			break;
 
 			  
 		// set options for gnuplot
 		case 37: 
+			cmd( "set sysTermTmp $sysTerm" );
+			cmd( "set gptermTmp $gpterm" );
+			cmd( "set gpdgrid3dTmp $gpdgrid3d" );
+			
 			cmd( "newtop .da.a \"Gnuplot Options\" { set choice 2 } .da" );
 			cmd( "label .da.a.l -text \"Options for invoking Gnuplot\"" );
 
-			cmd( "set gptermTmp $gpterm" );
+			cmd( "frame .da.a.st -bd 2" );
+			cmd( "label .da.a.st.l -text \"System terminal\"" );
+			cmd( "entry .da.a.st.e -textvariable sysTermTmp -width 20 -justify center" );
+			cmd( "pack .da.a.st.l .da.a.st.e -side left" );
+
 			cmd( "frame .da.a.t -bd 2" );
-			cmd( "label .da.a.t.l -text \"Terminal\"" );
+			cmd( "label .da.a.t.l -text \"Plot terminal (blank for default)\"" );
 			cmd( "entry .da.a.t.e -textvariable gptermTmp -width 12 -justify center" );
 			cmd( "pack .da.a.t.l .da.a.t.e -side left" );
 
-			cmd( "set gpdgrid3dTmp $gpdgrid3d" );
 			cmd( "frame .da.a.d -bd 2" );
 			cmd( "label .da.a.d.l -text \"3D grid configuration\"" );
 			cmd( "entry .da.a.d.e -textvariable gpdgrid3dTmp -width 12 -justify center" );
@@ -1716,10 +1696,10 @@ while ( true )
 			cmd( "frame .da.a.o -relief groove -bd 2" );
 			cmd( "label .da.a.o.l -text \"Other options\"" );
 			cmd( "text .da.a.o.t -undo 1 -height 10 -width 50 -font \"$font_small\"" );
-			cmd( ".da.a.o.t insert end \"$gpooptions\"" );
+			cmd( ".da.a.o.t insert end \"$gpoptions\"" );
 			cmd( "pack .da.a.o.l .da.a.o.t" );
 
-			cmd( "pack .da.a.l .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
+			cmd( "pack .da.a.l .da.a.st .da.a.t .da.a.d .da.a.o -pady 5 -padx 5" );
 			cmd( "okXhelpcancel .da.a b  { Default } { set choice 3 } { set choice 1 } { LsdHelp menudata_res.html#gpoptions } { set choice 2 }" );
 
 			cmd( "showtop .da.a" );
@@ -1732,17 +1712,19 @@ while ( true )
 
 			if ( *choice == 3 )
 			{
-				cmd( "set gpdgrid3dTmp \"60,60,3\"" );
-				cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"set ticslevel 0.0\"" );
-				cmd( "if { $tcl_platform(platform) == \"windows\"} {set gptermTmp \"windows\"} { set gptermTmp \"x11\"}" );
+				cmd( "set sysTermTmp $systemTerm" );
+				cmd( "set gptermTmp $gnuplotTerm" );
+				cmd( "set gpdgrid3dTmp \"$gnuplotGrid3D\"" );
+				cmd( ".da.a.o.t delete 1.0 end; .da.a.o.t insert end \"$gnuplotOptions\"" );
 				goto gpoptions;
 			}
 			 
 			if ( *choice == 1 )
 			{
+				cmd( "set sysTerm $sysTermTmp" );
 				cmd( "set gpterm $gptermTmp" );
 				cmd( "set gpdgrid3d $gpdgrid3dTmp" );
-				cmd( "set gpooptions [.da.a.o.t get 0.0 end]" ); 
+				cmd( "set gpoptions [.da.a.o.t get 0.0 end]" ); 
 			}
 
 			cmd( "destroytop .da.a" );
@@ -2925,7 +2907,7 @@ cmd( "label $p.u.i.lb.l -text \"Selected time steps\"" );
 
 cmd( "frame $p.u.i.lb.lb" );
 cmd( "scrollbar $p.u.i.lb.lb.v_scroll -command \".da.s.u.i.lb.lb.lb yview\"" );
-cmd( "listbox $p.u.i.lb.lb.lb -listvariable list_times -width 8 -height 7 -justify center -selectmode extended -yscroll \".da.s.u.i.lb.lb.v_scroll set\"" );
+cmd( "listbox $p.u.i.lb.lb.lb -listvariable list_times -width 8 -height 7 -selectmode extended -yscroll \".da.s.u.i.lb.lb.v_scroll set\"" );
 cmd( "mouse_wheel $p.u.i.lb.lb.lb" );
 cmd( "pack $p.u.i.lb.lb.lb $p.u.i.lb.lb.v_scroll -side left -fill y" );
 
@@ -3117,7 +3099,7 @@ void insert_labels_mem( object *r, int *num_v, int *num_c )
 			}
 
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL && cb->head->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_labels_mem( cur, num_v, num_c );
 	 
@@ -3155,7 +3137,7 @@ void insert_store_mem( object *r, int *num_v )
 		}
 	  
 	for ( cb = r->b; cb != NULL; cb = cb->next )
-		if ( cb->head != NULL && cb->head->to_compute == 1 )
+		if ( cb->head != NULL && cb->head->to_compute )
 			for ( cur = cb->head; cur != NULL; cur = cur->next )
 				insert_store_mem( cur, num_v );
 	 
@@ -4106,7 +4088,8 @@ fprintf( f2, "set datafile missing \"nan\" \n" );
 
 app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
 fprintf( f, "set term tkcanvas\n" );
-fprintf( f2, "set term %s\n", app );
+if ( strlen( app ) > 0 )
+	fprintf( f2, "set term %s\n", app );
 fprintf( f, "set output 'plot.file'\n" );
 
 if ( grid )
@@ -4183,7 +4166,7 @@ else
    }
 }
 
-app = ( char * ) Tcl_GetVar( inter, "gpooptions", 0 );
+app = ( char * ) Tcl_GetVar( inter, "gpoptions", 0 );
 fprintf( f, "%s\n", app );
 fprintf( f2, "%s\n", app );
  
@@ -4241,16 +4224,14 @@ for ( ; i < nv; ++i )
 		strcpy( str2, "" );  
     }  
 
-   if ( strlen( str2 )>0 && allblack )
-     strcat( str2, str3);
+   if ( strlen( str2 ) > 0 && allblack )
+     strcat( str2, str3 );
    fprintf( f, "%s", str2 );
    fprintf( f2, "%s", str2 );
   }
 
 fprintf( f, "\n" );
 fprintf( f2, "\n" );
-
-fprintf( f2, "pause -1 \"Close plot %d\"\n", cur_plot);
 
 fclose( f );
 fclose( f2 );
@@ -4549,8 +4530,9 @@ f2 = fopen( "gnuplot.gp", "w" );
 fprintf( f, "set datafile missing \"nan\" \n" );		//handle NaNs
 fprintf( f2, "set datafile missing \"nan\" \n" );
 app = ( char * ) Tcl_GetVar( inter, "gpterm", 0 );
-fprintf( f2, "set term %s\n", app );
 fprintf( f, "set term tkcanvas\n" );
+if ( strlen( app ) > 0 )
+	fprintf( f2, "set term %s\n", app );
 fprintf( f, "set output 'plot.file'\n" );
 
 if ( grid )
@@ -4647,8 +4629,6 @@ for (; i < nv/block_length; ++i )
 strcat( msg, "\n" );
 fprintf( f, "%s", msg );
 fprintf( f2, "%s", msg );
-
-fprintf( f2, "pause -1 \"Close plot %d\"\n", cur_plot);
 
 fclose( f );
 fclose( f2 );
@@ -4910,8 +4890,6 @@ strcat( msg, "\n" );
 fprintf( f, "%s", msg );
 fprintf( f2, "%s", msg );
 
-fprintf( f2, "pause -1 \"Close plot %d\"\n", cur_plot);
-
 fclose( f );
 fclose( f2 );
 
@@ -4958,13 +4936,11 @@ cmd( "tk_messageBox -parent .da -type ok -icon warning -title Warning -message \
 cmd( "raise .da ." );
 	
 if ( type == 1 )
-{	//plot with external gnuplot
-	cmd( "if {$tcl_platform(platform) == \"unix\"} { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } {if {$tcl_platform(os) == \"Windows NT\"} { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }" );
-
+{	// plot with external gnuplot
+	cmd( "set choice [ open_gnuplot gnuplot.gp \"Please check if you have selected an adequate configuration for the plot.\" ]" );
 	
 	if ( *choice != 0 )			// Gnuplot failed
 	{
-		cmd( "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Gnuplot returned error '$choice'\" -detail \"Please check if you have selected an adequate configuration for the plot.\"" );
 		*choice = 2;
 		return;
 	}
@@ -4985,15 +4961,21 @@ get_int( "sbordsizeP", & sbordsize );	// 0
 
 
 // generate tk canvas filling routine using Gnuplot
-cmd( "if { $tcl_platform(platform) == \"unix\" } { set choice [ catch { exec xterm -e gnuplot gnuplot.lsd } ] } { if { $tcl_platform(os) == \"Windows NT\" } { set choice [ catch { exec wgnuplot gnuplot.lsd } ] } { set choice [ catch { exec start wgnuplot gnuplot.lsd } ] } }" );
-if ( *choice != 0 )			// Gnuplot failed
+cmd( "set choice [ open_gnuplot gnuplot.lsd \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\" true ]" );
+
+if ( *choice != 0 )						// Gnuplot failed
 {
-	cmd( "tk_messageBox -parent .da -type ok -icon error -title Error -message \"Gnuplot returned error '$choice'\" -detail \"Please check if you have selected an adequate configuration for the plot and if Gnuplot is set up properly.\"" );
 	*choice = 2;
 	return;
 }
 
-shrink_gnufile( );
+if ( shrink_gnufile( ) != 0 )			// file conversion failed
+{
+	*choice = 2;
+	return;
+}
+	
+
 cmd( "file delete plot.file; file rename plot_clean.file plot.file" );
 
 // create plot window & canvas
@@ -5045,7 +5027,12 @@ cmd( "pack $w.b.o.l1 $w.b.o.l2 $w.b.o.l3" );
 
 cmd( "frame $w.b.s" );
 cmd( "button $w.b.s.save -width $butWid -text Save -command { set it \"%d) $tit\"; set fromPlot 1; set choice 11 } -state disabled -underline 0", n );
-cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { set oldpath [pwd]; cd plotxy_%d; if { $tcl_platform(platform) == \"unix\" } { set choice [ catch { exec xterm -e gnuplot gnuplot.gp & } ] } { if { $tcl_platform(os) == \"Windows NT\" } { set choice [ catch { exec wgnuplot gnuplot.gp & } ] } { set choice [ catch { exec start wgnuplot gnuplot.gp & } ] } }; cd $oldpath; if { $choice != 0 } { tk_messageBox -parent .da.f.new%d -type ok -icon error -title Error -message \"Gnuplot returned error '$choice'\" -detail \"Please check if Gnuplot is set up properly.\" } } -state disabled -underline 0", n, n );
+cmd( "button $w.b.s.gnu -width $butWid -text Gnuplot -command { \
+		set oldpath [pwd]; \
+		cd plotxy_%d; \
+		open_gnuplot gnuplot.gp; \
+		cd $oldpath; \
+	} -state disabled -underline 0", n );
 cmd( "pack $w.b.s.save $w.b.s.gnu -pady 5" );
 
 cmd( "label $w.b.pad -width 6" );
@@ -8151,7 +8138,6 @@ void plot_canvas( int type, int nv, int *start, int *end, char **str, char **tag
 
 /*******************************************************
  MIN_HBORDER
- 
  calculate horizontal borders required for legends 
  *******************************************************/
 int min_hborder( int *choice, int pdigits, double miny, double maxy )
@@ -8174,7 +8160,6 @@ int min_hborder( int *choice, int pdigits, double miny, double maxy )
  
 /*****************************
  TCL_UPLOAD_SERIES
- 
  data transfer routine from C to Tcl 
  *****************************/
 int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST ov[ ] )
@@ -8200,4 +8185,263 @@ int Tcl_upload_series( ClientData cd, Tcl_Interp *inter, int oc, Tcl_Obj *CONST 
 		data[ i ] = cdata[ i ];
 
 	return TCL_OK;
+}
+
+
+/***************************************************
+SHRINK_GNUFILE
+Prepare gnuplot file
+***************************************************/
+struct s
+{
+	int x;
+	struct s *son;
+	struct s *next;
+} d;
+
+int store( struct s *c, int x4 )
+{
+	struct s *app, *prev;
+
+	for ( app = c; app != NULL; app = app->next )
+		if ( app->x == x4 )
+			return 0;
+		else
+			prev = app; 
+	
+	if ( app == NULL )
+	{
+		prev->next = new struct s;
+		app = prev->next;
+		app->x = x4;
+		app->next = NULL;
+		app->son = NULL;
+
+		return 1;
+	}
+
+	error_hard( "invalid data structure",
+				"internal problem in LSD", 
+				"if error persists, please contact developers",
+				true );
+	myexit( 14 );
+	
+	return 0;
+}
+
+int store( struct s *c, int x3, int x4 )
+{
+	struct s *app, *prev;
+
+	for ( app = c; app != NULL; app = app->next )
+		if ( app->x == x3 )
+			return store( app->son, x4 );
+		else
+			prev = app;
+	
+	if ( app == NULL )
+	{
+		prev->next = new struct s;
+		app = prev->next;
+		app->x = x3;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x4;
+		app->next = NULL;
+		app->son = NULL;
+	
+		return 1;
+	 }
+
+	error_hard( "invalid data structure",
+				"internal problem in LSD", 
+				"if error persists, please contact developers",
+				true );
+	myexit( 15 );
+	
+	return 0;
+}
+
+int store( struct s *c, int x2, int x3, int x4 )
+{
+	struct s *app, *prev;
+
+	for ( app = c; app != NULL; app = app->next )
+		if ( app->x == x2 )
+			return store( app->son, x3, x4 );
+		else
+			prev = app;
+		
+	if ( app == NULL )
+	{
+		prev->next = new struct s;
+		app = prev->next;
+		app->x = x2;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x3;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x4;
+		app->next = NULL;
+		app->son = NULL;
+	
+		return 1;
+	}
+
+	error_hard( "invalid data structure",
+				"internal problem in LSD", 
+				"if error persists, please contact developers",
+				true );
+	myexit( 16 );
+	
+	return 0;
+}
+
+int store( int x1, int x2, int x3, int x4 )
+{
+	struct s *app, *prev;
+
+	for ( app = &d; app != NULL; app = app->next )
+		if ( app->x == x1 )
+			return store( app->son, x2, x3, x4 );
+		else
+			prev = app;
+	
+	if ( app == NULL )
+	{
+		prev->next = new struct s;
+		app = prev->next;
+		app->x = x1;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x2;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x3;
+		app->next = NULL;
+		
+		app->son = new struct s;
+		app = app->son;
+		app->x = x4;
+		app->next = NULL;
+		app->son = NULL;
+		
+		return 1;
+	}
+
+	error_hard( "invalid data structure", 
+				"internal problem in LSD", 
+				"if error persists, please contact developers",
+				true );
+	myexit( 17 );
+	
+	return 0;
+}
+
+void free_storage( struct s *c )
+{
+	struct s *app, *n, *down;
+
+	if ( c->next != NULL )
+		free_storage( c->next );
+	
+	if ( c->son != NULL )
+		free_storage( c->son );
+
+	delete c;
+}
+
+int shrink_gnufile( void ) 
+{
+	char str[ 2 * MAX_ELEM_LENGTH ], str1[ 2 * MAX_ELEM_LENGTH ], str2[ 2 * MAX_ELEM_LENGTH ], str3[ 2 * MAX_ELEM_LENGTH ], str4[ 2 * MAX_ELEM_LENGTH ];
+
+	int x1, x2, x3, x4, i, j, h = 0, count = 0;
+	FILE *f, *f1;
+
+	d.son = NULL;
+	d.next = NULL;
+	d.x = -1;
+
+	// wait some time for the file to be ready in macOS
+	while ( ( f = fopen( "plot.file", "r" ) ) == NULL && count++ < 10 )
+		msleep( 1000 );
+	
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot open plot\" -detail \"The plot file produced by Gnuplot is not available.\nPlease check if you have selected an adequate configuration for the plot.\nIf the error persists if Gnuplot is installed and set up properly.\"" );
+		return 1;
+	}
+
+	f1 = fopen( "plot_clean.file", "w" );
+	if ( f == NULL )
+	{
+		cmd( "tk_messageBox -parent .da -title Error -icon error -type ok -message \"Cannot create plot file\" -detail \"Please check if the drive or the directory is not set READ-ONLY or full\nand try again\"" );
+		return 2;
+	}
+
+	while ( fgets( str, 2 * MAX_ELEM_LENGTH, f ) != NULL )
+	{
+		if ( h++ == 1 )
+		fprintf( f1, "set font \"{$::fontP}\"\n" );
+		sscanf( str, "%s %s", str1, str2 );
+		if ( ! strcmp( str1, "$can" ) && ! strcmp( str2, "create" ) )
+		{
+			i = strcspn( str, "[" );
+			j = strcspn( str, "]" );
+			strncpy( str1, str + i, j - i + 1 );
+			str1[ j - i + 1 ] = '\0';
+			sscanf( str1, "[expr $cmx * %d /1000]", &x1 );
+		
+			i = strcspn( str + j + 1, "[" );
+			i += j + 1;
+			j = strcspn( str + i + 1, "]" );
+			j += i + 1;
+			strncpy( str2, str + i, j - i + 1 );
+			str2[ j - i + 1 ]='\0';
+			sscanf( str2, "[expr $cmy * %d /1000]", &x2 );
+		
+			i = strcspn( str + j + 1, "[" );
+			i += j + 1;
+			j = strcspn( str + i + 1, "]" );
+			j += i + 1;
+			strncpy( str3, str + i, j - i + 1 );
+			str3[ j - i + 1 ] = '\0';
+			sscanf( str3, "[expr $cmx * %d /1000]", &x3 );
+		
+			i = strcspn( str + j + 1, "[" );
+			i += j + 1;
+			j = strcspn( str + i + 1, "]" );
+			j += i + 1;
+			strncpy( str4, str + i, j - i + 1 );
+			str4[ j - i + 1 ] = '\0';
+			sscanf( str4, "[expr $cmy * %d /1000]", &x4 );
+			
+			// if new data are stored, then add it to the cleaned file
+			if ( store( x1, x2, x3, x4 ) == 1 )
+				fprintf( f1, "%s", str );
+		}
+		else
+			fprintf( f1, "%s", str );
+
+	}
+	fclose( f );
+	fclose( f1 );
+
+	if ( d.next != NULL )
+		free_storage( d.next );
+	if ( d.son != NULL )
+		free_storage( d.son );
+
+	return 0;
 }

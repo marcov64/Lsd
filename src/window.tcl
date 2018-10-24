@@ -70,17 +70,26 @@ if [ string equal $tcl_platform(platform) unix ] {
 		set daCwid $daCwidMac
 		set corrX $corrXmac
 		set corrY $corrYmac
+		
+		set systemTerm $sysTermMac
+		set gnuplotTerm $gnuplotTermMac
 	} {
 		set butWid $butLinux
 		set daCwid $daCwidLinux
 		set corrX $corrXlinux
 		set corrY $corrYlinux
+		
+		set systemTerm $sysTermLinux
+		set gnuplotTerm $gnuplotTermLinux
 	}
 } {
 	set butWid $butWindows
 	set daCwid $daCwidWindows
 	set corrX $corrXwindows
 	set corrY $corrYwindows
+	
+	set systemTerm $sysTermWindows
+	set gnuplotTerm $gnuplotTermWindows
 }
 
 # text line default canvas height & minimum horizontal border width
@@ -1369,6 +1378,53 @@ proc update_title_bar { } {
 		set tosave 0
 		wm title . "  $filename - LMM"
 	}
+}
+
+# Open gnuplot window
+proc open_gnuplot { { script "" } { errmsg "" } { wait false } { par ".da" } } {
+	global tcl_platform sysTerm
+	
+	if [ string equal $script "" ] { 
+		set args "" 
+	} else {
+		set args "-p $script"
+	}
+	
+	if [ string equal $tcl_platform(platform) unix ] {
+		if [ string equal $tcl_platform(os) Darwin ] {
+			if { $wait } {
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $script; exit\"" } ]
+			} else {
+				set ret [ catch { exec osascript -e "tell application \"$sysTerm\" to do script \"cd [ pwd ]; gnuplot $args; exit\"" & } ]
+			}
+		} else {
+			if { $wait } {
+				set ret [ catch { exec $sysTerm -e "gnuplot $script; exit" } ]
+			} else {
+				set ret [ catch { exec $sysTerm -e "gnuplot $args; exit" & } ]
+			}
+		}
+	} else {
+		if [ string equal $script "" ] { 
+			set ret [ catch { exec wgnuplot.exe & } ]
+		} else {
+			if { $wait } {
+				set ret [ catch { exec wgnuplot.exe $script } ]
+			} else {
+				set ret [ catch { exec wgnuplot.exe -p $script & } ]
+			}
+		}
+	}
+
+	if { $ret != 0 } {
+		if [ string equal $errmsg "" ] { 
+			set errmsg "Please check if Gnuplot is installed and set up properly." 
+		}
+		
+		tk_messageBox -parent $par -type ok -icon error -title Error -message "Gnuplot failed to launch" -detail "Gnuplot returned error '$ret'.\n$errmsg" 
+	}			
+
+	return $ret
 }
 
 # Open Tk console window

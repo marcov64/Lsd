@@ -471,12 +471,12 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 
 	cmd( "frame $n.e" );
 	cmd( "label $n.e.l -text \"Number of instances\"" );
-	cmd( "entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.e.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invalidcommand { bell } -justify center } { entry $n.e.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set num %%P; return 1 } { %%W delete 0 end; %%W insert 0 $num; return 0 } } -invcmd { bell } -justify center }" );
 	cmd( "pack $n.e.l $n.e.e -side left -padx 2" );
 
 	cmd( "frame $n.cp" );
 	cmd( "label $n.cp.l -text \"Copy from instance\"" );
-	cmd( "entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center" );
+	cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $n.cp.e -width 5 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invalidcommand { bell } -justify center } { entry $n.cp.e -width 5 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set cfrom %%P; return 1 } { %%W delete 0 end; %%W insert 0 $cfrom; return 0 } } -invcmd { bell } -justify center }" );
 	cmd( "button $n.cp.compute -width 7 -text Compute -command { set conf 1; set choice 3; .numobj.cp.e selection range 0 end; focus .numobj.cp.e }" );
 	cmd( "pack $n.cp.l $n.cp.e $n.cp.compute -side left -padx 2" );
 
@@ -705,7 +705,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 
 		cmd( "frame $d.t" );
 		cmd( "label $d.t.tit -text \"Instance to delete\"", (*r)->label );
-		cmd( "entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center" );
+		cmd( "if [ string equal [ info tclversion ] 8.6 ] { ttk::spinbox $d.t.e -width 6 -from 1 -to 9999 -validate focusout -validatecommand { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invalidcommand { bell } -justify center } { entry $d.t.e -width 6 -validate focusout -vcmd { if [ string is integer -strict %%P ] { set value %%P; return 1 } { %%W delete 0 end; %%W insert 0 $value; return 0 } } -invcmd { bell } -justify center }" );
 		cmd( "label $d.t.tit1 -text \"\"" );
 		cmd( "pack $d.t.tit $d.t.e $d.t.tit1" );
 		cmd( "pack $d.l $d.t -padx 5 -pady 5" );

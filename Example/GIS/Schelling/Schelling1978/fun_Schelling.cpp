@@ -4,6 +4,8 @@
 
 // do not add Equations in this area
 
+#define latt2d true //to switch between 1d (false) and 2d (true) lat.
+
 
 MODELBEGIN
 
@@ -60,18 +62,27 @@ Initialise the model
 */
 
   //Initialise the space
-  INIT_SPACE_GRID_WRAP("Patch",V("xn"),V("yn"),V("wrapping") );
+  #if latt2d
+    INIT_SPACE_GRID_WRAP("Patch",V("xn"),V("yn"),V("wrapping") );
+  #else
+    INIT_SPACE_GRID_WRAP("Patch",V("xn"),1,V("wrapping") );
+  #endif
 
   //Initialise the lattice, but only for first Model and only if just one Model
   #ifndef NO_WINDOW
   if (V("lattice")>0){
     if (COUNTS(p->up,"Model")==1){
-    	INIT_LAT(1000,V("yn"),V("xn") );
+      cur = SEARCH("Patch");
+      INIT_LAT_GISS(cur);
     }
   }
   #endif
   //Initialse the agents
-  	double nAgents =  floor(V("fracAgents")*V("xn")*V("yn"));
+    #if latt2d
+      double nAgents =  floor(V("fracAgents")*V("xn")*V("yn"));
+    #else
+      double nAgents =  floor(V("fracAgents")*V("xn")*1);
+    #endif
   	ADDNOBJ("Agent", nAgents -1); //add missing number of agents to the SPACE - same place as other agents.
   //Add agents to random position
 
@@ -98,7 +109,7 @@ Initialise the model
       #ifndef NO_WINDOW
       if (V("lattice")>0){
         if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT(POSITION_YS(cur)+1,POSITION_XS(cur)+1,VS(cur,"Colour"));
+          WRITE_LAT_GISS(cur,VS(cur,"Colour"));
         }
       }
       #endif
@@ -138,15 +149,13 @@ EQUATION("isOption")
       double callerColour = VS(c,"Colour");
       double fracOther = 0.0;
       double nNeighbours = 0.0; //A function for neighbourhood statistics would be good
-      i = 0;
       CYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
         if (cur == c){
           continue; //skip self
         }
-      //     PLOG("\nt=%i, Checking neighbour %i",t,++i);
-        	if (VS(cur,"Colour")!=callerColour){
-        		fracOther++;
-        	}
+      	if (VS(cur,"Colour")!=callerColour){
+      		fracOther++;
+      	}
       	nNeighbours++;
       }
 
@@ -182,9 +191,7 @@ The agent moves if it is not content with its situation.
 
 
   if (Content == 0.0){
-
     //move
-  //   PLOG("\nLooking for a free patch!");
 
       //Depending on RationalExpectations on/off, only free patches that make
       //the agent content are options (on) or all free patches are options (off)
@@ -197,7 +204,7 @@ The agent moves if it is not content with its situation.
       #ifndef NO_WINDOW
       if (V("lattice")>0){
         if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT(POSITION_Y+1,POSITION_X+1,1000); //free white
+          WRITE_LAT_GIS(1000); //free white
         }
       }
       #endif
@@ -205,15 +212,11 @@ The agent moves if it is not content with its situation.
       #ifndef NO_WINDOW
       if (V("lattice")>0){
         if (COUNTS(p->up,"Model")==1){
-          WRITE_LAT(POSITION_Y+1,POSITION_X+1,V("Colour"));
+          WRITE_LAT_GIS(V("Colour"));
         }
       }
       #endif
-    //   PLOG("\nFound a free patch!");
-    } else {
-  //     PLOG("\nNo free patch that meets condition.")
     }
-
   }
 RESULT( move )
 
@@ -226,7 +229,6 @@ Measures the fraction of people in the neighbourhood that differ from ones own c
   double ownColour = V("Colour");
   double fracOther = 0.0;
   double nNeighbours = 0.0; //A function for neighbourhood statistics would be good
-  i = 0;
   CYCLE_NEIGHBOUR(cur,"Agent",VS(p->up,"distance")){
   	if (VS(cur,"Colour")!=ownColour){
   		fracOther++;
@@ -264,16 +266,19 @@ RESULT( v[1] /*Average*/ )
 EQUATION("EndOfSim")
 /* Stop the simulation if no model changes any more. */
   STAT("fracMove");
-  if (v[3] == 0.0 ) {
+    //not first step, no movement now, no movement the time before.
+  if ( t>1 && v[3] == 0.0 && CURRENT == 0.0) {
     PLOG("\nSimulation of %g models at end after %g steps.",v[0],T);
     ABORT; //finish simulation
+    END_EQUATION( T ) //save current time.
   }
-RESULT( T )
+RESULT( v[3] ) //save maximum fraction that moved
 
 EQUATION("fracContent")
 /*
 Monitor the fraction of agents that are content.
 */
+  V("Scheduler"); //make sure that scheduler is in charge.
   STAT("Content");
 RESULT( v[1] /* Average */ )
 
@@ -281,19 +286,33 @@ EQUATION("dissimilarity")
 /*
 Monitor the aggregate level of segregation with the dissimilarity index for the
 moore neighbourhood.
-D = 1/xn * sum_xn ( |b_i/B_t - r_i/R_t| )
 
+This is an adjusted concept of the standard index:
+D = 1/2 * sum_xn ( |b_i/B_t - r_i/R_t| )
 where b_i is the number of blue in the 9-field neighbourhood (moore) and r_i the
 number of red respectively. B_t and R_t are the total numbers of Blue and Red.
 
-To define the neighbourhood accordingly in both, 2d and 1d setting and also the
-continuous case, we define it as the patch and its neirest 8 neighbours.
+In our case, we measure overlapping neighbourhoods. To define the neighbourhood
+accordingly in both, 2d and 1d setting and also the continuous case, we define
+it as the patch and its neirest 8 neighbours.Therefore, we aggegragte
+for each agent, the deviation of the local segregation from the global
+segregation and normalised in 0..1:
+
+D = (2 * sum_n ( |b_i/n_i - B/n| ) ) / n
+
+Note: The distance for the measurement is different from that of the agents
+      perception of "neighbourhood".
+
 */
 
   double dissimilarity = 0.0;
   double loc_diss;
-  double const neighbDist = 4.0; //sufficiently big geometric distance to have the moore neighbourhood
-  double loc_b, loc_r;
+  #if latt2d
+    double const neighbDist = 1.5; //sufficiently big geometric distance to have the moore (8) neighbourhood
+  #else
+    double const neighbDist = 4; //sufficiently big geometric distance to have the moore (8) neighbourhood
+  #endif
+  double loc_b, loc_n;
   double tot_b = 0.0;
   double tot_r = 0.0;
     //Calculate the total number of red and blue agents.
@@ -304,31 +323,30 @@ continuous case, we define it as the patch and its neirest 8 neighbours.
       tot_r++;
     }
   }
+  double tot_n = tot_b + tot_r;
+
 
     //calculate the index
-  double n_tot = 0.0; //can be different from number of agents.
-  CYCLE(cur,"Patch"){
-
+  CYCLE(cur,"Agent"){
+    loc_n = 1.0; //number of agents in neighbourhood
     loc_b = 0.0;
-    loc_r = 0.0;
+    if (VS(cur,"Colour") == 5 /*blue*/){
+      loc_b++;
+    }
     loc_diss = 0.0;
-    //for each patch (i.e. place), calculate the local dissimilarity index
+    //for each agent, calculate the local dissimilarity index
     CYCLE_NEIGHBOURS(cur, cur1, "Agent", neighbDist ) {
+      loc_n++;
       if ( VS(cur1,"Colour") == 5.0 ){
         loc_b++;
-      } else {
-        loc_r++;
       }
     }
-      //empty neighbourhoods are not counted.
-    if ( !(loc_b == 0.0 && loc_r == 0.0) ) {
-      n_tot++;
-      loc_diss = abs( loc_b/tot_b - loc_r/tot_r );
-      dissimilarity += loc_diss;
-    }
+
+    loc_diss = abs( loc_b/loc_n - tot_b/tot_n );
+    dissimilarity += loc_diss;
 
   }
-  dissimilarity /= n_tot;
+  dissimilarity /= tot_n/2;
 
 RESULT( dissimilarity )
 
