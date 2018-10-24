@@ -371,6 +371,7 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 		// do run( ) cleanup
 		unwind_stack( );
 		actual_steps = t;
+		unsavedData = true;				// flag unsaved simulation results
 		running = false;
 		close_sim( );
 		reset_end( root );

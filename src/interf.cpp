@@ -921,15 +921,29 @@ int browse( object *r, int *choice )
 	cmd( "if [ info exists modElem ] { set modElem [ lsort -dictionary -unique $modElem ] }" );
 
 	// restore correct selection on list boxes
-	cmd( "if { $listfocus == 1 && $itemfocus != [ .l.v.c.var_name curselection ] } { \
+	cmd( "if { $listfocus == 1 } { \
 			focus .l.v.c.var_name; \
+			if { [ .l.v.c.var_name size ] == 0 } { \
+				set itemfocus 0 \
+			} { \
+				if { $itemfocus >= [ .l.v.c.var_name size ] } { \
+					set itemfocus [ expr [ .l.v.c.var_name size ] - 1 ] \
+				} \
+			}; \
 			.l.v.c.var_name selection clear 0 end; \
 			.l.v.c.var_name selection set $itemfocus; \
 			.l.v.c.var_name activate $itemfocus; \
 			.l.v.c.var_name see $itemfocus \
 		}" );
-	cmd( "if { $listfocus == 2 && $itemfocus != [ .l.s.c.son_name curselection ] } { \
+	cmd( "if { $listfocus == 2 } { \
 			focus .l.s.c.son_name; \
+			if { [ .l.s.c.son_name size ] == 0 } { \
+				set itemfocus 0 \
+			} { \
+				if { $itemfocus >= [ .l.s.c.son_name size ] } { \
+					set itemfocus [ expr [ .l.s.c.son_name size ] - 1 ] \
+				} \
+			}; \
 			.l.s.c.son_name selection clear 0 end; \
 			.l.s.c.son_name selection set $itemfocus; \
 			.l.s.c.son_name activate $itemfocus; \
@@ -1256,6 +1270,8 @@ case 2:
 					justAddedVar = true;	// flag variable just added (for acquiring focus)
 				}
 				
+				// update focus memory
+				cmd( "set listfocus 1; set itemfocus [ .l.v.c.var_name index end ]" );
 				cmd( "lappend modElem %s }", lab );
 				struct_loaded = true;		// some model structure loaded
 				unsaved_change( true );		// signal unsaved change
@@ -1388,6 +1404,8 @@ case 3:
 		lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
 		add_description( lab, "Object", lab1 );
 		
+		// update focus memory
+		cmd( "set listfocus 2; set itemfocus [ .l.s.c.son_name index end ]" );
 		struct_loaded = true;	// some model structure loaded
 		unsaved_change( true );	// signal unsaved change
 		redrawRoot = true;		// force browser redraw
@@ -2660,6 +2678,12 @@ case 1:
 	Tcl_LinkVar( inter, "dozip", ( char * ) & dozip, TCL_LINK_BOOLEAN );
 	Tcl_LinkVar( inter, "overwConf", ( char * ) & overwConf, TCL_LINK_BOOLEAN );
 
+	// save the current object & cursor position for quick reload
+	strcpy( lastObj, r->label );
+	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
+	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
+	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
+
 	// Only ask to overwrite configuration if there are changes
 	overwConf = unsaved_change( ) ? true : false;
 
@@ -2669,12 +2693,6 @@ case 1:
 		*choice = 1;
 		goto run;
 	}
-
-	// save the current object & cursor position for quick reload
-	strcpy( lastObj, r->label );
-	cmd( "if { ! [ string equal [ .l.s.c.son_name curselection ] \"\" ] } { set lastList 2 } { set lastList 1 }" );
-	cmd( "if { $lastList == 1 } { set lastItem [ .l.v.c.var_name curselection ] } { set lastItem [ .l.s.c.son_name curselection ] }" );
-	cmd( "if { $lastItem == \"\" } { set lastItem 0 }" );
 
 	cmd( "set firstFile \"%s_%d\"", simul_name, seed );
 	cmd( "set lastFile \"%s_%d\"", simul_name, seed + sim_num - 1 );
@@ -2787,6 +2805,7 @@ case 1:
 	set_blueprint( blueprint, n );
 
 	if ( overwConf )					// save if needed
+	{
 		if ( ! save_configuration( ) )
 		{
 			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name );
@@ -2796,7 +2815,10 @@ case 1:
 				break;
 			}
 		}
-
+		else
+			unsaved_change( false );	// signal no unsaved change
+	}
+	
 	*choice = 1; 
 	return n;
 
@@ -5427,6 +5449,7 @@ case 69:
 	set_blueprint( blueprint, n );
 	
 	if ( overwConf )				// save if needed
+	{
 		if ( ! save_configuration( ) )
 		{
 			cmd( "set answer [ tk_messageBox -parent . -type okcancel -default cancel -icon warning -title Warning -message \"File '%s.lsd' cannot be saved\" -detail \"Check if the drive or the file is set READ-ONLY. Press 'OK' to run the simulation without saving the initialization file.\" ]; switch -- $answer { ok { set choice 1 } cancel { set choice 2 } } ", simul_name  );
@@ -5436,6 +5459,9 @@ case 69:
 				break;
 			}
 		}
+		else
+			unsaved_change( false );	// signal no unsaved change
+	}
 
 	// start the job
 	cmd( "set oldpath [pwd]" );
