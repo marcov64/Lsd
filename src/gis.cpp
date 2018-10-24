@@ -51,6 +51,7 @@ GIS.CPP
 
 #include "decl.h"
 
+#ifdef CPP11
 char gismsg[300];
 
 //NEW gis creation stuff below
@@ -1226,3 +1227,4 @@ char gismsg[300];
     double line = position->map->yn - y;
     return read_lattice( line, col );
   }
+#endif //#ifdef CPP11

@@ -708,11 +708,13 @@ extern int fast_mode;
 extern int max_step;
 extern int quit;
 extern int ran_gen;				// pseudo-random number generator to use (1-5) )
+#ifdef CPP11
 extern minstd_rand lc;						// linear congruential generator
 extern mt19937 mt32;						// Mersenne-Twister 32 bits generator
 extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
 extern ranlux24 lf24;						// lagged fibonacci 24 bits generator
 extern ranlux48 lf48;						// lagged fibonacci 48 bits generator
+#endif //#ifdef CPP11
 extern int seed;
 extern int sim_num;
 extern int t;

@@ -327,7 +327,9 @@ int object::init( object *_up, char const *_label )
 	hook = NULL;
 	node = NULL;				// not part of a network yet
 	cext = NULL;				// no C++ object extension yet
+  #ifdef CPP11
   position = NULL;    // not part of a GIS Space yet
+  #endif //#ifdef CPP11
 	acounter = 0;				// "fail safe" when creating labels
 	lstCntUpd = 0; 				// counter never updated
 	del_flag = NULL;			// address of flag to signal deletion
@@ -826,7 +828,9 @@ object *object::add_n_objects2( char const *lab, int n, int t_update )
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
 	bool net;
+  #ifdef CPP11
 	bool gis;
+  #endif //#ifdef CPP11
 	int i;
 	bridge *cb, *cb1, *cb2;
 	object *cur, *last, *cur1, *first;
@@ -853,12 +857,12 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 
 	// check if copy from an object in a gis. If yes, then this one inherits all info AND is registered at same pos.
 	// blueprint is never part of gis
-
+  #ifdef CPP11
 	if (ex->ptr_map() == NULL)
 		gis = false;
 	else
 		gis = true;
-
+  #endif //#ifdef CPP11
 
 	last = NULL;	// pointer of the object to link to, signaling also the special first case
 	for ( i = 0; i < n; ++i )
@@ -888,15 +892,16 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 				return NULL;
 			}
 		}
-
-	if (gis)              // if object is part of a gis/map
-	{
-		cur->position = NULL; //reset, to not take position from ext
-		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y) == false) //register at map
-		{
-			return NULL; //error, msgs contained in register_at_map
-		}
-	}
+    #ifdef CPP11
+  	if (gis)              // if object is part of a gis/map
+  	{
+  		cur->position = NULL; //reset, to not take position from ext
+  		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y) == false) //register at map
+  		{
+  			return NULL; //error, msgs contained in register_at_map
+  		}
+  	}
+    #endif //#ifdef CPP11
 
 		// create its variables and initialize them
 		for ( cv = ex->v; cv != NULL; cv = cv->next )  
@@ -1204,10 +1209,12 @@ void object::empty( void )
 		node = NULL;
 	}
 
+  #ifdef CPP11
 	if ( position != NULL ) // gis data to delete?
 	{
 		unregister_from_gis();
 	}
+  #endif
 
 	delete [ ] label;
 	label = NULL;
