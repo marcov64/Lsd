@@ -2174,6 +2174,11 @@ void object::write( char const *lab, double value, int time, int lag )
 					}
 					else
 					{
+						// if not yet calculated this time step, adjust lagged values
+						if ( time == t && lag == 0 && cv->last_update < t )	
+							for ( int i = 0; i < cv->num_lag; ++i )
+								cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
+						
 						cv->val[ lag ] = value;
 						cv->last_update = time;
 						int eff_time = time - lag;

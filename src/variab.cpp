@@ -424,7 +424,7 @@ double variable::cal( object *caller, int lag )
 	}
 	user_exception = false;
 
-	for ( i = 0; i < num_lag; ++i ) 	// scale down the past values
+	for ( i = 0; i < num_lag; ++i ) // scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
 	val[ 0 ] = app;
 
