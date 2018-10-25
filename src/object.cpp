@@ -2572,7 +2572,7 @@ object *mnode::fetch( double *n, double level )
 
 	--level;
 	if ( level == 0 )
-	  cur = son[ ( int )( *n ) ].pntr;
+		cur = son[ ( int )( *n ) ].pntr;
 	else
 	{  
 		a = pow( 10, level );
@@ -2596,12 +2596,21 @@ object *object::turbosearch( char const *label, double tot, double num )
 	bridge *cb;
 	double val, lev;
 
+	if ( num < 1 )
+	{
+		sprintf( msg, "position '%.0lf' is invalid for turbo searching object '%s'", num, label ); 
+		error_hard( msg, "invalid search operation", 
+					"check your equation code to prevent this situation",
+					true );
+		return NULL;
+	} 
+	 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( ! strcmp( cb->blabel, label ) )
 			break;
 	if ( cb == NULL )
 	{
-		sprintf( msg, "failure when searching object '%s'", label ); 
+		sprintf( msg, "failure when turbo searching object '%s'", label ); 
 		error_hard( msg, "object not found", 
 					"check your equation code to prevent this situation",
 					true );
@@ -2622,6 +2631,7 @@ object *object::turbosearch( char const *label, double tot, double num )
 		lev = floor( log10( tot - 1 ) ) + 1;
 	else
 		lev = 0;					// if not, use default
+	
 	return( cb->mn->fetch( &val, lev ) );
 }
 
