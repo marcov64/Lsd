@@ -169,6 +169,7 @@ VARIABLE constructor
 ****************************************************/
 variable::variable( void )
 {
+	dummy = false;
 	observe = false;
 	parallel = false;
 	plot = false;
@@ -202,6 +203,7 @@ VARIABLE copy constructor
 ****************************************************/
 variable::variable( const variable &v )
 {
+	dummy = v.dummy;
 	observe = v.observe;
 	parallel = v.parallel;
 	plot = v.plot;

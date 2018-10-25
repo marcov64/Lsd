@@ -29,8 +29,8 @@ using namespace Eigen;
 #define DEBUG_CODE \
 	if ( debug_flag ) \
 	{ \
-		for ( i = 0; i < 1000; i++ ) \
-			i_values[ i ] = v[ i ]; \
+		for ( int n = 0; n < 1000; n++ ) \
+			i_values[ n ] = v[ n ]; \
 	};
 #else
 #define DEBUG_CODE
@@ -110,6 +110,14 @@ using namespace Eigen;
 		goto end; \
 	}
 
+#define EQUATION_DUMMY( X, Y ) \
+	if ( ! strcmp( label, X ) ) { \
+		var->dummy = true; \
+		p->cal( p, ( char * ) Y, 0 ); \
+		res = var->val[ 0 ]; \
+		goto end; \
+	}
+
 #else
 // use fast map method for equation look-up
 #define MODELBEGIN \
@@ -160,6 +168,15 @@ using namespace Eigen;
 		DEBUG_CODE \
 		return res; \
 	}
+
+#define EQUATION_DUMMY( X, Y ) \
+	{ string( X ), [ ]( object *caller, variable *var ) \
+		{ \
+			var->dummy = true; \
+			var->up->cal( var->up, ( char * ) Y, 0 ); \
+			return var->val[ 0 ]; \
+		} \
+	},
 
 #endif
 

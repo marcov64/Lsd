@@ -227,12 +227,14 @@ href="LSD_macros.html#count">count object instances</a> (<span class=Cdigo>COUNT
 class=Cdigo>COUNT_ALL(…)</span>), access pure <a
 href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects directly (<span
 class=Cdigo>EXT(…)</span>, <span class=Cdigo>EXTS(…)</span>), and execute
-extension C++ objects methods (<span class=Cdigo>DO_EXT(…)</span>). Option to
-disable/enable the automatic search of Variables and Parameters (<span
-class=Cdigo>NO_SEARCH</span>/<span class=Cdigo>USE_SEARCH</span>). New <a
-href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of
-the LSD Debugger activation and log file creation. Please refer to the <a
-href="LSD_macros.html">LSD Macros</a> documentation.</p>
+extension C++ objects methods (<span class=Cdigo>DO_EXT(…)</span>). Create <a
+href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (<span class=Cdigo>EQUATION_DUMMY(…)</span>)
+for Variables only updated by other Variables. Option to disable/enable the
+automatic search of Variables and Parameters (<span class=Cdigo>NO_SEARCH</span>/<span
+class=Cdigo>USE_SEARCH</span>). New <a href="LSD_macros.html#DEBUG">debug-control
+macros</a> allow finer control of the LSD Debugger activation and log file
+creation. Please refer to the <a href="LSD_macros.html">LSD Macros</a>
+documentation.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -280,9 +282,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 <h1>Version 7.0 (Apr 2018)</h1>
 
-<p class=MsoNormal>The new version maintains the compatibility with all the models
-built with previous versions of LSD (some optimizations require C++11 and <span
-class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD (some optimizations require C++11
+and <span class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -324,9 +326,9 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
 hierarchical data in R (multidimensional arrays). Parallel multi-core reading
 of multiple results files. Automatic handling of compressed results files.
-Advanced tools for sensitivity analysis and the study of response surfaces of simulation
-models (Morris Elementary Effects, Sobol Decomposition, Kriging Meta-modelling
-etc.).</p>
+Advanced tools for sensitivity analysis and the study of response surfaces of
+simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
+Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -365,8 +367,8 @@ Windows/Linux). LLDB debugger support.</p>
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Improved analysis of results tools.</b> New, native Tk
-plotting engine (faster and better looking). Fully editable plots. Improved plot
-windows, including zoom. Many more configuration options for plots. </p>
+plotting engine (faster and better looking). Fully editable plots. Improved
+plot windows, including zoom. Many more configuration options for plots. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -437,8 +439,9 @@ New lattice color options (full RGB support).</p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>New pseudorandom number generator.</b> A new (default) Mersenne-Twister
-generator included (old Parks-Miler still available as option).</p>
+</span></span><b>New pseudorandom number generator.</b> A new (default)
+Mersenne-Twister generator included (old Parks-Miler still available as
+option).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
@@ -608,8 +611,8 @@ style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 </span></span><b>Stricter error catching.</b> The number of errors spotted by
 LSD model programs is vastly increased. Moreover, detailed information is
 provided when an error occurs. For example, among other things, the system
-controls the amount of memory required to save the results, and indicated when it
-is not sufficient, leaving to the user the decision on whether to reduce the
+controls the amount of memory required to save the results, and indicated when
+it is not sufficient, leaving to the user the decision on whether to reduce the
 model dimension, simulation length, or amount of data to save.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:

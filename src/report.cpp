@@ -1189,24 +1189,28 @@ for (cb=r->b; cb!=NULL; cb=cb->next)
 Squeeze the spaces out of line and returns 1 if the line is an equation header,
 placing the Variable label in Var
 */
-int is_equation_header(char *line, char *var)
+int is_equation_header( char *line, char *var )
 {
-int i, j;
-clean_spaces(line);
-if (!strncmp(line, "if (!strcmp(label,",17)|| !strncmp(line, "EQUATION(",9) || !strncmp(line, "FUNCTION(",9))
- {
-  if (!strncmp(line, "if (!strcmp(label,",17))
-   macro=false;
-  else
-   macro=true;
-   for ( i = 0; line[ i ]!='"'; ++i );
-   for (j=++i; line[ i ]!='"'; ++i )
-    var[i-j]=line[ i ];
-   var[i-j]= '\0';
-   return 1;
- }
+	int i, j;
+	
+	clean_spaces( line );
+	if ( ! strncmp( line, "if (!strcmp(label,", 17 ) || ! strncmp( line, "EQUATION(", 9 ) || ! strncmp( line, "EQUATION_DUMMY(", 9 ) || ! strncmp( line, "FUNCTION(", 9 ) )
+	{
+		if ( ! strncmp( line, "if (!strcmp(label,",17) )
+			macro = false;
+		else
+			macro = true;
+		
+		for ( i = 0; line[ i ] != '"'; ++i );
+		
+		for ( j = ++i; line[ i ] != '"'; ++i )
+			var[ i - j ] = line[ i ];
+		var[ i - j ] = '\0';
+		
+		return 1;
+	}
 
-return 0;
+	return 0;
 }
 
 

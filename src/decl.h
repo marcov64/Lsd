@@ -253,6 +253,7 @@ struct variable
 {
 	public:
 	
+	bool dummy;
 	bool observe;
 	bool parallel;
 	bool plot;

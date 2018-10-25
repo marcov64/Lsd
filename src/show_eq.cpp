@@ -115,15 +115,17 @@ void show_eq( char *lab, int *choice )
 				c2_lab[ i ] = c1_lab[ i ];
 			c2_lab[ i ] = '\0'; 		// close the string
 
-			if ( ! strcmp( c2_lab, "if ( ! strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
+			if ( ! strcmp( c2_lab, "if ( ! strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 			{
 				if ( ! strcmp( c2_lab, "if (!strcmp( label," ) )
 					macro = false;
 				else
 					macro = true;
+				
 				for ( j =  i + 1 ; c1_lab[ j ] != '"'; ++j )
 					c3_lab[ j - i - 1 ] = c1_lab[ j ];
 				c3_lab[ j - i - 1 ]= '\0';
+				
 				if ( ! strcmp( c3_lab, lab ) )
 					done = true;
 			}
@@ -393,7 +395,7 @@ void scan_used_lab( char *lab, int *choice )
 				
 				c2_lab[ i ] = '\0'; 			// close the string
 				
-				if ( ! strcmp( c2_lab, "if (!strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
+				if ( ! strcmp( c2_lab, "if (!strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 				{
 					if ( ! strcmp( c2_lab, "if (!strcmp( label," ) )
 						macro = false;
@@ -401,8 +403,7 @@ void scan_used_lab( char *lab, int *choice )
 						macro = true;
 					
 					for ( j = 0; c1_lab[ i + 1 + j ] != '"'; ++j )
-						c2_lab[ j ] = c1_lab[ i + 1 + j ]; 	// prepare the c2_lab to store the var's label
-					
+						c2_lab[ j ] = c1_lab[ i + 1 + j ]; 	// prepare the c2_lab to store the var's label			
 					c2_lab[ j ] = '\0';
 					
 					done = contains( f, lab, strlen( lab ) );

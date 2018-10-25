@@ -1122,7 +1122,7 @@ bool object::under_computation( void )
 	 
 	// check variables directly contained in object
 	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->under_computation )
+		if ( cv->under_computation && ! cv->dummy )
 			return true;
 	
 	return false;
@@ -2108,7 +2108,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 /****************************************************
  WRITE
  Write the value in the Variable or Parameter lab, making it appearing as if
- it was computed at time time-lag and the variable updated at time time.
+ it was computed at time lag and the variable updated at time time.
  ***************************************************/
 void object::write( char const *lab, double value, int time, int lag )
 {
@@ -2127,7 +2127,7 @@ void object::write( char const *lab, double value, int time, int lag )
     {
 		if ( ! strcmp( cv->label, lab ) )
 		{
-			if ( cv->under_computation == 1 )
+			if ( cv->under_computation && ! cv->dummy )
 			{
 				sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
 				error_hard( msg, "invalid write operation", 
@@ -2175,7 +2175,7 @@ void object::write( char const *lab, double value, int time, int lag )
 					else
 					{
 						// if not yet calculated this time step, adjust lagged values
-						if ( time == t && lag == 0 && cv->last_update < t )	
+						if ( time >= t && lag == 0 && cv->last_update < t )	
 							for ( int i = 0; i < cv->num_lag; ++i )
 								cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
 						

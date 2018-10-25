@@ -993,95 +993,105 @@ AUTO_DOCUMENT
 ***************************************************/
 void auto_document( int *choice, char const *lab, char const *which, bool append )
 {
+	bool var;
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ];
+	int i, j = 0, done;
 	FILE *f;
 	description *cd;
-	char str1[MAX_LINE_SIZE], app[10*MAX_LINE_SIZE];
-	int i, j = 0, done;
-	bool var;
 
-	for (cd=descr; cd!=NULL; cd=cd->next)
+	for ( cd = descr; cd != NULL; cd = cd->next )
 	{
-	 app[ 0 ] = '\0';
-	 if ( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
-	 { 
-	  //for each description
-	  if ( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
-	  { //if it is a Variable
-		var = true;
-		sprintf( msg, "EQUATION(\"%s\")", cd->label); //search its equation
-		f=search_str_nospaces(equation_name, msg);
-		if ( f == NULL )
-		 {sprintf( msg, "FUNCTION(\"%s\")", cd->label);
-		  f=search_str_nospaces(equation_name, msg);
-		 }
-		if ( f == NULL )
-		 {sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label);
-		  f=search_str_nospaces(equation_name, msg);
-		 }
-		if (f != NULL )
-		{
-		 done=-1;
-		 j = 0;
-		 while (done != 1 )
-		 {
-		  fgets(str1, MAX_LINE_SIZE, f );
-		  for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
-		  {
-		   if (done==-1) //no comment found yet
-			{
-			 if (isalpha(str1[ i ]) != 0 ) //no comment exists
-			  done=1;
-			  
-			 if (str1[ i ]=='/' && str1[ i + 1 ]=='*')
-			  { done = 0; //beginning of a multiline comment
-			   i+=2;
-			   // discard initial empty line
-			   while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
-					i += 2;
-			   while ( str1[ i ] == '\n' )
-					i++;
-			   if ( str1[ i ] == '\0')
-					break;
-			  } 
-			 if (str1[ i ]=='/' && str1[ i + 1 ]=='/')
-			  { done=2; //beginning of a single line comment
-			   i+=2;
-			  } 
-			}
-			
-			if (done==0 ) //we are in a comment
-			 if (str1[ i ]=='*' && str1[ i + 1 ]=='/')
-			  done=1;
+		app[ 0 ] = '\0';
+		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
+		{	// for each description
+			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
+			{ 	// if it is a Variable
+				var = true;
+				sprintf( msg, "EQUATION(\"%s\")", cd->label ); //search its equation
+				f = search_str_nospaces( equation_name, msg );
+				if ( f == NULL )
+				{
+					sprintf( msg, "EQUATION_DUMMY(\"%s\",", cd->label );
+					f = search_str_nospaces( equation_name, msg );
+				}
+				if ( f == NULL )
+				{
+					sprintf( msg, "FUNCTION(\"%s\")", cd->label );
+					f = search_str_nospaces( equation_name, msg );
+				}
+				if ( f == NULL )
+				{
+					sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label );
+					f = search_str_nospaces( equation_name, msg );
+				}
+				if (f != NULL )
+				{
+					done = -1;
+					j = 0;
+					while ( done != 1 )
+					{
+						fgets( str1, MAX_LINE_SIZE, f );
+						for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
+						{
+							if ( done==-1 ) 		// no comment found yet
+							{
+								if ( isalpha( str1[ i ]) != 0 ) 	// no comment exists
+									done = 1;
+								  
+								if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
+								{ 
+									done = 0; 		// beginning of a multiline comment
+									i += 2;
+									
+									// discard initial empty line
+									while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
+										i += 2;
+									while ( str1[ i ] == '\n' )
+										++i;
+									if ( str1[ i ] == '\0' )
+										break;
+								}
+								
+								if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
+								{ 
+									done = 2; 		// beginning of a single line comment
+									i += 2;
+								} 
+							}
+							
+							if ( done == 0 ) 		// we are in a comment
+								if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
+									done = 1;
 
-			if (done==0 || done ==2)
-			 if (str1[ i ]!='\r')
-			   app[j++]=str1[ i ];
+							if ( done == 0 || done == 2 )
+								if ( str1[ i ] != '\r' )
+									app[ j++ ] = str1[ i ];
 
-			if (done==2 && str1[ i ]=='\n')
-			 done=-1; 
-		 
-			if ( j >= 10 * MAX_LINE_SIZE )
-				done = 1;
-		  }
-		 }
-		 strcat(app, "\n");
-		} //end of the if (found equation)
-	  } //end of the if (cd==Variable)
-	  else
-		var = false;
+							if ( done==2 && str1[ i ] == '\n' )
+								done = -1; 
+						 
+							if ( j >= 10 * MAX_LINE_SIZE )
+								done = 1;
+						}
+					}
+					strcat( app, "\n" );
+				} 			// end of the if (found equation)
+			} 				// end of the if (cd == Variable)
+			else
+				var = false;
 	  
-	  app[ j ]='\0'; //close the string
-	  return_where_used(cd->label, str1); 
-	  if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
-		sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
-	  else
-		sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+			app[ j ]='\0'; //close the string
+			return_where_used( cd->label, str1 ); 
+			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
+				sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+			else
+				sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
-	  delete [ ] cd->text;
-	  cd->text= new char[strlen(msg)+1];
-	  strcpy(cd->text, msg);
-	 } //end of the label to document
-	}//end of the for (desc)
+			delete [ ] cd->text;
+			cd->text = new char[ strlen( msg ) + 1 ];
+			strcpy( cd->text, msg );
+		} 					// end of the label to document
+	}						// end of the for (desc)
 }
 
 
