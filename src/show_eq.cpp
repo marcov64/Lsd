@@ -115,9 +115,9 @@ void show_eq( char *lab, int *choice )
 				c2_lab[ i ] = c1_lab[ i ];
 			c2_lab[ i ] = '\0'; 		// close the string
 
-			if ( ! strcmp( c2_lab, "if ( ! strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
+			if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 			{
-				if ( ! strcmp( c2_lab, "if (!strcmp( label," ) )
+				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) )
 					macro = false;
 				else
 					macro = true;
@@ -337,45 +337,51 @@ SCAN_USED_LAB
 ****************************************************/
 void scan_used_lab( char *lab, int *choice )
 {
-	bool exist;
+	bool exist, no_window;
 	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], *fname;
-	int i, j, k, done, bra, start, caller = *choice;
+	int i, j, k, nfiles, done, bra, start, caller = *choice;
 	FILE *f;
+
+	no_window = ( *choice == -1 ) ? true : false;
 
 	cmd( "set list .list_%s", lab );
 
-	cmd( "if [ winfo exists $list ] { set choice 1 } { set choice 0 }" );
-	if ( *choice == 1 )
-		return;
+	if ( ! no_window )
+	{
+		cmd( "if [ winfo exists $list ] { set choice 1 } { set choice 0 }" );
+		if ( *choice == 1 )
+			return;
+		
+		cmd( "newtop $list \"Used In\" { destroytop .list_%s }", lab  );
 
-	cmd( "newtop $list \"Used In\" { destroytop .list_%s }", lab  );
+		cmd( "frame $list.lf " );
+		cmd( "label $list.lf.l1 -text \"Equations using\"" );
+		cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
+		cmd( "pack $list.lf.l1 $list.lf.l2" );
 
-	cmd( "frame $list.lf " );
-	cmd( "label $list.lf.l1 -text \"Equations using\"" );
-	cmd( "label $list.lf.l2 -fg red -text \"%s\"", lab );
-	cmd( "pack $list.lf.l1 $list.lf.l2" );
+		cmd( "frame $list.l" );
+		cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
+		cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".list_%s.l.v_scroll set\"", lab );
+		cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
+		cmd( "mouse_wheel $list.l.l" );
 
-	cmd( "frame $list.l" );
-	cmd( "scrollbar $list.l.v_scroll -command \".list_%s.l.l yview\"", lab );
-	cmd( "listbox $list.l.l -width 25 -selectmode single -yscroll \".list_%s.l.v_scroll set\"", lab );
-	cmd( "pack $list.l.l  $list.l.v_scroll -side left -fill y" );
-	cmd( "mouse_wheel $list.l.l" );
+		if ( caller != 1 )
+			cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
+		else
+			cmd( "label $list.l3" );
 
-	if ( caller != 1 )
-		cmd( "label $list.l3 -text \"(double-click to\\nobserve the element)\"" );
-	else
-		cmd( "label $list.l3" );
+		cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
 
-	cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
-
-	cmd( "done $list b { destroytop .list_%s }", lab );		// done button
+		cmd( "done $list b { destroytop .list_%s }", lab );		// done button
+	}
 
 	// search in all source files
 	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
 	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
-	cmd( "set choice [ llength $source_files ]" );
+	cmd( "set res [ llength $source_files ]" );
+	get_int( "res", & nfiles );
 	
-	for ( exist = false, k = 0; k < *choice; ++k )
+	for ( exist = false, k = 0; k < nfiles; ++k )
 	{
 		cmd( "set brr [ lindex $source_files %d ]", k );
 		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
@@ -395,9 +401,9 @@ void scan_used_lab( char *lab, int *choice )
 				
 				c2_lab[ i ] = '\0'; 			// close the string
 				
-				if ( ! strcmp( c2_lab, "if (!strcmp( label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
+				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
 				{
-					if ( ! strcmp( c2_lab, "if (!strcmp( label," ) )
+					if ( ! strcmp( c2_lab, "if(!strcmp(label," ) )
 						macro = false;
 					else
 						macro = true;
@@ -409,14 +415,22 @@ void scan_used_lab( char *lab, int *choice )
 					done = contains( f, lab, strlen( lab ) );
 					if ( done == 1 )
 					{
-						cmd( "$list.l.l insert end %s", c2_lab );
+						if ( no_window )
+							cmd( "lappend list_used %s", c2_lab );
+						else
+							cmd( "$list.l.l insert end %s", c2_lab );
 						exist = true;
 					}
 				}
 			}
-			
 			fclose( f );
 		}
+	}
+	
+	if ( no_window )
+	{
+		cmd( "set list_used [ join $list_used \", \" ]" );
+		return;
 	}
 
 	if ( exist )
@@ -429,6 +443,7 @@ void scan_used_lab( char *lab, int *choice )
 
 	cmd( "showtop $list" );
 }
+
 
 /****************************************************
 SCAN_USING_LAB

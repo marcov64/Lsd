@@ -655,7 +655,7 @@ if ( ! one )
 /******************************
 FIND_USING
 *******************************/
-void find_using(object *r, variable *v, FILE *frep)
+void find_using( object *r, variable *v, FILE *frep )
 {
 	bool one;
 	int count, done, i, nfiles;
@@ -695,7 +695,7 @@ void find_using(object *r, variable *v, FILE *frep)
 							done = contains( ffun, cv->label, strlen( cv->label ) );
 						if ( done == 1 )
 						{
-							if (frep != NULL )
+							if ( frep != NULL )
 							{
 								fprintf( frep, "<TT>%s<A HREF=\"#_d_%s\">%s</A></TT>", one ? ", " : "", cv->label, cv->label );
 								one = true;

@@ -597,34 +597,6 @@ FILE *search_str( char const *name, char const *str )
 
 
 /****************************************************
-SEARCH_STR_NOSPACES
-****************************************************/
-FILE *search_str_nospaces( char *name, char *str )
-{
-	FILE *f;
-	char got[ MAX_LINE_SIZE ];
-
-	f = fopen( name, "r" );
-	if ( f == NULL )
-		return NULL;
-
-	fgets( got, MAX_LINE_SIZE, f );
-	clean_spaces( got );
-	for ( int i = 0; strncmp( got, str, strlen( str ) ) && i < MAX_FILE_TRY; ++i )
-	{
-		if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
-			return NULL;
-		clean_spaces( got ); 
-	}
-	
-	if ( ! strncmp( got, str, strlen( str ) ) )
-		return f;
-	else
-		return NULL;
-}
-
-
-/****************************************************
 SEARCH_DATA_STR
 ****************************************************/
 FILE *search_data_str( char const *name, char const *init, char const *str )
@@ -920,71 +892,108 @@ void add_description(char const *lab, char const *type, char const *text)
 
 #ifndef NO_WINDOW
 
+/****************************************************
+SEARCH_ALL_SOURCES
+****************************************************/
+FILE *search_all_sources( char *str )
+{
+	char *fname, got[ MAX_LINE_SIZE ];
+	int i, j, nfiles;
+	FILE *f;
+	
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set res [ llength $source_files ]" );
+	get_int( "res", & nfiles );
+	
+	for ( i = 0; i < nfiles; ++i )
+	{
+		cmd( "set brr [ lindex $source_files %d ]", i );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		if ( ( f = fopen( fname, "r" ) ) == NULL )
+			continue;
+
+		fgets( got, MAX_LINE_SIZE, f );
+		clean_spaces( got );
+		for ( j = 0; strncmp( got, str, strlen( str ) ) && j < MAX_FILE_TRY; ++j )
+		{
+			if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
+				break;
+			clean_spaces( got ); 
+		}
+		
+		if ( ! strncmp( got, str, strlen( str ) ) )
+			return f;
+	}
+	
+	return NULL;
+}
+	
+	
+/***************************************************
+RETURN_WHERE_USED
+***************************************************/
+void return_where_used( char *lab, char s[ ] ) 
+{
+	char *r; 
+	int choice = -1;
+
+	scan_used_lab( lab, &choice );
+	r = ( char * ) Tcl_GetVar( inter, "list_used", 0 );
+	if ( r != NULL )
+		strcpy( s, r);
+	else
+		strcpy( s, "" );
+}
+
+
 /***************************************************
 CHANGE_DESCR_TEXT
 ***************************************************/
-void change_descr_text(char *lab)
+void change_descr_text( char *lab )
 {
-	description *cur, *cur1;
+	description *cur;
 	char *lab1;
 
-	for (cur=descr; cur!=NULL; cur=cur->next)
-	 {
-	  if (!strcmp(cur->label, lab) )
-	   {
-		 delete [ ] cur->text;
-		 lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		 cur->text = new char[strlen(lab1)+1];
-		 strcpy(cur->text, lab1);
-		 return;
+	for ( cur = descr; cur != NULL; cur = cur->next )
+	{
+		if ( ! strcmp( cur->label, lab ) )
+		{
+			delete [ ] cur->text;
+			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
+			cur->text = new char[ strlen( lab1 ) + 1 ];
+			strcpy( cur->text, lab1 );
+			return;
 	   }
-	 }
+	}
 }
 
 
 /***************************************************
 CHANGE_INIT_TEXT
 ***************************************************/
-void change_init_text(char *lab)
+void change_init_text( char *lab )
 {
-	description *cur, *cur1;
+	description *cur;
 	char *lab1;
 
-	for (cur=descr; cur!=NULL; cur=cur->next)
-	 {
-	  if (!strcmp(cur->label, lab) )
-	   {
-		 lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		 if (strlen(lab1)>0)
-		  {
-		  if (cur->init != NULL )
-			delete [ ] cur->init;
-		  cur->init = new char[strlen(lab1)+1];
-		  strcpy(cur->init, lab1);
-		  }
-		 return;
-
-	   }
-	 }
-}
-
-
-/***************************************************
-RETURN_WHERE_USED
-***************************************************/
-void return_where_used( char *lab, char s[ ] ) 
-{
-	int choice;
-	char *r; 
-
-	scan_used_lab( lab, &choice );
-	cmd( "set l [join [ $list.l.l get 0 end ] \", \"]" );
-	cmd( "destroytop $list" ); 
-	r = ( char * ) Tcl_GetVar( inter, "l", 0 );
-	if ( r != NULL )
-		strcpy( s, r);
-	else
-		strcpy( s, "" );
+	for ( cur = descr; cur != NULL; cur = cur->next )
+	{
+		if ( ! strcmp( cur->label, lab ) )
+		{
+			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
+			if ( strlen( lab1 ) > 0 )
+			{
+				if ( cur->init != NULL )
+				delete [ ] cur->init;
+				cur->init = new char[ strlen( lab1 ) + 1 ];
+				strcpy( cur->init, lab1 );
+			}
+			return;
+		}
+	}
 }
 
 
@@ -1008,23 +1017,23 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			{ 	// if it is a Variable
 				var = true;
 				sprintf( msg, "EQUATION(\"%s\")", cd->label ); //search its equation
-				f = search_str_nospaces( equation_name, msg );
+				f = search_all_sources( msg );
 				if ( f == NULL )
 				{
 					sprintf( msg, "EQUATION_DUMMY(\"%s\",", cd->label );
-					f = search_str_nospaces( equation_name, msg );
+					f = search_all_sources( msg );
 				}
 				if ( f == NULL )
 				{
 					sprintf( msg, "FUNCTION(\"%s\")", cd->label );
-					f = search_str_nospaces( equation_name, msg );
+					f = search_all_sources( msg );
 				}
 				if ( f == NULL )
 				{
 					sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label );
-					f = search_str_nospaces( equation_name, msg );
+					f = search_all_sources( msg );
 				}
-				if (f != NULL )
+				if ( f != NULL )
 				{
 					done = -1;
 					j = 0;
@@ -1083,7 +1092,10 @@ void auto_document( int *choice, char const *lab, char const *which, bool append
 			app[ j ]='\0'; //close the string
 			return_where_used( cd->label, str1 ); 
 			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
-				sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+				if ( strlen( cd->text ) == 0 || ! strcmp( cd->text, "\n" ) )
+					sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				else
+					sprintf( msg, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
 			else
 				sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 

@@ -2144,7 +2144,7 @@ void object::write( char const *lab, double value, int time, int lag )
 				else
 				{
 					sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
-					error_hard( msg, "dead-lock during parallel computation", 
+					error_hard( msg, "deadlock during parallel computation", 
 								"check your equation code to prevent this situation",
 								true );
 					return;

@@ -345,7 +345,7 @@ double variable::cal( object *caller, int lag )
 	if ( under_computation )
 	{
 		sprintf( msg, "equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
-		error_hard( msg, "dead-lock",
+		error_hard( msg, "deadlock",
 					"check your equation code to prevent this situation\nprobably using the variable lagged value instead", 
 					true );
 		return 0;
@@ -583,7 +583,7 @@ void worker::cal_worker( void )
 
 				if ( var->under_computation )
 				{
-					sprintf( err_msg1, "dead-lock during parallel computation" );
+					sprintf( err_msg1, "deadlock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
 					sprintf( err_msg3, "check your code to prevent this situation." );
 					user_excpt = true;
@@ -857,7 +857,7 @@ void parallel_update( variable *v, object* p, object *caller )
 					if ( wait_time > MAX_WAIT_TIME )
 					{
 						sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
-						error_hard( msg, "dead-lock during parallel computation", 
+						error_hard( msg, "deadlock during parallel computation", 
 									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 						return;
 					}
@@ -899,7 +899,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			// if something go wrong, wait fist worker (always there)
 			if ( i >= max_threads )
 			{
-				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a dead-lock state", cv->label, cv->up->label );
+				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a deadlock state", cv->label, cv->up->label );
 				error_hard( msg, "parallel computation problem", 
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
@@ -927,7 +927,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( wait_time > MAX_WAIT_TIME )
 			{
 				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-				error_hard( msg, "dead-lock during parallel computation", 
+				error_hard( msg, "deadlock during parallel computation", 
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
