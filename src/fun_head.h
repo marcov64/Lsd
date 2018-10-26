@@ -169,6 +169,15 @@ using namespace Eigen;
 #define ABORT quit = 1;
 #define CURRENT ( var->val[ 0 ] )
 #define PARAMETER var->param = 1;
+
+// some macros to define unique ids for some objects
+#ifdef CPP11
+  #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
+  #define UNIQUE_ID  p->unique_id( )
+  #define UNIQUE_IDS( PTR ) PTR->unique_id( )
+  #define SEARCH_UID( ID ) obj_by_unique_id( ID )
+#endif //#ifdef CPP11
+
 #define OBSERVE set_fast( 0 );
 #define FAST set_fast( 1 );
 #define FAST_FULL set_fast( 2 );
@@ -544,6 +553,7 @@ using namespace Eigen;
 #define CYCLE_EXTS( PTR, ITER, CLASS, OBJ ) for ( ITER = EXEC_EXTS( PTR, CLASS, OBJ, begin ); ITER != EXEC_EXTS( PTR, CLASS, OBJ, end ); ++ITER )
 
 #ifdef CPP11
+
 // GIS MACROS
 // The GIS is implemented as a 2d map (continous euclidean space) with a
 //   raster-filter (the integer positions). All different kind of LSD objects

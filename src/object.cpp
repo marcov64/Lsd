@@ -329,6 +329,7 @@ int object::init( object *_up, char const *_label )
 	cext = NULL;				// no C++ object extension yet
   #ifdef CPP11
   position = NULL;    // not part of a GIS Space yet
+  uID = NULL; //does not have a unique ID
   #endif //#ifdef CPP11
 	acounter = 0;				// "fail safe" when creating labels
 	lstCntUpd = 0; 				// counter never updated
@@ -337,6 +338,130 @@ int object::init( object *_up, char const *_label )
 	
 	return 0;
 }
+
+#ifdef CPP11
+/****************************************************
+DECLARE_AS_UNIQUE
+Set the objects of type LAB as "unique":
+Each object gets a unique ID (also accross different labels, for the whole
+model) which can be accessed via a read-only macro UNIQUE_ID(S). This allows
+to get the pointer to such an object by calling UNIQUE_OBJ(id).
+
+Subsequently create objects of the same type will automatically become uniques
+****************************************************/
+
+void object::declare_as_unique(char const *uLab)
+{
+  //first, check if a unique id is provided already for root (which is always 0).
+  //if not create it.
+  uniqueIdMap* Map;
+  if (root->uID == NULL){
+    Map = new uniqueIdMap;
+    root->uID = new uniqueId(root,Map);
+  } else {
+    Map = uID->map;
+  }
+
+  //set blueprint as unique but without any id
+  object *blueprt = blueprint->search( uLab );
+  if ( blueprt == NULL )
+	{
+			sprintf( msg, "object '%s' is missing and cannot be declared unique", uLab );
+			error_hard( msg, "object not found",
+						"create object in model structure",
+            true );
+	} else {
+    blueprt->uID = new uniqueId(blueprt,Map,true);
+  }
+
+  //all objects already present get a unique id.
+  for ( object *curU = root->search( uLab ); curU != NULL; curU = curU->hyper_next( uLab ) )
+  {
+    curU->uID = new uniqueId(curU,Map);
+  }
+}
+
+/****************************************************
+OBJ_BY_UNIQUE_ID
+retrieve the object associated with the unique ID
+provided
+****************************************************/
+
+//retrieve object by unique id.
+object* object::obj_by_unique_id(double id)
+{
+  if (root->uID == NULL){
+  	sprintf( msg, "cannot retrieve unique object '%g'", id );
+		error_hard( msg, "no unique objects initialised!",
+						"declare the object type as unique first",
+					true );
+    return NULL;
+  }
+
+  if (id >= 0.0 && id < root->uID->map->nelements ){
+    return root->uID->map->elements[(int)id];
+  } else {
+  	sprintf( msg, "cannot retrieve unique object '%g'", id );
+		error_hard( msg, "bounding error!",
+					"please contact developers",
+					true );
+  }
+}
+
+/****************************************************
+DECLARE_AS_NONUNIQUE
+make object non-unqique. Normally only in case of deleting of the obj.
+****************************************************/
+void object::declare_as_nonUnique()
+{
+  if (uID == NULL){
+    sprintf( msg, "cannot declare object '%s' as nonunique", label );
+		error_hard( msg, "it never was unique",
+					"please check your code to prevent this situation",
+					true );
+    return;
+  }
+  int id = (int) uID->id;
+  if (id < 0) { //blueprint called
+    uID->map->blueprints[-id-1] = NULL;
+  } else {  //regular element
+    uID->map->elements[id] = NULL;
+    uID->map->nelementsAlive--;
+    if ( uID->map->nelementsAlive==0 /* last reg. element deleted*/){
+      //clean up blueprints, too.
+      for (auto blueprt : uID->map->blueprints){
+        if (blueprt != NULL) {
+          delete blueprt->uID;
+          blueprt->uID=NULL;
+        }
+      }
+      delete uID->map; //delete the map
+      uID->map = NULL;
+    }
+  }
+
+  delete uID;
+  uID = NULL;
+}
+
+/****************************************************
+UNIQUE_ID
+Return the unique ID which can be used for fast look-up, if any.
+****************************************************/
+double object::unique_id()
+{
+  if (uID == NULL) {
+	     sprintf( msg, "object '%s' cannot be retrieved by its unique id", label );
+			error_hard( msg, "object is not declared unique",
+						"declare the object type as unique first",
+            true );
+  } else {
+    return uID -> id;
+  }
+}
+#endif //#ifdef CPP11
+
+
 
 
 /****************************************************
@@ -1214,13 +1339,19 @@ void object::empty( void )
 	{
 		unregister_from_gis();
 	}
-  #endif
+	position = NULL;    // not part of a GIS Space any more
+
+	if ( uID != NULL ) { //default: not an identified object
+		declare_as_nonUnique();
+	}
+	#endif //#ifdef CPP11
 
 	delete [ ] label;
 	label = NULL;
 	b = NULL;
  
 }
+
 
 
 /****************************************************
@@ -1679,6 +1810,7 @@ sort a group of Objects
 
 void object::lsdrndsort(char const *obj)
 {
+  #ifdef CPP11
   int num, i;
 	object *cur, *nex;
   bridge *cb;
@@ -1701,7 +1833,7 @@ void object::lsdrndsort(char const *obj)
 	cur = cb->head;
 
   nex = skip_next_obj( cur, &num );
-  #ifdef CPP11
+
   std::vector<object*> mylist;
   mylist.reserve(num);
 	for ( i = 0; i < num; ++i )

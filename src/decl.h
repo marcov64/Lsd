@@ -145,6 +145,10 @@ struct bridge;
 struct netNode;
 struct netLink;
 #ifdef CPP11
+//Unique IDs
+struct uniqueIdMap;
+struct uniqueId;
+//GIS
 struct gisMap;
 struct gisPosition;
 struct Wrap;
@@ -175,12 +179,13 @@ class object
 	variable *v;
 	void *cext;							// pointer to a C++ object extension to the LSD object
 	#ifdef CPP11
+  uniqueId *uID; //unique identifier - double due to LSD data structure.
 	gisPosition *position; //Pointer to gis data structure
 	#endif //#ifdef CPP11
 
   #ifdef PARALLEL_MODE
 	mutex parallel_delete;				// mutex lock for parallel deletion
-#endif
+  #endif
 
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
@@ -266,6 +271,14 @@ class object
 	void update( void );
 	void write( char const *lab, double value, int time );	// write value as if computed at time
 	void write( char const *lab, double value, int time, int lag );	// write value in the lag field
+  #ifdef CPP11
+  // Fast look-up of agents via individual, unique IDs
+  void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
+  object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
+  void declare_as_nonUnique(); //function to retreave object by unique id.
+  double unique_id();  //retrieve unique id, if any.
+
+  #endif //#ifdef CPP11
 
 	#ifdef CPP11
 	//set the new GIS handling methods
@@ -429,11 +442,41 @@ struct netLink							// individual outgoing link
 };
 
 
-//  GIS data structures
+
 #ifdef CPP11
+/* The uniqueMap holds pointers to objects with uIDs. Once the last element
+  is deleted, it is deleted as well. There is only one such uniqueMap per
+  model, residing in root.
+*/
+struct uniqueIdMap
+{
+  std::deque<object*> elements;
+  std::deque<object*> blueprints;
+  int nelements=0;
+  int nelementsAlive=0;
+};
+
+struct uniqueId
+{
+  uniqueIdMap* map;
+  double id;
+  uniqueId(object* addObj, uniqueIdMap* map, bool blueprint=false) : map(map)
+  {
+    if ( blueprint == true){
+      map->blueprints.push_back(addObj);
+      id = - (double)map->blueprints.size();
+    } else {
+      map->elements.push_back(addObj);
+      map->nelements++;
+      map->nelementsAlive++;
+      id = (double) map->elements.size();
+    }
+  };
+};
+
+//  GIS data structures
 struct gisPosition
 {
-  public:
   gisMap* map;  //link to shared map
   double x;     //x position
   double y;     //y position
@@ -635,7 +678,6 @@ struct worker							// multi-thread parallel worker data structure
 	void signal( int signum );			// signal handler
 };
 #endif
-
 
 // standalone C functions/procedures (visible to the users)
 
