@@ -1192,7 +1192,7 @@ Return the value of Variable or Parameter with label l with lag lag.
 The method search for the Variable starting from this Object and then calls
 the function variable->cal(caller, lag )
 ***************************************************/
-double object::cal( object *caller,  char const *l, int lag )
+double object::cal( object *caller, char const *l, int lag )
 {
 	variable *curr;
 
@@ -1221,7 +1221,7 @@ double object::cal( object *caller,  char const *l, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 )
+	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 && ! curr->dummy )
 		parallel_update( curr, this, caller );
 #endif
 	return curr->cal( caller, lag );
@@ -2127,15 +2127,31 @@ void object::write( char const *lab, double value, int time, int lag )
     {
 		if ( ! strcmp( cv->label, lab ) )
 		{
-			if ( cv->under_computation && ! cv->dummy )
+			if ( cv->under_computation )
 			{
-				sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
-				error_hard( msg, "invalid write operation", 
-							"check your equation code to prevent this situation",
-							true );
-				return;
+				if ( ! cv->dummy )
+				{
+					sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
+					error_hard( msg, "invalid write operation", 
+								"check your equation code to prevent this situation",
+								true );
+					return;
+				}
+
+#ifdef PARALLEL_MODE
+				if ( cv->parallel_comp.try_lock( ) )
+					cv->parallel_comp.unlock( );
+				else
+				{
+					sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
+					error_hard( msg, "dead-lock during parallel computation", 
+								"check your equation code to prevent this situation",
+								true );
+					return;
+				}
+#endif
 			}
-			
+
 #ifdef PARALLEL_MODE
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );

@@ -321,7 +321,7 @@ proc create_elem_file { path } {
 			lappend vars $var
 		}
 		
-		set eqs [ regexp -all -inline -- {EQUATION_DUMMY[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[^;]+\)} $text ]
+		set eqs [ regexp -all -inline -- {EQUATION_DUMMY[ \t]*\([ \t]*\"(\w+)\"[ \t]*,[ \t]*\"\w+\"[ \t]*\)} $text ]
 		foreach { eq var } $eqs {
 			lappend vars $var
 		}

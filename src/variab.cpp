@@ -314,8 +314,8 @@ double variable::cal( object *caller, int lag )
 			if ( last_update >= t )		// already calculated this time step
 				return( val[ 0 ] );		
 #ifdef PARALLEL_MODE
-			// prevent parallel computation of the same variable
-			if ( parallel_mode )
+			// prevent parallel computation of the same variable (except dummy equations)
+			if ( parallel_mode && ! dummy )
 				 guard.lock( );
 			if ( last_update >= t )			// recheck if not computed during lock
 				return( val[ 0 ] );		
@@ -334,8 +334,8 @@ double variable::cal( object *caller, int lag )
 			return val[ 0 ];   
 
 #ifdef PARALLEL_MODE
-		// prevent parallel computation of the same function
-		if ( parallel_mode )
+		// prevent parallel computation of the same function (except dummy equations)
+		if ( parallel_mode && ! dummy )
 			 guard.lock( );
 #endif	
 	}
@@ -585,7 +585,7 @@ void worker::cal_worker( void )
 				{
 					sprintf( err_msg1, "dead-lock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
-					sprintf( err_msg3, "Check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation." );
 					user_excpt = true;
 					throw;
 				}
@@ -601,9 +601,9 @@ void worker::cal_worker( void )
 				catch ( ... )
 				{
 					pexcpt = current_exception( );
-					sprintf( err_msg1, "Equation error" );
+					sprintf( err_msg1, "equation error" );
 					sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-					sprintf( err_msg3, "Check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation." );
 					throw;
 				}
 				user_excpt = false;
@@ -799,6 +799,15 @@ void parallel_update( variable *v, object* p, object *caller )
 	object *co;
 	variable *cv;
 	
+	// prevent concurrent parallel update and multi-threading in a single core
+	if ( parallel_ready && max_threads > 1 )
+		parallel_ready = false;
+	else
+	{
+		v->cal( caller, 0 );
+		return;
+	}
+		
 	// find the beginning of the linked list chain for current object
 	for ( cb = p->up->b; strcmp( cb->blabel, p->label ) && cb->next != NULL; cb = cb->next );
 	
@@ -809,15 +818,6 @@ void parallel_update( variable *v, object* p, object *caller )
 		return;
 	}
 	
-	// prevent concurrent parallel update and multi-threading in a single core
-	if ( parallel_ready && max_threads > 1 )
-		parallel_ready = false;
-	else
-	{
-		v->cal( caller, 0 );
-		return;
-	}
-		
 	// set ready worker threads
 	for ( nt = 0, i = 0; i < max_threads; ++i )
 	{

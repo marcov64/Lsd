@@ -112,8 +112,11 @@ using namespace Eigen;
 
 #define EQUATION_DUMMY( X, Y ) \
 	if ( ! strcmp( label, X ) ) { \
-		var->dummy = true; \
-		p->cal( p, ( char * ) Y, 0 ); \
+		if ( strlen( Y ) > 0 ) \
+		{ \
+			var->dummy = true; \
+			p->cal( p, ( char * ) Y, 0 ); \
+		} \
 		res = var->val[ 0 ]; \
 		goto end; \
 	}
@@ -172,8 +175,11 @@ using namespace Eigen;
 #define EQUATION_DUMMY( X, Y ) \
 	{ string( X ), [ ]( object *caller, variable *var ) \
 		{ \
-			var->dummy = true; \
-			var->up->cal( var->up, ( char * ) Y, 0 ); \
+			if ( strlen( Y ) > 0 ) \
+			{ \
+				var->dummy = true; \
+				var->up->cal( var->up, ( char * ) Y, 0 ); \
+			} \
 			return var->val[ 0 ]; \
 		} \
 	},
