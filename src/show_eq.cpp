@@ -54,8 +54,8 @@ SHOW_EQ
 ****************************************************/
 void show_eq( char *lab, int *choice )
 {
-	bool done;
-	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], *app, *fname;
+	bool done, eq_dum;
+	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
 	int i, j, k, bra, start, lun, printing_var = 0, comment_line = 0, temp_var = 0;
 	FILE *f;
 
@@ -122,12 +122,31 @@ void show_eq( char *lab, int *choice )
 				else
 					macro = true;
 				
-				for ( j =  i + 1 ; c1_lab[ j ] != '"'; ++j )
+				if ( ! strcmp( c2_lab, "EQUATION_DUMMY(" ) )
+					eq_dum = true;
+				else
+					eq_dum = false;
+				
+				for ( j =  i + 1 ; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0'; ++j )
 					c3_lab[ j - i - 1 ] = c1_lab[ j ];
 				c3_lab[ j - i - 1 ]= '\0';
 				
 				if ( ! strcmp( c3_lab, lab ) )
+				{
 					done = true;
+					
+					for ( ++j ; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0' && j < MAX_LINE_SIZE; ++j );
+					
+					if ( c1_lab[ j ] == '"' )
+					{
+						for ( i = 0, ++j; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0' && i < MAX_ELEM_LENGTH; ++i, ++j )
+							updt_in[ i ] = c1_lab[ j ];
+						updt_in[ i ] = '\0';
+					}
+					else
+						strcpy( updt_in, "" );
+					
+				}
 			}
 		}
 	}
@@ -214,9 +233,17 @@ void show_eq( char *lab, int *choice )
 		sscanf( c1_lab, "%s", c2_lab );
 		strcpy( c2_lab, c1_lab );
 		clean_spaces( c2_lab );
+		
+		// handle dummy equations without RESULT closing
+		if ( eq_dum && ( ! strncmp( c2_lab,"EQUATION(", 9 ) || ! strncmp( c2_lab,"EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab,"FUNCTION(", 9 ) || ! strncmp( c2_lab,"MODELEND", 8 ) ) )
+		{
+			cmd( ".eq_%s.f.text insert end \"\n(DUMMY EQUATION: variable '%s' updated in '%s')\"", lab, lab, updt_in );
+			break;
+		}
+	
 		if ( ! strncmp( c2_lab,"RESULT(", 7 ) )
 			bra--;
-	
+		
 		for ( i = 0; c1_lab[ i ] != 0; ++i )
 		{
 			if ( c1_lab[ i ] == '\r' ) 
@@ -224,7 +251,7 @@ void show_eq( char *lab, int *choice )
 			if ( c1_lab[ i ] == '{' )
 			{
 				if ( bra != 1 )
-					cmd( ".eq_%s.f.text insert end \"{\" $mytag",lab );
+					cmd( ".eq_%s.f.text insert end \"{\" $mytag", lab );
 				else
 					start = 0;
 				bra++;
@@ -234,18 +261,18 @@ void show_eq( char *lab, int *choice )
 				{
 					bra--;
 					if ( bra > 1 )
-						cmd( ".eq_%s.f.text insert end \"}\" $mytag ",lab );
+						cmd( ".eq_%s.f.text insert end \"}\" $mytag ", lab );
 				}
 				else
 					if ( c1_lab[ i ] == '\\' )
-						cmd( ".eq_%s.f.text insert end \\\\ $mytag",lab );
+						cmd( ".eq_%s.f.text insert end \\\\ $mytag", lab );
 					else
 						if ( c1_lab[ i ] == '[' )
-							cmd( ".eq_%s.f.text insert end \\[ $mytag ",lab );
+							cmd( ".eq_%s.f.text insert end \\[ $mytag ", lab );
 						else
 							if ( c1_lab[ i ] == ']' )
 							{
-								cmd( ".eq_%s.f.text insert end \\]  $mytag",lab );
+								cmd( ".eq_%s.f.text insert end \\]  $mytag", lab );
 								if ( temp_var == 1 )
 								{
 									temp_var = 0;
@@ -258,7 +285,7 @@ void show_eq( char *lab, int *choice )
 									if ( printing_var == 1 && comment_line == 0 )
 										cmd( "set mytag \"\"" );
 
-									cmd( ".eq_%s.f.text insert end {\"} $mytag",lab );
+									cmd( ".eq_%s.f.text insert end {\"} $mytag", lab );
 									if ( printing_var == 0 && comment_line == 0 )
 									{
 										cmd( "set mytag \"vars\"" );
@@ -272,7 +299,7 @@ void show_eq( char *lab, int *choice )
 									{
 										cmd( "set mytag comment_line" );
 										comment_line = 1;
-										cmd( ".eq_%s.f.text insert end \"//\" $mytag",lab );
+										cmd( ".eq_%s.f.text insert end \"//\" $mytag", lab );
 										i++;
 									}
 									else
