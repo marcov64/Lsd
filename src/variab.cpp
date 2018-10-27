@@ -244,8 +244,6 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	lock_guard < mutex > lock( parallel_comp );
 #endif	
 	
-	total_var++;
-
 	up =_up;
     save =_save;
 	
@@ -974,8 +972,6 @@ void variable::empty( void )
 			return;
 		}
 
-		total_var--;
-		
 		delete [ ] label;
 		delete [ ] data;
 		delete [ ] lab_tit;
@@ -983,8 +979,6 @@ void variable::empty( void )
 	}
 	else
 	{
-		total_var--;
-		
 		delete [ ] label;
 		delete [ ] data;
 		delete [ ] lab_tit;

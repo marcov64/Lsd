@@ -79,6 +79,7 @@ int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
 
 bool batch_sequential = false;	// no-window multi configuration job running
+bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
 bool message_logged = false;// new message posted in log window
@@ -142,8 +143,6 @@ int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
 int stack_info = 0;			// LSD stack control
 int t;						// current time step
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter

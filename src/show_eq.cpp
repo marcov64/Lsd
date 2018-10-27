@@ -30,11 +30,6 @@ list the code for that variable is shown.
 It is based on the recognition of the string lab between quotes, thus any function
 is recognized.
 
-- int contains (FILE *f, char *lab, int len);
-Checks if the equation beginning in the file position indicated by f contains
-any function using lab as parameter.
-
-
 other functions are the usual:
 - void plog( char *m );
 LSDMAIN.CPP print  message string m in the Log screen.
@@ -54,8 +49,8 @@ SHOW_EQ
 ****************************************************/
 void show_eq( char *lab, int *choice )
 {
-	bool done, eq_dum;
-	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
+	bool done;
+	char c1_lab[ MAX_LINE_SIZE ], c2_lab[ MAX_LINE_SIZE ], c3_lab[ MAX_LINE_SIZE ], c4_lab[ MAX_LINE_SIZE ], full_name[ 2 * MAX_PATH_LENGTH ], updt_in[ MAX_ELEM_LENGTH + 1 ], *app, *fname;
 	int i, j, k, bra, start, lun, printing_var = 0, comment_line = 0, temp_var = 0;
 	FILE *f;
 
@@ -105,50 +100,10 @@ void show_eq( char *lab, int *choice )
 		if ( ( f = fopen( fname, "r" ) ) == NULL )
 			continue;
 		
-		strcpy( c1_lab, "" );
-		strcpy( c2_lab, "" );
-
 		while ( ! done && fgets( c1_lab, MAX_LINE_SIZE - 1, f ) != NULL )
-		{
-			clean_spaces( c1_lab ); 	// eliminate the spaces
-			for ( i = 0; c1_lab[ i ] != '"' && c1_lab[ i ] != '\0'; ++i )
-				c2_lab[ i ] = c1_lab[ i ];
-			c2_lab[ i ] = '\0'; 		// close the string
-
-			if ( ! strcmp( c2_lab, "if(!strcmp(label," ) || ! strcmp( c2_lab, "EQUATION(" ) || ! strcmp( c2_lab, "EQUATION_DUMMY(" ) || ! strcmp( c2_lab, "FUNCTION(" ) )
-			{
-				if ( ! strcmp( c2_lab, "if(!strcmp(label," ) )
-					macro = false;
-				else
-					macro = true;
-				
-				if ( ! strcmp( c2_lab, "EQUATION_DUMMY(" ) )
-					eq_dum = true;
-				else
-					eq_dum = false;
-				
-				for ( j =  i + 1 ; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0'; ++j )
-					c3_lab[ j - i - 1 ] = c1_lab[ j ];
-				c3_lab[ j - i - 1 ]= '\0';
-				
-				if ( ! strcmp( c3_lab, lab ) )
-				{
+			if ( is_equation_header( c1_lab, c2_lab, updt_in ) )
+				if ( ! strcmp( c2_lab, lab ) )
 					done = true;
-					
-					for ( ++j ; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0' && j < MAX_LINE_SIZE; ++j );
-					
-					if ( c1_lab[ j ] == '"' )
-					{
-						for ( i = 0, ++j; c1_lab[ j ] != '"' && c1_lab[ j ] != '\0' && i < MAX_ELEM_LENGTH; ++i, ++j )
-							updt_in[ i ] = c1_lab[ j ];
-						updt_in[ i ] = '\0';
-					}
-					else
-						strcpy( updt_in, "" );
-					
-				}
-			}
-		}
 	}
 
 	if ( ! done )
@@ -161,7 +116,7 @@ void show_eq( char *lab, int *choice )
 
 	cmd( "set w .eq_%s", lab );
 	cmd( "set s \"\"" );
-	cmd( "newtop $w \"%s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, fname, lab  );
+	cmd( "newtop $w \"'%s' %s Equation (%s)\" { destroytop .eq_%s } $parWnd", lab, eq_dum ? "Dummy" : "", fname, lab );
 
 	cmd( "frame $w.f" );
 	cmd( "scrollbar $w.f.yscroll -command \"$w.f.text yview\"" );
@@ -178,7 +133,6 @@ void show_eq( char *lab, int *choice )
 			newtop $W.s \"\" { destroytop $W.s } $W; \
 			label $W.s.l -text \"Find\"; \
 			entry $W.s.e -textvariable s -justify center; \
-			focus $W.s.e; \
 			button $W.s.b -width $butWid -text OK -command { \
 				destroytop $W.s; \
 				set cur1 [ $W.f.text search -count length $s $cur1 ]; \
@@ -191,10 +145,12 @@ void show_eq( char *lab, int *choice )
 					update \
 				} \
 			}; \
-			pack $W.s.l $W.s.e; \
+			pack $W.s.l $W.s.e -padx 5; \
 			pack $W.s.b -padx 10 -pady 10; \
 			bind $W.s <KeyPress-Return> { $W.s.b invoke }; \
-			showtop $W.s centerS \
+			showtop $W.s centerS; \
+			$W.s.e selection range 0 end; \
+			focus $W.s.e \
 		} { LsdHelp equation.html } { destroytop .eq_%s }", lab, lab  );
 	cmd( "bind .eq_%s <Control-f> { .eq_%s.b.search invoke }; bind .eq_%s <Control-F> { .eq_%s.b.search invoke }", lab, lab, lab, lab );
 	cmd( "bind .eq_%s <F3> { \
@@ -228,22 +184,27 @@ void show_eq( char *lab, int *choice )
 		bra = 2;
 	}
 	
-	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL  )
-	{
-		sscanf( c1_lab, "%s", c2_lab );
+	strcpy( c4_lab, c1_lab );						// save original first line
+			
+	do
+	{	
 		strcpy( c2_lab, c1_lab );
 		clean_spaces( c2_lab );
 		
 		// handle dummy equations without RESULT closing
-		if ( eq_dum && ( ! strncmp( c2_lab,"EQUATION(", 9 ) || ! strncmp( c2_lab,"EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab,"FUNCTION(", 9 ) || ! strncmp( c2_lab,"MODELEND", 8 ) ) )
+		if ( eq_dum && strcmp( c1_lab, c4_lab ) && ( ! strncmp( c2_lab, "EQUATION(", 9 ) || ! strncmp( c2_lab, "EQUATION_DUMMY(", 15 ) || ! strncmp( c2_lab, "FUNCTION(", 9 ) || ! strncmp( c2_lab, "MODELEND", 8 ) ) )
 		{
-			cmd( ".eq_%s.f.text insert end \"\n(DUMMY EQUATION: variable '%s' updated in '%s')\"", lab, lab, updt_in );
+			if ( strlen( updt_in ) > 0 )
+				cmd( ".eq_%s.f.text insert end \"\n(DUMMY EQUATION: variable '%s' updated in '%s')\"", lab, lab, updt_in );
+			else
+				cmd( ".eq_%s.f.text insert end \"\n(DUMMY EQUATION: variable '%s' not updated here)\"", lab, lab );
+				
 			break;
 		}
 	
 		if ( ! strncmp( c2_lab,"RESULT(", 7 ) )
 			bra--;
-		
+
 		for ( i = 0; c1_lab[ i ] != 0; ++i )
 		{
 			if ( c1_lab[ i ] == '\r' ) 
@@ -339,6 +300,7 @@ void show_eq( char *lab, int *choice )
 													}
 		}
 	}
+	while ( ( bra > 1 || start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL  );
 	
 	fclose( f );
 
@@ -397,7 +359,7 @@ void scan_used_lab( char *lab, int *choice )
 		else
 			cmd( "label $list.l3" );
 
-		cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
+		cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
 
 		cmd( "done $list b { destroytop .list_%s }", lab );		// done button
 	}
@@ -505,14 +467,14 @@ void scan_using_lab( char *lab, int *choice )
 	else
 		cmd( "label $list.l3" );
 
-	cmd( "pack $list.lf $list.l $list.l3 -pady 5 -expand yes -fill both" );
+	cmd( "pack $list.lf $list.l $list.l3 -padx 5 -pady 5 -expand yes -fill both" );
 
 	cmd( "done $list b { destroytop .listusing_%s }", lab );		// done button
 
 	cv = root->search_var( root, lab );
 	find_using( root, cv, NULL );
 	
-	cmd( "set choice [$list.l.l size]" );
+	cmd( "set choice [ $list.l.l size ]" );
 	if ( *choice != 0 )
 	{
 		if ( caller != 1 )
@@ -522,87 +484,4 @@ void scan_using_lab( char *lab, int *choice )
 		cmd( "$list.l.l insert end \"(none)\"" );
 
 	cmd( "showtop $list" );
-}
-
-
-/****************************************************
-CONTAINS
- scans an equation checking if it contains anywhere the string
- lab between quotes. Returns 1 if found, and 0 otherwise.
- The file passed is moved to point to the next equation
- It correctly skip the commented text, either by // or by / * ... * /
-****************************************************/
-int contains ( FILE *f, char *lab, int len )
-{
-	int bra, found, start, i, got, j, comm = 0;
-	char c1_lab[ MAX_LINE_SIZE ], pot[ MAX_LINE_SIZE ];
-	
-	if ( ! macro )
-	{
-		start = 1;
-		bra = 1;
-	}
-	else
-	{
-		start = 0;
-		bra = 2;
-	}
-
-	// for each line of the equation ...
-	for ( found = 0; ( bra>1||start == 1 ) && fgets( c1_lab, MAX_LINE_SIZE, f ) != NULL;  )
-	{
-		if ( comm == 1 )
-			comm = 0;
-		
-		strcpy( pot, c1_lab );
-		clean_spaces( pot );
-		
-		if ( ! strncmp( pot, "RESULT(", 7 ) )
-			bra--;
-		
-		for ( i = 0; c1_lab[ i ] != 0; ++i ) // scans each character
-		{
-			if ( c1_lab[ i ] == '{' ) 		// if it is an open braket
-			{
-				bra++;
-				start = 0;
-			}
-			else
-				if ( c1_lab[ i ] == '}' ) 	// if it is a closed braket
-					bra--;
-				else
-				{
-					if ( c1_lab[ i ] == '/' && c1_lab[ i + 1 ] == '/' )
-						comm = 1;
-					else
-						if ( c1_lab[ i ] == '/' && c1_lab[ i + 1 ] == '*' )
-							comm = 2;
-						else
-							if ( comm == 2 && c1_lab[ i ] == '*' && c1_lab[ i + 1 ] == '/' )
-								comm = 0;
-							
-					if ( comm == 0 && c1_lab[ i ] == '\"' && found == 0 ) // if it is a quote (supposedly open quotes)
-					{
-						for ( j = i + 1; c1_lab[ j ] != '\"'; ++j ) // copy the characters till the last quotes
-							pot[ j - i - 1 ] = c1_lab[ j ];
-							
-						pot[ j - i - 1 ] = c1_lab[ j ];
-		
-						//scan the whole word, until a different char is not found
-						if ( pot[ 0 ] != '\"' ) 			// in case the eq. contains "" it gets fucked up..
-							for ( j = 0, got = 1 ; got == 1 && pot[ j ] != '\"' && lab+j != NULL; ++j )
-								if ( pot[ j ] != lab[ j ])
-									got = 0;
-						for ( ; pot[ j ] != '\"'; ++j ); //finishes the word, until the closed quotes
-						
-						i = i + j + 1;
-						
-						if ( got == 1 && j == len )
-							found = 1;
-					}
-				}		// new for comm
-		}
-	}
-	
-	return found;
 }

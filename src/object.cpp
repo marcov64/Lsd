@@ -355,7 +355,7 @@ void object::update( void )
 		if ( cv->last_update < t && cv->param == 0 )
 		{
 #ifdef PARALLEL_MODE
-			if ( parallel_ready && cv->parallel )
+			if ( parallel_ready && cv->parallel && ! cv->dummy )
 				parallel_update( cv, this );
 			else
 #endif
@@ -442,7 +442,7 @@ object *object::search( char const *lab )
 		
 		if ( cur != NULL )
 			return cur;
-	 }
+	}
 
 	return NULL;
 }

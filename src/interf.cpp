@@ -1910,11 +1910,12 @@ case 7:
 	cmd( "frame $T.h.l" );
 	
 	if ( cv->param == 0 )
-	  cmd( "label $T.h.l.lab_ent -text \"Variable:\"" );
+		cmd( "label $T.h.l.lab_ent -text \"Variable:\"" );
 	if ( cv->param == 1 )
-	  cmd( "label $T.h.l.lab_ent -text \"Parameter:\"" );
+		cmd( "label $T.h.l.lab_ent -text \"Parameter:\"" );
 	if ( cv->param == 2 )
-	  cmd( "label $T.h.l.lab_ent -text \"Function:\"" );
+		cmd( "label $T.h.l.lab_ent -text \"Function:\"" );
+	
 	cmd( "label $T.h.l.ent_var -fg red -text $vname" );
 	cmd( "pack $T.h.l.lab_ent $T.h.l.ent_var -side left -padx 2" );
 
@@ -2089,7 +2090,7 @@ case 7:
 		unsaved_change( true );		// signal unsaved change
 	}
 
-	if (done == 7 || done == 4 || done == 3 || done == 9)
+	if ( done == 7 || done == 4 || done == 3 || done == 9 )
 	  goto cycle_var;
 
 	if ( done == 2 || done == 8 )	// esc/cancel
@@ -2099,48 +2100,44 @@ case 7:
 	}
 	else
 	{
-	   cmd( "set choice $observe" );
-	   *choice == 1 ? observe = 'y' : observe = 'n';
-	   cmd( "set choice $initial" );
-	   *choice == 1 ? initial = 'y' : initial = 'n';
-	   cur_descr->initial = initial;
-	   cur_descr->observe = observe;
+		cmd( "set choice $observe" );
+		*choice == 1 ? observe = 'y' : observe = 'n';
+		cmd( "set choice $initial" );
+		*choice == 1 ? initial = 'y' : initial = 'n';
+		cur_descr->initial = initial;
+		cur_descr->observe = observe;
 	   
-	   for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-	   {
+		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
+		{
 		   cv = cur->search_var( NULL, lab_old );
-		   cv->save=save;
-		   cv->savei=savei;
-		   cv->debug=num==1?'d':'n';
-		   cv->plot=plot;
+		   cv->save = save;
+		   cv->savei = savei;
+		   cv->debug = ( num == 1 ) ? 'd' : 'n';
+		   cv->plot = plot;
 		   cv->parallel = parallel;
 		   cv->observe = ( observe == 'y' ) ? true : false;
-	   }
+		}
 		  
-	   cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
-	   change_descr_text( lab_old );
-	   if ( cv->param == 1 || cv->num_lag > 0 )
-	   {
-		 cmd( "set text_description \"[.chgelem.desc.i.text get 1.0 end]\"" );
-		 change_init_text( lab_old );
-	   }
+		cmd( "set text_description \"[.chgelem.desc.f.text get 1.0 end]\"" );
+		change_descr_text( lab_old );
+		if ( cv->param == 1 || cv->num_lag > 0 )
+		{
+			cmd( "set text_description \"[.chgelem.desc.i.text get 1.0 end]\"" );
+			change_init_text( lab_old );
+		}
 	  
-	   unsaved_change( true );		// signal unsaved change
+		unsaved_change( true );		// signal unsaved change
 
-	   if ( save == 1 || savei == 1 )
-	   {
-		  for ( cur = r; cur != NULL; cur = cur->up )
-			if ( ! cur->to_compute )
-			{
-			   cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
-			}
-	   }
+		if ( save == 1 || savei == 1 )
+			for ( cur = r; cur != NULL; cur = cur->up )
+				if ( ! cur->to_compute )
+					cmd( "tk_messageBox -parent .chgelem -type ok -title Warning -icon warning -message \"Cannot save item\" -detail \"Item\n'%s'\nset to be saved but it will not be registered for the Analysis of Results, since object\n'%s'\nis not set to be computed.\"", lab_old, cur->label );
 	}
 
 	if ( done != 8 )
-	  *choice = 0;
+		*choice = 0;
 	else
-	  *choice = 7;  
+		*choice = 7;  
 
 	here_endelem:
 
@@ -2288,7 +2285,7 @@ case 76:
 			cv = cur->search_var( NULL, lab_old );
 			cv->num_lag = numlag;
 			delete [ ] cv->val;
-			cv->val=new double[numlag+1];
+			cv->val = new double[ numlag + 1 ];
 			for ( i = 0; i < numlag + 1; ++i )
 				cv->val[ i ] = 0;
 			cv->param = nature;
@@ -3592,7 +3589,7 @@ case 37:
 		sprintf( msg, "%s/%s.%s", path, lab, docsv ? "csv" : "res" );
 		
 	rf = new result( msg, "wt", dozip, docsv );	// create results file object
-	for ( n = r; n->up != NULL; n = n->up );		// get root object
+	for ( n = r; n->up != NULL; n = n->up );	// get root object
 	rf->title( n, 1 );							// write header
 	rf->data( n, 0, actual_steps );				// write all data
 	delete rf;									// close file and delete object

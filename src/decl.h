@@ -556,8 +556,10 @@ FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
 bool alloc_save_mem( object *r );
+bool contains( FILE *f, char *lab, int len );
 bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 bool get_bool( const char *tcl_var, bool *var = NULL );
+bool is_equation_header( char *line, char *var, char *updt_in );
 bool load_description( char *msg, FILE *f );
 bool load_prev_configuration( void );
 bool open_configuration( object *&r, bool reload );
@@ -576,23 +578,15 @@ double get_double( const char *tcl_var, double *var = NULL );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
-int contains ( FILE *f, char *lab, int len );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 int get_int( const char *tcl_var, int *var = NULL );
-int is_equation_header( char *line, char *var );
 int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
 int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int my_strcmp( char *a, char *b );
 int num_sensitivity_variables( sense *rsens );
-int reset_bridges( object *r );
 int shrink_gnufile( void );
-int sort_function_down( const void *a, const void *b );
-int sort_function_down_two( const void *a, const void *b );
-int sort_function_up( const void *a, const void *b );
-int sort_function_up_two( const void *a, const void *b );
-int sort_labels_down( const void *a, const void *b );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
@@ -759,6 +753,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global internal variables (not visible to the users)
 extern FILE *log_file;			// log file, if any
+extern bool eq_dum;				// current equation is dummy
 extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool in_edit_data;		// in initial settings mode
@@ -813,8 +808,6 @@ extern int series_saved;		// number of series saved
 extern int stack;				// LSD stack call level
 extern int stack_info; 			// LSD stack control
 extern int strWindowOn;			// control the presentation of the model structure window (bool)
-extern int total_obj;			// total objects in model
-extern int total_var;       	// total variables/parameters in model
 extern int watch;				// allow for graph generation interruption (bool)
 extern int when_debug;      	// next debug stop time step (0 for none )
 extern int wr_warn_cnt;			// invalid write operations warning counter

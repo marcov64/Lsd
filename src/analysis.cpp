@@ -3700,15 +3700,6 @@ delete [ ] end;
 
 
 /************************
-SORT_ON_END
-************************/
-void sort_on_end( store *app )
-{
-	qsort( ( void * ) app, num_var, sizeof( vs[ 0 ] ), sort_labels_down );
-}
-
-
-/************************
 SORT_LABELS_DOWN
 ************************/
 /*
@@ -3721,7 +3712,7 @@ The variables are grouped according to:
 The function is complicated for the point 4) by the fact that the tag is recorded
 in the labels as a single string using the underscore '_' as joining character.
 */
-int sort_labels_down(const void *a, const void *b)
+int sort_labels_down( const void *a, const void *b )
 {
 	int a_int, b_int, counter;
 	int diff;
@@ -3731,16 +3722,20 @@ int sort_labels_down(const void *a, const void *b)
 	int b_sz = strlen( ( ( store * ) b )->label );
 	char *a_str = new char [ a_sz + 1 ];
 	char *b_str = new char [ b_sz + 1 ];
+	
 	strcpy( a_str, ( ( store * ) a )->label );
 	strcpy( b_str, ( ( store * ) b )->label );
+	
 	for ( int i = 0; i < a_sz; ++i )
 		a_str[ i ] = tolower( a_str[ i ] );
+	
 	for ( int i = 0; i < b_sz; ++i )
 		b_str[ i ] = tolower( b_str[ i ] );
 	
 	// make names started with a underscore go to the end
 	if ( a_str[ 0 ] == '_' )
 		a_str[ 0 ] = '~';
+	
 	if ( b_str[ 0 ] == '_' )
 		b_str[ 0 ] = '~';
 
@@ -3762,12 +3757,24 @@ int sort_labels_down(const void *a, const void *b)
 				{
 					a_int = atoi( ( ( store * ) a )->tag + counter );
 					b_int = atoi( ( ( store * ) b )->tag + counter );
+					
 					if ( a_int != b_int )
 						return a_int - b_int;
+					
 					while ( ( ( store * ) a )->tag[ counter ] != '_' )
 						++counter;
+					
 					++counter;
 				}
+}
+
+
+/************************
+SORT_ON_END
+************************/
+void sort_on_end( store *app )
+{
+	qsort( ( void * ) app, num_var, sizeof( vs[ 0 ] ), sort_labels_down );
 }
 
 

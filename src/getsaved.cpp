@@ -60,8 +60,6 @@ int t;						// current time step
 int seed = 1;				// random number generator initial seed
 int sim_num = 1;			// simulation number running
 int stack;					// LSD stack call level
-int total_obj = 0;			// total objects in model
-int total_var = 0;			// total variables/parameters in model
 int when_debug;				// next debug stop time step (0 for none)
 int wr_warn_cnt;			// invalid write operations warning counter
 long nodesSerial = 1;		// network node's serial number global counter
