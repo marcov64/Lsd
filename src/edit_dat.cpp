@@ -246,10 +246,9 @@ SEARCH_TITLE
 void search_title( object *root, char *tag, int *i, char *lab, int *incr )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
-	int num, multi, counter, j;
-	object *c, *cur;
-	variable *cv;
+	int multi, counter;
 	bridge *cb;
+	object *c, *cur;
 
 	set_title( root, lab, tag, incr );
 

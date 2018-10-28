@@ -980,48 +980,55 @@ void write_list(FILE *frep, object *root, int flag_all, char const *prefix)
 /********************************
 FILL_LIST_VAR
 *********************************/
-void fill_list_var(object *r, int flag_all, int flag_init)
+void fill_list_var( object *r, int flag_all, int flag_init )
 {
-	object *cur;
-	variable *cv;
 	int count;
 	bridge *cb;
+	object *cur;
+	variable *cv;
 
-	for ( cv=r->v; cv != NULL; cv = cv->next )
-	 {if ( ( cv->param == 0 || cv->param == 2 ) && ( flag_init == 0 || cv->num_lag > 0))
-	   cmd( "lappend rawlist \"%s (%d)\"", cv->label, cv->num_lag );
-	 }
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( ( cv->param == 0 || cv->param == 2 ) && ( flag_init == 0 || cv->num_lag > 0) )
+		cmd( "lappend rawlist \"%s (%d)\"", cv->label, cv->num_lag );
+	}
+	
 	if ( flag_all == 0 )
-	 return;
-	for (cb = r->b; cb != NULL; cb = cb->next )
-	 fill_list_var(cb->head, flag_all, flag_init);
+		return;
+	
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		fill_list_var( cb->head, flag_all, flag_init );
 }
 
 
 /********************************
 FILL_LIST_PAR
 *********************************/
-void fill_list_par(object *r, int flag_all)
+void fill_list_par( object *r, int flag_all )
 {
-	object *cur;
-	variable *cv;
 	int count;
 	bridge *cb;
+	object *cur;
+	variable *cv;
 
-	for ( cv=r->v; cv != NULL; cv = cv->next )
-	 {if ( cv->param == 1 )
-	   cmd( "lappend rawlist \"%s\"", cv->label );
-	 }
+	for ( cv = r->v; cv != NULL; cv = cv->next )
+	{
+		if ( cv->param == 1 )
+			cmd( "lappend rawlist \"%s\"", cv->label );
+	}
+	
 	if ( flag_all == 0 )
-	 return;
-	for (cb = r->b; cb != NULL; cb = cb->next )
-	 fill_list_par(cb->head, flag_all);
+		return;
+	
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+		fill_list_par( cb->head, flag_all);
 }
 
 
-/*
+/********************************
+CREATE_TABLE_INIT
 Create recursively the help table for an Object
-*/
+*********************************/
 void create_table_init(object *r)
 {
 	int i;
@@ -1045,7 +1052,7 @@ void create_table_init(object *r)
 	{
 	   fprintf( frep, "<i>Containing: &nbsp;</i>" );
 	   fprintf( frep, "<TT><a HREF=\"#%s\">%s</a></TT>", r->b->blabel, r->b->blabel );
-	   for (cb = r->b->next ; cb != NULL; cb = cb->next )
+	   for ( cb = r->b->next ; cb != NULL; cb = cb->next )
 		 fprintf( frep, "<TT>,  <a HREF=\"#%s\">%s</a></TT>", cb->blabel, cb->blabel );
 	   fprintf( frep, "<BR>\n" );
 	}
@@ -1182,14 +1189,15 @@ void create_table_init(object *r)
 	 fprintf( frep, "</table><br>\n" );
 	}//end if exist a var
 
-	for (cb = r->b; cb != NULL; cb = cb->next )
-	   create_table_init(cb->head);
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	   create_table_init( cb->head);
 }
 
 
-/*
+/********************************
+CREATE_INITIAL_VALUES
 Create recursively the help table for the initial values of an Object
-*/
+*********************************/
 void create_initial_values(object *r)
 {
 	int count = 0, i, j;
@@ -1204,8 +1212,8 @@ void create_initial_values(object *r)
 
 	if (count == 0 )
 	 {//no need for initialization, typically root
-	  for (cb = r->b; cb != NULL; cb = cb->next )
-	   create_initial_values(cb->head);
+	  for ( cb = r->b; cb != NULL; cb = cb->next )
+	   create_initial_values( cb->head);
 	  return;
 	 }  
 	 
@@ -1286,15 +1294,16 @@ void create_initial_values(object *r)
 	}
 	fprintf( frep, "</table><BR>\n" );
 
-	for (cb = r->b; cb != NULL; cb = cb->next )
-	  create_initial_values(cb->head);
+	for ( cb = r->b; cb != NULL; cb = cb->next )
+	  create_initial_values( cb->head);
 }
 
 
-/*
+/********************************
+IS_EQUATION_HEADER
 Squeeze the spaces out of line and returns 1 if the line is an equation header,
 placing the Variable label in Var
-*/
+*********************************/
 bool is_equation_header( char *raw_line, char *var, char *updt_in )
 {
 	bool header;
@@ -1381,10 +1390,10 @@ FILE *create_frames( char *t )
 	if ( f == NULL )
 		return NULL;
 
-	fprintf(f, "<html> <head> <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\"> <meta name=\"AUTHOR\" content=\"Marco Valente\"> </head>\n" );
-	fprintf(f, "<FRAMESET framespacing=0 border=1 rows=\"30,*\"> <FRAME NAME=\"testa\" SRC=\"head_%s\"",t);
+	fprintf( f, "<html> <head> <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\"> <meta name=\"AUTHOR\" content=\"Marco Valente\"> </head>\n" );
+	fprintf( f, "<FRAMESET framespacing=0 border=1 rows=\"30,*\"> <FRAME NAME=\"testa\" SRC=\"head_%s\"",t );
 
-	fprintf(f, "frameborder=0 MARGINHEIGHT=\"0\" MARGINWIDTH=\"0\" SCROLLING=\"NO\" NORESIZE> <FRAME NAME=\"body\" SRC=\"body_%s\" frameborder=0 MARGINHEIGHT=\"0\" MARGINWIDTH=\"0\" SCROLLING=\"AUTO\"> </FRAMESET> <NOFRAMES>  <p>Use a frame-enabled browser</p> </NOFRAMES> </html>",t);
+	fprintf( f, "frameborder=0 MARGINHEIGHT=\"0\" MARGINWIDTH=\"0\" SCROLLING=\"NO\" NORESIZE> <FRAME NAME=\"body\" SRC=\"body_%s\" frameborder=0 MARGINHEIGHT=\"0\" MARGINWIDTH=\"0\" SCROLLING=\"AUTO\"> </FRAMESET> <NOFRAMES>  <p>Use a frame-enabled browser</p> </NOFRAMES> </html>",t );
 
 	fclose( f );
 
@@ -1393,17 +1402,17 @@ FILE *create_frames( char *t )
 	if ( f == NULL )
 		return NULL;
 
-	fprintf(f, "<html> <head> </head > <body bgcolor=\"#D6A9FE\"> <center>" );
-	fprintf(f, "<a href=\"body_%s#_TOP_\" target=body>Top</a> &nbsp", t);
+	fprintf( f, "<html> <head> </head > <body bgcolor=\"#D6A9FE\"> <center>" );
+	fprintf( f, "<a href=\"body_%s#_TOP_\" target=body>Top</a> &nbsp", t );
 	if ( desc || extra )
-		fprintf(f, "<a href=\"body_%s#_DESCRIPTION_\" target=body>Description</a> &nbsp", t);
-	fprintf(f, "<a href=\"body_%s#_MODEL_STRUCTURE_\" target=body>Structure</a> &nbsp", t);
+		fprintf( f, "<a href=\"body_%s#_DESCRIPTION_\" target=body>Description</a> &nbsp", t );
+	fprintf( f, "<a href=\"body_%s#_MODEL_STRUCTURE_\" target=body>Structure</a> &nbsp", t );
 	if ( init )
-		fprintf(f, "<a href=\"body_%s#_INITIALVALUES_\" target=body>Initialization</a> &nbsp", t);
+		fprintf( f, "<a href=\"body_%s#_INITIALVALUES_\" target=body>Initialization</a> &nbsp", t );
 	if ( code )
-		fprintf(f, "<a href=\"body_%s#_DETAILS_\" target=body>Code</a> &nbsp", t);
+		fprintf( f, "<a href=\"body_%s#_DETAILS_\" target=body>Code</a> &nbsp", t );
 
-	fprintf(f, "</body> </html>" );
+	fprintf( f, "</body> </html>" );
 	fclose( f );
 
 	sprintf( msg, "body_%s", t );
@@ -1450,11 +1459,11 @@ SHOW_REP_OBSERVE
 ****************************************************/
 void show_rep_observe(FILE *f, object *n, int *begin)
 {
-	variable *cv, *cv1;
-	object *co;
-	description *cd;
 	int app, i;
 	bridge *cb;
+	object *co;
+	description *cd;
+	variable *cv, *cv1;
 
 	for ( cv=n->v; cv != NULL; cv = cv->next )
 	{
@@ -1477,17 +1486,17 @@ void show_rep_observe(FILE *f, object *n, int *begin)
 	  {
 		*begin = 0;
 		table = true;
-		fprintf(f,"<H3>Relevant elements to observe</H3>\n" );
+		fprintf( f,"<H3>Relevant elements to observe</H3>\n" );
 		
-		fprintf(f, "<table BORDER>" );
-		fprintf(f, "<tr>" );
-		fprintf(f, "<td><center><i>Element</i></center></td>\n" );
-		fprintf(f, "<td><center><i>Object</i></center></td>" );
-		fprintf(f, "<td><center><i>Type</i></center></td>\n" );
-		fprintf(f, "<td><center><i>Description</i></center></td>\n" );    
-		fprintf(f, "</tr>" );
+		fprintf( f, "<table BORDER>" );
+		fprintf( f, "<tr>" );
+		fprintf( f, "<td><center><i>Element</i></center></td>\n" );
+		fprintf( f, "<td><center><i>Object</i></center></td>" );
+		fprintf( f, "<td><center><i>Type</i></center></td>\n" );
+		fprintf( f, "<td><center><i>Description</i></center></td>\n" );    
+		fprintf( f, "</tr>" );
 	  }
-	 fprintf(f, "<tr VALIGN=TOP>" );
+	 fprintf( f, "<tr VALIGN=TOP>" );
 	 
 	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
 	 fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
@@ -1498,7 +1507,7 @@ void show_rep_observe(FILE *f, object *n, int *begin)
 	 if ( cv->param == 2 )
 	  fprintf( f, "<td>Function</td>" );
 		
-	 fprintf(f, "<td>" ); 
+	 fprintf( f, "<td>" ); 
 	 if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
 	 {   
 		for ( i = 0; cd->text[ i ] != '\0'; ++i )
@@ -1506,27 +1515,27 @@ void show_rep_observe(FILE *f, object *n, int *begin)
 		switch (cd->text[ i ])
 		 {
 		  case '\n':
-			 fprintf(f, "<br>\n" );
+			 fprintf( f, "<br>\n" );
 			 break;
 		  case '<':
-			 fprintf(f, "&lt;" );
+			 fprintf( f, "&lt;" );
 			 break;
 		  case '>':
-			 fprintf(f, "&gt;" );
+			 fprintf( f, "&gt;" );
 			 break;
 		  default:
-			 fprintf(f, "%c", cd->text[ i ] );
+			 fprintf( f, "%c", cd->text[ i ] );
 			 break;
 		 }
 		}
 	 }
 	 
-	 fprintf(f, "</td></tr>\n" );    
+	 fprintf( f, "</td></tr>\n" );    
 	}
 }
 
-for (cb=n->b; cb != NULL; cb = cb->next )
-	show_rep_observe(f, cb->head, begin);
+for ( cb = n->b; cb != NULL; cb = cb->next )
+	show_rep_observe( f, cb->head, begin);
 
 if ( n->up == NULL && table )
 	fprintf( f, "</table><BR>\n" );
@@ -1538,11 +1547,11 @@ if ( n->up == NULL && table )
  ****************************************************/
 void show_rep_initial( FILE *f, object *n, int *begin )
 {
-	variable *cv, *cv1;
-	object *co;
-	description *cd;
 	int app, i;
 	bridge *cb;
+	object *co;
+	description *cd;
+	variable *cv, *cv1;
 
 	for ( cv=n->v; cv != NULL; cv = cv->next )
 	{
@@ -1564,17 +1573,17 @@ void show_rep_initial( FILE *f, object *n, int *begin )
 	   {
 		*begin = 0;
 		table = true;
-		fprintf(f,"<H3>Relevant elements to initialize</H3>\n" );
+		fprintf( f,"<H3>Relevant elements to initialize</H3>\n" );
 		
-		fprintf(f, "<table BORDER>" );
-		fprintf(f, "<tr>" );
-		fprintf(f, "<td><center><i>Element</i></center></td>\n" );
-		fprintf(f, "<td><center><i>Object</i></center></td>" );
-		fprintf(f, "<td><center><i>Type</i></center></td>\n" );
-		fprintf(f, "<td><center><i>Description and initial values comments</i></center></td>\n" );    
-		fprintf(f, "</tr>" );
+		fprintf( f, "<table BORDER>" );
+		fprintf( f, "<tr>" );
+		fprintf( f, "<td><center><i>Element</i></center></td>\n" );
+		fprintf( f, "<td><center><i>Object</i></center></td>" );
+		fprintf( f, "<td><center><i>Type</i></center></td>\n" );
+		fprintf( f, "<td><center><i>Description and initial values comments</i></center></td>\n" );    
+		fprintf( f, "</tr>" );
 	   }
-	  fprintf(f, "<tr VALIGN=TOP>" );
+	  fprintf( f, "<tr VALIGN=TOP>" );
 	  
 	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", cv->label, cv->label );
 	  fprintf( f, "<td><TT><A HREF=\"#%s\">%s</A></TT></td>", n->label, n->label );
@@ -1585,7 +1594,7 @@ void show_rep_initial( FILE *f, object *n, int *begin )
 	  if ( cv->param == 2 )
 	   fprintf( f, "<td>Function</td>" );
 		
-	  fprintf(f, "<td>" ); 
+	  fprintf( f, "<td>" ); 
 	  bool desc_text = false;
 	  if ( cd->text != NULL && strlen( cd->text ) > 0 && ! strstr( cd->text, "(no description available)" ) )
 	  {   
@@ -1595,17 +1604,17 @@ void show_rep_initial( FILE *f, object *n, int *begin )
 		 switch (cd->text[ i ])
 		 {
 		  case '\n':
-			 fprintf(f, "<br>\n" );
+			 fprintf( f, "<br>\n" );
 			 desc_text = false;
 			 break;
 		  case '<':
-			 fprintf(f, "&lt;" );
+			 fprintf( f, "&lt;" );
 			 break;
 		  case '>':
-			 fprintf(f, "&gt;" );
+			 fprintf( f, "&gt;" );
 			 break;
 		  default:
-			 fprintf(f, "%c", cd->text[ i ] );
+			 fprintf( f, "%c", cd->text[ i ] );
 			 break;
 		 }
 		}
@@ -1621,28 +1630,28 @@ void show_rep_initial( FILE *f, object *n, int *begin )
 		 switch (cd->init[ i ])
 		 {
 		  case '\n':
-			 fprintf(f, "<br>\n" );
+			 fprintf( f, "<br>\n" );
 			 break;
 		  case '<':
-			 fprintf(f, "&lt;" );
+			 fprintf( f, "&lt;" );
 			 break;
 		  case '>':
-			 fprintf(f, "&gt;" );
+			 fprintf( f, "&gt;" );
 			 break;
 		  default:
-			 fprintf(f, "%c", cd->init[ i ] );
+			 fprintf( f, "%c", cd->init[ i ] );
 			 break;
 		 }
 		}
 	  }
 	  
-	  fprintf(f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label );
-	  fprintf(f, "</td></tr>\n" );    
+	  fprintf( f, " <A HREF=\"#_i_%s\">(Show initial values)</A>",  cv->label );
+	  fprintf( f, "</td></tr>\n" );    
 	 }
 	}
 
-	for (cb=n->b; cb != NULL; cb = cb->next )
-		show_rep_initial(f, cb->head, begin);
+	for ( cb = n->b; cb != NULL; cb = cb->next )
+		show_rep_initial( f, cb->head, begin);
 
 	if ( n->up == NULL && table )
 		fprintf( f, "</table><BR>\n" );
@@ -1780,12 +1789,12 @@ void tex_report_struct( object *r, FILE *f, bool table )
 {
 	int i;
 	char *ol, *vl;
-	variable *cv;
-	description *cd;
 	bridge *cb;
+	description *cd;
+	variable *cv;
 
 	if ( r->up == NULL )
-		fprintf(f, "\\section{Model Structure}\n\n" );
+		fprintf( f, "\\section{Model Structure}\n\n" );
 
 	ol = new char[ 2 * strlen( r->label ) + 1 ];
 	tex_strcpy( ol, r->label );
@@ -1871,15 +1880,15 @@ void tex_report_struct( object *r, FILE *f, bool table )
 		}
 
 		if ( ! table )
-			fprintf(f, "\\newline \n" ); 
+			fprintf( f, "\\newline \n" ); 
 		else
-			fprintf(f, "\\\\ \n  \\hline \n" ); 
+			fprintf( f, "\\\\ \n  \\hline \n" ); 
 	}
 
 	if ( r->v != NULL )
 	{
 		if ( table )
-			fprintf(f, "\\end{longtabu}\n\n" );
+			fprintf( f, "\\end{longtabu}\n\n" );
 		else
 			fprintf( f, "\n" );
 	}
@@ -1896,9 +1905,9 @@ void tex_report_observe( object *r, FILE *f, bool table )
 {
 	int i;
 	char *ol, *vl;
-	variable *cv;
-	description *cd;
 	bridge *cb;
+	description *cd;
+	variable *cv;
 
 	if ( r->up == NULL )
 	{
@@ -1970,9 +1979,9 @@ void tex_report_init( object *r, FILE *f, bool table )
 {
 	int i;
 	char *ol, *vl;
-	variable *cv;
-	description *cd;
 	bridge *cb;
+	description *cd;
+	variable *cv;
 
 	if ( r->up == NULL )
 	{
@@ -2056,10 +2065,10 @@ void tex_report_initall( object *r, FILE *f, bool table )
 {
 	int i, j;
 	char *ol, *vl;
+	bridge *cb;
+	description *cd;
 	object *cur;
 	variable *cv, *cv1;
-	description *cd;
-	bridge *cb;
 
 	if ( ! table )
 		return;

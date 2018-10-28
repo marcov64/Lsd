@@ -233,9 +233,9 @@ int browse( object *r, int *choice )
 {
 	char ch[ TCL_BUFF_STR ];
 	int num;
-	variable *ap_v;
-	object *ap_o;
 	bridge *cb;
+	object *ap_o;
+	variable *ap_v;
 
 	currObj = r;			// global pointer to C Tcl routines
 
@@ -1519,30 +1519,9 @@ case 32:
 			goto here_newparent;
 		}
 
-		if ( r->up == NULL )
-		{
-			cur = new object;
-			cur->init( NULL, lab );
-			cur->next = NULL;
-			cur->up = r;
-			cur->to_compute = true;
-			cur->b = r->b;
-			r->b = new bridge;
-			r->b->next = NULL;
-			r->b->blabel = new char[ strlen( lab ) + 1 ];
-			strcpy( r->b->blabel, lab );
-			r->b->head = cur;
-			cur->v = r->v;
-			r->v = NULL;
-			
-			for ( cur1 = cur->b->head; cur1 != NULL; cur1 = cur1->next )
-				cur1->up=cur;
-		}
-		else
-		{
-			r->insert_parent_obj_one( lab );
+		r->insert_parent_obj( lab );
+		if ( r->up != NULL )
 			r = r->up;
-		}
 	}
 
 	cmd( "set text_description [.inspar.d.f.text get 1.0 end]" );  
@@ -2340,39 +2319,10 @@ case 76:
 		}
 		
 		for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-		{
 			if ( ! delVar )
-			{
 				cur->chg_var_lab( lab_old, lab );
-				cv = cur->search_var( NULL, lab );
-			}
 			else
-			{
-				if ( ! strcmp( lab_old, cur->v->label ) )
-				{
-					app = cur->v->next;
-					delete [ ] cur->v->label;
-					delete [ ] cur->v->val;
-					delete cur->v;
-					cur->v = app;
-				}
-				else
-				{
-					for (cur_v = cur->v; cur_v->next != NULL; cur_v = cur_v->next )
-					{
-						if ( ! strcmp( lab_old,cur_v->next->label ) )
-						{
-							app = cur_v->next->next;
-							delete [ ] cur_v->next->label;
-							delete [ ] cur_v->next->val;
-							delete cur_v->next;
-							cur_v->next = app;
-							break;
-						}
-					}
-				}
-			}
-		}
+				cur->delete_var( lab_old );
 	}
 
 	if ( root->v == NULL && root->b == NULL )	// if last variable
@@ -2446,31 +2396,7 @@ case 79:
 		cur->add_var_from_example( cv );
 
 	for ( cur = r; cur != NULL; cur = cur->hyper_next( cur->label ) )
-	{
-		if ( ! strcmp( lab_old, cur->v->label ) )
-		{
-			app = cur->v->next;
-			delete [ ] cur->v->label;
-			delete [ ] cur->v->val;
-			delete cur->v;
-			cur->v = app;
-		}
-		else
-		{
-			for ( cur_v = cur->v; cur_v->next != NULL; cur_v = cur_v->next )
-			{
-				if ( ! strcmp( lab_old, cur_v->next->label) )
-				{
-					app = cur_v->next->next;
-					delete [ ] cur_v->next->label;
-					delete [ ] cur_v->next->val;
-					delete cur_v->next;
-					cur_v->next = app;
-					break;
-				}
-			}
-		}
-	}
+		cur->delete_var( lab_old );
 
 	unsaved_change( true );		// signal unsaved change
 	redrawRoot = true;			// request browser redraw
@@ -5783,9 +5709,9 @@ SHOW_SAVE
 ****************************************************/
 void show_save( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
@@ -5824,11 +5750,11 @@ SHOW_OBSERVE
 ****************************************************/
 void show_observe( object *n )
 {
-	variable *cv;
-	object *co;
-	description *cd;
 	int app;
 	bridge *cb;
+	description *cd;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
@@ -5861,11 +5787,11 @@ SHOW_INITIAL
 ****************************************************/
 void show_initial( object *n )
 {
-	variable *cv, *cv1;
-	object *co;
-	description *cd;
 	int i;
 	bridge *cb;
+	object *co;
+	description *cd;
+	variable *cv, *cv1;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
@@ -5934,9 +5860,9 @@ SHOW_PLOT
 ****************************************************/
 void show_plot( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->plot )
@@ -5967,9 +5893,9 @@ SHOW_DEBUG
 ****************************************************/
 void show_debug( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->debug == 'd' )
@@ -5998,9 +5924,9 @@ SHOW_PARALLEL
 ****************************************************/
 void show_parallel( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->parallel )
@@ -6026,9 +5952,9 @@ CLEAN_DEBUG
 ****************************************************/
 void clean_debug( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		cv->debug = 'n';
@@ -6044,9 +5970,9 @@ CLEAN_SAVE
 ****************************************************/
 void clean_save( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb; 
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 	{
@@ -6054,7 +5980,7 @@ void clean_save( object *n )
 		cv->savei = 0;
 	}
 	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co !=NULL; co = co->next )
+		for ( co = cb->head; co != NULL; co = co->next )
 			clean_save( co );
 }
 
@@ -6064,15 +5990,15 @@ CLEAN_PLOT
 ****************************************************/
 void clean_plot( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		cv->plot = false;
 	 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co !=NULL; co = co->next )
+		for ( co = cb->head; co != NULL; co = co->next )
 			clean_plot( co );
 }
 
@@ -6082,15 +6008,15 @@ CLEAN_PARALLEL
 ****************************************************/
 void clean_parallel( object *n )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		cv->parallel = false;
 	 
 	for ( cb = n->b; cb != NULL; cb = cb->next )
-		for ( co = cb->head; co !=NULL; co = co->next )
+		for ( co = cb->head; co != NULL; co = co->next )
 			clean_parallel( co );
 }
 
@@ -6128,9 +6054,9 @@ Also prevents invalid characters in the names
 ****************************************************/
 int check_label( char *l, object *r )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	Tcl_SetVar( inter, "nameVar", l, 0 );
 	cmd( "if [ regexp {^[a-zA-Z_][a-zA-Z0-9_]*$} $nameVar ] { set answer 1 } { set answer 0 }" );
@@ -6195,9 +6121,9 @@ CONTROL_TOCOMPUTE
 ****************************************************/
 void control_tocompute( object *r, char *l )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
@@ -6222,8 +6148,8 @@ INSERT_OBJECT
 ****************************************************/
 void insert_object( const char *w, object *r, bool netOnly )
 {
-	object *cur;
 	bridge *cb;
+	object *cur;
 
 	if ( ! netOnly || r->node != NULL )
 		cmd( "%s insert end %s", w, r->label );
@@ -6308,8 +6234,6 @@ void shift_var( int direction, char *vlab, object *r )
 			cv1 = cv;
 		}
 	} 
-
-	plog("\nWarning: should never reach this point in move_var" ); 
 }
 
 
@@ -6381,8 +6305,6 @@ void shift_desc( int direction, char *dlab, object *r )
 			cb1 = cb;
 		}
 	} 
-	 
-	plog("\nWarning: should never reach this point in shift_desc" ); 
 }
 
 
@@ -6501,6 +6423,8 @@ bool sort_listbox( int box, int order, object *r )
 		}
 		cv1->next = NULL;
 		
+		r->recreate_maps( );		// recreate the fast look-up maps
+		
 		return true;
 	}
 	
@@ -6519,6 +6443,7 @@ bool sort_listbox( int box, int order, object *r )
 		{
 			cb1 = cb->next;
 			newb.push_back( *cb );
+			cb->copy = true;		// prevent garbage collection
 			delete cb;
 		}
 		
@@ -6541,6 +6466,8 @@ bool sort_listbox( int box, int order, object *r )
 			cb1 = cb;
 		}
 		cb1->next = NULL;
+		
+		r->recreate_maps( );		// recreate the fast look-up maps
 		
 		return true;
 	}

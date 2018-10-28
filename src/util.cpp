@@ -489,8 +489,8 @@ This is the new version, after moving to the bridge-based representation
 ****************************************************/
 object *skip_next_obj( object *t, int *count )
 {
-	object *c;
 	int i;
+	object *c;
 
 	*count = 0;
 	if ( t == NULL )
@@ -547,9 +547,9 @@ SET_COUNTER
 ***************************************************/
 void set_counter( object *o )
 {
-	object *cur;
-	bridge *cb;
 	int i;
+	bridge *cb;
+	object *cur;
 
 	if ( o->up == NULL )
 		return;
@@ -698,10 +698,9 @@ lab_tit indicates the position of the object containing the variables in the mod
 ***************************************************/
 void set_lab_tit( variable *var )
 {
-	object *cur, *ceil, *cur1;
-	bridge *cb;
-	char app[ 20 * MAX_ELEM_LENGTH ], app1[ 20 * MAX_ELEM_LENGTH ];
 	bool first = true;
+	char app[ 20 * MAX_ELEM_LENGTH ], app1[ 20 * MAX_ELEM_LENGTH ];
+	object *cur;
 
 	if ( var->up->up == NULL )
 	{
@@ -757,31 +756,31 @@ description *search_description( char *lab )
 AUTOFILL_DESCR
 generate recur. the descriptions of the model as it is
 ***************************************************/
-void autofill_descr(object *o)
+void autofill_descr( object *o )
 {
 	int i;
+	bridge *cb;
 	description *cur;
 	variable *cv;
-	object *co;
-	bridge *cb;
 
-	cur=search_description(o->label);
-	if (cur == NULL )
-	 add_description(o->label, "Object", "(no description available)");
+	cur = search_description( o->label );
+	if ( cur == NULL )
+		add_description( o->label, "Object", "(no description available)" );
 
-	for (cv=o->v; cv!=NULL; cv=cv->next)
-	 {
-	  cur=search_description(cv->label);
-	  if (cur == NULL )
-	   {i=cv->param;
-	   if (i == 1 )
-		add_description(cv->label, "Parameter", "(no description available)");
-	   if (i == 0 )
-		add_description(cv->label, "Variable", "(no description available)");
-	   if (i==2)
-		add_description(cv->label, "Function", "(no description available)");
-	   } 
-	 } 
+	for ( cv = o->v; cv != NULL; cv = cv->next)
+	{
+		cur = search_description(cv->label);
+		if ( cur == NULL )
+		{
+			i = cv->param;
+			if ( i == 1 )
+				add_description( cv->label, "Parameter", "(no description available)" );
+			if ( i == 0 )
+				add_description( cv->label, "Variable", "(no description available)" );
+			if ( i == 2 )
+				add_description( cv->label, "Function", "(no description available)" );
+		} 
+	} 
 	 
 	for ( cb = o->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
@@ -1320,11 +1319,11 @@ COUNT_SAVE
 ****************************************************/
 void count_save( object *n, int *count )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
-	for ( cv = n->v; cv!=NULL; cv=cv->next )
+	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->save == 1 || cv->savei == 1 )
 			( *count )++;
 
@@ -1346,10 +1345,10 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
-	variable *cv;
-	object *co;
 	bridge *cb;
 	description *cd;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->save || all_var )
@@ -1580,9 +1579,9 @@ void result::data( object *root, int initstep, int endtstep )
 
 void result::data_recursive( object *r, int i )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
@@ -1710,9 +1709,9 @@ void result::title( object *root, int flag )
 void result::title_recursive( object *r, int header )
 {
 	bool single;
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{

@@ -1175,9 +1175,9 @@ ALLOC_SAVE_MEM
 bool alloc_save_mem( object *r )
 {
 	int toquit = quit;
+	bridge *cb;
 	object *cur;
 	variable *var;
-	bridge *cb;
 
 	//for each variable set the data saving support
 	for ( var = r->v; var != NULL; var = var->next )
@@ -1304,9 +1304,9 @@ RESET_END
 *********************************/
 void reset_end( object *r )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{ 
@@ -1548,9 +1548,9 @@ SEARCH_PARALLEL
 ***************************************/
 bool search_parallel( object *r )
 {
+	bridge *cb; 
 	variable *cv;
 	object *co;
-	bridge *cb; 
 
 	// search among the variables 
 	for ( cv = r->v; cv != NULL; cv=cv->next )

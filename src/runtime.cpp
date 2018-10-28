@@ -110,9 +110,9 @@ COUNT
 **************************************/
 void count( object *r, int *i )
 {
-	variable *a;
-	object *c;
 	bridge *cb;
+	object *c;
+	variable *a;
 
 	for ( a = r->v; a != NULL; a = a->next)
 		if ( a->plot == 1 )
@@ -129,11 +129,11 @@ ASSIGN
 **************************************/
 void assign( object *r, int *i, char *lab )
 {
-	variable *a;
-	object *c, *c1;
 	char cur_lab[ MAX_ELEM_LENGTH ];
 	int j;
 	bridge *cb;
+	object *c, *c1;
+	variable *a;
 
 	for ( a = r->v; a != NULL; a = a->next )
 		if ( a->plot == 1 )

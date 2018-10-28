@@ -791,9 +791,9 @@ Multi-thread scheduler for parallel updating
 void parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
-	bridge *cb;
-	clock_t start;
 	int i, nt, wait_time;
+	clock_t start;
+	bridge *cb;
 	object *co;
 	variable *cv;
 	
