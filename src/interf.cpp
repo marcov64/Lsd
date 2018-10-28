@@ -2898,8 +2898,18 @@ case 73:
 		delete [ ] path;
 		path = new char[ strlen( lab1 ) + 1 ];
 		strcpy( path, lab1 );
+		delete [ ] struct_file;
 		if ( strlen( lab1 ) > 0 )
+		{
 			cmd( "cd $path" );
+			struct_file = new char[ strlen( path ) + strlen( simul_name ) + 6 ];
+			sprintf( struct_file, "%s/%s.lsd", path, simul_name );
+		}
+		else
+		{
+			struct_file = new char[ strlen( simul_name ) + 6 ];
+			sprintf( struct_file, "%s.lsd", simul_name );
+		}
 	}
 
 	if ( ! save_configuration( ) )
