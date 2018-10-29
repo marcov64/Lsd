@@ -694,20 +694,20 @@ char gismsg[300];
           		case 1:						// linear congruential in (0,1)
           		case 3:						// linear congruential in [0,1)
           		default:
-                shuffle( it_start,it, lc);
+                std::shuffle( it_start,it, lc);
                 break;
           		case 2:						// Mersenne-Twister 32 bits in (0,1)
           		case 4:						// Mersenne-Twister 32 bits in [0,1)
-                shuffle( it_start,it, mt32);
+                std::shuffle( it_start,it, mt32);
                 break;
           		case 5:						// Mersenne-Twister 64 bits in [0,1)
-                shuffle( it_start,it, mt64);
+                std::shuffle( it_start,it, mt64);
                 break;
           		case 6:						// lagged fibonacci 24 bits in [0,1)
-                shuffle( it_start,it, lf24);
+                std::shuffle( it_start,it, lf24);
                 break;
           		case 7:						// lagged fibonacci 48 bits in [0,1)
-                shuffle( it_start,it, lf48);
+                std::shuffle( it_start,it, lf48);
                 break;
           	}
         }
@@ -734,20 +734,20 @@ char gismsg[300];
     		case 1:						// linear congruential in (0,1)
     		case 3:						// linear congruential in [0,1)
     		default:
-          shuffle(position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lc);
+          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lc);
           break;
     		case 2:						// Mersenne-Twister 32 bits in (0,1)
     		case 4:						// Mersenne-Twister 32 bits in [0,1)
-          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt32);
+          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt32);
           break;
     		case 5:						// Mersenne-Twister 64 bits in [0,1)
-          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt64);
+          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt64);
           break;
     		case 6:						// lagged fibonacci 24 bits in [0,1)
-          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf24);
+          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf24);
           break;
     		case 7:						// lagged fibonacci 48 bits in [0,1)
-          shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf48);
+          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf48);
           break;
     	}
 

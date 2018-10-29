@@ -2393,12 +2393,6 @@ ran_gen =	7 : Lagged fibonacci with 48 bits resolution in [0,1)
 ****************************************************/
 int ran_gen = 2;					// default pseudo-random number generator
 
-minstd_rand lc;						// linear congruential generator
-mt19937 mt32;						// Mersenne-Twister 32 bits generator
-mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
-ranlux24 lf24;						// lagged fibonacci 24 bits generator
-ranlux48 lf48;						// lagged fibonacci 48 bits generator
-
 void init_random( int seed )
 {
 	if ( seed < 0 )

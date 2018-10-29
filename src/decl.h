@@ -750,7 +750,7 @@ extern int fast_mode;
 extern int max_step;
 extern int quit;
 extern int ran_gen;				// pseudo-random number generator to use (1-5) )
-#ifdef CPP11
+#ifdef CPP11 //global declaration to allow usage elsewhere, too.
 extern minstd_rand lc;						// linear congruential generator
 extern mt19937 mt32;						// Mersenne-Twister 32 bits generator
 extern mt19937_64 mt64;					// Mersenne-Twister 64 bits generator

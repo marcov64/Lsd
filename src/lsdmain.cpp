@@ -157,8 +157,16 @@ map < string, profile > prof;	// set of saved profiling times
 FILE *log_file = NULL;		// log file, if any
 
 #ifdef CPP11
+
+//declare random number generators globally.
+minstd_rand lc;						// linear congruential generator
+mt19937 mt32;						// Mersenne-Twister 32 bits generator
+mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
+ranlux24 lf24;						// lagged fibonacci 24 bits generator
+ranlux48 lf48;						// lagged fibonacci 48 bits generator
+
 eq_mapT eq_map;				// fast equation look-up map
-#endif
+#endif //#ifdef CPP11
 
 #ifdef LIBZ
 int dozip = true;			// compressed results file flag (bool)
