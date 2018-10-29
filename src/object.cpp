@@ -405,6 +405,7 @@ object* object::obj_by_unique_id(double id)
 		error_hard( msg, "bounding error!",
 					"please contact developers",
 					true );
+    return NULL;
   }
 }
 
@@ -455,6 +456,7 @@ double object::unique_id()
 			error_hard( msg, "object is not declared unique",
 						"declare the object type as unique first",
             true );
+    return NULL;
   } else {
     return uID -> id;
   }
@@ -1821,7 +1823,8 @@ void object::lsdrndsort(char const *obj)
 //     sprintf(msg,"\nBridge label is %s",cb->blabel);plog(msg);
 
 
-  for ( cb = b; cb != NULL && strcmp( cb->blabel, obj ); cb = cb->next );
+  for ( cb = b; cb != NULL && strcmp( cb->blabel, obj )==0; cb = cb->next );
+
 	if ( cb == NULL || cb->head == NULL )
 	{
         sprintf( msg, "'%s' decending from '%s' is missing for random sorting", obj,label );
