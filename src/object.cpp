@@ -1817,12 +1817,6 @@ void object::lsdrndsort(char const *obj)
 	object *cur, *nex;
   bridge *cb;
 
-//   sprintf( msg,"\nCalled by %s",label);
-//   plog(msg);
-//   for (cb = b; cb != NULL; cb=cb->next)
-//     sprintf(msg,"\nBridge label is %s",cb->blabel);plog(msg);
-
-
   for ( cb = b; cb != NULL && strcmp( cb->blabel, obj )==0; cb = cb->next );
 
 	if ( cb == NULL || cb->head == NULL )

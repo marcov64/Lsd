@@ -242,10 +242,8 @@ char gismsg[300];
   					"check your code to prevent this situation. If you want to change the space, deregister elemet from old one first." );
         return false; //re-registering not allowed. derigster at gis first."
       } else {
-        sprintf( gismsg,"\nInfo (t=%i): In register_at_map() the item %s is already part of the space.",t,label);
-        plog(gismsg);
-        sprintf( gismsg,"It will be moved from pos (%g,%g) to pos (%g,%g) instead.",position->x,position->y,_x,_y);
-        plog(gismsg);
+        plog("\nInfo (t=%i): In register_at_map() the item %s is already part of the space.","",t,label);
+        plog("It will be moved from pos (%g,%g) to pos (%g,%g) instead.","",position->x,position->y,_x,_y);
         return change_position(_x,_y);
       }
     }
@@ -718,47 +716,51 @@ char gismsg[300];
 
   // it_rnd_full
   // Grab all objects with label for cycle in random order
-  void object::it_rnd_full(char const lab[]){
+  void object::it_rnd_full(char const lab[])
+  {
     position->objDis_inRadius.clear();//reset vector
     for (int x = 0; x < position->map->xn; x++){
       for (int y = 0; y < position->map->yn; y++){
         for (object* candidate : position->map->elements.at(x).at(y)){
           if ( strcmp(candidate->label,lab) == 0)
-            position->objDis_inRadius.emplace_back(-1.0,candidate);
+            position->objDis_inRadius.emplace_back(-1,candidate);
+//             position->objDis_inRadius.push_back(std::make_pair(RND,candidate));
         }
       }
     }
-
+//     std::sort( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius) );
+//     std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by distance
     switch ( ran_gen )
     	{
     		case 1:						// linear congruential in (0,1)
     		case 3:						// linear congruential in [0,1)
     		default:
-          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lc);
+          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lc);
           break;
     		case 2:						// Mersenne-Twister 32 bits in (0,1)
     		case 4:						// Mersenne-Twister 32 bits in [0,1)
-          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt32);
+          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), mt32);
           break;
     		case 5:						// Mersenne-Twister 64 bits in [0,1)
-          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), mt64);
+          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), mt64);
           break;
     		case 6:						// lagged fibonacci 24 bits in [0,1)
-          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf24);
+          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lf24);
           break;
     		case 7:						// lagged fibonacci 48 bits in [0,1)
-          std::shuffle( position->objDis_inRadius.begin(),position->objDis_inRadius.end(), lf48);
+          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lf48);
           break;
     	}
 
-    position->it_obj = position->objDis_inRadius.begin();
+    position->it_obj = std::begin(position->objDis_inRadius);
   }
 
   // it_in_radius -- works on position->objDis_inRadius
   // produce iterable list of objects with label inside of radius around origin.
   // the list is stored with the asking object. This allows parallelisation AND easy iterating with a macro.
   // give back first element in list
-  void object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal){
+  void object::it_in_radius(char const lab[], double radius, bool random, object* caller, int lag, char const varLab[], char const condition[], double condVal)
+  {
 
     position->objDis_inRadius.clear();//reset vector
     double pseudo_radius = (radius < 0 ? -1 : radius*radius);
@@ -772,7 +774,7 @@ char gismsg[300];
     make_objDisSet_unique(true); //sorted = true
     randomise_objDisSetIntvls(true); //sorted = true
 
-	  position->it_obj = position->objDis_inRadius.begin();
+	  position->it_obj = std::begin(position->objDis_inRadius);
   }
 
   //  next_neighbour_exists
@@ -787,7 +789,7 @@ char gismsg[300];
   object* object::next_neighbour()
   {
     object* next_ngbo = NULL;
-    if (position->it_obj != position->objDis_inRadius.end() ){
+    if (position->it_obj != std::end(position->objDis_inRadius) ){
       next_ngbo =  position->it_obj->second;
       position->it_obj++; //advance
     }
