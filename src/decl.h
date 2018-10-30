@@ -57,6 +57,7 @@
 #include <exception>
 #include <condition_variable>
 #include <functional>
+#include <unordered_map>
 #include <chrono>
 #endif //#ifdef CPP11
 
@@ -142,6 +143,7 @@ using namespace std;
 class object;
 class variable;
 struct bridge;
+struct mnode;
 struct netNode;
 struct netLink;
 #ifdef CPP11
@@ -154,34 +156,43 @@ struct gisPosition;
 struct Wrap;
 #endif //#ifdef CPP11
 
-#ifdef CPP11
-// special types used for fast equation lookup
+// special types used for fast equation, object and variable lookup
+typedef pair< string, bridge * > b_pairT;
+typedef pair< string, variable * > v_pairT;
+#ifndef CPP11
+typedef map< string, bridge * > b_mapT;
+typedef map< string, variable * > v_mapT;
+#else
 typedef function< double( object *caller, variable *var ) > eq_funcT;
-typedef map< string, eq_funcT > eq_mapT;
+typedef unordered_map< string, eq_funcT > eq_mapT;
+typedef unordered_map< string, bridge * > b_mapT;
+typedef unordered_map< string, variable * > v_mapT;
 #endif //#ifdef CPP11
 
 class object
 {
 	public:
 	
-	bool *del_flag;						// address of flag to signal deletion
+	char *label;
 	bool deleting;						// indicate deletion in process
 	bool to_compute;
-
-	bridge *b;
-	char *label;
 	int acounter;
 	int lstCntUpd;						// period of last counter update
-	netNode *node;						// pointer to network node data structure
-	object *hook;
+	bridge *b;
 	object *next;
 	object *up;
 	variable *v;
+	object *hook;
+	netNode *node;						// pointer to network node data structure
 	void *cext;							// pointer to a C++ object extension to the LSD object
+	bool *del_flag;						// address of flag to signal deletion
 	#ifdef CPP11
   uniqueId *uID; //unique identifier - double due to LSD data structure.
 	gisPosition *position; //Pointer to gis data structure
 	#endif //#ifdef CPP11
+
+	b_mapT b_map;						// fast lookup map to object bridges
+	v_mapT v_map;						// fast lookup map to variables
 
   #ifdef PARALLEL_MODE
 	mutex parallel_delete;				// mutex lock for parallel deletion
@@ -252,15 +263,17 @@ class object
 	void delete_net( char const *lab );
 	void delete_node_net( void );
 	void delete_obj( void );
+	void delete_var( char const *lab );
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
 	void initturbo( char const *label, double num );	// set turbo search structure
-	void insert_parent_obj_one( char const *lab );
+	void insert_parent_obj( char const *lab );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
 	void lsdrndsort(char const *obj);
 	void name_node_net( char const *nodeName );
 	void recal( char const *l );
+	void recreate_maps( void );
 	void replicate( int num, int propagate );
 	void save_param( FILE *f );
 	void save_struct( FILE *f, char const *tab );
@@ -349,25 +362,26 @@ struct variable
 {
 	public:
 	
+	char *label;
+	char *lab_tit;
+	char data_loaded;
+	char debug;
+	bool dummy;
 	bool observe;
 	bool parallel;
 	bool plot;
 	bool save;
 	bool savei;
 	bool under_computation;
-	char *lab_tit;
-	char *label;
-	char data_loaded;
-	char debug;
-	double *data;
-	double *val;
-	double deb_cnd_val;
 	int deb_cond;
 	int end;
 	int last_update;
 	int num_lag;
 	int param;
 	int start;
+	double *data;
+	double *val;
+	double deb_cnd_val;
 	object *up;
 	variable *next;
 
@@ -388,6 +402,20 @@ struct variable
 	void empty( void );
 };
 
+struct bridge
+{
+	char *blabel;
+	bool copy;							// just a temporary copy
+	bool counter_updated;
+	bridge *next;
+	mnode *mn;
+	object *head;
+	
+	bridge( const char *lab );			// constructor
+	bridge( const bridge &b );			// copy constructor
+	~bridge( void );					// destructor
+};
+
 struct mnode
 {
 	long deflev;						// saves the log number objects to allow defaulting
@@ -397,15 +425,6 @@ struct mnode
 	void create( double level );
 	void empty( void );
 	object *fetch( double *n, double level = 0 );
-};
-
-struct bridge
-{
-	bool counter_updated;
-	bridge *next;
-	char *blabel;
-	mnode *mn;
-	object *head;
 };
 
 // network data structures
@@ -781,8 +800,10 @@ FILE *search_data_ent( char *name, variable *v );
 FILE *search_data_str( char const *name, char const *init, char const *str );
 FILE *search_str( char const *name, char const *str );
 bool alloc_save_mem( object *r );
+bool contains( FILE *f, char *lab, int len );
 bool discard_change( bool checkSense = true, bool senseOnly = false, const char title[ ] = "" );
 bool get_bool( const char *tcl_var, bool *var = NULL );
+bool is_equation_header( char *line, char *var, char *updt_in );
 bool load_description( char *msg, FILE *f );
 bool load_prev_configuration( void );
 bool open_configuration( object *&r, bool reload );
@@ -801,23 +822,15 @@ double get_double( const char *tcl_var, double *var = NULL );
 int browse( object *r, int *choice );
 int check_label( char *l, object *r );
 int compute_copyfrom( object *c, int *choice );
-int contains ( FILE *f, char *lab, int len );
 int deb( object *r, object *c, char const *lab, double *res, bool interact = false );
 int get_int( const char *tcl_var, int *var = NULL );
-int is_equation_header( char *line, char *var );
 int load_configuration( bool reload, bool quick = false );
 int load_sensitivity( FILE *f );
 int lsdmain( int argn, char **argv );
 int min_hborder( int *choice, int pdigits, double miny, double maxy );
 int my_strcmp( char *a, char *b );
 int num_sensitivity_variables( sense *rsens );
-int reset_bridges( object *r );
 int shrink_gnufile( void );
-int sort_function_down( const void *a, const void *b );
-int sort_function_down_two( const void *a, const void *b );
-int sort_function_up( const void *a, const void *b );
-int sort_function_up_two( const void *a, const void *b );
-int sort_labels_down( const void *a, const void *b );
 long get_long( const char *tcl_var, long *var = NULL );
 long num_sensitivity_points( sense *rsens );
 object *check_net_struct( object *caller, char const *nodeLab, bool noErr = false );
@@ -984,6 +997,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global internal variables (not visible to the users)
 extern FILE *log_file;			// log file, if any
+extern bool eq_dum;				// current equation is dummy
 extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating
 extern bool in_edit_data;		// in initial settings mode
@@ -1038,8 +1052,6 @@ extern int series_saved;		// number of series saved
 extern int stack;				// LSD stack call level
 extern int stack_info; 			// LSD stack control
 extern int strWindowOn;			// control the presentation of the model structure window (bool)
-extern int total_obj;			// total objects in model
-extern int total_var;       	// total variables/parameters in model
 extern int watch;				// allow for graph generation interruption (bool)
 extern int when_debug;      	// next debug stop time step (0 for none )
 extern int wr_warn_cnt;			// invalid write operations warning counter

@@ -1156,12 +1156,19 @@ Extensive web-based analysis of results support, including time series plots.
 User configurations up and download. Results CSV data download.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'><a href="LSD_macros.html#eigen">Eigen
-library</a>.</span></b><span lang=EN-US style='mso-ansi-language:EN-US'> A
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Fast Object and Variable look-up</b>. Significant search
+speed-up of larger models by the allocation of high-performance dynamic memory
+maps to sets of Object instances (bridges), Variables and Parameters. It
+replaces linked-list sequential searching in most situations at the expense of
+slightly higher memory footprint. It affects both user generated searches and
+internal LSD element look ups.</p>
+
+<p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b><a href="LSD_macros.html#eigen">Eigen library</a>.</b> A
 powerful library for executing linear algebra in Equations code, including
 native C++ support to matrix and vector containers, numerical solvers, and
 related algorithms.<o:p></o:p></span></p>
@@ -1199,46 +1206,26 @@ href="modelbrowser.html#groups">examples</a> on industrial dynamics, market dyna
 consumer networks, and macroeconomics, including in-depth sensitivity analysis.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
-5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>New Macros.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> <a href="LSD_macros.html#lattice">Lattice
-macros</a> for color reading (</span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>V_LAT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>), window closing (</span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>DELETE_LAT(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>), and move in a Object structure
-organized as a lattice (</span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>UP_LAT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>DOWN_LAT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>RIGHT_LAT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span lang=EN-US
-style='mso-ansi-language:EN-US'>LEFT_LAT(…)</span></span><span lang=EN-US
-style='mso-ansi-language:EN-US'>). General macros to <a
-href="LSD_macros.html#count">count object instances</a> (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>COUNT(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>COUNT_ALL(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>), access pure <a
-href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects directly (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>EXT(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>, </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>EXTS(…)</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>), and execute extension C++ objects
-methods (</span><span class=Cdigo><span lang=EN-US style='mso-ansi-language:
-EN-US'>DO_EXT(…)</span></span><span lang=EN-US style='mso-ansi-language:EN-US'>).
-Option to disable/enable the automatic search of Variables and Parameters (</span><span
-class=Cdigo><span lang=EN-US style='mso-ansi-language:EN-US'>NO_SEARCH</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>/</span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>USE_SEARCH</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>). New <a
-href="LSD_macros.html#DEBUG">debug-control macros</a> allow finer control of
-the LSD Debugger activation and log file creation. Please refer to the <a
-href="LSD_macros.html">LSD Macros</a> documentation.<o:p></o:p></span></p>
+5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>New Macros.</b> <a href="LSD_macros.html#lattice">Lattice
+macros</a> for color reading (<span class=Cdigo>V_LAT(…)</span>), window
+closing (<span class=Cdigo>DELETE_LAT(…)</span>), and move in a Object
+structure organized as a lattice (<span class=Cdigo>UP_LAT(…)</span>, <span
+class=Cdigo>DOWN_LAT(…)</span>, <span class=Cdigo>RIGHT_LAT(…)</span>, <span
+class=Cdigo>LEFT_LAT(…)</span>). General macros to <a
+href="LSD_macros.html#count">count object instances</a> (<span class=Cdigo>COUNT(…)</span>/<span
+class=Cdigo>COUNT_ALL(…)</span>), access pure <a
+href="LSD_macros_arquivos#ADDEXT">data extension</a> C++ objects directly (<span
+class=Cdigo>EXT(…)</span>, <span class=Cdigo>EXTS(…)</span>), and execute
+extension C++ objects methods (<span class=Cdigo>DO_EXT(…)</span>). Create <a
+href="LSD_macros.html#EQUATION_DUMMY">dummy Equations</a> (<span class=Cdigo>EQUATION_DUMMY(…)</span>)
+for Variables only updated by other Variables. Option to disable/enable the
+automatic search of Variables and Parameters (<span class=Cdigo>NO_SEARCH</span>/<span
+class=Cdigo>USE_SEARCH</span>). New <a href="LSD_macros.html#DEBUG">debug-control
+macros</a> allow finer control of the LSD Debugger activation and log file
+creation. Please refer to the <a href="LSD_macros.html">LSD Macros</a>
+documentation.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span lang=EN-US
@@ -1416,14 +1403,11 @@ eliminated. Much improved graphical user interface (now on par with
 Windows/Linux). LLDB debugger support.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>Improved analysis of results tools.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> New, native Tk plotting engine
-(faster and better looking). Fully editable plots. Improved plot windows,
-including zoom. Many more configuration options for plots. <o:p></o:p></span></p>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Improved analysis of results tools.</b> New, native Tk plotting
+engine (faster and better looking). Fully editable plots. Improved plot
+windows, including zoom. Many more configuration options for plots. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -1545,13 +1529,11 @@ easy-to-use lattice macros, including save to disk. Revised lattice windows.
 New lattice color options (full RGB support).<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>New pseudorandom number generator.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> A new (default) Mersenne-Twister
-generator included (old Parks-Miler still available as option).<o:p></o:p></span></p>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>New pseudorandom number generator.</b> A new (default)
+Mersenne-Twister generator included (old Parks-Miler still available as
+option).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -1779,17 +1761,14 @@ relevant results. The list of these elements can be printed from the LSD
 browser and is automatically inserted in the model report. <o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>Stricter error catching.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> The number of errors spotted by LSD
-model programs is vastly increased. Moreover, detailed information is provided
-when an error occurs. For example, among other things, the system controls the
-amount of memory required to save the results, and indicated when it is not
-sufficient, leaving to the user the decision on whether to reduce the model
-dimension, simulation length, or amount of data to save.<o:p></o:p></span></p>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Stricter error catching.</b> The number of errors spotted by
+LSD model programs is vastly increased. Moreover, detailed information is
+provided when an error occurs. For example, among other things, the system
+controls the amount of memory required to save the results, and indicated when
+it is not sufficient, leaving to the user the decision on whether to reduce the
+model dimension, simulation length, or amount of data to save.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

@@ -262,7 +262,7 @@ Add a new object type in the model as descendant of current one
  and initialize its name. It makes num copies
 of it. This is NOT to be used to make more instances of existing objects.
 
-- void insert_parent_obj_one(char *lab);
+- void insert_parent_obj(char *lab);
 Creates a new type of object that has the current one as descendant
 and occupies the previous position of this in the chain of its (former) parent
 
@@ -302,6 +302,9 @@ see gis.cpp
 
 ****************************************************/
 
+//#define DEBUG_MAPS				// define to enable fast lookup maps debugging
+
+
 #include "decl.h"
 
 bool zero_instances = false;	// flag to allow deleting last object instance
@@ -311,19 +314,70 @@ object *globalcur;
 
 
 /****************************************************
+BRIDGE
+Constructor, copy constructor and destructor
+****************************************************/
+bridge::bridge( const char *lab )
+{
+	copy = false;
+	counter_updated = false;
+	next = NULL;
+	mn = NULL;
+	head = NULL;
+	
+	blabel = new char[ strlen( lab ) + 1 ];
+	strcpy( blabel, lab );
+}
+
+bridge::bridge( const bridge &b )
+{
+	copy = true;
+	counter_updated = b.counter_updated;
+	next = b.next;
+	blabel = b.blabel;
+	mn = b.mn;
+	head = b.head;
+}
+
+bridge::~bridge( void )
+{
+	object *cur, *cur1;
+
+	if ( copy )
+		return;					// don't empty copy bridges
+		
+	if ( mn != NULL )			// turbo search node exists?
+	{
+		mn->empty( );
+		delete mn;
+	}
+	
+	for ( cur = head; cur != NULL; cur = cur1 )
+	{ 
+		cur1 = cur->next;
+		cur->empty( );
+		delete cur;
+	}
+	
+	delete [ ] blabel;
+}
+
+
+/****************************************************
 INIT
 Set the basics for a newly created object
 ****************************************************/
-int object::init( object *_up, char const *_label )
+int object::init( object *_up, char const *lab )
 {
-	++total_obj;
 	up = _up;
 	v = NULL;
+	v_map.clear( );
 	next = NULL;
 	to_compute = true;
-	label = new char[ strlen( _label ) + 1 ];
-	strcpy( label, _label );
+	label = new char[ strlen( lab ) + 1 ];
+	strcpy( label, lab );
 	b = NULL;
+	b_map.clear( );
 	hook = NULL;
 	node = NULL;				// not part of a network yet
 	cext = NULL;				// no C++ object extension yet
@@ -467,6 +521,26 @@ double object::unique_id()
 
 
 /****************************************************
+RECREATE_MAPS
+Recreate both fast look-up maps
+****************************************************/
+void object::recreate_maps( void )
+{
+	bridge *cb;
+	variable *cv;
+
+	v_map.clear( );
+	b_map.clear( );
+	
+	for ( cv = v; cv != NULL; cv = cv->next )
+		v_map.insert( v_pairT ( cv->label, cv ) );
+
+	for ( cb = b; cb != NULL; cb = cb->next )
+		b_map.insert( b_pairT ( cb->blabel, cb ) );
+}
+
+
+/****************************************************
 UPDATE
 Compute the value of all the Variables in the Object, saving the values 
 and updating the runtime plot. 
@@ -478,8 +552,8 @@ should be the fastest.
 void object::update( void ) 
 {
 	bool deleted = false;
-	object *cur, *cur1;
 	bridge *cb, *cb1;
+	object *cur, *cur1;
 	variable *cv;
 	
 	del_flag = & deleted;			// register feedback channel
@@ -489,7 +563,7 @@ void object::update( void )
 		if ( cv->last_update < t && cv->param == 0 )
 		{
 #ifdef PARALLEL_MODE
-			if ( parallel_ready && cv->parallel )
+			if ( parallel_ready && cv->parallel && ! cv->dummy )
 				parallel_update( cv, this );
 			else
 #endif
@@ -557,16 +631,87 @@ object *object::hyper_next( void )
 
 /****************************************************
 SEARCH
-Search the first Object lab in the branch of the model below this
+Search the first Object lab in the branch of the model below this.
+Uses the fast variable look-up map of the searched variables.
 ***************************************************/
 object *object::search( char const *lab )
 {
-	object *cur;
 	bridge *cb;
+	object *cur;
+	b_mapT::iterator bit;
 
+	// the current object?
 	if ( ! strcmp( label, lab ) )
 		return this;
 
+#ifndef DEBUG_MAPS
+	// Search among the variables of current object
+	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+		return bit->second->head;
+	
+#else
+	
+	int i;
+	static int matches = 0, different = 0, maponly = 0, listonly = 0, mismatches = 0, sizematches = 0;
+	bool found_map = false, found_list = false, mismatch = false;
+	
+	for ( cb = b; cb != NULL; cb = cb->next )
+		if ( ! strcmp( lab, cb->blabel ) )
+	{
+			found_list = true;
+			break;
+		}
+	
+	if ( ( bit = b_map.find( lab ) ) != b_map.end( ) )
+	{
+		found_map = true;
+		
+		if ( found_list )
+		{
+			if ( cb == bit->second )
+				++matches;
+			else
+			{
+				mismatch = true;
+				plog( "\nFound in both, DIFFERENT bridges (m=%p x l=%p), %d times (match=%d)", "", (void*)bit->second, (void*)cb, ++different, matches );
+			}
+		}
+		else
+		{
+			mismatch = true;
+			plog( "\nFound bridge ONLY in map, %d times (match=%d)", "", ++maponly, matches );
+		}
+	}
+	else
+		if ( found_list )
+		{
+			mismatch = true;
+			plog( "\nFound bridge ONLY in list, %d times (match=%d)", "", ++listonly, matches );
+		}
+
+	for ( i = 0, cb = b; cb != NULL; ++i, cb = cb->next );
+
+	if ( i != b_map.size( ) )
+	{
+		mismatch = true;
+		plog( "\nBridge map to list size mismatch (m=%d x l=%d), %d times (match=%d)", "", b_map.size( ), i, ++mismatches, sizematches );
+	}
+	else
+		++sizematches;
+		
+	if ( mismatch )
+	{
+		plog( "\nObj=%s map=", "", label );
+		for ( auto it = b_map.begin( ); it != b_map.end( ); ++it )
+			plog( "%s ", "", it->second->blabel );
+		plog( "\nObj=%s lst=", "", label );
+		for ( cb = b; cb != NULL; ++i, cb = cb->next )
+			plog( "%s ", "", cb->blabel );
+	}
+
+#endif
+
+	// Search among descendants' descendants
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head != NULL )
@@ -601,16 +746,84 @@ is returned. This depends on the right choice of "this", that is, where the
 search is starting from.
 The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
+Uses the fast variable look-up map of the searched variables.
 *************************************************/
-variable *object::search_var( object *caller, char const *l, bool no_error, bool no_search )
+variable *object::search_var( object *caller, char const *lab, bool no_error, bool no_search )
 {
-	variable *cv;
 	bridge *cb; 
+	variable *cv;
+	v_mapT::iterator vit;
 
-	// Search among the variables 
+#ifndef DEBUG_MAPS
+	// Search among the variables of current object
+	if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
+		return vit->second;
+	
+#else
+	
+	int i;
+	static int matches = 0, different = 0, maponly = 0, listonly = 0, mismatches = 0, sizematches = 0;
+	bool found_map = false, found_list = false, mismatch = false;
+	variable *cv1;
+	
 	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( ! strcmp( l, cv->label ) )
+		if ( ! strcmp( lab, cv->label ) )
+		{
+			found_list = true;
+			break;
+		}
+
+	if ( ( vit = v_map.find( lab ) ) != v_map.end( ) )
+	{
+		found_map = true;
+		
+		if ( found_list )
+		{
+			if ( cv == vit->second )
+				++matches;
+			else
+			{
+				mismatch = true;
+				plog( "\nFound in both, DIFFERENT variables (m=%p x l=%p), %d times (match=%d)", "", (void*)vit->second, (void*)cv, ++different, matches );
+			}
+		}
+		else
+		{
+			mismatch = true;
+			plog( "\nFound variable ONLY in map, %d times (match=%d)", "", ++maponly, matches );
+		}
+	}
+	else
+		if ( found_list )
+		{
+			mismatch = true;
+			plog( "\nFound variable ONLY in list, %d times (match=%d)", "", ++listonly, matches );
+		}
+
+	for ( i = 0, cv1 = v; cv1 != NULL; ++i, cv1 = cv1->next );
+
+	if ( i != v_map.size( ) )
+	{
+		mismatch = true;
+		plog( "\nVariable map to list size mismatch (m=%d x l=%d), %d times (match=%d)", "", v_map.size( ), i, ++mismatches, sizematches );
+	}
+	else
+		++sizematches;
+
+	if ( mismatch )
+	{
+		plog( "\nObj=%s map=", "", label );
+		for ( auto it = v_map.begin( ); it != v_map.end( ); ++it )
+			plog( "%s ", "", it->second->label );
+		plog( "\nObj=%s lst=", "", label );
+		for ( cv1 = v; cv1 != NULL; ++i, cv1 = cv1->next )
+			plog( "%s ", "", cv1->label );
+	}
+		
+	if ( found_list )
 			return cv;
+	
+#endif
 
 	// stop if search is disabled
 	if ( no_search )
@@ -622,7 +835,7 @@ variable *object::search_var( object *caller, char const *l, bool no_error, bool
 		// search down only if one instance exists and the label is different from caller
 		if ( cb->head != NULL && ( caller == NULL || strcmp( cb->head->label, caller->label ) ) )
 		{
-			cv = cb->head->search_var( this, l, no_error );
+			cv = cb->head->search_var( this, lab, no_error );
 			if ( cv != NULL )
 				return cv;
 		}   
@@ -637,7 +850,7 @@ variable *object::search_var( object *caller, char const *l, bool no_error, bool
 		{
 			if ( ! no_error )
 			{
-				sprintf( msg, "element '%s' is missing", l );
+				sprintf( msg, "element '%s' is missing", lab );
 				error_hard( msg, "variable or parameter not found", 
 							"create variable or parameter in model structure" );
 			}
@@ -645,7 +858,7 @@ variable *object::search_var( object *caller, char const *l, bool no_error, bool
 			return NULL;
 		}
 		
-		cv = up->search_var( this, l, no_error );
+		cv = up->search_var( this, lab, no_error );
 	}
 
 	return cv;
@@ -685,7 +898,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 		{
 			res = cur->cal( lab, lag );
 			if ( res == value )
-				return( cur );
+				return cur;
 		}
 	}
 
@@ -699,26 +912,39 @@ Add a Variable to all the Objects of this type in the model
 ****************************************************/
 void object::add_var( char const *lab, int lag, double *val, int save )
 {
-	variable *a;
+	variable *cv;
 	object *cur;
+
+	if ( search_var( this, lab, true, true ) != NULL )
+	{
+		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
+		error_hard( msg, "variable or parameter not added", 
+					"choose an unique name for the element",
+					true );
+	}
 
 	for ( cur = this; cur != NULL; cur = cur->hyper_next( label ) )
 	{
-		a = cur->v;
-		if ( a != NULL )
-		{
-			for (  ; ; a = a->next )
-				if ( a->next == NULL )
-					break;
-			a->next = new variable;
-			a = a->next;
-			a->init( cur, lab, lag, val, save );
-		}
+		if ( cur->v == NULL )
+			cv = cur->v = new variable;
 		else
 		{
-			cur->v = new variable;
-			( cur->v )->init( cur, lab, lag, val, save );
+			for ( cv = cur->v; cv->next != NULL; cv = cv->next );
+			cv->next = new variable;
+			cv = cv->next;
 		}
+		
+		if ( cv == NULL )
+		{
+			sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
+			error_hard( msg, "out of memory",
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+		
+		cv->init( cur, lab, lag, val, save );
+		cur->v_map.insert( v_pairT ( lab, cv ) );
 	}
 }
 
@@ -727,43 +953,38 @@ void object::add_var( char const *lab, int lag, double *val, int save )
 ADD_EMPTY_VAR
 Add a new (empty) Variable, used in the creation of the model structure
 ****************************************************/
-variable *object::add_empty_var( char const *str )
+variable *object::add_empty_var( char const *lab )
 {
 	variable *cv;
-	variable *app;
 
-	if ( v == NULL )
+	if ( search_var( this, lab, true, true ) != NULL )
 	{
-		app = new variable;
-		if ( app == NULL )
-		{
-			sprintf( msg, "cannot allocate memory for adding element '%s'", str );
-			error_hard( msg, "out of memory",
-						"if there is memory available and the error persists,\nplease contact developers",
+		sprintf( msg, "element '%s' already exists in object '%s'", lab, label );
+		error_hard( msg, "variable or parameter not added", 
+					"choose an unique name for the element",
 						true );
-			return NULL;
 		}
 		
-		v = app;
-		v->next = NULL;
-		cv = v;
-	}
+	if ( v == NULL )
+		cv = v = new variable;
 	else
 	{
 		for ( cv = v; cv->next != NULL; cv = cv->next );
 		cv->next = new variable;
-		if ( cv->next == NULL )
+		cv = cv->next;
+	}
+	
+	if ( cv == NULL )
 		{
-			sprintf( msg, "cannot allocate memory for adding element '%s'", str );
+		sprintf( msg, "cannot allocate memory for adding element '%s'", lab );
 			error_hard( msg, "out of memory",
 						"if there is memory available and the error persists,\nplease contact developers",
 						true );
 			return NULL;
 		}
-		cv = cv->next;
-	}
 	 
-	cv->init( this, str, -1, NULL, 0 );
+	cv->init( this, lab, -1, NULL, 0 );		
+	v_map.insert( v_pairT ( lab, cv ) );
 
 	return cv;
 }
@@ -777,27 +998,24 @@ void object::add_var_from_example( variable *example )
 {
 	variable *cv;
 
-	if ( v == NULL )
+	if ( search_var( this, example->label, true, true ) != NULL )
 	{
-		v = new variable;
-		if ( v == NULL )
-		{
-			sprintf( msg, "cannot allocate memory for adding element '%s'", example->label );
-			error_hard( msg, "out of memory",
-						"if there is memory available and the error persists,\nplease contact developers",
+		sprintf( msg, "element '%s' already exists in object '%s'", example->label, label );
+		error_hard( msg, "variable or parameter not added", 
+					"choose an unique name for the element",
 						true );
-			return;
 		}
 
-		v->next = NULL;
-		cv = v;
-	}
+	if ( v == NULL )
+		cv = v = new variable;
 	else
 	{
 		for ( cv = v; cv->next != NULL; cv = cv->next );
-	   
 		cv->next = new variable;
-		if ( cv->next == NULL )
+		cv = cv->next;
+	}
+	   
+	if ( cv == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding element '%s'", example->label );
 			error_hard( msg, "out of memory",
@@ -805,9 +1023,6 @@ void object::add_var_from_example( variable *example )
 						true );
 			return;
 		}
-
-		cv = cv->next;
-	}
 
 	cv->init( this, example->label, example->num_lag, example->val, example->save );
 	
@@ -826,6 +1041,8 @@ void object::add_var_from_example( variable *example )
 	cv->debug = example->debug;
 	cv->deb_cnd_val = example->deb_cnd_val;
 	cv->data_loaded = example->data_loaded;
+
+	v_map.insert( v_pairT ( example->label, cv ) );
 }
 
 
@@ -838,91 +1055,309 @@ void object::add_obj( char const *lab, int num, int propagate )
 {
 	int i;
 	bridge *cb;
-	object *a, *cur;
+	object *cur, *cur1;
 
 	for ( cur = this; cur != NULL; propagate == 1 ? cur = cur->hyper_next( label ) : cur = NULL )
 	{
-
+		// create bridge
 		if ( cur->b == NULL )
-			cb = cur->b = new bridge;
+			cb = cur->b = new bridge( lab );
 		else
 		{
 			for ( cb = cur->b; cb->next != NULL; cb = cb->next );
-			cb->next = new bridge;
+			cb->next = new bridge( lab );
 			cb = cb->next;
 		}
-		cb->counter_updated = false; 
-		cb->next = NULL;  
-		cb->mn = NULL;
 
-		cb->blabel = new char[ strlen( lab ) + 1 ];
-		strcpy( cb->blabel, lab );
-		
-		a = cb->head = new object;
-		a->init( cur, lab );
-		for ( i = 1; i < num; ++i )
+		if ( cb == NULL )
 		{
-			a = a->next = new object;
-			a->init( cur, lab );
+			sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
+			error_hard( msg, "out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+		
+		// create object instances
+		for ( i = 0; i < num; ++i )
+		{
+			if ( i == 0 )
+				cur1 = cb->head = new object;
+			else
+				cur1 = cur1->next = new object;
+
+			if ( cur1 == NULL )
+			{
+				sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
+				error_hard( msg, "out of memory", 
+							"if there is memory available and the error persists,\nplease contact developers",
+							true );
+				return;
 		} 
+			
+			cur1->init( cur, lab );
+	}
+		
+		cur->b_map.insert( b_pairT ( lab, cb ) );
+}
+}
+
+
+/****************************************************
+INSERT_PARENT_OBJ
+Insert a new parent in the model structure. The this object is placed below
+the new (otherwise empty) Object
+****************************************************/
+void object::insert_parent_obj( char const *lab )
+{
+	bridge *cb, *cb1, *newb;
+	object *cur, *cur1, *newo;
+
+	if ( up != NULL )
+	{
+		cur1 = up->hyper_next( up->label );
+		
+		if ( cur1 != NULL )
+	{//implement the change to all (old) parents in the model
+			cur = cur1->search( label );
+			cur->insert_parent_obj( lab );
+	}
+	}
+
+	newo = new object;
+	if ( newo == NULL )
+	{
+		sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
+		error_hard( msg, "out of memory", 
+					"if there is memory available and the error persists,\nplease contact developers",
+					true );
+		return;
+	}
+			
+	newo->init( up, lab );
+
+	newb = new bridge( lab );
+	if ( newb == NULL )
+	{
+		sprintf( msg, "cannot allocate memory for adding object '%s'", lab );
+		error_hard( msg, "out of memory", 
+					"if there is memory available and the error persists,\nplease contact developers",
+					true );
+		return;
+	}
+
+	newb->head = newo;
+
+	if ( up == NULL )			// root?
+	{	// insert new parent below root
+		newo->up = this;
+		newo->b = b;
+		newo->b_map = b_map;	// new object will have the bridges of this object
+		newo->v = v;
+		b = newb;
+		v = NULL;
+		
+		// adjust old sons of root to sons of the new object
+		for ( cur = newo->b->head; cur != NULL; cur = cur->next )
+			cur->up = newo;
+		
+		// clear bridge of root and add single added new object
+		b_map.clear( );
+		b_map.insert( b_pairT ( lab, newb ) );	
+	}
+	else
+	{	// insert new parent over this object
+		
+		// remove this object's bridge from parent's map
+		up->b_map.erase( label );
+		up->b_map.insert( b_pairT ( lab, newb ) );
+		
+		// find the predecessor of current object's bridge, if any 
+	for ( cb1 = NULL, cb = up->b; strcmp( cb->blabel, label ); cb1 = cb, cb = cb->next );
+
+	if ( cb1 == NULL )
+			up->b = newb;		// the current replaced object is the first bridge
+	else
+		cb1->next = newb;	// the replaced object is in between, cb1 is the preceding bridge
+
+	newb->next = cb->next;	// new bridge continues chain of siblings
+		cb->next = NULL; 		// replaced object becomes single son/bridge
+
+		newo->b = cb;			// new object acquire sons/bridges of replaced
+		newo->b_map.insert( b_pairT ( label, cb ) );
+
+		// adjust old sons of replaced to sons of the new object
+	for ( cur = cb->head; cur != NULL; cur = cur->next )
+		cur->up = newo;
+} 
+} 
+
+
+/****************************************************
+REPLICATE
+****************************************************/
+void object::replicate( int num, int propagate )
+{
+	object *cur, *cur1;
+	variable *cv;
+	int i, usl;
+
+	if ( propagate == 1 )
+		cur = hyper_next( label );
+	else
+		cur = NULL;
+	
+	if ( cur != NULL )
+		cur->replicate( num, 1 );
+	
+	skip_next_obj( this, &usl );
+	for ( cur = this, i = 1; i < usl; cur = cur->next, ++i );
+
+	for ( i = usl; i < num; ++i )
+	{
+		cur1 = cur->next;
+		cur->next = new object;		
+		if ( cur->next == NULL )
+		{
+			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", label );
+			error_hard( msg, "out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+		
+		cur->next->init( up, label );
+		cur->next->to_compute = to_compute;
+		cur->next->next = cur1;
+		cur->to_compute = to_compute;
+		
+		cur1 = cur->next;
+		for ( cv = v; cv != NULL; cv = cv->next )
+			cur1->add_var_from_example( cv );
+
+		copy_descendant( this, cur1 );
 	}
 }
 
 
 /****************************************************
-INSERT_PARENT_OBJ_ONE
-Insert a new parent in the model structure. The this object is placed below
-the new (otherwise empty) Object
+COPY_DESCENDANT
 ****************************************************/
-void object::insert_parent_obj_one( char const *lab )
+void copy_descendant( object *from, object *to )
 {
-	object *cur,*c2, *newo;
-	bridge *cb, *cb1, *newb;
+	bridge *cb, *cb1;
+	object *cur;
+	variable *cv;
 
-	c2 = up->hyper_next( up->label );
-	if ( c2 != NULL )
-	{//implement the change to all (old) parents in the model
-		cur = c2->search( label );
-		cur->insert_parent_obj_one( lab );
+	if ( from->b == NULL )
+	{
+		to->b = NULL;
+		return;
+	}
+	
+	// create the first bridge
+	to->b = new bridge( from->b->blabel );
+	if ( to->b == NULL )
+	{
+		sprintf( msg, "cannot allocate memory for adding object '%s'", from->label );
+		error_hard( msg, "out of memory", 
+					"if there is memory available and the error persists,\nplease contact developers",
+					true );
+		return;
+	}
+	
+	// add bridge to new object lookup map
+	to->b_map.insert( b_pairT ( to->b->blabel, to->b ) );
+	
+	// create the first (head) object
+	if ( from->b->head == NULL )
+		cur = blueprint->search( from->b->blabel );
+	else
+		cur = from->b->head;
+	
+	to->b->head = new object;
+	if ( to->b->head == NULL )
+	{
+		sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", to->label );
+		error_hard( msg, "out of memory", 
+					"if there is memory available and the error persists,\nplease contact developers",
+					true );
+		return;
 	}
 
-	newo = new object;
-	newo->init( up, lab );
+	to->b->head->init( to, cur->label );
+	to->b->head->to_compute = cur->to_compute;
+	
+	// copy variables of head object
+	for ( cv = cur->v; cv != NULL; cv = cv->next )
+		to->b->head->add_var_from_example( cv );
 
-	newb = new bridge;
-	newb->mn = NULL;
-	newb->blabel = new char[ strlen( lab ) + 1 ];
-	strcpy( newb->blabel, lab );
-	newb->head = newo;
-	newb->counter_updated = false;
+	// copy head descendants
+	copy_descendant( cur, to->b->head );
 
-	for ( cb1 = NULL, cb = up->b; strcmp( cb->blabel, label ); cb1 = cb, cb = cb->next );
-
-	if ( cb1 == NULL )
-		up->b = newb;		// the replaced object is the first
-	else
-		cb1->next = newb;	// the replaced object is in between, cb1 is the preceding bridge
-
-	newb->next = cb->next;	// new bridge continues chain of siblings
-	cb->next = NULL; 		// replaced object becomes single son
-
-	newo->b = cb;
-	for ( cur = cb->head; cur != NULL; cur = cur->next )
-		cur->up = newo;
-} 
+	// create following bridges
+	for ( cb = to->b, cb1 = from->b->next; cb1 != NULL; cb1 = cb1->next )
+	{ 
+		cb->next = new bridge( cb1->blabel );
+		cb = cb->next;		
+		if ( cb == NULL )
+		{
+			sprintf( msg, "cannot allocate memory for adding object '%s'", cb1->blabel );
+			error_hard( msg, "out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+		
+		to->b_map.insert( b_pairT ( cb1->blabel, cb ) );
+		
+		if ( cb1->head == NULL )
+			cur = blueprint->search( cb1->blabel );
+		else
+			cur = cb1->head;
+		
+		cb->head = new object;   
+		if ( cb->head == NULL )
+		{
+			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", cur->label );
+			error_hard( msg, "out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+		
+		cb->head->init( to, cur->label );
+		cb->head->to_compute = cur->to_compute;
+		
+		for ( cv = cur->v; cv != NULL; cv = cv->next )
+			cb->head->add_var_from_example( cv );
+		
+		copy_descendant( cur, cb->head );
+	}
+}
 
 
 /****************************************************
 ADD_N_OBJECTS2 
 As the type with the example, but the example is taken from the blueprint
-*************************************/
+****************************************************/
 object *object::add_n_objects2( char const *lab, int n )
 {
-	object *cur;
+	return  add_n_objects2( lab, n, blueprint->search( lab ), -1 );
+}
 
-	cur = blueprint->search( lab );
-	cur = add_n_objects2( lab, n, cur, -1 );
-	return cur;
+
+/****************************************************
+ADD_N_OBJECTS2 
+As the type with the example, but the example is taken from the blueprint
+In respect of the original version, it allows for the specification
+of the time of last update if t_update is positive or zero. If
+t_update is negative (<0) it takes the time of last update from
+the example object (if >0) or current t (if =0)
+****************************************************/
+object *object::add_n_objects2( char const *lab, int n, int t_update )
+{
+	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
 }
 
 
@@ -946,11 +1381,6 @@ of the time of last update if t_update is positive or zero. If
 t_update is negative (<0) it takes the time of last update from
 the example object (if >0) or current t (if =0)
 ****************************************************/
-object *object::add_n_objects2( char const *lab, int n, int t_update )
-{
-	return add_n_objects2( lab, n, blueprint->search( lab ), t_update );
-}
-
 
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
@@ -960,11 +1390,12 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
   #endif //#ifdef CPP11
 	int i;
 	bridge *cb, *cb1, *cb2;
-	object *cur, *last, *cur1, *first;
+	object *cur, *cur1, *last, *first;
 	variable *cv;
 
 	// check the labels and prepare the bridge to attach to
 	for ( cb2 = b; cb2 != NULL && strcmp( cb2->blabel, lab ); cb2 = cb2->next );
+	
 	if ( cb2 == NULL )
 	{
 		sprintf( msg, "object '%s' contains no son object '%s' for adding instance(s)", label, lab );
@@ -996,7 +1427,6 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	{
 		// create a new copy of the object
 		cur = new object;
-
 		if ( cur == NULL )
 		{
 			sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
@@ -1005,6 +1435,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 						true );
 			return NULL;
 		}
+		
 		cur->init( this, lab );
 
 		if ( net )						// if objects are nodes in a network
@@ -1012,7 +1443,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			cur->node = new netNode( );	// insert new nodes in network (as isolated nodes)
 			if ( cur->node == NULL )
 			{
-				sprintf( msg, "cannot allocate memory for adding instance(s) of object '%s'", lab );
+				sprintf( msg, "cannot allocate memory for adding object '%s' to network", lab );
 				error_hard( msg, "out of memory", 
 							"if there is memory available and the error persists,\nplease contact developers",
 							true );
@@ -1074,16 +1505,22 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		for ( cb = ex->b; cb != NULL; cb = cb->next )
 		{
 			if ( cb1 == NULL )
-				cb1 = cur->b = new bridge;
+				cb1 = cur->b = new bridge( cb->blabel );
 			else
-				cb1 = cb1->next = new bridge;
+				cb1 = cb1->next = new bridge( cb->blabel );
 				
-			cb1->mn = NULL;
-			cb1->blabel = new char[ strlen( cb->blabel ) + 1 ];
-			strcpy( cb1->blabel, cb->blabel );
-			cb1->next = NULL;
-			cb1->head = NULL;    
-			cb1->counter_updated = false;
+			if ( cb1 == NULL )
+			{
+				sprintf( msg, "cannot allocate memory for adding object '%s'", cb->blabel );
+				error_hard( msg, "out of memory", 
+							"if there is memory available and the error persists,\nplease contact developers",
+							true );
+				return NULL;
+			}
+
+			// add bridge to new object lookup map
+			cur->b_map.insert( b_pairT ( cb->blabel, cb1 ) );
+	
 			for ( cur1 = cb->head; cur1 != NULL; cur1 = cur1->next )
 				cur->add_n_objects2( cur1->label, 1, cur1, t_update );
 		}
@@ -1110,11 +1547,43 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 }
 
 
+/****************************
+DELETE_BRIDGE
+Remove a bridge, used when an object is removed from the model.
+*****************************/
+void delete_bridge( object *d )
+{
+	bridge *cb, *cb1;
+
+	if ( d->up->b == NULL )
+		return;
+
+	if ( d->up->b->head == d )
+	{	// first bridge in the bridge chain
+		cb = d->up->b;
+		d->up->b = d->up->b->next;
+		d->up->b_map.erase( cb->blabel );
+		delete cb;
+	} 
+	else
+	{	// find position in bridge chain (not first)
+		for ( cb = d->up->b, cb1 = NULL; cb != NULL; cb1 = cb, cb = cb->next )
+			if ( cb->head == d && cb1 != NULL )
+			{
+				cb1->next = cb->next;			// previous bridge points to next
+				d->up->b_map.erase( cb->blabel );
+				delete cb;
+				break;
+			}
+	}
+}
+
+
 /****************************************************
 DELETE_OBJ
 Remove the object from the model
 Before killing the Variables data to be saved are stored
-in the "cemetery", a linked chain storing data to be analysed.
+in the "cemetery", a linked chain storing data to be analyzed.
 ****************************************************/
 void object::delete_obj( void ) 
 {
@@ -1194,6 +1663,83 @@ void object::delete_obj( void )
 
 
 /****************************************************
+EMPTY
+Garbage collection for Objects.
+****************************************************/
+void object::empty( void ) 
+{
+	bridge *cb, *cb1;
+	variable *cv, *cv1;
+
+	if ( root == this )
+		blueprint->empty( );
+ 
+	for ( cv = v; cv != NULL; cv = cv1 )
+		if ( running && ( cv->save || cv->savei ) )
+			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
+		else
+		{
+			cv1 = cv->next;
+			cv->empty( );
+			delete cv;
+		}
+
+	v = NULL;
+	v_map.clear( );
+
+	for ( cb = b; cb != NULL; cb = cb1 )
+	{
+		cb1 = cb->next;
+		delete cb; 
+	}
+	
+	b = NULL; 
+	b_map.clear( );
+
+	if ( node != NULL )			// network data to delete?
+	{
+		delete node;
+		node = NULL;
+	}
+	 
+	delete [ ] label;
+	label = NULL;
+}
+
+
+/****************************************************
+DELETE_VAR
+Remove the variable from the object
+****************************************************/
+void object::delete_var( char const *lab ) 
+{
+	variable *cv, *cv1;
+	
+	if ( ! strcmp( v->label, lab ) )
+	{	// first variable in the chain
+		cv = v->next;
+		v_map.erase( lab );
+		delete [ ] v->label;
+		delete [ ] v->val;
+		delete v;
+		v = cv;
+	}
+	else		// not first variable, search
+		for ( cv = v; cv->next != NULL; cv = cv->next)
+			if ( ! strcmp( cv->next->label, lab ) )
+			{
+				cv1 = cv->next->next;
+				v_map.erase( lab );
+				delete [ ] cv->next->label;
+				delete [ ] cv->next->val;
+				delete cv->next;
+				cv->next = cv1;
+				break;
+			}
+}
+
+
+/****************************************************
 CHG_LAB
 Change the label of the Object, for all the instances
 ****************************************************/
@@ -1213,50 +1759,40 @@ void object::chg_lab( char const *lab )
 
 	for ( cb = up->b; strcmp( cb->blabel, label ); cb = cb->next );
 	
+	up->b_map.erase( cb->blabel );
 	delete [ ] cb->blabel;
 	cb->blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( cb->blabel, lab );
+	up->b_map.insert( b_pairT ( lab, cb ) );
 
 	for ( cur = this; cur != NULL; cur = cur->next )
 	{
-		if ( cur->label == NULL )
-		{
-			cur->label = new char[ strlen( lab ) + 1 ];
-			strcpy( cur->label, lab );
-		}
-		else
-		{
 			delete [ ] cur->label;
 			cur->label = new char[ strlen( lab ) + 1 ];
 			strcpy( cur->label, lab );
 		}
 	}
-}
 
 
 /****************************************************
 CHG_VAR_LAB
-Change the label of the Variable from old to n
+Change the label of the Variable from old to new
 ****************************************************/
-void object::chg_var_lab( char const *old, char const *n )
+void object::chg_var_lab( char const *old, char const *newname )
 {
-	variable *cur;
+	variable *cv;
 
-	for ( cur = v; cur != NULL; cur = cur->next)
+	for ( cv = v; cv != NULL; cv = cv->next)
+		if ( ! strcmp( cv->label, old ) )
 	{
-		if ( ! strcmp( cur->label, old ) )
-		{ 
-#ifdef PARALLEL_MODE
-			// prevent concurrent use by more than one thread
-			lock_guard < mutex > lock( cur->parallel_comp );
-#endif	
-			delete [ ] cur->label;
-			cur->label = new char[ strlen( n ) + 1 ];
-			strcpy( cur->label, n );
+			v_map.erase( old );
+			delete [ ] cv->label;
+			cv->label = new char[ strlen( newname ) + 1 ];
+			strcpy( cv->label, newname );
+			v_map.insert( v_pairT ( newname, cv ) );
 			break;
 		}
 	}
-}
 
 
 /****************************************************
@@ -1278,7 +1814,7 @@ bool object::under_computation( void )
 	 
 	// check variables directly contained in object
 	for ( cv = v; cv != NULL; cv = cv->next )
-		if ( cv->under_computation )
+		if ( cv->under_computation && ! cv->dummy )
 			return true;
 	
 	return false;
@@ -1286,76 +1822,14 @@ bool object::under_computation( void )
 	
 	
 /****************************************************
-EMPTY
-Garbage collection for Objects.
-****************************************************/
-void object::empty( void ) 
-{
-	bridge *cb, *cb1;
-	object *cur, *cur1;
-	variable *cv, *cv1;
-
-	if ( root == this )
-		blueprint->empty( );
- 
-	for ( cv = v; cv != NULL; cv = cv1 )
-		if ( running && ( cv->save || cv->savei ) )
-			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
-		else
-		{
-			cv1 = cv->next;
-			cv->empty( );
-			delete cv;
-		}
-
-	v = NULL;
-
-	for ( cb = b; cb != NULL; cb = cb1)
-	{
-		cb1 = cb->next;
-		for ( cur = cb->head; cur != NULL; cur = cur1)
-		{ 
-			cur1 = cur->next;
-			cur->empty( );
-			delete cur;
-			--total_obj;
-		}
-		delete [ ] cb->blabel;
-		
-		if ( cb->mn != NULL )	// turbo search node exists?
-		{
-			cb->mn->empty( );
-			delete cb->mn;
-		}
-		delete cb; 
-	}
-	 
-	if ( node != NULL )			// network data to delete?
-	{
-		delete node;
-		node = NULL;
-	}
-
-  #ifdef CPP11
+	
+	#ifdef CPP11
 	if ( position != NULL ) // gis data to delete?
-	{
 		unregister_from_gis();
-	}
-	position = NULL;    // not part of a GIS Space any more
-
-	if ( uID != NULL ) { //default: not an identified object
+	if ( uID != NULL ) // default: not an identified object
 		declare_as_nonUnique();
-	}
 	#endif //#ifdef CPP11
-
-	delete [ ] label;
-	label = NULL;
-	b = NULL;
  
-}
-
-
-
 /****************************************************
 CAL
 Return the value of Variable or Parameter with label l with lag lag.
@@ -1391,7 +1865,7 @@ double object::cal( object *caller,  char const *l, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 )
+	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 && ! curr->dummy )
 		parallel_update( curr, this, caller );
 #endif
 	return curr->cal( caller, lag );
@@ -1875,23 +2349,57 @@ void object::lsdrndsort(char const *obj)
 }
 
 /****************************************************
-lsdqsort
+LSDQSORT
 Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
 ****************************************************/
+int sort_function_up( const void *a, const void *b )
+{
+	if ( qsort_lab != NULL )		// variable defined?
+	{
+		if ( (*( object ** ) a )->cal( qsort_lab, 0 ) < ( *( object ** ) b )->cal(qsort_lab, 0 ) )
+			return -1;
+		else
+			return 1;
+	}
+	
+	// handles the case of node id comparison
+	if ( ( *( object ** ) a )->node->id < ( *( object ** ) b )->node->id )
+		return -1;
+	else
+		return 1;
+}
+
+int sort_function_down( const void *a, const void *b )
+{
+	if ( qsort_lab != NULL )		// variable defined?
+	{
+		if ( ( *( object ** ) a )->cal( qsort_lab, 0) > ( *( object ** ) b )->cal( qsort_lab, 0 ) )
+			return -1;
+		else
+			return 1;
+	}
+	
+	// handles the case of node id comparison
+	if ( ( *( object ** ) a )->node->id > ( *( object ** ) b )->node->id )
+		return -1;
+	else
+		return 1;
+}
+
 void object::lsdqsort( char const *obj, char const *var, char const *direction )
 {
 	int num, i;
-	object *cur, *nex, **mylist;
 	bridge *cb;
-	variable *cur_v;
+	object *cur, *nex, **mylist;
+	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
 
 	if ( ! useNodeId )
 	{
-		cur_v = search_var( this, var, true, no_search );
-		if ( cur_v == NULL )
+		cv = search_var( this, var, true, no_search );
+		if ( cv == NULL )
 		{	// check if it is not a zero-instance object
 			if ( blueprint->search_var( this, var, true, no_search ) == NULL )
 			{
@@ -1901,7 +2409,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			}
 			else
 			{
-				sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cur_v->up->label, var );
+				sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, var );
 				error_hard( msg, "last object instance deleted", 
 							"check your equation code to ensure at least one instance\nof any object is kept", 
 							true );
@@ -1910,7 +2418,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			return;
 		}
 		
-		cur = cur_v->up;
+		cur = cv->up;
 		if ( strcmp( obj, cur->label ) )
 		{
 			sprintf( msg, "element '%s' is missing (object '%s') for sorting", var, obj );
@@ -1927,7 +2435,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			return;
 		}
 	
-		cb = cur_v->up->up->b;
+		cb = cv->up->up->b;
 	}
 	else									// pick network object to sort
 	{
@@ -1976,7 +2484,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 		else
 		{
 			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option", 
+			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)", 
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
@@ -1993,57 +2501,55 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	delete [ ] mylist;
 }
 
-/************************
-Comparison function used in lsdqsort
-*************************/
-int sort_function_up( const void *a, const void *b )
-{
-	if ( qsort_lab != NULL )		// variable defined?
-	{
-		if ( (*( object ** ) a )->cal( qsort_lab, 0 ) < ( *( object ** ) b )->cal(qsort_lab, 0 ) )
-			return -1;
-		else
-			return 1;
-	}
-	
-	// handles the case of node id comparison
-	if ( ( *( object ** ) a )->node->id < ( *( object ** ) b )->node->id )
-		return -1;
-	else
-		return 1;
-}
-
-
-/************************
-Comparison function used in lsdqsort
-*************************/
-int sort_function_down( const void *a, const void *b )
-{
-	if ( qsort_lab != NULL )		// variable defined?
-	{
-		if ( ( *( object ** ) a )->cal( qsort_lab, 0) > ( *( object ** ) b )->cal( qsort_lab, 0 ) )
-			return -1;
-		else
-			return 1;
-	}
-	// handles the case of node id comparison
-	if ( ( *( object ** ) a )->node->id > ( *( object ** ) b )->node->id )
-		return -1;
-	else
-		return 1;
-}
-
 
 /****************************************************
 LSDQSORT
 Two stage sorting. Objects with identical values of var1 are sorted according to their value of var2
 ****************************************************/
+int sort_function_up_two( const void *a, const void *b )
+{
+	double x, y;
+	
+	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
+	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
+	
+	if ( x < y )
+			return -1;
+		else
+		if ( x > y )
+			return 1;
+		else
+			if ( (* ( object ** ) a )->cal( qsort_lab_secondary, 0 ) < ( *( object ** ) b )->cal( qsort_lab_secondary, 0) )
+		return -1;
+	else
+		return 1;
+}
+
+int sort_function_down_two( const void *a, const void *b )
+{
+	double x, y;
+
+	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
+	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
+
+	if ( x > y )
+			return -1;
+		else
+		if ( x < y )
+			return 1;
+		else
+			if ( ( *( object ** ) a )->cal( qsort_lab_secondary, 0 ) > ( *( object ** ) b )->cal( qsort_lab_secondary, 0 ) )
+		return -1;
+	else
+		return 1;
+}
+
 void object::lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction )
 {
 	int num, i;
-	object *cur, *nex, **mylist;
 	bridge *cb;
-	variable *cur_v;
+	object *cur, *nex, **mylist;
+	variable *cv;
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 		if ( ! strcmp( cb->blabel, obj ) )
@@ -2057,8 +2563,8 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		return;
 	}
 	
-	cur_v = search_var( this, var1, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, var1, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, var1, true, no_search ) == NULL )
 		{
@@ -2068,7 +2574,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		}
 		else
 		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cur_v->up->label, var1 );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, var1 );
 			error_hard( msg, "last object instance deleted", 
 						"check your equation code to ensure at least one instance of\nany object is kept", 
 						true );
@@ -2077,7 +2583,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		return;
 	}
 	 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( strcmp( obj, cur->label ) )
 	{
 		sprintf( msg, "element '%s' is missing (object '%s') for sorting", var1, obj );
@@ -2115,7 +2621,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 		else
 		{
 			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option", 
+			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)", 
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;
@@ -2133,52 +2639,6 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 }
 
 
-/************************
-Comparison function used in lsdqsort with two stages
-*************************/
-int sort_function_up_two( const void *a, const void *b )
-{
-	double x, y;
-	
-	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
-	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
-	
-	if ( x < y )
-		return -1;
-	else
-		if ( x > y )
-			return 1;
-		else
-			if ( (* ( object ** ) a )->cal( qsort_lab_secondary, 0 ) < ( *( object ** ) b )->cal( qsort_lab_secondary, 0) )
-				return -1;
-			else
-				return 1;
-}
-
-
-/************************
-Comparison function used in lsdqsort with two stages
-*************************/
-int sort_function_down_two( const void *a, const void *b )
-{
-	double x, y;
-	
-	x = ( *( object ** ) a )->cal( qsort_lab, 0 );
-	y = ( *( object ** ) b )->cal( qsort_lab, 0 );
-
-	if ( x > y )
-		return -1;
-	else
-		if ( x < y )
-			return 1;
-		else
-			if ( ( *( object ** ) a )->cal( qsort_lab_secondary, 0 ) > ( *( object ** ) b )->cal( qsort_lab_secondary, 0 ) )
-				return -1;
-			else
-				return 1;
-}
-
-
 /*********************
 Draw randomly an object with label lo with probabilities proportional to the values of their Variables or Parameters lv
 *********************/
@@ -2186,10 +2646,10 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 {
 	double a, b;
 	object *cur, *cur1;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lv, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lv, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lv, true, no_search ) == NULL )
 		{
@@ -2201,7 +2661,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag )
 		return NULL;
 	}
 
-	cur1 = cur = cur_v->up;
+	cur1 = cur = cv->up;
 
 	for ( a = 0; cur != NULL; cur = cur->next )
 		a += cur->cal( lv, lag );
@@ -2246,8 +2706,8 @@ Draw randomly an object with label lo with identical probabilities
 *********************/
 object *object::draw_rnd( char const *lo )
 {
-	object *cur, *cur1;
 	double a, b;
+	object *cur, *cur1;
 
 	cur1 = cur = search( lo );
 
@@ -2297,7 +2757,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 {
 	double a, b;
 	object *cur, *cur1;
-	variable *cur_v;
+	variable *cv;
 
 	if ( tot <= 0 )
 	{
@@ -2308,8 +2768,8 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		return NULL;
 	}  
 
-	cur_v = search_var( this, lv, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lv, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lv, true, no_search ) == NULL )
 		{
@@ -2321,7 +2781,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 		return NULL;
 	}
 
-	cur1 = cur = cur_v->up;
+	cur1 = cur = cv->up;
 
 	b = RND * tot;
 	a = cur1->cal( lv, lag );
@@ -2347,7 +2807,7 @@ object *object::draw_rnd( char const *lo, char const *lv, int lag, double tot )
 /****************************************************
  WRITE
  Write the value in the Variable or Parameter lab, making it appearing as if
- it was computed at time time-lag and the variable updated at time time.
+ it was computed at time lag and the variable updated at time time.
  ***************************************************/
 void object::write( char const *lab, double value, int time, int lag )
 {
@@ -2366,8 +2826,10 @@ void object::write( char const *lab, double value, int time, int lag )
     {
 		if ( ! strcmp( cv->label, lab ) )
 		{
-			if ( cv->under_computation == 1 )
+			if ( cv->under_computation )
 			{
+				if ( ! cv->dummy )
+				{
 				sprintf( msg, "variable '%s' is under computation and cannot be written", lab );
 				error_hard( msg, "invalid write operation", 
 							"check your equation code to prevent this situation",
@@ -2375,6 +2837,20 @@ void object::write( char const *lab, double value, int time, int lag )
 				return;
 			}
 			
+#ifdef PARALLEL_MODE
+				if ( cv->parallel_comp.try_lock( ) )
+					cv->parallel_comp.unlock( );
+				else
+				{
+					sprintf( msg, "variable '%s' is under dummy computation and cannot be written", lab );
+					error_hard( msg, "deadlock during parallel computation", 
+								"check your equation code to prevent this situation",
+								true );
+					return;
+				}
+#endif
+			}
+
 #ifdef PARALLEL_MODE
 			// prevent concurrent use by more than one thread
 			lock_guard < mutex > lock( cv->parallel_comp );
@@ -2413,6 +2889,11 @@ void object::write( char const *lab, double value, int time, int lag )
 					}
 					else
 					{
+						// if not yet calculated this time step, adjust lagged values
+						if ( time >= t && lag == 0 && cv->last_update < t )	
+							for ( int i = 0; i < cv->num_lag; ++i )
+								cv->val[ cv->num_lag - i ] = cv->val[ cv->num_lag - i - 1 ];
+						
 						cv->val[ lag ] = value;
 						cv->last_update = time;
 						int eff_time = time - lag;
@@ -2592,67 +3073,12 @@ object *object::lat_left( void )
 
 
 /****************************
-DELETE_BRIDGE
-Remove a bridge, used when an object is removed from the model.
-*****************************/
-void delete_bridge( object *d )
-{
-	bridge *cb, *a;
-	object *cur, *cur1; 
-
-	if ( d->up->b == NULL )
-		return;
-
-	if ( d->up->b->head == d )
-	{
-		a = d->up->b;
-		d->up->b = d->up->b->next;
-		for ( cur = d ; cur != NULL; cur = cur1 )
-		{
-			cur1 = cur->next;
-			cur->empty( ); 
-			delete cur;
-		} 
-		
-		delete [ ] a->blabel;
-		if ( a->mn != NULL )		// turbo search node exists?
-		{
-			a->mn->empty( );
-			delete a->mn;
-		}
-		delete a;
-		return;
-	} 
-
-	for ( cb = d->up->b; cb != NULL; a = cb, cb = cb->next )
-		if ( cb->head == d )
-		{
-			for ( cur = d ; cur != NULL; cur = cur1 )
-			{
-				cur1 = cur->next;
-				cur->empty( ); 
-				delete cur;
-			} 
-
-			a->next = cb->next;
-	
-			delete [ ] cb->blabel;
-			if ( cb->mn != NULL )		// turbo search node exists?
-			{
-				cb->mn->empty( );
-				delete cb->mn;
-			}
-			delete cb;
-		}
-}
-
-
-/****************************
 EMPTY
 *****************************/
 void mnode::empty( void ) 
 {
 	int i;
+	
 	if ( son != NULL ) 
 	{
 		for ( i = 0; i < 10; ++i )
@@ -2675,8 +3101,18 @@ void mnode::create( double level )
 	{
 		pntr = NULL;
 		son = new mnode[ 10 ];
+		if ( son == NULL )
+		{
+			error_hard( "cannot allocate memory for turbo searching", 
+						"out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+
 		for ( i = 0; i < 10 && globalcur != NULL; ++i )
 		son[ i ].create( level - 1 );
+		
 		return;
 	}
 
@@ -2689,7 +3125,7 @@ void mnode::create( double level )
 
 
 /****************************
-CREATE
+FETCH
 *****************************/
 object *mnode::fetch( double *n, double level )
 {
@@ -2715,7 +3151,7 @@ object *mnode::fetch( double *n, double level )
 
 
 /****************************
-turbosearch
+TURBOSEARCH
 Search the object label placed in num position.
 This search exploits the structure created with 'initturbo'
 If tot is 0, previous set value is used
@@ -2799,8 +3235,8 @@ void object::initturbo( char const *label, double tot = 0 )
 	}
 	
 	globalcur = cb->head;
-	cb->mn = new mnode;
 	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
+	cb->mn = new mnode;
 	cb->mn->create( lev );
 }
 

@@ -644,8 +644,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
 	int i, j, *del, value, last;
-	object *cur, *app, *prev;
-	bridge *cb, *first;
+	object *cur, *app;
 
 	cmd( "set d .delobj" );
 	cmd( "newtop $d \"Delete Instances\" { set choice 3 }" );
@@ -758,7 +757,7 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 		Tcl_UnlinkVar( inter, "value" );
 		Tcl_UnlinkVar( inter, "j" );
 		*choice = 0;
-	}//choice==2
+	}
 }
 
 

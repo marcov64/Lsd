@@ -485,8 +485,8 @@ This is the new version, after moving to the bridge-based representation
 ****************************************************/
 object *skip_next_obj( object *t, int *count )
 {
-	object *c;
 	int i;
+	object *c;
 
 	*count = 0;
 	if ( t == NULL )
@@ -543,9 +543,9 @@ SET_COUNTER
 ***************************************************/
 void set_counter( object *o )
 {
-	object *cur;
-	bridge *cb;
 	int i;
+	bridge *cb;
+	object *cur;
 
 	if ( o->up == NULL )
 		return;
@@ -586,34 +586,6 @@ FILE *search_str( char const *name, char const *str )
 			return NULL;
 
 	if ( ! strcmp( got, str ) )
-		return f;
-	else
-		return NULL;
-}
-
-
-/****************************************************
-SEARCH_STR_NOSPACES
-****************************************************/
-FILE *search_str_nospaces( char *name, char *str )
-{
-	FILE *f;
-	char got[ MAX_LINE_SIZE ];
-
-	f = fopen( name, "r" );
-	if ( f == NULL )
-		return NULL;
-
-	fgets( got, MAX_LINE_SIZE, f );
-	clean_spaces( got );
-	for ( int i = 0; strncmp( got, str, strlen( str ) ) && i < MAX_FILE_TRY; ++i )
-	{
-		if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
-			return NULL;
-		clean_spaces( got ); 
-	}
-	
-	if ( ! strncmp( got, str, strlen( str ) ) )
 		return f;
 	else
 		return NULL;
@@ -722,10 +694,9 @@ lab_tit indicates the position of the object containing the variables in the mod
 ***************************************************/
 void set_lab_tit( variable *var )
 {
-	object *cur, *ceil, *cur1;
-	bridge *cb;
-	char app[ 20 * MAX_ELEM_LENGTH ], app1[ 20 * MAX_ELEM_LENGTH ];
 	bool first = true;
+	char app[ 20 * MAX_ELEM_LENGTH ], app1[ 20 * MAX_ELEM_LENGTH ];
+	object *cur;
 
 	if ( var->up->up == NULL )
 	{
@@ -781,31 +752,31 @@ description *search_description( char *lab )
 AUTOFILL_DESCR
 generate recur. the descriptions of the model as it is
 ***************************************************/
-void autofill_descr(object *o)
+void autofill_descr( object *o )
 {
 	int i;
+	bridge *cb;
 	description *cur;
 	variable *cv;
-	object *co;
-	bridge *cb;
 
-	cur=search_description(o->label);
-	if (cur == NULL )
-	 add_description(o->label, "Object", "(no description available)");
+	cur = search_description( o->label );
+	if ( cur == NULL )
+		add_description( o->label, "Object", "(no description available)" );
 
-	for (cv=o->v; cv!=NULL; cv=cv->next)
-	 {
-	  cur=search_description(cv->label);
-	  if (cur == NULL )
-	   {i=cv->param;
-	   if (i == 1 )
-		add_description(cv->label, "Parameter", "(no description available)");
-	   if (i == 0 )
-		add_description(cv->label, "Variable", "(no description available)");
-	   if (i==2)
-		add_description(cv->label, "Function", "(no description available)");
-	   } 
-	 } 
+	for ( cv = o->v; cv != NULL; cv = cv->next)
+	{
+		cur = search_description(cv->label);
+		if ( cur == NULL )
+		{
+			i = cv->param;
+			if ( i == 1 )
+				add_description( cv->label, "Parameter", "(no description available)" );
+			if ( i == 0 )
+				add_description( cv->label, "Variable", "(no description available)" );
+			if ( i == 2 )
+				add_description( cv->label, "Function", "(no description available)" );
+		} 
+	} 
 	 
 	for ( cb = o->b; cb != NULL; cb = cb->next )
 		if ( cb->head != NULL )
@@ -916,67 +887,56 @@ void add_description(char const *lab, char const *type, char const *text)
 
 #ifndef NO_WINDOW
 
-/***************************************************
-CHANGE_DESCR_TEXT
-***************************************************/
-void change_descr_text(char *lab)
+/****************************************************
+SEARCH_ALL_SOURCES
+****************************************************/
+FILE *search_all_sources( char *str )
 {
-	description *cur, *cur1;
-	char *lab1;
+	char *fname, got[ MAX_LINE_SIZE ];
+	int i, j, nfiles;
+	FILE *f;
+	
+	// search in all source files
+	cmd( "set source_files [ get_source_files \"%s\" ]", exec_path );
+	cmd( "if { [ lsearch -exact $source_files \"%s\" ] == -1 } { lappend source_files \"%s\" }", equation_name, equation_name );
+	cmd( "set res [ llength $source_files ]" );
+	get_int( "res", & nfiles );
+	
+	for ( i = 0; i < nfiles; ++i )
+	{
+		cmd( "set brr [ lindex $source_files %d ]", i );
+		cmd( "if { ! [ file exists $brr ] && [ file exists \"%s/$brr\" ] } { set brr \"%s/$brr\" }", exec_path, exec_path );
+		fname = ( char * ) Tcl_GetVar( inter, "brr", 0 );
+		if ( ( f = fopen( fname, "r" ) ) == NULL )
+			continue;
 
-	for (cur=descr; cur!=NULL; cur=cur->next)
-	 {
-	  if (!strcmp(cur->label, lab) )
-	   {
-		 delete [ ] cur->text;
-		 lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		 cur->text = new char[strlen(lab1)+1];
-		 strcpy(cur->text, lab1);
-		 return;
-	   }
-	 }
+		fgets( got, MAX_LINE_SIZE, f );
+		clean_spaces( got );
+		for ( j = 0; strncmp( got, str, strlen( str ) ) && j < MAX_FILE_TRY; ++j )
+		{
+			if ( fgets( got, MAX_LINE_SIZE, f ) == NULL )
+				break;
+			clean_spaces( got ); 
+		}
+		
+		if ( ! strncmp( got, str, strlen( str ) ) )
+			return f;
+	}
+	
+	return NULL;
 }
-
-
-/***************************************************
-CHANGE_INIT_TEXT
-***************************************************/
-void change_init_text(char *lab)
-{
-	description *cur, *cur1;
-	char *lab1;
-
-	for (cur=descr; cur!=NULL; cur=cur->next)
-	 {
-	  if (!strcmp(cur->label, lab) )
-	   {
-		 lab1=( char * ) Tcl_GetVar( inter, "text_description", 0 );
-		 if (strlen(lab1)>0)
-		  {
-		  if (cur->init != NULL )
-			delete [ ] cur->init;
-		  cur->init = new char[strlen(lab1)+1];
-		  strcpy(cur->init, lab1);
-		  }
-		 return;
-
-	   }
-	 }
-}
-
-
+	
+	
 /***************************************************
 RETURN_WHERE_USED
 ***************************************************/
 void return_where_used( char *lab, char s[ ] ) 
 {
-	int choice;
 	char *r; 
+	int choice = -1;
 
 	scan_used_lab( lab, &choice );
-	cmd( "set l [join [ $list.l.l get 0 end ] \", \"]" );
-	cmd( "destroytop $list" ); 
-	r = ( char * ) Tcl_GetVar( inter, "l", 0 );
+	r = ( char * ) Tcl_GetVar( inter, "list_used", 0 );
 	if ( r != NULL )
 		strcpy( s, r);
 	else
@@ -985,99 +945,160 @@ void return_where_used( char *lab, char s[ ] )
 
 
 /***************************************************
+CHANGE_DESCR_TEXT
+***************************************************/
+void change_descr_text( char *lab )
+{
+	description *cur;
+	char *lab1;
+
+	for ( cur = descr; cur != NULL; cur = cur->next )
+	{
+		if ( ! strcmp( cur->label, lab ) )
+		{
+			delete [ ] cur->text;
+			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
+			cur->text = new char[ strlen( lab1 ) + 1 ];
+			strcpy( cur->text, lab1 );
+			return;
+	   }
+	}
+}
+
+
+/***************************************************
+CHANGE_INIT_TEXT
+***************************************************/
+void change_init_text( char *lab )
+{
+	description *cur;
+	char *lab1;
+
+	for ( cur = descr; cur != NULL; cur = cur->next )
+	{
+		if ( ! strcmp( cur->label, lab ) )
+		{
+			lab1 = ( char * ) Tcl_GetVar( inter, "text_description", 0 );
+			if ( strlen( lab1 ) > 0 )
+			{
+				if ( cur->init != NULL )
+				delete [ ] cur->init;
+				cur->init = new char[ strlen( lab1 ) + 1 ];
+				strcpy( cur->init, lab1 );
+			}
+			return;
+		}
+	}
+}
+
+
+/***************************************************
 AUTO_DOCUMENT
 ***************************************************/
 void auto_document( int *choice, char const *lab, char const *which, bool append )
 {
+	bool var;
+	char str1[ MAX_LINE_SIZE ], app[ 10 * MAX_LINE_SIZE ];
+	int i, j = 0, done;
 	FILE *f;
 	description *cd;
-	char str1[MAX_LINE_SIZE], app[10*MAX_LINE_SIZE];
-	int i, j = 0, done;
-	bool var;
 
-	for (cd=descr; cd!=NULL; cd=cd->next)
+	for ( cd = descr; cd != NULL; cd = cd->next )
 	{
-	 app[ 0 ] = '\0';
-	 if ( (lab==NULL && (!strcmp(which, "ALL")||!strcmp(cd->type,"Variable") ||!strcmp(cd->type,"Function"))) || (lab!=NULL && !strcmp(lab, cd->label)) )
-	 { 
-	  //for each description
-	  if ( ( ! strcmp(cd->type, "Variable") ) == 1 || ( ! strcmp(cd->type, "Function") ) == 1 )
-	  { //if it is a Variable
-		var = true;
-		sprintf( msg, "EQUATION(\"%s\")", cd->label); //search its equation
-		f=search_str_nospaces(equation_name, msg);
-		if ( f == NULL )
-		 {sprintf( msg, "FUNCTION(\"%s\")", cd->label);
-		  f=search_str_nospaces(equation_name, msg);
-		 }
-		if ( f == NULL )
-		 {sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label);
-		  f=search_str_nospaces(equation_name, msg);
-		 }
-		if (f != NULL )
-		{
-		 done=-1;
-		 j = 0;
-		 while (done != 1 )
-		 {
-		  fgets(str1, MAX_LINE_SIZE, f );
-		  for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
-		  {
-		   if (done==-1) //no comment found yet
-			{
-			 if (isalpha(str1[ i ]) != 0 ) //no comment exists
-			  done=1;
-			  
-			 if (str1[ i ]=='/' && str1[ i + 1 ]=='*')
-			  { done = 0; //beginning of a multiline comment
-			   i+=2;
-			   // discard initial empty line
-			   while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
-					i += 2;
-			   while ( str1[ i ] == '\n' )
-					i++;
-			   if ( str1[ i ] == '\0')
-					break;
-			  } 
-			 if (str1[ i ]=='/' && str1[ i + 1 ]=='/')
-			  { done=2; //beginning of a single line comment
-			   i+=2;
-			  } 
-			}
-			
-			if (done==0 ) //we are in a comment
-			 if (str1[ i ]=='*' && str1[ i + 1 ]=='/')
-			  done=1;
+		app[ 0 ] = '\0';
+		if ( ( lab == NULL && ( ! strcmp( which, "ALL" ) || ! strcmp( cd->type, "Variable" ) || ! strcmp( cd->type, "Function" ) ) ) || ( lab != NULL && ! strcmp( lab, cd->label ) ) )
+		{	// for each description
+			if ( ( ! strcmp( cd->type, "Variable") ) == 1 || ( ! strcmp( cd->type, "Function" ) ) == 1 )
+			{ 	// if it is a Variable
+				var = true;
+				sprintf( msg, "EQUATION(\"%s\")", cd->label ); //search its equation
+				f = search_all_sources( msg );
+				if ( f == NULL )
+				{
+					sprintf( msg, "EQUATION_DUMMY(\"%s\",", cd->label );
+					f = search_all_sources( msg );
+				}
+				if ( f == NULL )
+				{
+					sprintf( msg, "FUNCTION(\"%s\")", cd->label );
+					f = search_all_sources( msg );
+				}
+				if ( f == NULL )
+				{
+					sprintf( msg, "if (!strcmp(label,\"%s\"))", cd->label );
+					f = search_all_sources( msg );
+				}
+				if ( f != NULL )
+				{
+					done = -1;
+					j = 0;
+					while ( done != 1 )
+					{
+						fgets( str1, MAX_LINE_SIZE, f );
+						for ( i = 0; str1[ i ] != '\0' && done != 1; ++i )
+						{
+							if ( done==-1 ) 		// no comment found yet
+							{
+								if ( isalpha( str1[ i ]) != 0 ) 	// no comment exists
+									done = 1;
+								  
+								if ( str1[ i ] == '/' && str1[ i + 1 ] == '*' )
+								{ 
+									done = 0; 		// beginning of a multiline comment
+									i += 2;
+									
+									// discard initial empty line
+									while ( str1[ i ] == '\r' && str1[ i + 1 ] == '\n' )
+										i += 2;
+									while ( str1[ i ] == '\n' )
+										++i;
+									if ( str1[ i ] == '\0' )
+										break;
+								}
+								
+								if ( str1[ i ] == '/' && str1[ i + 1 ] == '/' )
+								{ 
+									done = 2; 		// beginning of a single line comment
+									i += 2;
+								} 
+							}
+							
+							if ( done == 0 ) 		// we are in a comment
+								if ( str1[ i ] == '*' && str1[ i + 1 ] == '/' )
+									done = 1;
 
-			if (done==0 || done ==2)
-			 if (str1[ i ]!='\r')
-			   app[j++]=str1[ i ];
+							if ( done == 0 || done == 2 )
+								if ( str1[ i ] != '\r' )
+									app[ j++ ] = str1[ i ];
 
-			if (done==2 && str1[ i ]=='\n')
-			 done=-1; 
-		 
-			if ( j >= 10 * MAX_LINE_SIZE )
-				done = 1;
-		  }
-		 }
-		 strcat(app, "\n");
-		} //end of the if (found equation)
-	  } //end of the if (cd==Variable)
-	  else
-		var = false;
+							if ( done==2 && str1[ i ] == '\n' )
+								done = -1; 
+						 
+							if ( j >= 10 * MAX_LINE_SIZE )
+								done = 1;
+						}
+					}
+					strcat( app, "\n" );
+				} 			// end of the if (found equation)
+			} 				// end of the if (cd == Variable)
+			else
+				var = false;
 	  
-	  app[ j ]='\0'; //close the string
-	  return_where_used(cd->label, str1); 
-	  if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
-		sprintf( msg, "%s\n\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
-	  else
-		sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+			app[ j ]='\0'; //close the string
+			return_where_used( cd->label, str1 ); 
+			if ( ( append || ! var ) && ! strstr( cd->text, "(no description available)" ) )
+				if ( strlen( cd->text ) == 0 || ! strcmp( cd->text, "\n" ) )
+					sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
+				else
+					sprintf( msg, "%s\n%s\n'%s' appears in the equation for: %s", cd->text, app, cd->label, str1 );
+			else
+				sprintf( msg, "%s\n'%s' appears in the equation for: %s", app, cd->label, str1 );
 
-	  delete [ ] cd->text;
-	  cd->text= new char[strlen(msg)+1];
-	  strcpy(cd->text, msg);
-	 } //end of the label to document
-	}//end of the for (desc)
+			delete [ ] cd->text;
+			cd->text = new char[ strlen( msg ) + 1 ];
+			strcpy( cd->text, msg );
+		} 					// end of the label to document
+	}						// end of the for (desc)
 }
 
 
@@ -1294,11 +1315,11 @@ COUNT_SAVE
 ****************************************************/
 void count_save( object *n, int *count )
 {
-	variable *cv;
-	object *co;
 	bridge *cb;
+	object *co;
+	variable *cv;
 
-	for ( cv = n->v; cv!=NULL; cv=cv->next )
+	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->save == 1 || cv->savei == 1 )
 			( *count )++;
 
@@ -1320,10 +1341,10 @@ void get_saved( object *n, FILE *out, const char *sep, bool all_var )
 {
 	int i, sl;
 	char *lab;
-	variable *cv;
-	object *co;
 	bridge *cb;
 	description *cd;
+	object *co;
+	variable *cv;
 
 	for ( cv = n->v; cv != NULL; cv = cv->next )
 		if ( cv->save || all_var )
@@ -1554,9 +1575,9 @@ void result::data( object *root, int initstep, int endtstep )
 
 void result::data_recursive( object *r, int i )
 {
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{
@@ -1684,9 +1705,9 @@ void result::title( object *root, int flag )
 void result::title_recursive( object *r, int header )
 {
 	bool single;
+	bridge *cb;
 	object *cur;
 	variable *cv;
-	bridge *cb;
 
 	for ( cv = r->v; cv != NULL; cv = cv->next )
 	{

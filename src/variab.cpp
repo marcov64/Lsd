@@ -169,6 +169,7 @@ VARIABLE constructor
 ****************************************************/
 variable::variable( void )
 {
+	dummy = false;
 	observe = false;
 	parallel = false;
 	plot = false;
@@ -202,6 +203,7 @@ VARIABLE copy constructor
 ****************************************************/
 variable::variable( const variable &v )
 {
+	dummy = v.dummy;
 	observe = v.observe;
 	parallel = v.parallel;
 	plot = v.plot;
@@ -242,8 +244,6 @@ int variable::init( object *_up, char const *_label, int _num_lag, double *v, in
 	lock_guard < mutex > lock( parallel_comp );
 #endif	
 	
-	total_var++;
-
 	up =_up;
     save =_save;
 	
@@ -312,8 +312,8 @@ double variable::cal( object *caller, int lag )
 			if ( last_update >= t )		// already calculated this time step
 				return( val[ 0 ] );		
 #ifdef PARALLEL_MODE
-			// prevent parallel computation of the same variable
-			if ( parallel_mode )
+			// prevent parallel computation of the same variable (except dummy equations)
+			if ( parallel_mode && ! dummy )
 				 guard.lock( );
 			if ( last_update >= t )			// recheck if not computed during lock
 				return( val[ 0 ] );		
@@ -332,8 +332,8 @@ double variable::cal( object *caller, int lag )
 			return val[ 0 ];   
 
 #ifdef PARALLEL_MODE
-		// prevent parallel computation of the same function
-		if ( parallel_mode )
+		// prevent parallel computation of the same function (except dummy equations)
+		if ( parallel_mode && ! dummy )
 			 guard.lock( );
 #endif	
 	}
@@ -343,7 +343,7 @@ double variable::cal( object *caller, int lag )
 	if ( under_computation )
 	{
 		sprintf( msg, "equation for '%s' (object '%s') requested \nits own value while computing its current value", label, up->label );
-		error_hard( msg, "dead-lock",
+		error_hard( msg, "deadlock",
 					"check your equation code to prevent this situation\nprobably using the variable lagged value instead", 
 					true );
 		return 0;
@@ -424,7 +424,7 @@ double variable::cal( object *caller, int lag )
 	}
 	user_exception = false;
 
-	for ( i = 0; i < num_lag; ++i ) 	// scale down the past values
+	for ( i = 0; i < num_lag; ++i ) // scale down the past values
 		val[ num_lag - i ] = val[ num_lag - i - 1 ];
 	val[ 0 ] = app;
 
@@ -581,9 +581,9 @@ void worker::cal_worker( void )
 
 				if ( var->under_computation )
 				{
-					sprintf( err_msg1, "dead-lock during parallel computation" );
+					sprintf( err_msg1, "deadlock during parallel computation" );
 					sprintf( err_msg2, "the equation for '%s' in object '%s' requested its own value\nwhile parallel-computing its current value", var->label, var->up->label );
-					sprintf( err_msg3, "Check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation." );
 					user_excpt = true;
 					throw;
 				}
@@ -599,9 +599,9 @@ void worker::cal_worker( void )
 				catch ( ... )
 				{
 					pexcpt = current_exception( );
-					sprintf( err_msg1, "Equation error" );
+					sprintf( err_msg1, "equation error" );
 					sprintf( err_msg2, "an exception was detected while parallel-computing the equation\nfor '%s' in object '%s'", var->label, var->up->label );
-					sprintf( err_msg3, "Check your code to prevent this situation." );
+					sprintf( err_msg3, "check your code to prevent this situation." );
 					throw;
 				}
 				user_excpt = false;
@@ -791,21 +791,11 @@ Multi-thread scheduler for parallel updating
 void parallel_update( variable *v, object* p, object *caller )
 {
 	bool ready[ max_threads ], wait = false;
-	bridge *cb;
-	clock_t start;
 	int i, nt, wait_time;
+	clock_t start;
+	bridge *cb;
 	object *co;
 	variable *cv;
-	
-	// find the beginning of the linked list chain for current object
-	for ( cb = p->up->b; strcmp( cb->blabel, p->label ) && cb->next != NULL; cb = cb->next );
-	
-	// if problematic pointers or single instanced object, update as usual
-	if ( cb == NULL || cb->head == NULL || cb->head->next == NULL )
-	{
-		v->cal( caller, 0 );
-		return;
-	}
 	
 	// prevent concurrent parallel update and multi-threading in a single core
 	if ( parallel_ready && max_threads > 1 )
@@ -816,6 +806,16 @@ void parallel_update( variable *v, object* p, object *caller )
 		return;
 	}
 		
+	// find the beginning of the linked list chain for current object
+	for ( cb = p->up->b; strcmp( cb->blabel, p->label ) && cb->next != NULL; cb = cb->next );
+	
+	// if problematic pointers or single instanced object, update as usual
+	if ( cb == NULL || cb->head == NULL || cb->head->next == NULL )
+	{
+		v->cal( caller, 0 );
+		return;
+	}
+	
 	// set ready worker threads
 	for ( nt = 0, i = 0; i < max_threads; ++i )
 	{
@@ -855,7 +855,7 @@ void parallel_update( variable *v, object* p, object *caller )
 					if ( wait_time > MAX_WAIT_TIME )
 					{
 						sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->label, cv->up->label, MAX_WAIT_TIME, t );
-						error_hard( msg, "dead-lock during parallel computation", 
+						error_hard( msg, "deadlock during parallel computation", 
 									"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 						return;
 					}
@@ -897,7 +897,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			// if something go wrong, wait fist worker (always there)
 			if ( i >= max_threads )
 			{
-				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a dead-lock state", cv->label, cv->up->label );
+				sprintf( msg, "variable '%s' (object '%s') had a multi-threading inconsistency,\nmaybe a deadlock state", cv->label, cv->up->label );
 				error_hard( msg, "parallel computation problem", 
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
@@ -925,7 +925,7 @@ void parallel_update( variable *v, object* p, object *caller )
 			if ( wait_time > MAX_WAIT_TIME )
 			{
 				sprintf( msg, "variable '%s' (object '%s') took more than %d seconds\nwhile computing value for time %d", cv->up->label, cv->label, MAX_WAIT_TIME, t );
-				error_hard( msg, "dead-lock during parallel computation", 
+				error_hard( msg, "deadlock during parallel computation", 
 							"disable parallel computation for this variable or check your equation code to prevent this situation.\n\nPlease choose 'Quit LSD Browser' in the next dialog box", true );
 				return;
 			}
@@ -972,8 +972,6 @@ void variable::empty( void )
 			return;
 		}
 
-		total_var--;
-		
 		delete [ ] label;
 		delete [ ] data;
 		delete [ ] lab_tit;
@@ -981,8 +979,6 @@ void variable::empty( void )
 	}
 	else
 	{
-		total_var--;
-		
 		delete [ ] label;
 		delete [ ] data;
 		delete [ ] lab_tit;

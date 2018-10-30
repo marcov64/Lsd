@@ -594,25 +594,25 @@ zero) is set in menu <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;
 Settings</a></span>.</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><span style='font-family:Symbol'>·<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.0pt;margin-left:38.85pt;text-indent:-21.0pt'><a name=parallel></a><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span class=Cdigo><b>Parallel</b></span>: (<i>shortcut</i>: <span
 class=Cdigo>Ctrl+P</span>) (Variables only) Check to perform parallel
 processing when computing the <a href="LSD_faqs.html#equation">Equation</a> for
 multiple instances of this Variable in brother <a href="LSD_faqs.html#object">Object</a>
 copies. Beware that not all multi-instanced Variables can or should be
 processed in parallel, to avoid deadlocks because of the particular <a
-href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS overhead
-of creating new processing threads for computationally-light Equations. To
-identify the Variables which may provide parallelization gains, please check
-the <span class=Cdigo>Show aggregated profiling times</span> option in <span
-class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation Settings</a></span>.
-It is recommended to enable parallel processing of one Variable at a time,
-starting with the computationally-heavy ones, to make sure that the variable
-can be (logically) computed in parallel. If, because of the model structure,
-changing one Variable instance affects the computation of another instance of
-the same Variable, directly or indirectly, such Variable calculation cannot be
-parallelized and will throw a deadlock error. <br>
+href="LSD_faqs.html#modelstructure">model structure</a> and to save the OS
+overhead of creating new processing threads for computationally-light
+Equations. To identify the Variables which may provide parallelization gains,
+please check the <span class=Cdigo>Show aggregated profiling times</span>
+option in <span class=Cdigo><a href="menurun.html#simsetting">Run&gt;Simulation
+Settings</a></span>. It is recommended to enable parallel processing of one
+Variable at a time, starting with the computationally-heavy ones, to make sure
+that the variable can be (logically) computed in parallel. If, because of the
+model structure, changing one Variable instance affects the computation of
+another instance of the same Variable, directly or indirectly, such Variable
+calculation cannot be parallelized and will throw a deadlock error. <br>
 WARNING: only Variables that are computationally intensive should have this
 option enabled or this may end up slowing down the <a
 href="LSD_faqs.html#simulationrun">simulation run</a>.</p>

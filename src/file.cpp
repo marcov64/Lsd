@@ -43,17 +43,6 @@ It loads from the file named as specified the data
 for the object. It is made in specular way in respect of save_param.
 Called from browser in INTERF.CPP immediately after load_struct.
 
-- void object::replicate(int num, int propagate)
-Counts the number of instances (this included) of this type of object and
-make as many copy as necessary to have num of them. In case propagate is 1,
-it sends the replicate message to the hypernext, first. It should be applied
-to a structure model, that is, where the object is there are no more than
-one instance in any group.
-
-- void copy_descendant(object *from, object *to)
-This is a function called by replicate above, so that the replicated object
-are initialized also the descendants.
-
 - void clean_debug(object *n);
 remove all the flags to debug from any variable in the model
 
@@ -71,6 +60,13 @@ LSDMAIN.CPP print  message string m in the Log screen.
 
 - void analysis(int *choice);
 ANALYSIS.CPP analysis of result files
+
+- void object::replicate( int num, int propagate )
+OBJECT.CPP. Counts the number of instances (this included) of this type of object and
+make as many copy as necessary to have num of them. In case propagate is 1,
+it sends the replicate message to the hypernext, first. It should be applied
+to a structure model, that is, where the object is there are no more than
+one instance in any group.
 
 - object *skip_next_obj(object *t, int *i);
 UTIL.CPP. Counts how many types of objects equal to t are in this
@@ -124,8 +120,8 @@ OBJECT::SAVE_STRUCT
 void object::save_struct( FILE *f, char const *tab )
 {
 	char tab1[ 30 ];
-	object *o;
 	bridge *cb, *cb1;
+	object *o;
 	variable *var;
 
 	if ( up == NULL )
@@ -136,7 +132,7 @@ void object::save_struct( FILE *f, char const *tab )
 	strcat( tab1, "\t" );
 	
 	if ( b != NULL )
-		cb1=b->next;
+		cb1 = b->next;
 
 	for ( cb = b; cb != NULL; cb = cb->next )
 	{
@@ -170,10 +166,10 @@ void object::save_param( FILE *f )
 {
 	int i, count = 0;
 	char ch, ch1, ch2;
-	description *cur_descr;
-	variable *cv, *cv1;
-	object *cur;
 	bridge *cb;
+	description *cur_descr;
+	object *cur;
+	variable *cv, *cv1;
 
 	fprintf( f, "\nObject: %s", label );
 	
@@ -253,10 +249,10 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 {
 	char str[ MAX_ELEM_LENGTH ], ch, ch1, ch2;
 	int num, i;
-	object *cur;
-	variable *cv, *cv1;
 	double app;
 	bridge *cb;
+	object *cur;
+	variable *cv, *cv1;
 
 	if ( f == NULL )
 		f = search_data_str( file_name, "DATA", label ); 
@@ -347,107 +343,6 @@ bool object::load_param( char *file_name, int repl, FILE *f )
 		set_blueprint( blueprint, this );
 	 
 	return true;
-}
-
-
-/****************************************************
-OBJECT::REPLICATE
-****************************************************/
-void object::replicate( int num, int propagate )
-{
-	object *cur, *app;
-	variable *cv;
-	int i, usl;
-
-	if ( propagate == 1 )
-		cur = hyper_next( label );
-	else
-		cur = NULL;
-	
-	if ( cur != NULL )
-		cur->replicate( num, 1 );
-	
-	skip_next_obj( this, &usl );
-	for ( cur = this, i = 1; i < usl; cur = cur->next, ++i );
-
-	for ( i = usl; i < num; ++i )
-	{
-		app = cur->next;
-		cur->next = new object;
-		cur->next->init( up, label );
-		cur->next->to_compute = to_compute;
-		cur->next->next = app;
-		cur->to_compute = to_compute;
-		app = cur->next;
-		for ( cv = v; cv != NULL; cv = cv->next )
-			app->add_var_from_example( cv );
-
-		copy_descendant( this, app );
-	}
-}
-
-
-/****************************************************
-COPY_DESCENDANT
-****************************************************/
-void copy_descendant( object *from, object *to )
-{
-	object *app;
-	bridge *cb, *cb1;
-	variable *cv;
-
-	if ( from->b == NULL )
-	{
-		to->b = NULL;
-		return;
-	}
-	
-	if ( from->b->head == NULL )
-		app = blueprint->search( from->b->blabel );
-	else
-		app = from->b->head;
-	
-	to->b = new bridge;
-	to->b->blabel = new char[ strlen( from->b->blabel ) + 1 ];
-	strcpy( to->b->blabel, from->b->blabel );
-	to->b->counter_updated = false;
-	to->b->mn = NULL;
-
-	to->b->head = new object;
-	to->b->head->init( to, app->label );
-	
-	for ( cv = app->v; cv != NULL; cv = cv->next )
-		to->b->head->add_var_from_example( cv );
-	
-	to->b->head->to_compute = app->to_compute;
-	copy_descendant( app, to->b->head );
-	to->b->next = NULL;
-	cb = to->b;
-
-	for ( cb1 = from->b->next; cb1 != NULL; cb1 = cb1->next )
-	{ 
-		cb->next = new bridge;
-		cb = cb->next;
-		cb->next = NULL;
-		cb->mn = NULL;
-		cb->blabel = new char[ strlen( cb1->blabel ) + 1 ];
-		strcpy( cb->blabel, cb1->blabel );
-		cb->counter_updated = false;
-		
-		if ( cb1->head == NULL )
-			app = blueprint->search( cb1->blabel );
-		else
-			app = cb1->head;
-		
-		cb->head = new object;    
-		cb->head->init( to, app->label );
-		cb->head->next = NULL;
-		cb->head->to_compute = app->to_compute;
-		
-		for ( cv = app->v; cv != NULL; cv = cv->next )
-			cb->head->add_var_from_example( cv );
-		copy_descendant( app, cb->head );
-	}
 }
 
 
@@ -640,9 +535,9 @@ SAVE_DESCRIPTION
 ******************************************************************************/
 void save_description( object *r, FILE *f )
 {
+	bridge *cb;
 	variable *cv;
 	description *cd;
-	bridge *cb;
 
 	cd = search_description( r->label );
 	if ( cd == NULL )
@@ -694,9 +589,9 @@ SET_BLUEPRINT
 ******************************************************************************/
 void set_blueprint( object *container, object *r )
 {
+	bridge *cb, *cb1;
 	object *cur, *cur1;
 	variable *cv;
-	bridge *cb, *cb1;
 	
 	if ( r == NULL )
 		return;
