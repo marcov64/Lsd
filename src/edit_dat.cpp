@@ -65,10 +65,6 @@ did not issue an error message.
 UTIL.CPP returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
-- void go_next( object **t )
-UTIL.CPP
-returns next if (*t)->next is not null. Don't know it is used any longer
-
 - void show_graph( object *t );
 DRAW.CPP shows the grsphical representation of the model
 

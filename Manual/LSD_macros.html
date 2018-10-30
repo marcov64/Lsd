@@ -1268,7 +1268,7 @@ and <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">
   </td>
   <td width="21%" style='width:21.92%;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
   <p class=MsoNormal><span style='font-family:"Courier New"'><a
-  href="#_TSEARCH(_&quot;obj_Lab&quot;,_pos">TSEARCH/INIT_TSEARCH</a></span></p>
+  href="#_TSEARCH(_&quot;obj_Lab&quot;,_pos">TSEARCH</a></span></p>
   </td>
   <td width="15%" style='width:15.62%;background:#F2F2F2;padding:2.85pt 2.85pt 2.85pt 2.85pt'></td>
   <td width="17%" style='width:17.72%;padding:2.85pt 2.85pt 2.85pt 2.85pt'></td>
@@ -1281,7 +1281,10 @@ and <span class=Cdigo><a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">
   <td width="11%" style='width:11.42%;background:#F2F2F2;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
   <p class=MsoNormal><a href="#_Mathematical_and_statistical">Math functions</a></p>
   </td>
-  <td width="21%" style='width:21.92%;padding:2.85pt 2.85pt 2.85pt 2.85pt'></td>
+  <td width="21%" style='width:21.92%;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
+  <p class=MsoNormal><span class=MsoHyperlink><span style='font-family:"Courier New"'><a
+  href="#_TSEARCH_CND(_&quot;obj_Lab&quot;,_pos">TSEARCH_CND</a></span></span></p>
+  </td>
   <td width="15%" style='width:15.62%;background:#F2F2F2;padding:2.85pt 2.85pt 2.85pt 2.85pt'></td>
   <td width="17%" style='width:17.72%;padding:2.85pt 2.85pt 2.85pt 2.85pt'></td>
   <td width="24%" style='width:24.04%;background:#F2F2F2;padding:2.85pt 2.85pt 2.85pt 2.85pt'>
@@ -1752,8 +1755,8 @@ configuration in use when the simulation starts and often remain constant along
 the entire run. However, Parameters can be still changed by other Variables’
 Equations “on-the-flight”, see Macros like <span class=Cdigo><a
 href="#_WRITE(_&quot;Lab&quot;,_new_value">WRITE(…)</a></span> or <span
-class=Cdigo><a href="#_INCR(_&quot;Lab&quot;,_value">INCR(…)</a></span>, being the
-modeler responsible for the control of the update timing and value.</p>
+class=Cdigo><a href="#_INCR(_&quot;Lab&quot;,_value">INCR(…)</a></span>, being
+the modeler responsible for the control of the update timing and value.</p>
 
 <p>LSD Equation files are composed by standard C++ code plus LSD-specific
 keywords (Macro, Object, Variable and Parameter names). All LSD Macros are
@@ -1815,11 +1818,11 @@ style='color:#00B050'>// This Equation assigns always the value 3 to any copy
 of variable Lab</span> </span></p>
 
 <p>The first line indicates that the code refer to the Variable (or Function)
-labelled <i>Lab</i>. After the initial line normally it is added a comment (highlighted
-in green). The following lines can contain any LSD (or C++) code. The last line
-must be indicated with the keyword <a name=RESULT><span class=Cdigo>RESULT(…)</span></a>,
-where in between the parenthesis it is contained the value that the Variable
-(or Function) is to be assigned. </p>
+labelled <i>Lab</i>. After the initial line normally it is added a comment
+(highlighted in green). The following lines can contain any LSD (or C++) code.
+The last line must be indicated with the keyword <a name=RESULT><span
+class=Cdigo>RESULT(…)</span></a>, where in between the parenthesis it is
+contained the value that the Variable (or Function) is to be assigned. </p>
 
 <p>If <span class=Cdigo>EQUATION( &quot;Lab&quot; )</span> is associated to a
 Variable named <i>Lab</i>, each instance (copy) of the Variable must be
@@ -1828,13 +1831,13 @@ other Variables uses its value in other Equations, than the Equation provides
 always the same value during the same time step. That is, the numerical value
 of an instance of <i>Lab</i> at time <i>t</i> is always identical. </p>
 
-<p>Notice that, because of this particular updating scheme, the concept of
-Equation when used together with a LSD Variable is very different from the
-operation of a regular subroutine or procedure in most computer languages.
-Subroutines and procedures are usually reevaluated every time they are invoked,
-irrespective to the relative timing between calls. A similar updating scheme,
-despite not commonly used in LSD models, can be performed if the Equation is
-associated with a <a href="LSD_faqs.html#function">Function</a> instead of a <a
+<p>Notice that, because of this particular updating scheme, the concept of Equation
+when used together with a LSD Variable is very different from the operation of
+a regular subroutine or procedure in most computer languages. Subroutines and
+procedures are usually reevaluated every time they are invoked, irrespective to
+the relative timing between calls. A similar updating scheme, despite not
+commonly used in LSD models, can be performed if the Equation is associated
+with a <a href="LSD_faqs.html#function">Function</a> instead of a <a
 href="LSD_faqs.html#variable">Variable</a> (this association is defined during
 the <a href="LSD_faqs.html#modelstructure">model structure</a> configuration).</p>
 
@@ -1891,10 +1894,10 @@ class=Cdigo>v[1]</span>, <span class=Cdigo>v[2]</span> etc.</p>
 
 <p>Up to 1,000 temporary storage positions are available (from <span
 class=Cdigo>v[0]</span> to <span class=Cdigo>v[999]</span>) to each Equation.
-The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and
-therefore cannot be used to transfer information from one Equation to another
-or between different time steps of the same Equation. Technically, this storage
-is configured as a volatile C++ double precision array.</p>
+The values of <span class=Cdigo>v[…]</span> are reset for each Equation, and therefore
+cannot be used to transfer information from one Equation to another or between
+different time steps of the same Equation. Technically, this storage is
+configured as a volatile C++ double precision array.</p>
 
 <h2>Example</h2>
 
@@ -2017,13 +2020,13 @@ requests their calculation. </p>
 Object's pointers: <span class=Cdigo>cur</span>, <span class=Cdigo>cur1</span>,
 <span class=Cdigo>cur2</span>, <span class=Cdigo>…</span> </h2>
 
-<p>Besides temporary variables for intermediate numerical values, LSD also provides
-a predefined group of temporary pointers to Objects: <span class=Cdigo>cur</span>
-and from <span class=Cdigo>cur1</span> to<span class=Cdigo><span
-style='font-family:"Arial","sans-serif"'> </span>cur9</span>. These elements
-are generic pointers to Objects, used to temporary store the addresses of
-required Objects (like <span class=Cdigo><a href="#_CURRENT">v[…]</a></span> is
-used to stored temporary numerical values). </p>
+<p>Besides temporary variables for intermediate numerical values, LSD also
+provides a predefined group of temporary pointers to Objects: <span
+class=Cdigo>cur</span> and from <span class=Cdigo>cur1</span> to<span
+class=Cdigo><span style='font-family:"Arial","sans-serif"'> </span>cur9</span>.
+These elements are generic pointers to Objects, used to temporary store the
+addresses of required Objects (like <span class=Cdigo><a href="#_CURRENT">v[…]</a></span>
+is used to stored temporary numerical values). </p>
 
 <p>Typically, the user calls LSD Macros returning Objects and assigns the
 results to <span class=Cdigo>cur</span>, <span class=Cdigo>cur1</span>, <span
@@ -2162,7 +2165,8 @@ descending from it, as in the representation below:</p>
 . . .<br>
 &nbsp;&nbsp;&nbsp;&nbsp;
 ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ||<br>
-&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +----------+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
++----------+&nbsp;&nbsp;&nbsp;
 +----------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 +-------------+&nbsp; <br>
 &nbsp;&nbsp;&nbsp;&nbsp; ||&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Worker 1 |
@@ -2710,9 +2714,9 @@ Object named <i>obj_Lab</i>. That is, they count only within the descendants of
 <i>obj</i>, if specified in <span class=Cdigo>COUNTS(…)</span>, or in <a
 href="#_Parent_Object:_p"><span class=Cdigo><span style='color:blue'>p</span></span></a>
 if <i>obj</i> not specified in <span class=Cdigo>COUNT(…)</span>, and their
-descendants. Therefore, the search is not exhaustive over the entire model,
-unless it is started from the <span class=Cdigo><a
-href="#_Object’s_relatives:_up,">root</a></span> of the model.</p>
+descendants. Therefore, the search is not exhaustive over the entire model, unless
+it is started from the <span class=Cdigo><a href="#_Object’s_relatives:_up,">root</a></span>
+of the model.</p>
 
 <p>The <span class=Cdigo>COUNT(…)</span> versions only explore a single group
 of Object instances, that is, a set of Object instances named <i>obj_Lab</i>
@@ -2807,10 +2811,10 @@ under computation (which has the <span class=Cdigo>INTERACT(…)</span> call) or
 the specified Object <tt><i><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>obj</span></i></tt>.
 Contrary to the debugger usual behavior, additionally to the name of the
 Variable just computed, the interface presents the <i>value</i> chosen (the
-default to be used) in a numeric data entry field. User can input a new value
-as any C++ numeric constant or variable, typically one of the <span
-class=Cdigo><a href="#_CURRENT">v[…]</a></span> temporary elements. The value
-typed in by the user will be returned by the Macro as its result. </p>
+default to be used) in a numeric data entry field. User can input a new value as
+any C++ numeric constant or variable, typically one of the <span class=Cdigo><a
+href="#_CURRENT">v[…]</a></span> temporary elements. The value typed in by the
+user will be returned by the Macro as its result. </p>
 
 <p>This Macro inserted in an Equation allows the run to be modified according
 to the choice of an interacting user. </p>
@@ -2823,8 +2827,8 @@ to the choice of an interacting user. </p>
 class=Cdigo><span style='color:#00B050'>//minimum m.s. below which a firm
 should be removed </span><br>
 CYCLE_SAFE( cur, &quot;Firm&quot; ) <br>
-{ </span><span class=Cdigo><span style='color:#00B050'>//Cycle through each firm,
-allowing for the removal of the pointer</span> <br>
+{ </span><span class=Cdigo><span style='color:#00B050'>//Cycle through each
+firm, allowing for the removal of the pointer</span> <br>
 &nbsp; v[0] = VS( cur, &quot;MarketShare&quot; ); </span><span class=Cdigo><span
 style='color:#00B050'>//read the market share</span> <br>
 &nbsp; if ( v[0] &lt; v[1] ) <br>
@@ -2884,8 +2888,13 @@ ascending Object like <span class=Cdigo><a href="#_Object’s_relatives:_up,">p-&g
 (grandparent). <span class=Cdigo><a href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span>
 can also be considered for a more exhaustive search of the model (see below).</p>
 
-<p>The Macros return the pointer to the found Object or <span class=Cdigo>NULL</span>
-if no Object is found. </p>
+<p>The Macros return the pointer to the first found instance of Object <i>obj_Lab</i>
+or <span class=Cdigo>NULL</span> if no Object is found. </p>
+
+<p>If an specific instance of a multi-instanced Object is required, the
+advanced Macro family <span class=Cdigo><a href="#_TSEARCH(_&quot;obj_Lab&quot;,_pos">TSEARCH(…)</a></span>
+may be a complementary option to quickly find it, in particular when multiple
+instances must be found.</p>
 
 <h2>Example </h2>
 
@@ -2923,10 +2932,10 @@ v[1] = VS( cur, &quot;TotalSales&quot; );<br>
 SEARCH_CNDL( &quot;<i>Lab</i>&quot;, <i>value</i>, <i>lag </i>), SEARCH_CNDLS( <i>obj</i>,
 &quot;<i>Lab</i>&quot;, <i>value</i>, <i>lag </i>) </h1>
 
-<p>These Macros are used to find an Object in the model that contains the
-Variable named <i>Lab</i> with the specific numeric value <i>value</i>. The search
-can optionally consider <i>obj</i> as the starting point for the search
-(instead of the current Object under calculation, <span class=Cdigo><a
+<p>These Macros are used to find an Object instance in the model which contains
+the Variable or Parameter named <i>Lab</i> with the specific numeric value <i>value</i>.
+The search can optionally consider <i>obj</i> as the starting point for the
+search (instead of the current Object under calculation, <span class=Cdigo><a
 href="#_Parent_Object:_p">p</a></span>) and the specific lag <i>lag</i> if
 different from current time step. </p>
 
@@ -2937,9 +2946,9 @@ href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">V(…)</a></span> above,
 which eventually encompasses the entire hierarchical Object tree. However, it
 may not stop at the first instance encountered, but continues until the
 searched Variable is found in an Object instance which has the desired Variable
-set to <i>value</i>. When the first Object that satisfies the condition is
-found, it is returned to the calling Equation, and can be used with other LSD
-Macros like <a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),"><span
+or Parameter set to <i>value</i>. When the first Object that satisfies the
+condition is found, it is returned to the calling Equation, and can be used
+with other LSD Macros like <a href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),"><span
 class=Cdigo><span style='color:blue'>VS(…)</span></span></a>. </p>
 
 <p>The Macros are used to find a particular Object, which is neither the parent
@@ -2948,6 +2957,12 @@ nor the caller <a href="#_Caller_Object:_c"><span class=Cdigo><span
 style='color:blue'>c</span></span></a>. If no Object instance containing the
 searched value is found, <span class=Cdigo>SEARCH_CND(…)</span> family returns
 a <span class=Cdigo>NULL</span> pointer.</p>
+
+<p>If there are many Object instances to search for Variable or Parameter <i>Lab</i>,
+the Macros may demand significant time for finding the desired value. In such
+cases, particularly when searches are performed repeatedly, the advanced Macro
+family <span class=Cdigo><a href="#_TSEARCH_CND(_&quot;Lab&quot;,_value">TSEARCH_CND(…)</a></span>
+may be a better alternative, even if requiring initialization before usage.</p>
 
 <h2>Example </h2>
 
@@ -3138,8 +3153,8 @@ changing the value LSD would retrieve if a lagged value of the Variable is
 subsequently requested (in a <span class=Cdigo><a
 href="#_V(&quot;Lab&quot;),_VL(&quot;Lab&quot;,_lag),">VL(…)</a></span>
 command, for instance). Warning: this can be a very dangerous practice and is
-only recommended to correctly initialize lagged values of Variables in Objects
-created in the middle of the simulation.</p>
+only recommended to correctly initialize lagged values of Variables in Objects created
+in the middle of the simulation.</p>
 
 <h2>Warning</h2>
 
@@ -3173,11 +3188,11 @@ calculated (or just created) Variables.</p>
 <i>value </i>), INCRS( <i>obj</i>, &quot;<i>Lab</i>&quot;, <i>value </i>) </h1>
 
 <p>These Macros add <i>value</i> to the numeric content of the Variable named <i>Lab</i>.
-They work only if Variable <i>Lab</i> is contained in Object <i>obj</i>, or in the
-current Object <a href="#_Parent_Object:_p"><span class=Cdigo><span
-style='color:blue'>p</span></span></a> if <i>obj</i> is not specified,
-otherwise it produces an error. The Macros also return the new value after the
-increment. </p>
+They work only if Variable <i>Lab</i> is contained in Object <i>obj</i>, or in
+the current Object <a href="#_Parent_Object:_p"><span class=Cdigo><span
+style='color:blue'>p</span></span></a> if <i>obj</i> is not specified, otherwise
+it produces an error. The Macros also return the new value after the increment.
+</p>
 
 <p><span class=Cdigo>INCR(…)</span> Macro family should be used preferably with
 Parameters, for the same reasons explained in the <span class=Cdigo>WRITE(…)</span>
@@ -3242,8 +3257,8 @@ assigning cyclically the pointer <i>cur</i> specified to the address of each
 target Object. Nested <span class=Cdigo>CYCLE(…)</span>’s can be used, provided
 that the pointers (<span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur</a></span>,
 <span class=Cdigo><a href="#_Temporary_Object's_pointers:">cur1</a></span>, <span
-class=Cdigo><a href="#_Temporary_Object's_pointers:">cur2</a></span>,…) differ for
-the different levels.</p>
+class=Cdigo><a href="#_Temporary_Object's_pointers:">cur2</a></span>,…) differ
+for the different levels.</p>
 
 <h2>Example </h2>
 
@@ -3407,10 +3422,10 @@ cur = ADDOBJ( &quot;Firm&quot; ); <br>
 WRITES( cur, &quot;DateBirth&quot;, T ); <br>
 …</span></p>
 
-<p>The lines above create a new Object <i>Firm</i>, which has the same initial data
-as the first Object in the model file at the current time step. Then, the code
-modifies the new Object Parameter named <i>DateBirth</i>, storing there the
-current time step. </p>
+<p>The lines above create a new Object <i>Firm</i>, which has the same initial
+data as the first Object in the model file at the current time step. Then, the
+code modifies the new Object Parameter named <i>DateBirth</i>, storing there
+the current time step. </p>
 
 <h2>Warning </h2>
 
@@ -3609,8 +3624,8 @@ returned.</p>
 
 <p class=MsoNormal>Despite the Macros are designed to be used in a lattice
 organized Object structure, they can be used at any time to navigate across the
-neighbors structure (parents, descendants and siblings). LSD does not enforce that
-the model structure actually has a lattice format.</p>
+neighbors structure (parents, descendants and siblings). LSD does not enforce
+that the model structure actually has a lattice format.</p>
 
 <p class=MsoNormal>There is no direct association of these Macros with the
 lattice graphical window commands (see <span class=Cdigo><a
@@ -3853,23 +3868,23 @@ example).</p>
 <h1><a name="_LSD_networks"></a><a name=Networks></a>LSD Networks</h1>
 
 <p>LSD Network tools provide Macros to configure a set of LSD Objects,
-typically a <a href="#_Object’s_relatives:_up,">brotherhood chain</a>, as a network.
-Such Objects become the network nodes and any topology of directed links can be
-built over them. All Network Macros operate on a special data structure that
-can be added to any LSD Object. This structure is named Node. Only Objects with
-a Node added can be part of a Network. Networks are represented in LSD as
-directed graphs by default. Undirected networks can be represented by using two
-directed arcs (links) in opposite directions.</p>
+typically a <a href="#_Object’s_relatives:_up,">brotherhood chain</a>, as a
+network. Such Objects become the network nodes and any topology of directed
+links can be built over them. All Network Macros operate on a special data
+structure that can be added to any LSD Object. This structure is named Node.
+Only Objects with a Node added can be part of a Network. Networks are
+represented in LSD as directed graphs by default. Undirected networks can be
+represented by using two directed arcs (links) in opposite directions.</p>
 
 <p>Each LSD Object can have a single Node and so participate in a single
 Network. Also, only Objects which are part of a single <a
 href="#_Object’s_relatives:_up,">brotherhood chain</a>, that is, have the same
 name (label) and parent Object, can be handled as an entity by network-level
-Macros. However, multiple Networks can coexist in a model, given that each of
-them is based on Nodes associated to different chains. Additionally, Objects
-which are not brothers can use some of the basic Network Macros that do not
-operate over an entire Network/<a href="#_Object’s_relatives:_up,">brotherhood
-chain</a> (typically the ones which do not use the chain name “<i>node_Obj</i>”).</p>
+Macros. However, multiple Networks can coexist in a model, given that each of them
+is based on Nodes associated to different chains. Additionally, Objects which
+are not brothers can use some of the basic Network Macros that do not operate
+over an entire Network/<a href="#_Object’s_relatives:_up,">brotherhood chain</a>
+(typically the ones which do not use the chain name “<i>node_Obj</i>”).</p>
 
 <p>To create a Network, the modeler can start from any of the automatic
 generators available in <span class=Cdigo><a
@@ -4035,8 +4050,8 @@ search</a> approach is recommended in such cases.</p>
 <p class=MsoNormal>The <span class=Cdigo>SEARCH_LINK(…)</span> Macros search
 for outgoing Links from a Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
-the current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-otherwise, for first occurrence of a Link destined to a Node with ID equal to <i>id</i>.
+the current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise,
+for first occurrence of a Link destined to a Node with ID equal to <i>id</i>.
 The Macros return a <a href="#_Model_specific_objects">Link pointer</a> to the
 found Link or <span class=Cdigo>NULL</span> if no link exists to the searched
 destination.</p>
@@ -4062,11 +4077,11 @@ destination.</p>
 </span><a name="RNDDRAW_LINK"></a>RNDDRAW_LINK( ), RNDDRAW_LINKS( <i>node_obj </i>)</h1>
 
 <p class=MsoNormal>The <span class=Cdigo>RNDDRAW_NODE(…)</span> Macros random
-draw one Node from a Network composed by the Objects labelled <i>node_Lab</i>,
-descending from the Object pointed by <i>obj</i> or the current Object <span
-class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise. All Nodes have
-the same drawing probability by default but the individual Node probability may
-be reset using <span class=Cdigo><a href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_NODE(…)</a></span>.
+draw one Node from a Network composed by the Objects labelled <i>node_Lab</i>, descending
+from the Object pointed by <i>obj</i> or the current Object <span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span> otherwise. All Nodes have the same
+drawing probability by default but the individual Node probability may be reset
+using <span class=Cdigo><a href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_NODE(…)</a></span>.
 The Macros return an <a href="#_Temporary_Object's_pointers:">Object pointer</a>
 to the drawn Node or <span class=Cdigo>NULL</span> if no Node exists.</p>
 
@@ -4074,8 +4089,8 @@ to the drawn Node or <span class=Cdigo>NULL</span> if no Node exists.</p>
 draw one outgoing Link from a Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
 the current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-otherwise. All Links have the same drawing probability by default but the individual
-outgoing Link probability may be reset using <span class=Cdigo><a
+otherwise. All Links have the same drawing probability by default but the
+individual outgoing Link probability may be reset using <span class=Cdigo><a
 href="#_DRAWPROB_NODE(_prob_),_1">DRAWPROB_LINK(…)</a></span>. The Macros
 return a <a href="#_Model_specific_objects">Link pointer</a> to the drawn Link
 or <span class=Cdigo>NULL</span> if no link exists.</p>
@@ -4160,8 +4175,8 @@ null-terminated character array) of the Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>, or
 the current Node <span class=Cdigo>p</span> otherwise, to <i>id</i> or <i>name</i>,
 respectively. <i>name</i> can be set to <span class=Cdigo>&quot;&quot;</span>
-(null string). <i>id</i> must be provided but it is not required to be unique
-in the Network. If the selected Object is not a Node, the Macros do nothing.</p>
+(null string). <i>id</i> must be provided but it is not required to be unique in
+the Network. If the selected Object is not a Node, the Macros do nothing.</p>
 
 <p>Please note that the Node name is not related to the name (label) of the
 Object hosting the Node.</p>
@@ -4432,11 +4447,11 @@ ADDLINKW( <i>node_obj</i>, <i>weigth</i> ), ADDLINKWS( <i>obj</i>, <i>node_obj</
 
 <p>These Macros add a new Link from the Node indicated by <a
 href="#_Temporary_Object's_pointers:">Object pointer</a> <i>obj</i>, or the
-current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-otherwise, to the Node pointed by <i>node_obj</i>. Both Nodes must be in the
-same <a href="#_Object’s_relatives:_up,">brotherhood chain</a>. If any of the
-Objects is not yet a Node, it has the Node added automatically. Link may have
-its weight set to <i>weight</i> when using the <span class=Cdigo>ADDLINKW(…)</span>
+current Node <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> otherwise,
+to the Node pointed by <i>node_obj</i>. Both Nodes must be in the same <a
+href="#_Object’s_relatives:_up,">brotherhood chain</a>. If any of the Objects
+is not yet a Node, it has the Node added automatically. Link may have its
+weight set to <i>weight</i> when using the <span class=Cdigo>ADDLINKW(…)</span>
 Macros, or have the weight set to 1 by default.</p>
 
 <p class=MsoNormal>The <span class=Cdigo>ADDLINK(…)</span> Macro returns a <a
@@ -4522,11 +4537,11 @@ numbers or the network structure.</p>
 <h1><a name="CYCLE_LINK"></a>CYCLE_LINK( <i>curl</i> ), CYCLE_LINKS( <i>node_obj</i>,<i>
 curl</i> )</h1>
 
-<p>This Macro creates a cycle (loop) through the set of all Links departing from
-a Node pointed by <a href="#_Temporary_Object's_pointers:">Object pointer</a> <i>node_obj</i>
-or the current Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-otherwise, using <a href="#_Model_specific_objects">Link pointer</a> <i>curl</i>
-as iterator.</p>
+<p>This Macro creates a cycle (loop) through the set of all Links departing
+from a Node pointed by <a href="#_Temporary_Object's_pointers:">Object pointer</a>
+<i>node_obj</i> or the current Object <span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span> otherwise, using <a
+href="#_Model_specific_objects">Link pointer</a> <i>curl</i> as iterator.</p>
 
 <p>The following example shows an example. An Equation in the current Object
 Node scans all linked Nodes to calculate the average income of its neighbors:</p>
@@ -4765,9 +4780,9 @@ distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the
-lognormal cumulative distribution with mean <i>mean</i> and deviation <i>dev</i>
-from minus infinity to <i>x</i></p>
+</span></span><b>lnormcdf( <i>mean</i>, <i>dev</i>, <i>x</i> )</b>: the lognormal
+cumulative distribution with mean <i>mean</i> and deviation <i>dev</i> from
+minus infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4783,8 +4798,8 @@ from minus infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>poissoncdf( <i>mean</i>, <i>x</i> )</b>: the Poisson cumulative
-distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
+</span></span><b>poissoncdf( <i>mean</i>, <i>x</i> )</b>: the Poisson
+cumulative distribution with mean <i>mean</i> from minus infinity to <i>x</i></p>
 
 <p class=MsoListParagraph style='margin-bottom:6.0pt;text-indent:-18.0pt'><span
 style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -4897,8 +4912,8 @@ href="http://www.mozilla.org/MPL/2.0">MPL2</a> license.</p>
 
 <h1>Advanced LSD coding </h1>
 
-<p>The commands listed here provide special operations rarely necessary for
-basic models. They normally concern only advanced modelers.</p>
+<p>The commands listed here provide special operations rarely necessary for basic
+models. They normally concern only advanced modelers.</p>
 
 <h2><a name="_ABORT"></a><a name=ABORT></a>ABORT</h2>
 
@@ -4925,7 +4940,8 @@ in the example:</p>
 
 <p><span class=Cdigo>…<br>
 char[500] filename;&nbsp;&nbsp; </span><span class=Cdigo><span
-style='color:#00B050'>// allocate space for the file name character array (string)</span><br>
+style='color:#00B050'>// allocate space for the file name character array
+(string)</span><br>
 sprint( filename, &quot;%s/%s&quot;, PATH, CONFIG );&nbsp; </span><span
 class=Cdigo><span style='color:#00B050'>// concatenate with the &quot;/&quot;
 between<br>
@@ -5059,10 +5075,10 @@ OBSERVE</h2>
 
 <p>These Macros dynamically change the simulation execution mode, as if the
 modeler had clicked on the respective buttons of LSD Log window while a
-simulation is running. <span class=Cdigo>OBSERVE</span> mode is the default
-when one simulation starts to run and it creates a run-time plot window (if
-there is at least one Variable set to show during run time) and show extra
-(verbose) information in LSD Log window during the run. <span class=Cdigo>FAST</span>
+simulation is running. <span class=Cdigo>OBSERVE</span> mode is the default when
+one simulation starts to run and it creates a run-time plot window (if there is
+at least one Variable set to show during run time) and show extra (verbose)
+information in LSD Log window during the run. <span class=Cdigo>FAST</span>
 mode prevents the update of the run-time plot window (and hide it) as well
 discards the presentation of most of the non-critical information in LSD Log
 window (or log file), effectively speeding up the simulation execution. <span
@@ -5113,10 +5129,10 @@ are attributed to a Variable by an Equation.</p>
 NAN to indicate that the Variable’s value is not a number (or, generically, not
 available) for some specific time steps, to prevent biases in statistical
 calculations for instance. The Macro <span class=Cdigo>USE_NAN</span> instructs
-LSD to accept Variables to be set to NAN (but still forbidding infinite
-values), while <span class=Cdigo>NO_NAN</span> reverts it to the default
-behavior. In any case, LSD will treat NAN’s in results data as “not available”
-for plot generation, statistics calculation and data export.</p>
+LSD to accept Variables to be set to NAN (but still forbidding infinite values),
+while <span class=Cdigo>NO_NAN</span> reverts it to the default behavior. In
+any case, LSD will treat NAN’s in results data as “not available” for plot
+generation, statistics calculation and data export.</p>
 
 <h2><a name="_NO_SEARCH_USE_SEARCH"></a>NO_SEARCH<br>
 USE_SEARCH</h2>
@@ -5232,11 +5248,12 @@ Object. Instead of searching for a name (like <span class=Cdigo><u><span
 style='color:blue'><a href="#_SEARCH(_&quot;obj_Lab&quot;_),">SEARCH(…)</a></span></u></span>)
 or a value (like <span class=Cdigo><u><span style='color:blue'><a
 href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span></u></span>),
-<span class=Cdigo>TSEARCH(…)</span> family looks for the informed object
-position (<i>pos</i>) in the brotherhood chain of Objects named <i>obj_Lab</i>.
-A pointer to the Object in the <i>pos</i> position of the chain is returned. <i>pos</i>
-can be set from 1 (first object in the chain) to the total number of objects in
-the brotherhood. </p>
+<span class=Cdigo>TSEARCH(…)</span> family looks for the Object position (<i>pos</i>)
+in the brotherhood chain of Object instances named <i>obj_Lab</i>. A pointer to
+the instance in the <i>pos</i> position of the chain is returned. <i>pos</i>
+can be set from 1 (first object in the chain) up to the total number of objects
+in the brotherhood. If <i>pos</i> is larger than the number of existing Object
+instances, the last one will be returned.</p>
 
 <p>Before the first usage of <span class=Cdigo>TSEARCH(…)</span>, a special
 search data structure must be initialized by the modeler using one of the forms
@@ -5245,14 +5262,53 @@ used before initialization, an error is produced and the simulation stops. If
 the suffix “<span class=Cdigo>T</span>” initialization Macro version is
 selected, the total number (<i>num</i>) of Objects in the chain has to be
 informed. This speed up the initialization search procedure a little bit but
-has no effect on the subsequent <span class=Cdigo>TSEARCH(…)</span> performance.</p>
+has no effect on the subsequent <span class=Cdigo>TSEARCH(…)</span>
+performance.</p>
 
 <p class=MsoNormal>The main benefit of the <span class=Cdigo>TSEARCH(…)</span>
 family when compared to other search alternatives is its speed, usually several
 times faster for longer chains of Objects. On the other hand, this family of
 Macros requires that the object chain be previously sorted (so the Object
 position is meaningful for the modeler) and the search algorithm be initialized
-(so the search data structure exists and can be used).</p>
+(so the search data structure exists and can be used). Initialization must be
+repeated any time Object instances are added or deleted to/from a previously
+initialized Object brotherhood, before using <span class=Cdigo>TSEARCH(…)</span>
+again (or unpredictable results are produced).</p>
+
+<h2><a name="_TSEARCH_CND(_&quot;obj_Lab&quot;,_pos"></a><a
+name="_TSEARCH_CND(_&quot;Lab&quot;,_value"></a>TSEARCH_CND( &quot;<i>Lab</i>&quot;,
+<i>value</i> ), TSEARCH_CNDS( <i>obj</i>, &quot;<i>Lab</i>&quot;, <i>value</i>
+)<br>
+INIT_TSEARCH_CND( &quot;<i>Lab</i>&quot; ), INIT_TSEARCH_CNDS( <i>obj</i>,
+&quot;<i>Lab</i>&quot; )</h2>
+
+<p>Turbo searches in and below the current (<span class=Cdigo><a
+href="#_Parent_Object:_p">p</a></span>) or the chosen (<i>obj</i>) Object for
+the first Object instance which contains the Variable named <i>Lab</i> with the
+specific numeric value <i>value</i>. It performs exactly like <span
+class=Cdigo><u><span style='color:blue'><a href="#_SEARCH_CND(_&quot;Lab&quot;,_value">SEARCH_CND(…)</a></span></u></span>
+Macros using a much faster method to retrieve the desired object, in particular
+when searching among many Object instances. The Variable or Parameter values
+are supposed to be unique for each Object instance. If non-uniquely valued
+instances are present, only the first one appearing in the brotherhood chain
+will be returned by <span class=Cdigo>TSEARCH_CND(…)</span>.</p>
+
+<p>However, differently from <span class=Cdigo>SEARCH_CND(…)</span>, the <span
+class=Cdigo>TSEARCH_CND(…)</span> Macros require the initialization of the
+search engine data structure using one of the forms of the <span class=Cdigo>INIT_TSEARCH_CND(…)</span>
+Macro. If <span class=Cdigo>TSEARCH_CND(…)</span>is used before initialization,
+an error is produced and the simulation stops. Initialization must be repeated
+any time the values stored in the Variable or Parameter <i>Lab</i> have
+changed, in any Object instance, or when Object instances are added or deleted
+to/from the set of instances. Performing <span class=Cdigo>TSEARCH_CND(…)</span>
+under such conditions will produce undefined behavior.</p>
+
+<p>Each set of Object instances under a common parent (a brotherhood) can have
+a single Variable or Parameter initialized for conditional turbo searching.
+Every time <span class=Cdigo>INIT_TSEARCH_CND(…)</span> is called, it resets
+any existing initialization for the brotherhood containing the chosen Variable
+or Parameter <i>Lab</i>. However, multiple active initializations can be
+maintained in different brotherhoods.</p>
 
 <h2><a name="_NO_NAN_USE_NAN"></a><a name="_V_CHEAT(_&quot;Lab&quot;,_fake_caller_2"></a><a
 name="V_CHEAT"></a>V_CHEAT( &quot;<i>Lab</i>&quot;, <i>fake_caller</i> ),
@@ -5453,8 +5509,8 @@ is updated by CYCLE_EXT)</span><br>
 
 <p>The Macros delete the C++ data extension of type <i>class</i> in the LSD
 Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> under
-computation, or in the Object pointed by <i>obj</i>, if present, deallocating any
-allocated memory space. If the target LSD Object has no data extension set
+computation, or in the Object pointed by <i>obj</i>, if present, deallocating
+any allocated memory space. If the target LSD Object has no data extension set
 previously by <span class=Cdigo><u><span style='color:blue'><a
 href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>, <span class=Cdigo>DELETE_EXT(…)</span>
 does nothing.</p>
@@ -5515,8 +5571,8 @@ within an extension of type <i>class</i> (a <span class=Cdigo>class</span> or a
 <span class=Cdigo>struct</span>, in this case) hosted in the current Object <span
 class=Cdigo><a href="#_Parent_Object:_p">p</a></span>, or in the Object pointed
 by <i>obj</i>. If method <i>meth</i> requires arguments, they should be also
-included in <span class=Cdigo>EXEC_EXT(…)</span> call after the regular elements.
-If the method returns a value, the Macro also returns it. </p>
+included in <span class=Cdigo>EXEC_EXT(…)</span> call after the regular
+elements. If the method returns a value, the Macro also returns it. </p>
 
 <p>Please note that <span class=Cdigo>EXEC_EXT(…)</span> does not allow
 directly invoking a method in <i>class</i>, please use the command <span
@@ -5542,9 +5598,9 @@ C++ data extensions and an example. </p>
 P_EXTS( <i>obj</i>, <i>class</i> ) </h2>
 
 <p>The Macros return a pointer of type <i>class</i> to the C++ data extension
-in the LSD Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span>
-under computation, or in the Object pointed by <i>obj</i>, if present. If the
-target LSD Object has no data extension set previously by <span class=Cdigo><u><span
+in the LSD Object <span class=Cdigo><a href="#_Parent_Object:_p">p</a></span> under
+computation, or in the Object pointed by <i>obj</i>, if present. If the target
+LSD Object has no data extension set previously by <span class=Cdigo><u><span
 style='color:blue'><a href="#_ADDEXT(_class_),">ADDEXT(…)</a></span></u></span>,
 they return <span class=Cdigo>NULL</span>.</p>
 
@@ -5610,16 +5666,15 @@ once. </p>
 <h2><a name=hook></a>obj-&gt;hook</h2>
 
 <p class=MsoNormal>Any object pointed by <i>obj </i>in a LSD model contains a
-special field called <span class=Cdigo>hook</span>. This field is a pointer to
-another object, like the other pointers <span class=Cdigo><u><span
-style='color:blue'><a href="#_Object’s_relatives:_up,">up</a></span></u></span>
-and <span class=Cdigo><u><span style='color:blue'><a
-href="#_Object’s_relatives:_up,">next</a></span></u></span> that allow moving
-from one object&nbsp; to another in the model: the containing parent object,
-the first contained object, and then next object, under the same parent. The
-difference is that <span class=Cdigo>hook</span> is never used by the system,
-and is available to the modelers for special purposes. Typically, it serves to
-speed up the access of a frequently requested object.<br>
+special field called <span class=Cdigo>hook</span>. This field is a pointer to another
+object, like the other pointers <span class=Cdigo><u><span style='color:blue'><a
+href="#_Object’s_relatives:_up,">up</a></span></u></span> and <span
+class=Cdigo><u><span style='color:blue'><a href="#_Object’s_relatives:_up,">next</a></span></u></span>
+that allow moving from one object&nbsp; to another in the model: the containing
+parent object, the first contained object, and then next object, under the same
+parent. The difference is that <span class=Cdigo>hook</span> is never used by
+the system, and is available to the modelers for special purposes. Typically,
+it serves to speed up the access of a frequently requested object.<br>
 <br>
 For example, suppose you have a model where the Object <i>Consumer</i> stores
 in the Parameter <i>IdUsed</i> the ID of the Object product currently used.
@@ -5653,10 +5708,10 @@ else<br>
 product not broken, used the same product as before</span><br>
 RESULT( v[1] )</span></p>
 
-<p class=MsoNormal>This Equation can slow down the simulation in case it contains
-thousands of <i>Firms</i> and of <i>Consumers</i>, since the system has to scan
-many <i>Firm</i>’s to find the one required by the <i>Consumer</i>. The same
-code can be written as follows:</p>
+<p class=MsoNormal>This Equation can slow down the simulation in case it
+contains thousands of <i>Firms</i> and of <i>Consumers</i>, since the system
+has to scan many <i>Firm</i>’s to find the one required by the <i>Consumer</i>.
+The same code can be written as follows:</p>
 
 <p class=MsoNormal><span class=Cdigo>EQUATION( &quot;IdUsed&quot; )<br>
 </span><span class=Cdigo><span style='color:#00B050'>/*<br>
@@ -5972,8 +6027,8 @@ margin-left:35.7pt;text-indent:-17.85pt'><span style='font-size:10.0pt;
 font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><b>Logical “or”</b> <b>( </b><span class=Cdigo><b>||</b></span><b>
 )</b>: given two conditions <span class=Cdigo>cond1</span> and <span
-class=Cdigo>cond2</span>, the composed condition <span class=Cdigo>( cond1 ||
-cond2 )</span> is true if one or both conditions are true.</p>
+class=Cdigo>cond2</span>, the composed condition <span class=Cdigo>( cond1 || cond2
+)</span> is true if one or both conditions are true.</p>
 
 <p class=MsoNormal>For example, the following code distinguishes three possible
 situations:</p>
@@ -6054,9 +6109,9 @@ margin-left:35.7pt;text-indent:-17.85pt'>2.<span style='font:7.0pt "Times New Ro
 
 <p class=MsoNormal style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;
 margin-left:35.7pt;text-indent:-17.85pt'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span>If <span class=Cdigo>CONDITION</span> is not true exit the cycle and
-continue with the first line after the block of code following the <span
-class=Cdigo>for(…)</span> command</p>
+</span>If <span class=Cdigo>CONDITION</span> is not true exit the cycle and continue
+with the first line after the block of code following the <span class=Cdigo>for(…)</span>
+command</p>
 
 <p class=MsoNormal style='margin-top:5.0pt;margin-right:0cm;margin-bottom:6.0pt;
 margin-left:35.7pt;text-indent:-17.85pt'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;

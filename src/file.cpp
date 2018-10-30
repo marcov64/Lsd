@@ -379,8 +379,10 @@ bool object::load_struct( FILE *f )
 		{ 
 			fscanf( f, "%*[ ]%99s", ch );
 			add_obj( ch, 1, 0 );
-			for ( cb = b; strcmp( cb->blabel, ch ); cb = cb->next );
 
+			// find the bridge which contains the object
+			cb = search_bridge( ch );
+			
 			if ( cb->head == NULL || ! cb->head->load_struct( f ) )
 				return false;
 		}

@@ -38,9 +38,6 @@ require a writable string.
 It is a normal strcmp, but it catches the possibility of both strings being
 NULL
 
-- void go_next(object **t)
-returns next if (*t)->next is not null. Don't know it is used any longer
-
 - double norm(double mean, double dev)
 returns a random number drawn from a normal with mean mean and standard deviation\
 dev.
@@ -459,120 +456,6 @@ void msleep( unsigned msec )
 
 
 /****************************************************
-GO_BROTHER
-****************************************************/
-object *go_brother( object *c )
-{
-	if ( c == NULL )
-		return NULL;
-	if ( c->next == NULL )
-		return NULL;
-	return c->next;
-}
-
-
-/****************************************************
-GO_NEXT
-****************************************************/
-void go_next( object **t )
-{
-	if ( ( *t )->next != NULL )
-		*t = ( *t )->next;
-	else
-		*t = NULL;
-}
-
-
-/****************************************************
-SKIP_NEXT_OBJ
-This is the new version, after moving to the bridge-based representation
-****************************************************/
-object *skip_next_obj( object *t, int *count )
-{
-	int i;
-	object *c;
-
-	*count = 0;
-	if ( t == NULL )
-		return NULL;
-	
-	for ( c = t, i = 0; c != NULL; c = c->next, ++i );
-	*count = i;
-
-	return skip_next_obj( t );
-}
-
-object *skip_next_obj( object *tr )
-{
-	bridge *cb;
-	
-	if ( tr == NULL || tr->up == NULL )
-		return NULL;
-
-	for ( cb = tr->up->b; cb != NULL; cb = cb->next )
-	{
-		if ( ! strcmp( cb->blabel, tr->label ) )
-		{
-			if ( cb->next == NULL )
-				return NULL;
-			else
-				return cb->next->head; 
-		}  
-	}
-	
-	return NULL;
-}
-
-
-/***************************************************
-GET_CYCLE_OBJ
-Support function used in CYCLEx macros
-***************************************************/
-object *get_cycle_obj( object *parent, char const *label, char const *command )
-{
-	object *res = parent->search( label );
-	if ( res == NULL )
-	{
-		sprintf( msg, "'%s' is missing for cycling", label );
-		error_hard( msg, "object not found", 
-					"create object in model structure" );
-	}
-	
-	return res;
-}
-
-
-/***************************************************
-SET_COUNTER
-***************************************************/
-void set_counter( object *o )
-{
-	int i;
-	bridge *cb;
-	object *cur;
-
-	if ( o->up == NULL )
-		return;
-
-	set_counter( o->up );  
-
-	for ( cb = o->up->b; strcmp( cb->blabel, o->label ); cb = cb->next );
-
-	if ( cb->counter_updated )
-		return;
-
-	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lstCntUpd < t )		// don't update more than once per period
-		{								// to avoid deletions to change counters
-			cur->acounter = i;
-			cur->lstCntUpd = t;
-		}
-
-	cb->counter_updated = true;
-}
-
-
-/****************************************************
 SEARCH_STR
 ****************************************************/
 FILE *search_str( char const *name, char const *str )
@@ -687,6 +570,37 @@ FILE *search_data_ent( char *name, variable *v )
 		return NULL;
 	else
 		return f;
+}
+
+
+/***************************************************
+SET_COUNTER
+***************************************************/
+void set_counter( object *o )
+{
+	int i;
+	bridge *cb;
+	object *cur;
+
+	if ( o->up == NULL )
+		return;
+
+	set_counter( o->up );  
+
+	// find the bridge which contains the object
+	cb = o->up->search_bridge( o->label );
+			
+	if ( cb->counter_updated )
+		return;
+
+	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
+		if ( cur->lstCntUpd < t )		// don't update more than once per period
+		{								// to avoid deletions to change counters
+			cur->acounter = i;
+			cur->lstCntUpd = t;
+		}
+
+	cb->counter_updated = true;
 }
 
 

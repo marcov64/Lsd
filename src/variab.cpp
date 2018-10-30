@@ -807,10 +807,10 @@ void parallel_update( variable *v, object* p, object *caller )
 	}
 		
 	// find the beginning of the linked list chain for current object
-	for ( cb = p->up->b; strcmp( cb->blabel, p->label ) && cb->next != NULL; cb = cb->next );
+	cb = p->up->search_bridge( p->label );
 	
-	// if problematic pointers or single instanced object, update as usual
-	if ( cb == NULL || cb->head == NULL || cb->head->next == NULL )
+	// if single instanced object, update as usual
+	if ( cb->head == NULL || cb->head->next == NULL )
 	{
 		v->cal( caller, 0 );
 		return;

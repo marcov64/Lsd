@@ -337,11 +337,18 @@ using namespace Eigen;
 #define INIT_TSEARCHS( O, X ) O->initturbo( ( char * ) X, 0 )
 #define INIT_TSEARCHT( X, Y ) p->initturbo( ( char * ) X, Y )
 #define INIT_TSEARCHTS( O, X, Y ) O->initturbo( ( char * ) X, Y )
+//                     X=name of variable to be indexed
+#define INIT_TSEARCH_CND( X ) p->initturbo_cond( ( char * ) X )
+#define INIT_TSEARCH_CNDS( O, X ) O->initturbo_cond( ( char * ) X )
+
 
 // Performs turbo search: O, X as in TSEARCHS_INI
+//                        Z=position of the object to be searched for
+#define TSEARCH( X, Z ) p->turbosearch( ( char * ) X, 0, Z )
+#define TSEARCHS( O, X, Z ) O->turbosearch( ( char * ) X, 0, Z )
 //                        Z=value of variable X to be searched for
-#define TSEARCH( X, Z ) p->turbosearch( ( char * ) X, 0 , Z )
-#define TSEARCHS( O, X, Z ) O->turbosearch( ( char * ) X, 0 , Z )
+#define TSEARCH_CND( X, Z ) p->turbosearch_cond( ( char * ) X, Z )
+#define TSEARCH_CNDS( O, X, Z ) O->turbosearch_cond( ( char * ) X, Z )
 
 #define SORT( X, Y, Z ) p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )
 #define SORTS( O, X, Y, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )

@@ -140,14 +140,17 @@ struct netLink;
 
 // special types used for fast equation, object and variable lookup
 typedef pair< string, bridge * > b_pairT;
+typedef pair< double, object * > o_pairT;
 typedef pair< string, variable * > v_pairT;
 #ifndef CPP11
 typedef map< string, bridge * > b_mapT;
+typedef map< double, object * > o_mapT;
 typedef map< string, variable * > v_mapT;
 #else
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef unordered_map< string, eq_funcT > eq_mapT;
 typedef unordered_map< string, bridge * > b_mapT;
+typedef unordered_map< double, object * > o_mapT;
 typedef unordered_map< string, variable * > v_mapT;
 #endif
 
@@ -179,6 +182,7 @@ class object
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
+	bridge *search_bridge( char const *lab, bool no_error = false );
 	double av( char const *lab, int lag );
 	double cal( char const *l, int lag );
 	double cal( object *caller,  char const *l, int lag );
@@ -230,6 +234,7 @@ class object
 	object *search_var_cond( char const *lab, double value, int lag );
 	object *shuffle_nodes_net( char const *lab );
 	object *turbosearch( char const *label, double tot, double num );
+	object *turbosearch_cond( char const *label, double value );
 	variable *add_empty_var( char const *str );
 	variable *search_var( object *caller, char const *label, bool no_error = false, bool no_search = false );
 	void add_obj( char const *label, int num, int propagate );
@@ -245,6 +250,7 @@ class object
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
 	void initturbo( char const *label, double num );	// set turbo search structure
+	void initturbo_cond( char const *label );
 	void insert_parent_obj( char const *lab );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
@@ -315,6 +321,9 @@ struct bridge
 	bridge *next;
 	mnode *mn;
 	object *head;
+	char *search_var;					// current initialized search variable 
+	
+	o_mapT o_map;						// fast lookup map to objects
 	
 	bridge( const char *lab );			// constructor
 	bridge( const bridge &b );			// copy constructor
@@ -668,7 +677,6 @@ void find_lags( object *r );
 void find_using( object *r, variable *v, FILE *frep );
 void get_sa_limits( object *r, FILE *out, const char *sep );
 void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
-void go_next( object **t );
 void handle_signals( void ( * handler )( int signum ) );
 void histograms( int *choice );
 void histograms_cs( int *choice );

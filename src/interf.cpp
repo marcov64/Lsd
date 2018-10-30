@@ -6134,7 +6134,7 @@ void control_tocompute( object *r, char *l )
 	for ( cb = r->b; cb != NULL; cb = cb->next )
 	{
 		if ( cb->head == NULL )
-			cur=blueprint->search(cb->blabel);
+			cur = blueprint->search( cb->blabel );
 		else
 			cur = cb->head; 
 		

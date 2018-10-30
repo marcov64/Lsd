@@ -5295,18 +5295,16 @@ if ( choice == 48 )
 			.l.t.text insert end \"$default\" \
 		}" );
 	cmd( "button .l.d.opt.cle -width $butWid -text \"Clean Obj.\" -command { \
-			if { [ catch { glob \"$RootLsd/$LsdSrc/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$RootLsd/$LsdSrc\" *.o *.obj ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			}; \
-			if { [ catch { glob \"$modeldir/*.o\" } objs ] == 0 } { \
-				foreach i $objs { \
-					catch { \
-						file delete -force \"$i\" \
-					} \
+			set objs [ glob -nocomplain -directory \"$modeldir\" *.o *.obj src break.gdb makefile* makemessage.txt elements.txt lsd_gnu* LSD ]; \
+			foreach i $objs { \
+				catch { \
+					file delete -force \"$i\" \
 				} \
 			} \
 		}" );
@@ -5968,8 +5966,10 @@ if ( choice == 87 )
 				} else { \
 					.f.t.t see $errlin.0; \
 					.f.t.t mark set insert $errlin.0 \
-				} \
+				}; \
+				.f.hea.line.line conf -text [ .f.t.t index insert ] \
 			}" );
+		
 		choice = 0;						// nothing else to do
 	}
 	else
@@ -6107,7 +6107,7 @@ const char *cTypes[ ] = {"comment1", "comment2", "cprep", "str", "lsdvar", "lsdm
 	"^(\\s)*#\[^/]*",
 	"\\\"\[^\\\"]*\\\"",
 	"v\\[\[0-9]{1,3}]|curl?\[1-9]?|root|up|next|hook",
-	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH_CNDL?S?|SEARCHS?|SEARCH_(NODES?|LINKS?)|TSEARCHS?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCHT?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_SEARCH|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
+	"MODEL(BEGIN|END)|(END_)?EQUATION(_DUMMY)?|FUNCTION|RESULT|ABORT|DEBUG_(START|STOP)(_AT)?|CURRENT|VL?S?|V_(CHEATL?S?|NODEIDS?|NODENAMES?|LINKS?|EXTS?|LAT)|SUM|SUML?S?|COUNTS?(_ALLS?)?|STATS?|STAT_(NETS?|NODES?)|(WHT)?AVEL?S?|SDL?S?|INCRS?|MULTS?|CYCLES?|CYCLE_(EXTS?|LINKS?)|CYCLE2?3?_SAFES?|MAXL?S?|MINL?S?|WRITEL?L?S?|WRITE_(NODEIDS?|NODENAMES?|LINK|EXTS?|LAT)|SEARCH_CNDL?S?|SEARCHS?|SEARCH_(NODES?|LINKS?)|TSEARCH(_CND)?S?|SORT2?S?|ADDN?OBJL?S?|ADDN?OBJ_EXL?S?|ADD(NODES?|LINKW?S?|EXTS?)|DELETE|DELETE_(EXTS?|NETS?|NODES?|LINKS?)|RND|RND_(GENERATOR|SEED|SETSEED)|RNDDRAWL?S?|RNDDRAW_(FAIRS?|TOTL?S?|NODES?|LINKS?)|DRAWPROB_(NODES?|LINK)|PARAMETER|INTERACTS?|P?LOG|INIT_(TSEARCH(_CND)?T?S?|NETS?|LAT)|LOAD_NETS?|SAVE_(NETS?|LAT)|(SNAP|SHUFFLE)_NETS?|LINK(TO|FROM)|EXTS?|(P|DO|EXEC)_EXTS?|(USE|NO)_NAN|(USE|NO)_SEARCH|PATH|CONFIG|(LAST_)?T|SLEEP|FAST(_FULL)?|OBSERVE|RECALCS?|DEFAULT_RESULT|abs|min|max|round|(sq|cb)rt|pow|exp|log(10)?|fact|(t|l)?gamma|a?sin|a?cos|a?tan|pi|is_(finite|inf|nan)|uniform(_int)?|l?norm(cdf)?|poisson(cdf)?|beta(cdf)?|alapl(cdf)?|unifcdf|gammacdf|close_sim",
 	"auto|const|double|float|int|short|struct|unsigned|long|signed|void|enum|volatile|char|extern|static|union|asm|bool|explicit|template|typename|class|friend|private|inline|public|virtual|mutable|protected|wchar_t",
 	"break|continue|else|for|switch|case|default|goto|sizeof|typedef|do|if|return|while|dynamic_cast|namespace|reinterpret_cast|try|new|static_cast|typeid|catch|false|operator|this|using|throw|delete|true|const_cast|cin|endl|iomanip|main|npos|std|cout|include|iostream|NULL|string"
 };
