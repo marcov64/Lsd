@@ -1,26 +1,21 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/*****
-used up to 87 options
-*******/
-
-/*****************************************************
-
+/*************************************************************
+MODMAN.CPP
 This program is a front end for dealing with LSD models code (running, compiling, editing, 
 debugging LSD model programs). See the manual for help on its use.
 
 IMPORTANT: this is _NOT_ a LSD model, but the best I could produce of something similar to 
 a programming environment for LSD model programs.
-
 
 This file can be compiled with the command line:
 
@@ -34,13 +29,13 @@ operation it does is to ... run a copy of itself followed by the parameter "kick
 is required because under Windows there are troubles launching external package from a "first 
 instance" of a program.
 
-LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, R and src as model 
+LMM reads all the directories that are not: Manual, gnu, gnu64, LMM.app, lwi, R and src as model 
 directories, where it expect to find certain files. At any given moment a model name is stored, 
 together with its directory and the file shown. 
 
 Any internal command is executed in a condition like this:
 
-if ( choice == x)
+if ( choice == x )
  do_this_and_that
 
 and returned to the main cycle. After each block the flow returns to "loop" where the main 
@@ -49,8 +44,11 @@ Tcl_DoOneEvent loop sits.
 The widget of importance are:
 - .f.t.t is the main text editor
 - .f.m is the frame containing the upper buttons, models list and help window
+*************************************************************/
 
-*****************************************************/
+/*****
+used up to 87 options
+*******/
 
 #include <tk.h>
 #include <stdio.h>

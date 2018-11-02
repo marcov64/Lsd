@@ -1,28 +1,31 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 EDIT_DAT.CPP
 Called by INTERF.CPP shows all the lagged variables and parameters
 to be initialized for one object. Prepares the spread-sheet window
-and the bindings. It can exits in three ways:
+and the bindings. 
+
+It can exits in three ways:
 1) return to the calling function (either Browser or set object nunmber)
 2) setall, calling the routine to set all values at once
 3) move to set object number
+
 This interface shows a maximum of 100 columns, though it allows to set all
 the initial values of the model by using the setall options. In case
 you need to individually observe and edit the data of objects not shown
 by this function, use the Data Browse option.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
 - void edit_data( object *root, int *choice, char *obj_name )
 Initialize the window, calls search_title and link_data, then wait for a
@@ -43,35 +46,7 @@ of the model
 - void clean_cell( object *root, char *tag, char *lab );
 called before exiting, removes all the links between tcl variables and model
 values
-
-
-Functions used here from other files are:
-
-- void set_all( int *choice, object *r, char *lab, int lag );
-SET_ALL.CPP It contains the routine called from the edit_dat file for setting all the
-values of a variable with a function, instead of inserting manually.
-
-- object *skip_next_obj( object *t, int *i );
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- void cmd( char *cc );
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother( object *cur );
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-- void show_graph( object *t );
-DRAW.CPP shows the grsphical representation of the model
-
-- void set_obj_number( object *r, int *choice );
-EDIT.CPP allows to edit the number of instances in the model
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -84,7 +59,6 @@ int set_focus;
 
 /****************************************************
 EDIT_DATA
-
 ****************************************************/
 void edit_data(object *root, int *choice, char *obj_name)
 {
@@ -234,11 +208,10 @@ in_edit_data = false;
 Tcl_UnlinkVar( inter, "lag");
 }
 
+
 /****************************************************
 SEARCH_TITLE
-
 ****************************************************/
-
 void search_title( object *root, char *tag, int *i, char *lab, int *incr )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
@@ -278,11 +251,10 @@ void search_title( object *root, char *tag, int *i, char *lab, int *incr )
 	}
 }
 
+
 /****************************************************
 SET_TITLE
-
 ****************************************************/
-
 void set_title(object *c, char *lab, char *tag, int *incr)
 {
 int j;
@@ -316,9 +288,7 @@ else
 
 /****************************************************
 CLEAN_CELL
-
 ****************************************************/
-
 void clean_cell(object *root, char *tag, char *lab)
 {
 char ch1[2*MAX_ELEM_LENGTH];
@@ -349,11 +319,10 @@ for (cv=cur->v; cv!=NULL; cv=cv->next)
 
 }
 
+
 /****************************************************
 LINK_DATA
-
 ****************************************************/
-
 void link_data(object *root, char *lab)
 {
 object *cur, *cur1;

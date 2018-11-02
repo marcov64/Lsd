@@ -1,22 +1,25 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 DEBUG.CPP
-Builds and manages the debug window. This window appears under two conditions:
+Builds and manages the debug window. 
+
+This window appears under two conditions:
 - Simulation running in debug mode AND an equation for one of the variables
 to be debugged has just been computed, or
 - One conditional stop is met, whatever type of running mode is enabled
 Moreover, it can be used to explore thoughrouly a model by choosing
 the option Data Browse from the main Browser.
+
 When the simulation is stopped by the debugger,  shows all the contents of the
 objects, that is, it lists the Variables and Parameters of the object, their
 value and their time of last updating, for Variables. User are then allowed
@@ -25,11 +28,9 @@ Note that the browsing mode in the debugger is different from the main Browser,
 since in the debugger you move along the physical model, hence you have
 to browse through all the instances, instead of moving along object types.
 
+The main functions contained in this file are:
 
-
-The functions contained in this file are:
-
-- int deb(object *r, object *c, char *lab, double *res, bool interact)
+- int deb( object *r, object *c, char *lab, double *res, bool interact )
 initialize the debugging window and calls deb_show below. Then it waits for a
 command from user. The available actions are
 
@@ -45,30 +46,9 @@ command from user. The available actions are
 9) observe the object from which this equation was triggered, if any.
 10) Search for an Object containing a specific Variable with a specific value
 
-- void deb_show(object *r)
+- void deb_show( object *r )
 fill in all the content of the object.
-
-Functions used here from other files are:
-
-- void show_eq(char *lab, int *choice);
-SHOW_EQ.CPP shows one equation for variable lab
-
-- object *skip_next_obj(object *t, int *i);
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *search_var_cond(char *lab, double value, int lag );
-Uses search_var, but returns the instance of the object that has the searched
-variable with the desired value equal to value.
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

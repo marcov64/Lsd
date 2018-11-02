@@ -1,128 +1,127 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************************************************
+/*************************************************************
 NETS.CPP
-	Network tools: functions to load, generate and save networks in LSD
-	
-	v1: initial compilation by Marcelo Pereira
-	v2: full integration with LSD
-	
-	All functions work on specially defined LSD object's data structures (named here as 
-    "node"), with the following organization:
-	
-    object --+-- node --+- nodeID (long) : node unique ID number (re-orderable)
-                        +- serNum (long) : node serial number (initial order, fixed)
-                        +- nLinks (long) : number of arcs FROM node
-                        +- first (ptr) : pointer to the first outgoing link
-                        +- last(ptr) : pointer to the last outgoing link
-                        +- prob (double) : assigned node probability (power-law)
-                        |
-                        +-- link --+- serTo (long) : destination node serial
-                                   +- ptrTo (ptr) : pointer to neighbor
-                                   +- node (ptr) : node containing link
-                                   +- prev (ptr) : pointer to previous link or NULL
-                                   +- next (ptr) : pointer to next link or NULL
-                                   +- weight (double) : link weight
-                                   +- probTo (double) : dest. node prob. (power-law)
+Network tools: functions to load, generate and save networks in LSD
 
-	Objects with "node" equal to NULL are not elements of a network. Currently, each
-	object can be part of only one network.
+v1: initial compilation by Marcelo Pereira
+v2: full integration with LSD
 
-	Networks can be loaded and saved from/to Pajek-formatted files. Network objects are
-	formatted as directed graphs (undirected links represented by two directed arcs in 
-	opposite directions). The available methods are:
-	
-	parent->read_file_net( lab, dir, base_name, serial, ext )
-				
-	parent->write_file_net( lab, dir, base_name, serial, ext )
-	
-	Where "parent" is the object where to search for "lab", that is the name of the 
-	object that will be used as the container for the nodes in the network. If the 
-	existing number of objects "lab" is less than the required number, the missing 
-	objects are automatically created. "dir" is the folder where the Pajek network 
-	file is located. The format for the network file name is "<base_name>_<serial>.<ext>".
-	If multiple simulation runs are used, <serial> is incremented sequentially.
-	
-	There are also some alternative network generator algorithms available using:
+All functions work on specially defined LSD object's data structures (named here as 
+"node"), with the following organization:
 
-	parent->init_discon_net( lab, numNodes )
-	
-	parent->init_random_dir_net( lab, numNodes, numLinks )
-	
-	parent->init_random_undir_net( lab, numNodes, numLinks )
-	
-	parent->init_uniform_net( lab, numNodes, outDeg )
-	
-	parent->init_star_net( lab, numNodes )
+object --+-- node --+- nodeID (long) : node unique ID number (re-orderable)
+					+- serNum (long) : node serial number (initial order, fixed)
+					+- nLinks (long) : number of arcs FROM node
+					+- first (ptr) : pointer to the first outgoing link
+					+- last(ptr) : pointer to the last outgoing link
+					+- prob (double) : assigned node probability (power-law)
+					|
+					+-- link --+- serTo (long) : destination node serial
+							   +- ptrTo (ptr) : pointer to neighbor
+							   +- node (ptr) : node containing link
+							   +- prev (ptr) : pointer to previous link or NULL
+							   +- next (ptr) : pointer to next link or NULL
+							   +- weight (double) : link weight
+							   +- probTo (double) : dest. node prob. (power-law)
 
-	parent->init_circle_net( lab, numNodes, outDeg )
-	
-	parent->init_renyi_erdos_net( lab, numNodes, linkProb )
-	
-	parent->init_small_world_net( lab, numNodes, outDeg, rho )
+Objects with "node" equal to NULL are not elements of a network. Currently, each
+object can be part of only one network.
 
-	parent->init_scale_free_net( lab, numNodes, outDeg, expLink )
-	
-	parent->init_lattice_net( nRow, nCol, lab, eightNeigbr )
+Networks can be loaded and saved from/to Pajek-formatted files. Network objects are
+formatted as directed graphs (undirected links represented by two directed arcs in 
+opposite directions). The available methods are:
 
-	The additional parameters for those generators are:
-	
-	numNodes : number of nodes in network
-    numLinks : number of arcs (directed links) in network
-    (avg)outDeg : (average of) arcs (directed links) per node (out degree)
-	linkProb : probability of link between two nodes
-    expLink : power degree (power-law networks only)
-    rho : rewiring link probability (small-world networks only)
-	nRow : number of rows in the lattice
-	nCol : number of columns in the lattice
-	eightNeigbr : eight (true) or four (false) neighbors
+parent->read_file_net( lab, dir, base_name, serial, ext )
+			
+parent->write_file_net( lab, dir, base_name, serial, ext )
 
-	Another, more general method for creating networks is (network type is a parameter):
-	
-	parent->init_stub_net( lab, gen, numNodes, par1, par2 )
-	
-	gen : "DISCONNECTED" , "RANDOM-DIR" (par1: numLinks), "RANDOM-UNDIR" (par1: numLinks),
-		  "UNIFORM" (par1: outDeg), "STAR", "CIRCLE" (par1: outDeg), "RENYI-ERDOS" (par1: outDeg),
-		  "SMALL-WORLD" (par1: outDeg, par2: rho), "SCALE-FREE" (par1: outDeg, par2: expLink),
-		  "LATTICE" (par1: nCol, par2: eightNeigbr)
-		
-	All generators return the effective number of directed links (arcs) of the generated
-	network. According to the generator used, the network may have to be reshuffled before
-	use, applying the method:
-	
-	parent->shuffle_net( lab )
+Where "parent" is the object where to search for "lab", that is the name of the 
+object that will be used as the container for the nodes in the network. If the 
+existing number of objects "lab" is less than the required number, the missing 
+objects are automatically created. "dir" is the folder where the Pajek network 
+file is located. The format for the network file name is "<base_name>_<serial>.<ext>".
+If multiple simulation runs are used, <serial> is incremented sequentially.
 
-	Reshuffling reassigns nodeIDs and the network object linked list order but does not 
-	change original node's serial numbers or the network structure.
-	
-	Other methods to directly manipulate nodes data and links:
-	
-	object->add_node_net( id, name )
-	
-	object->delete_node_net( void )
+There are also some alternative network generator algorithms available using:
 
-	parent->search_node_net( lab, destId )
+parent->init_discon_net( lab, numNodes )
 
-	parent->draw_node_net( lab )
+parent->init_random_dir_net( lab, numNodes, numLinks )
 
-	object->add_link_net( destPtr )
+parent->init_random_undir_net( lab, numNodes, numLinks )
 
-	object->delete_link_net( destPtr )
+parent->init_uniform_net( lab, numNodes, outDeg )
 
-	object->search_link_net( destId )
+parent->init_star_net( lab, numNodes )
+
+parent->init_circle_net( lab, numNodes, outDeg )
+
+parent->init_renyi_erdos_net( lab, numNodes, linkProb )
+
+parent->init_small_world_net( lab, numNodes, outDeg, rho )
+
+parent->init_scale_free_net( lab, numNodes, outDeg, expLink )
+
+parent->init_lattice_net( nRow, nCol, lab, eightNeigbr )
+
+The additional parameters for those generators are:
+
+numNodes : number of nodes in network
+numLinks : number of arcs (directed links) in network
+(avg)outDeg : (average of) arcs (directed links) per node (out degree)
+linkProb : probability of link between two nodes
+expLink : power degree (power-law networks only)
+rho : rewiring link probability (small-world networks only)
+nRow : number of rows in the lattice
+nCol : number of columns in the lattice
+eightNeigbr : eight (true) or four (false) neighbors
+
+Another, more general method for creating networks is (network type is a parameter):
+
+parent->init_stub_net( lab, gen, numNodes, par1, par2 )
+
+gen : "DISCONNECTED" , "RANDOM-DIR" (par1: numLinks), "RANDOM-UNDIR" (par1: numLinks),
+	  "UNIFORM" (par1: outDeg), "STAR", "CIRCLE" (par1: outDeg), "RENYI-ERDOS" (par1: outDeg),
+	  "SMALL-WORLD" (par1: outDeg, par2: rho), "SCALE-FREE" (par1: outDeg, par2: expLink),
+	  "LATTICE" (par1: nCol, par2: eightNeigbr)
 	
-	object->draw_link_net( )
-	
-****************************************************************************************/
+All generators return the effective number of directed links (arcs) of the generated
+network. According to the generator used, the network may have to be reshuffled before
+use, applying the method:
+
+parent->shuffle_net( lab )
+
+Reshuffling reassigns nodeIDs and the network object linked list order but does not 
+change original node's serial numbers or the network structure.
+
+Other methods to directly manipulate nodes data and links:
+
+object->add_node_net( id, name )
+
+object->delete_node_net( void )
+
+parent->search_node_net( lab, destId )
+
+parent->draw_node_net( lab )
+
+object->add_link_net( destPtr )
+
+object->delete_link_net( destPtr )
+
+object->search_link_net( destId )
+
+object->draw_link_net( )
+*************************************************************/
 
 #include "decl.h"
 

@@ -3,9 +3,10 @@
 # the next line restarts using wish \
 exec wish "$0" -- ${1+"$@"}
 
-###############################################################################
+#*************************************************************
+# TKDIFF.TCL
+# A graphical front-end to diff for Unix and Windows.
 #
-# TkDiff -- A graphical front-end to diff for Unix and Windows.
 # Copyright (C) 1994-1998 by John M. Klassa.
 # Copyright (C) 1999-2001 by AccuRev Inc.
 # Copyright (C) 2002-2005 by John M. Klassa.
@@ -27,7 +28,7 @@ exec wish "$0" -- ${1+"$@"}
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-###############################################################################
+#*************************************************************
 
 package require Tk 8.0
 

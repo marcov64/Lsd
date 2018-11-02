@@ -1,13 +1,18 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
+ 
+/*************************************************************
+DECL.H
+Global definitions among all LSD C++ modules
+*************************************************************/
 
 // LSD compilation options file
 #include "choose.h"
@@ -74,7 +79,7 @@
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
 #define _LSD_VERSION_ "7.1"
-#define _LSD_DATE_ "Aug 15 2018"        // __DATE__
+#define _LSD_DATE_ "Dec 1 2018"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)

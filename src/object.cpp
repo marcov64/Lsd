@@ -1,17 +1,18 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 OBJECT.CPP
 It contains the core code for LSD, together with VARIAB.CPP.
+
 A model is nothing but a link of objects, whose behavior is defined here.
 Only the methods for saving a loading a model are placed in another file, FILE.CPP.
 
@@ -79,6 +80,7 @@ The methods for object implemented here all refer always to the "this" object.
 That is, if you consider the following as functions, then they have always as
 parameter the address of one object, refer to as "this", whose fields are
 addressed as if they were public variables.
+
 Methods as listed in two groups: the ones that can be used as functions in LSD
 and the ones used for management of the model. This distinction is only
 because of the functionalities, since all the methods are actually public, and
@@ -122,80 +124,41 @@ search is starting from.
 The field caller is used to avoid deadlocks when
 from descendants the search goes up again, or from the parent down.
 
-- object *search_var_cond(char *lab, double value, int lag );
+- object *search_var_cond( char *lab, double value, int lag );
 Uses search_var, but returns the instance of the object that has the searched
 variable with the desired value equal to value.
 
-- double overall_max(char *lab, int lag );
+- double overall_max( char *lab, int lag );
 Searches for the object having the variable lab. From that object, it considers
 the whole group of object of the same type as the one found, and searches the
 maximum value of the variables lab with lag lag there contained
 
-- double sum(char *lab, int lag );
+- double sum( char *lab, int lag );
 Searches for the object having the variable lab. From that object, it considers
 the whole group of object of the same type as the one found, and returns
 the sum of all the variables lab with lag lag in that group.
 
-- double whg_av(char *lab, char *lab2, int lag );
+- double whg_av( char *lab, char *lab2, int lag );
 Same as sum, but it adds up the product between variables lab and lab2 for each
 object. WARNING: if lab and lab2 are not in the same object, the results are
 messy
 
-- void sort(char *obj, char *var, char *dir);
+- void lsdqsort( char *obj, char *var, char *dir );
 Sorts the Objects whose label is obj according to the values of their
 variable var. The direction of sorting can be UP or DOWN. The method
 is just an interface for sort_asc and sort_desc below.
 
-- void sort_asc( object *from, char *l_var);
-Sorts (using bubblesort method) the objects in a group according to increasing
-values of their variable l_var, restructuring the linked chain.
 IMPORTANT:
 The initial Object must be the first element of the set of Objects to be sorted,
 and hence is must contain a Variable or Parameter labeled Var_label.
 The field from must be either the Object whose "next" is this, or, in case this
 is the first element of descendants from some Objects and hence it is a son,
 it must be the address of the parent of this.
-As example, consider a model having a number of Objects Capital defined as
-the only type of descendants from Object Firm.
-A Variable in Firm, can have an equation having the following line:
-...
-cur=search("Capital")
-cur->sort_asc(p, "Productivity");
-...
-which will sort the objects Capital according to the ascending values of
-Productivity
-If instead the object Capital is defined after a group of object (say Clients)
-then you need to following lines:
-
-...
-cur1=search("Capital"); // cur1 becomes the first Capital
-for (cur2=cur1; cur2->next!=cur1; cur2=cur2->next); //finds the last Client before the first Capital
-cur1->sort_asc(cur2, "Productivity"); //sorts the group starting from cur1 attached after cur2
-...
-
-- void sort_desc( object *from, char *l_var);
-Same as sort_asc, but sorting in descending order
 
 - void delete_obj( void ) ;
 eliminate the object, keeping in order the chain list.
 
-- object *add_an_object(char *lab);
-Add an object of type lab to the descendant of this. It is placed in the last
-position of the groups of the same object and initialized according to the initial
-values contained in the file of the model, corresponding to the first object
-of that type. The new object is returned, for further initialization.
-The variables of the object are set to be already computed in the present
-time step, and are all set to value 0.
-WARNING: it creates, if necessary, the whole set of descendants for the new objects
-but places one single element for each single type of object.
-
-- object *add_an_object(char *lab, object *example);
-It has the same effect as the method above, but it uses object given as
-example, instead of reading the object initializations from the files. It is
-much more efficient when the initialization files are huge, so that their
-scanning becomes a very complex task.
-
-- void stat(char *lab, double *v);
+- void stat( char *lab, double *v );
 Reports some statistics on the values of variable named lab contained
 in one group of object descending from the this. The results are stored in the
 vector v, with the following order:
@@ -205,7 +168,7 @@ v[ 2 ]=variance
 v[ 3 ]=max
 v[ 4 ]=min
 
-- void write(char *lab, double value, int time)
+- void write( char *lab, double value, int time )
 Assign the value value to the variable lab, resulting as if this was the
 value at gloabal time time. It does not make a search looking for lab. Lab
 must be a variable of this.
@@ -219,26 +182,26 @@ An equation can instead call "write"
 For sake of completeness, here are other two functions, not members of object,
 that are extensively used in equations, besides in the following code.
 
-- object *skip_next_obj(object *t, int *count);
+- object *skip_next_obj( object *t, int *count );
 Counts how many types of objects equal to t are in this
 group. count returns such value, and the whole function returns the next object
 after the last of the series of t.
 
-- object *go_brother(object *c);
+- object *go_brother( object *c );
 returns: c->next, if it is of the same type of c (brother).
 Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
 
 METHODS NOT USED IN THE EQUATIONS
 
-- double cal(object *caller, char *l, int lag, int *done);
+- double cal( object *caller, char *l, int lag, int *done );
 It is the basic function used in the equations for LSD variables.
 It is called by the former type of method cal(l,lag ), because that
 is simpler to be used in the equation code. It activates the method
-search_var(caller, label)
+search_var( caller, label )
 that returns a variable whose name is label and then calls the method
 cal() for that variable (see variable::cal), that returns the desired value.
 
-- int init(object *_up, char *_label);
+- int init( object *_up, char *_label );
 Initialization for an object. Assigns _up to up and creates the label
 
 - void update( void ) ;
@@ -246,44 +209,44 @@ The recursive function computing the equations for a new time step in the
 simulation. It first requests the values for its own variables. Then calls update
 for all the descendants.
 
-- object *hyper_next(char *lab);
+- object *hyper_next( char *lab );
 Returns the next object whose name is lab. That is, it makes a search only down
 and up, but does never consider objects before the one from which the search
 starts from. It is used to chase objects of lab type even when they are scattered
 in different groups.
 
-- void add_var(char *label, int lag, double *val, int save);
+- void add_var( char *label, int lag, double *val, int save );
 Add a variable to all the object of this type, initializing its main fields,
 that is label, number of lag, initial values and whether is has to be saved or
 not
 
-- void add_obj(char *label, int num );
+- void add_obj( char *label, int num );
 Add a new object type in the model as descendant of current one
  and initialize its name. It makes num copies
 of it. This is NOT to be used to make more instances of existing objects.
 
-- void insert_parent_obj(char *lab);
+- void insert_parent_obj( char *lab );
 Creates a new type of object that has the current one as descendant
 and occupies the previous position of this in the chain of its (former) parent
 
-- object *search(char *lab);
+- object *search( char *lab );
 Explores one branch of the model to find for an object whose label is lab.
 It searches only down and next. Only for Root, the search is extensive on the
 whole model.
 
-- void chg_lab(char *lab);
+- void chg_lab( char *lab );
 Changes the name of an object type, that is for all the object of this type in
 the model
 
-- void chg_var_lab(char *old, char *n);
+- void chg_var_lab( char *old, char *n );
 Only to this object, changes the label of the variable whose label is old,
 and it si changed in n
 
-- variable *add_empty_var(char *str);
+- variable *add_empty_var( char *str );
 Add a variable before knowing its contents, setting to a default initialization
 values all the fields in the variable. It operates only on object this
 
-- void add_var_from_example(variable *example);
+- void add_var_from_example( variable *example );
 Add a variable copying all the fields by the variable example.
 It operates only on object this
 
@@ -296,7 +259,10 @@ METHODS FOR NETWORK OPERATION
 
 see nets.cpp
 
-****************************************************/
+METHODS FOR FILE OPERATION
+
+see file.cpp
+*************************************************************/
 
 //#define DEBUG_MAPS				// define to enable fast lookup maps debugging
 

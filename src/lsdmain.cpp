@@ -1,21 +1,21 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-LSD_MAIN.CPP contains:
+/*************************************************************
+LSD_MAIN.CPP 
+Contains:
 - early initialization (namely, of the Log windows)
 - the main cycle: browse a model, run simulation, return to the browser.
 
-
-The functions contained here are:
+The main functions contained here are:
 
 - void run( )
 Run the simulation model whose root is r. Running is not only the actual
@@ -24,41 +24,7 @@ also to manage the messages from user and from the model at run time.
 
 - bool alloc_save_mem( );
 Prepare variables to store saved data.
-
-- Tcl_Interp *InterpInitWin( char *tcl_dir );
-A function that manages to initialize the tcl interpreter. Guess the standard
-functions are actually bugged, because of the difficulty to retrive the directory
-for the tk library. Why is difficult only for tk and not for tcl, don't know.
-But is a good thing, so that I can actually copy the tcl directory and make
-the modifications
-
-Other functions used here, and the source files where are contained:
-
-- object *create( );
-manage the browser. Its code is in INTERF.CPP
-
-- object *skip_next_obj( object *t, int *count );
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother( object *c );
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-- void cmd( char *cc );
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- void myexit( int v );
-Exit function, which is customized on the operative system.
-
-- FILE *search_str( char *name, char *str );
-UTIL.CPP given a string name, returns the file corresponding to name, and the current
-position of the file is just after str.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

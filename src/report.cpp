@@ -1,33 +1,34 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/************************
+/*************************************************************
 REPORT.CPP
-This file contains the code for the report generating routines. The main function,
-(report) needs the pointer to the root of the model. It also needs the equation
-file name to be correctly set (if the file does not exist, the routine ask for it).
-The output of the routine is a html file containing the main information on the model.
-This file is meant to be used as basic structure to be filled with modellers' comments
+This file contains the code for the report generating routines. 
+
+The main function, (report) needs the pointer to the root of the model. 
+It also needs the equation file name to be correctly set (if the file 
+does not exist, the routine ask for it). The output of the routine is 
+a html file containing the main information on the model. This file is 
+meant to be used as basic structure to be filled with modellers' comments
 in order to obtain the complete documentation of the model.
 
-The report lists all the objects, variables and parameters, all linked with pointers,
-so that readers can easily jump hypertextually through the whole report.
+The report lists all the objects, variables and parameters, all linked with 
+pointers, so that readers can easily jump hypertextually through the whole report.
 
 - Each object is listed with indication of its ancestors.
 - For each object, the set of variables and parameters is listed.
 - For each parameter is listed the set of variables whose equations make use of its value.
 - For each variables is listed the set of variables whose equations make use of its values,
 and also the whole set of variables and parameters used in the its own equation.
-
-************************/
+*************************************************************/
 
 #include "decl.h"
 

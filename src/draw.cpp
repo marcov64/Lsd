@@ -1,56 +1,39 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 DRAW.CPP
-Draw the graphical representation of the model. It is activated by
+Draws the graphical representation of the model. It is activated by
 INTERF.CPP only in case a model is loaded.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
-- void show_graph(object *t)
+- void show_graph( object *t )
 initialize the canvas and calls show_obj for the root
 
-- void draw_obj(object *blk, object *t, int level, int center, int from)
+- void draw_obj( object *blk, object *t, int level, int center, int from )
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node(int x1, int y1, int x2, int y2, char *str)
+- void put_node( int x1, int y1, int x2, int y2, char *str )
 Draw the circle.
 
-- void put_line(int x1, int y1, int x2, int y2)
+- void put_line( int x1, int y1, int x2, int y2 )
 draw the line
 
-- void put_text(char *str, char *num, int x, int y, char *str2);
+- void put_text( char *str, char *num, int x, int y, char *str2 );
 Draw the different texts and sets the bindings
-
-Functions used here from other files are:
-
-- object *skip_next_obj(object *t, int *i);
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother(object *cur);
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -75,7 +58,6 @@ int range_type;
 
 /****************************************************
 SHOW_GRAPH
-
 ****************************************************/
 void show_graph( object *t )
 {
@@ -163,7 +145,6 @@ void show_graph( object *t )
 
 /****************************************************
 DRAW_OBJ
-
 ****************************************************/
 void draw_obj( object *t, int level, int center, int from )
 {
@@ -302,7 +283,6 @@ void draw_obj( object *t, int level, int center, int from )
 
 /****************************************************
 PUT_NODE
-
 ****************************************************/
 void put_node( int x1, int y1, int x2, int y2, char *str )
 {
@@ -312,7 +292,6 @@ void put_node( int x1, int y1, int x2, int y2, char *str )
 
 /****************************************************
 PUT_LINE
-
 ****************************************************/
 void put_line( int x1, int y1, int x2, int y2 )
 {
@@ -322,7 +301,6 @@ void put_line( int x1, int y1, int x2, int y2 )
 
 /****************************************************
 PUT_TEXT
-
 ****************************************************/
 void put_text( char *str, char *n, int x, int y, char *str2 )
 {

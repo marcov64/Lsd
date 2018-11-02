@@ -1,10 +1,10 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
 	Silk icon set 1.3 by Mark James
@@ -12,18 +12,15 @@
 	
  *************************************************************/
 
-/*
-USED CASE 94
-*/
-
-/****************************************************
-INTERF.CPP Manage the main interfaces, that the browser and all the menus.
-It is re-build any time the window changes. There are some 20 actions that are
+/*************************************************************
+INTERF.CPP 
+Manages the main interfaces, that the browser and all the menus.
+It is re-build any time the window changes. There are many actions that are
 commanded from the browser window, implemented as a switch in operate.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
--object *create( )
+- object *create( )
 The main cycle for the Browser, from which it exits only to run a simulation
 or to quit the program. The cycle is just once call to browsw followed by
 a call to operate.
@@ -36,71 +33,34 @@ values for choice or choice_g different from 0)
 takes the value of choice and operate the relative command on the
 object r. See the switch for the complete list of the available commands
 
+- void show_save( object *n )
+shows all variables to be saved in the result files
+
 - void clean_debug( object *n );
 remove all the flags to debug from any variable in the model
 
 - void clean_save( object *n );
 remove all the flags to save from any variable in the model
 
-- void show_save( object *n )
-shows all variables to be saved in the result files
+- void clean_plot( object *n );
+remove all the flags to plot from any variable in the model
+
+- void clean_debug( object *n );
+remove all the flags to debug from any variable in the model
+
+- void clean_save( object *n );
+remove all the flags to save from any variable in the model
 
 - void clean_plot( object *n );
 remove all the flags to plot from any variable in the model
 
 - void wipe_out( object *d );
 Eliminate all the Object like d from the model. Cancel also the their descendants
+*************************************************************/
 
-
-Functions used here from other files are:
-
-- void plog( char *m );
-LSDMAIN.CPP print  message string m in the Log screen.
-
-- void analysis( int *choice );
-ANALYSIS.CPP analysis of result files
-
-- void show_eq( char *lab, int *choice );
-SHOW_EQ.CPP shows one equation for variable lab
-
-- object *skip_next_obj( object *t, int *i );
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- int my_strcmp( char *a, char *b );
-UTIL.CPP It is a normal strcmp, but it catches the possibility of both strings being
-NULL
-
-- void cmd( char *cc );
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother( object *cur );
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-- void show_graph( object *t );
-DRAW.CPP shows the grsphical representation of the model
-
-- void set_obj_number( object *r, int *choice );
-EDIT.CPP allows to edit the number of instances in the model
-
-- void edit_data( object *root, int *choice, char *obj_name );
-EDIT_DAT.CPP allows to edit the initial values
-
-- FILE *search_str( char *name, char *str );
-UTIL.CPP given a string name, returns the file corresponding to name, and the current
-position of the file is just after str.
-
-- int deb( object *r, object *c, char *lab, double *res );
-Use the debugger interface to browse through the model
-
-- void myexit( int v );
-Exit function, which is customized on the operative system.
-
-****************************************************/
+/*
+USED CASE 94
+*/
 
 #include "decl.h"
 

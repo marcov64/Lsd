@@ -1,28 +1,30 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 VARIAB.CPP
 The (C++) object variable is devoted to contain numerical values
-of the model. Only double precision floating point numbers are considered
-in LSD.
-Variables are mainly storages for information. Actually, all the work is
-done by LSD objects.
+of the model. Only double precision floating point numbers are used
+in LSD. Variables are mainly storages for information. Actually, all 
+the work is done by LSD objects.
+
 The most important task of variables is to return their value when requested.
 It is done by comparing the global time of the simulation with the time
 the variable was most recently updated. If the value requested (considering the
 lag ) is already available, that is returned. Otherwise, the variable shifts
 its lagged values, and calls its equation to compute the new value.
+
 All fields and functions in variables are public, so that users may override
 the default mechanism.
+
 The fields composing a variables are
 
 - char *label;
@@ -66,6 +68,7 @@ numerical value used for the conditional stop
 - int under_computation;
 control flag used to avoid infinite recursion of an equation calling itself.
 Used to issue a message of error
+
 - int last_update;
 contain the global time when it was lastly computed the equation for the variable
 
@@ -74,24 +77,19 @@ Flag set to 1, in case the variable is considered a parameter. In case it is,
 when requested the value it is always returned its field val[ 0 ].
 
 - char data_loaded;
-flag indicatibe whether the variable has been initiliazed with numerical values
+flag indicative whether the variable has been initialized with numerical values
 set as default by the system or if they were actually chosen by the user.
 The flag is 0 in case of newly created objects and 1 in case the variable's
 values has been at least shown once in the initial values editor window.
-This flag is also saved in the data file, so thatthis information is not lost.
+This flag is also saved in the data file, so that this information is not lost.
 The flag prevents to run a simulation if the data where not confirmed by users.
 
-- char computable;
-Flag not currently used.
+The main methods of the (C++) object variable are:
 
-
-
-The methods of the (C++) object variable are:
-
-- int init(object *_up, char *_label, int _num_lag, double *val, int _save);
+- int init( object *_up, char *_label, int _num_lag, double *val, int _save );
 perform the initialization.
 
-- double cal(object *caller, int lag );
+- double cal( object *caller, int lag );
 it is its main function. Return the numerical value
 
        val[last_update+lag-t]
@@ -113,40 +111,7 @@ that perform the equation computation.
 - void empty( void ) ;
 It is used to free all the memory assigned to the variable. Used by
 object::delete_obj to cancel an object.
-
-In the file FUNXXX.CPP there is the code for the last method of variable.
-This is the only file that is model specific, since it contains the equations
-for the variables. The names are normally of the form FUNXXX.CPP, where XXX
-is a code for the different models.
-
-- double fun(object *caller);
-It is a method common to all the variables and stores the code for the equations.
-Each equation needs to be defined as a block like:
-
-if (!strcmp(label, "LabelOfTheVariable"))
-{
-... here any code
-res=avalue;
-goto end;
-}
-
-The method is common to all the variables, so that the blocks ensure that
-only their piece of code is actually executed. Any code legal in C++ is allowed,
-including the methods and function provided with LSD.
-The value assigned to "res" is assigned as val[ 0 ] to the variable.
-The final line goto end; ensures that the equation has been computed.
-See file FUNXXX.CPP for more information on this
-
-Functions used here from other files are:
-
-- void plog(char *m);
-LSDMAIN.CPP print  message string m in the Log screen.
-
-- int deb(object *r, object *c, char *lab, double *res, bool interact);
-DEBUG.CPP
-activate the debugger.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

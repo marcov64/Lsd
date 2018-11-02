@@ -1,23 +1,19 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/* 
-Reached case 44
-*/
+/*************************************************************
+ANALYSIS.CPP 
+Contains the routines to manage the data analysis module.
 
-/****************************************************
-ANALYSIS.CPP contains the routines to manage the data analysis module.
-
-
-The functions contained here are:
+The main functions contained here are:
 
 - void analysis( int *choice )
 Makes an initialization and then there is the main cycle in
@@ -25,7 +21,7 @@ read_data
 
 - void read_data( int *choice );                            
 Builds the managemen window, setting all the bindings, and enters in a cycle
-from which can make 8 choices:
+from which can make several choices:
 
 1) Plot the plot as indicated
 2) Exit from data analysis
@@ -52,37 +48,17 @@ time steps. To choose which time to sort on, double-click on the time step.
 Interface used to determine the time steps to plot in the cross-section plots
 and the possible sorting.
 
-- void sort_cs_asc(char **s, double **v, int nv, int nt, int c);
+- void sort_cs_asc( char **s, double **v, int nv, int nt, int c );
 Sort in ascending order the variables. Used in plot_cross.
 
-- void sort_cs_desc(char **s, double **v, int nv, int nt, int c);
+- void sort_cs_desc( char **s, double **v, int nv, int nt, int c );
 
 Sort in descending order the variables. Used in plot_cross.
+*************************************************************/
 
-Other functions used here:
-- object *skip_next_obj(object *t, int *count);
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother(object *c);
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
-- void cmd(char *cc);
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-
-- void plog(char *m);
-print  message string m in the Log screen. It is in LSDMAIN.CPP
-
-- void myexit( int v);
-Exit function, which is customized on the operative system.
-
-****************************************************/
+/* 
+used case 44
+*/
 
 #include "decl.h"
 

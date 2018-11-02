@@ -1,23 +1,26 @@
-/* BEGIN debugbreak.c */
-/* by Kyle McKay */
+/*************************************************************
+DEBUGBREAK.C
+Debug break (CTRL+C) helper for Windows.
 
-/*	If you have ever tried to interrupt a program running under cygwin gdb, 
-	you have probably experienced some frustration. You've probably discovered 
-	that pressing Ctrl-C in the gdb window/ prompt while the program being 
-	debugged is running is a fruitless exercise. 
-	
-	The small debugbreak utility provides a workaround to Ctrl-C. Open a new 
-	cygwin command line prompt. Use ps -W to find the WINPID of the process 
-	being debugged and then execute debugbreak with that WINPID. gdb will then 
-	regain control and the program being debugged will break just as though 
-	Ctrl-C was working properly. Be sure to use the WINPID of the process being 
-	debugged rather than the WINPID of gdb. In gdb, the WINPID are the start
-	numbers (before the point) of all created threads after running the program.
+by Kyle McKay
 
-	Compile with this line in Windows 64-bit (requires Cygwin64 & Cygwin-minGW):
-	32-bit: i686-w64-mingw32-gcc -static -o debugbreak -mthreads debugbreak.c
-	64-bit: x86_64-w64-mingw32-gcc -static -o debugbreak -mthreads debugbreak.c
-*/
+If you have ever tried to interrupt a program running under cygwin gdb, 
+you have probably experienced some frustration. You've probably discovered 
+that pressing Ctrl-C in the gdb window/ prompt while the program being 
+debugged is running is a fruitless exercise. 
+
+The small debugbreak utility provides a workaround to Ctrl-C. Open a new 
+cygwin command line prompt. Use ps -W to find the WINPID of the process 
+being debugged and then execute debugbreak with that WINPID. gdb will then 
+regain control and the program being debugged will break just as though 
+Ctrl-C was working properly. Be sure to use the WINPID of the process being 
+debugged rather than the WINPID of gdb. In gdb, the WINPID are the start
+numbers (before the point) of all created threads after running the program.
+
+Compile with this line in Windows 64-bit (requires Cygwin64 & Cygwin-minGW):
+32-bit: i686-w64-mingw32-gcc -static -o debugbreak -mthreads debugbreak.c
+64-bit: x86_64-w64-mingw32-gcc -static -o debugbreak -mthreads debugbreak.c
+*************************************************************/
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501

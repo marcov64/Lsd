@@ -1,7 +1,26 @@
-# Makefile to compile LMM adapt as required. Under MS Windows system with installed Lsd follow these steps:
-# 1. Open a dos shell and move in the root of Lsd system, where this makefile is located.
-# 2. Run the batch file "run.bat". This will start LMM. Type Esc and quit the program. This will add the required path to the shell
-# 3. type make -f makefile.ms. This will create a new LMM program using the source "modman.cpp" in directory "src"
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.WIN32
+# Makefile to compile LMM under MS Windows 32-bit system.
+# Please follow these steps:
+# 1. Open a dos shell and move in the root of Lsd system, 
+#    where this makefile is located.
+# 2. Run the batch file "run.bat". This will start LMM. 
+#    Type Esc and quit the program. This will add the 
+#    required path to the shell
+# 3. Type make -f makefile.win32. This will create a new 
+#    LMM program using the source "modman.cpp" in directory "src"
+#**************************************************************
 
 CC=g++
 TARGET=lmm

@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-CONFGEN.CPP contains:
-- execute the lsd_confgen command line utility.
+/*************************************************************
+CONFGEN.CPP 
+Execute the lsd_confgen command line utility.
 
-	Generates new configurations from a base one
-
-****************************************************/
+Generates new configurations from a base one.
+*************************************************************/
 
 #include <set>
 #include "decl.h"

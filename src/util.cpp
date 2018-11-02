@@ -1,20 +1,22 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-UTIL.CPP contains a set of utilities for different parts of the
+/*************************************************************
+UTIL.CPP 
+Contains a set of utilities for different parts of the
 program.
-The functions contained in this file are:
 
-- void cmd(char *cc);
+The main functions contained in this file are:
+
+- void cmd( char *cc );
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
 It should be enough to make a call to Tcl_Eval. But there are problems due to the
@@ -27,31 +29,26 @@ require a writable string.
 - void plog( char *m );
 print  message string m in the Log screen.
 
-- int my_strcmp(char *a, char *b)
+- int my_strcmp( char *a, char *b )
 It is a normal strcmp, but it catches the possibility of both strings being
 NULL
 
-- double norm(double mean, double dev)
-returns a random number drawn from a normal with mean mean and standard deviation\
-dev.
-
-- FILE *search_str(char *name, char *str)
+- FILE *search_str( char *name, char *str )
 given a string name, returns the file corresponding to name, and the current
 position of the file is just after str. Think I don't use any longer.
 
-- FILE *search_data_str(char *name, char *init, char *str)
+- FILE *search_data_str( char *name, char *init, char *str )
 given a string name, returns the file with that name and the current position
 placed immediately after the string str found after the string init. Needed to
 not get confused managing the data files, where the same string appears twice,
 in the structure definition and in the data section.
 
-- FILE *search_data_ent(char *name, variable *v)
+- FILE *search_data_ent( char *name, variable *v )
 given the file name name, the routine searches for the data line for the variable
 (or parameter) v. It is not messed up by same labels for variables and objects.
 
 - other various mathematical routines
-
- ****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

@@ -1,30 +1,30 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 FILE.CPP
 Contains the methods and functions used to save and load a model. The
 data for a model are composed by a structure, initial values and simulation
 setting.
 
-The method of object contained in this file are:
+The main methods of object contained in this file are:
 
-- void object::save_struct(FILE *f, char *tab)
+- void object::save_struct( FILE *f, char *tab )
 Saves the structure of the object (that is, the label,
 variables and parameters and descendants, not number of objects).
 This method is called first time by the browser in INTERF.CPP by the root of the
-model.
+model. 
 Calls the save_struct for all the descendant type.
 
-- void object::save_param(FILE *f )
+- void object::save_param( FILE *f )
 Save the numerical values for the object (one digit
 for each group of object of this type) and the initial values for variables.
 It save also option information, that is whether to save, plot or debug the
@@ -33,83 +33,16 @@ It calls the save_param for all the descendant type.
 It is called in the browser, INTERF.CPP, immediately after save_struct, by the
 root of the model.
 
-- void object::load_struct(FILE *f )
+- void object::load_struct( FILE *f )
 Initialize a model by creating  one as defined
 in the data file. The model, after this stage, has only one instance for each
 object type and variables and parameters are simply labels.
 
-- int object::load_param(char *file_name, int repl)
+- int object::load_param( char *file_name, int repl )
 It loads from the file named as specified the data
 for the object. It is made in specular way in respect of save_param.
 Called from browser in INTERF.CPP immediately after load_struct.
-
-- void clean_debug(object *n);
-remove all the flags to debug from any variable in the model
-
-- void clean_save(object *n);
-remove all the flags to save from any variable in the model
-
-- void clean_plot(object *n);
-remove all the flags to plot from any variable in the model
-
-
-Functions used here from other files are:
-
-- void plog(char *m);
-LSDMAIN.CPP print  message string m in the Log screen.
-
-- void analysis(int *choice);
-ANALYSIS.CPP analysis of result files
-
-- void object::replicate( int num, int propagate )
-OBJECT.CPP. Counts the number of instances (this included) of this type of object and
-make as many copy as necessary to have num of them. In case propagate is 1,
-it sends the replicate message to the hypernext, first. It should be applied
-to a structure model, that is, where the object is there are no more than
-one instance in any group.
-
-- object *skip_next_obj(object *t, int *i);
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- int my_strcmp(char *a, char *b);
-UTIL.CPP It is a normal strcmp, but it catches the possibility of both strings being
-NULL
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother(object *cur);
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-- void show_graph( object *t);
-DRAW.CPP shows the grsphical representation of the model
-
-- void set_obj_number(object *r, int *choice);
-EDIT.CPP allows to edit the number of instances in the model
-
-- void edit_data(object *root, int *choice, char *obj_name);
-EDIT_DAT.CPP allows to edit the initial values
-
-- FILE *search_str(char *name, char *str);
-UTIL.CPP given a string name, returns the file corresponding to name, and the current
-position of the file is just after str.
-
-- FILE *search_data_str(char *name, char *init, char *str)
-UTIL.CPP given a string name, returns the file with that name and the current position
-placed immediately after the string str found after the string init. Needed to
-not get confused managing the data files, where the same string appears twice,
-in the structure definition and in the data section.
-
-- FILE *search_data_ent(char *name, variable *v)
-UTIL.CPP given the file name name, the routine searches for the data line for the variable
-(or parameter) v. It is not messed up by same labels for variables and objects.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

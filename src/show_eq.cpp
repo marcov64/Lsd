@@ -1,16 +1,18 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-SHOW_EQ.CPP show one window containig the equation for the label clicked on.
+/*************************************************************
+SHOW_EQ.CPP 
+Show one window containig the equation for the label clicked on.
+
 Less simple as it seems, given that it has to deal with all weird characters
 like parenthesis, quotes, brakets, that tk commands consider as special
 characters. The basic trick is that it loads one line per time. If it finds
@@ -19,7 +21,8 @@ line to be printed. Lines are printed character per character, so that it can
 deal with special characters. While printing it computes the number of parenthesis
 open and closed, and when it meets the last parenthesis exits.
 
-Everything is within just one single function,
+Everything is within just one single function:
+
 - void show_eq( char *lab )
 
 - void scan_used_lab( char *lab, int *choice )
@@ -29,17 +32,7 @@ using in any way the variable indicated. By clicking on the names in the
 list the code for that variable is shown.
 It is based on the recognition of the string lab between quotes, thus any function
 is recognized.
-
-other functions are the usual:
-- void plog( char *m );
-LSDMAIN.CPP print  message string m in the Log screen.
-
-- void cmd( char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

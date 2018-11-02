@@ -1,6 +1,22 @@
 #!/bin/bash
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# ADD-SHORTCUT-LINUX.SH
+# Add a shortcut to LSD LMM in the Linux Gnome desktop.
+#**************************************************************
+
 if [ "$1" = "-h" ]; then
-	echo "Add a shortcut to Lsd LMM in the desktop"
+	echo "Add a shortcut to LSD LMM in the desktop"
 	echo "Usage: ./add-shortcut.sh [full path to desktop directory]"
 else
 	TARGET=lsd.desktop
