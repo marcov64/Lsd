@@ -6733,11 +6733,18 @@ bool discard_change( bool checkSense, bool senseOnly, const char title[ ] )
 				return true;		// checking sensitivity data is disabled
 				
 	// must disable because of a bug in Tk when open dialog
-	cmd( ".l.s.c.son_name configure -state disabled" );
-	cmd( ".l.v.c.var_name configure -state disabled" );
+	if ( ! brCovered )
+	{
+		cmd( ".l.s.c.son_name configure -state disabled" );
+		cmd( ".l.v.c.var_name configure -state disabled" );
+	}
 	cmd( "if [ string equal [ tk_messageBox -parent . -type yesno -default yes -icon question -title Confirmation -message \"Discard data?%s%s\" -detail $question ] yes ] { set ans 1 } { set ans 0 }", strlen( title ) != 0 ? "\n\n" : "", title );  
-	cmd( ".l.s.c.son_name configure -state normal" );
-	cmd( ".l.v.c.var_name configure -state normal" );
+	if ( ! brCovered )
+	{
+		cmd( ".l.s.c.son_name configure -state normal" );
+		cmd( ".l.v.c.var_name configure -state normal" );
+	}
+	
 	const char *ans = Tcl_GetVar( inter, "ans", 0 );
 	if ( atoi( ans ) == 1 )
 		return true;

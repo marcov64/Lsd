@@ -405,10 +405,10 @@ void object::recreate_maps( void )
 	b_map.clear( );
 	
 	for ( cv = v; cv != NULL; cv = cv->next )
-		v_map.insert( v_pairT ( cv->label, cv ) );
+		v_map.insert( v_pairT( cv->label, cv ) );
 
 	for ( cb = b; cb != NULL; cb = cb->next )
-		b_map.insert( b_pairT ( cb->blabel, cb ) );
+		b_map.insert( b_pairT( cb->blabel, cb ) );
 }
 
 
@@ -772,7 +772,7 @@ Generate the data structure required to use the turbosearch.
 - label must be the label of the descending object whose set is to be organized 
 - num is the total number of objects (if not provided or zero, it's calculated).
 *****************************/
-void object::initturbo( char const *label, double tot = 0 )
+int object::initturbo( char const *label, double tot = 0 )
 {
 	bridge *cb;
 	object *cur;
@@ -785,12 +785,12 @@ void object::initturbo( char const *label, double tot = 0 )
 		error_hard( msg, "object has no instance", 
 					"check your equation code to prevent this situation",
 					true );
-		return;
+		return 0;
 	} 
 
-	if ( tot <= 0 )				// if size not informed
-		for ( tot = 0,cur = this->search( label ); cur != NULL; ++tot, cur = go_brother( cur ) );
-								// compute it
+	if ( tot <= 0 )				// if size not informed, compute it
+		for ( tot = 0, cur = this->search( label ); cur != NULL; ++tot, cur = go_brother( cur ) );
+
 	if ( cb->mn != NULL )		// remove existing mnode
 	{
 		cb->mn->empty( );
@@ -801,6 +801,8 @@ void object::initturbo( char const *label, double tot = 0 )
 	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
 	cb->mn = new mnode;
 	cb->mn->create( lev );
+	
+	return tot;
 }
 
 
@@ -1036,7 +1038,7 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 INITTURBO_COND
 Generate the data structure required to use the turbosearch with condition.
 *****************************/
-void object::initturbo_cond( char const *label )
+int object::initturbo_cond( char const *label )
 {
 	bridge *cb;
 	object *cur;
@@ -1049,7 +1051,7 @@ void object::initturbo_cond( char const *label )
 		sprintf( msg, "element '%s' is missing for turbo conditional searching", label );
 		error_hard( msg, "variable or parameter not found", 
 					"create variable or parameter in model structure" );
-		return;
+		return 0;
 	}
 	
 	if ( cv->up->up == NULL )				// variable at root level?
@@ -1057,7 +1059,7 @@ void object::initturbo_cond( char const *label )
 		sprintf( msg, "element '%s' is at root level (always single-instanced)", label );
 		error_hard( msg, "invalid variable or parameter for turbo search", 
 					"check your model structure to prevent this situation" );
-		return;
+		return 0;
 	}
 		
 	// find the bridge which contains the object containing the variable
@@ -1067,7 +1069,7 @@ void object::initturbo_cond( char const *label )
 					"internal problem in LSD", 
 					"if error persists, please contact developers",
 					true );
-		return;
+		return 0;
 	}
 	
 	cb = bit->second;
@@ -1080,6 +1082,8 @@ void object::initturbo_cond( char const *label )
 	// register the name of variable for which the map is set
 	cb->search_var = new char [ strlen( label ) + 1 ];
 	strcpy( cb->search_var, label );
+	
+	return cb->o_map.size( );
 }
 
 

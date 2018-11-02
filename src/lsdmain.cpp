@@ -32,9 +32,6 @@ for the tk library. Why is difficult only for tk and not for tcl, don't know.
 But is a good thing, so that I can actually copy the tcl directory and make
 the modifications
 
-- void plog( char *m );
-print  message string m in the Log screen.
-
 Other functions used here, and the source files where are contained:
 
 - object *create( );
@@ -79,6 +76,7 @@ int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
 
 bool batch_sequential = false;	// no-window multi configuration job running
+bool brCovered = false;		// browser cover currently covered
 bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
@@ -942,20 +940,20 @@ void run( void )
 #endif
 		}	// end of for t
 
-		actual_steps = t - 1;
+		actual_steps = max( t - 1, 1 );
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
 		deb_log( false );			// close debug log file, if any
 		end = clock( );
 
-		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
-			quit = 0;
-		
 		if ( fast_mode == 1 && on_bar )
 			plog( "100%%", "bar" );
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d %s (%.2f sec.)\n", "", i, quit == 2 ? "aborted" : "finished", ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
+		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
+			quit = 0;
+		
 #ifndef NO_WINDOW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
@@ -1216,16 +1214,11 @@ bool alloc_save_mem( object *r )
 				var->save = var->savei = 0;
 		}
 		
-		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
+		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded == '-' )
 		{
-			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, r->label );
-#ifndef NO_WINDOW   
-			plog( "Use the Initial Values editor to set its values\n" );
-			if ( var->param == 1 )
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, r->label, r->label );
-			else
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, r->label, r->label );  
-#endif
+			sprintf( msg, "%s '%s' in object '%s' has not been initialized", var->param == 1 ? "parameter" : "variable", var->label, r->label );
+			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
+			
 			toquit = 2;
 		}
 	}
@@ -1237,7 +1230,7 @@ bool alloc_save_mem( object *r )
 	if ( quit != 2 )
 		quit = toquit;
 	
-	return ( ! no_more_memory );
+	return ! no_more_memory;
 }
 
 
@@ -1364,8 +1357,6 @@ void set_buttons_log( bool on )
 /*********************************
 COVER_BROWSER
 *********************************/
-bool brCovered = false;
-
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
 	if ( brCovered )		// ignore if already covered

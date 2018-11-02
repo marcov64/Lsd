@@ -14,16 +14,6 @@ UTIL.CPP contains a set of utilities for different parts of the
 program.
 The functions contained in this file are:
 
-- object *skip_next_obj(object *t, int *count);
-Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother(object *c);
-returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
 - void cmd(char *cc);
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
@@ -33,6 +23,9 @@ it shouldn't work when a constant string is passed. Actually, it worked under wi
 but not under unix. Instead, I use Tcl_VarEval, that allows to use pieces
 of strings (including the last terminating character NULL) and  it does not
 require a writable string.
+
+- void plog( char *m );
+print  message string m in the Log screen.
 
 - int my_strcmp(char *a, char *b)
 It is a normal strcmp, but it catches the possibility of both strings being
@@ -296,9 +289,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	}
 	else
 	{
-		log_tcl_error( "ERROR", logText );
-		plog( "\n\nERROR: %s\n", "", logText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s.\"", boxTitle, boxText  );
+		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
+		plog( "\nSuggestion: %s\n", "", boxText );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 #endif
 

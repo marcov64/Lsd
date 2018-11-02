@@ -139,25 +139,23 @@ struct netNode;
 struct netLink;
 
 // special types used for fast equation, object and variable lookup
-typedef pair< string, bridge * > b_pairT;
-typedef pair< double, object * > o_pairT;
-typedef pair< string, variable * > v_pairT;
+typedef pair < string, bridge * > b_pairT;
+typedef pair < double, object * > o_pairT;
+typedef pair < string, variable * > v_pairT;
 #ifndef CPP11
-typedef map< string, bridge * > b_mapT;
-typedef map< double, object * > o_mapT;
-typedef map< string, variable * > v_mapT;
+typedef map < string, bridge * > b_mapT;
+typedef map < double, object * > o_mapT;
+typedef map < string, variable * > v_mapT;
 #else
-typedef function< double( object *caller, variable *var ) > eq_funcT;
-typedef unordered_map< string, eq_funcT > eq_mapT;
-typedef unordered_map< string, bridge * > b_mapT;
-typedef unordered_map< double, object * > o_mapT;
-typedef unordered_map< string, variable * > v_mapT;
+typedef function < double( object *caller, variable *var ) > eq_funcT;
+typedef unordered_map < string, eq_funcT > eq_mapT;
+typedef unordered_map < string, bridge * > b_mapT;
+typedef unordered_map < double, object * > o_mapT;
+typedef unordered_map < string, variable * > v_mapT;
 #endif
 
-class object
+struct object
 {
-	public:
-	
 	char *label;
 	bool deleting;						// indicate deletion in process
 	bool to_compute;
@@ -198,6 +196,8 @@ class object
 	double sum( char const *lab, int lag );
 	double whg_av( char const *lab, char const *lab2, int lag );
 	int init( object *_up, char const *_label );
+	int initturbo( char const *label, double num );
+	int initturbo_cond( char const *label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
@@ -249,8 +249,6 @@ class object
 	void delete_var( char const *lab );
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
-	void initturbo( char const *label, double num );	// set turbo search structure
-	void initturbo_cond( char const *label );
 	void insert_parent_obj( char const *lab );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
@@ -271,8 +269,6 @@ class object
 
 struct variable
 {
-	public:
-	
 	char *label;
 	char *lab_tit;
 	char data_loaded;
@@ -780,6 +776,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global internal variables (not visible to the users)
 extern FILE *log_file;			// log file, if any
+extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
 extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating

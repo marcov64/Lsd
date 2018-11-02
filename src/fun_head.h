@@ -220,20 +220,24 @@ using namespace Eigen;
 
 // regular logging (disabled in any fast mode)
 #define LOG( ... ) \
+{ \
 	if ( ! fast ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
 		plog( msg ); \
-	}
+	} \
+}
 // priority logging (show also in fast mode 1)
 #define PLOG( ... ) \
+{ \
 	if ( fast_mode < 2 ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
 		plog( msg ); \
-	}
+	} \
+}
 
 #define V( X ) p->cal( p, ( char * ) X, 0 )
 #define VL( X, Y ) p->cal( p, ( char * ) X, Y )
@@ -333,13 +337,13 @@ using namespace Eigen;
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
 //					   Y=total number of objects
-#define INIT_TSEARCH( X ) p->initturbo( ( char * ) X, 0 )
-#define INIT_TSEARCHS( O, X ) O->initturbo( ( char * ) X, 0 )
-#define INIT_TSEARCHT( X, Y ) p->initturbo( ( char * ) X, Y )
-#define INIT_TSEARCHTS( O, X, Y ) O->initturbo( ( char * ) X, Y )
+#define INIT_TSEARCH( X ) ( ( double ) p->initturbo( ( char * ) X, 0 ) ) )
+#define INIT_TSEARCHS( O, X ) ( ( double ) O->initturbo( ( char * ) X, 0 ) )
+#define INIT_TSEARCHT( X, Y ) ( ( double ) p->initturbo( ( char * ) X, Y ) )
+#define INIT_TSEARCHTS( O, X, Y ) ( ( double ) O->initturbo( ( char * ) X, Y ) )
 //                     X=name of variable to be indexed
-#define INIT_TSEARCH_CND( X ) p->initturbo_cond( ( char * ) X )
-#define INIT_TSEARCH_CNDS( O, X ) O->initturbo_cond( ( char * ) X )
+#define INIT_TSEARCH_CND( X ) ( ( double ) p->initturbo_cond( ( char * ) X ) )
+#define INIT_TSEARCH_CNDS( O, X ) ( ( double ) O->initturbo_cond( ( char * ) X ) )
 
 
 // Performs turbo search: O, X as in TSEARCHS_INI
