@@ -250,25 +250,25 @@ void draw_obj( object *t, int level, int center, int from )
 				level_factor[ 0 ] = 0.3;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
-				level_factor[ 3 ] = 0.3;
+				level_factor[ 3 ] = 1.0;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
 				level_factor[ 1 ] = 0.6;
 				level_factor[ 2 ] = 0.3;
-				level_factor[ 3 ] = 0.2;
+				level_factor[ 3 ] = 0.6;
 				break;
 			case 3:
 				level_factor[ 0 ] = 0.8;
 				level_factor[ 1 ] = 0.8;
 				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 3 ] = 0.4;
 				break;
 			case 4:
 				level_factor[ 0 ] = 1.0;
 				level_factor[ 1 ] = 0.95;
 				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 3 ] = 0.3;
 				break;
 			default:
 				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
