@@ -185,9 +185,9 @@ void draw_obj( object *t, int level, int center, int from )
 		
 		for ( cur = t, num_groups = 0; cur != NULL ; ++num_groups, cur = cur->hyper_next( cur->label ) )
 		{
-			if ( num_groups > 5 )
+			if ( num_groups >= MAX_COUNTS )
 			{
-				strcat( ch1, "." );
+				strcat( ch1, "\u2026" );
 				break;
 			}
 			
@@ -306,7 +306,7 @@ void put_text( char *str, char *n, int x, int y, char *str2 )
 {
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -fill $t_color -tags node -tags %s", x, y - 1, str, str2 );
 
-	//text for node numerosity
+	// text for node numerosity
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
 
 	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );
