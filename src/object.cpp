@@ -412,9 +412,9 @@ void object::declare_as_unique(char const *uLab)
   if (root->uID == NULL){
     Map = new uniqueIdMap;
     root->uID = new uniqueId(root,Map);
-  } else {
-    Map = uID->map;
   }
+
+  Map = root->uID->map;
 
   //set blueprint as unique but without any id
   object *blueprt = blueprint->search( uLab );
@@ -1666,14 +1666,14 @@ void object::delete_obj( void )
 EMPTY
 Garbage collection for Objects.
 ****************************************************/
-void object::empty( void ) 
+void object::empty( void )
 {
 	bridge *cb, *cb1;
 	variable *cv, *cv1;
 
 	if ( root == this )
 		blueprint->empty( );
- 
+
 	for ( cv = v; cv != NULL; cv = cv1 )
 		if ( running && ( cv->save || cv->savei ) )
 			cv1 = cv->next; 	// variable should have been already saved to cemetery!!!
@@ -1687,7 +1687,7 @@ void object::empty( void )
 	v = NULL;
 	v_map.clear( );
 
-	for ( cb = b; cb != NULL; cb = cb1 )
+	for ( cb = b; cb != NULL; cb = cb1)
 	{
 		cb1 = cb->next;
 		delete cb; 
@@ -1701,7 +1701,19 @@ void object::empty( void )
 		delete node;
 		node = NULL;
 	}
-	 
+
+  #ifdef CPP11
+	if ( position != NULL ) // gis data to delete?
+	{
+		unregister_from_gis();
+	}
+	position = NULL;    // not part of a GIS Space any more
+
+	if ( uID != NULL ) { //default: not an identified object
+		declare_as_nonUnique();
+	}
+	#endif //#ifdef CPP11
+
 	delete [ ] label;
 	label = NULL;
 }
@@ -1819,16 +1831,6 @@ bool object::under_computation( void )
 	
 	return false;
 }
-	
-	
-/****************************************************
-	
-	#ifdef CPP11
-	if ( position != NULL ) // gis data to delete?
-		unregister_from_gis();
-	if ( uID != NULL ) // default: not an identified object
-		declare_as_nonUnique();
-	#endif //#ifdef CPP11
  
 /****************************************************
 CAL

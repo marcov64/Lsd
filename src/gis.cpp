@@ -247,11 +247,11 @@ char gismsg[300];
         return change_position(_x,_y);
       }
     }
-    position = new  gisPosition (map, _x, _y);
+    position = new gisPosition(map, _x, _y);
     if ( position == NULL )
 		{
 			error_hard( "cannot allocate memory for register_at_map()",
-						"out of memory" );
+						"out of memory");
 			return false;
 		}
     register_position(_x,_y);
@@ -792,6 +792,8 @@ char gismsg[300];
     if (position->it_obj != std::end(position->objDis_inRadius) ){
       next_ngbo =  position->it_obj->second;
       position->it_obj++; //advance
+    } else {
+      position->objDis_inRadius.clear(); //this is imperformant but helps with debugging.
     }
     return next_ngbo;
   }

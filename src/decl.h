@@ -482,13 +482,13 @@ struct uniqueId
   uniqueId(object* addObj, uniqueIdMap* map, bool blueprint=false) : map(map)
   {
     if ( blueprint == true){
-      map->blueprints.push_back(addObj);
       id = - (double)map->blueprints.size();
+      map->blueprints.push_back(addObj);
     } else {
+      id = (double) map->elements.size();
       map->elements.push_back(addObj);
       map->nelements++;
       map->nelementsAlive++;
-      id = (double) map->elements.size();
     }
   };
 };

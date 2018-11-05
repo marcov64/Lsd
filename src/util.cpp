@@ -227,7 +227,7 @@ void plog( char const *cm, char const *tag, ... )
 	
 	// remove invalid charaters and Tk control characters
 	message = new char[ strlen( buffer ) + 1 ];
-	for ( i = 0, j = 0; buffer[ i ] != '\0' ; ++i )
+	for ( i = 0, j = 0; buffer[ i ] != '\0'; ++i )    //added check to not read past string AND not write past string
 		if ( ( isprint( buffer[ i ] ) || buffer[ i ] == '\n' || 
 			   buffer[ i ] == '\r' || buffer[ i ] == '\t' ) &&
 			 ! ( buffer[ i ] == '\"' || 
@@ -253,7 +253,7 @@ void plog( char const *cm, char const *tag, ... )
 	else
 		plog( "\nError: invalid tag, message ignored:\n%s\n", "", message );
 #endif 
-	delete message;
+	delete[] message;
 	
 	message_logged = true;
 }
