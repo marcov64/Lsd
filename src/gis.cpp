@@ -678,40 +678,70 @@ char gismsg[300];
     if (sorted == false)
       sort_objDisSet(false); //sort only by distance
 
-    auto it_start = position->objDis_inRadius.begin();
-    auto it_last = position->objDis_inRadius.end()-1;
-    for (auto it = position->objDis_inRadius.begin(); it != position->objDis_inRadius.end(); it++){
+//     auto it_start = position->objDis_inRadius.begin();
+//     auto it_last = position->objDis_inRadius.end()-1;
+//     for (auto it = position->objDis_inRadius.begin(); it != position->objDis_inRadius.end(); it++){
+//
+//         //entering new interval or at end of last interval?
+//       if (it->second != it_start->second || it == it_last)
+//       {
+//        if (std::distance(it_start,it)>1){
+//           switch ( ran_gen )
+//           	{
+//           		case 1:						// linear congruential in (0,1)
+//           		case 3:						// linear congruential in [0,1)
+//           		default:
+//                 std::shuffle( it_start,it, lc);
+//                 break;
+//           		case 2:						// Mersenne-Twister 32 bits in (0,1)
+//           		case 4:						// Mersenne-Twister 32 bits in [0,1)
+//                 std::shuffle( it_start,it, mt32);
+//                 break;
+//           		case 5:						// Mersenne-Twister 64 bits in [0,1)
+//                 std::shuffle( it_start,it, mt64);
+//                 break;
+//           		case 6:						// lagged fibonacci 24 bits in [0,1)
+//                 std::shuffle( it_start,it, lf24);
+//                 break;
+//           		case 7:						// lagged fibonacci 48 bits in [0,1)
+//                 std::shuffle( it_start,it, lf48);
+//                 break;
+//           	}
+//         }
+//         it_start = it;
+//       }
+//     }
 
-        //entering new interval or at end of last interval?
-      if (it->second != it_start->second || it == it_last)
-      {
-          //interval with more than one object?
-        if (std::distance(it_start,it)>1){
-          switch ( ran_gen )
-          	{
-          		case 1:						// linear congruential in (0,1)
-          		case 3:						// linear congruential in [0,1)
-          		default:
-                std::shuffle( it_start,it, lc);
-                break;
-          		case 2:						// Mersenne-Twister 32 bits in (0,1)
-          		case 4:						// Mersenne-Twister 32 bits in [0,1)
-                std::shuffle( it_start,it, mt32);
-                break;
-          		case 5:						// Mersenne-Twister 64 bits in [0,1)
-                std::shuffle( it_start,it, mt64);
-                break;
-          		case 6:						// lagged fibonacci 24 bits in [0,1)
-                std::shuffle( it_start,it, lf24);
-                break;
-          		case 7:						// lagged fibonacci 48 bits in [0,1)
-                std::shuffle( it_start,it, lf48);
-                break;
-          	}
+    int i_start = 0;
+    int i_n = position->objDis_inRadius.size();
+
+    for (int i = 0; i < i_n; ++i){
+
+      //entering new interval or at end of last interval?
+      if (position->objDis_inRadius.at(i).second != position->objDis_inRadius.at(i_start).second || i == i_n-1 ){
+
+        //interval with more than one object?
+        if (i != i_start) {
+          //create a list with the elements of the interval and random values.
+          std::vector< std::pair<double, std::pair<double,object*> > > rnd_vals;
+          rnd_vals.reserve(i-i_start +1);
+          int i_intvl = i_start;
+          for (int j = i_start; j <= i; j++ ){
+            rnd_vals.emplace_back(std::make_pair(RND,position->objDis_inRadius.at(j) ) );
+          }
+
+          //sort the interval by random numbers of associated list, using a buffer
+          std::sort(rnd_vals.begin(),rnd_vals.end());
+          i_intvl = i_start;
+          for (auto const & item : rnd_vals){
+             position->objDis_inRadius.at(i_intvl++)=item.second; //copy information from sorted intvl
+          }
         }
-        it_start = it;
+
+        i_start = i;
       }
     }
+
   }
 
   // it_rnd_full

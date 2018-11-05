@@ -1,14 +1,13 @@
 //#define EIGENLIB			// uncomment to use Eigen linear algebra library
-#include "multidim.hpp" //to allow easy excess of multi dim containers used for debugging only
-#include<random> //before fun_head**
+
 #include "fun_head_fast.h"
 
-#include <set>
+#include "multidim.hpp" //to allow easy excess of multi dim containers used for debugging only
 // see https://github.com/AlbertoMarnetto/multidim for details
+#include <set>
+
 
 // do not add Equations in this area
-
-#define TRACK_SEQUENCE_MAX_T 1
 
 
 MODELBEGIN
