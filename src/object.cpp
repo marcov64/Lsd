@@ -408,13 +408,11 @@ void object::declare_as_unique(char const *uLab)
 {
   //first, check if a unique id is provided already for root (which is always 0).
   //if not create it.
-  uniqueIdMap* Map;
-  if (root->uID == NULL){
-    Map = new uniqueIdMap;
-    root->uID = new uniqueId(root,Map);
-  }
 
-  Map = root->uID->map;
+  if (root->uID == NULL){
+    uniqueIdMap* new_uidMap = new uniqueIdMap;
+    root->uID = new uniqueId(root,new_uidMap);
+  }
 
   //set blueprint as unique but without any id
   object *blueprt = blueprint->search( uLab );
@@ -425,13 +423,23 @@ void object::declare_as_unique(char const *uLab)
 						"create object in model structure",
             true );
 	} else {
-    blueprt->uID = new uniqueId(blueprt,Map,true);
+    blueprt->uID = new uniqueId(blueprt,root->uID->uidMap,true);
   }
 
   //all objects already present get a unique id.
   for ( object *curU = root->search( uLab ); curU != NULL; curU = curU->hyper_next( uLab ) )
   {
-    curU->uID = new uniqueId(curU,Map);
+    if (curU->uID == NULL)
+    {
+      curU->uID = new uniqueId(curU,root->uID->uidMap);
+    }
+    else
+    {
+			sprintf( msg, "object '%s' is already declared unique", uLab );
+			error_hard( msg, "object already unique",
+						"contact the developer",
+            true );
+    }
   }
 }
 
@@ -452,8 +460,8 @@ object* object::obj_by_unique_id(double id)
     return NULL;
   }
 
-  if (id >= 0.0 && id < root->uID->map->nelements ){
-    return root->uID->map->elements[(int)id];
+  if (id >= 0.0 && id < root->uID->uidMap->nelements ){
+    return root->uID->uidMap->elements[(int)id];
   } else {
   	sprintf( msg, "cannot retrieve unique object '%g'", id );
 		error_hard( msg, "bounding error!",
@@ -478,20 +486,20 @@ void object::declare_as_nonUnique()
   }
   int id = (int) uID->id;
   if (id < 0) { //blueprint called
-    uID->map->blueprints[-id-1] = NULL;
+    uID->uidMap->blueprints[-id-1] = NULL;
   } else {  //regular element
-    uID->map->elements[id] = NULL;
-    uID->map->nelementsAlive--;
-    if ( uID->map->nelementsAlive==0 /* last reg. element deleted*/){
+    uID->uidMap->elements[id] = NULL;
+    uID->uidMap->nelementsAlive--;
+    if ( uID->uidMap->nelementsAlive==0 /* last reg. element deleted*/){
       //clean up blueprints, too.
-      for (auto blueprt : uID->map->blueprints){
+      for (auto blueprt : uID->uidMap->blueprints){
         if (blueprt != NULL) {
           delete blueprt->uID;
           blueprt->uID=NULL;
         }
       }
-      delete uID->map; //delete the map
-      uID->map = NULL;
+      delete uID->uidMap; //delete the map
+      uID->uidMap = NULL;
     }
   }
 
@@ -510,9 +518,9 @@ double object::unique_id()
 			error_hard( msg, "object is not declared unique",
 						"declare the object type as unique first",
             true );
-    return NULL;
+    return -0.0;
   } else {
-    return uID -> id;
+    return (double) uID -> id;
   }
 }
 #endif //#ifdef CPP11
@@ -1387,11 +1395,13 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	bool net;
   #ifdef CPP11
 	bool gis;
+  bool uids;
   #endif //#ifdef CPP11
 	int i;
 	bridge *cb, *cb1, *cb2;
 	object *cur, *cur1, *last, *first;
 	variable *cv;
+  first = NULL; //default
 
 	// check the labels and prepare the bridge to attach to
 	for ( cb2 = b; cb2 != NULL && strcmp( cb2->blabel, lab ); cb2 = cb2->next );
@@ -1413,9 +1423,16 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	else
 		net = false;
 
+  #ifdef CPP11
+  //check if these objects have a unique id
+  cur = root->search( lab );
+  if (cur != NULL && cur->uID != NULL)
+    uids = true;
+  else
+    uids = false;
+
 	// check if copy from an object in a gis. If yes, then this one inherits all info AND is registered at same pos.
 	// blueprint is never part of gis
-  #ifdef CPP11
 	if (ex->ptr_map() == NULL)
 		gis = false;
 	else
@@ -1451,6 +1468,11 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 			}
 		}
     #ifdef CPP11
+    if (uids)             // object gets unique id
+    {
+      cur->uID = new uniqueId(cur,root->uID->uidMap);
+    }
+
   	if (gis)              // if object is part of a gis/map
   	{
   		cur->position = NULL; //reset, to not take position from ext
@@ -1600,19 +1622,21 @@ void object::delete_obj( void )
 			return;					
 		
 		if ( under_computation( ) )
-			if ( wait_delete != NULL && wait_delete != this )
-			{
-				sprintf( msg, "cannot schedule the deletion of object '%s'", label );
-				error_hard( msg, "deletion already pending", 
-							"check your equation code to prevent deleting objects recursively",
-							true );
-				return;
-			}
-			else
-			{
-				wait_delete = this;
-				return;
-			}
+      {
+  			if ( wait_delete != NULL && wait_delete != this )
+  			{
+  				sprintf( msg, "cannot schedule the deletion of object '%s'", label );
+  				error_hard( msg, "deletion already pending",
+  							"check your equation code to prevent deleting objects recursively",
+  							true );
+  				return;
+  			}
+  			else
+  			{
+  				wait_delete = this;
+  				return;
+  			}
+      }
 			
 		deleting = true;		// signal deletion to other threads
 		
@@ -2280,82 +2304,23 @@ double object::stat( char const *lab, double *r )
 	return r[ 0 ];								// return the number of instances
 }
 
-/****************************************************
-rndsort
-Use the shuffle function in the standard library to randomly
-sort a group of Objects
-****************************************************/
-
-void object::lsdrndsort(char const *obj)
-{
-  #ifdef CPP11
-  int num, i;
-	object *cur, *nex;
-  bridge *cb;
-
-  for ( cb = b; cb != NULL && strcmp( cb->blabel, obj )==0; cb = cb->next );
-
-	if ( cb == NULL || cb->head == NULL )
-	{
-        sprintf( msg, "'%s' decending from '%s' is missing for random sorting", obj,label );
-				error_hard( msg, "object not found",
-							"check your code to prevent this situation",
-							true );
-	}
-	cb->counter_updated = false;
-	cur = cb->head;
-
-  nex = skip_next_obj( cur, &num );
-
-  std::vector<object*> mylist;
-  mylist.reserve(num);
-	for ( i = 0; i < num; ++i )
-	{
-		mylist.push_back(cur);
-		cur = cur->next;
-	}
-
-
-  switch ( ran_gen )
-	{
-		case 1:						// linear congruential in (0,1)
-		case 3:						// linear congruential in [0,1)
-		default:
-      shuffle( std::begin(mylist), std::end(mylist), lc);
-      break;
-		case 2:						// Mersenne-Twister 32 bits in (0,1)
-		case 4:						// Mersenne-Twister 32 bits in [0,1)
-      shuffle( std::begin(mylist), std::end(mylist), mt32);
-      break;
-		case 5:						// Mersenne-Twister 64 bits in [0,1)
-      shuffle( std::begin(mylist), std::end(mylist), mt64);
-      break;
-		case 6:						// lagged fibonacci 24 bits in [0,1)
-      shuffle( std::begin(mylist), std::end(mylist), lf24);
-      break;
-		case 7:						// lagged fibonacci 48 bits in [0,1)
-      shuffle( std::begin(mylist), std::end(mylist), lf48);
-      break;
-	}
-
-  cb->head = mylist[ 0 ];
-
-	for ( i = 1; i < num; ++i )
-		( mylist[ i - 1 ] )->next = mylist[ i ];
-
-	mylist[ i - 1 ]->next = NULL;
-
-  #else
-  plog("\nSORT_RND not implemented for <CPP11");
-  #endif //#ifdef CPP11
-}
 
 /****************************************************
 LSDQSORT
 Use the qsort function in the standard library to sort
 a group of Object with label obj according to the values of var
 if var is NULL, try sorting using the network node id
+The RANDOM option first assigns a random value to each
+object in the list before sorting it according to this value.
 ****************************************************/
+int sort_function_rnd( const void *a, const void *b )
+{
+		if ( (*( object ** ) a )->v_rndsort < ( *( object ** ) b )->v_rndsort )
+			return -1;
+		else
+			return 1;
+}
+
 int sort_function_up( const void *a, const void *b )
 {
 	if ( qsort_lab != NULL )		// variable defined?
@@ -2397,8 +2362,9 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	object *cur, *nex, **mylist;
 	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
+  bool sortRND = ( strcmp(direction,"RANDOM") == 0) ? true : false;  //random sorting of objects
 
-	if ( ! useNodeId )
+	if ( ! useNodeId && ! sortRND )
 	{
 		cv = search_var( this, var, true, no_search );
 		if ( cv == NULL )
@@ -2439,11 +2405,11 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	
 		cb = cv->up->up->b;
 	}
-	else									// pick network object to sort
+	else									// pick (network) object to sort
 	{
 		cur = search( obj );
 		if ( cur != NULL )
-			if ( cur->node != NULL )		// valid network node?
+			if ( sortRND || cur->node != NULL )		// valid network node OR rndsort?
 				cb = cur->up->b;
 			else
 			{
@@ -2474,19 +2440,22 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	for ( i = 0; i < num; ++i )
 	{
 		mylist[ i ] = cur;
+    if ( sortRND )
+      cur->v_rndsort = RND; //new random value for sorting
 		cur = cur->next;
 	}
 	
 	qsort_lab = ( char * ) var;
 	if ( ! strcmp( direction, "UP" ) )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
-	else
-		if ( ! strcmp( direction, "DOWN" ) )
+	else if ( ! strcmp( direction, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
+  else if ( sortRND )
+			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_rnd );
 		else
 		{
 			sprintf( msg, "direction '%s' is invalid for sorting", direction );
-			error_hard( msg, "invalid sort option ('UP' or 'DOWN' required)", 
+			error_hard( msg, "invalid sort option ('UP' or 'DOWN' or 'RANDOM' required)",
 						"check your equation code to prevent this situation",
 						true );
 			delete [ ] mylist;

@@ -186,6 +186,7 @@ class object
 	netNode *node;						// pointer to network node data structure
 	void *cext;							// pointer to a C++ object extension to the LSD object
 	bool *del_flag;						// address of flag to signal deletion
+  double v_rndsort;   //value for random sorting
 	#ifdef CPP11
   uniqueId *uID; //unique identifier - double due to LSD data structure.
 	gisPosition *position; //Pointer to gis data structure
@@ -270,7 +271,6 @@ class object
 	void insert_parent_obj( char const *lab );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
-	void lsdrndsort(char const *obj);
 	void name_node_net( char const *nodeName );
 	void recal( char const *l );
 	void recreate_maps( void );
@@ -477,18 +477,18 @@ struct uniqueIdMap
 
 struct uniqueId
 {
-  uniqueIdMap* map;
+  uniqueIdMap* uidMap;
   double id;
-  uniqueId(object* addObj, uniqueIdMap* map, bool blueprint=false) : map(map)
+  uniqueId(object* addObj, uniqueIdMap* uidMap, bool blueprint=false) : uidMap(uidMap)
   {
     if ( blueprint == true){
-      id = - (double)map->blueprints.size();
-      map->blueprints.push_back(addObj);
+      uidMap->blueprints.push_back(addObj);
+      id = - (double) uidMap->blueprints.size();
     } else {
-      id = (double) map->elements.size();
-      map->elements.push_back(addObj);
-      map->nelements++;
-      map->nelementsAlive++;
+      id = (double) uidMap->elements.size();
+      uidMap->elements.push_back(addObj);
+      uidMap->nelements++;
+      uidMap->nelementsAlive++;
     }
   };
 };

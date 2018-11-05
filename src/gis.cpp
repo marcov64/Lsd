@@ -669,7 +669,7 @@ char gismsg[300];
          ++it;
       }
     }
-  };
+  }
 
   //  randomise_objDisSetIntvls
   //  go through intervals with same distance and randomise the order in each

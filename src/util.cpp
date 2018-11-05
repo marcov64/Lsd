@@ -809,7 +809,8 @@ void change_descr_lab(char const *lab_old, char const *lab, char const *type, ch
 		  delete cur;
 		 }
 		else
-		 {for (cur1=descr; cur1->next!=cur; cur1=cur1->next);
+		 {
+      for (cur1=descr; cur1->next!=cur; cur1=cur1->next);
 		  cur1->next=cur->next;
 		  delete cur;
 		 } 
@@ -2087,7 +2088,7 @@ double _abs( double a )
 		return a;
 	else
 		return ( -1 * a );
-};
+}
 
 
 /****************************************************
