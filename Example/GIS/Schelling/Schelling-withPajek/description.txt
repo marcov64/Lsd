@@ -1,16 +1,15 @@
-#Model Schelling Segregation Model (1d discrete)
+#Model Schelling Segregation Model (1&2d, with Pajek Export)
 
 ##Description
-This is a simple implementation of the Schelling Segregation Model in it's one
-dimensional version (1971), discretesised.
+This is a simple implementation of the Schelling Segregation Model in it's two
+dimensional version (1978)
 
-The set of agents populates a 1d line with discrete number of "patches".
+The set of agents populates a 2d lattice with discrete number of "patches".
 Agents are blue or red. They prefer to have neighbours with equal colour,
 but not too strongly. The parameter "tolerance" in [0,1] defines the fraction
 of agents with a different colour that are O.K.
 
-They look in their neighbourhood spanning "distance" patches to the left and
-right to see if they are content. They are content as long as the fraction of
+They look in their neighbourhood spanning "distance" patches in radius to see if they are content. They are content as long as the fraction of
 neighbours with a different colour is at most equal to the "tolarance" level.
 
 The number of agents is strictly less then the number of patches. If an agent is
@@ -22,6 +21,17 @@ agents.
 The simulation stops when no agent wants to move, either because they are all
 content or because they do not find a new position that would make them content.
 
+##Export to Pajek
+The Model makes use of the MAKE_UNIQUE family of macros to provide agents with unique IDs.
+The Model makes use of the PajekFromCPP library to create a *.paj file, holding information on
+the movement of the agents and the organisation in space. This can be used to create (animated)
+svgs via Pajek (PajekToSVGAnim). See http://mrvar.fdv.uni-lj.si/pajek/ for infos.
+
+##Specific Sub-Verisons:
+There are some things that are most important for the "working" of the model, which are treated different in the literature. 1.) The Updating: parallel or sequential updating of "Content"ness and 2.) Movement: Move only if a new situation improves the "Content"ness or more randomly whenever one is not "Content".
+
+This can be controlled by the parameters "SequentialUpdating" and "RationalExpectations". In the original description in the 1978 Article both are activated.
+
 ##Parameters and Variables
 
 Control:
@@ -29,7 +39,7 @@ Control:
 [V]	Initialise	: Initialisation of the Model	
 
 Global (Sensitivity) Parameters :
-[P] xn  			  : Length of the line		(integer>>3)
+[P] xn  			  : x-dimension of the space (integer>>3)
 [P] yn  			  : y-dimension of the space (integer>>3)
 [P] wrapping  	: Wrapping 		(0: off, 1: left, 2: right, >=3: left & right)
 [P] fracAgents	: relative number of agents compared to xn (0..1)
@@ -37,6 +47,12 @@ Global (Sensitivity) Parameters :
 [P] tolerance		: the tolerance level (homogeneous, 0..1)
 [P] distance		: size of the neighbourhood, to left and right (1, ... xn)
 
+[P] SequentialUpdating		: if on (1) agents decide on movement based on the current state. 
+													.. if off (0) agents decide in parallel, i.e. with the same 
+													   information set for all agents.
+[P] RationalExpectations	: if on (1) agents only move if movement makes them content. 
+													.. if off (0), they move randomly and when not content.
+																										
 
 Agent:
 [P] Colour			:	The colour of the agent (red=1/blue=5, decided by initialisation)
@@ -48,7 +64,9 @@ Patch:
 [F] isOption     : Dummy, based on the asking agent tells if it is an option or not.
 
 Monitor / Output:
-( lattice				: graphical representation, only windowed, singular modus)
+[P] lattice				: graphical representation, only windowed, singular modus. 
+									.. Options: 0 - off, 1 - show 2- show & save every timestep 
+									.. 3 - show & save every step (careful!)
 [V] fracMove 		:	fraction of agents that move.
 [V] fracContent	:	fraction of agents that are content with their situation
 [V] dissimilarity	: measurement of segregation (dissimilarity index)

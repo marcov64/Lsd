@@ -38,7 +38,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
   #ifdef PAJEK
   CYCLE(cur,"Patch"){
     //(TIME,ID,KIND,VALUE,X,Y,SYMBOL,X_FACT,Y_FACT,COLOR)
-    PAJ_ADD_V_C(t,UNIQUE_IDS(cur),"Patch",1.0,POSITION_XS(cur),POSITION_YS(cur),"box",1.0,1.0,(COUNT_POSITIONS(cur,"Agent")==0?"White":"Black"));
+    PAJ_ADD_V_C(t,UIDS(cur),"Patch",1.0,POSITION_XS(cur),POSITION_YS(cur),"box",1.0,1.0,(COUNT_POSITIONS(cur,"Agent")==0?"White":"Black"));
   }
   #endif
 
@@ -46,7 +46,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
     cur1 = SEARCH_POSITIONS(cur,"Patch");
     bool has_moved = ( VS(cur,"Move") > 0.0 );
     #ifdef PAJEK
-      PAJ_ADD_V_C(t,UNIQUE_IDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
+      PAJ_ADD_V_C(t,UIDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
     #endif
     if (has_moved) {
       steps++;
@@ -60,7 +60,7 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
       #endif
             /* Save as network */
       #ifdef PAJEK
-      PAJ_ADD_A_C(t,UNIQUE_IDS(cur1),"Patch",UNIQUE_IDS(cur),"Agent",1.0,"Move",1.0,"Green");
+      PAJ_ADD_A_C(t,UIDS(cur1),"Patch",UIDS(cur),"Agent",1.0,"Move",1.0,"Green");
       #endif
     } //move action end
   }
@@ -161,11 +161,11 @@ Initialise the model
   #ifdef PAJEK
   CYCLE(cur,"Patch"){
     //(TIME,ID,KIND,VALUE,X,Y,SYMBOL,X_FACT,Y_FACT,COLOR)
-    PAJ_ADD_V_C(0,UNIQUE_IDS(cur),"Patch",1.0,POSITION_XS(cur),POSITION_YS(cur),"box",1.0,1.0,(COUNT_POSITIONS(cur,"Agent")==0?"White":"Black"));
+    PAJ_ADD_V_C(0,UIDS(cur),"Patch",1.0,POSITION_XS(cur),POSITION_YS(cur),"box",1.0,1.0,(COUNT_POSITIONS(cur,"Agent")==0?"White":"Black"));
   }
   CYCLE(cur,"Agent"){
     //(TIME,ID,KIND,VALUE,X,Y,SYMBOL,X_FACT,Y_FACT,COLOR)
-    PAJ_ADD_V_C(0,UNIQUE_IDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
+    PAJ_ADD_V_C(0,UIDS(cur),"Agent",1.0,POSITION_XS(cur),POSITION_YS(cur),(VS(cur,"Content")==1.0?"ellipse":"triangle"),1.0,1.0,(VS(cur,"Colour")==5?"Blue":"Red"));
   }
   #endif
 

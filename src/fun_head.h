@@ -195,8 +195,8 @@ using namespace Eigen;
 // some macros to define unique ids for some objects
 #ifdef CPP11
   #define MAKE_UNIQUE( LAB ) p->declare_as_unique( ( char * ) LAB )
-  #define UNIQUE_ID  p->unique_id( )
-  #define UNIQUE_IDS( PTR ) PTR->unique_id( )
+  #define UID  p->unique_id( )
+  #define UIDS( PTR ) PTR->unique_id( )
   #define SEARCH_UID( ID ) obj_by_unique_id( ID )
 #endif //#ifdef CPP11
 

@@ -438,7 +438,7 @@ object* object::obj_by_unique_id(double id)
   } else {
   	sprintf( msg, "cannot retrieve unique object '%g'", id );
 		error_hard( msg, "bounding error!",
-					"please contact developers",
+					"please make sure that an object with the id exists",
 					true );
     return NULL;
   }
