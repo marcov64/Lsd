@@ -1,18 +1,23 @@
 #*************************************************************
 #
-#	LSD 7.1 - May 2018
+#	LSD 7.1 - December 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
-#	Copyright Marco Valente
+#	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
 #	
 #*************************************************************
 
-# FILE HANDLING TCL SCRIPTS
+#*************************************************************
+# LST_MDL.TCL
+# Collection of file handling scripts.
+#*************************************************************
 
-# list models returning the list a exploring directory b
-
+#************************************************
+# LST_MDL
+# List models returning the list a exploring directory b
+#************************************************
 proc lst_mdl { } {
 	global lmod ldir lgroup cgroup
 
@@ -52,6 +57,10 @@ proc lst_mdl { } {
 	} 
 }
 
+
+#************************************************
+# CHS_MDL
+#************************************************
 proc chs_mdl { } {
 	global lmod ldir sd sf d1 d2 f1 f2 lgroup cgroup butWid
 
@@ -147,6 +156,10 @@ proc chs_mdl { } {
 	showtop .l centerS
 }
 
+
+#************************************************
+# SLCT
+#************************************************
 proc slct { } {
 	global sd sf ldir
 	
@@ -162,8 +175,10 @@ proc slct { } {
 }
 
 
-# check (best guess) if system option configuration is valid for the platform
-
+#************************************************
+# CHECK_SYS_OPT
+# Check (best guess) if system option configuration is valid for the platform
+#************************************************
 set win32Yes [ list ".exe" "85" "/gnu/" "g++" "-lz" "-mthreads" "-mwindows" ]
 set win32No  [ list "/gnu64/" "-framework" "-lpthread" ]
 set win64Yes [ list ".exe" "86" "/gnu64/" "x86_64-w64-mingw32-g++" "gnu++14" "-lz" "-mthreads" "-mwindows" ]
@@ -244,7 +259,10 @@ proc check_sys_opt { } {
 }
 
 
-# get the list of source files, including the main and extra files
+#************************************************
+# GET_SOURCE_FILES
+# Get the list of source files, including the main and extra files
+#************************************************
 proc get_source_files { path } {
 
 	if { ! [ file exists "$path/model_options.txt" ] } { 
@@ -281,6 +299,10 @@ proc get_source_files { path } {
 }
 
 
+#************************************************
+# CREATE_ELEM_FILE
+# Produce the element list file (elements.txt) to be used in LSD browser
+#************************************************
 # list of commands to search for parameters (X=number of macro arguments, Y=position of parameter)
 set cmds_1_1 [ list V SUM MAX MIN AVE SD STAT RECALC ]
 set cmds_2_1 [ list WHTAVE SEARCH_CND WRITE INCR MULT ]
@@ -293,7 +315,6 @@ set cmds_4_3 [ list RNDDRAW_TOTS SORTS SORT2 ]
 set cmds_5_3 [ list SORT2S ]
 set cmds_5_4 [ list SORT2S ]
 
-# produce the element list file (elements.txt) to be used in LSD browser
 proc create_elem_file { path } {
 	global cmds_1_1 cmds_2_1 cmds_2_2 cmds_3_1 cmds_3_2 cmds_3_3 cmds_4_2 cmds_4_3 cmds_5_3 cmds_5_4
 	
@@ -397,13 +418,17 @@ proc create_elem_file { path } {
 	close $f
 }
 
-# lists to hold the elements in model program and the ones missing in model
+
+#************************************************
+# READ_ELEM_FILE
+# Read the element list file (elements.txt) from dist to use in LSD browser
+#************************************************
+# Lists to hold the elements in model program and the ones missing in model
 set progVar [ list ]
 set progPar [ list ]
 set missVar [ list ]
 set missPar [ list ]
 
-# read the element list file (elements.txt) from dist to use in LSD browser
 proc read_elem_file { path } {
 	global progVar progPar
 
@@ -421,7 +446,11 @@ proc read_elem_file { path } {
 	upd_miss_elem
 }
 
-# update the missing elements list, considering the elements already in the model structure
+
+#************************************************
+# UPD_MISS_ELEM
+# Update the missing elements list, considering the elements already in the model structure
+#************************************************
 proc upd_miss_elem { } {
 	global modElem progVar progPar missPar missVar
 	
@@ -434,7 +463,11 @@ proc upd_miss_elem { } {
 	}
 }
 
-# remove duplicated and elements contained in toRemove from origList and sort it
+
+#************************************************
+# REMOVE_ELEM
+# Remove duplicated and elements contained in toRemove from origList and sort it
+#************************************************
 proc remove_elem { origList toRemove } {
 
 	set origList [ lsort -unique $origList ]

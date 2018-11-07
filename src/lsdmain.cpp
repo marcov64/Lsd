@@ -1,21 +1,21 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-LSD_MAIN.CPP contains:
+/*************************************************************
+LSD_MAIN.CPP 
+Contains:
 - early initialization (namely, of the Log windows)
 - the main cycle: browse a model, run simulation, return to the browser.
 
-
-The functions contained here are:
+The main functions contained here are:
 
 - void run( )
 Run the simulation model whose root is r. Running is not only the actual
@@ -24,44 +24,7 @@ also to manage the messages from user and from the model at run time.
 
 - bool alloc_save_mem( );
 Prepare variables to store saved data.
-
-- Tcl_Interp *InterpInitWin( char *tcl_dir );
-A function that manages to initialize the tcl interpreter. Guess the standard
-functions are actually bugged, because of the difficulty to retrive the directory
-for the tk library. Why is difficult only for tk and not for tcl, don't know.
-But is a good thing, so that I can actually copy the tcl directory and make
-the modifications
-
-- void plog( char *m );
-print  message string m in the Log screen.
-
-Other functions used here, and the source files where are contained:
-
-- object *create( );
-manage the browser. Its code is in INTERF.CPP
-
-- object *skip_next_obj( object *t, int *count );
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother( object *c );
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-- void cmd( char *cc );
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- void myexit( int v );
-Exit function, which is customized on the operative system.
-
-- FILE *search_str( char *name, char *str );
-UTIL.CPP given a string name, returns the file corresponding to name, and the current
-position of the file is just after str.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -79,6 +42,7 @@ int seed = 1;				// random number generator initial seed
 int strWindowOn = true;		// control the presentation of the model structure window (bool)
 
 bool batch_sequential = false;	// no-window multi configuration job running
+bool brCovered = false;		// browser cover currently covered
 bool eq_dum = false;		// current equation is dummy
 bool fast;					// safe copy of fast_mode flag
 bool log_ok = false;		// control for log window available
@@ -942,20 +906,20 @@ void run( void )
 #endif
 		}	// end of for t
 
-		actual_steps = t - 1;
+		actual_steps = max( t - 1, 1 );
 		unsavedData = true;			// flag unsaved simulation results
 		running = false;
 		deb_log( false );			// close debug log file, if any
 		end = clock( );
 
-		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
-			quit = 0;
-		
 		if ( fast_mode == 1 && on_bar )
 			plog( "100%%", "bar" );
 		if ( fast_mode < 2 )
-			plog( "\nSimulation %d finished (%.2f sec.)\n", "", i, ( float ) ( end - start ) / CLOCKS_PER_SEC );
+			plog( "\nSimulation %d %s (%.2f sec.)\n", "", i, quit == 2 ? "aborted" : "finished", ( float ) ( end - start ) / CLOCKS_PER_SEC );
 
+		if ( quit == 1 ) 			// for multiple simulation runs you need to reset quit
+			quit = 0;
+		
 #ifndef NO_WINDOW 
 		cmd( "destroytop .deb" );
 		cmd( "update" );
@@ -1216,16 +1180,11 @@ bool alloc_save_mem( object *r )
 				var->save = var->savei = 0;
 		}
 		
-		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded=='-')
+		if ( ( var->num_lag > 0 || var->param == 1 ) && var->data_loaded == '-' )
 		{
-			plog( "\nIntialization data for %s in object %s not set\n", "", var->label, r->label );
-#ifndef NO_WINDOW   
-			plog( "Use the Initial Values editor to set its values\n" );
-			if ( var->param == 1 )
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because parameter:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Initìal Values'.\"", var->label, r->label, r->label );
-			else
-				cmd( "tk_messageBox -parent . -type ok -icon error -title Error -message \"Run aborted\" -detail \"The simulation cannot start because a lagged value for variable:\n'%s' (object '%s')\nhas not been initialized.\nUse the browser to show object '%s' and choose menu 'Data'/'Init.Values'.\"", var->label, r->label, r->label );  
-#endif
+			sprintf( msg, "%s '%s' in object '%s' has not been initialized", var->param == 1 ? "parameter" : "variable", var->label, r->label );
+			error_hard( msg, "required initialization values missing", "select the object and choose menu 'Data'/'Initial Values'" );
+			
 			toquit = 2;
 		}
 	}
@@ -1237,7 +1196,7 @@ bool alloc_save_mem( object *r )
 	if ( quit != 2 )
 		quit = toquit;
 	
-	return ( ! no_more_memory );
+	return ! no_more_memory;
 }
 
 
@@ -1364,8 +1323,6 @@ void set_buttons_log( bool on )
 /*********************************
 COVER_BROWSER
 *********************************/
-bool brCovered = false;
-
 void cover_browser( const char *text1, const char *text2, const char *text3 )
 {
 	if ( brCovered )		// ignore if already covered

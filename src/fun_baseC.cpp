@@ -1,13 +1,9 @@
 /***************************************************
-
 Example for an equation file. Users should include 
 in this header a brief description of the model.
 
 Include the equations in the space indicated below, 
-after the line:
-
-Place here your equations
-
+after the indicated line.
 ****************************************************/
 
 //#define EIGENLIB				// uncomment to use Eigen linear algebra library

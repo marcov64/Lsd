@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-GETLIMITS.CPP contains:
-- execute the lsd_getlimits command line utility.
+/*************************************************************
+GETLIMITS.CPP
+Executes the lsd_getlimits command line utility.
 
-	Lists all initial values ranges and configuration
-
-****************************************************/
+Lists all initial values ranges and configuration.
+*************************************************************/
 
 #include <set>
 #include "decl.h"

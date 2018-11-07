@@ -1,7 +1,23 @@
 @echo off
+rem *************************************************************
+rem
+rem	 LSD 7.1 - December 2018
+rem	 written by Marco Valente, Universita' dell'Aquila
+rem	 and by Marcelo Pereira, University of Campinas
+rem
+rem	 Copyright Marco Valente and Marcelo Pereira
+rem	 LSD is distributed under the GNU General Public License
+rem	
+rem *************************************************************
+
+rem *************************************************************
+rem  CONFIG-CYGWIN32.BAT
+rem  Configure LSD to use Cygwin in Windows 32-bit.
+rem *************************************************************
+
 for %%X in (g++.exe) do (set FOUND=%%~$PATH:X)
 if not defined FOUND goto error
-echo Removing LSD intgrated gcc/g++ support.
+echo Removing LSD integrated gcc/g++ support.
 echo Press CTRL+C to interrupt now or
 pause
 rd /q /s gnu\include\backward

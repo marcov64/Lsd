@@ -1,17 +1,18 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 OBJECT.CPP
 It contains the core code for LSD, together with VARIAB.CPP.
+
 A model is nothing but a link of objects, whose behavior is defined here.
 Only the methods for saving a loading a model are placed in another file, FILE.CPP.
 
@@ -79,6 +80,7 @@ The methods for object implemented here all refer always to the "this" object.
 That is, if you consider the following as functions, then they have always as
 parameter the address of one object, refer to as "this", whose fields are
 addressed as if they were public variables.
+
 Methods as listed in two groups: the ones that can be used as functions in LSD
 and the ones used for management of the model. This distinction is only
 because of the functionalities, since all the methods are actually public, and
@@ -141,59 +143,20 @@ Same as sum, but it adds up the product between variables lab and lab2 for each
 object. WARNING: if lab and lab2 are not in the same object, the results are
 messy
 
-- void sort(char *obj, char *var, char *dir);
+- void lsdqsort( char *obj, char *var, char *dir );
 Sorts the Objects whose label is obj according to the values of their
 variable var. The direction of sorting can be UP or DOWN. The method
 is just an interface for sort_asc and sort_desc below.
 
-- void sort_asc( object *from, char *l_var);
-Sorts (using bubblesort method) the objects in a group according to increasing
-values of their variable l_var, restructuring the linked chain.
 IMPORTANT:
 The initial Object must be the first element of the set of Objects to be sorted,
 and hence is must contain a Variable or Parameter labeled Var_label.
 The field from must be either the Object whose "next" is this, or, in case this
 is the first element of descendants from some Objects and hence it is a son,
 it must be the address of the parent of this.
-As example, consider a model having a number of Objects Capital defined as
-the only type of descendants from Object Firm.
-A Variable in Firm, can have an equation having the following line:
-...
-cur=search("Capital")
-cur->sort_asc(p, "Productivity");
-...
-which will sort the objects Capital according to the ascending values of
-Productivity
-If instead the object Capital is defined after a group of object (say Clients)
-then you need to following lines:
-
-...
-cur1=search("Capital"); // cur1 becomes the first Capital
-for (cur2=cur1; cur2->next!=cur1; cur2=cur2->next); //finds the last Client before the first Capital
-cur1->sort_asc(cur2, "Productivity"); //sorts the group starting from cur1 attached after cur2
-...
-
-- void sort_desc( object *from, char *l_var);
-Same as sort_asc, but sorting in descending order
 
 - void delete_obj( void ) ;
 eliminate the object, keeping in order the chain list.
-
-- object *add_an_object(char *lab);
-Add an object of type lab to the descendant of this. It is placed in the last
-position of the groups of the same object and initialized according to the initial
-values contained in the file of the model, corresponding to the first object
-of that type. The new object is returned, for further initialization.
-The variables of the object are set to be already computed in the present
-time step, and are all set to value 0.
-WARNING: it creates, if necessary, the whole set of descendants for the new objects
-but places one single element for each single type of object.
-
-- object *add_an_object(char *lab, object *example);
-It has the same effect as the method above, but it uses object given as
-example, instead of reading the object initializations from the files. It is
-much more efficient when the initialization files are huge, so that their
-scanning becomes a very complex task.
 
 - void stat(char *lab, double *v);
 Reports some statistics on the values of variable named lab contained
@@ -296,10 +259,14 @@ METHODS FOR NETWORK OPERATION
 
 see nets.cpp
 
+METHODS FOR FILE OPERATION
+
+see file.cpp
+
+
 METHODS FOR GIS
 
 see gis.cpp
-
 ****************************************************/
 
 //#define DEBUG_MAPS				// define to enable fast lookup maps debugging
@@ -324,6 +291,8 @@ bridge::bridge( const char *lab )
 	next = NULL;
 	mn = NULL;
 	head = NULL;
+	search_var = NULL;	
+	o_map.clear( );
 	
 	blabel = new char[ strlen( lab ) + 1 ];
 	strcpy( blabel, lab );
@@ -337,6 +306,8 @@ bridge::bridge( const bridge &b )
 	blabel = b.blabel;
 	mn = b.mn;
 	head = b.head;
+	search_var = b.search_var;	
+	o_map = b.o_map;
 }
 
 bridge::~bridge( void )
@@ -358,6 +329,8 @@ bridge::~bridge( void )
 		cur->empty( );
 		delete cur;
 	}
+	
+	delete [ ] search_var;
 	
 	delete [ ] blabel;
 }
@@ -606,6 +579,48 @@ void object::update( void )
 
 
 /****************************************************
+GO_BROTHER
+****************************************************/
+object *go_brother( object *c )
+{
+	if ( c == NULL || c->next == NULL )
+		return NULL;
+	
+	return c->next;
+}
+
+
+/****************************************************
+SKIP_NEXT_OBJ
+****************************************************/
+object *skip_next_obj( object *tr, int *count )
+{
+	int i;
+	object *cur;
+
+	for ( cur = tr, i = 0; cur != NULL; cur = cur->next, ++i );
+	*count = i;
+
+	return skip_next_obj( tr );
+}
+
+object *skip_next_obj( object *tr )
+{
+	bridge *cb;
+	
+	if ( tr == NULL || tr->up == NULL )
+		return NULL;
+
+	cb = tr->up->search_bridge( tr->label );
+
+	if ( cb->next == NULL )
+		return NULL;
+	else
+		return cb->next->head; 
+}
+
+
+/****************************************************
 HYPER_NEXT
 Return the next Object in the model with the label lab. The Object is searched
 in the whole model, including different branches
@@ -618,11 +633,8 @@ object *object::hyper_next( char const *lab )
 	{
 		cur1 = cur->search( lab );
 		if ( cur1 != NULL )
-			break;
+			return cur1;
 	}
-
-	if ( cur1 != NULL )
-		return cur1;
 
 	if ( up != NULL )
 		cur = up->hyper_next( lab );
@@ -638,9 +650,33 @@ object *object::hyper_next( void )
 
 
 /****************************************************
+SEARCH_BRIDGE
+Search the bridge which contains the Object lab in this.
+Uses the fast bridge look-up map.
+***************************************************/
+bridge *object::search_bridge( char const *lab, bool no_error )
+{
+	b_mapT::iterator bit;
+
+	// find the bridge which contains the object
+	if ( ( bit = b_map.find( lab ) ) == b_map.end( ) )
+	{
+		if ( ! no_error )
+			error_hard( "invalid data structure (bridge not found)",
+						"internal problem in LSD", 
+						"if error persists, please contact developers",
+						true );
+		return NULL;
+	}
+	
+	return bit->second;
+}
+
+
+/****************************************************
 SEARCH
 Search the first Object lab in the branch of the model below this.
-Uses the fast variable look-up map of the searched variables.
+Uses the fast bridge look-up map.
 ***************************************************/
 object *object::search( char const *lab )
 {
@@ -732,6 +768,199 @@ object *object::search( char const *lab )
 	 }
 
 	return NULL;
+}
+
+
+/****************************
+EMPTY
+turbosearch component
+*****************************/
+void mnode::empty( void ) 
+{
+	int i;
+	
+	if ( son != NULL ) 
+	{
+		for ( i = 0; i < 10; ++i )
+			son[ i ].empty( );
+		delete [ ] son; 
+	}
+}
+
+
+/****************************
+EMPTYTURBO
+remove all turbo search nodes
+*****************************/
+void object::emptyturbo( void ) 
+{
+	bridge *cb;
+	object *cur;
+	
+	for ( cb = this->b; cb != NULL; cb = cb->next )
+	{
+		if ( cb->mn != NULL )
+		{
+			cb->mn->empty( );
+			delete cb->mn;
+			cb->mn = NULL;
+		} 
+		for ( cur = cb->head; cur != NULL; cur = cur->next )
+			cur->emptyturbo( );
+	}
+}
+
+
+/****************************
+CREATE
+turbosearch component
+*****************************/
+void mnode::create( double level )
+{
+	int i;
+
+	deflev = ( long int ) level;
+
+	if ( level > 0 )
+	{
+		pntr = NULL;
+		son = new mnode[ 10 ];
+		if ( son == NULL )
+		{
+			error_hard( "cannot allocate memory for turbo searching", 
+						"out of memory", 
+						"if there is memory available and the error persists,\nplease contact developers",
+						true );
+			return;
+		}
+
+		for ( i = 0; i < 10 && globalcur != NULL; ++i )
+			son[ i ].create( level - 1 );
+		
+		return;
+	}
+
+	son = NULL;
+	pntr = globalcur;
+	
+	if ( globalcur->next != NULL )
+		globalcur = globalcur->next;
+}
+
+
+/****************************
+FETCH
+turbosearch component
+*****************************/
+object *mnode::fetch( double *n, double level )
+{
+	object *cur;
+	double a, b;
+
+	if ( level <= 0 )
+		level = deflev;
+
+	--level;
+	if ( level == 0 )
+		cur = son[ ( int )( *n ) ].pntr;
+	else
+	{  
+		a = pow( 10, level );
+		b = floor( *n / a );
+		*n = *n - b * a ;
+		cur = son[ ( int ) b ].fetch( n, level );
+	}
+	
+	return cur; 
+}
+
+
+/****************************
+INITTURBO
+Generate the data structure required to use the turbosearch.
+- label must be the label of the descending object whose set is to be organized 
+- num is the total number of objects (if not provided or zero, it's calculated).
+*****************************/
+int object::initturbo( char const *label, double tot = 0 )
+{
+	bridge *cb;
+	object *cur;
+	double lev;
+
+	cb = search_bridge( label, true );
+	if ( cb == NULL || cb->head == NULL )
+	{
+		sprintf( msg, "failure when initializing object '%s' for turbo search", label ); 
+		error_hard( msg, "object has no instance", 
+					"check your equation code to prevent this situation",
+					true );
+		return 0;
+	} 
+
+	if ( tot <= 0 )				// if size not informed, compute it
+		for ( tot = 0, cur = this->search( label ); cur != NULL; ++tot, cur = go_brother( cur ) );
+
+	if ( cb->mn != NULL )		// remove existing mnode
+	{
+		cb->mn->empty( );
+		delete cb->mn;
+	}
+	
+	globalcur = cb->head;
+	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
+	cb->mn = new mnode;
+	cb->mn->create( lev );
+	
+	return tot;
+}
+
+
+/****************************
+TURBOSEARCH
+Search the object label placed in num position.
+This search exploits the structure created with 'initturbo'
+If tot is 0, previous set value is used
+*****************************/
+object *object::turbosearch( char const *label, double tot, double num )
+{
+	bridge *cb;
+	double val, lev;
+
+	if ( num < 1 )
+	{
+		sprintf( msg, "position '%.0lf' is invalid for turbo searching object '%s'", num, label ); 
+		error_hard( msg, "invalid search operation", 
+					"check your equation code to prevent this situation",
+					true );
+		return NULL;
+	} 
+	 
+	cb = search_bridge( label, true );
+	if ( cb == NULL )
+	{
+		sprintf( msg, "failure when turbo searching object '%s'", label ); 
+		error_hard( msg, "object not found", 
+					"check your equation code to prevent this situation",
+					true );
+		return NULL;
+	} 
+
+	if ( cb->mn == NULL )
+	{
+		sprintf( msg, "object '%s' is not initialized for turbo search", label ); 
+		error_hard( msg, "invalid search operation", 
+					"check your equation code to prevent this situation",
+					true );
+		return NULL;
+	} 
+	 
+	val = num - 1;
+	if ( tot > 1 )					// if size is informed
+		lev = floor( log10( tot - 1 ) ) + 1;
+	else
+		lev = 0;					// if not, use default
+	
+	return( cb->mn->fetch( &val, lev ) );
 }
 
 
@@ -911,6 +1140,118 @@ object *object::search_var_cond( char const *lab, double value, int lag )
 	}
 
 	return NULL;
+}
+
+
+/****************************
+INITTURBO_COND
+Generate the data structure required to use the turbosearch with condition.
+*****************************/
+int object::initturbo_cond( char const *label )
+{
+	bridge *cb;
+	object *cur;
+	variable *cv;
+	b_mapT::iterator bit;
+
+	cv = search_var( this, label, true, false );
+	if ( cv == NULL )
+	{
+		sprintf( msg, "element '%s' is missing for turbo conditional searching", label );
+		error_hard( msg, "variable or parameter not found", 
+					"create variable or parameter in model structure" );
+		return 0;
+	}
+	
+	if ( cv->up->up == NULL )				// variable at root level?
+	{
+		sprintf( msg, "element '%s' is at root level (always single-instanced)", label );
+		error_hard( msg, "invalid variable or parameter for turbo search", 
+					"check your model structure to prevent this situation" );
+		return 0;
+	}
+		
+	// find the bridge which contains the object containing the variable
+	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	{
+		error_hard( "invalid data structure (bridge not found)",
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+		return 0;
+	}
+	
+	cb = bit->second;
+	cb->o_map.clear( );						// remove any existing mapping
+	
+	// fill the map with the object values
+	for ( cur = cb->head; cur != NULL; cur = cur->next )
+		cb->o_map.insert( o_pairT ( cur->cal( label, 0 ), cur ) );
+	
+	// register the name of variable for which the map is set
+	cb->search_var = new char [ strlen( label ) + 1 ];
+	strcpy( cb->search_var, label );
+	
+	return cb->o_map.size( );
+}
+
+
+/****************************
+TURBOSEARCH_COND
+Search the object instance containing a variable label with given value.
+Return the containing object instance, if found, or NULL if not found.
+This search exploits the structure created with 'initturbo_cond'.
+*****************************/
+object *object::turbosearch_cond( char const *label, double value )
+{
+	bridge *cb;
+	variable *cv;
+	b_mapT::iterator bit;
+	o_mapT::iterator oit;
+
+	cv = search_var( this, label, true, false );
+	if ( cv == NULL )
+	{
+		sprintf( msg, "element '%s' is missing for turbo conditional search", label );
+		error_hard( msg, "variable or parameter not found", 
+					"create variable or parameter in model structure" );
+		return NULL;
+	}
+	
+	if ( cv->up->up == NULL )				// variable at root level?
+	{
+		sprintf( msg, "element '%s' is at root level (always single-instanced)", label );
+		error_hard( msg, "invalid variable or parameter for turbo search", 
+					"check your model structure to prevent this situation" );
+		return NULL;
+	}
+		
+	// find the bridge which contains the object containing the variable
+	if ( ( bit = cv->up->up->b_map.find( cv->up->label ) ) == cv->up->up->b_map.end( ) )
+	{
+		error_hard( "invalid data structure (bridge not found)",
+					"internal problem in LSD", 
+					"if error persists, please contact developers",
+					true );
+		return NULL;
+	}
+	
+	cb = bit->second;
+	
+	if ( cb->o_map.size( ) == 0 || cb->search_var == NULL || strcmp( cb->search_var, label ) )
+	{
+		sprintf( msg, "element '%s' is not initialized for turbo conditional search", label ); 
+		error_hard( msg, "invalid search operation", 
+					"check your equation code to prevent this situation",
+					true );
+		return NULL;
+	} 
+	
+	// find the object containing the variable
+	if ( ( oit = cb->o_map.find( value ) ) != cb->o_map.end( ) )
+		return oit->second;
+	else
+		return NULL;
 }
 
 
@@ -1393,15 +1734,15 @@ the example object (if >0) or current t (if =0)
 object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update )
 {
 	bool net;
-  #ifdef CPP11
+	#ifdef CPP11
 	bool gis;
-  bool uids;
-  #endif //#ifdef CPP11
+	bool uids;
+	#endif //#ifdef CPP11
 	int i;
 	bridge *cb, *cb1, *cb2;
 	object *cur, *cur1, *last, *first;
 	variable *cv;
-  first = NULL; //default
+	first = NULL; //default
 
 	// check the labels and prepare the bridge to attach to
 	for ( cb2 = b; cb2 != NULL && strcmp( cb2->blabel, lab ); cb2 = cb2->next );
@@ -1423,13 +1764,13 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 	else
 		net = false;
 
-  #ifdef CPP11
-  //check if these objects have a unique id
-  cur = root->search( lab );
-  if (cur != NULL && cur->uID != NULL)
-    uids = true;
-  else
-    uids = false;
+	#ifdef CPP11
+	//check if these objects have a unique id
+	cur = root->search( lab );
+	if (cur != NULL && cur->uID != NULL)
+		uids = true;
+	else
+		uids = false;
 
 	// check if copy from an object in a gis. If yes, then this one inherits all info AND is registered at same pos.
 	// blueprint is never part of gis
@@ -1437,7 +1778,7 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 		gis = false;
 	else
 		gis = true;
-  #endif //#ifdef CPP11
+	#endif //#ifdef CPP11
 
 	last = NULL;	// pointer of the object to link to, signaling also the special first case
 	for ( i = 0; i < n; ++i )
@@ -1467,21 +1808,20 @@ object *object::add_n_objects2( char const *lab, int n, object *ex, int t_update
 				return NULL;
 			}
 		}
-    #ifdef CPP11
-    if (uids)             // object gets unique id
-    {
-      cur->uID = new uniqueId(cur,root->uID->uidMap);
-    }
+	#ifdef CPP11
+	if (uids)             // object gets unique id
+		cur->uID = new uniqueId(cur,root->uID->uidMap);
 
-  	if (gis)              // if object is part of a gis/map
-  	{
-  		cur->position = NULL; //reset, to not take position from ext
-  		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y) == false) //register at map
-  		{
-  			return NULL; //error, msgs contained in register_at_map
-  		}
-  	}
-    #endif //#ifdef CPP11
+
+	if (gis)              // if object is part of a gis/map
+	{
+		cur->position = NULL; //reset, to not take position from ext
+		if (cur->register_at_map(ex->ptr_map(), ex->position->x, ex->position->y) == false) //register at map
+		{
+			return NULL; //error, msgs contained in register_at_map
+		}
+	}
+	#endif //#ifdef CPP11
 
 		// create its variables and initialize them
 		for ( cv = ex->v; cv != NULL; cv = cv->next )  
@@ -1648,7 +1988,7 @@ void object::delete_obj( void )
 
 	// find the bridge
 	if ( up != NULL )
-		for ( cb = up->b; cb != NULL && strcmp( cb->blabel, label ); cb = cb->next );
+		cb = up->search_bridge( label );
 	else
 		cb = NULL;
 
@@ -1680,6 +2020,9 @@ void object::delete_obj( void )
 	if ( del_flag != NULL )
 		*del_flag = true;	// flag deletion to caller, if requested
 		
+	if ( cb->search_var != NULL )	// indexed objects?
+		cb->o_map.erase( cal( cb->search_var, 0 ) );	// try to remove map entry
+
 	empty( );
 	
 	delete this;
@@ -1726,7 +2069,7 @@ void object::empty( void )
 		node = NULL;
 	}
 
-  #ifdef CPP11
+	#ifdef CPP11
 	if ( position != NULL ) // gis data to delete?
 	{
 		unregister_from_gis();
@@ -1788,12 +2131,13 @@ void object::chg_lab( char const *lab )
 	cur = up->hyper_next( up->label );
 	if ( cur != NULL )
 	{
-		for ( cb = cur->b; strcmp( cb->blabel, label ); cb = cb->next );
+		cb = cur->search_bridge( label );
+		
 		if ( cb->head != NULL )
 			cb->head->chg_lab( lab );
 	}
 
-	for ( cb = up->b; strcmp( cb->blabel, label ); cb = cb->next );
+	cb = up->search_bridge( label );
 	
 	up->b_map.erase( cb->blabel );
 	delete [ ] cb->blabel;
@@ -1831,6 +2175,26 @@ void object::chg_var_lab( char const *old, char const *newname )
 	}
 
 
+/***************************************************
+GET_CYCLE_OBJ
+Support function used in CYCLEx macros
+***************************************************/
+object *get_cycle_obj( object *parent, char const *label, char const *command )
+{
+	object *cur;
+
+	cur = parent->search( label );
+	if ( cur == NULL )
+	{
+		sprintf( msg, "'%s' is missing for cycling", label );
+		error_hard( msg, "object not found", 
+					"create object in model structure" );
+	}
+	
+	return cur;
+}
+
+
 /****************************************************
 UNDER_COMPUTATION
 Check if any variable in or below the object is
@@ -1858,30 +2222,30 @@ bool object::under_computation( void )
  
 /****************************************************
 CAL
-Return the value of Variable or Parameter with label l with lag lag.
+Return the value of Variable or Parameter with label lab with lag lag.
 The method search for the Variable starting from this Object and then calls
 the function variable->cal(caller, lag )
 ***************************************************/
-double object::cal( object *caller,  char const *l, int lag )
+double object::cal( object *caller, char const *lab, int lag )
 {
-	variable *curr;
+	variable *cv;
 
 	if ( quit == 2 )
 		return NAN;
 
-	curr = search_var( this, l, true, no_search );
-	if ( curr == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		curr = blueprint->search_var( this, l, true, no_search );
-		if ( curr == NULL )
+		cv = blueprint->search_var( this, lab, true, no_search );
+		if ( cv == NULL )
 		{
-			sprintf( msg, "element '%s' is missing for retrieving", l );
+			sprintf( msg, "element '%s' is missing for retrieving", lab );
 			error_hard( msg, "variable or parameter not found", 
 						"create variable or parameter in model structure" );
 		}
 		else
 		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", curr->up->label, l );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
 			error_hard( msg, "last object instance deleted", 
 						"check your equation code to ensure at least one instance\nof any object is kept", 
 						true );
@@ -1891,20 +2255,15 @@ double object::cal( object *caller,  char const *l, int lag )
 	}
 
 #ifdef PARALLEL_MODE
-	if ( parallel_ready && curr->parallel && curr->last_update < t && lag == 0 && ! curr->dummy )
-		parallel_update( curr, this, caller );
+	if ( parallel_ready && cv->parallel && cv->last_update < t && lag == 0 && ! cv->dummy )
+		parallel_update( cv, this, caller );
 #endif
-	return curr->cal( caller, lag );
+	return cv->cal( caller, lag );
 }
 
-
-/****************************************************
-CAL
-Interface for object->cal(...), using the "this" object by default
-****************************************************/
-double object::cal( char const *l, int lag )
+double object::cal( char const *lab, int lag )
 {
-	return cal( this, l, lag );
+	return cal( this, lab, lag );
 }
 
 
@@ -1913,23 +2272,23 @@ RECAL
 Mark variable as not calculated in the current time,
 forcing recalculation if already calculated
 ****************************************************/
-void object::recal( char const *l )
+void object::recal( char const *lab )
 {
-	variable *curr;
+	variable *cv;
 
-	curr = search_var( this, l, true, no_search );
-	if ( curr == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
-		curr = blueprint->search_var( this, l, true, no_search );
-		if ( curr == NULL )
+		cv = blueprint->search_var( this, lab, true, no_search );
+		if ( cv == NULL )
 		{
-			sprintf( msg, "element '%s' is missing for recalculating", l );
+			sprintf( msg, "element '%s' is missing for recalculating", lab );
 			error_hard( msg, "variable or parameter not found", 
 						"create variable or parameter in model structure" );
 		}
 		else
 		{
-			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", curr->up->label, l );
+			sprintf( msg, "all instances of '%s' (containing '%s') were deleted", cv->up->label, lab );
 			error_hard( msg, "last object instance deleted", 
 						"check your equation code to ensure at least one instance\nof any object is kept", 
 						true );
@@ -1938,7 +2297,7 @@ void object::recal( char const *l )
 		return;
 	}
 	
-	curr->last_update = t - 1;
+	cv->last_update = t - 1;
 }
 
 
@@ -1951,10 +2310,10 @@ double object::sum( char const *lab, int lag )
 {
 	double tot;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -1966,7 +2325,7 @@ double object::sum( char const *lab, int lag )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
@@ -1985,10 +2344,10 @@ double object::overall_max( char const *lab, int lag )
 {
 	double tot, temp;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2000,7 +2359,7 @@ double object::overall_max( char const *lab, int lag )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 	
@@ -2020,10 +2379,10 @@ double object::overall_min( char const *lab, int lag )
 {
 	double tot, temp;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2035,7 +2394,7 @@ double object::overall_min( char const *lab, int lag )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 	
@@ -2056,10 +2415,10 @@ double object::av( char const *lab, int lag )
 	int n;
 	double tot;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2071,7 +2430,7 @@ double object::av( char const *lab, int lag )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
@@ -2093,10 +2452,10 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 {
 	double tot, c1, c2;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2108,8 +2467,8 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		return NAN;
 	}
 
-	cur_v = search_var( this, lab2, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab2, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab2, true, no_search ) == NULL )
 		{
@@ -2121,7 +2480,7 @@ double object::whg_av( char const *lab, char const *lab2, int lag )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
@@ -2145,10 +2504,10 @@ double object::sd( char const *lab, int lag )
 	int n;
 	double x, tot, tot2;
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2160,7 +2519,7 @@ double object::sd( char const *lab, int lag )
 		return NAN;
 	}
 	
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur->up != NULL )
 		cur = ( cur->up )->search( cur->label );
 
@@ -2256,15 +2615,15 @@ double object::stat( char const *lab, double *r )
 {
 	double r_temp[ 5 ];
 	object *cur;
-	variable *cur_v;
+	variable *cv;
 
 	if ( r == NULL )
 		r = r_temp;
 	
 	r[ 0 ] = r[ 1 ] = r[ 2 ] = r[ 3 ] = r[ 4 ] = 0;
 	
-	cur_v = search_var( this, lab, true, no_search );
-	if ( cur_v == NULL )
+	cv = search_var( this, lab, true, no_search );
+	if ( cv == NULL )
 	{	// check if it is not a zero-instance object
 		if ( blueprint->search_var( this, lab, true, no_search ) == NULL )
 		{
@@ -2276,7 +2635,7 @@ double object::stat( char const *lab, double *r )
 		return NAN;
 	}
 
-	cur = cur_v->up;
+	cur = cv->up;
 	if ( cur != NULL )
 	{
 		r[ 3 ] = r[ 4 ] = cur->cal( lab, 0 );
@@ -2362,7 +2721,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	object *cur, *nex, **mylist;
 	variable *cv;
 	bool useNodeId = ( var == NULL ) ? true : false;		// sort on node id and not on variable
-  bool sortRND = ( strcmp(direction,"RANDOM") == 0) ? true : false;  //random sorting of objects
+	bool sortRND = ( strcmp(direction,"RANDOM") == 0) ? true : false;  //random sorting of objects
 
 	if ( ! useNodeId && ! sortRND )
 	{
@@ -2410,7 +2769,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 		cur = search( obj );
 		if ( cur != NULL )
 			if ( sortRND || cur->node != NULL )		// valid network node OR rndsort?
-				cb = cur->up->b;
+				cb = cur->up->search_bridge( obj, true );
 			else
 			{
 				sprintf( msg, "object '%s' has no network data structure", obj );
@@ -2423,7 +2782,6 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 			cb = NULL;
 	}
 
-	for ( ; cb != NULL && strcmp( cb->blabel, obj ); cb = cb->next );
 	if ( cb == NULL || cb->head == NULL )
 	{
 		sprintf( msg, "object '%s' is missing for sorting", label);
@@ -2440,8 +2798,8 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 	for ( i = 0; i < num; ++i )
 	{
 		mylist[ i ] = cur;
-    if ( sortRND )
-      cur->v_rndsort = RND; //new random value for sorting
+		if ( sortRND )
+			cur->v_rndsort = RND; //new random value for sorting
 		cur = cur->next;
 	}
 	
@@ -2450,7 +2808,7 @@ void object::lsdqsort( char const *obj, char const *var, char const *direction )
 		qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_up );
 	else if ( ! strcmp( direction, "DOWN" ) )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_down );
-  else if ( sortRND )
+	else if ( sortRND )
 			qsort( ( void * ) mylist, num, sizeof( mylist[ 0 ] ), sort_function_rnd );
 		else
 		{
@@ -2522,9 +2880,7 @@ void object::lsdqsort( char const *obj, char const *var1, char const *var2, char
 	object *cur, *nex, **mylist;
 	variable *cv;
 
-	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( ! strcmp( cb->blabel, obj ) )
-			break;								// found a bridge
+	cb = search_bridge( obj, true );			// try to find the bridge
 	   
 	if ( cb == NULL || cb->head == NULL )
 	{
@@ -3040,196 +3396,4 @@ object *object::lat_left( void )
 		for ( cur = up->search( label ); go_brother( cur ) != this; cur = go_brother( cur ) );
 
 	return cur;
-}
-
-
-/****************************
-EMPTY
-*****************************/
-void mnode::empty( void ) 
-{
-	int i;
-	
-	if ( son != NULL ) 
-	{
-		for ( i = 0; i < 10; ++i )
-			son[ i ].empty( );
-		delete [ ] son; 
-	}
-}
-
-
-/****************************
-CREATE
-*****************************/
-void mnode::create( double level )
-{
-	int i;
-
-	deflev = ( long int ) level;
-
-	if ( level > 0 )
-	{
-		pntr = NULL;
-		son = new mnode[ 10 ];
-		if ( son == NULL )
-		{
-			error_hard( "cannot allocate memory for turbo searching", 
-						"out of memory", 
-						"if there is memory available and the error persists,\nplease contact developers",
-						true );
-			return;
-		}
-
-		for ( i = 0; i < 10 && globalcur != NULL; ++i )
-		son[ i ].create( level - 1 );
-		
-		return;
-	}
-
-	son = NULL;
-	pntr = globalcur;
-	
-	if ( globalcur->next != NULL )
-		globalcur = globalcur->next;
-}
-
-
-/****************************
-FETCH
-*****************************/
-object *mnode::fetch( double *n, double level )
-{
-	object *cur;
-	double a, b;
-
-	if ( level <= 0 )
-		level = deflev;
-
-	--level;
-	if ( level == 0 )
-		cur = son[ ( int )( *n ) ].pntr;
-	else
-	{  
-		a = pow( 10, level );
-		b = floor( *n / a );
-		*n = *n - b * a ;
-		cur = son[ ( int ) b ].fetch( n, level );
-	}
-	
-	return cur; 
-}
-
-
-/****************************
-TURBOSEARCH
-Search the object label placed in num position.
-This search exploits the structure created with 'initturbo'
-If tot is 0, previous set value is used
-*****************************/
-object *object::turbosearch( char const *label, double tot, double num )
-{
-	bridge *cb;
-	double val, lev;
-
-	if ( num < 1 )
-	{
-		sprintf( msg, "position '%.0lf' is invalid for turbo searching object '%s'", num, label ); 
-		error_hard( msg, "invalid search operation", 
-					"check your equation code to prevent this situation",
-					true );
-		return NULL;
-	} 
-	 
-	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( ! strcmp( cb->blabel, label ) )
-			break;
-	if ( cb == NULL )
-	{
-		sprintf( msg, "failure when turbo searching object '%s'", label ); 
-		error_hard( msg, "object not found", 
-					"check your equation code to prevent this situation",
-					true );
-		return NULL;
-	} 
-
-	if ( cb->mn == NULL )
-	{
-		sprintf( msg, "object '%s' is not initialized for turbo search", label ); 
-		error_hard( msg, "invalid search operation", 
-					"check your equation code to prevent this situation",
-					true );
-		return NULL;
-	} 
-	 
-	val = num - 1;
-	if ( tot > 1 )					// if size is informed
-		lev = floor( log10( tot - 1 ) ) + 1;
-	else
-		lev = 0;					// if not, use default
-	
-	return( cb->mn->fetch( &val, lev ) );
-}
-
-
-/****************************
-INITTURBO
-Generate the data structure required to use the turbo-search.
-- label must be the label of the descending object whose set is to be organized 
-- num is the total number of objects (if not provided or zero, it's calculated).
-*****************************/
-void object::initturbo( char const *label, double tot = 0 )
-{
-	bridge *cb;
-	object *cur;
-	double lev;
-
-	for ( cb = b; cb != NULL; cb = cb->next )
-		if ( ! strcmp( cb->blabel, label ) )
-			break;
-	if ( cb == NULL || cb->head == NULL )
-	{
-		sprintf( msg, "failure when initializing object '%s' for turbo search", label ); 
-		error_hard( msg, "object has no instance", 
-					"check your equation code to prevent this situation",
-					true );
-		return;
-	} 
-
-	if ( tot <= 0 )				// if size not informed
-		for ( tot = 0,cur = this->search( label ); cur != NULL; ++tot, cur = go_brother( cur ) );
-								// compute it
-	if ( cb->mn != NULL )		// remove existing mnode
-	{
-		cb->mn->empty( );
-		delete cb->mn;
-	}
-	
-	globalcur = cb->head;
-	lev = ( tot > 1 ) ? floor( log10( tot - 1 ) ) + 1 : 1;
-	cb->mn = new mnode;
-	cb->mn->create( lev );
-}
-
-
-/****************************
-EMPTYTURBO
-remove all turbo search nodes
-*****************************/
-void object::emptyturbo( void ) 
-{
-	bridge *cb;
-	object *cur;
-	
-	for ( cb = this->b; cb != NULL; cb = cb->next )
-	{
-		if ( cb->mn != NULL )
-		{
-			cb->mn->empty( );
-			delete cb->mn;
-			cb->mn = NULL;
-		} 
-		for ( cur = cb->head; cur != NULL; cur = cur->next )
-			cur->emptyturbo( );
-	}
 }

@@ -4,7 +4,7 @@
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
 **************************************************************
@@ -13,7 +13,7 @@
 Legal stuff
 ***********
 
-LSD is copyrighted by Marco Valente and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices.
+LSD is copyrighted by Marco Valente and Marcelo C. Pereira (version 7.x additions) and is distributed according to the GNU General Public License. That is, as I understand it, you can use, modify and redistribute this code for free, as long as you maintain the same conditions. For legal conditions on gnuplot and the other software used see their legal notices.
 
 LSD includes third party software under the license of the copyright owners:
 

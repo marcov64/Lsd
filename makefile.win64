@@ -1,7 +1,27 @@
-# Makefile to compile LMM adapt as required. Under MS Windows system with installed Lsd follow these steps:
-# 1. Make sure you have Cygwin64 installed with the mingw64-x86_64-gcc-g++ package.
-# 2. If Cygwin64/mingw64 compiler is not available, it is possible to compile with the default Cygwin compiler by changing the "CC" variable below to "g++". 
-# 3. type make -f makefile64.ms in Lsd root directory. This will create a new LMM program using the source "modman.cpp" in directory "src".
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.WIN64
+# Makefile to compile LMM under MS Windows 64-bit system.
+# Please follow these steps:
+# 1. Make sure you have Cygwin64 installed with the 
+#    mingw64-x86_64-gcc-g++ package.
+# 2. If Cygwin64/mingw64 compiler is not available, it is 
+#    possible to compile with the default Cygwin compiler 
+#    by changing the "CC" variable below to "g++". 
+# 3. Type make -f makefile.win64 in Lsd root directory. 
+#    This will create a new LMM program using the source 
+#    "modman.cpp" in directory "src".
+#**************************************************************
 
 CC=x86_64-w64-mingw32-g++
 TARGET=lmm64

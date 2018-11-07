@@ -1,4 +1,19 @@
-# Makefile for lmm in MacOS (tested up to 10.11)
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.MAC-LEGACY
+# Makefile for LMM as OSX legacy executable (tested up to 10.11).
+# Use this makefile only for legacy mac versions (before El Capitan)
+#**************************************************************
 
 CC=g++
 TARGET=lmmOSX

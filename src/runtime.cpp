@@ -1,60 +1,39 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-RUN_TIME.CPP contains initialization and management of run-time plotting
+/*************************************************************
+RUN_TIME.CPP 
+Contains initialization and management of run-time plotting
 
+The main functions contained here are:
 
-The functions contained here are:
-
-- void prepare_plot(object *r, int id_sim)
+- void prepare_plot( object *r, int id_sim )
 Checks is there are LSD variables to plot. If not, returns immediately. Otherwise
 initiliaze the run time globale variables. Namely, the vector of the labels for
 the variables of plot. The plot window is initialized according to the id_sim name
 
-- void count(object *r, int *i);
+- void count( object *r, int *i );
 Recursive function that increments i of one for any variable to plot.
 
-- void assign(object *r, int *i, char *lab);
+- void assign( object *r, int *i, char *lab );
 Create a list of Variables to plot and create the list of labels (adding
 the indexes if necessary) to be used in the plot.
 
 
-- void init_plot(int i, int id_sim);
+- void init_plot( int i, int id_sim );
 create the canvas for the plot, the lines, button, labels, etc.
 
-- void plot_rt(variable *v)
+- void plot_rt( variable *v )
 the function used run time to plot the value of variable v
-
-Other functions used here:
-- object *skip_next_obj(object *t, int *count);
-Contained in UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- object *go_brother(object *c);
-Contained in UTIL.CPP. returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
-- void cmd(char *cc);
-Contained in UTIL.CPP. Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-
-- void plog(char *m);
-print  message string m in the Log screen. It is in LSDMAIN.CPP
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 

@@ -1,4 +1,18 @@
-# Makefile for LMM in a MacOS Acqua .app package (tested up to 10.12)
+#**************************************************************
+#
+#	LSD 7.1 - December 2018
+#	written by Marco Valente, Universita' dell'Aquila
+#	and by Marcelo Pereira, University of Campinas
+#
+#	Copyright Marco Valente and Marcelo Pereira
+#	LSD is distributed under the GNU General Public License
+#	
+#**************************************************************
+
+#**************************************************************
+# MAKEFILE.MAC
+# Makefile for LMM in a MacOS Acqua .app package (tested up to 10.13)
+#**************************************************************
 
 CC=g++
 TARGET=LMM

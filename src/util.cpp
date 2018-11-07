@@ -1,30 +1,22 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-UTIL.CPP contains a set of utilities for different parts of the
+/*************************************************************
+UTIL.CPP 
+Contains a set of utilities for different parts of the
 program.
-The functions contained in this file are:
 
-- object *skip_next_obj(object *t, int *count);
-Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
+The main functions contained in this file are:
 
-- object *go_brother(object *c);
-returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-
-- void cmd(char *cc);
+- void cmd( char *cc );
 Standard routine to send the message string cc to the TCL interpreter in order
 to execute a command for the graphical interfaces.
 It should be enough to make a call to Tcl_Eval. But there are problems due to the
@@ -34,34 +26,29 @@ but not under unix. Instead, I use Tcl_VarEval, that allows to use pieces
 of strings (including the last terminating character NULL) and  it does not
 require a writable string.
 
-- int my_strcmp(char *a, char *b)
+- void plog( char *m );
+print  message string m in the Log screen.
+
+- int my_strcmp( char *a, char *b )
 It is a normal strcmp, but it catches the possibility of both strings being
 NULL
 
-- void go_next(object **t)
-returns next if (*t)->next is not null. Don't know it is used any longer
-
-- double norm(double mean, double dev)
-returns a random number drawn from a normal with mean mean and standard deviation\
-dev.
-
-- FILE *search_str(char *name, char *str)
+- FILE *search_str( char *name, char *str )
 given a string name, returns the file corresponding to name, and the current
 position of the file is just after str. Think I don't use any longer.
 
-- FILE *search_data_str(char *name, char *init, char *str)
+- FILE *search_data_str( char *name, char *init, char *str )
 given a string name, returns the file with that name and the current position
 placed immediately after the string str found after the string init. Needed to
 not get confused managing the data files, where the same string appears twice,
 in the structure definition and in the data section.
 
-- FILE *search_data_ent(char *name, variable *v)
+- FILE *search_data_ent( char *name, variable *v )
 given the file name name, the routine searches for the data line for the variable
 (or parameter) v. It is not messed up by same labels for variables and objects.
 
 - other various mathematical routines
-
- ****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -302,9 +289,9 @@ void error_hard( const char *logText, const char *boxTitle, const char *boxText,
 	}
 	else
 	{
-		log_tcl_error( "ERROR", logText );
-		plog( "\n\nERROR: %s\n", "", logText );
-		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"%s\" -detail \"More details are available in the Log window.\n%s.\"", boxTitle, boxText  );
+		plog( "\n\nError: %s\nDetails: %s", "", boxTitle, logText );
+		plog( "\nSuggestion: %s\n", "", boxText );
+		cmd( "tk_messageBox -parent . -title Error -type ok -icon error -message \"[ string totitle {%s} ]\" -detail \"[ string totitle {%s} ].\n\nMore details are available in the Log window.\"", boxTitle, boxText  );
 	}
 #endif
 
@@ -462,120 +449,6 @@ void msleep( unsigned msec )
 
 
 /****************************************************
-GO_BROTHER
-****************************************************/
-object *go_brother( object *c )
-{
-	if ( c == NULL )
-		return NULL;
-	if ( c->next == NULL )
-		return NULL;
-	return c->next;
-}
-
-
-/****************************************************
-GO_NEXT
-****************************************************/
-void go_next( object **t )
-{
-	if ( ( *t )->next != NULL )
-		*t = ( *t )->next;
-	else
-		*t = NULL;
-}
-
-
-/****************************************************
-SKIP_NEXT_OBJ
-This is the new version, after moving to the bridge-based representation
-****************************************************/
-object *skip_next_obj( object *t, int *count )
-{
-	int i;
-	object *c;
-
-	*count = 0;
-	if ( t == NULL )
-		return NULL;
-	
-	for ( c = t, i = 0; c != NULL; c = c->next, ++i );
-	*count = i;
-
-	return skip_next_obj( t );
-}
-
-object *skip_next_obj( object *tr )
-{
-	bridge *cb;
-	
-	if ( tr == NULL || tr->up == NULL )
-		return NULL;
-
-	for ( cb = tr->up->b; cb != NULL; cb = cb->next )
-	{
-		if ( ! strcmp( cb->blabel, tr->label ) )
-		{
-			if ( cb->next == NULL )
-				return NULL;
-			else
-				return cb->next->head; 
-		}  
-	}
-	
-	return NULL;
-}
-
-
-/***************************************************
-GET_CYCLE_OBJ
-Support function used in CYCLEx macros
-***************************************************/
-object *get_cycle_obj( object *parent, char const *label, char const *command )
-{
-	object *res = parent->search( label );
-	if ( res == NULL )
-	{
-		sprintf( msg, "'%s' is missing for cycling", label );
-		error_hard( msg, "object not found", 
-					"create object in model structure" );
-	}
-	
-	return res;
-}
-
-
-/***************************************************
-SET_COUNTER
-***************************************************/
-void set_counter( object *o )
-{
-	int i;
-	bridge *cb;
-	object *cur;
-
-	if ( o->up == NULL )
-		return;
-
-	set_counter( o->up );  
-
-	for ( cb = o->up->b; strcmp( cb->blabel, o->label ); cb = cb->next );
-
-	if ( cb->counter_updated )
-		return;
-
-	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
-		if ( cur->lstCntUpd < t )		// don't update more than once per period
-		{								// to avoid deletions to change counters
-			cur->acounter = i;
-			cur->lstCntUpd = t;
-		}
-
-	cb->counter_updated = true;
-}
-
-
-/****************************************************
 SEARCH_STR
 ****************************************************/
 FILE *search_str( char const *name, char const *str )
@@ -690,6 +563,37 @@ FILE *search_data_ent( char *name, variable *v )
 		return NULL;
 	else
 		return f;
+}
+
+
+/***************************************************
+SET_COUNTER
+***************************************************/
+void set_counter( object *o )
+{
+	int i;
+	bridge *cb;
+	object *cur;
+
+	if ( o->up == NULL )
+		return;
+
+	set_counter( o->up );  
+
+	// find the bridge which contains the object
+	cb = o->up->search_bridge( o->label );
+			
+	if ( cb->counter_updated )
+		return;
+
+	for ( cur = cb->head, i = 1; cur != NULL; cur = cur->next, ++i )
+		if ( cur->lstCntUpd < t )		// don't update more than once per period
+		{								// to avoid deletions to change counters
+			cur->acounter = i;
+			cur->lstCntUpd = t;
+		}
+
+	cb->counter_updated = true;
 }
 
 

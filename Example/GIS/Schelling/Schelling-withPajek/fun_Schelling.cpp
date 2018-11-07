@@ -20,7 +20,7 @@ EQUATION("Scheduler")
 /*
 The Scheduler controls the updating scheme (that part which is not endogeneously defined 
 */
-  PLOG("\nt %i - Start Scheduler: ndraws %i, draw val %g",t,ran_draws,RND);
+  PLOG("\nt %i - Start Scheduler: draw val %g",t,RND);
   V("Initialise");
   if (V("Randomise")==1.0){
   	SORT_RND("Agent");
@@ -73,14 +73,14 @@ The Scheduler controls the updating scheme (that part which is not endogeneously
         }
       }
       #endif
-  PLOG("\tEnd Scheduler: %i, %g",ran_draws,RND);
+  PLOG("\tEnd Scheduler: %g",RND);
 RESULT( steps )
 
 EQUATION("Initialise")
 /*
 Initialise the model
 */
-    PLOG("\n\nInitialise Start: %i, %g",ran_draws,RND);
+    PLOG("\n\nInitialise Start: %g",RND);
    MAKE_UNIQUE("Agent"); //provide agents with unique ids
    MAKE_UNIQUE("Patch"); //provide patches with unique ids
   #ifdef PAJEK
@@ -132,7 +132,7 @@ Initialise the model
   	double nAgentsBlue = nAgents * V("fracBlue");
   	i = 0;
     SORT_RND("Agent");
-    PLOG("\nt randomised: %i, %g",ran_draws,RND);
+    PLOG("\nt randomised: %g",RND);
   	CYCLE(cur,"Agent"){
   		i++; //increase by 1
   		if (i <= nAgentsBlue) {
@@ -170,7 +170,7 @@ Initialise the model
   #endif
 
   PARAMETER //Set to parameter, i.e. compute only once
-  PLOG("\tInitialise End: %i, %g\n\n",ran_draws,RND);
+  PLOG("\tInitialise End: %g\n\n",RND);
 RESULT( 0.0 )
 
 /*****************
@@ -314,12 +314,12 @@ EQUATION("EndOfSim")
 /* Stop the simulation if no model changes any more. */
   STAT("fracMove");
     //not first step, no movement now, no movement the time before.
-  if ( t>1 && v[3] == 0.0 && CURRENT == 0.0) {
+  if ( t == max_step || (t>1 && v[3] == 0.0 && CURRENT == 0.0) ) {
     PLOG("\nSimulation of %g models at end after %g steps with dissimilarity %g.",v[0],T,V("dissimilarity"));
     ABORT; //finish simulation
     END_EQUATION( T ) //save current time.
   }
-RESULT( v[3] ) //save maximum fraction that moved
+RESULT( v[3] ) //save maximum fraction that moved for automatic stop condition
 
 EQUATION("fracContent")
 /*

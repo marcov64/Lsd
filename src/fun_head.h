@@ -1,20 +1,19 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/***************************************************
-FUN_HEAD.CPP
-
-This file contains all the declarations and macros 
-available in a model's equation file.
-****************************************************/
+/*************************************************************
+FUN_HEAD.H
+This file contains all the macros required by the
+model's equation file.
+*************************************************************/
 
 #define FUN												// comment this line to access internal LSD functions
 
@@ -228,20 +227,24 @@ using namespace Eigen;
 
 // regular logging (disabled in any fast mode)
 #define LOG( ... ) \
+{ \
 	if ( ! fast ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
 		plog( msg ); \
-	}
+	} \
+}
 // priority logging (show also in fast mode 1)
 #define PLOG( ... ) \
+{ \
 	if ( fast_mode < 2 ) \
 	{ \
 		char msg[ TCL_BUFF_STR ]; \
 		sprintf( msg, __VA_ARGS__ ); \
 		plog( msg ); \
-	}
+	} \
+}
 
 #define V( X ) p->cal( p, ( char * ) X, 0 )
 #define VL( X, Y ) p->cal( p, ( char * ) X, Y )
@@ -341,15 +344,22 @@ using namespace Eigen;
 // Seeds turbo search: O=pointer to container object where searched objects are
 //                     X=name of object contained inside the searched objects
 //					   Y=total number of objects
-#define INIT_TSEARCH( X ) p->initturbo( ( char * ) X, 0 )
-#define INIT_TSEARCHS( O, X ) O->initturbo( ( char * ) X, 0 )
-#define INIT_TSEARCHT( X, Y ) p->initturbo( ( char * ) X, Y )
-#define INIT_TSEARCHTS( O, X, Y ) O->initturbo( ( char * ) X, Y )
+#define INIT_TSEARCH( X ) ( ( double ) p->initturbo( ( char * ) X, 0 ) ) )
+#define INIT_TSEARCHS( O, X ) ( ( double ) O->initturbo( ( char * ) X, 0 ) )
+#define INIT_TSEARCHT( X, Y ) ( ( double ) p->initturbo( ( char * ) X, Y ) )
+#define INIT_TSEARCHTS( O, X, Y ) ( ( double ) O->initturbo( ( char * ) X, Y ) )
+//                     X=name of variable to be indexed
+#define INIT_TSEARCH_CND( X ) ( ( double ) p->initturbo_cond( ( char * ) X ) )
+#define INIT_TSEARCH_CNDS( O, X ) ( ( double ) O->initturbo_cond( ( char * ) X ) )
+
 
 // Performs turbo search: O, X as in TSEARCHS_INI
+//                        Z=position of the object to be searched for
+#define TSEARCH( X, Z ) p->turbosearch( ( char * ) X, 0, Z )
+#define TSEARCHS( O, X, Z ) O->turbosearch( ( char * ) X, 0, Z )
 //                        Z=value of variable X to be searched for
-#define TSEARCH( X, Z ) p->turbosearch( ( char * ) X, 0 , Z )
-#define TSEARCHS( O, X, Z ) O->turbosearch( ( char * ) X, 0 , Z )
+#define TSEARCH_CND( X, Z ) p->turbosearch_cond( ( char * ) X, Z )
+#define TSEARCH_CNDS( O, X, Z ) O->turbosearch_cond( ( char * ) X, Z )
 
 #define SORT( X, Y, Z ) p->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )
 #define SORTS( O, X, Y, Z ) O->lsdqsort( ( char * ) X, ( char * ) Y, ( char * ) Z )

@@ -30,6 +30,7 @@ Control:
 
 Global (Sensitivity) Parameters :
 [P] xn  			  : Length of the line		(integer>>3)
+[P] yn  			  : y-dimension of the space (integer>>3)
 [P] wrapping  	: Wrapping 		(0: off, 1: left, 2: right, >=3: left & right)
 [P] fracAgents	: relative number of agents compared to xn (0..1)
 [P] fracBlue		: relative number of blue agents from total (0..1)

@@ -1,56 +1,39 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 DRAW.CPP
-Draw the graphical representation of the model. It is activated by
+Draws the graphical representation of the model. It is activated by
 INTERF.CPP only in case a model is loaded.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
-- void show_graph(object *t)
+- void show_graph( object *t )
 initialize the canvas and calls show_obj for the root
 
-- void draw_obj(object *blk, object *t, int level, int center, int from)
+- void draw_obj( object *blk, object *t, int level, int center, int from )
 recursive function that according to the level of the object type sets the
 distances among the objects. Rather rigid, but it should work nicely
 for most of the model structures. It assigns all the labels (above and below the
 symbols) and the writing bound to the mouse.
 
-- void put_node(int x1, int y1, int x2, int y2, char *str)
+- void put_node( int x1, int y1, int x2, int y2, char *str )
 Draw the circle.
 
-- void put_line(int x1, int y1, int x2, int y2)
+- void put_line( int x1, int y1, int x2, int y2 )
 draw the line
 
-- void put_text(char *str, char *num, int x, int y, char *str2);
+- void put_text( char *str, char *num, int x, int y, char *str2 );
 Draw the different texts and sets the bindings
-
-Functions used here from other files are:
-
-- object *skip_next_obj(object *t, int *i);
-UTIL.CPP. Counts how many types of objects equal to t are in this
-group. count returns such value, and the whole function returns the next object
-after the last of the series.
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- object *go_brother(object *cur);
-UTIL.CPP returns: c->next, if it is of the same type of c (brother).
-Returns NULL otherwise. It is safe to use even when c or c->next are NULL.
-
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -75,7 +58,6 @@ int range_type;
 
 /****************************************************
 SHOW_GRAPH
-
 ****************************************************/
 void show_graph( object *t )
 {
@@ -163,7 +145,6 @@ void show_graph( object *t )
 
 /****************************************************
 DRAW_OBJ
-
 ****************************************************/
 void draw_obj( object *t, int level, int center, int from )
 {
@@ -204,9 +185,9 @@ void draw_obj( object *t, int level, int center, int from )
 		
 		for ( cur = t, num_groups = 0; cur != NULL ; ++num_groups, cur = cur->hyper_next( cur->label ) )
 		{
-			if ( num_groups > 5 )
+			if ( num_groups >= MAX_COUNTS )
 			{
-				strcat( ch1, "." );
+				strcat( ch1, "\u2026" );
 				break;
 			}
 			
@@ -250,25 +231,25 @@ void draw_obj( object *t, int level, int center, int from )
 				level_factor[ 0 ] = 0.3;
 				level_factor[ 1 ] = 0.1;
 				level_factor[ 2 ] = 0.5;
-				level_factor[ 3 ] = 0.3;
+				level_factor[ 3 ] = 1.0;
 				break;
 			case 2:
 				level_factor[ 0 ] = 0.5;
 				level_factor[ 1 ] = 0.6;
 				level_factor[ 2 ] = 0.3;
-				level_factor[ 3 ] = 0.2;
+				level_factor[ 3 ] = 0.6;
 				break;
 			case 3:
 				level_factor[ 0 ] = 0.8;
 				level_factor[ 1 ] = 0.8;
 				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 3 ] = 0.4;
 				break;
 			case 4:
 				level_factor[ 0 ] = 1.0;
 				level_factor[ 1 ] = 0.95;
 				level_factor[ 2 ] = 0.2;
-				level_factor[ 3 ] = 0.1;
+				level_factor[ 3 ] = 0.3;
 				break;
 			default:
 				level_factor[ 0 ] = 1 + ( i - 4.0 ) / 3;
@@ -302,7 +283,6 @@ void draw_obj( object *t, int level, int center, int from )
 
 /****************************************************
 PUT_NODE
-
 ****************************************************/
 void put_node( int x1, int y1, int x2, int y2, char *str )
 {
@@ -312,7 +292,6 @@ void put_node( int x1, int y1, int x2, int y2, char *str )
 
 /****************************************************
 PUT_LINE
-
 ****************************************************/
 void put_line( int x1, int y1, int x2, int y2 )
 {
@@ -322,13 +301,12 @@ void put_line( int x1, int y1, int x2, int y2 )
 
 /****************************************************
 PUT_TEXT
-
 ****************************************************/
 void put_text( char *str, char *n, int x, int y, char *str2 )
 {
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -fill $t_color -tags node -tags %s", x, y - 1, str, str2 );
 
-	//text for node numerosity
+	// text for node numerosity
 	cmd( "$g.f.c create text %d.m %d.m -text \"%s\" -tags node -tags %s", x, y + 2 * v_margin + 1, n, str2 );
 
 	cmd( "$g.f.c bind %s <Enter> { set res_g %s; if [winfo exists .list] { destroy .list }; toplevel .list; wm transient .list $g; wm title .list \"\"; wm protocol .list WM_DELETE_WINDOW { }; frame .list.h; label .list.h.l -text \"Object:\"; label .list.h.n -fg red -text \"%s\"; pack .list.h.l .list.h.n -side left -padx 2; label .list.l -text \"$list_%s\" -justify left; pack .list.h .list.l; align .list $g }", str2, str2, str2, str2 );

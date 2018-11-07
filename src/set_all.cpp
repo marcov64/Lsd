@@ -1,22 +1,22 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 SETALL.CPP
 It contains the routine called from the edit_dat file for setting all the
 values of a variable with a function, instead of inserting manually.
 
 The functions contained in this file are:
 
--void set_all(int *choice, object *r, char *lab, int lag )
+- void set_all( int *choice, object *r, char *lab, int lag )
 it allows 5 options to set all values. It uses one value entered by the user
 in this window and, for some option, the first value for this variable in the
 model. That is, the value for this variable contained in the first object of this
@@ -31,48 +31,7 @@ any new group.
 and max is the inserted value
 5) random numbers, drawn by a normal whose mean is the first value and
 standard deviation is the inserted value.
-
-
-
--object *create(object *root)
-The main cycle for the Browser, from which it exits only to run a simulation
-or to quit the program. The cycle is just once call to browsw followed by
-a call to operate.
-
-- int browse(object *r, int *choice);
-build the browser window and waits for an action (on the form of
-values for choice or choice_g different from 0)
-
-- object *operate(int *choice, object *r);
-takes the value of choice and operate the relative command on the
-object r. See the switch for the complete list of the available commands
-
-- void clean_debug(object *n);
-remove all the flags to debug from any variable in the model
-
-- void clean_save(object *n);
-remove all the flags to save from any variable in the model
-
-- void clean_plot(object *n);
-remove all the flags to plot from any variable in the model
-
-
-Functions used here from other files are:
-
-- void cmd(char *cc);
-UTIL.CPP Standard routine to send the message string cc to the interp
-Basically it makes a simple Tcl_Eval, but controls also that the interpreter
-did not issue an error message.
-
-- double norm(double mean, double dev)
-UTIL.CPP returns a random number drawn from a normal with mean mean and standard deviation\
-dev.
-
-- double rnd( void ) ;
-UTIL.CPP return the uniform value. Now is only implemented using the internal
-random generator, but it can be (and should...) linked with a serious random
-generator.
-****************************************************/
+*************************************************************/
 
 #include "decl.h"
 #include "nolh.h"
@@ -80,7 +39,6 @@ generator.
 
 /****************************************************
 SET_ALL
-
 ****************************************************/
 
 void set_all(int *choice, object *original, char *lab, int lag )
@@ -898,18 +856,27 @@ Tcl_UnlinkVar( inter, "res");
 }
 
 
-/*
-This function fills the initial values according to the sensitivity analysis system performed by parallel simulations: 1 single run over many independent configurations
-descending in parallel from Root.
+/*******************************************************************************
+SENSITIVITY_PARALLEL
+This function fills the initial values according to the sensitivity analysis 
+system performed by parallel simulations: 1 single run over many independent 
+configurations descending in parallel from Root.
 
-Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main LSD Browser. This command generates as many copies as the product of all values for all elements in the s.a. It then kicks off the initialization of all elements involved so that each combination of parameters is assigned to one branch of the model.
+Users can set one or more elements to be part of the sensitivity analysis. For 
+each element the user has to provide the number of values to be explored and 
+their values. When all elements involved in the sensitivity analysis are 
+configured, the user must launch the command Sensitivity from menu Data in the 
+main LSD Browser. This command generates as many copies as the product of all 
+values for all elements in the s.a. It then kicks off the initialization of all 
+elements involved so that each combination of parameters is assigned to one 
+branch of the model.
 
 The user is supposed then to save the resulting configuration.
 
-Options concerning initialization for sensitivity analysis are not saved into the model configuration files, and are therefore lost when closing the LSD model program if not saved in a .sa file. 
-*/
-
+Options concerning initialization for sensitivity analysis are not saved into 
+the model configuration files, and are therefore lost when closing the LSD model
+program if not saved in a .sa file. 
+*******************************************************************************/
 object *sensitivity_parallel( object *o, sense *s )
 {
 	int i;
@@ -947,20 +914,31 @@ object *sensitivity_parallel( object *o, sense *s )
 }
 
 
-/*
-This function fills the initial values according to the sensitivity analysis system performed by sequential simulations: each run executes one configuration labelled with sequential labels.
+/*******************************************************************************
+SENSITIVITY_SEQUENTIAL
+This function fills the initial values according to the sensitivity analysis 
+system performed by sequential simulations: each run executes one configuration 
+labelled with sequential labels.
 
-Contrary to parallel sensitivity settings, this function initialize all elements in the configuration with the specified label.
+Contrary to parallel sensitivity settings, this function initialize all elements 
+in the configuration with the specified label.
 
-Users can set one or more elements to be part of the sensitivity analysis. For each element the user has to provide the number of values to be explored and their values.
-When all elements involved in the sensitivity analysis are configured, the user must launch the command Sensitivity from menu Data in the main LSD Browser.
+Users can set one or more elements to be part of the sensitivity analysis. For 
+each element the user has to provide the number of values to be explored and 
+their values. When all elements involved in the sensitivity analysis are 
+configured, the user must launch the command Sensitivity from menu Data in the 
+main LSD Browser.
 
-Options concerning initialization for sensitivity analysis are saved into model configuration files, to be executed with a No Window version of the LSD model. 
-One configuration file is created for each possible combination of the sensitivity analysis values (parameters and initial conditions). Optionally, it is possible
-to define the parameter "probSampl" with the (uniform) probability of a given point in the sensitivity analysis space is saved as configuration file. In practice,
-this allows for the Monte Carlo sampling of the parameter space, which is often necessary when the s.a. space is too big to be analyzed in its entirety.
-
-*/
+Options concerning initialization for sensitivity analysis are saved into model 
+configuration files, to be executed with a No Window version of the LSD model. 
+One configuration file is created for each possible combination of the 
+sensitivity analysis values (parameters and initial conditions). Optionally, it 
+is possible to define the parameter "probSampl" with the (uniform) probability 
+of a given point in the sensitivity analysis space is saved as configuration 
+file. In practice, this allows for the Monte Carlo sampling of the parameter 
+space, which is often necessary when the s.a. space is too big to be analyzed 
+in its entirety.
+*******************************************************************************/
 
 void sensitivity_sequential( int *findex, sense *s, double probSampl )
 {
@@ -1216,18 +1194,19 @@ void dataentry_sensitivity( int *choice, sense *s, int nval )
 }
 
 
-/*
-	Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
-	Include tables to up to 29 variables (Sanchez 2009, Cioppa and Lucas 2007).
-	Returns the number of samples (n) required for the calculated design and a pointer
-	to the matrix n x k, where k is the number of factors (variables).
+/*******************************************************************************
+NOLH_TABLE
+Calculate a Near Orthogonal Latin Hypercube (NOLH) design for sampling.
+Include tables to up to 29 variables (Sanchez 2009, Cioppa and Lucas 2007).
+Returns the number of samples (n) required for the calculated design and a 
+pointer 	to the matrix n x k, where k is the number of factors (variables).
 
-	It is possible to load one additional design table from disk (file NOLH.csv in
-	the same folder as the configuration file .lsd). The table should be formed
-	by positive integers only, in the n (rows) x k (columns), separated by commas,
-	one row per text line and no empty lines. The table can be loaded manually
-	(NOLH_load function) or automatically as needed during sampling (NOLH_sampler).
-*/
+It is possible to load one additional design table from disk (file NOLH.csv in
+the same folder as the configuration file .lsd). The table should be formed
+by positive integers only, in the n (rows) x k (columns), separated by commas,
+one row per text line and no empty lines. The table can be loaded manually
+(NOLH_load function) or automatically as needed during sampling (NOLH_sampler).
+*******************************************************************************/
 
 int **NOLH_0 = NULL;				// pointer to the design loaded from file
 
@@ -1242,7 +1221,10 @@ int NOLH_table( int k )
 }
 
 
-// determine the valid NOLH tables for the number of factors
+/*****************************************************************************
+NOLH_VALID_TABLES
+Determine the valid NOLH tables for the number of factors
+******************************************************************************/
 char *NOLH_valid_tables( int k, char* ch )	
 {
 	int min_tab = NOLH_table( k );
@@ -1260,7 +1242,10 @@ char *NOLH_valid_tables( int k, char* ch )
 }
 
 			
-// function to remove table 0
+/*****************************************************************************
+NOLH_CLEAR
+Function to remove table 0
+******************************************************************************/
 void NOLH_clear( void )				
 {
 	if ( NOLH_0 == NULL )			// table is not allocated?
@@ -1273,9 +1258,12 @@ void NOLH_clear( void )
 }
 
 
-// function to load a .csv file named NOLH.csv as table 0 (first to be used)
-// if option 'force' is used, will be used for any number of factors
-bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )				
+/*****************************************************************************
+NOLH_LOAD
+Function to load a .csv file named NOLH.csv as table 0 (first to be used)
+If option 'force' is used, will be used for any number of factors
+******************************************************************************/
+bool NOLH_load( char const baseName[ ] = NOLH_DEF_FILE, bool force = false )			
 {
 	int i, j, k, n = 1, loLevel = INT_MAX, hiLevel = 1, kFile = 0;
 	char *fileName, *lBuffer, *str, *num;
@@ -1380,10 +1368,10 @@ end:
 	return ok;
 }
 
-/*
-	Support functions for morris_oat() and enhancements
-*/
-
+/*****************************************************************************
+MAT_*
+Matrix operations support functions for morris_oat() and enhancements
+******************************************************************************/
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -1394,7 +1382,6 @@ using namespace std;
 // Random choice between two numbers
 #define RND_CHOICE( o1, o2 ) ( RND < 0.5 ? o1 : o2 )
 
-// Matrix operations
 // allocate dynamic space for matrix
 double **mat_new( int m, int n )
 {
@@ -1403,6 +1390,7 @@ double **mat_new( int m, int n )
 		c[ i ] = new double[ n ];
 	return c;
 }
+
 // deallocate dynamic space for matrix
 void mat_del( double **a, int m, int n )
 {
@@ -1410,6 +1398,7 @@ void mat_del( double **a, int m, int n )
 		delete [ ] a[ i ];
 	delete [ ] a;
 }
+
 // multiply two matrices (c<-a*b)
 double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, double **c )
 {
@@ -1424,6 +1413,7 @@ double **mat_mult_mat( double **a, int m, int n, double **b, int o, int p, doubl
 		}
 	return c;
 }
+
 // add two same size matrices (c<-a+b)
 double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 {
@@ -1432,6 +1422,7 @@ double **mat_add_mat( double **a, int m, int n, double **b, double **c )
 			c[ i ][ j ] = a[ i ][ j ] + b[ i ][ j ];
 	return c;
 }
+
 // multiply all positions in matrix by a scalar 
 double **mat_mult_scal( double **a, int m, int n, double b, double **c )
 {
@@ -1440,6 +1431,7 @@ double **mat_mult_scal( double **a, int m, int n, double b, double **c )
 			c[ i ][ j ] = a[ i ][ j ] * b;
 	return c;
 }
+
 // add a scalar to all positions in matrix
 double **mat_add_scal( double **a, int m, int n, double b, double **c )
 {
@@ -1448,6 +1440,7 @@ double **mat_add_scal( double **a, int m, int n, double b, double **c )
 			c[ i ][ j ] = a[ i ][ j ] + b;
 	return c;
 }
+
 // copy a scalar to all positions in matrix
 double **mat_copy_scal( double **a, int m, int n, double b )
 {
@@ -1456,6 +1449,7 @@ double **mat_copy_scal( double **a, int m, int n, double b )
 			a[ i ][ j ] = b;
 	return a;
 }
+
 // copy same size matrices
 double **mat_copy_mat( double **a, int m, int n, double **b )
 {
@@ -1464,6 +1458,7 @@ double **mat_copy_mat( double **a, int m, int n, double **b )
 			a[ i ][ j ] = b[ i ][ j ];
 	return a;
 }
+
 // insert lines (replacing) in matrix (a<-b)
 double **mat_ins_mat( double **a, int m, int n, double **b, int o, int p, int lpos )
 {
@@ -1475,6 +1470,7 @@ double **mat_ins_mat( double **a, int m, int n, double **b, int o, int p, int lp
 				a[ i ][ j ] = b[ i - lpos ][ j ];
 	return a;
 }
+
 // extract lines (replacing) in matrix (a<-b)
 double **mat_ext_mat( double **a, int m, int n, double **b, int o, int p, int lpos )
 {
@@ -1485,10 +1481,10 @@ double **mat_ext_mat( double **a, int m, int n, double **b, int o, int p, int lp
 				a[ i ][ j ] = b[ i + lpos ][ j ];
 	return a;
 }
-/* 	Sum the Euclidean distances of points in two matrices of same size
-	Calculates the distance between all points pairs and adds them
-	The matrices a and b must have the same size
-*/
+
+// Sum the Euclidean distances of points in two matrices of same size
+// Calculates the distance between all points pairs and adds them
+// The matrices a and b must have the same size
 double mat_sum_dists( double **a, int m, int n, double **b )
 {
 	double sum = 0;
@@ -1503,7 +1499,9 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 	return sum;
 }
 
-/*
+
+/*****************************************************************************
+MORRIS_OAT
 	Calculate a DoE for Elementary Effects (Morris 1991) analysis,
 	according to Saltelli et al 2008. Code adapted from SAlib by
 	Jon Herman.
@@ -1515,7 +1513,7 @@ double mat_sum_dists( double **a, int m, int n, double **b )
 	p: number of grid levels
 	jump: delta measured in grid levels
 	X: preallocated memory area to save the trajectories
-*/
+******************************************************************************/
 double **morris_oat( int k, int r, int p, int jump, double **X )
 {
 	int i, j, l;
@@ -1592,7 +1590,9 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
     return X;
 }
 
-/*
+
+/*****************************************************************************
+COMPUTE_DISTANCE_MATRIX
 	Optimize a DoE for Elementary Effects (Morris 1991) analysis,
 	according to Campolongo et al 2007 and Ruano 2012. Code adapted
 	from SAlib by Jon Herman.
@@ -1602,7 +1602,7 @@ double **morris_oat( int k, int r, int p, int jump, double **X )
 	M: number of trajectories in pool
 	r: number of final trajectories (<= M)
 	ptr: preallocated memory area to save the trajectories
-*/
+******************************************************************************/
 double **compute_distance_matrix( double **sample, int M, int k, double **DM )
 {
 	double **input_1 = mat_new( k + 1, k ), 
@@ -1630,7 +1630,11 @@ double **compute_distance_matrix( double **sample, int M, int k, double **DM )
     return DM;
 }
 
-// Calculate the combinations of indices, r-to-r
+
+/*****************************************************************************
+COMBINATIONS
+	Calculate the combinations of indices, r-to-r
+******************************************************************************/
 vector < vector < int > > combinations( list < int > indices, int r )
 {
 	vector < int > comb;
@@ -1658,13 +1662,15 @@ vector < vector < int > > combinations( list < int > indices, int r )
 	return combs;
 }
 
-/*
+
+/*****************************************************************************
+SUM_DISTANCES
   Calculate combinatorial distance between a select group of trajectories, 
   indicated by indices
     
     indices: list of candidate pairs of points = list < int >
     DM: distance matrix = array (M,M)
-*/    
+******************************************************************************/
 double sum_distances( list < int > indices, double **DM )
 {
 	// get all combination pairs of indices
@@ -1678,7 +1684,11 @@ double sum_distances( list < int > indices, double **DM )
 	return D;
 }
 
-// get the top-i size items index from a unidimensional array
+
+/*****************************************************************************
+TOP_IDX
+	Get the top-i size items index from a unidimensional array
+******************************************************************************/
 list < int > top_idx( double *a, int n, int i )
 {
 	list < int > top;
@@ -1699,12 +1709,14 @@ list < int > top_idx( double *a, int n, int i )
 	return top;
 }
 
-/*
+
+/*****************************************************************************
+GET_MAX_SUM_IND
 	Get the indice that belong to the maximum distance in an array of distances
     
     indices_list = list of points
     distance = array (M)
-*/
+******************************************************************************/
 list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < double > row_maxima_i )
 {
 	int max_idx = -1;
@@ -1718,10 +1730,12 @@ list < int > get_max_sum_ind( vector < list < int > > indices_list, vector < dou
 	return indices_list[ max_idx ];
 }
 
-/*
+
+/*****************************************************************************
+ADD_INDICES
 	Adds extra indices for the combinatorial problem. 
 	For indices = (1,2) and M=5, the method returns [(1,2,3),(1,2,4),(1,2,5)]
-*/
+******************************************************************************/
 vector < list < int > > add_indices( list < int > m_max_ind, int M )
 {
 	vector < list < int > > list_new_indices;
@@ -1736,12 +1750,14 @@ vector < list < int > > add_indices( list < int > m_max_ind, int M )
 	return list_new_indices;
 }
 
-/*
+
+/*****************************************************************************
+OPT_TRAJECTORIES
 	An alternative by Ruano et al. (2012) for the brute force approach as 
 	originally proposed by Campolongo et al. (2007). The method should improve 
 	the speed with which an optimal set of trajectories is found tremendously 
 	for larger sample sizes.
-*/
+******************************************************************************/
 double **opt_trajectories( int k, double **pool, int M, int r, double **X )
 {
 	if ( r >= M )					// nothing to do?
@@ -1816,7 +1832,11 @@ double **opt_trajectories( int k, double **pool, int M, int r, double **X )
     return X;
 }
 	
-// destructor function to the design object
+
+/*****************************************************************************
+~DESIGN
+	Destructor function to the design object
+******************************************************************************/
 design::~design( void )
 {
 	for ( int i = 0; i < n; i++ )		// run through all experiments
@@ -1832,13 +1852,16 @@ design::~design( void )
 	delete [ ] intg;
 }
 
-// Constructor function to the design object
-// type = 1: NOLH
-// type = 2: random sampling
-// type = 3: Elementary Effects sampling (Morris, 1991)
-// samples = -1: use extended predefined sample size (n2)
-// factors = 0: use automatic DoE size
 
+/*****************************************************************************
+DESIGN
+	Constructor function to the design object
+		type = 1: NOLH
+		type = 2: random sampling
+		type = 3: Elementary Effects sampling (Morris, 1991)
+		samples = -1: use extended predefined sample size (n2)
+		factors = 0: use automatic DoE size
+******************************************************************************/
 design::design( sense *rsens, int typ, char const *fname, int findex, 
 				int samples, int factors, int jump, int trajs )
 {
@@ -2106,11 +2129,11 @@ design::design( sense *rsens, int typ, char const *fname, int findex,
 }
 
 
-/****************************************************
+/*****************************************************************************
 SENSITIVITY_DOE
-Generate the configuration files for the 
-Design of Experiment (DOE)
-****************************************************/
+	Generate the configuration files for the 
+	Design of Experiment (DOE)
+******************************************************************************/
 void sensitivity_doe( int *findex, design *doe )
 {
 	int i, j;

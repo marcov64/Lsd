@@ -1,26 +1,27 @@
 #*************************************************************
 #
-#	LSD 7.1 - May 2018
+#	LSD 7.1 - December 2018
 #	written by Marco Valente, Universita' dell'Aquila
 #	and by Marcelo Pereira, University of Campinas
 #
-#	Copyright Marco Valente
+#	Copyright Marco Valente and Marcelo Pereira
 #	LSD is distributed under the GNU General Public License
 #	
 #*************************************************************
 
-####################################################
-# Tcl script used to browse in the LSD models 
-# the script starts from the LSD root and reads
-# the modelinfo.txt or groupinfo.txt in all
-# the descending directories.
-# Users can browse through the model, create new models,
-# create new groups, or delete them
+#*************************************************************
+# SHOWMODEL.TCL
+# Tcl scripts used to browse in the LSD models .
+#
+# The script starts from the LSD root and reads the modelinfo.txt or groupinfo.txt in all
+# the descending directories. Users can browse through the model, create new models,
+# create new groups, or delete them.
 #
 # The implementation defines few global lists into which are stored the relevant
 # data. As returning value, the proceduce sets the global variable "result"
 # to the number of the list chosen and the global lists containing the references
 # in the group selected
+#*************************************************************
 
 set rootname "Root"
 set modelgroup "$rootname"
@@ -30,6 +31,10 @@ set result 0
 set memory 0
 set ltip ""
 
+
+#************************************************
+# SHOWMODEL
+#************************************************
 proc showmodel pippo {
 	global lmn lmd ldn lrn lbn group result choiceSM lver rootname modelgroup upsym grpsym RootLsd memory ltip fonttype small_character bRlf ovBrlf
 
@@ -335,9 +340,10 @@ proc showmodel pippo {
 }
 
 
-#################################
-# copy a model position for future pastes
-################################
+#************************************************
+# MCOPY
+# Copy a model position for future pastes
+#************************************************
 proc mcopy i {
 	global copylabel copyver copydir copydscr group ldn memory lmn lver lmd
 	
@@ -355,9 +361,10 @@ proc mcopy i {
 }
 
 
-#################################
+#************************************************
+# MDELETE
 # Remove a model/group, placing it in a trashbin
-################################
+#************************************************
 proc mdelete i {
 	global lrn ldn lmn group RootLsd memory
 
@@ -399,9 +406,10 @@ proc mdelete i {
 }
 
 
-#################################
+#************************************************
+# MEDIT
 # Edit the model/group name and description
-################################
+#************************************************
 proc medit i {
 	global lrn ldn lmn group lmd result memory fonttype small_character
 
@@ -472,9 +480,10 @@ proc medit i {
 }
 
 
-#################################
+#************************************************
+# MPASTE
 # Paste a previously copied model/group
-################################
+#************************************************
 proc mpaste i {
 	global copydir copyver copylabel copydscr lrn modelgroup lmn lver lmd choiceSM fonttype small_character
 
@@ -576,9 +585,10 @@ proc mpaste i {
 }
 
 
-#################################
+#************************************************
+# FIX_INFO
 # Fix invalid information in modelinfo.txt
-################################
+#************************************************
 proc fix_info { fi l1 l2 l3 } {
 	if { [ string length $l3 ] != 0 } {
 		set date [ split $l3 ]

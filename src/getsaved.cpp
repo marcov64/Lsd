@@ -1,21 +1,20 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
-GETSAVED.CPP contains:
-- execute the lsd_getsaved command line utility.
+/*************************************************************
+GETSAVED.CPP 
+Execute the lsd_getsaved command line utility.
 
-	Lists all variables being saved in a configuration
-
-****************************************************/
+Lists all variables being saved in a configuration.
+*************************************************************/
 
 #include <set>
 #include "decl.h"

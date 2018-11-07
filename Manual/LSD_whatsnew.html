@@ -1163,7 +1163,9 @@ speed-up of larger models by the allocation of high-performance dynamic memory
 maps to sets of Object instances (bridges), Variables and Parameters. It
 replaces linked-list sequential searching in most situations at the expense of
 slightly higher memory footprint. It affects both user generated searches and
-internal LSD element look ups.</p>
+internal LSD element look ups. User searches (<span class=Cdigo>TSEARCH_CND(…)</span>)
+require the user explicitly initialize the map structure (<span class=Cdigo>INIT_TSEARCH_CND(…)</span>),
+indicating the Variable or Parameter to be fast searched.</p>
 
 <p class=MsoListParagraph style='margin-top:6.0pt;margin-right:0cm;margin-bottom:
 5.0pt;margin-left:35.7pt;text-indent:-17.85pt'><span style='font-family:Symbol'>·<span
@@ -1288,11 +1290,9 @@ improvements.<o:p></o:p></span></p>
 <h1><span lang=EN-US style='mso-fareast-font-family:"Times New Roman";
 mso-ansi-language:EN-US'>Version 7.0 (Apr 2018)<o:p></o:p></span></h1>
 
-<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>The new
-version maintains the compatibility with all the models built with previous
-versions of LSD (some optimizations require C++11 and </span><span class=Cdigo><span
-lang=EN-US style='mso-ansi-language:EN-US'>fun_head_fast.h</span></span><span
-lang=EN-US style='mso-ansi-language:EN-US'>). Main changes:<o:p></o:p></span></p>
+<p class=MsoNormal>The new version maintains the compatibility with all the
+models built with previous versions of LSD (some optimizations require C++11
+and <span class=Cdigo>fun_head_fast.h</span>). Main changes:</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -1343,18 +1343,15 @@ of Experiments). External DoE file import. Full integration with R advanced
 sensitivity analysis package.<o:p></o:p></span></p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
-6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
-style='font-family:Symbol;mso-ansi-language:EN-US'>·</span><span lang=EN-US
-style='font-size:7.0pt;font-family:"Times New Roman",serif;mso-ansi-language:
-EN-US'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b><span
-lang=EN-US style='mso-ansi-language:EN-US'>Integration with R.</span></b><span
-lang=EN-US style='mso-ansi-language:EN-US'> Two advanced R packages available
-on CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD
-Object-oriented hierarchical data in R (multidimensional arrays). Parallel
-multi-core reading of multiple results files. Automatic handling of compressed
-results files. Advanced tools for sensitivity analysis and the study of
-response surfaces of simulation models (Morris Elementary Effects, Sobol
-Decomposition, Kriging Meta-modelling etc.).<o:p></o:p></span></p>
+6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Integration with R.</b> Two advanced R packages available on
+CRAN (LSDinterface and LSDsensitivity). Transparent use of LSD Object-oriented
+hierarchical data in R (multidimensional arrays). Parallel multi-core reading
+of multiple results files. Automatic handling of compressed results files.
+Advanced tools for sensitivity analysis and the study of response surfaces of
+simulation models (Morris Elementary Effects, Sobol Decomposition, Kriging
+Meta-modelling etc.).</p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US
@@ -1405,9 +1402,9 @@ Windows/Linux). LLDB debugger support.<o:p></o:p></span></p>
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span style='font-family:Symbol'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><b>Improved analysis of results tools.</b> New, native Tk plotting
-engine (faster and better looking). Fully editable plots. Improved plot
-windows, including zoom. Many more configuration options for plots. </p>
+</span></span><b>Improved analysis of results tools.</b> New, native Tk
+plotting engine (faster and better looking). Fully editable plots. Improved
+plot windows, including zoom. Many more configuration options for plots. </p>
 
 <p class=MsoListParagraph style='margin-top:5.0pt;margin-right:0cm;margin-bottom:
 6.0pt;margin-left:35.85pt;text-indent:-18.0pt'><span lang=EN-US

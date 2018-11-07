@@ -1,64 +1,57 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
 
-/****************************************************
+/*************************************************************
 EDIT.CPP
 This functions manage the computation, display and modification of
 objects' number. Any call to these module starts by scanning the whole
 model tree, counts the number of each type of objects and displays orderly
 the information.
+
 On request, it is possible to change these values, either for single "branches"
 of the model or for the whole set of one type of Objects.
 It can exit to return to the calling function (either the browser in INTERF.CPP
 or the set initial values in EDIT.CPP) or going in setting initial values.
 
-The functions contained in this file are:
+The main functions contained in this file are:
 
-- void set_obj_number(object *r, int *choice)
+- void set_obj_number( object *r, int *choice )
 The main function, called from the browser. Initialize the text widget and wait
 the actions of the users to take place.
 
-- void insert_obj_num(object *root, char *tag, char *indent, int counter, int *i, int *value);
+- void insert_obj_num( object *root, char *tag, char *indent, int counter, int *i, int *value );
 Does the real job. Scan the model from root recursively and for each Object found
 counts the number, prepare its index if the parent has multiple instances,
 and set the indentation. Each label is bound to return a unique integer number
 in case it is clicked. Such number is used as guide for the following function
 
-- void edit_str(object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done);
+- void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done );
 Explore recursively the model tree giving a unique number for every group of
 objects encountered. When it finds the one clicked by user prepare the
 window to accept a new value for the number of instances. Passes thie value
 to the next function
 
-- void chg_obj_num(object *c, int value, int all, int *choice);
+- void chg_obj_num( object *c, int value, int all, int *choice );
 Depending on all (the flag to modify all the values of that type in the model)
 changes only the number of instances following c, or otherwise, every group of
 intences of the type of c. If it has to increase the number of instances,
 it does it directly. If it has to decrease, checks again all. If all is false,
 it activate the routine below, otherwise, it eliminates directly the surplus
 
-- void eliminate_obj(object *r, int actual, int desired , int *choice);
+- void eliminate_obj( object *r, int actual, int desired , int *choice );
 Ask the user whether he wants to eliminate the last object or to choose
 individually the ones to eliminate. In this second case, it asks for a list
 numbers. The list is as long as are the instances to eliminate. Each element
 is the ordinal number of one instance to eliminate
-
-
-void search_title(object *root, char *tag, int *i, char *lab, int *incr);
-void clean_cell(object *root, char *tag, char *lab);
-void edit_data(object *root, int *choice, char *obj_name);
-void set_title(object *c, char *lab, char *tag, int *incr);
-void link_data(object *root, char *lab);
-
-************************************/
+*************************************************************/
 
 #include "decl.h"
 
@@ -74,7 +67,6 @@ int max_depth;
 /***************************************************
 SET_OBJ_NUMBER
 ****************************************************/
-
 void set_obj_number( object *r, int *choice )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ], *l;
@@ -316,7 +308,6 @@ void insert_obj_num( object *root, char const *tag, char const *ind, int counter
 /***************************************************
 COMPUTE_COPYFROM
 ****************************************************/
-
 int compute_copyfrom( object *c, int *choice )
 {
 	object *cur, *cur1, *cur2, *cur3;
@@ -437,7 +428,6 @@ int compute_copyfrom( object *c, int *choice )
 /***************************************************
 ENTRY_NEW_OBJNUM
 ****************************************************/
-
 void entry_new_objnum( object *c, int *choice, char const *tag )
 {  
 	object *cur, *first;
@@ -587,7 +577,6 @@ void entry_new_objnum( object *c, int *choice, char const *tag )
 /***************************************************
 EDIT_STR
 ****************************************************/
-
 void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, int *choice, int *done )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
@@ -639,7 +628,6 @@ void edit_str( object *root, char *tag, int counter, int *i, int res, int *num, 
 /***************************************************
 ELIMINATE_OBJ
 ****************************************************/
-
 void eliminate_obj( object **r, int actual, int desired , int *choice )
 {
 	char ch[ 2 * MAX_ELEM_LENGTH ];
@@ -764,7 +752,6 @@ void eliminate_obj( object **r, int actual, int desired , int *choice )
 /***************************************************
 CHECK_PIPPO
 ****************************************************/
-
 int check_pippo( object *c, object *pivot, int level, int pippo[ ] )
 {
 	int res = 1, i, j;
@@ -789,7 +776,6 @@ int check_pippo( object *c, object *pivot, int level, int pippo[ ] )
 /***************************************************
 CHG_OBJ_NUM
 ****************************************************/
-
 void chg_obj_num( object **c, int value, int level, int pippo[ ], int *choice, int cfrom )
 {
 	object *cur, *cur1, *last, *app, *first, *pivot;

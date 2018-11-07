@@ -1,13 +1,18 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
+
+/*************************************************************
+DECL.H
+Global definitions among all LSD C++ modules
+*************************************************************/
 
 // LSD compilation options file
 #include "choose.h"
@@ -82,8 +87,8 @@
 // LSD version strings, for About... boxes and code testing
 #define _LSD_MAJOR_ 7
 #define _LSD_MINOR_ 1
-#define _LSD_VERSION_ "7.1"
-#define _LSD_DATE_ "Aug 15 2018"        // __DATE__
+#define _LSD_VERSION_ "GIS"
+#define _LSD_DATE_ "Dec 1 2018"        // __DATE__
 
 // global constants
 #define TCL_BUFF_STR 3000				// standard Tcl buffer size (>1000)
@@ -100,7 +105,8 @@
 #define MAX_CORES 0						// maximum number of cores to use (0=auto )
 #define MAX_WAIT_TIME 10				// maximum wait time for a variable computation ( sec.)
 #define MAX_TIMEOUT 100					// maximum timeout for multi-thread scheduler (millisec.)
-#define MAX_LEVEL 10					// maximum number of object levels (for plotting only)
+#define MAX_LEVEL 10					// maximum number of object levels (plotting only)
+#define MAX_COUNTS 5					// maximum number of object counts (plotting only)
 #define ERR_LIM 10						// maximum number of repeated error messages
 #define BAR_DONE_SIZE 80				// characters in the percentage done bar
 #define SIG_DIG 10						// number of significant digits in data files
@@ -158,21 +164,22 @@ struct Wrap;
 
 // special types used for fast equation, object and variable lookup
 typedef pair< string, bridge * > b_pairT;
+typedef pair < double, object * > o_pairT;
 typedef pair< string, variable * > v_pairT;
 #ifndef CPP11
 typedef map< string, bridge * > b_mapT;
+typedef map < double, object * > o_mapT;
 typedef map< string, variable * > v_mapT;
 #else
 typedef function< double( object *caller, variable *var ) > eq_funcT;
 typedef unordered_map< string, eq_funcT > eq_mapT;
 typedef unordered_map< string, bridge * > b_mapT;
+typedef unordered_map < double, object * > o_mapT;
 typedef unordered_map< string, variable * > v_mapT;
 #endif //#ifdef CPP11
 
-class object
+struct object
 {
-	public:
-	
 	char *label;
 	bool deleting;						// indicate deletion in process
 	bool to_compute;
@@ -186,9 +193,9 @@ class object
 	netNode *node;						// pointer to network node data structure
 	void *cext;							// pointer to a C++ object extension to the LSD object
 	bool *del_flag;						// address of flag to signal deletion
-  double v_rndsort;   //value for random sorting
+	double v_rndsort;   //value for random sorting
 	#ifdef CPP11
-  uniqueId *uID; //unique identifier - double due to LSD data structure.
+	uniqueId *uID; //unique identifier - double due to LSD data structure.
 	gisPosition *position; //Pointer to gis data structure
 	#endif //#ifdef CPP11
 
@@ -202,6 +209,7 @@ class object
 	bool load_param( char *file_name, int repl, FILE *f );
 	bool load_struct( FILE *f );
 	bool under_computation( void );
+	bridge *search_bridge( char const *lab, bool no_error = false );
 	double av( char const *lab, int lag );
 	double cal( char const *l, int lag );
 	double cal( object *caller,  char const *l, int lag );
@@ -217,6 +225,8 @@ class object
 	double sum( char const *lab, int lag );
 	double whg_av( char const *lab, char const *lab2, int lag );
 	int init( object *_up, char const *_label );
+	int initturbo( char const *label, double num );
+	int initturbo_cond( char const *label );
 	long init_circle_net( char const *lab, long numNodes, long outDeg );
 	long init_discon_net( char const *lab, long numNodes );
 	long init_lattice_net( int nRow, int nCol, char const *lab, int eightNeigbr );
@@ -253,6 +263,7 @@ class object
 	object *search_var_cond( char const *lab, double value, int lag );
 	object *shuffle_nodes_net( char const *lab );
 	object *turbosearch( char const *label, double tot, double num );
+	object *turbosearch_cond( char const *label, double value );
 	variable *add_empty_var( char const *str );
 	variable *search_var( object *caller, char const *label, bool no_error = false, bool no_search = false );
 	void add_obj( char const *label, int num, int propagate );
@@ -267,7 +278,6 @@ class object
 	void delete_var( char const *lab );
 	void empty( void );
 	void emptyturbo( void );			// remove turbo search structure
-	void initturbo( char const *label, double num );	// set turbo search structure
 	void insert_parent_obj( char const *lab );
 	void lsdqsort( char const *obj, char const *var, char const *direction );
 	void lsdqsort( char const *obj, char const *var1, char const *var2, char const *direction );
@@ -284,14 +294,13 @@ class object
 	void update( void );
 	void write( char const *lab, double value, int time );	// write value as if computed at time
 	void write( char const *lab, double value, int time, int lag );	// write value in the lag field
-  #ifdef CPP11
-  // Fast look-up of agents via individual, unique IDs
-  void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
-  object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
-  void declare_as_nonUnique(); //function to retreave object by unique id.
-  double unique_id();  //retrieve unique id, if any.
-
-  #endif //#ifdef CPP11
+	#ifdef CPP11
+	// Fast look-up of agents via individual, unique IDs
+	void declare_as_unique(char const *uLab); //this object and all of its kind will become "unique", allowing for fast access by the new unique id.
+	object* obj_by_unique_id(double id); //when the object is deleted, clean up and update info.
+	void declare_as_nonUnique(); //function to retreave object by unique id.
+	double unique_id();  //retrieve unique id, if any.
+	#endif //#ifdef CPP11
 
 	#ifdef CPP11
 	//set the new GIS handling methods
@@ -360,8 +369,6 @@ class object
 
 struct variable
 {
-	public:
-	
 	char *label;
 	char *lab_tit;
 	char data_loaded;
@@ -410,6 +417,9 @@ struct bridge
 	bridge *next;
 	mnode *mn;
 	object *head;
+	char *search_var;					// current initialized search variable 
+	
+	o_mapT o_map;						// fast lookup map to objects
 	
 	bridge( const char *lab );			// constructor
 	bridge( const bridge &b );			// copy constructor
@@ -463,51 +473,49 @@ struct netLink							// individual outgoing link
 
 
 #ifdef CPP11
-/* The uniqueMap holds pointers to objects with uIDs. Once the last element
-  is deleted, it is deleted as well. There is only one such uniqueMap per
-  model, residing in root.
+/*	The uniqueMap holds pointers to objects with uIDs. Once the last element
+	is deleted, it is deleted as well. There is only one such uniqueMap per
+	model, residing in root.
 */
 struct uniqueIdMap
 {
-  std::deque<object*> elements;
-  std::deque<object*> blueprints;
-  int nelements=0;
-  int nelementsAlive=0;
+	std::deque<object*> elements;
+	std::deque<object*> blueprints;
+	int nelements=0;
+	int nelementsAlive=0;
 };
 
 struct uniqueId
 {
-  uniqueIdMap* uidMap;
-  double id;
-  uniqueId(object* addObj, uniqueIdMap* uidMap, bool blueprint=false) : uidMap(uidMap)
-  {
-    if ( blueprint == true){
-      uidMap->blueprints.push_back(addObj);
-      id = - (double) uidMap->blueprints.size();
-    } else {
-      id = (double) uidMap->elements.size();
-      uidMap->elements.push_back(addObj);
-      uidMap->nelements++;
-      uidMap->nelementsAlive++;
-    }
-  };
+	uniqueIdMap* uidMap;
+	double id;
+	uniqueId(object* addObj, uniqueIdMap* uidMap, bool blueprint=false) : uidMap(uidMap)
+	{
+		if ( blueprint == true){
+			uidMap->blueprints.push_back(addObj);
+			id = - (double) uidMap->blueprints.size();
+		} else {
+			id = (double) uidMap->elements.size();
+			uidMap->elements.push_back(addObj);
+			uidMap->nelements++;
+			uidMap->nelementsAlive++;
+		}
+	};
 };
 
 //  GIS data structures
 struct gisPosition
 {
-  gisMap* map;  //link to shared map
-  double x;     //x position
-  double y;     //y position
-  double z;     //z position, if any (default 0, not used in map!
-  std::deque<std::pair <double,object *> > objDis_inRadius; //list of objects in range, used by search
-  std::deque<std::pair <double,object *> >::iterator it_obj; //iterator for the CYCLES
+	gisMap* map;  //link to shared map
+	double x;     //x position
+	double y;     //y position
+	double z;     //z position, if any (default 0, not used in map!
+	std::deque<std::pair <double,object *> > objDis_inRadius; //list of objects in range, used by search
+	std::deque<std::pair <double,object *> >::iterator it_obj; //iterator for the CYCLES
 
-  gisPosition (gisMap* map, double x, double y, double z=0) : map(map), x(x), y(y), z(z)  //constructor.
-  {
-  };
-
-//   ~gisPosition( void ); //destructor. Take care of getting it OUT OF THE MAP
+	gisPosition (gisMap* map, double x, double y, double z=0) : map(map), x(x), y(y), z(z)  //constructor.
+	{
+	};
 };
 
 struct Wrap
@@ -893,7 +901,6 @@ void find_lags( object *r );
 void find_using( object *r, variable *v, FILE *frep );
 void get_sa_limits( object *r, FILE *out, const char *sep );
 void get_saved( object *n, FILE *out, const char *sep, bool all_var = false );
-void go_next( object **t );
 void handle_signals( void ( * handler )( int signum ) );
 void histograms( int *choice );
 void histograms_cs( int *choice );
@@ -997,6 +1004,7 @@ void parallel_update( variable *v, object* p, object *caller = NULL );
 
 // global internal variables (not visible to the users)
 extern FILE *log_file;			// log file, if any
+extern bool brCovered;			// browser cover currently covered
 extern bool eq_dum;				// current equation is dummy
 extern bool fast_lookup;		// flag for fast look-up mode
 extern bool ignore_eq_file;		// control of configuration files equation updating

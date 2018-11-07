@@ -1,13 +1,20 @@
 /*************************************************************
 
-	LSD 7.1 - May 2018
+	LSD 7.1 - December 2018
 	written by Marco Valente, Universita' dell'Aquila
 	and by Marcelo Pereira, University of Campinas
 
-	Copyright Marco Valente
+	Copyright Marco Valente and Marcelo Pereira
 	LSD is distributed under the GNU General Public License
 	
  *************************************************************/
+
+/*************************************************************
+MAIN_GNUWIN.CPP 
+LSD C++ system entry/exit point.
+
+Sets all OS signal handlers.
+*************************************************************/
 
 #include "decl.h"
 
