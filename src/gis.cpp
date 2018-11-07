@@ -678,40 +678,6 @@ char gismsg[300];
     if (sorted == false)
       sort_objDisSet(false); //sort only by distance
 
-//     auto it_start = position->objDis_inRadius.begin();
-//     auto it_last = position->objDis_inRadius.end()-1;
-//     for (auto it = position->objDis_inRadius.begin(); it != position->objDis_inRadius.end(); it++){
-//
-//         //entering new interval or at end of last interval?
-//       if (it->second != it_start->second || it == it_last)
-//       {
-//        if (std::distance(it_start,it)>1){
-//           switch ( ran_gen )
-//           	{
-//           		case 1:						// linear congruential in (0,1)
-//           		case 3:						// linear congruential in [0,1)
-//           		default:
-//                 std::shuffle( it_start,it, lc);
-//                 break;
-//           		case 2:						// Mersenne-Twister 32 bits in (0,1)
-//           		case 4:						// Mersenne-Twister 32 bits in [0,1)
-//                 std::shuffle( it_start,it, mt32);
-//                 break;
-//           		case 5:						// Mersenne-Twister 64 bits in [0,1)
-//                 std::shuffle( it_start,it, mt64);
-//                 break;
-//           		case 6:						// lagged fibonacci 24 bits in [0,1)
-//                 std::shuffle( it_start,it, lf24);
-//                 break;
-//           		case 7:						// lagged fibonacci 48 bits in [0,1)
-//                 std::shuffle( it_start,it, lf48);
-//                 break;
-//           	}
-//         }
-//         it_start = it;
-//       }
-//     }
-
     int i_start = 0;
     int i_n = position->objDis_inRadius.size();
 
@@ -753,35 +719,11 @@ char gismsg[300];
       for (int y = 0; y < position->map->yn; y++){
         for (object* candidate : position->map->elements.at(x).at(y)){
           if ( strcmp(candidate->label,lab) == 0)
-            position->objDis_inRadius.emplace_back(-1,candidate);
-//             position->objDis_inRadius.push_back(std::make_pair(RND,candidate));
+            position->objDis_inRadius.push_back(std::make_pair(RND,candidate));   //use rnd value as pseudo distance for sorting
         }
       }
     }
-//     std::sort( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius) );
-//     std::sort( position->objDis_inRadius.begin(),  position->objDis_inRadius.end(), [](auto const &A, auto const &B ){return A.first < B.first; } ); //sort only by distance
-    switch ( ran_gen )
-    	{
-    		case 1:						// linear congruential in (0,1)
-    		case 3:						// linear congruential in [0,1)
-    		default:
-          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lc);
-          break;
-    		case 2:						// Mersenne-Twister 32 bits in (0,1)
-    		case 4:						// Mersenne-Twister 32 bits in [0,1)
-          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), mt32);
-          break;
-    		case 5:						// Mersenne-Twister 64 bits in [0,1)
-          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), mt64);
-          break;
-    		case 6:						// lagged fibonacci 24 bits in [0,1)
-          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lf24);
-          break;
-    		case 7:						// lagged fibonacci 48 bits in [0,1)
-          std::shuffle( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius), lf48);
-          break;
-    	}
-
+    std::sort( std::begin(position->objDis_inRadius), std::end(position->objDis_inRadius) );
     position->it_obj = std::begin(position->objDis_inRadius);
   }
 

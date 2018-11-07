@@ -80,6 +80,13 @@ double dimH = 0;
 mutex error;
 #endif	
 
+#ifdef CPP11
+minstd_rand lc;						// linear congruential generator
+mt19937 mt32;						// Mersenne-Twister 32 bits generator
+mt19937_64 mt64;					// Mersenne-Twister 64 bits generator
+ranlux24 lf24;						// lagged fibonacci 24 bits generator
+ranlux48 lf48;						// lagged fibonacci 48 bits generator
+#endif //#ifdef CPP11
 
 #ifndef NO_WINDOW
 
