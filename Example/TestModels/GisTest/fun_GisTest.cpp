@@ -338,7 +338,30 @@ EQUATION("TEST_LATTICE")
 PARAMETER
 RESULT(0.0)
 
+EQUATION("TEST_UNIQUE")
+PLOG(" Make Unique Test" );
+cur = SEARCH("Agent");
+MAKE_UNIQUE("Agent");
+//MAKE_UNIQUE("Patch");//got Error as expected
+std::vector<double> UidVec;
+CYCLE(cur1,"Agent"){ 
+ PLOG("\nUnique ID %g \n",UIDS(cur1)); 
+UidVec.push_back(UIDS(cur1));
+ } 
+auto it=std::adjacent_find(UidVec.begin(),UidVec.end());
+if (it!=UidVec.end())
+	PLOG("\n not unique at",*it);
 
+double ID=0;
+for(int i=0;i<=UidVec.size();i++){
+cur=SEARCH_UID(ID);
+
+ PLOG("\n ID %g %s\n",ID,cur->label); 
+ID++;
+ } 
+
+PARAMETER
+RESULT(0.0)
 
 
 MODELEND

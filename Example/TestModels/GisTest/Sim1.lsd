@@ -40,6 +40,7 @@ Label Root
 	Func: Get_ID
 	Var: Init_GIS_W
 	Var: TEST_LATTICE
+	Var: TEST_UNIQUE
 
 }
 
@@ -63,6 +64,7 @@ Param: n_agents 0 n + n n	16
 Func: Get_ID 0 n + n n
 Var: Init_GIS_W 0 n + n n
 Var: TEST_LATTICE 0 n + n n
+Var: TEST_UNIQUE 0 n + n n
 
 Object: Patch N	1
 Param: Owned 0 n + n n	0
@@ -193,6 +195,12 @@ END_DESCRIPTION
 
 Variable_TEST_LATTICE
 (no description available)
+_INIT_
+
+END_DESCRIPTION
+
+Variable_TEST_UNIQUE
+(no description available)
 END_DESCRIPTION
 
 Object_Patch
@@ -239,6 +247,8 @@ END_DESCRIPTION
 
 Object_lat_obj
 (no description available)
+_INIT_
+
 END_DESCRIPTION
 
 
